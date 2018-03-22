@@ -1,0 +1,5 @@
+*.pyc
+*.swp
+*.tmp
+*egg-info
+old_tests

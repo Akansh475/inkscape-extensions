@@ -1,27 +1,36 @@
-'''
-Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
-Copyright (C) 2010 Alvin Penner, penner@vaxxine.com
+#
+# Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
+# Copyright (C) 2010 Alvin Penner, penner@vaxxine.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# barraud@math.univ-lille1.fr
+#
+# This code defines several functions to make handling of transform
+# attribute easier.
+#
+"""
+Provide tranformation parsing to extensions
+"""
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+import re
+import copy
+import math
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-barraud@math.univ-lille1.fr
-
-This code defines several functions to make handling of transform
-attribute easier.
-'''
-import inkex, cubicsuperpath, bezmisc, simplestyle
-import copy, math, re
+import inkex
+from .const import X, Y
+from .utils import pairwise
 
 def parseTransform(transf,mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
     if transf=="" or transf==None:
@@ -116,17 +125,20 @@ def applyTransformToNode(mat,node):
     newtransf=formatTransform(composeTransform(mat,m))
     node.set("transform", newtransf)
 
-def applyTransformToPoint(mat,pt):
-    x = mat[0][0]*pt[0] + mat[0][1]*pt[1] + mat[0][2]
-    y = mat[1][0]*pt[0] + mat[1][1]*pt[1] + mat[1][2]
+def applyTransformToPoint(mat, pt):
+    if isinstance(pt, str):
+        raise ValueError("Will not transform string '{}'".format(pt))
+    x = mat[0][0] * pt[0] + mat[0][1] * pt[1] + mat[0][2]
+    y = mat[1][0] * pt[0] + mat[1][1] * pt[1] + mat[1][2]
     pt[0]=x
     pt[1]=y
 
-def applyTransformToPath(mat,path):
+def applyTransformToPath(mat, path):
     for comp in path:
         for ctl in comp:
             for pt in ctl:
-                applyTransformToPoint(mat,pt)
+                if isinstance(pt, (list, tuple)):
+                    applyTransformToPoint(mat, pt)
 
 def fuseTransform(node):
     if node.get('d')==None:
@@ -137,9 +149,9 @@ def fuseTransform(node):
         return
     m = parseTransform(t)
     d = node.get('d')
-    p = cubicsuperpath.parsePath(d)
+    p = inkex.parseCubicPath(d)
     applyTransformToPath(m,p)
-    node.set('d', cubicsuperpath.formatPath(p))
+    node.set('d', inkex.formatCubicPath(p))
     del node.attrib["transform"]
 
 ####################################################################
@@ -154,28 +166,27 @@ def boxunion(b1,b2):
     else:
         return((min(b1[0],b2[0]), max(b1[1],b2[1]), min(b1[2],b2[2]), max(b1[3],b2[3])))
 
-def roughBBox(path):
-    xmin,xMax,ymin,yMax = path[0][0][0][0],path[0][0][0][0],path[0][0][0][1],path[0][0][0][1]
+def path_loop(path):
     for pathcomp in path:
         for ctl in pathcomp:
-            for pt in ctl:
-                xmin = min(xmin,pt[0])
-                xMax = max(xMax,pt[0])
-                ymin = min(ymin,pt[1])
-                yMax = max(yMax,pt[1])
-    return xmin,xMax,ymin,yMax
+            yield ctl
+
+def roughBBox(path):
+    """Returns a very basic bbox based on path points (no curve interpolation)"""
+    x, y = [], []
+    for ctl in path_loop(path):
+        for pt in ctl:
+            x.append(pt[X])
+            y.append(pt[Y])
+    return min(x), max(x), min(y), max(y)
 
 def refinedBBox(path):
-    xmin,xMax,ymin,yMax = path[0][0][1][0],path[0][0][1][0],path[0][0][1][1],path[0][0][1][1]
-    for pathcomp in path:
-        for i in range(1, len(pathcomp)):
-            cmin, cmax = cubicExtrema(pathcomp[i-1][1][0], pathcomp[i-1][2][0], pathcomp[i][0][0], pathcomp[i][1][0])
-            xmin = min(xmin, cmin)
-            xMax = max(xMax, cmax)
-            cmin, cmax = cubicExtrema(pathcomp[i-1][1][1], pathcomp[i-1][2][1], pathcomp[i][0][1], pathcomp[i][1][1])
-            ymin = min(ymin, cmin)
-            yMax = max(yMax, cmax)
-    return xmin,xMax,ymin,yMax
+    ret = ([], [])
+    for a, b in pairwise(path_loop(path)):
+        for c in (X, Y):
+            cmin, cmax = cubicExtrema(a[1][c], a[2][c], b[0][c], b[1][c])
+            ret[c].extend((cmin, cmax))
+    return min(ret[X]), max(ret[X]), min(ret[Y]), max(ret[Y])
 
 def cubicExtrema(y0, y1, y2, y3):
     cmin = min(y0, y3)
@@ -203,9 +214,9 @@ def cubicExtrema(y0, y1, y2, y3):
             cmax = max(cmax, y)
     return cmin, cmax
 
-def computeBBox(aList,mat=[[1,0,0],[0,1,0]]):
+def computeBBox(elements, mat=((1,0,0),(0,1,0))):
     bbox=None
-    for node in aList:
+    for node in elements:
         m = parseTransform(node.get('transform'))
         m = composeTransform(mat,m)
         #TODO: text not supported!
@@ -238,17 +249,17 @@ def computeBBox(aList,mat=[[1,0,0],[0,1,0]]):
                 'A' + rx + ',' + ry + ' 0 1 0 %f,%f' % (x1, cy)
  
         if d is not None:
-            p = cubicsuperpath.parsePath(d)
-            applyTransformToPath(m,p)
-            bbox=boxunion(refinedBBox(p),bbox)
+            p = inkex.parseCubicPath(d)
+            applyTransformToPath(m, p)
+            bbox=boxunion(refinedBBox(p), bbox)
 
         elif node.tag == inkex.addNS('use','svg') or node.tag=='use':
             refid=node.get(inkex.addNS('href','xlink'))
             path = '//*[@id="%s"]' % refid[1:]
             refnode = node.xpath(path)
             bbox=boxunion(computeBBox(refnode,m),bbox)
-            
-        bbox=boxunion(computeBBox(node,m),bbox)
+
+        bbox = boxunion(computeBBox(node,m), bbox)
     return bbox
 
 

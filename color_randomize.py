@@ -20,7 +20,7 @@ class C(coloreffect.ColorEffect):
             action="store", type="int", 
             dest="lightness_range", default=0,
             help="Lightness range")
-	self.OptionParser.add_option("-o", "--opacity_range",
+        self.OptionParser.add_option("-o", "--opacity_range",
             action="store", type="int", 
             dest="opacity_range", default=0,
             help="Opacity range")
@@ -43,15 +43,15 @@ class C(coloreffect.ColorEffect):
         return random.randrange(min, max) / 255.0
 
     def colmod(self,r,g,b):
-        hsl = self.rgb_to_hsl(r/255.0, g/255.0, b/255.0)
+        hsl = inkex.rgb_to_hsl(r/255.0, g/255.0, b/255.0)
         if self.options.hue_range > 0:
             hsl[0] = self.randomize_hsl(self.options.hue_range, hsl[0])
         if self.options.saturation_range > 0:
             hsl[1] = self.randomize_hsl(self.options.saturation_range, hsl[1])
         if self.options.lightness_range > 0:
             hsl[2] = self.randomize_hsl(self.options.lightness_range, hsl[2])
-        rgb = self.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
-        return '%02x%02x%02x' % (rgb[0]*255, rgb[1]*255, rgb[2]*255)
+        rgb = inkex.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
+        return '%02x%02x%02x' % (int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
 
     def opacmod(self, opacity):
         if self.options.opacity_range > 0:

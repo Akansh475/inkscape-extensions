@@ -1,39 +1,34 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2001-2002 Matt Chisholm matt@theory.org
-Copyright (C) 2008 Joel Holdsworth joel@airwebreathe.org.uk
-    for AP
+#
+# Copyright (C) 2001-2002 Matt Chisholm matt@theory.org
+# Copyright (C) 2008 Joel Holdsworth joel@airwebreathe.org.uk
+#    for AP
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
 import copy
 import math
 import cmath
-import string
 import random
 import os
 import sys
 import re
-# local library
+
 import inkex
-import simplestyle
 import render_alphabetsoup_config
-import bezmisc
-import simplepath
-import simpletransform
 
 syntax   = render_alphabetsoup_config.syntax
 alphabet = render_alphabetsoup_config.alphabet
@@ -55,7 +50,7 @@ def loadPath( svgPath ):
 	d = pathElement.get("d")
 	width = float(root.get("width"))
 	height = float(root.get("height"))
-	return simplepath.parsePath(d), width, height # Currently we only support a single path
+	return inkex.parsePath(d), width, height # Currently we only support a single path
 
 def combinePaths( pathA, pathB ):
 	if pathA == None and pathB == None:
@@ -96,14 +91,14 @@ def reversePath(sp):
 
 def flipLeftRight( sp, width ):
 	for cmd,params in sp:
-		defs = simplepath.pathdefs[cmd]
+		defs = inkex.pathdefs[cmd]
 		for i in range(defs[1]):
 			if defs[3][i] == 'x':
 				params[i] = width - params[i]
 
 def flipTopBottom( sp, height ):
 	for cmd,params in sp:
-		defs = simplepath.pathdefs[cmd]
+		defs = inkex.pathdefs[cmd]
 		for i in range(defs[1]):
 			if defs[3][i] == 'y':
 				params[i] = height - params[i]
@@ -309,7 +304,7 @@ def draw( stack ):									   # draw a character based on a tree stack
 				dx = rule[i][1]*units
 				dy = rule[i][2]*units
 				#newbox = ((box[0]+dx),(box[1]+dy),(box[2]+dx),(box[3]+dy))
-				simplepath.translatePath(currimg, dx, dy)
+				inkex.translatePath(currimg, dx, dy)
 				image = combinePaths( image, currimg )
 
 		stack.pop( 0 )
@@ -318,8 +313,8 @@ def draw( stack ):									   # draw a character based on a tree stack
 def draw_crop_scale( stack, zoom ):							# draw, crop and scale letter image
 	image, width, height = draw(stack)
 	bbox = getPathBoundingBox(image)			
-	simplepath.translatePath(image, -bbox[0], 0)	
-	simplepath.scalePath(image, zoom/units, zoom/units)
+	inkex.translatePath(image, -bbox[0], 0)	
+	inkex.scalePath(image, zoom/units, zoom/units)
 	return image, bbox[1] - bbox[0], bbox[3] - bbox[2]
 
 def randomize_input_string(tokens, zoom ):					   # generate a glyph starting from each token in the input string
@@ -328,11 +323,11 @@ def randomize_input_string(tokens, zoom ):					   # generate a glyph starting fr
 	for i in range(0,len(tokens)):
 		char = tokens[i]
 		#if ( re.match("[a-zA-Z0-9?]", char)):
-		if ( alphabet.has_key(char)):
+		if char in alphabet:
 			if ((i > 0) and (char == tokens[i-1])):		 # if this letter matches previous letter
 				imagelist.append(imagelist[len(stack)-1])# make them the same image
 			else:										# generate image for letter
-				stack = string.split( alphabet[char][random.randint(0,(len(alphabet[char])-1))] , "." )
+				stack = alphabet[char][random.randint(0,(len(alphabet[char])-1))].split(".")
 				#stack = string.split( alphabet[char][random.randint(0,(len(alphabet[char])-2))] , "." ) 
 				imagelist.append( draw_crop_scale( stack, zoom ))
 		elif( char == " "):							  # add a " " space to the image list
@@ -467,7 +462,7 @@ def layoutstring( imagelist, zoom ):					 # layout string of letter-images using
 
 		position = position - kern					   # move position back by kern amount
 		thisimage = copy.deepcopy(image)		
-		simplepath.translatePath(thisimage, position, 0)
+		inkex.translatePath(thisimage, position, 0)
 		workspace = combinePaths(workspace, thisimage)
 		position = position + width + zoom	# advance position by letter width
 
@@ -527,15 +522,15 @@ class AlphabetSoup(inkex.Effect):
 			s = { 'stroke': 'none', 'fill': '#000000' }
 
 			new = inkex.etree.Element(inkex.addNS('path','svg'))
-			new.set('style', simplestyle.formatStyle(s))
+			new.set('style', inkex.formatStyle(s))
 
-			new.set('d', simplepath.formatPath(image))
+			new.set('d', inkex.formatPath(image))
 			self.current_layer.append(new)
 
 			# compensate preserved transforms of parent layer
 			if self.current_layer.getparent() is not None:
-				mat = simpletransform.composeParents(self.current_layer, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-				simpletransform.applyTransformToNode(simpletransform.invertTransform(mat), new)
+				mat = inkex.composeParents(self.current_layer, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+				inkex.applyTransformToNode(inkex.invertTransform(mat), new)
 
 
 if __name__ == '__main__':

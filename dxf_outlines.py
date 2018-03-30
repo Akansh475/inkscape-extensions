@@ -30,40 +30,17 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
-# standard library
 import math
-# local library
 import inkex
-import simplestyle
-import simpletransform
-import cubicsuperpath
-import coloreffect
 import dxf_templates
 
 try:
+    import numpy
     from numpy import *
     from numpy.linalg import solve
 except:
-    # Initialize gettext for messages outside an inkex derived class
-    inkex.localize() 
-    inkex.errormsg(_("Failed to import the numpy or numpy.linalg modules. These modules are required by this extension. Please install them and try again."))
-    inkex.sys.exit()
+    numpy = None
 
-def pointdistance((x1,y1),(x2,y2)):
-    return math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
-
-def get_fit(u, csp, col):
-    return (1-u)**3*csp[0][col] + 3*(1-u)**2*u*csp[1][col] + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
-
-def get_matrix(u, i, j):
-    if j == i + 2:
-        return (u[i]-u[i-1])*(u[i]-u[i-1])/(u[i+2]-u[i-1])/(u[i+1]-u[i-1])
-    elif j == i + 1:
-        return ((u[i]-u[i-1])*(u[i+2]-u[i])/(u[i+2]-u[i-1]) + (u[i+1]-u[i])*(u[i]-u[i-2])/(u[i+1]-u[i-2]))/(u[i+1]-u[i-1])
-    elif j == i:
-        return (u[i+1]-u[i])*(u[i+1]-u[i])/(u[i+1]-u[i-2])/(u[i+1]-u[i-1])
-    else:
-        return 0
 
 class MyEffect(inkex.Effect):
     def __init__(self):
@@ -96,10 +73,11 @@ class MyEffect(inkex.Effect):
         self.layer = '0'                        # mandatory layer
         self.layernames = []
         self.csp_old = [[0.0,0.0]]*4            # previous spline
-        self.d = array([0], float)              # knot vector
+        if numpy is not None:
+            self.d = array([0], float)              # knot vector
         self.poly = [[0.0,0.0]]                 # LWPOLYLINE data
     def output(self):
-        print ''.join(self.dxf)
+        print(''.join(self.dxf))
     def dxf_add(self, str):
         self.dxf.append(str.encode(self.options.char_encode))
     def dxf_line(self,csp):
@@ -154,7 +132,7 @@ class MyEffect(inkex.Effect):
             j = len(self.d) + i - 4
             self.xfit[j] = get_fit(i/3.0, csp, 0)
             self.yfit[j] = get_fit(i/3.0, csp, 1)
-            self.d[j] = self.d[j-1] + pointdistance((self.xfit[j-1],self.yfit[j-1]),(self.xfit[j],self.yfit[j]))
+            self.d[j] = self.d[j-1] + inkex.pointdistance((self.xfit[j-1],self.yfit[j-1]),(self.xfit[j],self.yfit[j]))
         self.csp_old = csp
     def ROBO_output(self):
         if len(self.d) == 1:
@@ -193,11 +171,11 @@ class MyEffect(inkex.Effect):
         rgb = (0,0,0)
         style = node.get('style')
         if style:
-            style = simplestyle.parseStyle(style)
+            style = inkex.parseStyle(style)
             if style.has_key('stroke'):
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
-                    rgb = simplestyle.parseColor(style['stroke'])
-        hsl = coloreffect.ColorEffect.rgb_to_hsl(coloreffect.ColorEffect(),rgb[0]/255.0,rgb[1]/255.0,rgb[2]/255.0)
+                    rgb = inkex.parseColor(style['stroke'])
+        hsl = inkex.rgb_to_hsl(rgb[0]/255.0,rgb[1]/255.0,rgb[2]/255.0)
         self.color = 7                                  # default is black
         if hsl[2]:
             self.color = 1 + (int(6*hsl[0] + 0.5) % 6)  # use 6 hues
@@ -205,40 +183,40 @@ class MyEffect(inkex.Effect):
             d = node.get('d')
             if not d:
                 return
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
         elif node.tag == inkex.addNS('rect','svg'):
             x = float(node.get('x', 0))
             y = float(node.get('y', 0))
             width = float(node.get('width'))
             height = float(node.get('height'))
             d = "m %s,%s %s,%s %s,%s %s,%s z" % (x, y, width, 0, 0, height, -width, 0)
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
         elif node.tag == inkex.addNS('line','svg'):
             x1 = float(node.get('x1', 0))
             x2 = float(node.get('x2', 0))
             y1 = float(node.get('y1', 0))
             y2 = float(node.get('y2', 0))
             d = "M %s,%s L %s,%s" % (x1, y1, x2, y2)
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
         elif node.tag == inkex.addNS('circle','svg'):
             cx = float(node.get('cx', 0))
             cy = float(node.get('cy', 0))
             r = float(node.get('r'))
             d = "m %s,%s a %s,%s 0 0 1 %s,%s %s,%s 0 0 1 %s,%s z" % (cx + r, cy, r, r, -2*r, 0, r, r, 2*r, 0)
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
         elif node.tag == inkex.addNS('ellipse','svg'):
             cx = float(node.get('cx', 0))
             cy = float(node.get('cy', 0))
             rx = float(node.get('rx'))
             ry = float(node.get('ry'))
             d = "m %s,%s a %s,%s 0 0 1 %s,%s %s,%s 0 0 1 %s,%s z" % (cx + rx, cy, rx, ry, -2*rx, 0, rx, ry, 2*rx, 0)
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
         else:
             return
         trans = node.get('transform')
         if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
-        simpletransform.applyTransformToPath(mat, p)
+            mat = inkex.composeTransform(mat, inkex.parseTransform(trans))
+        inkex.applyTransformToPath(mat, p)
         for sub in p:
             for i in range(len(sub)-1):
                 s = sub[i]
@@ -259,14 +237,14 @@ class MyEffect(inkex.Effect):
         y = node.get('y')
         mat = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
+            mat = inkex.composeTransform(mat, inkex.parseTransform(trans))
         if x:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat = inkex.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat = inkex.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], mat))
+            self.groupmat.append(inkex.composeTransform(self.groupmat[-1], mat))
         # get referenced node
         refid = node.get(inkex.addNS('href','xlink'))
         refnode = self.getElementById(refid[1:])
@@ -285,7 +263,7 @@ class MyEffect(inkex.Effect):
         if group.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
             style = group.get('style')
             if style:
-                style = simplestyle.parseStyle(style)
+                style = inkex.parseStyle(style)
                 if style.has_key('display'):
                     if style['display'] == 'none' and self.options.layer_option and self.options.layer_option=='visible':
                         return
@@ -298,7 +276,7 @@ class MyEffect(inkex.Effect):
                 self.layer = layer
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], simpletransform.parseTransform(trans)))
+            self.groupmat.append(inkex.composeTransform(self.groupmat[-1], inkex.parseTransform(trans)))
         for node in group:
             if node.tag == inkex.addNS('g','svg'):
                 self.process_group(node)
@@ -310,6 +288,9 @@ class MyEffect(inkex.Effect):
             self.groupmat.pop()
 
     def effect(self):
+        if numpy is None:
+            inkex.errormsg(_("Failed to import the numpy or numpy.linalg modules. These modules are required by this extension. Please install them and try again."))
+            return
         #Warn user if name match field is empty
         if self.options.layer_option and self.options.layer_option=='name' and not self.options.layer_name:
             inkex.errormsg(_("Error: Field 'Layer match name' must be filled when using 'By name match' option"))

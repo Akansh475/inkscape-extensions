@@ -59,8 +59,7 @@ class HpglOutput(inkex.Effect):
                 self.hpgl = ''
                 return
             else:
-                type, value, traceback = sys.exc_info()
-                raise ValueError, ("", type, value), traceback
+                raise
         # convert raw HPGL to HPGL
         hpglInit = 'IN'
         if self.options.force > 0:
@@ -72,7 +71,7 @@ class HpglOutput(inkex.Effect):
     def output(self):
         # print to file
         if self.hpgl != '':
-            print self.hpgl
+            print(self.hpgl)
 
 if __name__ == '__main__':
     # start extension

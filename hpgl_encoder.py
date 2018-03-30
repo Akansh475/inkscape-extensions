@@ -1,37 +1,31 @@
 # coding=utf-8
-'''
-Copyright (C) 2008 Aaron Spike, aaron@ekips.org
-Copyright (C) 2013 Sebastian Wüst, sebi@timewaster.de
+#
+# Copyright (C) 2008 Aaron Spike, aaron@ekips.org
+# Copyright (C) 2013 Sebastian Wüst, sebi@timewaster.de
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-
-# standard libraries
-import math
 import re
+import math
+import shutil
 import string
+
 from distutils.spawn import find_executable
 from subprocess import Popen, PIPE
-from shutil import copy2
-# local libraries
-import bezmisc
-import cspsubdiv
-import cubicsuperpath
+
 import inkex
-import simplestyle
-import simpletransform
 
 
 class hpglEncoder:
@@ -115,29 +109,29 @@ class hpglEncoder:
         tempfile = inkex.os.path.splitext(file)[0] + "-prepare.svg"
         # tempfile is needed here only because we want to force the extension to be .svg
         # so that we can open and close it silently
-        copy2(file, tempfile)
+        #shutil.copy2(file, tempfile)
 
-        command = 'inkscape --verb=EditSelectAllInAllLayers --verb=EditUnlinkClone --verb=ObjectToPath --verb=FileSave --verb=FileQuit ' + tempfile
+        #command = 'inkscape --verb=EditSelectAllInAllLayers --verb=EditUnlinkClone --verb=ObjectToPath --verb=FileSave --verb=FileQuit ' + tempfile
 
-        if find_executable('xvfb-run'):
-            command = 'xvfb-run ' + command
+        #if find_executable('xvfb-run'):
+        #    command = 'xvfb-run ' + command
 
         # Unfortunately this briefly pops up the GUI and cannot be done with -z, see https://bugs.launchpad.net/inkscape/+bug/843260
-        p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
+        #p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+        #(out, err) = p.communicate()
 
-        if p.returncode != 0:
-            inkex.errormsg(_("Failed to convert objects to paths. Continued without converting."))
-            inkex.errormsg(out)
-            inkex.errormsg(err)
-            return document.getroot()
-        else:
-            return inkex.etree.parse(tempfile).getroot()
+        #if p.returncode != 0:
+        #    inkex.errormsg(_("Failed to convert objects to paths. Continued without converting."))
+        #    inkex.errormsg(out)
+        #    inkex.errormsg(err)
+        return document.getroot()
+        #else:
+        #    return inkex.etree.parse(tempfile).getroot()
 
     def getHpgl(self):
         # dryRun to find edges
         groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0], [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
-        groupmat = simpletransform.composeTransform(groupmat, simpletransform.parseTransform('rotate(' + self.options.orientation + ')'))
+        groupmat = inkex.composeTransform(groupmat, inkex.parseTransform('rotate(' + self.options.orientation + ')'))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         self.processGroups(self.doc, groupmat)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
@@ -184,7 +178,7 @@ class hpglEncoder:
         # initialize transformation matrix and cache
         groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, -self.divergenceX + self.offsetX],
             [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, -self.divergenceY + self.offsetY]]
-        groupmat = simpletransform.composeTransform(groupmat, simpletransform.parseTransform('rotate(' + self.options.orientation + ')'))
+        groupmat = inkex.composeTransform(groupmat, inkex.parseTransform('rotate(' + self.options.orientation + ')'))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
@@ -246,14 +240,14 @@ class hpglEncoder:
         # get and merge two matrixes into one
         trans = doc.get('transform')
         if trans:
-            return simpletransform.composeTransform(matrix, simpletransform.parseTransform(trans))
+            return inkex.composeTransform(matrix, inkex.parseTransform(trans))
         else:
             return matrix
 
     def isGroupVisible(self, group):
         style = group.get('style')
         if style:
-            style = simplestyle.parseStyle(style)
+            style = inkex.parseStyle(style)
             if 'display' in style and style['display'] == 'none':
                 return False
         return True
@@ -263,9 +257,9 @@ class hpglEncoder:
         path = node.get('d')
         if path:
             # parse and transform path
-            path = cubicsuperpath.parsePath(path)
-            simpletransform.applyTransformToPath(mat, path)
-            cspsubdiv.cspsubdiv(path, self.flat)
+            path = inkex.parseCubicPath(path)
+            inkex.applyTransformToPath(mat, path)
+            inkex.cspsubdiv(path, self.flat)
             # path to HPGL commands
             oldPosX = 0.0
             oldPosY = 0.0

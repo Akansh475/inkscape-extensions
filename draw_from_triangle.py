@@ -1,12 +1,12 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 John Beard john.j.beard@gmail.com
-
-##This extension allows you to draw various triangle constructions
-##It requires a path to be selected
-##It will use the first three nodes of this path
-
-## Dimensions of a triangle__
+#
+# Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# This extension allows you to draw various triangle constructions
+# It requires a path to be selected
+# It will use the first three nodes of this path
+#
+# Dimensions of a triangle__
 #
 #        /`__
 #       / a_c``--__
@@ -15,28 +15,26 @@ Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #    /a_a                    a_b`--__  
 #   /--------------------------------``B
 #  A              s_b
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
 import sys
 from math import *
-# local library
+
 import inkex
-import simplestyle
-import simplepath
 
 
 #DRAWING ROUTINES
@@ -51,7 +49,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):#draw an SVG circl
         circ_style = { 'stroke':style.c_col, 'stroke-width':str(style.c_th), 'fill':style.c_fill }
 
     cx,cy = get_cartesian_pt(centre, params)
-    circ_attribs = {'style':simplestyle.formatStyle(circ_style),
+    circ_attribs = {'style':inkex.formatStyle(circ_style),
                     inkex.addNS('label','inkscape'):name,
                     'cx':str(cx), 'cy':str(cy), 
                     'r':str(r)}
@@ -61,7 +59,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):#draw an SVG circl
 def draw_SVG_tri(vert_mat, params, style, name, parent):
     p1,p2,p3 = get_cartesian_tri(vert_mat, params) #get the vertex matrix in cartesian points
     tri_style   = { 'stroke': style.l_col, 'stroke-width':str(style.l_th), 'fill': style.l_fill }
-    tri_attribs = {'style':simplestyle.formatStyle(tri_style),
+    tri_attribs = {'style':inkex.formatStyle(tri_style),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(p1[0])+','+str(p1[1])+
                        ' L '+str(p2[0])+','+str(p2[1])+
@@ -70,9 +68,11 @@ def draw_SVG_tri(vert_mat, params, style, name, parent):
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), tri_attribs )
 
 #draw an SVG line segment between the given (raw) points
-def draw_SVG_line( (x1, y1), (x2, y2), style, name, parent):
+def draw_SVG_line(a, b, style, name, parent):
+    (x1, y1) = a
+    (x2, y2) = b
     line_style   = { 'stroke': style.l_col, 'stroke-width':str(style.l_th), 'fill': style.l_fill }
-    line_attribs = {'style':simplestyle.formatStyle(line_style),
+    line_attribs = {'style':inkex.formatStyle(line_style),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
@@ -85,11 +85,15 @@ def draw_vertex_lines( vert_mat, params, width, name, parent):
         
 #MATHEMATICAL ROUTINES
 
-def distance( (x0,y0),(x1,y1)):#find the pythagorean distance
+def distance(a, b):
+    """find the pythagorean distance"""
+    (x0, y0) = a
+    (x1, y1) = b
     return sqrt( (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1) )
 
-def vector_from_to( (x0,y0),(x1,y1) ):#get the vector from (x0,y0) to (x1,y1)
-    return (x1-x0, y1-y0)
+def vector_from_to(a, b):
+    """get the vector from (x0,y0) to (x1,y1)"""
+    return (b[X] - a[X], b[Y], a[Y])
 
 def get_cartesian_pt( t, p):#get the cartesian coordinates from a trilinear set
     denom = p[0][0]*t[0] + p[0][1]*t[1] + p[0][2]*t[2]
@@ -97,7 +101,9 @@ def get_cartesian_pt( t, p):#get the cartesian coordinates from a trilinear set
     c2 = p[0][2]*t[2]/denom
     return ( c1*p[2][1][0]+c2*p[2][0][0], c1*p[2][1][1]+c2*p[2][0][1] )
 
-def get_cartesian_tri( ((t11,t12,t13),(t21,t22,t23),(t31,t32,t33)), params):#get the cartesian points from a trilinear vertex matrix
+def get_cartesian_tri(arg, params):
+    """get the cartesian points from a trilinear vertex matrix"""
+    (t11,t12,t13), (t21,t22,t23), (t31,t32,t33) = arg
     p1=get_cartesian_pt( (t11,t12,t13), params )
     p2=get_cartesian_pt( (t21,t22,t23), params )
     p3=get_cartesian_pt( (t31,t32,t33), params )
@@ -131,13 +137,13 @@ def pt_from_tcf( tcf , params):#returns a trilinear triplet from a triangle cent
     
 def get_n_points_from_path( node, n):#returns a list of first n points (x,y) in an SVG path-representing node
 
-    p = simplepath.parsePath(node.get('d')) #parse the path
+    p = inkex.parsePath(node.get('d')) #parse the path
     
     xi = [] #temporary storage for x and y (will combine at end)
     yi = []
     
     for cmd,params in p:                    #a parsed path is made up of (cmd, params) pairs
-        defs = simplepath.pathdefs[cmd]
+        defs = inkex.pathdefs[cmd]
         for i in range(defs[1]):
             if   defs[3][i] == 'x' and len(xi) < n:#only collect the first three
                 xi.append(params[i])
@@ -309,9 +315,10 @@ class Draw_From_Triangle(inkex.Effect):
         so = self.options #shorthand
         
         pts = [] #initialise in case nothing is selected and following loop is not executed
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
-                pts = get_n_points_from_path( node, 3 ) #find the (x,y) coordinates of the first 3 points of the path
+                # find the (x,y) coordinates of the first 3 points of the path
+                pts = get_n_points_from_path( node, 3 )
 
 
         if len(pts) == 3: #if we have right number of nodes, else skip and end program

@@ -1,53 +1,52 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
 Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
-# standard library
+
 import sys
 import os
 import re
+
 try:
     from subprocess import Popen, PIPE
     bsubprocess = True
 except:
     bsubprocess = False
-# local library
+
 import inkex
-import simplepath
-import cubicsuperpath
-import simpletransform
+
 from ffgeom import *
 
-# third party
 try:
+    import numpy
     from numpy import *
     from numpy.linalg import *
 except:
-    # Initialize gettext for messages outside an inkex derived class
-    inkex.localize() 
-    inkex.errormsg(_("Failed to import the numpy or numpy.linalg modules. These modules are required by this extension. Please install them and try again.  On a Debian-like system this can be done with the command, sudo apt-get install python-numpy."))
-    exit()
+    numpy = None
 
 class Project(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
+
     def effect(self):
+        if numpy is None:
+            return inkex.errormsg(_("Failed to import the numpy or numpy.linalg modules. These modules are required by this extension. Please install them and try again.  On a Debian-like system this can be done with the command, sudo apt-get install python-numpy."))
         if len(self.options.ids) < 2:
             inkex.errormsg(_("This extension requires two selected paths."))
             exit()            
@@ -70,8 +69,8 @@ class Project(inkex.Effect):
             exit()
         if obj.tag == inkex.addNS('path','svg') or obj.tag == inkex.addNS('g','svg'):
             if envelope.tag == inkex.addNS('path','svg'):
-                mat = simpletransform.composeParents(envelope, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-                path = cubicsuperpath.parsePath(envelope.get('d'))
+                mat = inkex.composeParents(envelope, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+                path = inkex.parseCubicPath(envelope.get('d'))
                 if len(path) < 1 or len(path[0]) < 4:
                     inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
                     exit()
@@ -140,7 +139,7 @@ class Project(inkex.Effect):
     def process_path(self,path,m):
         mat = simpletransform.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         d = path.get('d')
-        p = cubicsuperpath.parsePath(d)
+        p = inkex.parseCubicPath(d)
         simpletransform.applyTransformToPath(mat, p)
         for subs in p:
             for csp in subs:
@@ -149,7 +148,7 @@ class Project(inkex.Effect):
                 csp[2] = self.project_point(csp[2],m)
         mat = simpletransform.invertTransform(mat)
         simpletransform.applyTransformToPath(mat, p)
-        path.set('d',cubicsuperpath.formatPath(p))
+        path.set('d', inkex.formatPath(p))
 
     def project_point(self,p,m):
         x = p[0]
@@ -159,6 +158,5 @@ class Project(inkex.Effect):
 if __name__ == '__main__':
     e = Project()
     e.affect()
-
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

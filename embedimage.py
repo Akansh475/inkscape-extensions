@@ -1,28 +1,26 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
 import base64
 import os
 import sys
 import urllib
-import urlparse
-# local library
 import inkex
 
 
@@ -60,7 +58,7 @@ class Embedder(inkex.Effect):
         xlink = node.get(inkex.addNS('href','xlink'))
         if xlink is None or xlink[:5] != 'data:':
             absref=node.get(inkex.addNS('absref','sodipodi'))
-            url=urlparse.urlparse(xlink)
+            url=urllib.parse.urlparse(xlink)
             href=urllib.url2pathname(url.path)
             
             path=''

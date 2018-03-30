@@ -1,71 +1,64 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+This extension draws 3d objects from a Wavefront .obj 3D file stored in a local folder
+Many settings for appearance, lighting, rotation, etc are available.
 
-##This extension draws 3d objects from a Wavefront .obj 3D file stored in a local folder
-##Many settings for appearance, lighting, rotation, etc are available.
+                              ^y
+                              |
+        __--``|               |_--``|     __--
+  __--``      |         __--``|     |_--``
+ |       z    |        |      |_--``|
+ |       <----|--------|-----_0-----|----------------
+ |            |        |_--`` |     |
+ |      __--``     <-``|      |_--``
+ |__--``           x   |__--``|
+  IMAGE PLANE           SCENE|
+                              |
 
-#                              ^y
-#                              |
-#        __--``|               |_--``|     __--
-#  __--``      |         __--``|     |_--``
-# |       z    |        |      |_--``|
-# |       <----|--------|-----_0-----|----------------
-# |            |        |_--`` |     |
-# |      __--``     <-``|      |_--``
-# |__--``           x   |__--``|
-#   IMAGE PLANE           SCENE|
-#                              |
+ Vertices are given as "v" followed by three numbers (x,y,z).
+ All files need a vertex list
+ v  x.xxx   y.yyy   z.zzz
 
-#Vertices are given as "v" followed by three numbers (x,y,z).
-#All files need a vertex list
-#v  x.xxx   y.yyy   z.zzz
+ Faces are given by a list of vertices
+ (vertex 1 is the first in the list above, 2 the second, etc):
+ f  1   2   3
 
-#Faces are given by a list of vertices
-#(vertex 1 is the first in the list above, 2 the second, etc):
-#f  1   2   3
+ Edges are given by a list of vertices. These will be broken down
+ into adjacent pairs automatically.
+ l  1   2   3
 
-#Edges are given by a list of vertices. These will be broken down
-#into adjacent pairs automatically.
-#l  1   2   3
+ Faces are rendered according to the painter's algorithm and perhaps
+ back-face culling, if selected. The parameter to sort the faces by
+ is user-selectable between max, min and average z-value of the vertices
+"""
 
-#Faces are rendered according to the painter's algorithm and perhaps
-#back-face culling, if selected. The parameter to sort the faces by
-#is user-selectable between max, min and average z-value of the vertices
-
-######LICENCE#######
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
-import sys
 import re
+import sys
 from math import *
-# local library
+
 import inkex
-import simplestyle
-from simpletransform import computePointInNode
 
-# Initialize gettext for messages outside an inkex derived class
-inkex.localize() 
-
-# third party
 try:
     from numpy import *
 except:
-    inkex.errormsg(_("Failed to import the numpy module. This module is required by this extension. Please install it and try again.  On a Debian-like system this can be done with the command 'sudo apt-get install python-numpy'."))
-    sys.exit()
+    numpy = None
 
 #FILE IO ROUTINES
 def get_filename(self_options):
@@ -139,17 +132,20 @@ def get_obj_data(obj, name):
 
 #RENDERING AND SVG OUTPUT FUNCTIONS
 
-def draw_SVG_dot((cx, cy), st, name, parent):
+def draw_SVG_dot(point, st, name, parent):
+    (cx, cy) = point
     style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'fill': st.fill, 'stroke-opacity':st.s_opac, 'fill-opacity':st.f_opac}
-    circ_attribs = {'style':simplestyle.formatStyle(style),
+    circ_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,
                     'r':str(st.r),
                     'cx':str(cx), 'cy':str(-cy)}
     inkex.etree.SubElement(parent, inkex.addNS('circle','svg'), circ_attribs )
     
-def draw_SVG_line((x1, y1),(x2, y2), st, name, parent):
+def draw_SVG_line(point1, point2, st, name, parent):
+    (x1, y1) = point1
+    (x2, y2) = point2
     style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'stroke-linecap':st.linecap}
-    line_attribs = {'style':simplestyle.formatStyle(style),
+    line_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(-y1)+' L '+str(x2)+','+str(-y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
@@ -165,7 +161,7 @@ def draw_SVG_poly(pts, face, st, name, parent):
         d = d+ str(pts[face[i]-1][0]) + ',' + str(-pts[face[i]-1][1])#add point
     d = d + 'z' #close the polygon
     
-    line_attribs = {'style':simplestyle.formatStyle(style),
+    line_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,'d': d}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
     
@@ -186,11 +182,11 @@ def draw_faces( faces_data, pts, obj, shading, fill_col,st, parent):
         face_no = face[3]#the number of the face to draw
         draw_SVG_poly(pts, obj.fce[ face_no ], st, 'Face:'+str(face_no), parent)
 
-def get_darkened_colour( (r,g,b), factor):
+def get_darkened_colour(rgb, factor):
 #return a hex triplet of colour, reduced in lightness proportionally to a value between 0 and 1
-    return  '#' + "%02X" % floor( factor*r ) \
-                + "%02X" % floor( factor*g ) \
-                + "%02X" % floor( factor*b ) #make the colour string
+    return  '#' + "%02X" % floor( factor*rgb[0] ) \
+                + "%02X" % floor( factor*rgb[1] ) \
+                + "%02X" % floor( factor*rgb[2] ) #make the colour string
 
 def make_rotation_log(options):
 #makes a string recording the axes and angles of each rotation, so an object can be repeated
@@ -346,7 +342,7 @@ class Obj(object): #a 3d object defined by the vertices and the faces (eg a poly
                 inkex.errormsg(_('Try selecting "Face Specified" in the Model File tab.\n'))
                 self.type = 'error'
 
-class Poly_3D(inkex.Effect):
+class Poly3D(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--tab",
@@ -452,6 +448,8 @@ class Poly_3D(inkex.Effect):
             
             
     def effect(self):
+        if numpy is None:
+            return inkex.errormsg(_("Failed to import the numpy module. This module is required by this extension. Please install it and try again.  On a Debian-like system this can be done with the command 'sudo apt-get install python-numpy'."))
         so = self.options#shorthand
         
         #INITIALISE AND LOAD DATA
@@ -469,7 +467,7 @@ class Poly_3D(inkex.Effect):
         #INKSCAPE GROUP TO CONTAIN THE POLYHEDRON
         
         #Put in in the centre of the current view
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
+        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
         poly_transform = 'translate(' + str( view_center[0]) + ',' + str( view_center[1]) + ')'
         if scale != 1:
             poly_transform += ' scale(' + str(scale) + ')'
@@ -527,7 +525,7 @@ class Poly_3D(inkex.Effect):
             inkex.errormsg(_('Internal Error. No view type selected\n'))
         
 if __name__ == '__main__':
-    e = Poly_3D()
+    e = Poly3D()
     e.affect()
 
 

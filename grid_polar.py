@@ -1,33 +1,33 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+This extension allows you to draw a polar grid in Inkscape.
+There is a wide range of options including subdivision and labels.
+"""
 
-##This extension allows you to draw a polar grid in Inkscape.
-##There is a wide range of options including subdivision and labels.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-
+import sys
 import inkex
-import simplestyle, sys
 from math import *
-from simpletransform import computePointInNode
 
 def draw_SVG_circle(r, cx, cy, width, fill, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': fill }
-    circ_attribs = {'style':simplestyle.formatStyle(style),
+    circ_attribs = {'style':inkex.formatStyle(style),
                     'cx':str(cx), 'cy':str(cy), 
                     'r':str(r),
                     inkex.addNS('label','inkscape'):name}
@@ -35,7 +35,7 @@ def draw_SVG_circle(r, cx, cy, width, fill, name, parent):
 
 def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    line_attribs = {'style':simplestyle.formatStyle(style),
+    line_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
@@ -45,13 +45,13 @@ def draw_SVG_label_centred(x, y, string, font_size, name, parent):
              'text-anchor': 'middle', 'font-size': str(font_size)+'px',
              'fill-opacity': '1.0', 'stroke': 'none',
              'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
-    label_attribs = {'style':simplestyle.formatStyle(style),
+    label_attribs = {'style':inkex.formatStyle(style),
                      inkex.addNS('label','inkscape'):name,
                      'x':str(x), 'y':str(y)}
     label = inkex.etree.SubElement(parent, inkex.addNS('text','svg'), label_attribs)
     label.text = string
 
-class Grid_Polar(inkex.Effect):
+class GridPolar(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--tab",
@@ -135,9 +135,9 @@ class Grid_Polar(inkex.Effect):
 
         # Embed grid in group
         #Put in in the centre of the current view
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
+        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
         t = 'translate(' + str( view_center[0] ) + ',' + str( view_center[1] ) + ')'
-        g_attribs = {inkex.addNS('label','inkscape'):'Grid_Polar:R' +
+        g_attribs = {inkex.addNS('label','inkscape'):'GridPolar:R' +
                                  str( self.options.r_divs )+':A'+str( self.options.a_divs ),
                      'transform':t }
         grid = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
@@ -189,7 +189,7 @@ class Grid_Polar(inkex.Effect):
                                   rmax*sin(angle), rmax*cos(angle), 
                                   self.options.a_subdivs_th, 'RadialMinorGridline'+str(i), grid)
         
-        if self.options.c_dot_dia <> 0: #if a non-zero diameter, draw the centre dot
+        if self.options.c_dot_dia != 0: #if a non-zero diameter, draw the centre dot
             draw_SVG_circle(self.options.c_dot_dia /2.0,
                             0, 0, 0, '#000000', 'CentreDot', grid)
         
@@ -205,7 +205,7 @@ class Grid_Polar(inkex.Effect):
                                        label_size, 'Label'+str(i), grid)
 
 if __name__ == '__main__':
-    e = Grid_Polar()
+    e = GridPolar()
     e.affect()
 
 

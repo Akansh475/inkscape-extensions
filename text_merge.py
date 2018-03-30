@@ -105,7 +105,7 @@ class Merge(inkex.Effect):
             maxx = x + w
             maxy = y + h
 
-            for id, node in self.selected.iteritems():
+            for id, node in self.selected.items():
                 # get the bounding box
                 x,y,w,h = dimen[id]
                 if x < minx:
@@ -121,7 +121,7 @@ class Merge(inkex.Effect):
             midy = (miny + maxy) / 2
 
             #calculate distances for each selected object
-            for id, node in self.selected.iteritems():
+            for id, node in self.selected.items():
                 # get the bounding box
                 x,y,w,h = dimen[id]
 

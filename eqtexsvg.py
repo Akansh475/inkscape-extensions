@@ -1,34 +1,35 @@
 #!/usr/bin/env python
-# -*- coding: cp1252 -*-
+#
+# Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
+#
+# 2010-04-04: Added support for custom packages
+#            Christoph Schmidt-Hieber <christsc@gmx.de>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
 """
-eqtexsvg.py
 functions for converting LaTeX equation string into SVG path
 This extension need, to work properly:
     - a TeX/LaTeX distribution (MiKTeX ...)
     - pstoedit software: <http://www.pstoedit.net/pstoedit>
-
-Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
-
-2010-04-04: Added support for custom packages
-            Christoph Schmidt-Hieber <christsc@gmx.de>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
-
 """
 
-import inkex, os, tempfile, sys, xml.dom.minidom
+import os
+import sys
+import tempfile
+import inkex
 
 def parse_pkgs(pkgstring):
     pkglist = pkgstring.replace(" ","").split(",")
@@ -119,8 +120,7 @@ class EQTEXSVG(inkex.Effect):
             os.rmdir(base_dir)
 
         if self.options.formula == "":
-            print >>sys.stderr, "empty LaTeX input.  Nothing to be done"
-            return
+            return inkex.errormsg(_("empty LaTeX input. Nothing to be done"))
 
         add_header = parse_pkgs(self.options.packages)
         create_equation_tex(latex_file, self.options.formula, add_header)

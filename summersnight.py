@@ -1,29 +1,24 @@
-#!/usr/bin/env python
-"""
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-"""
-# standard library
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 import os
-# local library
-import cubicsuperpath
+
 import inkex
-import simplepath
-import simpletransform
+
 from ffgeom import *
 
 try:
@@ -39,7 +34,7 @@ class Project(inkex.Effect):
     def effect(self):
         if len(self.options.ids) < 2:
             inkex.errormsg(_("This extension requires two selected paths. \nThe second path must be exactly four nodes long."))
-            exit()
+            return
 
         #obj is selected second
         scale = self.unittouu('1px')    # convert to document units
@@ -60,12 +55,12 @@ class Project(inkex.Effect):
         if obj.tag == inkex.addNS('path','svg') or obj.tag == inkex.addNS('g','svg'):
             if trafo.tag == inkex.addNS('path','svg'):
                 #distil trafo into four node points
-                mat = simpletransform.composeParents(trafo, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+                mat = inkex.composeParents(trafo, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
                 trafo = cubicsuperpath.parsePath(trafo.get('d'))
                 if len(trafo[0]) < 4:
                     inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
                     exit()
-                simpletransform.applyTransformToPath(mat, trafo)
+                inkex.applyTransformToPath(mat, trafo)
                 trafo = [[Point(csp[1][0],csp[1][1]) for csp in subs] for subs in trafo][0][:4]
 
                 #vectors pointing away from the trafo origin
@@ -112,21 +107,22 @@ class Project(inkex.Effect):
                 self.process_group(node)
 
     def process_path(self,path):
-        mat = simpletransform.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+        mat = inkex.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         d = path.get('d')
         p = cubicsuperpath.parsePath(d)
-        simpletransform.applyTransformToPath(mat, p)
+        inkex.applyTransformToPath(mat, p)
         for subs in p:
             for csp in subs:
                 csp[0] = self.trafopoint(csp[0])
                 csp[1] = self.trafopoint(csp[1])
                 csp[2] = self.trafopoint(csp[2])
-        mat = simpletransform.invertTransform(mat)
-        simpletransform.applyTransformToPath(mat, p)
+        mat = inkex.invertTransform(mat)
+        inkex.applyTransformToPath(mat, p)
         path.set('d',cubicsuperpath.formatPath(p))
 
-    def trafopoint(self,(x,y)):
-        #Transform algorithm thanks to Jose Hevia (freon)
+    def trafopoint(self, xy):
+        """Transform algorithm thanks to Jose Hevia (freon)"""
+        (x, y) = xy
         vector = Segment(Point(self.q['x'],self.q['y']),Point(x,y))
         xratio = abs(vector.delta_x())/self.q['width']
         yratio = abs(vector.delta_y())/self.q['height']

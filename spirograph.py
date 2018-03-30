@@ -1,23 +1,24 @@
 #! /usr/bin/env python
-'''
-Copyright (C) 2007 Joel Holdsworth joel@airwebreathe.org.uk
+#
+# Copyright (C) 2007 Joel Holdsworth joel@airwebreathe.org.uk
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import inkex, simplestyle, math
-from simpletransform import computePointInNode
+import math
+import inkex
 
 class Spirograph(inkex.Effect):
     def __init__(self):
@@ -73,7 +74,7 @@ class Spirograph(inkex.Effect):
 
         new = inkex.etree.Element(inkex.addNS('path','svg'))
         s = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
-        new.set('style', simplestyle.formatStyle(s))
+        new.set('style', inkex.formatStyle(s))
 
         pathString = ''
         maxPointCount = 1000
@@ -82,7 +83,7 @@ class Spirograph(inkex.Effect):
 
             theta = i * scale
 
-            view_center = computePointInNode(list(self.view_center), self.current_layer)
+            view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
             x = a * math.cos(theta + rotation) + \
                 self.options.penr * math.cos(ratio * theta + rotation) * flip + \
                 view_center[0]

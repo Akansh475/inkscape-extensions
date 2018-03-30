@@ -1,23 +1,26 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+import random
+import inkex
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import inkex, simplestyle, pturtle, random
-from simpletransform import computePointInNode
+from inkex import turtle as pturtle
 
 def stripme(s):
     return s.strip()
@@ -69,7 +72,7 @@ class LSystem(inkex.Effect):
         return self.turtle.getPath()
     def __compose_path(self, string):
         self.turtle.pu()
-        self.turtle.setpos(computePointInNode(list(self.view_center), self.current_layer))
+        self.turtle.setpos(inkex.computePointInNode(list(self.view_center), self.current_layer))
         self.turtle.pd()
         for c in string:
             if c in 'ABCDEF':
@@ -110,7 +113,7 @@ class LSystem(inkex.Effect):
             'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
             'stroke': '#000000', 'stroke-linecap': 'butt', 
             'fill': 'none'}
-        attribs = {'style':simplestyle.formatStyle(s),'d':self.iterate()}
+        attribs = {'style': inkex.formatStyle(s),'d':self.iterate()}
         inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'),attribs)
 
 if __name__ == '__main__':

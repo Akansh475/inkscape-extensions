@@ -1,26 +1,29 @@
 #!/usr/bin/env python
-'''
-Copyright (C) 2012 Juan Pablo Carbajal ajuanpi-dev@gmail.com
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2012 Juan Pablo Carbajal ajuanpi-dev@gmail.com
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+import math
+import random
+import inkex
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import random, math, inkex, cubicsuperpath
-
-def randomize((x, y), rx, ry, dist):
-
+def randomize(pos, rx, ry, dist):
+    (x, y) = pos
     if dist == "Gaussian":
         r1 = random.gauss(0.0,rx)
         r2 = random.gauss(0.0,ry)
@@ -82,10 +85,10 @@ class JitterNodes(inkex.Effect):
                         help="The selected UI-tab when OK was pressed")
 
     def effect(self):
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
-                p = cubicsuperpath.parsePath(d)
+                p = inkex.parseCubicPath(d)
                 for subpath in p:
                     for csp in subpath:
                         if self.options.end:
@@ -99,7 +102,7 @@ class JitterNodes(inkex.Effect):
                         if self.options.ctrl:
                             csp[0]=randomize(csp[0], self.options.radiusx, self.options.radiusy, self.options.dist)
                             csp[2]=randomize(csp[2], self.options.radiusx, self.options.radiusy, self.options.dist)
-                node.set('d',cubicsuperpath.formatPath(p))
+                node.set('d',inkex.formatCubicPath(p))
 
 if __name__ == '__main__':
     e = JitterNodes()

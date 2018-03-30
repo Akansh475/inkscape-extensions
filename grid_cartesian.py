@@ -1,47 +1,49 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+This extension allows you to draw a Cartesian grid in Inkscape.
 
-##This extension allows you to draw a Cartesian grid in Inkscape.
-##There is a wide range of options including subdivision, subsubdivions
-## and logarithmic scales. Custom line widths are also possible.
-##All elements are grouped with similar elements (eg all x-subdivs)
+There is a wide range of options including subdivision, subsubdivions and logarithmic scales. Custom line widths are also possible.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+All elements are grouped with similar elements (eg all x-subdivs)
+"""
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+import sys
+from math import *
 
 import inkex
-import simplestyle, sys
-from math import *
-from simpletransform import computePointInNode
 
 def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    line_attribs = {'style':simplestyle.formatStyle(style),
+    line_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
     
 def draw_SVG_rect(x,y,w,h, width, fill, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill':fill}
-    rect_attribs = {'style':simplestyle.formatStyle(style),
+    rect_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,
                     'x':str(x), 'y':str(y), 'width':str(w), 'height':str(h)}
     inkex.etree.SubElement(parent, inkex.addNS('rect','svg'), rect_attribs )
 
-class Grid_Polar(inkex.Effect):
+class GridPolar(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--tab",
@@ -143,10 +145,10 @@ class Grid_Polar(inkex.Effect):
         
         # Embed grid in group
         #Put in in the centre of the current view
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
+        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
         t = 'translate(' + str( view_center[0]- xmax/2.0) + ',' + \
                            str( view_center[1]- ymax/2.0) + ')'
-        g_attribs = {inkex.addNS('label','inkscape'):'Grid_Polar:X' + \
+        g_attribs = {inkex.addNS('label','inkscape'):'GridPolar:X' + \
                      str( self.options.x_divs )+':Y'+str( self.options.y_divs ),
                      'transform':t }
         grid = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
@@ -272,7 +274,7 @@ class Grid_Polar(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = Grid_Polar()
+    e = GridPolar()
     e.affect()
 
 

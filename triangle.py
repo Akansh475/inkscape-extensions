@@ -1,11 +1,26 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# Copyright (C) 2007 John Beard john.j.beard@gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+This extension allows you to draw a triangle given certain information
+ about side length or angles.
 
-##This extension allows you to draw a triangle given certain information
-## about side length or angles.
-
-##Measurements of the triangle
+Measurements of the triangle
 
          C(x_c,y_c)                              
         /`__                                     
@@ -15,36 +30,21 @@ Copyright (C) 2007 John Beard john.j.beard@gmail.com
     /a_a                    a_b`--__             
    /--------------------------------``B(x_b, y_b)
   A(x_a,y_a)         s_b                         
-
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
 
 import inkex
-import simplestyle, sys
-from simpletransform import computePointInNode
+
+from inkex.const import X, Y
 from math import *
 
-def draw_SVG_tri( (x1, y1), (x2, y2), (x3, y3), (ox,oy), width, name, parent):
+def draw_SVG_tri(point1, point2, point3, offset, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    tri_attribs = {'style':simplestyle.formatStyle(style),
+    tri_attribs = {'style':inkex.formatStyle(style),
                     inkex.addNS('label','inkscape'):name,
-                    'd':'M '+str(x1+ox)+','+str(y1+oy)+
-                       ' L '+str(x2+ox)+','+str(y2+oy)+
-                       ' L '+str(x3+ox)+','+str(y3+oy)+
-                       ' L '+str(x1+ox)+','+str(y1+oy)+' z'}
+                    'd':'M '+str(point1[X]+offset[X])+','+str(point1[Y]+offset[Y])+
+                       ' L '+str(point2[X]+offset[X])+','+str(point2[Y]+offset[Y])+
+                       ' L '+str(point3[X]+offset[X])+','+str(point3[Y]+offset[Y])+
+                       ' L '+str(point1[X]+offset[X])+','+str(point1[Y]+offset[Y])+' z'}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), tri_attribs )
     
 def angle_from_3_sides(a, b, c): #return the angle opposite side c
@@ -63,8 +63,8 @@ def pt_on_circ(radius, angle): #return the x,y coordinate of the polar coordinat
     y = radius * sin(angle)
     return [x, y]
 
-def v_add( (x1,y1),(x2,y2) ):#add an offset to coordinates
-    return [x1+x2, y1+y2]
+def v_add(point1, point2):#add an offset to coordinates
+    return [point1[X]+point2[X], point1[Y]+point2[Y]]
 
 def is_valid_tri_from_sides(a,b,c):#check whether triangle with sides a,b,c is valid
     return (a+b)>c and (a+c)>b and (b+c)>a and a > 0 and b> 0 and c>0#two sides must always be greater than the third
@@ -85,9 +85,9 @@ def draw_tri_from_3_sides(s_a, s_b, s_c, offset, width, parent): #draw a triangl
                
         draw_SVG_tri(a, b, c , offset, width, 'Triangle', parent)
     else:
-        sys.stderr.write('Error:Invalid Triangle Specifications.\n')
+        inkex.errormsg('Invalid Triangle Specifications.')
 
-class Grid_Polar(inkex.Effect):
+class Triangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--s_a",
@@ -122,7 +122,7 @@ class Grid_Polar(inkex.Effect):
     def effect(self):
         
         tri = self.current_layer
-        offset = computePointInNode(list(self.view_center), self.current_layer) #the offset require to centre the triangle
+        offset = inkex.computePointInNode(list(self.view_center), self.current_layer) #the offset require to centre the triangle
         self.options.s_a = self.unittouu(str(self.options.s_a) + 'px')
         self.options.s_b = self.unittouu(str(self.options.s_b) + 'px')
         self.options.s_c = self.unittouu(str(self.options.s_c) + 'px')
@@ -195,7 +195,7 @@ class Grid_Polar(inkex.Effect):
             draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
 
 if __name__ == '__main__':
-    e = Grid_Polar()
+    e = Triangle()
     e.affect()
 
 

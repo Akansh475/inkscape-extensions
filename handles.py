@@ -1,28 +1,29 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import inkex, simplepath, simplestyle
+import inkex
 
 class Handles(inkex.Effect):
     def effect(self):
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
-                p = simplepath.parsePath(node.get('d'))
+                p = inkex.parsePath(node.get('d'))
                 a =[]
                 pen = None
                 subPathStart = None
@@ -47,7 +48,7 @@ class Handles(inkex.Effect):
                         'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
                         'stroke': '#000000', 'stroke-linecap': 'butt', 
                         'fill': 'none'}
-                    attribs = {'style':simplestyle.formatStyle(s),'d':simplepath.formatPath(a)}
+                    attribs = {'style':inkex.formatStyle(s),'d':inkex.formatPath(a)}
                     inkex.etree.SubElement(node.getparent(), inkex.addNS('path','svg'), attribs)
                     
 if __name__ == '__main__':

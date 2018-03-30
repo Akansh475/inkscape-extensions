@@ -1,28 +1,27 @@
 #!/usr/bin/env python
-'''
-Copyright (C) 2007 Aaron Spike  (aaron @ ekips.org)
-Copyright (C) 2007 Tavmjong Bah (tavmjong @ free.fr)
+#
+# Copyright (C) 2007 Aaron Spike  (aaron @ ekips.org)
+# Copyright (C) 2007 Tavmjong Bah (tavmjong @ free.fr)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-
+import sys
 import inkex
-import simplestyle, sys
-from simpletransform import computePointInNode
+
 from math import *
-import string
 
 def involute_intersect_angle(Rb, R):
     Rb, R = float(Rb), float(R)
@@ -159,7 +158,7 @@ class Gears(inkex.Effect):
 
         # Embed gear in group to make animation easier:
         #  Translate group, Rotate path.
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
+        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
         t = 'translate(' + str( view_center[0] ) + ',' + str( view_center[1] ) + ')'
         g_attribs = {inkex.addNS('label','inkscape'):'Gear' + str( teeth ),
                      'transform':t }
@@ -167,10 +166,10 @@ class Gears(inkex.Effect):
 
         # Create SVG Path for gear
         style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
-        gear_attribs = {'style':simplestyle.formatStyle(style), 'd':path}
+        gear_attribs = {'style':inkex.formatStyle(style), 'd':path}
         gear = inkex.etree.SubElement(g, inkex.addNS('path','svg'), gear_attribs )
         if(centerdiameter > 0.0):
-            center_attribs = {'style':simplestyle.formatStyle(style), 
+            center_attribs = {'style':inkex.formatStyle(style), 
                 inkex.addNS('cx','sodipodi')        :'0.0',
                 inkex.addNS('cy','sodipodi')        :'0.0',
                 inkex.addNS('rx','sodipodi')        :str(centerdiameter/2),

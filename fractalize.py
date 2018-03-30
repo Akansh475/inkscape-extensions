@@ -1,22 +1,24 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005 Carsten Goetze c.goetze@tu-bs.de
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import random, math, inkex, simplepath
+#
+# Copyright (C) 2005 Carsten Goetze c.goetze@tu-bs.de
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+import random
+import math
+import inkex
 
 def calculateSubdivision(x1,y1,x2,y2,smoothness):
     """ Calculate the vector from (x1,y1) to (x2,y2) """
@@ -55,10 +57,10 @@ class PathFractalize(inkex.Effect):
                         dest="smooth", default="4.0",
                         help="Smoothness of the subdivision")
     def effect(self):
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
-                p = simplepath.parsePath(d)
+                p = inkex.parsePath(d)
                 
                 a = []
                 first = 1
@@ -77,7 +79,7 @@ class PathFractalize(inkex.Effect):
                             y1 = y2
                             a.append(['L',params[-2:]])
 
-                node.set('d', simplepath.formatPath(a))
+                node.set('d', inkex.formatPath(a))
 
     def fractalize(self,a,x1,y1,x2,y2,s,f):
         subdivPoint = calculateSubdivision(x1,y1,x2,y2,f)

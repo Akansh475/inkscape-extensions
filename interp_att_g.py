@@ -1,34 +1,27 @@
 #!/usr/bin/env python
-'''
-Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
+#
+# Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
-import sys
-import math
 import re
-import string
-# local library
+import math
 import inkex
-import simplestyle
-from pathmodifier import zSort
-
 
 class InterpAttG(inkex.Effect):
-
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("-a", "--att",
@@ -69,8 +62,8 @@ class InterpAttG(inkex.Effect):
                         help="The selected UI-tab when OK was pressed")
 
     def getColorValues(self):
-        sv = string.replace( self.options.start_val, '#', '' )
-        ev = string.replace( self.options.end_val, '#', '' )
+        sv = self.options.start_val.lstrip('#')
+        ev = self.options.end_val.lstrip('#')
         
         # index 0: start color, index 1: end color
         self.R, self.G, self.B = [0,0],[0,0],[0,0]
@@ -124,7 +117,7 @@ class InterpAttG(inkex.Effect):
         if len( self.selected ) > 1:
             # multiple selection
             if self.options.zsort:
-                sorted_ids = zSort(self.document.getroot(),self.selected.keys())
+                sorted_ids = inkex.zSort(self.document.getroot(),self.selected.keys())
             else:
                 sorted_ids = self.options.ids
             self.collection = list(sorted_ids)
@@ -144,7 +137,8 @@ class InterpAttG(inkex.Effect):
                 self.inte_att = self.options.att_other
             else:
                 inkex.errormsg(_("You selected 'Other'. Please enter an attribute to interpolate."))
-                sys.exit(0)
+                return
+
             self.inte_att_type = self.options.att_other_type
             self.where = self.options.att_other_where
         else:

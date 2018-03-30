@@ -1,22 +1,23 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2016 Richard White, rwhite8282@gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 """
 An Inkscape extension that creates a frame around a selected object.
-
-Copyright (C) 2016 Richard White, rwhite8282@gmail.com
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
 # These two lines are only needed if you don't put the script directly into
@@ -25,9 +26,9 @@ import sys
 sys.path.append('/usr/share/inkscape/extensions')
 
 import inkex
-import simplestyle
-from simpletransform import *
-from simplestyle import *
+
+from inkex.transforms import *
+from inkex.styles import *
 
 
 def get_picker_data(value):
@@ -147,13 +148,13 @@ class Frame(inkex.Effect):
         parent = self.current_layer
         position = self.options.position
         width = self.options.width
-        style = simplestyle.formatStyle({'stroke':stroke_data.color
+        style = formatStyle({'stroke':stroke_data.color
             , 'stroke-opacity':stroke_data.opacity
             , 'stroke-width':str(width)
-            , 'fill':(fill_data.color if (fill_data.opacity > 0) else 'none')
+            , 'fill': (fill_data.color or 'none')
             , 'fill-opacity':fill_data.opacity})
         
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             box = computeBBox([node])
             if 'outside' == position:
                 box = size_box(box, (width/2))

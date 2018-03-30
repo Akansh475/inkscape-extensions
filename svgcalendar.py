@@ -1,45 +1,41 @@
 #!/usr/bin/env python
-
-'''
-calendar.py
+#
+# Copyright (C) 2008 Aurelio A. Heckert <aurium(a)gmail.com>
+#    Week number option added by Olav Vitters and Nicolas Dufour (2012)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
 A calendar generator plugin for Inkscape, but also can be used as a standalone
 command line application.
-
-Copyright (C) 2008 Aurelio A. Heckert <aurium(a)gmail.com>
-Week number option added by Olav Vitters and Nicolas Dufour (2012)
-
+#
 More on ISO week number calculation on:
 http://en.wikipedia.org/wiki/ISO_week_date
-(The first week of a year is the week that contains the first Thursday
-of the year.)
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+(The first week of a year is the week that contains the first Thursdayof the year.)
+"""
 
 __version__ = "0.3"
 
-import calendar
 import re
+import calendar
+
 from datetime import *
 
 import inkex
-import simplestyle
 
-
-class SVGCalendar (inkex.Effect):
-
+class SVGCalendar(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--tab",
@@ -254,7 +250,7 @@ class SVGCalendar (inkex.Effect):
         return cal2
 
     def write_month_header(self, g, m):
-        txt_atts = {'style': simplestyle.formatStyle(self.style_month),
+        txt_atts = {'style': inkex.formatStyle(self.style_month),
                     'x': str((self.month_w - self.day_w) / 2),
                     'y': str(self.day_h / 5 )}
         try:
@@ -262,8 +258,8 @@ class SVGCalendar (inkex.Effect):
                                                 self.options.month_names[m-1],
                                                 self.options.input_encode)
         except:
-            inkex.errormsg(_('You must select a correct system encoding.'))
-            exit(1)
+            raise ValueError(_('You must select a correct system encoding.'))
+
         gw = inkex.etree.SubElement(g, 'g')
         week_x = 0
         if self.options.start_day=='sun':
@@ -276,7 +272,7 @@ class SVGCalendar (inkex.Effect):
             day_names.insert(0, self.options.weeknr_name)
 
         for wday in day_names:
-            txt_atts = {'style': simplestyle.formatStyle(self.style_day_name),
+            txt_atts = {'style': inkex.formatStyle(self.style_day_name),
                         'x': str( self.day_w * week_x ),
                         'y': str( self.day_h ) }
             try:
@@ -284,8 +280,8 @@ class SVGCalendar (inkex.Effect):
                                                     wday,
                                                     self.options.input_encode)
             except:
-                inkex.errormsg(_('You must select a correct system encoding.'))
-                exit(1)
+                raise ValueError(_('You must select a correct system encoding.'))
+
             week_x += 1
 
     def create_month(self, m):
@@ -344,7 +340,7 @@ class SVGCalendar (inkex.Effect):
                 # Remove leap week (starting previous year) and empty weeks
                 if self.weeknr != 0 and not (week[0] == 0 and week[6] == 0):
                     style = self.style_weeknr
-                    txt_atts = {'style': simplestyle.formatStyle(style),
+                    txt_atts = {'style': inkex.formatStyle(style),
                                 'x': str(self.day_w * week_x),
                                 'y': str(self.day_h * (week_y + 2))}
                     inkex.etree.SubElement(gdays, 'text', txt_atts).text = str(self.weeknr)
@@ -355,7 +351,7 @@ class SVGCalendar (inkex.Effect):
                 style = self.style_day
                 if self.is_weekend(week_x - self.cols_before): style = self.style_weekend
                 if day == 0: style = self.style_nmd
-                txt_atts = {'style': simplestyle.formatStyle(style),
+                txt_atts = {'style': inkex.formatStyle(style),
                             'x': str(self.day_w * week_x),
                             'y': str(self.day_h * (week_y + 2))}
                 if day == 0 and not self.options.fill_edb:
@@ -383,15 +379,18 @@ class SVGCalendar (inkex.Effect):
         parent = self.document.getroot()
         txt_atts = {'id': 'year_'+str(self.options.year) }
         self.year_g = inkex.etree.SubElement(parent, 'g', txt_atts)
-        txt_atts = {'style': simplestyle.formatStyle(self.style_year),
+        txt_atts = {'style': inkex.formatStyle(self.style_year),
                     'x': str(self.doc_w / 2 ),
                     'y': str(self.day_w * 1.5)}
         inkex.etree.SubElement(self.year_g, 'text', txt_atts).text = str(self.options.year)
-        if self.options.month == 0:
-            for m in range(1, 13):
-                self.create_month(m)
-        else:
-            self.create_month(self.options.month)
+        try:
+            if self.options.month == 0:
+                for m in range(1, 13):
+                    self.create_month(m)
+            else:
+                self.create_month(self.options.month)
+        except ValueError as err:
+            return inkex.errormsg(str(err))
 
 
 if __name__ == '__main__':   #pragma: no cover

@@ -1,84 +1,24 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import inkex, cubicsuperpath, simplestyle, copy, math, bezmisc, simpletransform, pathmodifier
-
-def numsegs(csp):
-    return sum([len(p)-1 for p in csp])
-def interpcoord(v1,v2,p):
-    return v1+((v2-v1)*p)
-def interppoints(p1,p2,p):
-    return [interpcoord(p1[0],p2[0],p),interpcoord(p1[1],p2[1],p)]
-def pointdistance((x1,y1),(x2,y2)):
-    return math.sqrt(((x2 - x1) ** 2) + ((y2 - y1) ** 2))
-def bezlenapprx(sp1, sp2):
-    return pointdistance(sp1[1], sp1[2]) + pointdistance(sp1[2], sp2[0]) + pointdistance(sp2[0], sp2[1])
-def tpoint((x1,y1), (x2,y2), t = 0.5):
-    return [x1+t*(x2-x1),y1+t*(y2-y1)]
-def cspbezsplit(sp1, sp2, t = 0.5):
-    m1=tpoint(sp1[1],sp1[2],t)
-    m2=tpoint(sp1[2],sp2[0],t)
-    m3=tpoint(sp2[0],sp2[1],t)
-    m4=tpoint(m1,m2,t)
-    m5=tpoint(m2,m3,t)
-    m=tpoint(m4,m5,t)
-    return [[sp1[0][:],sp1[1][:],m1], [m4,m,m5], [m3,sp2[1][:],sp2[2][:]]]
-def cspbezsplitatlength(sp1, sp2, l = 0.5, tolerance = 0.001):
-    bez = (sp1[1][:],sp1[2][:],sp2[0][:],sp2[1][:])
-    t = bezmisc.beziertatlength(bez, l, tolerance)
-    return cspbezsplit(sp1, sp2, t)
-def cspseglength(sp1,sp2, tolerance = 0.001):
-    bez = (sp1[1][:],sp1[2][:],sp2[0][:],sp2[1][:])
-    return bezmisc.bezierlength(bez, tolerance)    
-def csplength(csp):
-    total = 0
-    lengths = []
-    for sp in csp:
-        lengths.append([])
-        for i in xrange(1,len(sp)):
-            l = cspseglength(sp[i-1],sp[i])
-            lengths[-1].append(l)
-            total += l            
-    return lengths, total
-    
-def tweenstylefloat(property, start, end, time):
-    sp = float(start[property])
-    ep = float(end[property])
-    return str(sp + (time * (ep - sp)))
-def tweenstylecolor(property, start, end, time):
-    sr,sg,sb = parsecolor(start[property])
-    er,eg,eb = parsecolor(end[property])
-    return '#%s%s%s' % (tweenhex(time,sr,er),tweenhex(time,sg,eg),tweenhex(time,sb,eb))
-def tweenhex(time,s,e):
-    s = float(int(s,16))
-    e = float(int(e,16))
-    retval = hex(int(math.floor(s + (time * (e - s)))))[2:]
-    if len(retval)==1:
-        retval = '0%s' % retval
-    return retval
-def parsecolor(c):
-    r,g,b = '0','0','0'
-    if c[:1]=='#':
-        if len(c)==4:
-            r,g,b = c[1:2],c[2:3],c[3:4]
-        elif len(c)==7:
-            r,g,b = c[1:3],c[3:5],c[5:7]
-    return r,g,b
+import copy
+import inkex
 
 class Interp(inkex.Effect):
     def __init__(self):
@@ -107,12 +47,6 @@ class Interp(inkex.Effect):
                         action="store", type="inkbool",
                         dest="zsort", default=False,
                         help="use z-order instead of selection order")
-
-    def tweenstyleunit(self, property, start, end, time): # moved here so we can call 'unittouu'
-        scale = self.unittouu('1px')
-        sp = self.unittouu(start.get(property, '1px')) / scale
-        ep = self.unittouu(end.get(property, '1px')) / scale
-        return str(sp + (time * (ep - sp)))
 
     def effect(self):
         exponent = self.options.exponent
@@ -153,7 +87,7 @@ class Interp(inkex.Effect):
             est = copy.deepcopy(styles[sorted_ids[i]])
             basestyle = copy.deepcopy(sst)
             if basestyle.has_key('stroke-width'):
-                basestyle['stroke-width'] = self.tweenstyleunit('stroke-width',sst,est,0)
+                basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width',sst,est,0)
 
             #prepare for experimental style tweening
             if self.options.style:
@@ -190,8 +124,8 @@ class Interp(inkex.Effect):
 
             if self.options.method == 2:
                 #subdivide both paths into segments of relatively equal lengths
-                slengths, stotal = csplength(start)
-                elengths, etotal = csplength(end)
+                slengths, stotal = inkex.csplength(start)
+                elengths, etotal = inkex.csplength(end)
                 lengths = {}
                 t = 0
                 for sp in slengths:
@@ -222,7 +156,7 @@ class Interp(inkex.Effect):
                         if sadd and t > sadd[0]:
                             while sadd and sadd[0] < t:
                                 nt = (sadd[0] - pt) / (t - pt)
-                                bezes = cspbezsplitatlength(s[-1][-1][:],start[0][0][:], nt)
+                                bezes = inkex.cspbezsplitatlength(s[-1][-1][:],start[0][0][:], nt)
                                 s[-1][-1:] = bezes[:2]
                                 start[0][0] = bezes[2]
                                 pt = sadd.pop(0)
@@ -239,7 +173,7 @@ class Interp(inkex.Effect):
                         if eadd and t > eadd[0]:
                             while eadd and eadd[0] < t:
                                 nt = (eadd[0] - pt) / (t - pt)
-                                bezes = cspbezsplitatlength(e[-1][-1][:],end[0][0][:], nt)
+                                bezes = inkex.cspbezsplitatlength(e[-1][-1][:],end[0][0][:], nt)
                                 e[-1][-1:] = bezes[:2]
                                 end[0][0] = bezes[2]
                                 pt = eadd.pop(0)
@@ -248,7 +182,7 @@ class Interp(inkex.Effect):
                 end = e[:]
             else:
                 #which path has fewer segments?
-                lengthdiff = numsegs(start) - numsegs(end)
+                lengthdiff = inkex.numsegs(start) - inkex.numsegs(end)
                 #swap shortest first
                 if lengthdiff > 0:
                     start, end = end, start
@@ -259,13 +193,13 @@ class Interp(inkex.Effect):
                     segment = 0
                     for y in range(len(start)):
                         for z in range(1, len(start[y])):
-                            leng = bezlenapprx(start[y][z-1], start[y][z])
+                            leng = inkex.bezlenapprx(start[y][z-1], start[y][z])
                             if leng > maxlen:
                                 maxlen = leng
                                 subpath = y
                                 segment = z
                     sp1, sp2 = start[subpath][segment - 1:segment + 1]
-                    start[subpath][segment - 1:segment + 1] = cspbezsplit(sp1, sp2)
+                    start[subpath][segment - 1:segment + 1] = inkex.cspbezsplit(sp1, sp2)
                 #if swapped, swap them back
                 if lengthdiff > 0:
                     start, end = end, start
@@ -309,7 +243,7 @@ class Interp(inkex.Effect):
                         for p1,p2 in zip(sp, ep):
                             if not (sp or ep):
                                 break
-                            interp[-1][-1].append(interppoints(p1, p2, time))
+                            interp[-1][-1].append(inkex.interppoints(p1, p2, time))
 
                 #remove final subpath if empty.
                 if not interp[-1]:
@@ -317,15 +251,15 @@ class Interp(inkex.Effect):
 
                 #basic style tweening
                 if self.options.style:
-                    basestyle['opacity'] = tweenstylefloat('opacity',sst,est,time)
+                    basestyle['opacity'] = inkex.tweenstylefloat('opacity',sst,est,time)
                     if dostroke:
-                        basestyle['stroke-opacity'] = tweenstylefloat('stroke-opacity',sst,est,time)
-                        basestyle['stroke-width'] = self.tweenstyleunit('stroke-width',sst,est,time)
-                        basestyle['stroke'] = tweenstylecolor('stroke',sst,est,time)
+                        basestyle['stroke-opacity'] = inkex.tweenstylefloat('stroke-opacity',sst,est,time)
+                        basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width',sst,est,time)
+                        basestyle['stroke'] = inkex.tweenstylecolor('stroke',sst,est,time)
                     if dofill:
-                        basestyle['fill-opacity'] = tweenstylefloat('fill-opacity',sst,est,time)
-                        basestyle['fill'] = tweenstylecolor('fill',sst,est,time)
-                attribs = {'style':simplestyle.formatStyle(basestyle),'d':cubicsuperpath.formatPath(interp)}
+                        basestyle['fill-opacity'] = inkex.tweenstylefloat('fill-opacity',sst,est,time)
+                        basestyle['fill'] = inkex.tweenstylecolor('fill',sst,est,time)
+                attribs = {'style':inkex.formatStyle(basestyle),'d':cubicsuperpath.formatPath(interp)}
                 new = inkex.etree.SubElement(group,inkex.addNS('path','svg'), attribs)
 
 if __name__ == '__main__':

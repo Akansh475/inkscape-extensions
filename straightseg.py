@@ -1,28 +1,26 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+import math
+import inkex
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+from inkex.paths import pointAtPercent
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import math, inkex, simplepath, sys
-
-def pointAtPercent((x1, y1), (x2, y2), percent):
-    percent /= 100.0
-    x = x1 + (percent * (x2 - x1))
-    y = y1 + (percent * (y2 - y1))
-    return [x,y]
 
 class SegmentStraightener(inkex.Effect):
     def __init__(self):
@@ -36,10 +34,10 @@ class SegmentStraightener(inkex.Effect):
                         dest="behave", default=1,
                         help="straightening behavior for cubic segments")
     def effect(self):
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path', 'svg'):
                 d = node.get('d')
-                p = simplepath.parsePath(d)
+                p = inkex.parsePath(d)
                 last = []
                 subPathStart = []
                 for cmd,params in p:
@@ -63,7 +61,7 @@ class SegmentStraightener(inkex.Effect):
                         last = subPathStart[:]
                     else:
                         last = params[-2:]
-                node.set('d',simplepath.formatPath(p))
+                node.set('d', inkex.formatPath(p))
 
 if __name__ == '__main__':
     e = SegmentStraightener()

@@ -21,10 +21,11 @@ Inkscape's general barcode extension. Run from within inkscape or use the
 Barcode module provided for outside or scripting.
 """
 
-import inkex
 import sys
+import inkex
+
 from Barcode import getBarcode
-from simpletransform import computePointInNode
+from inkex.transforms import computePointInNode
 
 class InsertBarcode(inkex.Effect):
     """

@@ -1,37 +1,38 @@
 #!/usr/bin/env python
-'''
+#
+# Authors:
+#   Nicolas Dufour - Association Inkscape-fr
+#   Aurelio A. Heckert <aurium(a)gmail.com>
+#
+# Copyright (C) 2008 Authors
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
 This extension allows you to draw crop, registration and other
 printing marks in Inkscape.
+"""
 
-Authors:
-  Nicolas Dufour - Association Inkscape-fr
-  Aurelio A. Heckert <aurium(a)gmail.com>
-
-Copyright (C) 2008 Authors
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
 
 from subprocess import Popen, PIPE, STDOUT
 import math
 
 import inkex
-import simplestyle
+import inkex
 
-class Printing_Marks (inkex.Effect):
-
+class PrintingMarks (inkex.Effect):
     # Default parameters
     stroke_width = 0.25
 
@@ -97,7 +98,7 @@ class Printing_Marks (inkex.Effect):
     def draw_crop_line(self, x1, y1, x2, y2, name, parent):
         style = { 'stroke': '#000000', 'stroke-width': str(self.stroke_width),
                   'fill': 'none'}
-        line_attribs = {'style': simplestyle.formatStyle(style),
+        line_attribs = {'style': inkex.formatStyle(style),
                         'id': name,
                         'd': 'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
         inkex.etree.SubElement(parent, 'path', line_attribs)
@@ -107,7 +108,7 @@ class Printing_Marks (inkex.Effect):
                   'fill': 'none',
                   'stroke-miterlimit': '4', 'stroke-dasharray': '4, 2, 1, 2',
                   'stroke-dashoffset': '0' }
-        line_attribs = {'style': simplestyle.formatStyle(style),
+        line_attribs = {'style': inkex.formatStyle(style),
                         'id': name,
                         'd': 'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
         inkex.etree.SubElement(parent, 'path', line_attribs)
@@ -116,7 +117,7 @@ class Printing_Marks (inkex.Effect):
         for i in range(len(colours)):
             style = {'stroke':colours[i], 'stroke-width':str(r / len(colours)),
                      'fill':'none'}
-            circle_attribs = {'style':simplestyle.formatStyle(style),
+            circle_attribs = {'style':inkex.formatStyle(style),
                               inkex.addNS('label','inkscape'):name,
                               'cx':str(cx), 'cy':str(cy),
                               'r':str((r / len(colours)) * (i + 0.5))}
@@ -132,7 +133,7 @@ class Printing_Marks (inkex.Effect):
             step = r
             stroke = r / len(colours)
             regoffset = stroke * i
-            regmark_attribs = {'style': simplestyle.formatStyle(style),
+            regmark_attribs = {'style': inkex.formatStyle(style),
                                'd': 'm' +\
                                ' '+str(-regoffset)+','+str(r)  +\
                                ' '+str(-stroke)   +',0'        +\
@@ -156,7 +157,7 @@ class Printing_Marks (inkex.Effect):
             d += ' L 0,0 ' +\
                  ' L '+ str(math.sin(i)*r) +','+ str(math.cos(i)*r) +\
                  ' L '+ str(math.sin(i+0.09)*r) +','+ str(math.cos(i+0.09)*r)
-        regmark_attribs = {'style':simplestyle.formatStyle(style),
+        regmark_attribs = {'style':inkex.formatStyle(style),
                           inkex.addNS('label','inkscape'):name,
                           'transform':'translate('+str(cx)+','+str(cy)+')',
                           'd':d}
@@ -482,7 +483,6 @@ class Printing_Marks (inkex.Effect):
                        str(round(self.uutounit(self.area_h,self.options.unit),2)) +\
                        ' ' + self.options.unit
 
-
 if __name__ == '__main__':
-    e = Printing_Marks()
+    e = PrintingMarks()
     e.affect()

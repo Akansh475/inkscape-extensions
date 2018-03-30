@@ -1,23 +1,24 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import math, inkex, cubicsuperpath
-from simpletransform import computePointInNode
+import math
+import inkex
 
 class Whirl(inkex.Effect):
     def __init__(self):
@@ -31,15 +32,15 @@ class Whirl(inkex.Effect):
                         dest="rotation", default=True,
                         help="direction of rotation")
     def effect(self):
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
-        for id, node in self.selected.iteritems():
+        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
+        for id, node in self.selected.items():
             rotation = -1
             if self.options.rotation == True:
                 rotation = 1
             whirl = self.options.whirl / 1000
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
-                p = cubicsuperpath.parsePath(d)
+                p = inkex.parseCubicPath(d)
                 for sub in p:
                     for csp in sub:
                         for point in csp:
@@ -53,7 +54,7 @@ class Whirl(inkex.Effect):
                                 point[1] = (dist * math.sin(theta))
                             point[0] += view_center[0]
                             point[1] += view_center[1]
-                node.set('d',cubicsuperpath.formatPath(p))
+                node.set('d', inkex.formatCubicPath(p))
 
 if __name__ == '__main__':
     e = Whirl()

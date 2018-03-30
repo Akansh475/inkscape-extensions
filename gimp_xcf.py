@@ -1,32 +1,33 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2006 Aaron Spike, aaron@ekips.org
-Copyright (C) 2010-2012 Nicolas Dufour, nicoduf@yahoo.fr
-(Windows support and various fixes)
+#
+# Copyright (C) 2006 Aaron Spike, aaron@ekips.org
+# Copyright (C) 2010-2012 Nicolas Dufour, nicoduf@yahoo.fr
+# (Windows support and various fixes)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
 import os
 import re
 import shutil
-from subprocess import Popen, PIPE
 import sys
 import tempfile
-# local library
 import inkex
+
+# We really shouldn't be doing this
+from subprocess import Popen, PIPE
 
 # Define extension exceptions
 class GimpXCFError(Exception): pass
@@ -204,17 +205,18 @@ class MyEffect(inkex.Effect):
                 filename = os.path.join(self.tmp_dir, "%s.png" % id)
                 command = "inkscape -i \"%s\" -j %s %s -e \"%s\" %s %s" % (id, area, opacity, filename, svg_file, resolution)
 
-                p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                return_code = p.wait()
-                f = p.stdout
-                err = p.stderr
-                stdin = p.stdin
-                f.read()
-                f.close()
-                err.close()
-                stdin.close()
+                # XXX This must be replaced!
+                #p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+                #return_code = p.wait()
+                #f = p.stdout
+                #err = p.stderr
+                #stdin = p.stdin
+                #f.read()
+                #f.close()
+                #err.close()
+                #stdin.close()
 
-                if return_code != 0:
+                if False: #return_code != 0:
                     self.clear_tmp()
                     raise GimpXCFInkscapeNotInstalled
 
@@ -286,20 +288,20 @@ class MyEffect(inkex.Effect):
             junk = os.path.join(self.tmp_dir, 'junk_from_gimp.txt')
             command = 'gimp -i --batch-interpreter plug-in-script-fu-eval -b - > %s 2>&1' % junk
 
-            p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            f = p.stdin
-            out = p.stdout
-            err = p.stderr
-            f.write(script_fu.encode('utf-8'))
-            return_code = p.wait()
+            #p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            #f = p.stdin
+            #out = p.stdout
+            #err = p.stderr
+            #f.write(script_fu.encode('utf-8'))
+            #return_code = p.wait()
             
-            if p.returncode != 0:
+            if False: #p.returncode != 0:
                 self.clear_tmp()
                 raise GimpXCFGimpNotInstalled
 
-            f.close()
-            err.close()
-            out.close()
+            #f.close()
+            #err.close()
+            #out.close()
             # Uncomment these lines to see the output from gimp
             #err = open(junk, 'r')
             #inkex.debug(err.read())

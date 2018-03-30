@@ -38,7 +38,7 @@ class Style(dict):
             self[name.strip()] = value.strip()
 
     def entries(self):
-        return [ "%s:%s;" % (n,v) for (n,v) in self.iteritems() ]
+        return [ "%s:%s;" % (n,v) for (n,v) in self.items() ]
 
     def to_str(self, sep="\n    "):
         return "    " + "\n    ".join(self.entries())
@@ -55,7 +55,7 @@ class Style(dict):
 
     def add(self, c, el):
         self.total.append( (c, el) )
-        for name,value in c.iteritems():
+        for name,value in c.items():
             if not self.has_key(name):
                 self[name] = value
             if self[name] == value:

@@ -1,29 +1,27 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2006 Aaron Spike, aaron@ekips.org
-Copyright (C) 2010 Nicolas Dufour, nicoduf@yahoo.fr (color options)
+#
+# Copyright (C) 2006 Aaron Spike, aaron@ekips.org
+# Copyright (C) 2010 Nicolas Dufour, nicoduf@yahoo.fr (color options)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
-import random
 import copy
-# local library
-import inkex
-import simplestyle
+import random
 
+import inkex
 
 class MyEffect(inkex.Effect):
     def __init__(self):
@@ -74,10 +72,10 @@ class MyEffect(inkex.Effect):
         if defs == None:
             defs = inkex.etree.SubElement(self.document.getroot(),inkex.addNS('defs','svg'))
 
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             mprops = ['marker','marker-start','marker-mid','marker-end']
             try:
-                style = simplestyle.parseStyle(node.get('style'))
+                style = inkex.parseStyle(node.get('style'))
             except:
                 inkex.errormsg(_("No style attribute found for id: %s") % id)
                 continue
@@ -145,7 +143,7 @@ class MyEffect(inkex.Effect):
                     
                     children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
                     for child in children:
-                        cstyle = simplestyle.parseStyle(child.get('style'))
+                        cstyle = inkex.parseStyle(child.get('style'))
                         if (not('stroke' in cstyle  and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled")):
                             cstyle['stroke'] = stroke
                             if 'stroke_opacity' in locals():
@@ -154,8 +152,8 @@ class MyEffect(inkex.Effect):
                             cstyle['fill'] = fill
                             if 'fill_opacity' in locals():
                                 cstyle['fill-opacity'] = fill_opacity
-                        child.set('style',simplestyle.formatStyle(cstyle))
-            node.set('style',simplestyle.formatStyle(style))
+                        child.set('style', inkex.formatStyle(cstyle))
+            node.set('style', inkex.formatStyle(style))
 
 if __name__ == '__main__':
     e = MyEffect()

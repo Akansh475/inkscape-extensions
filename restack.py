@@ -1,29 +1,32 @@
 #!/usr/bin/env python
-"""
-Copyright (C) 2007-2011 Rob Antonishen; rob.antonishen@gmail.com
+#
+# Copyright (C) 2007-2011 Rob Antonishen; rob.antonishen@gmail.com
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+import os
+import csv
+import math
+import random
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-"""
-import inkex, os, csv, math, random
-from pathmodifier import zSort
-
+import inkex
 
 try:
     from subprocess import Popen, PIPE
@@ -124,7 +127,7 @@ class Restack(inkex.Effect):
         maxx = x + w
         maxy = y + h
 
-        for id, node in objects.iteritems():
+        for id, node in objects.items():
             # get the bounding box
             x,y,w,h = dimen[id]
             if x < minx:
@@ -140,7 +143,7 @@ class Restack(inkex.Effect):
         midy = (miny + maxy) / 2
 
         #calculate distances for each selected object
-        for id, node in objects.iteritems():
+        for id, node in objects.items():
             # get the bounding box
             x,y,w,h = dimen[id]
 
@@ -194,7 +197,7 @@ class Restack(inkex.Effect):
                     objects.append(child)
         else:
             parentnode = self.current_layer
-            for id_ in zSort(self.document.getroot(), self.selected.keys()):
+            for id_ in inkex.zSort(self.document.getroot(), self.selected.keys()):
                 objects.append(self.selected[id_])
         if self.options.zsort == "rev":
             objects.reverse()

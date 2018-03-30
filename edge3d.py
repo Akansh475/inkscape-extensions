@@ -1,22 +1,26 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
+#
+# Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+import sys
+import copy
+import inkex
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import inkex, simplepath, sys, copy
 from math import degrees, atan2
 
 class Edge3d(inkex.Effect):
@@ -72,7 +76,7 @@ class Edge3d(inkex.Effect):
            for the current shade.  shade is a floating point 0-1 white-black"""
         # size of a wedge for shade i, wedges come in pairs
         delta = 360. / self.options.shades / 2.
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
                 p = simplepath.parsePath(d)

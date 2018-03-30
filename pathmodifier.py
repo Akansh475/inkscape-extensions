@@ -1,22 +1,23 @@
 #!/usr/bin/env python
-'''
-Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-barraud@math.univ-lille1.fr
-
+#
+# Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# barraud@math.univ-lille1.fr
+#
+"""
 This code defines a basic class (PathModifier) of effects whose purpose is
 to somehow deform given objects: one common tasks for all such effect is to
 convert shapes, groups, clones to paths. The class has several functions to
@@ -26,34 +27,14 @@ to implement deformations of the form X=f(x,y), Y=g(x,y)...
 
 TODO: Several handy functions are defined, that might in fact be of general
 interest and that should be shipped out in separate files...
-'''
-# standard library
+"""
+
+import re
 import copy
 import math
-import re
 import random
-# local library
+
 import inkex
-import cubicsuperpath
-import bezmisc
-import simplestyle
-from simpletransform import *
-
-####################################################################
-##-- zOrder computation...
-##-- this should be shipped out in a separate file. inkex.py?
-
-def zSort(inNode,idList):
-    sortedList=[]
-    theid = inNode.get("id")
-    if theid in idList:
-        sortedList.append(theid)
-    for child in inNode:
-        if len(sortedList)==len(idList):
-            break
-        sortedList+=zSort(child,idList)
-    return sortedList
-
 
 class PathModifier(inkex.Effect):
     def __init__(self):
@@ -65,7 +46,7 @@ class PathModifier(inkex.Effect):
 
     def duplicateNodes(self, aList):
         clones={}
-        for id,node in aList.iteritems():
+        for id,node in aList.items():
             clone=copy.deepcopy(node)
             #!!!--> should it be given an id?
             #seems to work without this!?!
@@ -81,13 +62,13 @@ class PathModifier(inkex.Effect):
             id="%s%04i"%(prefix,random.randint(0,9999))
         return(id)
 
-    def expandGroups(self,aList,transferTransform=True):
+    def expandGroups(self,aList, transferTransform=True):
         for id, node in aList.items():      
             if node.tag == inkex.addNS('g','svg') or node.tag=='g':
-                mat=parseTransform(node.get("transform"))
+                mat = inkex.parseTransform(node.get("transform"))
                 for child in node:
                     if transferTransform:
-                        applyTransformToNode(mat,child)
+                        inkex.applyTransformToNode(mat,child)
                     aList.update(self.expandGroups({child.get('id'):child}))
                 if transferTransform and node.get("transform"):
                     del node.attrib["transform"]
@@ -98,8 +79,8 @@ class PathModifier(inkex.Effect):
         for id in aList.keys()[:]:     
             node=aList[id]
             if node.tag == inkex.addNS('g','svg') or node.tag=='g':
-                self.expandGroups(aList,transferTransform)
-                self.expandGroupsUnlinkClones(aList,transferTransform,doReplace)
+                self.expandGroups(aList, transferTransform)
+                self.expandGroupsUnlinkClones(aList, transferTransform,doReplace)
                 #Hum... not very efficient if there are many clones of groups...
 
             elif node.tag == inkex.addNS('use','svg') or node.tag=='use':
@@ -107,10 +88,10 @@ class PathModifier(inkex.Effect):
                 newnode=self.unlinkClone(node,doReplace)
                 del aList[id]
 
-                style = simplestyle.parseStyle(node.get('style') or "")
-                refstyle=simplestyle.parseStyle(refnode.get('style') or "")
+                style = inkex.parseStyle(node.get('style') or "")
+                refstyle = inkex.parseStyle(refnode.get('style') or "")
                 style.update(refstyle)
-                newnode.set('style',simplestyle.formatStyle(style))
+                newnode.set('style', inkex.formatStyle(style))
 
                 newid=newnode.get('id')
                 aList.update(self.expandGroupsUnlinkClones({newid:newnode},transferTransform,doReplace))
@@ -129,13 +110,13 @@ class PathModifier(inkex.Effect):
             newNode = self.document.getroot().xpath(path, namespaces=inkex.NSS)[0]
             return newNode
         else:
-            raise AssertionError, "Trying to follow empty xlink.href attribute."
+            raise AssertionError("Trying to follow empty xlink.href attribute.")
 
     def unlinkClone(self,node,doReplace):
         if node.tag == inkex.addNS('use','svg') or node.tag=='use':
             newNode = copy.deepcopy(self.refNode(node))
             self.recursNewIds(newNode)
-            applyTransformToNode(parseTransform(node.get('transform')),newNode)
+            inkex.applyTransformToNode(inkex.parseTransform(node.get('transform')),newNode)
 
             if doReplace:
                 parent=node.getparent()
@@ -144,7 +125,7 @@ class PathModifier(inkex.Effect):
 
             return newNode
         else:
-            raise AssertionError, "Only clones can be unlinked..."
+            raise AssertionError("Only clones can be unlinked...")
 
 
 
@@ -182,9 +163,9 @@ class PathModifier(inkex.Effect):
             nnt = node.get('transform')
             if nnt:
                 newnode.set('transform',nnt)
-                fuseTransform(newnode)
+                inkex.fuseTransform(newnode)
             if doReplace:
-                parent=node.getparent()
+                parent = node.getparent()
                 parent.insert(parent.index(node),newnode)
                 parent.remove(node)
             return newnode
@@ -193,16 +174,16 @@ class PathModifier(inkex.Effect):
         if node.tag == inkex.addNS('g','svg'):
             newNode = inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'))    
 
-            newstyle = simplestyle.parseStyle(node.get('style') or "")
+            newstyle = inkex.parseStyle(node.get('style') or "")
             newp = []
             for child in node:
-                childstyle = simplestyle.parseStyle(child.get('style') or "")
+                childstyle = inkex.parseStyle(child.get('style') or "")
                 childstyle.update(newstyle)
                 newstyle.update(childstyle)
                 childAsPath = self.objectToPath(child,False)
-                newp += cubicsuperpath.parsePath(childAsPath.get('d'))
-            newNode.set('d',cubicsuperpath.formatPath(newp))
-            newNode.set('style',simplestyle.formatStyle(newstyle))
+                newp += inkex.parseCubicPath(childAsPath.get('d'))
+            newNode.set('d',inkex.formatCubicPath(newp))
+            newNode.set('style', inkex.formatStyle(newstyle))
 
             self.current_layer.remove(newNode)
             if doReplace:
@@ -212,11 +193,11 @@ class PathModifier(inkex.Effect):
 
             return newNode
         else:
-            raise AssertionError
+            raise AssertionError('Node is not a group')
         
     def objectToPath(self,node,doReplace=True):
         #--TODO: support other object types!!!!
-        #--TODO: make sure cubicsuperpath supports A and Q commands... 
+        #--TODO: make sure inkex.cubic_paths supports A and Q commands... 
         if node.tag == inkex.addNS('rect','svg'):
             return(self.rectToPath(node,doReplace))
         if node.tag == inkex.addNS('g','svg'):
@@ -226,7 +207,7 @@ class PathModifier(inkex.Effect):
             for attName in node.attrib.keys():
                 if ("sodipodi" in attName) or ("inkscape" in attName):
                     del node.attrib[attName]
-            fuseTransform(node)
+            inkex.fuseTransform(node)
             return node
         elif node.tag == inkex.addNS('use','svg') or node.tag == 'use':
             newNode = self.unlinkClone(node,doReplace)
@@ -252,15 +233,15 @@ class PathModifier(inkex.Effect):
         #self.duplicateNodes(self.selected)
         #self.expandGroupsUnlinkClones(self.selected, True)
         self.objectsToPaths(self.selected, True)
-        self.bbox=computeBBox(self.selected.values())
-        for id, node in self.selected.iteritems():
+        self.bbox=inkex.computeBBox(self.selected.values())
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
-                p = cubicsuperpath.parsePath(d)
+                p = inkex.parseCubicPath(d)
 
                 #do what ever you want with p!
 
-                node.set('d',cubicsuperpath.formatPath(p))
+                node.set('d',inkex.formatCubicPath(p))
 
 
 class Diffeo(PathModifier):
@@ -297,20 +278,20 @@ class Diffeo(PathModifier):
         self.expandGroupsUnlinkClones(self.selected, True)
         self.expandGroups(self.selected, True)
         self.objectsToPaths(self.selected, True)
-        self.bbox=computeBBox(self.selected.values())
-        for id, node in self.selected.iteritems():
+        self.bbox=inkex.computeBBox(self.selected.values())
+        for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg') or node.tag=='path':
                 d = node.get('d')
-                p = cubicsuperpath.parsePath(d)
+                p = inkex.parseCubicPath(d)
 
                 for sub in p:
                     for ctlpt in sub:
                         self.applyDiffeo(ctlpt[1],(ctlpt[0],ctlpt[2]))
 
-                node.set('d',cubicsuperpath.formatPath(p))
+                node.set('d',inkex.formatCubicPath(p))
 
-#e = Diffeo()
-#e.affect()
+if __name__ == '__main__':
+    e = Diffeo()
+    e.affect()
 
-    
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

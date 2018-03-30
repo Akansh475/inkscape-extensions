@@ -1,27 +1,24 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007
+#
+# Copyright (C) 2007
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""Join paths with lines or polygons"""
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# local library
 import inkex
-import simplepath
-import simplestyle
-import simpletransform
-import cubicsuperpath
 
 class Extrude(inkex.Effect):
     def __init__(self):
@@ -35,7 +32,7 @@ class Extrude(inkex.Effect):
 
     def effect(self):
         paths = []
-        for id, node in self.selected.iteritems():
+        for id, node in self.selected.items():
             if node.tag == '{http://www.w3.org/2000/svg}path':
                 paths.append(node)
         if len(paths) < 2:
@@ -48,8 +45,8 @@ class Extrude(inkex.Effect):
         for i in range(len(paths)):
             if 'transform' in paths[i].keys():
                 trans = paths[i].get('transform')
-                trans = simpletransform.parseTransform(trans)
-                simpletransform.applyTransformToPath(trans, pts[i])
+                trans = inkex.parseTransform(trans)
+                inkex.applyTransformToPath(trans, pts[i])
 
         for n1 in range(0, len(paths)):
             for n2 in range(n1 + 1, len(paths)):
@@ -68,14 +65,14 @@ class Extrude(inkex.Effect):
                             line += [('L', v[1])]
                     ele = inkex.etree.Element('{http://www.w3.org/2000/svg}path')
                     paths[0].xpath('..')[0].append(ele)
-                    ele.set('d', simplepath.formatPath(line))
+                    ele.set('d', inkex.formatPath(line))
                     style = {
                         'fill': 'none',
                         'stroke': '#000000',
                         'stroke-opacity': 1,
                         'stroke-width': self.unittouu('1px'),
                     }
-                    ele.set('style', simplestyle.formatStyle(style))
+                    ele.set('style', inkex.formatStyle(style))
                 elif self.options.mode.lower() == 'polygons':
                     g = inkex.etree.Element('{http://www.w3.org/2000/svg}g')
                     style = {
@@ -85,7 +82,7 @@ class Extrude(inkex.Effect):
                         'stroke-opacity': 0.6,
                         'stroke-width': self.unittouu('2px'),
                     }
-                    g.set('style', simplestyle.formatStyle(style))
+                    g.set('style', inkex.formatStyle(style))
                     paths[0].xpath('..')[0].append(g)
                     for comp in verts:
                         for n,v in enumerate(comp):
@@ -99,7 +96,7 @@ class Extrude(inkex.Effect):
                             line += [('L', comp[n][0])]
                             ele = inkex.etree.Element('{http://www.w3.org/2000/svg}path')
                             g.append(ele)
-                            ele.set('d', simplepath.formatPath(line))
+                            ele.set('d', inkex.formatPath(line))
 
 
 if __name__ == '__main__':   #pragma: no cover

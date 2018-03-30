@@ -3,3 +3,5 @@
 *.tmp
 *egg-info
 old_tests
+.coverage
+TODO

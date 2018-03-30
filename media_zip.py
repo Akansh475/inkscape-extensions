@@ -1,57 +1,52 @@
 #!/usr/bin/env python
-'''
-svg_and_media_zip_output.py
+#
+# Copyright (C) 2005 Pim Snel, pim@lingewoud.com
+# Copyright (C) 2008 Aaron Spike, aaron@ekips.org
+# Copyright (C) 2011 Nicolas Dufour, nicoduf@yahoo.fr
+#
+#    * Fix for a bug related to special caracters in the path (LP #456248).
+#    * Fix for Windows support (LP #391307 ).
+#    * Font list and image directory features.
+#
+# this is  the first Python script  ever created
+# its based on embedimage.py
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# TODOs
+# - fix bug: not saving existing .zip after a Collect for Output is run
+#     this bug occurs because after running an effect extension the inkscape:output_extension is reset to svg.inkscape
+#     the file name is still xxx.zip. after saving again the file xxx.zip is written with a plain .svg which
+#     looks like a corrupt zip
+# - maybe add better extension
+# - consider switching to lzma in order to allow cross platform compression with no encoding problem...
+#
+"""
 An extension which collects all images to the documents directory and
 creates a zip archive containing all images and the document
+"""
 
-Copyright (C) 2005 Pim Snel, pim@lingewoud.com
-Copyright (C) 2008 Aaron Spike, aaron@ekips.org
-Copyright (C) 2011 Nicolas Dufour, nicoduf@yahoo.fr
-    * Fix for a bug related to special caracters in the path (LP #456248).
-    * Fix for Windows support (LP #391307 ).
-    * Font list and image directory features.
-
-this is  the first Python script  ever created
-its based on embedimage.py
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-TODOs
-- fix bug: not saving existing .zip after a Collect for Output is run
-     this bug occurs because after running an effect extension the inkscape:output_extension is reset to svg.inkscape
-     the file name is still xxx.zip. after saving again the file xxx.zip is written with a plain .svg which
-     looks like a corrupt zip
-- maybe add better extension
-- consider switching to lzma in order to allow cross platform compression with no encoding problem...
-'''
-# standard library
-import urlparse
-import urllib
-import os, os.path
-import string
+import os
+import sys
 import zipfile
 import shutil
-import sys
 import tempfile
 import locale
-# local library
-import inkex
-import simplestyle
+import urllib
 
-locale.setlocale(locale.LC_ALL, '')
-inkex.localize()  # TODO: test if it's still needed now that localize is called from inkex.
+import inkex
 
 class CompressedMediaOutput(inkex.Effect):
     def __init__(self):
@@ -103,18 +98,19 @@ class CompressedMediaOutput(inkex.Effect):
           dir_locale = locale.getpreferredencoding()
         else:
           dir_locale = "UTF-8"
-        dir = unicode(self.options.image_dir, dir_locale)
+
+        dir = self.options.image_dir
+
         for node in self.document.xpath('//svg:image', namespaces=inkex.NSS):
             xlink = node.get(inkex.addNS('href',u'xlink'))
             if (xlink[:4] != 'data'):
                 absref = node.get(inkex.addNS('absref',u'sodipodi'))
-                url = urlparse.urlparse(xlink)
+                url = urlib.urlparse(xlink)
                 href = urllib.url2pathname(url.path)
                 
                 if (href != None and os.path.isfile(href)):
                     absref = os.path.realpath(href)
 
-                absref = unicode(absref, "utf-8")
                 image_path = os.path.join(dir, os.path.basename(absref))
                 
                 if (os.path.isfile(absref)):
@@ -136,10 +132,9 @@ class CompressedMediaOutput(inkex.Effect):
         and add it to the temporary compressed file
         '''
         dst_file = os.path.join(self.tmp_dir, docstripped)
-        stream = open(dst_file,'w')
-        self.document.write(stream)
-        stream.close()
-        z.write(dst_file,docstripped.encode(self.encoding)+'.svg')
+        with open(dst_file,'wb') as stream:
+            self.document.write(stream)
+        z.write(dst_file,docstripped+'.svg')
 
     def is_text(self, node):
         '''
@@ -156,7 +151,7 @@ class CompressedMediaOutput(inkex.Effect):
         fonts = []
         s = ''
         if 'style' in node.attrib:
-            s = simplestyle.parseStyle(node.attrib['style'])
+            s = inkex.parseStyle(node.attrib['style'])
         if not s:
             return fonts
             

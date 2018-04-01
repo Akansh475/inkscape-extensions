@@ -17,6 +17,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
+
+def interpcoord(coord_a, coord_b, time):
+    """Interpolate single coordinate by the amount of time"""
+    return coord_a + ((coord_b - coord_a) * time)
+
+def interppoints(point1, point2, time):
+    """Interpolate coordinate points by amount of time"""
+    return [interpcoord(point1[X], point2[X], time), interpcoord(point1[Y], point2[Y], time)]
+
 def tweenstylefloat(property, start, end, time):
     sp = float(start[property])
     ep = float(end[property])

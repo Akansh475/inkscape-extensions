@@ -38,7 +38,8 @@ from math import *
 from .const import *
 from .utils import errormsg
 from .localize import localize
-from .utils import addNS, are_near_relative
+from .utils import addNS
+from .paths import are_near_relative
 
 
 def check_inkbool(option, opt, value):

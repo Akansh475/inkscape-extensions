@@ -166,6 +166,23 @@ def parsePath(d):
         retval.append([outputCommand,params])
     return retval
 
+
+def are_near_relative(point_a, point_b, eps):
+    """Return true if the points are near to eps"""
+    return (point_a - point_b <= point_a * eps) and (point_a - point_b >= -point_a * eps)
+
+def numsegs(csp):
+    """Returns the number of segments in the path"""
+    return sum([len(p)-1 for p in csp])
+
+def tpoint(point_a, point_b, time=0.5):
+    return point_a[X] + time * (point_b[X] - point_a[X]),\
+           point_a[Y] + time * (point_b[Y] - point_a[Y])
+
+def pointdistance(point_a, point_b):
+    """The size of the line between two points"""
+    return math.sqrt(((point_b[X] - point_a[X]) ** 2) + ((point_b[Y] - point_a[Y]) ** 2))
+
 def formatPath(a):
     """Format SVG path data from an array"""
     return "".join([cmd + " ".join([str(p) for p in params]) for cmd, params in a])

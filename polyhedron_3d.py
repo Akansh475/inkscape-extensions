@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -51,23 +51,22 @@ Many settings for appearance, lighting, rotation, etc are available.
 
 import re
 import sys
-from math import *
-
 import inkex
 
+from math import floor, pi, acos, sqrt, cos, sin
 try:
-    from numpy import *
+    import numpy
 except:
     numpy = None
 
 #FILE IO ROUTINES
 def get_filename(self_options):
-        if self_options.obj == 'from_file':
-            file = self_options.spec_file
-        else:
-            file = self_options.obj + '.obj'
-            
-        return file
+    if self_options.obj == 'from_file':
+        file = self_options.spec_file
+    else:
+        file = self_options.obj + '.obj'
+        
+    return file
 
 def objfile(name):
     import os.path
@@ -197,31 +196,37 @@ def make_rotation_log(options):
              options.r2_ax+str('%.2f'%options.r5_ang)+':'+\
              options.r3_ax+str('%.2f'%options.r6_ang)
 
-#MATHEMATICAL FUNCTIONS
-def get_angle( vector1, vector2 ): #returns the angle between two vectors
-    return acos( dot(vector1, vector2) )
+def get_angle(vector1, vector2):
+    """returns the angle between two vectors"""
+    return acos(numpy.dot(vector1, vector2))
 
-def length(vector):#return the pythagorean length of a vector
-    return sqrt(dot(vector,vector))
+def length(vector):
+    """return the pythagorean length of a vector"""
+    return sqrt(numpy.dot(vector, vector))
 
-def normalise(vector):#return the unit vector pointing in the same direction as the argument
-    return vector / length(vector)
+def normalise(vector):
+    """return the unit vector pointing in the same direction as the argument"""
+    return numpy.array(vector) / length(vector)
 
-def get_normal( pts, face): #returns the normal vector for the plane passing though the first three elements of face of pts
+def get_normal(pts, face):
+    """normal vector for the plane passing though the first three elements of face of pts"""
     #n = pt[0]->pt[1] x pt[0]->pt[3]
-    a = (array(pts[ face[0]-1 ]) - array(pts[ face[1]-1 ]))
-    b = (array(pts[ face[0]-1 ]) - array(pts[ face[2]-1 ]))
-    return cross(a,b).flatten()
+    return numpy.cross(
+        (numpy.array(pts[face[0]-1]) - numpy.array(pts[face[1] - 1])),
+        (numpy.array(pts[face[0]-1]) - numpy.array(pts[face[2] - 1])),
+    ).flatten()
 
-def get_unit_normal(pts, face, cw_wound): #returns the unit normal for the plane passing through the first three points of face, taking account of winding
+def get_unit_normal(pts, face, cw_wound):
+    """returns the unit normal for the plane passing through the first three points of face, taking account of winding"""
     if cw_wound:
         winding = -1 #if it is clockwise wound, reverse the vector direction
     else:
         winding = 1 #else leave alone
-    
-    return winding*normalise(get_normal(pts, face))
 
-def rotate( matrix, angle, axis ):#choose the correct rotation matrix to use
+    return winding * normalise(get_normal(pts, face))
+
+def rotate(matrix, angle, axis):
+    """choose the correct rotation matrix to use"""
     if   axis == 'x':
         matrix = rot_x(matrix, angle)
     elif axis == 'y':
@@ -229,29 +234,29 @@ def rotate( matrix, angle, axis ):#choose the correct rotation matrix to use
     elif axis == 'z':
         matrix = rot_z(matrix, angle)
     return matrix
-    
+
 def rot_z( matrix , a):#rotate around the z-axis by a radians
-    trans_mat = mat(array( [[ cos(a) , -sin(a) ,    0   ],
-                            [ sin(a) ,  cos(a) ,    0   ],
-                            [   0    ,    0    ,    1   ]]))
+    trans_mat = numpy.mat(numpy.array( [[ cos(a) , -sin(a) ,    0   ],
+                                        [ sin(a) ,  cos(a) ,    0   ],
+                                        [   0    ,    0    ,    1   ]]))
     return trans_mat*matrix
 
 def rot_y( matrix , a):#rotate around the y-axis by a radians
-    trans_mat = mat(array( [[ cos(a) ,    0    , sin(a) ],
-                            [   0    ,    1    ,    0   ],
-                            [-sin(a) ,    0    , cos(a) ]]))
+    trans_mat = numpy.mat(numpy.array( [[ cos(a) ,    0    , sin(a) ],
+                                        [   0    ,    1    ,    0   ],
+                                        [-sin(a) ,    0    , cos(a) ]]))
     return trans_mat*matrix
     
-def rot_x( matrix , a):#rotate around the x-axis by a radians
-    trans_mat = mat(array( [[   1    ,    0    ,    0   ],
-                            [   0    ,  cos(a) ,-sin(a) ],
-                            [   0    ,  sin(a) , cos(a) ]]))
+def rot_x( matrix, a):#rotate around the x-axis by a radians
+    trans_mat = numpy.mat(numpy.array( [[   1    ,    0    ,    0   ],
+                                        [   0    ,  cos(a) ,-sin(a) ],
+                                        [   0    ,  sin(a) , cos(a) ]]))
     return trans_mat*matrix
 
 def get_transformed_pts( vtx_list, trans_mat):#translate the points according to the matrix
     transformed_pts = []
     for vtx in vtx_list:
-        transformed_pts.append((trans_mat * mat(vtx).T).T.tolist()[0] )#transform the points at add to the list
+        transformed_pts.append((trans_mat * numpy.mat(vtx).T).T.tolist()[0] )#transform the points at add to the list
     return transformed_pts
 
 def get_max_z(pts, face): #returns the largest z_value of any point in the face
@@ -479,7 +484,7 @@ class Poly3D(inkex.Effect):
         
         #TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
         
-        trans_mat = mat(identity(3, float)) #init. trans matrix as identity matrix
+        trans_mat = numpy.mat(numpy.identity(3, float)) #init. trans matrix as identity matrix
         for i in range(1, 7):#for each rotation
             axis  = eval('so.r'+str(i)+'_ax')
             angle = eval('so.r'+str(i)+'_ang') *pi/180

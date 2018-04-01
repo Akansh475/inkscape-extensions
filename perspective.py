@@ -19,9 +19,7 @@
 Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
 
-import sys
 import os
-import re
 
 try:
     from subprocess import Popen, PIPE
@@ -30,27 +28,28 @@ except:
     bsubprocess = False
 
 import inkex
-
-from ffgeom import *
+from inkex.const import X, Y
 
 try:
-    import numpy
-    from numpy import *
-    from numpy.linalg import *
+    from numpy import np
+    import numpy.linalg as lin
 except:
-    numpy = None
+    np = None
 
 class Project(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
 
     def effect(self):
-        if numpy is None:
-            return inkex.errormsg(_("Failed to import the numpy or numpy.linalg modules. These modules are required by this extension. Please install them and try again.  On a Debian-like system this can be done with the command, sudo apt-get install python-numpy."))
+        if np is None:
+            return inkex.errormsg(
+                _("Failed to import the numpy or numpy.linalg modules."
+                  " These modules are required by this extension. Please install them."
+                  "  On a Debian-like system this can be done with the command, "
+                  "sudo apt-get install python-numpy."))
         if len(self.options.ids) < 2:
-            inkex.errormsg(_("This extension requires two selected paths."))
-            exit()            
-            
+            return inkex.errormsg(_("This extension requires two selected paths."))
+
         #obj is selected second
         scale = self.unittouu('1px')    # convert to document units
         doc = self.document.getroot()
@@ -65,17 +64,17 @@ class Project(inkex.Effect):
         obj = self.selected[self.options.ids[0]]
         envelope = self.selected[self.options.ids[1]]
         if obj.get(inkex.addNS('type','sodipodi')):
-            inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type','sodipodi'))))
-            exit()
+            return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type','sodipodi'))))
+
         if obj.tag == inkex.addNS('path','svg') or obj.tag == inkex.addNS('g','svg'):
             if envelope.tag == inkex.addNS('path','svg'):
                 mat = inkex.composeParents(envelope, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
                 path = inkex.parseCubicPath(envelope.get('d'))
                 if len(path) < 1 or len(path[0]) < 4:
-                    inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
-                    exit()
-                simpletransform.applyTransformToPath(mat, path)
-                dp = zeros((4,2), dtype=float64)
+                    return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
+
+                inkex.applyTransformToPath(mat, path)
+                dp = np.zeros((4, 2), dtype=np.float64)
                 for i in range(4):
                     dp[i][0] = path[0][i][1][0]
                     dp[i][1] = path[0][i][1][1]
@@ -86,7 +85,7 @@ class Project(inkex.Effect):
                 id = self.options.ids[0]
                 for query in q.keys():
                     if bsubprocess:
-                        p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query,id,file), shell=True, stdout=PIPE, stderr=PIPE)
+                        p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, id, file), shell=True, stdout=PIPE, stderr=PIPE)
                         rc = p.wait()
                         q[query] = scale*float(p.stdout.read())
                         err = p.stderr.read()
@@ -95,20 +94,19 @@ class Project(inkex.Effect):
                         q[query] = scale*float(f.read())
                         f.close()
                         err.close()
-                sp = array([[q['x'], q['y']+q['height']],[q['x'], q['y']],[q['x']+q['width'], q['y']],[q['x']+q['width'], q['y']+q['height']]], dtype=float64)
+                sp = np.array([[q['x'], q['y'] + q['height']], [q['x'], q['y']], [q['x'] + q['width'],
+                                q['y']], [q['x'] + q['width'], q['y'] + q['height']]], dtype=np.float64)
             else:
                 if envelope.tag == inkex.addNS('g','svg'):
-                    inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
+                    return inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
                 else:
-                    inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
-                exit()
+                    return inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
         else:
-            inkex.errormsg(_("The first selected object is not a path.\nTry using the procedure Path->Object to Path."))
-            exit()
+            return inkex.errormsg(_("The first selected object is not a path.\nTry using the procedure Path->Object to Path."))
 
-        solmatrix = zeros((8,8), dtype=float64)
-        free_term = zeros((8), dtype=float64)
-        for i in (0,1,2,3):
+        solmatrix = np.zeros((8,8), dtype=np.float64)
+        free_term = np.zeros((8), dtype=np.float64)
+        for i in (0, 1, 2, 3):
             solmatrix[i][0] = sp[i][0]
             solmatrix[i][1] = sp[i][1]
             solmatrix[i][2] = 1
@@ -122,41 +120,40 @@ class Project(inkex.Effect):
             free_term[i] = dp[i][0]
             free_term[i+4] = dp[i][1]
 
-        res = solve(solmatrix, free_term)
-        projmatrix = array([[res[0],res[1],res[2]],[res[3],res[4],res[5]],[res[6],res[7],1.0]],dtype=float64)
+        res = lin.solve(solmatrix, free_term)
+        projmatrix = np.array([[res[0],res[1],res[2]],[res[3],res[4],res[5]],[res[6],res[7],1.0]], dtype=np.float64)
         if obj.tag == inkex.addNS("path",'svg'):
-            self.process_path(obj,projmatrix)
+            self.process_path(obj, projmatrix)
         if obj.tag == inkex.addNS("g",'svg'):
             self.process_group(obj,projmatrix)
 
-    def process_group(self,group,m):
+    def process_group(self, group, matrix):
         for node in group:
             if node.tag == inkex.addNS('path','svg'):
-                self.process_path(node,m)
+                self.process_path(node, matrix)
             if node.tag == inkex.addNS('g','svg'):
-                self.process_group(node,m)    
+                self.process_group(node, matrix)
 
-    def process_path(self,path,m):
-        mat = simpletransform.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-        d = path.get('d')
-        p = inkex.parseCubicPath(d)
-        simpletransform.applyTransformToPath(mat, p)
-        for subs in p:
+    def process_path(self, path, matrix):
+        mat = inkex.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+        point = inkex.parseCubicPath(path.get('d'))
+        inkex.applyTransformToPath(mat, point)
+        for subs in point:
             for csp in subs:
-                csp[0] = self.project_point(csp[0],m)
-                csp[1] = self.project_point(csp[1],m)
-                csp[2] = self.project_point(csp[2],m)
-        mat = simpletransform.invertTransform(mat)
-        simpletransform.applyTransformToPath(mat, p)
-        path.set('d', inkex.formatPath(p))
+                csp[0] = self.project_point(csp[0], matrix)
+                csp[1] = self.project_point(csp[1], matrix)
+                csp[2] = self.project_point(csp[2], matrix)
+        mat = inkex.invertTransform(mat)
+        inkex.applyTransformToPath(mat, point)
+        path.set('d', inkex.formatPath(point))
 
-    def project_point(self,p,m):
-        x = p[0]
-        y = p[1]
-        return [(x*m[0][0] + y*m[0][1] + m[0][2])/(x*m[2][0]+y*m[2][1]+m[2][2]),(x*m[1][0] + y*m[1][1] + m[1][2])/(x*m[2][0]+y*m[2][1]+m[2][2])]
+    def project_point(self, point, matrix):
+        return [(point[X] * matrix[0][0] + point[Y] * matrix[0][1] + matrix[0][2]) /
+                (point[X] * matrix[2][0] + point[Y] * matrix[2][1] + matrix[2][2]),
+                (point[X] * matrix[1][0] + point[Y] * matrix[1][1] + matrix[1][2]) /
+                (point[X] * matrix[2][0] + point[Y] * matrix[2][1] + matrix[2][2])]
 
 if __name__ == '__main__':
-    e = Project()
-    e.affect()
+    Project().affect()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

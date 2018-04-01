@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import re
+import os
 import math
 import shutil
 import string
@@ -106,7 +107,7 @@ class hpglEncoder:
             self.viewBoxTransformY = self.docHeight / effect.unittouu(effect.addDocumentUnit(viewBox2[3]))
 
     def convertObjectsToPaths(self, file, document):
-        tempfile = inkex.os.path.splitext(file)[0] + "-prepare.svg"
+        tempfile = os.path.splitext(file)[0] + "-prepare.svg"
         # tempfile is needed here only because we want to force the extension to be .svg
         # so that we can open and close it silently
         #shutil.copy2(file, tempfile)

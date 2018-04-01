@@ -16,16 +16,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+Allow extentions to translate messages.
+"""
 
 import os
 import sys
 import gettext
 
 def localize():
+    """Turn on localisation for any platform"""
     domain = 'inkscape'
     if sys.platform.startswith('win'):
         import locale
-        current_locale, encoding = locale.getdefaultlocale()
+        current_locale, _ = locale.getdefaultlocale()
         os.environ['LANG'] = current_locale
         try:
             localdir = os.environ['INKSCAPE_LOCALEDIR']

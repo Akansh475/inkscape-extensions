@@ -20,8 +20,8 @@ Provide tests with some base utility.
 """
 
 import sys
-import os
 
+from os import path
 from unittest import TestCase as BaseCase
 
 # python 2.7 and python 3.5 support
@@ -36,7 +36,7 @@ except ImportError:
     # pylint: disable=no-name-in-module
     from test import support as test_support
 
-TEST_ROOT = os.path.dirname(os.path.dirname(__file__))
+TEST_ROOT = path.abspath(path.dirname(path.dirname(__file__)))
 
 # pylint: disable=too-few-public-methods
 class PrintedOutput(object):
@@ -73,12 +73,17 @@ class TestCase(BaseCase):
     effect = None
 
     @staticmethod
-    def data_file(filename, *path):
+    def data_file(filename, *parts):
         """Provide a data file from a filename, can accept directories as arguments."""
-        path = os.path.join(TEST_ROOT, 'data', filename, *path)
-        if not os.path.isfile(path):
+        full_path = path.join(TEST_ROOT, 'data', filename, *parts)
+        if not path.isfile(full_path):
             raise IOError("Can't find test data file: {}".format(filename))
-        return path
+        return full_path
+
+    @property
+    def root_dir(self):
+        """Return the full path to the extensions directory"""
+        return path.abspath(path.join(TEST_ROOT, '..'))
 
     @property
     def empty_svg(self):

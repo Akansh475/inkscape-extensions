@@ -15,6 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+# pylint: disable=no-self-use
 """
 Renderer for barcodes, SVG extension for Inkscape.
 
@@ -30,7 +31,7 @@ For supported barcodes see Barcode module directory.
 # ITF25
 # ========= Alpha-numeric ========= #
 # Code39Mod
-# USPS128 
+# USPS128
 # =========== 2D Based ============ #
 # PDF417
 # PDF417-Macro
@@ -41,13 +42,19 @@ import sys
 
 class NoBarcode(object):
     """Simple class for no barcode"""
+    def encode(self, text):
+        """Encode the text into a barcode pattern"""
+        return text
+
     def generate(self):
+        """Generate actual svg from the barcode pattern"""
         return None
 
-def getBarcode(code, **kw):
+def get_barcode(code, **kw):
     """Gets a barcode from a list of available barcode formats"""
     if not code:
-        return sys.stderr.write("No barcode format given!\n")
+        sys.stderr.write("No barcode format given!\n")
+        return NoBarcode()
 
     code = str(code).replace('-', '').strip()
     mod = 'Barcode'

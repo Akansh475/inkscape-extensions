@@ -19,7 +19,7 @@
 Python barcode renderer for Code39 barcodes. Designed for use with Inkscape.
 """
 
-from Base import Barcode
+from .Base import Barcode
 
 ENCODE = {
     '0': '000110100',

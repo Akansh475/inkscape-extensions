@@ -29,6 +29,7 @@ class ScriptCoverageTest(TestCase):
         """Check each extension has a test suite"""
         mods = []
         tests = []
+        alls = []
         for path, _, files in os.walk(self.root_dir):
             if '.git' in path or path.endswith('__pycache__'):
                 continue
@@ -37,12 +38,22 @@ class ScriptCoverageTest(TestCase):
                 if not fname.endswith('.py') or '__' in fname or fname == 'setup.py':
                     continue
                 if fname.startswith('test_'):
-                    tests.append(fname[5:-3].lower())
+                    if fname.endswith('_all.py'):
+                        alls.append(fname[5:-7].lower())
+                    else:
+                        tests.append(fname[5:-3].lower())
                 else:
                     name = fname[:-3]
                     if path:
                         name = path.replace('/', '_') + '_' + name
                     mods.append(name.lower())
+
+        # Alls are a list of test suites that cover multiple modules. So our matching
+        # must be set to {name}_* to cover this case.
+        for aull in alls:
+            for mod in mods:
+                if mod.startswith(aull):
+                    tests.append(mod)
 
         not_tested = sorted(list(set(mods) - set(tests)))
         not_matched = sorted(list(set(tests) - set(mods) - set(['coverage'])))

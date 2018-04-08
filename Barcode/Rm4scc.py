@@ -19,7 +19,7 @@
 Python barcode renderer for RM4CC barcodes. Designed for use with Inkscape.
 """
 
-from Base import Barcode
+from .Base import Barcode
 
 map = {
     '(' : '25',

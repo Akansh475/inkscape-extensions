@@ -24,8 +24,7 @@ Barcode module provided for outside or scripting.
 import sys
 import inkex
 
-from Barcode import getBarcode
-from inkex.transforms import computePointInNode
+from Barcode import get_barcode
 
 class InsertBarcode(inkex.Effect):
     """
@@ -33,24 +32,22 @@ class InsertBarcode(inkex.Effect):
     """
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-l", "--height",
-                        action="store", type="int",
-                        dest="height", default=30,
-                        help="Barcode Height")
-        self.OptionParser.add_option("-t", "--type",
-                        action="store", type="string",
-                        dest="type", default='',
-                        help="Barcode Type")
-        self.OptionParser.add_option("-d", "--text",
-                        action="store", type="string",
-                        dest="text", default='',
-                        help="Text to print on barcode")
+        self.OptionParser.add_option(
+            "-l", "--height", action="store", type="int",
+            dest="height", default=30, help="Barcode Height")
+        self.OptionParser.add_option(
+            "-t", "--type", action="store", type="string",
+            dest="type", default='', help="Barcode Type")
+        self.OptionParser.add_option(
+            "-d", "--text", action="store", type="string",
+            dest="text", default='', help="Text to print on barcode")
 
     def effect(self):
-        (pos_x, pos_y) = computePointInNode(
-                list(self.view_center), self.current_layer)
+        (pos_x, pos_y) = inkex.computePointInNode(
+            list(self.view_center), self.current_layer)
 
-        barcode = getBarcode(self.options.type,
+        barcode = get_barcode(
+            self.options.type,
             text=self.options.text,
             height=self.options.height,
             document=self.document,
@@ -62,35 +59,6 @@ class InsertBarcode(inkex.Effect):
         else:
             sys.stderr.write("No barcode was generated\n")
 
-def test_barcode():
-    """Run from command line"""
-    for (kind, text) in (
-        ('Ean2', '55'),
-        ('Ean5', '54321'),
-        ('Ean8', '0123456'),
-        ('Ean13', '123456789101'),
-        ('Ean13', '12345678910155'),
-        ('Ean13', '12345678910154321'),
-        ('Code128', 'Martin is Great'),
-        ('Code25i', '3242322'),
-        ('Code39', '4443322888'),
-        ('Code93', '3332222'),
-        ('Rm4scc', 'ROYAL POINT'),
-        ('Upca', '12345678911'),
-        ('Upce', '123456'),
-      ):
-        print("RENDER TEST: {:s}".format(kind))
-        bargen = getBarcode(kind, text=text)
-        if bargen is not None:
-            barcode = bargen.generate()
-            if barcode is not None:
-                print(inkex.etree.tostring(barcode, pretty_print=True))
-
-
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        # Debug mode without inkex
-        test_barcode()
-        exit(0)
     InsertBarcode().affect()
 

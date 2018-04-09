@@ -25,13 +25,18 @@ import os
 import sys
 import copy
 import tarfile
-import StringIO
 import calendar
 import time
 
+try:
+    # python2
+    from StringIO import StringIO
+except ImportError:
+    # python3
+    from io import StringIO
+
 # Inkscape Libraries
 import inkex
-import simplestyle
 
 GROUP = "{http://www.w3.org/2000/svg}g"
 LABEL = "{http://www.inkscape.org/namespaces/inkscape}label"
@@ -83,7 +88,7 @@ class LayersOutput(inkex.Effect):
         return node.tag == GROUP and node.attrib.get(GROUPMODE,'').lower() == 'layer'
 
     def io_document(self, name, doc):
-        string = StringIO.StringIO()
+        string = StringIO()
         doc.write(string)
         string.seek(0)
         info = tarfile.TarInfo(name=name+'.svg')

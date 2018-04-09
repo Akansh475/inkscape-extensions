@@ -252,7 +252,7 @@ def new_test_effect(raw_svg):
     try:
         # Write the SVG to a temp file that we can refer to by path.
         tf = tempfile.NamedTemporaryFile(
-                prefix='inkscape-inkex-test-', delete=False)
+                prefix='inkscape-inkex-test-', delete=False, mode='w')
         tmp_svg_path = tf.name
         tf.write(raw_svg)
         tf.close()

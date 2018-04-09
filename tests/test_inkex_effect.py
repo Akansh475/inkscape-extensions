@@ -187,7 +187,11 @@ class GetDocumentUnitTest(TestCase):
             # 100mm is ~3.94in, so unit should be 'in'.
             svg = 'width="{}" viewBox="0 0 3.94 5.90"'.format(w)
             e = new_effect_with_svg_attrs(svg)
-            self.assertEqual(e.getDocumentUnit(), 'in', msg=svg)
+            actual = e.getDocumentUnit()
+            expected = 'in'
+            self.assertEqual(
+                    actual, expected,
+                    msg='{} should be {} for [{}]'.format(actual, expected, w))
 
     # TODO: Demonstrate that unknown width units are treated as px while
     #     determining the ratio.
@@ -222,6 +226,192 @@ class GetDocumentUnitTest(TestCase):
         # of the viewBox; this fallback happens if any element is corrupt.
         e = new_effect_with_svg_attrs('width="3779px" viewBox="x 0 1 1"')
         self.assertEqual(e.getDocumentUnit(), 'cm')
+
+
+class UserUnitTest(TestCase):
+    """Tests for methods that are based on the value of getDocumentUnit()."""
+
+    def new_effect_with_uu(self, unit):
+        """Returns an Effect e where e.getDocumentUnit() == unit."""
+        # Effect bases its "user unit" on the ratio between the SVG width and
+        # the width of the viewBox (viewBox[2]).
+        svg = 'width="1{}" viewBox="0 0 1 1"'.format(unit)
+        e = new_effect_with_svg_attrs(svg)
+        # Demonstrate that this helper does the right thing.
+        self.assertEqual(e.getDocumentUnit(), unit, msg=svg)
+        return e
+
+    #
+    # Effect.unittouu() tests
+    #
+
+    # Unit-ratio tests. Don't exhaustively test every unit conversion, just
+    # demonstrate that the logic works.
+
+    def test_unittouu_in_to_cm(self):
+        e = self.new_effect_with_uu('cm')
+        # 1in is ~2.54cm
+        self.assertAlmostEqual(e.unittouu('1in'), 2.54)
+
+    def test_unittouu_yd_to_m(self):
+        e = self.new_effect_with_uu('m')
+        # 1yd is ~0.9144m
+        self.assertAlmostEqual(e.unittouu('1yd'), 0.9144)
+
+    def test_unittouu_identity(self):
+        e = self.new_effect_with_uu('pc')
+        # If the input and output units are the same, the input and output
+        # values should exactly be the same, too.
+        self.assertEqual(e.unittouu('9.87654321pc'), 9.87654321)
+
+    def test_unittouu_unitless_input_defaults_to_px(self):
+        e = self.new_effect_with_uu('in')
+        # Passing a unitless value to unittouu() should treat the units as 'px'.
+        # 1in == 96px
+        self.assertEqual(e.unittouu('96'), 1)
+
+    def test_unittouu_empty_input_defaults_to_zero(self):
+        e = self.new_effect_with_uu('in')
+        # Passing an empty string to unittouu() should treat the value as zero.
+        self.assertEqual(e.unittouu(''), 0)
+
+    def test_unittouu_input_number_parsing(self):
+        inputs = (
+            '100pc',
+            '100  pc',
+            # TODO: Allow whitespace before the value and add a test case.
+            #     Currently, '  100pc' would fail here, because the value will
+            #     be treated as 0.0.
+            # TODO: Allow whitespace after the units and add a test case.
+            #     Currently, '100pc  ' would fail here, because the units will
+            #     be treated as 'px'.
+            '+100pc',
+            '100.0pc',
+            '100.0e0pc',
+            '10.0e1pc',
+            '10.0e+1pc',
+            '1000.0e-1pc',
+            '.1e+3pc',
+            '+.1e+3pc',
+        )
+        e = self.new_effect_with_uu('px')
+        for i in inputs:
+            # 100pc is ~3.937in
+            actual = e.unittouu(i)
+            expected = 1600
+            self.assertEqual(
+                    actual, expected,
+                    msg='{} should be {} for [{}]'.format(actual, expected, i))
+
+    # Malformed input tests.
+
+    def test_unittouu_bad_input_number_defaults_to_zero(self):
+        e = self.new_effect_with_uu('cm')
+        # Demonstrate that 1in is ~2.54cm.
+        self.assertAlmostEqual(e.unittouu('1in'), 2.54)
+
+        # Corrupt the input to contain an invalid number component; note that
+        # the result changes to zero.
+        self.assertEqual(e.unittouu('ABCDin'), 0)
+
+    def test_unittouu_bad_input_unit_defaults_to_px(self):
+        e = self.new_effect_with_uu('in')
+        # Demonstrate that 1.0in passes through without change.
+        self.assertAlmostEqual(e.unittouu('1.0in'), 1.0)
+
+        # Corrupt the input to contain an invalid unit component; note that the
+        # result changes 1/96, the ratio between inches and pixels. This is
+        # because unittouu() treats unknown units as 'px'.
+        self.assertAlmostEqual(e.unittouu('1.0ABCD'), 1/96.0)
+
+    #
+    # Effect.uutounit() tests
+    #
+
+    # Unit-ratio tests. Don't exhaustively test every unit conversion, just
+    # demonstrate that the logic works.
+
+    def test_uutounit_cm_to_in(self):
+        e = self.new_effect_with_uu('in')
+        # Convert 1 user unit ('in') to 'cm'.
+        # 1in is ~2.54cm
+        self.assertAlmostEqual(e.uutounit(1, 'cm'), 2.54)
+
+    def test_uutounit_m_to_yd(self):
+        e = self.new_effect_with_uu('yd')
+        # Convert 1 user unit ('yd') to 'm'.
+        # 1yd is ~0.9144m
+        self.assertAlmostEqual(e.uutounit(1, 'm'), 0.9144)
+
+    def test_uutounit_identity(self):
+        e = self.new_effect_with_uu('pc')
+        # If the input and output units are the same, the input and output
+        # values should exactly be the same, too.
+        self.assertEqual(e.uutounit(9.87654321, 'pc'), 9.87654321)
+
+    # Failure tests.
+
+    def test_uutounit_unknown_unit_raises(self):
+        e = self.new_effect_with_uu('in')
+        # Demonstrate that passing an unknown unit string to uutounit()
+        # raises an exception.
+        # TODO: Determine whether this is the right behavior; none of the other
+        #     unit-related methods raises errors on bad units, they treat them
+        #     as 'px'. It would be better for them all to be consistent, either
+        #     by silently converting to 'px' here or by raising exceptions in
+        #     the other methods.
+        self.assertRaises(Exception, e.uutounit, 1, 'xy')
+
+    #
+    # Effect.addDocumentUnit() tests
+    #
+
+    def test_addDocumentUnit_common(self):
+        # For valid float inputs, the output should be the input with
+        # the user unit appended.
+        e = self.new_effect_with_uu('pt')
+        cases = (
+            # Input, expected output
+            ('100', '100pt'),
+            ('+100', '+100pt'),
+            ('100.0', '100.0pt'),
+            ('100.0e0', '100.0e0pt'),
+            ('10.0e1', '10.0e1pt'),
+            ('10.0e+1', '10.0e+1pt'),
+            ('1000.0e-1', '1000.0e-1pt'),
+            ('.1e+3', '.1e+3pt'),
+            ('+.1e+3', '+.1e+3pt'),
+
+            # Demonstrate whitespace-preserving behavior.
+            # TODO: Determine whether this is expected; consider stripping
+            #     whitespace and updating these tests.
+            ('   100', '   100pt'),
+            ('100   ', '100   pt'),
+            ('  100   ', '  100   pt'),
+        )
+        for input_value, expected in cases:
+            self.assertEqual(e.addDocumentUnit(input_value), expected)
+
+    def test_addDocumentUnit_non_float_strings_pass_through(self):
+        # Strings that are invalid floats should pass through unchanged.
+        inputs = (
+            '',
+            'ABCD',
+            '.',
+            '   ',
+        )
+        e = self.new_effect_with_uu('pt')
+        for i in inputs:
+            self.assertEqual(e.addDocumentUnit(i), i)
+
+    def test_addDocumentUnit_float_type_raises(self):
+        # addDocumentUnit() expects a string. Demonstrate that passing
+        # an actual float value raises an exception.
+        # TODO: Determine whether this is the desired behavior. If so,
+        #     consider changing addDocumentUnit() to handle the case more
+        #     explicitly.
+        e = self.new_effect_with_uu('pt')
+        self.assertRaises(Exception, e.addDocumentUnit, 1.2)
 
 
 def new_effect_with_svg_attrs(svg_attrs):
@@ -270,3 +460,4 @@ if __name__ == '__main__':
     test_support.run_unittest(GetDocumentHeightTest)
     test_support.run_unittest(GetDocumentUnitTest)
     test_support.run_unittest(GetDocumentWidthTest)
+    test_support.run_unittest(UnitToUUTest)

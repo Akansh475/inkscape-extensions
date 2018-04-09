@@ -10,7 +10,8 @@ To run all tests:
 
 ```shell
 # In the top-level directory of the extensions repo:
-$ python setup.py test
+$ python2 setup.py test
+$ python3 setup.py test
 ```
 
 To run the tests in a specific file (in this case,
@@ -18,5 +19,6 @@ To run the tests in a specific file (in this case,
 
 ```shell
 # In the top-level directory of the extensions repo:
-$ python setup.py test --test-suite=tests.test_inkex_effect
+$ python2 setup.py test --test-suite=tests.test_inkex_effect
+$ python3 setup.py test --test-suite=tests.test_inkex_effect
 ```

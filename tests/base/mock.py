@@ -28,7 +28,11 @@ def replace_function(owner, name, new=None):
         def _inner(*args, **kwargs):
             try:
                 old = getattr(owner, name)
-                if new is None or isinstance(new, (str, int, float, list, tuple)):
+                if isinstance(new, Exception):
+                    def _error_function(*args2, **kw2): # pylint: disable=unused-argument
+                        raise type(new)(new.message.format(*args, **kwargs))
+                    setattr(owner, name, _error_function)
+                elif new is None or isinstance(new, (str, int, float, list, tuple)):
                     def _empty_function(*args, **kw): # pylint: disable=unused-argument
                         return new
                     setattr(owner, name, _empty_function)

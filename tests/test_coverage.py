@@ -28,12 +28,26 @@ from inkex.effect import Effect
 from tests.base import TestCase, test_support
 from tests.base.mock import replace_function
 
+class NoMainError(Exception):
+    """Many effects try and call affect without even checking if they are running
+    as a script or being loaded as modules. We invite them to the fail couch."""
+
+
+class ExitedError(Exception):
+    """Prevent modules from calling sys.exit, which they shouldn't be doing."""
+
+
 class ScriptCoverageTest(TestCase):
     """Does each effect have a basic test"""
     _current_result = None
 
     def test_basic_tests(self):
-        """Check each extension has a test suite"""
+        """Check each extension has a test suite and list ones that don't.
+
+        It will also attempt to run any effect it can find with the default test and
+        cause multiple failures or errors. This is a meta-test pattern and shouldn't
+        be copied unless you know why it's being used.
+        """
         mods, tests = self.get_mod_list()
 
         not_tested = sorted(list(set(mods) - set(tests)))
@@ -52,20 +66,7 @@ class ScriptCoverageTest(TestCase):
             bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(
                 len(not_tested), '\n - '.join(not_tested), '\n + '.join(not_matched)))
 
-    @staticmethod
-    def no_exit(status):
-        """We prevent modules from calling sys.exit, which they shouldn't be doing."""
-        raise SyntaxError("Script called sys.exit({})!".format(status))
-
-    @staticmethod
-    def no_affect():
-        """
-        Many effects try and call affect without even checking if they are running
-        as a script or being loaded as modules. We invite them to the fail couch.
-        """
-        raise SyntaxError("Called affect on module import, add __main__ to script.")
-
-    @replace_function(Effect, 'affect', no_affect)
+    @replace_function(Effect, 'affect', NoMainError("{1}.py calls affect outside of __main__"))
     def get_effect_module(self, module):
         """Returns the module for use, catching issues"""
         try:
@@ -75,7 +76,7 @@ class ScriptCoverageTest(TestCase):
         except Exception: # pylint: disable=broad-except
             self._current_result.addError(self, sys.exc_info())
 
-    @replace_function(sys, 'exit', no_exit)
+    @replace_function(sys, 'exit', ExitedError("Tried to sys.exit(), don't do that!"))
     def auto_test_effect(self, module):
         """Take an effect module and test it.
 

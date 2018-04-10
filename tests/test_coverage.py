@@ -20,16 +20,98 @@ Test how well we cover the code with tests.
 """
 
 import os
+import sys
+import inspect
+
+from inkex.effect import Effect
 
 from tests.base import TestCase, test_support
+from tests.base.mock import replace_function
 
 class ScriptCoverageTest(TestCase):
     """Does each effect have a basic test"""
+    _current_result = None
+
     def test_basic_tests(self):
         """Check each extension has a test suite"""
-        mods = []
-        tests = []
-        alls = []
+        mods, tests = self.get_mod_list()
+
+        not_tested = sorted(list(set(mods) - set(tests)))
+        not_matched = sorted(list(set(tests) - set(mods) - set(['coverage'])))
+
+        # We catch any known effects that use inkex and test them with the minimum runner
+        for module in list(not_tested):
+            if os.path.isfile(module + '.py'):
+                if self.auto_test_effect(module):
+                    # We remove this effect from the list of 'not-tested' not this
+                    # doesn't mean the effect has no errors.
+                    not_tested.remove(module)
+
+        # Usually this will contain non-effect modules that are untested
+        self.assertFalse(
+            bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(
+                len(not_tested), '\n - '.join(not_tested), '\n + '.join(not_matched)))
+
+    @staticmethod
+    def no_exit(status):
+        """We prevent modules from calling sys.exit, which they shouldn't be doing."""
+        raise SyntaxError("Script called sys.exit({})!".format(status))
+
+    @staticmethod
+    def no_affect():
+        """
+        Many effects try and call affect without even checking if they are running
+        as a script or being loaded as modules. We invite them to the fail couch.
+        """
+        raise SyntaxError("Called affect on module import, add __main__ to script.")
+
+    @replace_function(Effect, 'affect', no_affect)
+    def get_effect_module(self, module):
+        """Returns the module for use, catching issues"""
+        try:
+            return __import__(module, fromlist=[])
+        except ImportError:
+            return False
+        except Exception: # pylint: disable=broad-except
+            self._current_result.addError(self, sys.exc_info())
+
+    @replace_function(sys, 'exit', no_exit)
+    def auto_test_effect(self, module):
+        """Take an effect module and test it.
+
+        Returns:
+          - True   - module was tested (failure or success).
+          - False  - the module isn't an effect or doesn't exist.
+
+        """
+        mod = self.get_effect_module(module)
+        if not mod:
+            # Failure to import doesn't mean we got to test anything.
+            return False
+
+        mod_result = None
+        for _, value in mod.__dict__.items():
+            mod_result = True
+            if inspect.isclass(value) and issubclass(value, Effect):
+                try:
+                    self.assertEffectEmpty(value)
+                    self._current_result.addSuccess(self)
+                except self.failureException:
+                    self._current_result.addFailure(self, sys.exc_info())
+                except Exception: #pylint: disable=broad-except
+                    self._current_result.addError(self, sys.exc_info())
+
+        return mod_result is not None
+
+    def get_mod_list(self):
+        """Gets a list of python files that may be effects or modules
+
+        Returns three lists:
+          - mods   - List of modules, folders seperated by '.'
+          - tests  - List of tests found
+
+        """
+        mods, tests, alls = [], [], []
         for path, _, files in os.walk(self.root_dir):
             if '.git' in path or path.endswith('__pycache__'):
                 continue
@@ -45,7 +127,7 @@ class ScriptCoverageTest(TestCase):
                 else:
                     name = fname[:-3]
                     if path:
-                        name = path.replace('/', '_') + '_' + name
+                        name = os.path.join(path, name).replace('/', '_')
                     mods.append(name.lower())
 
         # Alls are a list of test suites that cover multiple modules. So our matching
@@ -55,13 +137,13 @@ class ScriptCoverageTest(TestCase):
                 if mod.startswith(aull):
                     tests.append(mod)
 
-        not_tested = sorted(list(set(mods) - set(tests)))
-        not_matched = sorted(list(set(tests) - set(mods) - set(['coverage'])))
+        return mods, tests
 
-        print(set(mods) & set(tests))
-        self.assertFalse(
-            bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(
-                len(not_tested), '\n - '.join(not_tested), '\n + '.join(not_matched)))
+    def __call__(self, result=None, **kw):
+        """Wrapper for TestCase run to insert multiple errors (sub-errors)"""
+        self._current_result = result if result is not None else self.defaultTestResult()
+        super(ScriptCoverageTest, self).__call__(result=result, **kw)
+
 
 if __name__ == '__main__':
     test_support.run_unittest(ScriptCoverageTest)

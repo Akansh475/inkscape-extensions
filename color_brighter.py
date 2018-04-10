@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import coloreffect
 
 class C(coloreffect.ColorEffect):
@@ -21,5 +22,6 @@ class C(coloreffect.ColorEffect):
    
     return '%02x%02x%02x' % (r,g,b)
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

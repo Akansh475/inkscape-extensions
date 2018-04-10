@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-#############################################################################
 #
 # Voronoi diagram calculator/ Delaunay triangulator
 # Translated to Python by Bill Simons
 # September, 2005
 #
-# Calculate Delaunay triangulation or the Voronoi polygons for a set of 
+# Calculate Delaunay triangulation or the Voronoi polygons for a set of
 # 2D input points.
 #
 # Derived from code bearing the following notice:
@@ -22,46 +21,43 @@
 #  REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
 #  OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
 #
-# Comments were incorporated from Shane O'Sullivan's translation of the 
+# Comments were incorporated from Shane O'Sullivan's translation of the
 # original code into C++ (http://mapviewer.skynet.ie/voronoi.html)
 #
 # Steve Fortune's homepage: http://netlib.bell-labs.com/cm/cs/who/sjf/index.html
 #
-#############################################################################
-
-def usage():
-    print """
+"""
 voronoi - compute Voronoi diagram or Delaunay triangulation
 
 voronoi [-t -p -d]  [filename]
 
-Voronoi reads from filename (or standard input if no filename given) for a set 
-of points in the plane and writes either the Voronoi diagram or the Delaunay 
-triangulation to the standard output.  Each input line should consist of two 
+Voronoi reads from filename (or standard input if no filename given) for a set
+of points in the plane and writes either the Voronoi diagram or the Delaunay
+triangulation to the standard output.  Each input line should consist of two
 real numbers, separated by white space.
 
-If option -t is present, the Delaunay triangulation is produced. 
+If option -t is present, the Delaunay triangulation is produced.
 Each output line is a triple i j k, which are the indices of the three points
 in a Delaunay triangle. Points are numbered starting at 0.
 
-If option -t is not present, the Voronoi diagram is produced.  
+If option -t is not present, the Voronoi diagram is produced.
 There are four output record types.
 
 s a b      indicates that an input point at coordinates a b was seen.
 l a b c    indicates a line with equation ax + by = c.
 v a b      indicates a vertex at a b.
 e l v1 v2  indicates a Voronoi segment which is a subsegment of line number l
-           with endpoints numbered v1 and v2.  If v1 or v2 is -1, the line 
+           with endpoints numbered v1 and v2.  If v1 or v2 is -1, the line
            extends to infinity.
 
 Other options include:
 
 d    Print debugging info
 
-p    Produce output suitable for input to plot (1), rather than the forms 
+p    Produce output suitable for input to plot (1), rather than the forms
      described above.
 
-On unsorted data uniformly distributed in the unit square, voronoi uses about 
+On unsorted data uniformly distributed in the unit square, voronoi uses about
 20n+140 bytes of storage.
 
 AUTHOR
@@ -756,11 +752,7 @@ def computeDelaunayTriangulation(points):
 
 #-----------------------------------------------------------------------------
 if __name__=="__main__":
-    try:
-        optlist,args = getopt.getopt(sys.argv[1:],"thdp")
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
+    optlist, args = getopt.getopt(sys.argv[1:],"thdp")
       
     doHelp = 0
     c = Context()
@@ -782,10 +774,6 @@ if __name__=="__main__":
             y = float(fld[1])
             pts.append(Site(x,y))
         if len(args) > 0: fp.close()
-
-    if doHelp or len(pts) == 0:
-        usage()
-        sys.exit(2)
 
     sl = SiteList(pts)
     voronoi(sl,c)

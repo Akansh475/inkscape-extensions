@@ -91,8 +91,11 @@ class TestCase(BaseCase):
         return self.data_file('svg', 'minimal-blank.svg')
 
     def test_without_parameters(self):
-        """Test calling effect without any arguments"""
+        """Test calling effect without any arguments (default test for every suite)"""
         if self.effect is not None:
-            # pylint: disable=not-callable
-            self.effect().affect([self.empty_svg], False)
+            return self.assertEffectEmpty(self.effect)
+
+    def assertEffectEmpty(self, effect): # pylint: disable=invalid-name
+        """Assert calling effect without any arguments"""
+        return effect().affect([self.empty_svg], False)
 

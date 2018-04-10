@@ -57,10 +57,10 @@ class InkOption(optparse.Option):
     TYPE_CHECKER["inkbool"] = check_inkbool
 
 
-class Effect:
+class Effect(object):
     """A class for creating Inkscape SVG Effects"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.document = None
         self.original_document = None
         self.ctx = None

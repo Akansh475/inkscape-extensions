@@ -81,7 +81,7 @@ class Effect(object):
     def effect(self):
         """Apply some effects on the document."""
         raise NotImplementedError(
-            "Extensions subclassing Effect must override"
+            "Extension {} must override".format(type(self).__name__) + \
             " this function and define the transformations in it.")
 
     def getoptions(self,args=sys.argv[1:]):

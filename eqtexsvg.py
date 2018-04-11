@@ -129,10 +129,7 @@ class EQTEXSVG(inkex.Effect):
         try:
             os.stat(dvi_file)
         except OSError:
-            print >>sys.stderr, "invalid LaTeX input:"
-            print >>sys.stderr, self.options.formula
-            print >>sys.stderr, "temporary files were left in:", base_dir
-            sys.exit(1)
+            return inkex.errormsg("invalid LaTeX input: {} temporary files were left in: {}".format(self.options.formula, base_dir))
 
         os.system('dvips -q -f -E -D 600 -y 5000 -o "%s" "%s"' % (ps_file, dvi_file))
         # cd to base_dir is necessary, because pstoedit writes

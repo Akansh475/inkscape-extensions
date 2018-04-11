@@ -28,9 +28,11 @@ def is_empty(val):
 
 
 class WebSlicer_Effect(inkex.Effect):
-
     def __init__(self):
         inkex.Effect.__init__(self)
+
+    def effect(self):
+        pass
 
     def get_slicer_layer(self, force_creation=False):
         # Test if webslicer-layer layer existis

@@ -1,38 +1,30 @@
 #!/usr/bin/env python
-"""
-Copyright (C) 2010 Alvin Penner, penner@vaxxine.com
+#
+# Copyright (C) 2010 Alvin Penner, penner@vaxxine.com
+#
+# - Voronoi Diagram algorithm and C code by Steven Fortune, 1987, http://ect.bell-labs.com/who/sjf/
+# - Python translation to file voronoi.py by Bill Simons, 2005, http://www.oxfish.com/
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-- Voronoi Diagram algorithm and C code by Steven Fortune, 1987, http://ect.bell-labs.com/who/sjf/
-- Python translation to file voronoi.py by Bill Simons, 2005, http://www.oxfish.com/
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-"""
-# standard library
 import random
-# local library
 import inkex
-import simplestyle, simpletransform
 import voronoi
 
-try:
-    from subprocess import Popen, PIPE
-except:
-    inkex.errormsg(_("Failed to import the subprocess module. Please report this as a bug at: https://bugs.launchpad.net/inkscape."))
-    inkex.errormsg(_("Python version is: ") + str(inkex.sys.version_info))
-    exit()
+from subprocess import Popen, PIPE
 
 def clip_line(x1, y1, x2, y2, w, h):
     if x1 < 0 and x2 < 0:
@@ -89,8 +81,7 @@ class Pattern(inkex.Effect):
 
     def effect(self):
         if not self.options.ids:
-            inkex.errormsg(_("Please select an object"))
-            exit()
+            return inkex.errormsg(_("Please select an object"))
         scale = self.unittouu('1px')            # convert to document units
         self.options.size *= scale
         self.options.border *= scale
@@ -99,7 +90,7 @@ class Pattern(inkex.Effect):
             p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, self.options.ids[0], self.args[-1]), shell=True, stdout=PIPE, stderr=PIPE)
             rc = p.wait()
             q[query] = scale*float(p.stdout.read())
-        mat = simpletransform.composeParents(self.selected[self.options.ids[0]], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+        mat = inkex.composeParents(self.selected[self.options.ids[0]], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         defs = self.xpathSingle('/svg:svg//svg:defs')
         pattern = inkex.etree.SubElement(defs ,inkex.addNS('pattern','svg'))
         pattern.set('id', 'Voronoi' + str(random.randint(1, 9999)))
@@ -141,8 +132,7 @@ class Pattern(inkex.Effect):
             # dot.set('width', '2')
             # dot.set('height', '2')
         if len(pts) < 3:
-            inkex.errormsg("Please choose a larger object, or smaller cell size")
-            exit()
+            return inkex.errormsg("Please choose a larger object, or smaller cell size")
 
         # plot Voronoi diagram
         sl = voronoi.SiteList(pts)
@@ -177,23 +167,23 @@ class Pattern(inkex.Effect):
                 path += 'M %.3f,%.3f %.3f,%.3f ' % (x1, y1, x2, y2)
 
         patternstyle = {'stroke': '#000000', 'stroke-width': str(scale)}
-        attribs = {'d': path, 'style': simplestyle.formatStyle(patternstyle)}
+        attribs = {'d': path, 'style': inkex.formatStyle(patternstyle)}
         inkex.etree.SubElement(pattern, inkex.addNS('path', 'svg'), attribs)
 
         # link selected object to pattern
         obj = self.selected[self.options.ids[0]]
         style = {}
         if obj.attrib.has_key('style'):
-            style = simplestyle.parseStyle(obj.attrib['style'])
+            style = inkex.parseStyle(obj.attrib['style'])
         style['fill'] = 'url(#%s)' % pattern.get('id')
-        obj.attrib['style'] = simplestyle.formatStyle(style)
+        obj.attrib['style'] = inkex.formatStyle(style)
         if obj.tag == inkex.addNS('g', 'svg'):
             for node in obj:
                 style = {}
                 if node.attrib.has_key('style'):
-                    style = simplestyle.parseStyle(node.attrib['style'])
+                    style = inkex.parseStyle(node.attrib['style'])
                 style['fill'] = 'url(#%s)' % pattern.get('id')
-                node.attrib['style'] = simplestyle.formatStyle(style)
+                node.attrib['style'] = inkex.formatStyle(style)
 
 if __name__ == '__main__':
     e = Pattern()

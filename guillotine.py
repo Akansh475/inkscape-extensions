@@ -1,25 +1,22 @@
 #!/usr/bin/env python
-'''
-guillotine.py
-
-Copyright (C) 2010 Craig Marshall, craig9 [at] gmail.com
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
------------------------
-
+#
+# Copyright (C) 2010 Craig Marshall, craig9 [at] gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+"""
 This script slices an inkscape drawing along the guides, similarly to
 the GIMP plugin called "guillotine". It can optionally export to the
 same directory as the SVG file with the same name, but with a number
@@ -36,7 +33,8 @@ will export to:
 
 etc.
 
-'''
+"""
+
 # standard library
 import locale
 import os
@@ -48,7 +46,6 @@ except:
     bsubprocess = False
 # local library
 import inkex
-import simplestyle
 
 locale.setlocale(locale.LC_ALL, '')
 

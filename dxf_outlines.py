@@ -1,13 +1,28 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2005,2007,2008 Aaron Spike, aaron@ekips.org
-Copyright (C) 2008,2010 Alvin Penner, penner@vaxxine.com
-
+#
+# Copyright (C) 2005,2007,2008 Aaron Spike, aaron@ekips.org
+# Copyright (C) 2008,2010 Alvin Penner, penner@vaxxine.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
 This file output script for Inkscape creates a AutoCAD R14 DXF file.
 The spec can be found here: http://www.autodesk.com/techpubs/autocad/acadr14/dxf/index.htm.
 
-File history:
-- template dxf_outlines.dxf added Feb 2008 by Alvin Penner
+ File history:
+ - template dxf_outlines.dxf added Feb 2008 by Alvin Penner
 - ROBO-Master output option added Aug 2008
 - ROBO-Master multispline output added Sept 2008
 - LWPOLYLINE output modification added Dec 2008
@@ -15,22 +30,8 @@ File history:
 - support for transform elements added July 2010
 - support for layers added July 2010
 - support for rectangle added Dec 2010
+"""
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import math
 import inkex
 import dxf_templates
 
@@ -42,7 +43,7 @@ except:
     numpy = None
 
 
-class MyEffect(inkex.Effect):
+class DxfOutlines(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("-R", "--ROBO", action="store",
@@ -293,8 +294,8 @@ class MyEffect(inkex.Effect):
             return
         #Warn user if name match field is empty
         if self.options.layer_option and self.options.layer_option=='name' and not self.options.layer_name:
-            inkex.errormsg(_("Error: Field 'Layer match name' must be filled when using 'By name match' option"))
-            inkex.sys.exit()
+            return inkex.errormsg(_("Error: Field 'Layer match name' must be filled when using 'By name match' option"))
+
         #Split user layer data into a list: "layerA,layerb,LAYERC" becomes ["layera", "layerb", "layerc"]
         if self.options.layer_name:
             self.options.layer_name = self.options.layer_name.lower().split(',')
@@ -345,7 +346,7 @@ class MyEffect(inkex.Effect):
                     inkex.errormsg(_("Warning: Layer '%s' not found!") % (layer))
 
 if __name__ == '__main__':
-    e = MyEffect()
+    e = DxfOutlines()
     e.affect()
 
 

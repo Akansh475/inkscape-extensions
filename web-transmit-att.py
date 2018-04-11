@@ -50,8 +50,7 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
       self.ensureInkWebSupport()
 
       if len(self.options.ids) < 2:
-        inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
-        exit(1)
+        return inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
 
       elFrom = []
       idTo = []

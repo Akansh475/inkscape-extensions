@@ -59,6 +59,8 @@ class ScriptCoverageTest(TestCase):
                     # We remove this effect from the list of 'not-tested' not this
                     # doesn't mean the effect has no errors.
                     not_tested.remove(module)
+            else:
+                print("File {}.py doesn't exist?".format(module))
 
         # Usually this will contain non-effect modules that are untested
         self.assertFalse(
@@ -77,6 +79,7 @@ class ScriptCoverageTest(TestCase):
         except Exception: # pylint: disable=broad-except
             self._current_result.addError(self, sys.exc_info())
 
+    @replace_function(os, 'chdir', IOError("Hell no you cn't do that!"))
     @replace_function(sys, 'exit', ExitedError("Tried to sys.exit(), don't do that!"))
     def auto_test_effect(self, module):
         """Take an effect module and test it.
@@ -94,7 +97,7 @@ class ScriptCoverageTest(TestCase):
         mod_result = None
         for _, value in mod.__dict__.items():
             mod_result = True
-            if inspect.isclass(value) and issubclass(value, Effect):
+            if inspect.isclass(value) and issubclass(value, Effect) and value != Effect:
                 try:
                     self.assertEffectEmpty(value)
                     self._current_result.addSuccess(self)

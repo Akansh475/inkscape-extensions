@@ -1,56 +1,57 @@
 #!/usr/bin/env python 
-'''
-Author: Jos Hirth, kaioa.com
-License: GNU General Public License - http://www.gnu.org/licenses/gpl.html
-Warranty: see above
-'''
+#
+# Copyright (c) 2009 - Jos Hirth, kaioa.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+"""
+Export a gimp pallet file (.gpl)
+"""
 
-DOCNAME='sodipodi:docname'
-
-# standard library
 import sys
-# third party
-try:
-    from xml.dom.minidom import parse
-except:
-    inkex.errormsg(_('The export_gpl.py module requires PyXML.  Please download the latest version from http://pyxml.sourceforge.net/.'))
-    sys.exit()
-# local library
 import inkex
-import simplestyle
 
-colortags=(u'fill',u'stroke',u'stop-color',u'flood-color',u'lighting-color')
-colors={}
+DOCNAME = 'sodipodi:docname'
+TAGS = ('fill', 'stroke', 'stop-color', 'flood-color', 'lighting-color')
 
-def walk(node):
-    checkStyle(node)
-    if node.hasChildNodes():
-        childs=node.childNodes
-        for child in childs:
-            walk(child)
+class ExportGpl(inkex.Effect):
+    def effect(self):
+        svg = self.document.getroot()
 
-def checkStyle(node):
-    if hasattr(node,"hasAttributes") and node.hasAttributes():
-        sa=node.getAttribute('style')
-        if sa!='':
-            styles=simplestyle.parseStyle(sa)
-            for c in range(len(colortags)):
-                if colortags[c] in styles.keys():
-                    addColor(styles[colortags[c]])
+        print('GIMP Palette\nName: %s\n#' % (svg.getAttribute(DOCNAME).split('.')[0]))
+        for key, value in sorted(self.walk(svg)):
+            print(key + value)
 
-def addColor(col):
-    if simplestyle.isColor(col):
-        c=simplestyle.parseColor(col)
-        colors['%3i %3i %3i ' % (c[0],c[1],c[2])]=simplestyle.formatColoria(c).upper()
+    def walk(self, node):
+        """Walks over all svg dom nodes"""
+        if hasattr(node, "hasAttributes") and node.hasAttributes():
+            styles = inkex.parseStyle(node.getAttribute('style'))
+            for tag in TAGS:
+                col = styles.get(tag, None)
+                if inkex.isColor(col):
+                    parsed = inkex.parseColor(col)
+                    yield ('%3i %3i %3i ' % parsed[:3], inkex.formatColoria(parsed).upper())
 
-stream = open(sys.argv[-1:][0],'r')
-dom = parse(stream)
-stream.close()
-walk(dom)
-print 'GIMP Palette\nName: %s\n#' % (dom.getElementsByTagName('svg')[0].getAttribute(DOCNAME).split('.')[0])
+        if node.hasChildNodes():
+            childs = node.childNodes
+            for child in childs:
+                for color in self.walk(child):
+                    yield color
 
-for k,v in sorted(colors.items()):
-    print k+v
+if __name__ == '__main__':
+    ExportGpl().affect()
 
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

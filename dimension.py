@@ -1,5 +1,22 @@
 #!/usr/bin/env python 
-'''
+#
+# Copyright (C) 2007 Peter Lewerin, peter.lewerin@tele2.se
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
 dimension.py
 An Inkscape effect for adding CAD style dimensions to selected objects
 in a drawing.
@@ -14,35 +31,17 @@ Path" effect to add measurements.
 
 This code contains snippets from existing effects in the Inkscape
 extensions library, and marker data from markers.svg.
+"""
 
-Copyright (C) 2007 Peter Lewerin, peter.lewerin@tele2.se
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-
-# standard library
 import sys
 try:
     from subprocess import Popen, PIPE
     bsubprocess = True
 except:
     bsubprocess = False
-# local library
+
 import inkex
 import pathmodifier
-from simpletransform import *
 
 
 class Dimension(pathmodifier.PathModifier):
@@ -105,10 +104,9 @@ class Dimension(pathmodifier.PathModifier):
 
         # query inkscape about the bounding box
         if len(self.options.ids) == 0:
-            inkex.errormsg(_("Please select an object."))
-            exit()
+            return inkex.errormsg(_("Please select an object."))
         if self.options.type == "geometric":
-            self.bbox = computeBBox(self.selected.values())
+            self.bbox = inkex.computeBBox(self.selected.values())
         else:
             q = {'x':0,'y':0,'width':0,'height':0}
             file = self.args[-1]
@@ -130,8 +128,7 @@ class Dimension(pathmodifier.PathModifier):
         try:
             testing_the_water = self.bbox[0]
         except TypeError:
-            inkex.errormsg(_('Unable to process this object.  Try changing it into a path first.'))
-            exit()
+            return inkex.errormsg(_('Unable to process this object.  Try changing it into a path first.'))
 
         layer = self.current_layer
 

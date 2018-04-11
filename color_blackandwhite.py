@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import coloreffect,sys
+
+import coloreffect
 
 class C(coloreffect.ColorEffect):
   def __init__(self):
@@ -21,5 +22,6 @@ class C(coloreffect.ColorEffect):
     #coloreffect.debug('gs '+hex(r)+' '+hex(g)+' '+hex(b)+'%02x%02x%02x' % (ig,ig,ig))
     return '%02x%02x%02x' % (ig,ig,ig)
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

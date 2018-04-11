@@ -81,5 +81,6 @@ class C(inkex.Effect):
       namedview.set( 'bordercolor', pagecolor )
       namedview.set( 'borderopacity', "0" )
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

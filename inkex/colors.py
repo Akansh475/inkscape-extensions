@@ -171,7 +171,9 @@ svgcolors={
 
 def isColor(c):
     """Determine if its a color we can use. If not, leave it unchanged."""
-    if c.startswith('#') and (len(c)==4 or len(c)==7):
+    if c is None:
+        return False
+    if c.startswith('#') and len(c) in (4, 7):
         return True
     if c.lower() in svgcolors.keys():
         return True

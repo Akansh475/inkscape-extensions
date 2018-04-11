@@ -21,9 +21,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import inkex, simplepath, cubicsuperpath, cspsubdiv, re
-
-import simpletransform
+import re
+import inkex
 
 r12_header = ''' 0 
 SECTION
@@ -103,7 +102,7 @@ class MyEffect(inkex.Effect):
                 self.dxf_line(layer,[s[1],e[1]])
     
     def dxf_path_to_point(self,layer,p):
-        bbox = simpletransform.roughBBox(p)
+        bbox = inkex.roughBBox(p)
         x = (bbox[0] + bbox[1]) / 2
         y = (bbox[2] + bbox[3]) / 2
         self.dxf_point(layer,x,y)
@@ -123,15 +122,15 @@ class MyEffect(inkex.Effect):
                layer = 'Layer 1'
             
             d = node.get('d')
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
             
             t = node.get('transform')
             if t != None:
-                m = simpletransform.parseTransform(t)
-                simpletransform.applyTransformToPath(m,p)
+                m = inkex.parseTransform(t)
+                inkex.applyTransformToPath(m,p)
             
             m = [[scale,0,0],[0,-scale,h*scale]]
-            simpletransform.applyTransformToPath(m,p)
+            inkex.applyTransformToPath(m,p)
     
             if re.search('drill$',layer,re.I) == None:
             #if layer == 'Brackets Drill':
@@ -141,5 +140,6 @@ class MyEffect(inkex.Effect):
                 
         self.dxf_add( r12_footer )
         
-e = MyEffect()
-e.affect()
+if __name__ == '__main__':
+    e = MyEffect()
+    e.affect()

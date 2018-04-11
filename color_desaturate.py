@@ -7,5 +7,7 @@ class C(coloreffect.ColorEffect):
     ig=int(round(l))
     return '%02x%02x%02x' % (ig,ig,ig)
 
-c = C()
-c.affect()
+
+if __name__ == '__main__':
+    c = C()
+    c.affect()

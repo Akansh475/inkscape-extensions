@@ -49,7 +49,6 @@ class ScriptCoverageTest(TestCase):
         be copied unless you know why it's being used.
         """
         mods, tests = self.get_mod_list()
-
         not_tested = sorted(list(set(mods) - set(tests)))
         not_matched = sorted(list(set(tests) - set(mods) - set(['coverage'])))
 
@@ -71,8 +70,10 @@ class ScriptCoverageTest(TestCase):
         """Returns the module for use, catching issues"""
         try:
             return __import__(module, fromlist=[])
-        except ImportError:
-            return False
+        except ImportError as err:
+            if module in str(err):
+                return False
+            self._current_result.addError(self, sys.exc_info())
         except Exception: # pylint: disable=broad-except
             self._current_result.addError(self, sys.exc_info())
 

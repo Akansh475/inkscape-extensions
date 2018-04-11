@@ -52,5 +52,6 @@ class C(coloreffect.ColorEffect):
             return self._hexstr(255.0,0.0,0.0)
         return self._hexstr(r2*factor,g2*factor,b2*factor)
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

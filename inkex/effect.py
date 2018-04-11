@@ -79,10 +79,10 @@ class Effect(object):
         # TODO write a parser for this
 
     def effect(self):
-        """Apply some effects on the document. Extensions subclassing Effect
-        must override this function and define the transformations
-        in it."""
-        pass
+        """Apply some effects on the document."""
+        raise NotImplementedError(
+            "Extensions subclassing Effect must override"
+            " this function and define the transformations in it.")
 
     def getoptions(self,args=sys.argv[1:]):
         """Collect command line arguments"""

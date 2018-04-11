@@ -1,31 +1,31 @@
-#!/usr/bin/env python 
-'''
-This extension scales a document to fit different SVG DPI -90/96-
-
-Copyright (C) 2012 Jabiertxo Arraiza, jabier.arraiza@marker.es
-Copyright (C) 2016 su_v, <suv-sf@users.sf.net>
-
+#!/usr/bin/env python
+#
+# Copyright (C) 2012 Jabiertxo Arraiza, jabier.arraiza@marker.es
+# Copyright (C) 2016 su_v, <suv-sf@users.sf.net>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+"""
 Version 0.6 - DPI Switcher
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+This extension scales a document to fit different SVG DPI -90/96-
 
 Changes since v0.5:
     - transform all top-level containers and graphics elements
     - support scientific notation in SVG lengths
-    - fix scaling with existing matrix() (use functions from simpletransform.py)
+    - fix scaling with existing matrix()
     - support different units for document width, height attributes
     - improve viewBox support (syntax, offset)
     - support common cases of text-put-on-path in SVG root
@@ -39,7 +39,7 @@ TODO:
     - check more <use> and text-on-path cases (reverse scaling needed?)
     - scale perspective of 3dboxes
 
-'''
+"""
 # standard libraries
 import sys
 import re
@@ -48,9 +48,6 @@ import math
 from lxml import etree
 # local libraries
 import inkex
-import simpletransform
-import simplestyle
-
 
 # globals
 SKIP_CONTAINERS = [
@@ -152,28 +149,28 @@ def check_text_on_path(svg, element, scale_x, scale_y):
             skip = True
             # scale offset
             if 'transform' in element.attrib:
-                mat = simpletransform.parseTransform(element.get('transform'))
+                mat = inkex.parseTransform(element.get('transform'))
                 mat[0][2] *= scale_x
                 mat[1][2] *= scale_y
-                element.set('transform', simpletransform.formatTransform(mat))
+                element.set('transform', inkex.formatTransform(mat))
             # scale font size
-            mat = simpletransform.parseTransform(
+            mat = inkex.parseTransform(
                 'scale({},{})'.format(scale_x, scale_y))
             det = abs(mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0])
             descrim = math.sqrt(abs(det))
             prop = 'font-size'
             # outer text
-            sdict = simplestyle.parseStyle(element.get('style'))
+            sdict = inkex.parseStyle(element.get('style'))
             if prop in sdict:
                 sdict[prop] = float(sdict[prop]) * descrim
-                element.set('style', simplestyle.formatStyle(sdict))
+                element.set('style', inkex.formatStyle(sdict))
             # inner tspans
             for child in element.iterdescendants():
-                if child.tag == inkex.addNS('tspan', 'svg'): 
-                    sdict = simplestyle.parseStyle(child.get('style'))
+                if child.tag == inkex.addNS('tspan', 'svg'):
+                    sdict = inkex.parseStyle(child.get('style'))
                     if prop in sdict:
                         sdict[prop] = float(sdict[prop]) * descrim
-                        child.set('style', simplestyle.formatStyle(sdict))
+                        child.set('style', inkex.formatStyle(sdict))
     return skip
 
 
@@ -186,15 +183,14 @@ def check_use(svg, element, scale_x, scale_y):
             skip = True
             # scale offset
             if 'transform' in element.attrib:
-                mat = simpletransform.parseTransform(element.get('transform'))
+                mat = inkex.parseTransform(element.get('transform'))
                 mat[0][2] *= scale_x
                 mat[1][2] *= scale_y
-                element.set('transform', simpletransform.formatTransform(mat))
+                element.set('transform', inkex.formatTransform(mat))
     return skip
 
 
 class DPISwitcher(inkex.Effect):
-
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--switcher", action="store", 
@@ -336,9 +332,9 @@ class DPISwitcher(inkex.Effect):
 
                 # set preserved transforms on top-level elements
                 if width_scale != 1.0 and height_scale != 1.0:
-                    mat = simpletransform.parseTransform(
+                    mat = inkex.parseTransform(
                         'scale({},{})'.format(width_scale, height_scale))
-                    simpletransform.applyTransformToNode(mat, element)
+                    inkex.applyTransformToNode(mat, element)
 
     def scaleElement(self, m):
         pass  # TODO: optionally scale graphics elements only?
@@ -385,7 +381,9 @@ class DPISwitcher(inkex.Effect):
             if viewBox:
                 print "viewBox: " + viewBox
             namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
-            docunits= namedview.get(inkex.addNS('document-units', 'inkscape'))
+            if not namedview:
+                return inkex.errormsg("No document named view available.")
+            docunits =  namedview.get(inkex.addNS('document-units', 'inkscape'))
             if docunits:
                 print "document-units: " + docunits
             units = namedview.get('units')
@@ -407,6 +405,8 @@ class DPISwitcher(inkex.Effect):
                 self.factor_a = 96.0/90.0
                 self.factor_b = 90.0/96.0
             namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
+            if not namedview:
+                return inkex.errormsg("No document named view available.")
             namedview.set(inkex.addNS('document-units', 'inkscape'), "px")
             self.units = self.parse_length(svg.get('width'))[1]
             if self.units and self.units <> "px" and self.units <> "" and self.units <> "%":

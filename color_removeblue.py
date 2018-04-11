@@ -2,8 +2,9 @@
 import coloreffect
 
 class C(coloreffect.ColorEffect):
-  def colmod(self,r,g,b):
-    return '%02x%02x%02x' % (r,g,0)
+    def colmod(self,r,g,b):
+        return '%02x%02x%02x' % (r,g,0)
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

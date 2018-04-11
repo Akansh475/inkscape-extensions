@@ -85,7 +85,7 @@ def run(command_format, prog_name):
     try:
         # Clean up.
         os.remove(svgfile)
-    except IOError:
+    except (IOError, OSError):
         pass
 
     # Output error message (if any) and exit.

@@ -9,5 +9,6 @@ class C(coloreffect.ColorEffect):
     b=int(round(max(b*FACTOR,0)))
     return '%02x%02x%02x' % (r,g,b)
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

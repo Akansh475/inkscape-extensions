@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (c) 2009 - Jos Hirth, kaioa.com
 #
@@ -20,7 +20,6 @@
 Export a gimp pallet file (.gpl)
 """
 
-import sys
 import inkex
 
 DOCNAME = 'sodipodi:docname'
@@ -30,25 +29,22 @@ class ExportGpl(inkex.Effect):
     def effect(self):
         svg = self.document.getroot()
 
-        print('GIMP Palette\nName: %s\n#' % (svg.getAttribute(DOCNAME).split('.')[0]))
+        print('GIMP Palette\nName: %s\n#' % (svg.get(inkex.addNS("docname", "sodipodi"))))
         for key, value in sorted(self.walk(svg)):
             print(key + value)
 
     def walk(self, node):
         """Walks over all svg dom nodes"""
-        if hasattr(node, "hasAttributes") and node.hasAttributes():
-            styles = inkex.parseStyle(node.getAttribute('style'))
-            for tag in TAGS:
-                col = styles.get(tag, None)
-                if inkex.isColor(col):
-                    parsed = inkex.parseColor(col)
-                    yield ('%3i %3i %3i ' % parsed[:3], inkex.formatColoria(parsed).upper())
+        styles = inkex.parseStyle(node.get('style', ''))
+        for tag in TAGS:
+            col = styles.get(tag, None)
+            if inkex.isColor(col):
+                parsed = inkex.parseColor(col)
+                yield ('%3i %3i %3i ' % parsed[:3], inkex.formatColoria(parsed).upper())
 
-        if node.hasChildNodes():
-            childs = node.childNodes
-            for child in childs:
-                for color in self.walk(child):
-                    yield color
+        for child in node.iterchildren():
+            for color in self.walk(child):
+                yield color
 
 if __name__ == '__main__':
     ExportGpl().affect()

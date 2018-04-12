@@ -24,15 +24,12 @@
 A helper module for creating Inkscape extensions
 """
 
-import os
 import re
 import sys
 import copy
 import random
 import optparse
 
-import lxml
-from lxml import etree
 
 from math import *
 from .const import *
@@ -40,7 +37,7 @@ from .utils import errormsg
 from .localize import localize
 from .utils import addNS
 from .paths import are_near_relative
-
+from .svg import lxml, etree, svg_parser
 
 def check_inkbool(option, opt, value):
     if str(value).capitalize() == 'True':
@@ -113,8 +110,7 @@ class Effect(object):
         else:
             stream = sys.stdin
 
-        p = etree.XMLParser(huge_tree=True)
-        self.document = etree.parse(stream, parser=p)
+        self.document = etree.parse(stream, parser=svg_parser)
         self.original_document = copy.deepcopy(self.document)
         stream.close()
 

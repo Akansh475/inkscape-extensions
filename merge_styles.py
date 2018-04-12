@@ -113,7 +113,7 @@ class MergeStyles(inkex.Effect):
         common.clean(threshold)
 
         if not common:
-            raise KeyError("There are no common styles between these elements.")
+            return inkex.errormsg("There are no common styles between these elements.")
 
         styles = get_styles(self.document)
         styles.text = (styles.text or "") + "\n" + common.css( newclass )

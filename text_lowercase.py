@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-import chardataeffect, inkex, string
+import chardataeffect
 
 class C(chardataeffect.CharDataEffect):
-  def process_chardata(self,text, line=False, par=False):
+  def process_chardata(self, text, line=False, par=False):
     return text.lower()
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

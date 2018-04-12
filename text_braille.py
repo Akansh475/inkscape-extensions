@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import chardataeffect, inkex, string
+import chardataeffect
 
 convert_table = {\
 'a': unicode("⠁", "utf-8"),\
@@ -43,5 +43,6 @@ class C(chardataeffect.CharDataEffect):
         r = r + c
     return r
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

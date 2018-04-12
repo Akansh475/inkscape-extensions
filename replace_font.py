@@ -1,38 +1,31 @@
 #!/usr/bin/env python
-'''
-replace_font.py
-
-Copyright (C) 2010 Craig Marshall, craig9 [at] gmail.com
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
------------------------
-
+#
+# Copyright (C) 2010 Craig Marshall, craig9 [at] gmail.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+"""
 This script finds all fonts in the current drawing that match the
 specified find font, and replaces them with the specified replacement
 font.
 
 It can also replace all fonts indiscriminately, and list all fonts
 currently being used.
-'''
-# standard library
-import os
+"""
 import sys
-# local library
 import inkex
-import simplestyle
 
 text_tags = ['{http://www.w3.org/2000/svg}tspan',
                             '{http://www.w3.org/2000/svg}text',
@@ -96,13 +89,13 @@ def get_style(node):
     Sugar coated way to get style dict from a node
     '''
     if 'style' in node.attrib:
-        return simplestyle.parseStyle(node.attrib['style'])
+        return inkex.parseStyle(node.attrib['style'])
 
 def set_style(node, style):
     '''
     Sugar coated way to set the style dict, for node
     '''
-    node.attrib['style'] = simplestyle.formatStyle(style)
+    node.attrib['style'] = inkex.formatStyle(style)
 
 def get_fonts(node):
     '''
@@ -118,17 +111,13 @@ def get_fonts(node):
             fonts.append(s[a])
     return fonts
 
-def die(msg = "Dying!"):
-    inkex.errormsg(msg)
-    sys.exit(0)
-
 def report_replacements(num):
     '''
     Sends a message to the end user showing success of failure
     of the font replacement
     '''
     if num == 0:
-        die(_('Couldn\'t find anything using that font, please ensure the spelling and spacing is correct.'))
+        inkex.errormsg(_('Couldn\'t find anything using that font, please ensure the spelling and spacing is correct.'))
 
 def report_findings(findings):
     '''
@@ -191,7 +180,7 @@ class ReplaceFont(inkex.Effect):
                 self.find_child_text_items(item[1])
             items = self.selected_items
             if len(items) == 0:
-                die(_("There was nothing selected"))
+                return inkex.errormsg(_("There was nothing selected"))
         else:
             items = self.document.getroot().getiterator()
         to_return.extend(filter(is_text, items))
@@ -231,6 +220,8 @@ class ReplaceFont(inkex.Effect):
         report_findings(sorted(fonts_found))
 
     def effect(self):
+        if not self.options.action:
+            return inkex.errormsg("Nothing to do, no action specified.")
         action = self.options.action.strip("\"") # TODO Is this a bug? (Extra " characters)
         scope = self.options.scope
 
@@ -239,16 +230,16 @@ class ReplaceFont(inkex.Effect):
         if action == "find_replace":
             find = self.options.fr_find
             if find is None or find == "":
-                die(_("Please enter a search string in the find box."));
+                return inkex.errormsg(_("Please enter a search string in the find box."));
             find = find.strip().lower()
             replace = self.options.fr_replace
             if replace is None or replace == "":
-                die(_("Please enter a replacement font in the replace with box."));
+                return inkex.errormsg(_("Please enter a replacement font in the replace with box."));
             self.find_replace(relevant_items, find, replace)
         elif action == "replace_all":
             replace = self.options.r_replace
             if replace is None or replace == "":
-                die(_("Please enter a replacement font in the replace all box."));
+                return inkex.errormsg(_("Please enter a replacement font in the replace all box."));
             self.replace_all(relevant_items, replace)
         elif action == "list_only":
             self.list_all(relevant_items)

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import chardataeffect, inkex, string
 
 import random
+import chardataeffect
 
 class C(chardataeffect.CharDataEffect):
-
   def process_chardata(self,text, line, par):
     r = ""
     a = 1
@@ -24,5 +23,6 @@ class C(chardataeffect.CharDataEffect):
 
     return r
 
-c = C()
-c.affect()
+if __name__ == '__main__':
+    c = C()
+    c.affect()

@@ -1,9 +1,23 @@
 #!/usr/bin/env python 
-'''
-print_win32_vector.py
+#
+# Copyright (C) 2012 Alvin Penner, penner@vaxxine.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
 This extension will generate vector graphics printout, specifically for Windows GDI32.
-
-Copyright (C) 2012 Alvin Penner, penner@vaxxine.com
 
 This is a modified version of the file dxf_outlines.py by Aaron Spike, aaron@ekips.org
 It will write only to the default printer.
@@ -13,35 +27,19 @@ In order to ensure a pure vector output, use a linewidth < 1 printer pixel
 - see http://www.lessanvaezi.com/changing-printer-settings-using-the-windows-api/
 - get GdiPrintSample.zip at http://archive.msdn.microsoft.com/WindowsPrintSample
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+"""
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+import sys
+import ctypes
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-# standard library
-from ctypes import *
-# local library
 import inkex
-import simplestyle
-import simpletransform
-import cubicsuperpath
 
-inkex.localize()                        # Initialize gettext
-if not inkex.sys.platform.startswith('win'):
-    exit(_("sorry, this will run only on Windows, exiting..."))
+if not sys.platform.startswith('win'):
+    raise inkex.DependencyError("sorry, this will run only on Windows, exiting...")
 
-myspool = WinDLL("winspool.drv")
-mygdi = WinDLL("gdi32.dll")
-LOGBRUSH = c_long*3
+myspool = ctypes.WinDLL("winspool.drv")
+mygdi = ctypes.WinDLL("gdi32.dll")
+LOGBRUSH = ctypes.c_long * 3
 DM_IN_PROMPT = 4                        # call printer property sheet 
 DM_OUT_BUFFER = 2                       # write to DEVMODE structure
 
@@ -57,23 +55,23 @@ class MyEffect(inkex.Effect):
         # Very NB : If the pen width is greater than 1 then the output will Not be a vector output !
         style = node.get('style')
         if style:
-            style = simplestyle.parseStyle(style)
+            style = inkex.parseStyle(style)
             if style.has_key('stroke'):
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
-                    rgb = simplestyle.parseColor(style['stroke'])
+                    rgb = inkex.parseColor(style['stroke'])
             if style.has_key('stroke-width'):
                 stroke = self.unittouu(style['stroke-width'])/self.unittouu('1px')
                 stroke = int(stroke*self.scale)
             if style.has_key('fill'):
                 if style['fill'] and style['fill'] != 'none' and style['fill'][0:3] != 'url':
-                    fill = simplestyle.parseColor(style['fill'])
+                    fill = inkex.parseColor(style['fill'])
                     fillcolor = fill[0] + 256*fill[1] + 256*256*fill[2]
         color = rgb[0] + 256*rgb[1] + 256*256*rgb[2]
         if node.tag == inkex.addNS('path','svg'):
             d = node.get('d')
             if not d:
                 return
-            p = cubicsuperpath.parsePath(d)
+            p = inkex.parseCubicPath(d)
         elif node.tag == inkex.addNS('rect','svg'):
             x = float(node.get('x'))
             y = float(node.get('y'))
@@ -89,14 +87,14 @@ class MyEffect(inkex.Effect):
             return
         trans = node.get('transform')
         if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
-        simpletransform.applyTransformToPath(mat, p)
+            mat = inkex.composeTransform(mat, inkex.parseTransform(trans))
+        inkex.applyTransformToPath(mat, p)
         hPen = mygdi.CreatePen(0, stroke, color)
         mygdi.SelectObject(self.hDC, hPen)
         self.emit_path(p)
         if fillcolor is not None:
             brush = LOGBRUSH(0, fillcolor, 0)
-            hBrush = mygdi.CreateBrushIndirect(addressof(brush))
+            hBrush = mygdi.CreateBrushIndirect(ctypes.addressof(brush))
             mygdi.SelectObject(self.hDC, hBrush)
             mygdi.BeginPath(self.hDC)
             self.emit_path(p)
@@ -107,7 +105,7 @@ class MyEffect(inkex.Effect):
     def emit_path(self, p):
         for sub in p:
             mygdi.MoveToEx(self.hDC, int(sub[0][1][0]), int(sub[0][1][1]), None)
-            POINTS = c_long*(6*(len(sub)-1))
+            POINTS = ctypes.c_long*(6*(len(sub)-1))
             points = POINTS()
             for i in range(len(sub)-1):
                 points[6*i]     = int(sub[i][2][0])
@@ -116,7 +114,7 @@ class MyEffect(inkex.Effect):
                 points[6*i + 3] = int(sub[i + 1][0][1])
                 points[6*i + 4] = int(sub[i + 1][1][0])
                 points[6*i + 5] = int(sub[i + 1][1][1])
-            mygdi.PolyBezierTo(self.hDC, addressof(points), 3*(len(sub)-1))
+            mygdi.PolyBezierTo(self.hDC, ctypes.addressof(points), 3*(len(sub)-1))
         return
 
     def process_clone(self, node):
@@ -125,14 +123,14 @@ class MyEffect(inkex.Effect):
         y = node.get('y')
         mat = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
+            mat = inkex.composeTransform(mat, inkex.parseTransform(trans))
         if x:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat = inkex.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat = inkex.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], mat))
+            self.groupmat.append(inkex.composeTransform(self.groupmat[-1], mat))
         # get referenced node
         refid = node.get(inkex.addNS('href','xlink'))
         refnode = self.getElementById(refid[1:])
@@ -151,13 +149,13 @@ class MyEffect(inkex.Effect):
         if group.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
             style = group.get('style')
             if style:
-                style = simplestyle.parseStyle(style)
+                style = inkex.parseStyle(style)
                 if style.has_key('display'):
                     if style['display'] == 'none' and self.visibleLayers:
                         return
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], simpletransform.parseTransform(trans)))
+            self.groupmat.append(inkex.composeTransform(self.groupmat[-1], inkex.parseTransform(trans)))
         for node in group:
             if node.tag == inkex.addNS('g','svg'):
                 self.process_group(node)
@@ -169,19 +167,19 @@ class MyEffect(inkex.Effect):
             self.groupmat.pop()
 
     def effect(self):
-        pcchBuffer = c_long()
-        myspool.GetDefaultPrinterA(None, byref(pcchBuffer))     # get length of printer name
-        pname = create_string_buffer(pcchBuffer.value)
-        myspool.GetDefaultPrinterA(pname, byref(pcchBuffer))    # get printer name
-        hPrinter = c_long()
-        if myspool.OpenPrinterA(pname.value, byref(hPrinter), None) == 0:
-            exit(_("Failed to open default printer"))
+        pcchBuffer = ctypes.c_long()
+        myspool.GetDefaultPrinterA(None, ctypes.byref(pcchBuffer))     # get length of printer name
+        pname = ctypes.create_string_buffer(pcchBuffer.value)
+        myspool.GetDefaultPrinterA(pname, ctypes.byref(pcchBuffer))    # get printer name
+        hPrinter = ctypes.c_long()
+        if myspool.OpenPrinterA(pname.value, ctypes.byref(hPrinter), None) == 0:
+            return inkex.errormsg(_("Failed to open default printer"))
 
         # get printer properties dialog
 
         pcchBuffer = myspool.DocumentPropertiesA(0, hPrinter, pname, None, None, 0)
-        pDevMode = create_string_buffer(pcchBuffer + 100) # allocate extra just in case
-        pcchBuffer = myspool.DocumentPropertiesA(0, hPrinter, pname, byref(pDevMode), None, DM_IN_PROMPT + DM_OUT_BUFFER)
+        pDevMode = ctypes.create_string_buffer(pcchBuffer + 100) # allocate extra just in case
+        pcchBuffer = myspool.DocumentPropertiesA(0, hPrinter, pname, ctypes.byref(pDevMode), None, DM_IN_PROMPT + DM_OUT_BUFFER)
         myspool.ClosePrinter(hPrinter)
         if pcchBuffer != 1:             # user clicked Cancel
             exit()
@@ -191,11 +189,11 @@ class MyEffect(inkex.Effect):
         docname = self.document.getroot().xpath('@sodipodi:docname', namespaces=inkex.NSS)
         if not docname:
             docname = ['New document 1']
-        lpszDocName = create_string_buffer('Inkscape ' + docname[0].split('\\')[-1])
-        DOCINFO = c_long*5
-        docInfo = DOCINFO(20, addressof(lpszDocName), 0, 0, 0)
-        self.hDC = mygdi.CreateDCA(None, pname, None, byref(pDevMode))
-        if mygdi.StartDocA(self.hDC, byref(docInfo)) < 0:
+        lpszDocName = ctypes.create_string_buffer('Inkscape ' + docname[0].split('\\')[-1])
+        DOCINFO = ctypes.c_long * 5
+        docInfo = DOCINFO(20, ctypes.addressof(lpszDocName), 0, 0, 0)
+        self.hDC = mygdi.CreateDCA(None, pname, None, ctypes.byref(pDevMode))
+        if mygdi.StartDocA(self.hDC, ctypes.byref(docInfo)) < 0:
             exit()                      # user clicked Cancel
 
         self.scale = (ord(pDevMode[58]) + 256.0*ord(pDevMode[59]))/96    # use PrintQuality from DEVMODE

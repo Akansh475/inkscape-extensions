@@ -23,10 +23,10 @@ import sys
 import hpgl_decoder
 import inkex
 
-class HpglFile(inkex.Effect):
+class HpglFile(inkex.InputExtension):
     def __init__(self):
         super(HpglFile, self).__init__()
-        parser = self.options_parser
+        parser = self.OptionParser
         #parser = inkex.optparse.OptionParser(usage='usage: %prog [options] HPGLfile', option_class=inkex.InkOption)
         parser.add_option('--resolutionX',   action='store', type='float',   dest='resolutionX',   default=1016.0,  help='Resolution X (dpi)')
         parser.add_option('--resolutionY',   action='store', type='float',   dest='resolutionY',   default=1016.0,  help='Resolution Y (dpi)')
@@ -34,8 +34,8 @@ class HpglFile(inkex.Effect):
 
     def effect(self):
         # needed to initialize the document
-        options.docWidth = 210.0 # 210mm (DIN A4)
-        options.docHeight = 297.0 # 297mm (DIN A4)
+        self.options.docWidth = 210.0 # 210mm (DIN A4)
+        self.options.docHeight = 297.0 # 297mm (DIN A4)
 
         # read file
         #fobj = open(args[0], 'r')

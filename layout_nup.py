@@ -1,37 +1,26 @@
 #!/usr/bin/env python 
-'''
-Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
+#
+# Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
-import inkex
 import sys
+import inkex
 
-try:
-    import xml.etree.ElementTree as ElementTree
-except:
-    try:
-        from lxml import etree as ElementTree
-    except:
-        try:
-            from elementtree.ElementTree import ElementTree
-        except:
-            sys.stderr.write("""Requires ElementTree module, included
-in Python 2.5 or supplied by lxml or elementtree modules.
-
-""")
+from inkex import etree as ElementTree
 
 class Nup(inkex.Effect):
     def __init__(self):
@@ -154,6 +143,9 @@ class Nup(inkex.Effect):
 
         pgSize = self.expandTuple(unit, pgSize, length = 2)
     #    num = tuple(map(lambda ev: eval(str(ev)), num))
+
+        if not pgMargin or not pgPadding:
+            return inkex.errormsg("No padding or margin available.")
 
         pgEdge = map(sum,zip(pgMargin, pgPadding))
 
@@ -294,5 +286,6 @@ class Nup(inkex.Effect):
         else:
             return ElementTree.tostring(root)
 
-e = Nup()
-e.affect()
+if __name__ == '__main__':
+    e = Nup()
+    e.affect()

@@ -88,7 +88,7 @@ class TestCase(BaseCase):
     @property
     def empty_svg(self):
         """Returns a common minimal svg file"""
-        return self.data_file('svg', 'minimal-blank.svg')
+        return self.data_file('svg', 'default-inkscape-SVG.svg')
 
     def test_without_parameters(self):
         """Test calling effect without any arguments (default test for every suite)"""

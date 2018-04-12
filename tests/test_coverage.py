@@ -24,6 +24,7 @@ import sys
 import inspect
 
 from inkex.effect import Effect
+from inkex.utils import DependencyError
 
 from tests.base import TestCase, test_support
 from tests.base.mock import replace_function
@@ -72,6 +73,8 @@ class ScriptCoverageTest(TestCase):
         """Returns the module for use, catching issues"""
         try:
             return __import__(module, fromlist=[])
+        except DependencyError as err:
+            self._addSkip(self._current_result, str(err))
         except ImportError as err:
             if module in str(err):
                 return False

@@ -1,4 +1,6 @@
 
+from __future__ import print_function
+
 from .effect import Effect, etree
 from .const import *
 from .utils import *

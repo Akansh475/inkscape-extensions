@@ -21,7 +21,10 @@
 Basic common utility functions for calculated things
 """
 
+import os
 import sys
+
+from argparse import ArgumentTypeError
 
 from itertools import tee
 from .const import NSS, PY3
@@ -51,6 +54,9 @@ def errormsg(msg):
     else:
         sys.stderr.write((unicode(msg, "utf-8", errors='replace') + "\n").encode("utf-8"))
 
+class DependencyError(NotImplementedError):
+    """Raised when we need an external python module that isn't available"""
+
 def to(kind): # pylint: disable=invalid-name
     """
     Decorator which will turn a generator into a list, tuple or other object type.
@@ -73,5 +79,13 @@ def pairwise(iterable):
     first, then = tee(iterable)
     next(then, None)
     return zip(first, then)
+
+def filename_arg(name):
+    """Existing file to read or option used in script arguments"""
+    filename = os.path.abspath(os.path.expanduser(name))
+    if not os.path.isfile(filename):
+        raise ArgumentTypeError("File not found: {}".format(name))
+    # TODO: File handle is kept open forever!
+    return open(filename, 'r')
 
 

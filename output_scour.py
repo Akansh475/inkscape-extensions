@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import platform
 import sys
+import platform
 
 from distutils.version import StrictVersion
 
@@ -19,16 +19,10 @@ try:
         except:
             raise
 except Exception as e:
-    inkex.errormsg("Failed to import Python module 'scour'.\nPlease make sure it is installed (e.g. using 'pip install scour' or 'sudo apt-get install python-scour') and try again.")
-    inkex.errormsg("\nDetails:\n" + str(e))
-    sys.exit()
-
-try:
-    import six
-except Exception as e:
-    inkex.errormsg("Failed to import Python module 'six'.\nPlease make sure it is installed (e.g. using 'pip install six' or 'sudo apt-get install python-six') and try again.")
-    inkex.errormsg("\nDetails:\n" + str(e))
-    sys.exit()
+    raise inkex.DependencyError("""Failed to import module 'scour'.
+Please make sure it is installed (e.g. using 'pip install scour'
+  or 'sudo apt-get install python-scour') and try again.
+""")
 
 
 class ScourInkscape (inkex.Effect):

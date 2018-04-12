@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <_name>Optimized SVG Output</_name>
     <id>org.inkscape.output.scour</id>
-    <dependency type="executable" location="extensions">scour.inkscape.py</dependency>
+    <dependency type="executable" location="extensions">output_scour.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param _gui-text="Number of significant digits for coordinates:"
@@ -116,6 +116,6 @@
         <_filetypetooltip>Scalable Vector Graphics</_filetypetooltip>
     </output>
     <script>
-        <command reldir="extensions" interpreter="python">scour.inkscape.py</command>
+        <command reldir="extensions" interpreter="python">output_scour.py</command>
     </script>
 </inkscape-extension>

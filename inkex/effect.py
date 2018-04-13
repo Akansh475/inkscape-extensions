@@ -32,12 +32,12 @@ import optparse
 
 
 from math import *
-from .const import *
 from .utils import errormsg
 from .localize import localize
 from .utils import addNS
 from .paths import are_near_relative
-from .svg import lxml, etree, svg_parser
+from .svg import etree, SVG_PARSER, NSS
+from .base import InkscapeExtension
 
 def check_inkbool(option, opt, value):
     if str(value).capitalize() == 'True':
@@ -77,9 +77,6 @@ class Effect(object):
 
     def effect(self):
         """Apply some effects on the document."""
-        raise NotImplementedError(
-            "Extension {} must override".format(type(self).__name__) + \
-            " this function and define the transformations in it.")
 
     def getoptions(self,args=sys.argv[1:]):
         """Collect command line arguments"""
@@ -110,7 +107,7 @@ class Effect(object):
         else:
             stream = sys.stdin
 
-        self.document = etree.parse(stream, parser=svg_parser)
+        self.document = etree.parse(stream, parser=SVG_PARSER)
         self.original_document = copy.deepcopy(self.document)
         stream.close()
 

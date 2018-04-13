@@ -27,7 +27,16 @@ import sys
 from argparse import ArgumentTypeError
 
 from itertools import tee
-from .const import NSS, PY3
+
+import platform
+PY3 = platform.python_version()[0] == '3' 
+
+(X, Y) = range(2)
+
+if PY3:
+    unicode = str 
+    basestring = str 
+
 
 def debug(what):
     """Print debug message if debugging is switched on"""
@@ -85,7 +94,6 @@ def filename_arg(name):
     filename = os.path.abspath(os.path.expanduser(name))
     if not os.path.isfile(filename):
         raise ArgumentTypeError("File not found: {}".format(name))
-    # TODO: File handle is kept open forever!
-    return open(filename, 'r')
+    return filename
 
 

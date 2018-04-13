@@ -21,8 +21,7 @@ functions for digesting paths into a simple list structure
 import re
 import math
 
-from .const import X, Y
-from .utils import to
+from .utils import to, X, Y
 
 def lexPath(d):
     """

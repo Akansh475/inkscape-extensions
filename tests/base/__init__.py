@@ -20,7 +20,9 @@ Provide tests with some base utility.
 """
 
 import sys
-
+import uuid
+import shutil
+import tempfile
 from os import path
 from unittest import TestCase as BaseCase
 
@@ -38,18 +40,22 @@ except ImportError:
 
 TEST_ROOT = path.abspath(path.dirname(path.dirname(__file__)))
 
-# pylint: disable=too-few-public-methods
-class PrintedOutput(object):
-    """Capture printed output for testing
 
-    with PrintedOutput() as out:
-        # DO something()
-        self.assertEqual(out, 'expected')
+class StdRedirect(object): # pylint: disable=too-few-public-methods
+    """Capture printed output, or provide standard input
+
+    with StdRedirect('stdout') as out:
+        print("expected")
+        str(out) == 'expected'
+
+    with StdRedirect('stdin', 'data') as inp:
+        sys.stdin.read() == 'data'
+        imp += 'more data arrived'
     """
-    def __init__(self, name='stdout'):
+    def __init__(self, name='stdout', initial=None):
         self.name = name
         self.std = getattr(sys, self.name)
-        self.str = StringIO()
+        self.str = StringIO(initial)
 
     def __enter__(self):
         setattr(sys, self.name, self.str)
@@ -60,7 +66,12 @@ class PrintedOutput(object):
         return self.str.read()
 
     def __repr__(self):
-        return "<PrintedOutput {}>".format(self.name)
+        return "<StdRedirect {}>".format(self.name)
+
+    def __iadd__(self, data):
+        self.str.seek(0, mode=2)
+        self.str.write(data)
+        self.str.seek(0, mode=1)
 
     def __exit__(self, kind, value, traceback):
         setattr(sys, self.name, self.std)
@@ -70,7 +81,22 @@ class TestCase(BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
-    effect = None
+    def __init__(self, *args, **kw):
+        super(TestCase, self).__init__(*args, **kw)
+        self.temp_dir = None
+
+    def tearDown(self):
+        if self.temp_dir and path.isdir(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+    def temp_file(self, prefix='file-', template='{prefix}{name}{suffix}', suffix='.tmp'):
+        """Generate the filename of a temporary file"""
+        if not self.temp_dir:
+            self.temp_dir = tempfile.mkdtemp(prefix='inkex-tests-')
+        if not path.isdir(self.temp_dir):
+            raise IOError("The temporary directory has disapeared!")
+        filename = template.format(prefix=prefix, suffix=suffix, name=uuid.uuid4().hex)
+        return path.join(self.temp_dir, filename)
 
     @staticmethod
     def data_file(filename, *parts):
@@ -90,10 +116,15 @@ class TestCase(BaseCase):
         """Returns a common minimal svg file"""
         return self.data_file('svg', 'default-inkscape-SVG.svg')
 
+class ExtensionTestCase(TestCase):
+    """
+    Provide tests that every extension should be running.
+    """
+    effect = None
+
     def test_without_parameters(self):
         """Test calling effect without any arguments (default test for every suite)"""
-        if self.effect is not None:
-            return self.assertEffectEmpty(self.effect)
+        return self.assertEffectEmpty(self.effect)
 
     def assertEffectEmpty(self, effect): # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""

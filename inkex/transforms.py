@@ -25,12 +25,11 @@ Provide tranformation parsing to extensions
 """
 
 import re
-import copy
 import math
 
 import inkex
-from .const import X, Y
-from .utils import pairwise
+
+from .utils import pairwise, X, Y
 
 def parseTransform(transf,mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
     if transf=="" or transf==None:

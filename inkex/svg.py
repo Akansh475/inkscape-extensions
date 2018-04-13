@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 - Martin Owens <doctormo@gmail.com>
+# Copyright (c) Aaron Spike <aaron@ekips.org>
+#               Aurélio A. Heckert <aurium(a)gmail.com>
+#               Bulia Byak <buliabyak@users.sf.net>
+#               Nicolas Dufour, nicoduf@yahoo.fr
+#               Peter J. R. Moulder <pjrm@users.sourceforge.net>
+#               Martin Owens <doctormo@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,9 +26,13 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import sys
+import math
 import inspect
+import random
 import lxml
 from lxml import etree
+
+from .units import discover_unit, convert_unit, render_unit
 
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc
 NSS = {
@@ -62,8 +72,7 @@ class SvgDocumentElement(etree.ElementBase):
         """Generate a new id from an existing old_id"""
         ids = self.get_ids()
         while old_id in ids:
-            # TODO: Fix this up
-            old_id = re.sub(r'\d+', random.digits())
+            old_id += random.randint(0, 9)
         return old_id
 
     def set_selected(self, *ids):
@@ -72,6 +81,96 @@ class SvgDocumentElement(etree.ElementBase):
         for elem_id in ids:
             for node in self.xpath('//*[@id="{}"]'.format(elem_id), namespaces=NSS):
                 self.selected[elem_id] = node
+
+    def get_posinlayer(self):
+        """defines view_center in terms of document units"""
+        self.current_layer = self
+        self.view_center = (0.0, 0.0)
+
+        layerattr = self.xpath('//sodipodi:namedview/@inkscape:current-layer', namespaces=NSS)
+        if layerattr:
+            self.current_layer = self.getElementById(layerattr[0], 'svg:g')
+
+        xattr = self.xpath('//sodipodi:namedview/@inkscape:cx', namespaces=NSS)
+        yattr = self.xpath('//sodipodi:namedview/@inkscape:cy', namespaces=NSS)
+        if xattr and yattr:
+            x = self.unittouu(xattr[0] + 'px')
+            y = self.unittouu(yattr[0] + 'px')
+            doc_height = self.unittouu(self.height)
+            if x and y:
+                # FIXME: y-coordinate flip, eliminate it when it's gone in Inkscape
+                self.view_center = (float(x), doc_height - float(y))
+
+    def getElement(self, xpath): # pylint: disable=invalid-name
+        """Gets a single element from the given xpath or returns None"""
+        # XXX This used to be called Effect.xpathSingle
+        el_list = self.xpath(xpath, namespaces=NSS)
+        return el_list[0] if el_list else None
+
+    def getElementById(self, eid, elm='*'): # pylint: disable=invalid-name
+        """Get an element in this svg document by it's ID attribute"""
+        return self.getElement('//{}[@id="{}"]'.format(elm, eid))
+
+    def getNamedView(self):
+        """Return the sp namedview meta information element"""
+        # TODO: We should make one if it doesn't exist...
+        return self.xpath('//sodipodi:namedview', namespaces=NSS)[0]
+
+    def getViewBox(self):
+        """Parse and return the document's viewBox attribute"""
+        return [float(unit) for unit in self.get('viewBox', '0 0 0 0').split()]
+
+    @property
+    def width(self): #getDocumentWidth(self):
+        """Fault tolerance for lazily defined SVG"""
+        return self.get('width') or self.getViewBox()[2] or '0'
+
+    @property
+    def height(self): #getDocumentHeight(self):
+        """Returns a string corresponding to the height of the document, as
+        defined in the SVG file. If it is not defined, returns the height
+        as defined by the viewBox attribute. If viewBox is not defined,
+        returns the string '0'."""
+        return self.get('height') or self.getViewBox()[3] or '0'
+
+    def getDocumentUnit(self):
+        """Returns the unit used for in the SVG document.
+        In the case the SVG document lacks an attribute that explicitly
+        defines what units are used for SVG coordinates, it tries to calculate
+        the unit from the SVG width and viewBox attributes.
+        Defaults to 'px' units."""
+        viewbox = self.getViewBox()
+        if viewbox and set(viewbox) != {0}:
+            return discover_unit(self.width, viewbox[2], default='px')
+        return 'px' # Default is px
+
+    def unittouu(self, value):
+        """Convert a unit value into the document's units"""
+        return convert_unit(value, self.getDocumentUnit())
+
+    def uutounit(self, value, to_unit):
+        """Convert from the document's units to the given unit"""
+        return convert_unit(render_unit(value, self.getDocumentUnit()), to_unit)
+
+    def addDocumentUnit(self, value):
+        """Add document unit when no unit is specified in the string """
+        return render_unit(value, self.getDocumentUnit())
+
+
+class NamedViewElement(etree.ElementBase):
+    """The NamedView element is Inkscape specific metadata about the file"""
+    tag_name = 'namedview'
+
+    def create_guide(self, pos_x, pos_y, angle):
+        """Create a guide in this namedView section"""
+        atts = {
+            'position': str(pos_x)+','+str(pos_y),
+            'orientation': "{},{}".format(
+                str(math.sin(math.radians(angle))),
+                str(-math.cos(math.radians(angle)))
+            ),
+        }
+        return etree.SubElement(self, addNS('guide', 'sodipodi'), atts)
 
 
 class SvgClassLookup(etree.CustomElementClassLookup):

@@ -21,6 +21,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+# pylint: disable=attribute-defined-outside-init
+#
 """
 Provide a way to load lxml attributes with an svg API on top.
 """
@@ -49,7 +51,7 @@ NSS = {
 
 def addNS(tag, ns=None): # pylint: disable=invalid-name
     """Add a known namespace to a name for use with lxml"""
-    if ns is not None and len(ns) > 0 and ns in NSS and len(tag) > 0 and tag[0] != '{':
+    if ns is not None and ns in NSS and tag and tag[0] != '{':
         return "{%s}%s" % (NSS[ns], tag)
     return tag
 
@@ -57,8 +59,10 @@ def addNS(tag, ns=None): # pylint: disable=invalid-name
 class SvgDocumentElement(etree.ElementBase):
     """Provide access to the document level svg functionality"""
     tag_name = 'svg'
-    def __init__(self, *args, **kw):
-        super(SvgDocumentElement, self).__init__(*args, **kw)
+
+    def _init(self):
+        self.current_layer = None
+        self.view_center = (0.0, 0.0)
         self.selected = {}
         self.ids = {}
 
@@ -72,7 +76,8 @@ class SvgDocumentElement(etree.ElementBase):
         """Generate a new id from an existing old_id"""
         ids = self.get_ids()
         while old_id in ids:
-            old_id += random.randint(0, 9)
+            old_id += str(random.randint(0, 9))
+        self.ids.add(old_id)
         return old_id
 
     def set_selected(self, *ids):
@@ -82,15 +87,12 @@ class SvgDocumentElement(etree.ElementBase):
             for node in self.xpath('//*[@id="{}"]'.format(elem_id), namespaces=NSS):
                 self.selected[elem_id] = node
 
+    def get_current_layer(self):
+        """Returns the currently selected layer"""
+        return self.getElementById(self.getNamedView().current_layer, 'svg:g') or self
+
     def get_posinlayer(self):
         """defines view_center in terms of document units"""
-        self.current_layer = self
-        self.view_center = (0.0, 0.0)
-
-        layerattr = self.xpath('//sodipodi:namedview/@inkscape:current-layer', namespaces=NSS)
-        if layerattr:
-            self.current_layer = self.getElementById(layerattr[0], 'svg:g')
-
         xattr = self.xpath('//sodipodi:namedview/@inkscape:cx', namespaces=NSS)
         yattr = self.xpath('//sodipodi:namedview/@inkscape:cy', namespaces=NSS)
         if xattr and yattr:
@@ -99,7 +101,8 @@ class SvgDocumentElement(etree.ElementBase):
             doc_height = self.unittouu(self.height)
             if x and y:
                 # FIXME: y-coordinate flip, eliminate it when it's gone in Inkscape
-                self.view_center = (float(x), doc_height - float(y))
+                return (float(x), doc_height - float(y))
+        return (0.0, 0.0)
 
     def getElement(self, xpath): # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
@@ -113,12 +116,21 @@ class SvgDocumentElement(etree.ElementBase):
 
     def getNamedView(self):
         """Return the sp namedview meta information element"""
-        # TODO: We should make one if it doesn't exist...
-        return self.xpath('//sodipodi:namedview', namespaces=NSS)[0]
+        nvs = self.xpath('//sodipodi:namedview', namespaces=NSS)
+        if not nvs:
+            # Create a nameView here.
+            nvs = etree.Element(addNS('namedview', 'sodipodi'))
+        return nvs
 
     def getViewBox(self):
         """Parse and return the document's viewBox attribute"""
-        return [float(unit) for unit in self.get('viewBox', '0 0 0 0').split()]
+        try:
+            ret = [float(unit) for unit in self.get('viewBox', '0').split()]
+        except ValueError:
+            ret = ''
+        if len(ret) != 4:
+            return [0, 0, 0, 0]
+        return ret
 
     @property
     def width(self): #getDocumentWidth(self):
@@ -160,6 +172,10 @@ class SvgDocumentElement(etree.ElementBase):
 class NamedViewElement(etree.ElementBase):
     """The NamedView element is Inkscape specific metadata about the file"""
     tag_name = 'namedview'
+
+    center_x = property(lambda self: self.get(addNS('cx', 'inkscape')))
+    center_y = property(lambda self: self.get(addNS('cy', 'inkscape')))
+    current_layer = property(lambda self: self.get(addNS('current-layer', 'inkscape')))
 
     def create_guide(self, pos_x, pos_y, angle):
         """Create a guide in this namedView section"""

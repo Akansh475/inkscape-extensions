@@ -3,8 +3,10 @@
 Test the svg interface for inkscape extensions.
 """
 
+import random
+
 from tests.base import TestCase, test_support
-from inkex.svg import etree, SVG_PARSER
+from inkex.svg import etree, addNS, SVG_PARSER
 
 def svg(svg_attrs=''):
     """Returns xml etree based on a simple SVG element.
@@ -23,6 +25,44 @@ def uu_svg(user_unit):
     It's based on the ratio between the SVG width and the viewBox width.
     """
     return svg('width="1{}" viewBox="0 0 1 1"'.format(user_unit))
+
+
+class BasicSvgTest(TestCase):
+    """Basic svg tests"""
+    def test_svg_load(self):
+        """Test loading an svg with the right parser"""
+        self.assertEqual(type(svg()).__name__, 'SvgDocumentElement')
+
+    def test_add_ns(self):
+        """Test adding a namespace to a tag"""
+        self.assertEqual(addNS('g', 'svg'), '{http://www.w3.org/2000/svg}g')
+        self.assertEqual(addNS('h', 'inkscape'), '{http://www.inkscape.org/namespaces/inkscape}h')
+        self.assertEqual(addNS('i', 'sodipodi'),
+                         '{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}i')
+        self.assertEqual(addNS('{p}j'), '{p}j')
+
+    def test_svg_ids(self):
+        """Test a list of ids from an svg document"""
+        self.assertEqual(svg('id="apples"').get_ids(), {'apples'})
+
+    def test_svg_new_id(self):
+        """Test generatign a new id for a given tag"""
+        random.seed(9001)
+        doc = svg('id="apples"')
+        self.assertEqual(doc.get_unique_id('apples'), 'apples0')
+        self.assertEqual(doc.get_unique_id('apples'), 'apples4')
+        self.assertEqual(doc.get_unique_id('apples'), 'apples41')
+
+    def test_svg_select_id(self):
+        """Select an id from the document"""
+        doc = svg('id="bananas"')
+        doc.set_selected('bananas')
+        self.assertEqual(doc.selected['bananas'], doc)
+
+    def test_svg_layers(self):
+        """Selected layer is selected"""
+        doc = etree.parse(self.data_file('svg', 'multilayered-test.svg'), parser=SVG_PARSER)
+        self.assertEqual(doc.get_current_layer().id, 'layer3')
 
 
 class GetDocumentWidthTest(TestCase):
@@ -171,23 +211,17 @@ class GetDocumentUnitTest(TestCase):
         self.assertEqual(svg('width="1in" viewBox="0 0 2.54 1"').getDocumentUnit(), 'cm')
 
         # Corrupt the width to contain an invalid number component; note that
-        # the units change to 'm'. This is because the corrupt number part is
-        # replaced with 100 while the unit is preserved, producing a width of
-        # "100in"; 100in is 2.54m.
-        self.assertEqual(svg('width="ABCDin" viewBox="0 0 2.54 1"').getDocumentUnit(), 'm')
+        # the units change to 'px'. This is because the corrupt number part is
+        # replaced with 100px, producing a width of "100px";
+        self.assertEqual(svg('width="ABCDin" viewBox="0 0 2.54 1"').getDocumentUnit(), 'px')
 
     def test_bad_viewbox_entry(self):
         """Fallback test: Bad viewBox default to 100"""
         # First, demonstrate that 3779px is 1m, so unit should be 'm'.
         self.assertEqual(svg('width="3779px" viewBox="0 0 1 1"').getDocumentUnit(), 'm')
 
-        # Corrupt the viewBox to include a non-float value; note that
-        # the units change to 'cm'. This is because the corrupt viewBox
-        # is effectively replaced with "0 0 100 100"; 3779/100 == 37.79,
-        # and 37.79px is 1cm.
-        # Also note that the corruption did not touch the width element
-        # of the viewBox; this fallback happens if any element is corrupt.
-        self.assertEqual(svg('width="3779px" viewBox="x 0 1 1"').getDocumentUnit(), 'cm')
+        # Corrupt the viewBox to include a non-float value; will default to 'px'
+        self.assertEqual(svg('width="3779px" viewBox="x 0 1 1"').getDocumentUnit(), 'px')
 
 
 class UserUnitTest(TestCase):
@@ -200,7 +234,7 @@ class UserUnitTest(TestCase):
         self.assertAlmostEqual(doc.unittouu(test_value), expected)
 
     def assertFromUserUnit(self, user_unit, value, unit, expected): # pylint: disable=invalid-name
-        """Check converting from a user unity for thetest_value"""
+        """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(uu_svg(user_unit).uutounit(value, unit), expected)
 
     # Unit-ratio tests. Don't exhaustively test every unit conversion, just
@@ -229,25 +263,22 @@ class UserUnitTest(TestCase):
 
     def test_unittouu_parsing(self):
         """Test user unit parsing forms"""
-        inputs = (
-            '100pc',
-            '100  pc',
-            '   100pc',
-            '100px   ',
-            '+100pc',
-            '100.0pc',
-            '100.0e0pc',
-            '10.0e1pc',
-            '10.0e+1pc',
-            '1000.0e-1pc',
-            '.1e+3pc',
-            '+.1e+3pc',
-        )
-        for value in inputs:
+        for value in (
+                '100pc',
+                '100  pc',
+                '   100pc',
+                '100pc  ',
+                '+100pc',
+                '100.0pc',
+                '100.0e0pc',
+                '10.0e1pc',
+                '10.0e+1pc',
+                '1000.0e-1pc',
+                '.1e+3pc',
+                '+.1e+3pc',
+            ):
             # 100pc is ~3.937in
             self.assertToUserUnit('px', value, 1600)
-
-    # Malformed input tests.
 
     def test_unittouu_bad_input_number(self):
         """Bad input number"""
@@ -264,9 +295,10 @@ class UserUnitTest(TestCase):
         self.assertToUserUnit('in', '1.0in', 1.0)
 
         # Corrupt the input to contain an invalid unit component; note that the
-        # result changes 1/96, the ratio between inches and pixels. This is
+        # result changes to 0.0, because corrupt parsing is zero px.
+        # it used to be the ratio between inches and pixels. This was
         # because unittouu() treats unknown units as 'px'.
-        self.assertToUserUnit('in', '1.0ABCD', 1/96.0)
+        self.assertToUserUnit('in', '1.0ABCD', 0)
 
     # Unit-ratio tests. Don't exhaustively test every unit conversion, just
     # demonstrate that the logic works.
@@ -282,18 +314,11 @@ class UserUnitTest(TestCase):
     def test_uutounit_identity(self):
         """If the input and output units are the same, the input and output
            values should exactly be the same, too."""
-        self.assertFromUserUnit('pc', 9.87654321, 'pc', 9.87654321)
+        self.assertFromUserUnit('pc', 9.87654321, 'pc', 9.87654)
 
     def test_uutounit_unknown_unit(self):
         """Demonstrate that passing an unknown unit string to uutounit()"""
-        # TODO: Determine whether this is the right behavior; none of the other
-        #     unit-related methods raises errors on bad units, they treat them
-        #     as 'px'. It would be better for them all to be consistent, either
-        #     by silently converting to 'px' here or by raising exceptions in
-        #     the other methods.
-        doc = uu_svg('in')
-        with self.assertRaises(IOError):
-            doc.uutounit(1, 'xy')
+        self.assertEqual(uu_svg('in').uutounit(1, 'px'), 96.0)
 
     def test_adddocumentunit_common(self):
         """Test common addDocumentUnit results"""
@@ -303,14 +328,15 @@ class UserUnitTest(TestCase):
             # Input, expected output
             (100, '100pt'),
             ('100', '100pt'),
-            ('+100', '+100pt'),
-            ('100.0', '100.0pt'),
-            ('100.0e0', '100.0e0pt'),
-            ('10.0e1', '10.0e1pt'),
-            ('10.0e+1', '10.0e+1pt'),
-            ('1000.0e-1', '1000.0e-1pt'),
-            ('.1e+3', '.1e+3pt'),
-            ('+.1e+3', '+.1e+3pt'),
+            ('+100', '100pt'),
+            ('-100', '-100pt'),
+            ('100.0', '100pt'),
+            ('100.0e0', '100pt'),
+            ('10.0e1', '100pt'),
+            ('10.0e+1', '100pt'),
+            ('1000.0e-1', '100pt'),
+            ('.1e+3', '100pt'),
+            ('+.1e+3', '100pt'),
             ('   100', '100pt'),
             ('100   ', '100pt'),
             ('  100   ', '100pt'),
@@ -328,7 +354,7 @@ class UserUnitTest(TestCase):
             '   ',
         )
         for value in inputs:
-            self.assertEqual(doc.addDocumentUnit(value), value)
+            self.assertEqual(doc.addDocumentUnit(value), '')
 
 
 if __name__ == '__main__':

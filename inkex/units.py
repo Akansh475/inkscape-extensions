@@ -84,7 +84,10 @@ def convert_unit(value, to_unit):
 
 def render_unit(value, unit):
     """Checks a then renders a number with it's unit"""
-    if isinstance(value, str):
-        (value, unit) = parse_unit(value, default_unit=unit)
-    return "{:.6g}{:s}".format(value, unit)
+    try:
+        if isinstance(value, str):
+            (value, unit) = parse_unit(value, default_unit=unit)
+        return "{:.6g}{:s}".format(value, unit)
+    except TypeError:
+        return ''
 

@@ -24,7 +24,7 @@ Barcode module provided for outside or scripting.
 import sys
 import inkex
 
-from Barcode import get_barcode
+from barcode import get_barcode
 
 class InsertBarcode(inkex.Effect):
     """

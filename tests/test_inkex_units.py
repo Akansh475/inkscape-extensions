@@ -58,7 +58,7 @@ class UnitsTest(TestCase):
                 '1000.0e-1mm',
                 '.1e+3mm',
                 '+.1e+3mm'):
-            self.assertEqual(parse_unit(value), '100mm')
+            self.assertEqual(parse_unit(value), (100, 'mm'))
 
 if __name__ == '__main__':
     test_support.run_unittest(UnitsTest)

@@ -53,15 +53,15 @@ class GetDocumentWidthTest(TestCase):
 
     def test_viewbox_only(self):
         """IF only the viewBox is present"""
-        self.assertEqual(svg('viewBox="0 0 22 99"').width, '22')
+        self.assertEqual(svg('viewBox="0 0 22 99"').width, 22.0)
 
     def test_only_valid_viewbox(self):
         """An empty width value should be the same as a missing width."""
-        self.assertEqual(svg('width="" viewBox="0 0 22 99"').width, '22')
+        self.assertEqual(svg('width="" viewBox="0 0 22 99"').width, 22.0)
 
     def test_non_zero_viewbox_x(self):
         """Demonstrate that a non-zero x value (viewbox[0]) does not affect the width value."""
-        self.assertEqual(svg('width="" viewBox="5 7 22 99"').width, '22')
+        self.assertEqual(svg('width="" viewBox="5 7 22 99"').width, 22.0)
 
 
 class GetDocumentHeightTest(TestCase):
@@ -92,15 +92,15 @@ class GetDocumentHeightTest(TestCase):
 
     def test_viewbox_only(self):
         """Height from viewBox only"""
-        self.assertEqual(svg('viewBox="0 0 22 99"').height, '99')
+        self.assertEqual(svg('viewBox="0 0 22 99"').height, 99.0)
 
     def test_no_height_valid_viewbox(self):
         """An empty height value should be the same as a missing height."""
-        self.assertEqual(svg('height="" viewBox="0 0 22 99"').height, '99')
+        self.assertEqual(svg('height="" viewBox="0 0 22 99"').height, 99.0)
 
     def test_non_zero_viewbox_y(self):
         """Demonstrate that a non-zero y value (viewbox[1]) does not affect the height value."""
-        self.assertEqual(svg('height="" viewBox="5 7 22 99"').height, '99')
+        self.assertEqual(svg('height="" viewBox="5 7 22 99"').height, 99.0)
 
 
 class GetDocumentUnitTest(TestCase):

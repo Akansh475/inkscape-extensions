@@ -41,9 +41,9 @@ CONVERSIONS = {
     'ft': 1152.0,
     '': 1.0, # Default px
 }
-UNIT_MATCH = re.compile(r'({})$'.format('|'.join(CONVERSIONS)))
+UNIT_MATCH = re.compile(r'({})'.format('|'.join(CONVERSIONS)))
 NUMBER_MATCH = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
-BOTH_MATCH = re.compile(NUMBER_MATCH.pattern + UNIT_MATCH.pattern)
+BOTH_MATCH = re.compile(r'^\s*{}\s*{}\s*$'.format(NUMBER_MATCH.pattern, UNIT_MATCH.pattern))
 
 def parse_unit(value, default_unit='px', default_value=None):
     """
@@ -69,9 +69,10 @@ def discover_unit(value, viewbox, default='px'):
 
     # try to find the svgunitfactor in the list of units known. If we don't find something, ...
     for unit, unit_factor in CONVERSIONS.items():
-        # allow 1% error in factor
-        if are_near_relative(this_factor, unit_factor, eps=0.01):
-            return unit
+        if unit is not '':
+            # allow 1% error in factor
+            if are_near_relative(this_factor, unit_factor, eps=0.01):
+                return unit
     return default
 
 
@@ -85,5 +86,5 @@ def render_unit(value, unit):
     """Checks a then renders a number with it's unit"""
     if isinstance(value, str):
         (value, unit) = parse_unit(value, default_unit=unit)
-    return "{:f.6}{:s}".format(value, unit)
+    return "{:.6g}{:s}".format(value, unit)
 

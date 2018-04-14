@@ -1,7 +1,8 @@
 
 from __future__ import print_function
 
-from .effect import Effect, etree
+from .effect import Effect
+from .svg import etree
 from .utils import *
 from .bezier import *
 from .styles import *

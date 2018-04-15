@@ -177,16 +177,21 @@ class NamedViewElement(etree.ElementBase):
     center_y = property(lambda self: self.get(addNS('cy', 'inkscape')))
     current_layer = property(lambda self: self.get(addNS('current-layer', 'inkscape')))
 
+    def get_guides(self):
+        """Returns a list of guides"""
+        return self.findall('sodipodi:guide', namespaces=NSS)
+
     def create_guide(self, pos_x, pos_y, angle):
         """Create a guide in this namedView section"""
         atts = {
-            'position': str(pos_x)+','+str(pos_y),
-            'orientation': "{},{}".format(
-                str(math.sin(math.radians(angle))),
-                str(-math.cos(math.radians(angle)))
+            'position': "{:g},{:g}".format(pos_x, pos_y),
+            'orientation': "{:g},{:g}".format(
+                math.sin(math.radians(angle)),
+                -math.cos(math.radians(angle))
             ),
         }
         return etree.SubElement(self, addNS('guide', 'sodipodi'), atts)
+
 
 
 class SvgClassLookup(etree.CustomElementClassLookup):

@@ -76,6 +76,27 @@ class BasicSvgTest(TestCase):
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
         self.assertEqual(doc.get_current_layer().get('id'), 'layer3')
 
+    def test_svg_center_position(self):
+        """SVG with namedview has a center position"""
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        self.assertEqual(doc.get_center_position(), (30.714286, 520.0))
+        self.assertEqual(svg().get_center_position(), (0, 0))
+
+
+class NamedViewTest(TestCase):
+    """Tests for the named view functionality"""
+    def test_create_guide(self):
+        """Test creating guides"""
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        namedview = doc.get_namedview()
+        self.assertEqual(len(namedview.get_guides()), 0)
+
+        namedview.create_guide(50, 50, angle=45)
+        self.assertEqual(len(namedview.get_guides()), 1)
+        guide, = namedview.get_guides()
+        self.assertEqual(guide.get('position'), '50,50')
+        self.assertEqual(guide.get('orientation'), '0.707107,-0.707107')
+
 
 class GetDocumentWidthTest(TestCase):
     """Tests for Effect.width."""

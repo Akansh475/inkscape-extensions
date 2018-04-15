@@ -56,7 +56,18 @@ def addNS(tag, ns=None): # pylint: disable=invalid-name
     return tag
 
 
-class SvgDocumentElement(etree.ElementBase):
+class BaseElement(etree.ElementBase):
+    """Provide automatic namespaces to all calls"""
+    def xpath(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
+        """Wrap xpath call and add svg namespaces"""
+        return super(BaseElement, self).xpath(pattern, namespaces=namespaces)
+
+    def findall(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
+        """Wrap findall call and add svg namespaces"""
+        return super(BaseElement, self).findall(pattern, namespaces=namespaces)
+
+
+class SvgDocumentElement(BaseElement):
     """Provide access to the document level svg functionality"""
     tag_name = 'svg'
 
@@ -69,7 +80,7 @@ class SvgDocumentElement(etree.ElementBase):
     def get_ids(self):
         """Returns a set of unqiue document ids"""
         if not self.ids:
-            self.ids = set(self.xpath('//@id', namespaces=NSS))
+            self.ids = set(self.xpath('//@id'))
         return self.ids
 
     def get_unique_id(self, old_id):
@@ -84,7 +95,7 @@ class SvgDocumentElement(etree.ElementBase):
         """Sets the currently selected elements to these ids"""
         self.selected = {}
         for elem_id in ids:
-            for node in self.xpath('//*[@id="{}"]'.format(elem_id), namespaces=NSS):
+            for node in self.xpath('//*[@id="{}"]'.format(elem_id)):
                 self.selected[elem_id] = node
 
     def get_current_layer(self):
@@ -105,7 +116,7 @@ class SvgDocumentElement(etree.ElementBase):
     # This used to be called Effect.xpathSingle
     def getElement(self, xpath): # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
-        el_list = self.xpath(xpath, namespaces=NSS)
+        el_list = self.xpath(xpath)
         return el_list[0] if el_list else None
 
     def getElementById(self, eid, elm='*'): # pylint: disable=invalid-name
@@ -114,7 +125,7 @@ class SvgDocumentElement(etree.ElementBase):
 
     def get_namedview(self):
         """Return the sp namedview meta information element"""
-        nvs = self.xpath('//sodipodi:namedview', namespaces=NSS)
+        nvs = self.xpath('//sodipodi:namedview')
         return nvs[0] if nvs else NamedViewElement(addNS('namedview', 'sodipodi'))
 
     def create_namedview(self):
@@ -169,7 +180,7 @@ class SvgDocumentElement(etree.ElementBase):
         return render_unit(value, self.unit)
 
 
-class NamedViewElement(etree.ElementBase):
+class NamedViewElement(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""
     tag_name = 'namedview'
 
@@ -179,7 +190,7 @@ class NamedViewElement(etree.ElementBase):
 
     def get_guides(self):
         """Returns a list of guides"""
-        return self.findall('sodipodi:guide', namespaces=NSS)
+        return self.findall('sodipodi:guide')
 
     def create_guide(self, pos_x, pos_y, angle):
         """Create a guide in this namedView section"""
@@ -204,7 +215,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
     def lookup(self, node_type, document, namespace, name): # pylint: disable=unused-argument
         """Choose what kind of functionality our element will have"""
         for cls in self.get_lookups():
-            if name.lower() == cls.tag_name:
+            if name.lower() == getattr(cls, 'tag_name', None):
                 return cls
 
     def get_lookups(self):

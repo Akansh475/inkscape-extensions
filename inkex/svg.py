@@ -89,24 +89,22 @@ class SvgDocumentElement(etree.ElementBase):
 
     def get_current_layer(self):
         """Returns the currently selected layer"""
-        return self.getElementById(self.getNamedView().current_layer, 'svg:g') or self
+        return self.getElementById(self.get_namedview().current_layer, 'svg:g') or self
 
-    def get_posinlayer(self):
-        """defines view_center in terms of document units"""
-        xattr = self.xpath('//sodipodi:namedview/@inkscape:cx', namespaces=NSS)
-        yattr = self.xpath('//sodipodi:namedview/@inkscape:cy', namespaces=NSS)
-        if xattr and yattr:
-            x = self.unittouu(xattr[0] + 'px')
-            y = self.unittouu(yattr[0] + 'px')
-            doc_height = self.unittouu(self.height)
-            if x and y:
-                # FIXME: y-coordinate flip, eliminate it when it's gone in Inkscape
-                return (float(x), doc_height - float(y))
+    def get_center_position(self):
+        """Returns view_center in terms of document units"""
+        namedview = self.get_namedview()
+        if namedview.center_x and namedview.center_y:
+            return (self.unittouu(namedview.center_x),
+                    self.unittouu(namedview.center_y))
+            # y-coordinate flip, eliminate it when it's gone in Inkscape
+            #doc_height = self.unittouu(self.height)
+            #return (float(x), doc_height - float(y))
         return (0.0, 0.0)
 
+    # This used to be called Effect.xpathSingle
     def getElement(self, xpath): # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
-        # XXX This used to be called Effect.xpathSingle
         el_list = self.xpath(xpath, namespaces=NSS)
         return el_list[0] if el_list else None
 
@@ -114,15 +112,16 @@ class SvgDocumentElement(etree.ElementBase):
         """Get an element in this svg document by it's ID attribute"""
         return self.getElement('//{}[@id="{}"]'.format(elm, eid))
 
-    def getNamedView(self):
+    def get_namedview(self):
         """Return the sp namedview meta information element"""
         nvs = self.xpath('//sodipodi:namedview', namespaces=NSS)
-        if not nvs:
-            # Create a nameView here.
-            nvs = etree.Element(addNS('namedview', 'sodipodi'))
-        return nvs
+        return nvs[0] if nvs else NamedViewElement(addNS('namedview', 'sodipodi'))
 
-    def getViewBox(self):
+    def create_namedview(self):
+        """Create a named view element"""
+        self.insert(0, NamedViewElement(addNS('namedview', 'sodipodi')))
+
+    def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""
         try:
             ret = [float(unit) for unit in self.get('viewBox', '0').split()]
@@ -135,7 +134,7 @@ class SvgDocumentElement(etree.ElementBase):
     @property
     def width(self): #getDocumentWidth(self):
         """Fault tolerance for lazily defined SVG"""
-        return self.get('width') or self.getViewBox()[2] or '0'
+        return self.get('width') or self.get_viewbox()[2] or '0'
 
     @property
     def height(self): #getDocumentHeight(self):
@@ -143,30 +142,31 @@ class SvgDocumentElement(etree.ElementBase):
         defined in the SVG file. If it is not defined, returns the height
         as defined by the viewBox attribute. If viewBox is not defined,
         returns the string '0'."""
-        return self.get('height') or self.getViewBox()[3] or '0'
+        return self.get('height') or self.get_viewbox()[3] or '0'
 
-    def getDocumentUnit(self):
+    @property
+    def unit(self):
         """Returns the unit used for in the SVG document.
         In the case the SVG document lacks an attribute that explicitly
         defines what units are used for SVG coordinates, it tries to calculate
         the unit from the SVG width and viewBox attributes.
         Defaults to 'px' units."""
-        viewbox = self.getViewBox()
+        viewbox = self.get_viewbox()
         if viewbox and set(viewbox) != {0}:
             return discover_unit(self.width, viewbox[2], default='px')
         return 'px' # Default is px
 
     def unittouu(self, value):
         """Convert a unit value into the document's units"""
-        return convert_unit(value, self.getDocumentUnit())
+        return convert_unit(value, self.unit)
 
     def uutounit(self, value, to_unit):
         """Convert from the document's units to the given unit"""
-        return convert_unit(render_unit(value, self.getDocumentUnit()), to_unit)
+        return convert_unit(render_unit(value, self.unit), to_unit)
 
-    def addDocumentUnit(self, value):
+    def add_unit(self, value):
         """Add document unit when no unit is specified in the string """
-        return render_unit(value, self.getDocumentUnit())
+        return render_unit(value, self.unit)
 
 
 class NamedViewElement(etree.ElementBase):

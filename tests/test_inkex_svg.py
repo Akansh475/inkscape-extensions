@@ -26,6 +26,11 @@ def uu_svg(user_unit):
     """
     return svg('width="1{}" viewBox="0 0 1 1"'.format(user_unit))
 
+def svg_file(filename):
+    """Parse an svg file and return it's document root"""
+    with open(filename, 'r') as fhl:
+        doc = etree.parse(fhl, parser=SVG_PARSER)
+        return doc.getroot()
 
 class BasicSvgTest(TestCase):
     """Basic svg tests"""
@@ -59,10 +64,17 @@ class BasicSvgTest(TestCase):
         doc.set_selected('bananas')
         self.assertEqual(doc.selected['bananas'], doc)
 
+    def test_svg_nameview(self):
+        """Can get the sodipodi nameview element"""
+        doc = svg()
+        self.assertEqual(doc.get_namedview().center_x, None)
+        doc.create_namedview()
+        self.assertEqual(type(doc.get_namedview()).__name__, 'NamedViewElement')
+
     def test_svg_layers(self):
         """Selected layer is selected"""
-        doc = etree.parse(self.data_file('svg', 'multilayered-test.svg'), parser=SVG_PARSER)
-        self.assertEqual(doc.get_current_layer().id, 'layer3')
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        self.assertEqual(doc.get_current_layer().get('id'), 'layer3')
 
 
 class GetDocumentWidthTest(TestCase):
@@ -144,58 +156,58 @@ class GetDocumentHeightTest(TestCase):
 
 
 class GetDocumentUnitTest(TestCase):
-    """Tests for Effect.getDocumentUnit()."""
+    """Tests for Effect.unit."""
     def test_no_dimensions(self):
         """Default units with no arguments"""
-        self.assertEqual(svg().getDocumentUnit(), 'px')
+        self.assertEqual(svg().unit, 'px')
 
     def test_width_only(self):
         """"Units from document width only"""
         # TODO: Determine whether returning 'px' in this case is the
         #     intended behavior.
-        self.assertEqual(svg('width="100m"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('width="100m"').unit, 'px')
 
     def test_height_only(self):
         """Units from document height only"""
         # TODO: Determine whether returning 'px' in this case is the
         #     intended behavior.
-        self.assertEqual(svg('height="100m"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('height="100m"').unit, 'px')
 
     def test_viewbox_only(self):
         """Test viewbox only document units"""
-        self.assertEqual(svg('viewBox="0 0 377 565"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('viewBox="0 0 377 565"').unit, 'px')
 
     # Unit-ratio tests. Don't exhaustively test every unit conversion, just
     # demonstrate that the logic works.
 
     def test_width_and_viewbox_px(self):
         """100mm is ~377px, so unit should be 'px'."""
-        self.assertEqual(svg('width="100mm" viewBox="0 0 377 565"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('width="100mm" viewBox="0 0 377 565"').unit, 'px')
 
     def test_width_and_viewbox_in(self):
         """100mm is ~3.94in, so unit should be 'in'."""
-        self.assertEqual(svg('width="100mm" viewBox="0 0 3.94 5.90"').getDocumentUnit(), 'in')
+        self.assertEqual(svg('width="100mm" viewBox="0 0 3.94 5.90"').unit, 'in')
 
     def test_unitless_width_and_viewbox(self):
         """Unitless width should be treated as 'px'."""
         # 3779px is ~1m, so unit should be 'm'.
-        self.assertEqual(svg('width="3779" viewBox="0 0 1 1.5"').getDocumentUnit(), 'm')
+        self.assertEqual(svg('width="3779" viewBox="0 0 1 1.5"').unit, 'm')
 
     def test_height_with_viewbox(self):
         """150mm is ~5.90in, so unit should be 'in', but height is ignored"""
         # TODO: Determine whether returning 'px' in this case is the intended
         #     behavior.
-        self.assertEqual(svg('height="150mm" viewBox="0 0 3.94 5.90"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('height="150mm" viewBox="0 0 3.94 5.90"').unit, 'px')
 
     def test_height_width_and_viewbox(self):
         """100mm is ~23.6pc, so unit should be 'pc'."""
         doc = svg('width="100mm" height="150mm" viewBox="0 0 23.6 35.4"')
-        self.assertEqual(doc.getDocumentUnit(), 'pc')
+        self.assertEqual(doc.unit, 'pc')
 
     def test_large_error_reverts_to_px(self):
         """'px' instead of using the closest match 'pc'."""
         # 100mm is ~23.6pc; 24.1 is ~2% off from that, so unit should fall back
-        self.assertEqual(svg('width="100mm" viewBox="0 0 24.1 35.4"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('width="100mm" viewBox="0 0 24.1 35.4"').unit, 'px')
 
     # TODO: Demonstrate that unknown width units are treated as px while
     #     determining the ratio.
@@ -208,29 +220,29 @@ class GetDocumentUnitTest(TestCase):
     def test_bad_width_number(self):
         """Fallback test: Bad numbers default to 100"""
         # First, demonstrate that 1in is 2.54cm, so unit should be 'cm'.
-        self.assertEqual(svg('width="1in" viewBox="0 0 2.54 1"').getDocumentUnit(), 'cm')
+        self.assertEqual(svg('width="1in" viewBox="0 0 2.54 1"').unit, 'cm')
 
         # Corrupt the width to contain an invalid number component; note that
         # the units change to 'px'. This is because the corrupt number part is
         # replaced with 100px, producing a width of "100px";
-        self.assertEqual(svg('width="ABCDin" viewBox="0 0 2.54 1"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('width="ABCDin" viewBox="0 0 2.54 1"').unit, 'px')
 
     def test_bad_viewbox_entry(self):
         """Fallback test: Bad viewBox default to 100"""
         # First, demonstrate that 3779px is 1m, so unit should be 'm'.
-        self.assertEqual(svg('width="3779px" viewBox="0 0 1 1"').getDocumentUnit(), 'm')
+        self.assertEqual(svg('width="3779px" viewBox="0 0 1 1"').unit, 'm')
 
         # Corrupt the viewBox to include a non-float value; will default to 'px'
-        self.assertEqual(svg('width="3779px" viewBox="x 0 1 1"').getDocumentUnit(), 'px')
+        self.assertEqual(svg('width="3779px" viewBox="x 0 1 1"').unit, 'px')
 
 
 class UserUnitTest(TestCase):
-    """Tests for methods that are based on the value of getDocumentUnit()."""
+    """Tests for methods that are based on the value of unit."""
 
     def assertToUserUnit(self, user_unit, test_value, expected): # pylint: disable=invalid-name
         """Checks a user unit and a test_value against the expected result"""
         doc = uu_svg(user_unit)
-        self.assertEqual(doc.getDocumentUnit(), user_unit, msg=svg)
+        self.assertEqual(doc.unit, user_unit, msg=svg)
         self.assertAlmostEqual(doc.unittouu(test_value), expected)
 
     def assertFromUserUnit(self, user_unit, value, unit, expected): # pylint: disable=invalid-name
@@ -321,7 +333,7 @@ class UserUnitTest(TestCase):
         self.assertEqual(uu_svg('in').uutounit(1, 'px'), 96.0)
 
     def test_adddocumentunit_common(self):
-        """Test common addDocumentUnit results"""
+        """Test common add_unit results"""
         # For valid float inputs, the output should be the input with the user unit appended.
         doc = uu_svg('pt')
         cases = (
@@ -342,7 +354,7 @@ class UserUnitTest(TestCase):
             ('  100   ', '100pt'),
         )
         for input_value, expected in cases:
-            self.assertEqual(doc.addDocumentUnit(input_value), expected)
+            self.assertEqual(doc.add_unit(input_value), expected)
 
     def test_adddocumentunit_non_float(self):
         """Strings that are invalid floats should pass through unchanged."""
@@ -354,7 +366,7 @@ class UserUnitTest(TestCase):
             '   ',
         )
         for value in inputs:
-            self.assertEqual(doc.addDocumentUnit(value), '')
+            self.assertEqual(doc.add_unit(value), '')
 
 
 if __name__ == '__main__':

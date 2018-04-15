@@ -57,7 +57,7 @@ def get_barcode(code, **kw):
         return NoBarcode()
 
     code = str(code).replace('-', '').strip()
-    mod = 'Barcode'
+    mod = 'barcode'
     try:
         return getattr(__import__(mod+'.'+code, fromlist=[mod]), code)(kw)
     except ImportError:

@@ -19,11 +19,11 @@
 Written to test the coding of generating barcodes.
 """
 
-from tests.base import TestCase, test_support
+from tests.base import Extension, TestCase, test_support
 
 from render_barcode import InsertBarcode
 
-class InsertBarcodeBasicTest(TestCase):
+class InsertBarcodeBasicTest(Extension, TestCase):
     """Render Barcode"""
     effect = InsertBarcode
 

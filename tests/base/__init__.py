@@ -116,7 +116,7 @@ class TestCase(BaseCase):
         """Returns a common minimal svg file"""
         return self.data_file('svg', 'default-inkscape-SVG.svg')
 
-class ExtensionTestCase(TestCase):
+class Extension(object):
     """
     Provide tests that every extension should be running.
     """
@@ -128,5 +128,5 @@ class ExtensionTestCase(TestCase):
 
     def assertEffectEmpty(self, effect): # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""
-        return effect().affect([self.empty_svg], False)
+        return effect().affect([self.empty_svg], False) # pylint: disable=no-member
 

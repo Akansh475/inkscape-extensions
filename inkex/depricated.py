@@ -66,7 +66,7 @@ class DepricatedEffect(object):
     def add_option(self, *args, **kw):
         # Convert type string into type method as needed
         kw['type'] = {
-            'string': 'str',
+            'string': str,
         }.get(kw.get('type', 'string'))
         self.arg_parser.add_argument(*args, **kw)
 
@@ -83,7 +83,7 @@ class DepricatedEffect(object):
     @property
     def view_center(self):
         self.warn_about('view_center', _('{} is now a method in the svg '\
-            'document. USe `self.svg.get_center_position()` instead.'))
+            'document. Use `self.svg.get_center_position()` instead.'))
         return self.svg.get_center_position()
 
     @property
@@ -95,12 +95,12 @@ class DepricatedEffect(object):
     @property
     def doc_ids(self):
         self.warn_about('doc_ids', _('{} is now a method in the svg '\
-            'document. User `self.svg.get_ids()` instead.'))
+            'document. Use `self.svg.get_ids()` instead.'))
         return self.svg.get_ids()
 
     def getElementById(self, eid):
         self.warn_about('getElementById', _('{} is now a method in the svg '\
-            'document. USe `self.svg.getElementById(eid)` instead.'))
+            'document. Use `self.svg.getElementById(eid)` instead.'))
         return self.svg.getElementById(eid)
 
     def xpathSingle(self, xpath):

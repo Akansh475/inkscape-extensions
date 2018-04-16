@@ -100,11 +100,11 @@ class SvgDocumentElement(BaseElement):
 
     def get_current_layer(self):
         """Returns the currently selected layer"""
-        return self.getElementById(self.get_namedview().current_layer, 'svg:g') or self
+        return self.getElementById(self.namedview.current_layer, 'svg:g') or self
 
     def get_center_position(self):
         """Returns view_center in terms of document units"""
-        namedview = self.get_namedview()
+        namedview = self.namedview
         if namedview.center_x and namedview.center_y:
             return (self.unittouu(namedview.center_x),
                     self.unittouu(namedview.center_y))
@@ -123,14 +123,15 @@ class SvgDocumentElement(BaseElement):
         """Get an element in this svg document by it's ID attribute"""
         return self.getElement('//{}[@id="{}"]'.format(elm, eid))
 
-    def get_namedview(self):
+    @property
+    def namedview(self):
         """Return the sp namedview meta information element"""
         nvs = self.xpath('//sodipodi:namedview')
-        return nvs[0] if nvs else NamedViewElement(addNS('namedview', 'sodipodi'))
-
-    def create_namedview(self):
-        """Create a named view element"""
-        self.insert(0, NamedViewElement(addNS('namedview', 'sodipodi')))
+        if not nvs:
+            # We auto create a namedview element when needed
+            nvs = [NamedViewElement(addNS('namedview', 'sodipodi'))]
+            self.insert(0, nvs[0])
+        return nvs[0]
 
     def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""

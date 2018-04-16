@@ -67,9 +67,8 @@ class BasicSvgTest(TestCase):
     def test_svg_nameview(self):
         """Can get the sodipodi nameview element"""
         doc = svg()
-        self.assertEqual(doc.get_namedview().center_x, None)
-        doc.create_namedview()
-        self.assertEqual(type(doc.get_namedview()).__name__, 'NamedViewElement')
+        self.assertEqual(doc.namedview.center_x, None)
+        self.assertEqual(type(doc.namedview).__name__, 'NamedViewElement')
 
     def test_svg_layers(self):
         """Selected layer is selected"""
@@ -88,7 +87,7 @@ class NamedViewTest(TestCase):
     def test_create_guide(self):
         """Test creating guides"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
-        namedview = doc.get_namedview()
+        namedview = doc.namedview
         self.assertEqual(len(namedview.get_guides()), 0)
 
         namedview.create_guide(50, 50, angle=45)

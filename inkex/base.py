@@ -45,15 +45,6 @@ class InkscapeExtension(object):
             "--output", type=str, default=sys.stdout,
             help="Optional output filename for saving the result (default is stdout).")
 
-    def affect(self, *args, **kw): #pylint: disable=unused-argument,no-self-use
-        """Compatibility with old style extensions"""
-        raise AttributeError("Old style affect() called, update to use run() instead.")
-
-    @property
-    def OptionParser(self): #pylint: disable=invalid-name
-        """Compatibility with old style extensions"""
-        raise AttributeError("Old style optparser is depricated, please use new style argparse.")
-
     def run(self, args=sys.argv[1:], output=True, input_=True):
         """Main entrypoint for any Inkscape Extension"""
         self.options = self.arg_parser.parse_args(args)

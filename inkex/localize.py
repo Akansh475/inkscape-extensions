@@ -24,6 +24,8 @@ import os
 import sys
 import gettext
 
+_ = gettext.gettext
+
 def localize():
     """Turn on localisation for any platform"""
     domain = 'inkscape'

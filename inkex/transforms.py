@@ -31,59 +31,55 @@ import inkex
 
 from .utils import pairwise, X, Y
 
-def parseTransform(transf,mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
-    if transf=="" or transf==None:
-        return(mat)
-    stransf = transf.strip()
-    result=re.match("(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?",stransf)
-#-- translate --
-    if result.group(1)=="translate":
-        args=result.group(2).replace(',',' ').split()
-        dx=float(args[0])
-        if len(args)==1:
-            dy=0.0
-        else:
-            dy=float(args[1])
-        matrix=[[1,0,dx],[0,1,dy]]
-#-- scale --
-    if result.group(1)=="scale":
-        args=result.group(2).replace(',',' ').split()
-        sx=float(args[0])
-        if len(args)==1:
-            sy=sx
-        else:
-            sy=float(args[1])
-        matrix=[[sx,0,0],[0,sy,0]]
-#-- rotate --
-    if result.group(1)=="rotate":
-        args=result.group(2).replace(',',' ').split()
-        a=float(args[0])*math.pi/180
-        if len(args)==1:
-            cx,cy=(0.0,0.0)
-        else:
-            cx,cy=map(float,args[1:])
-        matrix=[[math.cos(a),-math.sin(a),cx],[math.sin(a),math.cos(a),cy]]
-        matrix=composeTransform(matrix,[[1,0,-cx],[0,1,-cy]])
-#-- skewX --
-    if result.group(1)=="skewX":
-        a=float(result.group(2))*math.pi/180
-        matrix=[[1,math.tan(a),0],[0,1,0]]
-#-- skewY --
-    if result.group(1)=="skewY":
-        a=float(result.group(2))*math.pi/180
-        matrix=[[1,0,0],[math.tan(a),1,0]]
-#-- matrix --
-    if result.group(1)=="matrix":
-        a11,a21,a12,a22,v1,v2=result.group(2).replace(',',' ').split()
-        matrix=[[float(a11),float(a12),float(v1)], [float(a21),float(a22),float(v2)]]
+DEFAULT_MATRIX = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
+TR = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
 
-    matrix=composeTransform(mat,matrix)
+def parse_transform(transf, mat=DEFAULT_MATRIX):
+    """Parse a transformation matrix from an svg group"""
+    if transf in ("", None):
+        return mat
+
+    result = TR.match(transf.strip())
+    kind = result.group(1)
+    args = [float(val) for val in result.group(2).replace(',', ' ').split()]
+
+    if kind == "translate":
+        if len(args) == 1:
+            args.append(0.0)
+        matrix = [[1.0, 0, args[X]], [0, 1.0, args[Y]]]
+
+    if kind == "scale":
+        if len(args) == 1:
+            args[Y] = args[X]
+        matrix = [[args[X], 0, 0], [0, args[Y], 0]]
+
+    if kind == "rotate":
+        angle = args[0] * math.pi / 180
+        if len(args) == 1:
+            cx, cy = (0.0, 0.0)
+        else:
+            cx, cy = args[1:]
+        matrix = [[math.cos(angle), -math.sin(angle), cx],
+                  [math.sin(angle),  math.cos(angle), cy]]
+        matrix = compose_transform(matrix, [[1.0, 0, -cx], [0, 1.0, -cy]])
+
+    if kind == "skewX":
+        matrix = [[1, math.tan(args[0] * math.pi / 180), 0], [0, 1, 0]]
+
+    if kind == "skewY":
+        matrix = [[1, 0, 0], [math.tan(args[0] * math.pi / 180), 1, 0]]
+
+    if kind == "matrix":
+        matrix = [args[::2], args[1::2]]
+
+    matrix = compose_transform(mat, matrix)
+
     if result.end() < len(stransf):
-        return(parseTransform(stransf[result.end():], matrix))
-    else:
-        return matrix
+        return parsei_transform(stransf[result.end():], matrix)
 
-def get_matrix(u, i, j): 
+    return matrix
+
+def get_matrix(u, i, j):
     if j == i + 2:
         return (u[i]-u[i-1])*(u[i]-u[i-1])/(u[i+2]-u[i-1])/(u[i+1]-u[i-1])
     elif j == i + 1:
@@ -97,8 +93,10 @@ def get_fit(u, csp, col):
     return (1-u)**3*csp[0][col] + 3*(1-u)**2*u*csp[1][col] + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
 
 
-def formatTransform(mat):
-    return ("matrix(%f,%f,%f,%f,%f,%f)" % (mat[0][0], mat[1][0], mat[0][1], mat[1][1], mat[0][2], mat[1][2]))
+def format_transform(mat):
+    """Format the given matrix into a string repr for svg"""
+    mat = [val for lst in zip(*mat) for val in lst]
+    return "matrix(%f,%f,%f,%f,%f,%f)" % mat
 
 def invertTransform(mat):
     det = mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0]
@@ -125,18 +123,37 @@ def composeTransform(M1,M2):
     v2 = M1[1][0]*M2[0][2] + M1[1][1]*M2[1][2] + M1[1][2]
     return [[a11,a12,v1],[a21,a22,v2]]
 
-def composeParents(node, mat):
-    trans = node.get('transform')
-    if trans:
-        mat = composeTransform(parseTransform(trans), mat)
-    if node.getparent().tag == inkex.addNS('g','svg'):
-        mat = composeParents(node.getparent(), mat)
-    return mat
+#def composeParents(node, mat):                                            -XXX> group.compose_transform
+#    trans = node.get('transform')
+#    if trans:
+#        mat = composeTransform(parseTransform(trans), mat)
+#    if node.getparent().tag == inkex.addNS('g','svg'):
+#        mat = composeParents(node.getparent(), mat)
+#    return mat
 
-def applyTransformToNode(mat,node):
-    m=parseTransform(node.get("transform"))
-    newtransf=formatTransform(composeTransform(mat,m))
-    node.set("transform", newtransf)
+#def applyTransformToNode(mat,node):                                       -XXX> group.apply_transform
+#    m=parseTransform(node.get("transform"))
+#    newtransf=formatTransform(composeTransform(mat,m))
+#    node.set("transform", newtransf)
+
+#def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]): -XXX> group.compute_point
+#    if node.getparent() is not None:
+#        applyTransformToPoint(invertTransform(composeParents(node, mat)), pt)
+#    return pt
+
+def fuseTransform(node):
+    if node.get('d')==None:
+        #FIXME: how do you raise errors?
+        raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
+    t = node.get("transform")
+    if t == None:
+        return
+    m = parseTransform(t)
+    d = node.get('d')
+    p = inkex.parseCubicPath(d)
+    applyTransformToPath(m,p)
+    node.set('d', inkex.formatCubicPath(p))
+    del node.attrib["transform"]
 
 def applyTransformToPoint(mat, pt):
     if isinstance(pt, str):
@@ -152,20 +169,6 @@ def applyTransformToPath(mat, path):
             for pt in ctl:
                 if isinstance(pt, (list, tuple)):
                     applyTransformToPoint(mat, pt)
-
-def fuseTransform(node):
-    if node.get('d')==None:
-        #FIXME: how do you raise errors?
-        raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
-    t = node.get("transform")
-    if t == None:
-        return
-    m = parseTransform(t)
-    d = node.get('d')
-    p = inkex.parseCubicPath(d)
-    applyTransformToPath(m,p)
-    node.set('d', inkex.formatCubicPath(p))
-    del node.attrib["transform"]
 
 ####################################################################
 ##-- Some functions to compute a rough bbox of a given list of objects.
@@ -275,11 +278,6 @@ def computeBBox(elements, mat=((1,0,0),(0,1,0))):
         bbox = boxunion(computeBBox(node,m), bbox)
     return bbox
 
-
-def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
-    if node.getparent() is not None:
-        applyTransformToPoint(invertTransform(composeParents(node, mat)), pt)
-    return pt
 
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

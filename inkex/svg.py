@@ -66,6 +66,11 @@ class BaseElement(etree.ElementBase):
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
+    @staticmethod
+    def composed_transform(mat):
+        """Passthrough transformation matrix"""
+        return mat
+
 
 class SvgDocumentElement(BaseElement):
     """Provide access to the document level svg functionality"""
@@ -204,6 +209,25 @@ class NamedViewElement(BaseElement):
         }
         return etree.SubElement(self, addNS('guide', 'sodipodi'), atts)
 
+
+class GroupElement(BaseElement):
+    """Any group element (layer or regular group)"""
+    def compute_point(self, pt):
+        """Using the compound matrix, transform the point into this group"""
+        pass
+
+    def composed_transform(self, mat):
+        """Compose this node and all of it's parent into a compound transformation matrix"""
+        trans = self.get('transform')
+        if trans:
+            mat = compose_transform(parse_transform(trans), mat)
+        return self.getparent().composed_transform(mat)
+
+    def apply_transform(self, mat):
+        """Add the given matrix to the existing transformation matrix"""
+        mat2 = parse_transform(self.get("transform"))
+        newtransf = format_transform(compose_transform(mat, mat2))
+        self.set("transform", newtransf)
 
 
 class SvgClassLookup(etree.CustomElementClassLookup):

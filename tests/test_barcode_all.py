@@ -22,7 +22,7 @@ Test each available barcode type
 from collections import defaultdict
 from tests.base import TestCase, test_support
 
-from Barcode import get_barcode
+from barcode import get_barcode
 
 class GetBarcodeTest(TestCase):
     """Render Barcode"""

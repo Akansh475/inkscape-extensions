@@ -19,13 +19,15 @@
 Written to test the coding of generating barcodes.
 """
 
-from tests.base import Extension, TestCase, test_support
+from tests.base import TestCase, test_support
 
 from render_barcode import InsertBarcode
 
-class InsertBarcodeBasicTest(Extension, TestCase):
+class InsertBarcodeBasicTest(TestCase):
     """Render Barcode"""
-    effect = InsertBarcode
+    def test_without_parameters(self):
+        """With no existing svg document"""
+        self.assertEffectEmpty(InsertBarcode)
 
 if __name__ == '__main__':
     test_support.run_unittest(InsertBarcodeBasicTest)

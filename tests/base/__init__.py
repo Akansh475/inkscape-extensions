@@ -116,17 +116,10 @@ class TestCase(BaseCase):
         """Returns a common minimal svg file"""
         return self.data_file('svg', 'default-inkscape-SVG.svg')
 
-class Extension(object):
-    """
-    Provide tests that every extension should be running.
-    """
-    effect = None
-
-    def test_without_parameters(self):
-        """Test calling effect without any arguments (default test for every suite)"""
-        return self.assertEffectEmpty(self.effect)
-
-    def assertEffectEmpty(self, effect): # pylint: disable=invalid-name
+    def assertEffectEmpty(self, effect, **kwargs): # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""
-        return effect().affect([self.empty_svg], False) # pylint: disable=no-member
+        args = ['--{}={}'.format(*kw) for kw in kwargs.items()]
+        effect().run([self.empty_svg] + args, False)
+        warnings = getattr(effect, 'warned_about', set())
+        self.assertFalse(warnings, "Depricated API is still being used!")
 

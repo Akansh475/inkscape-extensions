@@ -43,8 +43,10 @@ class InsertBarcode(inkex.Effect):
             dest="text", default='', help="Text to print on barcode")
 
     def effect(self):
-        (pos_x, pos_y) = inkex.computePointInNode(
-            list(self.view_center), self.current_layer)
+        layer = self.svg.get_current_layer()
+        (pos_x, pos_y) = layerget_center_position()
+        #inkex.computePointInNode(
+        #    self.svg.get_center_position(), self.svg.get_current_layer())
 
         barcode = get_barcode(
             self.options.type,
@@ -52,13 +54,13 @@ class InsertBarcode(inkex.Effect):
             height=self.options.height,
             document=self.document,
             x=pos_x, y=pos_y,
-            scale=self.unittouu('1px'),
+            scale=self.svg.unittouu('1px'),
         ).generate()
         if barcode is not None:
-            self.current_layer.append(barcode)
+            self.svg.get_current_layer().append(barcode)
         else:
             sys.stderr.write("No barcode was generated\n")
 
 if __name__ == '__main__':
-    InsertBarcode().affect()
+    InsertBarcode().run()
 

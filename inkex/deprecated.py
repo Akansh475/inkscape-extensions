@@ -33,11 +33,11 @@ import inkex
 from inkex.localize import _
 
 
-class DepricatedEffect(object):
+class DeprecatedEffect(object):
     """An Inkscape effect, takes SVG in and outputs SVG"""
     def __init__(self):
-        super(DepricatedEffect, self).__init__()
-        # These are things we reference in the depricated code, they are provided
+        super(DeprecatedEffect, self).__init__()
+        # These are things we reference in the deprecated code, they are provided
         # by the new effects code, but we want to keep this as a Mixin so these
         # items will keep pylint happy and let use check our code as we write.
         if not hasattr(self, 'svg'):
@@ -49,7 +49,7 @@ class DepricatedEffect(object):
 
     warned_about = set()
     def warn_about(self, name, msg=_('{} is deprecated and should be removed')):
-        """Give the user a warning about their extension using a depricated API"""
+        """Give the user a warning about their extension using a deprecated API"""
         inkex.localize.localize()
         if name not in self.warned_about:
             sys.stderr.write(msg.format('Effect.' + name) + '\n')
@@ -58,7 +58,7 @@ class DepricatedEffect(object):
     @property
     def OptionParser(self):
         self.warn_about('OptionParser', _('{} or `optparse` is very old, it was '\
-            'depricated when python 2.7 came out in 2009 and is now replaced with '
+            'deprecated when python 2.7 came out in 2009 and is now replaced with '
             '`argparser`. You must change `self.OptionParser.add_option` to '
             '`self.arg_parser.add_argument` the arguments are similar.'))
         return self

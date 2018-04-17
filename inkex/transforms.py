@@ -25,103 +25,150 @@ Provide tranformation parsing to extensions
 """
 
 import re
-import math
+from math import cos, sin, tan, radians
 
 import inkex
 
 from .utils import pairwise, X, Y
 
-DEFAULT_MATRIX = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
-TR = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
 
-def parse_transform(transf, mat=DEFAULT_MATRIX):
-    """Parse a transformation matrix from an svg group"""
-    if transf in ("", None):
-        return mat
+class Transform(object):
+    """A transformation object which will always reduce to a matrix and can
+    then be used in combination with other transformations for reducing
+    finding a point and printing svg ready output.
 
-    result = TR.match(transf.strip())
-    kind = result.group(1)
-    args = [float(val) for val in result.group(2).replace(',', ' ').split()]
+    Use with svg transform attribute input:
 
-    if kind == "translate":
-        if len(args) == 1:
-            args.append(0.0)
-        matrix = [[1.0, 0, args[X]], [0, 1.0, args[Y]]]
+      tr = Transform("scale(45, 32)")
 
-    if kind == "scale":
-        if len(args) == 1:
-            args[Y] = args[X]
-        matrix = [[args[X], 0, 0], [0, args[Y], 0]]
+    Use with triplet matrix input (internal repr):
 
-    if kind == "rotate":
-        angle = args[0] * math.pi / 180
-        if len(args) == 1:
-            cx, cy = (0.0, 0.0)
-        else:
-            cx, cy = args[1:]
-        matrix = [[math.cos(angle), -math.sin(angle), cx],
-                  [math.sin(angle),  math.cos(angle), cy]]
-        matrix = compose_transform(matrix, [[1.0, 0, -cx], [0, 1.0, -cy]])
+      tr = Transform(((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)))
 
-    if kind == "skewX":
-        matrix = [[1, math.tan(args[0] * math.pi / 180), 0], [0, 1, 0]]
+    Use with sixtlet matrix input (i.e. svg matrix(...)):
 
-    if kind == "skewY":
-        matrix = [[1, 0, 0], [math.tan(args[0] * math.pi / 180), 1, 0]]
+      tr = Transform((1.0, 0.0, 0.0, 1.0, 0.0, 0.0))
 
-    if kind == "matrix":
-        matrix = [args[::2], args[1::2]]
+    Once you have a transformation you can operate tr * tr to compose,
+    any of the above inputs are also valid operators for composing.
+    """
+    TRM = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
 
-    matrix = compose_transform(mat, matrix)
+    def __init__(self, matrix=None):
+        self.matrix = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
+        if matrix is not None:
+            # We parse a given string as an svg transformation instruction
+            if isinstance(matrix, str):
+                for func, values in self.TRM.findall(matrix.strip()):
+                    args = [float(val) for val in values.replace(',', ' ').split()]
+                    getattr(self, 'add_' + func.lower())(*args)
+            elif isinstance(matrix, Transform):
+                self.matrix = matrix.matrix
+            elif not isinstance(matrix, (tuple, list)):
+                raise ValueError("Given transformation isn't a valid input")
+            elif len(matrix) == 2:
+                self.matrix = tuple(matrix[0]), tuple(matrix[1])
+            elif len(matrix) == 6:
+                self.matrix = tuple(matrix[::2]), tuple(matrix[1::2])
+            else:
+                raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
 
-    if result.end() < len(stransf):
-        return parsei_transform(stransf[result.end():], matrix)
+    # These provide quick access to the svg matrix:
+    #
+    # [ a, c, e ]
+    # [ b, d, f ]
+    #
+    a = property(lambda self: self.matrix[0][0]) # pylint: disable=invalid-name
+    b = property(lambda self: self.matrix[1][0]) # pylint: disable=invalid-name
+    c = property(lambda self: self.matrix[0][1]) # pylint: disable=invalid-name
+    d = property(lambda self: self.matrix[1][1]) # pylint: disable=invalid-name
+    e = property(lambda self: self.matrix[0][2]) # pylint: disable=invalid-name
+    f = property(lambda self: self.matrix[1][2]) # pylint: disable=invalid-name
 
-    return matrix
+    def add_matrix(self, *args):
+        """Add matrix in order they appear in the svg sixtlet"""
+        self.__imul__(Transform(args))
 
-def get_matrix(u, i, j):
-    if j == i + 2:
-        return (u[i]-u[i-1])*(u[i]-u[i-1])/(u[i+2]-u[i-1])/(u[i+1]-u[i-1])
-    elif j == i + 1:
-        return ((u[i]-u[i-1])*(u[i+2]-u[i])/(u[i+2]-u[i-1]) + (u[i+1]-u[i])*(u[i]-u[i-2])/(u[i+1]-u[i-2]))/(u[i+1]-u[i-1])
-    elif j == i:
-        return (u[i+1]-u[i])*(u[i+1]-u[i])/(u[i+1]-u[i-2])/(u[i+1]-u[i-1])
-    else:
-        return 0
-        
-def get_fit(u, csp, col):
-    return (1-u)**3*csp[0][col] + 3*(1-u)**2*u*csp[1][col] + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
+    def add_translate(self, tr_x, tr_y=0.0):
+        """Add translation to this transformation"""
+        self.__imul__(((1.0, 0.0, tr_x), (0.0, 1.0, tr_y)))
 
+    def add_scale(self, sc_x, sc_y=None):
+        """Add scale to this transformation"""
+        sc_y = sc_x if sc_y is None else sc_y
+        self.__imul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
 
-def format_transform(mat):
-    """Format the given matrix into a string repr for svg"""
-    mat = [val for lst in zip(*mat) for val in lst]
-    return "matrix(%f,%f,%f,%f,%f,%f)" % mat
+    def add_rotate(self, deg, center_x=0.0, center_y=0.0):
+        """Add rotation to this transformation"""
+        _cos, _sin = cos(radians(deg)), sin(radians(deg))
+        self.__imul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
+        self.__imul__((((1.0, 0.0, -center_x), (0.0, 1.0, -center_y))))
 
-def invertTransform(mat):
-    det = mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0]
-    if det !=0:  # det is 0 only in case of 0 scaling
+    def add_skewx(self, deg):
+        """Add skew x to this transformation"""
+        self.__imul__(((1.0, tan(radians(deg)), 0.0), (0.0, 1.0, 0.0)))
+
+    def add_skewy(self, deg):
+        """Add skew y to this transformation"""
+        self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
+
+    def to_sixlet(self):
+        """Returns the transform as a sixtlet matrix (used in svg)"""
+        return (val for lst in zip(*self.matrix) for val in lst)
+
+    def __str__(self):
+        """Format the given matrix into a string repr for svg"""
+        return "matrix({})".format(" ".join(format(var, '.6g') for var in self.to_sixlet()))
+
+    def __repr__(self):
+        """String Representation of this object"""
+        return "{}((({}), ({})))".format(
+            type(self).__name__,
+            ', '.join(format(var, '.6g') for var in self.matrix[0]),
+            ', '.join(format(var, '.6g') for var in self.matrix[1]))
+
+    def __eq__(self, matrix):
+        """Test if this transformation is equal to the given matrix"""
+        return self.matrix == Transform(matrix).matrix
+
+    def __mul__(self, matrix):
+        """Combine this transform's internal matrix with the given matrix"""
+        # Conform the input to a known quantity (and convert if needed)
+        other = Transform(matrix)
+        # Return a transformation as the combined result
+        return Transform((
+            self.a * other.a + self.c * other.b,
+            self.b * other.a + self.d * other.b,
+            self.a * other.c + self.c * other.d,
+            self.b * other.c + self.d * other.d,
+            self.a * other.e + self.c * other.f + self.e,
+            self.b * other.e + self.d * other.f + self.f))
+
+    def __imul__(self, matrix):
+        """In place multiplication of transformat matricies"""
+        self.matrix = (self * matrix).matrix
+
+    def __neg__(self):
+        """Returns an inverted transformation"""
+        det = (self.a * self.d) - (self.c * self.b)
         # invert the rotation/scaling part
-        a11 =  mat[1][1]/det
-        a12 = -mat[0][1]/det
-        a21 = -mat[1][0]/det
-        a22 =  mat[0][0]/det
+        new_a = self.d / det
+        new_d = self.a / det
+        new_c = -self.c / det
+        new_b = -self.b / det
         # invert the translational part
-        a13 = -(a11*mat[0][2] + a12*mat[1][2])
-        a23 = -(a21*mat[0][2] + a22*mat[1][2])
-        return [[a11,a12,a13],[a21,a22,a23]]
-    else:
-        return[[0,0,-mat[0][2]],[0,0,-mat[1][2]]]
+        new_e = -(new_a * self.e + new_c * self.f)
+        new_f = -(new_b * self.e + new_d * self.f)
+        return Transform((new_a, new_b, new_c, new_d, new_e, new_f))
 
-def composeTransform(M1,M2):
-    a11 = M1[0][0]*M2[0][0] + M1[0][1]*M2[1][0]
-    a12 = M1[0][0]*M2[0][1] + M1[0][1]*M2[1][1]
-    a21 = M1[1][0]*M2[0][0] + M1[1][1]*M2[1][0]
-    a22 = M1[1][0]*M2[0][1] + M1[1][1]*M2[1][1]
+    def apply_to_point(self, point):
+        """Transform a tuple (X, Y)"""
+        if isinstance(point, str):
+            raise ValueError("Will not transform string '{}'".format(point))
+        return (self.a * point[X] + self.c * point[Y] + self.e,
+                self.b * point[X] + self.d * point[Y] + self.f)
 
-    v1 = M1[0][0]*M2[0][2] + M1[0][1]*M2[1][2] + M1[0][2]
-    v2 = M1[1][0]*M2[0][2] + M1[1][1]*M2[1][2] + M1[1][2]
-    return [[a11,a12,v1],[a21,a22,v2]]
+
 
 #def composeParents(node, mat):                                            -XXX> group.compose_transform
 #    trans = node.get('transform')
@@ -141,34 +188,27 @@ def composeTransform(M1,M2):
 #        applyTransformToPoint(invertTransform(composeParents(node, mat)), pt)
 #    return pt
 
-def fuseTransform(node):
-    if node.get('d')==None:
-        #FIXME: how do you raise errors?
-        raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
-    t = node.get("transform")
-    if t == None:
-        return
-    m = parseTransform(t)
-    d = node.get('d')
-    p = inkex.parseCubicPath(d)
-    applyTransformToPath(m,p)
-    node.set('d', inkex.formatCubicPath(p))
-    del node.attrib["transform"]
+#def fuseTransform(node):
+#    if node.get('d')==None:
+#        #FIXME: how do you raise errors?
+#        raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
+#    t = node.get("transform")
+#    if t == None:
+#        return
+#    m = parseTransform(t)
+#    d = node.get('d')
+#    p = inkex.parseCubicPath(d)
+#    applyTransformToPath(m,p)
+#    node.set('d', inkex.formatCubicPath(p))
+#    del node.attrib["transform"]
 
-def applyTransformToPoint(mat, pt):
-    if isinstance(pt, str):
-        raise ValueError("Will not transform string '{}'".format(pt))
-    x = mat[0][0] * pt[0] + mat[0][1] * pt[1] + mat[0][2]
-    y = mat[1][0] * pt[0] + mat[1][1] * pt[1] + mat[1][2]
-    pt[0]=x
-    pt[1]=y
 
-def applyTransformToPath(mat, path):
-    for comp in path:
-        for ctl in comp:
-            for pt in ctl:
-                if isinstance(pt, (list, tuple)):
-                    applyTransformToPoint(mat, pt)
+#def applyTransformToPath(mat, path):
+#    for comp in path:
+#        for ctl in comp:
+#            for pt in ctl:
+#                if isinstance(pt, (list, tuple)):
+#                    applyTransformToPoint(mat, pt)
 
 ####################################################################
 ##-- Some functions to compute a rough bbox of a given list of objects.
@@ -183,7 +223,7 @@ def boxunion(b1,b2):
         return((min(b1[0],b2[0]), max(b1[1],b2[1]), min(b1[2],b2[2]), max(b1[3],b2[3])))
 
 def path_loop(path):
-    for pathcomp in path:
+     for pathcomp in path:
         for ctl in pathcomp:
             yield ctl
 

@@ -169,58 +169,29 @@ class Transform(object):
                 self.b * point[X] + self.d * point[Y] + self.f)
 
 
+class BoundingBox(list):
+    """
+    Some functions to compute a rough bbox of a given list of objects.
+    """
+    def __init__(self, box):
+        super(BoundingBox, self).__init__()
+        if len(box) == 2:
+            box = list(box) * 2
+        if len(box) != 4:
+            raise ValueError("Unknown box coords: {}".format(box))
+        self.extend(box)
 
-#def composeParents(node, mat):                                            -XXX> group.compose_transform
-#    trans = node.get('transform')
-#    if trans:
-#        mat = composeTransform(parseTransform(trans), mat)
-#    if node.getparent().tag == inkex.addNS('g','svg'):
-#        mat = composeParents(node.getparent(), mat)
-#    return mat
+    def __add__(self, other):
+        new = BoundingBox(self[:])
+        if other is not None:
+            new += other
+        return new
 
-#def applyTransformToNode(mat,node):                                       -XXX> group.apply_transform
-#    m=parseTransform(node.get("transform"))
-#    newtransf=formatTransform(composeTransform(mat,m))
-#    node.set("transform", newtransf)
+    def __iadd__(self, other):
+        other = BoundingBox(other[:])
+        self[:] = [min(self[0], other[0]), max(self[1], other[1]),
+                   min(self[2], other[2]), max(self[3], other[3])]
 
-#def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]): -XXX> group.compute_point
-#    if node.getparent() is not None:
-#        applyTransformToPoint(invertTransform(composeParents(node, mat)), pt)
-#    return pt
-
-#def fuseTransform(node):
-#    if node.get('d')==None:
-#        #FIXME: how do you raise errors?
-#        raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
-#    t = node.get("transform")
-#    if t == None:
-#        return
-#    m = parseTransform(t)
-#    d = node.get('d')
-#    p = inkex.parseCubicPath(d)
-#    applyTransformToPath(m,p)
-#    node.set('d', inkex.formatCubicPath(p))
-#    del node.attrib["transform"]
-
-
-#def applyTransformToPath(mat, path):
-#    for comp in path:
-#        for ctl in comp:
-#            for pt in ctl:
-#                if isinstance(pt, (list, tuple)):
-#                    applyTransformToPoint(mat, pt)
-
-####################################################################
-##-- Some functions to compute a rough bbox of a given list of objects.
-##-- this should be shipped out in an separate file...
-
-def boxunion(b1,b2):
-    if b1 is None:
-        return b2
-    elif b2 is None:
-        return b1    
-    else:
-        return((min(b1[0],b2[0]), max(b1[1],b2[1]), min(b1[2],b2[2]), max(b1[3],b2[3])))
 
 def path_loop(path):
      for pathcomp in path:

@@ -25,6 +25,7 @@ give path, transform, and property access easilly.
 
 from lxml import etree
 
+from .transforms import Transform
 from .utils import NSS
 
 class BaseElement(etree.ElementBase):
@@ -37,37 +38,20 @@ class BaseElement(etree.ElementBase):
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
-    @property
-    def root(self):
-        """Get the root node (the document usually)"""
-        return self.getparent().root if self.getparent() else self
+    root = property(lambda self: self.getparent().root if self.getparent() else self)
+    transform = property(lambda self: Transform(self.get('transform', None)))
 
-    @staticmethod
-    def composed_transform(mat):
-        """Passthrough transformation matrix"""
-        return mat
+    def composed_transform(self):
+        """Calculate every transform down to the root document node"""
+        if self.getparent():
+            return self.transform * self.getparent().composed_transform()
+        return self.transform
 
 
 class Group(BaseElement):
     """Any group element (layer or regular group)"""
     tag_name = 'g'
 
-    def compute_point(self, pt):
-        """Using the compound matrix, transform the point into this group"""
-        pass
-
-    def composed_transform(self, mat):
-        """Compose this node and all of it's parent into a compound transformation matrix"""
-        trans = self.get('transform')
-        if trans:
-            mat = compose_transform(parse_transform(trans), mat)
-        return self.getparent().composed_transform(mat)
-
-    def apply_transform(self, mat):
-        """Add the given matrix to the existing transformation matrix"""
-        mat2 = parse_transform(self.get("transform"))
-        newtransf = format_transform(compose_transform(mat, mat2))
-        self.set("transform", newtransf)
 
 class Path(BaseElement):
     """Provide a useful extension for path elements"""

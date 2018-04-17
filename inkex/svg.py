@@ -35,42 +35,10 @@ import lxml
 from lxml import etree
 
 from .units import discover_unit, convert_unit, render_unit
-
-# a dictionary of all of the xmlns prefixes in a standard inkscape doc
-NSS = {
-    u'sodipodi' :u'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
-    u'cc'       :u'http://creativecommons.org/ns#',
-    u'ccOLD'    :u'http://web.resource.org/cc/',
-    u'svg'      :u'http://www.w3.org/2000/svg',
-    u'dc'       :u'http://purl.org/dc/elements/1.1/',
-    u'rdf'      :u'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-    u'inkscape' :u'http://www.inkscape.org/namespaces/inkscape',
-    u'xlink'    :u'http://www.w3.org/1999/xlink',
-    u'xml'      :u'http://www.w3.org/XML/1998/namespace'
-}
-
-def addNS(tag, ns=None): # pylint: disable=invalid-name
-    """Add a known namespace to a name for use with lxml"""
-    if ns is not None and ns in NSS and tag and tag[0] != '{':
-        return "{%s}%s" % (NSS[ns], tag)
-    return tag
-
-
-class BaseElement(etree.ElementBase):
-    """Provide automatic namespaces to all calls"""
-    def xpath(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
-        """Wrap xpath call and add svg namespaces"""
-        return super(BaseElement, self).xpath(pattern, namespaces=namespaces)
-
-    def findall(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
-        """Wrap findall call and add svg namespaces"""
-        return super(BaseElement, self).findall(pattern, namespaces=namespaces)
-
-    @staticmethod
-    def composed_transform(mat):
-        """Passthrough transformation matrix"""
-        return mat
-
+from .utils import addNS
+from .elements import ( # pylint: disable=unused-import
+    BaseElement, Group, Path, Points, Rectangle, Image, Circle, Ellipse
+)
 
 class SvgDocumentElement(BaseElement):
     """Provide access to the document level svg functionality"""
@@ -208,26 +176,6 @@ class NamedViewElement(BaseElement):
             ),
         }
         return etree.SubElement(self, addNS('guide', 'sodipodi'), atts)
-
-
-class GroupElement(BaseElement):
-    """Any group element (layer or regular group)"""
-    def compute_point(self, pt):
-        """Using the compound matrix, transform the point into this group"""
-        pass
-
-    def composed_transform(self, mat):
-        """Compose this node and all of it's parent into a compound transformation matrix"""
-        trans = self.get('transform')
-        if trans:
-            mat = compose_transform(parse_transform(trans), mat)
-        return self.getparent().composed_transform(mat)
-
-    def apply_transform(self, mat):
-        """Add the given matrix to the existing transformation matrix"""
-        mat2 = parse_transform(self.get("transform"))
-        newtransf = format_transform(compose_transform(mat, mat2))
-        self.set("transform", newtransf)
 
 
 class SvgClassLookup(etree.CustomElementClassLookup):

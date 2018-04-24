@@ -44,7 +44,7 @@ class InsertBarcode(inkex.Effect):
 
     def effect(self):
         layer = self.svg.get_current_layer()
-        (pos_x, pos_y) = layerget_center_position()
+        (pos_x, pos_y) = layer.get_center_position()
         #inkex.computePointInNode(
         #    self.svg.get_center_position(), self.svg.get_current_layer())
 

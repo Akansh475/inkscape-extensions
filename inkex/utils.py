@@ -26,8 +26,6 @@ import sys
 
 from argparse import ArgumentTypeError
 
-from itertools import tee
-
 import platform
 PY3 = platform.python_version()[0] == '3'
 
@@ -88,6 +86,10 @@ def to(kind): # pylint: disable=invalid-name
         return _outer
     return _inner
 
+def strargs(string, kind=float):
+    """Returns a list of floats from a string with commas or space seperators"""
+    return [kind(val) for val in string.replace(',', ' ').split()]
+
 def addNS(tag, ns=None): # pylint: disable=invalid-name
     """Add a known namespace to a name for use with lxml"""
     val = tag
@@ -95,11 +97,13 @@ def addNS(tag, ns=None): # pylint: disable=invalid-name
         val = "{%s}%s" % (NSS[ns], tag)
     return val
 
-def pairwise(iterable):
-    "Iterate over a list with overlapping pairs (see itertools recipies)"
-    first, then = tee(iterable)
-    next(then, None)
-    return zip(first, then)
+class classproperty(object): # pylint: disable=invalid-name, too-few-public-methods
+    """Combine classmethod and property decorators"""
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, owner):
+        return self.func(owner)
 
 def filename_arg(name):
     """Existing file to read or option used in script arguments"""

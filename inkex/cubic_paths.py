@@ -21,8 +21,6 @@ Tools for cubic path interpolation
 
 from math import *
 
-from .paths import parsePath, formatPath
-
 def matprod(mlist):
     prod=mlist[0]
     for m in mlist[1:]:

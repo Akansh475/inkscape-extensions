@@ -27,9 +27,7 @@ Provide tranformation parsing to extensions
 import re
 from math import cos, sin, tan, radians
 
-import inkex
-
-from .utils import pairwise, X, Y
+from .utils import strargs, X, Y
 
 
 class Transform(object):
@@ -60,8 +58,7 @@ class Transform(object):
             # We parse a given string as an svg transformation instruction
             if isinstance(matrix, str):
                 for func, values in self.TRM.findall(matrix.strip()):
-                    args = [float(val) for val in values.replace(',', ' ').split()]
-                    getattr(self, 'add_' + func.lower())(*args)
+                    getattr(self, 'add_' + func.lower())(*strargs(values))
             elif isinstance(matrix, Transform):
                 self.matrix = matrix.matrix
             elif not isinstance(matrix, (tuple, list)):
@@ -175,9 +172,11 @@ class BoundingBox(list):
     """
     def __init__(self, box):
         super(BoundingBox, self).__init__()
-        if len(box) == 2:
+        if isinstance(box, str):
+            box = self.from_path(box)
+        elif len(box) == 2:
             box = list(box) * 2
-        if len(box) != 4:
+        elif len(box) != 4:
             raise ValueError("Unknown box coords: {}".format(box))
         self.extend(box)
 
@@ -188,10 +187,28 @@ class BoundingBox(list):
         return new
 
     def __iadd__(self, other):
-        other = BoundingBox(other[:])
+        other = BoundingBox(other)
         self[:] = [min(self[0], other[0]), max(self[1], other[1]),
                    min(self[2], other[2]), max(self[3], other[3])]
 
+    @staticmethod
+    def from_path(path):
+        """Make a bounding box from a node list (a path's d attribute)"""
+    #def refinedBBox(path):
+        ret = ([], [])
+        for a, b in Path(path): #pairwise(path_loop(path)):
+            for c in (X, Y):
+                cmin, cmax = cubicExtrema(a[1][c], a[2][c], b[0][c], b[1][c])
+                ret[c].extend((cmin, cmax))
+        return min(ret[X]), max(ret[X]), min(ret[Y]), max(ret[Y])
+
+
+def pairwise(iterable):
+    "Iterate over a list with overlapping pairs (see itertools recipies)"
+    from itertools import tee
+    first, then = tee(iterable)
+    next(then, None)
+    return zip(first, then)
 
 def path_loop(path):
      for pathcomp in path:
@@ -206,14 +223,6 @@ def roughBBox(path):
             x.append(pt[X])
             y.append(pt[Y])
     return min(x), max(x), min(y), max(y)
-
-def refinedBBox(path):
-    ret = ([], [])
-    for a, b in pairwise(path_loop(path)):
-        for c in (X, Y):
-            cmin, cmax = cubicExtrema(a[1][c], a[2][c], b[0][c], b[1][c])
-            ret[c].extend((cmin, cmax))
-    return min(ret[X]), max(ret[X]), min(ret[Y]), max(ret[Y])
 
 def cubicExtrema(y0, y1, y2, y3):
     cmin = min(y0, y3)
@@ -247,33 +256,6 @@ def computeBBox(elements, mat=((1,0,0),(0,1,0))):
         m = parseTransform(node.get('transform'))
         m = composeTransform(mat,m)
         #TODO: text not supported!
-        d = None
-        if node.get("d"):
-            d = node.get('d')
-        elif node.get('points'):
-            d = 'M' + node.get('points')
-        elif node.tag in [ inkex.addNS('rect','svg'), 'rect', inkex.addNS('image','svg'), 'image' ]:
-            d = 'M' + node.get('x', '0') + ',' + node.get('y', '0') + \
-                'h' + node.get('width') + 'v' + node.get('height') + \
-                'h-' + node.get('width')
-        elif node.tag in [ inkex.addNS('line','svg'), 'line' ]:
-            d = 'M' + node.get('x1') + ',' + node.get('y1') + \
-                ' ' + node.get('x2') + ',' + node.get('y2')
-        elif node.tag in [ inkex.addNS('circle','svg'), 'circle', \
-                            inkex.addNS('ellipse','svg'), 'ellipse' ]:
-            rx = node.get('r')
-            if rx is not None:
-                ry = rx
-            else:
-                rx = node.get('rx')
-                ry = node.get('ry')
-            cx = float(node.get('cx', '0'))
-            cy = float(node.get('cy', '0'))
-            x1 = cx - float(rx)
-            x2 = cx + float(rx)
-            d = 'M %f %f ' % (x1, cy) + \
-                'A' + rx + ',' + ry + ' 0 1 0 %f,%f' % (x2, cy) + \
-                'A' + rx + ',' + ry + ' 0 1 0 %f,%f' % (x1, cy)
  
         if d is not None:
             p = inkex.parseCubicPath(d)

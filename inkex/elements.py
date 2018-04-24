@@ -40,6 +40,7 @@ class BaseElement(etree.ElementBase):
 
     root = property(lambda self: self.getparent().root if self.getparent() else self)
     transform = property(lambda self: Transform(self.get('transform', None)))
+    transform.setter = lambda self, matrix: self.set('transform', str(Transform(matrix)))
 
     def composed_transform(self):
         """Calculate every transform down to the root document node"""

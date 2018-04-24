@@ -391,6 +391,8 @@ class UserUnitTest(TestCase):
 
 if __name__ == '__main__':
     # Keep sorted.
+    test_support.run_unittest(BasicSvgTest)
+    test_support.run_unittest(NamedViewTest)
     test_support.run_unittest(GetDocumentHeightTest)
     test_support.run_unittest(GetDocumentUnitTest)
     test_support.run_unittest(GetDocumentWidthTest)

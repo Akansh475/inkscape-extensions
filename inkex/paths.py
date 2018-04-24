@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+# Copyright (C) 2018 Martin Owens <doctormo@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,230 +18,230 @@
 """
 functions for digesting paths into a simple list structure
 """
+
 import re
-import math
+import copy
+from math import cos, sin, atan2, sqrt
+from operator import add, mul
+from inkex.utils import strargs, classproperty, X, Y
 
-from .utils import to, X, Y
+LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
+NONE = lambda obj: obj is not None
 
-def lexPath(d):
-    """
-    returns and iterator that breaks path data
-    identifies command and parameter tokens
-    """
-    offset = 0
-    length = len(d)
-    delim = re.compile(r'[ \t\r\n,]+')
-    command = re.compile(r'[MLHVCSQTAZmlhvcsqtaz]')
-    parameter = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
-    while 1:
-        match = delim.match(d, offset)
-        if match:
-            offset = match.end()
-        if offset >= length:
-            break
-        match = command.match(d, offset)
-        if match:
-            yield [d[offset:match.end()], True]
-            offset = match.end()
-            continue
-        match = parameter.match(d, offset)
-        if match:
-            yield [d[offset:match.end()], False]
-            offset = match.end()
-            continue
-        #TODO: create new exception
-        raise Exception('Invalid path data!')
-'''
-pathdefs = {commandfamily:
-    [
-    implicitnext,
-    #params,
-    [casts,cast,cast],
-    [coord type,x,y,0]
-    ]}
-'''
-pathdefs = {
-    'M':['L', 2, [float, float], ['x', 'y']],
-    'L':['L', 2, [float, float], ['x', 'y']],
-    'H':['H', 1, [float], ['x']],
-    'V':['V', 1, [float], ['y']],
-    'C':['C', 6, [float, float, float, float, float, float], ['x', 'y', 'x', 'y', 'x', 'y']],
-    'S':['S', 4, [float, float, float, float], ['x', 'y', 'x', 'y']],
-    'Q':['Q', 4, [float, float, float, float], ['x', 'y', 'x', 'y']],
-    'T':['T', 2, [float, float], ['x', 'y']],
-    'A':['A', 7, [float, float, float, int, int, float, float], ['r', 'r', 'a', 0, 's', 'x', 'y']],
-    'Z':['L', 0, [], []]
-    }
+class InvalidPath(ValueError):
+    """Raised when given an invalid path string"""
 
-def parsePath(d):
-    """
-    Parse SVG path and return an array of segments.
-    Removes all shorthand notation.
-    Converts coordinates to absolute.
-    """
-    retval = []
-    lexer = lexPath(d)
+class PathCommand(tuple):
+    """A list of arguments that make up a segment, may return a list of
+    command objects if the command string parsed was chained."""
+    num = -1
+    name = classproperty(lambda cls: cls.__name__)
+    this_cmd = classproperty(lambda cls: cls.name[0])
+    next_cmd = classproperty(lambda cls: (cls.this_cmd, cls.this_cmd.lower()))
+    isrelative = lambda self: self.cmd.islower()
+    isabsolute = lambda self: self.cmd.isupper()
 
-    pen = (0.0,0.0)
-    subPathStart = pen
-    lastControl = pen
-    lastCommand = ''
-
-    while 1:
+    @classmethod
+    def __new__(cls, _, cmd, *args):
+        if cmd.upper() == cls.this_cmd:
+            if len(args) < cls.num:
+                raise InvalidPath("Bad arguments {}({})".format(cmd, args))
+            obj = tuple.__new__(cls, args[:cls.num])
+            obj.cmd = cmd
+            if len(args) > cls.num:
+                nxt = PathCommand(cls.next_cmd[obj.cmd.islower()], *args[cls.num:])
+                return [obj] + nxt if isinstance(nxt, list) else [obj, nxt]
+            return obj
         try:
-            token, isCommand = next(lexer)
+            return next(filter(NONE, [c(cmd, *args) for c in cls.__subclasses__()]))
         except StopIteration:
-            break
-        params = []
-        needParam = True
-        if isCommand:
-            if not lastCommand and token.upper() != 'M':
-                raise Exception('Invalid path, must begin with moveto.')
-            else:
-                command = token
-        else:
-            #command was omitted
-            #use last command's implicit next command
-            needParam = False
-            if lastCommand:
-                if lastCommand.isupper():
-                    command = pathdefs[lastCommand][0]
-                else:
-                    command = pathdefs[lastCommand.upper()][0].lower()
-            else:
-                raise Exception('Invalid path, no initial command.')
-        numParams = pathdefs[command.upper()][1]
-        while numParams > 0:
-            if needParam:
-                try:
-                    token, isCommand = next(lexer)
-                    if isCommand:
-                        raise Exception('Invalid number of parameters')
-                except StopIteration:
-                    raise Exception('Unexpected end of path')
-            cast = pathdefs[command.upper()][2][-numParams]
-            param = cast(token)
-            if command.islower():
-                if pathdefs[command.upper()][3][-numParams]=='x':
-                    param += pen[0]
-                elif pathdefs[command.upper()][3][-numParams]=='y':
-                    param += pen[1]
-            params.append(param)
-            needParam = True
-            numParams -= 1
-        #segment is now absolute so
-        outputCommand = command.upper()
+            if cls is PathCommand:
+                raise InvalidPath("Path command {} not recognised.".format(cmd))
 
-        #Flesh out shortcut notation
-        if outputCommand in ('H','V'):
-            if outputCommand == 'H':
-                params.append(pen[1])
-            if outputCommand == 'V':
-                params.insert(0,pen[0])
-            outputCommand = 'L'
-        if outputCommand in ('S','T'):
-            params.insert(0,pen[1]+(pen[1]-lastControl[1]))
-            params.insert(0,pen[0]+(pen[0]-lastControl[0]))
-            if outputCommand == 'S':
-                outputCommand = 'C'
-            if outputCommand == 'T':
-                outputCommand = 'Q'
+    _argt = classmethod(lambda cls, sep: (sep+"{:.6g}") * cls.num)
 
-        #current values become "last" values
-        if outputCommand == 'M':
-            subPathStart = tuple(params[0:2])
-            pen = subPathStart
-        if outputCommand == 'Z':
-            pen = subPathStart
-        else:
-            pen = tuple(params[-2:])
+    def __str__(self):
+        return self.cmd + self._argt(" ").format(*self)
 
-        if outputCommand in ('Q','C'):
-            lastControl = tuple(params[-4:-2])
-        else:
-            lastControl = pen
-        lastCommand = command
+    def __repr__(self):
+        return "{{}}('{{}}'{})".format(self._argt(", ")).format(self.name, self.cmd, *self)
 
-        retval.append([outputCommand,params])
-    return retval
+    def __add__(self, other):
+        if self.isabsolute():
+            return self.translate(other)
+        return self
+
+    def __mul__(self, other):
+        return self.scale(other)
+
+    @property
+    def points(self):
+        """Returns a list of points in this path command, x and y only"""
+        return tuple(zip(self[::2], self[1::2]))
+
+    def translate(self, coords, opr=add):
+        """Translate or scale this path command by the given coords X/Y"""
+        lst = (opr(val, coords[i % 2]) for i, val in enumerate(self))
+        return PathCommand(self.cmd, *lst)
+
+    def scale(self, coords):
+        """Scale this path command by the given coords X/Y"""
+        return self.translate(coords, opr=mul)
+
+    def rotate(self, angle, center_x, center_y):
+        """Rotate this path command around the given center"""
+        for (x, y) in self.points: # pylint: disable=invalid-name
+            offset_x = x - center_x
+            offset_y = y - center_y
+            theta = atan2(offset_y, offset_x) + angle
+            rad = sqrt((offset_x ** 2) + (offset_y ** 2))
+            if rad != 0:
+                print (rad * cos(theta)) + center_x, (rad * sin(theta)) + center_y
+
+    def get_pen(self, previous):
+        """Where will the pen be after this command"""
+        if not self.isabsolute():
+            self = self.translate(previous)
+        return self.points[-1]
+
+class Line(PathCommand):
+    """Line instruction"""
+    num = 2
+
+class ZClose(PathCommand):
+    """Close instruction to finish a path"""
+    next_cmd = 'Ll'
+    num = 0
+
+class Move(PathCommand):
+    """Move pen instruction without a line"""
+    next_cmd = 'Ll'
+    num = 2
+
+class Horz(PathCommand):
+    """Horizontal Line instruction"""
+    num = 1
+    index = X
+    points = property(lambda self: ((self[0], None),))
+
+    def get_pen(self, previous):
+        """When getting the pen for Horz moves, we return the combined point"""
+        pen = super(Horz, self).get_pen(previous)
+        return tuple(pen[i] is None and previous[i] or pen[i] for i in (0, 1))
+
+    def translate(self, coords, opr=add):
+        """Translate this Horz path by the given coords X/Y"""
+        return PathCommand(self.cmd, opr(self[0], coords[self.index]))
+
+class Vert(Horz):
+    """Vertical Line instruction"""
+    index = Y
+    points = property(lambda self: ((None, self[0]),))
+
+class Curve(PathCommand):
+    """Curved Line instruction"""
+    num = 6
+
+class SmoothCurve(PathCommand):
+    """Smoothed Curved Line instruction"""
+    num = 4
+
+class Quadratic(PathCommand):
+    """Quadratic Curved Line instruction"""
+    num = 4
+
+class TepidQuadratic(PathCommand):
+    """Smoothed Quadratic Line instruction"""
+    num = 2
+
+class Arc(PathCommand):
+    """Special Arc instruction"""
+    num = 7
+    points = property(lambda self: (self[-2:],))
+
+    def translate(self, coords, opr=add):
+        """Translate or scale this path command by the given coords X/Y"""
+        lst = self[:5] + (opr(self[5], coords[X]), opr(self[6], coords[Y]))
+        return PathCommand(self.cmd, *lst)
+
+    def scale(self, coords):
+        """Scale the Arc by the given coords"""
+        (x, y) = coords # pylint: disable=invalid-name
+        return PathCommand(self.cmd,
+                           self[0] * x,         # Radius
+                           self[1] * x,         # Radius
+                           (self[2], 0)[y < 0], # X-axis rotation angle
+                           self[3],             # Unknown param '0'
+                           (self[4], 1 - self[4])[x * y < 0], # sweep-flag
+                           self[5] * x,         # X coord
+                           self[6] * y,         # Y coord
+                          )
 
 
-def are_near_relative(point_a, point_b, eps):
-    """Return true if the points are near to eps"""
-    return (point_a - point_b <= point_a * eps) and (point_a - point_b >= -point_a * eps)
 
-def numsegs(csp):
-    """Returns the number of segments in the path"""
-    return sum([len(p)-1 for p in csp])
+class Path(list):
+    """A list of segment commands which combine to draw a shape"""
+    def __init__(self, path_d=None):
+        super(Path, self).__init__()
+        if isinstance(path_d, str):
+            for cmd, nums in LEX_REX.findall(path_d):
+                self.append(PathCommand(cmd, *strargs(nums)))
+        elif isinstance(path_d, (list, tuple)):
+            self.extend(path_d)
 
-def tpoint(point_a, point_b, time=0.5):
-    return point_a[X] + time * (point_b[X] - point_a[X]),\
-           point_a[Y] + time * (point_b[Y] - point_a[Y])
+    def append(self, cmd):
+        """Append a command to this path including any chained commands"""
+        if isinstance(cmd, list):
+            self.extend(cmd)
+        elif isinstance(cmd, PathCommand):
+            super(Path, self).append(cmd)
 
-def pointdistance(point_a, point_b):
-    """The size of the line between two points"""
-    return math.sqrt(((point_b[X] - point_a[X]) ** 2) + ((point_b[Y] - point_a[Y]) ** 2))
+    def translate(self, x, y): # pylint: disable=invalid-name
+        """Move all coords in this path by the given amount"""
+        for i, seg in enumerate(self):
+            self[i] = seg + (x, y)
 
-def formatPath(a):
-    """Format SVG path data from an array"""
-    return "".join([cmd + " ".join([str(p) for p in params]) for cmd, params in a])
+    def scale(self, x, y): # pylint: disable=invalid-name
+        """Scale all coords in this path by the given amounts"""
+        for i, seg in enumerate(self):
+            self[i] = seg * (x, y)
 
-def translatePath(p, x, y):
-    for cmd,params in p:
-        defs = pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'x':
-                params[i] += x
-            elif defs[3][i] == 'y':
-                params[i] += y
+    def rotate(self, angle, center_x=0.0, center_y=0.0):
+        """Rotate the path around the given point"""
+        for i, seg in enumerate(self):
+            self[i] = seg.rotate(angle, center_x, center_y)
 
-def scalePath(p, x, y):
-    for cmd,params in p:
-        defs = pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'x':
-                params[i] *= x
-            elif defs[3][i] == 'y':
-                params[i] *= y
-            elif defs[3][i] == 'r':         # radius parameter
-                params[i] *= x
-            elif defs[3][i] == 's':         # sweep-flag parameter
-                if x*y < 0:
-                    params[i] = 1 - params[i]
-            elif defs[3][i] == 'a':         # x-axis-rotation angle
-                if y < 0:
-                    params[i] = - params[i]
+    def to_absolute(self, factor=1):
+        """Convert this path to use only absolute coordinates"""
+        pen = (0.0, 0.0)
+        for i, seg in enumerate(self):
+            if seg.isrelative() != (factor == -1):
+                self[i] = seg.translate((pen[0] * factor, pen[1] * factor))
+                self[i].cmd = self[i].cmd.swapcase()
+            pen = self[i].get_pen(pen)
 
-def rotatePath(p, a, cx = 0, cy = 0):
-    if a == 0:
-        return p
-    for cmd,params in p:
-        defs = pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'x':
-                x = params[i] - cx
-                y = params[i + 1] - cy
-                r = math.sqrt((x**2) + (y**2))
-                if r != 0:
-                    theta = math.atan2(y, x) + a
-                    params[i] = (r * math.cos(theta)) + cx
-                    params[i + 1] = (r * math.sin(theta)) + cy
+    def to_relative(self):
+        """Convert this path to use only relative coordinates"""
+        return self.to_absolute(factor=-1)
 
-@to(list)
-def pointAtPercent(point1, point2, percent):
-    """Returns a list containing the point between two points"""
-    for coord in (X, Y):
-        yield point1[coord] + ((percent / 100.0) * (point2[coord] - point1[coord]))
+    def __str__(self):
+        return " ".join([str(seg) for seg in self])
 
-def zSort(inNode,idList):
-    sortedList=[]
-    theid = inNode.get("id")
-    if theid in idList:
-        sortedList.append(theid)
-    for child in inNode:
-        if len(sortedList)==len(idList):
-            break
-        sortedList+=zSort(child,idList)
-    return sortedList
+    def __add__(self, other):
+        acopy = copy.copy(self)
+        if isinstance(other, tuple):
+            acopy.translate(other[X], other[Y])
+        if isinstance(other, str):
+            other = Path(other)
+        if isinstance(other, list):
+            acopy.extend(other)
+        return acopy
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99
+    def __mul__(self, other):
+        acopy = copy.copy(self)
+        acopy.scale(other[X], other[Y])
+        return acopy
+
+    def __sub__(self, other):
+        return self.__add__((other[X] * -1, other[Y] * -1))
+

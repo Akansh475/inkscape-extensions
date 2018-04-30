@@ -1,38 +1,42 @@
 #!/usr/bin/env python
-'''
-Copyright (C) 2009 Michel Chatelain.
-Copyright (C) 2007 Tavmjong Bah, tavmjong@free.fr
-Copyright (C) 2006 Georg Wiora, xorx@quarkbox.de
-Copyright (C) 2006 Johan Engelen, johan@shouraizou.nl
-Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#
+# Copyright (C) 2009 Michel Chatelain.
+#               2007 Tavmjong Bah, tavmjong@free.fr
+#               2006 Georg Wiora, xorx@quarkbox.de
+#               2006 Johan Engelen, johan@shouraizou.nl
+#               2005 Aaron Spike, aaron@ekips.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Changes:
+#  * This program is derived by Michel Chatelain from funcplot.py.
+#    His changes are in the Public Domain.
+#  * Michel Chatelain, 17-18 janvier 2009, a partir de funcplot.py
+#  * 20 janvier 2009 : adaptation a la version 0.46 a partir de la nouvelle version de funcplot.py
+#
+"""
+Parametric Curves has no real decription, even in the inx file, which is really odd.
+"""
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+from math import pi
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-Changes:
- * This program is derived by Michel Chatelain from funcplot.py. His changes are in the Public Domain.
- * Michel Chatelain, 17-18 janvier 2009, a partir de funcplot.py
- * 20 janvier 2009 : adaptation a la version 0.46 a partir de la nouvelle version de funcplot.py
-
-'''
-
-import inkex, simplepath, simplestyle
-from math import *
-from random import *
+import inkex
+from inkex.paths import Path
 
 def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, height, left, bottom,
-    fx = "cos(3*t)", fy = "sin(5*t)", times2pi = False, isoscale = True, drawaxis = True):
+    fx="cos(3*t)", fy="sin(5*t)", times2pi = False, isoscale = True, drawaxis = True):
 
     if times2pi == True:
         t_start = 2 * pi * t_start
@@ -217,7 +221,7 @@ class ParamCurves(inkex.Effect):
                     newpath.set('transform', t)
 
                 # top and bottom were exchanged
-                newpath.set('d', simplepath.formatPath(
+                newpath.set('d', Path(
                             drawfunction(self.options.t_start,
                                 self.options.t_end,
                                 self.options.xleft,
@@ -242,11 +246,9 @@ class ParamCurves(inkex.Effect):
                 node.getparent().append(newpath)
                 # option whether to remove the rectangle or not.
                 if self.options.remove:
-                  node.getparent().remove(node)
+                    node.getparent().remove(node)
 
 if __name__ == '__main__':
-    e = ParamCurves()
-    e.affect()
-
+    ParamCurves().affect()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

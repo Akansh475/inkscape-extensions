@@ -21,10 +21,14 @@
 Bezier calculations
 """
 
-from .paths import pointdistance
-import math, cmath
+import math
+import cmath
 
 X, Y = range(2)
+
+def pointdistance(point_a, point_b):
+    """The size of the line between two points"""
+    return math.sqrt(((point_b[X] - point_a[X]) ** 2) + ((point_b[Y] - point_a[Y]) ** 2))
 
 def rootWrapper(a, b, c, d):
     if a:
@@ -214,7 +218,6 @@ Jens Gravesen <gravesen@mat.dth.dk>
 mat-report no. 1992-10, Mathematical Institute, The Technical
 University of Denmark. 
 '''
-
 def Gravesen_addifclose(b, len, error=0.001):
     box = 0
     for i in range(1,4):

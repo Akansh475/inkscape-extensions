@@ -42,9 +42,12 @@ import sys
 
 class NoBarcode(object):
     """Simple class for no barcode"""
+    def __init__(self, msg):
+        self.msg = msg
+
     def encode(self, text):
         """Encode the text into a barcode pattern"""
-        return text
+        raise ValueError("No barcode encoder: {}".format(self.msg))
 
     def generate(self):
         """Generate actual svg from the barcode pattern"""
@@ -53,16 +56,16 @@ class NoBarcode(object):
 def get_barcode(code, **kw):
     """Gets a barcode from a list of available barcode formats"""
     if not code:
-        sys.stderr.write("No barcode format given!\n")
-        return NoBarcode()
+        return NoBarcode("No barcode format given.")
 
     code = str(code).replace('-', '').strip()
-    mod = 'barcode'
+    module = 'barcode.' + code
+    lst = ['barcode']
     try:
-        return getattr(__import__(mod+'.'+code, fromlist=[mod]), code)(kw)
-    except ImportError:
-        sys.stderr.write("Invalid type of barcode: %s\n" % code)
+        return getattr(__import__(module, fromlist=lst), code)(kw)
+    except ImportError as err:
+        if code in str(err):
+            return NoBarcode("Invalid type of barcode: {}.{}".format(module, code))
+        raise
     except AttributeError:
-        sys.stderr.write("Barcode module is missing barcode class: %s\n" % code)
-    return NoBarcode()
-
+        return NoBarcode("Barcode module is missing barcode class: {}.{}".format(module, code))

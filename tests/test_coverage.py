@@ -74,7 +74,7 @@ class ScriptCoverageTest(TestCase):
         try:
             return __import__(module, fromlist=[])
         except DependencyError as err:
-            self._addSkip(self._current_result, str(err))
+            self._addSkip(self._current_result, reason=str(err))
         except ImportError as err:
             if module in str(err):
                 return False

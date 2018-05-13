@@ -72,7 +72,7 @@ class Plot(inkex.Effect):
                 return 1
             else:
                 type, value, traceback = sys.exc_info()
-                raise ValueError, ('', type, value), traceback
+                raise ValueError(('', type, value), traceback)
         # TODO: Get preview to work. This requires some work on the C++ side to be able to determine if it is
         # a preview or a final run. (Remember to set <effect needs-live-preview='false'> to true)
         '''

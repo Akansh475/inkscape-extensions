@@ -32,17 +32,12 @@ they move and rotate, deforming the pattern.
 '''
 # standard library
 import copy
-import math
-import re
 import random
 # third party
 from lxml import etree
 # local library
 import inkex
-import cubicsuperpath
-import bezmisc
 import pathmodifier
-import simpletransform 
 
 def zSort(inNode,idList):
     sortedList=[]
@@ -89,12 +84,12 @@ def linearize(p,tolerance=0.001):
     d=0
     lengths=[]
     while i<len(p)-1:
-        box  = bezmisc.pointdistance(p[i  ][1],p[i  ][2])
-        box += bezmisc.pointdistance(p[i  ][2],p[i+1][0])
-        box += bezmisc.pointdistance(p[i+1][0],p[i+1][1])
-        chord = bezmisc.pointdistance(p[i][1], p[i+1][1])
+        box  = inkex.pointdistance(p[i  ][1],p[i  ][2])
+        box += inkex.pointdistance(p[i  ][2],p[i+1][0])
+        box += inkex.pointdistance(p[i+1][0],p[i+1][1])
+        chord = inkex.pointdistance(p[i][1], p[i+1][1])
         if (box - chord) > tolerance:
-            b1, b2 = bezmisc.beziersplitatt([p[i][1],p[i][2],p[i+1][0],p[i+1][1]], 0.5)
+            b1, b2 = inkex.beziersplitatt([p[i][1],p[i][2],p[i+1][0],p[i+1][1]], 0.5)
             p[i  ][2][0],p[i  ][2][1]=b1[1]
             p[i+1][0][0],p[i+1][0][1]=b2[2]
             p.insert(i+1,[[b1[2][0],b1[2][1]],[b1[3][0],b1[3][1]],[b2[1][0],b2[1][1]]])
@@ -206,11 +201,11 @@ class PathScatter(pathmodifier.Diffeo):
         '''
         i,t=self.lengthtotime(s)
         if i==len(self.skelcomp)-1:
-            x,y=bezmisc.tpoint(self.skelcomp[i-1],self.skelcomp[i],1+t)
+            x,y=inkex.between_point(self.skelcomp[i-1],self.skelcomp[i],1+t)
             dx=(self.skelcomp[i][0]-self.skelcomp[i-1][0])/self.lengths[-1]
             dy=(self.skelcomp[i][1]-self.skelcomp[i-1][1])/self.lengths[-1]
         else:
-            x,y=bezmisc.tpoint(self.skelcomp[i],self.skelcomp[i+1],t)
+            x,y=inkex.between_point(self.skelcomp[i],self.skelcomp[i+1],t)
             dx=(self.skelcomp[i+1][0]-self.skelcomp[i][0])/self.lengths[i]
             dy=(self.skelcomp[i+1][1]-self.skelcomp[i][1])/self.lengths[i]
         if follow:
@@ -228,13 +223,13 @@ class PathScatter(pathmodifier.Diffeo):
         self.prepareSelectionList()
         
         #center at (0,0)
-        bbox=pathmodifier.computeBBox([self.patternNode])
+        bbox = inkex.computeBBox([self.patternNode])
         mat=[[1,0,-(bbox[0]+bbox[1])/2],[0,1,-(bbox[2]+bbox[3])/2]]
         if self.options.vertical:
             bbox=[-bbox[3],-bbox[2],bbox[0],bbox[1]]
-            mat=simpletransform.composeTransform([[0,-1,0],[1,0,0]],mat)
+            mat = inkex.composeTransform([[0,-1,0],[1,0,0]],mat)
         mat[1][2] += self.options.noffset
-        simpletransform.applyTransformToNode(mat,self.patternNode)
+        inkex.applyTransformToNode(mat,self.patternNode)
                 
         width=bbox[1]-bbox[0]
         dx=width+self.options.space
@@ -242,9 +237,9 @@ class PathScatter(pathmodifier.Diffeo):
 		#check if group and expand it
         patternList = []
         if self.options.grouppick and (self.patternNode.tag == inkex.addNS('g','svg') or self.patternNode.tag=='g') :
-            mat=simpletransform.parseTransform(self.patternNode.get("transform"))
+            mat = inkex.parseTransform(self.patternNode.get("transform"))
             for child in self.patternNode:
-                simpletransform.applyTransformToNode(mat,child)
+                inkex.applyTransformToNode(mat,child)
                 patternList.append(child)
         else :
             patternList.append(self.patternNode)
@@ -252,7 +247,7 @@ class PathScatter(pathmodifier.Diffeo):
                 
         counter=0
         for skelnode in self.skeletons.itervalues(): 
-            self.curSekeleton=cubicsuperpath.parsePath(skelnode.get('d'))
+            self.curSekeleton = parsecubicPath(skelnode.get('d'))
             for comp in self.curSekeleton:
                 self.skelcomp,self.lengths=linearize(comp)
                 #!!!!>----> TODO: really test if path is closed! end point==start point is not enough!
@@ -285,7 +280,7 @@ class PathScatter(pathmodifier.Diffeo):
                     clone.set("id", self.uniqueId(myid))
                     self.gNode.append(clone)
                     
-                    simpletransform.applyTransformToNode(mat,clone)
+                    inkex.applyTransformToNode(mat,clone)
 
                     s+=dx
         self.patternNode.getparent().remove(self.patternNode)

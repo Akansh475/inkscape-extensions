@@ -28,7 +28,8 @@ except:
     bsubprocess = False
 
 import inkex
-from inkex.const import X, Y
+
+X, Y = range(2)
 
 try:
     from numpy import np

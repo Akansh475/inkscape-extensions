@@ -470,8 +470,8 @@ class PixelSnapEffect(inkex.Effect):
             for e in elem:
                 try:
                     self.pixel_snap(e, transform)
-                except TransformError, e:
-                    print >>sys.stderr, e
+                except TransformError as err:
+                    print >>sys.stderr, err
             return
 
         if not elemtype(elem, ('path', 'rect', 'image')):

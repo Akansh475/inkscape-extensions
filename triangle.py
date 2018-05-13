@@ -32,10 +32,11 @@ Measurements of the triangle
   A(x_a,y_a)         s_b                         
 """
 
+from math import *
+
 import inkex
 
-from inkex.const import X, Y
-from math import *
+X, Y = range(2)
 
 def draw_SVG_tri(point1, point2, point3, offset, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }

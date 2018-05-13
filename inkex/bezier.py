@@ -30,6 +30,15 @@ def pointdistance(point_a, point_b):
     """The size of the line between two points"""
     return math.sqrt(((point_b[X] - point_a[X]) ** 2) + ((point_b[Y] - point_a[Y]) ** 2))
 
+def between_point(point_a, point_b, time=0.5):
+    """Returns the point between point a and point b"""
+    return point_a[X] + time * (point_b[X] - point_a[X]),\
+           point_a[Y] + time * (point_b[Y] - point_a[Y])
+
+def percent_point(point_a, point_b, percent=50.0):
+    """Returns between_point but takes percent instead of 0.0-1.0"""
+    return between_point(point_a, point_b, percent / 100.0)
+
 def rootWrapper(a, b, c, d):
     if a:
         # Monics formula see http://en.wikipedia.org/wiki/Cubic_function#Monic_formula_of_roots

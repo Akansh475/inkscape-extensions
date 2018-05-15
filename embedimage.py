@@ -98,6 +98,8 @@ class Embedder(inkex.Effect):
                 #ico files lack any magic... therefore we check the filename instead
                 elif(path.endswith('.ico')):
                     type='image/x-icon' #official IANA registered MIME is 'image/vnd.microsoft.icon' tho
+                elif(path.endswith('.svg')):
+                    type='image/svg+xml'
                 else:
                     embed=False
                 if (embed):

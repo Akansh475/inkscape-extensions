@@ -17,8 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+Basic color controls
+"""
 
-svgcolors={
+SVG_COLOR = {
     'aliceblue':'#f0f8ff',
     'antiquewhite':'#faebd7',
     'aqua':'#00ffff',
@@ -169,71 +172,65 @@ svgcolors={
     'yellowgreen':'#9acd32'
 }
 
-def isColor(c):
+def is_color(color):
     """Determine if its a color we can use. If not, leave it unchanged."""
-    if c is None:
-        return False
-    if c.startswith('#') and len(c) in (4, 7):
-        return True
-    if c.lower() in svgcolors.keys():
-        return True
-    #might be "none" or some undefined color constant or rgb()
-    #however, rgb() shouldn't occur at this point
-    return False
-
-def parseColor(c):
-    """Creates a rgb int array"""
-    tmp = svgcolors.get(c.lower())
-    if tmp is not None:
-        c = tmp 
-    elif c.startswith('#') and len(c)==4:
-        c='#'+c[1:2]+c[1:2]+c[2:3]+c[2:3]+c[3:]+c[3:]
-    elif c.startswith('rgb('):
-        # remove the rgb(...) stuff
-        tmp = c.strip()[4:-1]
-        numbers = [number.strip() for number in tmp.split(',')]
-        converted_numbers = []
-        if len(numbers) == 3:
-            for num in numbers:
-                if num.endswith(r'%'):
-                    converted_numbers.append(int(float(num[0:-1])*255/100))
-                else:
-                    converted_numbers.append(int(num))
-            return tuple(converted_numbers)
-        else:    
-            return (0,0,0)
     try:
-        r=int(c[1:3],16)
-        g=int(c[3:5],16)
-        b=int(c[5:],16)
-    except:
-        # unknown color ...
-        # Return a default color. Maybe not the best thing to do but probably
-        # better than raising an exception. 
-       return(0,0,0)
-    return (r,g,b)
+        return bool(Color(color))
+    except ColorError:
+        return False
 
-def formatColoria(a):
-    """int array to #rrggbb"""
-    return '#%02x%02x%02x' % (a[0],a[1],a[2])
+class ColorError(KeyError):
+    """Specific color parsing error"""
 
-def formatColorfa(a):
-    """float array to #rrggbb"""
-    return '#%02x%02x%02x' % (int(round(a[0]*255)),int(round(a[1]*255)),int(round(a[2]*255)))
+class Color(object):
+    """An RGB array for the color"""
+    def __init__(self, color):
+        if isinstance(color, str):
+            values = self.parse_str(color)
+        if isinstance(color, (list, tuple)):
+            def _parse(val):
+                if isinstance(val, float):
+                    return int(val * 255)
+                return int(val)
+            values = [_parse(val) for val in color]
+            self.red, self.green, self.blue = values
 
-def formatColor3i(r,g,b):
-    """3 ints to #rrggbb"""
-    return '#%02x%02x%02x' % (r,g,b)
+    @staticmethod
+    def parse_str(color):
+        """Creates a rgb int array"""
+        # Handle pre-defined svg color values
+        color = SVG_COLOR.get(color.lower(), color)
 
-def formatColor3f(r,g,b):
-    """3 floats to #rrggbb"""
-    return '#%02x%02x%02x' % (int(round(r*255)),int(round(g*255)),int(round(b*255)))
+        # Next handle short colors (css: #abc -> #aabbcc)
+        if color.startswith('#'):
+            # Remove any icc or ilab directives
+            # FUTURE: We could use icc or ilab information
+            col = color.split(' ')[0]
+            if len(col) == 4:
+                col = '#{1}{1}{2}{2}{3}{3}'.format(*col)
 
-def extract_hsl(rgb):
-    r = int(rgb[:2], 16) 
-    g = int(rgb[2:4], 16) 
-    b = int(rgb[4:6], 16) 
-    return rgb_to_hsl(r/255.0, g/255.0, b/255.0)
+            # Convert hex to integers
+            return int(col[1:3], 16), int(col[3:5], 16), int(col[5:], 16)
+
+        # Handle other css color values
+        elif '(' in color and ')' in color:
+            def _parse(val):
+                val = val.strip()
+                if val.endswith('%'):
+                    return float(val[-1:]) / 100
+                return int(val)
+            (space, values) = color.lower().strip().strip(')').split('(')
+            values = (_parse(num) for num in values.split(','))
+            if space == 'rgb':
+                return values
+            else:
+                raise ColorError("Unknown color space {}".format(space))
+        else:
+            raise ColorError("Unknown color format: {}".format(color))
+
+    def __str__(self):
+        """int array to #rrggbb"""
+        return '#{.red:02x}{.green:02x}{.blue:02x}'.format(self)
 
 
 def hue_to_rgb (v1, v2, h): 

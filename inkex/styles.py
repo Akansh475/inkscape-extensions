@@ -20,15 +20,38 @@ Two simple functions for working with inline css
 and some color handling on top.
 """
 
-def parseStyle(s):
-    """Create a dictionary from the value of an inline style attribute"""
-    if s is None:
-      return {}
-    else:
-      return dict([[x.strip() for x in i.split(":")] for i in s.split(";") if len(i.strip())])
+from collections import OrderedDict
 
-def formatStyle(a):
-    """Format an inline style attribute from a dictionary"""
-    return ";".join([att+":"+str(val) for att,val in a.items()])
+class Style(OrderedDict):
+    """A list of style directives"""
+    def __init__(self, style=None, **kw):
+        style = style or kw
+        if isinstance(style, str):
+            style = self.parse_str(style)
+        # Should accept dict, Style, parsed string, list etc.
+        super(Style, self).__init__(style)
+
+    @staticmethod
+    def parse_str(style):
+        """Create a dictionary from the value of an inline style attribute"""
+        for directive in style.split(';'):
+            if ':' in directive:
+                (name, value) = directive.split(':', 1)
+                # FUTURE: Parse value here for extra functionality
+                yield (name.strip().lower(), value.strip())
+
+    def __str__(self):
+        """Format an inline style attribute from a dictionary"""
+        return ";".join(["{0}:{1}".format(*seg) for seg in self.items()])
+
+    def __add__(self, other):
+        """Add two styles together to get a third, composing them"""
+        ret = self.copy()
+        ret.update(Style(other))
+        return ret
+
+    def __iadd__(self, other):
+        """Add style to this style, the same as style.update(dict)"""
+        self.update(Style(other))
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) Martin Owens <doctormo@gmail.com>
+# Copyright (c) 2018 - Martin Owens <doctormo@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ give path, transform, and property access easilly.
 from lxml import etree
 
 from .transforms import Transform
+from .styles import Style
 from .utils import NSS
 
 class BaseElement(etree.ElementBase):
@@ -47,6 +48,15 @@ class BaseElement(etree.ElementBase):
         if self.getparent():
             return self.transform * self.getparent().composed_transform()
         return self.transform
+
+    style = property(lambda self: Style(self.get('transform', None)))
+
+    def composed_style(self):
+        """Calculate the final styles applied to this element"""
+        # FUTURE: We could compose styles from class/css too.
+        if self.getparent():
+            return self.getparent().composed_style() + self.style
+        return self.style
 
 
 class Group(BaseElement):

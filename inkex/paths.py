@@ -49,6 +49,7 @@ class PathCommand(tuple):
             obj = tuple.__new__(cls, args[:cls.num])
             obj.cmd = cmd
             if len(args) > cls.num:
+                # pylint: disable=no-value-for-parameter
                 nxt = PathCommand(cls.next_cmd[obj.cmd.islower()], *args[cls.num:])
                 return [obj] + nxt if isinstance(nxt, list) else [obj, nxt]
             return obj
@@ -96,7 +97,7 @@ class PathCommand(tuple):
             theta = atan2(offset_y, offset_x) + angle
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
             if rad != 0:
-                print (rad * cos(theta)) + center_x, (rad * sin(theta)) + center_y
+                print("({rad} * cos({theta})) + {x}, ({rad} * sin({theta})) + {y}".format(rad=rad, theta=theta, x=center_x, y=center_y))
 
     def get_pen(self, previous):
         """Where will the pen be after this command"""
@@ -244,4 +245,3 @@ class Path(list):
 
     def __sub__(self, other):
         return self.__add__((other[X] * -1, other[Y] * -1))
-

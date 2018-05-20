@@ -53,5 +53,6 @@ class Style(OrderedDict):
     def __iadd__(self, other):
         """Add style to this style, the same as style.update(dict)"""
         self.update(Style(other))
+        return self
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

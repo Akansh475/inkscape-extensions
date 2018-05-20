@@ -182,18 +182,46 @@ def is_color(color):
 class ColorError(KeyError):
     """Specific color parsing error"""
 
-class Color(object):
+class Color(list):
     """An RGB array for the color"""
-    def __init__(self, color):
+    red = property(lambda self: self.to_rgb()[0])
+    green = property(lambda self: self.to_rgb()[1])
+    blue = property(lambda self: self.to_rgb()[2])
+    hue = property(lambda self: self.to_hsl()[0])
+    saturation = property(lambda self: self.to_hsl()[1])
+    lightness = property(lambda self: self.to_hsl()[2])
+
+    def __init__(self, color=None, space='rgb'):
+        super(Color, self).__init__()
         if isinstance(color, str):
-            values = self.parse_str(color)
-        if isinstance(color, (list, tuple)):
-            def _parse(val):
-                if isinstance(val, float):
-                    return int(val * 255)
-                return int(val)
-            values = [_parse(val) for val in color]
-            self.red, self.green, self.blue = values
+            space, color = self.parse_str(color)
+        elif color is None:
+            color = (0, 0, 0)
+
+        if not isinstance(color, (list, tuple)):
+            raise ColorError("Not a known a color value")
+
+        self.space = space
+        for val in color:
+            self.append(val)
+
+    def append(self, val):
+        """Append a value to the local list"""
+        if len(self) == len(self.space):
+            raise ValueError("Can't add any more values to color.")
+
+        if isinstance(val, str):
+            val = val.strip()
+            if val.endswith('%'):
+                val = float(val.strip('%')) / 100
+            else:
+                val = int(float(val))
+
+        if isinstance(val, float) and val <= 1.0:
+            val = val * 255
+
+        if isinstance(val, (int, float)):
+            super(Color, self).append(int(val))
 
     @staticmethod
     def parse_str(color):
@@ -210,85 +238,93 @@ class Color(object):
                 col = '#{1}{1}{2}{2}{3}{3}'.format(*col)
 
             # Convert hex to integers
-            return int(col[1:3], 16), int(col[3:5], 16), int(col[5:], 16)
+            return 'rgb', (int(col[1:3], 16), int(col[3:5], 16), int(col[5:], 16))
 
         # Handle other css color values
         elif '(' in color and ')' in color:
-            def _parse(val):
-                val = val.strip()
-                if val.endswith('%'):
-                    return float(val[-1:]) / 100
-                return int(val)
-            (space, values) = color.lower().strip().strip(')').split('(')
-            values = (_parse(num) for num in values.split(','))
-            if space == 'rgb':
-                return values
-            else:
-                raise ColorError("Unknown color space {}".format(space))
-        else:
-            raise ColorError("Unknown color format: {}".format(color))
+            space, values = color.lower().strip().strip(')').split('(')
+            return (space, values.split(','))
+
+        raise ColorError("Unknown color format: {}".format(color))
 
     def __str__(self):
         """int array to #rrggbb"""
-        return '#{.red:02x}{.green:02x}{.blue:02x}'.format(self)
+        if self.space == 'rgb':
+            return '#{0:02x}{1:02x}{2:02x}'.format(*self)
+        elif self.space == 'hsl':
+            return 'hsl({0:g}, {1:g}, {2:g})'.format(*self)
+        raise ColorError("Can't print colour space '{}'".format(self.space))
 
+    def to_hsl(self):
+        """Turn this color into a Hue/Saturation/Lightness colour space"""
+        if self.space == 'hsl':
+            return self
+        elif self.space == 'rgb':
+            return Color(rgb_to_hsl(*self.to_floats()), space='hsl')
+        raise ColorError("Unknown color conversion {}->hsl".format(self.space))
 
-def hue_to_rgb (v1, v2, h): 
-    if h < 0:
-        h += 6.0 
-    if h > 6:
-        h -= 6.0 
-    if h < 1:
-        return v1 + (v2 - v1) * h 
-    if h < 3:
-        return v2
-    if h < 4:
-        return v1 + (v2 - v1) * (4 - h)
-    return v1
+    def to_rgb(self):
+        """Turn this color into a Red/Green/Blue colour space"""
+        if self.space == 'rgb':
+            return self
+        elif self.space == 'hsl':
+            return Color(hsl_to_rgb(*self.to_floats()), space='rgb')
+        raise ColorError("Unknown color conversion {}->rgb".format(self.space))
 
-def hsl_to_rgb (h, s, l): 
-    rgb = [0, 0, 0]
-    if s == 0:
-        rgb[0] = l 
-        rgb[1] = l 
-        rgb[2] = l 
-    else:
-        if l < 0.5:
-            v2 = l * (1 + s)
-        else:
-            v2 = l + s - l*s 
-        v1 = 2*l - v2
-        rgb[0] = hue_to_rgb (v1, v2, h*6 + 2.0)
-        rgb[1] = hue_to_rgb (v1, v2, h*6)
-        rgb[2] = hue_to_rgb (v1, v2, h*6 - 2.0)
-    return rgb 
+    def to_floats(self):
+        """Returns the colour values as percentage floats (0.0 - 1.0)"""
+        return [val / 255.0 for val in self]
 
-def rgb_to_hsl(r, g, b):
-    rgb_max = max (max (r, g), b)
-    rgb_min = min (min (r, g), b)
+def rgb_to_hsl(red, green, blue):
+    """RGB to HSL colour conversion"""
+    rgb_max = max(red, green, blue)
+    rgb_min = min(red, green, blue)
     delta = rgb_max - rgb_min
-    hsl = [0.0, 0.0, 0.0]
-    hsl[2] = (rgb_max + rgb_min)/2.0
-    if delta == 0:
-        hsl[0] = 0.0 
-        hsl[1] = 0.0 
-    else:
+    hsl = [0.0, 0.0, (rgb_max + rgb_min) / 2.0]
+    if delta != 0:
         if hsl[2] <= 0.5:
             hsl[1] = delta / (rgb_max + rgb_min)
         else:
             hsl[1] = delta / (2 - rgb_max - rgb_min)
-        if r == rgb_max:
-            hsl[0] = (g - b) / delta
-        else:
-            if g == rgb_max:
-                hsl[0] = 2.0 + (b - r) / delta
-            else:
-                if b == rgb_max:
-                    hsl[0] = 4.0 + (r - g) / delta
-        hsl[0] = hsl[0] / 6.0 
+
+        if red == rgb_max:
+            hsl[0] = (green - blue) / delta
+        elif green == rgb_max:
+            hsl[0] = 2.0 + (blue - red) / delta
+        elif blue == rgb_max:
+            hsl[0] = 4.0 + (red - green) / delta
+
+        hsl[0] = hsl[0] / 6.0
         if hsl[0] < 0:
-            hsl[0] = hsl[0] + 1 
+            hsl[0] = hsl[0] + 1
         if hsl[0] > 1:
-            hsl[0] = hsl[0] - 1 
+            hsl[0] = hsl[0] - 1
     return hsl
 
+
+def hsl_to_rgb(hue, sat, light):
+    """HSL to RGB Color Conversion"""
+    if sat == 0:
+        return [light, light, light] # Gray
+
+    if light < 0.5:
+        val2 = light * (1 + sat)
+    else:
+        val2 = light + sat - light * sat
+    val1 = 2 * light - val2
+    return [_hue_to_rgb(val1, val2, hue * 6 + 2.0),
+            _hue_to_rgb(val1, val2, hue * 6),
+            _hue_to_rgb(val1, val2, hue * 6 - 2.0)]
+
+def _hue_to_rgb(val1, val2, hue):
+    if hue < 0:
+        hue += 6.0
+    if hue > 6:
+        hue -= 6.0
+    if hue < 1:
+        return val1 + (val2 - val1) * hue
+    if hue < 3:
+        return val2
+    if hue < 4:
+        return val1 + (val2 - val1) * (4 - hue)
+    return val1

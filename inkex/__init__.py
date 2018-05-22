@@ -9,7 +9,6 @@ from .styles import *
 from .paths import *
 from .colors import *
 from .tween import *
-from .text import *
 from .transforms import *
 from .cubic_paths import *
 

@@ -165,7 +165,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         """Choose what kind of functionality our element will have"""
         for cls in self.get_lookups():
             nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
-            if name.lower() == tag.lower() and \
+            if name.lower() == (tag or '').lower() and \
                   (not namespace or not nsp or nsp == namespace):
                 return cls
         raise KeyError("Failed to look up element: {}:{} ({})".format(

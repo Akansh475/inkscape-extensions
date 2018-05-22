@@ -37,7 +37,8 @@ from lxml import etree
 from .units import discover_unit, convert_unit, render_unit
 from .utils import addNS
 from .elements import ( # pylint: disable=unused-import
-    BaseElement, Group, Path, Points, Rectangle, Image, Circle, Ellipse
+    BaseElement, Group, Path, Points, Rectangle, Image, Circle, Ellipse,
+    Defs, Metadata,
 )
 
 class SvgDocumentElement(BaseElement):
@@ -190,6 +191,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         for cls in self.get_lookups():
             if name.lower() == getattr(cls, 'tag_name', None):
                 return cls
+        raise KeyError("Failed to look up element: {}:{} (lookups: {})".format(node_type, name, self.get_lookups()))
 
     def get_lookups(self):
         """Scan for and cache a list of available classes"""

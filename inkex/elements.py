@@ -40,24 +40,26 @@ class BaseElement(etree.ElementBase):
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
     root = property(lambda self: self.getparent().root if self.getparent() else self)
-    transform = property(lambda self: Transform(self.get('transform', None)))
-    transform.setter(lambda self, matrix: self.set('transform', str(Transform(matrix))))
+    transform = property(lambda self: Transform(self.get('transform', None)),
+                         lambda self, matrix: self.set('transform', str(Transform(matrix))))
 
     def composed_transform(self):
         """Calculate every transform down to the root document node"""
-        if self.getparent():
+        if self.getparent() is not None:
             return self.transform * self.getparent().composed_transform()
         return self.transform
 
-    style = property(lambda self: Style(self.get('transform', None)))
+    style = property(lambda self: Style(self.get('style', None)))
 
     def composed_style(self):
         """Calculate the final styles applied to this element"""
         # FUTURE: We could compose styles from class/css too.
-        if self.getparent():
+        if self.getparent() is not None:
             return self.getparent().composed_style() + self.style
         return self.style
 
+    def __str__(self):
+        return str(etree.tostring(self))
 
 class Group(BaseElement):
     """Any group element (layer or regular group)"""
@@ -127,3 +129,10 @@ class Use(BaseElement):
         """Returns the reffered to element if available"""
         return self.root.getElementById(self.get('href'))
 
+class Defs(BaseElement):
+    """An header defs element, one per document"""
+    tag_name = 'defs'
+
+class Metadata(BaseElement):
+    """Inkscape Metadata element"""
+    tag_name = 'metadata'

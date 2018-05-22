@@ -193,3 +193,16 @@ class Guide(BaseElement):
 class Metadata(BaseElement):
     """Inkscape Metadata element"""
     tag_name = 'metadata'
+
+
+class TextPath(BaseElement):
+    """A textPath element"""
+    tag_name = 'textPath'
+
+    def append_superscript(self, text):
+        """Adds a superscript tspan element"""
+        self.append(Tspan(text, style="font-size:65%;baseline-shift:super"))
+
+class Tspan(BaseElement):
+    """A tspan text element"""
+    tag_name = 'tspan'

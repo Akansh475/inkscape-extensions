@@ -28,17 +28,16 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import sys
-import math
 import inspect
 import random
 import lxml
 from lxml import etree
 
 from .units import discover_unit, convert_unit, render_unit
-from .utils import addNS
+from .utils import removeNS
 from .elements import ( # pylint: disable=unused-import
     BaseElement, Group, Path, Points, Rectangle, Image, Circle, Ellipse,
-    Use, Defs, Metadata,
+    Use, Defs, NamedView, Metadata, Guide,
 )
 
 class SvgDocumentElement(BaseElement):
@@ -103,7 +102,7 @@ class SvgDocumentElement(BaseElement):
         nvs = self.xpath('//sodipodi:namedview')
         if not nvs:
             # We auto create a namedview element when needed
-            nvs = [NamedViewElement(addNS('namedview', 'sodipodi'))]
+            nvs = [NamedView()]
             self.insert(0, nvs[0])
         return nvs[0]
 
@@ -155,30 +154,6 @@ class SvgDocumentElement(BaseElement):
         return render_unit(value, self.unit)
 
 
-class NamedViewElement(BaseElement):
-    """The NamedView element is Inkscape specific metadata about the file"""
-    tag_name = 'namedview'
-
-    center_x = property(lambda self: self.get(addNS('cx', 'inkscape')))
-    center_y = property(lambda self: self.get(addNS('cy', 'inkscape')))
-    current_layer = property(lambda self: self.get(addNS('current-layer', 'inkscape')))
-
-    def get_guides(self):
-        """Returns a list of guides"""
-        return self.findall('sodipodi:guide')
-
-    def create_guide(self, pos_x, pos_y, angle):
-        """Create a guide in this namedView section"""
-        atts = {
-            'position': "{:g},{:g}".format(pos_x, pos_y),
-            'orientation': "{:g},{:g}".format(
-                math.sin(math.radians(angle)),
-                -math.cos(math.radians(angle))
-            ),
-        }
-        return etree.SubElement(self, addNS('guide', 'sodipodi'), atts)
-
-
 class SvgClassLookup(etree.CustomElementClassLookup):
     """
     We choose what kind of Elements we should return for each element, providing useful
@@ -189,10 +164,11 @@ class SvgClassLookup(etree.CustomElementClassLookup):
     def lookup(self, node_type, document, namespace, name): # pylint: disable=unused-argument
         """Choose what kind of functionality our element will have"""
         for cls in self.get_lookups():
-            if name.lower() == getattr(cls, 'tag_name', None):
+            nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
+            if name.lower() == tag and (not namespace or not nsp or nsp == namespace):
                 return cls
-        raise KeyError("Failed to look up element: {}:{}".format(
-            node_type, name))
+        raise KeyError("Failed to look up element: {}:{} ({})".format(
+            node_type, name, namespace))
 
     def get_lookups(self):
         """Scan for and cache a list of available classes"""

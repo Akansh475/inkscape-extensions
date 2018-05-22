@@ -24,7 +24,7 @@ import random
 
 from tests.base import TestCase, test_support
 from tests.base.svg import svg, uu_svg, svg_file
-from inkex.svg import addNS
+from inkex.utils import addNS
 
 class BasicSvgTest(TestCase):
     """Basic svg tests"""
@@ -62,7 +62,7 @@ class BasicSvgTest(TestCase):
         """Can get the sodipodi nameview element"""
         doc = svg()
         self.assertEqual(doc.namedview.center_x, None)
-        self.assertEqual(type(doc.namedview).__name__, 'NamedViewElement')
+        self.assertEqual(type(doc.namedview).__name__, 'NamedView')
 
     def test_svg_layers(self):
         """Selected layer is selected"""

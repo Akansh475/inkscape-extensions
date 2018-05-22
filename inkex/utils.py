@@ -47,6 +47,7 @@ NSS = {
     u'xlink'    :u'http://www.w3.org/1999/xlink',
     u'xml'      :u'http://www.w3.org/XML/1998/namespace'
 }
+SSN = dict((b, a) for (a, b) in NSS.items())
 
 def debug(what):
     """Print debug message if debugging is switched on"""
@@ -92,10 +93,22 @@ def strargs(string, kind=float):
 
 def addNS(tag, ns=None): # pylint: disable=invalid-name
     """Add a known namespace to a name for use with lxml"""
-    val = tag
+    if ns is None and ':' in tag:
+        (ns, tag) = tag.split(':', 1)
     if ns is not None and ns in NSS and tag and tag[0] != '{':
-        val = "{%s}%s" % (NSS[ns], tag)
-    return val
+        return "{%s}%s" % (NSS[ns], tag)
+    return tag
+
+def removeNS(name, url=False): # pylint: disable=invalid-name
+    """The reverse of addNS, finds any namespace and returns tuple (ns, tag)"""
+    if name:
+        if ':' in name:
+            (nsp, tag) = name.split(':', 1)
+            return (NSS[nsp], tag) if url else (nsp, tag)
+        if name[0] == '{':
+            (nsp, tag) = name[1:].split('}', 1)
+            return (nsp, tag) if url else (SSN.get(nsp, 'svg'), tag)
+    return (NSS['svg'], name) if url else ('svg', name)
 
 class classproperty(object): # pylint: disable=invalid-name, too-few-public-methods
     """Combine classmethod and property decorators"""

@@ -23,14 +23,19 @@ This is useful for having a common interface for each element which can
 give path, transform, and property access easilly.
 """
 
+import math
 from lxml import etree
 
 from .transforms import Transform
 from .styles import Style
-from .utils import addNS, NSS
+from .utils import addNS, removeNS, NSS
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
+    tag_name = None
+    TAG = property(lambda self: removeNS(self.tag_name)[-1])
+    NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
+
     def xpath(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
         return super(BaseElement, self).xpath(pattern, namespaces=namespaces)
@@ -38,6 +43,14 @@ class BaseElement(etree.ElementBase):
     def findall(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
+
+    def get(self, name, default=None):
+        """Get element attribute named, with addNS support."""
+        return super(BaseElement, self).get(addNS(name), default)
+
+    def set(self, name, value):
+        """Set element attribute named, with addNS support."""
+        return super(BaseElement, self).set(addNS(name), value)
 
     @property
     def root(self):
@@ -136,11 +149,46 @@ class Use(BaseElement):
 
     def ref(self):
         """Returns the reffered to element if available"""
-        return self.root.getElementById(self.get(addNS('href', 'xlink')).strip('#'))
+        return self.root.getElementById(self.get('xlink:href').strip('#'))
 
 class Defs(BaseElement):
     """An header defs element, one per document"""
     tag_name = 'defs'
+
+class NamedView(BaseElement):
+    """The NamedView element is Inkscape specific metadata about the file"""
+    tag_name = 'sodipodi:namedview'
+
+    center_x = property(lambda self: self.get('inkscape:cx'))
+    center_y = property(lambda self: self.get('inkscape:cy'))
+    current_layer = property(lambda self: self.get('inkscape:current-layer'))
+
+    def get_guides(self):
+        """Returns a list of guides"""
+        return self.findall('sodipodi:guide')
+
+    def create_guide(self, pos_x, pos_y, angle):
+        """Create a guide in this namedView section"""
+        self.append(Guide(pos_x, pos_y, angle))
+
+
+class Guide(BaseElement):
+    """An inkscape guide"""
+    tag_name = 'sodipodi:guide'
+
+    def __init__(self, *args):
+        super(Guide, self).__init__()
+        if args:
+            self.move_to(*args)
+
+    def move_to(self, pos_x, pos_y, angle=None):
+        """Move this guide to the given position"""
+        self.set('position', "{:g},{:g}".format(pos_x, pos_y))
+        if angle is not None:
+            self.set('orientation', "{:g},{:g}".format(
+                math.sin(math.radians(angle)),
+                -math.cos(math.radians(angle))
+            ))
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""

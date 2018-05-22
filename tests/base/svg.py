@@ -19,7 +19,7 @@
 SVG specific utilities for tests.
 """
 
-from inkex.svg import etree, addNS, SVG_PARSER
+from inkex.svg import etree, SVG_PARSER
 
 def svg(svg_attrs=''):
     """Returns xml etree based on a simple SVG element.
@@ -44,6 +44,3 @@ def svg_file(filename):
     with open(filename, 'r') as fhl:
         doc = etree.parse(fhl, parser=SVG_PARSER)
         return doc.getroot()
-
-
-

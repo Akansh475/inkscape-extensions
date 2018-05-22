@@ -27,7 +27,7 @@ from lxml import etree
 
 from .transforms import Transform
 from .styles import Style
-from .utils import NSS
+from .utils import addNS, NSS
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
@@ -39,7 +39,13 @@ class BaseElement(etree.ElementBase):
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
-    root = property(lambda self: self.getparent().root if self.getparent() else self)
+    @property
+    def root(self):
+        """Get the root document element from any element decendent"""
+        if self.getparent() is not None:
+            return self.getparent().root
+        return self
+
     transform = property(lambda self: Transform(self.get('transform', None)),
                          lambda self, matrix: self.set('transform', str(Transform(matrix))))
 
@@ -59,7 +65,10 @@ class BaseElement(etree.ElementBase):
         return self.style
 
     def __str__(self):
-        return str(etree.tostring(self))
+        # We would do more here, but lxml is VERY unpleseant when it comes to
+        # namespaces, basically over printing details and providing no
+        # supression mechanisms to turn off xml's over engineering.
+        return str(self.tag).split('}')[-1]
 
 class Group(BaseElement):
     """Any group element (layer or regular group)"""
@@ -87,7 +96,7 @@ class Rectangle(BaseElement):
     @property
     def path(self):
         """Calculate the path as the box around the rect"""
-        return 'M {.left},{.top} h{.width}v{.height}h-{.width}'.format(self)
+        return 'M {0.left},{0.top} h{0.width}v{0.height}h-{0.width}'.format(self)
 
 
 class Image(Rectangle):
@@ -109,10 +118,10 @@ class Circle(BaseElement):
     @property
     def path(self):
         """Calculte the arc path of this circle/elipse"""
-        return ('M {.left} {.right} '\
-                'A {.radius_x},{.radius_y} 0 1 0 {.right}, {.center_y} '\
-                'A {.radius_x},{.radius_y} 0 1 0 {.left}, {.center_y}').format(self)
-
+        return ('M {0.left} {0.right} '\
+                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '\
+                'A {0.radius_x},{0.radius_y} 0 1 0 {0.left}, {0.center_y}'
+               ).format(self)
 
 class Ellipse(Circle):
     """Provide a similar extension to the Circle interface"""
@@ -123,11 +132,11 @@ class Use(BaseElement):
     """A 'use' element that links to another in the document"""
     tag_name = 'use'
 
-    path = property(lambda self: self.ref.path)
+    path = property(lambda self: self.ref().path) # pylint: disable=no-member
 
     def ref(self):
         """Returns the reffered to element if available"""
-        return self.root.getElementById(self.get('href'))
+        return self.root.getElementById(self.get(addNS('href', 'xlink')).strip('#'))
 
 class Defs(BaseElement):
     """An header defs element, one per document"""

@@ -24,13 +24,9 @@ class Word(inkex.Effect):
             					  string.ascii_uppercase + \
             					  string.digits + \
             					  string.punctuation)
-            #print(word)
 
         return word
 
-
-#w = Word()
-#print(w.wordGenerator(10))
 
 
 if __name__ == '__main__':

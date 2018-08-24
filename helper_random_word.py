@@ -1,10 +1,14 @@
 """
-This function generates a random word comprised of:
+The function wordGenerator generates a random word comprised of:
 
 - lowercase letters
 - uppercase letters
 - digits
 - punctuations
+
+The function sentencecase takes a word that is generated
+from wordGenerator($^&inkscape) and makes the first letter
+uppercase.  
 
 This is used for testing purposes for the text extensions
 
@@ -26,6 +30,19 @@ class Word(inkex.Effect):
             					  string.punctuation)
 
         return word
+
+    def sentencecase(self, word):
+        word_new = ""
+        lower_letters = list(string.ascii_lowercase)
+        first = True
+        for letter in word:
+            if letter in lower_letters and first == True:
+                word_new += letter.upper()
+                first = False
+            else:
+                word_new += letter
+
+        return word_new
 
 
 

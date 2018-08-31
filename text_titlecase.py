@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import chardataeffect
 
-class C(chardataeffect.CharDataEffect):
+class TitleCase(chardataeffect.CharDataEffect):
   word_ended = True
 
   def process_chardata(self, text, line, par):
@@ -25,5 +25,5 @@ class C(chardataeffect.CharDataEffect):
     return r
 
 if __name__ == '__main__':
-    c = C()
+    c = TitleCase()
     c.affect()

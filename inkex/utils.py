@@ -49,6 +49,13 @@ NSS = {
 }
 SSN = dict((b, a) for (a, b) in NSS.items())
 
+def inkbool(value):
+    """Turn a boolean string into a python boolean"""
+    if value.upper() == 'TRUE':
+        return True
+    elif value.upper() == 'FALSE':
+        return False
+
 def debug(what):
     """Print debug message if debugging is switched on"""
     sys.stderr.write(str(what) + "\n")

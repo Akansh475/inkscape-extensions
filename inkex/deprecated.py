@@ -29,6 +29,7 @@ import sys
 from argparse import ArgumentParser
 
 import inkex
+import inkex.utils
 
 from inkex.localize import _
 
@@ -67,6 +68,9 @@ class DeprecatedEffect(object):
         # Convert type string into type method as needed
         kw['type'] = {
             'string': str,
+            'int': int,
+            'float': float,
+            'inkbool': inkex.utils.inkbool,
         }.get(kw.get('type', 'string'))
         self.arg_parser.add_argument(*args, **kw)
 

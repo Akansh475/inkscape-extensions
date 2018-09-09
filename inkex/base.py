@@ -45,14 +45,18 @@ class InkscapeExtension(object):
             "--output", type=str, default=sys.stdout,
             help="Optional output filename for saving the result (default is stdout).")
 
-    def run(self, args=sys.argv[1:], output=True, input_=True):
+    def run(self, args=None, output=True, input_=True):
         """Main entrypoint for any Inkscape Extension"""
+        if args is None:
+            args = sys.argv[1:]
+
         self.options = self.arg_parser.parse_args(args)
 
+        file_io = None
         if input_:
             if isinstance(self.options.input_file, str):
-                with open(self.options.input_file, 'rb') as stream:
-                    self.document = self.load(stream)
+                file_io = open(self.options.input_file, 'rb')
+                self.document = self.load(file_io)
             else:
                 self.document = self.load(self.options.input_file)
 
@@ -64,6 +68,9 @@ class InkscapeExtension(object):
                     self.save(stream)
             else:
                 self.save(self.options.output)
+
+        if file_io is not None:
+            file_io.close()
 
     @staticmethod
     def has_changed():

@@ -8,10 +8,34 @@ Unit test file for ../inkex.py
 #
 
 from tests.base import TestCase, StdRedirect, test_support
-from inkex.utils import errormsg
+from inkex.utils import errormsg, addNS
 
 class InkexBasicTest(TestCase):
     """Test basic utiltiies of inkex"""
+    def test_add_ns(self):
+        """Test addNS function"""
+        self.assertEqual(
+            addNS('inkscape:foo'),
+            '{http://www.inkscape.org/namespaces/inkscape}foo')
+        self.assertEqual(
+            addNS('bar', 'inkscape'),
+            '{http://www.inkscape.org/namespaces/inkscape}bar')
+        self.assertEqual(
+            addNS('url', 'rdf'),
+            '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}url')
+        self.assertEqual(
+            addNS('{http://www.inkscape.org/namespaces/inkscape}bar'),
+            '{http://www.inkscape.org/namespaces/inkscape}bar')
+        self.assertEqual(
+            addNS('http://www.inkscape.org/namespaces/inkscape:bar'),
+            '{http://www.inkscape.org/namespaces/inkscape}bar')
+        self.assertEqual(
+            addNS('car', 'http://www.inkscape.org/namespaces/inkscape'),
+            '{http://www.inkscape.org/namespaces/inkscape}car')
+        self.assertEqual(
+            addNS('{http://www.inkscape.org/namespaces/inkscape}bar', 'rdf'),
+            '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}bar')
+
     def test_ascii(self):
         """Parse ABCabc"""
         with StdRedirect('stderr') as err:

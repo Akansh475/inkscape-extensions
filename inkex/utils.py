@@ -100,21 +100,26 @@ def strargs(string, kind=float):
 
 def addNS(tag, ns=None): # pylint: disable=invalid-name
     """Add a known namespace to a name for use with lxml"""
-    if ns is None and ':' in tag:
-        (ns, tag) = tag.split(':', 1)
-    if ns is not None and ns in NSS and tag and tag[0] != '{':
-        return "{%s}%s" % (NSS[ns], tag)
+    if tag.startswith('{') and ns:
+        _, tag = removeNS(tag)
+    if not tag.startswith('{'):
+        if ':' in tag:
+            (ns, tag) = tag.rsplit(':', 1)
+        if ns in NSS:
+            ns = NSS[ns]
+        if ns is not None:
+            return "{%s}%s" % (ns, tag)
     return tag
 
 def removeNS(name, url=False): # pylint: disable=invalid-name
     """The reverse of addNS, finds any namespace and returns tuple (ns, tag)"""
     if name:
-        if ':' in name:
-            (nsp, tag) = name.split(':', 1)
-            return (NSS[nsp], tag) if url else (nsp, tag)
         if name[0] == '{':
             (nsp, tag) = name[1:].split('}', 1)
             return (nsp, tag) if url else (SSN.get(nsp, 'svg'), tag)
+        if ':' in name:
+            (nsp, tag) = name.rsplit(':', 1)
+            return (NSS[nsp], tag) if url else (nsp, tag)
     return (NSS['svg'], name) if url else ('svg', name)
 
 class classproperty(object): # pylint: disable=invalid-name, too-few-public-methods

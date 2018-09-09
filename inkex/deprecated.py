@@ -124,7 +124,8 @@ class DeprecatedEffect(object):
             'element object. Use `self.svg.namedview.create_guide(x, y, a)` instead'))
         return self.svg.namedview.create_guide(posX, posY, angle)
 
-    def affect(self, args=sys.argv[1:], output=True):
+    def affect(self, args=sys.argv[1:], output=True): # pylint: disable=dangerous-default-value
+        # We need a list as the default value to preserve backwards compatibility
         self.warn_about('affect', _('{} is now `Effect.run()` with the same args'))
         return self.run(args=args, output=output)
 

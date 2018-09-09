@@ -28,6 +28,12 @@ from StringIO import StringIO
 from urllib import quote
 
 import inkex
+import inkex.base
+import inkex.utils
+import inkex.styles
+
+def formatStyle(style):
+    return str(inkex.styles.Style(style))
 
 def export_MTEXT():
     # mandatory group codes : (1 or 3, 10, 20) (text, x, y)
@@ -237,9 +243,9 @@ def export_HATCH():
                     i10 += 1
                 path += "z "
             if vals[groups['70']][0]:
-                style = inkex.formatStyle({'fill': '%s' % color})
+                style = formatStyle({'fill': '%s' % color})
             else:
-                style = inkex.formatStyle({'fill': 'url(#Hatch)', 'fill-opacity': '1.0'})
+                style = formatStyle({'fill': 'url(#Hatch)', 'fill-opacity': '1.0'})
             attribs = {'d': path, 'style': style}
             inkex.etree.SubElement(layer, 'path', attribs)
 
@@ -345,21 +351,34 @@ colors = {  1: '#FF0000',   2: '#FFFF00',   3: '#00FF00',   4: '#00FFFF',   5: '
             6: '#FF00FF',   8: '#414141',   9: '#808080',  12: '#BD0000',  30: '#FF7F00',
           250: '#333333', 251: '#505050', 252: '#696969', 253: '#828282', 254: '#BEBEBE', 255: '#FFFFFF'}
 
-class DxfInput(inkex.Effect):
+class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
     def __init__(self):
         super(DxfInput, self).__init__()
-        parser = self.OptionParser
-        parser.add_option("--scalemethod", action="store", type="string", dest="scalemethod", default="manual")
-        parser.add_option("--scale", action="store", type="string", dest="scale", default="1.0")
-        parser.add_option("--xmin", action="store", type="string", dest="xmin", default="0.0")
-        parser.add_option("--ymin", action="store", type="string", dest="ymin", default="0.0")
-        parser.add_option("--gcodetoolspoints", action="store", type="inkbool", dest="gcodetoolspoints", default=True)
-        parser.add_option("--encoding", action="store", type="string", dest="input_encode", default="latin_1")
-        parser.add_option("--font", action="store", type="string", dest="font", default="Arial")
-        parser.add_option("--tab", action="store", type="string", dest="tab", default="Options")
-        parser.add_option("--inputhelp", action="store", type="string", dest="inputhelp", default="")
+        p = self.arg_parser
+        p.add_argument("--scalemethod", dest="scalemethod", default="manual")
+        p.add_argument("--scale", dest="scale", default="1.0")
+        p.add_argument("--xmin", dest="xmin", default="0.0")
+        p.add_argument("--ymin", dest="ymin", default="0.0")
+        p.add_argument("--gcodetoolspoints", dest="gcodetoolspoints", default=True, type=inkex.utils.inkbool)
+        p.add_argument("--encoding", dest="input_encode", default="latin_1")
+        p.add_argument("--font", dest="font", default="Arial")
+        p.add_argument("--tab", dest="tab", default="Options")
+        p.add_argument("--inputhelp", dest="inputhelp", default="")
+
+    def load(self, stream):
+        return stream
 
     def effect(self):
+        global options
+        global defs
+        global entity
+        global vals
+        global seqs
+        global style
+        global layer
+
+        options = self.options
+
         doc = inkex.etree.parse(StringIO('<svg xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="%s" height="%s"></svg>' % (210*96/25.4, 297*96/25.4)))
         desc = inkex.etree.SubElement(doc.getroot(), 'desc', {})
         defs = inkex.etree.SubElement(doc.getroot(), 'defs', {})
@@ -370,10 +389,8 @@ class DxfInput(inkex.Effect):
         inkex.etree.SubElement(pattern, 'path', {'d': 'M6 2 l-4,4', 'stroke': '#000000', 'stroke-width': '0.25', 'linecap': 'square'})
         inkex.etree.SubElement(pattern, 'path', {'d': 'M4 0 l-4,4', 'stroke': '#000000', 'stroke-width': '0.25', 'linecap': 'square'})
 
-        # XXX <- I believe this needs to be an input / output non-effect
-        stream = open(sys.args[1], 'r')
         def get_line():
-            return (stream.readline().strip(), stream.readline().strip())
+            return (self.document.readline().strip(), self.document.readline().strip())
 
         xmax = xmin = ymin = 0.0
         height = 297.0*96.0/25.4                            # default A4 height in pixels
@@ -433,7 +450,8 @@ class DxfInput(inkex.Effect):
             scale = float(options.scale)                    # manual scale factor
             xmin = float(options.xmin)
             ymin = float(options.ymin)
-        desc.text = '%s - scale = %f, origin = (%f, %f), method = %s' % (unicode(args[0], options.input_encode), scale, xmin, ymin, options.scalemethod)
+        desc.text = '%s - scale = %f, origin = (%f, %f), method = %s' % (
+                options.input_file, scale, xmin, ymin, options.scalemethod)
         scale *= 96.0/25.4                                  # convert from mm to pixels
 
         if not layer_nodes.has_key('0'):
@@ -501,14 +519,14 @@ class DxfInput(inkex.Effect):
                     if vals[groups['62']]:                  # Common Color Number
                         if colors.has_key(vals[groups['62']][0]):
                             color = colors[vals[groups['62']][0]]
-                    style = inkex.formatStyle({'stroke': '%s' % color, 'fill': 'none'})
+                    style = formatStyle({'stroke': '%s' % color, 'fill': 'none'})
                     w = 0.5                                 # default lineweight for POINT
                     if vals[groups['370']]:                 # Common Lineweight
                         if vals[groups['370']][0] > 0:
                             w = 96.0/25.4*vals[groups['370']][0]/100.0
                             if w < 0.5:
                                 w = 0.5
-                            style = inkex.formatStyle({'stroke': '%s' % color, 'fill': 'none', 'stroke-width': '%.1f' % w})
+                            style = formatStyle({'stroke': '%s' % color, 'fill': 'none', 'stroke-width': '%.1f' % w})
                     if vals[groups['6']]:                   # Common Linetype
                         if linetypes.has_key(vals[groups['6']][0]):
                             style += ';' + linetypes[vals[groups['6']][0]]
@@ -536,9 +554,9 @@ class DxfInput(inkex.Effect):
 
         if polylines:
             inkex.errormsg(_('%d ENTITIES of type POLYLINE encountered and ignored. Please try to convert to Release 13 format using QCad.') % polylines)
-        doc.write(inkex.sys.stdout)
+        self.document = doc
 
 if __name__ == '__main__':
-    DxfInput().affect()
+    DxfInput().run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

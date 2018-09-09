@@ -3,7 +3,6 @@
 	<_name>Measure Path</_name>
 	<id>com.njhurst.filter.measure_length</id>
 	<dependency type="executable" location="extensions">measure.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<param name="tab" type="notebook">
 		<page name="measure" _gui-text="Measure">
 			<param name="type" type="enum" _gui-text="Measurement Type: ">

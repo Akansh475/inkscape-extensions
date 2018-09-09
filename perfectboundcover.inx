@@ -3,7 +3,6 @@
     <_name>Perfect-Bound Cover Template</_name>
     <id>org.coswellproductions.inkscape.effects.perfectboundcover</id>
     <dependency type="executable" location="extensions">perfectboundcover.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <_param name="book" type="description" appearance="header">Book Properties</_param>
     <param name="width" precision="3" type="float" indent="1" min="0.0" max="100.000" _gui-text="Book Width (inches):">6</param>
     <param name="height" precision="3" type="float" indent="1" min="0.0" max="100.000" _gui-text="Book Height (inches):">9</param>

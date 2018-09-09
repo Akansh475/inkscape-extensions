@@ -4,7 +4,6 @@
   <id>org.inkscape.color.HSL_adjust</id>
   <dependency type="executable" location="extensions">coloreffect.py</dependency>
   <dependency type="executable" location="extensions">color_HSL_adjust.py</dependency>
-  <dependency type="executable" location="extensions">simplestyle.py</dependency>
   <param name="tab" type="notebook">
     <page name="Options" _gui-text="Options">
       <param name="hue"        type="int" appearance="full" min="-360" max="360" indent="0" _gui-text="Hue (°)">0</param>

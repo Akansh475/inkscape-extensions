@@ -3,7 +3,6 @@
   <_name>Isometric Grid</_name>
   <id>grid.iso_grid</id>
   <dependency type="executable" location="extensions">grid_isometric.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <param name="x_divs"        type="int"   min="1" max="1000" _gui-text="X Divisions [x2]:">5</param>
   <param name="y_divs"        type="int"   min="1" max="1000" _gui-text="Y Divisions [x2] [> 1/2 X Div]:">5</param>
   <param name="dx"            type="float" min="1" max="1000" _gui-text="Division Spacing (px):">50.0</param>

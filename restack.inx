@@ -3,7 +3,6 @@
     <_name>Restack</_name>
     <id>org.inkscape.filter.restack</id>
 	<dependency type="executable" location="extensions">restack.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
     <param name="tab" type="notebook">
         <page name="positional" _gui-text="Based on Position">
             <_param name="desc_dir" type="description" appearance="header">Restack Direction</_param>

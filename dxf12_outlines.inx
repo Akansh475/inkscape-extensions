@@ -2,10 +2,6 @@
     <_name>Desktop Cutting Plotter R12</_name>
     <id>org.ekips.output.dxf12_outlines</id>
         <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-        <dependency type="executable" location="extensions">inkex.py</dependency>
-        <dependency type="executable" location="extensions">simpletransform.py</dependency>
-        <dependency type="executable" location="extensions">cubicsuperpath.py</dependency>
-        <dependency type="executable" location="extensions">cspsubdiv.py</dependency>
     <output>
                 <extension>.dxf</extension>
                 <mimetype>image/dxf</mimetype>

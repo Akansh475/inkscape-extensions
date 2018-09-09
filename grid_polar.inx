@@ -3,7 +3,6 @@
   <_name>Polar Grid</_name>
   <id>grids.polar</id>
   <dependency type="executable" location="extensions">grid_polar.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
 
   <param name="c_dot_dia"    type="float" min="1" max="1000" _gui-text="Centre Dot Diameter (px):">5.0</param>
   <param name="a_labels"     type="enum"  _gui-text="Circumferential Labels:">

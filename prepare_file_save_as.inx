@@ -3,7 +3,6 @@
     <_name>Pre-Process File Save As...</_name>
     <id>com.vaxxine.file.saveas.preprocess</id>
     <dependency type="executable" location="extensions">prepare_file_save_as.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <effect>
         <object-type>path</object-type>
         <effects-menu>

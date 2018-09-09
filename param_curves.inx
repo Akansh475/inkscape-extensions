@@ -3,7 +3,6 @@
     <_name>Parametric Curves</_name>
     <id>org.inkscape.effect.param_curves</id>
     <dependency type="executable" location="extensions">param_curves.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <param name="tab" type="notebook">
         <page name="sampling"  _gui-text="Range and Sampling">
             <param name="t_start"  type="float" min="-1000.0" max="1000.0" _gui-text="Start t-value:">0.0</param>

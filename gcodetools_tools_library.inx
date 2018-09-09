@@ -4,7 +4,6 @@
     <_name>Tools library</_name>
     <id>ru.cnc-club.filter.gcodetools_tools_library_no_options_no_preferences</id>
 	<dependency type="executable" location="extensions">gcodetools.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<param name='active-tab' type="notebook">
 
 		<page name='tools_library' _gui-text='Tools library'>	

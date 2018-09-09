@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Summary</_name>
   <id>jessyink.summary</id>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <dependency type="executable" location="extensions">jessyInk_summary.py</dependency>
   <param name="tab" type="notebook">
     <page name="help" _gui-text="Help">

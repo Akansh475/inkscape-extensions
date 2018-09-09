@@ -3,7 +3,6 @@
     <_name>Foldable Box</_name>
     <id>org.inkscape.render.foldable-box</id>
     <dependency type="executable" location="extensions">foldablebox.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <param name="width"  type="float" min="0.1" max="1000.0" _gui-text="Width:">10.0</param>
     <param name="height" type="float" min="0.1" max="1000.0" _gui-text="Height:">15.0</param>
     <param name="depth"  type="float" min="0.1" max="1000.0" _gui-text="Depth:">3.0</param>

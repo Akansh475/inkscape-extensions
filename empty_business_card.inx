@@ -3,7 +3,6 @@
     <_name>Business Card</_name>
     <id>org.inkscape.render.empty_business_card</id>
     <dependency type="executable" location="extensions">empty_business_card.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     
     <param name="size" _gui-text="Business card size:" type="enum">
         <item value="74mmx52mm">74mm x 52mm (A8)</item>

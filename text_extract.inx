@@ -3,7 +3,6 @@
     <_name>Extract</_name>
     <id>org.inkscape.text.extract</id>
 	<dependency type="executable" location="extensions">text_extract.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
     <param name="direction" type="enum" _gui-text="Text direction:">
         <_item value="lr">Left to right</_item>
         <_item value="bt">Bottom to top</_item>

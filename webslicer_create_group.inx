@@ -4,7 +4,6 @@
     <id>org.inkscape.web.slicer.create-group</id>
     <dependency type="executable" location="extensions">webslicer_effect.py</dependency>
     <dependency type="executable" location="extensions">webslicer_create_group.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
 	<param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="html-id" type="string" _gui-text="HTML id attribute:"></param>

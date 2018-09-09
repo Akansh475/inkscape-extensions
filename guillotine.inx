@@ -6,7 +6,6 @@
 	<dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
 	
 	<dependency type="executable" location="extensions">guillotine.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	
 	<param name="directory" type="string" _gui-text="Directory to save images to:">~/</param>
 	<param name="image" type="string" _gui-text="Image name (without extension):">guillotined</param>

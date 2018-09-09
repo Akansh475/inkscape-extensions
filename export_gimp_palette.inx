@@ -3,7 +3,6 @@
     <_name>Export as GIMP Palette</_name>
     <id>com.kaioa.export_gimp_palette</id>
     <dependency type="executable" location="extensions">export_gimp_palette.py</dependency>
-    <dependency type="executable" location="extensions">simplestyle.py</dependency>
     <output>
         <extension>.gpl</extension>
         <mimetype>text/plain</mimetype>

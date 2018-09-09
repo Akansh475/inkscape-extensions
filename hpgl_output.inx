@@ -5,7 +5,6 @@
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">hpgl_output.py</dependency>
   <dependency type="executable" location="extensions">hpgl_encoder.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <_param name="introduction" type="description">Please make sure that all objects you want to save are converted to paths. Please use the plotter extension (Extensions menu) to plot directly over a serial connection.</_param>
   <param name="tab" type="notebook">
     <page name="plotter" _gui-text="Plotter Settings ">

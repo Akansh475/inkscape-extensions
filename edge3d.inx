@@ -3,7 +3,6 @@
     <_name>Edge 3D</_name>
     <id>org.greygreen.inkscape.effects.edge3d</id>
     <dependency type="executable" location="extensions">edge3d.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <param name="angle" type="float" min="0.0" max="360.0" _gui-text="Illumination Angle:">45</param>
     <param name="shades" type="int" min="2" max="360" _gui-text="Shades:">2</param>
     <param name="bw" type="boolean" _gui-text="Only black and white:">0</param>

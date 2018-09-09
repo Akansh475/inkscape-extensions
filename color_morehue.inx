@@ -4,7 +4,6 @@
 	<id>org.inkscape.color.morehue</id>
 	<dependency type="executable" location="extensions">coloreffect.py</dependency>
 	<dependency type="executable" location="extensions">color_morehue.py</dependency>
-	<dependency type="executable" location="extensions">simplestyle.py</dependency>
 	<effect>
 		<object-type>all</object-type>
 		<effects-menu>

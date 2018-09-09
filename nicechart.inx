@@ -27,7 +27,6 @@
   <_name>NiceCharts</_name>
   <id>org.inkscape.filter.nicechart</id>
   <dependency type="executable" location="extensions">nicechart.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <param name="input_sections" type="notebook">
     <page name="data_settings" _gui-text="Data">
       <param name="input_type" type="notebook">

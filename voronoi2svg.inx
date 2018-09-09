@@ -3,7 +3,6 @@
   <_name>Voronoi Diagram</_name>
   <id>org.inkscape.effect.voronoi</id>
   <dependency type="executable" location="extensions">voronoi2svg.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <dependency type="executable" location="extensions">voronoi.py</dependency>
   <param name="tab" type="notebook">
     <page name="options" _gui-text="Options">

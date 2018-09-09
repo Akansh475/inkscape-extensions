@@ -3,7 +3,6 @@
     <_name>Generic Canvas</_name>
     <id>org.inkscape.render.empty_generic_canvas</id>
     <dependency type="executable" location="extensions">empty_generic.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     
     <param name="width"  _gui-text="Custom Width:"  type="float" min="1" max="15360">800</param>
     <param name="height" _gui-text="Custom Height:" type="float" min="1" max="8640">600</param>

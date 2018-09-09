@@ -3,7 +3,6 @@
   <_name>Color Markers</_name>
   <id>org.ekips.filter.markers.strokepaint</id>
   <dependency type="executable" location="extensions">markers_strokepaint.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   
   <param name='tab' type="notebook">
     <page name='object' _gui-text="From object">

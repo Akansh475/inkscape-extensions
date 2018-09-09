@@ -3,7 +3,6 @@
     <_name>Convert to html5 canvas</_name>
     <id>org.inkscape.output.html5canvas</id>
 	<dependency type="executable" location="extensions">ink2canvas.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<output>
         <extension>.html</extension>
         <mimetype>text/html</mimetype>

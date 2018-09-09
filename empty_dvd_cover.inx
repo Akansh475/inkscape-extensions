@@ -3,7 +3,6 @@
     <_name>DVD Cover</_name>
     <id>org.inkscape.render.empty_dvd_cover</id>
     <dependency type="executable" location="extensions">empty_dvd_cover.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     
     <param name="spine" _gui-text="DVD spine width:" type="enum">
         <item value="14">Normal (14mm)</item>

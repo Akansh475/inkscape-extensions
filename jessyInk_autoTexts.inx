@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Auto-texts</_name>
   <id>jessyink.autotexts</id>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <dependency type="executable" location="extensions">jessyInk_autoTexts.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" _gui-text="Settings">

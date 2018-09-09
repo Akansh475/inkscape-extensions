@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Master slide</_name>
   <id>jessyink.masterSlide</id>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <dependency type="executable" location="extensions">jessyInk_masterSlide.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" _gui-text="Settings">

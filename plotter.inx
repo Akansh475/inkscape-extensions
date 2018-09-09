@@ -5,7 +5,6 @@
   <dependency type="executable" location="extensions">plotter.py</dependency>
   <dependency type="executable" location="extensions">hpgl_decoder.py</dependency>
   <dependency type="executable" location="extensions">hpgl_encoder.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <_param name="introduction" type="description">Please make sure that all objects you want to plot are converted to paths.</_param>
   <param name="tab" type="notebook">
     <page name="misc" _gui-text="Connection Settings ">

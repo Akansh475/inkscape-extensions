@@ -4,7 +4,6 @@
 	<id>org.inkscape.color.custom</id>
 	<dependency type="executable" location="extensions">coloreffect.py</dependency>
 	<dependency type="executable" location="extensions">color_custom.py</dependency>
-	<dependency type="executable" location="extensions">simplestyle.py</dependency>
 	<param name="tab" type="notebook">
 		<page name="Options" _gui-text="Options">
 			<param name="r" type="string" _gui-text="Red Function:">r</param>

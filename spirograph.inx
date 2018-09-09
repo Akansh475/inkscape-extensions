@@ -3,7 +3,6 @@
     <_name>Spirograph</_name>
     <id>org.ekips.filter.spirograph</id>
 	<dependency type="executable" location="extensions">spirograph.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<param name="primaryr" type="float" min="0.0" max="1000.0" _gui-text="R - Ring Radius (px):">100.0</param>
 	<param name="secondaryr" type="float" min="0.0" max="1000.0" _gui-text="r - Gear Radius (px):">60.0</param>
 	<param name="penr" type="float" min="0.0" max="1000.0" _gui-text="d - Pen Radius (px):">50.0</param>

@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Video</_name>
   <id>jessyink.core.video</id>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <dependency type="executable" location="extensions">jessyInk_video.py</dependency>
   <param name="tab" type="notebook">
     <page name="help" _gui-text="Help">

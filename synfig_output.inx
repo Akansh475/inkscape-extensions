@@ -5,7 +5,6 @@
     <dependency type="executable" location="extensions">synfig_fileformat.py</dependency>
     <dependency type="executable" location="extensions">synfig_output.py</dependency>
     <dependency type="executable" location="extensions">synfig_prepare.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <output>
         <extension>.sif</extension>
         <mimetype>image/sif</mimetype>

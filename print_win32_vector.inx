@@ -4,7 +4,6 @@
 	<id>com.vaxxine.print.win32</id>
 	<dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
 	<dependency type="executable" location="extensions">print_win32_vector.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<effect needs-live-preview="false">
 		<object-type>all</object-type>
 		<effects-menu>

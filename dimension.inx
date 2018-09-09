@@ -3,8 +3,6 @@
 	<_name>Dimensions</_name>
 	<id>se.lewerin.filter.dimension</id>
 	<dependency type="executable" location="extensions">dimension.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
-	<dependency type="executable" location="extensions">pathmodifier.py</dependency>
 	<param name="xoffset" type="float" min="0" max="1000" _gui-text="X Offset:">50</param>
 	<param name="yoffset" type="float" min="0" max="1000" _gui-text="Y Offset:">50</param>
 	<param name="type" type="enum" _gui-text="Bounding box type:">

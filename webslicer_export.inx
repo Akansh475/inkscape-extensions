@@ -4,7 +4,6 @@
     <id>org.inkscape.web.slicer.export</id>
     <dependency type="executable" location="extensions">webslicer_effect.py</dependency>
     <dependency type="executable" location="extensions">webslicer_export.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
 	<param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="dir" type="string" _gui-text="Directory path to export:"></param>

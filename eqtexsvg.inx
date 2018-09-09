@@ -3,7 +3,6 @@
     <_name>LaTeX</_name>
     <id>org.inkscape.effect.eqtexsvg</id>
 	<dependency type="executable" location="extensions">eqtexsvg.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<dependency type="executable" location="path">latex</dependency>
 	<dependency type="executable" location="path">dvips</dependency>
 	<dependency type="executable" location="path">pstoedit</dependency>

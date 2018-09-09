@@ -3,7 +3,6 @@
   <_name>Cartesian Grid</_name>
   <id>grid.cartesian</id>
   <dependency type="executable" location="extensions">grid_cartesian.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
 
   <param name="border_th"       type="float"   min="0" max="1000" _gui-text="Border Thickness (px):">3</param>
   <param name="tab" type="notebook">

@@ -3,7 +3,6 @@
 	<_name>Convert to Dashes</_name>
 	<id>com.vaxxine.filter.dashes</id>
 	<dependency type="executable" location="extensions">convert2dashes.py</dependency>
-	<dependency type="executable" location="extensions">inkex.py</dependency>
 	<effect>
 		<object-type>path</object-type>
 		<effects-menu>

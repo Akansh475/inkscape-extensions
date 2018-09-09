@@ -3,7 +3,6 @@
     <_name>Draw From Triangle</_name>
     <id>il.fromtriangle</id>
     <dependency type="executable" location="extensions">draw_from_triangle.py</dependency>
-    <dependency type="executable" location="extensions">inkex.py</dependency>
     <param name="tab" type="notebook">
         <page name="common1" _gui-text="Common Objects">
             <param name="circumcircle"    type="boolean" _gui-text="Circumcircle"></param>

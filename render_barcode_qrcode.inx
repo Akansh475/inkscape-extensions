@@ -3,7 +3,6 @@
   <_name>QR Code</_name>
   <id>org.inkscape.qrcode</id>
   <dependency type="executable" location="extensions">render_barcode_qrcode.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
   <_param name="generalhint" type="description" xml:space="preserve">See http://www.denso-wave.com/qrcode/index-e.html for details</_param>
   <param name="text" type="string" _gui-text="Text:">www.inkscape.org</param>
   <param name="typenumber" type="enum" _gui-text="Size, in unit squares:">

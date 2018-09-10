@@ -27,6 +27,7 @@ Provide some documentation to existing extensions about why they're failing.
 
 import os
 import sys
+import warnings
 from argparse import ArgumentParser
 
 import inkex
@@ -57,17 +58,15 @@ class DeprecatedEffect(object):
         if not hasattr(self, 'run'):
             self.run = self.affect
 
-    warned_about = set()
-    def warn_about(self, name, msg=_('{} is deprecated and should be removed')):
+    @staticmethod
+    def _depricated(name, msg=_('{} is deprecated and should be removed')):
         """Give the user a warning about their extension using a deprecated API"""
-        inkex.localize.localize()
-        if name not in self.warned_about:
-            sys.stderr.write(msg.format('Effect.' + name) + '\n')
-            self.warned_about.add(name)
+        msg = msg.format('Effect.' + name)
+        warnings.warn(msg, DeprecationWarning)
 
     @property
     def OptionParser(self):
-        self.warn_about('OptionParser', _('{} or `optparse` is very old, it was '\
+        self._depricated('OptionParser', _('{} or `optparse` is very old, it was '\
             'deprecated when python 2.7 came out in 2009 and is now replaced with '
             '`argparser`. You must change `self.OptionParser.add_option` to '
             '`self.arg_parser.add_argument` the arguments are similar.'))
@@ -84,104 +83,125 @@ class DeprecatedEffect(object):
         self.arg_parser.add_argument(*args, **kw)
 
     def effect(self):
-        self.warn_about('effect', _('{} method is now a required method. It should '\
+        self._depricated('effect', _('{} method is now a required method. It should '\
             'be created in your extension class, even if it does nothing.'))
 
     @property
     def current_layer(self):
-        self.warn_about('current_layer', _('{} is now a method in the svg '\
+        self._depricated('current_layer', _('{} is now a method in the svg '\
             'document. Use `self.svg.get_current_layer()` instead.'))
         return self.svg.get_current_layer()
 
     @property
     def view_center(self):
-        self.warn_about('view_center', _('{} is now a method in the svg '\
+        self._depricated('view_center', _('{} is now a method in the svg '\
             'document. Use `self.svg.get_center_position()` instead.'))
         return self.svg.get_center_position()
 
     @property
     def selected(self):
-        self.warn_about('selected', _('{} is now a dictionary in the svg '\
+        self._depricated('selected', _('{} is now a dictionary in the svg '\
             'document. Use self.svg.selected instead.'))
         return self.svg.selected
 
     @property
     def doc_ids(self):
-        self.warn_about('doc_ids', _('{} is now a method in the svg '\
+        self._depricated('doc_ids', _('{} is now a method in the svg '\
             'document. Use `self.svg.get_ids()` instead.'))
         return self.svg.get_ids()
 
     def getElementById(self, eid):
-        self.warn_about('getElementById', _('{} is now a method in the svg '\
+        self._depricated('getElementById', _('{} is now a method in the svg '\
             'document. Use `self.svg.getElementById(eid)` instead.'))
         return self.svg.getElementById(eid)
 
     def xpathSingle(self, xpath):
-        self.warn_about('xpathSingle', _('{} is now a new method in the svg '\
+        self._depricated('xpathSingle', _('{} is now a new method in the svg '\
             'document. Use `self.svg.getElement(path)` instead.`'))
         return self.svg.getElement(xpath)
 
     def getParentNode(self, node):
-        self.warn_about('getParentNode', _('{} should never have existed. '\
+        self._depricated('getParentNode', _('{} should never have existed. '\
             'lxml always had a getparent() method and that should be used '
             'instead of this custom Effect method.'))
         return node.getparent()
 
     def getNamedView(self):
-        self.warn_about('getNamedView', _('{} is now a property of the svg '\
+        self._depricated('getNamedView', _('{} is now a property of the svg '\
             'document. Use `self.svg.namedview` to access this element'))
         return self.svg.namedview
 
     def createGuide(self, posX, posY, angle):
-        self.warn_about('createGuide', _('{} is now a method of the namedview '\
+        self._depricated('createGuide', _('{} is now a method of the namedview '\
             'element object. Use `self.svg.namedview.create_guide(x, y, a)` instead'))
         return self.svg.namedview.create_guide(posX, posY, angle)
 
-    def affect(self, args=sys.argv[1:], output=True): # pylint: disable=dangerous-default-value
+    def affect(self, args=sys.argv[1:]): # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility
-        self.warn_about('affect', _('{} is now `Effect.run()` with the same args'))
-        return self.run(args=args, output=output)
+        self._depricated('affect', _('{} is now `Effect.run()` with the same args'))
+        return self.run(args=args)
 
     def uniqueId(self, old_id, make_new_id=True):
-        self.warn_about('uniqueId', _('{} is now a method in the svg document. '\
+        self._depricated('uniqueId', _('{} is now a method in the svg document. '\
             ' Use `self.svg.get_unique_id(old_id)` instead.'))
         return self.svg.get_unique_id(old_id)
 
     @property
     def __uuconv(self):
-        self.warn_about('__uuconv', _('{} wasn\'t even a public property, '\
+        self._depricated('__uuconv', _('{} wasn\'t even a public property, '\
             'why is your effect extension even using it? Shoudl be '
             'inkex.units.CONVERSIONS'))
         return inkex.units.CONVERSIONS
 
     def getDocumentWidth(self):
-        self.warn_about('getDocumentWidth', _('{} is now a property of the svg '\
+        self._depricated('getDocumentWidth', _('{} is now a property of the svg '\
             'document. Use `self.svg.width` instead.'))
         return self.svg.width
 
     def getDocumentHeight(self):
-        self.warn_about('getDocumentHeight', _('{} is now a property of the svg '\
+        self._depricated('getDocumentHeight', _('{} is now a property of the svg '\
             'document. Use `self.svg.height` instead.'))
         return self.svg.height
 
     def getDocumentUnit(self):
-        self.warn_about('getDocumentUnit', _('{} is now a property of the svg '\
+        self._depricated('getDocumentUnit', _('{} is now a property of the svg '\
             'document. Use `self.svg.unit` instead.'))
         return self.svg.unit
 
     def unittouu(self, string):
-        self.warn_about('unittouu', _('{} is now a method in the svg '\
+        self._depricated('unittouu', _('{} is now a method in the svg '\
             'document. Use `self.svg.unittouu(str)` instead.'))
         return self.svg.unittouu(string)
 
     def uutounit(self, val, unit):
-        self.warn_about('uutounit', _('{} is now a method in the svg '\
+        self._depricated('uutounit', _('{} is now a method in the svg '\
             'document. Use `self.svg.uutounit(value, unit)` instead.'))
         return self.svg.uutounit(val, unit)
 
     def addDocumentUnit(self, value):
-        self.warn_about('addDocumentUnit', _('{} is now a method in the svg '\
+        self._depricated('addDocumentUnit', _('{} is now a method in the svg '\
             'document. Use `self.svg.add_unit(value)` instead.'))
         return self.svg.add_unit(value)
+
+
+def deprecate(func):
+    """Function decorator for deprecation functions which have a one-liner
+    equivalent in the new API. The one-liner has to passed as a string
+    to the decorator.
+
+    >>> @deprecated
+    >>> def someOldFunction(*args):
+    >>>     '''Example replacement code someNewFunction('foo', ...)'''
+    >>>     someNewFunction('foo', *args)
+
+    Or if the args API is the same:
+
+    >>> someOldFunction = deprecated(someNewFunction)
+
+    """
+    def _inner(func):
+        warnings.warn('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), DeprecationWarning)
+        return func()
+    return _inner
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

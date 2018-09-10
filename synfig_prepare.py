@@ -263,7 +263,7 @@ def fuse_subpaths(path_node):
         i += 1
 
 
-    path_d = simplepath.formatPath(path)
+    path_d = str(inkex.Path(path))
     path_node.set("d", path_d)
 
 def split_fill_and_stroke(path_node):
@@ -272,7 +272,7 @@ def split_fill_and_stroke(path_node):
     Returns a the list [fill, stroke], where each is the XML element of the
     fill or stroke, or None.
     """
-    style = simplestyle.parseStyle(path_node.get("style", ""))
+    style = dict(inkex.Style.parse_str(path_node.get("style", "")))
 
     # If there is only stroke or only fill, don't split anything
     if "fill" in style.keys() and style["fill"] == "none":
@@ -341,10 +341,10 @@ def split_fill_and_stroke(path_node):
             style_stroke[key] = style[key]
 
     if len(style_group) != 0:
-        group.set("style", simplestyle.formatStyle(style_group))
+        group.set("style", str(inkex.Style(style_group)))
 
-    fill.set("style", simplestyle.formatStyle(style_fill))
-    stroke.set("style", simplestyle.formatStyle(style_stroke))
+    fill.set("style", str(inkex.Style(style_fill)))
+    stroke.set("style", str(inkex.Style(style_stroke)))
 
     # Finalize the two paths
     fill.set("d", d)
@@ -390,7 +390,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
         this_transform = simpletransform.parseTransform(node.get("transform"), parent_transform)
 
     # Compose the style attribs
-    this_style = simplestyle.parseStyle(node.get("style", ""))
+    this_style = dict(inkex.Style.parse_str(node.get("style", "")))
     remaining_style = {} # Style attributes that are not propagated
 
     non_propagated = ["filter"] # Filters should remain on the topmost ancestor
@@ -420,7 +420,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
             if "style" in node.keys():
                 del node.attrib["style"]
         else:
-            node.set("style", simplestyle.formatStyle(remaining_style))
+            node.set("style", str(inkex.Style(remaining_style)))
 
         # Remove the transform attribute
         if "transform" in node.keys():
@@ -436,7 +436,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
         this_style.update(remaining_style)
 
         # Set the element's style and transform attribs
-        node.set("style", simplestyle.formatStyle(this_style))
+        node.set("style", str(inkex.Style(this_style)))
         node.set("transform", simpletransform.formatTransform(this_transform))
 
 ### Style related

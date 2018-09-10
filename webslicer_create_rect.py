@@ -24,56 +24,20 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
 
     def __init__(self):
         WebSlicer_Effect.__init__(self)
-        self.OptionParser.add_option("--name",
-                                     action="store", type="string",
-                                     dest="name",
-                                     help="")
-        self.OptionParser.add_option("--format",
-                                     action="store", type="string",
-                                     dest="format",
-                                     help="")
-        self.OptionParser.add_option("--dpi",
-                                     action="store", type="int",
-                                     dest="dpi",
-                                     help="")
-        self.OptionParser.add_option("--dimension",
-                                     action="store", type="string",
-                                     dest="dimension",
-                                     help="")
-        self.OptionParser.add_option("--bg-color",
-                                     action="store", type="string",
-                                     dest="bg_color",
-                                     help="")
-        self.OptionParser.add_option("--quality",
-                                     action="store", type="int",
-                                     dest="quality",
-                                     help="")
-        self.OptionParser.add_option("--gif-type",
-                                     action="store", type="string",
-                                     dest="gif_type",
-                                     help="")
-        self.OptionParser.add_option("--palette-size",
-                                     action="store", type="int",
-                                     dest="palette_size",
-                                     help="")
-        self.OptionParser.add_option("--html-id",
-                                     action="store", type="string",
-                                     dest="html_id",
-                                     help="")
-        self.OptionParser.add_option("--html-class",
-                                     action="store", type="string",
-                                     dest="html_class",
-                                     help="")
-        self.OptionParser.add_option("--layout-disposition",
-                                     action="store", type="string",
-                                     dest="layout_disposition",
-                                     help="")
-        self.OptionParser.add_option("--layout-position-anchor",
-                                     action="store", type="string",
-                                     dest="layout_position_anchor",
-                                     help="")
+        self.arg_parser.add_argument("--name")
+        self.arg_parser.add_argument("--format", default="png")
+        self.arg_parser.add_argument("--dpi", type=int)
+        self.arg_parser.add_argument("--dimension")
+        self.arg_parser.add_argument("--bg-color")
+        self.arg_parser.add_argument("--quality", type=int)
+        self.arg_parser.add_argument("--gif-type")
+        self.arg_parser.add_argument("--palette-size", type=int)
+        self.arg_parser.add_argument("--html-id")
+        self.arg_parser.add_argument("--html-class")
+        self.arg_parser.add_argument("--layout-disposition")
+        self.arg_parser.add_argument("--layout-position-anchor")
         # inkscape param workarround
-        self.OptionParser.add_option("--tab")
+        self.arg_parser.add_argument("--tab")
 
 
     def unique_slice_name(self):
@@ -93,7 +57,7 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
 
 
     def validate_options(self):
-        self.options.format = self.options.ensure_value('format', 'png').lower()
+        self.options.format = self.options.format.lower()
         if not is_empty( self.options.dimension ):
             self.options.dimension
 

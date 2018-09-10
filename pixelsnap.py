@@ -163,7 +163,7 @@ class PixelSnapEffect(inkex.Effect):
     def stroke_width(self, elem, setval=None):
         """ Return stroke-width in pixels, untransformed
         """
-        style = simplestyle.parseStyle(elem.attrib.get('style', ''))
+        style = dict(inkex.Style.parse_str(elem.attrib.get('style', '')))
         stroke = style.get('stroke', None)
         if stroke == 'none': stroke = None
             
@@ -173,7 +173,7 @@ class PixelSnapEffect(inkex.Effect):
             
         if setval:
             style['stroke-width'] = str(setval)
-            elem.attrib['style'] = simplestyle.formatStyle(style)
+            elem.attrib['style'] = str(inkex.Style(style))
         else:
             return stroke_width
 
@@ -334,7 +334,7 @@ class PixelSnapEffect(inkex.Effect):
                                        path, i)
             self.transform_path_node([[1, 0, +min_xy[0]], [0, 1, +min_xy[1]]], path, i)     # uncenter transform
         
-        path = simplepath.formatPath(path)
+        path = str(inkex.Path(path))
         if original_d in elem.attrib: elem.attrib[original_d] = path
         else: elem.attrib['d'] = path
 
@@ -354,7 +354,7 @@ class PixelSnapEffect(inkex.Effect):
                                        [0, 1, -fractional_offset[1]]],
                                        path, i)
 
-        path = simplepath.formatPath(path)
+        path = str(inkex.Path(path))
         if original_d in elem.attrib: elem.attrib[original_d] = path
         else: elem.attrib['d'] = path
 
@@ -423,7 +423,7 @@ class PixelSnapEffect(inkex.Effect):
                                        path, i)
 
 
-        path = simplepath.formatPath(path)
+        path = str(inkex.Path(path))
         if original_d in elem.attrib: elem.attrib[original_d] = path
         else: elem.attrib['d'] = path
 

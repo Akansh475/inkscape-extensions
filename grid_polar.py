@@ -27,7 +27,7 @@ from math import *
 
 def draw_SVG_circle(r, cx, cy, width, fill, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': fill }
-    circ_attribs = {'style':inkex.formatStyle(style),
+    circ_attribs = {'style':str(inkex.Style(style)),
                     'cx':str(cx), 'cy':str(cy), 
                     'r':str(r),
                     inkex.addNS('label','inkscape'):name}
@@ -35,7 +35,7 @@ def draw_SVG_circle(r, cx, cy, width, fill, name, parent):
 
 def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    line_attribs = {'style':inkex.formatStyle(style),
+    line_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
@@ -45,7 +45,7 @@ def draw_SVG_label_centred(x, y, string, font_size, name, parent):
              'text-anchor': 'middle', 'font-size': str(font_size)+'px',
              'fill-opacity': '1.0', 'stroke': 'none',
              'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
-    label_attribs = {'style':inkex.formatStyle(style),
+    label_attribs = {'style':str(inkex.Style(style)),
                      inkex.addNS('label','inkscape'):name,
                      'x':str(x), 'y':str(y)}
     label = inkex.etree.SubElement(parent, inkex.addNS('text','svg'), label_attribs)

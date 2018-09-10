@@ -250,7 +250,7 @@ class SVGCalendar(inkex.Effect):
         return cal2
 
     def write_month_header(self, g, m):
-        txt_atts = {'style': inkex.formatStyle(self.style_month),
+        txt_atts = {'style': str(inkex.Style(self.style_month)),
                     'x': str((self.month_w - self.day_w) / 2),
                     'y': str(self.day_h / 5 )}
         try:
@@ -272,7 +272,7 @@ class SVGCalendar(inkex.Effect):
             day_names.insert(0, self.options.weeknr_name)
 
         for wday in day_names:
-            txt_atts = {'style': inkex.formatStyle(self.style_day_name),
+            txt_atts = {'style': str(inkex.Style(self.style_day_name)),
                         'x': str( self.day_w * week_x ),
                         'y': str( self.day_h ) }
             try:
@@ -340,7 +340,7 @@ class SVGCalendar(inkex.Effect):
                 # Remove leap week (starting previous year) and empty weeks
                 if self.weeknr != 0 and not (week[0] == 0 and week[6] == 0):
                     style = self.style_weeknr
-                    txt_atts = {'style': inkex.formatStyle(style),
+                    txt_atts = {'style': str(inkex.Style(style)),
                                 'x': str(self.day_w * week_x),
                                 'y': str(self.day_h * (week_y + 2))}
                     inkex.etree.SubElement(gdays, 'text', txt_atts).text = str(self.weeknr)
@@ -351,7 +351,7 @@ class SVGCalendar(inkex.Effect):
                 style = self.style_day
                 if self.is_weekend(week_x - self.cols_before): style = self.style_weekend
                 if day == 0: style = self.style_nmd
-                txt_atts = {'style': inkex.formatStyle(style),
+                txt_atts = {'style': str(inkex.Style(style)),
                             'x': str(self.day_w * week_x),
                             'y': str(self.day_h * (week_y + 2))}
                 if day == 0 and not self.options.fill_edb:
@@ -379,7 +379,7 @@ class SVGCalendar(inkex.Effect):
         parent = self.document.getroot()
         txt_atts = {'id': 'year_'+str(self.options.year) }
         self.year_g = inkex.etree.SubElement(parent, 'g', txt_atts)
-        txt_atts = {'style': inkex.formatStyle(self.style_year),
+        txt_atts = {'style': str(inkex.Style(self.style_year)),
                     'x': str(self.doc_w / 2 ),
                     'y': str(self.day_w * 1.5)}
         inkex.etree.SubElement(self.year_g, 'text', txt_atts).text = str(self.options.year)

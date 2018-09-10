@@ -146,7 +146,7 @@ class Project(inkex.Effect):
                 csp[2] = self.project_point(csp[2], matrix)
         mat = inkex.invertTransform(mat)
         inkex.applyTransformToPath(mat, point)
-        path.set('d', inkex.formatPath(point))
+        path.set('d', str(inkex.Path(point)))
 
     def project_point(self, point, matrix):
         return [(point[X] * matrix[0][0] + point[Y] * matrix[0][1] + matrix[0][2]) /

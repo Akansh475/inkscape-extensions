@@ -998,7 +998,7 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
 ### Style related
 
 def extract_style(node, style_attrib="style"):
-    #return simplestyle.parseStyle(node.get("style"))
+    #return dict(inkex.Style.parse_str(node.get("style")))
 
     # Work around a simplestyle bug in older versions of Inkscape
     # that leaves spaces at the beginning and end of values
@@ -1012,7 +1012,7 @@ def extract_color(style, color_attrib, *opacity_attribs):
     if color_attrib in style.keys():
         if style[color_attrib] == "none":
             return [1, 1, 1, 0]
-        c = simplestyle.parseColor(style[color_attrib])
+        c = inkex.Color(style[color_attrib]).to_rgb()
     else:
         c = (0, 0, 0)
 

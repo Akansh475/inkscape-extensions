@@ -227,7 +227,7 @@ class PathScatter(pathmodifier.Diffeo):
         mat=[[1,0,-(bbox[0]+bbox[1])/2],[0,1,-(bbox[2]+bbox[3])/2]]
         if self.options.vertical:
             bbox=[-bbox[3],-bbox[2],bbox[0],bbox[1]]
-            mat = inkex.composeTransform([[0,-1,0],[1,0,0]],mat)
+            mat = simpletransform.composeTransform([[0,-1,0],[1,0,0]],mat)
         mat[1][2] += self.options.noffset
         inkex.applyTransformToNode(mat,self.patternNode)
                 
@@ -237,7 +237,7 @@ class PathScatter(pathmodifier.Diffeo):
 		#check if group and expand it
         patternList = []
         if self.options.grouppick and (self.patternNode.tag == inkex.addNS('g','svg') or self.patternNode.tag=='g') :
-            mat = inkex.parseTransform(self.patternNode.get("transform"))
+            mat = simpletransform.parseTransform(self.patternNode.get("transform"))
             for child in self.patternNode:
                 inkex.applyTransformToNode(mat,child)
                 patternList.append(child)

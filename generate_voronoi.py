@@ -167,23 +167,23 @@ class Pattern(inkex.Effect):
                 path += 'M %.3f,%.3f %.3f,%.3f ' % (x1, y1, x2, y2)
 
         patternstyle = {'stroke': '#000000', 'stroke-width': str(scale)}
-        attribs = {'d': path, 'style': inkex.formatStyle(patternstyle)}
+        attribs = {'d': path, 'style': str(inkex.Style(patternstyle))}
         inkex.etree.SubElement(pattern, inkex.addNS('path', 'svg'), attribs)
 
         # link selected object to pattern
         obj = self.selected[self.options.ids[0]]
         style = {}
         if obj.attrib.has_key('style'):
-            style = inkex.parseStyle(obj.attrib['style'])
+            style = dict(inkex.Style.parse_str(obj.attrib['style']))
         style['fill'] = 'url(#%s)' % pattern.get('id')
-        obj.attrib['style'] = inkex.formatStyle(style)
+        obj.attrib['style'] = str(inkex.Style(style))
         if obj.tag == inkex.addNS('g', 'svg'):
             for node in obj:
                 style = {}
                 if node.attrib.has_key('style'):
-                    style = inkex.parseStyle(node.attrib['style'])
+                    style = dict(inkex.Style.parse_str(node.attrib['style']))
                 style['fill'] = 'url(#%s)' % pattern.get('id')
-                node.attrib['style'] = inkex.formatStyle(style)
+                node.attrib['style'] = str(inkex.Style(style))
 
 if __name__ == '__main__':
     e = Pattern()

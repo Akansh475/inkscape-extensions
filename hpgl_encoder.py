@@ -27,6 +27,7 @@ from distutils.spawn import find_executable
 from subprocess import Popen, PIPE
 
 import inkex
+import simpletransform
 
 
 class hpglEncoder:
@@ -54,7 +55,7 @@ class hpglEncoder:
         '''
         self.options = effect.options
         if self.options.convertObjects:
-            self.doc = self.convertObjectsToPaths(effect.args[-1], effect.document)
+            self.doc = self.convertObjectsToPaths(effect.options.input_file, effect.document)
         else:
             self.doc = effect.document.getroot()
         self.docWidth = effect.unittouu(self.doc.get('width'))
@@ -132,7 +133,7 @@ class hpglEncoder:
     def getHpgl(self):
         # dryRun to find edges
         groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0], [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
-        groupmat = inkex.composeTransform(groupmat, inkex.parseTransform('rotate(' + self.options.orientation + ')'))
+        groupmat = simpletransform.composeTransform(groupmat, simpletransform.parseTransform('rotate(' + self.options.orientation + ')'))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         self.processGroups(self.doc, groupmat)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
@@ -179,7 +180,7 @@ class hpglEncoder:
         # initialize transformation matrix and cache
         groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, -self.divergenceX + self.offsetX],
             [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, -self.divergenceY + self.offsetY]]
-        groupmat = inkex.composeTransform(groupmat, inkex.parseTransform('rotate(' + self.options.orientation + ')'))
+        groupmat = simpletransform.composeTransform(groupmat, simpletransform.parseTransform('rotate(' + self.options.orientation + ')'))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
@@ -241,14 +242,14 @@ class hpglEncoder:
         # get and merge two matrixes into one
         trans = doc.get('transform')
         if trans:
-            return inkex.composeTransform(matrix, inkex.parseTransform(trans))
+            return simpletransform.composeTransform(matrix, simpletransform.parseTransform(trans))
         else:
             return matrix
 
     def isGroupVisible(self, group):
         style = group.get('style')
         if style:
-            style = inkex.parseStyle(style)
+            style = dict(inkex.Style.parse_str(style))
             if 'display' in style and style['display'] == 'none':
                 return False
         return True

@@ -617,7 +617,7 @@ def draw_SVG_square((w,h), (x,y), parent):
             }
                 
     attribs = {
-        'style'     :simplestyle.formatStyle(style),
+        'style'     :str(inkex.Style(style)),
         'height'    : str(h),
         'width'     : str(w),
         'x'         : str(x),

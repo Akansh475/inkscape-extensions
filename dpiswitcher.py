@@ -149,28 +149,28 @@ def check_text_on_path(svg, element, scale_x, scale_y):
             skip = True
             # scale offset
             if 'transform' in element.attrib:
-                mat = inkex.parseTransform(element.get('transform'))
+                mat = simpletransform.parseTransform(element.get('transform'))
                 mat[0][2] *= scale_x
                 mat[1][2] *= scale_y
                 element.set('transform', inkex.formatTransform(mat))
             # scale font size
-            mat = inkex.parseTransform(
+            mat = simpletransform.parseTransform(
                 'scale({},{})'.format(scale_x, scale_y))
             det = abs(mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0])
             descrim = math.sqrt(abs(det))
             prop = 'font-size'
             # outer text
-            sdict = inkex.parseStyle(element.get('style'))
+            sdict = dict(inkex.Style.parse_str(element.get('style')))
             if prop in sdict:
                 sdict[prop] = float(sdict[prop]) * descrim
-                element.set('style', inkex.formatStyle(sdict))
+                element.set('style', str(inkex.Style(sdict)))
             # inner tspans
             for child in element.iterdescendants():
                 if child.tag == inkex.addNS('tspan', 'svg'):
-                    sdict = inkex.parseStyle(child.get('style'))
+                    sdict = dict(inkex.Style.parse_str(child.get('style')))
                     if prop in sdict:
                         sdict[prop] = float(sdict[prop]) * descrim
-                        child.set('style', inkex.formatStyle(sdict))
+                        child.set('style', str(inkex.Style(sdict)))
     return skip
 
 
@@ -183,7 +183,7 @@ def check_use(svg, element, scale_x, scale_y):
             skip = True
             # scale offset
             if 'transform' in element.attrib:
-                mat = inkex.parseTransform(element.get('transform'))
+                mat = simpletransform.parseTransform(element.get('transform'))
                 mat[0][2] *= scale_x
                 mat[1][2] *= scale_y
                 element.set('transform', inkex.formatTransform(mat))
@@ -332,7 +332,7 @@ class DPISwitcher(inkex.Effect):
 
                 # set preserved transforms on top-level elements
                 if width_scale != 1.0 and height_scale != 1.0:
-                    mat = inkex.parseTransform(
+                    mat = simpletransform.parseTransform(
                         'scale({},{})'.format(width_scale, height_scale))
                     inkex.applyTransformToNode(mat, element)
 

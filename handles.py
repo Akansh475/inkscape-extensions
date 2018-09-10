@@ -48,7 +48,7 @@ class Handles(inkex.Effect):
                         'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
                         'stroke': '#000000', 'stroke-linecap': 'butt', 
                         'fill': 'none'}
-                    attribs = {'style':inkex.formatStyle(s),'d':inkex.formatPath(a)}
+                    attribs = {'style':str(inkex.Style(s)),'d':str(inkex.Path(a))}
                     inkex.etree.SubElement(node.getparent(), inkex.addNS('path','svg'), attribs)
                     
 if __name__ == '__main__':

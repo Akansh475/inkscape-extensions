@@ -231,7 +231,7 @@ class Length(inkex.Effect):
                     'text-anchor': anchor, 'font-size': str(self.options.fontsize),
                     'fill-opacity': '1.0', 'stroke': 'none',
                     'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
-                new.set('style', inkex.formatStyle(s))
+                new.set('style', str(inkex.Style(s)))
                 new.set(inkex.addNS('href','xlink'), '#'+id)
                 new.set('startOffset', startOffset)
                 new.set('dy', str(dy)) # dubious merit
@@ -251,7 +251,7 @@ class Length(inkex.Effect):
                     'text-anchor': anchor, 'font-size': str(self.options.fontsize),
                     'fill-opacity': '1.0', 'stroke': 'none',
                     'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
-                new.set('style', inkex.formatStyle(s))
+                new.set('style', str(inkex.Style(s)))
                 new.set('dy', str(dy))
                 if text[-2:] == "^2":
                     appendSuperScript(new, "2")

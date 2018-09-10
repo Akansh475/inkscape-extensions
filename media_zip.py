@@ -151,7 +151,7 @@ class CompressedMediaOutput(inkex.Effect):
         fonts = []
         s = ''
         if 'style' in node.attrib:
-            s = inkex.parseStyle(node.attrib['style'])
+            s = dict(inkex.Style.parse_str(node.attrib['style']))
         if not s:
             return fonts
             

@@ -22,6 +22,7 @@ import math
 from StringIO import StringIO
 # local library
 import inkex
+from inkex.localize import _
 
 
 class hpglDecoder:

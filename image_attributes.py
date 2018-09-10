@@ -78,7 +78,7 @@ class SetAttrImage(inkex.Effect):
                     if node.get(key):
                         del node.attrib[key]
             elif key == 'image-rendering':
-                node_style = simplestyle.parseStyle(node.get('style'))
+                node_style = dict(inkex.Style.parse_str(node.get('style')))
                 if key not in node_style:
                     # set presentation attribute
                     if value != "unset":
@@ -92,7 +92,7 @@ class SetAttrImage(inkex.Effect):
                         node_style[key] = str(value)
                     else:
                         del node_style[key]
-                    node.set('style', simplestyle.formatStyle(node_style))
+                    node.set('style', str(inkex.Style(node_style)))
             else:
                 pass
 

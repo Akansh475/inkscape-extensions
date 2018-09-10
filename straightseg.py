@@ -61,7 +61,7 @@ class SegmentStraightener(inkex.Effect):
                         last = subPathStart[:]
                     else:
                         last = params[-2:]
-                node.set('d', inkex.formatPath(p))
+                node.set('d', str(inkex.Path(p)))
 
 if __name__ == '__main__':
     SegmentStraightener().affect()

@@ -166,10 +166,10 @@ class Gears(inkex.Effect):
 
         # Create SVG Path for gear
         style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
-        gear_attribs = {'style':inkex.formatStyle(style), 'd':path}
+        gear_attribs = {'style':str(inkex.Style(style)), 'd':path}
         gear = inkex.etree.SubElement(g, inkex.addNS('path','svg'), gear_attribs )
         if(centerdiameter > 0.0):
-            center_attribs = {'style':inkex.formatStyle(style), 
+            center_attribs = {'style':str(inkex.Style(style)), 
                 inkex.addNS('cx','sodipodi')        :'0.0',
                 inkex.addNS('cy','sodipodi')        :'0.0',
                 inkex.addNS('rx','sodipodi')        :str(centerdiameter/2),

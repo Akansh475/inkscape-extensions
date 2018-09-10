@@ -113,7 +113,7 @@ class LSystem(inkex.Effect):
             'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
             'stroke': '#000000', 'stroke-linecap': 'butt', 
             'fill': 'none'}
-        attribs = {'style': inkex.formatStyle(s),'d':self.iterate()}
+        attribs = {'style': str(inkex.Style(s)),'d':self.iterate()}
         inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'),attribs)
 
 if __name__ == '__main__':

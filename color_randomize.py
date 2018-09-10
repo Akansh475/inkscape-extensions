@@ -8,29 +8,23 @@ import inkex
 class C(coloreffect.ColorEffect):
     def __init__(self):
         coloreffect.ColorEffect.__init__(self)
-        self.OptionParser.add_option("-y", "--hue_range",
-            action="store", type="int", 
+        self.arg_parser.add_argument("-y", "--hue_range", type=int,
             dest="hue_range", default=0,
             help="Hue range")
-        self.OptionParser.add_option("-t", "--saturation_range",
-            action="store", type="int", 
+        self.arg_parser.add_argument("-t", "--saturation_range", type=int,
             dest="saturation_range", default=0,
             help="Saturation range")
-        self.OptionParser.add_option("-m", "--lightness_range",
-            action="store", type="int", 
+        self.arg_parser.add_argument("-m", "--lightness_range", type=int,
             dest="lightness_range", default=0,
             help="Lightness range")
-        self.OptionParser.add_option("-o", "--opacity_range",
-            action="store", type="int", 
+        self.arg_parser.add_argument("-o", "--opacity_range", type=int,
             dest="opacity_range", default=0,
             help="Opacity range")
-        self.OptionParser.add_option("--tab",
-            action="store", type="string",
-            dest="tab",
+        self.arg_parser.add_argument("--tab",
             help="The selected UI-tab when OK was pressed")
 
     def randomize_hsl(self, limit, current_value):
-        limit = 255.0 * limit / 100.0
+        limit = 255.0 * float(limit) / 100.0
         limit /= 2
         max = int((current_value * 255.0) + limit)
         min = int((current_value * 255.0) - limit)

@@ -74,7 +74,7 @@ class Spirograph(inkex.Effect):
 
         new = inkex.etree.Element(inkex.addNS('path','svg'))
         s = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
-        new.set('style', inkex.formatStyle(s))
+        new.set('style', str(inkex.Style(s)))
 
         pathString = ''
         maxPointCount = 1000

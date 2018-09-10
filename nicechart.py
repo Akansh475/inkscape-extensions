@@ -130,12 +130,12 @@ class NiceChart(inkex.Effect):
               help="color-scheme")
 
         # Define string option "--colors_override"
-        self.OptionParser.add_option("", "--colors_override", action="store",
+        self.OptionParser.add_option("--colors_override", action="store",
               type="string", dest="colors_override", default='',
               help="color-scheme-override")
         
 
-        self.OptionParser.add_option("", "--reverse_colors", action="store",
+        self.OptionParser.add_option("--reverse_colors", action="store",
               type="inkbool", dest="reverse_colors", default='False',
               help="reverse color-scheme")
         
@@ -148,11 +148,11 @@ class NiceChart(inkex.Effect):
               type="int", dest="col_val", default='1',
               help="column that contains the values")
               
-        self.OptionParser.add_option("", "--encoding", action="store",
+        self.OptionParser.add_option("--encoding", action="store",
               type="string", dest="encoding", default='utf-8',
               help="encoding of the CSV file, e.g. utf-8")
         
-        self.OptionParser.add_option("", "--headings", action="store",
+        self.OptionParser.add_option("--headings", action="store",
               type="inkbool", dest="headings", default='False',
               help="the first line of the CSV file consists of headings for the columns")
               
@@ -176,18 +176,18 @@ class NiceChart(inkex.Effect):
             type="int", dest="bar_offset", default='5',
             help="distance between bars")
             
-        self.OptionParser.add_option("", "--stroke-width", action="store",
+        self.OptionParser.add_option("--stroke-width", action="store",
             type="float", dest="stroke_width", default='1')
             
         self.OptionParser.add_option("-o", "--text-offset", action="store",
             type="int", dest="text_offset", default='5',
             help="distance between bar and descriptions")
         
-        self.OptionParser.add_option("", "--heading-offset", action="store",
+        self.OptionParser.add_option("--heading-offset", action="store",
             type="int", dest="heading_offset", default='50',
             help="distance between chart and chart title")
         
-        self.OptionParser.add_option("", "--segment-overlap", action="store",
+        self.OptionParser.add_option("--segment-overlap", action="store",
             type="inkbool", dest="segment_overlap", default='False',
             help="work around aliasing effects by letting pie chart segments overlap")
             
@@ -203,7 +203,7 @@ class NiceChart(inkex.Effect):
             type="string", dest="font_color", default='black',
             help="font color of description")
         #Dummy:
-        self.OptionParser.add_option("","--input_sections")
+        self.OptionParser.add_option("--input_sections")
 
         self.OptionParser.add_option("-V", "--show_values", action="store",
             type="inkbool", dest="show_values", default='False',

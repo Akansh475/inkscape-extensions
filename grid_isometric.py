@@ -31,14 +31,14 @@ from simpletransform import computePointInNode
 
 def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    line_attribs = {'style':simplestyle.formatStyle(style),
+    line_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
 
 def draw_SVG_rect(x,y,w,h, width, fill, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill':fill}
-    rect_attribs = {'style':simplestyle.formatStyle(style),
+    rect_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,
                     'x':str(x), 'y':str(y), 'width':str(w), 'height':str(h)}
     inkex.etree.SubElement(parent, inkex.addNS('rect','svg'), rect_attribs )

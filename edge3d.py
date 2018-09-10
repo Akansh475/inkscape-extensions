@@ -108,7 +108,7 @@ class Edge3d(inkex.Effect):
                         if g is None:
                             g = self.getGroup(node)
                         nn = copy.deepcopy(node)
-                        nn.set('d',simplepath.formatPath(result))
+                        nn.set('d',str(inkex.Path(result)))
                         
                         col = 255 - int(255. * level)
                         a = 'fill:none;stroke:#%02x%02x%02x;stroke-opacity:1;stroke-width:10;%s' % ((col,)*3 + (self.filtId,))

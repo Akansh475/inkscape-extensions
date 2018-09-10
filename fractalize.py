@@ -79,7 +79,7 @@ class PathFractalize(inkex.Effect):
                             y1 = y2
                             a.append(['L',params[-2:]])
 
-                node.set('d', inkex.formatPath(a))
+                node.set('d', str(inkex.Path(a)))
 
     def fractalize(self,a,x1,y1,x2,y2,s,f):
         subdivPoint = calculateSubdivision(x1,y1,x2,y2,f)

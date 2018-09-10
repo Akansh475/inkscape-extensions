@@ -189,19 +189,19 @@ def deprecate(func):
     equivalent in the new API. The one-liner has to passed as a string
     to the decorator.
 
-    >>> @deprecated
+    >>> @deprecate
     >>> def someOldFunction(*args):
     >>>     '''Example replacement code someNewFunction('foo', ...)'''
     >>>     someNewFunction('foo', *args)
 
     Or if the args API is the same:
 
-    >>> someOldFunction = deprecated(someNewFunction)
+    >>> someOldFunction = deprecate(someNewFunction)
 
     """
-    def _inner(func):
+    def _inner(*args, **kwargs):
         warnings.warn('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), DeprecationWarning)
-        return func()
+        return func(*args, **kwargs)
     return _inner
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

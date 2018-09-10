@@ -72,7 +72,6 @@ gcodetools_current_version = "1.7"
 # standard library
 import os
 import math
-import bezmisc
 import re
 import copy
 import sys
@@ -80,24 +79,16 @@ import time
 import cmath
 import codecs
 import random
+import numpy
 # local library
 import inkex
 import simplestyle
 import simplepath
 import cubicsuperpath
 import simpletransform
-import bezmisc
+import inkex.bezier as bezmisc
+from inkex.localize import _
  
-### Check if inkex has errormsg (0.46 version does not have one.) Could be removed later.
-if "errormsg" not in dir(inkex):
-	inkex.errormsg = lambda msg: sys.stderr.write((unicode(msg) + "\n").encode("UTF-8"))
-
-try:
-    import numpy
-except:
-    inkex.errormsg(_("Failed to import the numpy modules. These modules are required by this extension. Please install them and try again.  On a Debian-like system this can be done with the command, sudo apt-get install python-numpy."))
-    exit()
-
 
 def bezierslopeatt(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)),t):
 	ax,ay,bx,by,cx,cy,x0,y0=bezmisc.bezierparameterize(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)))
@@ -164,62 +155,62 @@ intersection_recursion_depth = 10
 intersection_tolerance = 0.00001
 
 styles = {
-		"in_out_path_style" : simplestyle.formatStyle({ 'stroke': '#0072a7', 'fill': 'none', 'stroke-width':'1', 'marker-mid':'url(#InOutPathMarker)' }),
+		"in_out_path_style" : str(inkex.Style({ 'stroke': '#0072a7', 'fill': 'none', 'stroke-width':'1', 'marker-mid':'url(#InOutPathMarker)' })),
 		
 		"loft_style" : {
-				'main curve':	simplestyle.formatStyle({ 'stroke': '#88f', 'fill': 'none', 'stroke-width':'1', 'marker-end':'url(#Arrow2Mend)' }),
+				'main curve':	str(inkex.Style({ 'stroke': '#88f', 'fill': 'none', 'stroke-width':'1', 'marker-end':'url(#Arrow2Mend)' })),
 			},
 		"biarc_style" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#88f', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#8f8', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#f88', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#777', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#88f', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#8f8', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'line':		str(inkex.Style({ 'stroke': '#f88', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'area':		str(inkex.Style({ 'stroke': '#777', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' })),
 			},
 		"biarc_style_dark" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#33a', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#3a3', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#a33', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#222', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#33a', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#3a3', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'line':		str(inkex.Style({ 'stroke': '#a33', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'area':		str(inkex.Style({ 'stroke': '#222', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
 		"biarc_style_dark_area" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#33a', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#3a3', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#a33', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#222', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#33a', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#3a3', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' })),
+				'line':		str(inkex.Style({ 'stroke': '#a33', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.1' })),
+				'area':		str(inkex.Style({ 'stroke': '#222', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
 		"biarc_style_i"  : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#880', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#808', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#088', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#999', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#880', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#808', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'line':		str(inkex.Style({ 'stroke': '#088', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'area':		str(inkex.Style({ 'stroke': '#999', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
 		"biarc_style_dark_i" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#dd5', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#d5d', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#5dd', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#dd5', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#d5d', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'line':		str(inkex.Style({ 'stroke': '#5dd', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'1' })),
+				'area':		str(inkex.Style({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
 		"biarc_style_lathe_feed" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#07f', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#0f7', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#f44', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#07f', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#0f7', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'line':		str(inkex.Style({ 'stroke': '#f44', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'area':		str(inkex.Style({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
 		"biarc_style_lathe_passing feed" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#07f', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#0f7', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#f44', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#07f', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#0f7', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'line':		str(inkex.Style({ 'stroke': '#f44', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'area':		str(inkex.Style({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
 		"biarc_style_lathe_fine feed" : {
-				'biarc0':	simplestyle.formatStyle({ 'stroke': '#7f0', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'biarc1':	simplestyle.formatStyle({ 'stroke': '#f70', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'line':		simplestyle.formatStyle({ 'stroke': '#744', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' }),
-				'area':		simplestyle.formatStyle({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' }),
+				'biarc0':	str(inkex.Style({ 'stroke': '#7f0', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'biarc1':	str(inkex.Style({ 'stroke': '#f70', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'line':		str(inkex.Style({ 'stroke': '#744', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'.4' })),
+				'area':		str(inkex.Style({ 'stroke': '#aaa', 'fill': 'none', "marker-end":"url(#DrawCurveMarker)", 'stroke-width':'0.3' })),
 			},
-		"area artefact": 		simplestyle.formatStyle({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' }),
-		"area artefact arrow":	simplestyle.formatStyle({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' }),
-		"dxf_points":		 	simplestyle.formatStyle({ "stroke": "#ff0000", "fill": "#ff0000"}),
+		"area artefact": 		str(inkex.Style({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' })),
+		"area artefact arrow":	str(inkex.Style({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' })),
+		"dxf_points":		 	str(inkex.Style({ "stroke": "#ff0000", "fill": "#ff0000"})),
 		
 	}
 
@@ -1843,10 +1834,10 @@ class Biarc:
 		gcodetools.set_markers()
 
 		for i in [0,1]:
-			style['biarc%s_r'%i] = simplestyle.parseStyle(style['biarc%s'%i])
+			style['biarc%s_r'%i] = dict(inkex.Style.parse_str(style['biarc%s'%i]))
 			style['biarc%s_r'%i]["marker-start"] = "url(#DrawCurveMarker_r)"
 			del(style['biarc%s_r'%i]["marker-end"])
-			style['biarc%s_r'%i] = simplestyle.formatStyle(style['biarc%s_r'%i])
+			style['biarc%s_r'%i] = str(inkex.Style(style['biarc%s_r'%i]))
 		
 		if group==None:
 			if "preview_groups" not in dir(options.self) :
@@ -3564,108 +3555,109 @@ class Gcodetools(inkex.Effect):
 		
 		
 	def __init__(self):
-		inkex.Effect.__init__(self)
-		self.OptionParser.add_option("-d", "--directory",					action="store", type="string", 		dest="directory", default="/home/",					help="Directory for gcode file")
-		self.OptionParser.add_option("-f", "--filename",					action="store", type="string", 		dest="file", default="-1.0",						help="File name")			
-		self.OptionParser.add_option("",   "--add-numeric-suffix-to-filename", action="store", type="inkbool",	dest="add_numeric_suffix_to_filename", default=True,help="Add numeric suffix to filename")			
-		self.OptionParser.add_option("",   "--Zscale",						action="store", type="float", 		dest="Zscale", default="1.0",						help="Scale factor Z")				
-		self.OptionParser.add_option("",   "--Zoffset",						action="store", type="float", 		dest="Zoffset", default="0.0",						help="Offset along Z")
-		self.OptionParser.add_option("-s", "--Zsafe",						action="store", type="float", 		dest="Zsafe", default="0.5",						help="Z above all obstacles")
-		self.OptionParser.add_option("-z", "--Zsurface",					action="store", type="float", 		dest="Zsurface", default="0.0",						help="Z of the surface")
-		self.OptionParser.add_option("-c", "--Zdepth",						action="store", type="float", 		dest="Zdepth", default="-0.125",					help="Z depth of cut")
-		self.OptionParser.add_option("",   "--Zstep",						action="store", type="float", 		dest="Zstep", default="-0.125",						help="Z step of cutting")		
-		self.OptionParser.add_option("-p", "--feed",						action="store", type="float", 		dest="feed", default="4.0",							help="Feed rate in unit/min")
+		super(Gcodetools, self).__init__()
+                add_argument = self.arg_parser.add_argument
+		add_argument("-d", "--directory", default="/home/", help="Directory for gcode file")
+		add_argument("-f", "--filename", dest="file", default="-1.0", help="File name")
+		add_argument("--add-numeric-suffix-to-filename", type=inkex.inkbool, default=True, help="Add numeric suffix to filename")
+		add_argument("--Zscale", type=float, default="1.0", help="Scale factor Z")
+		add_argument("--Zoffset", type=float, default="0.0", help="Offset along Z")
+		add_argument("-s", "--Zsafe", type=float, default="0.5", help="Z above all obstacles")
+		add_argument("-z", "--Zsurface", type=float, default="0.0", help="Z of the surface")
+		add_argument("-c", "--Zdepth", type=float, default="-0.125", help="Z depth of cut")
+		add_argument("--Zstep", type=float, default="-0.125", help="Z step of cutting")
+		add_argument("-p", "--feed", type=float, default="4.0", help="Feed rate in unit/min")
 
-		self.OptionParser.add_option("",   "--biarc-tolerance",				action="store", type="float", 		dest="biarc_tolerance", default="1",				help="Tolerance used when calculating biarc interpolation.")				
-		self.OptionParser.add_option("",   "--biarc-max-split-depth",		action="store", type="int", 		dest="biarc_max_split_depth", default="4",			help="Defines maximum depth of splitting while approximating using biarcs.")				
-		self.OptionParser.add_option("",   "--path-to-gcode-order",			action="store", type="string", 		dest="path_to_gcode_order", default="path by path",	help="Defines cutting order path by path or layer by layer.")				
-		self.OptionParser.add_option("",   "--path-to-gcode-depth-function",action="store", type="string", 		dest="path_to_gcode_depth_function", default="zd",	help="Path to gcode depth function.")				
-		self.OptionParser.add_option("",   "--path-to-gcode-sort-paths",	action="store", type="inkbool",		dest="path_to_gcode_sort_paths", default=True,		help="Sort paths to reduce rapid distance.")		
-		self.OptionParser.add_option("",   "--comment-gcode",				action="store", type="string", 		dest="comment_gcode", default="",					help="Comment Gcode")				
-		self.OptionParser.add_option("",   "--comment-gcode-from-properties",action="store", type="inkbool", 	dest="comment_gcode_from_properties", default=False,help="Get additional comments from Object Properties")				
-
-
-
-		self.OptionParser.add_option("",   "--tool-diameter",				action="store", type="float", 		dest="tool_diameter", default="3",					help="Tool diameter used for area cutting")		
-		self.OptionParser.add_option("",   "--max-area-curves",				action="store", type="int", 		dest="max_area_curves", default="100",				help="Maximum area curves for each area")
-		self.OptionParser.add_option("",   "--area-inkscape-radius",		action="store", type="float", 		dest="area_inkscape_radius", default="0",			help="Area curves overlaping (depends on tool diameter [0,0.9])")
-		self.OptionParser.add_option("",   "--area-tool-overlap",			action="store", type="float", 		dest="area_tool_overlap", default="-10",			help="Radius for preparing curves using inkscape")
-		self.OptionParser.add_option("",   "--unit",						action="store", type="string", 		dest="unit", default="G21 (All units in mm)",		help="Units")
-		self.OptionParser.add_option("",   "--active-tab",					action="store", type="string", 		dest="active_tab", default="",						help="Defines which tab is active")
-
-		self.OptionParser.add_option("",   "--area-fill-angle",				action="store", type="float", 		dest="area_fill_angle", default="0",					help="Fill area with lines heading this angle")
-		self.OptionParser.add_option("",   "--area-fill-shift",				action="store", type="float", 		dest="area_fill_shift", default="0",					help="Shift the lines by tool d * shift")
-		self.OptionParser.add_option("",   "--area-fill-method",			action="store", type="string", 		dest="area_fill_method", default="zig-zag",					help="Filling method either zig-zag or spiral")
-
-		self.OptionParser.add_option("",   "--area-find-artefacts-diameter",action="store", type="float", 		dest="area_find_artefacts_diameter", default="1",					help="Artefacts seeking radius")
-		self.OptionParser.add_option("",   "--area-find-artefacts-action",	action="store", type="string",	 	dest="area_find_artefacts_action", default="mark with an arrow",	help="Artefacts action type")
-
-		self.OptionParser.add_option("",   "--auto_select_paths",			action="store", type="inkbool",		dest="auto_select_paths", default=True,				help="Select all paths if nothing is selected.")		
-
-		self.OptionParser.add_option("",   "--loft-distances",				action="store", type="string", 		dest="loft_distances", default="10",				help="Distances between paths.")
-		self.OptionParser.add_option("",   "--loft-direction",				action="store", type="string", 		dest="loft_direction", default="crosswise",			help="Direction of loft's interpolation.")
-		self.OptionParser.add_option("",   "--loft-interpolation-degree",	action="store", type="float",		dest="loft_interpolation_degree", default="2",		help="Which interpolation use to loft the paths smooth interpolation or staright.")
-
-		self.OptionParser.add_option("",   "--min-arc-radius",				action="store", type="float", 		dest="min_arc_radius", default=".1",				help="All arc having radius less than minimum will be considered as straight line")		
-
-		self.OptionParser.add_option("",   "--engraving-sharp-angle-tollerance",action="store", type="float",	dest="engraving_sharp_angle_tollerance", default="150",		help="All angles thar are less than engraving-sharp-angle-tollerance will be thought sharp")		
-		self.OptionParser.add_option("",   "--engraving-max-dist",			action="store", type="float", 		dest="engraving_max_dist", default="10",					help="Distance from original path where engraving is not needed (usually it's cutting tool diameter)")		
-		self.OptionParser.add_option("",   "--engraving-newton-iterations", action="store", type="int", 		dest="engraving_newton_iterations", default="4",			help="Number of sample points used to calculate distance")		
-		self.OptionParser.add_option("",   "--engraving-draw-calculation-paths",action="store", type="inkbool",	dest="engraving_draw_calculation_paths", default=False,		help="Draw additional graphics to debug engraving path")		
-		self.OptionParser.add_option("",   "--engraving-cutter-shape-function",action="store", type="string", 	dest="engraving_cutter_shape_function", default="w",		help="Cutter shape function z(w). Ex. cone: w. ")
-
-		self.OptionParser.add_option("",   "--lathe-width",					action="store", type="float", 		dest="lathe_width", default=10.,							help="Lathe width")
-		self.OptionParser.add_option("",   "--lathe-fine-cut-width",		action="store", type="float", 		dest="lathe_fine_cut_width", default=1.,					help="Fine cut width")
-		self.OptionParser.add_option("",   "--lathe-fine-cut-count",		action="store", type="int", 		dest="lathe_fine_cut_count", default=1.,					help="Fine cut count")
-		self.OptionParser.add_option("",   "--lathe-create-fine-cut-using",	action="store", type="string",		dest="lathe_create_fine_cut_using", default="Move path",			help="Create fine cut using")
-		self.OptionParser.add_option("",   "--lathe-x-axis-remap",			action="store", type="string", 		dest="lathe_x_axis_remap", default="X",						help="Lathe X axis remap")
-		self.OptionParser.add_option("",   "--lathe-z-axis-remap",			action="store", type="string", 		dest="lathe_z_axis_remap", default="Z",						help="Lathe Z axis remap")
-
-		self.OptionParser.add_option("",   "--lathe-rectangular-cutter-width",action="store", type="float", 	dest="lathe_rectangular_cutter_width", default="4",		help="Rectangular cutter width")
-
-		self.OptionParser.add_option("",   "--create-log",					action="store", type="inkbool", 	dest="log_create_log", default=False,				help="Create log files")
-		self.OptionParser.add_option("",   "--log-filename",				action="store", type="string", 		dest="log_filename", default='',					help="Create log files")
-
-		self.OptionParser.add_option("",   "--orientation-points-count",	action="store", type="string", 		dest="orientation_points_count", default="2",			help="Orientation points count")
-		self.OptionParser.add_option("",   "--tools-library-type",			action="store", type="string", 		dest="tools_library_type", default='cylinder cutter',	help="Create tools definition")
-
-		self.OptionParser.add_option("",   "--dxfpoints-action",			action="store", type="string", 		dest="dxfpoints_action", default='replace',			help="dxfpoint sign toggle")
-																										  
-		self.OptionParser.add_option("",   "--help-language",				action="store", type="string", 		dest="help_language", default='http://www.cnc-club.ru/forum/viewtopic.php?f=33&t=35',	help="Open help page in webbrowser.")
-
-		self.OptionParser.add_option("",   "--offset-radius",				action="store", type="float", 		dest="offset_radius", default=10.,		help="Offset radius")
-		self.OptionParser.add_option("",   "--offset-step",					action="store", type="float", 		dest="offset_step", default=10.,		help="Offset step")
-		self.OptionParser.add_option("",   "--offset-draw-clippend-path",	action="store", type="inkbool",		dest="offset_draw_clippend_path", default=False,		help="Draw clipped path")		
-		self.OptionParser.add_option("",   "--offset-just-get-distance",	action="store", type="inkbool",		dest="offset_just_get_distance", default=False,		help="Don't do offset just get distance")		
-	
-		self.OptionParser.add_option("",   "--arrangement-material-width",	action="store", type="float",		dest="arrangement_material_width", default=500,		help="Materials width for arrangement")		
-		self.OptionParser.add_option("",   "--arrangement-population-count",action="store", type="int",			dest="arrangement_population_count", default=100,	help="Genetic algorithm populations count")		
-		self.OptionParser.add_option("",   "--arrangement-inline-test",		action="store", type="inkbool", 	dest="arrangement_inline_test", default=False,	help="Use C-inline test (some additional packets will be needed)")
+		add_argument("--biarc-tolerance", type=float, default="1", help="Tolerance used when calculating biarc interpolation.")
+		add_argument("--biarc-max-split-depth", type=int, default="4", help="Defines maximum depth of splitting while approximating using biarcs.")
+		add_argument("--path-to-gcode-order", default="path by path", help="Defines cutting order path by path or layer by layer.")
+		add_argument("--path-to-gcode-depth-function", default="zd", help="Path to gcode depth function.")
+		add_argument("--path-to-gcode-sort-paths", type=inkex.inkbool, default=True, help="Sort paths to reduce rapid distance.")
+		add_argument("--comment-gcode", default="", help="Comment Gcode")
+		add_argument("--comment-gcode-from-properties", type=inkex.inkbool, default=False, help="Get additional comments from Object Properties")
 
 
-		self.OptionParser.add_option("",   "--postprocessor",				action="store", type="string", 		dest="postprocessor", default='',			help="Postprocessor command.")
-		self.OptionParser.add_option("",   "--postprocessor-custom",		action="store", type="string", 		dest="postprocessor_custom", default='',	help="Postprocessor custom command.")
-	
-		self.OptionParser.add_option("",   "--graffiti-max-seg-length",		action="store", type="float", 		dest="graffiti_max_seg_length", default=1.,	help="Graffiti maximum segment length.")
-		self.OptionParser.add_option("",   "--graffiti-min-radius",			action="store", type="float", 		dest="graffiti_min_radius", default=10.,	help="Graffiti minimal connector's radius.")
-		self.OptionParser.add_option("",   "--graffiti-start-pos",			action="store", type="string", 		dest="graffiti_start_pos", default="(0;0)",	help="Graffiti Start position (x;y).")
-		self.OptionParser.add_option("",   "--graffiti-create-linearization-preview",	action="store", type="inkbool", 	dest="graffiti_create_linearization_preview", default=True,	help="Graffiti create linearization preview.")
-		self.OptionParser.add_option("",   "--graffiti-create-preview",		action="store", type="inkbool", 	dest="graffiti_create_preview", default=True,	help="Graffiti create preview.")
-		self.OptionParser.add_option("",   "--graffiti-preview-size",		action="store", type="int", 		dest="graffiti_preview_size", default=800,	help="Graffiti preview's size.")
-		self.OptionParser.add_option("",   "--graffiti-preview-emmit",		action="store", type="int", 		dest="graffiti_preview_emmit", default=800,	help="Preview's paint emmit (pts/s).")
+
+		add_argument("--tool-diameter", type=float, default="3", help="Tool diameter used for area cutting")
+		add_argument("--max-area-curves", type=int, default="100", help="Maximum area curves for each area")
+		add_argument("--area-inkscape-radius", type=float, default="0", help="Area curves overlaping (depends on tool diameter [0, 0.9])")
+		add_argument("--area-tool-overlap", type=float, default="-10", help="Radius for preparing curves using inkscape")
+		add_argument("--unit", default="G21 (All units in mm)", help="Units")
+		add_argument("--active-tab", default="", help="Defines which tab is active")
+
+		add_argument("--area-fill-angle", type=float, default="0", help="Fill area with lines heading this angle")
+		add_argument("--area-fill-shift", type=float, default="0", help="Shift the lines by tool d * shift")
+		add_argument("--area-fill-method", default="zig-zag", help="Filling method either zig-zag or spiral")
+
+		add_argument("--area-find-artefacts-diameter", type=float, default="1", help="Artefacts seeking radius")
+		add_argument("--area-find-artefacts-action", default="mark with an arrow", help="Artefacts action type")
+
+		add_argument("--auto_select_paths", type=inkex.inkbool, default=True, help="Select all paths if nothing is selected.")
+
+		add_argument("--loft-distances", default="10", help="Distances between paths.")
+		add_argument("--loft-direction", default="crosswise", help="Direction of loft's interpolation.")
+		add_argument("--loft-interpolation-degree", type=float, default="2", help="Which interpolation use to loft the paths smooth interpolation or staright.")
+
+		add_argument("--min-arc-radius", type=float, default=".1", help="All arc having radius less than minimum will be considered as straight line")
+
+		add_argument("--engraving-sharp-angle-tollerance", type=float, default="150", help="All angles thar are less than engraving-sharp-angle-tollerance will be thought sharp")
+		add_argument("--engraving-max-dist", type=float, default="10", help="Distance from original path where engraving is not needed (usually it's cutting tool diameter)")
+		add_argument("--engraving-newton-iterations", type=int, default="4", help="Number of sample points used to calculate distance")
+		add_argument("--engraving-draw-calculation-paths", type=inkex.inkbool, default=False, help="Draw additional graphics to debug engraving path")
+		add_argument("--engraving-cutter-shape-function", default="w", help="Cutter shape function z(w). Ex. cone: w. ")
+
+		add_argument("--lathe-width", type=float, default=10., help="Lathe width")
+		add_argument("--lathe-fine-cut-width", type=float, default=1., help="Fine cut width")
+		add_argument("--lathe-fine-cut-count", type=int, default=1., help="Fine cut count")
+		add_argument("--lathe-create-fine-cut-using", default="Move path", help="Create fine cut using")
+		add_argument("--lathe-x-axis-remap", default="X", help="Lathe X axis remap")
+		add_argument("--lathe-z-axis-remap", default="Z", help="Lathe Z axis remap")
+
+		add_argument("--lathe-rectangular-cutter-width", type=float, default="4", help="Rectangular cutter width")
+
+		add_argument("--create-log", type=inkex.inkbool, dest="log_create_log", default=False, help="Create log files")
+		add_argument("--log-filename", default='', help="Create log files")
+
+		add_argument("--orientation-points-count", default="2", help="Orientation points count")
+		add_argument("--tools-library-type", default='cylinder cutter', help="Create tools definition")
+
+		add_argument("--dxfpoints-action", default='replace', help="dxfpoint sign toggle")
+
+		add_argument("--help-language", default='http://www.cnc-club.ru/forum/viewtopic.php?f=33&t=35', help="Open help page in webbrowser.")
+
+		add_argument("--offset-radius", type=float, default=10., help="Offset radius")
+		add_argument("--offset-step", type=float, default=10., help="Offset step")
+		add_argument("--offset-draw-clippend-path", type=inkex.inkbool, default=False, help="Draw clipped path")
+		add_argument("--offset-just-get-distance", type=inkex.inkbool, default=False, help="Don't do offset just get distance")
+
+		add_argument("--arrangement-material-width", type=float, default=500, help="Materials width for arrangement")
+		add_argument("--arrangement-population-count", type=int, default=100, help="Genetic algorithm populations count")
+		add_argument("--arrangement-inline-test", type=inkex.inkbool, default=False, help="Use C-inline test (some additional packets will be needed)")
 
 
-		self.OptionParser.add_option("",   "--in-out-path",					action="store", type="inkbool", 	dest="in_out_path",	default=True,			help="Create in-out paths")
-		self.OptionParser.add_option("",   "--in-out-path-do-not-add-reference-point",	action="store", type="inkbool", dest="in_out_path_do_not_add_reference_point", default=False,	help="Just add reference in-out point")
-		self.OptionParser.add_option("",   "--in-out-path-point-max-dist",	action="store", type="float", 		dest="in_out_path_point_max_dist", default=10.,	help="In-out path max distance to reference point")
-		self.OptionParser.add_option("",   "--in-out-path-type",			action="store", type="string", 		dest="in_out_path_type", default="Round",	help="In-out path type")
-		self.OptionParser.add_option("",   "--in-out-path-len",				action="store", type="float", 		dest="in_out_path_len", default=10.,		help="In-out path length")
-		self.OptionParser.add_option("",   "--in-out-path-replace-original-path",action="store", type="inkbool", dest="in_out_path_replace_original_path", default=False,	help="Replace original path")
-		self.OptionParser.add_option("",   "--in-out-path-radius",			action="store", type="float", 		dest="in_out_path_radius", default=10.,		help="In-out path radius for round path")
+		add_argument("--postprocessor", default='', help="Postprocessor command.")
+		add_argument("--postprocessor-custom", default='', help="Postprocessor custom command.")
 
-		self.OptionParser.add_option("",   "--plasma-prepare-corners",		action="store", type="inkbool",		dest="plasma_prepare_corners", default=True,	help="Prepare corners")
-		self.OptionParser.add_option("",   "--plasma-prepare-corners-distance", action="store", type="float",	dest="plasma_prepare_corners_distance", default=10.,help="Stepout distance for corners")
-		self.OptionParser.add_option("",   "--plasma-prepare-corners-tolerance", action="store", type="float",	dest="plasma_prepare_corners_tolerance", default=10.,help="Maximum angle for corner (0-180 deg)")
+		add_argument("--graffiti-max-seg-length", type=float, default=1., help="Graffiti maximum segment length.")
+		add_argument("--graffiti-min-radius", type=float, default=10., help="Graffiti minimal connector's radius.")
+		add_argument("--graffiti-start-pos", default="(0;0)", help="Graffiti Start position (x;y).")
+		add_argument("--graffiti-create-linearization-preview", type=inkex.inkbool, default=True, help="Graffiti create linearization preview.")
+		add_argument("--graffiti-create-preview", type=inkex.inkbool, default=True, help="Graffiti create preview.")
+		add_argument("--graffiti-preview-size", type=int, default=800, help="Graffiti preview's size.")
+		add_argument("--graffiti-preview-emmit", type=int, default=800, help="Preview's paint emmit (pts/s).")
+
+
+		add_argument("--in-out-path", type=inkex.inkbool, default=True, help="Create in-out paths")
+		add_argument("--in-out-path-do-not-add-reference-point", type=inkex.inkbool, default=False, help="Just add reference in-out point")
+		add_argument("--in-out-path-point-max-dist", type=float, default=10., help="In-out path max distance to reference point")
+		add_argument("--in-out-path-type", default="Round", help="In-out path type")
+		add_argument("--in-out-path-len", type=float, default=10., help="In-out path length")
+		add_argument("--in-out-path-replace-original-path", type=inkex.inkbool, default=False, help="Replace original path")
+		add_argument("--in-out-path-radius", type=float, default=10., help="In-out path radius for round path")
+
+		add_argument("--plasma-prepare-corners", type=inkex.inkbool, default=True, help="Prepare corners")
+		add_argument("--plasma-prepare-corners-distance", type=float, default=10., help="Stepout distance for corners")
+		add_argument("--plasma-prepare-corners-tolerance", type=float, default=10., help="Maximum angle for corner (0-180 deg)")
 
 		self.default_tool = {
 					"name": "Default tool",
@@ -3766,10 +3758,10 @@ class Gcodetools(inkex.Effect):
 		self.set_markers()
 
 		for i in [0,1]:
-			style['biarc%s_r'%i] = simplestyle.parseStyle(style['biarc%s'%i])
+			style['biarc%s_r'%i] = dict(inkex.Style.parse_str(style['biarc%s'%i]))
 			style['biarc%s_r'%i]["marker-start"] = "url(#DrawCurveMarker_r)"
 			del(style['biarc%s_r'%i]["marker-end"])
-			style['biarc%s_r'%i] = simplestyle.formatStyle(style['biarc%s_r'%i])
+			style['biarc%s_r'%i] = str(inkex.Style(style['biarc%s_r'%i]))
 		
 		if group==None:
 			if "preview_groups" not in dir(self) :
@@ -4144,8 +4136,7 @@ class Gcodetools(inkex.Effect):
 		s = str(s)
 		if type_.lower() in re.split("[\s\n,\.]+", errors.lower()) :
 			print_(s)
-			inkex.errormsg(s+"\n")		
-			sys.exit()
+			raise inkex.AbortExtension(s)
 		elif type_.lower() in re.split("[\s\n,\.]+", warnings.lower()) :
 			print_(s)
 			inkex.errormsg(s+"\n")		
@@ -4153,8 +4144,7 @@ class Gcodetools(inkex.Effect):
 			print_(s)
 		else :
 			print_(s)
-			inkex.errormsg(s)		
-			sys.exit()
+			raise inkex.AbortExtension(s)
 	
 
 ################################################################################
@@ -4354,7 +4344,7 @@ class Gcodetools(inkex.Effect):
 		for i in g:
 			#	Get parameters
 			if i.get("gcodetools") == "Gcodetools tool background" : 
-				tool["style"] = simplestyle.parseStyle(i.get("style"))
+				tool["style"] = dict(inkex.Style.parse_str(i.get("style")))
 			elif i.get("gcodetools") == "Gcodetools tool parameter" :
 				key = None
 				value = None
@@ -4576,8 +4566,8 @@ class Gcodetools(inkex.Effect):
 						for tag in tags :
 							comment += gcode_comment_str("%s: %s"%(tag,tags[tag]))
 
-					style = simplestyle.parseStyle(path.get("style"))
-					colors[id_] = simplestyle.parseColor(style['stroke'] if "stroke"  in style and style['stroke']!='none' else "#000")
+					style = dict(inkex.Style.parse_str(path.get("style")))
+					colors[id_] = inkex.Color(style['stroke'] if "stroke"  in style and style['stroke']!='none' else "#000").to_rgb()
 					if path.get("dxfpoint") == "1":
 						tmp_curve=self.transform_csp(csp, layer)
 						x=tmp_curve[0][0][0][0]
@@ -6020,7 +6010,7 @@ G01 Z1 (going to cutting z)\n""",
 				self.set_tool(layer)
 				tool = self.tools[layer][0]
 				tools_bounds[layer] = tools_bounds[layer] if layer in tools_bounds else [float("inf"),float("-inf")]
-				style = simplestyle.formatStyle(tool["style"])
+				style = str(inkex.Style(tool["style"]))
 				for path in paths[layer] :
 					style = "fill:%s; fill-opacity:%s; stroke:#000044; stroke-width:1; marker-mid:url(#CheckToolsAndOPMarker);" % (
 					tool["style"]["fill"] if "fill" in tool["style"] else "#00ff00", 
@@ -6746,7 +6736,6 @@ G01 Z1 (going to cutting z)\n""",
 		print_("End at %s."%time.strftime("%d.%m.%Y %H:%M:%S"))
 		
 		
-#						
-gcodetools = Gcodetools()
-gcodetools.affect()					
-
+if __name__ == '__main__':
+    gcodetools = Gcodetools()
+    gcodetools.affect()

@@ -162,9 +162,11 @@ def unCubicSuperPath(csp):
     return a
 
 def parseCubicPath(d):
+    from simplepath import parsePath
     return CubicSuperPath(parsePath(d))
 
 def formatCubicPath(p):
+    from simplepath import formatPath
     return formatPath(unCubicSuperPath(p))
 
 

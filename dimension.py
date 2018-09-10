@@ -41,6 +41,7 @@ except:
     bsubprocess = False
 
 import inkex
+from inkex.localize import _
 import pathmodifier
 
 

@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # local library
 from webslicer_effect import *
 import inkex
+from inkex.localize import _
 
 class WebSlicer_CreateGroup(WebSlicer_Effect):
 

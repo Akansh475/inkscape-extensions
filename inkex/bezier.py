@@ -197,6 +197,23 @@ def beziertatslope(arg, d):
             retval.append(i)
     return retval
 
+def tpoint(p1, p2, t):
+    '''Linearly interpolate between p1 and p2.
+
+    t = 0.0 returns p1, t = 1.0 returns p2.
+
+    :return: Interpolated point
+    :rtype: tuple
+
+    :param p1: First point as sequence of two floats
+    :param p2: Second point as sequence of two floats
+    :param t: Number between 0.0 and 1.0
+    :type t: float
+    '''
+    x1, y1 = p1
+    x2, y2 = p2
+    return x1 + t * (x2 - x1), y1 + t * (y2 - y1)
+
 def beziersplitatt(arg, t):
     ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)) = arg
     m1=tpoint((bx0,by0),(bx1,by1),t)

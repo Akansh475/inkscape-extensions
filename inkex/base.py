@@ -90,8 +90,7 @@ class InkscapeExtension(object):
         """Apply some effects on the document or local context"""
         raise NotImplementedError("No effect handle for {}".format(self.name))
 
-    @staticmethod
-    def has_changed(ret):
+    def has_changed(self, ret):
         """Return true if the output should be saved"""
         return ret is not False
 
@@ -143,7 +142,7 @@ class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
     """
     Combine the input and output svg document handling (usually for effects.
     """
-    def has_changed(self):
+    def has_changed(self, ret):
         """Return true if the svg document has changed"""
         original = etree.tostring(self.original_document)
         result = etree.tostring(self.document)

@@ -24,7 +24,7 @@ import copy
 
 from argparse import ArgumentParser
 
-from .utils import filename_arg
+from .utils import filename_arg, AbortExtension
 from .svg import etree, SVG_PARSER
 
 class InkscapeExtension(object):
@@ -33,6 +33,7 @@ class InkscapeExtension(object):
     variable handling features.
     """
     def __init__(self):
+        self.file_io = None
         self.options = None
         self.document = None
         self.arg_parser = ArgumentParser(description=self.__doc__)
@@ -45,37 +46,37 @@ class InkscapeExtension(object):
             "--output", type=str, default=sys.stdout,
             help="Optional output filename for saving the result (default is stdout).")
 
-    def run(self, args=None, output=True, input_=True):
+    def run(self, args=None):
         """Main entrypoint for any Inkscape Extension"""
         if args is None:
             args = sys.argv[1:]
 
         self.options = self.arg_parser.parse_args(args)
 
-        file_io = None
-        if input_:
-            if isinstance(self.options.input_file, str):
-                file_io = open(self.options.input_file, 'rb')
-                self.document = self.load(file_io)
-            else:
-                self.document = self.load(self.options.input_file)
+        try:
+            self.load_raw()
+            ret = self.effect()
+            self.save_raw(ret)
+        except AbortExtension as err:
+            err.write()
+            ret = False
 
-        self.effect()
+    def load_raw(self):
+        """Load the input stream or filename, save everything to self"""
+        if isinstance(self.options.input_file, str):
+            self.file_io = open(self.options.input_file, 'rb')
+            self.document = self.load(self.file_io)
+        else:
+            self.document = self.load(self.options.input_file)
 
-        if output and self.has_changed():
+    def save_raw(self, ret):
+        """Save to the output steam, use everything from self"""
+        if self.has_changed(ret):
             if isinstance(self.options.output, str):
                 with open(self.options.output, 'wb') as stream:
                     self.save(stream)
             else:
                 self.save(self.options.output)
-
-        if file_io is not None:
-            file_io.close()
-
-    @staticmethod
-    def has_changed():
-        """Returns if the effect has changed the document or not (always True)"""
-        return True
 
     def load(self, stream):
         """Takes the input stream and creates a document for parsing"""
@@ -88,6 +89,16 @@ class InkscapeExtension(object):
     def effect(self):
         """Apply some effects on the document or local context"""
         raise NotImplementedError("No effect handle for {}".format(self.name))
+
+    @staticmethod
+    def has_changed(ret):
+        """Return true if the output should be saved"""
+        return ret is not False
+
+    def clean_up(self):
+        """Clean up any open handles and other items"""
+        if self.file_io is not None:
+            self.file_io.close()
 
     @property
     def name(self):
@@ -137,4 +148,3 @@ class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
         original = etree.tostring(self.original_document)
         result = etree.tostring(self.document)
         return original != result
-

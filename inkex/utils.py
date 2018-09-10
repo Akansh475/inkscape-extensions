@@ -81,6 +81,12 @@ def errormsg(msg):
     else:
         sys.stderr.write((unicode(msg, "utf-8", errors='replace') + "\n").encode("utf-8"))
 
+class AbortExtension(Exception):
+    """Raised to print a message to the user without backtrace"""
+    def write(self):
+        """write the error message out to the user"""
+        errormsg(str(self))
+
 class DependencyError(NotImplementedError):
     """Raised when we need an external python module that isn't available"""
 

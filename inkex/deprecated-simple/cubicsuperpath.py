@@ -16,17 +16,17 @@
 # pylint: disable=invalid-name
 """Depricated cubic super path API"""
 
-from inkex.depreciated import depreciate
+from inkex.deprecated import deprecate
 from inkex import cubic_paths
 
-matprod = depreciate(cubic_paths.matprod)
-rotmat = depreciate(cubic_paths.rotmat)
-applymat = depreciate(cubic_paths.applymat)
-norm = depreciate(cubic_paths.norm)
-ArcToPath = depreciate(cubic_paths.ArtToPath)
-CubicSuperPath = depreciate(cubic_paths.CubicSuperPath)
-unCubicSuperPath = depreciate(cubic_paths.unCubicSuperPath)
-parsePath = depreciate(cubic_paths.parsePath)
-formatPath = depreciate(cubic_paths.formatPath)
+matprod = deprecate(cubic_paths.matprod)
+rotmat = deprecate(cubic_paths.rotmat)
+applymat = deprecate(cubic_paths.applymat)
+norm = deprecate(cubic_paths.norm)
+ArcToPath = deprecate(cubic_paths.ArcToPath)
+CubicSuperPath = deprecate(cubic_paths.CubicSuperPath)
+unCubicSuperPath = deprecate(cubic_paths.unCubicSuperPath)
+parsePath = deprecate(cubic_paths.parseCubicPath)
+formatPath = deprecate(cubic_paths.formatCubicPath)
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

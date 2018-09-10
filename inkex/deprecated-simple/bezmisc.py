@@ -16,21 +16,21 @@
 # pylint: disable=invalid-name
 """Depricated bezmisc API"""
 
-from inkex.depricated import depricate
+from inkex.deprecated import deprecate
 from inkex import bezier
 
-bezierparameterize = depricate(bezier.bezierparameterize)
-linebezierintersect = depricate(bezier.linebezierintersect)
-bezierpointatt = depricate(bezier.bezierpointatt)
-bezierslopeatt = depricate(bezier.bezierslopeatt)
-beziertatslope = depricate(bezier.beziertatslope)
-tpoint = depricate(bezier.tpoint)
-beziersplitatt = depricate(bezier.beziersplitatt)
-pointdistance = depricate(bezier.pointdistance)
-Gravesen_addifclose = depricate(bezier.Gravesen_addifclose)
-bezierlengthGravesen = depricate(bezier.bezierlengthGravesen)
-balf = depricate(bezier.balf)
-Simpson = depricate(bezier.Simpson)
-bezierlengthSimpson = depricate(bezier.bezierlengthSimpson)
-beziertatlength = depricate(bezier.beziertatlength)
+bezierparameterize = deprecate(bezier.bezierparameterize)
+linebezierintersect = deprecate(bezier.linebezierintersect)
+bezierpointatt = deprecate(bezier.bezierpointatt)
+bezierslopeatt = deprecate(bezier.bezierslopeatt)
+beziertatslope = deprecate(bezier.beziertatslope)
+tpoint = deprecate(bezier.tpoint)
+beziersplitatt = deprecate(bezier.beziersplitatt)
+pointdistance = deprecate(bezier.pointdistance)
+Gravesen_addifclose = deprecate(bezier.Gravesen_addifclose)
+bezierlengthGravesen = deprecate(bezier.bezierlengthGravesen)
+balf = deprecate(bezier.balf)
+Simpson = deprecate(bezier.Simpson)
+bezierlengthSimpson = deprecate(bezier.bezierlengthSimpson)
+beziertatlength = deprecate(bezier.beziertatlength)
 bezierlength = bezierlengthSimpson

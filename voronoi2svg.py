@@ -27,6 +27,7 @@ Create Voronoi diagram from seeds (midpoints of selected objects)
 
 import random
 import inkex
+from inkex.localize import _
 
 import voronoi
 

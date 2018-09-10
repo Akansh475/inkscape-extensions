@@ -42,7 +42,7 @@ class FrameTest(TestCase):
             , '--width=10'
             , self.data_file('svg', 'single_box.svg')]
         uut = Frame()
-        uut.affect( args, False )
+        uut.affect( args)
         new_frame = self.get_frame(uut.document)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
@@ -71,7 +71,7 @@ class FrameTest(TestCase):
             , '--width=10'
             , self.data_file('svg', 'single_box.svg')]
         uut = Frame()
-        uut.affect( args, False )
+        uut.affect( args)
         new_frame = self.get_frame(uut.document)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
@@ -94,7 +94,7 @@ class FrameTest(TestCase):
             , '--width=10'
             , self.data_file('svg', 'single_box.svg')]
         uut = Frame()
-        uut.affect( args, False )
+        uut.affect( args)
         new_frame = self.get_frame(uut.document)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)

@@ -23,6 +23,7 @@ import tempfile
 # local library
 from webslicer_effect import *
 import inkex
+from inkex.localize import _
 
 
 class WebSlicer_Export(WebSlicer_Effect):

@@ -13,7 +13,7 @@ class StrokeColorBasicTest(TestCase):
 
     def test_empty_defs(self):
         e = MyEffect()
-        e.affect([self.data_file('svg', 'default-plain-SVG.svg')], False)
+        e.affect([self.data_file('svg', 'default-plain-SVG.svg')])
 
 if __name__ == '__main__':
     test_support.run_unittest(StrokeColorBasicTest)

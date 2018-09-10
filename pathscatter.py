@@ -38,6 +38,7 @@ from lxml import etree
 # local library
 import inkex
 import pathmodifier
+from inkex.localize import _
 
 def zSort(inNode,idList):
     sortedList=[]

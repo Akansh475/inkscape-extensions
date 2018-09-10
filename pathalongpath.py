@@ -41,6 +41,7 @@ import cubicsuperpath
 import bezmisc
 import pathmodifier
 import simpletransform
+from inkex.localize import _
 
 
 def flipxy(path):

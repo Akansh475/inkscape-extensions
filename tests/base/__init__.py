@@ -119,7 +119,7 @@ class TestCase(BaseCase):
     def assertEffectEmpty(self, effect, **kwargs): # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""
         args = ['--{}={}'.format(*kw) for kw in kwargs.items()]
-        effect().run([self.empty_svg] + args, False)
+        effect().run([self.empty_svg] + args)
         warnings = getattr(effect, 'warned_about', set())
-        self.assertFalse(warnings, "Depricated API is still being used!")
+       # self.assertFalse(warnings, "Depricated API is still being used!")
 

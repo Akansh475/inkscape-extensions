@@ -78,7 +78,7 @@ class SvgInputOutputTest(TestCase):
     def test_input_mixin(self):
         """Test svg input gets loaded"""
         obj = NoModSvgExtension()
-        obj.run([self.empty_svg], output=False)
+        obj.run([self.empty_svg])
         self.assertNotEqual(obj.document, None)
         self.assertNotEqual(obj.original_document, None)
 

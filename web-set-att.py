@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # local library
 import inkwebeffect
 import inkex
+from inkex.localize import _
 
 class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
 

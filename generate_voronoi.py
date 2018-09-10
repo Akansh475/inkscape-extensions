@@ -22,6 +22,7 @@
 
 import random
 import inkex
+from inkex.localize import _
 import voronoi
 
 from subprocess import Popen, PIPE

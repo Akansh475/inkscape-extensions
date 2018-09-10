@@ -172,8 +172,7 @@ class Guillotine(inkex.Effect):
 
         if self.options.ignore == False:
             if self.options.image == "" or self.options.image is None:
-                inkex.errormsg("Please enter an image name")
-                sys.exit(0)
+                raise inkex.AbortExtension("Please enter an image name")
             return (self.options.directory, self.options.image)
         else:
             '''
@@ -188,10 +187,10 @@ class Guillotine(inkex.Effect):
             try:
                 export_file = svg.attrib[att]
             except KeyError:
-                inkex.errormsg("To use the export hints option, you " +
-                "need to have previously exported the document. " +
-                "Otherwise no export hints exist!")
-                sys.exit(-1)
+                raise inkex.AbortExtension(
+                        "To use the export hints option, you "
+                        "need to have previously exported the document. "
+                        "Otherwise no export hints exist!")
             dirname, filename = os.path.split(export_file)
             filename = filename.rsplit(".", 1)[0] # Without extension
             return (dirname, filename)

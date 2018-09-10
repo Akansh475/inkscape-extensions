@@ -28,6 +28,8 @@ Provide some documentation to existing extensions about why they're failing.
 import os
 import sys
 import warnings
+warnings.simplefilter("default")
+
 from argparse import ArgumentParser
 
 import inkex

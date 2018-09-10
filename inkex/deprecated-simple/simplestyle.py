@@ -1,28 +1,46 @@
 # COPYRIGHT
 """DOCSTRING"""
 
-svgcolors = # XXX
+import inkex
+from inkex import SVG_COLOR as svgcolors
+from inkex.deprecated import deprecate
 
+@deprecate
 def parseStyle(s):
-    """Create a dictionary from the value of an inline style attribute"""
+    '''dict(inkex.Style.parse_str(s))'''
+    return dict(inkex.Style.parse_str(s))
 
+@deprecate
 def formatStyle(a):
-    """Format an inline style attribute from a dictionary"""
+    '''str(inkex.Style(a))'''
+    return str(inkex.Style(a))
 
+@deprecate
 def isColor(c):
-    """Determine if its a color we can use. If not, leave it unchanged."""
+    '''inkex.is_color(c)'''
+    return inkex.is_color(c)
 
+@deprecate
 def parseColor(c):
-    """Creates a rgb int array"""
+    '''inkex.Color(c).to_rgb()'''
+    return inkex.Color(c).to_rgb()
 
+@deprecate
 def formatColoria(a):
-    """int array to #rrggbb"""
+    '''str(inkex.Color(*a))'''
+    return str(inkex.Color(*a))
 
+@deprecate
 def formatColorfa(a):
-    """float array to #rrggbb"""
+    '''str(inkex.Color(*a))'''
+    return str(inkex.Color(*a))
 
+@deprecate
 def formatColor3i(r,g,b):
-    """3 ints to #rrggbb"""
+    '''str(inkex.Color((r, g, b)))'''
+    return str(inkex.Color((r, g, b)))
 
+@deprecate
 def formatColor3f(r,g,b):
-    """3 floats to #rrggbb"""
+    '''str(inkex.Color((r, g, b)))'''
+    return str(inkex.Color((r, g, b)))

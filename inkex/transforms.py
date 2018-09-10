@@ -251,6 +251,7 @@ def cubicExtrema(y0, y1, y2, y3):
     return cmin, cmax
 
 def computeBBox(elements, mat=((1,0,0),(0,1,0))):
+    from simpletransform import parseTransform
     bbox=None
     for node in elements:
         m = parseTransform(node.get('transform'))

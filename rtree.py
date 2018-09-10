@@ -49,7 +49,7 @@ class RTreeTurtle(inkex.Effect):
         t.pd()
         t.rtree(self.options.size, self.options.minimum, self.options.pentoggle)
         
-        attribs = {'d':t.getPath(),'style':inkex.formatStyle(s)}
+        attribs = {'d':t.getPath(),'style':str(inkex.Style(s))}
         inkex.etree.SubElement(self.current_layer, inkex.addNS('path','svg'), attribs)
 
 if __name__ == '__main__':

@@ -65,7 +65,7 @@ class PathModifier(inkex.Effect):
     def expandGroups(self,aList, transferTransform=True):
         for id, node in aList.items():      
             if node.tag == inkex.addNS('g','svg') or node.tag=='g':
-                mat = inkex.parseTransform(node.get("transform"))
+                mat = simpletransform.parseTransform(node.get("transform"))
                 for child in node:
                     if transferTransform:
                         inkex.applyTransformToNode(mat,child)
@@ -88,10 +88,10 @@ class PathModifier(inkex.Effect):
                 newnode=self.unlinkClone(node,doReplace)
                 del aList[id]
 
-                style = inkex.parseStyle(node.get('style') or "")
-                refstyle = inkex.parseStyle(refnode.get('style') or "")
+                style = dict(inkex.Style.parse_str(node.get('style') or ""))
+                refstyle = dict(inkex.Style.parse_str(refnode.get('style') or ""))
                 style.update(refstyle)
-                newnode.set('style', inkex.formatStyle(style))
+                newnode.set('style', str(inkex.Style(style)))
 
                 newid=newnode.get('id')
                 aList.update(self.expandGroupsUnlinkClones({newid:newnode},transferTransform,doReplace))
@@ -116,7 +116,7 @@ class PathModifier(inkex.Effect):
         if node.tag == inkex.addNS('use','svg') or node.tag=='use':
             newNode = copy.deepcopy(self.refNode(node))
             self.recursNewIds(newNode)
-            inkex.applyTransformToNode(inkex.parseTransform(node.get('transform')),newNode)
+            inkex.applyTransformToNode(simpletransform.parseTransform(node.get('transform')),newNode)
 
             if doReplace:
                 parent=node.getparent()
@@ -174,16 +174,16 @@ class PathModifier(inkex.Effect):
         if node.tag == inkex.addNS('g','svg'):
             newNode = inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'))    
 
-            newstyle = inkex.parseStyle(node.get('style') or "")
+            newstyle = dict(inkex.Style.parse_str(node.get('style') or ""))
             newp = []
             for child in node:
-                childstyle = inkex.parseStyle(child.get('style') or "")
+                childstyle = dict(inkex.Style.parse_str(child.get('style') or ""))
                 childstyle.update(newstyle)
                 newstyle.update(childstyle)
                 childAsPath = self.objectToPath(child,False)
                 newp += inkex.parseCubicPath(childAsPath.get('d'))
             newNode.set('d',inkex.formatCubicPath(newp))
-            newNode.set('style', inkex.formatStyle(newstyle))
+            newNode.set('style', str(inkex.Style(newstyle)))
 
             self.current_layer.remove(newNode)
             if doReplace:

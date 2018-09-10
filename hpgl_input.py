@@ -22,32 +22,26 @@ import sys
 
 import hpgl_decoder
 import inkex
+import inkex.base
+from inkex.localize import _
 
-class HpglFile(inkex.InputExtension):
+class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
     def __init__(self):
         super(HpglFile, self).__init__()
-        parser = self.OptionParser
-        #parser = inkex.optparse.OptionParser(usage='usage: %prog [options] HPGLfile', option_class=inkex.InkOption)
-        parser.add_option('--resolutionX',   action='store', type='float',   dest='resolutionX',   default=1016.0,  help='Resolution X (dpi)')
-        parser.add_option('--resolutionY',   action='store', type='float',   dest='resolutionY',   default=1016.0,  help='Resolution Y (dpi)')
-        parser.add_option('--showMovements', action='store', type='inkbool', dest='showMovements', default='FALSE', help='Show Movements between paths')
+        self.arg_parser.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
+        self.arg_parser.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
+        self.arg_parser.add_argument('--showMovements', type=inkex.inkbool, default=False, help='Show Movements between paths')
+        self.arg_parser.add_argument('--docWidth', type=float, default=210.0, help='Width in mm')
+        self.arg_parser.add_argument('--docHeight', type=float, default=297.0, help='Height in mm')
+
+    def load(self, stream):
+        return ';'.join(line.strip() for line in stream)
 
     def effect(self):
-        # needed to initialize the document
-        self.options.docWidth = 210.0 # 210mm (DIN A4)
-        self.options.docHeight = 297.0 # 297mm (DIN A4)
-
-        # read file
-        #fobj = open(args[0], 'r')
-        hpglString = []
-        for line in fobj:
-            hpglString.append(line.strip())
-        fobj.close()
-        # combine all lines
-        hpglString = ';'.join(hpglString)
-
         # interpret HPGL data
-        myHpglDecoder = hpgl_decoder.hpglDecoder(hpglString, options)
+        myHpglDecoder = hpgl_decoder.hpglDecoder(self.document, self.options)
+        self.document = None
+
         try:
             doc, warnings = myHpglDecoder.getSvg()
         except Exception as inst:
@@ -64,7 +58,7 @@ class HpglFile(inkex.InputExtension):
             inkex.errormsg(_("The HPGL data contained unknown (unsupported) commands, there is a possibility that the drawing is missing some content."))
 
         # deliver document to inkscape
-        doc.write(inkex.sys.stdout)
+        self.document = doc
 
 if __name__ == '__main__':
     HpglFile().affect()

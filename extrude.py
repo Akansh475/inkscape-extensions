@@ -45,7 +45,7 @@ class Extrude(inkex.Effect):
         for i in range(len(paths)):
             if 'transform' in paths[i].keys():
                 trans = paths[i].get('transform')
-                trans = inkex.parseTransform(trans)
+                trans = simpletransform.parseTransform(trans)
                 inkex.applyTransformToPath(trans, pts[i])
 
         for n1 in range(0, len(paths)):
@@ -65,14 +65,14 @@ class Extrude(inkex.Effect):
                             line += [('L', v[1])]
                     ele = inkex.etree.Element('{http://www.w3.org/2000/svg}path')
                     paths[0].xpath('..')[0].append(ele)
-                    ele.set('d', inkex.formatPath(line))
+                    ele.set('d', str(inkex.Path(line)))
                     style = {
                         'fill': 'none',
                         'stroke': '#000000',
                         'stroke-opacity': 1,
                         'stroke-width': self.unittouu('1px'),
                     }
-                    ele.set('style', inkex.formatStyle(style))
+                    ele.set('style', str(inkex.Style(style)))
                 elif self.options.mode.lower() == 'polygons':
                     g = inkex.etree.Element('{http://www.w3.org/2000/svg}g')
                     style = {
@@ -82,7 +82,7 @@ class Extrude(inkex.Effect):
                         'stroke-opacity': 0.6,
                         'stroke-width': self.unittouu('2px'),
                     }
-                    g.set('style', inkex.formatStyle(style))
+                    g.set('style', str(inkex.Style(style)))
                     paths[0].xpath('..')[0].append(g)
                     for comp in verts:
                         for n,v in enumerate(comp):
@@ -96,7 +96,7 @@ class Extrude(inkex.Effect):
                             line += [('L', comp[n][0])]
                             ele = inkex.etree.Element('{http://www.w3.org/2000/svg}path')
                             g.append(ele)
-                            ele.set('d', inkex.formatPath(line))
+                            ele.set('d', str(inkex.Path(line)))
 
 
 if __name__ == '__main__':   #pragma: no cover

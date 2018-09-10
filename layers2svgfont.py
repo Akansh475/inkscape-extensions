@@ -49,7 +49,7 @@ class Layers2SVGFont(inkex.Effect):
         pathdata = inkex.parsePath(d)
         inkex.scalePath(pathdata, 1,-1)
         inkex.translatePath(pathdata, 0, int(emsize) - int(baseline))
-        return inkex.formatPath(pathdata)
+        return str(inkex.Path(pathdata))
 
     def effect(self):
         # Get access to main SVG document element

@@ -75,7 +75,7 @@ class MyEffect(inkex.Effect):
         for id, node in self.selected.items():
             mprops = ['marker','marker-start','marker-mid','marker-end']
             try:
-                style = inkex.parseStyle(node.get('style'))
+                style = dict(inkex.Style.parse_str(node.get('style')))
             except:
                 inkex.errormsg(_("No style attribute found for id: %s") % id)
                 continue
@@ -143,7 +143,7 @@ class MyEffect(inkex.Effect):
                     
                     children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
                     for child in children:
-                        cstyle = inkex.parseStyle(child.get('style'))
+                        cstyle = dict(inkex.Style.parse_str(child.get('style')))
                         if (not('stroke' in cstyle  and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled")):
                             cstyle['stroke'] = stroke
                             if 'stroke_opacity' in locals():
@@ -152,8 +152,8 @@ class MyEffect(inkex.Effect):
                             cstyle['fill'] = fill
                             if 'fill_opacity' in locals():
                                 cstyle['fill-opacity'] = fill_opacity
-                        child.set('style', inkex.formatStyle(cstyle))
-            node.set('style', inkex.formatStyle(style))
+                        child.set('style', str(inkex.Style(cstyle)))
+            node.set('style', str(inkex.Style(style)))
 
 if __name__ == '__main__':
     e = MyEffect()

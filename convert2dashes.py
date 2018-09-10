@@ -44,7 +44,7 @@ class SplitIt(inkex.Effect):
             if node.tag == inkex.addNS('path','svg'):
                 dashes = []
                 offset = 0
-                style = inkex.parseStyle(node.get('style'))
+                style = dict(inkex.Style.parse_str(node.get('style')))
                 if style.has_key('stroke-dasharray'):
                     if style['stroke-dasharray'].find(',') > 0:
                         dashes = [float (dash) for dash in style['stroke-dasharray'].split(',')]
@@ -82,7 +82,7 @@ class SplitIt(inkex.Effect):
                             i += 1
                     node.set('d', inkex.formatCubicPath(new))
                     del style['stroke-dasharray']
-                    node.set('style', inkex.formatStyle(style))
+                    node.set('style', str(inkex.Style(style)))
                     if node.get(inkex.addNS('type','sodipodi')):
                         del node.attrib[inkex.addNS('type', 'sodipodi')]
             else:

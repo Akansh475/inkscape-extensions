@@ -97,7 +97,7 @@ class RackGear(inkex.Effect):
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px'))}
         gear_attribs = {
-            'style': simplestyle.formatStyle(style),
+            'style': str(inkex.Style(style)),
             'd': path}
         gear = inkex.etree.SubElement(
             g, inkex.addNS('path', 'svg'), gear_attribs)

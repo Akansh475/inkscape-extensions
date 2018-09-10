@@ -167,7 +167,7 @@ class Split(inkex.Effect):
             #gets the font size. If element doesn't have a style attribute, it assumes font-size = 12px
             try:
                 import simplestyle
-                fontsize = simplestyle.parseStyle(word.get("style"))["font-size"]
+                fontsize = dict(inkex.Style.parse_str(word.get("style")))["font-size"]
             except:
                 fontsize = "12px"
             fs = self.unittouu(fontsize)

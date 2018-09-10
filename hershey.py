@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 import hersheydata          #data file w/ Hershey font data
 import inkex
-import simplestyle
 from simpletransform import computePointInNode
 
 Debug = False
@@ -33,7 +32,7 @@ def draw_svg_text(char, face, offset, vertoffset, parent):
     midpoint = offset - int(splitString[0]) 
     pathString = pathString[pathString.find("M"):] #portion after first move
     trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
-    text_attribs = {'style':simplestyle.formatStyle(style), 'd':pathString, 'transform':trans}
+    text_attribs = {'style':str(inkex.Style(style)), 'd':pathString, 'transform':trans}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs) 
     return midpoint + int(splitString[1])   #new offset value
 
@@ -41,21 +40,17 @@ def draw_svg_text(char, face, offset, vertoffset, parent):
 class Hershey( inkex.Effect ):
     def __init__( self ):
         inkex.Effect.__init__( self )
-        self.OptionParser.add_option( "--tab",  #NOTE: value is not used.
-            action="store", type="string",
-            dest="tab", default="splash",
+        self.arg_parser.add_argument( "--tab",  #NOTE: value is not used.
+            default="splash",
             help="The active tab when Apply was pressed" )
-        self.OptionParser.add_option( "--text",
-            action="store", type="string", 
-            dest="text", default="Hershey Text for Inkscape",
+        self.arg_parser.add_argument( "--text",
+            default="Hershey Text for Inkscape",
             help="The input text to render")
-        self.OptionParser.add_option( "--action",
-            action="store", type="string",
-            dest="action", default="render",
+        self.arg_parser.add_argument( "--action",
+            default="render",
             help="The active option when Apply was pressed" )
-        self.OptionParser.add_option( "--fontface",
-            action="store", type="string",
-            dest="fontface", default="rowmans",
+        self.arg_parser.add_argument( "--fontface",
+            default="futural",
             help="The selected font face when Apply was pressed" )
 
     def effect( self ):
@@ -65,7 +60,7 @@ class Hershey( inkex.Effect ):
         g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
 
         scale = self.unittouu('1px')    # convert to document units
-        font = eval('hersheydata.' + str(self.options.fontface))
+        font = getattr(hersheydata, self.options.fontface)
         clearfont = hersheydata.futural  
         #Baseline: modernized roman simplex from JHF distribution.
         

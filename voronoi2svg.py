@@ -169,12 +169,12 @@ class Voronoi2svg(inkex.Effect):
 
     def getGlobalTransform(self,node):
         parent = node.getparent()
-        myTrans = inkex.parseTransform(node.get('transform'))
+        myTrans = simpletransform.parseTransform(node.get('transform'))
         if myTrans:
             if parent is not None:
                 parentTrans = self.getGlobalTransform(parent)
                 if parentTrans:
-                    return inkex.composeTransform(parentTrans,myTrans)
+                    return simpletransform.composeTransform(parentTrans,myTrans)
                 else:
                     return myTrans
         else:
@@ -315,7 +315,7 @@ class Voronoi2svg(inkex.Effect):
                 rect.set('y',str(clipBox[2]))
                 rect.set('width',str(clipBox[1]-clipBox[0]))
                 rect.set('height',str(clipBox[3]-clipBox[2]))
-                rect.set('style',inkex.formatStyle(linestyle))
+                rect.set('style',str(inkex.Style(linestyle)))
 
         #}}}
 
@@ -337,8 +337,8 @@ class Voronoi2svg(inkex.Effect):
                         v2 = segment[1]
                         cmds = [['M',[v1[0],v1[1]]],['L',[v2[0],v2[1]]]]
                         path = inkex.etree.Element(inkex.addNS('path','svg'))
-                        path.set('d',inkex.formatPath(cmds))
-                        path.set('style',inkex.formatStyle(linestyle))
+                        path.set('d',str(inkex.Path(cmds)))
+                        path.set('style',str(inkex.Style(linestyle)))
                         groupVoronoi.append(path)
 
         if self.options.diagramType != 'Voronoi':
@@ -363,8 +363,8 @@ class Voronoi2svg(inkex.Effect):
                                 'stroke-linejoin' : 'round'
                                 }
                 path = inkex.etree.Element(inkex.addNS('path','svg'))
-                path.set('d',inkex.formatPath(cmds))
-                path.set('style',inkex.formatStyle(facestyle))
+                path.set('d',str(inkex.Path(cmds)))
+                path.set('style',str(inkex.Style(facestyle)))
                 groupDelaunay.append(path)
                 i += 1;
         #sys.stdout = saveout

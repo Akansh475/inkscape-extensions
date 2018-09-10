@@ -5,9 +5,8 @@ import coloreffect
 class C(coloreffect.ColorEffect):
   def __init__(self):
     coloreffect.ColorEffect.__init__(self)
-    self.OptionParser.add_option("-t", "--threshold",
-                                 action="store", type="int",
-                                 dest="threshold", default=127,
+    self.arg_parser.add_argument("-t", "--threshold",
+                                 type=int, default=127,
                                  help="Threshold Color Level")
 
   def colmod(self,r,g,b):

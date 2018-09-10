@@ -148,11 +148,11 @@ class Frame(inkex.Effect):
         parent = self.current_layer
         position = self.options.position
         width = self.options.width
-        style = formatStyle({'stroke':stroke_data.color
+        style = str(inkex.Style({'stroke':stroke_data.color
             , 'stroke-opacity':stroke_data.opacity
             , 'stroke-width':str(width)
             , 'fill': (fill_data.color or 'none')
-            , 'fill-opacity':fill_data.opacity})
+            , 'fill-opacity':fill_data.opacity}))
         
         for id, node in self.selected.items():
             box = computeBBox([node])

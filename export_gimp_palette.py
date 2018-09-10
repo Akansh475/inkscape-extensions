@@ -30,17 +30,18 @@ class ExportGpl(inkex.Effect):
         svg = self.document.getroot()
 
         print('GIMP Palette\nName: %s\n#' % (svg.get(inkex.addNS("docname", "sodipodi"))))
-        for key, value in sorted(self.walk(svg)):
+        colors = dict(self.walk(svg))
+        for key, value in sorted(colors.items()):
             print(key + value)
 
     def walk(self, node):
         """Walks over all svg dom nodes"""
-        styles = inkex.parseStyle(node.get('style', ''))
+        styles = dict(inkex.Style.parse_str(node.get('style', '')))
         for tag in TAGS:
             col = styles.get(tag, None)
-            if inkex.isColor(col):
-                parsed = inkex.parseColor(col)
-                yield ('%3i %3i %3i ' % parsed[:3], inkex.formatColoria(parsed).upper())
+            if col is not None and inkex.is_color(col):
+                parsed = inkex.Color(col).to_rgb()
+                yield ('%3i %3i %3i ' % tuple(parsed[:3]), str(parsed).upper())
 
         for child in node.iterchildren():
             for color in self.walk(child):

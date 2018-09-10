@@ -68,7 +68,7 @@ def draw_SVG_ellipse((rx, ry), (cx, cy), width, parent, start_end=(0,2*pi),trans
     style = {   'stroke'        : '#000000',
                 'stroke-width'  : str(width),
                 'fill'          : 'none'            }
-    circ_attribs = {'style':simplestyle.formatStyle(style),
+    circ_attribs = {'style':str(inkex.Style(style)),
         inkex.addNS('cx','sodipodi')        :str(cx),
         inkex.addNS('cy','sodipodi')        :str(cy),
         inkex.addNS('rx','sodipodi')        :str(rx),

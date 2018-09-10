@@ -29,11 +29,9 @@ from urllib import quote
 
 import inkex
 import inkex.base
-import inkex.utils
-import inkex.styles
 
 def formatStyle(style):
-    return str(inkex.styles.Style(style))
+    return str(inkex.Style(style))
 
 def export_MTEXT():
     # mandatory group codes : (1 or 3, 10, 20) (text, x, y)
@@ -359,7 +357,7 @@ class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         p.add_argument("--scale", dest="scale", default="1.0")
         p.add_argument("--xmin", dest="xmin", default="0.0")
         p.add_argument("--ymin", dest="ymin", default="0.0")
-        p.add_argument("--gcodetoolspoints", dest="gcodetoolspoints", default=True, type=inkex.utils.inkbool)
+        p.add_argument("--gcodetoolspoints", dest="gcodetoolspoints", default=True, type=inkex.inkbool)
         p.add_argument("--encoding", dest="input_encode", default="latin_1")
         p.add_argument("--font", dest="font", default="Arial")
         p.add_argument("--tab", dest="tab", default="Options")

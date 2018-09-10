@@ -98,7 +98,7 @@ class PrintingMarks (inkex.Effect):
     def draw_crop_line(self, x1, y1, x2, y2, name, parent):
         style = { 'stroke': '#000000', 'stroke-width': str(self.stroke_width),
                   'fill': 'none'}
-        line_attribs = {'style': inkex.formatStyle(style),
+        line_attribs = {'style': str(inkex.Style(style)),
                         'id': name,
                         'd': 'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
         inkex.etree.SubElement(parent, 'path', line_attribs)
@@ -108,7 +108,7 @@ class PrintingMarks (inkex.Effect):
                   'fill': 'none',
                   'stroke-miterlimit': '4', 'stroke-dasharray': '4, 2, 1, 2',
                   'stroke-dashoffset': '0' }
-        line_attribs = {'style': inkex.formatStyle(style),
+        line_attribs = {'style': str(inkex.Style(style)),
                         'id': name,
                         'd': 'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
         inkex.etree.SubElement(parent, 'path', line_attribs)
@@ -117,7 +117,7 @@ class PrintingMarks (inkex.Effect):
         for i in range(len(colours)):
             style = {'stroke':colours[i], 'stroke-width':str(r / len(colours)),
                      'fill':'none'}
-            circle_attribs = {'style':inkex.formatStyle(style),
+            circle_attribs = {'style':str(inkex.Style(style)),
                               inkex.addNS('label','inkscape'):name,
                               'cx':str(cx), 'cy':str(cy),
                               'r':str((r / len(colours)) * (i + 0.5))}
@@ -133,7 +133,7 @@ class PrintingMarks (inkex.Effect):
             step = r
             stroke = r / len(colours)
             regoffset = stroke * i
-            regmark_attribs = {'style': inkex.formatStyle(style),
+            regmark_attribs = {'style': str(inkex.Style(style)),
                                'd': 'm' +\
                                ' '+str(-regoffset)+','+str(r)  +\
                                ' '+str(-stroke)   +',0'        +\
@@ -157,7 +157,7 @@ class PrintingMarks (inkex.Effect):
             d += ' L 0,0 ' +\
                  ' L '+ str(math.sin(i)*r) +','+ str(math.cos(i)*r) +\
                  ' L '+ str(math.sin(i+0.09)*r) +','+ str(math.cos(i+0.09)*r)
-        regmark_attribs = {'style':inkex.formatStyle(style),
+        regmark_attribs = {'style':str(inkex.Style(style)),
                           inkex.addNS('label','inkscape'):name,
                           'transform':'translate('+str(cx)+','+str(cy)+')',
                           'd':d}

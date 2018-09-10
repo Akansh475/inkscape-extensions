@@ -56,7 +56,7 @@ class Motion(inkex.Effect):
         a.append([cmd,np[:]])
             
         a.append(['Z',[]])
-        face = inkex.etree.SubElement(self.facegroup,inkex.addNS('path','svg'),{'d':inkex.formatPath(a)})
+        face = inkex.etree.SubElement(self.facegroup,inkex.addNS('path','svg'),{'d':str(inkex.Path(a))})
         
     def effect(self):
         self.vx = math.cos(math.radians(self.options.angle))*self.options.magnitude

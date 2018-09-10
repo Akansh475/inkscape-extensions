@@ -89,13 +89,13 @@ def get_style(node):
     Sugar coated way to get style dict from a node
     '''
     if 'style' in node.attrib:
-        return inkex.parseStyle(node.attrib['style'])
+        return dict(inkex.Style.parse_str(node.attrib['style']))
 
 def set_style(node, style):
     '''
     Sugar coated way to set the style dict, for node
     '''
-    node.attrib['style'] = inkex.formatStyle(style)
+    node.attrib['style'] = str(inkex.Style(style))
 
 def get_fonts(node):
     '''

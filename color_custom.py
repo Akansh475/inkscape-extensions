@@ -4,25 +4,18 @@ import coloreffect
 class C(coloreffect.ColorEffect):
     def __init__(self):
         coloreffect.ColorEffect.__init__(self)
-        self.OptionParser.add_option("--r",
-            action="store", type="string",
+        self.arg_parser.add_argument("--r",
             dest="rFunction", default="r",
             help="red channel function")
-        self.OptionParser.add_option("--g",
-            action="store", type="string",
+        self.arg_parser.add_argument("--g",
             dest="gFunction", default="g",
             help="green channel function")
-        self.OptionParser.add_option("--b",
-            action="store", type="string",
+        self.arg_parser.add_argument("--b",
             dest="bFunction", default="b",
             help="blue channel function")
-        self.OptionParser.add_option("--tab",
-            action="store", type="string",
-            dest="tab",
+        self.arg_parser.add_argument("--tab",
             help="The selected UI-tab when OK was pressed")
-        self.OptionParser.add_option("--scale",
-            action="store", type="string",
-            dest="scale",
+        self.arg_parser.add_argument("--scale", type=float, default=1.0,
             help="The input (r,g,b) range")
 
     def normalize(self, v):

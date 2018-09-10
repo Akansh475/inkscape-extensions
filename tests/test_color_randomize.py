@@ -5,8 +5,12 @@ import sys
 
 from tests.base import TestCase, test_support
 
-from inkex import extract_hsl
 from color_randomize import *
+
+def extract_hsl(hexcol):
+    from inkex.colors import Color
+    return Color('#' + hexcol).to_hsl().to_floats()
+
 
 class ColorRandomizeBasicTest(TestCase):
     def setUp(self):
@@ -38,7 +42,8 @@ class ColorRandomizeColorModificationTest(TestCase):
         args = ['-y 50','-t 0','-m 0',self.empty_svg]
         self.e.affect(args, False)
         hsl = extract_hsl(self.e.colmod(150, 100, 200))
-        self.assertEqual([0.47, 0.59], [round(hsl[1], 2), round(hsl[2], 2)])
+        self.assertAlmostEqual(hsl[1], 0.47, delta=0.01)
+        self.assertAlmostEqual(hsl[2], 0.59, delta=0.01)
 
     def test_random_lightness(self):
         """ Random lightness only. Hue and saturation not changed. """
@@ -54,7 +59,8 @@ class ColorRandomizeColorModificationTest(TestCase):
         args = ['-y 0', '-t 50', '-m 0', self.empty_svg]
         self.e.affect(args, False)
         hsl = extract_hsl(self.e.colmod(150, 100, 200))
-        self.assertEqual([0.75, 0.59], [round(hsl[0], 2), round(hsl[2], 2)])
+        self.assertAlmostEqual(hsl[0], 0.75, delta=0.01)
+        self.assertAlmostEqual(hsl[2], 0.59, delta=0.01)
 
     def test_range_limits(self):
         """ The maximum hsl values should be between 0 and 100% of their maximum """

@@ -49,7 +49,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):#draw an SVG circl
         circ_style = { 'stroke':style.c_col, 'stroke-width':str(style.c_th), 'fill':style.c_fill }
 
     cx,cy = get_cartesian_pt(centre, params)
-    circ_attribs = {'style':inkex.formatStyle(circ_style),
+    circ_attribs = {'style':str(inkex.Style(circ_style)),
                     inkex.addNS('label','inkscape'):name,
                     'cx':str(cx), 'cy':str(cy), 
                     'r':str(r)}
@@ -59,7 +59,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):#draw an SVG circl
 def draw_SVG_tri(vert_mat, params, style, name, parent):
     p1,p2,p3 = get_cartesian_tri(vert_mat, params) #get the vertex matrix in cartesian points
     tri_style   = { 'stroke': style.l_col, 'stroke-width':str(style.l_th), 'fill': style.l_fill }
-    tri_attribs = {'style':inkex.formatStyle(tri_style),
+    tri_attribs = {'style':str(inkex.Style(tri_style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(p1[0])+','+str(p1[1])+
                        ' L '+str(p2[0])+','+str(p2[1])+
@@ -72,7 +72,7 @@ def draw_SVG_line(a, b, style, name, parent):
     (x1, y1) = a
     (x2, y2) = b
     line_style   = { 'stroke': style.l_col, 'stroke-width':str(style.l_th), 'fill': style.l_fill }
-    line_attribs = {'style':inkex.formatStyle(line_style),
+    line_attribs = {'style':str(inkex.Style(line_style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )

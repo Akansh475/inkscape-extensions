@@ -73,7 +73,7 @@ class Interp(inkex.Effect):
             node = self.selected[id]
             if node.tag ==inkex.addNS('path','svg'):
                 paths[id] = cubicsuperpath.parsePath(node.get('d'))
-                styles[id] = simplestyle.parseStyle(node.get('style'))
+                styles[id] = dict(inkex.Style.parse_str(node.get('style')))
                 trans = node.get('transform')
                 if trans:
                     simpletransform.applyTransformToPath(simpletransform.parseTransform(trans), paths[id])
@@ -259,7 +259,7 @@ class Interp(inkex.Effect):
                     if dofill:
                         basestyle['fill-opacity'] = inkex.tweenstylefloat('fill-opacity',sst,est,time)
                         basestyle['fill'] = inkex.tweenstylecolor('fill',sst,est,time)
-                attribs = {'style':inkex.formatStyle(basestyle),'d':cubicsuperpath.formatPath(interp)}
+                attribs = {'style':str(inkex.Style(basestyle)),'d':cubicsuperpath.formatPath(interp)}
                 new = inkex.etree.SubElement(group,inkex.addNS('path','svg'), attribs)
 
 if __name__ == '__main__':

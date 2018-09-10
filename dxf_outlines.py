@@ -187,10 +187,10 @@ class DxfOutlines(inkex.Effect):
         rgb = (0,0,0)
         style = node.get('style')
         if style:
-            style = inkex.parseStyle(style)
+            style = dict(inkex.Style.parse_str(style))
             if style.has_key('stroke'):
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
-                    rgb = inkex.parseColor(style['stroke'])
+                    rgb = inkex.Color(style['stroke']).to_rgb()
         hsl = inkex.rgb_to_hsl(rgb[0]/255.0,rgb[1]/255.0,rgb[2]/255.0)
         self.color = 7                                  # default is black
         if hsl[2]:
@@ -231,7 +231,7 @@ class DxfOutlines(inkex.Effect):
             return
         trans = node.get('transform')
         if trans:
-            mat = inkex.composeTransform(mat, inkex.parseTransform(trans))
+            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
         inkex.applyTransformToPath(mat, p)
         for sub in p:
             for i in range(len(sub)-1):
@@ -253,14 +253,14 @@ class DxfOutlines(inkex.Effect):
         y = node.get('y')
         mat = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         if trans:
-            mat = inkex.composeTransform(mat, inkex.parseTransform(trans))
+            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
         if x:
-            mat = inkex.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat = inkex.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(inkex.composeTransform(self.groupmat[-1], mat))
+            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], mat))
         # get referenced node
         refid = node.get(inkex.addNS('href','xlink'))
         refnode = self.getElementById(refid[1:])
@@ -279,7 +279,7 @@ class DxfOutlines(inkex.Effect):
         if group.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
             style = group.get('style')
             if style:
-                style = inkex.parseStyle(style)
+                style = dict(inkex.Style.parse_str(style))
                 if style.has_key('display'):
                     if style['display'] == 'none' and self.options.layer_option and self.options.layer_option=='visible':
                         return
@@ -292,7 +292,7 @@ class DxfOutlines(inkex.Effect):
                 self.layer = layer
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(inkex.composeTransform(self.groupmat[-1], inkex.parseTransform(trans)))
+            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], simpletransform.parseTransform(trans)))
         for node in group:
             if node.tag == inkex.addNS('g','svg'):
                 self.process_group(node)

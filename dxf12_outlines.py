@@ -126,7 +126,7 @@ class MyEffect(inkex.Effect):
             
             t = node.get('transform')
             if t != None:
-                m = inkex.parseTransform(t)
+                m = simpletransform.parseTransform(t)
                 inkex.applyTransformToPath(m,p)
             
             m = [[scale,0,0],[0,-scale,h*scale]]

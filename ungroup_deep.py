@@ -111,7 +111,7 @@ class Ungroup(inkex.Effect):
         """
 
         # Compose the style attribs
-        this_style = simplestyle.parseStyle(node.get("style", ""))
+        this_style = dict(inkex.Style.parse_str(node.get("style", "")))
         remaining_style = {}  # Style attributes that are not propagated
 
         # Filters should remain on the top ancestor
@@ -142,7 +142,7 @@ class Ungroup(inkex.Effect):
                 if "style" in node.keys():
                     del node.attrib["style"]
             else:
-                node.set("style", simplestyle.formatStyle(remaining_style))
+                node.set("style", str(inkex.Style(remaining_style)))
 
         else:
             # This element is not a container
@@ -151,7 +151,7 @@ class Ungroup(inkex.Effect):
             this_style.update(remaining_style)
 
             # Set the element's style attribs
-            node.set("style", simplestyle.formatStyle(this_style))
+            node.set("style", str(inkex.Style(this_style)))
 
     def _merge_clippath(self, node, clippathurl):
 
@@ -196,7 +196,7 @@ class Ungroup(inkex.Effect):
     def _ungroup(self, node):
         node_parent = node.getparent()
         node_index = list(node_parent).index(node)
-        node_style = simplestyle.parseStyle(node.get("style"))
+        node_style = dict(inkex.Style.parse_str(node.get("style")))
         node_transform = simpletransform.parseTransform(node.get("transform"))
         node_clippathurl = node.get('clip-path')
         for c in reversed(list(node)):

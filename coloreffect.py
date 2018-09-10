@@ -24,6 +24,7 @@ import copy
 import random
 
 import inkex
+import inkex.colors
 
 color_props_fill = ('fill', 'stop-color',  'flood-color', 'lighting-color')
 color_props_stroke = ('stroke',)
@@ -37,10 +38,10 @@ class ColorEffect(inkex.Effect):
         self.visited = []
 
     def effect(self):
-        if len(self.selected)==0:
+        if not self.svg.selected:
             self.getAttribs(self.document.getroot())
         else:
-            for id,node in self.selected.items():
+            for node in self.svg.selected.values():
                 self.getAttribs(node)
 
     def getAttribs(self,node):
@@ -103,8 +104,8 @@ class ColorEffect(inkex.Effect):
 
     def process_prop(self, col):
         #inkex.debug('got:'+col+str(type(col)))
-        if inkex.isColor(col):
-            c=inkex.parseColor(col)
+        if inkex.colors.is_color(col):
+            c = inkex.colors.Color(col).to_rgb()
             col='#'+self.colmod(c[0], c[1], c[2])
             #inkex.debug('made:'+col)
         elif col.startswith('url(#'):
@@ -150,7 +151,7 @@ class ColorEffect(inkex.Effect):
                     self.process_gradient(node, newhref)
  
     def colmod(self,r,g,b):
-        pass
+        raise NotImplementedError
     
     def opacmod(self, opacity):
         return opacity

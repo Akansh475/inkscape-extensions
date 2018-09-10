@@ -134,7 +134,7 @@ def get_obj_data(obj, name):
 def draw_SVG_dot(point, st, name, parent):
     (cx, cy) = point
     style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'fill': st.fill, 'stroke-opacity':st.s_opac, 'fill-opacity':st.f_opac}
-    circ_attribs = {'style':inkex.formatStyle(style),
+    circ_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,
                     'r':str(st.r),
                     'cx':str(cx), 'cy':str(-cy)}
@@ -144,7 +144,7 @@ def draw_SVG_line(point1, point2, st, name, parent):
     (x1, y1) = point1
     (x2, y2) = point2
     style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'stroke-linecap':st.linecap}
-    line_attribs = {'style':inkex.formatStyle(style),
+    line_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(-y1)+' L '+str(x2)+','+str(-y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
@@ -160,7 +160,7 @@ def draw_SVG_poly(pts, face, st, name, parent):
         d = d+ str(pts[face[i]-1][0]) + ',' + str(-pts[face[i]-1][1])#add point
     d = d + 'z' #close the polygon
     
-    line_attribs = {'style':inkex.formatStyle(style),
+    line_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,'d': d}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
     

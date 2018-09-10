@@ -54,7 +54,7 @@ class PathCommand(tuple):
                 return [obj] + nxt if isinstance(nxt, list) else [obj, nxt]
             return obj
         try:
-            return next(filter(NONE, [c(cmd, *args) for c in cls.__subclasses__()]))
+            return next(iter(filter(NONE, [c(cmd, *args) for c in cls.__subclasses__()])))
         except StopIteration:
             if cls is PathCommand:
                 raise InvalidPath("Path command {} not recognised.".format(cmd))

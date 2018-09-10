@@ -40,7 +40,7 @@ X, Y = range(2)
 
 def draw_SVG_tri(point1, point2, point3, offset, width, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    tri_attribs = {'style':inkex.formatStyle(style),
+    tri_attribs = {'style':str(inkex.Style(style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(point1[X]+offset[X])+','+str(point1[Y]+offset[Y])+
                        ' L '+str(point2[X]+offset[X])+','+str(point2[Y]+offset[Y])+

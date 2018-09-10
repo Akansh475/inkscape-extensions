@@ -522,9 +522,9 @@ class AlphabetSoup(inkex.Effect):
 			s = { 'stroke': 'none', 'fill': '#000000' }
 
 			new = inkex.etree.Element(inkex.addNS('path','svg'))
-			new.set('style', inkex.formatStyle(s))
+			new.set('style', str(inkex.Style(s)))
 
-			new.set('d', inkex.formatPath(image))
+			new.set('d', str(inkex.Path(image)))
 			self.current_layer.append(new)
 
 			# compensate preserved transforms of parent layer

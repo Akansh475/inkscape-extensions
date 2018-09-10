@@ -84,7 +84,7 @@ class Dots(inkex.Effect):
         except:
             pass
 
-        style = inkex.formatStyle({ 'stroke': 'none', 'fill': '#000' })
+        style = str(inkex.Style({ 'stroke': 'none', 'fill': '#000' }))
         a = []
         p = inkex.parsePath(node.get('d'))
 
@@ -115,7 +115,7 @@ class Dots(inkex.Effect):
                 new = inkex.etree.SubElement(node,inkex.addNS('text','svg'))
                 s = {'font-size': self.unittouu(self.options.fontsize), 'fill-opacity': '1.0', 'stroke': 'none',
                     'font-weight': 'normal', 'font-style': 'normal', 'fill': '#999'}
-                new.set('style', inkex.formatStyle(s))
+                new.set('style', str(inkex.Style(s)))
                 new.set('x', str(x))
                 new.set('y', str(y))
                 new.text = str(text)

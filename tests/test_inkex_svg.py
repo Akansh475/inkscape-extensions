@@ -20,8 +20,6 @@
 Test the svg interface for inkscape extensions.
 """
 
-import random
-
 from tests.base import TestCase, test_support
 from tests.base.svg import svg, uu_svg, svg_file
 from inkex.utils import addNS
@@ -46,11 +44,13 @@ class BasicSvgTest(TestCase):
 
     def test_svg_new_id(self):
         """Test generatign a new id for a given tag"""
-        random.seed(9001)
         doc = svg('id="apples"')
-        self.assertEqual(doc.get_unique_id('apples'), 'apples0')
-        self.assertEqual(doc.get_unique_id('apples'), 'apples4')
-        self.assertEqual(doc.get_unique_id('apples'), 'apples41')
+        usedids = set(['apples'])
+        for prefix in ['apples'] * 3:
+            newid = doc.get_unique_id(prefix)
+            self.assertTrue(newid.startswith(prefix))
+            self.assertTrue(newid not in usedids)
+            usedids.add(newid)
 
     def test_svg_select_id(self):
         """Select an id from the document"""

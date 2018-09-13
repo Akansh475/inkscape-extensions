@@ -71,6 +71,7 @@ class InkscapeExtension(object):
         except AbortExtension as err:
             err.write()
             ret = False
+        self.clean_up()
 
     def load_raw(self):
         """Load the input stream or filename, save everything to self"""

@@ -40,6 +40,7 @@ class PathCommand(tuple):
     next_cmd = classproperty(lambda cls: (cls.this_cmd, cls.this_cmd.lower()))
     isrelative = lambda self: self.cmd.islower()
     isabsolute = lambda self: self.cmd.isupper()
+    number_template = "{:6g}"
 
     @classmethod
     def __new__(cls, _, cmd, *args):
@@ -59,7 +60,7 @@ class PathCommand(tuple):
             if cls is PathCommand:
                 raise InvalidPath("Path command {} not recognised.".format(cmd))
 
-    _argt = classmethod(lambda cls, sep: (sep+"{:.6g}") * cls.num)
+    _argt = classmethod(lambda cls, sep: (sep + cls.number_template) * cls.num)
 
     def __str__(self):
         return self.cmd + self._argt(" ").format(*self)

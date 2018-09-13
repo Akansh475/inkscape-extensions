@@ -1,7 +1,23 @@
-# COPYRIGHT
-"""DOCSTRING"""
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# pylint: disable=invalid-name
+"""Depricated ffgeom API"""
 
-import math
+from inkex.depricated import depricate
+from inkex.paths import Move
 
 try:
     NaN = float('NaN')
@@ -9,24 +25,16 @@ except ValueError:
     PosInf = 1e300000
     NaN = PosInf/PosInf
 
-class Point:
+@depricate
+class Point(Move):
     precision = 5
-    def __init__(self, x, y):
-        self.__coordinates = {'x' : float(x), 'y' : float(y)}
-    def __getitem__(self, key):
-        return self.__coordinates[key]
-    def __setitem__(self, key, value):
-        self.__coordinates[key] = float(value)
-    def __repr__(self):
-        return '(%s, %s)' % (round(self['x'],self.precision),round(self['y'],self.precision))
-    def copy(self):
-        return Point(self['x'],self['y'])
+    number_template = "{:5g}"
+
     def translate(self, x, y):
-        self['x'] += x
-        self['y'] += y
+        return super(Point, self).translate([x, y])
+
     def move(self, x, y):
-        self['x'] = float(x)
-        self['y'] = float(y)
+        return super(Point, self).translate([x - self.x, y - self.y])
 
 class Segment:
     def __init__(self, e0, e1):

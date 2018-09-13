@@ -46,6 +46,17 @@ class InkscapeExtension(object):
             "--output", type=str, default=sys.stdout,
             help="Optional output filename for saving the result (default is stdout).")
 
+        self.add_arguments(self.arg_parser)
+
+    def add_arguments(self, pars):
+        """Add any extra arguments to your extension handle, use:
+
+        def add_arguments(self, pars):
+            pars.add_argument("--num-cool-things", type=int, default=3)
+            pars.add_argument("--pos-in-doc", type=str, default="doobry")
+        """
+        pass # No extra arguments by default so super is not required
+
     def run(self, args=None):
         """Main entrypoint for any Inkscape Extension"""
         if args is None:

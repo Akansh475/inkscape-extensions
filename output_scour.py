@@ -7,6 +7,7 @@ import platform
 from distutils.version import StrictVersion
 
 import inkex
+from inkex import inkbool
 
 try:
     import scour
@@ -25,40 +26,46 @@ Please make sure it is installed (e.g. using 'pip install scour'
 """)
 
 
-class ScourInkscape (inkex.Effect):
+class ScourInkscape(inkex.base.InkscapeExtension):
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(ScourInkscape, self).__init__()
 
         # Scour options
-        self.OptionParser.add_option("--tab",                      type="string",  action="store", dest="tab")
-        self.OptionParser.add_option("--simplify-colors",          type="inkbool", action="store", dest="simple_colors")
-        self.OptionParser.add_option("--style-to-xml",             type="inkbool", action="store", dest="style_to_xml")
-        self.OptionParser.add_option("--group-collapsing",         type="inkbool", action="store", dest="group_collapse")
-        self.OptionParser.add_option("--create-groups",            type="inkbool", action="store", dest="group_create")
-        self.OptionParser.add_option("--enable-id-stripping",      type="inkbool", action="store", dest="strip_ids")
-        self.OptionParser.add_option("--shorten-ids",              type="inkbool", action="store", dest="shorten_ids")
-        self.OptionParser.add_option("--shorten-ids-prefix",       type="string",  action="store", dest="shorten_ids_prefix", default="")
-        self.OptionParser.add_option("--embed-rasters",            type="inkbool", action="store", dest="embed_rasters")
-        self.OptionParser.add_option("--keep-unreferenced-defs",   type="inkbool", action="store", dest="keep_defs")
-        self.OptionParser.add_option("--keep-editor-data",         type="inkbool", action="store", dest="keep_editor_data")
-        self.OptionParser.add_option("--remove-metadata",          type="inkbool", action="store", dest="remove_metadata")
-        self.OptionParser.add_option("--strip-xml-prolog",         type="inkbool", action="store", dest="strip_xml_prolog")
-        self.OptionParser.add_option("--set-precision",            type=int,       action="store", dest="digits")
-        self.OptionParser.add_option("--indent",                   type="string",  action="store", dest="indent_type")
-        self.OptionParser.add_option("--nindent",                  type=int,       action="store", dest="indent_depth")
-        self.OptionParser.add_option("--line-breaks",              type="inkbool", action="store", dest="newlines")
-        self.OptionParser.add_option("--strip-xml-space",          type="inkbool", action="store", dest="strip_xml_space_attribute")
-        self.OptionParser.add_option("--protect-ids-noninkscape",  type="inkbool", action="store", dest="protect_ids_noninkscape")
-        self.OptionParser.add_option("--protect-ids-list",         type="string",  action="store", dest="protect_ids_list")
-        self.OptionParser.add_option("--protect-ids-prefix",       type="string",  action="store", dest="protect_ids_prefix")
-        self.OptionParser.add_option("--enable-viewboxing",        type="inkbool", action="store", dest="enable_viewboxing")
-        self.OptionParser.add_option("--enable-comment-stripping", type="inkbool", action="store", dest="strip_comments")
-        self.OptionParser.add_option("--renderer-workaround",      type="inkbool", action="store", dest="renderer_workaround")
+        self.arg_parser.add_argument("--tab",                      type=str,     action="store", dest="tab")
+        self.arg_parser.add_argument("--simplify-colors",          type=inkbool, action="store", dest="simple_colors")
+        self.arg_parser.add_argument("--style-to-xml",             type=inkbool, action="store", dest="style_to_xml")
+        self.arg_parser.add_argument("--group-collapsing",         type=inkbool, action="store", dest="group_collapse")
+        self.arg_parser.add_argument("--create-groups",            type=inkbool, action="store", dest="group_create")
+        self.arg_parser.add_argument("--enable-id-stripping",      type=inkbool, action="store", dest="strip_ids")
+        self.arg_parser.add_argument("--shorten-ids",              type=inkbool, action="store", dest="shorten_ids")
+        self.arg_parser.add_argument("--shorten-ids-prefix",       type=str,     action="store", dest="shorten_ids_prefix", default="")
+        self.arg_parser.add_argument("--embed-rasters",            type=inkbool, action="store", dest="embed_rasters")
+        self.arg_parser.add_argument("--keep-unreferenced-defs",   type=inkbool, action="store", dest="keep_defs")
+        self.arg_parser.add_argument("--keep-editor-data",         type=inkbool, action="store", dest="keep_editor_data")
+        self.arg_parser.add_argument("--remove-metadata",          type=inkbool, action="store", dest="remove_metadata")
+        self.arg_parser.add_argument("--strip-xml-prolog",         type=inkbool, action="store", dest="strip_xml_prolog")
+        self.arg_parser.add_argument("--set-precision",            type=int,     action="store", dest="digits")
+        self.arg_parser.add_argument("--indent",                   type=str,     action="store", dest="indent_type")
+        self.arg_parser.add_argument("--nindent",                  type=int,     action="store", dest="indent_depth")
+        self.arg_parser.add_argument("--line-breaks",              type=inkbool, action="store", dest="newlines")
+        self.arg_parser.add_argument("--strip-xml-space",          type=inkbool, action="store", dest="strip_xml_space_attribute")
+        self.arg_parser.add_argument("--protect-ids-noninkscape",  type=inkbool, action="store", dest="protect_ids_noninkscape")
+        self.arg_parser.add_argument("--protect-ids-list",         type=str,     action="store", dest="protect_ids_list")
+        self.arg_parser.add_argument("--protect-ids-prefix",       type=str,     action="store", dest="protect_ids_prefix")
+        self.arg_parser.add_argument("--enable-viewboxing",        type=inkbool, action="store", dest="enable_viewboxing")
+        self.arg_parser.add_argument("--enable-comment-stripping", type=inkbool, action="store", dest="strip_comments")
+        self.arg_parser.add_argument("--renderer-workaround",      type=inkbool, action="store", dest="renderer_workaround")
 
         # options for internal use of the extension
-        self.OptionParser.add_option("--scour-version",            type="string",  action="store", dest="scour_version")
-        self.OptionParser.add_option("--scour-version-warn-old",   type="inkbool", action="store", dest="scour_version_warn_old")
+        self.arg_parser.add_argument("--scour-version",            type=str,     action="store", dest="scour_version")
+        self.arg_parser.add_argument("--scour-version-warn-old",   type=inkbool, action="store", dest="scour_version_warn_old")
+
+    def load(self, stream):
+        return stream
+
+    def save(self, stream):
+        stream.write(self.document)
 
     def effect(self):
         # version check if enabled in options
@@ -77,11 +84,7 @@ class ScourInkscape (inkex.Effect):
 
         # do the scouring
         try:
-            input = file(self.args[0], "r")
-            self.options.infilename = self.args[0]
-            sys.stdout.write(scourString(input.read(), self.options).encode("UTF-8"))
-            input.close()
-            sys.stdout.close()
+            self.document = scourString(self.document.read(), self.options).encode("UTF-8")
         except Exception as e:
             inkex.errormsg("Error during optimization.")
             inkex.errormsg("\nDetails:\n" + str(e))
@@ -92,5 +95,4 @@ class ScourInkscape (inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = ScourInkscape()
-    e.affect(output=False)
+    ScourInkscape().run()

@@ -231,7 +231,10 @@ class hpglEncoder:
                 self.processPath(node[1], node[2], node[3])
 
     def getPenNumber(self, doc):
-        penNum = str(doc.get('{' + inkex.NSS['inkscape'] + '}label')).lower().strip(' \t\n\r')
+        penNum = doc.get('{' + inkex.NSS['inkscape'] + '}label')
+        if penNum == None:
+            return self.options.pen
+        penNum = penNum.lower().strip(' \t\n\r')
         if re.search(r'( |\A)pen *\d+( |\Z)', penNum):
             penNum = re.sub(r'(.* |\A)pen *(\d+)( .*|\Z)', r'\2', penNum, 1)
             return int(penNum)

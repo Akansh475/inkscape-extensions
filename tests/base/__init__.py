@@ -94,7 +94,7 @@ class TestCase(BaseCase):
         if not self.temp_dir:
             self.temp_dir = tempfile.mkdtemp(prefix='inkex-tests-')
         if not path.isdir(self.temp_dir):
-            raise IOError("The temporary directory has disapeared!")
+            raise IOError("The temporary directory has disappeared!")
         filename = template.format(prefix=prefix, suffix=suffix, name=uuid.uuid4().hex)
         return path.join(self.temp_dir, filename)
 

@@ -206,7 +206,7 @@ InkWeb.log = function (type, msg) {
   */
   if ( this.mustLog ) {
     if( type.constructor == ReferenceError ) {
-      // in a error loging the type argument is the error object.
+      // in a error logging the type argument is the error object.
       var error = type;
       type = "error";
       this.addViewLogBt();
@@ -254,9 +254,9 @@ InkWeb.__logSequence = function ( msg ) {
 InkWeb.logToString = function (conf) {
   /* Show the log in a formatted string.
   ** conf attributes:
-  **   format: a string to format the log itens.
-  **   formatError: to format the error log itens.
-  **   sep: the log itens separator string.
+  **   format: a string to format the log items.
+  **   formatError: to format the error log items.
+  **   sep: the log items separator string.
   ** format variables:
   **   $F: the item date in the format YYYY-MM-DD
   **   $T: the item time in the format HH:MM:SS
@@ -284,7 +284,7 @@ InkWeb.logToString = function (conf) {
   if ( logSize == 0 ) {
     str = "There are no errors.";
   }
-  // View all itens to mount the log string:
+  // View all items to mount the log string:
   for ( var item,pos=0; item=this.__log__[pos]; pos++ ) {
     var d = item.date;
     // Add log line, converting variables:

@@ -261,7 +261,7 @@ def point_inside_csp(p,csp, on_the_path = True) :
 	# we'll do the raytracing and see how many intersections are there on the ray's way. 
 	# if number of intersections is even then point is outside.
 	# ray will be x=p.x and y=>p.y
-	# you can assing any value to on_the_path, by dfault if point is on the path 
+	# you can assign any value to on_the_path, by dfault if point is on the path 
 	# function will return thai it's inside the path. 
 	x,y = p
 	ray_intersections_count = 0
@@ -524,7 +524,7 @@ def csp_true_bounds(csp) :
 ############################################################################
 ### csp_segments_intersection(sp1,sp2,sp3,sp4)
 ###
-### Returns array containig all intersections between two segmets of cubic 
+### Returns array containing all intersections between two segmets of cubic 
 ### super path. Results are [ta,tb], or [ta0, ta1, tb0, tb1, "Overlap"] 
 ### where ta, tb are values of t for the intersection point.
 ############################################################################
@@ -576,7 +576,7 @@ def csp_segments_intersection(sp1,sp2,sp3,sp4) :
 			b1,b2 = bez_split(b,0.5)
 			if bez_bounds_intersect(a,b1) : recursion(a,b1, ta0,ta1,tb0,tbm, depth_a,depth_b-1) 
 			if bez_bounds_intersect(a,b2) : recursion(a,b2, ta0,ta1,tbm,tb1, depth_a,depth_b-1) 
-		else : # Both segments have been subdevided enougth. Let's get some intersections :).
+		else : # Both segments have been subdevided enough. Let's get some intersections :).
 			intersection, t1, t2 =  straight_segments_intersection([a[0]]+[a[3]],[b[0]]+[b[3]])
 			if intersection :
 				if intersection == "Overlap" :
@@ -2195,7 +2195,7 @@ def csp_offset(csp, r) :
 	
 	#for i in range(len(splitted_offset)):
 	#	draw_csp([splitted_offset[i]], color = ["Green","Red","Blue"][i%3])
-	print_("Splitted in %s"%(time.time()-time_))
+	print_("Split in %s"%(time.time()-time_))
 	time_ = time.time()
 
 	
@@ -2249,7 +2249,7 @@ def csp_offset(csp, r) :
 	time_ = time.time()
 			
 	########################################################################
-	# Now to the Dummy cliping: remove parts from splitted offset if their 
+	# Now to the Dummy cliping: remove parts from split offset if their 
 	# centers are  closer to the original path than offset radius. 
 	########################################################################		
 	
@@ -2840,7 +2840,7 @@ class Polygon:
 			for i in range(len(poly)):
 				st,end = poly[i-1], poly[i]
 				if p==st or p==end : return True # point is a vertex = point is on the edge
-				if st[0]>end[0] : st, end = end, st # This will be needed to check that edge if open only at rigth end
+				if st[0]>end[0] : st, end = end, st # This will be needed to check that edge if open only at right end
 				c = (p[1]-st[1])*(end[0]-st[0])-(end[1]-st[1])*(p[0]-st[0])
 				#print_(c)
 				if st[0]<=p[0]<end[0] : 
@@ -3027,7 +3027,7 @@ class Arangement_Genetic:
 
 	
 	def species_distance2(self,sp1,sp2) :
-		# retun distance, each component is normalized
+		# return distance, each component is normalized
 		s = 0
 		for j in range(self.genes_count) :
 			s += ((sp1[j][0]-sp2[j][0])/self.genes_count)**2 + (( sp1[j][1]-sp2[j][1]))**2 + ((sp1[j][2]-sp2[j][2]))**2
@@ -3295,7 +3295,7 @@ class Gcodetools(inkex.Effect):
 				return csp_subpath_line_to([], [sp2[1],p])
 	
 		if not self.options.in_out_path and not self.options.plasma_prepare_corners and self.options.in_out_path_do_not_add_reference_point: 
-			self.error("Warning! Extenstion is not said to do anything! Enable one of Create in-out paths or Prepare corners checkboxes or disable Do not add in-out referense point!")
+			self.error("Warning! Extension is not said to do anything! Enable one of Create in-out paths or Prepare corners checkboxes or disable Do not add in-out referense point!")
 			return
 
 		# Add in-out-reference point if there is no one yet.		
@@ -3580,7 +3580,7 @@ class Gcodetools(inkex.Effect):
 
 		add_argument("--tool-diameter", type=float, default="3", help="Tool diameter used for area cutting")
 		add_argument("--max-area-curves", type=int, default="100", help="Maximum area curves for each area")
-		add_argument("--area-inkscape-radius", type=float, default="0", help="Area curves overlaping (depends on tool diameter [0, 0.9])")
+		add_argument("--area-inkscape-radius", type=float, default="0", help="Area curves overlapping (depends on tool diameter [0, 0.9])")
 		add_argument("--area-tool-overlap", type=float, default="-10", help="Radius for preparing curves using inkscape")
 		add_argument("--unit", default="G21 (All units in mm)", help="Units")
 		add_argument("--active-tab", default="", help="Defines which tab is active")
@@ -4081,7 +4081,7 @@ class Gcodetools(inkex.Effect):
 			print_(self.transform_matrix_reverse)
 
 			###self.Zauto_scale[layer]  = math.sqrt( (self.transform_matrix[layer][0][0]**2 + self.transform_matrix[layer][1][1]**2)/2 )
-			### Zautoscale is absolete
+			### Zautoscale is obsolete
 			self.Zauto_scale[layer] = 1
 			print_("Z automatic scale = %s (computed according orientation points)" % self.Zauto_scale[layer])
 
@@ -4152,7 +4152,7 @@ class Gcodetools(inkex.Effect):
 ################################################################################
 	def set_markers(self) :
 		self.get_defs()
-		# Add marker to defs if it doesnot exists
+		# Add marker to defs if it does not exists
 		if "CheckToolsAndOPMarker" not in self.defs : 
 			defs = inkex.etree.SubElement( self.document.getroot(), inkex.addNS("defs","svg"))
 			marker = inkex.etree.SubElement( defs, inkex.addNS("marker","svg"), {"id":"CheckToolsAndOPMarker","orient":"auto","refX":"-4","refY":"-1.687441","style":"overflow:visible"})
@@ -4244,7 +4244,7 @@ class Gcodetools(inkex.Effect):
 						self.error(_("Warning! Found bad orientation points in '%s' layer. Resulting Gcode could be corrupt!") % layer.get(inkex.addNS('label','inkscape')), "bad_orientation_points_in_some_layers") 
 
 				#Need to recognise old files ver 1.6.04 and earlier
-				elif i.get("gcodetools") == "Gcodetools tool definition" or i.get("gcodetools") == "Gcodetools tool defenition"  :
+				elif i.get("gcodetools") == "Gcodetools tool definition" or i.get("gcodetools") == "Gcodetools tool definition"  :
 					tool = self.get_tool(i)
 					self.tools[layer] = self.tools[layer] + [tool.copy()] if layer in self.tools else [tool.copy()]
 					print_("Found tool in '%s' layer: %s" % (layer.get(inkex.addNS('label','inkscape')), tool))
@@ -5132,7 +5132,7 @@ class Gcodetools(inkex.Effect):
 					
 					# if we've used spiral method we'll try to save the order of cutting
 					do_not_change_order = self.options.area_fill_method == 'spiral' 
-					# now let's try connect splitted lines
+					# now let's try connect split lines
 					#while len(splitted_line)>0 :
 					#TODO	
 					
@@ -6265,7 +6265,7 @@ G01 Z1 (going to cutting z)\n""",
 									)
 							first_seg = False
 							
-						# Add last horisontal straigth line if needed
+						# Add last horisontal straight line if needed
 						if a==0 or a==math.pi :
 							new_subpath +=  [ [[subpath[-1][i][0] - width*o ,subpath[-1][i][1]] for i in range(3)] ]
 
@@ -6302,9 +6302,9 @@ G01 Z1 (going to cutting z)\n""",
 					else :
 						self.error("You are currently using latest stable version of Gcodetools.","Warning")					
 					return 
-			self.error("Can not check the latest version. You can check it manualy at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s"%gcodetools_current_version,"Warning")					
+			self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s"%gcodetools_current_version,"Warning")					
 		except :
-			self.error("Can not check the latest version. You can check it manualy at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s"%gcodetools_current_version,"Warning")					
+			self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s"%gcodetools_current_version,"Warning")					
 				
 
 

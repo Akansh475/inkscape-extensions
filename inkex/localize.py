@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-Allow extentions to translate messages.
+Allow extensions to translate messages.
 """
 
 import os
@@ -56,4 +56,3 @@ def localize():
             trans = gettext.translation(domain, fallback=True)
     #sys.stderr.write(str(localdir) + "\n")
     trans.install()
-

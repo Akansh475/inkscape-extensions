@@ -791,7 +791,7 @@ extension-element-prefixes="math">
   * Decimal to hexadecimal converter
   * Unit to pixel converter
   * Switch
-  * Unknows tags
+  * Unknown tags
   * Object description (not supported)
   * Title and description (not supported)
   * Symbols (not supported)
@@ -2618,7 +2618,7 @@ extension-element-prefixes="math">
   Not supported by FXG:
   * elliptical arc curve commands (workaround: convert to path first)
   TODO:
-  * Implement an arc to curve convertor
+  * Implement an arc to curve converter
 -->
 <xsl:template mode="forward" match="*[name(.) = 'path']">
   <xsl:variable name="object">

@@ -115,7 +115,7 @@ class ScriptCoverageTest(TestCase):
         """Gets a list of python files that may be effects or modules
 
         Returns three lists:
-          - mods   - List of modules, folders seperated by '.'
+          - mods   - List of modules, folders separated by '.'
           - tests  - List of tests found
 
         """

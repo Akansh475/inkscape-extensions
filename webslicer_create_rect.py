@@ -36,7 +36,7 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
         self.arg_parser.add_argument("--html-class")
         self.arg_parser.add_argument("--layout-disposition")
         self.arg_parser.add_argument("--layout-position-anchor")
-        # inkscape param workarround
+        # inkscape param workaround
         self.arg_parser.add_argument("--tab")
 
 

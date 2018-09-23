@@ -20,7 +20,7 @@
 Provide extra utility to each svg element type specific to it's type.
 
 This is useful for having a common interface for each element which can
-give path, transform, and property access easilly.
+give path, transform, and property access easily.
 """
 
 import math
@@ -54,7 +54,7 @@ class BaseElement(etree.ElementBase):
 
     @property
     def root(self):
-        """Get the root document element from any element decendent"""
+        """Get the root document element from any element descendent"""
         if self.getparent() is not None:
             return self.getparent().root
         return self
@@ -148,7 +148,7 @@ class Use(BaseElement):
     path = property(lambda self: self.ref().path) # pylint: disable=no-member
 
     def ref(self):
-        """Returns the reffered to element if available"""
+        """Returns the referred to element if available"""
         return self.root.getElementById(self.get('xlink:href').strip('#'))
 
 class Defs(BaseElement):

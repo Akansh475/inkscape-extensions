@@ -4,7 +4,7 @@
 # Copyright (C) 2008 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2011 Nicolas Dufour, nicoduf@yahoo.fr
 #
-#    * Fix for a bug related to special caracters in the path (LP #456248).
+#    * Fix for a bug related to special characters in the path (LP #456248).
 #    * Fix for Windows support (LP #391307 ).
 #    * Font list and image directory features.
 #
@@ -107,12 +107,12 @@ class CompressedMediaOutput(inkex.Effect):
                 absref = node.get(inkex.addNS('absref',u'sodipodi'))
                 url = urlib.urlparse(xlink)
                 href = urllib.url2pathname(url.path)
-                
+
                 if (href != None and os.path.isfile(href)):
                     absref = os.path.realpath(href)
 
                 image_path = os.path.join(dir, os.path.basename(absref))
-                
+
                 if (os.path.isfile(absref)):
                     shutil.copy(absref, self.tmp_dir)
                     z.write(absref, image_path.encode(self.encoding))
@@ -154,7 +154,7 @@ class CompressedMediaOutput(inkex.Effect):
             s = dict(inkex.Style.parse_str(node.attrib['style']))
         if not s:
             return fonts
-            
+
         if s.has_key('font-family'):
             if s.has_key('font-weight'):
                 fonts.append(s['font-family'] + ' ' + s['font-weight'])

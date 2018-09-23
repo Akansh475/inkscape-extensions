@@ -84,7 +84,7 @@ class PathTest(TestCase):
         self.assertEqual(str(ret), 'M 10 10 L 80 80 l 10 10 Z')
 
     def test_scale(self):
-        """Paths canbe scaled using the times operator"""
+        """Paths can be scaled using the times operator"""
         ret = Path('M 10,10 L 30,30 C 20 20 10 10 10 10 l 10 10') * (2.5, 3)
         self.assertEqual(str(ret), 'M 25 30 L 75 90 C 50 60 25 30 25 30 l 25 30')
 

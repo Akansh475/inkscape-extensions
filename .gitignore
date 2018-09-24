@@ -8,3 +8,4 @@ TODO
 source
 build
 old
+.mypy_cache

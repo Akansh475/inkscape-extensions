@@ -51,7 +51,7 @@ class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
                 exit(1)
             else:
                 type, value, traceback = sys.exc_info()
-                raise ValueError, ("", type, value), traceback
+                raise ValueError("", type, value).with_traceback(traceback)
 
         # issue warning if unknown commands where found
         if 'UNKNOWN_COMMANDS' in warnings:

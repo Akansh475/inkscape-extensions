@@ -212,7 +212,7 @@ class Plot(inkex.Effect):
                 return
             else:
                 type, value, traceback = sys.exc_info()
-                raise ValueError, ('', type, value), traceback
+                raise ValueError('', type, value).with_traceback(traceback)
         # send data to plotter
         mySerial.write(self.hpgl)
         mySerial.read(2)

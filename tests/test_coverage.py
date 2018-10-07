@@ -127,6 +127,9 @@ class ScriptCoverageTest(TestCase):
             for fname in files:
                 if not fname.endswith('.py') or '__' in fname or fname == 'setup.py':
                     continue
+                if fname == 'inkex.py':
+                    # legacy compatibility module
+                    continue
                 if fname.startswith('test_'):
                     if fname.endswith('_all.py'):
                         alls.append(fname[5:-7].lower())

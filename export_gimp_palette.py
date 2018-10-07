@@ -20,6 +20,8 @@
 Export a gimp pallet file (.gpl)
 """
 
+from __future__ import print_function
+
 import inkex
 
 DOCNAME = 'sodipodi:docname'

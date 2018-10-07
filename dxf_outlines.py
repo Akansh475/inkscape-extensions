@@ -32,6 +32,8 @@ The spec can be found here: http://www.autodesk.com/techpubs/autocad/acadr14/dxf
 - support for rectangle added Dec 2010
 """
 
+from __future__ import print_function
+
 import inkex
 import dxf_templates
 

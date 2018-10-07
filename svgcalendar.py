@@ -30,6 +30,13 @@ __version__ = "0.3"
 
 import re
 import calendar
+import sys
+
+if sys.version_info[0] > 2:
+    def unicode(s, encoding):
+        if isinstance(s, bytes):
+            return s.decode(encoding)
+        return s
 
 from datetime import *
 

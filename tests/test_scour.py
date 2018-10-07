@@ -13,7 +13,7 @@ class ScourBasicTests(TestCase):
 
         obj.run(['--output', output, input])
 
-        with open(output_expected) as f:
+        with open(output_expected, 'rb') as f:
             self.assertEqual(obj.document, f.read())
 
 if __name__ == '__main__':

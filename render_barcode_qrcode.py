@@ -508,7 +508,7 @@ class QRUtil(object):
         if maskPattern == QRMaskPattern.PATTERN001 : return i % 2 == 0
         if maskPattern == QRMaskPattern.PATTERN010 : return j % 3 == 0
         if maskPattern == QRMaskPattern.PATTERN011 : return (i + j) % 3 == 0
-        if maskPattern == QRMaskPattern.PATTERN100 : return (math.floor(i / 2) + math.floor(j / 3) ) % 2 == 0
+        if maskPattern == QRMaskPattern.PATTERN100 : return ((i // 2) + (j // 3)) % 2 == 0
         if maskPattern == QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 == 0
         if maskPattern == QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 == 0
         if maskPattern == QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 == 0
@@ -973,7 +973,7 @@ class QRRSBlock:
         if rsBlock == None:
             raise Exception("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel)
 
-        length = len(rsBlock) / 3
+        length = len(rsBlock) // 3
 
         list = []
 
@@ -1008,7 +1008,7 @@ class QRBitBuffer:
     def __repr__(self):
         return ".".join([str(n) for n in self.buffer])
     def get(self, index):
-        bufIndex = math.floor(index / 8)
+        bufIndex = index // 8
         val = ( (self.buffer[bufIndex] >> (7 - index % 8) ) & 1) == 1
         print("get ", val)
         return ( (self.buffer[bufIndex] >> (7 - index % 8) ) & 1) == 1
@@ -1057,7 +1057,8 @@ class QRCodeInkscape(inkex.Effect):
         
             #INKSCAPE GROUP TO CONTAIN EVERYTHING
             
-            so.TEXT = unicode(so.TEXT, so.input_encode)
+            if isinstance(so.TEXT, bytes):
+                so.TEXT = so.TEXT.decode(so.input_encode)
             centre = tuple(computePointInNode(list(self.view_center), self.current_layer))   #Put in in the centre of the current view
             grp_transform = 'translate' + str( centre ) + ' scale(%f)' % scale
             grp_name = 'QR Code: '+so.TEXT

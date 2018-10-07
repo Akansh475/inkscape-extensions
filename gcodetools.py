@@ -91,6 +91,7 @@ from inkex.localize import _
  
 if sys.version_info[0] > 2:
     xrange = range
+    unicode = str
 
 
 def bezierslopeatt(b0_b1_b2_b3, t):
@@ -1628,11 +1629,11 @@ def cubic_solver(a,b,c,d):
 ################################################################################
 
 def print_(*arg):
-	f = open(options.log_filename,"a")
+	f = open(options.log_filename, "ab")
 	for s in arg :
-		s = str(unicode(s).encode('unicode_escape'))+" "
+		s = unicode(s).encode('unicode_escape') + b" "
 		f.write( s )
-	f.write("\n")
+	f.write(b"\n")
 	f.close()
 
 

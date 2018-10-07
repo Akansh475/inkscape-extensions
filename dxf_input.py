@@ -23,6 +23,7 @@ Input a DXF file >= (AutoCAD Release 13 == AC1012)
 # thanks to Aaron Spike for inkex without which this would not have been possible
 
 import math
+import re
 
 import sys
 if sys.version_info[0] < 3:
@@ -31,9 +32,13 @@ if sys.version_info[0] < 3:
 else:
     from io import StringIO
     from urllib.parse import quote
+    unichr = chr
 
 import inkex
 import inkex.base
+
+def re_hex2unichar(m):
+    return unichr(int(m.group(1), 16))
 
 def formatStyle(style):
     return str(inkex.Style(style))
@@ -339,13 +344,6 @@ def generate_gcodetools_point(xc, yc):
     attribs = {'d': path, inkex.addNS('dxfpoint','inkscape'):'1', 'style': 'stroke:none;fill:#ff0000'}
     inkex.etree.SubElement(layer, 'path', attribs)
 
-def get_group(group):
-    line = get_line()
-    if line[0] == group:
-        return float(line[1])
-    else:
-        return 0.0
-
 #   define DXF Entities and specify which Group Codes to monitor
 
 entities = {'MTEXT': export_MTEXT, 'TEXT': export_MTEXT, 'POINT': export_POINT, 'LINE': export_LINE, 'SPLINE': export_SPLINE, 'CIRCLE': export_CIRCLE, 'ARC': export_ARC, 'ELLIPSE': export_ELLIPSE, 'LEADER': export_LEADER, 'LWPOLYLINE': export_LWPOLYLINE, 'HATCH': export_HATCH, 'DIMENSION': export_DIMENSION, 'INSERT': export_INSERT, 'BLOCK': export_BLOCK, 'ENDBLK': export_ENDBLK, 'ATTDEF': export_ATTDEF, 'VIEWPORT': False, 'ENDSEC': False}
@@ -392,8 +390,17 @@ class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         inkex.etree.SubElement(pattern, 'path', {'d': 'M6 2 l-4,4', 'stroke': '#000000', 'stroke-width': '0.25', 'linecap': 'square'})
         inkex.etree.SubElement(pattern, 'path', {'d': 'M4 0 l-4,4', 'stroke': '#000000', 'stroke-width': '0.25', 'linecap': 'square'})
 
+        def _get_line():
+            return self.document.readline().strip().decode(options.input_encode)
+
         def get_line():
-            return (self.document.readline().strip(), self.document.readline().strip())
+            return (_get_line(), _get_line())
+
+        def get_group(group):
+            line = get_line()
+            if line[0] == group:
+                return float(line[1])
+            return 0.0
 
         xmax = xmin = ymin = 0.0
         height = 297.0*96.0/25.4                            # default A4 height in pixels
@@ -418,14 +425,14 @@ class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
                 if line[1] == '$EXTMAX':
                     xmax = get_group('10')
             if flag == 1 and line[0] == '2':
-                layername = unicode(line[1], options.input_encode)
+                layername = line[1]
                 attribs = {inkex.addNS('groupmode','inkscape'): 'layer', inkex.addNS('label','inkscape'): '%s' % layername}
                 layer_nodes[layername] = inkex.etree.SubElement(doc.getroot(), 'g', attribs)
             if flag == 2 and line[0] == '2':
-                linename = unicode(line[1], options.input_encode)
+                linename = line[1]
                 linetypes[linename] = []
             if flag == 3 and line[0] == '2':
-                stylename = unicode(line[1], options.input_encode)
+                stylename = line[1]
             if line[0] == '2' and line[1] == 'LAYER':
                 flag = 1
             if line[0] == '2' and line[1] == 'LTYPE':
@@ -485,19 +492,17 @@ class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
                 polylines += 1
             if entity and line[0] in groups:
                 seqs.append(line[0])                        # list of group codes
-                if line[0] == '1' or line[0] == '2' or line[0] == '3' or line[0] == '6' or line[0] == '8':  # text value
-                    val = line[1].replace('\~', ' ')
-                    val = inkex.re.sub( '\\\\A.*;', '', val)
-                    val = inkex.re.sub( '\\\\H.*;', '', val)
-                    val = inkex.re.sub( '\\^I', '', val)
-                    val = inkex.re.sub( '{\\\\L', '', val)
-                    val = inkex.re.sub( '}', '', val)
-                    val = inkex.re.sub( '\\\\S.*;', '', val)
-                    val = inkex.re.sub( '\\\\W.*;', '', val)
-                    val = unicode(val, options.input_encode)
-                    val = val.encode('unicode_escape')
-                    val = inkex.re.sub( '\\\\\\\\U\+([0-9A-Fa-f]{4})', '\\u\\1', val)
-                    val = val.decode('unicode_escape')
+                if line[0] in ('1', '2', '3', '6', '8'):  # text value
+                    val = line[1].replace(r'\~', ' ')
+                    val = re.sub(r'\\A.*;', '', val)
+                    val = re.sub(r'\\H.*;', '', val)
+                    val = re.sub(r'\^I', '', val)
+                    val = re.sub(r'{\\L', '', val)
+                    val = re.sub(r'}', '', val)
+                    val = re.sub(r'\\S.*;', '', val)
+                    val = re.sub(r'\\W.*;', '', val)
+                    val = val
+                    val = re.sub(r'\\U\+([0-9A-Fa-f]{4})', re_hex2unichar, val)
                 elif line[0] == '62' or line[0] == '70' or line[0] == '92' or line[0] == '93':
                     val = int(line[1])
                 else:                                       # unscaled float value

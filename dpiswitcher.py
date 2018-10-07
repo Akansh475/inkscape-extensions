@@ -40,6 +40,10 @@ TODO:
     - scale perspective of 3dboxes
 
 """
+
+from __future__ import print_function
+from __future__ import absolute_import
+
 # standard libraries
 import sys
 import re
@@ -193,8 +197,8 @@ def check_use(svg, element, scale_x, scale_y):
 class DPISwitcher(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--switcher", action="store", 
-            type="string", dest="switcher", default="0", 
+        self.OptionParser.add_option("--switcher", action="store",
+            type="string", dest="switcher", default="0",
             help="Select the DPI switch you want")
         self.OptionParser.add_option("--action", action="store",
             type="string", dest="action",
@@ -233,9 +237,9 @@ class DPISwitcher(inkex.Effect):
     def parse_length(self, length, percent=False):
         """Parse SVG length."""
         if self.options.switcher == "0":  # dpi90to96
-            known_units = self.__uuconvLegacy.keys()
+            known_units = list(self.__uuconvLegacy)
         else:  # dpi96to90
-            known_units = self.__uuconv.keys()
+            known_units = list(self.__uuconv)
         if percent:
             unitmatch = re.compile('(%s)$' % '|'.join(known_units + ['%']))
         else:
@@ -261,7 +265,7 @@ class DPISwitcher(inkex.Effect):
                 unit = doc_unit
             else:  # dpi96to90
                 val_px = val * self.__uuconv[unit]
-                val = val_px / (self.__uuconv[doc_unit] / self.__uuconv['px']) 
+                val = val_px / (self.__uuconv[doc_unit] / self.__uuconv['px'])
                 unit = doc_unit
         return (val, unit)
 
@@ -345,7 +349,7 @@ class DPISwitcher(inkex.Effect):
         for guide in guides:
             point = string.split(guide.get("position"), ",")
             guide.set("position", str(float(point[0].strip()) * self.factor_a ) + "," + str(float(point[1].strip()) * self.factor_a ))
-    
+
     def scaleGrid(self, svg):
         xpathStr = '//inkscape:grid'
         grids = svg.xpath(xpathStr, namespaces=inkex.NSS)
@@ -369,36 +373,36 @@ class DPISwitcher(inkex.Effect):
         sys.stdout = sys.stderr
         svg = self.document.getroot()
         if self.options.action == '"page_info"':
-            print ":::SVG document related info:::"
-            print "version: " + str(svg.get(inkex.addNS('version',u'inkscape')))
+            print(":::SVG document related info:::")
+            print("version: " + str(svg.get(inkex.addNS('version', 'inkscape'))))
             width = svg.get('width')
             if width:
-                print "width: " + width
+                print("width: " + width)
             height = svg.get('height')
             if height:
-                print "height: " + height
+                print("height: " + height)
             viewBox = svg.get('viewBox')
             if viewBox:
-                print "viewBox: " + viewBox
+                print("viewBox: " + viewBox)
             namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
             if not namedview:
                 return inkex.errormsg("No document named view available.")
             docunits =  namedview.get(inkex.addNS('document-units', 'inkscape'))
             if docunits:
-                print "document-units: " + docunits
+                print("document-units: " + docunits)
             units = namedview.get('units')
             if units:
-                print "units: " + units
+                print("units: " + units)
             xpathStr = '//sodipodi:guide'
             guides = svg.xpath(xpathStr, namespaces=inkex.NSS)
             xpathStr = '//inkscape:grid'
             if guides:
                 numberGuides = len(guides)
-                print "Document has " + str(numberGuides) + " guides"
+                print("Document has " + str(numberGuides) + " guides")
             grids = svg.xpath(xpathStr, namespaces=inkex.NSS)
             i = 1
             for grid in grids:
-                print "Grid number " + str(i) + ": Units: " + grid.get("units")
+                print("Grid number " + str(i) + ": Units: " + grid.get("units"))
                 i = i+1
         else:
             if self.options.switcher == "0":
@@ -409,7 +413,7 @@ class DPISwitcher(inkex.Effect):
                 return inkex.errormsg("No document named view available.")
             namedview.set(inkex.addNS('document-units', 'inkscape'), "px")
             self.units = self.parse_length(svg.get('width'))[1]
-            if self.units and self.units <> "px" and self.units <> "" and self.units <> "%":
+            if self.units and self.units != "px" and self.units != "" and self.units != "%":
                 if self.options.switcher == "0":
                     self.unitExponent = 1.0/(self.factor_a/self.__uuconv[self.units])
                 else:

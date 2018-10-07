@@ -371,6 +371,12 @@ class DPISwitcher(inkex.Effect):
     def effect(self):
         saveout = sys.stdout
         sys.stdout = sys.stderr
+        try:
+            self._effect_stderr()
+        finally:
+            sys.stdout = saveout
+
+    def _effect_stderr(self):
         svg = self.document.getroot()
         if self.options.action == '"page_info"':
             print(":::SVG document related info:::")
@@ -419,7 +425,6 @@ class DPISwitcher(inkex.Effect):
                 else:
                     self.unitExponent = 1.0/(self.factor_a/self.__uuconvLegacy[self.units])
             self.scaleRoot(svg);
-        sys.stdout = saveout
 
 
 if __name__ == '__main__':

@@ -63,8 +63,10 @@ from simpletransform import computePointInNode
 
 
 #SVG OUTPUT FUNCTIONS ================================================
-def draw_SVG_ellipse((rx, ry), (cx, cy), width, parent, start_end=(0,2*pi),transform='' ):
+def draw_SVG_ellipse(r_xy, c_xy, width, parent, start_end=(0,2*pi),transform='' ):
 
+    (rx, ry) = r_xy
+    (cx, cy) = c_xy
     style = {   'stroke'        : '#000000',
                 'stroke-width'  : str(width),
                 'fill'          : 'none'            }

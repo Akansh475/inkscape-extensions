@@ -93,7 +93,8 @@ if sys.version_info[0] > 2:
     xrange = range
 
 
-def bezierslopeatt(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)),t):
+def bezierslopeatt(b0_b1_b2_b3, t):
+	(bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3) = b0_b1_b2_b3
 	ax,ay,bx,by,cx,cy,x0,y0=bezmisc.bezierparameterize(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)))
 	dx=3*ax*(t**2)+2*bx*t+cx
 	dy=3*ay*(t**2)+2*by*t+cy
@@ -1343,7 +1344,9 @@ def bounds_intersect(a, b) :
 	return not ( (a[0]>b[2]) or (b[0]>a[2]) or (a[1]>b[3]) or (b[1]>a[3]) )
 
 
-def tpoint((x1,y1),(x2,y2),t):
+def tpoint(xy1, xy2, t):
+	(x1,y1) = xy1
+	(x2,y2) = xy2
 	return [x1+t*(x2-x1),y1+t*(y2-y1)]
 
 
@@ -1377,7 +1380,8 @@ def bez_normalized_slope(bez,t):
 ###	Some vector functions
 ################################################################################
 	
-def normalize((x,y)) :
+def normalize(xy) :
+	(x, y) = xy
 	l = math.sqrt(x**2+y**2)
 	if l == 0 : return [0.,0.]
 	else : 		return [x/l, y/l]
@@ -5182,7 +5186,7 @@ class Gcodetools(inkex.Effect):
 		eye_dist = 100 #3D constant. Try varying it for your eyes
 
 
-		def bisect((nx1,ny1),(nx2,ny2)) :
+		def bisect(nxy1, nxy2) :
 			"""LT Find angle bisecting the normals n1 and n2
 
 			Parameters: Normalised normals
@@ -5192,8 +5196,8 @@ class Gcodetools(inkex.Effect):
 			Note that bisect(n1,n2) and bisect(n2,n1) give opposite sinBis2 results
 			If sinturn is less than the user's requested angle tolerance, I return 0
 			"""
-			#We can get absolute value of cos(bisector vector)
-			#Note: Need to use max in case of rounding errors
+			(nx1, ny1) = nxy1
+			(nx2, ny2) = nxy2
 			cosBis = math.sqrt(max(0,(1.0+nx1*nx2-ny1*ny2)/2.0))
 			#We can get correct sign of the sin, assuming cos is positive
 			if (abs(ny1-ny2)< engraving_tolerance)  or (abs(cosBis) < engraving_tolerance) :
@@ -5212,7 +5216,7 @@ class Gcodetools(inkex.Effect):
 			return (cosBis/costurn,sinBis/costurn, sinturn)
 			#end bisect
 
-		def get_radius_to_line((x1,y1),(nx1,ny1), (nx2,ny2),(x2,y2),(nx23,ny23),(x3,y3),(nx3,ny3)):
+		def get_radius_to_line(xy1, n_xy1, n_xy2, xy2, n_xy23, xy3, n_xy3):
 			"""LT find biggest circle we can engrave here, if constrained by line 2-3
 
 			Parameters:
@@ -5238,7 +5242,13 @@ class Gcodetools(inkex.Effect):
 			# Algorithm uses dot products of normals to find radius
 			# and hence coordinates of centre
 			"""
-
+			(x1, y1) = xy1
+			(nx1, ny1) = n_xy1
+			(nx2, ny2) = n_xy2
+			(x2, y2) = xy2
+			(nx23, ny23) = n_xy23
+			(x3, y3) = xy3
+			(nx3, ny3) = n_xy3
 			global max_dist
 
 			#Start by converting coordinates to be relative to x1,y1
@@ -5272,7 +5282,7 @@ class Gcodetools(inkex.Effect):
 			return min(r, max_dist)
 			#end of get_radius_to_line
 
-		def get_radius_to_point((x1,y1),(nx,ny), (x2,y2)):
+		def get_radius_to_point(xy1, n_xy, xy2):
 			"""LT find biggest circle we can engrave here, constrained by point x2,y2
 
 			This function can be used in three ways:
@@ -5286,7 +5296,9 @@ class Gcodetools(inkex.Effect):
 			It turns out that finding a circle touching a point is harder than a circle
 			touching a line.
 			"""
-
+			(x1, y1) = xy1
+			(nx, ny) = n_xy
+			(x2, y2) = xy2
 			global max_dist
 
 			#Start by converting coordinates to be relative to x1,y1
@@ -5349,7 +5361,7 @@ class Gcodetools(inkex.Effect):
 			return bez_divide(a,[abx,aby],[abcx,abcy],m) + bez_divide(m,[bcdx,bcdy],[cdx,cdy],d)
 			#end of bez_divide
 
-		def get_biggest((x1,y1),(nx,ny)):
+		def get_biggest(nxy1, nxy2):
 			"""LT Find biggest circle we can draw inside path at point x1,y1 normal nx,ny
 
 			Parameters:
@@ -5359,6 +5371,8 @@ class Gcodetools(inkex.Effect):
 				tuple (j,i,r)
 				..where j and i are indices of limiting segment, r is radius
 			"""
+			(x1, y1) = nxy1
+			(nx, ny) = nxy2
 			global max_dist, nlLT, i, j
 			n1 = nlLT[j][i-1] #current node
 			jjmin = -1
@@ -5407,7 +5421,7 @@ class Gcodetools(inkex.Effect):
 			return (jjmin,iimin,r)
 			#end of get_biggest
 
-		def line_divide((x0,y0),j0,i0,(x1,y1),j1,i1,(nx,ny),length):
+		def line_divide(xy0, j0, i0, xy1, j1, i1, n_xy, length):
 			"""LT recursively divide a line as much as necessary
 
 			NOTE: This function is not currently used
@@ -5422,6 +5436,9 @@ class Gcodetools(inkex.Effect):
 					each a list of 3 reals: x, y coordinates, radius
 
 			"""
+			(x0, y0) = xy0
+			(x1, y1) = xy1
+			(nx, ny) = n_xy
 			global nlLT, i, j, lmin
 			x2=(x0+x1)/2
 			y2=(y0+y1)/2
@@ -5434,12 +5451,13 @@ class Gcodetools(inkex.Effect):
 			return [ line_divide((x0,y0),j0,i0,(x2,y2),j2,i2,(nx,ny),length/2), line_divide((x2,y2),j2,i2,(x1,y1),j1,i1,(nx,ny),length/2)]
 			#end of line_divide()
 
-		def save_point((x,y),w,i,j,ii,jj):
+		def save_point(xy, w, i, j, ii, jj):
 			"""LT Save this point and delete previous one if linear
 
 			The point is, we generate tons of points but many may be in a straight 3D line.
 			There is no benefit in saving the imtermediate points.
 			"""
+			(x, y) = xy
 			global wl, cspm
 			x=round(x,4) #round to 4 decimals
 			y=round(y,4) #round to 4 decimals
@@ -5467,13 +5485,15 @@ class Gcodetools(inkex.Effect):
 			wl+=[w]
 			#end of save_point
 
-		def draw_point((x0,y0),(x,y),w,t):
+		def draw_point(xy0, xy, w, t):
 			"""LT Draw this point as a circle with a 1px dot in the middle (x,y) 
 			and a 3D line from (x0,y0) down to x,y. 3D line thickness should be t/2 
 
 			Note that points that are subsequently erased as being unneeded do get
 			displayed, but this helps the user see the total area covered.
 			"""
+			(x0, y0) = xy0
+			(x, y) = xy
 			global gcode_3Dleft ,gcode_3Dright
 			if self.options.engraving_draw_calculation_paths :
 				inkex.etree.SubElement(	engraving_group, inkex.addNS('path','svg'), 

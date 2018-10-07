@@ -38,12 +38,19 @@ class InkscapeExtension(object):
         self.document = None
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
-        self.arg_parser.add_argument(
-            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-            help="Filename of the input file (default is stdin)", default=sys.stdin)
+        if sys.version_info[0] < 3:
+            sys_stdin_buffer = sys.stdin
+            sys_stdout_buffer = sys.stdout
+        else:
+            sys_stdin_buffer = sys.stdin.buffer
+            sys_stdout_buffer = sys.stdout.buffer
 
         self.arg_parser.add_argument(
-            "--output", type=str, default=sys.stdout,
+            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
+            help="Filename of the input file (default is stdin)", default=sys_stdin_buffer)
+
+        self.arg_parser.add_argument(
+            "--output", type=str, default=sys_stdout_buffer,
             help="Optional output filename for saving the result (default is stdout).")
 
         self.add_arguments(self.arg_parser)

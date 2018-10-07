@@ -24,8 +24,13 @@ Input a DXF file >= (AutoCAD Release 13 == AC1012)
 
 import math
 
-from StringIO import StringIO
-from urllib import quote
+import sys
+if sys.version_info[0] < 3:
+    from StringIO import StringIO
+    from urllib import quote
+else:
+    from io import StringIO
+    from urllib.parse import quote
 
 import inkex
 import inkex.base

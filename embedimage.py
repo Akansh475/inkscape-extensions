@@ -20,7 +20,14 @@
 import base64
 import os
 import sys
-import urllib
+
+if sys.version_info[0] < 3:
+    import urllib
+    import urlparse
+else:
+    import urllib.request as urllib
+    import urllib.parse as urlparse
+
 import inkex
 
 
@@ -58,7 +65,7 @@ class Embedder(inkex.Effect):
         xlink = node.get(inkex.addNS('href','xlink'))
         if xlink is None or xlink[:5] != 'data:':
             absref=node.get(inkex.addNS('absref','sodipodi'))
-            url=urllib.parse.urlparse(xlink)
+            url=urlparse.urlparse(xlink)
             href=urllib.url2pathname(url.path)
             
             path=''

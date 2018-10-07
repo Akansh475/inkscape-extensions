@@ -44,7 +44,11 @@ import zipfile
 import shutil
 import tempfile
 import locale
-import urllib
+
+if sys.version_info[0] < 3:
+    import urllib
+else:
+    import urllib.request as urllib
 
 import inkex
 

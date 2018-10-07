@@ -6290,7 +6290,10 @@ G01 Z1 (going to cutting z)\n""",
 	
 	def update(self) :
 		try :
-			import urllib
+			if sys.version_info[0] < 3:
+				import urllib
+			else:
+				import urllib.request as urllib
 			f = urllib.urlopen("http://www.cnc-club.ru/gcodetools_latest_version", proxies = urllib.getproxies())
 			a = f.read()
 			for s in a.split("\n") :

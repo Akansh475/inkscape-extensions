@@ -16,9 +16,9 @@
 # pylint: disable=invalid-name
 """Depricated cspsubdiv API"""
 
-from inkex.depricated import depricate
-from inkex import cspsubdiv
+from inkex.deprecated import deprecate
+from inkex import bezier
 
-maxdist = depricate(cspsubdiv.maxdist)
-cspsubdiv = depricate(cspsubdiv.cspsubdiv)
-subdiv = depricate(cspsubdiv.subdiv)
+maxdist = deprecate(bezier.maxdist)
+cspsubdiv = deprecate(bezier.cspsubdiv)
+subdiv = deprecate(bezier.subdiv)

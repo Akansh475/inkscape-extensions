@@ -16,7 +16,7 @@
 # pylint: disable=invalid-name
 """Depricated ffgeom API"""
 
-from inkex.depricated import depricate
+from inkex.deprecated import deprecate
 from inkex.paths import Move
 
 try:
@@ -25,7 +25,7 @@ except ValueError:
     PosInf = 1e300000
     NaN = PosInf/PosInf
 
-@depricate
+@deprecate
 class Point(Move):
     precision = 5
     number_template = "{:5g}"

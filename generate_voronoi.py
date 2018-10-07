@@ -174,14 +174,14 @@ class Pattern(inkex.Effect):
         # link selected object to pattern
         obj = self.selected[self.options.ids[0]]
         style = {}
-        if obj.attrib.has_key('style'):
+        if 'style' in obj.attrib:
             style = dict(inkex.Style.parse_str(obj.attrib['style']))
         style['fill'] = 'url(#%s)' % pattern.get('id')
         obj.attrib['style'] = str(inkex.Style(style))
         if obj.tag == inkex.addNS('g', 'svg'):
             for node in obj:
                 style = {}
-                if node.attrib.has_key('style'):
+                if 'style' in node.attrib:
                     style = dict(inkex.Style.parse_str(node.attrib['style']))
                 style['fill'] = 'url(#%s)' % pattern.get('id')
                 node.attrib['style'] = str(inkex.Style(style))

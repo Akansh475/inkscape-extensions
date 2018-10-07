@@ -56,13 +56,13 @@ class MyEffect(inkex.Effect):
         style = node.get('style')
         if style:
             style = dict(inkex.Style.parse_str(style))
-            if style.has_key('stroke'):
+            if 'stroke' in style:
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
                     rgb = inkex.Color(style['stroke']).to_rgb()
-            if style.has_key('stroke-width'):
+            if 'stroke-width' in style:
                 stroke = self.unittouu(style['stroke-width'])/self.unittouu('1px')
                 stroke = int(stroke*self.scale)
-            if style.has_key('fill'):
+            if 'fill' in style:
                 if style['fill'] and style['fill'] != 'none' and style['fill'][0:3] != 'url':
                     fill = inkex.Color(style['fill']).to_rgb()
                     fillcolor = fill[0] + 256*fill[1] + 256*256*fill[2]
@@ -150,7 +150,7 @@ class MyEffect(inkex.Effect):
             style = group.get('style')
             if style:
                 style = dict(inkex.Style.parse_str(style))
-                if style.has_key('display'):
+                if 'display' in style:
                     if style['display'] == 'none' and self.visibleLayers:
                         return
         trans = group.get('transform')

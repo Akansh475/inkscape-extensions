@@ -262,7 +262,7 @@ def interleave( blocks, inter):
         result = []
         for block in blocks:    #for each codeword block in the stream
             block_length = len(block)/inter    #length of each interleaved block
-            inter_blocks = [[0] * block_length for i in xrange(inter)]   #the interleaved blocks
+            inter_blocks = [[0] * block_length for i in range(inter)]   #the interleaved blocks
             
             for i in range(block_length):   #for each element in the interleaved blocks
                 for j in range(inter):       #for each interleaved block
@@ -513,7 +513,7 @@ def utah(array, nrow, ncol, row, col, char):
 def place_bits(data, (nrow, ncol)): 
 # First, fill the array[] with invalid entries */ 
     INVALID = 2
-    array = [[INVALID] * ncol for i in xrange(nrow)]   #initialise and fill with -1's (invalid value)
+    array = [[INVALID] * ncol for i in range(nrow)]   #initialise and fill with -1's (invalid value)
 # Starting in the correct location for character #1, bit 8,...
     char = 0
     row = 4
@@ -582,7 +582,7 @@ def add_finder_pattern( array, data_nrow, data_ncol, reg_row, reg_col ):
     nrow = (data_nrow+2) * reg_row
     ncol = (data_ncol+2) * reg_col
 
-    datamatrix = [[0] * ncol for i in xrange(nrow)]   #initialise and fill with 0's
+    datamatrix = [[0] * ncol for i in range(nrow)]   #initialise and fill with 0's
     
     for i in range( reg_col ):    #for each column of data regions
         for j in range(nrow):

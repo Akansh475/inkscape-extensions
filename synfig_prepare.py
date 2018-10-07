@@ -494,7 +494,7 @@ if __name__ == '__main__':
     try:
         e = SynfigPrep()
         e.affect()
-    except MalformedSVGError, e:
+    except MalformedSVGError as e:
         errormsg(e)
 
 

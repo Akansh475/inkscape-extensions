@@ -480,7 +480,7 @@ class PixelSnapEffect(inkex.Effect):
         self.snap_transform(elem)
         try:
             self.snap_stroke(elem, parent_transform)
-        except TransformError, e:
+        except TransformError as e:
             print >>sys.stderr, e
 
         if elemtype(elem, 'path'):
@@ -498,7 +498,7 @@ class PixelSnapEffect(inkex.Effect):
         for id, elem in self.selected.items():
             try:
                 self.pixel_snap(elem)
-            except TransformError, e:
+            except TransformError as e:
                 print >>sys.stderr, e
 
 

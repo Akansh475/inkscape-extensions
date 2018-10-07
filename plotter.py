@@ -153,7 +153,7 @@ class Plot(inkex.Effect):
         # gracefully exit script when pySerial is missing
         try:
             import serial
-        except ImportError, e:
+        except ImportError as e:
             inkex.errormsg(_("pySerial is not installed. Please follow these steps:")
                 + "\n\n" + _("1. Download and extract (unzip) this file to your local harddisk:")
                 + "\n"   +   "   https://pypi.python.org/packages/source/p/pyserial/pyserial-2.7.tar.gz"

@@ -65,7 +65,7 @@ class SplitIt(inkex.Effect):
                         else:
                             splits = math.ceil(length/self.options.max)
 
-                        for s in xrange(int(splits),1,-1):
+                        for s in range(int(splits),1,-1):
                             new[-1][-1], next, sub[i] = cspbezsplitatlength(new[-1][-1], sub[i], 1.0/s)
                             new[-1].append(next[:])
                         new[-1].append(sub[i])

@@ -89,6 +89,9 @@ import simpletransform
 import inkex.bezier as bezmisc
 from inkex.localize import _
  
+if sys.version_info[0] > 2:
+    xrange = range
+
 
 def bezierslopeatt(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)),t):
 	ax,ay,bx,by,cx,cy,x0,y0=bezmisc.bezierparameterize(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)))
@@ -3019,7 +3022,7 @@ class Arangement_Genetic:
 	def add_random_species(self,count):
 		for i in range(count):
 			specimen = []
-			order = range(self.genes_count)
+			order = list(range(self.genes_count))
 			random.shuffle(order)
 			for j in order:
 				specimen += [ [j, random.random(), random.random()] ]
@@ -3711,7 +3714,7 @@ class Gcodetools(inkex.Effect):
 			
 
 			### Sort to reduce Rapid distance	
-			k = range(1,len(p))
+			k = list(range(1,len(p)))
 			keys = [0]
 			while len(k)>0:
 				end = p[keys[-1]][-1][1]

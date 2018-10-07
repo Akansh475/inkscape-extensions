@@ -168,7 +168,9 @@ class SvgClassLookup(etree.CustomElementClassLookup):
             if name.lower() == (tag or '').lower() and \
                   (not namespace or not nsp or nsp == namespace):
                 return cls
-        raise KeyError("Failed to look up element: {}:{} ({})".format(
+
+        import inkex
+        inkex.errormsg("Failed to look up element: {}:{} ({})".format(
             node_type, name, namespace))
 
     def get_lookups(self):

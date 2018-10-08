@@ -74,7 +74,9 @@ class ScriptCoverageTest(TestCase):
         try:
             return __import__(module, fromlist=[])
         except DependencyError as err:
-            self._addSkip(self._current_result, reason=str(err))
+            addSkip = getattr(self._current_result, 'addSkip', None)
+            if addSkip is not None:
+                addSkip(self, str(err))
         except ImportError as err:
             if module in str(err):
                 return False
@@ -98,7 +100,7 @@ class ScriptCoverageTest(TestCase):
             return False
 
         mod_result = None
-        for _, value in mod.__dict__.items():
+        for value in list(mod.__dict__.values()):
             mod_result = True
             if inspect.isclass(value) and issubclass(value, Effect) and value != Effect:
                 try:

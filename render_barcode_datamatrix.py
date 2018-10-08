@@ -598,8 +598,8 @@ def add_finder_pattern( array, data_nrow, data_ncol, reg_row, reg_col ):
             
     for i in range( data_nrow*reg_row ):
         for j in range( data_ncol* reg_col ):
-            dest_col = j + 1 + 2*(j/(data_ncol)) #offset by 1, plus two for every addition block
-            dest_row = i + 1 + 2*(i/(data_nrow))
+            dest_col = j + 1 + 2 * (j // data_ncol) #offset by 1, plus two for every addition block
+            dest_row = i + 1 + 2 * (i // data_nrow)
             
             datamatrix[dest_row][dest_col] = array[i][j]    #transfer from the plain bit array
             

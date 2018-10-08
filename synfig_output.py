@@ -1071,7 +1071,10 @@ class SynfigExport(SynfigPrep):
         for layer in layers:
             root_canvas.append(layer)
 
-        d.get_root_tree().write(sys.stdout)
+        self.synfig_document = d.get_root_tree()
+
+    def save(self, stream):
+        self.synfig_document.write(stream)
 
     def convert_node(self, node, d):
         """Convert an SVG node to a list of Synfig layers"""
@@ -1340,7 +1343,7 @@ class SynfigExport(SynfigPrep):
 if __name__ == '__main__':
     try:
         e = SynfigExport()
-        e.affect(output=False)
+        e.affect()
     except MalformedSVGError as e:
         errormsg(e)
 

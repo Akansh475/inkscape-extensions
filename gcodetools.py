@@ -215,7 +215,7 @@ styles = {
 			},
 		"area artefact": 		str(inkex.Style({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' })),
 		"area artefact arrow":	str(inkex.Style({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' })),
-		"dxf_points":		 	str(inkex.Style({ "stroke": "#ff0000", "fill": "#ff0000"})),
+		"dxf_points":			str(inkex.Style({ "stroke": "#ff0000", "fill": "#ff0000"})),
 		
 	}
 
@@ -275,25 +275,25 @@ def point_inside_csp(p,csp, on_the_path = True) :
 		for i in range(1, len(subpath)) :
 			sp1, sp2 = subpath[i-1], subpath[i]
 			ax,ay,bx,by,cx,cy,dx,dy = csp_parameterize(sp1,sp2)
-		 	if  ax==0 and bx==0 and cx==0 and dx==x : 
-		 		#we've got a special case here
-		 		b = csp_true_bounds( [[sp1,sp2]])
-		 		if  b[1][1]<=y<=b[3][1] :
-		 			# points is on the path 
-			 		return on_the_path
-			 	else :
-			 		# we can skip this segment because it wont influence the answer.
-			 		pass	
-		 	else: 
-	 			for t in csp_line_intersection([x,y],[x,y+5],sp1,sp2) :
-	 				if t == 0 or t == 1 :
-	 					#we've got another special case here
-		 				x1,y1 = csp_at_t(sp1,sp2,t)
-		 				if y1==y : 
-		 					# the point is on the path 
-		 					return on_the_path
-	 					# if t == 0 we should have considered this case previously. 
-	 					if t == 1 :
+			if  ax==0 and bx==0 and cx==0 and dx==x :
+				#we've got a special case here
+				b = csp_true_bounds( [[sp1,sp2]])
+				if  b[1][1]<=y<=b[3][1] :
+					# points is on the path
+					return on_the_path
+				else :
+					# we can skip this segment because it wont influence the answer.
+					pass
+			else:
+				for t in csp_line_intersection([x,y],[x,y+5],sp1,sp2) :
+					if t == 0 or t == 1 :
+						#we've got another special case here
+						x1,y1 = csp_at_t(sp1,sp2,t)
+						if y1==y :
+							# the point is on the path
+							return on_the_path
+						# if t == 0 we should have considered this case previously.
+						if t == 1 :
 							# we have to check the next segmant if it is on the same side of the ray
 							st_d = csp_normalized_slope(sp1,sp2,1)[0]
 							if st_d == 0 : st_d = csp_normalized_slope(sp1,sp2,0.99)[0]
@@ -302,20 +302,20 @@ def point_inside_csp(p,csp, on_the_path = True) :
 								if (i+j) % len(subpath) == 0  : continue # skip the closing segment 
 								sp11,sp22 = subpath[(i-1+j) % len(subpath)], subpath[(i+j) % len(subpath)]
 								ax1,ay1,bx1,by1,cx1,cy1,dx1,dy1 = csp_parameterize(sp1,sp2)
-		 						if  ax1==0 and bx1==0 and cx1==0 and dx1==x : continue # this segment parallel to the ray, so skip it 
+								if  ax1==0 and bx1==0 and cx1==0 and dx1==x : continue # this segment parallel to the ray, so skip it
 								en_d = csp_normalized_slope(sp11,sp22,0)[0]
 								if en_d == 0 : en_d = csp_normalized_slope(sp11,sp22,0.01)[0]
 								if st_d*en_d <=0 : 
-			 						ray_intersections_count += 1
-			 						break 
-	 				else :	
-		 				x1,y1 = csp_at_t(sp1,sp2,t)
-		 				if y1==y : 
-		 					# the point is on the path 
-		 					return on_the_path
-		 				else :
-		 					if y1>y and 3*ax*t**2 + 2*bx*t + cx !=0 : # if it's 0 the path only touches the ray
-		 						ray_intersections_count += 1 	
+									ray_intersections_count += 1
+									break
+					else :
+						x1,y1 = csp_at_t(sp1,sp2,t)
+						if y1==y :
+							# the point is on the path
+							return on_the_path
+						else :
+							if y1>y and 3*ax*t**2 + 2*bx*t + cx !=0 : # if it's 0 the path only touches the ray
+								ray_intersections_count += 1
 	return ray_intersections_count%2 == 1 				
 
 def csp_close_all_subpaths(csp, tolerance = 0.000001):
@@ -633,7 +633,7 @@ def csp_get_t_at_curvature(sp1,sp2,c, sample_points = 16):
 				d = (f1x**2+f1y**2)**1.5
 				F1 = (
 						 (	(f1x*f3y-f3x*f1y)*d - (f1x*f2y-f2x*f1y)*3.*(f2x*f1x+f2y*f1y)*((f1x**2+f1y**2)**.5) )	/ 
-				 				((f1x**2+f1y**2)**3)
+								((f1x**2+f1y**2)**3)
 					 )
 				F = (f1x*f2y-f1y*f2x)/d - c
 				t -= F/F1
@@ -670,7 +670,7 @@ def csp_max_curvature(sp1,sp2):
 			F = (f1x*f2y-f1y*f2x)/d
 			F1 = 	(
 						 (	d*(f1x*f3y-f3x*f1y) - (f1x*f2y-f2x*f1y)*3.*(f2x*f1x+f2y*f1y)*pow(f1x**2+f1y**2,.5) )	/ 
-				 				(f1x**2+f1y**2)**3
+								(f1x**2+f1y**2)**3
 					)
 			i+=1	
 			if F1!=0:
@@ -1149,10 +1149,10 @@ def csp_seg_bound_to_csp_seg_bound_max_min_distance(sp1,sp2,sp3,sp4) :
 
 def csp_reverse(csp) :
 	for i in range(len(csp)) :
-	 	n = []
-	 	for j in csp[i] :
+		n = []
+		for j in csp[i] :
 			n = [  [j[2][:],j[1][:],j[0][:]]  ] + n
-	 	csp[i] = n[:]
+		csp[i] = n[:]
 	return csp			
 
 
@@ -1208,9 +1208,9 @@ def csp_concat_subpaths(*s):
 		if s1 == [] : return s2
 		if s2 == [] : return s1
 		if (s1[-1][1][0]-s2[0][1][0])**2 + (s1[-1][1][1]-s2[0][1][1])**2 > 0.00001 :
-	 		return s1[:-1]+[ [s1[-1][0],s1[-1][1],s1[-1][1]],  [s2[0][1],s2[0][1],s2[0][2]] ] + s2[1:]		
-	 	else :
-	 		return s1[:-1]+[ [s1[-1][0],s2[0][1],s2[0][2]] ] + s2[1:]		
+			return s1[:-1]+[ [s1[-1][0],s1[-1][1],s1[-1][1]],  [s2[0][1],s2[0][1],s2[0][2]] ] + s2[1:]
+		else :
+			return s1[:-1]+[ [s1[-1][0],s2[0][1],s2[0][2]] ] + s2[1:]
 	 		
 	if len(s) == 0 : return []
 	if len(s) ==1 : return s[0]
@@ -1555,7 +1555,7 @@ def draw_pointer(x,color = "#f00", figure = "cross", group = None, comment = "",
 
 
 def straight_segments_intersection(a,b, true_intersection = True) : # (True intersection means check ta and tb are in [0,1])
- 	ax,bx,cx,dx, ay,by,cy,dy = a[0][0],a[1][0],b[0][0],b[1][0], a[0][1],a[1][1],b[0][1],b[1][1] 
+	ax,bx,cx,dx, ay,by,cy,dy = a[0][0],a[1][0],b[0][0],b[1][0], a[0][1],a[1][1],b[0][1],b[1][1]
 	if (ax==bx and ay==by) or (cx==dx and cy==dy) : return False, 0, 0
 	if (bx-ax)*(dy-cy)-(by-ay)*(dx-cx)==0 :	# Lines are parallel
 		ta = (ax-cx)/(dx-cx) if cx!=dx else (ay-cy)/(dy-cy)
@@ -3564,7 +3564,7 @@ class Gcodetools(inkex.Effect):
 		
 	def __init__(self):
 		super(Gcodetools, self).__init__()
-                add_argument = self.arg_parser.add_argument
+		add_argument = self.arg_parser.add_argument
 		add_argument("-d", "--directory", default="/home/", help="Directory for gcode file")
 		add_argument("-f", "--filename", dest="file", default="-1.0", help="File name")
 		add_argument("--add-numeric-suffix-to-filename", type=inkex.inkbool, default=True, help="Add numeric suffix to filename")
@@ -4366,9 +4366,9 @@ class Gcodetools(inkex.Effect):
 				if value == None or key == None: continue
 				#print_("Found tool parameter '%s':'%s'" % (key,value))
 				if key in self.default_tool.keys() :
-					 try :
+					try :
 						tool[key] = type(self.default_tool[key])(value)
-					 except :
+					except :
 						tool[key] = self.default_tool[key]
 						self.error(_("Warning! Tool's and default tool's parameter's (%s) types are not the same ( type('%s') != type('%s') ).") % (key, value, self.default_tool[key]), "tools_warning")
 				else :
@@ -4588,8 +4588,8 @@ class Gcodetools(inkex.Effect):
 						c = 1. - float(sum(colors[id_]))/255/3
 						curves += 	[
 										 [  
-										 	[id_, depth_func(c,zd,zs), comment],
-										 	[ self.parse_curve([subpath], layer) for subpath in csp  ]
+											[id_, depth_func(c,zd,zs), comment],
+											[ self.parse_curve([subpath], layer) for subpath in csp  ]
 										 ]
 									]
 #				for c in curves : 
@@ -4718,7 +4718,7 @@ class Gcodetools(inkex.Effect):
 						if  (bounds[2]-bounds[0])**2+(bounds[3]-bounds[1])**2 < self.options.area_find_artefacts_diameter**2:
 							if self.options.area_find_artefacts_action == "mark with an arrow" :
 								arrow =  cubicsuperpath.parsePath( 'm %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z' % (subpath[0][1][0],subpath[0][1][1]) )
- 								arrow = self.apply_transforms(path,arrow,True)
+								arrow = self.apply_transforms(path,arrow,True)
 								inkex.etree.SubElement(parent, inkex.addNS('path','svg'), 
 										{
 											'd': cubicsuperpath.formatPath(arrow),
@@ -4780,26 +4780,26 @@ class Gcodetools(inkex.Effect):
 						# Reverse path if needed.
 						if min_y!=float("-inf") :
 							# Move outline subpath to the beginning of csp
-	 					 	subp = csp[min_i]
-	 					 	del csp[min_i]
-	 					 	j = min_j
-	 					 	# Split by the topmost point and join again
-	 					 	if min_t in [0,1]:
-	 					 		if min_t == 0: j=j-1
-		 					 	subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
-	 					 		subp = [ [subp[j][1], subp[j][1], subp[j][2]] ] + subp[j+1:] + subp[:j] + [ [subp[j][0], subp[j][1], subp[j][1]] ]
-							else: 					 		
-		 						sp1,sp2,sp3 = csp_split(subp[j-1],subp[j],min_t)
-		 						subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
-								subp = [ [ sp2[1], sp2[1],sp2[2] ] ] + [sp3] + subp[j+1:] + subp[:j-1] + [sp1] + [[ sp2[0], sp2[1],sp2[1] ]] 					 	  
-	 					 	csp = [subp] + csp
+							subp = csp[min_i]
+							del csp[min_i]
+							j = min_j
+							# Split by the topmost point and join again
+							if min_t in [0,1]:
+								if min_t == 0: j=j-1
+								subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
+								subp = [ [subp[j][1], subp[j][1], subp[j][2]] ] + subp[j+1:] + subp[:j] + [ [subp[j][0], subp[j][1], subp[j][1]] ]
+							else:
+								sp1,sp2,sp3 = csp_split(subp[j-1],subp[j],min_t)
+								subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
+								subp = [ [ sp2[1], sp2[1],sp2[2] ] ] + [sp3] + subp[j+1:] + subp[:j-1] + [sp1] + [[ sp2[0], sp2[1],sp2[1] ]]
+							csp = [subp] + csp
 							# reverse path if needed
 							if csp_subpath_ccw(csp[0]) :
 								for i in range(len(csp)):
-								 	n = []
-								 	for j in csp[i]:
-								 		n = [  [j[2][:],j[1][:],j[0][:]]  ] + n
-								 	csp[i] = n[:]
+									n = []
+									for j in csp[i]:
+										n = [  [j[2][:],j[1][:],j[0][:]]  ] + n
+									csp[i] = n[:]
 
 	 					 	
 						d = cubicsuperpath.formatPath(csp)
@@ -5701,7 +5701,7 @@ class Gcodetools(inkex.Effect):
 						#LT6a build nlLT[j] for each subpath - ends here
 						#for nnn in nlLT :
 							#print_("nlLT",nnn) #LT debug stuff
-				 		# Calculate offset points
+						# Calculate offset points
 						reflex=False
 						for j in xrange(len(nlLT)): #LT6b for each subpath
 							cspm=[] #Will be my output. List of csps.
@@ -6463,8 +6463,8 @@ G01 Z1 (going to cutting z)\n""",
 							self.graffiti_reference_points[layer] = self.graffiti_reference_points[self.layers[i]]
 							break
 					if reference_points == None :
-					 	self.error('There are no graffiti reference points for layer %s'%layer,"error")
-					 	
+						self.error('There are no graffiti reference points for layer %s'%layer,"error")
+
 				# Transform reference points
 				for i in range(len(self.graffiti_reference_points[layer])):
 					self.graffiti_reference_points[layer][i][0] = self.transform(self.graffiti_reference_points[layer][i][0], layer)

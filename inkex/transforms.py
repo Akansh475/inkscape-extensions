@@ -21,7 +21,7 @@
 # attribute easier.
 #
 """
-Provide tranformation parsing to extensions
+Provide transformation parsing to extensions
 """
 
 import re
@@ -204,7 +204,7 @@ class BoundingBox(list):
 
 
 def pairwise(iterable):
-    "Iterate over a list with overlapping pairs (see itertools recipies)"
+    "Iterate over a list with overlapping pairs (see itertools recipes)"
     from itertools import tee
     first, then = tee(iterable)
     next(then, None)

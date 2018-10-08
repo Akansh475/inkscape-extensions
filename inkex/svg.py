@@ -51,7 +51,7 @@ class SvgDocumentElement(BaseElement):
         self.ids = {}
 
     def get_ids(self):
-        """Returns a set of unqiue document ids"""
+        """Returns a set of unique document ids"""
         if not self.ids:
             self.ids = set(self.xpath('//@id'))
         return self.ids

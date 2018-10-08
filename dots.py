@@ -54,7 +54,7 @@ class Dots(inkex.Effect):
             inkex.errormsg("Please select an object.")
 
     def separateLastAndFirst(self, p):
-        # Separate the last and first dot if they are togheter
+        # Separate the last and first dot if they are together
         lastDot = -1
         if p[lastDot][1] == []: lastDot = -2
         if round(p[lastDot][1][-2]) == round(p[0][1][-2]) and \

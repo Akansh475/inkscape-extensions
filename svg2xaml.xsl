@@ -832,7 +832,7 @@ exclude-result-prefixes="rdf xlink xs exsl libxslt inkscape">
   * Use
   * RDF and foreign objects
   * Misc ignored stuff (markers, patterns, styles)
-  * Unknows tags
+  * Unknown tags
 -->
 
 <!--

@@ -27,7 +27,7 @@
 #  * 20 janvier 2009 : adaptation a la version 0.46 a partir de la nouvelle version de funcplot.py
 #
 """
-Parametric Curves has no real decription, even in the inx file, which is really odd.
+Parametric Curves has no real description, even in the inx file, which is really odd.
 """
 
 from math import pi

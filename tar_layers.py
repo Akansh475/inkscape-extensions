@@ -19,7 +19,7 @@
 """
 An extension to export multiple svg files from a single svg file containing layers.
 
-Each defs is duplicated for each svg outputed.
+Each defs is duplicated for each svg outputted.
 """
 import os
 import sys

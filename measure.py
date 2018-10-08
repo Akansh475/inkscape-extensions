@@ -97,7 +97,7 @@ class Length(inkex.Effect):
         self.OptionParser.add_option("-f", "--fontsize",
                         action="store", type="int", 
                         dest="fontsize", default=20,
-                        help="Size of length lable text in px")
+                        help="Size of length label text in px")
         self.OptionParser.add_option("-o", "--offset",
                         action="store", type="float", 
                         dest="offset", default=-6,

@@ -37,7 +37,7 @@ import inkex.utils
 
 from inkex.localize import _
 
-# To load each of the depricated sub-modules (the ones without a namespace)
+# To load each of the deprecated sub-modules (the ones without a namespace)
 # we will add the directory to our pythonpath so older scripts can find them
 
 INKEX_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -47,7 +47,7 @@ if os.path.isdir(SIMPLE_DIR):
     sys.path.append(SIMPLE_DIR)
 
 class DeprecatedEffect(object):
-    """An Inkscape effect, takes SVG in and outputs SVG, providing a depricated layer"""
+    """An Inkscape effect, takes SVG in and outputs SVG, providing a deprecated layer"""
     def __init__(self):
         super(DeprecatedEffect, self).__init__()
         # These are things we reference in the deprecated code, they are provided
@@ -151,7 +151,7 @@ class DeprecatedEffect(object):
     @property
     def __uuconv(self):
         self._depricated('__uuconv', _('{} wasn\'t even a public property, '\
-            'why is your effect extension even using it? Shoudl be '
+            'why is your effect extension even using it? Should be '
             'inkex.units.CONVERSIONS'))
         return inkex.units.CONVERSIONS
 

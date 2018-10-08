@@ -101,7 +101,7 @@ def to(kind): # pylint: disable=invalid-name
     return _inner
 
 def strargs(string, kind=float):
-    """Returns a list of floats from a string with commas or space seperators"""
+    """Returns a list of floats from a string with commas or space separators"""
     return [kind(val) for val in string.replace(',', ' ').split()]
 
 def addNS(tag, ns=None): # pylint: disable=invalid-name

@@ -14,7 +14,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 # pylint: disable=invalid-name
-"""Depricated ffgeom API"""
+"""Deprecated ffgeom API"""
 
 from inkex.deprecated import deprecate
 from inkex.paths import Move

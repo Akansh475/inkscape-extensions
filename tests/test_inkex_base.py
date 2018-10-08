@@ -56,8 +56,8 @@ class InkscapeExtensionTest(TestCase):
     def test_arg_parser_defaults(self):
         """Test arguments for the base class are given defaults"""
         options = self.obj.arg_parser.parse_args([])
-        self.assertEqual(options.input_file, sys.stdin)
-        self.assertEqual(options.output, sys.stdout)
+        self.assertEqual(options.input_file.name, '<stdin>') # Python 3 compatible
+        self.assertEqual(options.output.name, '<stdout>') # Python 3 compatible
 
     def test_arg_parser_passed(self):
         """Test arguments for the base class are parsed"""

@@ -89,8 +89,13 @@ import simpletransform
 import inkex.bezier as bezmisc
 from inkex.localize import _
  
+if sys.version_info[0] > 2:
+    xrange = range
+    unicode = str
 
-def bezierslopeatt(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)),t):
+
+def bezierslopeatt(b0_b1_b2_b3, t):
+	(bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3) = b0_b1_b2_b3
 	ax,ay,bx,by,cx,cy,x0,y0=bezmisc.bezierparameterize(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)))
 	dx=3*ax*(t**2)+2*bx*t+cx
 	dy=3*ay*(t**2)+2*by*t+cy
@@ -210,7 +215,7 @@ styles = {
 			},
 		"area artefact": 		str(inkex.Style({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' })),
 		"area artefact arrow":	str(inkex.Style({ 'stroke': '#ff0000', 'fill': '#ffff00', 'stroke-width':'1' })),
-		"dxf_points":		 	str(inkex.Style({ "stroke": "#ff0000", "fill": "#ff0000"})),
+		"dxf_points":			str(inkex.Style({ "stroke": "#ff0000", "fill": "#ff0000"})),
 		
 	}
 
@@ -270,25 +275,25 @@ def point_inside_csp(p,csp, on_the_path = True) :
 		for i in range(1, len(subpath)) :
 			sp1, sp2 = subpath[i-1], subpath[i]
 			ax,ay,bx,by,cx,cy,dx,dy = csp_parameterize(sp1,sp2)
-		 	if  ax==0 and bx==0 and cx==0 and dx==x : 
-		 		#we've got a special case here
-		 		b = csp_true_bounds( [[sp1,sp2]])
-		 		if  b[1][1]<=y<=b[3][1] :
-		 			# points is on the path 
-			 		return on_the_path
-			 	else :
-			 		# we can skip this segment because it wont influence the answer.
-			 		pass	
-		 	else: 
-	 			for t in csp_line_intersection([x,y],[x,y+5],sp1,sp2) :
-	 				if t == 0 or t == 1 :
-	 					#we've got another special case here
-		 				x1,y1 = csp_at_t(sp1,sp2,t)
-		 				if y1==y : 
-		 					# the point is on the path 
-		 					return on_the_path
-	 					# if t == 0 we should have considered this case previously. 
-	 					if t == 1 :
+			if  ax==0 and bx==0 and cx==0 and dx==x :
+				#we've got a special case here
+				b = csp_true_bounds( [[sp1,sp2]])
+				if  b[1][1]<=y<=b[3][1] :
+					# points is on the path
+					return on_the_path
+				else :
+					# we can skip this segment because it wont influence the answer.
+					pass
+			else:
+				for t in csp_line_intersection([x,y],[x,y+5],sp1,sp2) :
+					if t == 0 or t == 1 :
+						#we've got another special case here
+						x1,y1 = csp_at_t(sp1,sp2,t)
+						if y1==y :
+							# the point is on the path
+							return on_the_path
+						# if t == 0 we should have considered this case previously.
+						if t == 1 :
 							# we have to check the next segmant if it is on the same side of the ray
 							st_d = csp_normalized_slope(sp1,sp2,1)[0]
 							if st_d == 0 : st_d = csp_normalized_slope(sp1,sp2,0.99)[0]
@@ -297,20 +302,20 @@ def point_inside_csp(p,csp, on_the_path = True) :
 								if (i+j) % len(subpath) == 0  : continue # skip the closing segment 
 								sp11,sp22 = subpath[(i-1+j) % len(subpath)], subpath[(i+j) % len(subpath)]
 								ax1,ay1,bx1,by1,cx1,cy1,dx1,dy1 = csp_parameterize(sp1,sp2)
-		 						if  ax1==0 and bx1==0 and cx1==0 and dx1==x : continue # this segment parallel to the ray, so skip it 
+								if  ax1==0 and bx1==0 and cx1==0 and dx1==x : continue # this segment parallel to the ray, so skip it
 								en_d = csp_normalized_slope(sp11,sp22,0)[0]
 								if en_d == 0 : en_d = csp_normalized_slope(sp11,sp22,0.01)[0]
 								if st_d*en_d <=0 : 
-			 						ray_intersections_count += 1
-			 						break 
-	 				else :	
-		 				x1,y1 = csp_at_t(sp1,sp2,t)
-		 				if y1==y : 
-		 					# the point is on the path 
-		 					return on_the_path
-		 				else :
-		 					if y1>y and 3*ax*t**2 + 2*bx*t + cx !=0 : # if it's 0 the path only touches the ray
-		 						ray_intersections_count += 1 	
+									ray_intersections_count += 1
+									break
+					else :
+						x1,y1 = csp_at_t(sp1,sp2,t)
+						if y1==y :
+							# the point is on the path
+							return on_the_path
+						else :
+							if y1>y and 3*ax*t**2 + 2*bx*t + cx !=0 : # if it's 0 the path only touches the ray
+								ray_intersections_count += 1
 	return ray_intersections_count%2 == 1 				
 
 def csp_close_all_subpaths(csp, tolerance = 0.000001):
@@ -628,7 +633,7 @@ def csp_get_t_at_curvature(sp1,sp2,c, sample_points = 16):
 				d = (f1x**2+f1y**2)**1.5
 				F1 = (
 						 (	(f1x*f3y-f3x*f1y)*d - (f1x*f2y-f2x*f1y)*3.*(f2x*f1x+f2y*f1y)*((f1x**2+f1y**2)**.5) )	/ 
-				 				((f1x**2+f1y**2)**3)
+								((f1x**2+f1y**2)**3)
 					 )
 				F = (f1x*f2y-f1y*f2x)/d - c
 				t -= F/F1
@@ -665,7 +670,7 @@ def csp_max_curvature(sp1,sp2):
 			F = (f1x*f2y-f1y*f2x)/d
 			F1 = 	(
 						 (	d*(f1x*f3y-f3x*f1y) - (f1x*f2y-f2x*f1y)*3.*(f2x*f1x+f2y*f1y)*pow(f1x**2+f1y**2,.5) )	/ 
-				 				(f1x**2+f1y**2)**3
+								(f1x**2+f1y**2)**3
 					)
 			i+=1	
 			if F1!=0:
@@ -1144,10 +1149,10 @@ def csp_seg_bound_to_csp_seg_bound_max_min_distance(sp1,sp2,sp3,sp4) :
 
 def csp_reverse(csp) :
 	for i in range(len(csp)) :
-	 	n = []
-	 	for j in csp[i] :
+		n = []
+		for j in csp[i] :
 			n = [  [j[2][:],j[1][:],j[0][:]]  ] + n
-	 	csp[i] = n[:]
+		csp[i] = n[:]
 	return csp			
 
 
@@ -1203,9 +1208,9 @@ def csp_concat_subpaths(*s):
 		if s1 == [] : return s2
 		if s2 == [] : return s1
 		if (s1[-1][1][0]-s2[0][1][0])**2 + (s1[-1][1][1]-s2[0][1][1])**2 > 0.00001 :
-	 		return s1[:-1]+[ [s1[-1][0],s1[-1][1],s1[-1][1]],  [s2[0][1],s2[0][1],s2[0][2]] ] + s2[1:]		
-	 	else :
-	 		return s1[:-1]+[ [s1[-1][0],s2[0][1],s2[0][2]] ] + s2[1:]		
+			return s1[:-1]+[ [s1[-1][0],s1[-1][1],s1[-1][1]],  [s2[0][1],s2[0][1],s2[0][2]] ] + s2[1:]
+		else :
+			return s1[:-1]+[ [s1[-1][0],s2[0][1],s2[0][2]] ] + s2[1:]
 	 		
 	if len(s) == 0 : return []
 	if len(s) ==1 : return s[0]
@@ -1316,7 +1321,7 @@ def csp_segment_convex_hull(sp1,sp2):
 	if not (m1 and m2) and m3 : return [c,a,d]
 	if not (m1 and m3) and m2 : return [b,c,d]
 	
-	raise ValueError, "csp_segment_convex_hull happened which is something that shouldn't happen!"	
+	raise ValueError("csp_segment_convex_hull happened which is something that shouldn't happen!")
 
 	
 ################################################################################
@@ -1340,7 +1345,9 @@ def bounds_intersect(a, b) :
 	return not ( (a[0]>b[2]) or (b[0]>a[2]) or (a[1]>b[3]) or (b[1]>a[3]) )
 
 
-def tpoint((x1,y1),(x2,y2),t):
+def tpoint(xy1, xy2, t):
+	(x1,y1) = xy1
+	(x2,y2) = xy2
 	return [x1+t*(x2-x1),y1+t*(y2-y1)]
 
 
@@ -1374,7 +1381,8 @@ def bez_normalized_slope(bez,t):
 ###	Some vector functions
 ################################################################################
 	
-def normalize((x,y)) :
+def normalize(xy) :
+	(x, y) = xy
 	l = math.sqrt(x**2+y**2)
 	if l == 0 : return [0.,0.]
 	else : 		return [x/l, y/l]
@@ -1465,7 +1473,7 @@ def atan2(*arg):
 		
 		return (math.pi/2 - math.atan2(arg[0],arg[1]) ) % math.pi2
 	else :
-		raise ValueError, "Bad argumets for atan! (%s)" % arg  
+		raise ValueError("Bad argumets for atan! (%s)" % arg)
 
 def get_text(node) :
 	value = None
@@ -1547,7 +1555,7 @@ def draw_pointer(x,color = "#f00", figure = "cross", group = None, comment = "",
 
 
 def straight_segments_intersection(a,b, true_intersection = True) : # (True intersection means check ta and tb are in [0,1])
- 	ax,bx,cx,dx, ay,by,cy,dy = a[0][0],a[1][0],b[0][0],b[1][0], a[0][1],a[1][1],b[0][1],b[1][1] 
+	ax,bx,cx,dx, ay,by,cy,dy = a[0][0],a[1][0],b[0][0],b[1][0], a[0][1],a[1][1],b[0][1],b[1][1]
 	if (ax==bx and ay==by) or (cx==dx and cy==dy) : return False, 0, 0
 	if (bx-ax)*(dy-cy)-(by-ay)*(dx-cx)==0 :	# Lines are parallel
 		ta = (ax-cx)/(dx-cx) if cx!=dx else (ay-cy)/(dy-cy)
@@ -1621,11 +1629,11 @@ def cubic_solver(a,b,c,d):
 ################################################################################
 
 def print_(*arg):
-	f = open(options.log_filename,"a")
+	f = open(options.log_filename, "ab")
 	for s in arg :
-		s = str(unicode(s).encode('unicode_escape'))+" "
+		s = unicode(s).encode('unicode_escape') + b" "
 		f.write( s )
-	f.write("\n")
+	f.write(b"\n")
 	f.close()
 
 
@@ -2322,11 +2330,11 @@ def biarc(sp1, sp2, z1, z2, depth=0):
 	elif 	csmall and a!=0:	beta = -b/a 
 	elif not asmall:	 
 		discr = b*b-4*a*c
-		if discr < 0:	raise ValueError, (a,b,c,discr)
+		if discr < 0:	raise ValueError(a,b,c,discr)
 		disq = discr**.5
 		beta1 = (-b - disq) / 2 / a
 		beta2 = (-b + disq) / 2 / a
-		if beta1*beta2 > 0 :	raise ValueError, (a,b,c,disq,beta1,beta2)
+		if beta1*beta2 > 0 :	raise ValueError(a,b,c,disq,beta1,beta2)
 		beta = max(beta1, beta2)
 	elif	asmall and bsmall:	
 		return biarc_split(sp1, sp2, z1, z2, depth)
@@ -2975,7 +2983,7 @@ class Polygon:
 		
 		while len(edges)>0 :
 			poly = []
-			if loops > len_edges  : raise ValueError, "Hull error"
+			if loops > len_edges  : raise ValueError("Hull error")
 			loops+=1
 			# Find left most vertex.
 			start = (1e100,1)
@@ -2986,7 +2994,7 @@ class Polygon:
 			loops1 = 0
 			while (last[1]!=start[0] or first_run) : 	
 				first_run = False
-				if loops1 > len_edges  : raise ValueError, "Hull error"
+				if loops1 > len_edges  : raise ValueError("Hull error")
 				loops1 += 1
 				next = get_closes_edge_by_angle(edges[last[1]],last)
 				#draw_pointer(next[0]+next[1],"Green","line", comment=i, width= 1)
@@ -3019,7 +3027,7 @@ class Arangement_Genetic:
 	def add_random_species(self,count):
 		for i in range(count):
 			specimen = []
-			order = range(self.genes_count)
+			order = list(range(self.genes_count))
 			random.shuffle(order)
 			for j in order:
 				specimen += [ [j, random.random(), random.random()] ]
@@ -3556,7 +3564,7 @@ class Gcodetools(inkex.Effect):
 		
 	def __init__(self):
 		super(Gcodetools, self).__init__()
-                add_argument = self.arg_parser.add_argument
+		add_argument = self.arg_parser.add_argument
 		add_argument("-d", "--directory", default="/home/", help="Directory for gcode file")
 		add_argument("-f", "--filename", dest="file", default="-1.0", help="File name")
 		add_argument("--add-numeric-suffix-to-filename", type=inkex.inkbool, default=True, help="Add numeric suffix to filename")
@@ -3711,7 +3719,7 @@ class Gcodetools(inkex.Effect):
 			
 
 			### Sort to reduce Rapid distance	
-			k = range(1,len(p))
+			k = list(range(1,len(p)))
 			keys = [0]
 			while len(k)>0:
 				end = p[keys[-1]][-1][1]
@@ -4358,9 +4366,9 @@ class Gcodetools(inkex.Effect):
 				if value == None or key == None: continue
 				#print_("Found tool parameter '%s':'%s'" % (key,value))
 				if key in self.default_tool.keys() :
-					 try :
+					try :
 						tool[key] = type(self.default_tool[key])(value)
-					 except :
+					except :
 						tool[key] = self.default_tool[key]
 						self.error(_("Warning! Tool's and default tool's parameter's (%s) types are not the same ( type('%s') != type('%s') ).") % (key, value, self.default_tool[key]), "tools_warning")
 				else :
@@ -4580,8 +4588,8 @@ class Gcodetools(inkex.Effect):
 						c = 1. - float(sum(colors[id_]))/255/3
 						curves += 	[
 										 [  
-										 	[id_, depth_func(c,zd,zs), comment],
-										 	[ self.parse_curve([subpath], layer) for subpath in csp  ]
+											[id_, depth_func(c,zd,zs), comment],
+											[ self.parse_curve([subpath], layer) for subpath in csp  ]
 										 ]
 									]
 #				for c in curves : 
@@ -4710,7 +4718,7 @@ class Gcodetools(inkex.Effect):
 						if  (bounds[2]-bounds[0])**2+(bounds[3]-bounds[1])**2 < self.options.area_find_artefacts_diameter**2:
 							if self.options.area_find_artefacts_action == "mark with an arrow" :
 								arrow =  cubicsuperpath.parsePath( 'm %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z' % (subpath[0][1][0],subpath[0][1][1]) )
- 								arrow = self.apply_transforms(path,arrow,True)
+								arrow = self.apply_transforms(path,arrow,True)
 								inkex.etree.SubElement(parent, inkex.addNS('path','svg'), 
 										{
 											'd': cubicsuperpath.formatPath(arrow),
@@ -4772,26 +4780,26 @@ class Gcodetools(inkex.Effect):
 						# Reverse path if needed.
 						if min_y!=float("-inf") :
 							# Move outline subpath to the beginning of csp
-	 					 	subp = csp[min_i]
-	 					 	del csp[min_i]
-	 					 	j = min_j
-	 					 	# Split by the topmost point and join again
-	 					 	if min_t in [0,1]:
-	 					 		if min_t == 0: j=j-1
-		 					 	subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
-	 					 		subp = [ [subp[j][1], subp[j][1], subp[j][2]] ] + subp[j+1:] + subp[:j] + [ [subp[j][0], subp[j][1], subp[j][1]] ]
-							else: 					 		
-		 						sp1,sp2,sp3 = csp_split(subp[j-1],subp[j],min_t)
-		 						subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
-								subp = [ [ sp2[1], sp2[1],sp2[2] ] ] + [sp3] + subp[j+1:] + subp[:j-1] + [sp1] + [[ sp2[0], sp2[1],sp2[1] ]] 					 	  
-	 					 	csp = [subp] + csp
+							subp = csp[min_i]
+							del csp[min_i]
+							j = min_j
+							# Split by the topmost point and join again
+							if min_t in [0,1]:
+								if min_t == 0: j=j-1
+								subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
+								subp = [ [subp[j][1], subp[j][1], subp[j][2]] ] + subp[j+1:] + subp[:j] + [ [subp[j][0], subp[j][1], subp[j][1]] ]
+							else:
+								sp1,sp2,sp3 = csp_split(subp[j-1],subp[j],min_t)
+								subp[-1][2], subp[0][0] = subp[-1][1], subp[0][1]
+								subp = [ [ sp2[1], sp2[1],sp2[2] ] ] + [sp3] + subp[j+1:] + subp[:j-1] + [sp1] + [[ sp2[0], sp2[1],sp2[1] ]]
+							csp = [subp] + csp
 							# reverse path if needed
 							if csp_subpath_ccw(csp[0]) :
 								for i in range(len(csp)):
-								 	n = []
-								 	for j in csp[i]:
-								 		n = [  [j[2][:],j[1][:],j[0][:]]  ] + n
-								 	csp[i] = n[:]
+									n = []
+									for j in csp[i]:
+										n = [  [j[2][:],j[1][:],j[0][:]]  ] + n
+									csp[i] = n[:]
 
 	 					 	
 						d = cubicsuperpath.formatPath(csp)
@@ -4884,11 +4892,11 @@ class Gcodetools(inkex.Effect):
 			elif 	csmall and a!=0:	beta = -b/a 
 			elif not asmall:	 
 				discr = b*b-4*a*c
-				if discr < 0:	raise ValueError, (a,b,c,discr)
+				if discr < 0:	raise ValueError(a,b,c,discr)
 				disq = discr**.5
 				beta1 = (-b - disq) / 2 / a
 				beta2 = (-b + disq) / 2 / a
-				if beta1*beta2 > 0 :	raise ValueError, (a,b,c,disq,beta1,beta2)
+				if beta1*beta2 > 0 :	raise ValueError(a,b,c,disq,beta1,beta2)
 				beta = max(beta1, beta2)
 			elif	asmall and bsmall:	
 				return biarc_split(sp1, sp2, z1, z2, depth)
@@ -5179,7 +5187,7 @@ class Gcodetools(inkex.Effect):
 		eye_dist = 100 #3D constant. Try varying it for your eyes
 
 
-		def bisect((nx1,ny1),(nx2,ny2)) :
+		def bisect(nxy1, nxy2) :
 			"""LT Find angle bisecting the normals n1 and n2
 
 			Parameters: Normalised normals
@@ -5189,8 +5197,8 @@ class Gcodetools(inkex.Effect):
 			Note that bisect(n1,n2) and bisect(n2,n1) give opposite sinBis2 results
 			If sinturn is less than the user's requested angle tolerance, I return 0
 			"""
-			#We can get absolute value of cos(bisector vector)
-			#Note: Need to use max in case of rounding errors
+			(nx1, ny1) = nxy1
+			(nx2, ny2) = nxy2
 			cosBis = math.sqrt(max(0,(1.0+nx1*nx2-ny1*ny2)/2.0))
 			#We can get correct sign of the sin, assuming cos is positive
 			if (abs(ny1-ny2)< engraving_tolerance)  or (abs(cosBis) < engraving_tolerance) :
@@ -5209,7 +5217,7 @@ class Gcodetools(inkex.Effect):
 			return (cosBis/costurn,sinBis/costurn, sinturn)
 			#end bisect
 
-		def get_radius_to_line((x1,y1),(nx1,ny1), (nx2,ny2),(x2,y2),(nx23,ny23),(x3,y3),(nx3,ny3)):
+		def get_radius_to_line(xy1, n_xy1, n_xy2, xy2, n_xy23, xy3, n_xy3):
 			"""LT find biggest circle we can engrave here, if constrained by line 2-3
 
 			Parameters:
@@ -5235,7 +5243,13 @@ class Gcodetools(inkex.Effect):
 			# Algorithm uses dot products of normals to find radius
 			# and hence coordinates of centre
 			"""
-
+			(x1, y1) = xy1
+			(nx1, ny1) = n_xy1
+			(nx2, ny2) = n_xy2
+			(x2, y2) = xy2
+			(nx23, ny23) = n_xy23
+			(x3, y3) = xy3
+			(nx3, ny3) = n_xy3
 			global max_dist
 
 			#Start by converting coordinates to be relative to x1,y1
@@ -5269,7 +5283,7 @@ class Gcodetools(inkex.Effect):
 			return min(r, max_dist)
 			#end of get_radius_to_line
 
-		def get_radius_to_point((x1,y1),(nx,ny), (x2,y2)):
+		def get_radius_to_point(xy1, n_xy, xy2):
 			"""LT find biggest circle we can engrave here, constrained by point x2,y2
 
 			This function can be used in three ways:
@@ -5283,7 +5297,9 @@ class Gcodetools(inkex.Effect):
 			It turns out that finding a circle touching a point is harder than a circle
 			touching a line.
 			"""
-
+			(x1, y1) = xy1
+			(nx, ny) = n_xy
+			(x2, y2) = xy2
 			global max_dist
 
 			#Start by converting coordinates to be relative to x1,y1
@@ -5346,7 +5362,7 @@ class Gcodetools(inkex.Effect):
 			return bez_divide(a,[abx,aby],[abcx,abcy],m) + bez_divide(m,[bcdx,bcdy],[cdx,cdy],d)
 			#end of bez_divide
 
-		def get_biggest((x1,y1),(nx,ny)):
+		def get_biggest(nxy1, nxy2):
 			"""LT Find biggest circle we can draw inside path at point x1,y1 normal nx,ny
 
 			Parameters:
@@ -5356,6 +5372,8 @@ class Gcodetools(inkex.Effect):
 				tuple (j,i,r)
 				..where j and i are indices of limiting segment, r is radius
 			"""
+			(x1, y1) = nxy1
+			(nx, ny) = nxy2
 			global max_dist, nlLT, i, j
 			n1 = nlLT[j][i-1] #current node
 			jjmin = -1
@@ -5404,7 +5422,7 @@ class Gcodetools(inkex.Effect):
 			return (jjmin,iimin,r)
 			#end of get_biggest
 
-		def line_divide((x0,y0),j0,i0,(x1,y1),j1,i1,(nx,ny),length):
+		def line_divide(xy0, j0, i0, xy1, j1, i1, n_xy, length):
 			"""LT recursively divide a line as much as necessary
 
 			NOTE: This function is not currently used
@@ -5419,6 +5437,9 @@ class Gcodetools(inkex.Effect):
 					each a list of 3 reals: x, y coordinates, radius
 
 			"""
+			(x0, y0) = xy0
+			(x1, y1) = xy1
+			(nx, ny) = n_xy
 			global nlLT, i, j, lmin
 			x2=(x0+x1)/2
 			y2=(y0+y1)/2
@@ -5431,12 +5452,13 @@ class Gcodetools(inkex.Effect):
 			return [ line_divide((x0,y0),j0,i0,(x2,y2),j2,i2,(nx,ny),length/2), line_divide((x2,y2),j2,i2,(x1,y1),j1,i1,(nx,ny),length/2)]
 			#end of line_divide()
 
-		def save_point((x,y),w,i,j,ii,jj):
+		def save_point(xy, w, i, j, ii, jj):
 			"""LT Save this point and delete previous one if linear
 
 			The point is, we generate tons of points but many may be in a straight 3D line.
 			There is no benefit in saving the imtermediate points.
 			"""
+			(x, y) = xy
 			global wl, cspm
 			x=round(x,4) #round to 4 decimals
 			y=round(y,4) #round to 4 decimals
@@ -5464,13 +5486,15 @@ class Gcodetools(inkex.Effect):
 			wl+=[w]
 			#end of save_point
 
-		def draw_point((x0,y0),(x,y),w,t):
+		def draw_point(xy0, xy, w, t):
 			"""LT Draw this point as a circle with a 1px dot in the middle (x,y) 
 			and a 3D line from (x0,y0) down to x,y. 3D line thickness should be t/2 
 
 			Note that points that are subsequently erased as being unneeded do get
 			displayed, but this helps the user see the total area covered.
 			"""
+			(x0, y0) = xy0
+			(x, y) = xy
 			global gcode_3Dleft ,gcode_3Dright
 			if self.options.engraving_draw_calculation_paths :
 				inkex.etree.SubElement(	engraving_group, inkex.addNS('path','svg'), 
@@ -5677,7 +5701,7 @@ class Gcodetools(inkex.Effect):
 						#LT6a build nlLT[j] for each subpath - ends here
 						#for nnn in nlLT :
 							#print_("nlLT",nnn) #LT debug stuff
-				 		# Calculate offset points
+						# Calculate offset points
 						reflex=False
 						for j in xrange(len(nlLT)): #LT6b for each subpath
 							cspm=[] #Will be my output. List of csps.
@@ -6290,7 +6314,10 @@ G01 Z1 (going to cutting z)\n""",
 	
 	def update(self) :
 		try :
-			import urllib
+			if sys.version_info[0] < 3:
+				import urllib
+			else:
+				import urllib.request as urllib
 			f = urllib.urlopen("http://www.cnc-club.ru/gcodetools_latest_version", proxies = urllib.getproxies())
 			a = f.read()
 			for s in a.split("\n") :
@@ -6349,7 +6376,7 @@ G01 Z1 (going to cutting z)\n""",
 			time_ = l/feed
 			c1,c2 = self.graffiti_reference_points[layer][0][0],self.graffiti_reference_points[layer][1][0]
 			d = math.sqrt( (c1[0]-c2[0])**2 + (c1[1]-c2[1])**2 )
-			if d == 0 : raise ValueError, "Error! Reference points should not be the same!"
+			if d == 0 : raise ValueError("Error! Reference points should not be the same!")
 			for i in range(int(time_*emmit+1)) :
 				t = i/(time_*emmit)
 				r1,r2 = start[0]*(1-t) + end[0]*t, start[1]*(1-t) + end[1]*t
@@ -6436,8 +6463,8 @@ G01 Z1 (going to cutting z)\n""",
 							self.graffiti_reference_points[layer] = self.graffiti_reference_points[self.layers[i]]
 							break
 					if reference_points == None :
-					 	self.error('There are no graffiti reference points for layer %s'%layer,"error")
-					 	
+						self.error('There are no graffiti reference points for layer %s'%layer,"error")
+
 				# Transform reference points
 				for i in range(len(self.graffiti_reference_points[layer])):
 					self.graffiti_reference_points[layer][i][0] = self.transform(self.graffiti_reference_points[layer][i][0], layer)

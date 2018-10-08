@@ -20,8 +20,16 @@
 import base64
 import os
 import sys
-import urllib
+
+if sys.version_info[0] < 3:
+    import urllib
+    import urlparse
+else:
+    import urllib.request as urllib
+    import urllib.parse as urlparse
+
 import inkex
+from inkex.localize import _
 
 
 class Embedder(inkex.Effect):
@@ -58,7 +66,7 @@ class Embedder(inkex.Effect):
         xlink = node.get(inkex.addNS('href','xlink'))
         if xlink is None or xlink[:5] != 'data:':
             absref=node.get(inkex.addNS('absref','sodipodi'))
-            url=urllib.parse.urlparse(xlink)
+            url=urlparse.urlparse(xlink)
             href=urllib.url2pathname(url.path)
             
             path=''
@@ -74,9 +82,9 @@ class Embedder(inkex.Effect):
 
             try:
                 path=unicode(path, "utf-8")
-            except TypeError:
+            except (TypeError, NameError): # NameError in Python 3
                 path=path
-                
+
             if (not os.path.isfile(path)):
                 inkex.errormsg(_('No xlink:href or sodipodi:absref attributes found, or they do not point to an existing file! Unable to embed image.'))
                 if path:
@@ -85,15 +93,15 @@ class Embedder(inkex.Effect):
             if (os.path.isfile(path)):
                 file = open(path,"rb").read()
                 embed=True
-                if (file[:4]=='\x89PNG'):
+                if file[:4] == b'\x89PNG':
                     type='image/png'
-                elif (file[:2]=='\xff\xd8'):
+                elif file[:2] == b'\xff\xd8':
                     type='image/jpeg'
-                elif (file[:2]=='BM'):
+                elif file[:2] == b'BM':
                     type='image/bmp'
-                elif (file[:6]=='GIF87a' or file[:6]=='GIF89a'):
+                elif file[:6] == b'GIF87a' or file[:6] == b'GIF89a':
                     type='image/gif'
-                elif (file[:4]=='MM\x00\x2a' or file[:4]=='II\x2a\x00'):
+                elif file[:4] == b'MM\x00\x2a' or file[:4] == b'II\x2a\x00':
                     type='image/tiff'
                 #ico files lack any magic... therefore we check the filename instead
                 elif(path.endswith('.ico')):
@@ -103,7 +111,8 @@ class Embedder(inkex.Effect):
                 else:
                     embed=False
                 if (embed):
-                    node.set(inkex.addNS('href','xlink'), 'data:%s;base64,%s' % (type, base64.encodestring(file)))
+                    node.set(inkex.addNS('href','xlink'), 'data:%s;base64,%s' % (type,
+                        base64.encodestring(file).decode('ascii')))
                     if (absref != None):
                         del node.attrib[inkex.addNS('absref',u'sodipodi')]
                 else:

@@ -44,7 +44,11 @@ import zipfile
 import shutil
 import tempfile
 import locale
-import urllib
+
+if sys.version_info[0] < 3:
+    import urllib
+else:
+    import urllib.request as urllib
 
 import inkex
 
@@ -155,12 +159,12 @@ class CompressedMediaOutput(inkex.Effect):
         if not s:
             return fonts
             
-        if s.has_key('font-family'):
-            if s.has_key('font-weight'):
+        if 'font-family' in s:
+            if 'font-weight' in s:
                 fonts.append(s['font-family'] + ' ' + s['font-weight'])
             else:
                 fonts.append(s['font-family'])
-        elif s.has_key('-inkscape-font-specification'):
+        elif '-inkscape-font-specification' in s:
             fonts.append(s['-inkscape-font-specification'])
         return fonts
 

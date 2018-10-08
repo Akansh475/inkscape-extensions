@@ -59,6 +59,7 @@ Note: Paths that have curves & arcs on some sides of the bounding box won't
 """
 
 from __future__ import division
+from __future__ import print_function
 
 import sys
 # *** numpy causes issue #4 on Mac OS 10.6.2. I use it for
@@ -471,7 +472,7 @@ class PixelSnapEffect(inkex.Effect):
                 try:
                     self.pixel_snap(e, transform)
                 except TransformError as err:
-                    print >>sys.stderr, err
+                    print(err, file=sys.stderr)
             return
 
         if not elemtype(elem, ('path', 'rect', 'image')):
@@ -480,8 +481,8 @@ class PixelSnapEffect(inkex.Effect):
         self.snap_transform(elem)
         try:
             self.snap_stroke(elem, parent_transform)
-        except TransformError, e:
-            print >>sys.stderr, e
+        except TransformError as e:
+            print(e, file=sys.stderr)
 
         if elemtype(elem, 'path'):
             self.snap_path_scale(elem, parent_transform)
@@ -498,8 +499,8 @@ class PixelSnapEffect(inkex.Effect):
         for id, elem in self.selected.items():
             try:
                 self.pixel_snap(elem)
-            except TransformError, e:
-                print >>sys.stderr, e
+            except TransformError as e:
+                print(e, file=sys.stderr)
 
 
 if __name__ == '__main__':

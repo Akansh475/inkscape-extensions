@@ -21,6 +21,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import print_function
+from __future__ import absolute_import
+
 import re
 import inkex
 
@@ -67,7 +70,7 @@ class MyEffect(inkex.Effect):
         self.flatness = 0.1
         
     def output(self):
-        print self.dxf
+        print(self.dxf)
         
     def dxf_add(self, str):
         self.dxf += str

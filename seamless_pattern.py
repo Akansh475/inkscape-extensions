@@ -17,6 +17,12 @@ class C(inkex.Effect):
     def effect(self):
         saveout = sys.stdout
         sys.stdout = sys.stderr
+        try:
+            self._effect_stderr()
+        finally:
+            sys.stdout = saveout
+
+    def _effect_stderr(self):
         width  = self.options.desktop_width
         height = self.options.desktop_height
         if height == 0 | width == 0:
@@ -194,7 +200,6 @@ class C(inkex.Effect):
         namedview.set(inkex.addNS('cx',        'inkscape'), str((width*5.5)/2.0) )
         namedview.set(inkex.addNS('cy',        'inkscape'), "0" )
         namedview.set(inkex.addNS('zoom',        'inkscape'), str(1.0 / (width/100.00)) )
-        sys.stdout = saveout
 
 if __name__ == '__main__':
     c = C()

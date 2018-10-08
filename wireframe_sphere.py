@@ -63,8 +63,10 @@ from simpletransform import computePointInNode
 
 
 #SVG OUTPUT FUNCTIONS ================================================
-def draw_SVG_ellipse((rx, ry), (cx, cy), width, parent, start_end=(0,2*pi),transform='' ):
+def draw_SVG_ellipse(r_xy, c_xy, width, parent, start_end=(0,2*pi),transform='' ):
 
+    (rx, ry) = r_xy
+    (cx, cy) = c_xy
     style = {   'stroke'        : '#000000',
                 'stroke-width'  : str(width),
                 'fill'          : 'none'            }
@@ -147,7 +149,7 @@ class Wireframe_Sphere(inkex.Effect):
                 
                 delta_long = 360.0/so.NUM_LONG      #angle between neighbouring lines of longitude in degrees
                 
-                for i in range(0,so.NUM_LONG/2):
+                for i in range(0, so.NUM_LONG // 2):
                     long_angle = so.ROT_OFFSET + (i*delta_long)*(pi/180.0); #The longitude of this particular line in radians
                     if long_angle > pi:
                         long_angle -= 2*pi

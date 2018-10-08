@@ -79,7 +79,7 @@ def run(command_format, prog_name):
         try:
             with open(svgfile, "rb") as fhl:
                 sys.stdout.write(fhl.read())
-        except IOError, inst:
+        except IOError as inst:
             msg = "Error reading temporary file: %s" % str(inst)
 
     try:

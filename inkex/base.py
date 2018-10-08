@@ -38,12 +38,16 @@ class InkscapeExtension(object):
         self.document = None
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
-        self.arg_parser.add_argument(
-            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-            help="Filename of the input file (default is stdin)", default=sys.stdin)
+        def binary(stream):
+            # For Python 3: Get the underlying binary handle if available
+            return getattr(stream, 'buffer', stream)
 
         self.arg_parser.add_argument(
-            "--output", type=str, default=sys.stdout,
+            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
+            help="Filename of the input file (default is stdin)", default=binary(sys.stdin))
+
+        self.arg_parser.add_argument(
+            "--output", type=str, default=binary(sys.stdout),
             help="Optional output filename for saving the result (default is stdout).")
 
         self.add_arguments(self.arg_parser)

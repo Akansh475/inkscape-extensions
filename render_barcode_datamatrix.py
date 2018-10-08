@@ -95,8 +95,9 @@ symbols = {
 #=====================================================================
     
 #create a 2d list corresponding to the 1's and 0s of the DataMatrix
-def encode(text, (nrow, ncol) ):
+def encode(text, n_row_col):
     #retrieve the parameters of this size of DataMatrix
+    (nrow, ncol) = n_row_col
     data_nrow, data_ncol, reg_row, reg_col, nd, nc, inter = get_parameters( nrow, ncol )
 
     if not ((nrow == 144) and (ncol == 144)):   #we have a regular datamatrix
@@ -262,7 +263,7 @@ def interleave( blocks, inter):
         result = []
         for block in blocks:    #for each codeword block in the stream
             block_length = len(block)/inter    #length of each interleaved block
-            inter_blocks = [[0] * block_length for i in xrange(inter)]   #the interleaved blocks
+            inter_blocks = [[0] * block_length for i in range(inter)]   #the interleaved blocks
             
             for i in range(block_length):   #for each element in the interleaved blocks
                 for j in range(inter):       #for each interleaved block
@@ -510,10 +511,11 @@ def utah(array, nrow, ncol, row, col, char):
 
 #"place_bits" fills an nrow x ncol array with the bits from the 
 # codewords in data. 
-def place_bits(data, (nrow, ncol)): 
+def place_bits(data, n_row_col): 
 # First, fill the array[] with invalid entries */ 
+    (nrow, ncol) = n_row_col
     INVALID = 2
-    array = [[INVALID] * ncol for i in xrange(nrow)]   #initialise and fill with -1's (invalid value)
+    array = [[INVALID] * ncol for i in range(nrow)]   #initialise and fill with -1's (invalid value)
 # Starting in the correct location for character #1, bit 8,...
     char = 0
     row = 4
@@ -582,7 +584,7 @@ def add_finder_pattern( array, data_nrow, data_ncol, reg_row, reg_col ):
     nrow = (data_nrow+2) * reg_row
     ncol = (data_ncol+2) * reg_col
 
-    datamatrix = [[0] * ncol for i in xrange(nrow)]   #initialise and fill with 0's
+    datamatrix = [[0] * ncol for i in range(nrow)]   #initialise and fill with 0's
     
     for i in range( reg_col ):    #for each column of data regions
         for j in range(nrow):
@@ -596,8 +598,8 @@ def add_finder_pattern( array, data_nrow, data_ncol, reg_row, reg_col ):
             
     for i in range( data_nrow*reg_row ):
         for j in range( data_ncol* reg_col ):
-            dest_col = j + 1 + 2*(j/(data_ncol)) #offset by 1, plus two for every addition block
-            dest_row = i + 1 + 2*(i/(data_nrow))
+            dest_col = j + 1 + 2 * (j // data_ncol) #offset by 1, plus two for every addition block
+            dest_row = i + 1 + 2 * (i // data_nrow)
             
             datamatrix[dest_row][dest_col] = array[i][j]    #transfer from the plain bit array
             
@@ -609,8 +611,10 @@ def add_finder_pattern( array, data_nrow, data_ncol, reg_row, reg_col ):
 #=====================================================================
 
 #SVG element generation routine
-def draw_SVG_square((w,h), (x,y), parent):
+def draw_SVG_square(wh, xy, parent):
 
+    (w, h) = wh
+    (x, y) = xy
     style = {   'stroke'        : 'none',
                 'stroke-width'  : '1',
                 'fill'          : '#000000'

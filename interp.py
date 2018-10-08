@@ -86,7 +86,7 @@ class Interp(inkex.Effect):
             sst = copy.deepcopy(styles[sorted_ids[i-1]])
             est = copy.deepcopy(styles[sorted_ids[i]])
             basestyle = copy.deepcopy(sst)
-            if basestyle.has_key('stroke-width'):
+            if 'stroke-width' in basestyle:
                 basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width',sst,est,0)
 
             #prepare for experimental style tweening

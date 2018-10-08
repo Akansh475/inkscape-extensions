@@ -76,7 +76,7 @@ class PathModifier(inkex.Effect):
         return(aList)
 
     def expandGroupsUnlinkClones(self,aList,transferTransform=True,doReplace=True):
-        for id in aList.keys()[:]:     
+        for id in list(aList):
             node=aList[id]
             if node.tag == inkex.addNS('g','svg') or node.tag=='g':
                 self.expandGroups(aList, transferTransform)

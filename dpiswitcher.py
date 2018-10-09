@@ -415,7 +415,7 @@ class DPISwitcher(inkex.Effect):
                 self.factor_a = 96.0/90.0
                 self.factor_b = 90.0/96.0
             namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
-            if not namedview:
+            if namedview is None:
                 return inkex.errormsg("No document named view available.")
             namedview.set(inkex.addNS('document-units', 'inkscape'), "px")
             self.units = self.parse_length(svg.get('width'))[1]

@@ -73,7 +73,10 @@ class SvgDocumentElement(BaseElement):
 
     def get_current_layer(self):
         """Returns the currently selected layer"""
-        return self.getElementById(self.namedview.current_layer, 'svg:g') or self
+        layer = self.getElementById(self.namedview.current_layer, 'svg:g')
+        if layer is None:
+            return self
+        return layer
 
     def get_center_position(self):
         """Returns view_center in terms of document units"""

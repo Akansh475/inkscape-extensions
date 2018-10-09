@@ -52,11 +52,13 @@ class SVGFont2Layers(inkex.Effect):
         self.svg = self.document.getroot()
         self.defs = self.svg.find(inkex.addNS('defs', 'svg'))
 
-        if not self.defs:
+        if self.defs is None:
             return inkex.errormsg("There are no svg fonts (no defs at all!)")
         #TODO: detect files with multiple svg fonts declared. 
         # Current code only reads the first svgfont instance
         font = self.defs.find(inkex.addNS('font', 'svg'))
+        if font is None:
+            return inkex.errormsg("There are no svg fonts")
         setwidth = font.get("horiz-adv-x")
         baseline = font.get("horiz-origin-y")
         if baseline is None:

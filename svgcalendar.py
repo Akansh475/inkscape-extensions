@@ -111,11 +111,27 @@ class SVGCalendar(inkex.Effect):
         self.OptionParser.add_option("--color-nmd",
           action="store", type="string",
           dest="color_nmd", default="#BBB",
-          help='Color for the next month day, in enpty day boxes.')
+          help='Color for the next month day, in empty day boxes.')
         self.OptionParser.add_option("--color-weeknr",
           action="store", type="string",
           dest="color_weeknr", default="#808080",
           help='Color for the week numbers.')
+        self.OptionParser.add_option("--font-year",
+          action="store", type="string",
+          dest="font_year", default="arial",
+          help='Font for the year string.')
+        self.OptionParser.add_option("--font-month",
+          action="store", type="string",
+          dest="font_month", default="arial",
+          help='Font for the month strings.')
+        self.OptionParser.add_option("--font-day-name",
+          action="store", type="string",
+          dest="font_day_name", default="arial",
+          help='Font for the days of the week strings.')
+        self.OptionParser.add_option("--font-day",
+          action="store", type="string",
+          dest="font_day", default="arial",
+          help='Font for the day strings.')
         self.OptionParser.add_option("--month-names",
           action="store", type="string",
           dest="month_names", default='January February March ' + \
@@ -210,7 +226,7 @@ class SVGCalendar(inkex.Effect):
             self.year_margin = (self.doc_w - self.month_w) / 2
         self.style_day = {
           'font-size': str(self.day_w / 2),
-          'font-family': 'arial',
+          'font-family': self.options.font_day,
           'text-anchor': 'middle',
           'text-align': 'center',
           'fill': self.options.color_day
@@ -221,13 +237,16 @@ class SVGCalendar(inkex.Effect):
         self.style_nmd['fill'] = self.options.color_nmd
         self.style_month = self.style_day.copy()
         self.style_month['fill'] = self.options.color_month
+        self.style_month['font-family'] = self.options.font_month
         self.style_month['font-size'] = str(self.day_w / 1.5)
         self.style_month['font-weight'] = 'bold'
         self.style_day_name = self.style_day.copy()
         self.style_day_name['fill'] = self.options.color_day_name
+        self.style_day_name['font-family'] = self.options.font_day_name
         self.style_day_name['font-size'] = str(self.day_w / 3 )
         self.style_year = self.style_day.copy()
         self.style_year['fill'] = self.options.color_year
+        self.style_year['font-family'] = self.options.font_year
         self.style_year['font-size'] = str(self.day_w * 2)
         self.style_year['font-weight'] = 'bold'
         self.style_weeknr = self.style_day.copy()

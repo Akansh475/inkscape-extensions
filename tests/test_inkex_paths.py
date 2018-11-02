@@ -27,12 +27,12 @@ class PathTest(TestCase):
 
     def test_repr(self):
         """Path representation"""
-        self.assertEqual(repr(Path('M 10 10 10 10')), "[Move('M', 10, 10), Line('L', 10, 10)]")
+        self._assertPath(repr(Path('M 10 10 10 10')), "[Move('M', 10, 10), Line('L', 10, 10)]")
 
     def test_list(self):
         """Path of previous commands"""
         path = Path(Path('M 10 10 20 20 30 30 Z')[1:-1])
-        self.assertEqual(str(path), 'L 20 20 L 30 30')
+        self._assertPath(path, 'L 20 20 L 30 30')
 
     def test_passthrough(self):
         """Create a path and test the re-rendering of the commands"""

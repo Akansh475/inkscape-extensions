@@ -377,6 +377,11 @@ class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         global seqs
         global style
         global layer
+        global scale
+        global extrude
+        global xmin
+        global ymin
+        global height
 
         options = self.options
 

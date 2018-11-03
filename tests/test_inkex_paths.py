@@ -21,7 +21,7 @@ class PathTest(TestCase):
 
     def test_invalid(self):
         """Load an invalid path"""
-        self.assertEqual(str(Path('& 10 10 M 20 20')), 'M 20 20')
+        self._assertPath(Path('& 10 10 M 20 20'), 'M 20 20')
         self.assertRaises(InvalidPath, PathCommand, '&')
         self.assertRaises(InvalidPath, PathCommand, 'Z', 40)
 
@@ -40,7 +40,7 @@ class PathTest(TestCase):
                 'M 50,50 L 10,10 m 10 10 l 2.1,2',
                 'm 150 150 c 10 10 6 6 20 10 L 10 10',
             ):
-            self.assertEqual(str(Path(path)), path.replace(',', ' '))
+            self._assertPath(Path(path), path.replace(',', ' '))
 
     def test_chained_conversion(self):
         """Paths always extrapolate chained commands"""

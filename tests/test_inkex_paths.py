@@ -21,18 +21,18 @@ class PathTest(TestCase):
 
     def test_invalid(self):
         """Load an invalid path"""
-        self.assertEqual(str(Path('& 10 10 M 20 20')), 'M 20 20')
+        self._assertPath(Path('& 10 10 M 20 20'), 'M 20 20')
         self.assertRaises(InvalidPath, PathCommand, '&')
         self.assertRaises(InvalidPath, PathCommand, 'Z', 40)
 
     def test_repr(self):
         """Path representation"""
-        self.assertEqual(repr(Path('M 10 10 10 10')), "[Move('M', 10, 10), Line('L', 10, 10)]")
+        self._assertPath(repr(Path('M 10 10 10 10')), "[Move('M', 10, 10), Line('L', 10, 10)]")
 
     def test_list(self):
         """Path of previous commands"""
         path = Path(Path('M 10 10 20 20 30 30 Z')[1:-1])
-        self.assertEqual(str(path), 'L 20 20 L 30 30')
+        self._assertPath(path, 'L 20 20 L 30 30')
 
     def test_passthrough(self):
         """Create a path and test the re-rendering of the commands"""
@@ -40,7 +40,7 @@ class PathTest(TestCase):
                 'M 50,50 L 10,10 m 10 10 l 2.1,2',
                 'm 150 150 c 10 10 6 6 20 10 L 10 10',
             ):
-            self.assertEqual(str(Path(path)), path.replace(',', ' '))
+            self._assertPath(Path(path), path.replace(',', ' '))
 
     def test_chained_conversion(self):
         """Paths always extrapolate chained commands"""
@@ -51,7 +51,7 @@ class PathTest(TestCase):
                 ('m 50 50 l 20 20 40 40', 'm 50 50 l 20 20 l 40 40'),
                 ('m 50 50 20 20', 'm 50 50 l 20 20'),
             ):
-            self.assertEqual(str(Path(path)), ret)
+            self._assertPath(Path(path), ret)
 
     def test_points(self):
         """Test how x,y points are extracted"""

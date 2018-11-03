@@ -51,7 +51,7 @@ class PathTest(TestCase):
                 ('m 50 50 l 20 20 40 40', 'm 50 50 l 20 20 l 40 40'),
                 ('m 50 50 20 20', 'm 50 50 l 20 20'),
             ):
-            self.assertEqual(str(Path(path)), ret)
+            self._assertPath(Path(path), ret)
 
     def test_points(self):
         """Test how x,y points are extracted"""

@@ -2,8 +2,10 @@
 *.swp
 *.tmp
 *egg-info
+.eggs/
 old_tests
 .coverage
+htmlcov/
 TODO
 source
 build

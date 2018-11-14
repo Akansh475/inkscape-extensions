@@ -47,8 +47,8 @@ test:coverage:
       - htmlcov/
 
 
-deploy:sphinx:
-  stage: deploy
+sphinx:
+  stage: test
   when: always
   script:
     - sphinx-apidoc -F -o source inkex
@@ -60,3 +60,16 @@ deploy:sphinx:
   artifacts:
     paths:
       - build/sphinx/
+
+pages:
+  stage: deploy
+  only:
+    - master@inkscape/extensions
+  when: always
+  script:
+    - mkdir -p public
+    - if test -e htmlcov; then cp -r htmlcov public/coverage; fi
+    - if test -e build/sphinx/html; then cp -r build/sphinx/html public/documentation; fi
+  artifacts:
+    paths:
+      - public

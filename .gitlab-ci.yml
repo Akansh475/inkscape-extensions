@@ -45,3 +45,18 @@ test:coverage:
   artifacts:
     paths:
       - htmlcov/
+
+
+deploy:sphinx:
+  stage: deploy
+  when: always
+  script:
+    - sphinx-apidoc -F -o source inkex
+    - python3 setup.py build_sphinx -s source
+    - echo -e "\n\n"
+              "Documentation for inkex module successfully created; you can access the HTML version at\n"
+              "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/sphinx/html/index.html"
+              "\n\n"
+  artifacts:
+    paths:
+      - build/sphinx/

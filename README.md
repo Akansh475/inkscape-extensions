@@ -14,10 +14,18 @@ install the files into /usr/share/inkscape/extensions or
 ## Testing
 
 These extensions are designed to have good test coverage as well as python 2.7 
-and python 3.5 support.  
+and python 3.6 support.  
 Testing can be run using the setup.py command:
 
     python3 setup.py test
+
+To create a test coverage report just run the same command through coverage:
+
+    python3-coverage run setup.py test
+    python3-coverage report
+    
+The latest coverage report for master branch can be found at
+https://inkscape.gitlab.io/extensions/coverage/.
 
 ## Extension description
 
@@ -36,6 +44,9 @@ be done with these commands:
     firefox ./build/sphinx/html/inkex.html
 
 All documentation should be included INSIDE of each python module.
+
+The latest documentation for master branch can be found at
+https://inkscape.gitlab.io/extensions/documentation/.
 
 ## License Requirements
 

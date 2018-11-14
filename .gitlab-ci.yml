@@ -8,23 +8,25 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 
-test:python2:
+.test: &test
   stage: build
   script:
-    - python2-coverage run --parallel-mode --omit="tests/*" --omit=".*" setup.py test
+    - ${COVERAGE} run --parallel-mode --omit=".*","tests/*","*deprecated*","/usr/*" setup.py test
   artifacts:
     paths:
       - .coverage*
     when: always
 
+test:python2:
+  <<: *test
+  variables:
+    COVERAGE: python2-coverage
+
 test:python3:
-  stage: build
-  script:
-    - python3-coverage run --parallel-mode --omit="tests/*" --omit=".*" setup.py test
-  artifacts:
-    paths:
-      - .coverage*
-    when: always
+  <<: *test
+  variables:
+    COVERAGE: python3-coverage
+
 
 test:coverage:
   dependencies:
@@ -34,8 +36,7 @@ test:coverage:
   script:
     - python3-coverage combine
     - python3-coverage report
-    - python3-coverage html --omit="tests/*" --omit=".*" --omit="/usr/*" --ignore-errors
-                            --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
+    - python3-coverage html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
     - echo -e "\n\n"
               "Coverage report successfully created; you can access the full HTML report at\n"
               "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"

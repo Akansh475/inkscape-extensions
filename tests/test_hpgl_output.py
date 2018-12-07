@@ -3,8 +3,8 @@
 from tests.base import TestCase, test_support
 from hpgl_output import *
 
-class HPGLOuputBasicTest(TestCase):
+class HPGLOutputBasicTest(TestCase):
     effect = HpglOutput
 
 if __name__ == '__main__':
-    test_support.run_unittest(HPGLOuputBasicTest)
+    test_support.run_unittest(HPGLOutputBasicTest)

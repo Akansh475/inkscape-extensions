@@ -43,101 +43,47 @@ def draw_SVG_rect(x,y,w,h, width, fill, name, parent):
                     'x':str(x), 'y':str(y), 'width':str(w), 'height':str(h)}
     inkex.etree.SubElement(parent, inkex.addNS('rect','svg'), rect_attribs )
 
-class GridPolar(inkex.Effect):
+class GridCartesian(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string", 
-                        dest="tab", default="x_tab") 
-        self.OptionParser.add_option("--x_divs",
-                        action="store", type="int", 
-                        dest="x_divs", default=5,
-                        help="Major X Divisions")
-        self.OptionParser.add_option("--dx",
-                        action="store", type="float", 
-                        dest="dx", default=100.0,
-                        help="Major X division Spacing")
-        self.OptionParser.add_option("--x_subdivs",
-                        action="store", type="int", 
-                        dest="x_subdivs", default=2,
-                        help="Subdivisions per Major X division")
-        self.OptionParser.add_option("--x_log",
-                        action="store", type="inkbool", 
-                        dest="x_log", default=False,
-                        help="Logarithmic x subdivisions if true")
-        self.OptionParser.add_option("--x_subsubdivs",
-                        action="store", type="int", 
-                        dest="x_subsubdivs", default=5,
-                        help="Subsubdivisions per Minor X division")
-        self.OptionParser.add_option("--x_half_freq",
-                        action="store", type="int", 
-                        dest="x_half_freq", default=4,
-                        help="Halve Subsubdiv. Frequency after 'n' Subdivs. (log only)")
-        self.OptionParser.add_option("--x_divs_th",
-                        action="store", type="float", 
-                        dest="x_divs_th", default=2,
-                        help="Major X Division Line thickness")
-        self.OptionParser.add_option("--x_subdivs_th",
-                        action="store", type="float", 
-                        dest="x_subdivs_th", default=1,
-                        help="Minor X Division Line thickness")
-        self.OptionParser.add_option("--x_subsubdivs_th",
-                        action="store", type="float", 
-                        dest="x_subsubdivs_th", default=1,
-                        help="Subminor X Division Line thickness")
-        self.OptionParser.add_option("--y_divs",
-                        action="store", type="int", 
-                        dest="y_divs", default=6,
-                        help="Major Y Divisions")
-        self.OptionParser.add_option("--dy",
-                        action="store", type="float", 
-                        dest="dy", default=100.0,
-                        help="Major Gridline Increment")
-        self.OptionParser.add_option("--y_subdivs",
-                        action="store", type="int", 
-                        dest="y_subdivs", default=2,
-                        help="Minor Divisions per Major Y division")
-        self.OptionParser.add_option("--y_log",
-                        action="store", type="inkbool", 
-                        dest="y_log", default=False,
-                        help="Logarithmic y subdivisions if true")
-        self.OptionParser.add_option("--y_subsubdivs",
-                        action="store", type="int", 
-                        dest="y_subsubdivs", default=5,
-                        help="Subsubdivisions per Minor Y division")
-        self.OptionParser.add_option("--y_half_freq",
-                        action="store", type="int", 
-                        dest="y_half_freq", default=4,
-                        help="Halve Y Subsubdiv. Frequency after 'n' Subdivs. (log only)")
-        self.OptionParser.add_option("--y_divs_th",
-                        action="store", type="float", 
-                        dest="y_divs_th", default=2,
-                        help="Major Y Division Line thickness")
-        self.OptionParser.add_option("--y_subdivs_th",
-                        action="store", type="float", 
-                        dest="y_subdivs_th", default=1,
-                        help="Minor Y Division Line thickness")
-        self.OptionParser.add_option("--y_subsubdivs_th",
-                        action="store", type="float", 
-                        dest="y_subsubdivs_th", default=1,
-                        help="Subminor Y Division Line thickness")
-        self.OptionParser.add_option("--border_th",
-                        action="store", type="float", 
-                        dest="border_th", default=3,
-                        help="Border Line thickness")
+        self.arg_parser.add_argument("--border_th", action="store", type=float, dest="border_th", default=3)
+        self.arg_parser.add_argument("--border_th_unit", action="store", dest="border_th_unit", default="cm")
+        self.arg_parser.add_argument("--tab", action="store", dest="tab", default="x_tab")
+        self.arg_parser.add_argument("--x_divs", action="store", type=int, dest="x_divs", default=6)
+        self.arg_parser.add_argument("--dx", action="store", type=float, dest="dx", default=100.0)
+        self.arg_parser.add_argument("--dx_unit", action="store", dest="dx_unit", default="cm")
+        self.arg_parser.add_argument("--x_subdivs", action="store", type=int, dest="x_subdivs", default=2)
+        self.arg_parser.add_argument("--x_log", action="store", type=inkex.inkbool, dest="x_log", default="false")
+        self.arg_parser.add_argument("--x_subsubdivs", action="store", type=int, dest="x_subsubdivs", default=5)
+        self.arg_parser.add_argument("--x_half_freq", action="store", type=int, dest="x_half_freq", default=4)
+        self.arg_parser.add_argument("--x_divs_th", action="store", type=float, dest="x_divs_th", default=2)
+        self.arg_parser.add_argument("--x_subdivs_th", action="store", type=float, dest="x_subdivs_th", default=1)
+        self.arg_parser.add_argument("--x_subsubdivs_th", action="store", type=float, dest="x_subsubdivs_th", default=0.3)
+        self.arg_parser.add_argument("--x_div_unit", action="store", dest="x_div_unit", default="cm")
+        self.arg_parser.add_argument("--y_divs", action="store", type=int, dest="y_divs", default=5)
+        self.arg_parser.add_argument("--dy", action="store", type=float, dest="dy", default=100.0)
+        self.arg_parser.add_argument("--dy_unit", action="store", dest="dy_unit", default="cm")
+        self.arg_parser.add_argument("--y_subdivs", action="store", type=int, dest="y_subdivs", default=1)
+        self.arg_parser.add_argument("--y_log", action="store", type=inkex.inkbool, dest="y_log", default="false")
+        self.arg_parser.add_argument("--y_subsubdivs", action="store", type=int, dest="y_subsubdivs", default=5)
+        self.arg_parser.add_argument("--y_half_freq", action="store", type=int, dest="y_half_freq", default=4)
+        self.arg_parser.add_argument("--y_divs_th", action="store", type=float, dest="y_divs_th", default=2)
+        self.arg_parser.add_argument("--y_subdivs_th", action="store", type=float, dest="y_subdivs_th", default=1)
+        self.arg_parser.add_argument("--y_subsubdivs_th", action="store", type=float, dest="y_subsubdivs_th", default=0.3)
+        self.arg_parser.add_argument("--y_div_unit", action="store", dest="y_div_unit", default="cm")
 
+    def effect(self):        
+        self.options.border_th = self.svg.unittouu(str(self.options.border_th) + self.options.border_th_unit)
 
-    def effect(self):
-
-        self.options.border_th = self.unittouu(str(self.options.border_th) + 'px')
-        self.options.dx = self.unittouu(str(self.options.dx) + 'px')
-        self.options.x_divs_th = self.unittouu(str(self.options.x_divs_th) + 'px')
-        self.options.x_subdivs_th = self.unittouu(str(self.options.x_subdivs_th) + 'px')
-        self.options.x_subsubdivs_th = self.unittouu(str(self.options.x_subsubdivs_th) + 'px')
-        self.options.dy = self.unittouu(str(self.options.dy) + 'px')
-        self.options.y_divs_th = self.unittouu(str(self.options.y_divs_th) + 'px')
-        self.options.y_subdivs_th = self.unittouu(str(self.options.y_subdivs_th) + 'px')
-        self.options.y_subsubdivs_th = self.unittouu(str(self.options.y_subsubdivs_th) + 'px')
+        self.options.dx = self.svg.unittouu(str(self.options.dx) + self.options.dx_unit)
+        self.options.x_divs_th = self.svg.unittouu(str(self.options.x_divs_th) + self.options.x_div_unit)
+        self.options.x_subdivs_th = self.svg.unittouu(str(self.options.x_subdivs_th) + self.options.x_div_unit)
+        self.options.x_subsubdivs_th = self.svg.unittouu(str(self.options.x_subsubdivs_th) + self.options.x_div_unit)
+        
+        self.options.dy = self.svg.unittouu(str(self.options.dy) + self.options.dy_unit)
+        self.options.y_divs_th = self.svg.unittouu(str(self.options.y_divs_th) + self.options.y_div_unit)
+        self.options.y_subdivs_th = self.svg.unittouu(str(self.options.y_subdivs_th) + self.options.y_div_unit)
+        self.options.y_subsubdivs_th = self.svg.unittouu(str(self.options.y_subsubdivs_th) + self.options.y_div_unit)
 
         #find the pixel dimensions of the overall grid
         ymax = self.options.dy * self.options.y_divs
@@ -145,13 +91,13 @@ class GridPolar(inkex.Effect):
         
         # Embed grid in group
         #Put in in the centre of the current view
-        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
+        view_center = inkex.computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
         t = 'translate(' + str( view_center[0]- xmax/2.0) + ',' + \
                            str( view_center[1]- ymax/2.0) + ')'
-        g_attribs = {inkex.addNS('label','inkscape'):'GridPolar:X' + \
+        g_attribs = {inkex.addNS('label','inkscape'):'GridCartesian:X' + \
                      str( self.options.x_divs )+':Y'+str( self.options.y_divs ),
                      'transform':t }
-        grid = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+        grid = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
         
         #Group for major x gridlines
         g_attribs = {inkex.addNS('label','inkscape'):'MajorXGridlines'}
@@ -274,8 +220,8 @@ class GridPolar(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = GridPolar()
-    e.affect()
+    e = GridCartesian()
+    e.run()
 
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

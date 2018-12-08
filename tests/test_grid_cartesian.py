@@ -4,7 +4,7 @@ from tests.base import TestCase, test_support
 from grid_cartesian import *
 
 class GridPolarBasicTest(TestCase):
-    effect = GridPolar
+    effect = GridCartesian
 
 if __name__ == '__main__':
     test_support.run_unittest(GridPolarBasicTest)

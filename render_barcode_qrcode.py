@@ -2,16 +2,13 @@
 
 from __future__ import print_function
 
-import math, sys
+from itertools import product
 import inkex
 from simpletransform import computePointInNode
 
 #QRCode for Python
 #
-#Ported from the Javascript library by Sam Curren
-#
-#QRCode for Javascript
-#http://d-project.googlecode.com/svn/trunk/misc/qrcode/js/qrcode.js
+#https://github.com/kazuhikoarase/qrcode-generator/blob/master/python/qrcode.py
 #
 #Copyright (c) 2009 Kazuhiko Arase
 #
@@ -20,6 +17,11 @@ from simpletransform import computePointInNode
 # Copyright (c) 2010 buliabyak@gmail.com:
 #       adapting for Inkscape extension, SVG output, Auto mode
 #
+# Copyright (c) 2018 kirill.okhotnikov@gmail.com:
+#       QRCode generation replaced completely: Bugfix
+#       SVG output rewrote: visual artifacts removed, svg output size reduced 10 times,
+#                           highly customizable visual representation, deprecated code removed
+#
 #Licensed under the MIT license:
 #   http://www.opensource.org/licenses/mit-license.php
 #
@@ -27,401 +29,304 @@ from simpletransform import computePointInNode
 # DENSO WAVE INCORPORATED
 #   http://www.denso-wave.com/qrcode/faqpatent-e.html
 
-class QR8bitByte:
-
-    def __init__(self, data):
-        self.mode = QRMode.MODE_8BIT_BYTE
-        self.data = data
-
-    def getLength(self):
-        return len(self.data)
-
-    def write(self, buffer):
-        for i in range(len(self.data)):
-            #// not JIS ...
-            buffer.put(ord(self.data[i]), 8)
-    def __repr__(self):
-        return self.data
-
 class QRCode:
-    def __init__(self, typeNumber, errorCorrectLevel):
-        self.typeNumber = typeNumber
-        self.errorCorrectLevel = errorCorrectLevel
-        self.modules = None
+
+    PAD0 = 0xEC
+    PAD1 = 0x11
+
+    def __init__(self):
+        self.typeNumber = 1
+        self.errorCorrectLevel = ErrorCorrectLevel.H
+        self.qrDataList = []
+        self.modules = []
         self.moduleCount = 0
-        self.dataCache = None
-        self.dataList = []
+
+    def getTypeNumber(self):
+        return self.typeNumber
+    def setTypeNumber(self, typeNumber):
+        self.typeNumber = typeNumber
+
+    def getErrorCorrectLevel(self):
+        return self.errorCorrectLevel
+    def setErrorCorrectLevel(self, errorCorrectLevel):
+        self.errorCorrectLevel = errorCorrectLevel
+
+    def clearData(self):
+        self.qrDataList = []
+
     def addData(self, data):
-        newData = QR8bitByte(data)
-        self.dataList.append(newData)
-        self.dataCache = None
+        self.qrDataList.append(QR8BitByte(data) )
+
+    def getDataCount(self):
+        return len(self.qrDataList)
+
+    def getData(self, index):
+        return self.qrDataList[index]
+
     def isDark(self, row, col):
-        if (row < 0 or self.moduleCount <= row or col < 0 or self.moduleCount <= col):
-            raise Exception("%s,%s - %s" % (row, col, self.moduleCount))
-        return self.modules[row][col]
+        return (self.modules[row][col] if self.modules[row][col] != None
+            else False)
+
     def getModuleCount(self):
         return self.moduleCount
+
     def make(self):
-        self.makeImpl(False, self.getBestMaskPattern() )
-    def makeImpl(self, test, maskPattern):
+        self._make(False, self._getBestMaskPattern() )
 
-        if self.typeNumber == 0:
-            self.typeNumber = QRCode.autoNumber(self.errorCorrectLevel, self.dataList)
-        self.moduleCount = self.typeNumber * 4 + 17
-        self.modules = [None for x in range(self.moduleCount)]
-
-        for row in range(self.moduleCount):
-
-            self.modules[row] = [None for x in range(self.moduleCount)]
-
-            for col in range(self.moduleCount):
-                self.modules[row][col] = None #//(col + row) % 3;
-
-        self.setupPositionProbePattern(0, 0)
-        self.setupPositionProbePattern(self.moduleCount - 7, 0)
-        self.setupPositionProbePattern(0, self.moduleCount - 7)
-        self.setupPositionAdjustPattern()
-        self.setupTimingPattern()
-        self.setupTypeInfo(test, maskPattern)
-
-        if (self.typeNumber >= 7):
-            self.setupTypeNumber(test)
-
-        if (self.dataCache == None):
-            self.dataCache = QRCode.createData(self.typeNumber, self.errorCorrectLevel, self.dataList)
-        self.mapData(self.dataCache, maskPattern)
-
-    def setupPositionProbePattern(self, row, col):
-
-        for r in range(-1, 8):
-
-            if (row + r <= -1 or self.moduleCount <= row + r): continue
-
-            for c in range(-1, 8):
-
-                if (col + c <= -1 or self.moduleCount <= col + c): continue
-
-                if ( (0 <= r and r <= 6 and (c == 0 or c == 6) )
-                        or (0 <= c and c <= 6 and (r == 0 or r == 6) )
-                        or (2 <= r and r <= 4 and 2 <= c and c <= 4) ):
-                    self.modules[row + r][col + c] = True;
-                else:
-                    self.modules[row + r][col + c] = False;
-
-    def getBestMaskPattern(self):
-
+    def _getBestMaskPattern(self):
         minLostPoint = 0
         pattern = 0
-
         for i in range(8):
-
-            self.makeImpl(True, i);
-
-            lostPoint = QRUtil.getLostPoint(self);
-
-            if (i == 0 or minLostPoint > lostPoint):
+            self._make(True, i)
+            lostPoint = QRUtil.getLostPoint(self)
+            if i == 0 or minLostPoint > lostPoint:
                 minLostPoint = lostPoint
                 pattern = i
-
         return pattern
 
-    def makeSVG(self, grp, boxsize):
-        margin = 4
-        pixelsize = (self.getModuleCount() + 2*margin) * boxsize #self.getModuleCount() * boxsize
+    def _make(self, test, maskPattern):
 
-        # white background providing margin:
-        rect = inkex.etree.SubElement(grp, inkex.addNS('rect', 'svg'))
-        rect.set('x', '0')
-        rect.set('y', '0')
-        rect.set('width', str(pixelsize))
-        rect.set('height', str(pixelsize))
-        rect.set('style', 'fill:white;stroke:none')
-        
-        for r in range(self.getModuleCount()):
-            for c in range(self.getModuleCount()):
-                if (self.isDark(r, c) ):
-                    x = (c + margin) * boxsize
-                    y = (r + margin) * boxsize
-                    rect = inkex.etree.SubElement(grp, inkex.addNS('rect', 'svg'))
-                    rect.set('x', str(x))
-                    rect.set('y', str(y))
-                    rect.set('width', str(boxsize))
-                    rect.set('height', str(boxsize))
-                    rect.set('style', 'fill:black;stroke:none')
+        self.moduleCount = self.typeNumber * 4 + 17
+        self.modules = [[None] * self.moduleCount
+            for i in range(self.moduleCount)]
 
-    def setupTimingPattern(self):
+        self._setupPositionProbePattern(0, 0)
+        self._setupPositionProbePattern(self.moduleCount - 7, 0)
+        self._setupPositionProbePattern(0, self.moduleCount - 7)
 
-        for r in range(8, self.moduleCount - 8):
-            if (self.modules[r][6] != None):
-                continue
-            self.modules[r][6] = (r % 2 == 0)
+        self._setupPositionAdjustPattern()
+        self._setupTimingPattern()
 
-        for c in range(8, self.moduleCount - 8):
-            if (self.modules[6][c] != None):
-                continue
-            self.modules[6][c] = (c % 2 == 0)
+        self._setupTypeInfo(test, maskPattern)
 
-    def setupPositionAdjustPattern(self):
+        if self.typeNumber >= 7:
+            self._setupTypeNumber(test)
 
+        data = QRCode._createData(
+            self.typeNumber,
+            self.errorCorrectLevel,
+            self.qrDataList)
+
+        self._mapData(data, maskPattern)
+
+    def _mapData(self, data, maskPattern):
+
+        rows = list(range(self.moduleCount) )
+        cols = [col - 1 if col <= 6 else col
+            for col in range(self.moduleCount - 1, 0, -2)]
+        maskFunc = QRUtil.getMaskFunction(maskPattern)
+
+        byteIndex = 0
+        bitIndex = 7
+
+        for col in cols:
+            rows.reverse()
+            for row in rows:
+                for c in range(2):
+                    if self.modules[row][col - c] == None:
+
+                        dark = False
+                        if byteIndex < len(data):
+                            dark = ( (data[byteIndex] >> bitIndex) & 1) == 1
+                        if maskFunc(row, col - c):
+                            dark = not dark
+                        self.modules[row][col - c] = dark
+
+                        bitIndex -= 1
+                        if bitIndex == -1:
+                            byteIndex += 1
+                            bitIndex = 7
+
+    def _setupPositionAdjustPattern(self):
         pos = QRUtil.getPatternPosition(self.typeNumber)
-
-        for i in range(len(pos)):
-
-            for j in range(len(pos)):
-
-                row = pos[i]
-                col = pos[j]
-
-                if (self.modules[row][col] != None):
+        for row in pos:
+            for col in pos:
+                if self.modules[row][col] != None:
                     continue
-
                 for r in range(-2, 3):
-
                     for c in range(-2, 3):
+                        self.modules[row + r][col + c] = (
+                            r == -2 or r == 2 or c == -2 or c == 2
+                            or (r == 0 and c == 0) )
 
-                        if (r == -2 or r == 2 or c == -2 or c == 2 or (r == 0 and c == 0) ):
-                            self.modules[row + r][col + c] = True
-                        else:
-                            self.modules[row + r][col + c] = False
+    def _setupPositionProbePattern(self, row, col):
+        for r in range(-1, 8):
+            for c in range(-1, 8):
+                if (row + r <= -1 or self.moduleCount <= row + r
+                        or col + c <= -1 or self.moduleCount <= col + c):
+                    continue
+                self.modules[row + r][col + c] = (
+                    (0 <= r and r <= 6 and (c == 0 or c == 6) )
+                    or (0 <= c and c <= 6 and (r == 0 or r == 6) )
+                    or (2 <= r and r <= 4 and 2 <= c and c <= 4) )
 
-    def setupTypeNumber(self, test):
+    def _setupTimingPattern(self):
+        for r in range(8, self.moduleCount - 8):
+            if self.modules[r][6] != None:
+                continue
+            self.modules[r][6] = r % 2 == 0
+        for c in range(8, self.moduleCount - 8):
+            if self.modules[6][c] != None:
+                continue
+            self.modules[6][c] = c % 2 == 0
 
+    def _setupTypeNumber(self, test):
         bits = QRUtil.getBCHTypeNumber(self.typeNumber)
-
         for i in range(18):
-            mod = (not test and ( (bits >> i) & 1) == 1)
-            self.modules[i // 3][i % 3 + self.moduleCount - 8 - 3] = mod;
-
+            self.modules[i // 3][i % 3 + self.moduleCount - 8 - 3] = (
+                not test and ( (bits >> i) & 1) == 1)
         for i in range(18):
-            mod = (not test and ( (bits >> i) & 1) == 1)
-            self.modules[i % 3 + self.moduleCount - 8 - 3][i // 3] = mod;
+            self.modules[i % 3 + self.moduleCount - 8 - 3][i // 3] = (
+                not test and ( (bits >> i) & 1) == 1)
 
-    def setupTypeInfo(self, test, maskPattern):
+    def _setupTypeInfo(self, test, maskPattern):
 
         data = (self.errorCorrectLevel << 3) | maskPattern
         bits = QRUtil.getBCHTypeInfo(data)
 
-        #// vertical
+        # vertical
         for i in range(15):
-
-            mod = (not test and ( (bits >> i) & 1) == 1)
-
-            if (i < 6):
+            mod = not test and ( (bits >> i) & 1) == 1
+            if i < 6:
                 self.modules[i][8] = mod
-            elif (i < 8):
+            elif i < 8:
                 self.modules[i + 1][8] = mod
             else:
                 self.modules[self.moduleCount - 15 + i][8] = mod
 
-        #// horizontal
+        # horizontal
         for i in range(15):
-
-            mod = (not test and ( (bits >> i) & 1) == 1);
-
-            if (i < 8):
+            mod = not test and ( (bits >> i) & 1) == 1
+            if i < 8:
                 self.modules[8][self.moduleCount - i - 1] = mod
-            elif (i < 9):
+            elif i < 9:
                 self.modules[8][15 - i - 1 + 1] = mod
             else:
                 self.modules[8][15 - i - 1] = mod
 
-        #// fixed module
-        self.modules[self.moduleCount - 8][8] = (not test)
-
-    def mapData(self, data, maskPattern):
-
-        inc = -1
-        row = self.moduleCount - 1
-        bitIndex = 7
-        byteIndex = 0
-
-        for col in range(self.moduleCount - 1, 0, -2):
-
-            if (col == 6): col-=1
-
-            while (True):
-
-                for c in range(2):
-
-                    if (self.modules[row][col - c] == None):
-
-                        dark = False
-
-                        if (byteIndex < len(data)):
-                            dark = ( ( (data[byteIndex] >> bitIndex) & 1) == 1)
-
-                        mask = QRUtil.getMask(maskPattern, row, col - c)
-
-                        if (mask):
-                            dark = not dark
-
-                        self.modules[row][col - c] = dark
-                        bitIndex-=1
-
-                        if (bitIndex == -1):
-                            byteIndex+=1
-                            bitIndex = 7
-
-                row += inc
-
-                if (row < 0 or self.moduleCount <= row):
-                    row -= inc
-                    inc = -inc
-                    break
-    PAD0 = 0xEC
-    PAD1 = 0x11
+        # fixed
+        self.modules[self.moduleCount - 8][8] = not test
 
     @staticmethod
-    def autoNumber(errorCorrectLevel, dataList):
+    def _createData(typeNumber, errorCorrectLevel, dataArray):
 
-        for tn in range (1, 40):
-            
-            rsBlocks = QRRSBlock.getRSBlocks(tn, errorCorrectLevel)
+        rsBlocks = RSBlock.getRSBlocks(typeNumber, errorCorrectLevel)
 
-            buffer = QRBitBuffer();
+        buffer = BitBuffer()
 
-            for i in range(len(dataList)):
-                data = dataList[i]
-                buffer.put(data.mode, 4)
-                buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, tn) )
-                data.write(buffer)
-
-            #// calc num max data.
-            totalDataCount = 0;
-            for i in range(len(rsBlocks)):
-                totalDataCount += rsBlocks[i].dataCount
-
-            if (buffer.getLengthInBits() <= totalDataCount * 8):
-                return tn
-
-        inkex.errormsg("Even the largest size won't take this much data ("
-            + str(buffer.getLengthInBits())
-            + ">"
-            +  str(totalDataCount * 8)
-            + ")")
-        sys.exit()
-        
-
-
-    @staticmethod
-    def createData(typeNumber, errorCorrectLevel, dataList):
-
-        rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel)
-
-        buffer = QRBitBuffer();
-
-        for i in range(len(dataList)):
-            data = dataList[i]
-            buffer.put(data.mode, 4)
-            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) )
+        for data in dataArray:
+            buffer.put(data.getMode(), 4)
+            buffer.put(data.getLength(), data.getLengthInBits(typeNumber) )
             data.write(buffer)
 
-        #// calc num max data.
-        totalDataCount = 0;
-        for i in range(len(rsBlocks)):
-            totalDataCount += rsBlocks[i].dataCount
+        totalDataCount = sum(rsBlock.getDataCount()
+                              for rsBlock in rsBlocks)
 
-        if (buffer.getLengthInBits() > totalDataCount * 8):
-            inkex.errormsg("Text is too long for this size ("
-                + str(buffer.getLengthInBits())
-                + ">"
-                +  str(totalDataCount * 8)
-                + ")")
-            sys.exit()
+        if buffer.getLengthInBits() > totalDataCount * 8:
+            raise Exception('code length overflow. (%s>%s)' %
+                    (buffer.getLengthInBits(), totalDataCount * 8) )
 
-        #// end code
-        if (buffer.getLengthInBits() + 4 <= totalDataCount * 8):
+        # end code
+        if buffer.getLengthInBits() + 4 <= totalDataCount * 8:
             buffer.put(0, 4)
 
-        #// padding
-        while (buffer.getLengthInBits() % 8 != 0):
-            buffer.putBit(False)
+        # padding
+        while buffer.getLengthInBits() % 8 != 0:
+            buffer.put(False)
 
-        #// padding
-        while (True):
-
-            if (buffer.getLengthInBits() >= totalDataCount * 8):
+        # padding
+        while True:
+            if buffer.getLengthInBits() >= totalDataCount * 8:
                 break
             buffer.put(QRCode.PAD0, 8)
-
-            if (buffer.getLengthInBits() >= totalDataCount * 8):
+            if buffer.getLengthInBits() >= totalDataCount * 8:
                 break
             buffer.put(QRCode.PAD1, 8)
 
-        return QRCode.createBytes(buffer, rsBlocks)
+        return QRCode._createBytes(buffer, rsBlocks)
 
     @staticmethod
-    def createBytes(buffer, rsBlocks):
+    def _createBytes(buffer, rsBlocks):
 
         offset = 0
 
         maxDcCount = 0
         maxEcCount = 0
 
-        dcdata = [0 for x in range(len(rsBlocks))]
-        ecdata = [0 for x in range(len(rsBlocks))]
+        dcdata = [None] * len(rsBlocks)
+        ecdata = [None] * len(rsBlocks)
 
-        for r in range(len(rsBlocks)):
+        for r in range(len(rsBlocks) ):
 
-            dcCount = rsBlocks[r].dataCount
-            ecCount = rsBlocks[r].totalCount - dcCount
+            dcCount = rsBlocks[r].getDataCount()
+            ecCount = rsBlocks[r].getTotalCount() - dcCount
 
             maxDcCount = max(maxDcCount, dcCount)
             maxEcCount = max(maxEcCount, ecCount)
 
-            dcdata[r] = [0 for x in range(dcCount)]
-
-            for i in range(len(dcdata[r])):
-                dcdata[r][i] = 0xff & buffer.buffer[i + offset]
+            dcdata[r] = [0] * dcCount
+            for i in range(len(dcdata[r] ) ):
+                dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset]
             offset += dcCount
 
             rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount)
-            rawPoly = QRPolynomial(dcdata[r], rsPoly.getLength() - 1)
+            rawPoly = Polynomial(dcdata[r], rsPoly.getLength() - 1)
 
             modPoly = rawPoly.mod(rsPoly)
-            ecdata[r] = [0 for x in range(rsPoly.getLength()-1)]
-            for i in range(len(ecdata[r])):
+            ecdata[r] = [0] * (rsPoly.getLength() - 1)
+            for i in range(len(ecdata[r]) ):
                 modIndex = i + modPoly.getLength() - len(ecdata[r])
-                if (modIndex >= 0):
-                    ecdata[r][i] = modPoly.get(modIndex)
-                else:
-                    ecdata[r][i] = 0
+                ecdata[r][i] = modPoly.get(modIndex) if modIndex >= 0 else 0
 
-        totalCodeCount = 0
-        for i in range(len(rsBlocks)):
-            totalCodeCount += rsBlocks[i].totalCount
+        totalCodeCount = sum(rsBlock.getTotalCount()
+                              for rsBlock in rsBlocks)
 
-        data = [None for x in range(totalCodeCount)]
+        data = [0] * totalCodeCount
+
         index = 0
 
         for i in range(maxDcCount):
-            for r in range(len(rsBlocks)):
-                if (i < len(dcdata[r])):
+            for r in range(len(rsBlocks) ):
+                if i < len(dcdata[r] ):
                     data[index] = dcdata[r][i]
-                    index+=1
+                    index += 1
 
         for i in range(maxEcCount):
-            for r in range(len(rsBlocks)):
-                if (i < len(ecdata[r])):
+            for r in range(len(rsBlocks) ):
+                if i < len(ecdata[r] ):
                     data[index] = ecdata[r][i]
-                    index+=1
+                    index += 1
 
         return data
 
+    @staticmethod
+    def getMinimumQRCode(data, errorCorrectLevel):
+        mode = Mode.MODE_8BIT_BYTE # fixed to 8bit byte
+        qr = QRCode()
+        qr.setErrorCorrectLevel(errorCorrectLevel)
+        qr.addData(data)
+        length = qr.getData(0).getLength()
+        for typeNumber in range(1, 11):
+            if length <= QRUtil.getMaxLength(
+                    typeNumber, mode, errorCorrectLevel):
+                qr.setTypeNumber(typeNumber)
+                break
+        qr.make()
+        return qr
 
-class QRMode:
-    MODE_NUMBER = 1 << 0
+class Mode:
+    MODE_NUMBER    = 1 << 0
     MODE_ALPHA_NUM = 1 << 1
     MODE_8BIT_BYTE = 1 << 2
-    MODE_KANJI = 1 << 3
+    MODE_KANJI     = 1 << 3
 
-class QRErrorCorrectLevel:
-    L = 1
-    M = 0
-    Q = 3
-    H = 2
+class ErrorCorrectLevel:
+    L = 1 # 7%
+    M = 0 # 15%
+    Q = 3 # 25%
+    H = 2 # 30%
 
-class QRMaskPattern:
+class MaskPattern:
     PATTERN000 = 0
     PATTERN001 = 1
     PATTERN010 = 2
@@ -431,7 +336,12 @@ class QRMaskPattern:
     PATTERN110 = 6
     PATTERN111 = 7
 
-class QRUtil(object):
+class QRUtil:
+
+    @staticmethod
+    def getPatternPosition(typeNumber):
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1]
+
     PATTERN_POSITION_TABLE = [
         [],
         [6, 18],
@@ -473,607 +383,733 @@ class QRUtil(object):
         [6, 32, 58, 84, 110, 136, 162],
         [6, 26, 54, 82, 110, 138, 166],
         [6, 30, 58, 86, 114, 142, 170]
-    ]
+        ]
 
-    G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0)
-    G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0)
-    G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
+    MAX_LENGTH = [
+        [ [41,  25,  17,  10],  [34,  20,  14,  8],   [27,  16,  11,  7],  [17,  10,  7,   4] ],
+        [ [77,  47,  32,  20],  [63,  38,  26,  16],  [48,  29,  20,  12], [34,  20,  14,  8] ],
+        [ [127, 77,  53,  32],  [101, 61,  42,  26],  [77,  47,  32,  20], [58,  35,  24,  15] ],
+        [ [187, 114, 78,  48],  [149, 90,  62,  38],  [111, 67,  46,  28], [82,  50,  34,  21] ],
+        [ [255, 154, 106, 65],  [202, 122, 84,  52],  [144, 87,  60,  37], [106, 64,  44,  27] ],
+        [ [322, 195, 134, 82],  [255, 154, 106, 65],  [178, 108, 74,  45], [139, 84,  58,  36] ],
+        [ [370, 224, 154, 95],  [293, 178, 122, 75],  [207, 125, 86,  53], [154, 93,  64,  39] ],
+        [ [461, 279, 192, 118], [365, 221, 152, 93],  [259, 157, 108, 66], [202, 122, 84,  52] ],
+        [ [552, 335, 230, 141], [432, 262, 180, 111], [312, 189, 130, 80], [235, 143, 98,  60] ],
+        [ [652, 395, 271, 167], [513, 311, 213, 131], [364, 221, 151, 93], [288, 174, 119, 74] ]
+        ]
 
     @staticmethod
-    def getBCHTypeInfo(data):
-        d = data << 10;
-        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0):
-            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) )
+    def getMaxLength(typeNumber, mode, errorCorrectLevel):
+        t = typeNumber - 1
+        e = {
+            ErrorCorrectLevel.L: 0,
+            ErrorCorrectLevel.M: 1,
+            ErrorCorrectLevel.Q: 2,
+            ErrorCorrectLevel.H: 3
+            }[errorCorrectLevel]
+        m = {
+            Mode.MODE_NUMBER: 0,
+            Mode.MODE_ALPHA_NUM: 1,
+            Mode.MODE_8BIT_BYTE: 2,
+            Mode.MODE_KANJI: 3
+            }[mode]
+        return QRUtil.MAX_LENGTH[t][e][m]
 
-        return ( (data << 10) | d) ^ QRUtil.G15_MASK
-    @staticmethod
-    def getBCHTypeNumber(data):
-        d = data << 12;
-        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0):
-            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) )
-        return (data << 12) | d
-    @staticmethod
-    def getBCHDigit(data):
-        digit = 0;
-        while (data != 0):
-            digit += 1
-            data >>= 1
-        return digit
-    @staticmethod
-    def getPatternPosition(typeNumber):
-        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1]
-    @staticmethod
-    def getMask(maskPattern, i, j):
-        if maskPattern == QRMaskPattern.PATTERN000 : return (i + j) % 2 == 0
-        if maskPattern == QRMaskPattern.PATTERN001 : return i % 2 == 0
-        if maskPattern == QRMaskPattern.PATTERN010 : return j % 3 == 0
-        if maskPattern == QRMaskPattern.PATTERN011 : return (i + j) % 3 == 0
-        if maskPattern == QRMaskPattern.PATTERN100 : return ((i // 2) + (j // 3)) % 2 == 0
-        if maskPattern == QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 == 0
-        if maskPattern == QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 == 0
-        if maskPattern == QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 == 0
-        raise Exception("bad maskPattern:" + maskPattern);
     @staticmethod
     def getErrorCorrectPolynomial(errorCorrectLength):
-        a = QRPolynomial([1], 0);
+        a = Polynomial([1])
         for i in range(errorCorrectLength):
-            a = a.multiply(QRPolynomial([1, QRMath.gexp(i)], 0) )
+            a = a.multiply(Polynomial([1, QRMath.gexp(i)]) )
         return a
+
     @staticmethod
-    def getLengthInBits(mode, type):
+    def getMaskFunction(maskPattern):
+        return {
+            MaskPattern.PATTERN000:
+                lambda i, j: (i + j) % 2 == 0,
+            MaskPattern.PATTERN001:
+                lambda i, j: i % 2 == 0,
+            MaskPattern.PATTERN010:
+                lambda i, j: j % 3 == 0,
+            MaskPattern.PATTERN011:
+                lambda i, j: (i + j) % 3 == 0,
+            MaskPattern.PATTERN100:
+                lambda i, j: (i // 2 + j // 3) % 2 == 0,
+            MaskPattern.PATTERN101:
+                lambda i, j: (i * j) % 2 + (i * j) % 3 == 0,
+            MaskPattern.PATTERN110:
+                lambda i, j: ( (i * j) % 2 + (i * j) % 3) % 2 == 0,
+            MaskPattern.PATTERN111:
+                lambda i, j: ( (i * j) % 3 + (i + j) % 2) % 2 == 0
+            }[maskPattern]
 
-        if 1 <= type and type < 10:
-
-            #// 1 - 9
-
-            if mode == QRMode.MODE_NUMBER     : return 10
-            if mode == QRMode.MODE_ALPHA_NUM     : return 9
-            if mode == QRMode.MODE_8BIT_BYTE    : return 8
-            if mode == QRMode.MODE_KANJI      : return 8
-            raise Exception("mode:" + mode)
-
-        elif (type < 27):
-
-            #// 10 - 26
-
-            if mode == QRMode.MODE_NUMBER     : return 12
-            if mode == QRMode.MODE_ALPHA_NUM     : return 11
-            if mode == QRMode.MODE_8BIT_BYTE    : return 16
-            if mode == QRMode.MODE_KANJI      : return 10
-            raise Exception("mode:" + mode)
-
-        elif (type < 41):
-
-            #// 27 - 40
-
-            if mode == QRMode.MODE_NUMBER     : return 14
-            if mode == QRMode.MODE_ALPHA_NUM    : return 13
-            if mode == QRMode.MODE_8BIT_BYTE    : return 16
-            if mode == QRMode.MODE_KANJI      : return 12
-            raise Exception("mode:" + mode)
-
-        else:
-            raise Exception("type:" + type)
     @staticmethod
-    def getLostPoint(qrCode):
+    def getLostPoint(qrcode):
 
-        moduleCount = qrCode.getModuleCount();
+        moduleCount = qrcode.getModuleCount()
+        lostPoint = 0
 
-        lostPoint = 0;
-
-        #// LEVEL1
-
+        # LEVEL1
         for row in range(moduleCount):
-
             for col in range(moduleCount):
-
-                sameCount = 0;
-                dark = qrCode.isDark(row, col);
-
+                sameCount = 0
+                dark = qrcode.isDark(row, col)
                 for r in range(-1, 2):
-
-                    if (row + r < 0 or moduleCount <= row + r):
+                    if row + r < 0 or moduleCount <= row + r:
                         continue
-
                     for c in range(-1, 2):
-
-                        if (col + c < 0 or moduleCount <= col + c):
+                        if col + c < 0 or moduleCount <= col + c:
                             continue
-                        if (r == 0 and c == 0):
+                        if r == 0 and c == 0:
                             continue
-
-                        if (dark == qrCode.isDark(row + r, col + c) ):
-                            sameCount+=1
-                if (sameCount > 5):
+                        if dark == qrcode.isDark(row + r, col + c):
+                            sameCount += 1
+                if sameCount > 5:
                     lostPoint += (3 + sameCount - 5)
 
-        #// LEVEL2
-
+        # LEVEL2
         for row in range(moduleCount - 1):
             for col in range(moduleCount - 1):
-                count = 0;
-                if (qrCode.isDark(row,     col    ) ): count+=1
-                if (qrCode.isDark(row + 1, col    ) ): count+=1
-                if (qrCode.isDark(row,     col + 1) ): count+=1
-                if (qrCode.isDark(row + 1, col + 1) ): count+=1
-                if (count == 0 or count == 4):
+                count = 0
+                if qrcode.isDark(row, col):
+                    count += 1
+                if qrcode.isDark(row + 1, col):
+                    count += 1
+                if qrcode.isDark(row, col + 1):
+                    count += 1
+                if qrcode.isDark(row + 1, col + 1):
+                    count += 1
+                if count == 0 or count == 4:
                     lostPoint += 3
 
-        #// LEVEL3
-
+        # LEVEL3
         for row in range(moduleCount):
             for col in range(moduleCount - 6):
-                if (qrCode.isDark(row, col)
-                        and not qrCode.isDark(row, col + 1)
-                        and  qrCode.isDark(row, col + 2)
-                        and  qrCode.isDark(row, col + 3)
-                        and  qrCode.isDark(row, col + 4)
-                        and not qrCode.isDark(row, col + 5)
-                        and  qrCode.isDark(row, col + 6) ):
+                if (qrcode.isDark(row, col)
+                        and not qrcode.isDark(row, col + 1)
+                        and     qrcode.isDark(row, col + 2)
+                        and     qrcode.isDark(row, col + 3)
+                        and     qrcode.isDark(row, col + 4)
+                        and not qrcode.isDark(row, col + 5)
+                        and     qrcode.isDark(row, col + 6) ):
                     lostPoint += 40
 
         for col in range(moduleCount):
             for row in range(moduleCount - 6):
-                if (qrCode.isDark(row, col)
-                        and not qrCode.isDark(row + 1, col)
-                        and  qrCode.isDark(row + 2, col)
-                        and  qrCode.isDark(row + 3, col)
-                        and  qrCode.isDark(row + 4, col)
-                        and not qrCode.isDark(row + 5, col)
-                        and  qrCode.isDark(row + 6, col) ):
+                if (qrcode.isDark(row, col)
+                        and not qrcode.isDark(row + 1, col)
+                        and     qrcode.isDark(row + 2, col)
+                        and     qrcode.isDark(row + 3, col)
+                        and     qrcode.isDark(row + 4, col)
+                        and not qrcode.isDark(row + 5, col)
+                        and     qrcode.isDark(row + 6, col) ):
                     lostPoint += 40
 
-        #// LEVEL4
-
-        darkCount = 0;
-
+        # LEVEL4
+        darkCount = 0
         for col in range(moduleCount):
             for row in range(moduleCount):
-                if (qrCode.isDark(row, col) ):
-                    darkCount+=1
+                if qrcode.isDark(row, col):
+                    darkCount += 1
 
-        ratio = abs(100 * darkCount / moduleCount / moduleCount - 50) / 5
+        ratio = abs(100 * darkCount // moduleCount // moduleCount - 50) // 5
         lostPoint += ratio * 10
 
         return lostPoint
 
+    G15 = ( (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) |
+            (1 << 2) | (1 << 1) | (1 << 0) )
+    G18 = ( (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) |
+            (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0) )
+    G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
+
+    @staticmethod
+    def getBCHTypeInfo(data):
+        d = data << 10
+        while QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0:
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) -
+                                 QRUtil.getBCHDigit(QRUtil.G15) ) )
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK
+
+    @staticmethod
+    def getBCHTypeNumber(data):
+        d = data << 12
+        while QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0:
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) -
+                                 QRUtil.getBCHDigit(QRUtil.G18) ) )
+        return (data << 12) | d
+
+    @staticmethod
+    def getBCHDigit(data):
+        digit = 0
+        while data != 0:
+            digit += 1
+            data >>= 1
+        return digit
+
+    @staticmethod
+    def stringToBytes(s):
+        return [ord(c) & 0xff for c in s]
+
+class QR8BitByte:
+
+    def __init__(self, data):
+        self.mode = Mode.MODE_8BIT_BYTE
+        self.data = data
+
+    def getMode(self):
+        return self.mode
+
+    def getData(self):
+        return self.data
+
+    '''
+    def write(self, buffer): raise Exception('not implemented.')
+    def getLength(self): raise Exception('not implemented.')
+    '''
+
+    def write(self, buffer):
+        data = QRUtil.stringToBytes(self.getData() )
+        for d in data:
+            buffer.put(d, 8)
+
+    def getLength(self):
+        return len(QRUtil.stringToBytes(self.getData() ) )
+
+    def getLengthInBits(self, type):
+        if 1 <= type and type < 10: # 1 - 9
+            return {
+                Mode.MODE_NUMBER:    10,
+                Mode.MODE_ALPHA_NUM: 9,
+                Mode.MODE_8BIT_BYTE: 8,
+                Mode.MODE_KANJI:     8
+                }[self.mode]
+
+        elif type < 27: # 10 - 26
+            return {
+                Mode.MODE_NUMBER:    12,
+                Mode.MODE_ALPHA_NUM: 11,
+                Mode.MODE_8BIT_BYTE: 16,
+                Mode.MODE_KANJI:     10
+                }[self.mode]
+
+        elif type < 41: # 27 - 40
+            return {
+                Mode.MODE_NUMBER:    14,
+                Mode.MODE_ALPHA_NUM: 13,
+                Mode.MODE_8BIT_BYTE: 16,
+                Mode.MODE_KANJI:     12
+                }[self.mode]
+
+        else:
+            raise Exception('type:%s' % type)
+
 class QRMath:
+
+    EXP_TABLE = None
+    LOG_TABLE = None
+
+    @staticmethod
+    def _init():
+
+        QRMath.EXP_TABLE = [0] * 256
+        for i in range(256):
+            QRMath.EXP_TABLE[i] = (1 << i if i < 8 else
+                     QRMath.EXP_TABLE[i - 4] ^ QRMath.EXP_TABLE[i - 5] ^
+                     QRMath.EXP_TABLE[i - 6] ^ QRMath.EXP_TABLE[i - 8])
+
+        QRMath.LOG_TABLE = [0] * 256
+        for i in range(255):
+            QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i
 
     @staticmethod
     def glog(n):
-        if (n < 1):
-            raise Exception("glog(" + n + ")")
-        return LOG_TABLE[n];
+        if n < 1:
+            raise Exception('log(%s)' % n)
+        return QRMath.LOG_TABLE[n]
+
     @staticmethod
     def gexp(n):
         while n < 0:
             n += 255
         while n >= 256:
             n -= 255
-        return EXP_TABLE[n];
+        return QRMath.EXP_TABLE[n]
 
-EXP_TABLE = [x for x in range(256)]
+# initialize statics
+QRMath._init()
 
-LOG_TABLE = [x for x in range(256)]
+class Polynomial:
 
-for i in range(8):
-    EXP_TABLE[i] = 1 << i;
-
-for i in range(8, 256):
-    EXP_TABLE[i] = EXP_TABLE[i - 4] ^ EXP_TABLE[i - 5] ^ EXP_TABLE[i - 6] ^ EXP_TABLE[i - 8]
-
-for i in range(255):
-    LOG_TABLE[EXP_TABLE[i] ] = i
-
-class QRPolynomial:
-
-    def __init__(self, num, shift):
-
-        if (len(num) == 0):
-            raise Exception(num.length + "/" + shift)
-
+    def __init__(self, num, shift=0):
         offset = 0
-
-        while offset < len(num) and num[offset] == 0:
+        length = len(num)
+        while offset < length and num[offset] == 0:
             offset += 1
-
-        self.num = [0 for x in range(len(num)-offset+shift)]
-        for i in range(len(num) - offset):
-            self.num[i] = num[i + offset]
-
+        self.num = num[offset:] + [0] * shift
 
     def get(self, index):
         return self.num[index]
+
     def getLength(self):
         return len(self.num)
+
+    def __repr__(self):
+        return ','.join( [str(self.get(i) )
+            for i in range(self.getLength() ) ] )
+
+    def toLogString(self):
+        return ','.join( [str(QRMath.glog(self.get(i) ) )
+            for i in range(self.getLength() ) ] )
+
     def multiply(self, e):
-        num = [0 for x in range(self.getLength() + e.getLength() - 1)];
+        num = [0] * (self.getLength() + e.getLength() - 1)
+        for i in range(self.getLength() ):
+            for j in range(e.getLength() ):
+                num[i + j] ^= QRMath.gexp(QRMath.glog(self.get(i) ) +
+                              QRMath.glog(e.get(j) ) )
+        return Polynomial(num)
 
-        for i in range(self.getLength()):
-            for j in range(e.getLength()):
-                num[i + j] ^= QRMath.gexp(QRMath.glog(self.get(i) ) + QRMath.glog(e.get(j) ) )
-
-        return QRPolynomial(num, 0);
     def mod(self, e):
-
-        if (self.getLength() - e.getLength() < 0):
-            return self;
-
+        if self.getLength() - e.getLength() < 0:
+            return self
         ratio = QRMath.glog(self.get(0) ) - QRMath.glog(e.get(0) )
-
-        num = [0 for x in range(self.getLength())]
-
-        for i in range(self.getLength()):
-            num[i] = self.get(i);
-
-        for i in range(e.getLength()):
+        num = self.num[:]
+        for i in range(e.getLength() ):
             num[i] ^= QRMath.gexp(QRMath.glog(e.get(i) ) + ratio)
+        return Polynomial(num).mod(e)
 
-        # recursive call
-        return QRPolynomial(num, 0).mod(e);
-
-class QRRSBlock:
+class RSBlock:
 
     RS_BLOCK_TABLE = [
 
-        #// L
-        #// M
-        #// Q
-        #// H
+        # L
+        # M
+        # Q
+        # H
 
-        #// 1
+        # 1
         [1, 26, 19],
         [1, 26, 16],
         [1, 26, 13],
         [1, 26, 9],
 
-        #// 2
+        # 2
         [1, 44, 34],
         [1, 44, 28],
         [1, 44, 22],
         [1, 44, 16],
 
-        #// 3
+        # 3
         [1, 70, 55],
         [1, 70, 44],
         [2, 35, 17],
         [2, 35, 13],
 
-        #// 4
+        # 4
         [1, 100, 80],
         [2, 50, 32],
         [2, 50, 24],
         [4, 25, 9],
 
-        #// 5
+        # 5
         [1, 134, 108],
         [2, 67, 43],
         [2, 33, 15, 2, 34, 16],
         [2, 33, 11, 2, 34, 12],
 
-        #// 6
+        # 6
         [2, 86, 68],
         [4, 43, 27],
         [4, 43, 19],
         [4, 43, 15],
 
-        #// 7
+        # 7
         [2, 98, 78],
         [4, 49, 31],
         [2, 32, 14, 4, 33, 15],
         [4, 39, 13, 1, 40, 14],
 
-        #// 8
+        # 8
         [2, 121, 97],
         [2, 60, 38, 2, 61, 39],
         [4, 40, 18, 2, 41, 19],
         [4, 40, 14, 2, 41, 15],
 
-        #// 9
+        # 9
         [2, 146, 116],
         [3, 58, 36, 2, 59, 37],
         [4, 36, 16, 4, 37, 17],
         [4, 36, 12, 4, 37, 13],
 
-        #// 10
+        # 10
         [2, 86, 68, 2, 87, 69],
         [4, 69, 43, 1, 70, 44],
         [6, 43, 19, 2, 44, 20],
-        [6, 43, 15, 2, 44, 16],
-
-      # 11
-      [4, 101, 81],
-      [1, 80, 50, 4, 81, 51],
-      [4, 50, 22, 4, 51, 23],
-      [3, 36, 12, 8, 37, 13],
-
-      # 12
-      [2, 116, 92, 2, 117, 93],
-      [6, 58, 36, 2, 59, 37],
-      [4, 46, 20, 6, 47, 21],
-      [7, 42, 14, 4, 43, 15],
-
-      # 13
-      [4, 133, 107],
-      [8, 59, 37, 1, 60, 38],
-      [8, 44, 20, 4, 45, 21],
-      [12, 33, 11, 4, 34, 12],
-
-      # 14
-      [3, 145, 115, 1, 146, 116],
-      [4, 64, 40, 5, 65, 41],
-      [11, 36, 16, 5, 37, 17],
-      [11, 36, 12, 5, 37, 13],
-
-      # 15
-      [5, 109, 87, 1, 110, 88],
-      [5, 65, 41, 5, 66, 42],
-      [5, 54, 24, 7, 55, 25],
-      [11, 36, 12],
-
-      # 16
-      [5, 122, 98, 1, 123, 99],
-      [7, 73, 45, 3, 74, 46],
-      [15, 43, 19, 2, 44, 20],
-      [3, 45, 15, 13, 46, 16],
-
-      # 17
-      [1, 135, 107, 5, 136, 108],
-      [10, 74, 46, 1, 75, 47],
-      [1, 50, 22, 15, 51, 23],
-      [2, 42, 14, 17, 43, 15],
-
-      # 18
-      [5, 150, 120, 1, 151, 121],
-      [9, 69, 43, 4, 70, 44],
-      [17, 50, 22, 1, 51, 23],
-      [2, 42, 14, 19, 43, 15],
-
-      # 19
-      [3, 141, 113, 4, 142, 114],
-      [3, 70, 44, 11, 71, 45],
-      [17, 47, 21, 4, 48, 22],
-      [9, 39, 13, 16, 40, 14],
-
-      # 20
-      [3, 135, 107, 5, 136, 108],
-      [3, 67, 41, 13, 68, 42],
-      [15, 54, 24, 5, 55, 25],
-      [15, 43, 15, 10, 44, 16],
-
-      # 21
-      [4, 144, 116, 4, 145, 117],
-      [17, 68, 42],
-      [17, 50, 22, 6, 51, 23],
-      [19, 46, 16, 6, 47, 17],
-
-      # 22
-      [2, 139, 111, 7, 140, 112],
-      [17, 74, 46],
-      [7, 54, 24, 16, 55, 25],
-      [34, 37, 13],
-
-      # 23
-      [4, 151, 121, 5, 152, 122],
-      [4, 75, 47, 14, 76, 48],
-      [11, 54, 24, 14, 55, 25],
-      [16, 45, 15, 14, 46, 16],
-
-      # 24
-      [6, 147, 117, 4, 148, 118],
-      [6, 73, 45, 14, 74, 46],
-      [11, 54, 24, 16, 55, 25],
-      [30, 46, 16, 2, 47, 17],
-
-      # 25
-      [8, 132, 106, 4, 133, 107],
-      [8, 75, 47, 13, 76, 48],
-      [7, 54, 24, 22, 55, 25],
-      [22, 45, 15, 13, 46, 16],
-
-      # 26
-      [10, 142, 114, 2, 143, 115],
-      [19, 74, 46, 4, 75, 47],
-      [28, 50, 22, 6, 51, 23],
-      [33, 46, 16, 4, 47, 17],
-
-      # 27
-      [8, 152, 122, 4, 153, 123],
-      [22, 73, 45, 3, 74, 46],
-      [8, 53, 23, 26, 54, 24],
-      [12, 45, 15, 28, 46, 16],
-
-      # 28
-      [3, 147, 117, 10, 148, 118],
-      [3, 73, 45, 23, 74, 46],
-      [4, 54, 24, 31, 55, 25],
-      [11, 45, 15, 31, 46, 16],
-
-      # 29
-      [7, 146, 116, 7, 147, 117],
-      [21, 73, 45, 7, 74, 46],
-      [1, 53, 23, 37, 54, 24],
-      [19, 45, 15, 26, 46, 16],
-
-      # 30
-      [5, 145, 115, 10, 146, 116],
-      [19, 75, 47, 10, 76, 48],
-      [15, 54, 24, 25, 55, 25],
-      [23, 45, 15, 25, 46, 16],
-
-      # 31
-      [13, 145, 115, 3, 146, 116],
-      [2, 74, 46, 29, 75, 47],
-      [42, 54, 24, 1, 55, 25],
-      [23, 45, 15, 28, 46, 16],
-
-      # 32
-      [17, 145, 115],
-      [10, 74, 46, 23, 75, 47],
-      [10, 54, 24, 35, 55, 25],
-      [19, 45, 15, 35, 46, 16],
-
-      # 33
-      [17, 145, 115, 1, 146, 116],
-      [14, 74, 46, 21, 75, 47],
-      [29, 54, 24, 19, 55, 25],
-      [11, 45, 15, 46, 46, 16],
-
-      # 34
-      [13, 145, 115, 6, 146, 116],
-      [14, 74, 46, 23, 75, 47],
-      [44, 54, 24, 7, 55, 25],
-      [59, 46, 16, 1, 47, 17],
-
-      # 35
-      [12, 151, 121, 7, 152, 122],
-      [12, 75, 47, 26, 76, 48],
-      [39, 54, 24, 14, 55, 25],
-      [22, 45, 15, 41, 46, 16],
-
-      # 36
-      [6, 151, 121, 14, 152, 122],
-      [6, 75, 47, 34, 76, 48],
-      [46, 54, 24, 10, 55, 25],
-      [2, 45, 15, 64, 46, 16],
-
-      # 37
-      [17, 152, 122, 4, 153, 123],
-      [29, 74, 46, 14, 75, 47],
-      [49, 54, 24, 10, 55, 25],
-      [24, 45, 15, 46, 46, 16],
-
-      # 38
-      [4, 152, 122, 18, 153, 123],
-      [13, 74, 46, 32, 75, 47],
-      [48, 54, 24, 14, 55, 25],
-      [42, 45, 15, 32, 46, 16],
-
-      # 39
-      [20, 147, 117, 4, 148, 118],
-      [40, 75, 47, 7, 76, 48],
-      [43, 54, 24, 22, 55, 25],
-      [10, 45, 15, 67, 46, 16],
-
-      # 40
-      [19, 148, 118, 6, 149, 119],
-      [18, 75, 47, 31, 76, 48],
-      [34, 54, 24, 34, 55, 25],
-      [20, 45, 15, 61, 46, 16]
-
-    ]
+        [6, 43, 15, 2, 44, 16]
+        ]
 
     def __init__(self, totalCount, dataCount):
         self.totalCount = totalCount
-        self.dataCount = dataCount
+        self.dataCount  = dataCount
+
+    def getDataCount(self):
+        return self.dataCount
+
+    def getTotalCount(self):
+        return self.totalCount
+
+    def __repr__(self):
+        return ('(total=%s,data=%s)' % (self.totalCount, self.dataCount) )
 
     @staticmethod
     def getRSBlocks(typeNumber, errorCorrectLevel):
-        rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
-        if rsBlock == None:
-            raise Exception("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel)
-
+        rsBlock = RSBlock.getRsBlockTable(typeNumber, errorCorrectLevel)
         length = len(rsBlock) // 3
-
         list = []
-
         for i in range(length):
-
-            count = rsBlock[i * 3 + 0]
+            count      = rsBlock[i * 3 + 0]
             totalCount = rsBlock[i * 3 + 1]
             dataCount  = rsBlock[i * 3 + 2]
-
-            for j in range(count):
-                list.append(QRRSBlock(totalCount, dataCount))
-
-        return list;
+            list += [RSBlock(totalCount, dataCount)] * count
+        return list
 
     @staticmethod
     def getRsBlockTable(typeNumber, errorCorrectLevel):
-        if errorCorrectLevel == QRErrorCorrectLevel.L:
-            return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
-        elif errorCorrectLevel == QRErrorCorrectLevel.M:
-            return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
-        elif errorCorrectLevel ==  QRErrorCorrectLevel.Q:
-            return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
-        elif errorCorrectLevel ==  QRErrorCorrectLevel.H:
-            return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
-        else:
-            return None;
+        return {
+            ErrorCorrectLevel.L:
+                RSBlock.RS_BLOCK_TABLE[ (typeNumber - 1) * 4 + 0],
+            ErrorCorrectLevel.M:
+                RSBlock.RS_BLOCK_TABLE[ (typeNumber - 1) * 4 + 1],
+            ErrorCorrectLevel.Q:
+                RSBlock.RS_BLOCK_TABLE[ (typeNumber - 1) * 4 + 2],
+            ErrorCorrectLevel.H:
+                RSBlock.RS_BLOCK_TABLE[ (typeNumber - 1) * 4 + 3]
+            }[errorCorrectLevel]
 
-class QRBitBuffer:
-    def __init__(self):
-        self.buffer = []
+class BitBuffer:
+
+    def __init__(self, inclements=32):
+        self.inclements = inclements
+        self.buffer = [0] * self.inclements
         self.length = 0
-    def __repr__(self):
-        return ".".join([str(n) for n in self.buffer])
+
+    def getBuffer(self):
+        return self.buffer
+
+    def getLengthInBits(self):
+        return self.length
+
     def get(self, index):
-        bufIndex = index // 8
-        val = ( (self.buffer[bufIndex] >> (7 - index % 8) ) & 1) == 1
-        print("get ", val)
-        return ( (self.buffer[bufIndex] >> (7 - index % 8) ) & 1) == 1
+        return ( (self.buffer[index // 8] >> (7 - index % 8) ) & 1) == 1
+
+    def putBit(self, bit):
+        if self.length == len(self.buffer) * 8:
+            self.buffer += [0] * self.inclements
+        if bit:
+            self.buffer[self.length // 8] |= (0x80 >> (self.length % 8) )
+        self.length += 1
+
     def put(self, num, length):
         for i in range(length):
             self.putBit( ( (num >> (length - i - 1) ) & 1) == 1)
-    def getLengthInBits(self):
-        return self.length
-    def putBit(self, bit):
-        bufIndex = self.length // 8
-        if len(self.buffer) <= bufIndex:
-            self.buffer.append(0)
-        if bit:
-            self.buffer[bufIndex] |= (0x80 >> (self.length % 8) )
-        self.length+=1
+
+    def __repr__(self):
+        return ''.join('1' if self.get(i) else '0'
+            for i in range(self.getLengthInBits() ) )
+
+
+class GridDrawer:
+    def __init__(self, boxsize, invert_code, smooth_factor, symbol_id, margin=4):
+        self.boxsize = boxsize
+        self.invertCode = invert_code
+        self.smoothFactor = smooth_factor
+        self.symbolId = symbol_id
+        self.margin = margin
+        
+        self.grid = None
+    
+    def setGrid(self, grid):
+        if len({len(g) for g in grid}) != 1:
+           raise Exception("The array is not rectangular")
+        else:
+           self.grid = grid
+
+    def rowCount(self):
+        return len(self.grid) if self.grid is not None else 0
+    
+    def colCount(self):
+        return len(self.grid[0]) if self.rowCount() > 0 else 0
+   
+    def isDark(self, col, row):
+        inside = col >= 0 and row >= 0 and row < self.rowCount() and col < self.colCount()
+        return False if not inside else self.grid[row][col] != self.invertCode
+
+    def getSVGPos(self, col, row):
+        return ((col + self.margin) * self.boxsize, (row + self.margin) * self.boxsize)
+
+    def makeSVGRect(self, grp):
+        for r in range(self.rowCount()):
+            for c in range(self.colCount()):
+                if self.isDark(c, r):
+                    x, y = self.getSVGPos(c, r)
+                    rect = inkex.etree.SubElement(grp, inkex.addNS("rect", 'svg'))
+                    rect.set('x', str(x))
+                    rect.set('y', str(y))
+                    rect.set('width', str(self.boxsize))
+                    rect.set('height', str(self.boxsize))
+
+    def makeSVGSymbol(self, grp):
+        for r in range(self.rowCount()):
+            for c in range(self.colCount()):
+                if self.isDark(c, r):
+                    x, y = self.getSVGPos(c, r)
+                    symbol = inkex.etree.SubElement(grp, inkex.addNS("use", 'svg'))
+                    symbol.set(inkex.addNS('href', 'xlink'), self.symbolId)
+                    symbol.set('x', str(x))
+                    symbol.set('y', str(y))
+                    symbol.set('width', str(self.boxsize))
+                    symbol.set('height', str(self.boxsize))
+
+    def getIconPathStr(self, pointStr):
+        result = ""
+        digBuffer = ""
+        for c in pointStr:
+            if c.isdigit() or c == "-" or c == '.':
+                digBuffer += c
+            else:
+                if len(digBuffer) > 0:
+                    result += str(float(digBuffer) * self.boxsize)
+                    digBuffer = ""
+                result += c
+
+        if len(digBuffer) > 0:
+            result += str(float(digBuffer) * self.boxsize)
+
+        return result
+        
+    def makeSVGPath(self, grp, pointStr):
+        singlePath = self.getIconPathStr(pointStr)
+        pathStr = ""
+        for r in range(self.rowCount()):
+            for c in range(self.colCount()):
+                if self.isDark(c, r):
+                    x, y = self.getSVGPos(c, r)
+                    pathStr += "M %f,%f " % (x, y) + singlePath + " z "
+
+        path = inkex.etree.SubElement(grp, inkex.addNS('path', 'svg'))
+        path.set('d', pathStr)
+
+    def makeSVGCircle(self, grp):
+        s = 'm 0.5,0.5 ' \
+            'c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 ' \
+            'c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 ' \
+            'c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 ' \
+            'c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5' \
+
+        self.makeSVGPath(grp, s)
+
+    @staticmethod
+    def moveByDirection(xyd):
+       dm = {0 : (1, 0), 1 : (0, -1), 2 : (-1, 0), 3 : (0, 1)}
+       return (xyd[0] + dm[xyd[2]][0], xyd[1] + dm[xyd[2]][1])
+
+    @staticmethod
+    def makeDirectionsTable():
+       result = []
+       for cfg in product(range(2), repeat=4):
+           result.append([])
+           for d in range(4):
+               if cfg[3 - d] == 0 and cfg[3 - (d - 1) % 4] != 0:
+                   result[-1].append(d)
+       return result
+
+    def createVertexesForAdvDrawer(self):
+        dirTable = self.makeDirectionsTable()
+        result = []
+        # Create vertex 
+        for r in range(self.rowCount() + 1):
+            for c in range(self.colCount() + 1):
+                indx = (2**0 if self.isDark(c - 0, r - 1) else 0) + \
+                       (2**1 if self.isDark(c - 1, r - 1) else 0) + \
+                       (2**2 if self.isDark(c - 1, r - 0) else 0) + \
+                       (2**3 if self.isDark(c - 0, r - 0) else 0)
+                
+                for d in dirTable[indx]:
+                    result.append((c, r, d, len(dirTable[indx]) > 1))
+       
+        return result 
+
+    def getSmoothPosition(self, v, extraSmoothFactor=1.0):
+      vn = self.moveByDirection(v)
+      sc = extraSmoothFactor * self.smoothFactor / 2.0
+      sc1 = 1.0 - sc
+      return (v[0] * sc1 + vn[0] * sc, v[1] * sc1 + vn[1] * sc), (v[0] * sc + vn[0] * sc1, v[1] * sc + vn[1] * sc1)
+
+    def makeSVGAdv(self, grp, greedy):
+        
+        verts = self.createVertexesForAdvDrawer()
+        qrPathStr = ""
+        while len(verts) > 0:
+            vertsIndexStart = len(verts) - 1
+            vertsIndexCur = vertsIndexStart
+            ringIndexes = []
+            while True:
+                ringIndexes.append(vertsIndexCur)
+                nextPos = self.moveByDirection(verts[vertsIndexCur])
+                nextIndexes = [i for i, x in enumerate(verts) if x[0] == nextPos[0] and x[1] == nextPos[1]]
+                if len(nextIndexes) == 0 or len(nextIndexes) > 2:
+                    raise Exception("Vertex " + str(next_c) + " has no connections" )
+                elif len(nextIndexes) == 1:
+                    vertsIndexNext = nextIndexes[0]
+                else:
+                    if {verts[nextIndexes[0]][2], verts[nextIndexes[1]][2]} != {(verts[vertsIndexCur][2] - 1) % 4, (verts[vertsIndexCur][2] + 1) % 4}:
+                       raise Exception("Bad next vertex directions " + str(verts[nextIndexes[0]]) + str(verts[nextIndexes[1]]))
+                    
+                    # Greedy - CCW turn, proud and neutral CW turn
+                    vertsIndexNext = nextIndexes[0] if (greedy == "g") == (verts[nextIndexes[0]][2] == (verts[vertsIndexCur][2] + 1) % 4) else nextIndexes[1]
+             
+                if vertsIndexNext == vertsIndexStart:
+                  break
+                
+                vertsIndexCur = vertsIndexNext
+            
+            posStart, _  = self.getSmoothPosition(verts[ringIndexes[0]])
+            qrPathStr = qrPathStr + "M %f,%f " % self.getSVGPos(posStart[0], posStart[1])
+            for ri in range(len(ringIndexes)):
+                vc = verts[ringIndexes[ri]]
+                vn = verts[ringIndexes[(ri + 1) % len(ringIndexes)]]
+                if vn[2] != vc[2]:
+                    if (greedy != "n") or not vn[3]:
+                        # Add bezier
+                        # Opt length http://spencermortensen.com/articles/bezier-circle/ 
+                        # c = 0.552284749
+                        ex = 1 - 0.552284749
+                        _, bs = self.getSmoothPosition(vc)
+                        _, bp1 = self.getSmoothPosition(vc, ex)
+                        bp2, _ = self.getSmoothPosition(vn, ex)
+                        bf, _ = self.getSmoothPosition(vn)
+                        qrPathStr += "L %f,%f " % self.getSVGPos(bs[0], bs[1])
+                        qrPathStr += "C %f,%f %f,%f %f,%f " \
+                                  % (self.getSVGPos(bp1[0], bp1[1]) + self.getSVGPos(bp2[0], bp2[1]) + \
+                                     self.getSVGPos(bf[0], bf[1]))
+                    else:
+                        # Add straight
+                        qrPathStr = qrPathStr + "L %f,%f " % self.getSVGPos(vn[0], vn[1])
+
+            qrPathStr = qrPathStr + "z "
+
+            # Delete already processed vertex
+            for i in sorted(ringIndexes, reverse=True):
+                del verts[i]
+
+        path = inkex.etree.SubElement(grp, inkex.addNS('path', 'svg'))
+        path.set('d', qrPathStr)
+
+
+    def getSVGDrawer(self, drawtype):
+        drawerDict = { "neutral"    : lambda g : self.makeSVGAdv(g, "n"),
+                       "greedy"     : lambda g : self.makeSVGAdv(g, "g"),
+                       "proud"      : lambda g : self.makeSVGAdv(g, "p"),
+                       "simple"     : lambda g : self.makeSVGPath(g, "h 1 v 1 h -1"),
+                       "circle"     : self.makeSVGCircle,
+                       "pathcustom" : lambda g : self.makeSVGPath(g, self.symbolId),
+                       "symbol"     : self.makeSVGSymbol,
+                       "obsolete"   : self.makeSVGRect
+                    }
+        return drawerDict.get(drawtype)
+
+    def makeSVG(self, grp, drawtype):
+        drawer = self.getSVGDrawer(drawtype)
+        if drawer is None:
+            raise Exception("Unknown draw type: " + drawtype)
+
+        canvas_width = (self.colCount() + 2 * self.margin) * self.boxsize 
+        canvas_height = (self.rowCount() + 2 * self.margin) * self.boxsize
+
+        # white background providing margin:
+        rect = inkex.etree.SubElement(grp, inkex.addNS('rect', 'svg'))
+        rect.set('x', '0')
+        rect.set('y', '0')
+        rect.set('width', str(canvas_width))
+        rect.set('height', str(canvas_height))
+        rect.set('style', 'fill:%s;stroke:none' % ("black" if self.invertCode else "white"))
+        
+        qrg = inkex.etree.SubElement(grp, inkex.addNS('g', 'svg'))
+        qrg.set('style', 'fill:%s;stroke:none' % ("white" if self.invertCode else "black"))
+        
+        drawer(qrg)
 
 class QRCodeInkscape(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         
         #PARSE OPTIONS
-        self.OptionParser.add_option("--text",
-            action="store", type="string",
+        self.arg_parser.add_argument("--text",
+            action="store", type=str,
             dest="TEXT", default='www.inkscape.org')
-        self.OptionParser.add_option("--typenumber",
-            action="store", type="string",
+        self.arg_parser.add_argument("--typenumber",
+            action="store", type=str,
             dest="TYPENUMBER", default="0")
-        self.OptionParser.add_option("--correctionlevel",
-            action="store", type="string",
+        self.arg_parser.add_argument("--correctionlevel",
+            action="store", type=str,
             dest="CORRECTIONLEVEL", default="0")
-        self.OptionParser.add_option("--encoding",
-            action="store", type="string",
+        self.arg_parser.add_argument("--encoding",
+            action="store", type=str,
             dest="input_encode", default="latin_1")
-        self.OptionParser.add_option("--modulesize",
-            action="store", type="float",
+        self.arg_parser.add_argument("--modulesize",
+            action="store", type=float,
             dest="MODULESIZE", default=10)
+        self.arg_parser.add_argument("--invert",
+            action="store", type=inkex.inkbool,
+            dest="invert_code", default="false")
+        self.arg_parser.add_argument("--drawtype",
+            action="store", type=str,
+            dest="drawtype", default="greedy")
+        self.arg_parser.add_argument("--smoothval",
+            action="store", type=float,
+            dest="smooth_value", default=0.2)
+        self.arg_parser.add_argument("--symbolid",
+            action="store", type=str,
+            dest="symbol_id", default="")
+
             
     def effect(self):
         
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         so = self.options
         
         if so.TEXT == '':  #abort if converting blank text
-            inkex.errormsg(_('Please enter an input text'))
+            inkex.errormsg( ('Please enter an input text'))
+        elif so.drawtype == "symbol" and so.symbol_id == "":
+            inkex.errormsg( ('Please enter symbol id'))
         else:
         
             #INKSCAPE GROUP TO CONTAIN EVERYTHING
             
             if isinstance(so.TEXT, bytes):
                 so.TEXT = so.TEXT.decode(so.input_encode)
-            centre = tuple(computePointInNode(list(self.view_center), self.current_layer))   #Put in in the centre of the current view
-            grp_transform = 'translate' + str( centre ) + ' scale(%f)' % scale
-            grp_name = 'QR Code: '+so.TEXT
+            center = tuple(computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer()))   #Put in in the center of the current view
+            grp_transform = 'translate' + str( center ) + ' scale(%f)' % scale
+            grp_name = 'QR Code: '+ so.TEXT
             grp_attribs = {inkex.addNS('label','inkscape'):grp_name,
                            'transform':grp_transform }
-            grp = inkex.etree.SubElement(self.current_layer, 'g', grp_attribs) #the group to put everything in
+            grp = inkex.etree.SubElement( self.svg.get_current_layer(), 'g', grp_attribs) #the group to put everything in
             
             #GENERATE THE QRCODE
-            qr = QRCode(int(so.TYPENUMBER), int(so.CORRECTIONLEVEL))
+            qr = QRCode()
+            qr.setTypeNumber(int(so.TYPENUMBER))
+            qr.setErrorCorrectLevel(int(so.CORRECTIONLEVEL))
             qr.addData(so.TEXT)
             qr.make()
-            qr.makeSVG(grp, so.MODULESIZE)
+
+            qrDraw = GridDrawer(int(so.MODULESIZE), so.invert_code, so.smooth_value, so.symbol_id, 4)
+            qrDraw.setGrid(qr.modules)
+            qrDraw.makeSVG(grp, so.drawtype)
+
             
 if __name__ == '__main__':
     e = QRCodeInkscape()
-    e.affect()
+    e.run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

@@ -16,37 +16,7 @@
     <item value="7">45x45</item>
     <item value="8">49x49</item>
     <item value="9">53x53</item>
-    <item value="10">57x37</item>
-    <item value="11">61x61</item>
-    <item value="12">65x65</item>
-    <item value="13">69x69</item>
-    <item value="14">73x73</item>
-    <item value="15">77x77</item>
-    <item value="16">81x81</item>
-    <item value="17">85x85</item>
-    <item value="18">89x89</item>
-    <item value="19">93x93</item>
-    <item value="20">97x97</item>
-    <item value="21">101x101</item>
-    <item value="22">105x105</item>
-    <item value="23">109x109</item>
-    <item value="24">113x113</item>
-    <item value="25">117x117</item>
-    <item value="26">121x121</item>
-    <item value="27">125x125</item>
-    <item value="28">129x129</item>
-    <item value="29">133x133</item>
-    <item value="30">137x137</item>
-    <item value="31">141x141</item>
-    <item value="32">145x145</item>
-    <item value="33">149x149</item>
-    <item value="34">153x153</item>
-    <item value="35">157x157</item>
-    <item value="36">161x161</item>
-    <item value="37">165x165</item>
-    <item value="38">169x169</item>
-    <item value="39">173x173</item>
-    <item value="40">177x177</item>
+    <item value="10">57x57</item>
   </param>
   <_param name="sizehint" type="description" xml:space="preserve">With "Auto", the size of the barcode depends on the length of the text and the error correction level</_param>
   <param name="correctionlevel" type="enum" _gui-text="Error correction level:">
@@ -61,7 +31,21 @@
     <item value="cp1252">CP 1252</item>
     <item value="utf_8">UTF 8</item>
   </param>
+  <param name="invert" type="boolean" _gui-text="Invert QR code:">false</param>
   <param name="modulesize" type="float" min="0" max="1000" _gui-text="Square size (px):">4</param>
+  <param name="drawtype" type="enum" _gui-text="Drawing type: ">
+    <_item value="neutral">Smooth: neutral</_item>
+    <_item value="greedy">Smooth: greedy</_item>
+    <_item value="proud">Smooth: proud</_item>
+    <_item value="simple">Path: simple</_item>
+    <_item value="circle">Path: circle</_item>
+    <_item value="pathcustom">Path: custom</_item>
+    <_item value="symbol">Symbol</_item>
+    <_item value="obsolete">Square sharp: obsolete</_item>
+  </param>
+  <param name="smoothval" type="float" min="0.01" max="1.0" precision="2" _gui-text="Smooth square value (0-1):">0.2</param>
+  <_param name="symbolidhint" type="description" xml:space="preserve">For Path: custom set the path in relative coordinates (0,0)=(left,up) square size 1.0 </_param>
+  <param name="symbolid" type="string" _gui-text="Path string (Path: custom) or symbol #url:">m 0,1 l 0.5,-1 l 0.5,1</param>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

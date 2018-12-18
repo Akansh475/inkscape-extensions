@@ -1,35 +1,36 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2009 Kazuhiko Arase (http://www.d-project.com/)
+#               2010 Bulia Byak <buliabyak@gmail.com>
+#               2018 Kirill Okhotnikov <kirill.okhotnikov@gmail.com> (MIT)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
+#
+"""
+Provide the QR Code rendering.
+"""
 
 from __future__ import print_function
 
 from itertools import product
 import inkex
+
+# TODO: Remove this depricated API
 from simpletransform import computePointInNode
 
-#QRCode for Python
-#
-#https://github.com/kazuhikoarase/qrcode-generator/blob/master/python/qrcode.py
-#
-#Copyright (c) 2009 Kazuhiko Arase
-#
-#URL: http://www.d-project.com/
-#
-# Copyright (c) 2010 buliabyak@gmail.com:
-#       adapting for Inkscape extension, SVG output, Auto mode
-#
-# Copyright (c) 2018 kirill.okhotnikov@gmail.com:
-#       QRCode generation replaced completely: Bugfix
-#       SVG output rewrote: visual artifacts removed, svg output size reduced 10 times,
-#                           highly customizable visual representation, deprecated code removed
-#
-#Licensed under the MIT license:
-#   http://www.opensource.org/licenses/mit-license.php
-#
-# The word "QR Code" is registered trademark of
-# DENSO WAVE INCORPORATED
-#   http://www.denso-wave.com/qrcode/faqpatent-e.html
-
-class QRCode:
+class QRCode(object):
 
     PAD0 = 0xEC
     PAD1 = 0x11

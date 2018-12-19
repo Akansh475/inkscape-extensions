@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2009 Kazuhiko Arase (http://www.d-project.com/)
 #               2010 Bulia Byak <buliabyak@gmail.com>
-#               2018 Kirill Okhotnikov <kirill.okhotnikov@gmail.com> (MIT)
+#               2018 Kirill Okhotnikov <kirill.okhotnikov@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ Provide the QR Code rendering.
 
 from __future__ import print_function
 
+import sys
 from itertools import product
 import inkex
 
@@ -1085,24 +1086,33 @@ class QRCodeInkscape(inkex.Effect):
         elif so.drawtype == "symbol" and so.symbol_id == "":
             inkex.errormsg( ('Please enter symbol id'))
         else:
-        
-            #INKSCAPE GROUP TO CONTAIN EVERYTHING
-            
-            if isinstance(so.TEXT, bytes):
-                so.TEXT = so.TEXT.decode(so.input_encode)
+            # Python 2 and 3 compatibility.
+            if sys.version_info >= (3, 0, 0):
+                # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
+                text_bytes = bytes(so.TEXT, so.input_encode).decode("latin_1")
+                text_str = str(so.TEXT)
+            else:
+                text_bytes = so.TEXT
+                text_str = so.TEXT.decode('utf-8')
+
             center = tuple(computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer()))   #Put in in the center of the current view
             grp_transform = 'translate' + str( center ) + ' scale(%f)' % scale
-            grp_name = 'QR Code: '+ so.TEXT
+            grp_name = 'QR Code: ' + text_str
             grp_attribs = {inkex.addNS('label','inkscape'):grp_name,
                            'transform':grp_transform }
             grp = inkex.etree.SubElement( self.svg.get_current_layer(), 'g', grp_attribs) #the group to put everything in
             
             #GENERATE THE QRCODE
-            qr = QRCode()
-            qr.setTypeNumber(int(so.TYPENUMBER))
-            qr.setErrorCorrectLevel(int(so.CORRECTIONLEVEL))
-            qr.addData(so.TEXT)
-            qr.make()
+            if int(so.TYPENUMBER) == 0:
+                # Automatic QR code size
+                qr = QRCode.getMinimumQRCode(text_bytes, int(so.CORRECTIONLEVEL))
+            else:
+                # Manual QR code size
+                qr = QRCode()
+                qr.setTypeNumber(int(so.TYPENUMBER))
+                qr.setErrorCorrectLevel(int(so.CORRECTIONLEVEL))
+                qr.addData(text_bytes)
+                qr.make()
 
             qrDraw = GridDrawer(int(so.MODULESIZE), so.invert_code, so.smooth_value, so.symbol_id, 4)
             qrDraw.setGrid(qr.modules)

@@ -30,6 +30,9 @@ Provide a way to load lxml attributes with an svg API on top.
 import sys
 import inspect
 import random
+
+from collections import OrderedDict
+
 import lxml
 from lxml import etree
 
@@ -47,7 +50,7 @@ class SvgDocumentElement(BaseElement):
     def _init(self):
         self.current_layer = None
         self.view_center = (0.0, 0.0)
-        self.selected = {}
+        self.selected = OrderedDict()
         self.ids = {}
 
     def get_ids(self):
@@ -66,10 +69,14 @@ class SvgDocumentElement(BaseElement):
 
     def set_selected(self, *ids):
         """Sets the currently selected elements to these ids"""
-        self.selected = {}
+        self.selected = OrderedDict()
         for elem_id in ids:
             for node in self.xpath('//*[@id="{}"]'.format(elem_id)):
                 self.selected[elem_id] = node
+
+    def get_z_selected(self):
+        """Get the selected elements, but ordered by their apperence in the document"""
+        return OrderedDict([(_id, self.selected[_id]) for _id in self.sort_ids(self.selected)])
 
     def get_current_layer(self):
         """Returns the currently selected layer"""

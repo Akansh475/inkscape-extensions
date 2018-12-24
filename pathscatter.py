@@ -40,18 +40,6 @@ import inkex
 import pathmodifier
 from inkex.localize import _
 
-def zSort(inNode,idList):
-    sortedList=[]
-    theid = inNode.get("id")
-    if theid in idList:
-        sortedList.append(theid)
-    for child in inNode:
-        if len(sortedList)==len(idList):
-            break
-        sortedList+=zSort(child,idList)
-    return sortedList
-            
-
 def flipxy(path):
     for pathcomp in path:
         for ctl in pathcomp:
@@ -151,9 +139,8 @@ class PathScatter(pathmodifier.Diffeo):
 
     def prepareSelectionList(self):
 
-        idList=self.options.ids
-        idList=zSort(self.document.getroot(),idList)
-                
+        idList = self.document.get_z_selected()
+
         ##first selected->pattern, all but first selected-> skeletons
         #id = self.options.ids[-1]
         id = idList[-1]

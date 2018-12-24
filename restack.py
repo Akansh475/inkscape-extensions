@@ -197,8 +197,7 @@ class Restack(inkex.Effect):
                     objects.append(child)
         else:
             parentnode = self.current_layer
-            for id_ in inkex.zSort(self.document.getroot(), self.selected.keys()):
-                objects.append(self.selected[id_])
+            objects = self.document.get_z_selected().values()
         if self.options.zsort == "rev":
             objects.reverse()
         elif self.options.zsort == "rand":

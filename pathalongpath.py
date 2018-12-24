@@ -131,10 +131,9 @@ class PathAlongPath(pathmodifier.Diffeo):
 
     def prepareSelectionList(self):
 
-        idList=self.options.ids
-        idList=pathmodifier.zSort(self.document.getroot(),idList)
-        id = idList[-1]
-        self.patterns={id:self.selected[id]}
+        idList = self.document.get_z_selected()
+        _id = list(idList)[-1]
+        self.patterns={_id:self.selected[_id]}
 
 ##        ##first selected->pattern, all but first selected-> skeletons
 ##        id = self.options.ids[-1]
@@ -144,7 +143,7 @@ class PathAlongPath(pathmodifier.Diffeo):
             self.patterns=self.duplicateNodes(self.patterns)
         self.expandGroupsUnlinkClones(self.patterns, True, True)
         self.objectsToPaths(self.patterns)
-        del self.selected[id]
+        del self.selected[_id]
 
         self.skeletons=self.selected
         self.expandGroupsUnlinkClones(self.skeletons, True, False)

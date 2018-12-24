@@ -19,6 +19,24 @@ class ElementTestCase(TestCase):
         """Print element as string"""
         self.assertEqual(str(self.elem), self.tag)
 
+class CoreElementTestCase(ElementTestCase):
+    """Test core element functionality"""
+    tag = 'g'
+    def test_sort_ids(self):
+        """Are the element ids sorted"""
+        self.assertEqual(tuple(self.elem.sort_ids([])), ())
+        self.assertEqual(tuple(self.elem.sort_ids(['A', 'B', 'C', 'D', 'E', 'F', 'G'])),
+                                                  ('A', 'B', 'C', 'D', 'E', 'F', 'G'))
+        self.assertEqual(tuple(self.elem.sort_ids(['G', 'B', 'D', 'F'])), ('B', 'D', 'F', 'G'))
+        self.assertEqual(tuple(self.elem.sort_ids(['X', 'Y', 'Z', 'A'])), ('A',))
+
+    def test_sort_selected(self):
+        """Are the selected items sorted"""
+        self.svg.set_selected('G', 'B', 'D', 'F')
+        self.assertEqual(tuple(self.svg.selected), ('G', 'B', 'D', 'F'))
+        items = self.svg.get_z_selected()
+        self.assertTrue(isinstance(items, dict))
+        self.assertEqual(tuple(items), ('B', 'D', 'F', 'G'))
 
 
 class GroupTest(ElementTestCase):

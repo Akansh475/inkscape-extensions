@@ -44,14 +44,16 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
-    <g transform="matrix(1.4498514,0,0,1.3641667,-107.03035,-167.3624)" style="fill:#fff;stroke:#d88;">
-      <g transform="rotate(-45.759928,361.64932,382.80575)" style="fill:#eee;">
-        <g transform="matrix(1,0,0.50642107,1,-193.8609,0)" style="fill:#ddd;">
+    <g transform="matrix(1.4498514,0,0,1.3641667,-107.03035,-167.3624)" style="fill:#fff;stroke:#d88;" id="A">
+      <g transform="rotate(-45.759928,361.64932,382.80575)" style="fill:#eee;" id="B">
+        <g transform="matrix(1,0,0.50642107,1,-193.8609,0)" style="fill:#ddd;" id="C">
+          <path id="D" fill="#C00" opacity="0.2" transform="translate(30,10)"
+                d="M30,130 L60,130 L60,120 L70,140 L60,160 L60,150 L30,150" />
           <rect transform="rotate(16.097889)"
              y="200" x="200" height="100" width="100"
-             style="fill:#0000ff;stroke-width:1px;" />
-          <circle cx="100" cy="100" r="50" style="stroke:#f00;"/>
-          <use xlink:href="#path1"/>
+             style="fill:#0000ff;stroke-width:1px;" id="E"/>
+          <circle cx="100" cy="100" r="50" style="stroke:#f00;" id="F"/>
+          <use xlink:href="#path1" id="G"/>
         </g>
       </g>
     </g>

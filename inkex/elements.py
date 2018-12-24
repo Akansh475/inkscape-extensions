@@ -77,6 +77,28 @@ class BaseElement(etree.ElementBase):
             return self.getparent().composed_style() + self.style
         return self.style
 
+    def sort_ids(self, id_list, count=0):
+        """
+        Sort the given list of element ids (keys) in the order they appear in the
+        document, starting at this node and working our way down the tree.
+
+        This gives the element's z-order, for example if you needed to know the
+        order of selected items, the selected order is different to their
+        actual paint order in the document.
+
+        Returned is a generator (not a list!)
+        """
+        if self.get("id") in id_list:
+            count += 1
+            yield self.get("id")
+
+        for child in self:
+            if count >= len(id_list):
+                break
+            if hasattr(child, 'sort_ids'):
+                for child_id in child.sort_ids(id_list, count=count):
+                    yield child_id
+
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to
         # namespaces, basically over printing details and providing no

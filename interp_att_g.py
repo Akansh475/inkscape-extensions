@@ -117,9 +117,10 @@ class InterpAttG(inkex.Effect):
         if len( self.selected ) > 1:
             # multiple selection
             if self.options.zsort:
-                sorted_ids = inkex.zSort(self.document.getroot(),self.selected.keys())
+                sorted_ids = self.document.get_z_selected()
             else:
-                sorted_ids = self.options.ids
+                sorted_ids = self.document.selected
+
             self.collection = list(sorted_ids)
             for i in sorted_ids:
                 path = '//*[@id="%s"]' % i

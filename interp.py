@@ -64,23 +64,23 @@ class Interp(inkex.Effect):
 
         if self.options.zsort:
             # work around selection order swapping with Live Preview
-            sorted_ids = pathmodifier.zSort(self.document.getroot(),self.selected.keys())
+            objects = self.document.get_z_selected()
         else:
             # use selection order (default)
-            sorted_ids = self.options.ids
+            objects = self.document.selected
 
-        for id in sorted_ids:
-            node = self.selected[id]
+        for _id, node in objects.items():
             if node.tag ==inkex.addNS('path','svg'):
-                paths[id] = cubicsuperpath.parsePath(node.get('d'))
-                styles[id] = dict(inkex.Style.parse_str(node.get('style')))
+                paths[_id] = cubicsuperpath.parsePath(node.get('d'))
+                styles[_id] = dict(inkex.Style.parse_str(node.get('style')))
                 trans = node.get('transform')
                 if trans:
-                    simpletransform.applyTransformToPath(simpletransform.parseTransform(trans), paths[id])
+                    simpletransform.applyTransformToPath(simpletransform.parseTransform(trans), paths[_id])
             else:
-                sorted_ids.remove(id)
+                objects.pop(_id)
 
-        for i in range(1,len(sorted_ids)):
+        sorted_ids = list(objects) # This should be fixed since it's an OrderedDict now
+        for i in range(1, len(sorted_ids)):
             start = copy.deepcopy(paths[sorted_ids[i-1]])
             end = copy.deepcopy(paths[sorted_ids[i]])
             sst = copy.deepcopy(styles[sorted_ids[i-1]])

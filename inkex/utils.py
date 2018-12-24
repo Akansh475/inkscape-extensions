@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright (C) 2010 Nick Drobchenko, nick@cnc-club.ru
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org

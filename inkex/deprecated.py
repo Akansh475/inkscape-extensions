@@ -28,7 +28,6 @@ Provide some documentation to existing extensions about why they're failing.
 import os
 import sys
 import warnings
-warnings.simplefilter("default")
 
 from argparse import ArgumentParser
 
@@ -37,6 +36,7 @@ import inkex.utils
 
 from inkex.localize import _
 
+warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
 # we will add the directory to our pythonpath so older scripts can find them
 

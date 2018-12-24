@@ -77,6 +77,13 @@ class BaseElement(etree.ElementBase):
             return self.getparent().composed_style() + self.style
         return self.style
 
+    def get_center_position(self):
+        """Returns object's center in terms of document units"""
+        for attr in ('width', 'height', 'top', 'left'):
+            if not hasattr(self, attr):
+                return (0, 0) # Can't compute without units.
+        return (self.left + (self.width / 2), self.top + (self.height / 2))
+
     def sort_ids(self, id_list, count=0):
         """
         Sort the given list of element ids (keys) in the order they appear in the

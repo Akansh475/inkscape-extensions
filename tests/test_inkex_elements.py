@@ -23,13 +23,6 @@ class ElementTestCase(TestCase):
 class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
     tag = 'g'
-    def test_sort_ids(self):
-        """Are the element ids sorted"""
-        self.assertEqual(tuple(self.elem.sort_ids([])), ())
-        self.assertEqual(tuple(self.elem.sort_ids(['A', 'B', 'C', 'D', 'E', 'F', 'G'])),
-                                                  ('A', 'B', 'C', 'D', 'E', 'F', 'G'))
-        self.assertEqual(tuple(self.elem.sort_ids(['G', 'B', 'D', 'F'])), ('B', 'D', 'F', 'G'))
-        self.assertEqual(tuple(self.elem.sort_ids(['X', 'Y', 'Z', 'A'])), ('A',))
 
     def test_sort_selected(self):
         """Are the selected items sorted"""

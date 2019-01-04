@@ -385,10 +385,4 @@ class UserUnitTest(TestCase):
 
 
 if __name__ == '__main__':
-    # Keep sorted.
-    unittest.main()
-    unittest.main()
-    unittest.main()
-    unittest.main()
-    unittest.main()
     unittest.main()

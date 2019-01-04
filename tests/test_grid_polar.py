@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from grid_polar import *
 
 class GridPolarBasicTest(TestCase):
     effect = GridPolar
 
 if __name__ == '__main__':
-    test_support.run_unittest(GridPolarBasicTest)
+    unittest.main()

@@ -2,7 +2,8 @@
 
 import calendar
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from svgcalendar import *
 
 class CalendarArguments(TestCase):
@@ -103,6 +104,6 @@ class CalendarMethods(TestCase):
         self.assertFalse( e.is_weekend(1), 'Monday is NOT weekend' )
 
 if __name__ == '__main__':
-    test_support.run_unittest(CalendarArguments)
-    test_support.run_unittest(CalendarMethods)
+    unittest.main()
+    unittest.main()
 

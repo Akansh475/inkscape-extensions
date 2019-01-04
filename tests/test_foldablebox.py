@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from foldablebox import *
 
 class FoldableBoxArguments(TestCase):
@@ -13,4 +14,4 @@ class FoldableBoxArguments(TestCase):
         self.assertEqual( len( e.box.getchildren() ), 13, 'The box group must have 13 childs.' )
 
 if __name__ == '__main__':
-    test_support.run_unittest(FoldableBoxArguments)
+    unittest.main()

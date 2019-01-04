@@ -26,7 +26,8 @@ import inspect
 from inkex.effect import Effect
 from inkex.utils import DependencyError
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from tests.base.mock import replace_function
 
 class NoMainError(Exception):
@@ -159,5 +160,5 @@ class ScriptCoverageTest(TestCase):
 
 
 if __name__ == '__main__':
-    test_support.run_unittest(ScriptCoverageTest)
+    unittest.main()
 

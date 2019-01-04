@@ -4,7 +4,8 @@ Test elements extra logic from svg xml lxml custom classes.
 """
 from inkex.transforms import Transform
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from tests.base.svg import svg_file
 
 class ElementTestCase(TestCase):
@@ -90,4 +91,4 @@ class UseTest(ElementTestCase):
         self.assertEqual(str(self.elem.path), 'M 0 0 L 10 10 Z')
 
 if __name__ == '__main__':
-    test_support.run_unittest(GroupTest)
+    unittest.main()

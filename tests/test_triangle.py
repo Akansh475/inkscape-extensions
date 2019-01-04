@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from triangle import Triangle
 
 class TriangleBasicTest(TestCase):
     effect = Triangle
 
 if __name__ == '__main__':
-    test_support.run_unittest(TriangleBasicTest)
+    unittest.main()

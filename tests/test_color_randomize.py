@@ -3,7 +3,8 @@
 import os
 import sys
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 from color_randomize import *
 
@@ -104,8 +105,8 @@ class ColorRandomizeOpacityModificationTest(TestCase):
         self.assertLessEqual(opac, "toto")
 
 if __name__ == '__main__':
-    test_support.run_unittest(ColorRandomizeBasicTest)
-    test_support.run_unittest(ColorRandomizeColorModificationTest)
-    test_support.run_unittest(ColorRandomizeOpacityModificationTest)
+    unittest.main()
+    unittest.main()
+    unittest.main()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

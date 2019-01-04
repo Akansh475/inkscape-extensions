@@ -7,7 +7,9 @@ Unit test file for ../inkex.py
 #   * 2012-01-27 (jazzynico): check errormsg function.
 #
 
-from tests.base import TestCase, StdRedirect, test_support
+import unittest
+from unittest import TestCase
+from tests.base import StdRedirect
 from inkex.utils import errormsg, addNS
 
 class InkexBasicTest(TestCase):
@@ -55,4 +57,4 @@ class InkexBasicTest(TestCase):
             self.assertEqual(str(err), 'Àûïàèé\n')
 
 if __name__ == '__main__':
-    test_support.run_unittest(InkexBasicTest)
+    unittest.main()

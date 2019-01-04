@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 from inkex.colors import Color, ColorError, is_color
 
@@ -93,4 +94,4 @@ class ColorTest(TestCase):
         self.assertTrue(is_color('#fff'))
 
 if __name__ == '__main__':
-    test_support.run_unittest(ColorTest)
+    unittest.main()

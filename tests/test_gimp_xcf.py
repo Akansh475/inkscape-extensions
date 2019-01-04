@@ -5,7 +5,8 @@ Revision history:
   * 2012-01-26 (jazzynico): checks defaulf parameters and file handling.
 """
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from gimp_xcf import *
 
 class GimpXCFBasicTest(TestCase):
@@ -34,4 +35,4 @@ class GimpXCFBasicTest(TestCase):
 
 
 if __name__ == '__main__':
-    test_support.run_unittest(GimpXCFBasicTest)
+    unittest.main()

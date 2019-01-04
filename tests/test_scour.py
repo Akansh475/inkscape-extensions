@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from output_scour import *
 
 class ScourBasicTests(TestCase):
@@ -17,4 +18,4 @@ class ScourBasicTests(TestCase):
             self.assertEqual(obj.document, f.read())
 
 if __name__ == '__main__':
-    test_support.run_unittest(ScourBasicTests)
+    unittest.main()

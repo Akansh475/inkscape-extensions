@@ -5,11 +5,12 @@
 #    with the default parameters).
 #
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from summersnight import Project
 
 class EnvelopeBasicTest(TestCase):
     effect = Project
 
 if __name__ == '__main__':
-    test_support.run_unittest(EnvelopeBasicTest)
+    unittest.main()

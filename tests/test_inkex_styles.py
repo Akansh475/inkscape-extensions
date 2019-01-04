@@ -3,7 +3,8 @@
 Test Inkex style parsing functionality.
 """
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from inkex.styles import Style
 
 
@@ -30,4 +31,4 @@ class StyleTest(TestCase):
 
 
 if __name__ == '__main__':
-    test_support.run_unittest(StyleTest)
+    unittest.main()

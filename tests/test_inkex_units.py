@@ -7,7 +7,8 @@ import sys
 from inkex.units import (
     parse_unit, are_near_relative, discover_unit, convert_unit, render_unit
 )
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 class UnitsTest(TestCase):
     """Tests for Inkscape Units handling"""
@@ -61,4 +62,4 @@ class UnitsTest(TestCase):
             self.assertEqual(parse_unit(value), (100, 'mm'))
 
 if __name__ == '__main__':
-    test_support.run_unittest(UnitsTest)
+    unittest.main()

@@ -5,7 +5,8 @@ Test Inkex path parsing functionality.
 
 import re
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 from inkex.paths import Path, PathCommand, InvalidPath
 
@@ -155,4 +156,4 @@ class PathTest(TestCase):
 
 
 if __name__ == '__main__':
-    test_support.run_unittest(PathTest)
+    unittest.main()

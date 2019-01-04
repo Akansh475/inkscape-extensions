@@ -32,12 +32,6 @@ try:
 except ImportError:
     from io import StringIO
 
-try:
-    from test import test_support
-except ImportError:
-    # pylint: disable=no-name-in-module
-    from test import support as test_support
-
 TEST_ROOT = path.abspath(path.dirname(path.dirname(__file__)))
 
 

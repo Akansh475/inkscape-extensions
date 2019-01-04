@@ -19,7 +19,8 @@
 An Inkscape frame extension test class.
 """
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 import inkex
 from frame import *
@@ -105,4 +106,4 @@ class FrameTest(TestCase):
 
 
 if __name__ == '__main__':
-    test_support.run_unittest(FrameTest)
+    unittest.main()

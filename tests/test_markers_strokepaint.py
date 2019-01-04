@@ -5,7 +5,8 @@
 #  * 2012-01-27 (jazzynico): checks defaulf parameters and file handling.
 #
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from markers_strokepaint import *
 
 class StrokeColorBasicTest(TestCase):
@@ -16,4 +17,4 @@ class StrokeColorBasicTest(TestCase):
         e.affect([self.data_file('svg', 'default-plain-SVG.svg')])
 
 if __name__ == '__main__':
-    test_support.run_unittest(StrokeColorBasicTest)
+    unittest.main()

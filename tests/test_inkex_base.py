@@ -5,7 +5,8 @@ import os
 import sys
 
 from inkex.base import InkscapeExtension, SvgThroughMixin
-from tests.base import TestCase, test_support, StdRedirect
+from unittest import TestCase
+import unittest, StdRedirect
 
 class ModExtension(InkscapeExtension):
     """A non-svg extension that loads, saves and flipples"""
@@ -102,6 +103,4 @@ class SvgInputOutputTest(TestCase):
 
 
 if __name__ == '__main__':
-    # Keep sorted.
-    test_support.run_unittest(InkscapeExtensionTest)
-    test_support.run_unittest(SvgInputOutputTest)
+    unittest.main()

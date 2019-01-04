@@ -20,7 +20,8 @@
 Test the svg interface for inkscape extensions.
 """
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from tests.base.svg import svg, uu_svg, svg_file
 from inkex.utils import addNS
 
@@ -384,10 +385,4 @@ class UserUnitTest(TestCase):
 
 
 if __name__ == '__main__':
-    # Keep sorted.
-    test_support.run_unittest(BasicSvgTest)
-    test_support.run_unittest(NamedViewTest)
-    test_support.run_unittest(GetDocumentHeightTest)
-    test_support.run_unittest(GetDocumentUnitTest)
-    test_support.run_unittest(GetDocumentWidthTest)
-    test_support.run_unittest(UserUnitTest)
+    unittest.main()

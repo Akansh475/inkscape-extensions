@@ -19,7 +19,8 @@
 Written to test the coding of generating barcodes.
 """
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 from render_barcode import InsertBarcode
 
@@ -30,5 +31,5 @@ class InsertBarcodeBasicTest(TestCase):
         self.assertEffectEmpty(InsertBarcode)
 
 if __name__ == '__main__':
-    test_support.run_unittest(InsertBarcodeBasicTest)
+    unittest.main()
 

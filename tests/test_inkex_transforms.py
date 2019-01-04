@@ -3,7 +3,8 @@
 Test Inkex transformational logic.
 """
 
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 
 from inkex.transforms import Transform
 
@@ -87,5 +88,4 @@ class BoundingBoxTest(TestCase):
     #    self.assertEqual("0.0 25.0 0.0 25.0", text_bbox)
 
 if __name__ == '__main__':
-    test_support.run_unittest(TransformTest)
-    test_support.run_unittest(BoundingBoxTest)
+    unittest.main()

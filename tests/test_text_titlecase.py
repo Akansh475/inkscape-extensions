@@ -1,6 +1,7 @@
 import chardataeffect
 from text_titlecase import TitleCase
-from tests.base import TestCase, test_support
+from unittest import TestCase
+import unittest
 from helper_random_word import Word
 import string
 
@@ -69,4 +70,4 @@ class TitleCaseTest(TestCase):
 
 
 if __name__ == '__main__':
-    test_support.run_unittest(TitleCaseTest)
+    unittest.main()

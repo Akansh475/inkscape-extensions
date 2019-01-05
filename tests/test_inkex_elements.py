@@ -32,6 +32,14 @@ class CoreElementTestCase(ElementTestCase):
         self.assertTrue(isinstance(items, dict))
         self.assertEqual(tuple(items), ('B', 'D', 'F', 'G'))
 
+        self.svg.set_selected()
+        self.assertEqual(tuple(self.svg.get_z_selected()), ())
+        A_to_G = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+        self.svg.set_selected(*A_to_G)
+        self.assertEqual(tuple(self.svg.get_z_selected()), A_to_G)
+        self.svg.set_selected('X', 'Y', 'Z', 'A')
+        self.assertEqual(tuple(self.svg.get_z_selected()), ('A',))
+
 
 class GroupTest(ElementTestCase):
     """Test extra functionality on a group element"""

@@ -20,7 +20,7 @@
 Test the svg interface for inkscape extensions.
 """
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from tests.base.svg import svg, uu_svg, svg_file
 from inkex.utils import addNS

@@ -8,7 +8,7 @@ Unit test file for ../inkex.py
 #
 
 import unittest
-from unittest import TestCase
+from tests.base import TestCase
 from tests.base import StdRedirect
 from inkex.utils import errormsg, addNS
 

@@ -20,7 +20,7 @@ Test each available barcode type
 """
 
 from collections import defaultdict
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 from barcode import get_barcode

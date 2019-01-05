@@ -4,7 +4,7 @@ Test elements extra logic from svg xml lxml custom classes.
 """
 from inkex.transforms import Transform
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from tests.base.svg import svg_file
 

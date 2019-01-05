@@ -3,7 +3,7 @@
 Test Inkex transformational logic.
 """
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 from inkex.transforms import Transform

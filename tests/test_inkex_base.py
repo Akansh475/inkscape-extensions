@@ -5,7 +5,7 @@ import os
 import sys
 
 from inkex.base import InkscapeExtension, SvgThroughMixin
-from unittest import TestCase
+from tests.base import TestCase
 import unittest, StdRedirect
 
 class ModExtension(InkscapeExtension):

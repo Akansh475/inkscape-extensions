@@ -1,7 +1,7 @@
 
 import chardataeffect
 from text_lowercase import C
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from helper_random_word import Word
 import string

@@ -3,7 +3,7 @@
 import os
 import sys
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 from color_randomize import *

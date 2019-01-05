@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from interp_att_g import *
 

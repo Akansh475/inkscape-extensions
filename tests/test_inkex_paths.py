@@ -5,7 +5,7 @@ Test Inkex path parsing functionality.
 
 import re
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 from inkex.paths import Path, PathCommand, InvalidPath

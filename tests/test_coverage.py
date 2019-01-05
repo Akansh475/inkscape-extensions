@@ -26,7 +26,7 @@ import inspect
 from inkex.effect import Effect
 from inkex.utils import DependencyError
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from tests.base.mock import replace_function
 

@@ -19,7 +19,7 @@
 An Inkscape frame extension test class.
 """
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 import inkex

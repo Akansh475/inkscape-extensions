@@ -6,7 +6,7 @@
 #    with the default parameters).
 #
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from perspective import *
 

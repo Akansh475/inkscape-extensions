@@ -1,6 +1,6 @@
 #!/usr/bin/en
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from addnodes import *
 

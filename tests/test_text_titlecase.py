@@ -1,6 +1,6 @@
 import chardataeffect
 from text_titlecase import TitleCase
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from helper_random_word import Word
 import string

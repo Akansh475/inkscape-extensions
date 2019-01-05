@@ -7,7 +7,7 @@ import sys
 from inkex.units import (
     parse_unit, are_near_relative, discover_unit, convert_unit, render_unit
 )
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 class UnitsTest(TestCase):

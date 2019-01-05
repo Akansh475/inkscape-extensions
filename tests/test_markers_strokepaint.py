@@ -5,7 +5,7 @@
 #  * 2012-01-27 (jazzynico): checks defaulf parameters and file handling.
 #
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from markers_strokepaint import *
 

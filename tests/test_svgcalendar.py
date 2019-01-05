@@ -2,7 +2,7 @@
 
 import calendar
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from svgcalendar import *
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from polyhedron_3d import *
 

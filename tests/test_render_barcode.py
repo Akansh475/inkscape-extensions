@@ -19,7 +19,7 @@
 Written to test the coding of generating barcodes.
 """
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 
 from render_barcode import InsertBarcode

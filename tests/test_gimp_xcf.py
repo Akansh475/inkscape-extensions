@@ -5,7 +5,7 @@ Revision history:
   * 2012-01-26 (jazzynico): checks defaulf parameters and file handling.
 """
 
-from unittest import TestCase
+from tests.base import TestCase
 import unittest
 from gimp_xcf import *
 

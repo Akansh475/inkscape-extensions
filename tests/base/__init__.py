@@ -115,5 +115,4 @@ class TestCase(BaseCase):
         args = ['--{}={}'.format(*kw) for kw in kwargs.items()]
         effect().run([self.empty_svg] + args)
         warnings = getattr(effect, 'warned_about', set())
-       # self.assertFalse(warnings, "Depricated API is still being used!")
-
+       # self.assertFalse(warnings, "Deprecated API is still being used!")

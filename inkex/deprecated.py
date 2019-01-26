@@ -76,12 +76,16 @@ class DeprecatedEffect(object):
 
     def add_option(self, *args, **kw):
         # Convert type string into type method as needed
-        kw['type'] = {
-            'string': str,
-            'int': int,
-            'float': float,
-            'inkbool': inkex.utils.inkbool,
-        }.get(kw.get('type', 'string'))
+        if 'type' in kw:
+            kw['type'] = {
+                'string': str,
+                'int': int,
+                'float': float,
+                'inkbool': inkex.utils.inkbool,
+            }.get(kw['type'])
+        if kw.get('action', None) == 'store':
+            # Default store action not required, removed.
+            kw.pop('action')
         self.arg_parser.add_argument(*args, **kw)
 
     def effect(self):

@@ -25,7 +25,7 @@ Provide transformation parsing to extensions
 """
 
 import re
-from math import cos, sin, tan, radians
+from math import cos, sin, tan, radians, sqrt
 
 from .utils import strargs, X, Y
 
@@ -172,9 +172,7 @@ class BoundingBox(list):
     """
     def __init__(self, box):
         super(BoundingBox, self).__init__()
-        if isinstance(box, str):
-            box = self.from_path(box)
-        elif len(box) == 2:
+        if len(box) == 2:
             box = list(box) * 2
         elif len(box) != 4:
             raise ValueError("Unknown box coords: {}".format(box))
@@ -190,18 +188,47 @@ class BoundingBox(list):
         other = BoundingBox(other)
         self[:] = [min(self[0], other[0]), max(self[1], other[1]),
                    min(self[2], other[2]), max(self[3], other[3])]
+        return self
 
-    @staticmethod
-    def from_path(path):
-        """Make a bounding box from a node list (a path's d attribute)"""
-    #def refinedBBox(path):
-        ret = ([], [])
-        for a, b in Path(path): #pairwise(path_loop(path)):
-            for c in (X, Y):
-                cmin, cmax = cubicExtrema(a[1][c], a[2][c], b[0][c], b[1][c])
-                ret[c].extend((cmin, cmax))
-        return min(ret[X]), max(ret[X]), min(ret[Y]), max(ret[Y])
+    def __radd__(self, other):
+        if other != 0:
+            return self + other
+        return self
 
+    def __eq__(self, other):
+        return tuple(self) == tuple(other)
+
+    def center(self):
+        """Returns the middle of the bounding box"""
+        return self[0] + ((self[1] - self[0]) / 2),\
+               self[2] + ((self[3] - self[2]) / 2)
+
+def cubicExtrema(py0, py1, py2, py3):
+    """Returns the extreme value, given a set of bezier coords"""
+    cmin, cmax = min(py0, py3), max(py0, py3)
+    pd1 = py1 - py0
+    pd2 = py2 - py1
+    pd3 = py3 - py2
+
+    def _is_bigger(point):
+        if (point > 0) and (point < 1):
+            pyx = py0 * (1 - point) * (1 - point) * (1 - point) + \
+                  3 * py1 * point * (1 - point) * (1 - point) + \
+                  3 * py2 * point * point * (1 - point) + \
+                  py3 * point * point * point
+            return min(cmin, pyx), max(cmax, pyx)
+        return cmin, cmax
+
+    if pd1 - 2 * pd2 + pd3:
+        if (pd2 * pd2 > pd1 * pd3):
+            pds = sqrt(pd2 * pd2 - pd1 * pd3)
+            cmin, cmax = _is_bigger((pd1 - pd2 + pds) / (pd1 - 2 * pd2 + pd3))
+            cmin, cmax = _is_bigger((pd1 - pd2 - pds) / (pd1 - 2 * pd2 + pd3))
+
+    elif (pd3 - pd1):
+        cmin, cmax = _is_bigger(-pd1 / (pd3 - pd1))
+
+    return cmin, cmax
 
 def pairwise(iterable):
     "Iterate over a list with overlapping pairs (see itertools recipes)"
@@ -223,32 +250,6 @@ def roughBBox(path):
             x.append(pt[X])
             y.append(pt[Y])
     return min(x), max(x), min(y), max(y)
-
-def cubicExtrema(y0, y1, y2, y3):
-    cmin = min(y0, y3)
-    cmax = max(y0, y3)
-    d1 = y1 - y0
-    d2 = y2 - y1
-    d3 = y3 - y2
-    if (d1 - 2*d2 + d3):
-        if (d2*d2 > d1*d3):
-            t = (d1 - d2 + math.sqrt(d2*d2 - d1*d3))/(d1 - 2*d2 + d3)
-            if (t > 0) and (t < 1):
-                y = y0*(1-t)*(1-t)*(1-t) + 3*y1*t*(1-t)*(1-t) + 3*y2*t*t*(1-t) + y3*t*t*t
-                cmin = min(cmin, y)
-                cmax = max(cmax, y)
-            t = (d1 - d2 - math.sqrt(d2*d2 - d1*d3))/(d1 - 2*d2 + d3)
-            if (t > 0) and (t < 1):
-                y = y0*(1-t)*(1-t)*(1-t) + 3*y1*t*(1-t)*(1-t) + 3*y2*t*t*(1-t) + y3*t*t*t
-                cmin = min(cmin, y)
-                cmax = max(cmax, y)
-    elif (d3 - d1):
-        t = -d1/(d3 - d1)
-        if (t > 0) and (t < 1):
-            y = y0*(1-t)*(1-t)*(1-t) + 3*y1*t*(1-t)*(1-t) + 3*y2*t*t*(1-t) + y3*t*t*t
-            cmin = min(cmin, y)
-            cmax = max(cmax, y)
-    return cmin, cmax
 
 def computeBBox(elements, mat=((1,0,0),(0,1,0))):
     from simpletransform import parseTransform

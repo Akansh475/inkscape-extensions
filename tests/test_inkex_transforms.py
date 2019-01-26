@@ -6,7 +6,7 @@ Test Inkex transformational logic.
 from tests.base import TestCase
 import unittest
 
-from inkex.transforms import Transform
+from inkex.transforms import Transform, BoundingBox
 
 class TransformTest(TestCase):
     """Test transformation API and calculations"""
@@ -76,6 +76,16 @@ class TransformTest(TestCase):
 
 class BoundingBoxTest(TestCase):
     """Test bounding box calculations"""
+    def test_bbox_sum(self):
+        """Test adding bboxes together"""
+        self.assertEqual(BoundingBox([0, 10, 0, 10]) + (-10, 0, -10, 0), (-10, 10, -10, 10))
+        ret = sum([
+            BoundingBox([-5, 0, 0, 0]),
+            BoundingBox([0, 5, 0, 0]),
+            BoundingBox([0, 0, -5, 0]),
+            BoundingBox([0, 0, 0, 5])])
+        self.assertEqual(ret, (-5, 5, -5, 5))
+
     #def setUp(self):
     #    args = [self.data_file('svg', 'simpletransform.test.svg')]
     #    self.e = Effect()

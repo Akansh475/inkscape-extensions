@@ -31,6 +31,9 @@ __version__ = "0.3"
 import re
 import calendar
 import sys
+from datetime import *
+
+import inkex
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -38,127 +41,97 @@ if sys.version_info[0] > 2:
             return s.decode(encoding)
         return s
 
-from datetime import *
-
-import inkex
-
 class SVGCalendar(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--tab",
-          action="store", type="string",
-          dest="tab")
-        self.OptionParser.add_option("--month",
-          action="store", type="int",
-          dest="month", default=0,
-          help="Month to be generated. If 0, then the entry year will be generated.")
-        self.OptionParser.add_option("--year",
-          action="store", type="int",
-          dest="year", default=0,
-          help="Year to be generated. If 0, then the current year will be generated.")
-        self.OptionParser.add_option("--fill-empty-day-boxes",
-          action="store", type="inkbool",
-          dest="fill_edb", default=True,
-          help="Fill empty day boxes with next month days.")
-        self.OptionParser.add_option("--show-week-number",
-          action="store", type="inkbool",
-          dest="show_weeknr", default=False,
-          help="Include a week number column.")
-        self.OptionParser.add_option("--start-day",
-          action="store", type="string",
-          dest="start_day", default="sun",
-          help='Week start day. ("sun" or "mon")')
-        self.OptionParser.add_option("--weekend",
-          action="store", type="string",
-          dest="weekend", default="sat+sun",
-          help='Define the weekend days. ("sat+sun" or "sat" or "sun")')
-        self.OptionParser.add_option("--auto-organize",
-          action="store", type="inkbool",
-          dest="auto_organize", default=True,
-          help='Automatically set the size and positions.')
-        self.OptionParser.add_option("--months-per-line",
-          action="store", type="int",
-          dest="months_per_line", default=3,
-          help='Number of months side by side.')
-        self.OptionParser.add_option("--month-width",
-          action="store", type="string",
-          dest="month_width", default="6cm",
-          help='The width of the month days box.')
-        self.OptionParser.add_option("--month-margin",
-          action="store", type="string",
-          dest="month_margin", default="1cm",
-          help='The space between the month boxes.')
-        self.OptionParser.add_option("--color-year",
-          action="store", type="string",
-          dest="color_year", default="#888",
-          help='Color for the year header.')
-        self.OptionParser.add_option("--color-month",
-          action="store", type="string",
-          dest="color_month", default="#666",
-          help='Color for the month name header.')
-        self.OptionParser.add_option("--color-day-name",
-          action="store", type="string",
-          dest="color_day_name", default="#999",
-          help='Color for the week day names header.')
-        self.OptionParser.add_option("--color-day",
-          action="store", type="string",
-          dest="color_day", default="#000",
-          help='Color for the common day box.')
-        self.OptionParser.add_option("--color-weekend",
-          action="store", type="string",
-          dest="color_weekend", default="#777",
-          help='Color for the weekend days.')
-        self.OptionParser.add_option("--color-nmd",
-          action="store", type="string",
-          dest="color_nmd", default="#BBB",
-          help='Color for the next month day, in empty day boxes.')
-        self.OptionParser.add_option("--color-weeknr",
-          action="store", type="string",
-          dest="color_weeknr", default="#808080",
-          help='Color for the week numbers.')
-        self.OptionParser.add_option("--font-year",
-          action="store", type="string",
-          dest="font_year", default="arial",
-          help='Font for the year string.')
-        self.OptionParser.add_option("--font-month",
-          action="store", type="string",
-          dest="font_month", default="arial",
-          help='Font for the month strings.')
-        self.OptionParser.add_option("--font-day-name",
-          action="store", type="string",
-          dest="font_day_name", default="arial",
-          help='Font for the days of the week strings.')
-        self.OptionParser.add_option("--font-day",
-          action="store", type="string",
-          dest="font_day", default="arial",
-          help='Font for the day strings.')
-        self.OptionParser.add_option("--month-names",
-          action="store", type="string",
-          dest="month_names", default='January February March ' + \
-                                      'April May June '+ \
-                                      'July August September ' + \
-                                      'October November December',
-          help='The month names for localization.')
-        self.OptionParser.add_option("--day-names",
-          action="store", type="string",
-          dest="day_names", default='Sun Mon Tue Wed Thu Fri Sat',
-          help='The week day names for localization.')
-        self.OptionParser.add_option("--weeknr-name",
-          action="store", type="string",
-          dest="weeknr_name", default='Wk',
-          help='The week number column name for localization.')
-        self.OptionParser.add_option("--encoding",
-          action="store", type="string",
-          dest="input_encode", default='utf-8',
-          help='The input encoding of the names.')
+        self.arg_parser.add_argument("--tab", type=str, dest="tab")
+        self.arg_parser.add_argument(
+            "--month", type=int, dest="month", default=0,
+            help="Month to be generated. If 0, then the entry year will be generated.")
+        self.arg_parser.add_argument(
+            "--year", type=int, dest="year", default=0,
+            help="Year to be generated. If 0, then the current year will be generated.")
+        self.arg_parser.add_argument(
+            "--fill-empty-day-boxes", type=inkex.utils.inkbool, dest="fill_edb", default=True,
+            help="Fill empty day boxes with next month days.")
+        self.arg_parser.add_argument(
+            "--show-week-number", type=inkex.utils.inkbool, dest="show_weeknr", default=False,
+            help="Include a week number column.")
+        self.arg_parser.add_argument(
+            "--start-day", type=str, dest="start_day", default="sun",
+            help='Week start day. ("sun" or "mon")')
+        self.arg_parser.add_argument(
+            "--weekend", type=str, dest="weekend", default="sat+sun",
+            help='Define the weekend days. ("sat+sun" or "sat" or "sun")')
+        self.arg_parser.add_argument(
+            "--auto-organize", type=inkex.utils.inkbool, dest="auto_organize", default=True,
+            help='Automatically set the size and positions.')
+        self.arg_parser.add_argument(
+            "--months-per-line", type=int, dest="months_per_line", default=3,
+            help='Number of months side by side.')
+        self.arg_parser.add_argument(
+            "--month-width", type=str, dest="month_width", default="6cm",
+            help='The width of the month days box.')
+        self.arg_parser.add_argument(
+            "--month-margin", type=str, dest="month_margin", default="1cm",
+            help='The space between the month boxes.')
+        self.arg_parser.add_argument(
+            "--color-year", type=str, dest="color_year", default="#888",
+            help='Color for the year header.')
+        self.arg_parser.add_argument(
+            "--color-month", type=str, dest="color_month", default="#666",
+            help='Color for the month name header.')
+        self.arg_parser.add_argument(
+            "--color-day-name", type=str, dest="color_day_name", default="#999",
+            help='Color for the week day names header.')
+        self.arg_parser.add_argument(
+            "--color-day", type=str, dest="color_day", default="#000",
+            help='Color for the common day box.')
+        self.arg_parser.add_argument(
+            "--color-weekend", type=str, dest="color_weekend", default="#777",
+            help='Color for the weekend days.')
+        self.arg_parser.add_argument(
+            "--color-nmd", type=str, dest="color_nmd", default="#BBB",
+            help='Color for the next month day, in empty day boxes.')
+        self.arg_parser.add_argument(
+            "--color-weeknr", type=str, dest="color_weeknr", default="#808080",
+            help='Color for the week numbers.')
+        self.arg_parser.add_argument(
+            "--font-year", type=str, dest="font_year", default="arial",
+            help='Font for the year string.')
+        self.arg_parser.add_argument(
+            "--font-month", type=str, dest="font_month", default="arial",
+            help='Font for the month strings.')
+        self.arg_parser.add_argument(
+            "--font-day-name", type=str, dest="font_day_name", default="arial",
+            help='Font for the days of the week strings.')
+        self.arg_parser.add_argument(
+            "--font-day", type=str, dest="font_day", default="arial",
+            help='Font for the day strings.')
+        self.arg_parser.add_argument(
+            "--month-names", type=str, dest="month_names",
+            default='January February March ' + \
+                    'April May June '+ \
+                    'July August September ' + \
+                    'October November December',
+            help='The month names for localization.')
+        self.arg_parser.add_argument(
+            "--day-names", type=str, dest="day_names", default='Sun Mon Tue Wed Thu Fri Sat',
+            help='The week day names for localization.')
+        self.arg_parser.add_argument(
+            "--weeknr-name", type=str, dest="weeknr_name", default='Wk',
+            help='The week number column name for localization.')
+        self.arg_parser.add_argument(
+            "--encoding", type=str, dest="input_encode", default='utf-8',
+            help='The input encoding of the names.')
 
     def validate_options(self):
         #inkex.errormsg( self.options.input_encode )
         # Convert string names lists in real lists
-        m = re.match('\s*(.*[^\s])\s*', self.options.month_names)
-        self.options.month_names = re.split('\s+', m.group(1))
-        m = re.match('\s*(.*[^\s])\s*', self.options.day_names)
-        self.options.day_names = re.split('\s+', m.group(1))
+        m = re.match(r'\s*(.*[^\s])\s*', self.options.month_names)
+        self.options.month_names = re.split(r'\s+', m.group(1))
+        m = re.match(r'\s*(.*[^\s])\s*', self.options.day_names)
+        self.options.day_names = re.split(r'\s+', m.group(1))
         # Validate names lists
         if len(self.options.month_names) != 12:
             inkex.errormsg('The month name list "' + \
@@ -420,5 +393,4 @@ class SVGCalendar(inkex.Effect):
 
 
 if __name__ == '__main__':   #pragma: no cover
-    e = SVGCalendar()
-    e.affect()
+    SVGCalendar().run()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2010 Nicolas Dufour, nicoduf@yahoo.fr (color options)
@@ -19,60 +19,49 @@
 #
 
 import copy
-import random
 
 import inkex
 
-class MyEffect(inkex.Effect):
+class MarkerStrokePaintEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-m", "--modify",
-                        action="store", type="inkbool", 
-                        dest="modify", default=False,
-                        help="Do not create a copy, modify the markers")
-        self.OptionParser.add_option("-t", "--type",
-                        action="store", type="string", 
-                        dest="fill_type", default="stroke",
-                        help="Replace the markers' fill with the object stroke or fill color")
-        self.OptionParser.add_option("-a", "--alpha",
-                        action="store", type="inkbool", 
-                        dest="assign_alpha", default=True,
-                        help="Assign the object fill and stroke alpha to the markers")
-        self.OptionParser.add_option("-i", "--invert",
-                        action="store", type="inkbool", 
-                        dest="invert", default=False,
-                        help="Invert fill and stroke colors")
-        self.OptionParser.add_option("--assign_fill",
-                        action="store", type="inkbool", 
-                        dest="assign_fill", default=True,
-                        help="Assign a fill color to the markers")
-        self.OptionParser.add_option("-f", "--fill_color",
-                        action="store", type="int", 
-                        dest="fill_color", default=1364325887,
-                        help="Choose a custom fill color")
-        self.OptionParser.add_option("--assign_stroke",
-                        action="store", type="inkbool", 
-                        dest="assign_stroke", default=True,
-                        help="Assign a stroke color to the markers")
-        self.OptionParser.add_option("-s", "--stroke_color",
-                        action="store", type="int", 
-                        dest="stroke_color", default=1364325887,
-                        help="Choose a custom fill color")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
-        self.OptionParser.add_option("--colortab",
-                        action="store", type="string",
-                        dest="colortab",
-                        help="The selected custom color tab when OK was pressed")
+        self.arg_parser.add_argument(
+            "-m", "--modify", type=inkex.utils.inkbool, dest="modify", default=False,
+            help="Do not create a copy, modify the markers")
+        self.arg_parser.add_argument(
+            "-t", "--type", type=str, dest="fill_type", default="stroke",
+            help="Replace the markers' fill with the object stroke or fill color")
+        self.arg_parser.add_argument(
+            "-a", "--alpha", type=inkex.utils.inkbool, dest="assign_alpha", default=True,
+            help="Assign the object fill and stroke alpha to the markers")
+        self.arg_parser.add_argument(
+            "-i", "--invert", type=inkex.utils.inkbool, dest="invert", default=False,
+            help="Invert fill and stroke colors")
+        self.arg_parser.add_argument(
+            "--assign_fill", type=inkex.utils.inkbool, dest="assign_fill", default=True,
+            help="Assign a fill color to the markers")
+        self.arg_parser.add_argument(
+            "-f", "--fill_color", type=int, dest="fill_color", default=1364325887,
+            help="Choose a custom fill color")
+        self.arg_parser.add_argument(
+            "--assign_stroke", type=inkex.utils.inkbool, dest="assign_stroke", default=True,
+            help="Assign a stroke color to the markers")
+        self.arg_parser.add_argument(
+            "-s", "--stroke_color", type=int, dest="stroke_color", default=1364325887,
+            help="Choose a custom fill color")
+        self.arg_parser.add_argument(
+            "--tab", type=str, dest="tab",
+            help="The selected UI-tab when OK was pressed")
+        self.arg_parser.add_argument(
+            "--colortab", type=str, dest="colortab",
+            help="The selected custom color tab when OK was pressed")
 
     def effect(self):
-        defs = self.xpathSingle('/svg:svg//svg:defs')
+        defs = self.svg.getElement('/svg:svg//svg:defs')
         if defs == None:
             defs = inkex.etree.SubElement(self.document.getroot(),inkex.addNS('defs','svg'))
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             mprops = ['marker','marker-start','marker-mid','marker-end']
             try:
                 style = dict(inkex.Style.parse_str(node.get('style')))
@@ -133,14 +122,14 @@ class MyEffect(inkex.Effect):
                     except:
                         inkex.errormsg(_("unable to locate marker: %s") % marker_id)
                         continue
-                        
+
                     new_id = self.uniqueId(marker_id, not self.options.modify)
-                    
+
                     style[mprop] = "url(#%s)" % new_id
                     mnode.set('id', new_id)
                     mnode.set(inkex.addNS('stockid','inkscape'), new_id)
                     defs.append(mnode)
-                    
+
                     children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
                     for child in children:
                         cstyle = dict(inkex.Style.parse_str(child.get('style')))
@@ -156,8 +145,6 @@ class MyEffect(inkex.Effect):
             node.set('style', str(inkex.Style(style)))
 
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
-
+    MarkerStrokePaintEffect().run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

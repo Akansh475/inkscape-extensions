@@ -258,12 +258,6 @@ class FoldableBox(inkex.Effect):
 
         g.set( 'transform', 'translate(%f,%f)' % ( (docW-left_pos)/2, (docH-lower_pos)/2 ) )
 
-        # compensate preserved transforms of parent layer
-        if self.current_layer.getparent() is not None:
-            mat = inkex.composeParents(self.current_layer, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-            inkex.applyTransformToNode(inkex.invertTransform(mat), g)
-
-
 if __name__ == '__main__':   #pragma: no cover
     e = FoldableBox()
     e.affect()

@@ -21,9 +21,10 @@ functions for digesting paths into a simple list structure
 
 import re
 import copy
-from math import cos, sin, atan2, sqrt
+from math import atan2, sqrt
 from operator import add, mul
-from inkex.utils import strargs, classproperty, X, Y
+from .utils import strargs, classproperty, X, Y
+from .transforms import BoundingBox, cubicExtrema
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
@@ -76,10 +77,19 @@ class PathCommand(tuple):
     def __mul__(self, other):
         return self.scale(other)
 
+    all_x = property(lambda self: self[::2])
+    all_y = property(lambda self: self[1::2])
+
     @property
     def points(self):
         """Returns a list of points in this path command, x and y only"""
-        return tuple(zip(self[::2], self[1::2]))
+        return tuple(zip(self.all_x, self.all_y))
+
+    def bounding_box(self):
+        """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
+        if not self:
+            raise ValueError("Invalid bounding box request on empty path segment.")
+        return BoundingBox([min(self.all_x), max(self.all_x), min(self.all_y), max(self.all_y)])
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""
@@ -99,6 +109,8 @@ class PathCommand(tuple):
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
             if rad != 0:
                 print("({rad} * cos({theta})) + {x}, ({rad} * sin({theta})) + {y}".format(rad=rad, theta=theta, x=center_x, y=center_y))
+        raise NotImplementedError("Rotating paths needs to be coded")
+        return self
 
     def get_pen(self, previous):
         """Where will the pen be after this command"""
@@ -135,10 +147,18 @@ class Horz(PathCommand):
         """Translate this Horz path by the given coords X/Y"""
         return PathCommand(self.cmd, opr(self[0], coords[self.index]))
 
+    def to_line(self, previous):
+        """Return this path command as a line instead"""
+        return PathCommand('L', self[0], previous[1])
+
 class Vert(Horz):
     """Vertical Line instruction"""
     index = Y
     points = property(lambda self: ((None, self[0]),))
+
+    def to_line(self, previous):
+        """Return this path command as a line instead"""
+        return PathCommand('L', previous[0], self[0])
 
 class Curve(PathCommand):
     """Curved Line instruction"""
@@ -148,9 +168,17 @@ class SmoothCurve(PathCommand):
     """Smoothed Curved Line instruction"""
     num = 4
 
+    def bounding_box(self):
+        """Returns a bounding box for curved lines, similar to refinedBBox"""
+        return cubicExtrema(*self.all_x) + cubicExtrema(*self.all_y)
+
 class Quadratic(PathCommand):
     """Quadratic Curved Line instruction"""
     num = 4
+
+    def bounding_box(self):
+        """Returns a bounding box for curved lines, similar to refinedBBox"""
+        return cubicExtrema(*self.all_x) + cubicExtrema(*self.all_y)
 
 class TepidQuadratic(PathCommand):
     """Smoothed Quadratic Line instruction"""
@@ -191,6 +219,10 @@ class Path(list):
         elif isinstance(path_d, (list, tuple)):
             self.extend(path_d)
 
+    def bounding_box(self):
+        """Return the top,left and bottom,right coords"""
+        return sum([seg.bounding_box() for seg in self if seg])
+
     def append(self, cmd):
         """Append a command to this path including any chained commands"""
         if isinstance(cmd, list):
@@ -208,10 +240,21 @@ class Path(list):
         for i, seg in enumerate(self):
             self[i] = seg * (x, y)
 
-    def rotate(self, angle, center_x=0.0, center_y=0.0):
+    def rotate(self, angle, center_x=None, center_y=None):
         """Rotate the path around the given point"""
+        if center_x is None or center_y is None:
+            # Default center is center of bbox
+            center = self.bounding_box().center()
+            center_x = center_x or center[0]
+            center_y = center_y or center[1]
+        pen = (0.0, 0.0)
         for i, seg in enumerate(self):
-            self[i] = seg.rotate(angle, center_x, center_y)
+            if seg.num == 1:
+                # Vertical and Horzontal lines can not be rotated
+                seg = seg.to_line(pen)
+            if seg.num:
+                pen = self[i].get_pen(pen)
+                self[i] = seg.rotate(angle, center_x, center_y)
 
     def to_absolute(self, factor=1):
         """Convert this path to use only absolute coordinates"""

@@ -1,12 +1,10 @@
-#!/usr/bin/env python
 """
 Test Inkex transformational logic.
 """
 
 from tests.base import TestCase
-import unittest
 
-from inkex.transforms import Transform, BoundingBox
+from inkex.transforms import Transform, Scale, BoundingBox
 
 class TransformTest(TestCase):
     """Test transformation API and calculations"""
@@ -74,6 +72,25 @@ class TransformTest(TestCase):
         self.assertEqual(trans.apply_to_point((10, 10)), (20, 20))
         self.assertRaises(ValueError, trans.apply_to_point, '')
 
+class ScaleTest(TestCase):
+    """Test scale class"""
+    def test_creation(self):
+        """Creating scales"""
+        self.assertEqual(Scale(), (None, None))
+        self.assertEqual(Scale(1), (1, 1))
+        self.assertEqual(Scale(10), (10, 10))
+        self.assertEqual(Scale(10, 20), (10, 20))
+        self.assertEqual(Scale(10, 2, 100, 1, 4), (1, 100))
+        self.assertEqual(Scale([2, 50]), (2, 50))
+        self.assertEqual(Scale([5, 50], [4, 5]), (4, 50))
+
+    def test_center(self):
+        """Center of a scale"""
+        self.assertEqual(Scale().center(), None)
+        self.assertEqual(Scale(0, 10).center(), 5)
+        self.assertEqual(Scale(-10, 10).center(), 0)
+
+
 class BoundingBoxTest(TestCase):
     """Test bounding box calculations"""
     def test_bbox_sum(self):
@@ -96,6 +113,3 @@ class BoundingBoxTest(TestCase):
     #    bbox = computeBBox(self.e.document.xpath("//svg:g", namespaces=NSS))
     #    text_bbox = "{} {} {} {}".format(bbox[0], bbox[1], bbox[2], bbox[3])
     #    self.assertEqual("0.0 25.0 0.0 25.0", text_bbox)
-
-if __name__ == '__main__':
-    unittest.main()

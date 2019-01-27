@@ -76,7 +76,8 @@ class SvgDocumentElement(BaseElement):
 
     def get_z_selected(self):
         """Get the selected elements, but ordered by their apperence in the document"""
-        return OrderedDict([(_id, self.selected[_id]) for _id in self.sort_ids(self.selected)])
+        sel = self.selected
+        return OrderedDict((_id, sel[_id]) for _id in self.xpath('//@id') if _id in sel)
 
     def get_current_layer(self):
         """Returns the currently selected layer"""

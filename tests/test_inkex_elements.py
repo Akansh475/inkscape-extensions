@@ -23,13 +23,6 @@ class ElementTestCase(TestCase):
 class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
     tag = 'g'
-    def test_sort_ids(self):
-        """Are the element ids sorted"""
-        self.assertEqual(tuple(self.elem.sort_ids([])), ())
-        self.assertEqual(tuple(self.elem.sort_ids(['A', 'B', 'C', 'D', 'E', 'F', 'G'])),
-                                                  ('A', 'B', 'C', 'D', 'E', 'F', 'G'))
-        self.assertEqual(tuple(self.elem.sort_ids(['G', 'B', 'D', 'F'])), ('B', 'D', 'F', 'G'))
-        self.assertEqual(tuple(self.elem.sort_ids(['X', 'Y', 'Z', 'A'])), ('A',))
 
     def test_sort_selected(self):
         """Are the selected items sorted"""
@@ -38,6 +31,14 @@ class CoreElementTestCase(ElementTestCase):
         items = self.svg.get_z_selected()
         self.assertTrue(isinstance(items, dict))
         self.assertEqual(tuple(items), ('B', 'D', 'F', 'G'))
+
+        self.svg.set_selected()
+        self.assertEqual(tuple(self.svg.get_z_selected()), ())
+        A_to_G = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+        self.svg.set_selected(*A_to_G)
+        self.assertEqual(tuple(self.svg.get_z_selected()), A_to_G)
+        self.svg.set_selected('X', 'Y', 'Z', 'A')
+        self.assertEqual(tuple(self.svg.get_z_selected()), ('A',))
 
 
 class GroupTest(ElementTestCase):

@@ -26,6 +26,7 @@ Provide transformation parsing to extensions
 
 import re
 from math import cos, sin, tan, radians, sqrt
+from decimal import Decimal
 
 from .utils import strargs, X, Y
 
@@ -166,28 +167,88 @@ class Transform(object):
                 self.b * point[X] + self.d * point[Y] + self.f)
 
 
-class BoundingBox(list):
-    """
-    Some functions to compute a rough bbox of a given list of objects.
-    """
-    def __init__(self, box):
-        super(BoundingBox, self).__init__()
-        if len(box) == 2:
-            box = list(box) * 2
-        elif len(box) != 4:
-            raise ValueError("Unknown box coords: {}".format(box))
-        self.extend(box)
+class Scale(object): # pylint: disable=too-few-public-methods
+    """A pair of numbers that reprisent the minimum and maximum values."""
+    def __init__(self, value=None, *others):
+        if isinstance(value, Scale):
+            self.maximum = value.maximum
+            self.minimum = value.minimum
+        elif isinstance(value, (tuple, list)) and len(value) == 2:
+            (self.minimum, self.maximum) = value
+        elif isinstance(value, (int, float, Decimal)):
+            self.minimum = value
+            self.maximum = value
+        elif value is None:
+            self.minimum = None
+            self.maximum = None
+        else:
+            raise ValueError("Not a number for scaling: {} ({})"\
+                .format(str(value), type(value).__name__))
+
+        for item in others:
+            self += item
 
     def __add__(self, other):
-        new = BoundingBox(self[:])
+        return Scale(other) + self
+
+    def __iadd__(self, other):
+        other = Scale(other)
+        if self.minimum is None:
+            self.minimum = other.minimum
+        elif other.minimum is not None:
+            self.minimum = min((self.minimum, other.minimum))
+        if self.maximum is None:
+            self.maximum = other.maximum
+        elif other.maximum is not None:
+            self.maximum = max((self.maximum, other.maximum))
+        return self
+
+    def __radd__(self, other):
+        if other != 0: # ignore sum() initial value
+            return self + other
+        return self
+
+    def __iter__(self):
+        yield self.minimum
+        yield self.maximum
+
+    def __eq__(self, other):
+        return tuple(self) == tuple(Scale(other))
+
+    def __repr__(self):
+        return "scale:" + str(tuple(self))
+
+    def center(self):
+        """Pick the middle of the line"""
+        if self.minimum is None or self.maximum is None:
+            return None
+        return self.minimum + ((self.maximum - self.minimum) / 2)
+
+
+class BoundingBox(object): # pylint: disable=too-few-public-methods
+    """Some functions to compute a rough bbox of a given list of objects."""
+    def __init__(self, x, y=None):
+        if y is None:
+            if isinstance(x, BoundingBox):
+                x, y = x.x, x.y
+            elif isinstance(x, (list, tuple)):
+                if len(x) == 2:
+                    x, y = x
+                elif len(x) == 4:
+                    x, y = x[:2], x[2:]
+        self.x = Scale(x)
+        self.y = Scale(y)
+
+    def __add__(self, other):
+        new = BoundingBox(self.x, self.y)
         if other is not None:
             new += other
         return new
 
     def __iadd__(self, other):
         other = BoundingBox(other)
-        self[:] = [min(self[0], other[0]), max(self[1], other[1]),
-                   min(self[2], other[2]), max(self[3], other[3])]
+        self.x += other.x
+        self.y += other.y
         return self
 
     def __radd__(self, other):
@@ -198,10 +259,18 @@ class BoundingBox(list):
     def __eq__(self, other):
         return tuple(self) == tuple(other)
 
+    def __iter__(self):
+        yield self.x.minimum
+        yield self.x.maximum
+        yield self.y.minimum
+        yield self.y.maximum
+
+    def __repr__(self):
+        return "bbox:" + str(tuple(self))
+
     def center(self):
         """Returns the middle of the bounding box"""
-        return self[0] + ((self[1] - self[0]) / 2),\
-               self[2] + ((self[3] - self[2]) / 2)
+        return self.x.center(), self.y.center()
 
 def cubicExtrema(py0, py1, py2, py3):
     """Returns the extreme value, given a set of bezier coords"""

@@ -24,7 +24,7 @@ import copy
 from math import atan2, sqrt
 from operator import add, mul
 from .utils import strargs, classproperty, X, Y
-from .transforms import BoundingBox, cubicExtrema
+from .transforms import BoundingBox, Scale, cubicExtrema
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
@@ -87,9 +87,7 @@ class PathCommand(tuple):
 
     def bounding_box(self):
         """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
-        if not self:
-            raise ValueError("Invalid bounding box request on empty path segment.")
-        return BoundingBox([min(self.all_x), max(self.all_x), min(self.all_y), max(self.all_y)])
+        return BoundingBox(Scale(*self.all_x), Scale(*self.all_y))
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""

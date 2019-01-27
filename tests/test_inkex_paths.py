@@ -74,6 +74,11 @@ class PathTest(TestCase):
         """Test the bounding box calculations"""
         self.assertEqual(Path('M 20,20 L 90,90 l 10,10 Z').bounding_box(), (10, 90, 10, 90))
 
+        self.assertEqual(
+            Path('M 85.355333,14.644651 A 50,50 0 0 1 85.355333,85.355341 50,50 0 0 1 14.644657,85'
+                 '.355341 50,50 0 0 1 14.644676,14.644651 50,50 0 0 1 85.355333,14.644651 Z')\
+                         .bounding_box(), (0, 0, 100, 100))
+
     def test_adding_to_path(self):
         """Paths can be translated using addition"""
         ret = Path('M 20,20 L 90,90 l 10,10 Z') + (50, 50)

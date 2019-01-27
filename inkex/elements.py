@@ -29,12 +29,17 @@ from lxml import etree
 from .transforms import Transform
 from .styles import Style
 from .utils import addNS, removeNS, NSS
+from .paths import Path
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
     tag_name = None
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
+
+    def path(self):
+        """Gets the outline or path of the element, this can be a simple bounding box for most"""
+        raise NotImplementedError("Path should be provided by svg element implementations.")
 
     def xpath(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
@@ -77,12 +82,13 @@ class BaseElement(etree.ElementBase):
             return self.getparent().composed_style() + self.style
         return self.style
 
+    def bounding_box(self):
+        """Returns the bounding box for the element as a BoundingBox object (x1, x2, y1, y2)"""
+        return Path(self.path).bounding_box()
+
     def get_center_position(self):
         """Returns object's center in terms of document units"""
-        for attr in ('width', 'height', 'top', 'left'):
-            if not hasattr(self, attr):
-                return (0, 0) # Can't compute without units.
-        return (self.left + (self.width / 2), self.top + (self.height / 2))
+        return self.bounding_box().center()
 
     def sort_ids(self, id_list, count=0):
         """
@@ -117,7 +123,7 @@ class Group(BaseElement):
     tag_name = 'g'
 
 
-class Path(BaseElement):
+class PathElement(BaseElement):
     """Provide a useful extension for path elements"""
     tag_name = 'path'
     path = property(lambda self: self.get('d'))

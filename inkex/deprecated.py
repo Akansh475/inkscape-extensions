@@ -64,7 +64,7 @@ class DeprecatedEffect(object):
     def _depricated(name, msg=_('{} is deprecated and should be removed')):
         """Give the user a warning about their extension using a deprecated API"""
         msg = msg.format('Effect.' + name)
-        warnings.warn(msg, DeprecationWarning)
+        warnings.warn(msg, DeprecationWarning, stacklevel=3)
 
     @property
     def OptionParser(self):

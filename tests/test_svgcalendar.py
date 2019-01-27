@@ -10,7 +10,7 @@ class CalendarArguments(TestCase):
     def test_default_names_list(self):
         args = [self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.month_names[0], 'January' )
         self.assertEqual( e.options.month_names[11], 'December' )
         self.assertEqual( e.options.day_names[0], 'Sun' )
@@ -23,7 +23,7 @@ class CalendarArguments(TestCase):
             self.data_file('svg', 'minimal-blank.svg'),
             ]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.month_names[0], 'JAN' )
         self.assertEqual( e.options.month_names[11], 'DEZ' )
         self.assertEqual( e.options.day_names[0], 'DOM' )
@@ -36,7 +36,7 @@ class CalendarArguments(TestCase):
             self.data_file('svg', 'minimal-blank.svg'),
             ]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.month_names[0], 'JAN' )
         self.assertEqual( e.options.month_names[11], 'DEZ' )
         self.assertEqual( e.options.day_names[0], 'DOM' )
@@ -49,7 +49,7 @@ class CalendarArguments(TestCase):
             self.data_file('svg', 'minimal-blank.svg'),
             ]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.month_names[0], 'JAN' )
         self.assertEqual( e.options.month_names[2], 'MAR' )
         self.assertEqual( e.options.month_names[11], 'DEZ' )
@@ -60,37 +60,37 @@ class CalendarArguments(TestCase):
     def test_default_year_must_be_the_current_year(self):
         args = [self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.year, datetime.today().year )
 
     def test_option_year_equal_0_is_converted_to_current_year(self):
         args = ['--year=0', self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.year, datetime.today().year )
 
     def test_option_year_2000_configuration(self):
         args = ['--year=2000', self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( e.options.year, 2000 )
 
     def test_default_week_start_day(self):
         args = [self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( calendar.firstweekday(), 6 )
 
     def test_configuring_week_start_sun(self):
         args = ['--start-day=sun', self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( calendar.firstweekday(), 6 )
 
     def test_configuring_week_start_mon(self):
         args = ['--start-day=mon', self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertEqual( calendar.firstweekday(), 0 )
 
 
@@ -98,7 +98,7 @@ class CalendarMethods(TestCase):
     def test_recognize_a_weekend(self):
         args = ['--start-day=sun', '--weekend=sat+sun',    self.data_file('svg', 'minimal-blank.svg')]
         e = SVGCalendar()
-        e.affect( args)
+        e.run(args)
         self.assertTrue(    e.is_weekend(0), 'Sunday is weekend in this configuration' )
         self.assertTrue(    e.is_weekend(6), 'Saturday is weekend in this configuration' )
         self.assertFalse( e.is_weekend(1), 'Monday is NOT weekend' )

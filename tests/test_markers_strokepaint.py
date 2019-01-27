@@ -7,14 +7,14 @@
 
 from tests.base import TestCase
 import unittest
-from markers_strokepaint import *
+from markers_strokepaint import MarkerStrokePaintEffect
 
 class StrokeColorBasicTest(TestCase):
-    effect = MyEffect
+    effect = MarkerStrokePaintEffect
 
     def test_empty_defs(self):
-        e = MyEffect()
-        e.affect([self.data_file('svg', 'default-plain-SVG.svg')])
+        e = MarkerStrokePaintEffect()
+        e.run([self.data_file('svg', 'default-plain-SVG.svg')])
 
 if __name__ == '__main__':
     unittest.main()

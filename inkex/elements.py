@@ -33,7 +33,7 @@ from .paths import Path
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
-    tag_name = None
+    tag_name = 'none'
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
 
@@ -207,6 +207,10 @@ class Metadata(BaseElement):
     """Inkscape Metadata element"""
     tag_name = 'metadata'
 
+
+class TextElement(BaseElement):
+    """A Text element"""
+    tag_name = 'text'
 
 class TextPath(BaseElement):
     """A textPath element"""

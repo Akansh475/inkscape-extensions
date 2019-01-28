@@ -39,8 +39,8 @@ from lxml import etree
 from .units import discover_unit, convert_unit, render_unit
 from .utils import removeNS
 from .elements import ( # pylint: disable=unused-import
-    BaseElement, Group, Path, Points, Rectangle, Image, Circle, Ellipse,
-    Use, Defs, NamedView, Metadata, Guide,
+    BaseElement, Group, PathElement, Points, Rectangle, Image, Circle, Ellipse,
+    TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide,
 )
 
 class SvgDocumentElement(BaseElement):

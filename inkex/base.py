@@ -38,16 +38,12 @@ class InkscapeExtension(object):
         self.document = None
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
-        def binary(stream):
-            # For Python 3: Get the underlying binary handle if available
-            return getattr(stream, 'buffer', stream)
-
         self.arg_parser.add_argument(
             "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-            help="Filename of the input file (default is stdin)", default=binary(sys.stdin))
+            help="Filename of the input file (default is stdin)", default=None)
 
         self.arg_parser.add_argument(
-            "--output", type=str, default=binary(sys.stdout),
+            "--output", type=str, default=None,
             help="Optional output filename for saving the result (default is stdout).")
 
         self.add_arguments(self.arg_parser)
@@ -63,10 +59,19 @@ class InkscapeExtension(object):
 
     def run(self, args=None):
         """Main entrypoint for any Inkscape Extension"""
+        def binary(stream):
+            """For Python 3: Get the underlying binary handle if available"""
+            return getattr(stream, 'buffer', stream)
+
         if args is None:
             args = sys.argv[1:]
 
         self.options = self.arg_parser.parse_args(args)
+        if self.options.input_file is None:
+            self.options.input_file = binary(sys.stdin)
+
+        if self.options.output is None:
+            self.options.output = binary(sys.stdout)
 
         try:
             self.load_raw()

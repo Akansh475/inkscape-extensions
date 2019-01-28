@@ -1,12 +1,10 @@
-#!/usr/bin/env python
 """Test base inkex module functionality"""
 
 import os
 import sys
 
 from inkex.base import InkscapeExtension, SvgThroughMixin
-from tests.base import TestCase
-import unittest, StdRedirect
+from tests.base import TestCase, StdRedirect
 
 class ModExtension(InkscapeExtension):
     """A non-svg extension that loads, saves and flipples"""
@@ -100,7 +98,3 @@ class SvgInputOutputTest(TestCase):
         self.assertTrue(os.path.isfile(filename))
         with open(filename, 'r') as fhl:
             self.assertIn('<svg', fhl.read())
-
-
-if __name__ == '__main__':
-    unittest.main()

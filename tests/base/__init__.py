@@ -19,11 +19,11 @@
 Provide tests with some base utility.
 """
 
+import os
 import sys
 import uuid
 import shutil
 import tempfile
-from os import path
 from unittest import TestCase as BaseCase
 
 # python 2.7 and python 3.5 support
@@ -32,7 +32,7 @@ try:
 except ImportError:
     from io import StringIO
 
-TEST_ROOT = path.abspath(path.dirname(path.dirname(__file__)))
+TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
 class StdRedirect(object): # pylint: disable=too-few-public-methods
@@ -70,40 +70,50 @@ class StdRedirect(object): # pylint: disable=too-few-public-methods
     def __exit__(self, kind, value, traceback):
         setattr(sys, self.name, self.std)
 
+class NoExtension(object): # pylint: disable=too-few-public-methods
+    """Test case must specify 'ext_model' to assertEffect."""
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError(self.__doc__)
+
+    def run(self, *args, **kwargs):
+        """Fake run"""
+        pass
 
 class TestCase(BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
+    ext_model = NoExtension
+
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
         self.temp_dir = None
 
     def tearDown(self):
-        if self.temp_dir and path.isdir(self.temp_dir):
+        if self.temp_dir and os.path.isdir(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
     def temp_file(self, prefix='file-', template='{prefix}{name}{suffix}', suffix='.tmp'):
         """Generate the filename of a temporary file"""
         if not self.temp_dir:
             self.temp_dir = tempfile.mkdtemp(prefix='inkex-tests-')
-        if not path.isdir(self.temp_dir):
+        if not os.path.isdir(self.temp_dir):
             raise IOError("The temporary directory has disappeared!")
         filename = template.format(prefix=prefix, suffix=suffix, name=uuid.uuid4().hex)
-        return path.join(self.temp_dir, filename)
+        return os.path.join(self.temp_dir, filename)
 
     @staticmethod
     def data_file(filename, *parts):
         """Provide a data file from a filename, can accept directories as arguments."""
-        full_path = path.join(TEST_ROOT, 'data', filename, *parts)
-        if not path.isfile(full_path):
+        full_path = os.path.join(TEST_ROOT, 'data', filename, *parts)
+        if not os.path.isfile(full_path):
             raise IOError("Can't find test data file: {}".format(filename))
         return full_path
 
     @property
     def root_dir(self):
         """Return the full path to the extensions directory"""
-        return path.abspath(path.join(TEST_ROOT, '..'))
+        return os.path.abspath(os.path.join(TEST_ROOT, '..'))
 
     @property
     def empty_svg(self):
@@ -112,7 +122,29 @@ class TestCase(BaseCase):
 
     def assertEffectEmpty(self, effect, **kwargs): # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""
-        args = ['--{}={}'.format(*kw) for kw in kwargs.items()]
-        effect().run([self.empty_svg] + args)
-        warnings = getattr(effect, 'warned_about', set())
-       # self.assertFalse(warnings, "Deprecated API is still being used!")
+        self.assertEffect(effect=effect, **kwargs)
+
+    def assertEffect(self, *filename, **kwargs): # pylint: disable=invalid-name
+        """Assert an effect, capturing the output to stdout.
+
+           filename should point to a starting svg document, default is empty_svg
+        """
+        contains = kwargs.pop('contains', None)
+        effect = kwargs.pop('effect', self.ext_model)()
+
+        args = [self.data_file(*filename)] if filename else [self.empty_svg] # pylint: disable=no-value-for-parameter
+        args += kwargs.pop('args', [])
+        args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
+
+        with StdRedirect() as out:
+            effect.run(args)
+            if contains is not None:
+                self.assertIn(contains, out)
+            str(out)
+
+        if os.environ.get('FAIL_ON_DEPRICATION', False):
+            warnings = getattr(effect, 'warned_about', set())
+            effect.warned_about = set() # reset for next test
+            self.assertFalse(warnings, "Deprecated API is still being used!")
+
+        return effect

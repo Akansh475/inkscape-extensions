@@ -60,11 +60,11 @@ class DeprecatedEffect(object):
         if not hasattr(self, 'run'):
             self.run = self.affect
 
-    @staticmethod
-    def _depricated(name, msg=_('{} is deprecated and should be removed')):
+    @classmethod
+    def _depricated(cls, name, msg=_('{} is deprecated and should be removed'), stack=3):
         """Give the user a warning about their extension using a deprecated API"""
-        msg = msg.format('Effect.' + name)
-        warnings.warn(msg, DeprecationWarning, stacklevel=3)
+        msg = msg.format('Effect.' + name, cls=cls.__module__ + '.' + cls.__name__)
+        warnings.warn(msg, DeprecationWarning, stacklevel=stack)
 
     @property
     def OptionParser(self):
@@ -90,7 +90,7 @@ class DeprecatedEffect(object):
 
     def effect(self):
         self._depricated('effect', _('{} method is now a required method. It should '\
-            'be created in your extension class, even if it does nothing.'))
+            'be created on {cls}, even if it does nothing.'))
 
     @property
     def current_layer(self):

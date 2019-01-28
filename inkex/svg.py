@@ -39,8 +39,8 @@ from lxml import etree
 from .units import discover_unit, convert_unit, render_unit
 from .utils import removeNS
 from .elements import ( # pylint: disable=unused-import
-    BaseElement, Group, PathElement, Points, Rectangle, Image, Circle, Ellipse,
-    TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide,
+    BaseElement, OtherElements, Group, PathElement, Points, Rectangle, Image,
+    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide,
 )
 
 class SvgDocumentElement(BaseElement):
@@ -176,6 +176,9 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         """Choose what kind of functionality our element will have"""
         for cls in self.get_lookups():
             nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
+            tags = getattr(cls, 'tag_names', [])
+            if name.lower() in tags:
+                return cls
             if name.lower() == (tag or '').lower() and \
                   (not namespace or not nsp or nsp == namespace):
                 return cls

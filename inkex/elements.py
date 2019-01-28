@@ -96,6 +96,10 @@ class BaseElement(etree.ElementBase):
         # supression mechanisms to turn off xml's over engineering.
         return str(self.tag).split('}')[-1]
 
+class OtherElements(BaseElement):
+    """A bunch of other svg elements"""
+    tag_names = ['work', 'rdf', 'format', 'type', 'desc', 'font', 'font-face', 'filter', 'fegaussianblur']
+
 class Group(BaseElement):
     """Any group element (layer or regular group)"""
     tag_name = 'g'

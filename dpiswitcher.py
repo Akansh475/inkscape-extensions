@@ -197,12 +197,10 @@ def check_use(svg, element, scale_x, scale_y):
 class DPISwitcher(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--switcher", action="store",
-            type="string", dest="switcher", default="0",
+        self.arg_parser.add_argument(
+            "--switcher", type=str, dest="switcher", default="0",
             help="Select the DPI switch you want")
-        self.OptionParser.add_option("--action", action="store",
-            type="string", dest="action",
-            default=None, help="")
+        self.arg_parser.add_argument("--action", type=str, dest="action", default=None)
         self.factor_a = 90.0/96.0
         self.factor_b = 96.0/90.0
         self.units = "px"

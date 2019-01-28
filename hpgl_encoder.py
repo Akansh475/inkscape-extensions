@@ -16,21 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+Base class for HGPL Encoding
+"""
 
 import re
 import os
 import math
-import shutil
 import string
-
-from distutils.spawn import find_executable
-from subprocess import Popen, PIPE
 
 import inkex
 import simpletransform
 
 
-class hpglEncoder:
+class hpglEncoder(object):
     PI = math.pi
     TWO_PI = PI * 2
 
@@ -58,8 +58,8 @@ class hpglEncoder:
             self.doc = self.convertObjectsToPaths(effect.options.input_file, effect.document)
         else:
             self.doc = effect.document.getroot()
-        self.docWidth = effect.unittouu(self.doc.get('width'))
-        self.docHeight = effect.unittouu(self.doc.get('height'))
+        self.docWidth = effect.svg.unittouu(self.doc.get('width'))
+        self.docHeight = effect.svg.unittouu(self.doc.get('height'))
         self.hpgl = ''
         self.divergenceX = 'False'
         self.divergenceY = 'False'
@@ -70,11 +70,11 @@ class hpglEncoder:
         self.lastPen = -1
         self.offsetX = 0
         self.offsetY = 0
-        self.scaleX = self.options.resolutionX / effect.unittouu("1.0in") # dots per inch to dots per user unit
-        self.scaleY = self.options.resolutionY / effect.unittouu("1.0in") # dots per inch to dots per user unit
+        self.scaleX = self.options.resolutionX / effect.svg.unittouu("1.0in") # dots per inch to dots per user unit
+        self.scaleY = self.options.resolutionY / effect.svg.unittouu("1.0in") # dots per inch to dots per user unit
         scaleXY = (self.scaleX + self.scaleY) / 2
-        self.overcut = effect.unittouu(str(self.options.overcut) + "mm") * scaleXY # mm to dots (plotter coordinate system)
-        self.toolOffset = effect.unittouu(str(self.options.toolOffset) + "mm") * scaleXY # mm to dots
+        self.overcut = effect.svg.unittouu(str(self.options.overcut) + "mm") * scaleXY # mm to dots (plotter coordinate system)
+        self.toolOffset = effect.svg.unittouu(str(self.options.toolOffset) + "mm") * scaleXY # mm to dots
         self.flat = self.options.flat / (1016 / ((self.options.resolutionX + self.options.resolutionY) / 2)) # scale flatness to resolution
         if self.toolOffset > 0.0:
             self.toolOffsetFlat = self.flat / self.toolOffset * 4.5 # scale flatness to offset

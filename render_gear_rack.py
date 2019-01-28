@@ -49,19 +49,16 @@ def points_to_svgd(p):
 class RackGear(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option(
-            "-l", "--length",
-            action="store", type="float",
+        self.arg_parser.add_argument(
+            "-l", "--length", type="float",
             dest="length", default=100.,
             help="Rack Length")
-        self.OptionParser.add_option(
-            "-s", "--spacing",
-            action="store", type="float",
+        self.arg_parser.add_argument(
+            "-s", "--spacing", type="float",
             dest="spacing", default=10.,
             help="Tooth Spacing")
-        self.OptionParser.add_option(
-            "-a", "--angle",
-            action="store", type="float",
+        self.arg_parser.add_argument(
+            "-a", "--angle", type="float",
             dest="angle", default=20.,
             help="Contact Angle")
 

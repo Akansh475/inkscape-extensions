@@ -57,9 +57,9 @@ class Hershey( inkex.Effect ):
 
         # Embed text in group to make manipulation easier:
         g_attribs = {inkex.addNS('label','inkscape'):'Hershey Text' }
-        g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+        g = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
 
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         font = getattr(hersheydata, self.options.fontface)
         clearfont = hersheydata.futural  
         #Baseline: modernized roman simplex from JHF distribution.
@@ -94,7 +94,7 @@ class Hershey( inkex.Effect ):
             w = wmax
             
         #  Translate group to center of view, approximately
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
+        view_center = self.svg.get_center_position()
         t = 'translate(' + str( view_center[0] - scale*w/2) + ',' + str( view_center[1] ) + ')'
         if scale != 1:
             t += ' scale(' + str(scale) + ')'

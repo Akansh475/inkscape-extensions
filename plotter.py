@@ -26,40 +26,42 @@ import sys
 import gettext
 import hpgl_decoder
 import hpgl_encoder
+
 import inkex
 from inkex.localize import _
+from inkex.utils import inkbool
 
 
 class Plot(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option('--tab',               action='store', type='string',  dest='tab')
-        self.OptionParser.add_option('--portType',          action='store', type='string',  dest='portType',          default='serial',       help='Port type')
-        self.OptionParser.add_option('--parallelPort',      action='store', type='string',  dest='parallelPort',      default='/dev/usb/lp2', help='Parallel port')
-        self.OptionParser.add_option('--serialPort',        action='store', type='string',  dest='serialPort',        default='COM1',         help='Serial port')
-        self.OptionParser.add_option('--serialBaudRate',    action='store', type='string',  dest='serialBaudRate',    default='9600',         help='Serial Baud rate')
-        self.OptionParser.add_option('--serialByteSize',    action='store', type='string',  dest='serialByteSize',    default='eight',        help='Serial byte size')
-        self.OptionParser.add_option('--serialStopBits',    action='store', type='string',  dest='serialStopBits',    default='one',          help='Serial stop bits')
-        self.OptionParser.add_option('--serialParity',      action='store', type='string',  dest='serialParity',      default='none',         help='Serial parity')
-        self.OptionParser.add_option('--serialFlowControl', action='store', type='string',  dest='serialFlowControl', default='0',            help='Flow control')
-        self.OptionParser.add_option('--commandLanguage',   action='store', type='string',  dest='commandLanguage',   default='hpgl',         help='Command Language')
-        self.OptionParser.add_option('--resolutionX',       action='store', type='float',   dest='resolutionX',       default=1016.0,         help='Resolution X (dpi)')
-        self.OptionParser.add_option('--resolutionY',       action='store', type='float',   dest='resolutionY',       default=1016.0,         help='Resolution Y (dpi)')
-        self.OptionParser.add_option('--pen',               action='store', type='int',     dest='pen',               default=1,              help='Pen number')
-        self.OptionParser.add_option('--force',             action='store', type='int',     dest='force',             default=24,             help='Pen force (g)')
-        self.OptionParser.add_option('--speed',             action='store', type='int',     dest='speed',             default=20,             help='Pen speed (cm/s)')
-        self.OptionParser.add_option('--orientation',       action='store', type='string',  dest='orientation',       default='90',           help='Rotation (Clockwise)')
-        self.OptionParser.add_option('--mirrorX',           action='store', type='inkbool', dest='mirrorX',           default='FALSE',        help='Mirror X axis')
-        self.OptionParser.add_option('--mirrorY',           action='store', type='inkbool', dest='mirrorY',           default='FALSE',        help='Mirror Y axis')
-        self.OptionParser.add_option('--center',            action='store', type='inkbool', dest='center',            default='FALSE',        help='Center zero point')
-        self.OptionParser.add_option('--overcut',           action='store', type='float',   dest='overcut',           default=1.0,            help='Overcut (mm)')
-        self.OptionParser.add_option('--toolOffset',        action='store', type='float',   dest='toolOffset',        default=0.25,           help='Tool (Knife) offset correction (mm)')
-        self.OptionParser.add_option('--precut',            action='store', type='inkbool', dest='precut',            default='TRUE',         help='Use precut')
-        self.OptionParser.add_option('--flat',              action='store', type='float',   dest='flat',              default=1.2,            help='Curve flatness')
-        self.OptionParser.add_option('--autoAlign',         action='store', type='inkbool', dest='autoAlign',         default='TRUE',         help='Auto align')
-        self.OptionParser.add_option('--debug',             action='store', type='inkbool', dest='debug',             default='FALSE',        help='Show debug information')
-        self.OptionParser.add_option('--convertObjects',    action='store', type='inkbool', dest='convertObjects',    default='TRUE',         help='Convert objects to paths')
+        self.arg_parser.add_argument('--tab',               type=str,     dest='tab')
+        self.arg_parser.add_argument('--portType',          type=str,     dest='portType',          default='serial',       help='Port type')
+        self.arg_parser.add_argument('--parallelPort',      type=str,     dest='parallelPort',      default='/dev/usb/lp2', help='Parallel port')
+        self.arg_parser.add_argument('--serialPort',        type=str,     dest='serialPort',        default='COM1',         help='Serial port')
+        self.arg_parser.add_argument('--serialBaudRate',    type=str,     dest='serialBaudRate',    default='9600',         help='Serial Baud rate')
+        self.arg_parser.add_argument('--serialByteSize',    type=str,     dest='serialByteSize',    default='eight',        help='Serial byte size')
+        self.arg_parser.add_argument('--serialStopBits',    type=str,     dest='serialStopBits',    default='one',          help='Serial stop bits')
+        self.arg_parser.add_argument('--serialParity',      type=str,     dest='serialParity',      default='none',         help='Serial parity')
+        self.arg_parser.add_argument('--serialFlowControl', type=str,     dest='serialFlowControl', default='0',            help='Flow control')
+        self.arg_parser.add_argument('--commandLanguage',   type=str,     dest='commandLanguage',   default='hpgl',         help='Command Language')
+        self.arg_parser.add_argument('--resolutionX',       type=float,   dest='resolutionX',       default=1016.0,         help='Resolution X (dpi)')
+        self.arg_parser.add_argument('--resolutionY',       type=float,   dest='resolutionY',       default=1016.0,         help='Resolution Y (dpi)')
+        self.arg_parser.add_argument('--pen',               type=int,     dest='pen',               default=1,              help='Pen number')
+        self.arg_parser.add_argument('--force',             type=int,     dest='force',             default=24,             help='Pen force (g)')
+        self.arg_parser.add_argument('--speed',             type=int,     dest='speed',             default=20,             help='Pen speed (cm/s)')
+        self.arg_parser.add_argument('--orientation',       type=str,     dest='orientation',       default='90',           help='Rotation (Clockwise)')
+        self.arg_parser.add_argument('--mirrorX',           type=inkbool, dest='mirrorX',           default='FALSE',        help='Mirror X axis')
+        self.arg_parser.add_argument('--mirrorY',           type=inkbool, dest='mirrorY',           default='FALSE',        help='Mirror Y axis')
+        self.arg_parser.add_argument('--center',            type=inkbool, dest='center',            default='FALSE',        help='Center zero point')
+        self.arg_parser.add_argument('--overcut',           type=float,   dest='overcut',           default=1.0,            help='Overcut (mm)')
+        self.arg_parser.add_argument('--toolOffset',        type=float,   dest='toolOffset',        default=0.25,           help='Tool (Knife) offset correction (mm)')
+        self.arg_parser.add_argument('--precut',            type=inkbool, dest='precut',            default='TRUE',         help='Use precut')
+        self.arg_parser.add_argument('--flat',              type=float,   dest='flat',              default=1.2,            help='Curve flatness')
+        self.arg_parser.add_argument('--autoAlign',         type=inkbool, dest='autoAlign',         default='TRUE',         help='Auto align')
+        self.arg_parser.add_argument('--debug',             type=inkbool, dest='debug',             default='FALSE',        help='Show debug information')
+        self.arg_parser.add_argument('--convertObjects',    type=inkbool, dest='convertObjects',    default='TRUE',         help='Convert objects to paths')
 
     def effect(self):
         # get hpgl data

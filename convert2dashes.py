@@ -29,7 +29,7 @@ class SplitIt(inkex.Effect):
         self.not_converted = []
 
     def effect(self):
-        for i, node in self.selected.items():
+        for i, node in self.svg.selected.items():
             self.convert2dash(node)
         if len(self.not_converted):
             inkex.errormsg(_('Total number of objects not converted: {}\n').format(len(self.not_converted)))

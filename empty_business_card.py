@@ -5,10 +5,11 @@
 import re
 import inkex
 
-class C(inkex.Effect):
+class BusinessCard(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--size", action="store", type="string", dest="card_size", default="90mmx55mm", help="Business card size")
+        super(BusinessCard, self).__init__()
+        self.arg_parser.add_argument("-s", "--size", type=str, dest="card_size",
+                                     default="90mmx55mm", help="Business card size")
 
     def effect(self):
         size = self.options.card_size
@@ -32,13 +33,12 @@ class C(inkex.Effect):
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), width_unit)
 
-        width_int = int(self.uutounit(float(width), 'px'))
-        height_int = int(self.uutounit(float(height), 'px'))
+        width_int = int(self.svg.uutounit(float(width), 'px'))
+        height_int = int(self.svg.uutounit(float(height), 'px'))
 
         namedview.set(inkex.addNS('zoom', 'inkscape'), str(2))
         namedview.set(inkex.addNS('cx', 'inkscape'), str(width_int/2.0))
         namedview.set(inkex.addNS('cy', 'inkscape'), str(height_int/2.0))
 
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    BusinessCard().run()

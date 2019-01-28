@@ -4,10 +4,12 @@
 
 import inkex
 
-class C(inkex.Effect):
+class EmptyIcon(inkex.Effect):
+    """Empty Icon Template"""
     def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--size", action="store", type="int", dest="icon_size", default="16", help="Icon size")
+        super(EmptyIcon, self).__init__()
+        self.arg_parser.add_argument("-s", "--size", type=int, dest="icon_size",
+                                     default="16", help="Icon size")
 
     def effect(self):
 
@@ -31,5 +33,4 @@ class C(inkex.Effect):
         namedview.set(inkex.addNS('grid-bbox', 'inkscape'), "true")
 
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    EmptyIcon().run()

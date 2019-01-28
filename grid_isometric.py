@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 #Copyright (C) 2010 Jean-Luc JOULIN "JeanJouX" jean-luc.joulin@laposte.net
 
@@ -43,53 +43,34 @@ def draw_SVG_rect(x,y,w,h, width, fill, name, parent):
                     'x':str(x), 'y':str(y), 'width':str(w), 'height':str(h)}
     inkex.etree.SubElement(parent, inkex.addNS('rect','svg'), rect_attribs )
 
-class Grid_Polar(inkex.Effect):
+class GridPolar(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--x_divs",
-                        action="store", type="int", 
-                        dest="x_divs", default=5,
-                        help="Major X Divisions")
-        self.OptionParser.add_option("--y_divs",
-                        action="store", type="int", 
-                        dest="y_divs", default=5,
-                        help="Major X Divisions")        
-        self.OptionParser.add_option("--dx",
-                        action="store", type="float", 
-                        dest="dx", default=10.0,
-                        help="Major X division Spacing")
-        self.OptionParser.add_option("--subdivs",
-                        action="store", type="int", 
-                        dest="subdivs", default=2,
-                        help="Subdivisions per Major X division")
-        self.OptionParser.add_option("--subsubdivs",
-                        action="store", type="int", 
-                        dest="subsubdivs", default=5,
-                        help="Subsubdivisions per Minor X division")
-        self.OptionParser.add_option("--divs_th",
-                        action="store", type="float", 
-                        dest="divs_th", default=2,
-                        help="Major X Division Line thickness")
-        self.OptionParser.add_option("--subdivs_th",
-                        action="store", type="float", 
-                        dest="subdivs_th", default=1,
-                        help="Minor X Division Line thickness")
-        self.OptionParser.add_option("--subsubdivs_th",
-                        action="store", type="float", 
-                        dest="subsubdivs_th", default=0.3,
-                        help="Subminor X Division Line thickness")
-        self.OptionParser.add_option("--border_th",
-                        action="store", type="float", 
-                        dest="border_th", default=3,
-                        help="Border Line thickness")
+        super(GridPolar, self).__init__()
+        self.arg_parser.add_argument("--x_divs", type=int, dest="x_divs", default=5,
+                                     help="Major X Divisions")
+        self.arg_parser.add_argument("--y_divs", type=int, dest="y_divs", default=5,
+                                     help="Major X Divisions")
+        self.arg_parser.add_argument("--dx", type=float, dest="dx", default=10.0,
+                                     help="Major X division Spacing")
+        self.arg_parser.add_argument("--subdivs", type=int, dest="subdivs", default=2,
+                                     help="Subdivisions per Major X division")
+        self.arg_parser.add_argument("--subsubdivs", type=int, dest="subsubdivs", default=5,
+                                     help="Subsubdivisions per Minor X division")
+        self.arg_parser.add_argument("--divs_th", type=float, dest="divs_th", default=2,
+                                     help="Major X Division Line thickness")
+        self.arg_parser.add_argument("--subdivs_th", type=float, dest="subdivs_th", default=1,
+                                     help="Minor X Division Line thickness")
+        self.arg_parser.add_argument("--subsubdivs_th", type=float, dest="subsubdivs_th",
+                                     default=0.3, help="Subminor X Division Line thickness")
+        self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3,
+                                     help="Border Line thickness")
 
     def effect(self):
-
-        self.options.dx = self.unittouu(str(self.options.dx) + 'px')
-        self.options.divs_th = self.unittouu(str(self.options.divs_th) + 'px')
-        self.options.subdivs_th = self.unittouu(str(self.options.subdivs_th) + 'px')
-        self.options.subsubdivs_th = self.unittouu(str(self.options.subsubdivs_th) + 'px')
-        self.options.border_th = self.unittouu(str(self.options.border_th) + 'px')
+        self.options.dx = self.svg.unittouu(str(self.options.dx) + 'px')
+        self.options.divs_th = self.svg.unittouu(str(self.options.divs_th) + 'px')
+        self.options.subdivs_th = self.svg.unittouu(str(self.options.subdivs_th) + 'px')
+        self.options.subsubdivs_th = self.svg.unittouu(str(self.options.subsubdivs_th) + 'px')
+        self.options.border_th = self.svg.unittouu(str(self.options.border_th) + 'px')
 
         #Can't generate a grid too flat
         #If the Y dimension is smallest than half the X dimension, fix it.
@@ -97,18 +78,19 @@ class Grid_Polar(inkex.Effect):
             self.options.y_divs=int((self.options.x_divs+1)/2)
 
         #Find the pixel dimensions of the overall grid
-        xmax = self.options.dx * (2*self.options.x_divs) 
+        xmax = self.options.dx * (2*self.options.x_divs)
         ymax = self.options.dx * (2*self.options.y_divs) / 0.866025
 
         #Embed grid in group
         #Put in in the centre of the current view
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
-        t = 'translate(' + str( view_center[0]- xmax/2.0) + ',' + \
-                           str( view_center[1]- ymax/2.0) + ')'
-        g_attribs = {inkex.addNS('label','inkscape'):'Grid_Polar:X' + \
-                     str( self.options.x_divs )+':Y'+str( self.options.y_divs ),
-                     'transform':t }
-        grid = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+
+        view_center = self.svg.get_center_position()
+        t = 'translate(' + str(view_center[0]- xmax/2.0) + ',' + \
+                           str(view_center[1]- ymax/2.0) + ')'
+        g_attribs = {inkex.addNS('label', 'inkscape'): 'Grid_Polar:X' + \
+                     str(self.options.x_divs) + ':Y' + str(self.options.y_divs),
+                     'transform':t}
+        grid = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
 
         #Group for major x gridlines
         g_attribs = {inkex.addNS('label','inkscape'):'MajorXGridlines'}
@@ -150,9 +132,9 @@ class Grid_Polar(inkex.Effect):
 
         #X DIVISION
         #Shortcuts for divisions
-        sd  = self.options.subdivs   
-        ssd = self.options.subsubdivs 
-        
+        sd  = self.options.subdivs
+        ssd = self.options.subsubdivs
+
         #Initializing variable
         cpt_div=0
         cpt_subdiv=0
@@ -161,7 +143,7 @@ class Grid_Polar(inkex.Effect):
         com_subdiv=0
         com_subsubdiv=0
 
-        for i in range(1, (2*self.options.x_divs*sd*ssd)): 
+        for i in range(1, (2*self.options.x_divs*sd*ssd)):
             cpt_subsubdiv=cpt_subsubdiv+1
             com_subsubdiv=1
             if cpt_subsubdiv==self.options.subsubdivs:
@@ -195,11 +177,11 @@ class Grid_Polar(inkex.Effect):
                               self.options.divs_th,
                               'MajorXDiv'+str(i), majglx)
 
-         
+
         #Y DIVISIONS
         #Shortcuts for divisions
-        sd  = self.options.subdivs   
-        ssd = self.options.subsubdivs 
+        sd  = self.options.subdivs
+        ssd = self.options.subsubdivs
 
         taille=self.options.dx/sd/ssd   #Size of unity
         nb_ligne=(self.options.x_divs+self.options.y_divs)*self.options.subdivs*self.options.subsubdivs  #Global number of lines
@@ -229,14 +211,14 @@ class Grid_Polar(inkex.Effect):
                 cpt_subdiv=0
                 com_subsubdiv=0
                 com_subdiv=0
-                com_div=1                
+                com_div=1
 
             if ((2*l)-1)< (2*nb_ligne_x):
                 txa=taille*((2*l)-1)
                 tya=ymax
                 txb=0
                 tyb=ymax-(taille)/(2*0.866025)-(taille*((l-1))/(0.866025))
-        
+
                 if com_subsubdiv==1:
                     draw_SVG_line(txa, tya,
                               txb,tyb,
@@ -245,7 +227,7 @@ class Grid_Polar(inkex.Effect):
                     draw_SVG_line(xmax-txa, tya,
                               xmax-txb,tyb,
                               self.options.subsubdivs_th,
-                              'MajorZDiv'+str(l), mminglz) 
+                              'MajorZDiv'+str(l), mminglz)
                 if com_subdiv==1:
                     com_subdiv=0
                     draw_SVG_line(txa, tya,
@@ -255,17 +237,17 @@ class Grid_Polar(inkex.Effect):
                     draw_SVG_line(xmax-txa, tya,
                               xmax-txb,tyb,
                               self.options.subdivs_th,
-                              'MajorZDiv'+str(l), minglz) 
+                              'MajorZDiv'+str(l), minglz)
                 if com_div==1:
                     com_div=0
                     draw_SVG_line(txa, tya,
                               txb,tyb,
                               self.options.divs_th,
-                              'MajorYDiv'+str(i), majgly)        
+                              'MajorYDiv'+str(i), majgly)
                     draw_SVG_line(xmax-txa, tya,
                               xmax-txb,tyb,
                               self.options.divs_th,
-                              'MajorZDiv'+str(l), majglz) 
+                              'MajorZDiv'+str(l), majglz)
 
             if ((2*l)-1)==(2*nb_ligne_x):
                 txa=taille*((2*l)-1)
@@ -281,7 +263,7 @@ class Grid_Polar(inkex.Effect):
                     draw_SVG_line(xmax-txa, tya,
                               xmax-txb,tyb,
                               self.options.subsubdivs_th,
-                              'MajorZDiv'+str(l), mminglz) 
+                              'MajorZDiv'+str(l), mminglz)
                 if com_subdiv==1:
                     com_subdiv=0
                     draw_SVG_line(txa, tya,
@@ -291,17 +273,17 @@ class Grid_Polar(inkex.Effect):
                     draw_SVG_line(xmax-txa, tya,
                               xmax-txb,tyb,
                               self.options.subdivs_th,
-                              'MajorZDiv'+str(l), minglz) 
+                              'MajorZDiv'+str(l), minglz)
                 if com_div==1:
                     com_div=0
                     draw_SVG_line(txa, tya,
                               txb,tyb,
                               self.options.divs_th,
-                              'MajorYDiv'+str(i), majgly)        
+                              'MajorYDiv'+str(i), majgly)
                     draw_SVG_line(xmax-txa, tya,
                               xmax-txb,tyb,
                               self.options.divs_th,
-                              'MajorZDiv'+str(l), majglz) 
+                              'MajorZDiv'+str(l), majglz)
 
             if ((2*l)-1)> (2*nb_ligne_x):
                 txa=xmax
@@ -314,7 +296,7 @@ class Grid_Polar(inkex.Effect):
                     tya=ymax-(taille)/(2*0.866025)-(taille*((l-1-((2*nb_ligne_x)/2)))/(0.866025))
                     txb=taille*((2*(l-(2*nb_ligne_y))-1))
                     tyb=0
- 
+
                     if txb<xmax:
                         if com_subsubdiv==1:
                                 draw_SVG_line(txa, tya,
@@ -324,7 +306,7 @@ class Grid_Polar(inkex.Effect):
                                 draw_SVG_line(xmax-txa, tya,
                                 xmax-txb,tyb,
                                 self.options.subsubdivs_th,
-                                'MajorZDiv'+str(l), mminglz) 
+                                'MajorZDiv'+str(l), mminglz)
                         if com_subdiv==1:
                                 com_subdiv=0
                                 draw_SVG_line(txa, tya,
@@ -334,17 +316,17 @@ class Grid_Polar(inkex.Effect):
                                 draw_SVG_line(xmax-txa, tya,
                                 xmax-txb,tyb,
                                 self.options.subdivs_th,
-                                'MajorZDiv'+str(l), minglz) 
+                                'MajorZDiv'+str(l), minglz)
                         if com_div==1:
                                 com_div=0
                                 draw_SVG_line(txa, tya,
                                 txb,tyb,
                                 self.options.divs_th,
-                                'MajorYDiv'+str(i), majgly)        
+                                'MajorYDiv'+str(i), majgly)
                                 draw_SVG_line(xmax-txa, tya,
                                 xmax-txb,tyb,
                                 self.options.divs_th,
-                                'MajorZDiv'+str(l), majglz) 
+                                'MajorZDiv'+str(l), majglz)
 
                 else:
                     if txb<xmax:
@@ -356,7 +338,7 @@ class Grid_Polar(inkex.Effect):
                             draw_SVG_line(xmax-txa, tya,
                                     xmax-txb,tyb,
                                     self.options.subsubdivs_th,
-                                    'MajorZDiv'+str(l), mminglz) 
+                                    'MajorZDiv'+str(l), mminglz)
                         if com_subdiv==1:
                             com_subdiv=0
                             draw_SVG_line(txa, tya,
@@ -366,24 +348,19 @@ class Grid_Polar(inkex.Effect):
                             draw_SVG_line(xmax-txa, tya,
                                     xmax-txb,tyb,
                                     self.options.subdivs_th,
-                                    'MajorZDiv'+str(l), minglz) 
+                                    'MajorZDiv'+str(l), minglz)
                         if com_div==1:
                             com_div=0
                             draw_SVG_line(txa, tya,
                                     txb,tyb,
                                     self.options.divs_th,
-                                    'MajorYDiv'+str(i), majgly)        
+                                    'MajorYDiv'+str(i), majgly)
                             draw_SVG_line(xmax-txa, tya,
                                     xmax-txb,tyb,
                                     self.options.divs_th,
-                                    'MajorZDiv'+str(l), majglz) 
+                                    'MajorZDiv'+str(l), majglz)
 
 
 
 if __name__ == '__main__':
-    e = Grid_Polar()
-    e.affect()
-
-#End of file
-
-
+    GridPolar().run()

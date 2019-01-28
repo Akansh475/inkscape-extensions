@@ -21,11 +21,12 @@
 #
 
 import random
-import inkex
-from inkex.localize import _
+from subprocess import Popen, PIPE
+
 import voronoi
 
-from subprocess import Popen, PIPE
+import inkex
+from inkex.localize import _
 
 def clip_line(x1, y1, x2, y2, w, h):
     if x1 < 0 and x2 < 0:
@@ -66,24 +67,18 @@ def clip_line(x1, y1, x2, y2, w, h):
 
 class Pattern(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--size",
-                        action="store", type="int", 
-                        dest="size", default=10,
-                        help="Average size of cell (px)")
-        self.OptionParser.add_option("--border",
-                        action="store", type="int", 
-                        dest="border", default=0,
-                        help="Size of Border (px)")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+        super(Pattern, self).__init__()
+        self.arg_parser.add_argument("--size", type=int, dest="size", default=10,
+                                     help="Average size of cell (px)")
+        self.arg_parser.add_argument("--border", type=int, dest="border", default=0,
+                                     help="Size of Border (px)")
+        self.arg_parser.add_argument("--tab", type=str, dest="tab",
+                                     help="The selected UI-tab when OK was pressed")
 
     def effect(self):
         if not self.options.ids:
             return inkex.errormsg(_("Please select an object"))
-        scale = self.unittouu('1px')            # convert to document units
+        scale = self.svg.unittouu('1px')            # convert to document units
         self.options.size *= scale
         self.options.border *= scale
         q = {'x':0,'y':0,'width':0,'height':0}  # query the bounding box of ids[0]

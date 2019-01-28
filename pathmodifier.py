@@ -232,9 +232,9 @@ class PathModifier(inkex.Effect):
     def effect(self):
         #self.duplicateNodes(self.selected)
         #self.expandGroupsUnlinkClones(self.selected, True)
-        self.objectsToPaths(self.selected, True)
-        self.bbox=inkex.computeBBox(self.selected.values())
-        for id, node in self.selected.items():
+        self.objectsToPaths(self.svg.selected, True)
+        self.bbox = inkex.computeBBox(self.svg.selected.values())
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
                 p = inkex.parseCubicPath(d)
@@ -274,12 +274,12 @@ class Diffeo(PathModifier):
 
 
     def effect(self):
-        #self.duplicateNodes(self.selected)
-        self.expandGroupsUnlinkClones(self.selected, True)
-        self.expandGroups(self.selected, True)
-        self.objectsToPaths(self.selected, True)
-        self.bbox=inkex.computeBBox(self.selected.values())
-        for id, node in self.selected.items():
+        #self.duplicateNodes(self.svg.selected)
+        self.expandGroupsUnlinkClones(self.svg.selected, True)
+        self.expandGroups(self.svg.selected, True)
+        self.objectsToPaths(self.svg.selected, True)
+        self.bbox=inkex.computeBBox(self.svg.selected.values())
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg') or node.tag=='path':
                 d = node.get('d')
                 p = inkex.parseCubicPath(d)
@@ -291,7 +291,6 @@ class Diffeo(PathModifier):
                 node.set('d',inkex.formatCubicPath(p))
 
 if __name__ == '__main__':
-    e = Diffeo()
-    e.affect()
+    Diffeo().run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

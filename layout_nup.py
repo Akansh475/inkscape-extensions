@@ -95,7 +95,7 @@ class Nup(inkex.Effect):
         if len(x) != length:
             raise Exception("expandTuple: requires 2 or 4 item tuple")
         try:
-            return tuple(map(lambda ev: (self.unittouu(str(eval(str(ev)))+unit)/self.unittouu('1px')), x))
+            return tuple(map(lambda ev: (self.svg.unittouu(str(eval(str(ev)))+unit)/self.svg.unittouu('1px')), x))
         except:
             return None
 

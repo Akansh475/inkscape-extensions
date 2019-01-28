@@ -36,12 +36,14 @@ import math
 import re
 import random
 # local library
-import inkex
 import cubicsuperpath
 import bezmisc
 import pathmodifier
 import simpletransform
+
+import inkex
 from inkex.localize import _
+from inkex.utils import inkbool
 
 
 def flipxy(path):
@@ -98,36 +100,22 @@ def linearize(p,tolerance=0.001):
 class PathAlongPath(pathmodifier.Diffeo):
     def __init__(self):
         pathmodifier.Diffeo.__init__(self)
-        self.OptionParser.add_option("--title")
-        self.OptionParser.add_option("-n", "--noffset",
-                        action="store", type="float", 
-                        dest="noffset", default=0.0, help="normal offset")
-        self.OptionParser.add_option("-t", "--toffset",
-                        action="store", type="float", 
-                        dest="toffset", default=0.0, help="tangential offset")
-        self.OptionParser.add_option("-k", "--kind",
-                        action="store", type="string", 
-                        dest="kind", default=True,
-                        help="choose between wave or snake effect")
-        self.OptionParser.add_option("-c", "--copymode",
-                        action="store", type="string", 
-                        dest="copymode", default=True,
-                        help="repeat the path to fit deformer's length")
-        self.OptionParser.add_option("-p", "--space",
-                        action="store", type="float", 
-                        dest="space", default=0.0)
-        self.OptionParser.add_option("-v", "--vertical",
-                        action="store", type="inkbool", 
-                        dest="vertical", default=False,
-                        help="reference path is vertical")
-        self.OptionParser.add_option("-d", "--duplicate",
-                        action="store", type="inkbool", 
-                        dest="duplicate", default=False,
-                        help="duplicate pattern before deformation")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+        self.arg_parser.add_argument("--title")
+        self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0,
+                                     help="normal offset")
+        self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0,
+                                     help="tangential offset")
+        self.arg_parser.add_argument("-k", "--kind", type=str, dest="kind", default=True,
+                                     help="choose between wave or snake effect")
+        self.arg_parser.add_argument("-c", "--copymode", type=str, dest="copymode", default=True,
+                                     help="repeat the path to fit deformer's length")
+        self.arg_parser.add_argument("-p", "--space", type=float,  dest="space", default=0.0)
+        self.arg_parser.add_argument("-v", "--vertical", type=inkbool, dest="vertical", default=False,
+                                     help="reference path is vertical")
+        self.arg_parser.add_argument("-d", "--duplicate", type=inkbool, dest="duplicate", default=False,
+                                     help="duplicate pattern before deformation")
+        self.arg_parser.add_argument("--tab", type=str, dest="tab",
+                                     help="The selected UI-tab when OK was pressed")
 
     def prepareSelectionList(self):
 

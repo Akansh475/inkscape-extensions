@@ -34,6 +34,7 @@ from math import pi
 
 import inkex
 from inkex.paths import Path
+from inkex.utils import inkbool
 
 def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, height, left, bottom,
     fx="cos(3*t)", fy="sin(5*t)", times2pi = False, isoscale = True, drawaxis = True):
@@ -136,70 +137,38 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
 class ParamCurves(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--t_start",
-                        action="store", type="float",
-                        dest="t_start", default=0.0,
-                        help="Start t-value")
-        self.OptionParser.add_option("--t_end",
-                        action="store", type="float",
-                        dest="t_end", default=1.0,
-                        help="End t-value")
-        self.OptionParser.add_option("--times2pi",
-                        action="store", type="inkbool",
-                        dest="times2pi", default=True,
-                        help="Multiply t-range by 2*pi")
-        self.OptionParser.add_option("--xleft",
-                        action="store", type="float",
-                        dest="xleft", default=-1.0,
-                        help="x-value of rectangle's left")
-        self.OptionParser.add_option("--xright",
-                        action="store", type="float",
-                        dest="xright", default=1.0,
-                        help="x-value of rectangle's right")
-        self.OptionParser.add_option("--ybottom",
-                        action="store", type="float",
-                        dest="ybottom", default=-1.0,
-                        help="y-value of rectangle's bottom")
-        self.OptionParser.add_option("--ytop",
-                        action="store", type="float",
-                        dest="ytop", default=1.0,
-                        help="y-value of rectangle's top")
-        self.OptionParser.add_option("-s", "--samples",
-                        action="store", type="int",
-                        dest="samples", default=8,
-                        help="Samples")
-        self.OptionParser.add_option("--fofx",
-                        action="store", type="string",
-                        dest="fofx", default="cos(3*t)",
-                        help="fx(t) for plotting")
-        self.OptionParser.add_option("--fofy",
-                        action="store", type="string",
-                        dest="fofy", default="sin(5*t)",
-                        help="fy(t) for plotting")
-        self.OptionParser.add_option("--remove",
-                        action="store", type="inkbool",
-                        dest="remove", default=True,
-                        help="If True, source rectangle is removed")
-        self.OptionParser.add_option("--isoscale",
-                        action="store", type="inkbool",
-                        dest="isoscale", default=True,
-                        help="If True, isotropic scaling is used")
-        self.OptionParser.add_option("--drawaxis",
-                        action="store", type="inkbool",
-                        dest="drawaxis", default=True,
-                        help="If True, axis are drawn")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
-                        dest="tab", default="sampling",
-                        help="The selected UI-tab when OK was pressed")
-        self.OptionParser.add_option("--paramcurvesuse",
-                        action="store", type="string",
-                        dest="paramcurvesuse", default="",
-                        help="dummy")
-        self.OptionParser.add_option("--pythonfunctions",
-                        action="store", type="string",
-                        dest="pythonfunctions", default="",
-                        help="dummy")
+        self.arg_parser.add_argument("--t_start", type=float, dest="t_start", default=0.0,
+                                     help="Start t-value")
+        self.arg_parser.add_argument("--t_end", type=float, dest="t_end", default=1.0,
+                                     help="End t-value")
+        self.arg_parser.add_argument("--times2pi", type=inkbool, dest="times2pi", default=True,
+                                     help="Multiply t-range by 2*pi")
+        self.arg_parser.add_argument("--xleft", type=float, dest="xleft", default=-1.0,
+                                     help="x-value of rectangle's left")
+        self.arg_parser.add_argument("--xright", type=float, dest="xright", default=1.0,
+                                     help="x-value of rectangle's right")
+        self.arg_parser.add_argument("--ybottom", type=float, dest="ybottom", default=-1.0,
+                                     help="y-value of rectangle's bottom")
+        self.arg_parser.add_argument("--ytop", type=float, dest="ytop", default=1.0,
+                                     help="y-value of rectangle's top")
+        self.arg_parser.add_argument("-s", "--samples", type="int", dest="samples", default=8,
+                                     help="Samples")
+        self.arg_parser.add_argument("--fofx", type=str, dest="fofx", default="cos(3*t)",
+                                     help="fx(t) for plotting")
+        self.arg_parser.add_argument("--fofy", type=str, dest="fofy", default="sin(5*t)",
+                                     help="fy(t) for plotting")
+        self.arg_parser.add_argument("--remove", type=inkbool, dest="remove", default=True,
+                                     help="If True, source rectangle is removed")
+        self.arg_parser.add_argument("--isoscale", type=inkbool, dest="isoscale", default=True,
+                                     help="If True, isotropic scaling is used")
+        self.arg_parser.add_argument("--drawaxis", type=inkbool, dest="drawaxis", default=True,
+                                     help="If True, axis are drawn")
+        self.arg_parser.add_argument("--tab", type=str, dest="tab", default="sampling",
+                                     help="The selected UI-tab when OK was pressed")
+        self.arg_parser.add_argument("--paramcurvesuse", type=str, dest="paramcurvesuse", default="",
+                                     help="dummy")
+        self.arg_parser.add_argument("--pythonfunctions", type=str, dest="pythonfunctions", default="",
+                                     help="dummy")
 
     def effect(self):
         for id, node in self.selected.items():

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 Peter Lewerin, peter.lewerin@tele2.se
 #
@@ -23,7 +23,7 @@ in a drawing.
 
 It uses the selection's bounding box, so if the bounding box has empty
 space in the x- or y-direction (such as with some stars) the results
-will look strange.  Strokes might also overlap the edge of the 
+will look strange.  Strokes might also overlap the edge of the
 bounding box.
 
 The dimension arrows aren't measured: use the "Visualize Path/Measure
@@ -46,20 +46,18 @@ import pathmodifier
 
 
 class Dimension(pathmodifier.PathModifier):
+    """Add dimentions as a path modifier"""
     def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-x", "--xoffset",
-                        action="store", type="float", 
-                        dest="xoffset", default=100.0,
-                        help="x offset of the vertical dimension arrow")    
-        self.OptionParser.add_option("-y", "--yoffset",
-                        action="store", type="float", 
-                        dest="yoffset", default=100.0,
-                        help="y offset of the horizontal dimension arrow")    
-        self.OptionParser.add_option("-t", "--type",
-                        action="store", type="string", 
-                        dest="type", default="geometric",
-                        help="Bounding box type")
+        super(Dimension, self).__init__()
+        self.arg_parser.add_argument(
+            "-x", "--xoffset", type=float, dest="xoffset", default=100.0,
+            help="x offset of the vertical dimension arrow")
+        self.arg_parser.add_argument(
+            "-y", "--yoffset", type=float, dest="yoffset", default=100.0,
+            help="y offset of the horizontal dimension arrow")
+        self.arg_parser.add_argument(
+            "-t", "--type", type=str, dest="type", default="geometric",
+            help="Bounding box type")
 
     def addMarker(self, name, rotate):
         defs = self.xpathSingle('/svg:svg//svg:defs')
@@ -99,7 +97,7 @@ class Dimension(pathmodifier.PathModifier):
         return line
 
     def effect(self):
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         self.xoffset = scale*self.options.xoffset
         self.yoffset = scale*self.options.yoffset
 
@@ -150,17 +148,17 @@ class Dimension(pathmodifier.PathModifier):
         line = self.dimVLine(self.bbox[0], [0, 2])
         line.set('stroke-width', str(0.5*scale))
         group.append(line)
-        
+
         line = self.dimVLine(self.bbox[1], [0, 2])
         line.set('stroke-width', str(0.5*scale))
         group.append(line)
-        
+
         line = self.dimVLine(self.bbox[0], [1, 0])
         line.set('marker-start', 'url(#Arrow1Lstart)')
         line.set('marker-end', 'url(#Arrow1Lend)')
         line.set('stroke-width', str(scale))
         group.append(line)
-        
+
         line = self.dimHLine(self.bbox[2], [2, 0])
         line.set('stroke-width', str(0.5*scale))
         group.append(line)
@@ -171,7 +169,7 @@ class Dimension(pathmodifier.PathModifier):
 
         for id, node in self.selected.iteritems():
             group.append(node)
-        
+
         layer.append(group)
 
 if __name__ == '__main__':

@@ -5,12 +5,16 @@
 import re
 import inkex
 
-class C(inkex.Effect):
+class EmptyVideo(inkex.Effect):
+    """Empty video template"""
     def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--size", action="store", type="string", dest="video_size", default="16", help="Video size")
-        self.OptionParser.add_option("-w", "--width", action="store", type="int", dest="video_width", default="1920", help="Custom width")
-        self.OptionParser.add_option("-z", "--height", action="store", type="int", dest="video_height", default="1080", help="Custom height")
+        super(EmptyVideo, self).__init__()
+        self.arg_parser.add_argument("-s", "--size", type=str, dest="video_size",
+                                     default="16", help="Video size")
+        self.arg_parser.add_argument("-w", "--width", type=int, dest="video_width",
+                                     default="1920", help="Custom width")
+        self.arg_parser.add_argument("-z", "--height", type=int, dest="video_height",
+                                     default="1080", help="Custom height")
 
     def effect(self):
         size = self.options.video_size
@@ -40,5 +44,4 @@ class C(inkex.Effect):
         namedview.set(inkex.addNS('cy', 'inkscape'), str(height/2.0))
 
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    EmptyVideo().run()

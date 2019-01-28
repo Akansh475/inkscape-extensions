@@ -1,31 +1,33 @@
 #!/usr/bin/env python
-'''
+#
+# Copyright (C) 2015, ~suv <suv-sf@users.sf.net>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
 image_attributes.py - adjust image attributes which don't have global
 GUI options yet
 
 Tool for Inkscape 0.91 to adjust rendering of drawings with linked
 or embedded bitmap images created with older versions of Inkscape
 or third-party applications.
-
-Copyright (C) 2015, ~suv <suv-sf@users.sf.net>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
 
 # local library
 import inkex
+from inkex.utils import inkbool
 import simplestyle
 
 
@@ -33,38 +35,27 @@ class SetAttrImage(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         # main options
-        self.OptionParser.add_option("--fix_scaling",
-                                     action="store", type="inkbool",
-                                     dest="fix_scaling", default=True,
-                                     help="")
-        self.OptionParser.add_option("--fix_rendering",
-                                     action="store", type="inkbool",
-                                     dest="fix_rendering", default=False,
-                                     help="")
-        self.OptionParser.add_option("--aspect_ratio",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--fix_scaling", type=inkbool,
+                                     dest="fix_scaling", default=True)
+        self.arg_parser.add_argument("--fix_rendering", type=inkbool,
+                                     dest="fix_rendering", default=False)
+        self.arg_parser.add_argument("--aspect_ratio", type=str,
                                      dest="aspect_ratio", default="none",
                                      help="Value for attribute 'preserveAspectRatio'")
-        self.OptionParser.add_option("--aspect_clip",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--aspect_clip", type=str,
                                      dest="aspect_clip", default="unset",
                                      help="optional 'meetOrSlice' value")
-        self.OptionParser.add_option("--aspect_ratio_scope",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--aspect_ratio_scope", type=str,
                                      dest="aspect_ratio_scope", default="selected_only",
-                                     help="scope within which to edit 'preserveAspectRatio' attribute")
-        self.OptionParser.add_option("--image_rendering",
-                                     action="store", type="string",
+                                     help="scope within which to edit 'preserveAspectRatio' attr")
+        self.arg_parser.add_argument("--image_rendering", type=str,
                                      dest="image_rendering", default="unset",
                                      help="Value for attribute 'image-rendering'")
-        self.OptionParser.add_option("--image_rendering_scope",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--image_rendering_scope", type=str,
                                      dest="image_rendering_scope", default="selected_only",
                                      help="scope within which to edit 'image-rendering' attribute")
         # tabs
-        self.OptionParser.add_option("--tab_main",
-                                     action="store", type="string",
-                                     dest="tab_main")
+        self.arg_parser.add_argument("--tab_main", type=str, dest="tab_main")
 
     # core method
 

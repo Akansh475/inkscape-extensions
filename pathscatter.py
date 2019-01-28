@@ -36,9 +36,11 @@ import random
 # third party
 from lxml import etree
 # local library
-import inkex
 import pathmodifier
+
+import inkex
 from inkex.localize import _
+from inkex.utils import inkbool
 
 def flipxy(path):
     for pathcomp in path:
@@ -64,8 +66,8 @@ def linearize(p,tolerance=0.001):
     '''
     This function receives a component of a 'cubicsuperpath' and returns two things:
     The path subdivided in many straight segments, and an array containing the length of each segment.
-    
-    We could work with bezier path as well, but bezier arc lengths are (re)computed for each point 
+
+    We could work with bezier path as well, but bezier arc lengths are (re)computed for each point
     in the deformed object. For complex paths, this might take a while.
     '''
     zero=0.000001
@@ -94,48 +96,26 @@ def linearize(p,tolerance=0.001):
 class PathScatter(pathmodifier.Diffeo):
     def __init__(self):
         pathmodifier.Diffeo.__init__(self)
-        self.OptionParser.add_option("--title")
-        self.OptionParser.add_option("-n", "--noffset",
-                        action="store", type="float", 
-                        dest="noffset", default=0.0, help="normal offset")
-        self.OptionParser.add_option("-t", "--toffset",
-                        action="store", type="float", 
-                        dest="toffset", default=0.0, help="tangential offset")
-        self.OptionParser.add_option("-g", "--grouppick",
-                        action="store", type="inkbool", 
-                        dest="grouppick", default=False,
-                        help="if pattern is a group then randomly pick group members")
-        self.OptionParser.add_option("-m", "--pickmode",
-                        action="store", type="string", 
-                        dest="pickmode", default="rand",
-                        help="group pick mode (rand=random seq=sequentially)")
-        self.OptionParser.add_option("-f", "--follow",
-                        action="store", type="inkbool", 
-                        dest="follow", default=True,
-                        help="choose between wave or snake effect")
-        self.OptionParser.add_option("-s", "--stretch",
-                        action="store", type="inkbool", 
-                        dest="stretch", default=True,
-                        help="repeat the path to fit deformer's length")
-        self.OptionParser.add_option("-p", "--space",
-                        action="store", type="float", 
-                        dest="space", default=0.0)
-        self.OptionParser.add_option("-v", "--vertical",
-                        action="store", type="inkbool", 
-                        dest="vertical", default=False,
-                        help="reference path is vertical")
-        self.OptionParser.add_option("-d", "--duplicate",
-                        action="store", type="inkbool", 
-                        dest="duplicate", default=False,
-                        help="duplicate pattern before deformation")
-        self.OptionParser.add_option("-c", "--copymode",
-                        action="store", type="string", 
-                        dest="copymode", default="clone",
-                        help="duplicate pattern before deformation")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+        self.arg_parser.add_argument("--title")
+        self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0, help="normal offset")
+        self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0, help="tangential offset")
+        self.arg_parser.add_argument("-g", "--grouppick", type=inkbool, dest="grouppick", default=False,
+                                     help="if pattern is a group then randomly pick group members")
+        self.arg_parser.add_argument("-m", "--pickmode", type="string", dest="pickmode", default="rand",
+                                     help="group pick mode (rand=random seq=sequentially)")
+        self.arg_parser.add_argument("-f", "--follow", type=inkbool, dest="follow", default=True,
+                                     help="choose between wave or snake effect")
+        self.arg_parser.add_argument("-s", "--stretch", type=inkbool, dest="stretch", default=True,
+                                     help="repeat the path to fit deformer's length")
+        self.arg_parser.add_argument("-p", "--space", type=float, dest="space", default=0.0)
+        self.arg_parser.add_argument("-v", "--vertical", type=inkbool, dest="vertical", default=False,
+                                     help="reference path is vertical")
+        self.arg_parser.add_argument("-d", "--duplicate", type=inkbool, dest="duplicate", default=False,
+                                     help="duplicate pattern before deformation")
+        self.arg_parser.add_argument("-c", "--copymode", type="string", dest="copymode", default="clone",
+                                     help="duplicate pattern before deformation")
+        self.arg_parser.add_argument("--tab", type="string", dest="tab",
+                                     help="The selected UI-tab when OK was pressed")
 
     def prepareSelectionList(self):
 
@@ -145,7 +125,7 @@ class PathScatter(pathmodifier.Diffeo):
         #id = self.options.ids[-1]
         id = idList[-1]
         self.patternNode=self.selected[id]
-		
+
         self.gNode = etree.Element('{http://www.w3.org/2000/svg}g')
         self.patternNode.getparent().append(self.gNode)
 
@@ -166,7 +146,7 @@ class PathScatter(pathmodifier.Diffeo):
 
     def lengthtotime(self,l):
         '''
-        Receives an arc length l, and returns the index of the segment in self.skelcomp 
+        Receives an arc length l, and returns the index of the segment in self.skelcomp
         containing the corresponding point, to gether with the position of the point on this segment.
 
         If the deformer is closed, do computations modulo the total length.
@@ -209,7 +189,7 @@ class PathScatter(pathmodifier.Diffeo):
             inkex.errormsg(_("This extension requires two selected paths."))
             return
         self.prepareSelectionList()
-        
+
         #center at (0,0)
         bbox = inkex.computeBBox([self.patternNode])
         mat=[[1,0,-(bbox[0]+bbox[1])/2],[0,1,-(bbox[2]+bbox[3])/2]]
@@ -218,7 +198,7 @@ class PathScatter(pathmodifier.Diffeo):
             mat = simpletransform.composeTransform([[0,-1,0],[1,0,0]],mat)
         mat[1][2] += self.options.noffset
         inkex.applyTransformToNode(mat,self.patternNode)
-                
+
         width=bbox[1]-bbox[0]
         dx=width+self.options.space
 
@@ -232,9 +212,9 @@ class PathScatter(pathmodifier.Diffeo):
         else :
             patternList.append(self.patternNode)
         #inkex.debug(patternList)
-                
+
         counter=0
-        for skelnode in self.skeletons.itervalues(): 
+        for skelnode in self.skeletons.itervalues():
             self.curSekeleton = parsecubicPath(skelnode.get('d'))
             for comp in self.curSekeleton:
                 self.skelcomp,self.lengths=linearize(comp)
@@ -261,13 +241,13 @@ class PathScatter(pathmodifier.Diffeo):
                     if self.options.pickmode=="seq":
                         clone=copy.deepcopy(patternList[counter])
                         counter=(counter+1)%len(patternList)
-                        
+
                     #!!!--> should it be given an id?
                     #seems to work without this!?!
                     myid = patternList[random.randint(0, len(patternList)-1)].tag.split('}')[-1]
                     clone.set("id", self.uniqueId(myid))
                     self.gNode.append(clone)
-                    
+
                     inkex.applyTransformToNode(mat,clone)
 
                     s+=dx

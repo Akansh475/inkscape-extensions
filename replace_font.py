@@ -137,25 +137,16 @@ class ReplaceFont(inkex.Effect):
     '''
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--fr_find", action="store",
-                                        type="string", dest="fr_find",
-                                        default=None, help="")
-
-        self.OptionParser.add_option("--fr_replace", action="store",
-                                        type="string", dest="fr_replace",
-                                        default=None, help="")
-
-        self.OptionParser.add_option("--r_replace", action="store",
-                                        type="string", dest="r_replace",
-                                        default=None, help="")
-
-        self.OptionParser.add_option("--action", action="store",
-                                        type="string", dest="action",
-                                        default=None, help="")
-
-        self.OptionParser.add_option("--scope", action="store",
-                                        type="string", dest="scope",
-                                        default=None, help="")
+        self.arg_parser.add_argument("--fr_find", type=str, dest="fr_find",
+                                     default=None, help="")
+        self.arg_parser.add_argument("--fr_replace", type=str, dest="fr_replace",
+                                     default=None, help="")
+        self.arg_parser.add_argument("--r_replace", type=str, dest="r_replace",
+                                     default=None, help="")
+        self.arg_parser.add_argument("--action", type=str, dest="action",
+                                     default=None, help="")
+        self.arg_parser.add_argument("--scope", type=str, dest="scope",
+                                     default=None, help="")
 
     def find_child_text_items(self, node):
         '''

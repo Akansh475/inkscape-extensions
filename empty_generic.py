@@ -3,16 +3,17 @@
 # Written by Tavmjong Bah
 
 import inkex
+from inkex.utils import inkbool
 
-class C(inkex.Effect):
+class GenericTemplate(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-w", "--width", action="store", type="int", dest="generic_width", default="1920", help="Custom width")
-        self.OptionParser.add_option("-z", "--height", action="store", type="int", dest="generic_height", default="1080", help="Custom height")
-        self.OptionParser.add_option("-u", "--unit", action="store", type="string", dest="generic_unit", default="px", help="SVG Unit")
-        self.OptionParser.add_option("-b", "--background", action="store", type="string", dest="generic_background", default="normal", help="Canvas background")
-        self.OptionParser.add_option("-n", "--noborder", action="store", type="inkbool", dest="generic_noborder", default=False)
-        # self.OptionParser.add_option("-l", "--layer", action="store", type="inkbool", dest="generic_layer", default=True)
+        self.arg_parser.add_argument("-w", "--width", type=int, dest="generic_width", default="1920", help="Custom width")
+        self.arg_parser.add_argument("-z", "--height", type=int, dest="generic_height", default="1080", help="Custom height")
+        self.arg_parser.add_argument("-u", "--unit", type=str, dest="generic_unit", default="px", help="SVG Unit")
+        self.arg_parser.add_argument("-b", "--background", type=str, dest="generic_background", default="normal", help="Canvas background")
+        self.arg_parser.add_argument("-n", "--noborder", type=inkbool, dest="generic_noborder", default=False)
+        # self.arg_parser.add_argument("-l", "--layer", type=inkbool, dest="generic_layer", default=True)
 
     def effect(self):
 
@@ -33,9 +34,9 @@ class C(inkex.Effect):
         namedview.set(inkex.addNS('document-units', 'inkscape'), unit)
 
         # Until units are supported in 'cx', etc.
-        namedview.set(inkex.addNS('zoom', 'inkscape'), str(512.0/self.uutounit(width, 'px')))
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(self.uutounit(width, 'px')/2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(self.uutounit(height, 'px')/2.0))
+        namedview.set(inkex.addNS('zoom', 'inkscape'), str(512.0/self.svg.uutounit(width, 'px')))
+        namedview.set(inkex.addNS('cx', 'inkscape'), str(self.svg.uutounit(width, 'px')/2.0))
+        namedview.set(inkex.addNS('cy', 'inkscape'), str(self.svg.uutounit(height, 'px')/2.0))
 
         if self.options.generic_background == "white":
             namedview.set('pagecolor', "#ffffff")
@@ -77,5 +78,4 @@ class C(inkex.Effect):
         #             pass
 
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    GenericTemplate().run()

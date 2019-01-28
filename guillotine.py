@@ -46,6 +46,7 @@ except:
     bsubprocess = False
 # local library
 import inkex
+from inkex.utils import inkbool
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -53,17 +54,9 @@ class Guillotine(inkex.Effect):
     """Exports slices made using guides"""
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--directory", action="store",
-                                        type="string", dest="directory",
-                                        default=None, help="")
-
-        self.OptionParser.add_option("--image", action="store",
-                                        type="string", dest="image",
-                                        default=None, help="")
-
-        self.OptionParser.add_option("--ignore", action="store",
-                                        type="inkbool", dest="ignore",
-                                        default=None, help="")
+        self.arg_parser.add_argument("--directory", type=str, dest="directory")
+        self.arg_parser.add_argument("--image", type=str, dest="image")
+        self.arg_parser.add_argument("--ignore", type=inkbool, dest="ignore")
 
     def get_guides(self):
         '''
@@ -116,7 +109,7 @@ class Guillotine(inkex.Effect):
         '''
         root = self.document.getroot()
         horizontals = ['0']
-        height = self.unittouu(root.attrib['height'])
+        height = self.svg.unittouu(root.attrib['height'])
         for h in self.get_all_horizontal_guides():
             if h >= 0 and float(h) <= float(height):
                 horizontals.append(h)
@@ -132,7 +125,7 @@ class Guillotine(inkex.Effect):
         '''
         root = self.document.getroot()
         verticals = ['0']
-        width = self.unittouu(root.attrib['width'])
+        width = self.svg.unittouu(root.attrib['width'])
         for v in self.get_all_vertical_guides():
             if v >= 0 and float(v) <= float(width):
                 verticals.append(v)

@@ -115,7 +115,7 @@ class MyEffect(inkex.Effect):
         self.dxf_add( r12_header )
         
         scale = 25.4/90.0
-        h = self.unittouu(self.getDocumentHeight())
+        h = self.svg.unittouu(self.svg.height)
         
         path = '//svg:path'
         for node in self.document.getroot().xpath(path, namespaces=inkex.NSS):

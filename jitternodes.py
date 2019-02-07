@@ -21,6 +21,7 @@
 import math
 import random
 import inkex
+import inkex.utils
 
 def randomize(pos, rx, ry, dist):
     (x, y) = pos
@@ -58,34 +59,34 @@ def randomize(pos, rx, ry, dist):
 class JitterNodes(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--title")
-        self.OptionParser.add_option("-x", "--radiusx",
-                        action="store", type="float",
+        self.arg_parser.add_argument("--title")
+        self.arg_parser.add_argument("-x", "--radiusx",
+                        action="store", type=float,
                         dest="radiusx", default=10.0,
                         help="Randomly move nodes and handles within this radius, X")
-        self.OptionParser.add_option("-y", "--radiusy",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-y", "--radiusy",
+                        action="store", type=float,
                         dest="radiusy", default=10.0,
                         help="Randomly move nodes and handles within this radius, Y")
-        self.OptionParser.add_option("-c", "--ctrl",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("-c", "--ctrl",
+                        action="store", type=inkex.utils.inkbool,
                         dest="ctrl", default=True,
                         help="Randomize control points")
-        self.OptionParser.add_option("-e", "--end",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("-e", "--end",
+                        action="store", type=inkex.utils.inkbool,
                         dest="end", default=True,
                         help="Randomize nodes")
-        self.OptionParser.add_option("-d", "--dist",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-d", "--dist",
+                        action="store", type=str,
                         dest="dist", default="Uniform",
                         help="Choose the distribution of the displacements")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
                 p = inkex.parseCubicPath(d)
@@ -106,7 +107,7 @@ class JitterNodes(inkex.Effect):
 
 if __name__ == '__main__':
     e = JitterNodes()
-    e.affect()
+    e.run()
 
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

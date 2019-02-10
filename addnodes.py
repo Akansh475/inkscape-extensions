@@ -30,25 +30,25 @@ from inkex.utils import *
 class SplitIt(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--segments",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("--segments",
+                        action="store", type=int,
                         dest="segments", default=2,
                         help="Number of segments to divide the path into")
-        self.OptionParser.add_option("--max",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--max",
+                        action="store", type=float,
                         dest="max", default=2,
                         help="Number of segments to divide the path into")
-        self.OptionParser.add_option("--method",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--method",
+                        action="store", type=str,
                         dest="method", default='',
                         help="The kind of division to perform")
 
     def effect(self):
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
-                p = cubicsuperpath.parsePath(node.get('d'))
-                
+                d = node.get('d')
+                p = inkex.parseCubicPath(d)
                 #lens, total = csplength(p)
                 #avg = total/numlengths(lens)
                 #inkex.debug("average segment length: %s" % avg)
@@ -58,23 +58,24 @@ class SplitIt(inkex.Effect):
                     new.append([sub[0][:]])
                     i = 1
                     while i <= len(sub)-1:
-                        length = cspseglength(new[-1][-1], sub[i])
-                        
+                        length = inkex.cspseglength(new[-1][-1], sub[i])
+
                         if self.options.method == 'bynum':
                             splits = self.options.segments
                         else:
                             splits = math.ceil(length/self.options.max)
 
                         for s in range(int(splits),1,-1):
-                            new[-1][-1], next, sub[i] = cspbezsplitatlength(new[-1][-1], sub[i], 1.0/s)
+                            result = inkex.cspbezsplitatlength(new[-1][-1], sub[i], 1.0/s)
+                            better_result = [[list(_) for _ in elements] for elements in result]
+                            new[-1][-1], next, sub[i] = better_result
                             new[-1].append(next[:])
                         new[-1].append(sub[i])
                         i+=1
-                    
-                node.set('d',cubicsuperpath.formatPath(new))
+                node.set('d',inkex.formatCubicPath(new))
 
 if __name__ == '__main__':
     e = SplitIt()
-    e.affect()
+    e.run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

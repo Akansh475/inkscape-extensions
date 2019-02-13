@@ -151,7 +151,7 @@ class ParamCurves(inkex.Effect):
                                      help="y-value of rectangle's bottom")
         self.arg_parser.add_argument("--ytop", type=float, dest="ytop", default=1.0,
                                      help="y-value of rectangle's top")
-        self.arg_parser.add_argument("-s", "--samples", type="int", dest="samples", default=8,
+        self.arg_parser.add_argument("-s", "--samples", type=int, dest="samples", default=8,
                                      help="Samples")
         self.arg_parser.add_argument("--fofx", type=str, dest="fofx", default="cos(3*t)",
                                      help="fx(t) for plotting")

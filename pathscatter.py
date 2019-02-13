@@ -101,7 +101,7 @@ class PathScatter(pathmodifier.Diffeo):
         self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0, help="tangential offset")
         self.arg_parser.add_argument("-g", "--grouppick", type=inkbool, dest="grouppick", default=False,
                                      help="if pattern is a group then randomly pick group members")
-        self.arg_parser.add_argument("-m", "--pickmode", type="string", dest="pickmode", default="rand",
+        self.arg_parser.add_argument("-m", "--pickmode", type=str, dest="pickmode", default="rand",
                                      help="group pick mode (rand=random seq=sequentially)")
         self.arg_parser.add_argument("-f", "--follow", type=inkbool, dest="follow", default=True,
                                      help="choose between wave or snake effect")
@@ -112,9 +112,9 @@ class PathScatter(pathmodifier.Diffeo):
                                      help="reference path is vertical")
         self.arg_parser.add_argument("-d", "--duplicate", type=inkbool, dest="duplicate", default=False,
                                      help="duplicate pattern before deformation")
-        self.arg_parser.add_argument("-c", "--copymode", type="string", dest="copymode", default="clone",
+        self.arg_parser.add_argument("-c", "--copymode", type=str, dest="copymode", default="clone",
                                      help="duplicate pattern before deformation")
-        self.arg_parser.add_argument("--tab", type="string", dest="tab",
+        self.arg_parser.add_argument("--tab", type=str, dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 
     def prepareSelectionList(self):

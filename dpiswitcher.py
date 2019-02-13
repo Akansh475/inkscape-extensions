@@ -334,9 +334,7 @@ class DPISwitcher(inkex.Effect):
 
                 # set preserved transforms on top-level elements
                 if width_scale != 1.0 and height_scale != 1.0:
-                    mat = simpletransform.parseTransform(
-                        'scale({},{})'.format(width_scale, height_scale))
-                    inkex.applyTransformToNode(mat, element)
+                    element.transform.add_scale(width_scale, height_scale)
 
     def scaleElement(self, m):
         pass  # TODO: optionally scale graphics elements only?

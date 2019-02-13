@@ -131,7 +131,7 @@ class NiceChart(inkex.Effect):
                                      help="height of bars")
         self.arg_parser.add_argument("-O", "--bar-offset", type=int, dest="bar_offset", default='5',
                                      help="distance between bars")
-        self.arg_parser.add_argument("--stroke-width", type="float", dest="stroke_width", default='1')
+        self.arg_parser.add_argument("--stroke-width", type=float, dest="stroke_width", default='1')
         self.arg_parser.add_argument("-o", "--text-offset", type=int, dest="text_offset", default='5',
                                      help="distance between bar and descriptions")
         self.arg_parser.add_argument("--heading-offset", type=int, dest="heading_offset", default='50',
@@ -216,8 +216,8 @@ class NiceChart(inkex.Effect):
         svg = self.document.getroot()
 
         # Get the page attributes:
-        width  = self.svg.getunittouu(svg.get('width'))
-        height = self.svg.getunittouu(svg.attrib['height'])
+        width  = self.svg.unittouu(svg.get('width'))
+        height = self.svg.unittouu(svg.attrib['height'])
 
         # Create a new layer.
         layer = inkex.etree.SubElement(svg, 'g')

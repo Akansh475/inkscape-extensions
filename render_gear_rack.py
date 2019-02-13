@@ -50,15 +50,15 @@ class RackGear(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument(
-            "-l", "--length", type="float",
+            "-l", "--length", type=float,
             dest="length", default=100.,
             help="Rack Length")
         self.arg_parser.add_argument(
-            "-s", "--spacing", type="float",
+            "-s", "--spacing", type=float,
             dest="spacing", default=10.,
             help="Tooth Spacing")
         self.arg_parser.add_argument(
-            "-a", "--angle", type="float",
+            "-a", "--angle", type=float,
             dest="angle", default=20.,
             help="Contact Angle")
 

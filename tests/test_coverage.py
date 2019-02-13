@@ -22,13 +22,13 @@ Test how well we cover the code with tests.
 import os
 import sys
 import inspect
+import unittest
 
 from inkex.effect import Effect
 from inkex.utils import DependencyError
 
 from tests.base import TestCase
-import unittest
-from tests.base.mock import replace_function
+from tests.base.mock import replace_function, ManualVerbosity
 
 class NoMainError(Exception):
     """Many effects try and call affect without even checking if they are running
@@ -106,7 +106,8 @@ class ScriptCoverageTest(TestCase):
             if inspect.isclass(value) and issubclass(value, Effect) and value != Effect:
                 try:
                     self.assertEffectEmpty(value)
-                    self._current_result.addSuccess(self)
+                    with ManualVerbosity(self, okay=False, dots=True):
+                        self._current_result.addSuccess(self)
                 except self.failureException:
                     self._current_result.addFailure(self, sys.exc_info())
                 except Exception: #pylint: disable=broad-except

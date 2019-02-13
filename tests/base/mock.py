@@ -15,12 +15,31 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
 #
+# pylint: disable=protected-access
 """
 Any mocking utilities required by testing. Mocking is when you need the test
 to exercise a piece of code, but that code may or does call on something
 outside of the target code that either takes too long to run, isn't available
 during the test running process or simply shouldn't be running at all.
 """
+
+class ManualVerbosity(object):
+    """Change the verbosity of the test suite manually"""
+    result = property(lambda self: self.test._current_result)
+
+    def __init__(self, test, okay=True, dots=False):
+        self.test = test
+        self.okay = okay
+        self.dots = dots
+
+    def flip(self, exc_type=None, exc_val=None, exc_tb=None):
+        """Swap the stored verbosity with the original"""
+        self.okay, self.result.showAll = self.result.showAll, self.okay
+        self.dots, self.result.dots = self.result.dots, self.okay
+
+    __enter__ = flip
+    __exit__ = flip
+
 
 def replace_function(owner, name, new=None):
     """Replace the named function with the new function for mocking"""

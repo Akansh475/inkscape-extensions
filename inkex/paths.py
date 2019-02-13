@@ -35,12 +35,26 @@ class InvalidPath(ValueError):
 class PathCommand(tuple):
     """A list of arguments that make up a segment, may return a list of
     command objects if the command string parsed was chained."""
+    # Number of arguments that follow this path commands letter
     num = -1
+
+    # The full name of the segment (i.e. Line, Arc, etc)
     name = classproperty(lambda cls: cls.__name__)
+
+    # The single letter represtation of this command (i.e. L, A, etc)
+    # This is always upper case and wouldn't be confused with self.cmd
     this_cmd = classproperty(lambda cls: cls.name[0])
+
+    # The next command, this is for automatic chains where the next command
+    # isn't given, just a bunch on numbers which we automatically parse.
     next_cmd = classproperty(lambda cls: (cls.this_cmd, cls.this_cmd.lower()))
+
+    # Returns True/False if the command is relative/absolute
+    # based on the case of the command
     isrelative = lambda self: self.cmd.islower()
     isabsolute = lambda self: self.cmd.isupper()
+
+    # The precision of the numbers when converting to string
     number_template = "{:6g}"
 
     @classmethod

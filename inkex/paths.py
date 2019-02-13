@@ -55,7 +55,7 @@ class PathCommand(tuple):
     isabsolute = lambda self: self.cmd.isupper()
 
     # The precision of the numbers when converting to string
-    number_template = "{:6g}"
+    number_template = "{:.6g}"
 
     @classmethod
     def __new__(cls, _, cmd, *args):
@@ -120,7 +120,6 @@ class PathCommand(tuple):
             offset_y = y - center_y
             theta = (atan2(offset_y, offset_x) + angle * pi / 180)
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
-            print("({rad} * cos({theta})) + {x}, ({rad} * sin({theta})) + {y}".format(rad=rad, theta=theta, x=center_x, y=center_y))
             ans.extend([rad*cos(theta)+center_x, rad*sin(theta)+center_y])
         return PathCommand(self.cmd, *ans)
 
@@ -128,7 +127,9 @@ class PathCommand(tuple):
         """Where will the pen be after this command"""
         if not self.isabsolute():
             self = self.translate(previous)
-        return self.points[-1]
+        if self.num:
+            return self.points[-1]
+        return previous
 
 class Line(PathCommand):
     """Line instruction"""
@@ -229,7 +230,11 @@ class Path(list):
             for cmd, nums in LEX_REX.findall(path_d):
                 self.append(PathCommand(cmd, *strargs(nums)))
         elif isinstance(path_d, (list, tuple)):
-            self.extend(path_d)
+            for item in path_d:
+                if isinstance(item, PathCommand):
+                    self.append(item)
+                elif isinstance(item, (list, tuple)) and len(item) == 2:
+                    self.append(PathCommand(item[0], *item[1]))
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
@@ -301,3 +306,9 @@ class Path(list):
 
     def __sub__(self, other):
         return self.__add__((other[X] * -1, other[Y] * -1))
+
+    def to_arrays(self):
+        """Duplicates the original output of parsePath, returning arrays of segment data"""
+        acopy = copy.copy(self)
+        acopy.to_absolute()
+        return [[seg.cmd, list(seg)] for seg in acopy]

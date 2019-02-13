@@ -21,7 +21,7 @@ functions for digesting paths into a simple list structure
 
 import re
 import copy
-from math import atan2, sqrt
+from math import atan2, sqrt, pi, cos, sin
 from operator import add, mul
 from .utils import strargs, classproperty, X, Y
 from .transforms import BoundingBox, Scale, cubicExtrema
@@ -113,16 +113,16 @@ class PathCommand(tuple):
         return self.translate(coords, opr=mul)
 
     def rotate(self, angle, center_x, center_y):
-        """Rotate this path command around the given center"""
+        """Rotate this path command around the given center, angle is given in degrees"""
+        ans = []
         for (x, y) in self.points: # pylint: disable=invalid-name
             offset_x = x - center_x
             offset_y = y - center_y
-            theta = atan2(offset_y, offset_x) + angle
+            theta = (atan2(offset_y, offset_x) + angle * pi / 180)
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
-            if rad != 0:
-                print("({rad} * cos({theta})) + {x}, ({rad} * sin({theta})) + {y}".format(rad=rad, theta=theta, x=center_x, y=center_y))
-        raise NotImplementedError("Rotating paths needs to be coded")
-        return self
+            print("({rad} * cos({theta})) + {x}, ({rad} * sin({theta})) + {y}".format(rad=rad, theta=theta, x=center_x, y=center_y))
+            ans.extend([rad*cos(theta)+center_x, rad*sin(theta)+center_y])
+        return PathCommand(self.cmd, *ans)
 
     def get_pen(self, previous):
         """Where will the pen be after this command"""

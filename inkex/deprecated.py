@@ -147,6 +147,15 @@ class DeprecatedEffect(object):
         self._depricated('affect', _('{} is now `Effect.run()` with the same args'))
         return self.run(args=args)
 
+    def save_raw(self, ret):
+        # Derived class may implement "output()"
+        if hasattr(self, 'output'):
+            self._depricated('output', 'Use `save()` or `save_raw()` instead of `output()`', stack=5)
+            self.output()
+            return
+
+        inkex.base.InkscapeExtension.save_raw(self, ret)
+
     def uniqueId(self, old_id, make_new_id=True):
         self._depricated('uniqueId', _('{} is now a method in the svg document. '\
             ' Use `self.svg.get_unique_id(old_id)` instead.'))

@@ -33,21 +33,21 @@ class Ungroup(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--startdepth",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("-s", "--startdepth",
+                                     action="store", type=int,
                                      dest="startdepth", default=0,
                                      help="starting depth for ungrouping")
-        self.OptionParser.add_option("-m", "--maxdepth",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("-m", "--maxdepth",
+                                     action="store", type=int,
                                      dest="maxdepth", default=65535,
                                      help="maximum ungrouping depth")
-        self.OptionParser.add_option("-k", "--keepdepth",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("-k", "--keepdepth",
+                                     action="store", type=int,
                                      dest="keepdepth", default=0,
                                      help="levels of ungrouping to " +
                                      "leave untouched")
 
-    def _get_dimension(s="1024"):
+    def _get_dimension(self, s="1024"):
         """Convert an SVG length string from arbitrary units to pixels"""
         if s == "":
             return 0
@@ -155,10 +155,10 @@ class Ungroup(inkex.Effect):
 
     def _merge_clippath(self, node, clippathurl):
 
-        if (clippathurl):
+        if clippathurl:
             node_transform = simpletransform.parseTransform(
                 node.get("transform"))
-            if (node_transform):
+            if node_transform:
                 # Clip-paths on nodes with a transform have the transform
                 # applied to the clipPath as well, which we don't want.  So, we
                 # create new clipPath element with references to all existing
@@ -170,7 +170,7 @@ class Ungroup(inkex.Effect):
                     {'clipPathUnits': 'userSpaceOnUse',
                      'id': self.uniqueId("clipPath")})
                 clippath = self.getElementById(clippathurl[5:-1])
-                for c in (clippath.iterchildren()):
+                for c in clippath.iterchildren():
                     inkex.etree.SubElement(
                         new_clippath, 'use',
                         {inkex.addNS('href', 'xlink'): '#' + c.get("id"),
@@ -183,7 +183,7 @@ class Ungroup(inkex.Effect):
             # Reference the parent clip-path to keep clipping intersection
             # Find end of clip-path chain and add reference there
             node_clippathurl = node.get("clip-path")
-            while (node_clippathurl):
+            while node_clippathurl:
                 node = self.getElementById(node_clippathurl[5:-1])
                 node_clippathurl = node.get("clip-path")
             node.set("clip-path", clippathurl)
@@ -196,12 +196,17 @@ class Ungroup(inkex.Effect):
     def _ungroup(self, node):
         node_parent = node.getparent()
         node_index = list(node_parent).index(node)
-        node_style = dict(inkex.Style.parse_str(node.get("style")))
+
+        if node.get("style") is not None:
+            node_style = dict(inkex.Style.parse_str(node.get("style")))
+        else:
+            node_style = ""
         node_transform = simpletransform.parseTransform(node.get("transform"))
         node_clippathurl = node.get('clip-path')
         for c in reversed(list(node)):
             self._merge_transform(c, node_transform)
-            self._merge_style(c, node_style)
+            if node.get("style") is not None:
+                self._merge_style(c, node_style)
             self._merge_clippath(c, node_clippathurl)
             node_parent.insert(node_index, c)
         node_parent.remove(node)
@@ -211,8 +216,8 @@ class Ungroup(inkex.Effect):
         if (node.tag == addNS("g", "svg") and
                 node.getparent() is not None and
                 height > self.options.keepdepth and
-                depth >= self.options.startdepth and
-                depth <= self.options.maxdepth):
+                self.options.startdepth <= depth <=
+                self.options.maxdepth):
             return True
         return False
 
@@ -233,7 +238,7 @@ class Ungroup(inkex.Effect):
             height = current['height']
 
             # Recursion path
-            if (height is None):
+            if height is None:
                 # Don't enter non-graphical portions of the document
                 if (node.tag == addNS("namedview", "sodipodi")
                         or node.tag == addNS("defs", "svg")
@@ -242,7 +247,7 @@ class Ungroup(inkex.Effect):
                     q.pop()
 
                 # Base case: Leaf node
-                if (node.tag != addNS("g", "svg") or not len(node)):
+                if node.tag != addNS("g", "svg") or not len(node):
                     current['height'] = 0
 
                 # Recursive case: Group element with children
@@ -255,27 +260,27 @@ class Ungroup(inkex.Effect):
             # Return path
             else:
                 # Ungroup if desired
-                if (self._want_ungroup(node, depth, height)):
+                if self._want_ungroup(node, depth, height):
                     self._ungroup(node)
 
                 # Propagate (max) height up the call chain
                 height += 1
                 previous = current['prev']
                 prev_height = previous['height']
-                if (prev_height is None or prev_height < height):
+                if prev_height is None or prev_height < height:
                     previous['height'] = height
 
                 # Only process each node once
                 q.pop()
 
     def effect(self):
-        if len(self.selected):
-            for elem in self.selected.itervalues():
+        if len(self.svg.selected):
+            for (key, elem) in self.svg.selected.items():
                 self._deep_ungroup(elem)
         else:
             for elem in self.document.getroot():
                 self._deep_ungroup(elem)
 
+
 if __name__ == '__main__':
-    effect = Ungroup()
-    effect.affect()
+    Ungroup().run()

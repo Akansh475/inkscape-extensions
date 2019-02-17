@@ -10,7 +10,6 @@ __version__ = "0.2"  # Works but in terms of maturity, still unsure
 
 from inkex import addNS
 import logging
-import simplestyle
 import simpletransform
 logging.basicConfig(format='%(levelname)s:%(funcName)s:%(message)s',
                     level=logging.INFO)
@@ -22,7 +21,7 @@ except ImportError:
 
 try:
     from numpy import matrix
-except:
+except ImportError:
     raise ImportError("""Cannot find numpy.matrix in {0}.""".format(__file__))
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -47,13 +46,14 @@ class Ungroup(inkex.Effect):
                                      help="levels of ungrouping to " +
                                      "leave untouched")
 
-    def _get_dimension(self, s="1024"):
+    @staticmethod
+    def _get_dimension(s="1024"):
         """Convert an SVG length string from arbitrary units to pixels"""
         if s == "":
             return 0
         try:
             last = int(s[-1])
-        except:
+        except ValueError:
             last = None
 
         if type(last) == int:
@@ -89,8 +89,10 @@ class Ungroup(inkex.Effect):
                               for x in node.get("viewBox").split()]
             dw = self._get_dimension(node.get("width", vw))
             dh = self._get_dimension(node.get("height", vh))
-            t = ("translate(%f, %f) scale(%f, %f)" %
-                (-vx, -vy, dw / vw, dh / vh))
+            t = (
+                "translate(%f, %f) scale(%f, %f)" %
+                (-vx, -vy, dw / vw, dh / vh)
+            )
             this_transform = simpletransform.parseTransform(
                 t, transform)
             this_transform = simpletransform.parseTransform(
@@ -104,7 +106,8 @@ class Ungroup(inkex.Effect):
         node.set("transform",
                  simpletransform.formatTransform(this_transform))
 
-    def _merge_style(self, node, style):
+    @staticmethod
+    def _merge_style(node, style):
         """Propagate style and transform to remove inheritance
         Originally from
         https://github.com/nikitakit/svg2sif/blob/master/synfig_prepare.py#L370
@@ -188,7 +191,8 @@ class Ungroup(inkex.Effect):
                 node_clippathurl = node.get("clip-path")
             node.set("clip-path", clippathurl)
 
-    def _invert_transform(self, transform):
+    @staticmethod
+    def _invert_transform(transform):
         # duplicate list to avoid modifying it
         return matrix(transform + [[0, 0, 1]]).I.tolist()[0:2]
 
@@ -201,6 +205,7 @@ class Ungroup(inkex.Effect):
             node_style = dict(inkex.Style.parse_str(node.get("style")))
         else:
             node_style = ""
+
         node_transform = simpletransform.parseTransform(node.get("transform"))
         node_clippathurl = node.get('clip-path')
         for c in reversed(list(node)):

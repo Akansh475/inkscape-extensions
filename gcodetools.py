@@ -5903,7 +5903,7 @@ G01 Z1 (going to cutting z)\n""",
                         gcode += ("G02" if s[3]*flip_angle<0 else "G03") + (" %s %f %s %f %s %f %s %f" % (x,s[4][0],z,s[4][1],i_,(s[2][0]-s[0][0]), k_, (s[2][1]-s[0][1]) ) ) + feed + "\n"
                     else:
                         r = (r1.mag()+r2.mag())/2
-                        gcode += ("G02" if s[3]*flip_angle<0 else "G03") + (" %s %f %s %f" % (x,s[4][0],z,y[4][1]) ) + " R%f"%r + feed + "\n"
+                        gcode += ("G02" if s[3]*flip_angle<0 else "G03") + (" %s %f %s %f" % (x,s[4][0],z,s[4][1]) ) + " R%f"%r + feed + "\n"
         return gcode
 
 

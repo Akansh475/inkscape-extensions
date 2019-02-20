@@ -70,21 +70,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 gcodetools_current_version = "1.7"
 
 # standard library
-import os
-import math
-import re
+import cmath
 import copy
+import math
+import os
+import random
+import re
 import sys
 import time
-import cmath
-import random
-import numpy
+
 # local library
 import inkex
-import cubicsuperpath
-import simpletransform
 import inkex.bezier as bezmisc
+from inkex import cubic_paths
 from inkex.localize import _
+import numpy
+import simpletransform
 
 if sys.version_info[0] > 2:
     xrange = range
@@ -1512,7 +1513,7 @@ def draw_text(text,x,y, group = None, style = None, font_size = 10, gcodetools_t
 def draw_csp(csp, stroke = "#f00", fill = "none", comment = "", width = 0.354, group = None, style = None, gcodetools_tag = None) :
     if style == None :
         style = "fill:%s;fill-opacity:1;stroke:%s;stroke-width:%s"%(fill,stroke,width)
-    attributes = {            'd':    cubicsuperpath.formatPath(csp),
+    attributes = {            'd':    cubic_paths.formatCubicPath(csp),
                             'style' : style
                 }
     if comment != '':
@@ -2122,7 +2123,7 @@ def csp_offset(csp, r) :
         #for k,t in intersection[i]:
         #    draw_pointer(csp_at_t(subpath_offset[k-1], subpath_offset[k], t))
 
-    #inkex.etree.SubElement( options.doc_root, inkex.addNS('path','svg'), {"d": cubicsuperpath.formatPath(unclipped_offset), "style":"fill:none;stroke:#0f0;"} )
+    #inkex.etree.SubElement( options.doc_root, inkex.addNS('path','svg'), {"d": cubic_paths.formatCubicPath(unclipped_offset), "style":"fill:none;stroke:#0f0;"} )
     print_("Offsetted path in %s"%(time.time()-time_))
     time_ = time.time()
 
@@ -3334,7 +3335,7 @@ class Gcodetools(inkex.Effect):
                     l = min(l,r*3/2*math.pi)
 
                     for path in self.selected_paths[layer]:
-                        csp = self.apply_transforms( path, cubicsuperpath.parsePath(path.get("d")) )
+                        csp = self.apply_transforms( path, cubic_paths.parseCubicPath(path.get("d")) )
                         csp = csp_remove_zerro_segments(csp)
                         res = []
 
@@ -3412,7 +3413,7 @@ class Gcodetools(inkex.Effect):
 
 
                         if self.options.in_out_path_replace_original_path :
-                            path.set("d", cubicsuperpath.formatPath( self.apply_transforms(path,res,True) ))
+                            path.set("d", cubic_paths.formatCubicPath( self.apply_transforms(path,res,True) ))
                         else:
                             draw_csp(res, width=1, style=styles["in_out_path_style"] )
 
@@ -3430,7 +3431,7 @@ class Gcodetools(inkex.Effect):
         for layer in self.layers :
             if layer in paths :
                 for path in paths[layer] :
-                    csp = cubicsuperpath.parsePath(path.get("d"))
+                    csp = cubic_paths.parseCubicPath(path.get("d"))
                     polygon = Polygon()
                     for subpath in csp :
                         for sp1, sp2 in zip(subpath,subpath[1:]) :
@@ -4272,7 +4273,7 @@ class Gcodetools(inkex.Effect):
                     items_.reverse()
                     for j in items_ :
                         if j.get("gcodetools") == "In-out reference point" :
-                            self.in_out_reference_points.append( self.apply_transforms(j,cubicsuperpath.parsePath(j.get("d")))[0][0][1] )
+                            self.in_out_reference_points.append( self.apply_transforms(j,cubic_paths.parseCubicPath(j.get("d")))[0][0][1] )
 
 
                 elif i.tag == inkex.addNS("g",'svg'):
@@ -4325,7 +4326,7 @@ class Gcodetools(inkex.Effect):
             point = [[],[]]
             for  node in i :
                 if node.get('gcodetools') == "Gcodetools orientation point arrow":
-                    point[0] = self.apply_transforms(node,cubicsuperpath.parsePath(node.get("d")))[0][0][1]
+                    point[0] = self.apply_transforms(node,cubic_paths.parseCubicPath(node.get("d")))[0][0][1]
                 if node.get('gcodetools') == "Gcodetools orientation point text":
                     r = re.match(r'(?i)\s*\(\s*(-?\s*\d*(?:,|\.)*\d*)\s*;\s*(-?\s*\d*(?:,|\.)*\d*)\s*;\s*(-?\s*\d*(?:,|\.)*\d*)\s*\)\s*',get_text(node))
                     point[1] = [float(r.group(1)),float(r.group(2)),float(r.group(3))]
@@ -4337,7 +4338,7 @@ class Gcodetools(inkex.Effect):
             point = [[], '']
             for node in g :
                 if node.get('gcodetools') == "Gcodetools graffiti reference point arrow":
-                    point[0] = self.apply_transforms(node,cubicsuperpath.parsePath(node.get("d")))[0][0][1]
+                    point[0] = self.apply_transforms(node,cubic_paths.parseCubicPath(node.get("d")))[0][0][1]
                 if node.get('gcodetools') == "Gcodetools graffiti reference point text":
                     point[1] = get_text(node)
             if point[0]!=[] and point[1]!='' : return point
@@ -4551,7 +4552,7 @@ class Gcodetools(inkex.Effect):
                     if "d" not in path.keys() :
                         self.error(_("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"),"selection_contains_objects_that_are_not_paths")
                         continue
-                    csp = cubicsuperpath.parsePath(path.get("d"))
+                    csp = cubic_paths.parseCubicPath(path.get("d"))
                     csp = self.apply_transforms(path, csp)
                     id_ = path.get("id")
 
@@ -4706,7 +4707,7 @@ class Gcodetools(inkex.Effect):
                     if "d" not in path.keys() :
                         self.error(_("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"),"selection_contains_objects_that_are_not_paths")
                         continue
-                    csp = cubicsuperpath.parsePath(path.get("d"))
+                    csp = cubic_paths.parseCubicPath(path.get("d"))
                     remove = []
                     for i in range(len(csp)) :
                         subpath = [ [point[:] for point in points] for points in csp[i]]
@@ -4714,16 +4715,16 @@ class Gcodetools(inkex.Effect):
                         bounds = csp_simple_bound([subpath])
                         if  (bounds[2]-bounds[0])**2+(bounds[3]-bounds[1])**2 < self.options.area_find_artefacts_diameter**2:
                             if self.options.area_find_artefacts_action == "mark with an arrow" :
-                                arrow =  cubicsuperpath.parsePath( 'm %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z' % (subpath[0][1][0],subpath[0][1][1]) )
+                                arrow =  cubic_paths.parseCubicPath( 'm %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z' % (subpath[0][1][0],subpath[0][1][1]) )
                                 arrow = self.apply_transforms(path,arrow,True)
                                 inkex.etree.SubElement(parent, inkex.addNS('path','svg'),
                                         {
-                                            'd': cubicsuperpath.formatPath(arrow),
+                                            'd': cubic_paths.formatCubicPath(arrow),
                                             'style': styles["area artefact arrow"],
                                             'gcodetools': 'area artefact arrow',
                                         })
                             elif self.options.area_find_artefacts_action == "mark with style" :
-                                inkex.etree.SubElement(parent, inkex.addNS('path','svg'), {'d': cubicsuperpath.formatPath(csp[i]), 'style': styles["area artefact"]})
+                                inkex.etree.SubElement(parent, inkex.addNS('path','svg'), {'d': cubic_paths.formatCubicPath(csp[i]), 'style': styles["area artefact"]})
                                 remove.append(i)
                             elif self.options.area_find_artefacts_action == "delete" :
                                 remove.append(i)
@@ -4734,7 +4735,7 @@ class Gcodetools(inkex.Effect):
                     if len(csp) == 0 :
                         parent.remove(path)
                     else :
-                        path.set("d", cubicsuperpath.formatPath(csp))
+                        path.set("d", cubic_paths.formatCubicPath(csp))
 
             return
 
@@ -4765,7 +4766,7 @@ class Gcodetools(inkex.Effect):
                         print_("omitting non-path")
                         self.error(_("Warning: omitting non-path"),"selection_contains_objects_that_are_not_paths")
                         continue
-                    csp = cubicsuperpath.parsePath(d)
+                    csp = cubic_paths.parseCubicPath(d)
 
                     if path.get(inkex.addNS('type','sodipodi'))!="inkscape:offset":
                         print_("Path %s is not an offset. Preparation started." % path.get("id"))
@@ -4799,7 +4800,7 @@ class Gcodetools(inkex.Effect):
                                     csp[i] = n[:]
 
 
-                        d = cubicsuperpath.formatPath(csp)
+                        d = cubic_paths.formatCubicPath(csp)
                         print_(("original  d=",d))
                         d = re.sub(r'(?i)(m[^mz]+)',r'\1 Z ',d)
                         d = re.sub(r'(?i)\s*z\s*z\s*',r' Z ',d)
@@ -4954,7 +4955,7 @@ class Gcodetools(inkex.Effect):
                         print_("omitting non-path")
                         self.error(_("Warning: omitting non-path"),"selection_contains_objects_that_are_not_paths")
                         continue
-                    csp = cubicsuperpath.parsePath(d)
+                    csp = cubic_paths.parseCubicPath(d)
                     csp = self.apply_transforms(path, csp)
                     csp = self.transform_csp(csp, layer)
 
@@ -5009,7 +5010,7 @@ class Gcodetools(inkex.Effect):
                         print_("omitting non-path")
                         self.error(_("Warning: omitting non-path"),"selection_contains_objects_that_are_not_paths")
                         continue
-                    csp = cubicsuperpath.parsePath(d)
+                    csp = cubic_paths.parseCubicPath(d)
                     csp = self.apply_transforms(path, csp)
                     csp = csp_close_all_subpaths(csp)
                     csp = self.transform_csp(csp, layer)
@@ -5574,7 +5575,7 @@ class Gcodetools(inkex.Effect):
 
                 for node in self.selected_paths[layer] :
                     if node.tag == inkex.addNS('path','svg'):
-                        cspi = cubicsuperpath.parsePath(node.get('d'))
+                        cspi = cubic_paths.parseCubicPath(node.get('d'))
                         #LT: Create my own list. n1LT[j] is for subpath j
                         nlLT = []
                         for j in xrange(len(cspi)): #LT For each subpath...
@@ -5672,12 +5673,12 @@ class Gcodetools(inkex.Effect):
                                 cspl+=[cspl[0]] #Close paths
                                 cspr+=[cspr[0]] #Close paths
                                 inkex.etree.SubElement(    gcode_3Dleft , inkex.addNS('path','svg'),
-                                { "d": cubicsuperpath.formatPath([cspl]),
+                                { "d": cubic_paths.formatCubicPath([cspl]),
                                 'style': "stroke:#808080; stroke-opacity:1; stroke-width:0.6; fill:none",
                                 "gcodetools": "G1L outline"
                                 })
                                 inkex.etree.SubElement(    gcode_3Dright , inkex.addNS('path','svg'),
-                                { "d": cubicsuperpath.formatPath([cspr]),
+                                { "d": cubic_paths.formatCubicPath([cspr]),
                                 'style': "stroke:#808080; stroke-opacity:1; stroke-width:0.6; fill:none",
                                 "gcodetools": "G1L outline"
                                 })
@@ -5783,7 +5784,7 @@ class Gcodetools(inkex.Effect):
 
                             if self.options.engraving_draw_calculation_paths==True:
                                 node =  inkex.etree.SubElement(    engraving_group, inkex.addNS('path','svg'),                                         {
-                                                         "d":     cubicsuperpath.formatPath([cspm]),
+                                                         "d":     cubic_paths.formatCubicPath([cspm]),
                                                         'style':    styles["biarc_style_i"]['biarc1'],
                                                         "gcodetools": "Engraving calculation paths",
                                                     })
@@ -6042,7 +6043,7 @@ G01 Z1 (going to cutting z)\n""",
 
                     trans = self.get_transforms(path)
                     trans = simpletransform.composeTransform( trans_, trans if trans != [] else [[1.,0.,0.],[0.,1.,0.]])
-                    csp = cubicsuperpath.parsePath(path.get("d"))
+                    csp = cubic_paths.parseCubicPath(path.get("d"))
                     simpletransform.applyTransformToPath(trans,csp)
                     path_bounds = csp_simple_bound(csp)
                     trans = simpletransform.formatTransform(trans)
@@ -6137,7 +6138,7 @@ G01 Z1 (going to cutting z)\n""",
                     gcode += ( "(Change tool to %s)\n" % re.sub("\"'\(\)\\\\"," ",self.tool["name"]) ) + self.tool["tool change gcode"] + "\n"
 
                 for path in paths[layer]:
-                    csp = self.transform_csp(cubicsuperpath.parsePath(path.get("d")),layer)
+                    csp = self.transform_csp(cubic_paths.parseCubicPath(path.get("d")),layer)
 
                     for subpath in csp :
                         # Offset the path if fine cut is defined.
@@ -6247,7 +6248,7 @@ G01 Z1 (going to cutting z)\n""",
                 width = self.options.lathe_rectangular_cutter_width
                 #self.set_tool(layer)
                 for path in paths[layer]:
-                    csp = self.transform_csp(cubicsuperpath.parsePath(path.get("d")),layer)
+                    csp = self.transform_csp(cubic_paths.parseCubicPath(path.get("d")),layer)
                     new_csp = []
                     for subpath in csp:
                         orientation = subpath[-1][1][0]>subpath[0][1][0]
@@ -6472,7 +6473,7 @@ G01 Z1 (going to cutting z)\n""",
                     for point in self.graffiti_reference_points[layer]:
                         minx,miny,maxx,maxy = min(minx,point[0][0]), min(miny,point[0][1]), max(maxx,point[0][0]), max(maxy,point[0][1])
                     for path in paths[layer]:
-                        csp = cubicsuperpath.parsePath(path.get("d"))
+                        csp = cubic_paths.parseCubicPath(path.get("d"))
                         csp = self.apply_transforms(path, csp)
                         csp = self.transform_csp(csp, layer)
                         bounds = csp_simple_bound(csp)
@@ -6502,7 +6503,7 @@ G01 Z1 (going to cutting z)\n""",
                 subpaths = []
                 for path in paths[layer]:
                     # Rebuild the paths to polyline.
-                    csp = cubicsuperpath.parsePath(path.get("d"))
+                    csp = cubic_paths.parseCubicPath(path.get("d"))
                     csp = self.apply_transforms(path, csp)
                     csp = self.transform_csp(csp, layer)
                     subpaths += csp
@@ -6716,7 +6717,7 @@ G01 Z1 (going to cutting z)\n""",
                 if self.options.offset_just_get_distance :
                     for layer in self.selected_paths :
                         if len(self.selected_paths[layer]) == 2 :
-                            csp1, csp2 = cubicsuperpath.parsePath(self.selected_paths[layer][0].get("d")), cubicsuperpath.parsePath(self.selected_paths[layer][1].get("d"))
+                            csp1, csp2 = cubic_paths.parseCubicPath(self.selected_paths[layer][0].get("d")), cubic_paths.parseCubicPath(self.selected_paths[layer][1].get("d"))
                             dist = csp_to_csp_distance(csp1,csp2)
                             print_(dist)
                             draw_pointer( list(csp_at_t(csp1[dist[1]][dist[2]-1],csp1[dist[1]][dist[2]],dist[3]))
@@ -6731,7 +6732,7 @@ G01 Z1 (going to cutting z)\n""",
 
                         offset = self.options.offset_step/2
                         while abs(offset) <= abs(self.options.offset_radius) :
-                            offset_ = csp_offset(cubicsuperpath.parsePath(path.get("d")), offset)
+                            offset_ = csp_offset(cubic_paths.parseCubicPath(path.get("d")), offset)
                             offsets_count += 1
                             if offset_ != [] :
                                 for iii in offset_ :

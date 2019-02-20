@@ -102,7 +102,7 @@ def csplength(csp):
     lengths = []
     for sp in csp:
         lengths.append([])
-        for i in xrange(1,len(sp)):
+        for i in range(1,len(sp)):
             l = cspseglength(sp[i-1],sp[i])
             lengths[-1].append(l)
             total += l
@@ -283,7 +283,7 @@ def Simpson(f, a, b, n_limit, tolerance):
         asum += bsum
         bsum = 0.0
         est0 = est1
-        for i in xrange(1, n, 2):
+        for i in range(1, n, 2):
             bsum += f(a + (i * interval))
             est1 = multiplier * (endsum + (2.0 * asum) + (4.0 * bsum))
     #print(multiplier, endsum, interval, asum, bsum, est1, est0)

@@ -139,9 +139,9 @@ class Interp(inkex.Effect):
                         t += l / etotal
                         lengths.setdefault(t,0)
                         lengths[t] += -1
-                sadd = [k for (k,v) in lengths.iteritems() if v < 0]
+                sadd = [k for (k,v) in lengths.items() if v < 0]
                 sadd.sort()
-                eadd = [k for (k,v) in lengths.iteritems() if v > 0]
+                eadd = [k for (k,v) in lengths.items() if v > 0]
                 eadd.sort()
 
                 t = 0

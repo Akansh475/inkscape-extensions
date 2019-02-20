@@ -122,10 +122,6 @@ def ireplace(self, old, new, count=0):
     return re.sub(pattern, new, self, count)
 
 
-def isset(variable):
-    # VARIABLE NAME SHOULD BE A STRING! Like isset("foobar")
-    return variable in locals() or variable in globals()
-
 
 ################################################################################
 #
@@ -727,30 +723,6 @@ def csp_curvature_at_t(sp1, sp2, t, depth=3):
         return 1e100
 
 
-def csp_curvature_radius_at_t(sp1, sp2, t):
-    c = csp_curvature_at_t(sp1, sp2, t)
-    if c == 0:
-        return 1e100
-    else:
-        return 1 / c
-
-
-def csp_special_points(sp1, sp2):
-    # special points = curvature == 0
-    ax, ay, bx, by, cx, cy, dx, dy = bezmisc.bezierparameterize((sp1[1], sp1[2], sp2[0], sp2[1]))
-    a = 3 * ax * by - 3 * ay * bx
-    b = 3 * ax * cy - 3 * cx * ay
-    c = bx * cy - cx * by
-    roots = cubic_solver(0, a, b, c)
-    res = []
-    for i in roots:
-        if type(i) is complex and i.imag == 0:
-            i = i.real
-        if type(i) is not complex and 0 <= i <= 1:
-            res.append(i)
-    return res
-
-
 def csp_subpath_ccw(subpath):
     # Remove all zerro length segments
     s = 0
@@ -787,26 +759,9 @@ def csp_at_length(sp1, sp2, l=0.5, tolerance=0.01):
     return csp_at_t(sp1, sp2, t)
 
 
-def csp_splitatlength(sp1, sp2, l=0.5, tolerance=0.01):
-    bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
-    t = bezmisc.beziertatlength(bez, l, tolerance)
-    return csp_split(sp1, sp2, t)
-
-
 def cspseglength(sp1, sp2, tolerance=0.01):
     bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
     return bezmisc.bezierlength(bez, tolerance)
-
-
-def csplength(csp):
-    total = 0
-    lengths = []
-    for sp in csp:
-        for i in xrange(1, len(sp)):
-            l = cspseglength(sp[i - 1], sp[i])
-            lengths.append(l)
-            total += l
-    return lengths, total
 
 
 def csp_segments(csp):
@@ -819,38 +774,6 @@ def csp_segments(csp):
     if l > 0:
         seg = [seg[i] / l for i in xrange(len(seg))]
     return seg, l
-
-
-def rebuild_csp(csp, segs, s=None):
-    # rebuild_csp() adds to csp control points making it's segments looks like segs
-    if s is None:
-        s, l = csp_segments(csp)
-
-    if len(s) > len(segs):
-        return None
-    segs = segs[:]
-    segs.sort()
-    for i in xrange(len(s)):
-        d = None
-        for j in xrange(len(segs)):
-            d = min([abs(s[i] - segs[j]), j], d) if d is not None else [abs(s[i] - segs[j]), j]
-        del segs[d[1]]
-    for i in xrange(len(segs)):
-        for j in xrange(0, len(s)):
-            if segs[i] < s[j]:
-                break
-        if s[j] - s[j - 1] != 0:
-            t = (segs[i] - s[j - 1]) / (s[j] - s[j - 1])
-            sp1, sp2, sp3 = csp_split(csp[j - 1], csp[j], t)
-            csp = csp[:j - 1] + [sp1, sp2, sp3] + csp[j + 1:]
-            s = s[:j] + [s[j - 1] * (1 - t) + s[j] * t] + s[j:]
-    return csp, s
-
-
-def csp_slope(sp1, sp2, t):
-    bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
-    return bezmisc.bezierslopeatt(bez, t)
-
 
 def csp_line_intersection(l1, l2, sp1, sp2):
     dd = l1[0]
@@ -1037,18 +960,6 @@ def csp_to_arc_distance(sp1, sp2, arc1, arc2, tolerance=0.01):  # arc = [start,e
     return d1[0]
 
 
-def csp_simple_bound_to_point_distance(p, csp):
-    minx, miny, maxx, maxy = None, None, None, None
-    for subpath in csp:
-        for sp in subpath:
-            for p_ in sp:
-                minx = min(minx, p_[0]) if minx is not None else p_[0]
-                miny = min(miny, p_[1]) if miny is not None else p_[1]
-                maxx = max(maxx, p_[0]) if maxx is not None else p_[0]
-                maxy = max(maxy, p_[1]) if maxy is not None else p_[1]
-    return math.sqrt(max(minx - p[0], p[0] - maxx, 0) ** 2 + max(miny - p[1], p[1] - maxy, 0) ** 2)
-
-
 def csp_point_inside_bound(sp1, sp2, p):
     bez = [sp1[1], sp1[2], sp2[0], sp2[1]]
     x, y = p
@@ -1063,18 +974,6 @@ def csp_point_inside_bound(sp1, sp2, p):
         if x0 - x1 != 0 and (y - y0) * (x1 - x0) >= (x - x0) * (y1 - y0) and x > min(x0, x1) and x <= max(x0, x1):
             c += 1
     return xmin <= x <= xmax and c % 2 == 0
-
-
-def csp_bound_to_point_distance(sp1, sp2, p):
-    if csp_point_inside_bound(sp1, sp2, p):
-        return 0.
-    bez = csp_segment_to_bez(sp1, sp2)
-    min_dist = 1e100
-    for i in range(0, 4):
-        d = point_to_line_segment_distance_2(p, bez[i - 1], bez[i])
-        if d <= min_dist:
-            min_dist = d
-    return min_dist
 
 
 def line_line_intersect(p1, p2, p3, p4):  # Return only true intersection.
@@ -1414,10 +1313,6 @@ def tpoint(xy1, xy2, t):
     return [x1 + t * (x2 - x1), y1 + t * (y2 - y1)]
 
 
-def bez_to_csp_segment(bez):
-    return [bez[0], bez[0], bez[1]], [bez[2], bez[3], bez[3]]
-
-
 def bez_split(a, t=0.5):
     a1 = tpoint(a[0], a[1], t)
     at = tpoint(a[1], a[2], t)
@@ -1426,19 +1321,6 @@ def bez_split(a, t=0.5):
     b1 = tpoint(b2, at, t)
     a3 = tpoint(a2, b1, t)
     return [a[0], a1, a2, a3], [a3, b1, b2, a[3]]
-
-
-def bez_at_t(bez, t):
-    return csp_at_t([bez[0], bez[0], bez[1]], [bez[2], bez[3], bez[3]], t)
-
-
-def bez_to_point_distance(bez, p, needed_dist=[0., 1e100]):
-    # returns [d^2,t]
-    return csp_seg_to_point_distance(bez_to_csp_segment(bez), p, needed_dist)
-
-
-def bez_normalized_slope(bez, t):
-    return csp_normalized_slope([bez[0], bez[0], bez[1]], [bez[2], bez[3], bez[3]], t)
 
 
 ################################################################################
@@ -1474,54 +1356,12 @@ def vectors_ccw(a, b):
     return a[0] * b[1] - b[0] * a[1] < 0
 
 
-def vector_add(a, b):
-    return [a[0] + b[0], a[1] + b[1]]
 
-
-def vector_mul(a, b):
-    return [a[0] * b, a[1] * b]
-
-
-def vector_from_to_length(a, b):
-    return math.sqrt((a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1]))
 
 
 ################################################################################
 # Common functions
 ################################################################################
-
-def matrix_mul(a, b):
-    return [[sum([a[i][k] * b[k][j] for k in range(len(a[0]))]) for j in range(len(b[0]))] for i in range(len(a))]
-    try:
-        return [[sum([a[i][k] * b[k][j] for k in range(len(a[0]))]) for j in range(len(b[0]))] for i in range(len(a))]
-    except:
-        return None
-
-
-def transpose(a):
-    try:
-        return [[a[i][j] for i in range(len(a))] for j in range(len(a[0]))]
-    except:
-        return None
-
-
-def det_3x3(a):
-    return float(
-            a[0][0] * a[1][1] * a[2][2] + a[0][1] * a[1][2] * a[2][0] + a[1][0] * a[2][1] * a[0][2]
-            - a[0][2] * a[1][1] * a[2][0] - a[0][0] * a[2][1] * a[1][2] - a[0][1] * a[2][2] * a[1][0]
-    )
-
-
-def inv_3x3(a):  # invert matrix 3x3
-    det = det_3x3(a)
-    if det == 0:
-        return None
-    return [
-        [(a[1][1] * a[2][2] - a[2][1] * a[1][2]) / det, -(a[0][1] * a[2][2] - a[2][1] * a[0][2]) / det, (a[0][1] * a[1][2] - a[1][1] * a[0][2]) / det],
-        [-(a[1][0] * a[2][2] - a[2][0] * a[1][2]) / det, (a[0][0] * a[2][2] - a[2][0] * a[0][2]) / det, -(a[0][0] * a[1][2] - a[1][0] * a[0][2]) / det],
-        [(a[1][0] * a[2][1] - a[2][0] * a[1][1]) / det, -(a[0][0] * a[2][1] - a[2][0] * a[0][1]) / det, (a[0][0] * a[1][1] - a[1][0] * a[0][1]) / det]
-    ]
-
 
 def inv_2x2(a):  # invert matrix 2x2
     det = a[0][0] * a[1][1] - a[1][0] * a[0][1]
@@ -1647,12 +1487,6 @@ def straight_segments_intersection(a, b, true_intersection=True):  # (True inter
         ta = ((ay - cy) * (dx - cx) - (ax - cx) * (dy - cy)) / ((bx - ax) * (dy - cy) - (by - ay) * (dx - cx))
         tb = (ax - cx + ta * (bx - ax)) / (dx - cx) if dx != cx else (ay - cy + ta * (by - ay)) / (dy - cy)
         return (0 <= ta <= 1 and 0 <= tb <= 1 or not true_intersection), ta, tb
-
-
-def isnan(x): return type(x) is float and x != x
-
-
-def isinf(x): inf = 1e5000; return x == inf or x == -inf
 
 
 def between(c, x, y):
@@ -2483,15 +2317,6 @@ def biarc(sp1, sp2, z1, z2, depth=0):
             arc2 = [[P2.x, P2.y], 'arc', [R2.x, R2.y], a2, [P4.x, P4.y], [zm, z2]]
 
         return [arc1, arc2]
-
-
-def biarc_curve_segment_length(seg):
-    if seg[1] == "arc":
-        return math.sqrt((seg[0][0] - seg[2][0]) ** 2 + (seg[0][1] - seg[2][1]) ** 2) * seg[3]
-    elif seg[1] == "line":
-        return math.sqrt((seg[0][0] - seg[4][0]) ** 2 + (seg[0][1] - seg[4][1]) ** 2)
-    else:
-        return 0
 
 
 class Postprocessor(object):

@@ -106,7 +106,7 @@ def bezierslopeatt(b0_b1_b2_b3, t):
             dx = 6 * ax
             dy = 6 * ay
             if dx == dy == 0:
-                print_("Slope error x = %s*t^3+%s*t^2+%s*t+%s, y = %s*t^3+%s*t^2+%s*t+%s,  t = %s, dx==dy==0" % (ax, bx, cx, dx, ay, by, cy, dy, t))
+                print_("Slope error x = {}*t^3+{}*t^2+{}*t+{}, y = {}*t^3+{}*t^2+{}*t+{},  t = {}, dx==dy==0".format(ax, bx, cx, dx, ay, by, cy, dy, t))
                 print_(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
                 dx, dy = 1, 1
 
@@ -1551,7 +1551,7 @@ def atan2(*arg):
 
         return (math.pi / 2 - math.atan2(arg[0], arg[1])) % TAU
     else:
-        raise ValueError("Bad argumets for atan! (%s)" % arg)
+        raise ValueError("Bad argumets for atan! ({})".format(*arg))
 
 
 def get_text(node):
@@ -1568,7 +1568,7 @@ def get_text(node):
 def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=None):
     if style == None:
         style = "font-family:DejaVu Sans;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;fill:#000000;fill-opacity:1;stroke:none;"
-    style += "font-size:%fpx;" % font_size
+    style += "font-size:{:f}px;".format(font_size)
     attributes = {'x': str(x),
                   inkex.addNS("space", "xml"): "preserve",
                   'y': str(y),
@@ -1595,7 +1595,7 @@ def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=N
 
 def draw_csp(csp, stroke="#f00", fill="none", comment="", width=0.354, group=None, style=None, gcodetools_tag=None):
     if style == None:
-        style = "fill:%s;fill-opacity:1;stroke:%s;stroke-width:%s" % (fill, stroke, width)
+        style = "fill:{};fill-opacity:1;stroke:{};stroke-width:{}".format(fill, stroke, width)
     attributes = {'d': cubic_paths.formatCubicPath(csp),
                   'style': style
                   }
@@ -1624,18 +1624,18 @@ def draw_pointer(x, color="#f00", figure="cross", group=None, comment="", fill=N
     if figure == "line":
         s = ""
         for i in range(1, len(x) / 2):
-            s += " %s, %s " % (x[i * 2], x[i * 2 + 1])
-        attrib.update({"d": "M %s,%s L %s" % (x[0], x[1], s), "style": "fill:none;stroke:%s;stroke-width:%f;" % (color, width), "comment": str(comment)})
+            s += " {}, {} ".format(x[i * 2], x[i * 2 + 1])
+        attrib.update({"d": "M {},{} L {}".format(x[0], x[1], s), "style": "fill:none;stroke:{};stroke-width:{:f};".format(color, width), "comment": str(comment)})
         etree.SubElement(group, inkex.addNS('path', 'svg'), attrib)
     elif figure == "arrow":
         if fill == None:
             fill = "#12b3ff"
         fill_opacity = "0.8"
-        d = "m %s,%s " % (x[0], x[1]) + re.sub("([0-9\-.e]+)", (lambda match: str(float(match.group(1)) * size * 2.)), "0.88464,-0.40404 c -0.0987,-0.0162 -0.186549,-0.0589 -0.26147,-0.1173 l 0.357342,-0.35625 c 0.04631,-0.039 0.0031,-0.13174 -0.05665,-0.12164 -0.0029,-1.4e-4 -0.0058,-1.4e-4 -0.0087,0 l -2.2e-5,2e-5 c -0.01189,0.004 -0.02257,0.0119 -0.0305,0.0217 l -0.357342,0.35625 c -0.05818,-0.0743 -0.102813,-0.16338 -0.117662,-0.26067 l -0.409636,0.88193 z")
-        attrib.update({"d": d, "style": "fill:%s;stroke:none;fill-opacity:%s;" % (fill, fill_opacity), "comment": str(comment)})
+        d = "m {},{} ".format(x[0], x[1]) + re.sub("([0-9\-.e]+)", (lambda match: str(float(match.group(1)) * size * 2.)), "0.88464,-0.40404 c -0.0987,-0.0162 -0.186549,-0.0589 -0.26147,-0.1173 l 0.357342,-0.35625 c 0.04631,-0.039 0.0031,-0.13174 -0.05665,-0.12164 -0.0029,-1.4e-4 -0.0058,-1.4e-4 -0.0087,0 l -2.2e-5,2e-5 c -0.01189,0.004 -0.02257,0.0119 -0.0305,0.0217 l -0.357342,0.35625 c -0.05818,-0.0743 -0.102813,-0.16338 -0.117662,-0.26067 l -0.409636,0.88193 z")
+        attrib.update({"d": d, "style": "fill:{};stroke:none;fill-opacity:{};".format(fill, fill_opacity), "comment": str(comment)})
         etree.SubElement(group, inkex.addNS('path', 'svg'), attrib)
     else:
-        attrib.update({"d": "m %s,%s l %f,%f %f,%f %f,%f %f,%f , %f,%f" % (x[0], x[1], size, size, -2 * size, -2 * size, size, size, size, -size, -2 * size, 2 * size), "style": "fill:none;stroke:%s;stroke-width:%f;" % (color, width), "comment": str(comment)})
+        attrib.update({"d": "m {},{} l {:f},{:f} {:f},{:f} {:f},{:f} {:f},{:f} , {:f},{:f}".format(x[0], x[1], size, size, -2 * size, -2 * size, size, size, size, -size, -2 * size, 2 * size), "style": "fill:none;stroke:{};stroke-width:{:f};".format(color, width), "comment": str(comment)})
         etree.SubElement(group, inkex.addNS('path', 'svg'), attrib)
 
 
@@ -1777,10 +1777,10 @@ class P(object):
         return math.atan2(self.y, self.x)
 
     def __repr__(self):
-        return '%f,%f' % (self.x, self.y)
+        return '{:f},{:f}'.format(self.x, self.y)
 
     def pr(self):
-        return "%.2f,%.2f" % (self.x, self.y)
+        return "{:.2f},{:.2f}".format(self.x, self.y)
 
     def to_list(self):
         return [self.x, self.y]
@@ -1825,11 +1825,11 @@ class Arc(object):
         r = r.mag()
         if a < 0:
             a_end = a_st + a
-            style = style['biarc%s' % (num % 2)]
+            style = style['biarc{}'.format(num % 2)]
         else:
             a_end = a_st
             a_st = a_st + a
-            style = style['biarc%s_r' % (num % 2)]
+            style = style['biarc{}_r'.format(num % 2)]
 
         attr = {
             'style': style,
@@ -1880,7 +1880,7 @@ class Line(object):
         end = gcodetools.transform(self.end.to_list(), layer, True)
 
         attr = {'style': style['line'],
-                'd': 'M %s,%s L %s,%s' % (st[0], st[1], end[0], end[1]),
+                'd': 'M {},{} L {},{}'.format(st[0], st[1], end[0], end[1]),
                 "gcodetools": "Preview",
                 }
         if transform != []:
@@ -1970,10 +1970,10 @@ class Biarc(object):
         gcodetools.set_markers()
 
         for i in [0, 1]:
-            style['biarc%s_r' % i] = dict(inkex.Style.parse_str(style['biarc%s' % i]))
-            style['biarc%s_r' % i]["marker-start"] = "url(#DrawCurveMarker_r)"
-            del (style['biarc%s_r' % i]["marker-end"])
-            style['biarc%s_r' % i] = str(inkex.Style(style['biarc%s_r' % i]))
+            style['biarc{}_r'.format(i)] = dict(inkex.Style.parse_str(style['biarc{}'.format(i)]))
+            style['biarc{}_r'.format(i)]["marker-start"] = "url(#DrawCurveMarker_r)"
+            del (style['biarc{}_r'.format(i)]["marker-end"])
+            style['biarc{}_r'.format(i)] = str(inkex.Style(style['biarc{}_r'.format(i)]))
 
         if group == None:
             if "preview_groups" not in dir(options.self):
@@ -2029,8 +2029,8 @@ def csp_offset(csp, r):
     offset_subdivision_depth = 10
     time_ = time.time()
     time_start = time_
-    print_("Offset start at %s" % time_)
-    print_("Offset radius %s" % r)
+    print_("Offset start at {}".format(time_))
+    print_("Offset radius {}".format(r))
 
     def csp_offset_segment(sp1, sp2, r):
         result = []
@@ -2203,8 +2203,8 @@ def csp_offset(csp, r):
     original_csp = csp[:]
     # Clip segments which has curvature>1/r. Because their offset will be selfintersecting and very nasty.
 
-    print_("Offset prepared the path in %s" % (time.time() - time_))
-    print_("Path length = %s" % sum([len(i) for i in csp]))
+    print_("Offset prepared the path in {}".format(time.time() - time_))
+    print_("Path length = {}".format(sum([len(i) for i in csp])))
     time_ = time.time()
 
     ############################################################################
@@ -2249,7 +2249,7 @@ def csp_offset(csp, r):
         #    draw_pointer(csp_at_t(subpath_offset[k-1], subpath_offset[k], t))
 
     # inkex.etree.SubElement( options.doc_root, inkex.addNS('path','svg'), {"d": cubic_paths.formatCubicPath(unclipped_offset), "style":"fill:none;stroke:#0f0;"} )
-    print_("Offsetted path in %s" % (time.time() - time_))
+    print_("Offsetted path in {}".format(time.time() - time_))
     time_ = time.time()
 
     # for i in range(len(unclipped_offset)):
@@ -2301,9 +2301,9 @@ def csp_offset(csp, r):
                                 intersection[subpath_i] += [[i, t[0]], [i, t[1]]]
                                 intersection[subpath_j] += [[j, t[1]], [j, t[3]]]
 
-    print_("Intersections found in %s" % (time.time() - time_))
-    print_("Examined %s segments" % (summ))
-    print_("found %s intersections" % (summ1))
+    print_("Intersections found in {}".format(time.time() - time_))
+    print_("Examined {} segments".format(summ))
+    print_("found {} intersections".format(summ1))
     time_ = time.time()
 
     ########################################################################
@@ -2326,7 +2326,7 @@ def csp_offset(csp, r):
 
     # for i in range(len(splitted_offset)):
     #    draw_csp([splitted_offset[i]], color = ["Green","Red","Blue"][i%3])
-    print_("Split in %s" % (time.time() - time_))
+    print_("Split in {}".format(time.time() - time_))
     time_ = time.time()
 
     ########################################################################
@@ -2374,7 +2374,7 @@ def csp_offset(csp, r):
             minx, miny, maxx, maxy = csp_true_bounds([s])
             if (minx[0] - maxx[0]) ** 2 + (miny[1] - maxy[1]) ** 2 < 0.1:
                 joined_result.remove(s)
-    print_("Clipped and joined path in %s" % (time.time() - time_))
+    print_("Clipped and joined path in {}".format(time.time() - time_))
     time_ = time.time()
 
     ########################################################################
@@ -2392,7 +2392,7 @@ def csp_offset(csp, r):
                 draw_pointer(csp_at_t(csp[dist[1]][dist[2] - 1], csp[dist[1]][dist[2]], dist[3]) + s[int(len(s) / 2)][1], "blue", "line", comment=[math.sqrt(dist[0]), i, j, sp])
 
     print_("-----------------------------")
-    print_("Total offset time %s" % (time.time() - time_start))
+    print_("Total offset time {}".format(time.time() - time_start))
     print_()
     return joined_result
 
@@ -2552,23 +2552,23 @@ class Postprocessor(object):
     def parse_command(self, command):
         r = re.match(r"([A-Za-z0-9_]+)\s*\(\s*(.*)\)", command)
         if not r:
-            self.error("Parse error while postprocessing.\n(Command: '%s')" % (command), "error")
+            self.error("Parse error while postprocessing.\n(Command: '{}')".format(command), "error")
         function, parameters = r.group(1).lower(), r.group(2)
         if function in self.functions:
-            print_("Postprocessor: executing function %s(%s)" % (function, parameters))
+            print_("Postprocessor: executing function {}({})".format(function, parameters))
             self.functions[function](parameters)
         else:
-            self.error("Unrecognized function '%s' while postprocessing.\n(Command: '%s')" % (function, command), "error")
+            self.error("Unrecognized function '{}' while postprocessing.\n(Command: '{}')".format(function, command), "error")
 
     def re_sub_on_gcode_lines(self, parameters):
         gcode = self.gcode.split("\n")
         self.gcode = ""
         try:
             for line in gcode:
-                self.gcode += eval("re.sub(%s,line)" % parameters) + "\n"
+                self.gcode += eval("re.sub({},line)".format(parameters)) + "\n"
 
         except Exception as ex:
-            self.error("Bad parameters for regexp. They should be as re.sub pattern and replacement parameters! For example: r\"G0(\d)\", r\"G\\1\" \n(Parameters: '%s')\n %s" % (parameters, ex), "error")
+            self.error("Bad parameters for regexp. They should be as re.sub pattern and replacement parameters! For example: r\"G0(\\d)\", r\"G\\1\" \n(Parameters: '{}')\n {}".format(parameters, ex), "error")
 
     def remapi(self, parameters):
         self.remap(parameters, case_sensitive=True)
@@ -2582,18 +2582,18 @@ class Postprocessor(object):
             s = s.replace(":#:#:coma:#:#:", "\,")
             r = re.match("""\s*(\'|\")(.*)\\1\s*->\s*(\'|\")(.*)\\3\s*""", s)
             if not r:
-                self.error("Bad parameters for remap.\n(Parameters: '%s')" % (parameters), "error")
+                self.error("Bad parameters for remap.\n(Parameters: '{}')".format(parameters), "error")
             pattern += [r.group(2)]
             remap += [r.group(4)]
 
         for i in range(len(pattern)):
             if case_sensitive:
-                self.gcode = ireplace(self.gcode, pattern[i], ":#:#:remap_pattern%s:#:#:" % i)
+                self.gcode = ireplace(self.gcode, pattern[i], ":#:#:remap_pattern{}:#:#:".format(i))
             else:
-                self.gcode = self.gcode.replace(pattern[i], ":#:#:remap_pattern%s:#:#:" % i)
+                self.gcode = self.gcode.replace(pattern[i], ":#:#:remap_pattern{}:#:#:".format(i))
 
         for i in range(len(remap)):
-            self.gcode = self.gcode.replace(":#:#:remap_pattern%s:#:#:" % i, remap[i])
+            self.gcode = self.gcode.replace(":#:#:remap_pattern{}:#:#:".format(i), remap[i])
 
     def transform(self, move, scale):
         axis = ["xi", "yj", "zk", "a"]
@@ -2631,13 +2631,13 @@ class Postprocessor(object):
                     for a in axis[i]:
                         r = re.search(r"(?i)(" + a + r")\s*(-?)\s*(\d*\.?\d*)", s)
                         if r and r.group(3) != "":
-                            s = re.sub(r"(?i)(" + a + r")\s*(-?)\s*(\d*\.?\d*)", r"\1 %f" % (float(r.group(2) + r.group(3)) * scale[i] + (move[i] if a not in ["i", "j", "k"] else 0)), s)
+                            s = re.sub(r"(?i)(" + a + r")\s*(-?)\s*(\d*\.?\d*)", r"\1 {:f}".format(float(r.group(2) + r.group(3)) * scale[i] + (move[i] if a not in ["i", "j", "k"] else 0)), s)
             # scale radius R
             if r_scale != 1:
                 r = re.search(r"(?i)(r)\s*(-?\s*(\d*\.?\d*))", s)
                 if r and r.group(3) != "":
                     try:
-                        s = re.sub(r"(?i)(r)\s*(-?)\s*(\d*\.?\d*)", r"\1 %f" % (float(r.group(2) + r.group(3)) * r_scale), s)
+                        s = re.sub(r"(?i)(r)\s*(-?)\s*(\d*\.?\d*)", r"\1 {:f}".format(float(r.group(2) + r.group(3)) * r_scale), s)
                     except:
                         pass
 
@@ -2678,7 +2678,7 @@ class Postprocessor(object):
         # Add offset parametrization
         offset = {"x": "#6", "y": "#7", "z": "#8", "a": "#9"}
         for c in coords:
-            gcode += "%s  = 0 (%s axis offset)\n" % (offset[c], c.upper())
+            gcode += "{}  = 0 ({} axis offset)\n".format(offset[c], c.upper())
 
         # Add scale parametrization
         if planes == []:
@@ -2687,8 +2687,8 @@ class Postprocessor(object):
             gcode += "#10 = 1 (Scale factor)\n"
             scale = {"x": "#10", "i": "#10", "y": "#10", "j": "#10", "z": "#10", "k": "#10", "r": "#10"}
         else:
-            gcode += "#10 = 1 (%s Scale factor)\n" % ({"g17": "XY", "g18": "XZ", "g19": "YZ"}[planes[0]])
-            gcode += "#11 = 1 (%s Scale factor)\n" % ({"g17": "Z", "g18": "Y", "g19": "X"}[planes[0]])
+            gcode += "#10 = 1 ({} Scale factor)\n".format({"g17": "XY", "g18": "XZ", "g19": "YZ"}[planes[0]])
+            gcode += "#11 = 1 ({} Scale factor)\n".format({"g17": "Z", "g18": "Y", "g19": "X"}[planes[0]])
             scale = {"x": "#10", "i": "#10", "y": "#10", "j": "#10", "z": "#10", "k": "#10", "r": "#10"}
             if "g17" in planes:
                 scale["z"] = "#11"
@@ -2706,25 +2706,25 @@ class Postprocessor(object):
 
         # Add feed parametrization
         for f in feeds:
-            gcode += "%s = %f (Feed definition)\n" % (feeds[f], f)
+            gcode += "{} = {:f} (Feed definition)\n".format(feeds[f], f)
 
         # Parameterize Gcode
         for s in self.gcode.split("\n"):
             # feed replace :
             r = re.search(r"(?i)(F)\s*(-?)\s*(\d*\.?\d*)", s)
             if r and len(r.group(3)) > 0:
-                s = re.sub(r"(?i)(F)\s*(-?)\s*(\d*\.?\d*)", "F [%s]" % feeds[float(r.group(2) + r.group(3))], s)
+                s = re.sub(r"(?i)(F)\s*(-?)\s*(\d*\.?\d*)", "F [{}]".format(feeds[float(r.group(2) + r.group(3))]), s)
             # Coords XYZA replace
             for c in "xyza":
                 r = re.search(r"(?i)((" + c + r")\s*(-?)\s*(\d*\.?\d*))", s)
                 if r and len(r.group(4)) > 0:
-                    s = re.sub(r"(?i)(" + c + r")\s*((-?)\s*(\d*\.?\d*))", r"\1[\2*%s+%s]" % (scale[c], offset[c]), s)
+                    s = re.sub(r"(?i)(" + c + r")\s*((-?)\s*(\d*\.?\d*))", r"\1[\2*{}+{}]".format(scale[c], offset[c]), s)
 
             # Coords IJKR replace
             for c in "ijkr":
                 r = re.search(r"(?i)((" + c + r")\s*(-?)\s*(\d*\.?\d*))", s)
                 if r and len(r.group(4)) > 0:
-                    s = re.sub(r"(?i)(" + c + r")\s*((-?)\s*(\d*\.?\d*))", r"\1[\2*%s]" % scale[c], s)
+                    s = re.sub(r"(?i)(" + c + r")\s*((-?)\s*(\d*\.?\d*))", r"\1[\2*{}]".format(scale[c]), s)
 
             gcode += s + "\n"
 
@@ -2734,7 +2734,7 @@ class Postprocessor(object):
         try:
             round_ = int(parameters)
         except:
-            self.error("Bad parameters for round. Round should be an integer! \n(Parameters: '%s')" % (parameters), "error")
+            self.error("Bad parameters for round. Round should be an integer! \n(Parameters: '{}')".format(parameters), "error")
         gcode = ""
         for s in self.gcode.split("\n"):
             for a in "xyzijkaf":
@@ -2755,10 +2755,10 @@ class Postprocessor(object):
         try:
             for i in range(len(parameters)):
                 if float(parameters[i]) == 0:
-                    self.error("Bad parameters for scale. Scale should not be 0 at any axis! \n(Parameters: '%s')" % (parameters), "error")
+                    self.error("Bad parameters for scale. Scale should not be 0 at any axis! \n(Parameters: '{}')".format(parameters), "error")
                 scale[i] = float(parameters[i])
         except:
-            self.error("Bad parameters for scale.\n(Parameters: '%s')" % (parameters), "error")
+            self.error("Bad parameters for scale.\n(Parameters: '{}')".format(parameters), "error")
         self.transform([0, 0, 0, 0], scale)
 
     def move(self, parameters):
@@ -2768,7 +2768,7 @@ class Postprocessor(object):
             for i in range(len(parameters)):
                 move[i] = float(parameters[i])
         except:
-            self.error("Bad parameters for move.\n(Parameters: '%s')" % (parameters), "error")
+            self.error("Bad parameters for move.\n(Parameters: '{}')".format(parameters), "error")
         self.transform(move, [1., 1., 1., 1.])
 
     def flip_axis(self, parameters):
@@ -2778,9 +2778,9 @@ class Postprocessor(object):
             if p in [",", " ", "    ", "\r", "'", '"']:
                 continue
             if p not in ["x", "y", "z", "a"]:
-                self.error("Bad parameters for flip_axis. Parameter should be string consists of 'xyza' \n(Parameters: '%s')" % (parameters), "error")
+                self.error("Bad parameters for flip_axis. Parameter should be string consists of 'xyza' \n(Parameters: '{}')".format(parameters), "error")
             axis[p] = -axis[p]
-        self.scale("%f,%f,%f,%f" % (axis["x"], axis["y"], axis["z"], axis["a"]))
+        self.scale("{:f},{:f},{:f},{:f}".format(axis["x"], axis["y"], axis["z"], axis["a"]))
 
 
 ################################################################################
@@ -3514,7 +3514,7 @@ class Gcodetools(inkex.Effect):
         surface = Polygon()
         polygons = []
         time_ = time.time()
-        print_("Arrangement start at %s" % (time_))
+        print_("Arrangement start at {}".format(time_))
         original_paths = []
         for layer in self.layers:
             if layer in paths:
@@ -3529,8 +3529,8 @@ class Gcodetools(inkex.Effect):
                     original_paths += [path]
                     polygons += [polygon]
 
-        print_("Paths hull computed in %s sec." % (time.time() - time_))
-        print_("Got %s polygons having average %s edges each." % (len(polygons), float(sum([sum([len(poly) for poly in polygon.polygon]) for polygon in polygons])) / len(polygons)))
+        print_("Paths hull computed in {} sec.".format(time.time() - time_))
+        print_("Got {} polygons having average {} edges each.".format(len(polygons), float(sum([sum([len(poly) for poly in polygon.polygon]) for polygon in polygons])) / len(polygons)))
         time_ = time.time()
 
         #        material_width = self.options.arrangement_material_width
@@ -3541,13 +3541,13 @@ class Gcodetools(inkex.Effect):
         material_width = self.options.arrangement_material_width
         population = Arangement_Genetic(polygons, material_width)
 
-        print_("Genetic algorithm start at %s" % (time_))
+        print_("Genetic algorithm start at {}".format(time_))
         start_time = time.time()
         time_ = time.time()
 
         population.add_random_species(50)
         # population.test(population.test_spiece_centroid)
-        print_("Initial population done in %s" % (time.time() - time_))
+        print_("Initial population done in {}".format(time.time() - time_))
         time_ = time.time()
         pop = copy.deepcopy(population)
         population_count = self.options.arrangement_population_count
@@ -3562,7 +3562,7 @@ class Gcodetools(inkex.Effect):
             population.move_mutation_factor = 1.
             population.mutation_genes_count = [1, 2]
             population.populate_species(250, 20)
-            print_("Populate done at %s" % (time.time() - time_))
+            print_("Populate done at {}".format(time.time() - time_))
             """
             randomize = i%100 < 40
             if     i%100 < 40 : 
@@ -3579,7 +3579,7 @@ class Gcodetools(inkex.Effect):
             else:
                 population.test(population.test_spiece_centroid)
 
-            print_("Test done at %s" % (time.time() - time_))
+            print_("Test done at {}".format(time.time() - time_))
             draw_new_champ = False
             print_()
 
@@ -3588,9 +3588,9 @@ class Gcodetools(inkex.Effect):
                 improve = last_champ - population.population[0][0]
                 last_champ = population.population[0][0] * 1
 
-            print_("Cicle %s done in %s" % (i, time.time() - time_))
+            print_("Cicle {} done in {}".format(i, time.time() - time_))
             time_ = time.time()
-            print_("%s incests been found" % population.inc)
+            print_("{} incests been found".format(population.inc))
             print_()
 
             if i == 0 or i == population_count - 1 or draw_new_champ:
@@ -3601,7 +3601,7 @@ class Gcodetools(inkex.Effect):
                 x, y = 400 * (champions_count % 10), 700 * int(champions_count / 10)
                 surface.move(x - b[0], y - b[1])
                 surface.draw(width=2, color=colors[0])
-                draw_text("Step = %s\nSquare = %f\nSquare improvement = %f\nTime from start = %f" % (i, (b[2] - b[0]) * (b[3] - b[1]), improve, time.time() - start_time), x, y - 50)
+                draw_text("Step = {}\nSquare = {:f}\nSquare improvement = {:f}\nTime from start = {:f}".format(i, (b[2] - b[0]) * (b[3] - b[1]), improve, time.time() - start_time), x, y - 50)
                 champions_count += 1
                 """
                 spiece = population.population[0][1]
@@ -3833,10 +3833,10 @@ class Gcodetools(inkex.Effect):
         self.set_markers()
 
         for i in [0, 1]:
-            style['biarc%s_r' % i] = dict(inkex.Style.parse_str(style['biarc%s' % i]))
-            style['biarc%s_r' % i]["marker-start"] = "url(#DrawCurveMarker_r)"
-            del (style['biarc%s_r' % i]["marker-end"])
-            style['biarc%s_r' % i] = str(inkex.Style(style['biarc%s_r' % i]))
+            style['biarc{}_r'.format(i)] = dict(inkex.Style.parse_str(style['biarc{}'.format(i)]))
+            style['biarc{}_r'.format(i)]["marker-start"] = "url(#DrawCurveMarker_r)"
+            del (style['biarc{}_r'.format(i)]["marker-end"])
+            style['biarc{}_r'.format(i)] = str(inkex.Style(style['biarc{}_r'.format(i)]))
 
         if group == None:
             if "preview_groups" not in dir(self):
@@ -3866,7 +3866,7 @@ class Gcodetools(inkex.Effect):
             if s != '':
                 if s[1] == 'line':
                     attr = {'style': style['line'],
-                            'd': 'M %s,%s L %s,%s' % (s[0][0], s[0][1], si[0][0], si[0][1]),
+                            'd': 'M {},{} L {},{}'.format(s[0][0], s[0][1], si[0][0], si[0][1]),
                             "gcodetools": "Preview",
                             }
                     if transform != []:
@@ -3886,14 +3886,14 @@ class Gcodetools(inkex.Effect):
                             a = TAU + a
                     r = math.sqrt((sp[0] - c[0]) ** 2 + (sp[1] - c[1]) ** 2)
                     a_st = (math.atan2(sp[0] - c[0], - (sp[1] - c[1])) - math.pi / 2) % (math.pi * 2)
-                    st = style['biarc%s' % (arcn % 2)][:]
+                    st = style['biarc{}'.format(arcn % 2)][:]
                     if a > 0:
                         a_end = a_st + a
-                        st = style['biarc%s' % (arcn % 2)]
+                        st = style['biarc{}'.format(arcn % 2)]
                     else:
                         a_end = a_st * 1
                         a_st = a_st + a
-                        st = style['biarc%s_r' % (arcn % 2)]
+                        st = style['biarc{}_r'.format(arcn % 2)]
 
                     attr = {
                         'style': st,
@@ -3919,7 +3919,7 @@ class Gcodetools(inkex.Effect):
                 self.options.directory += "\\"
             else:
                 self.options.directory += "/"
-        print_("Checking directory: '%s'" % self.options.directory)
+        print_("Checking directory: '{}'".format(self.options.directory))
         if (os.path.isdir(self.options.directory)):
             if (os.path.isfile(self.options.directory + 'header')):
                 f = open(self.options.directory + 'header', 'r')
@@ -3949,7 +3949,7 @@ class Gcodetools(inkex.Effect):
                 name = self.options.file
             max_n = 0
             for s in dir_list:
-                r = re.match(r"^%s_0*(\d+)%s$" % (re.escape(name), re.escape(ext)), s)
+                r = re.match(r"^{}_0*(\d+){}$".format(re.escape(name), re.escape(ext)), s)
                 if r:
                     max_n = max(max_n, int(r.group(1)))
             filename = name + "_" + ("0" * (4 - len(str(max_n + 1))) + str(max_n + 1)) + ext
@@ -3965,7 +3965,7 @@ class Gcodetools(inkex.Effect):
             f = open(self.options.directory + self.options.file, "w")
             f.close()
         except:
-            self.error(_("Can not write to specified file!\n%s" % (self.options.directory + self.options.file)), "error")
+            self.error(_("Can not write to specified file!\n{}".format(self.options.directory + self.options.file)), "error")
             return False
         return True
 
@@ -3991,7 +3991,7 @@ class Gcodetools(inkex.Effect):
             r = ''
             for i in range(6):
                 if c[i] != None:
-                    r += s[i] + ("%f" % (c[i] * m[i] + a[i])) + s1[i]
+                    r += s[i] + ("{:f}".format(c[i] * m[i] + a[i])) + s1[i]
             return r
 
         def calculate_angle(a, current_a):
@@ -4011,12 +4011,12 @@ class Gcodetools(inkex.Effect):
         print_(curve)
 
         if tool != self.last_used_tool:
-            g += ("(Change tool to %s)\n" % re.sub("\"'\(\)\\\\", " ", tool["name"])) + tool["tool change gcode"] + "\n"
+            g += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", tool["name"]))) + tool["tool change gcode"] + "\n"
 
-        lg, zs, f = 'G00', self.options.Zsafe, " F%f" % tool['feed']
+        lg, zs, f = 'G00', self.options.Zsafe, " F{:f}".format(tool['feed'])
         current_a = 0
         go_to_safe_distance = "G00" + c([None, None, zs]) + "\n"
-        penetration_feed = " F%s" % tool['penetration feed']
+        penetration_feed = " F{}".format(tool['penetration feed'])
         for i in range(1, len(curve)):
             #    Creating Gcode for curve between s=curve[i-1] and si=curve[i] start at s[0] end at s[4]=si[0]
             s, si = curve[i - 1], curve[i]
@@ -4031,7 +4031,7 @@ class Gcodetools(inkex.Effect):
                 if tool['4th axis meaning'] == "tangent knife":
                     a = atan2(si[0][0] - s[0][0], si[0][1] - s[0][1])
                     a = calculate_angle(a, current_a)
-                    g += "G01 A%s\n" % (a * tool['4th axis scale'] + tool['4th axis offset'])
+                    g += "G01 A{}\n".format(a * tool['4th axis scale'] + tool['4th axis offset'])
                     current_a = a
                 if lg == "G00":
                     g += "G01" + c([None, None, s[5][0] + depth]) + penetration_feed + "(Penetrate)\n"
@@ -4045,9 +4045,9 @@ class Gcodetools(inkex.Effect):
                     else:  # CCW
                         a1 = atan2(-s[2][1] + s[0][1], s[2][0] - s[0][0]) + math.pi
                     a = calculate_angle(a1, current_a)
-                    g += "G01 A%s\n" % (a * tool['4th axis scale'] + tool['4th axis offset'])
+                    g += "G01 A{}\n".format(a * tool['4th axis scale'] + tool['4th axis offset'])
                     current_a = a
-                    axis4 = " A%s" % ((current_a + s[3]) * tool['4th axis scale'] + tool['4th axis offset'])
+                    axis4 = " A{}".format((current_a + s[3]) * tool['4th axis scale'] + tool['4th axis offset'])
                     current_a = current_a + s[3]
                 else:
                     axis4 = ""
@@ -4059,13 +4059,13 @@ class Gcodetools(inkex.Effect):
                         g += ("G02" if s[3] < 0 else "G03") + c(si[0] + [s[5][1] + depth, (s[2][0] - s[0][0]), (s[2][1] - s[0][1])]) + feed + axis4 + "\n"
                     else:
                         r = (r1.mag() + r2.mag()) / 2
-                        g += ("G02" if s[3] < 0 else "G03") + c(si[0] + [s[5][1] + depth]) + " R%f" % (r) + feed + axis4 + "\n"
+                        g += ("G02" if s[3] < 0 else "G03") + c(si[0] + [s[5][1] + depth]) + " R{:f}".format(r) + feed + axis4 + "\n"
                     lg = 'G02'
                 else:
                     if tool['4th axis meaning'] == "tangent knife":
                         a = atan2(si[0][0] - s[0][0], si[0][1] - s[0][1]) + math.pi
                         a = calculate_angle(a, current_a)
-                        g += "G01 A%s\n" % (a * tool['4th axis scale'] + tool['4th axis offset'])
+                        g += "G01 A{}\n".format(a * tool['4th axis scale'] + tool['4th axis offset'])
                         current_a = a
                     g += "G01" + c(si[0] + [s[5][1] + depth]) + feed + "\n"
                     lg = 'G01'
@@ -4111,19 +4111,19 @@ class Gcodetools(inkex.Effect):
                 if self.layers[i] in self.orientation_points:
                     break
             if self.layers[i] not in self.orientation_points:
-                self.error(_("Orientation points for '%s' layer have not been found! Please add orientation points using Orientation tab!") % layer.get(inkex.addNS('label', 'inkscape')), "no_orientation_points")
+                self.error(_("Orientation points for '{}' layer have not been found! Please add orientation points using Orientation tab!").format(layer.get(inkex.addNS('label', 'inkscape'))), "no_orientation_points")
             elif self.layers[i] in self.transform_matrix:
                 self.transform_matrix[layer] = self.transform_matrix[self.layers[i]]
                 self.Zcoordinates[layer] = self.Zcoordinates[self.layers[i]]
             else:
                 orientation_layer = self.layers[i]
                 if len(self.orientation_points[orientation_layer]) > 1:
-                    self.error(_("There are more than one orientation point groups in '%s' layer") % orientation_layer.get(inkex.addNS('label', 'inkscape')), "more_than_one_orientation_point_groups")
+                    self.error(_("There are more than one orientation point groups in '{}' layer").format(orientation_layer.get(inkex.addNS('label', 'inkscape'))), "more_than_one_orientation_point_groups")
                 points = self.orientation_points[orientation_layer][0]
                 if len(points) == 2:
                     points += [[[(points[1][0][1] - points[0][0][1]) + points[0][0][0], -(points[1][0][0] - points[0][0][0]) + points[0][0][1]], [-(points[1][1][1] - points[0][1][1]) + points[0][1][0], points[1][1][0] - points[0][1][0] + points[0][1][1]]]]
                 if len(points) == 3:
-                    print_("Layer '%s' Orientation points: " % orientation_layer.get(inkex.addNS('label', 'inkscape')))
+                    print_("Layer '{}' Orientation points: ".format(orientation_layer.get(inkex.addNS('label', 'inkscape'))))
                     for point in points:
                         print_(point)
                     #    Zcoordinates definition taken from Orientatnion point 1 and 2
@@ -4154,14 +4154,14 @@ class Gcodetools(inkex.Effect):
                     self.error(_("Orientation points are wrong! (if there are two orientation points they should not be the same. If there are three orientation points they should not be in a straight line.)"), "wrong_orientation_points")
 
             self.transform_matrix_reverse[layer] = numpy.linalg.inv(self.transform_matrix[layer]).tolist()
-            print_("\n Layer '%s' transformation matrixes:" % layer.get(inkex.addNS('label', 'inkscape')))
+            print_("\n Layer '{}' transformation matrixes:".format(layer.get(inkex.addNS('label', 'inkscape'))))
             print_(self.transform_matrix)
             print_(self.transform_matrix_reverse)
 
             # self.Zauto_scale[layer]  = math.sqrt( (self.transform_matrix[layer][0][0]**2 + self.transform_matrix[layer][1][1]**2)/2 )
             # Zautoscale is obsolete
             self.Zauto_scale[layer] = 1
-            print_("Z automatic scale = %s (computed according orientation points)" % self.Zauto_scale[layer])
+            print_("Z automatic scale = {} (computed according orientation points)".format(self.Zauto_scale[layer]))
 
         x, y = source_point[0], source_point[1]
         if not reverse:
@@ -4313,22 +4313,22 @@ class Gcodetools(inkex.Effect):
                     points = self.get_orientation_points(i)
                     if points != None:
                         self.orientation_points[layer] = self.orientation_points[layer] + [points[:]] if layer in self.orientation_points else [points[:]]
-                        print_("Found orientation points in '%s' layer: %s" % (layer.get(inkex.addNS('label', 'inkscape')), points))
+                        print_("Found orientation points in '{}' layer: {}".format(layer.get(inkex.addNS('label', 'inkscape')), points))
                     else:
-                        self.error(_("Warning! Found bad orientation points in '%s' layer. Resulting Gcode could be corrupt!") % layer.get(inkex.addNS('label', 'inkscape')), "bad_orientation_points_in_some_layers")
+                        self.error(_("Warning! Found bad orientation points in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))), "bad_orientation_points_in_some_layers")
 
                 # Need to recognise old files ver 1.6.04 and earlier
                 elif i.get("gcodetools") == "Gcodetools tool definition" or i.get("gcodetools") == "Gcodetools tool definition":
                     tool = self.get_tool(i)
                     self.tools[layer] = self.tools[layer] + [tool.copy()] if layer in self.tools else [tool.copy()]
-                    print_("Found tool in '%s' layer: %s" % (layer.get(inkex.addNS('label', 'inkscape')), tool))
+                    print_("Found tool in '{}' layer: {}".format(layer.get(inkex.addNS('label', 'inkscape')), tool))
 
                 elif i.get("gcodetools") == "Gcodetools graffiti reference point":
                     point = self.get_graffiti_reference_points(i)
                     if point != []:
                         self.graffiti_reference_points[layer] = self.graffiti_reference_points[layer] + [point[:]] if layer in self.graffiti_reference_points else [point]
                     else:
-                        self.error(_("Warning! Found bad graffiti reference point in '%s' layer. Resulting Gcode could be corrupt!") % layer.get(inkex.addNS('label', 'inkscape')), "bad_orientation_points_in_some_layers")
+                        self.error(_("Warning! Found bad graffiti reference point in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))), "bad_orientation_points_in_some_layers")
 
                 elif i.tag == inkex.addNS('path', 'svg'):
                     if "gcodetools" not in i.keys():
@@ -4438,16 +4438,16 @@ class Gcodetools(inkex.Effect):
                             value = ""
                 if value == None or key == None:
                     continue
-                # print_("Found tool parameter '%s':'%s'" % (key,value))
+                # print_("Found tool parameter '{}':'{}'".format(key, value))
                 if key in self.default_tool.keys():
                     try:
                         tool[key] = type(self.default_tool[key])(value)
                     except:
                         tool[key] = self.default_tool[key]
-                        self.error(_("Warning! Tool's and default tool's parameter's (%s) types are not the same ( type('%s') != type('%s') ).") % (key, value, self.default_tool[key]), "tools_warning")
+                        self.error(_("Warning! Tool's and default tool's parameter's ({}) types are not the same ( type('{}') != type('{}') ).").format(key, value, self.default_tool[key]), "tools_warning")
                 else:
                     tool[key] = value
-                    self.error(_("Warning! Tool has parameter that default tool has not ( '%s': '%s' ).") % (key, value), "tools_warning")
+                    self.error(_("Warning! Tool has parameter that default tool has not ( '{}': '{}' ).").format(key, value), "tools_warning")
         return tool
 
     def set_tool(self, layer):
@@ -4462,10 +4462,10 @@ class Gcodetools(inkex.Effect):
             if self.layers[i] != layer:
                 self.tools[layer] = self.tools[self.layers[i]]
             if len(self.tools[layer]) > 1:
-                self.error(_("Layer '%s' contains more than one tool!") % self.layers[i].get(inkex.addNS('label', 'inkscape')), "more_than_one_tool")
+                self.error(_("Layer '{}' contains more than one tool!").format(self.layers[i].get(inkex.addNS('label', 'inkscape'))), "more_than_one_tool")
             return self.tools[layer]
         else:
-            self.error(_("Can not find tool for '%s' layer! Please add one with Tools library tab!") % layer.get(inkex.addNS('label', 'inkscape')), "no_tool_error")
+            self.error(_("Can not find tool for '{}' layer! Please add one with Tools library tab!").format(layer.get(inkex.addNS('label', 'inkscape'))), "no_tool_error")
 
     ################################################################################
     #
@@ -4581,7 +4581,7 @@ class Gcodetools(inkex.Effect):
         def print_dxfpoints(points):
             gcode = ""
             for point in points:
-                gcode += "(drilling dxfpoint)\nG00 Z%f\nG00 X%f Y%f\nG01 Z%f F%f\nG04 P%f\nG00 Z%f\n" % (self.options.Zsafe, point[0], point[1], self.Zcoordinates[layer][1], self.tools[layer][0]["penetration feed"], 0.2, self.options.Zsafe)
+                gcode += "(drilling dxfpoint)\nG00 Z{:f}\nG00 X{:f} Y{:f}\nG01 Z{:f} F{:f}\nG04 P{:f}\nG00 Z{:f}\n".format(self.options.Zsafe, point[0], point[1], self.Zcoordinates[layer][1], self.tools[layer][0]["penetration feed"], 0.2, self.options.Zsafe)
             #            print_(("got dxfpoints array=",points))
             return gcode
 
@@ -4647,7 +4647,7 @@ class Gcodetools(inkex.Effect):
                     if self.options.comment_gcode_from_properties:
                         tags = get_path_properties(path)
                         for tag in tags:
-                            comment += gcode_comment_str("%s: %s" % (tag, tags[tag]))
+                            comment += gcode_comment_str("{}: {}".format(tag, tags[tag]))
 
                     style = dict(inkex.Style.parse_str(path.get("style")))
                     colors[id_] = inkex.Color(style['stroke'] if "stroke" in style and style['stroke'] != 'none' else "#000").to_rgb()
@@ -4655,7 +4655,7 @@ class Gcodetools(inkex.Effect):
                         tmp_curve = self.transform_csp(csp, layer)
                         x = tmp_curve[0][0][0][0]
                         y = tmp_curve[0][0][0][1]
-                        print_("got dxfpoint (scaled) at (%f,%f)" % (x, y))
+                        print_("got dxfpoint (scaled) at ({:f},{:f})".format(x, y))
                         dxfpoints += [[x, y]]
                     else:
 
@@ -4694,14 +4694,14 @@ class Gcodetools(inkex.Effect):
                         for step in range(0, int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
                             z = max(d, zs - abs(self.tools[layer][0]["depth step"] * (step + 1)))
 
-                            gcode += gcode_comment_str("\nStart cutting path id: %s" % curves[key][0][0])
+                            gcode += gcode_comment_str("\nStart cutting path id: {}".format(curves[key][0][0]))
                             if curves[key][0][2] != "()":
                                 gcode += curves[key][0][2]  # add comment
 
                             for curve in curves[key][1]:
                                 gcode += self.generate_gcode(curve, layer, z)
 
-                            gcode += gcode_comment_str("End cutting path id: %s\n\n" % curves[key][0][0])
+                            gcode += gcode_comment_str("End cutting path id: {}\n\n".format(curves[key][0][0]))
 
                 else:  # pass by pass
                     mind = min([curve[0][1] for curve in curves])
@@ -4713,7 +4713,7 @@ class Gcodetools(inkex.Effect):
                                 curves_.append(curve)
 
                         z = zs - abs(self.tools[layer][0]["depth step"] * (step + 1))
-                        gcode += "\n(Pass at depth %s)\n" % z
+                        gcode += "\n(Pass at depth {})\n".format(z)
 
                         if self.options.path_to_gcode_sort_paths:
                             keys = sort_curves([curve[1] for curve in curves_])
@@ -4721,14 +4721,14 @@ class Gcodetools(inkex.Effect):
                             keys = range(len(curves_))
                         for key in keys:
 
-                            gcode += gcode_comment_str("Start cutting path id: %s" % curves[key][0][0])
+                            gcode += gcode_comment_str("Start cutting path id: {}".format(curves[key][0][0]))
                             if curves[key][0][2] != "()":
                                 gcode += curves[key][0][2]  # add comment
 
                             for subcurve in curves_[key][1]:
                                 gcode += self.generate_gcode(subcurve, layer, max(z, curves_[key][0][1]))
 
-                            gcode += gcode_comment_str("End cutting path id: %s\n\n" % curves[key][0][0])
+                            gcode += gcode_comment_str("End cutting path id: {}\n\n".format(curves[key][0][0]))
 
         self.export_gcode(gcode)
 
@@ -4751,7 +4751,7 @@ class Gcodetools(inkex.Effect):
                         r = re.match("^\s*.\s*(\S+)", path.get("d"))
                         if r != None:
                             print_(("got path=", r.group(1)))
-                            path.set("d", "m %s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z" % r.group(1))
+                            path.set("d", "m {} 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z".format(r.group(1)))
                             path.set("style", styles["dxf_points"])
 
                     if self.options.dxfpoints_action == 'save':
@@ -4790,7 +4790,7 @@ class Gcodetools(inkex.Effect):
                     bounds = csp_simple_bound([subpath])
                     if (bounds[2] - bounds[0]) ** 2 + (bounds[3] - bounds[1]) ** 2 < self.options.area_find_artefacts_diameter ** 2:
                         if self.options.area_find_artefacts_action == "mark with an arrow":
-                            arrow = cubic_paths.parseCubicPath('m %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z' % (subpath[0][1][0], subpath[0][1][1]))
+                            arrow = cubic_paths.parseCubicPath('m {},{} 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z'.format(subpath[0][1][0], subpath[0][1][1]))
                             arrow = self.apply_transforms(path, arrow, True)
                             etree.SubElement(parent, inkex.addNS('path', 'svg'),
                                              {
@@ -4803,7 +4803,7 @@ class Gcodetools(inkex.Effect):
                             remove.append(i)
                         elif self.options.area_find_artefacts_action == "delete":
                             remove.append(i)
-                            print_("Deleted artefact %s" % subpath)
+                            print_("Deleted artefact {}".format(subpath))
                 remove.reverse()
                 for i in remove:
                     del csp[i]
@@ -4827,7 +4827,7 @@ class Gcodetools(inkex.Effect):
             if layer in self.selected_paths:
                 self.set_tool(layer)
                 if self.tools[layer][0]['diameter'] <= 0:
-                    self.error(_("Tool diameter must be > 0 but tool's diameter on '%s' layer is not!") % layer.get(inkex.addNS('label', 'inkscape')), "area_tools_diameter_error")
+                    self.error(_("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!").format(layer.get(inkex.addNS('label', 'inkscape'))), "area_tools_diameter_error")
 
                 for path in self.selected_paths[layer]:
                     print_(("doing path", path.get("style"), path.get("d")))
@@ -4843,7 +4843,7 @@ class Gcodetools(inkex.Effect):
                     csp = cubic_paths.parseCubicPath(d)
 
                     if path.get(inkex.addNS('type', 'sodipodi')) != "inkscape:offset":
-                        print_("Path %s is not an offset. Preparation started." % path.get("id"))
+                        print_("Path {} is not an offset. Preparation started.".format(path.get("id")))
                         # Path is not offset. Preparation will be needed.
                         # Finding top most point in path (min y value)
 
@@ -4892,7 +4892,7 @@ class Gcodetools(inkex.Effect):
                     tool_d = self.tools[layer][0]['diameter'] * scale
                     r = self.options.area_inkscape_radius * scale
                     sign = 1 if r > 0 else -1
-                    print_("Tool diameter = %s, r = %s" % (tool_d, r))
+                    print_("Tool diameter = {}, r = {}".format(tool_d, r))
 
                     # avoiding infinite loops
                     if self.options.area_tool_overlap > 0.9:
@@ -4931,7 +4931,7 @@ class Gcodetools(inkex.Effect):
             if layer in self.selected_paths:
                 self.set_tool(layer)
                 if self.tools[layer][0]['diameter'] <= 0:
-                    self.error(_("Tool diameter must be > 0 but tool's diameter on '%s' layer is not!") % layer.get(inkex.addNS('label', 'inkscape')), "area_tools_diameter_error")
+                    self.error(_("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!").format(layer.get(inkex.addNS('label', 'inkscape'))), "area_tools_diameter_error")
                 tool = self.tools[layer][0]
                 for path in self.selected_paths[layer]:
                     lines = []
@@ -5444,12 +5444,12 @@ class Gcodetools(inkex.Effect):
                     # convert to 2 hex digits as a shade of red
                     s2 = "#{0:x}0000".format(int(101 * (1.5 - math.sin(s + 0.5))))
                     etree.SubElement(gcode_3Dleft, inkex.addNS('path', 'svg'),
-                                     {"d": "M %f,%f L %f,%f" % (x0 - eye_dist, y0, x - eye_dist - 0.14 * w, y),
+                                     {"d": "M {:f},{:f} L {:f},{:f}".format(x0 - eye_dist, y0, x - eye_dist - 0.14 * w, y),
                                       'style': "stroke:" + s2 + "; stroke-opacity:1; stroke-width:" + str(t / 2) + " ; fill:none",
                                       "gcodetools": "Gcode G1R"
                                       })
                     etree.SubElement(gcode_3Dright, inkex.addNS('path', 'svg'),
-                                     {"d": "M %f,%f L %f,%f" % (x0 + eye_dist, y0, x + eye_dist + 0.14 * r, y),
+                                     {"d": "M {:f},{:f} L {:f},{:f}".format(x0 + eye_dist, y0, x + eye_dist + 0.14 * r, y),
                                       'style': "stroke:" + s2 + "; stroke-opacity:1; stroke-width:" + str(t / 2) + " ; fill:none",
                                       "gcodetools": "Gcode G1L"
                                       })
@@ -5492,7 +5492,7 @@ class Gcodetools(inkex.Effect):
                 if re.search('w', shape):
                     toolshape = eval('lambda w: ' + shape.strip('"'))
                 else:
-                    self.error(_("Tool '%s' has no shape. 45 degree cone assumed!") % self.tools[layer][0]['name'], "Continue")
+                    self.error(_("Tool '{}' has no shape. 45 degree cone assumed!").format(self.tools[layer][0]['name']), "Continue")
                     toolshape = lambda w: w
                 # Get tool radius in pixels
                 toolr = self.tools[layer][0]['diameter'] * orientation_scale / 2
@@ -5625,13 +5625,13 @@ class Gcodetools(inkex.Effect):
                                 for p in nlLT[-1]:  # For last sub-path
                                     if p[2]:
                                         etree.SubElement(engraving_group, inkex.addNS('path', 'svg'),
-                                                         {"d": "M %f,%f L %f,%f" % (p[0][0], p[0][1], p[0][0] + p[1][0] * 10, p[0][1] + p[1][1] * 10),
+                                                         {"d": "M {:f},{:f} L {:f},{:f}".format(p[0][0], p[0][1], p[0][0] + p[1][0] * 10, p[0][1] + p[1][1] * 10),
                                                           'style': "stroke:#f000af; stroke-opacity:0.46; stroke-width:0.1; fill:none",
                                                           "gcodetools": "Engraving normals"
                                                           })
                                     else:
                                         etree.SubElement(engraving_group, inkex.addNS('path', 'svg'),
-                                                         {"d": "M %f,%f L %f,%f" % (p[0][0], p[0][1], p[0][0] + p[1][0] * 10, p[0][1] + p[1][1] * 10),
+                                                         {"d": "M {:f},{:f} L {:f},{:f}".format(p[0][0], p[0][1], p[0][0] + p[1][0] * 10, p[0][1] + p[1][1] * 10),
                                                           'style': "stroke:#0000ff; stroke-opacity:0.46; stroke-width:0.1; fill:none",
                                                           "gcodetools": "Engraving bisectors"
                                                           })
@@ -5792,7 +5792,7 @@ class Gcodetools(inkex.Effect):
             etree.SubElement(g, inkex.addNS('path', 'svg'),
                              {
                                  'style': "stroke:none;fill:#00ff00;",
-                                 'd': 'm %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z z' % (graffiti_reference_points_count * 100, 0),
+                                 'd': 'm {},{} 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z z'.format(graffiti_reference_points_count * 100, 0),
                                  'gcodetools': "Gcodetools graffiti reference point arrow"
                              })
 
@@ -5815,7 +5815,7 @@ class Gcodetools(inkex.Effect):
             doc_height = self.unittouu(self.document.getroot().get('height'))
             if self.document.getroot().get('height') == "100%":
                 doc_height = 1052.3622047
-                print_("Overruding height from 100 percents to %s" % doc_height)
+                print_("Overruding height from 100 percents to {}".format(doc_height))
             if self.options.unit == "G21 (All units in mm)":
                 points = [[0., 0., self.options.Zsurface], [100., 0., self.options.Zdepth], [0., 100., 0.]]
             elif self.options.unit == "G20 (All units in inches)":
@@ -5823,15 +5823,15 @@ class Gcodetools(inkex.Effect):
             if self.options.orientation_points_count == "2":
                 points = points[:2]
             for i in points:
-                g = etree.SubElement(orientation_group, inkex.addNS('g', 'svg'), {'gcodetools': "Gcodetools orientation point (%s points)" % self.options.orientation_points_count})
+                g = etree.SubElement(orientation_group, inkex.addNS('g', 'svg'), {'gcodetools': "Gcodetools orientation point ({} points)".format(self.options.orientation_points_count)})
                 etree.SubElement(g, inkex.addNS('path', 'svg'),
                                  {
                                      'style': "stroke:none;fill:#000000;",
-                                     'd': 'm %s,%s 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z z' % (i[0], -i[1] + doc_height),
+                                     'd': 'm {},{} 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z z'.format(i[0], -i[1] + doc_height),
                                      'gcodetools': "Gcodetools orientation point arrow"
                                  })
 
-                draw_text("(%s; %s; %s)" % (i[0], i[1], i[2]), (i[0] + 10), (-i[1] - 10 + doc_height), group=g, gcodetools_tag="Gcodetools orientation point text")
+                draw_text("({}; {}; {})".format(i[0], i[1], i[2]), (i[0] + 10), (-i[1] - 10 + doc_height), group=g, gcodetools_tag="Gcodetools orientation point text")
 
     ################################################################################
     #
@@ -5929,7 +5929,7 @@ G01 Z1 (going to cutting z)\n""",
 
         tools_group = etree.SubElement(layer, inkex.addNS('g', 'svg'), {'gcodetools': "Gcodetools tool definition"})
         bg = etree.SubElement(tools_group, inkex.addNS('path', 'svg'),
-                              {'style': "fill:#%s;fill-opacity:0.5;stroke:#444444; stroke-width:1px;" % colors[tool_num % len(colors)], "gcodetools": "Gcodetools tool background"})
+                              {'style': "fill:#{};fill-opacity:0.5;stroke:#444444; stroke-width:1px;".format(colors[tool_num % len(colors)]), "gcodetools": "Gcodetools tool background"})
 
         y = 0
         keys = []
@@ -5949,7 +5949,7 @@ G01 Z1 (going to cutting z)\n""",
             v = str(param).split("\n")
             y += 15 * len(v) if key != 'name' else 20 * len(v)
 
-        bg.set('d', "m -20,-20 l 400,0 0,%f -400,0 z " % (y + 50))
+        bg.set('d', "m -20,-20 l 400,0 0,{:f} -400,0 z ".format(y + 50))
         tool = []
         tools_group.set("transform", simpletransform.formatTransform([[1, 0, self.view_center[0] - 150], [0, 1, self.view_center[1]]]))
 
@@ -5979,9 +5979,8 @@ G01 Z1 (going to cutting z)\n""",
                 tools_bounds[layer] = tools_bounds[layer] if layer in tools_bounds else [float("inf"), float("-inf")]
                 style = str(inkex.Style(tool["style"]))
                 for path in paths[layer]:
-                    style = "fill:%s; fill-opacity:%s; stroke:#000044; stroke-width:1; marker-mid:url(#CheckToolsAndOPMarker);" % (
-                        tool["style"]["fill"] if "fill" in tool["style"] else "#00ff00",
-                        tool["style"]["fill-opacity"] if "fill-opacity" in tool["style"] else "0.5")
+                    style = "fill:{}; fill-opacity:{}; stroke:#000044; stroke-width:1; marker-mid:url(#CheckToolsAndOPMarker);".format(tool["style"]["fill"] if "fill" in tool["style"] else "#00ff00",
+                                                                                                                                       tool["style"]["fill-opacity"] if "fill-opacity" in tool["style"] else "0.5")
                     group.insert(0, etree.Element(path.tag, path.attrib))
                     new = group.getchildren()[0]
                     new.set("style", style)
@@ -6022,7 +6021,7 @@ G01 Z1 (going to cutting z)\n""",
     def generate_lathe_gcode(self, subpath, layer, feed_type):
         if len(subpath) < 2:
             return ""
-        feed = " F %f" % self.tool[feed_type]
+        feed = " F {:f}".format(self.tool[feed_type])
         x, z = self.options.lathe_x_axis_remap, self.options.lathe_z_axis_remap
         flip_angle = -1 if x.lower() + z.lower() in ["xz", "yx", "zy"] else 1
         alias = {"X": "I", "Y": "J", "Z": "K", "x": "i", "y": "j", "z": "k"}
@@ -6034,21 +6033,21 @@ G01 Z1 (going to cutting z)\n""",
         for i in range(1, len(c)):  # Just in case check end point of each segment
             c[i - 1][4] = c[i][0][:]
         c += [[subpath[-1][1], "end", 0, 0, 0]]
-        self.draw_curve(c, layer, style=styles["biarc_style_lathe_%s" % feed_type])
+        self.draw_curve(c, layer, style=styles["biarc_style_lathe_{}".format(feed_type)])
 
-        gcode = ("G01 %s %f %s %f" % (x, c[0][4][0], z, c[0][4][1])) + feed + "\n"  # Just in case move to the start...
+        gcode = ("G01 {} {:f} {} {:f}".format(x, c[0][4][0], z, c[0][4][1])) + feed + "\n"  # Just in case move to the start...
         for s in c:
             if s[1] == 'line':
-                gcode += ("G01 %s %f %s %f" % (x, s[4][0], z, s[4][1])) + feed + "\n"
+                gcode += ("G01 {} {:f} {} {:f}".format(x, s[4][0], z, s[4][1])) + feed + "\n"
             elif s[1] == 'arc':
                 r = [(s[2][0] - s[0][0]), (s[2][1] - s[0][1])]
                 if (r[0] ** 2 + r[1] ** 2) > self.options.min_arc_radius ** 2:
                     r1, r2 = (P(s[0]) - P(s[2])), (P(s[4]) - P(s[2]))
                     if abs(r1.mag() - r2.mag()) < 0.001:
-                        gcode += ("G02" if s[3] * flip_angle < 0 else "G03") + (" %s %f %s %f %s %f %s %f" % (x, s[4][0], z, s[4][1], i_, (s[2][0] - s[0][0]), k_, (s[2][1] - s[0][1]))) + feed + "\n"
+                        gcode += ("G02" if s[3] * flip_angle < 0 else "G03") + (" {} {:f} {} {:f} {} {:f} {} {:f}".format(x, s[4][0], z, s[4][1], i_, (s[2][0] - s[0][0]), k_, (s[2][1] - s[0][1]))) + feed + "\n"
                     else:
                         r = (r1.mag() + r2.mag()) / 2
-                        gcode += ("G02" if s[3] * flip_angle < 0 else "G03") + (" %s %f %s %f" % (x, s[4][0], z, s[4][1])) + " R%f" % r + feed + "\n"
+                        gcode += ("G02" if s[3] * flip_angle < 0 else "G03") + (" {} {:f} {} {:f}".format(x, s[4][0], z, s[4][1])) + " R{:f}".format(r) + feed + "\n"
         return gcode
 
     def lathe(self):
@@ -6082,7 +6081,7 @@ G01 Z1 (going to cutting z)\n""",
                     self.tool["passing feed"] = float(self.tool["passing feed"] if "passing feed" in self.tool else self.tool["feed"])
                     self.tool["feed"] = float(self.tool["feed"])
                     self.tool["fine feed"] = float(self.tool["fine feed"] if "fine feed" in self.tool else self.tool["feed"])
-                    gcode += ("(Change tool to %s)\n" % re.sub("\"'\(\)\\\\", " ", self.tool["name"])) + self.tool["tool change gcode"] + "\n"
+                    gcode += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", self.tool["name"]))) + self.tool["tool change gcode"] + "\n"
 
                 for path in paths[layer]:
                     csp = self.transform_csp(cubic_paths.parseCubicPath(path.get("d")), layer)
@@ -6115,8 +6114,8 @@ G01 Z1 (going to cutting z)\n""",
                         bound = csp_simple_bound([subpath])
                         top_start, top_end = [subpath[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width], [subpath[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
 
-                        gcode += ("G01 %s %f F %f \n" % (z, top_start[1], self.tool["passing feed"]))
-                        gcode += ("G01 %s %f %s %f F %f \n" % (x, top_start[0], z, top_start[1], self.tool["passing feed"]))
+                        gcode += ("G01 {} {:f} F {:f} \n".format(z, top_start[1], self.tool["passing feed"]))
+                        gcode += ("G01 {} {:f} {} {:f} F {:f} \n".format(x, top_start[0], z, top_start[1], self.tool["passing feed"]))
 
                         subpath = csp_concat_subpaths(csp_subpath_line_to([], [top_start, subpath[0][1]]), subpath)
                         subpath = csp_subpath_line_to(subpath, [top_end, top_start])
@@ -6145,7 +6144,7 @@ G01 Z1 (going to cutting z)\n""",
                                     gcode += self.generate_lathe_gcode(part, layer, "feed")
 
                         top_start, top_end = [fine_cut[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width], [fine_cut[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
-                        gcode += "\n(Fine cutting start)\n(Calculating fine cut using %s)\n" % self.options.lathe_create_fine_cut_using
+                        gcode += "\n(Fine cutting start)\n(Calculating fine cut using {})\n".format(self.options.lathe_create_fine_cut_using)
                         for i in range(self.options.lathe_fine_cut_count):
                             width = self.options.lathe_fine_cut_width * (1 - float(i + 1) / self.options.lathe_fine_cut_count)
                             if width == 0:
@@ -6165,14 +6164,14 @@ G01 Z1 (going to cutting z)\n""",
                                     offsetted_subpath = csp_clip_by_line(offsetted_subpath, [0, miny[1] - r], [10, miny[1] - r])
                                     current_pass = csp_join_subpaths(offsetted_subpath)[0]
 
-                            gcode += "\n(Fine cut %i-th cicle start)\n" % (i + 1)
-                            gcode += ("G01 %s %f %s %f F %f \n" % (x, top_start[0], z, top_start[1], self.tool["passing feed"]))
-                            gcode += ("G01 %s %f %s %f F %f \n" % (x, current_pass[0][1][0], z, current_pass[0][1][1] + self.options.lathe_fine_cut_width, self.tool["passing feed"]))
-                            gcode += ("G01 %s %f %s %f F %f \n" % (x, current_pass[0][1][0], z, current_pass[0][1][1], self.tool["fine feed"]))
+                            gcode += "\n(Fine cut {:d}-th cicle start)\n".format(i + 1)
+                            gcode += ("G01 {} {:f} {} {:f} F {:f} \n".format(x, top_start[0], z, top_start[1], self.tool["passing feed"]))
+                            gcode += ("G01 {} {:f} {} {:f} F {:f} \n".format(x, current_pass[0][1][0], z, current_pass[0][1][1] + self.options.lathe_fine_cut_width, self.tool["passing feed"]))
+                            gcode += ("G01 {} {:f} {} {:f} F {:f} \n".format(x, current_pass[0][1][0], z, current_pass[0][1][1], self.tool["fine feed"]))
 
                             gcode += self.generate_lathe_gcode(current_pass, layer, "fine feed")
-                            gcode += ("G01 %s %f F %f \n" % (z, top_start[1], self.tool["passing feed"]))
-                            gcode += ("G01 %s %f %s %f F %f \n" % (x, top_start[0], z, top_start[1], self.tool["passing feed"]))
+                            gcode += ("G01 {} {:f} F {:f} \n".format(z, top_start[1], self.tool["passing feed"]))
+                            gcode += ("G01 {} {:f} {} {:f} F {:f} \n".format(x, top_start[0], z, top_start[1], self.tool["passing feed"]))
 
         self.export_gcode(gcode)
 
@@ -6275,9 +6274,9 @@ G01 Z1 (going to cutting z)\n""",
                     else:
                         self.error("You are currently using latest stable version of Gcodetools.", "Warning")
                     return
-            self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s" % gcodetools_current_version, "Warning")
+            self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools {}".format(gcodetools_current_version), "Warning")
         except:
-            self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s" % gcodetools_current_version, "Warning")
+            self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools {}".format(gcodetools_current_version), "Warning")
 
     ################################################################################
     # Graffiti function generates Gcode for graffiti drawer
@@ -6290,7 +6289,7 @@ G01 Z1 (going to cutting z)\n""",
             pos = []
             for ref_point in self.graffiti_reference_points[layer]:
                 c = math.sqrt((point[0] - ref_point[0][0]) ** 2 + (point[1] - ref_point[0][1]) ** 2)
-                gcode += " %s %f" % (ref_point[1], c)
+                gcode += " {} {:f}".format(ref_point[1], c)
                 pos += [c]
             return pos, gcode
 
@@ -6407,13 +6406,13 @@ G01 Z1 (going to cutting z)\n""",
                             self.graffiti_reference_points[layer] = self.graffiti_reference_points[self.layers[i]]
                             break
                     if reference_points == None:
-                        self.error('There are no graffiti reference points for layer %s' % layer, "error")
+                        self.error('There are no graffiti reference points for layer {}'.format(layer), "error")
 
                 # Transform reference points
                 for i in range(len(self.graffiti_reference_points[layer])):
                     self.graffiti_reference_points[layer][i][0] = self.transform(self.graffiti_reference_points[layer][i][0], layer)
                     point = self.graffiti_reference_points[layer][i]
-                    gcode += "(Reference point %f;%f for %s axis)\n" % (point[0][0], point[0][1], point[1])
+                    gcode += "(Reference point {:f};{:f} for {} axis)\n".format(point[0][0], point[0][1], point[1])
 
                 if self.options.graffiti_create_preview:
                     for point in self.graffiti_reference_points[layer]:
@@ -6444,7 +6443,7 @@ G01 Z1 (going to cutting z)\n""",
                 self.tool = self.tools[layer][0]
                 # Change tool every layer. (Probably layer = color so it'll be
                 # better to change it even if the tool has not been changed)
-                gcode += ("(Change tool to %s)\n" % re.sub("\"'\(\)\\\\", " ", self.tool["name"])) + self.tool["tool change gcode"] + "\n"
+                gcode += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", self.tool["name"]))) + self.tool["tool change gcode"] + "\n"
 
                 subpaths = []
                 for path in paths[layer]:
@@ -6552,7 +6551,7 @@ G01 Z1 (going to cutting z)\n""",
                         l = (last_pos[0] - point[0]) ** 2 + (last_pos[1] - point[1]) ** 2
                         if l != 0:
                             feed = self.tool['feed'] * math.sqrt(real_l / l)
-                            gcode += "G01 " + g + " F %f\n" % feed
+                            gcode += "G01 " + g + " F {:f}\n".format(feed)
                             if self.options.graffiti_create_preview:
                                 draw_graffiti_segment(layer, real_pos, last_real_pos, feed, color=(0, 0, 255, 200) if polyline_[0] == "draw" else (255, 0, 0, 200), emmit=self.options.graffiti_preview_emmit)
                             last_real_pos = real_pos
@@ -6599,8 +6598,8 @@ G01 Z1 (going to cutting z)\n""",
                 if os.path.isfile(self.options.log_filename):
                     os.remove(self.options.log_filename)
                 f = open(self.options.log_filename, "a")
-                f.write("Gcodetools log file.\nStarted at %s.\n%s\n" % (time.strftime("%d.%m.%Y %H:%M:%S"), options.log_filename))
-                f.write("%s tab is active.\n" % self.options.active_tab)
+                f.write("Gcodetools log file.\nStarted at {}.\n{}\n".format(time.strftime("%d.%m.%Y %H:%M:%S"), options.log_filename))
+                f.write("{} tab is active.\n".format(self.options.active_tab))
                 f.close()
             except:
                 print_ = lambda *x: None
@@ -6617,7 +6616,7 @@ G01 Z1 (going to cutting z)\n""",
             self.test()
 
         elif self.options.active_tab not in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"orientation"', '"tools_library"', '"lathe"', '"offset"', '"arrangement"', '"update"', '"graffiti"', '"lathe_modify_path"', '"plasma-prepare-path"']:
-            self.error(_("Select one of the action tabs - Path to Gcode, Area, Engraving, DXF points, Orientation, Offset, Lathe or Tools library.\n Current active tab id is %s" % self.options.active_tab), "error")
+            self.error(_("Select one of the action tabs - Path to Gcode, Area, Engraving, DXF points, Orientation, Offset, Lathe or Tools library.\n Current active tab id is {}".format(self.options.active_tab)), "error")
         else:
             # Get all Gcodetools data from the scene.
             self.get_info()
@@ -6686,7 +6685,7 @@ G01 Z1 (going to cutting z)\n""",
                                     draw_csp([iii], color="Green", width=1)
                                     # print_(offset_)
                             else:
-                                print_("------------Reached empty offset at radius %s" % offset)
+                                print_("------------Reached empty offset at radius {}".format(offset))
                                 break
                             offset += self.options.offset_step
                 print_()
@@ -6694,8 +6693,8 @@ G01 Z1 (going to cutting z)\n""",
                 print_("-----------------------------------------------------------------------------------")
                 print_("-----------------------------------------------------------------------------------")
                 print_()
-                print_("Done in %s" % (time.time() - time_))
-                print_("Total offsets count %s" % offsets_count)
+                print_("Done in {}".format(time.time() - time_))
+                print_("Total offsets count {}".format(offsets_count))
             elif self.options.active_tab == '"arrangement"':
                 self.arrangement()
 
@@ -6703,8 +6702,8 @@ G01 Z1 (going to cutting z)\n""",
                 self.plasma_prepare_path()
 
         print_("------------------------------------------")
-        print_("Done in %f seconds" % (time.time() - start_time))
-        print_("End at %s." % time.strftime("%d.%m.%Y %H:%M:%S"))
+        print_("Done in {:f} seconds".format(time.time() - start_time))
+        print_("End at {}.".format(time.strftime("%d.%m.%Y %H:%M:%S")))
 
 
 if __name__ == '__main__':

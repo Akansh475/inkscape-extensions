@@ -358,8 +358,6 @@ def csp_to_point_distance(csp, p, dist_bounds=[0, 1e100], tolerance=.01):
         for i in range(1, len(csp[j])):
             d = csp_seg_to_point_distance(csp[j][i - 1], csp[j][i], p, sample_points=5, tolerance=.01)
             if d[0] < dist_bounds[0]:
-                #                draw_pointer( list(csp_at_t(subpath[dist[2]-1],subpath[dist[2]],dist[3]))
-                #                    +list(csp_at_t(csp[dist[4]][dist[5]-1],csp[dist[4]][dist[5]],dist[6])),"red","line", comment = math.sqrt(dist[0]))
                 return [d[0], j, i, d[1]]
             else:
                 if d[0] < min_dist[0]:
@@ -428,7 +426,6 @@ def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=[0, 1e100], samp
             F1, F2, F = [0, 0], [[0, 0], [0, 0]], 1e100
             x, y = ax1 * t13 + bx1 * t12 + cx1 * t1 + dx1 - (ax2 * t23 + bx2 * t22 + cx2 * t2 + dx2), ay1 * t13 + by1 * t12 + cy1 * t1 + dy1 - (ay2 * t23 + by2 * t22 + cy2 * t2 + dy2)
             while i < 2 or abs(F - Flast) > tolerance and i < 30:
-                # draw_pointer(csp_at_t(sp1,sp2,t1))
                 f1x = 3 * ax1 * t12 + 2 * bx1 * t1 + cx1
                 f1y = 3 * ay1 * t12 + 2 * by1 * t1 + cy1
                 f2x = 3 * ax2 * t22 + 2 * bx2 * t2 + cx2
@@ -477,9 +474,6 @@ def csp_to_csp_distance(csp1, csp2, dist_bounds=[0, 1e100], tolerance=.01):
                 return dist
     return dist
 
-
-#    draw_pointer( list(csp_at_t(csp1[dist[1]][dist[2]-1],csp1[dist[1]][dist[2]],dist[3]))
-#                + list(csp_at_t(csp2[dist[4]][dist[5]-1],csp2[dist[4]][dist[5]],dist[6])), "#507","line")
 
 
 def csp_split(sp1, sp2, t=.5):
@@ -760,7 +754,6 @@ def csp_special_points(sp1, sp2):
 def csp_subpath_ccw(subpath):
     # Remove all zerro length segments
     s = 0
-    # subpath = subpath[:]
     if (P(subpath[-1][1]) - P(subpath[0][1])).l2() > 1e-10:
         subpath[-1][2] = subpath[-1][1]
         subpath[0][0] = subpath[0][1]
@@ -2000,7 +1993,6 @@ class Biarc(object):
         for subitems in self.items:
             for item in subitems:
                 num += 1
-                # if num>1 : break
                 item.draw(group, style, layer, transform, num, reverse_angle)
 
     def from_old_style(self, curve):
@@ -2068,8 +2060,6 @@ def csp_offset(csp, r):
                             result = csp_concat_subpaths(result, [sp2_, sp3_] + offset[j + 1:])
                         else:
                             pass  # ???
-                            # raise ValueError, "Offset curvature clipping error"
-        # draw_csp([result])
         return result
 
     def create_offset_segment(sp1, sp2, r):
@@ -2133,7 +2123,6 @@ def csp_offset(csp, r):
                     sp3_, sp4_, sp5_ = csp_split(arc[j - 1], arc[j], t2)
                     prev = prev[:i - 1] + [sp1_, sp2_]
                     arc = [sp4_, sp5_] + arc[j + 1:]
-                # else : raise ValueError, "Offset curvature clipping error"
             # Clip next by arc
             if next == []:
                 return prev, [], arc
@@ -2145,7 +2134,6 @@ def csp_offset(csp, r):
                     sp3_, sp4_, sp5_ = csp_split(next[j - 1], next[j], t2)
                     arc = arc[:i - 1] + [sp1_, sp2_]
                     next = [sp4_, sp5_] + next[j + 1:]
-                # else : raise ValueError, "Offset curvature clipping error"
 
             return prev, arc, next
 
@@ -2158,7 +2146,6 @@ def csp_offset(csp, r):
         )
 
         if err > tolerance ** 2 and depth > 0:
-            # print_(csp_seg_to_point_distance(sp1_r,sp2_r, (P(csp_at_t(sp1,sp2,.25)) + P(csp_normalized_normal(sp1,sp2,.25))*r).to_list())[0], tolerance)
             if depth > offset_subdivision_depth - 2:
                 t = csp_max_curvature(sp1, sp2)
                 t = max(.1, min(.9, t))
@@ -2169,9 +2156,6 @@ def csp_offset(csp, r):
             r2 = offset_segment_recursion(sp4, sp5, r, depth - 1, tolerance)
             return r1[:-1] + [[r1[-1][0], r1[-1][1], r2[0][2]]] + r2[1:]
         else:
-            # draw_csp([[sp1_r,sp2_r]])
-            # draw_pointer(sp1[1]+sp1_r[1], "#057", "line")
-            # draw_pointer(sp2[1]+sp2_r[1], "#705", "line")
             return [sp1_r, sp2_r]
 
     ############################################################################
@@ -2228,8 +2212,7 @@ def csp_offset(csp, r):
                 prev_l = len(subpath_offset)
             else:
                 prev, arc, next = csp_join_offsets(subpath_offset[-prev_l:], segment_offset, sp1, sp2, sp1_l, sp2_l, r)
-                # draw_csp([prev],"Blue")
-                # draw_csp([arc],"Magenta")
+
                 subpath_offset = csp_concat_subpaths(subpath_offset[:-prev_l + 1], prev, arc, next)
                 prev_l = len(next)
             sp1_l, sp2_l = sp1[:], sp2[:]
@@ -2239,23 +2222,15 @@ def csp_offset(csp, r):
         prev, arc, next = csp_join_offsets(subpath_offset[-prev_l:], subpath_offset[:2], subpath[0], subpath[1], sp1_l, sp2_l, r)
         subpath_offset[:2] = next[:]
         subpath_offset = csp_concat_subpaths(subpath_offset[:-prev_l + 1], prev, arc)
-        # draw_csp([prev],"Blue")
-        # draw_csp([arc],"Red")
-        # draw_csp([next],"Red")
 
         # Collect subpath's offset and save it to unclipped offset list.
         unclipped_offset[i] = subpath_offset[:]
 
-        # for k,t in intersection[i]:
-        #    draw_pointer(csp_at_t(subpath_offset[k-1], subpath_offset[k], t))
 
-    # inkex.etree.SubElement( options.doc_root, inkex.addNS('path','svg'), {"d": cubic_paths.formatCubicPath(unclipped_offset), "style":"fill:none;stroke:#0f0;"} )
+
     print_("Offsetted path in {}".format(time.time() - time_))
     time_ = time.time()
 
-    # for i in range(len(unclipped_offset)):
-    #    draw_csp([unclipped_offset[i]], color = ["Green","Red","Blue"][i%3], width = .1)
-    # return []
     ############################################################################
     # Now to the clipping.
     ############################################################################
@@ -2295,9 +2270,7 @@ def csp_offset(csp, r):
                                     (i - j - 1) % (len(subpath) - 1) == 0 and small(t[1] - 1) and small(t[0]))):
                                 intersection[subpath_i] += [[i, t[0]]]
                                 intersection[subpath_j] += [[j, t[1]]]
-                                # draw_pointer(csp_at_t(subpath[i-1],subpath[i],t[0]),"#f00")
-                                # print_(t)
-                                # print_(i,j)
+
                             elif len(t) == 5 and t[4] == "Overlap":
                                 intersection[subpath_i] += [[i, t[0]], [i, t[1]]]
                                 intersection[subpath_j] += [[j, t[1]], [j, t[3]]]
@@ -2325,8 +2298,6 @@ def csp_offset(csp, r):
         else:
             splitted_offset += [subpath[:]]
 
-    # for i in range(len(splitted_offset)):
-    #    draw_csp([splitted_offset[i]], color = ["Green","Red","Blue"][i%3])
     print_("Split in {}".format(time.time() - time_))
     time_ = time.time()
 
@@ -2360,7 +2331,6 @@ def csp_offset(csp, r):
     # Now join all together and check closure and orientation of result
     joined_result = csp_join_subpaths(result)
     # Check if each subpath from joined_result is closed
-    # draw_csp(joined_result,color="Green",width=1)
 
     for s in joined_result[:]:
         if csp_subpaths_end_to_start_distance2(s, s) > 0.001:
@@ -2912,8 +2882,6 @@ class Polygon(object):
 
         if zerro_plane and dist > 10 + top:
             dist = 10 + top
-        # print_(dist, top, bottom)
-        # self.draw()
         self.move(0, -dist)
 
     def draw(self, color="#075", width=.1, group=None):
@@ -2936,7 +2904,6 @@ class Polygon(object):
                 if st[0] > end[0]:
                     st, end = end, st  # This will be needed to check that edge if open only at right end
                 c = (p[1] - st[1]) * (end[0] - st[0]) - (end[1] - st[1]) * (p[0] - st[0])
-                # print_(c)
                 if st[0] <= p[0] < end[0]:
                     if c < 0:
                         inside = not inside
@@ -2996,8 +2963,6 @@ class Polygon(object):
                 if not break_s and not break_e:
                     edges[s] = [[s, e, l]]
                     edges[e] = [[e, s, l]]
-                    # draw_pointer(s+e,"red","line")
-                    # draw_pointer(s+e,"red","line")
                 else:
                     if e in edges:
                         for edge in edges[e]:
@@ -3005,21 +2970,16 @@ class Polygon(object):
                                 break
                         if point_to_point_d2(edge[1], s) > 0.000001:
                             edges[e] += [[e, s, l]]
-                            # draw_pointer(s+e,"red","line")
-
                     else:
                         edges[e] = [[e, s, l]]
-                        # draw_pointer(s+e,"green","line")
                     if s in edges:
                         for edge in edges[s]:
                             if point_to_point_d2(edge[1], e) < 0.000001:
                                 break
                         if point_to_point_d2(edge[1], e) > 0.000001:
                             edges[s] += [[s, e, l]]
-                            # draw_pointer(s+e,"red","line")
                     else:
                         edges[s] = [[s, e, l]]
-                        # draw_pointer(s+e,"green","line")
 
         def angle_quadrant(sin, cos):
             # quadrants are (0,pi/2], (pi/2,pi], (pi,3*pi/2], (3*pi/2, 2*pi], i.e. 0 is in the 4-th quadrant
@@ -3057,18 +3017,13 @@ class Polygon(object):
             next = last
             last_edge = [(last[0][0] - last[1][0]) / last[2], (last[0][1] - last[1][1]) / last[2]]
             for p in edges:
-                # draw_pointer(list(p[0])+[p[0][0]+last_edge[0]*40,p[0][1]+last_edge[1]*40], "Red", "line", width=1)
-                # print_("len(edges)=",len(edges))
+
                 cur = [(p[1][0] - p[0][0]) / p[2], (p[1][1] - p[0][1]) / p[2]]
                 cos, sin = dot(cur, last_edge), cross(cur, last_edge)
-                # draw_pointer(list(p[0])+[p[0][0]+cur[0]*40,p[0][1]+cur[1]*40], "Orange", "line", width=1, comment = [sin,cos])
-                # print_("cos, sin=",cos,sin)
-                # print_("min_angle_before=",min_angle)
 
                 if angle_is_less(sin, cos, min_angle[0], min_angle[1]):
                     min_angle = [sin, cos]
                     next = p
-                # print_("min_angle=",min_angle)
 
             return next
 
@@ -3095,8 +3050,6 @@ class Polygon(object):
                     raise ValueError("Hull error")
                 loops1 += 1
                 next = get_closes_edge_by_angle(edges[last[1]], last)
-                # draw_pointer(next[0]+next[1],"Green","line", comment=i, width= 1)
-                # print_(next[0],"-",next[1])
 
                 last = next
                 poly += [list(last[0])]
@@ -3159,19 +3112,6 @@ class Arangement_Genetic(object):
             res += [copy.deepcopy(self.population[t[0][1]])]
             del self.population[t[0][1]]
         self.population = res
-        # del self.population[0]
-        # for c in range(count-1) :
-        #    rank = []
-        #    for i in range(len(self.population)) :
-        #        sim = self.similarity(self.population[i][1],res)
-        #        rank += [ [self.population[i][0] / sim if sim>0 else 1e100,i] ]
-        #    rank.sort()
-        #    res += [  copy.deepcopy(self.population[rank[0][1]]) ]
-        #    print_(rank[0],self.population[rank[0][1]][0])
-        #    print_(res[-1])
-        #    del self.population[rank[0][1]]
-
-        self.population = res
 
     def populate_species(self, count, parent_count):
         self.population.sort()
@@ -3197,15 +3137,12 @@ class Arangement_Genetic(object):
                 self.incest_mutation_count_multiplyer = 2.
             else:
                 pass
-            #                if random.random()<.01 : print_(self.species_distance2(parent1, parent2))
             start_gene = random.randint(0, self.genes_count)
             end_gene = (max(1, random.randint(0, self.genes_count), int(self.genes_count / 4)) + start_gene) % self.genes_count
             if end_gene < start_gene:
                 end_gene, start_gene = start_gene, end_gene
                 parent1, parent2 = parent2, parent1
             for i in range(start_gene, end_gene):
-                # rotation_mutate_param = random.random()/100
-                # xposition_mutate_param = random.random()/100
                 tr = 1.  # - rotation_mutate_param
                 tp = 1.  # - xposition_mutate_param
                 specimen[i] = [parent1[i][0], parent1[i][1] * tr + parent2[i][1] * (1 - tr), parent1[i][2] * tp + parent2[i][2] * (1 - tp)]
@@ -3326,9 +3263,6 @@ class Arangement_Genetic(object):
 
         for i in range(len(test_)):
             self.population[i][0] = test_[i]
-
-        # surface.draw()
-
 
 ################################################################################
 #
@@ -3525,7 +3459,6 @@ class Gcodetools(inkex.Effect):
                     for subpath in csp:
                         for sp1, sp2 in zip(subpath, subpath[1:]):
                             polygon.add([csp_segment_convex_hull(sp1, sp2)])
-                    # print_("Reduced edges count from", sum([len(poly) for poly in polygon.polygon ]) )
                     polygon.hull()
                     original_paths += [path]
                     polygons += [polygon]
@@ -3534,11 +3467,6 @@ class Gcodetools(inkex.Effect):
         print_("Got {} polygons having average {} edges each.".format(len(polygons), float(sum([sum([len(poly) for poly in polygon.polygon]) for polygon in polygons])) / len(polygons)))
         time_ = time.time()
 
-        #        material_width = self.options.arrangement_material_width
-        #        population = Arangement_Genetic(polygons, material_width)
-        #        population.add_random_species(1)
-        #        population.test_population_centroid()
-        #        return
         material_width = self.options.arrangement_material_width
         population = Arangement_Genetic(polygons, material_width)
 
@@ -3547,7 +3475,6 @@ class Gcodetools(inkex.Effect):
         time_ = time.time()
 
         population.add_random_species(50)
-        # population.test(population.test_spiece_centroid)
         print_("Initial population done in {}".format(time.time() - time_))
         time_ = time.time()
         pop = copy.deepcopy(population)
@@ -3564,17 +3491,7 @@ class Gcodetools(inkex.Effect):
             population.mutation_genes_count = [1, 2]
             population.populate_species(250, 20)
             print_("Populate done at {}".format(time.time() - time_))
-            """
-            randomize = i%100 < 40
-            if     i%100 < 40 : 
-                population.add_random_species(250)
-            if  40<= i%100 < 100 : 
-                population.mutation_genes_count = [1,max(2,int(population.genes_count/4))]  #[1,max(2,int(population.genes_count/2))] if 40<=i%100<60 else [1,max(2,int(population.genes_count/10))]
-                population.move_mutation_multiplier = 1. if 40<=i%100<80 else .1
-                population.move_mutation_factor = (-(i%100)/30+10/3) if 50<=i%100<100 else .5
-                population.order_mutation_factor = 1./(i%100-79) if 80<=i%100<100 else 1.
-                population.populate_species(250, 10)
-            """
+
             if self.options.arrangement_inline_test:
                 population.test_inline()
             else:
@@ -3604,40 +3521,7 @@ class Gcodetools(inkex.Effect):
                 surface.draw(width=2, color=colors[0])
                 draw_text("Step = {}\nSquare = {:f}\nSquare improvement = {:f}\nTime from start = {:f}".format(i, (b[2] - b[0]) * (b[3] - b[1]), improve, time.time() - start_time), x, y - 50)
                 champions_count += 1
-                """
-                spiece = population.population[0][1]
-                poly = Polygon(copy.deepcopy(population.polygons[spiece[0][0]].polygon))
-                poly.rotate(spiece[0][2]*math.pi2)
-                surface  = Polygon(poly.polygon)
-                poly.draw(width = 2, color= "Violet")
-                for p in spiece[1:] :
-                    poly = Polygon(copy.deepcopy(population.polygons[p[0]].polygon))
-                    poly.rotate(p[2]*math.pi2)
-                    direction = [math.cos(p[1]*math.pi2), -math.sin(p[1]*math.pi2)]
-                    normalize(direction)
-                    c = surface.centroid()
-                    c1 = poly.centroid()
-                    poly.move(c[0]-c1[0]-direction[0]*400,c[1]-c1[1]-direction[1]*400)
-                    c = surface.centroid()
-                    c1 = poly.centroid()
-                    poly.draw(width = 5, color= "Violet")
-                    draw_pointer(c+c1,"Green","line")
-                    direction = normalize(direction)
-                    
-                    
-                    sin,cos = direction[0], direction[1]
-                    poly.rotate_(-sin,cos)
-                    surface.rotate_(-sin,cos)
-#                    poly.draw(color = "Violet",width=4)                    
-                    surface.draw(color = "Orange",width=4)                    
-                    poly.rotate_(sin,cos)
-                    surface.rotate_(sin,cos)
 
-
-                    poly.drop_into_direction(direction,surface)
-                    surface.add(poly)
-                
-                """
         # Now we'll need apply transforms to original paths
 
     def __init__(self):
@@ -3808,8 +3692,6 @@ class Gcodetools(inkex.Effect):
                 sp1 = [[subpath[i - 1][j][0], subpath[i - 1][j][1]] for j in range(3)]
                 sp2 = [[subpath[i][j][0], subpath[i][j][1]] for j in range(3)]
                 c += biarc(sp1, sp2, 0, 0) if w is None else biarc(sp1, sp2, -f(w[k][i - 1]), -f(w[k][i]))
-            #                    l1 = biarc(sp1,sp2,0,0) if w==None else biarc(sp1,sp2,-f(w[k][i-1]),-f(w[k][i]))
-            #                    print_((-f(w[k][i-1]),-f(w[k][i]), [i1[5] for i1 in l1]) )
             c += [[[subpath[-1][1][0], subpath[-1][1][1]], 'end', 0, 0]]
         return c
 
@@ -4159,7 +4041,6 @@ class Gcodetools(inkex.Effect):
             print_(self.transform_matrix)
             print_(self.transform_matrix_reverse)
 
-            # self.Zauto_scale[layer]  = math.sqrt( (self.transform_matrix[layer][0][0]**2 + self.transform_matrix[layer][1][1]**2)/2 )
             # Zautoscale is obsolete
             self.Zauto_scale[layer] = 1
             print_("Z automatic scale = {} (computed according orientation points)".format(self.Zauto_scale[layer]))
@@ -4423,7 +4304,7 @@ class Gcodetools(inkex.Effect):
         tool = self.default_tool.copy()
         tool["self_group"] = g
         for i in g:
-            #    Get parameters
+            # Get parameters
             if i.get("gcodetools") == "Gcodetools tool background":
                 tool["style"] = dict(inkex.Style.parse_str(i.get("style")))
             elif i.get("gcodetools") == "Gcodetools tool parameter":
@@ -4439,7 +4320,6 @@ class Gcodetools(inkex.Effect):
                             value = ""
                 if value is None or key is None:
                     continue
-                # print_("Found tool parameter '{}':'{}'".format(key, value))
                 if key in self.default_tool.keys():
                     try:
                         tool[key] = type(self.default_tool[key])(value)
@@ -4452,11 +4332,7 @@ class Gcodetools(inkex.Effect):
         return tool
 
     def set_tool(self, layer):
-        #        print_(("index(layer)=",self.layers.index(layer),"set_tool():layer=",layer,"self.tools=",self.tools))
-        #        for l in self.layers:
-        #            print_(("l=",l))
         for i in range(self.layers.index(layer), -1, -1):
-            #            print_(("processing layer",i))
             if self.layers[i] in self.tools:
                 break
         if self.layers[i] in self.tools:
@@ -4523,7 +4399,6 @@ class Gcodetools(inkex.Effect):
 
         def sort_dxfpoints(points):
             points = remove_duplicates(points)
-            #            print_(get_boundaries(get_boundaries(points)[2])[1])
             ways = [
                 # l=0, d=1, r=2, u=3
                 [3, 0],  # ul
@@ -4535,17 +4410,14 @@ class Gcodetools(inkex.Effect):
                 [2, 3],  # ru
                 [2, 1],  # rd
             ]
-            #            print_(("points=",points))
             minimal_way = []
             minimal_len = None
             minimal_way_type = None
             for w in ways:
                 tpoints = points[:]
                 cw = []
-                #                print_(("tpoints=",tpoints))
                 for j in xrange(0, len(points)):
                     p = get_boundaries(get_boundaries(tpoints)[w[0]])[w[1]]
-                    #                    print_(p)
                     tpoints.remove(p[0])
                     cw += p
                 curlen = get_way_len(cw)
@@ -4582,7 +4454,6 @@ class Gcodetools(inkex.Effect):
             gcode = ""
             for point in points:
                 gcode += "(drilling dxfpoint)\nG00 Z{:f}\nG00 X{:f} Y{:f}\nG01 Z{:f} F{:f}\nG04 P{:f}\nG00 Z{:f}\n".format(self.options.Zsafe, point[0], point[1], self.Zcoordinates[layer][1], self.tools[layer][0]["penetration feed"], 0.2, self.options.Zsafe)
-            #            print_(("got dxfpoints array=",points))
             return gcode
 
         def get_path_properties(node, recursive=True, tags={inkex.addNS('desc', 'svg'): "Description", inkex.addNS('title', 'svg'): "Title"}):
@@ -4667,8 +4538,6 @@ class Gcodetools(inkex.Effect):
                                 [self.parse_curve([subpath], layer) for subpath in csp]
                             ]
                         ]
-                #                for c in curves :
-                #                    print_(c)
                 dxfpoints = sort_dxfpoints(dxfpoints)
                 gcode += print_dxfpoints(dxfpoints)
 
@@ -4743,9 +4612,7 @@ class Gcodetools(inkex.Effect):
         for layer in self.layers:
             if layer in self.selected_paths:
                 for path in self.selected_paths[layer]:
-                    #                    print_(("processing path",path.get('d')))
                     if self.options.dxfpoints_action == 'replace':
-                        #                        print_("trying to set as dxfpoint")
 
                         path.set("dxfpoint", "1")
                         r = re.match("^\s*.\s*(\S+)", path.get("d"))
@@ -4760,9 +4627,6 @@ class Gcodetools(inkex.Effect):
                     if self.options.dxfpoints_action == 'clear' and path.get("dxfpoint") == "1":
                         path.set("dxfpoint", "0")
 
-    #                        for id, node in self.selected.iteritems():
-    #                            print_((id,node,node.attrib))
-
     ################################################################################
     #
     # Artefacts
@@ -4775,7 +4639,6 @@ class Gcodetools(inkex.Effect):
         else:
             paths = self.selected_paths
         for layer in paths:
-            #                paths[layer].reverse() # Reverse list of paths to leave their order
             for path in paths[layer]:
                 parent = path.getparent()
                 style = path.get("style") if "style" in path.keys() else ""
@@ -4880,7 +4743,6 @@ class Gcodetools(inkex.Effect):
                         d = re.sub(r'(?i)\s*z\s*z\s*', r' Z ', d)
                         d = re.sub(r'(?i)\s*([A-Za-z])\s*', r' \1 ', d)
                         print_(("formatted d=", d))
-                    # scale = sqrt(Xscale**2 + Yscale**2) / sqrt(1**2 + 1**2)
                     p0 = self.transform([0, 0], layer)
                     p1 = self.transform([0, 1], layer)
                     scale = (P(p0) - P(p1)).mag()
@@ -4946,7 +4808,6 @@ class Gcodetools(inkex.Effect):
                     csp = self.apply_transforms(path, csp)
                     csp = csp_close_all_subpaths(csp)
                     csp = self.transform_csp(csp, layer)
-                    # maxx = max([x,y,i,j,root],maxx)
 
                     # rotate the path to get bounds in defined direction.
                     a = - self.options.area_fill_angle
@@ -5047,8 +4908,7 @@ class Gcodetools(inkex.Effect):
                                             intersections[p] += [[i, j, t]]
                                         else:
                                             intersections[p] = [[i, j, t]]
-                                        # p = self.transform(p,layer,True)
-                                        # draw_pointer(p)
+
                         ints.sort()
                         for i in ints:
                             splitted_line[-1] += [[i[1], i[2]]]
@@ -5062,7 +4922,6 @@ class Gcodetools(inkex.Effect):
                         l1, l2 = splitted_line[i][0], splitted_line[i][1]
                         p = [(l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2]
                         if not point_inside_csp(p, csp):
-                            # i +=1
                             del splitted_line[i]
                         else:
                             i += 1
@@ -5079,7 +4938,6 @@ class Gcodetools(inkex.Effect):
 
                     self.draw_csp(csp_line, group=area_group)
 
-    #                    draw_csp(lines)
 
     ################################################################################
     #
@@ -5103,7 +4961,6 @@ class Gcodetools(inkex.Effect):
     # parent = self.selected_paths[layer][0].getparent()
     ################################################################################
     def engraving(self):
-        # global x1,y1,rx,ry
         global cspm, wl
         global nlLT, i, j
         global gcode_3Dleft, gcode_3Dright
@@ -5165,10 +5022,10 @@ class Gcodetools(inkex.Effect):
             If the centre of the circle tangential to the line 2-3 is outside the
             angle bisectors at its ends, ignore this line.
 
-            # Note that it handles corners in the conventional manner of letter cutting
-            # by mitering, not rounding.
-            # Algorithm uses dot products of normals to find radius
-            # and hence coordinates of centre
+            Note that it handles corners in the conventional manner of letter cutting
+            by mitering, not rounding.
+            Algorithm uses dot products of normals to find radius
+            and hence coordinates of centre
             """
             (x1, y1) = xy1
             (nx1, ny1) = n_xy1
@@ -5240,14 +5097,12 @@ class Gcodetools(inkex.Effect):
                 # if x2,y2 not in front of the normal...
                 if x2 * nx + y2 * ny <= 0:
                     return max_dist
-                # print_("Straight",x1,y1,nx,ny,x2,y2)
                 return (x2 ** 2 + y2 ** 2) / (2 * (x2 * nx + y2 * ny))
             # It is a corner bisector, so..
             discriminator = (x2 * nx + y2 * ny) ** 2 - denom * (x2 ** 2 + y2 ** 2)
             if discriminator < 0:
                 return max_dist  # this part irrelevant
             r = (x2 * nx + y2 * ny - math.sqrt(discriminator)) / denom
-            # print_("Corner",x1,y1,nx,ny,x1+x2,y1+y2,discriminator,r)
             return min(r, max_dist)
             # end of get_radius_to_point
 
@@ -5319,7 +5174,6 @@ class Gcodetools(inkex.Effect):
                             if abs(ii - i) < 3 or abs(ii - i) > len(nlLT[j]) - 3:
                                 continue
                         t1 = get_radius_to_point((x1, y1), (nx, ny), nlLT[jj][ii - 1][0])
-                        # print_("Try pt   i,ii,t1,x1,y1",i,ii,t1,x1,y1)
                     else:  # doing a line
                         if jj == j:  # except this one
                             if abs(ii - i) < 2 or abs(ii - i) == len(nlLT[j]) - 1:
@@ -5345,7 +5199,6 @@ class Gcodetools(inkex.Effect):
                         if n1[2] == False and (x23max < xmin or x23min > xmax or y23max < ymin or y23min > ymax):
                             continue
                         t1 = get_radius_to_line((x1, y1), (nx, ny), (nx2, ny2), (x2, y2), (nx23, ny23), (x3, y3), (nx3, ny3))
-                        # print_("Try line i,ii,t1,x1,y1",i,ii,t1,x1,y1)
                     if 0 <= t1 < r:
                         r = t1
                         iimin = ii
@@ -5415,7 +5268,6 @@ class Gcodetools(inkex.Effect):
                             if xydist < ENGRAVING_TOLERANCE:  # so far so good
                                 wdist = w2 + (w - w2) * length1 / length2 - w1
                                 if abs(wdist) < ENGRAVING_TOLERANCE:
-                                    # print_("pop",j,i,xy1)
                                     cspm.pop()
                                     wl.pop()
             cspm += [[[x, y], [x, y], [x, y], i, j, ii, jj]]
@@ -5544,7 +5396,6 @@ class Gcodetools(inkex.Effect):
                             print_("csp is", csp)
                             nlLT.append([])
                             for i in range(0, len(csp)):  # LT for each point
-                                # n = []
                                 sp0, sp1, sp2 = csp[i - 2], csp[i - 1], csp[i]
                                 if self.options.engraving_draw_calculation_paths:
                                     # Copy it to 3D layer objects
@@ -5608,7 +5459,6 @@ class Gcodetools(inkex.Effect):
                             print_(("engraving_draw_calculation_paths=", self.options.engraving_draw_calculation_paths))
                             if self.options.engraving_draw_calculation_paths:
                                 # Copy complete paths to 3D layer
-                                # print_("cspl",cspl)
                                 cspl += [cspl[0]]  # Close paths
                                 cspr += [cspr[0]]  # Close paths
                                 etree.SubElement(gcode_3Dleft, inkex.addNS('path', 'svg'),
@@ -5637,8 +5487,6 @@ class Gcodetools(inkex.Effect):
                                                           })
 
                         # LT6a build nlLT[j] for each subpath - ends here
-                        # for nnn in nlLT :
-                        # print_("nlLT",nnn) #LT debug stuff
                         # Calculate offset points
                         reflex = False
                         for j in xrange(len(nlLT)):  # LT6b for each subpath
@@ -5680,13 +5528,11 @@ class Gcodetools(inkex.Effect):
                                     bits = int((length - bit0) / bitlen)
                                     # split excess evenly at both ends
                                     bit0 += (length - bit0 - bitlen * bits) / 2
-                                    # print_("j,i,r,bit0,bits",j,i,w,bit0,bits)
                                 for b in xrange(bits):  # divide line into bits
                                     x1 = x1a + ny * (b * bitlen + bit0)
                                     y1 = y1a - nx * (b * bitlen + bit0)
                                     jjmin, iimin, w = get_biggest((x1, y1), (nx, ny))
                                     print_("i,j,jjmin,iimin,w", i, j, jjmin, iimin, w)
-                                    # w = min(r, toolr)
                                     wmax = max(wmax, w)
                                     if reflex:  # just after a reflex corner
                                         reflex = False
@@ -5743,8 +5589,6 @@ class Gcodetools(inkex.Effect):
                             we += [wluu]
                         # LT6b For each subpath - ends here
                     # LT5 if it is a path - ends here
-                    # print_("cspe",cspe)
-                    # print_("we",we)
                 # LT4 for each selected object in this layer - ends here
 
                 if cspe != []:
@@ -6027,7 +5871,6 @@ G01 Z1 (going to cutting z)\n""",
         alias = {"X": "I", "Y": "J", "Z": "K", "x": "i", "y": "j", "z": "k"}
         i_, k_ = alias[x], alias[z]
         c = [[subpath[0][1], "move", 0, 0, 0]]
-        # draw_csp(self.transform_csp([subpath],layer,True), color = "Orange", width = .1)
         for sp1, sp2 in zip(subpath, subpath[1:]):
             c += biarc(sp1, sp2, 0, 0)
         for i in range(1, len(c)):  # Just in case check end point of each segment
@@ -6105,7 +5948,6 @@ G01 Z1 (going to cutting z)\n""",
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [left, 10], [left, 0])
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [right, 0], [right, 10])
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [0, miny[1] - r], [10, miny[1] - r])
-                                # draw_csp(self.transform_csp(offsetted_subpath,layer,True), color = "Green", width = 1)
                                 # Join offsetted_subpath together
                                 # Hope there wont be any cicles
                                 subpath = csp_join_subpaths(offsetted_subpath)[0]
@@ -6192,7 +6034,6 @@ G01 Z1 (going to cutting z)\n""",
         for layer in self.layers:
             if layer in paths:
                 width = self.options.lathe_rectangular_cutter_width
-                # self.set_tool(layer)
                 for path in paths[layer]:
                     csp = self.transform_csp(cubic_paths.parseCubicPath(path.get("d")), layer)
                     new_csp = []
@@ -6241,13 +6082,6 @@ G01 Z1 (going to cutting z)\n""",
 
                     new_csp += [new_subpath]
                     self.draw_csp(new_csp, layer)
-
-    #
-    #                                o = (1 if cross(n, [0,1])>0 else -1)*orientation
-    #                                new_subpath += [  [sp1[i][0] - width*o,sp1[i][1]] for i in range(3)  ]
-    #                            n = csp_normalized_normal(sp1,sp2,1)
-    #                            o = (1 if cross(n, [0,1])>0 else -1)*orientation
-    #                            new_subpath += [  [sp2[i][0] - width*o,sp2[i][1]] for i in range(3)  ]
 
     ################################################################################
     # Graffiti function generates Gcode for graffiti drawer
@@ -6336,9 +6170,6 @@ G01 Z1 (going to cutting z)\n""",
                 return csp_from_arc(p1, p2, C1.to_list(), r, t1)
 
             cos, sin = Dc.x / dc, Dc.y / dc
-            # draw_csp(self.transform_csp([[ [[C1.x-r*sin,C1.y+r*cos]]*3,[[C2.x-r*sin,C2.y+r*cos]]*3 ]],layer,reverse=True), color = "#00ff00;" )
-            # draw_pointer(self.transform(C1.to_list(),layer,reverse=True))
-            # draw_pointer(self.transform(C2.to_list(),layer,reverse=True))
 
             p1_end = [C1.x - r * sin * m, C1.y + r * cos * m]
             p2_st = [C2.x - r * sin * m, C2.y + r * cos * m]
@@ -6652,7 +6483,6 @@ G01 Z1 (going to cutting z)\n""",
                             if offset_ != []:
                                 for iii in offset_:
                                     draw_csp([iii], color="Green", width=1)
-                                    # print_(offset_)
                             else:
                                 print_("------------Reached empty offset at radius {}".format(offset))
                                 break

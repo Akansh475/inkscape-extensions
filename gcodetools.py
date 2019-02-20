@@ -341,10 +341,10 @@ def csp_simple_bound(csp):
     for subpath in csp:
         for sp in subpath:
             for p in sp:
-                minx = min(minx, p[0]) if minx != None else p[0]
-                miny = min(miny, p[1]) if miny != None else p[1]
-                maxx = max(maxx, p[0]) if maxx != None else p[0]
-                maxy = max(maxy, p[1]) if maxy != None else p[1]
+                minx = min(minx, p[0]) if minx is not None else p[0]
+                miny = min(miny, p[1]) if miny is not None else p[1]
+                maxx = max(maxx, p[0]) if maxx is not None else p[0]
+                maxy = max(maxy, p[1]) if maxy is not None else p[1]
     return minx, miny, maxx, maxy
 
 
@@ -440,7 +440,7 @@ def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=[0, 1e100], samp
                 F2[1][0] = -2 * f2x * f1x - 2 * f2y * f1y
                 F2[1][1] = -2 * (6 * ax2 * t2 + 2 * bx2) * x + 2 * f2x * f2x - 2 * (6 * ay2 * t2 + 2 * by2) * y + 2 * f2y * f2y
                 F2 = inv_2x2(F2)
-                if F2 != None:
+                if F2 is not None:
                     t1 -= (F2[0][0] * F1[0] + F2[0][1] * F1[1])
                     t2 -= (F2[1][0] * F1[0] + F2[1][1] * F1[1])
                     t12, t13, t22, t23 = t1 * t1, t1 * t1 * t1, t2 * t2, t2 * t2 * t2
@@ -830,7 +830,7 @@ def csp_segments(csp):
 
 def rebuild_csp(csp, segs, s=None):
     # rebuild_csp() adds to csp control points making it's segments looks like segs
-    if s == None:
+    if s is None:
         s, l = csp_segments(csp)
 
     if len(s) > len(segs):
@@ -840,7 +840,7 @@ def rebuild_csp(csp, segs, s=None):
     for i in xrange(len(s)):
         d = None
         for j in xrange(len(segs)):
-            d = min([abs(s[i] - segs[j]), j], d) if d != None else [abs(s[i] - segs[j]), j]
+            d = min([abs(s[i] - segs[j]), j], d) if d is not None else [abs(s[i] - segs[j]), j]
         del segs[d[1]]
     for i in xrange(len(segs)):
         for j in xrange(0, len(s)):
@@ -1049,10 +1049,10 @@ def csp_simple_bound_to_point_distance(p, csp):
     for subpath in csp:
         for sp in subpath:
             for p_ in sp:
-                minx = min(minx, p_[0]) if minx != None else p_[0]
-                miny = min(miny, p_[1]) if miny != None else p_[1]
-                maxx = max(maxx, p_[0]) if maxx != None else p_[0]
-                maxy = max(maxy, p_[1]) if maxy != None else p_[1]
+                minx = min(minx, p_[0]) if minx is not None else p_[0]
+                miny = min(miny, p_[1]) if miny is not None else p_[1]
+                maxx = max(maxx, p_[0]) if maxx is not None else p_[0]
+                maxy = max(maxy, p_[1]) if maxy is not None else p_[1]
     return math.sqrt(max(minx - p[0], p[0] - maxx, 0) ** 2 + max(miny - p[1], p[1] - maxy, 0) ** 2)
 
 
@@ -1557,17 +1557,17 @@ def atan2(*arg):
 
 def get_text(node):
     value = None
-    if node.text != None:
-        value = value + "\n" + node.text if value != None else node.text
+    if node.text is not None:
+        value = value + "\n" + node.text if value is not None else node.text
     for k in node:
         if k.tag == inkex.addNS('tspan', 'svg'):
-            if k.text != None:
-                value = value + "\n" + k.text if value != None else k.text
+            if k.text is not None:
+                value = value + "\n" + k.text if value is not None else k.text
     return value
 
 
 def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=None):
-    if style == None:
+    if style is None:
         style = "font-family:DejaVu Sans;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;fill:#000000;fill-opacity:1;stroke:none;"
     style += "font-size:{:f}px;".format(font_size)
     attributes = {'x': str(x),
@@ -1575,10 +1575,10 @@ def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=N
                   'y': str(y),
                   'style': style
                   }
-    if gcodetools_tag != None:
+    if gcodetools_tag is not None:
         attributes["gcodetools"] = str(gcodetools_tag)
 
-    if group == None:
+    if group is None:
         group = options.doc_root
 
     t = etree.SubElement(group, inkex.addNS('text', 'svg'), attributes)
@@ -1595,14 +1595,14 @@ def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=N
 
 
 def draw_csp(csp, stroke="#f00", fill="none", comment="", width=0.354, group=None, style=None, gcodetools_tag=None):
-    if style == None:
+    if style is None:
         style = "fill:{};fill-opacity:1;stroke:{};stroke-width:{}".format(fill, stroke, width)
     attributes = {'d': cubic_paths.formatCubicPath(csp),
                   'style': style
                   }
     if comment != '':
         attributes['comment'] = comment
-    if group == None:
+    if group is None:
         group = options.doc_root
 
     return etree.SubElement(group, inkex.addNS('path', 'svg'), attributes)
@@ -1610,15 +1610,15 @@ def draw_csp(csp, stroke="#f00", fill="none", comment="", width=0.354, group=Non
 
 def draw_pointer(x, color="#f00", figure="cross", group=None, comment="", fill=None, width=.1, size=10., text=None, font_size=None, pointer_type=None, attrib=None):
     size = size / 2
-    if attrib == None:
+    if attrib is None:
         attrib = {}
-    if pointer_type == None:
+    if pointer_type is None:
         pointer_type = "Pointer"
     attrib["gcodetools"] = pointer_type
-    if group == None:
+    if group is None:
         group = options.self.current_layer
-    if text != None:
-        if font_size == None:
+    if text is not None:
+        if font_size is None:
             font_size = 7
         group = etree.SubElement(group, inkex.addNS('g', 'svg'), {"gcodetools": pointer_type + " group"})
         draw_text(text, x[0] + size * 2.2, x[1] - size, group=group, font_size=font_size)
@@ -1629,7 +1629,7 @@ def draw_pointer(x, color="#f00", figure="cross", group=None, comment="", fill=N
         attrib.update({"d": "M {},{} L {}".format(x[0], x[1], s), "style": "fill:none;stroke:{};stroke-width:{:f};".format(color, width), "comment": str(comment)})
         etree.SubElement(group, inkex.addNS('path', 'svg'), attrib)
     elif figure == "arrow":
-        if fill == None:
+        if fill is None:
             fill = "#12b3ff"
         fill_opacity = "0.8"
         d = "m {},{} ".format(x[0], x[1]) + re.sub("([0-9\-.e]+)", (lambda match: str(float(match.group(1)) * size * 2.)), "0.88464,-0.40404 c -0.0987,-0.0162 -0.186549,-0.0589 -0.26147,-0.1173 l 0.357342,-0.35625 c 0.04631,-0.039 0.0031,-0.13174 -0.05665,-0.12164 -0.0029,-1.4e-4 -0.0058,-1.4e-4 -0.0087,0 l -2.2e-5,2e-5 c -0.01189,0.004 -0.02257,0.0119 -0.0305,0.0217 l -0.357342,0.35625 c -0.05818,-0.0743 -0.102813,-0.16338 -0.117662,-0.26067 l -0.409636,0.88193 z")
@@ -1732,7 +1732,7 @@ def print_(*arg):
 ################################################################################
 class P(object):
     def __init__(self, x, y=None):
-        if not y == None:
+        if not y is None:
             self.x, self.y = float(x), float(y)
         else:
             self.x, self.y = float(x[0]), float(x[1])
@@ -1935,7 +1935,7 @@ class Line(object):
 
 class Biarc(object):
     def __init__(self, items=None):
-        if items == None:
+        if items is None:
             self.items = []
         else:
             self.items = items
@@ -1976,7 +1976,7 @@ class Biarc(object):
             del (style['biarc{}_r'.format(i)]["marker-end"])
             style['biarc{}_r'.format(i)] = str(inkex.Style(style['biarc{}_r'.format(i)]))
 
-        if group == None:
+        if group is None:
             if "preview_groups" not in dir(options.self):
                 gcodetools.preview_groups = {layer: etree.SubElement(gcodetools.layers[min(1, len(gcodetools.layers) - 1)], inkex.addNS('g', 'svg'), {"gcodetools": "Preview group"})}
             elif layer not in gcodetools.preview_groups:
@@ -2486,7 +2486,7 @@ def biarc(sp1, sp2, z1, z2, depth=0):
 
     R1, a1 = calculate_arc_params(P0, P1, P2)
     R2, a2 = calculate_arc_params(P2, P3, P4)
-    if R1 == None or R2 == None or (R1 - P0).mag() < straight_tolerance or (R2 - P2).mag() < straight_tolerance:
+    if R1 is None or R2 is None or (R1 - P0).mag() < straight_tolerance or (R2 - P2).mag() < straight_tolerance:
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
 
     d = csp_to_arc_distance(sp1, sp2, [P0, P2, R1, a1], [P2, P4, R2, a2])
@@ -2789,7 +2789,7 @@ class Postprocessor(object):
 ################################################################################
 class Polygon(object):
     def __init__(self, polygon=None):
-        self.polygon = [] if polygon == None else polygon[:]
+        self.polygon = [] if polygon is None else polygon[:]
 
     def move(self, x, y):
         for i in range(len(self.polygon)):
@@ -3246,7 +3246,7 @@ class Arangement_Genetic(object):
     def test(self, test_function):
         time_ = time.time()
         for i in range(len(self.population)):
-            if self.population[i][0] == None:
+            if self.population[i][0] is None:
                 surface = test_function(self.population[i][1])
                 b = surface.bounds()
                 self.population[i][0] = (b[3] - b[1]) * (b[2] - b[0])
@@ -3296,7 +3296,7 @@ class Arangement_Genetic(object):
         test_ = []
         population_ = []
         for spiece in self.population:
-            test_.append(spiece[0] if spiece[0] != None else -1)
+            test_.append(spiece[0] if spiece[0] is not None else -1)
             for sp in spiece[1]:
                 population_ += sp
 
@@ -3455,7 +3455,7 @@ class Gcodetools(inkex.Effect):
                                                 max_cross = max(max_cross, [cross(s1, s2), j - 1])
                                         # return back last point
                                         subpath.append(subpath[0])
-                                        if max_cross[1] != None and max_cross[0] > corner_tolerance:
+                                        if max_cross[1] is not None and max_cross[0] > corner_tolerance:
                                             # there's an angle near the point
                                             j = max_cross[1]
                                             if j < 0:
@@ -3807,7 +3807,7 @@ class Gcodetools(inkex.Effect):
             for i in range(1, len(subpath)):
                 sp1 = [[subpath[i - 1][j][0], subpath[i - 1][j][1]] for j in range(3)]
                 sp2 = [[subpath[i][j][0], subpath[i][j][1]] for j in range(3)]
-                c += biarc(sp1, sp2, 0, 0) if w == None else biarc(sp1, sp2, -f(w[k][i - 1]), -f(w[k][i]))
+                c += biarc(sp1, sp2, 0, 0) if w is None else biarc(sp1, sp2, -f(w[k][i - 1]), -f(w[k][i]))
             #                    l1 = biarc(sp1,sp2,0,0) if w==None else biarc(sp1,sp2,-f(w[k][i-1]),-f(w[k][i]))
             #                    print_((-f(w[k][i-1]),-f(w[k][i]), [i1[5] for i1 in l1]) )
             c += [[[subpath[-1][1][0], subpath[-1][1][1]], 'end', 0, 0]]
@@ -3818,14 +3818,14 @@ class Gcodetools(inkex.Effect):
     ################################################################################
 
     def draw_csp(self, csp, layer=None, group=None, fill='none', stroke='#178ade', width=0.354, style=None):
-        if layer != None:
+        if layer is not None:
             csp = self.transform_csp(csp, layer, reverse=True)
-        if group == None and layer == None:
+        if group is None and layer is None:
             group = self.document.getroot()
-        elif group == None and layer != None:
+        elif group is None and layer is not None:
             group = layer
         csp = self.apply_transforms(group, csp, reverse=True)
-        if style != None:
+        if style is not None:
             return draw_csp(csp, group=group, style=style)
         else:
             return draw_csp(csp, group=group, fill=fill, stroke=stroke, width=width)
@@ -3839,7 +3839,7 @@ class Gcodetools(inkex.Effect):
             del (style['biarc{}_r'.format(i)]["marker-end"])
             style['biarc{}_r'.format(i)] = str(inkex.Style(style['biarc{}_r'.format(i)]))
 
-        if group == None:
+        if group is None:
             if "preview_groups" not in dir(self):
                 self.preview_groups = {layer: etree.SubElement(self.layers[min(1, len(self.layers) - 1)], inkex.addNS('g', 'svg'), {"gcodetools": "Preview group"})}
             elif layer not in self.preview_groups:
@@ -3991,7 +3991,7 @@ class Gcodetools(inkex.Effect):
             m, a = [1, 1, self.options.Zscale * Zauto_scale, 1, 1, self.options.Zscale * Zauto_scale], [0, 0, self.options.Zoffset, 0, 0, 0]
             r = ''
             for i in range(6):
-                if c[i] != None:
+                if c[i] is not None:
                     r += s[i] + ("{:f}".format(c[i] * m[i] + a[i])) + s1[i]
             return r
 
@@ -4005,7 +4005,7 @@ class Gcodetools(inkex.Effect):
             return ""
 
         try:
-            self.last_used_tool == None
+            self.last_used_tool is None
         except:
             self.last_used_tool = None
         print_("working on curve")
@@ -4312,7 +4312,7 @@ class Gcodetools(inkex.Effect):
 
                 elif i.get('gcodetools') == "Gcodetools orientation group":
                     points = self.get_orientation_points(i)
-                    if points != None:
+                    if points is not None:
                         self.orientation_points[layer] = self.orientation_points[layer] + [points[:]] if layer in self.orientation_points else [points[:]]
                         print_("Found orientation points in '{}' layer: {}".format(layer.get(inkex.addNS('label', 'inkscape')), points))
                     else:
@@ -4389,7 +4389,7 @@ class Gcodetools(inkex.Effect):
             p = p2
         elif len(p3) == 3:
             p = p3
-        if p == None:
+        if p is None:
             return None
         points = []
         for i in p:
@@ -4437,7 +4437,7 @@ class Gcodetools(inkex.Effect):
                         value = get_text(j)
                         if value == "(None)":
                             value = ""
-                if value == None or key == None:
+                if value is None or key is None:
                     continue
                 # print_("Found tool parameter '{}':'{}'".format(key, value))
                 if key in self.default_tool.keys():
@@ -4480,25 +4480,25 @@ class Gcodetools(inkex.Effect):
             for p in points:
                 if minx == p[0]:
                     out[0] += [p]
-                if minx == None or p[0] < minx:
+                if minx is None or p[0] < minx:
                     minx = p[0]
                     out[0] = [p]
 
                 if miny == p[1]:
                     out[1] += [p]
-                if miny == None or p[1] < miny:
+                if miny is None or p[1] < miny:
                     miny = p[1]
                     out[1] = [p]
 
                 if maxx == p[0]:
                     out[2] += [p]
-                if maxx == None or p[0] > maxx:
+                if maxx is None or p[0] > maxx:
                     maxx = p[0]
                     out[2] = [p]
 
                 if maxy == p[1]:
                     out[3] += [p]
-                if maxy == None or p[1] > maxy:
+                if maxy is None or p[1] > maxy:
                     maxy = p[1]
                     out[3] = [p]
             return out
@@ -4549,7 +4549,7 @@ class Gcodetools(inkex.Effect):
                     tpoints.remove(p[0])
                     cw += p
                 curlen = get_way_len(cw)
-                if minimal_len == None or curlen < minimal_len:
+                if minimal_len is None or curlen < minimal_len:
                     minimal_len = curlen
                     minimal_way = cw
                     minimal_way_type = w
@@ -4749,7 +4749,7 @@ class Gcodetools(inkex.Effect):
 
                         path.set("dxfpoint", "1")
                         r = re.match("^\s*.\s*(\S+)", path.get("d"))
-                        if r != None:
+                        if r is not None:
                             print_(("got path=", r.group(1)))
                             path.set("d", "m {} 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z".format(r.group(1)))
                             path.set("style", styles["dxf_points"])
@@ -4836,7 +4836,7 @@ class Gcodetools(inkex.Effect):
 
                     d = path.get('d')
                     print_(d)
-                    if d == None:
+                    if d is None:
                         print_("omitting non-path")
                         self.error(_("Warning: omitting non-path"), "selection_contains_objects_that_are_not_paths")
                         continue
@@ -4938,7 +4938,7 @@ class Gcodetools(inkex.Effect):
                     print_(("doing path", path.get("style"), path.get("d")))
                     area_group = etree.SubElement(path.getparent(), inkex.addNS('g', 'svg'))
                     d = path.get('d')
-                    if d == None:
+                    if d is None:
                         print_("omitting non-path")
                         self.error(_("Warning: omitting non-path"), "selection_contains_objects_that_are_not_paths")
                         continue
@@ -5503,7 +5503,7 @@ class Gcodetools(inkex.Effect):
                 print_("max_dist pixels", max_dist)
 
                 engraving_group = etree.SubElement(self.selected_paths[layer][0].getparent(), inkex.addNS('g', 'svg'))
-                if self.options.engraving_draw_calculation_paths and (self.my3Dlayer == None):
+                if self.options.engraving_draw_calculation_paths and (self.my3Dlayer is None):
                     self.my3Dlayer = etree.SubElement(self.document.getroot(), 'g')  # Create a generic element at root level
                     self.my3Dlayer.set(inkex.addNS('label', 'inkscape'), "3D")  # Gives it a name
                     self.my3Dlayer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')  # Tells Inkscape it's a layer
@@ -5769,7 +5769,7 @@ class Gcodetools(inkex.Effect):
     ################################################################################
     def orientation(self, layer=None):
 
-        if layer == None:
+        if layer is None:
             layer = self.current_layer if self.current_layer is not None else self.document.getroot()
 
         transform = self.get_transforms(layer)
@@ -5840,7 +5840,7 @@ class Gcodetools(inkex.Effect):
     ################################################################################
     def tools_library(self, layer=None):
         # Add a tool to the drawing
-        if layer == None:
+        if layer is None:
             layer = self.current_layer if self.current_layer is not None else self.document.getroot()
         if layer in self.tools:
             self.error(_("Active layer already has a tool! Remove it or select another layer!"), "active_layer_already_has_tool")
@@ -6376,7 +6376,7 @@ G01 Z1 (going to cutting z)\n""",
                             reference_points = self.graffiti_reference_points[self.layers[i]]
                             self.graffiti_reference_points[layer] = self.graffiti_reference_points[self.layers[i]]
                             break
-                    if reference_points == None:
+                    if reference_points is None:
                         self.error('There are no graffiti reference points for layer {}'.format(layer), "error")
 
                 # Transform reference points
@@ -6449,7 +6449,7 @@ G01 Z1 (going to cutting z)\n""",
                             i += 1
 
                     for sp1, sp2 in zip(subpath, subpath[1:]):
-                        if spl != None and abs(cross(csp_normalized_slope(spl, sp1, 1.), csp_normalized_slope(sp1, sp2, 0.))) > 0.1:  # TODO add coefficient into inx
+                        if spl is not None and abs(cross(csp_normalized_slope(spl, sp1, 1.), csp_normalized_slope(sp1, sp2, 0.))) > 0.1:  # TODO add coefficient into inx
                             # We've got sharp angle at sp1.
                             polyline += [sp1]
                             polylines += [['draw', polyline[:]]]

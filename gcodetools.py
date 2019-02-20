@@ -64,11 +64,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-###
-### Gcodetools v 1.7
-###
-
-gcodetools_current_version = "1.7"
+#
+# Gcodetools v 1.7
+#
 
 # standard library
 import cmath
@@ -92,6 +90,8 @@ from lxml import etree
 if sys.version_info[0] > 2:
     xrange = range
     unicode = str
+
+gcodetools_current_version = "1.7"
 
 
 def bezierslopeatt(b0_b1_b2_b3, t):
@@ -127,9 +127,9 @@ def isset(variable):
 
 
 ################################################################################
-###
-### Styles and additional parameters
-###
+#
+# Styles and additional parameters
+#
 ################################################################################
 
 TAU = math.pi * 2
@@ -224,7 +224,7 @@ styles = {
 
 
 ################################################################################
-### Gcode additional functions
+# Gcode additional functions
 ################################################################################
 
 def gcode_comment_str(s, replace_new_line=False):
@@ -242,7 +242,7 @@ def gcode_comment_str(s, replace_new_line=False):
 
 
 ################################################################################
-### Cubic Super Path additional functions
+# Cubic Super Path additional functions
 ################################################################################
 
 
@@ -533,11 +533,11 @@ def csp_true_bounds(csp):
 
 
 ############################################################################
-### csp_segments_intersection(sp1,sp2,sp3,sp4)
-###
-### Returns array containing all intersections between two segmets of cubic
-### super path. Results are [ta,tb], or [ta0, ta1, tb0, tb1, "Overlap"]
-### where ta, tb are values of t for the intersection point.
+# csp_segments_intersection(sp1,sp2,sp3,sp4)
+#
+# Returns array containing all intersections between two segmets of cubic
+# super path. Results are [ta,tb], or [ta0, ta1, tb0, tb1, "Overlap"]
+# where ta, tb are values of t for the intersection point.
 ############################################################################
 def csp_segments_intersection(sp1, sp2, sp3, sp4):
     a, b = csp_segment_to_bez(sp1, sp2), csp_segment_to_bez(sp3, sp4)
@@ -1005,7 +1005,7 @@ def csp_from_arc(start, end, center, r, slope_st):
 
 
 def point_to_arc_distance(p, arc):
-    ### Distance calculattion from point to arc
+    # Distance calculattion from point to arc
     P0, P2, c, a = arc
     dist = None
     p = P(p)
@@ -1394,7 +1394,7 @@ def csp_segment_convex_hull(sp1, sp2):
 
 
 ################################################################################
-### Bezier additional functions
+# Bezier additional functions
 ################################################################################
 
 def bez_bounds_intersect(bez1, bez2):
@@ -1448,7 +1448,7 @@ def bez_normalized_slope(bez, t):
 
 
 ################################################################################
-### Some vector functions
+# Some vector functions
 ################################################################################
 
 def normalize(xy):
@@ -1493,7 +1493,7 @@ def vector_from_to_length(a, b):
 
 
 ################################################################################
-### Common functions
+# Common functions
 ################################################################################
 
 def matrix_mul(a, b):
@@ -1714,7 +1714,7 @@ def cubic_solver(a, b, c, d):
 
 
 ################################################################################
-### print_ prints any arguments into specified log file
+# print_ prints any arguments into specified log file
 ################################################################################
 
 def print_(*arg):
@@ -1727,7 +1727,7 @@ def print_(*arg):
 
 
 ################################################################################
-### Point (x,y) operations
+# Point (x,y) operations
 ################################################################################
 class P(object):
     def __init__(self, x, y=None):
@@ -2016,13 +2016,13 @@ class Biarc(object):
 
 
 ################################################################################
-###
-### Offset function
-###
-### This function offsets given cubic super path.
-### It's based on src/livarot/PathOutline.cpp from Inkscape's source code.
-###
-###
+#
+# Offset function
+#
+# This function offsets given cubic super path.
+# It's based on src/livarot/PathOutline.cpp from Inkscape's source code.
+#
+#
 ################################################################################
 def csp_offset(csp, r):
     offset_tolerance = 0.05
@@ -2398,12 +2398,12 @@ def csp_offset(csp, r):
 
 
 ################################################################################
-###
-### Biarc function
-###
-### Calculates biarc approximation of cubic super path segment
-###  splits segment if needed or approximates it with straight line
-###
+#
+# Biarc function
+#
+# Calculates biarc approximation of cubic super path segment
+#  splits segment if needed or approximates it with straight line
+#
 ################################################################################
 def biarc(sp1, sp2, z1, z2, depth=0):
     def biarc_split(sp1, sp2, z1, z2, depth):
@@ -2784,7 +2784,7 @@ class Postprocessor(object):
 
 
 ################################################################################
-### Polygon class
+# Polygon class
 ################################################################################
 class Polygon(object):
     def __init__(self, polygon=None):
@@ -3269,9 +3269,9 @@ class Arangement_Genetic(object):
         return surface
 
     def test_inline(self):
-        ###
-        ### Fast test function using weave's from scipy inline function
-        ###
+        #
+        # Fast test function using weave's from scipy inline function
+        #
         try:
             converters is None
         except:
@@ -3330,9 +3330,9 @@ class Arangement_Genetic(object):
 
 
 ################################################################################
-###
-### Gcodetools class
-###
+#
+# Gcodetools class
+#
 ################################################################################
 
 class Gcodetools(inkex.Effect):
@@ -3354,8 +3354,8 @@ class Gcodetools(inkex.Effect):
         f.close()
 
     ################################################################################
-    ### In/out paths:
-    ### TODO move it to the bottom
+    # In/out paths:
+    # TODO move it to the bottom
     ################################################################################
     def plasma_prepare_path(self):
 
@@ -3506,8 +3506,8 @@ class Gcodetools(inkex.Effect):
                             draw_csp(res, width=1, style=styles["in_out_path_style"])
 
     ################################################################################
-    ### Arrangement: arranges paths by givven params
-    ### TODO move it to the bottom
+    # Arrangement: arranges paths by givven params
+    # TODO move it to the bottom
     ################################################################################
     def arrangement(self):
         paths = self.selected_paths
@@ -3813,7 +3813,7 @@ class Gcodetools(inkex.Effect):
         return c
 
     ################################################################################
-    ### Draw csp
+    # Draw csp
     ################################################################################
 
     def draw_csp(self, csp, layer=None, group=None, fill='none', stroke='#178ade', width=0.354, style=None):
@@ -3970,12 +3970,12 @@ class Gcodetools(inkex.Effect):
         return True
 
     ################################################################################
-    ###
-    ### Generate Gcode
-    ### Generates Gcode on given curve.
-    ###
-    ### Curve definition [start point, type = {'arc','line','move','end'}, arc center, arc angle, end point, [zstart, zend]]
-    ###
+    #
+    # Generate Gcode
+    # Generates Gcode on given curve.
+    #
+    # Curve definition [start point, type = {'arc','line','move','end'}, arc center, arc angle, end point, [zstart, zend]]
+    #
     ################################################################################
     def generate_gcode(self, curve, layer, depth):
         Zauto_scale = self.Zauto_scale[layer]
@@ -4179,11 +4179,11 @@ class Gcodetools(inkex.Effect):
         return csp
 
     ################################################################################
-    ### Errors handling function, notes are just printed into Logfile,
-    ### warnings are printed into log file and warning message is displayed but
-    ### extension continues working, errors causes log and execution is halted
-    ### Notes, warnings and errors could be assigned to space or comma or dot
-    ### sepparated strings (case is ignoreg).
+    # Errors handling function, notes are just printed into Logfile,
+    # warnings are printed into log file and warning message is displayed but
+    # extension continues working, errors causes log and execution is halted
+    # Notes, warnings and errors could be assigned to space or comma or dot
+    # sepparated strings (case is ignoreg).
     ################################################################################
     def error(self, s, type_="Warning"):
         notes = "Note "
@@ -4223,7 +4223,7 @@ class Gcodetools(inkex.Effect):
             raise inkex.AbortExtension(s)
 
     ################################################################################
-    ### Set markers
+    # Set markers
     ################################################################################
     def set_markers(self):
         self.get_defs()
@@ -4262,7 +4262,7 @@ class Gcodetools(inkex.Effect):
                              )
 
     ################################################################################
-    ### Get defs from svg
+    # Get defs from svg
     ################################################################################
     def get_defs(self):
         self.defs = {}
@@ -4278,9 +4278,9 @@ class Gcodetools(inkex.Effect):
         recursive(self.document.getroot())
 
     ################################################################################
-    ###
-    ### Get Gcodetools info from the svg
-    ###
+    #
+    # Get Gcodetools info from the svg
+    #
     ################################################################################
     def get_info(self):
         self.selected_paths = {}
@@ -4468,9 +4468,9 @@ class Gcodetools(inkex.Effect):
             self.error(_("Can not find tool for '%s' layer! Please add one with Tools library tab!") % layer.get(inkex.addNS('label', 'inkscape')), "no_tool_error")
 
     ################################################################################
-    ###
-    ### Path to Gcode
-    ###
+    #
+    # Path to Gcode
+    #
     ################################################################################
     def path_to_gcode(self):
         from functools import partial
@@ -4733,9 +4733,9 @@ class Gcodetools(inkex.Effect):
         self.export_gcode(gcode)
 
     ################################################################################
-    ###
-    ### dxfpoints
-    ###
+    #
+    # dxfpoints
+    #
     ################################################################################
     def dxfpoints(self):
         if self.selected_paths == {}:
@@ -4764,9 +4764,9 @@ class Gcodetools(inkex.Effect):
     #                            print_((id,node,node.attrib))
 
     ################################################################################
-    ###
-    ### Artefacts
-    ###
+    #
+    # Artefacts
+    #
     ################################################################################
     def area_artefacts(self):
         if self.selected_paths == {} and self.options.auto_select_paths:
@@ -4815,9 +4815,9 @@ class Gcodetools(inkex.Effect):
         return
 
     ################################################################################
-    ###
-    ### Calculate area curves
-    ###
+    #
+    # Calculate area curves
+    #
     ################################################################################
     def area(self):
         if len(self.selected_paths) <= 0:
@@ -4915,10 +4915,10 @@ class Gcodetools(inkex.Effect):
                             break
 
     ################################################################################
-    ###
-    ### Area fill
-    ###
-    ### Fills area with lines
+    #
+    # Area fill
+    #
+    # Fills area with lines
     ################################################################################
 
     def area_fill(self):
@@ -5082,9 +5082,9 @@ class Gcodetools(inkex.Effect):
     #                    draw_csp(lines)
 
     ################################################################################
-    ###
-    ### Engraving
-    ###
+    #
+    # Engraving
+    #
     # LT Notes to self: See wiki.inkscape.org/wiki/index.php/PythonEffectTutorial
     # To create anything in the Inkscape document, look at the XML editor for
     # details of how such an element looks in XML, then follow this model.
@@ -5763,9 +5763,9 @@ class Gcodetools(inkex.Effect):
             self.error(_("No need to engrave sharp angles."), "warning")
 
     ################################################################################
-    ###
-    ### Orientation
-    ###
+    #
+    # Orientation
+    #
     ################################################################################
     def orientation(self, layer=None):
 
@@ -5834,9 +5834,9 @@ class Gcodetools(inkex.Effect):
                 draw_text("(%s; %s; %s)" % (i[0], i[1], i[2]), (i[0] + 10), (-i[1] - 10 + doc_height), group=g, gcodetools_tag="Gcodetools orientation point text")
 
     ################################################################################
-    ###
-    ### Tools library
-    ###
+    #
+    # Tools library
+    #
     ################################################################################
     def tools_library(self, layer=None):
         # Add a tool to the drawing
@@ -5954,9 +5954,9 @@ G01 Z1 (going to cutting z)\n""",
         tools_group.set("transform", simpletransform.formatTransform([[1, 0, self.view_center[0] - 150], [0, 1, self.view_center[1]]]))
 
     ################################################################################
-    ###
-    ### Check tools and OP asignment
-    ###
+    #
+    # Check tools and OP asignment
+    #
     ################################################################################
     def check_tools_and_op(self):
         if len(self.selected) <= 0:
@@ -6010,14 +6010,14 @@ G01 Z1 (going to cutting z)\n""",
                     group.insert(0, g)
 
     ################################################################################
-    ### TODO Launch browser on help tab
+    # TODO Launch browser on help tab
     ################################################################################
     def help(self):
         self.error(_("""Tutorials, manuals and support can be found at\nEnglish support forum:\n    http://www.cnc-club.ru/gcodetools\nand Russian support forum:\n    http://www.cnc-club.ru/gcodetoolsru"""), "warning")
         return
 
     ################################################################################
-    ### Lathe
+    # Lathe
     ################################################################################
     def generate_lathe_gcode(self, subpath, layer, feed_type):
         if len(subpath) < 2:
@@ -6177,10 +6177,10 @@ G01 Z1 (going to cutting z)\n""",
         self.export_gcode(gcode)
 
     ################################################################################
-    ###
-    ### Lathe modify path
-    ### Modifies path to fit current cutter. As for now straight rect cutter.
-    ###
+    #
+    # Lathe modify path
+    # Modifies path to fit current cutter. As for now straight rect cutter.
+    #
     ################################################################################
 
     def lathe_modify_path(self):
@@ -6251,11 +6251,11 @@ G01 Z1 (going to cutting z)\n""",
     #                            new_subpath += [  [sp2[i][0] - width*o,sp2[i][1]] for i in range(3)  ]
 
     ################################################################################
-    ###
-    ### Update function
-    ###
-    ### Gets file containing version information from the web and compaares it with.
-    ### current version.
+    #
+    # Update function
+    #
+    # Gets file containing version information from the web and compaares it with.
+    # current version.
     ################################################################################
 
     def update(self):
@@ -6280,7 +6280,7 @@ G01 Z1 (going to cutting z)\n""",
             self.error("Can not check the latest version. You can check it manually at \nhttp://www.cnc-club.ru/gcodetools (English version). \nhttp://www.cnc-club.ru/gcodetools_ru (Russian version). \nCurrent version is Gcodetools %s" % gcodetools_current_version, "Warning")
 
     ################################################################################
-    ### Graffiti function generates Gcode for graffiti drawer
+    # Graffiti function generates Gcode for graffiti drawer
     ################################################################################
     def graffiti(self):
         # Get reference points.
@@ -6579,11 +6579,11 @@ G01 Z1 (going to cutting z)\n""",
                 self.error("Png module have not been found!", "warning")
 
     ################################################################################
-    ###
-    ### Effect
-    ###
-    ### Main function of Gcodetools class
-    ###
+    #
+    # Effect
+    #
+    # Main function of Gcodetools class
+    #
     ################################################################################
     def effect(self):
         start_time = time.time()

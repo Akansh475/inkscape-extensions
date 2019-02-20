@@ -92,7 +92,7 @@ if sys.version_info[0] > 2:
     xrange = range
     unicode = str
 
-gcodetools_current_version = "1.7"
+GCODETOOLS_CURRENT_VERSION = "1.7"
 
 
 def bezierslopeatt(b0_b1_b2_b3, t):
@@ -134,10 +134,10 @@ def isset(variable):
 ################################################################################
 
 TAU = math.pi * 2
-straight_tolerance = 0.0001
-straight_distance_tolerance = 0.0001
-engraving_tolerance = 0.0001
-loft_lengths_tolerance = 0.0000001
+STRAIGHT_TOLERANCE = 0.0001
+STRAIGHT_DISTANCE_TOLERANCE = 0.0001
+ENGRAVING_TOLERANCE = 0.0001
+LOFT_LENGTHS_TOLERANCE = 0.0000001
 
 EMC_TOLERANCE_EQUAL = 0.00001
 
@@ -160,8 +160,8 @@ M2
 %"""
 }
 
-intersection_recursion_depth = 10
-intersection_tolerance = 0.00001
+INTERSECTION_RECURSION_DEPTH = 10
+INTERSECTION_TOLERANCE = 0.00001
 
 styles = {
     "in_out_path_style": str(inkex.Style({'stroke': '#0072a7', 'fill': 'none', 'stroke-width': '1', 'marker-mid': 'url(#InOutPathMarker)'})),
@@ -543,7 +543,7 @@ def csp_true_bounds(csp):
 def csp_segments_intersection(sp1, sp2, sp3, sp4):
     a, b = csp_segment_to_bez(sp1, sp2), csp_segment_to_bez(sp3, sp4)
 
-    def polish_intersection(a, b, ta, tb, tolerance=intersection_tolerance):
+    def polish_intersection(a, b, ta, tb, tolerance=INTERSECTION_TOLERANCE):
         ax, ay, bx, by, cx, cy, dx, dy = bezmisc.bezierparameterize(a)
         ax1, ay1, bx1, by1, cx1, cy1, dx1, dy1 = bezmisc.bezierparameterize(b)
         i = 0
@@ -606,7 +606,7 @@ def csp_segments_intersection(sp1, sp2, sp3, sp4):
 
     global bezier_intersection_recursive_result
     bezier_intersection_recursive_result = []
-    recursion(a, b, 0., 1., 0., 1., intersection_recursion_depth, intersection_recursion_depth)
+    recursion(a, b, 0., 1., 0., 1., INTERSECTION_RECURSION_DEPTH, INTERSECTION_RECURSION_DEPTH)
     intersections = bezier_intersection_recursive_result
     for i in range(len(intersections)):
         if len(intersections[i]) < 5 or intersections[i][4] != "Overlap":
@@ -1019,7 +1019,7 @@ def point_to_arc_distance(p, arc):
                 alpha = alpha - TAU
             else:
                 alpha = TAU + alpha
-        if between(alpha, 0, a) or min(abs(alpha), abs(alpha - a)) < straight_tolerance:
+        if between(alpha, 0, a) or min(abs(alpha), abs(alpha - a)) < STRAIGHT_TOLERANCE:
             return (p - i).mag(), [i.x, i.y]
         else:
             d1, d2 = (p - P0).mag(), (p - P2).mag()
@@ -1663,7 +1663,7 @@ def isinf(x): inf = 1e5000; return x == inf or x == -inf
 
 
 def between(c, x, y):
-    return x - straight_tolerance <= c <= y + straight_tolerance or y - straight_tolerance <= c <= x + straight_tolerance
+    return x - STRAIGHT_TOLERANCE <= c <= y + STRAIGHT_TOLERANCE or y - STRAIGHT_TOLERANCE <= c <= x + STRAIGHT_TOLERANCE
 
 
 def cubic_solver_real(a, b, c, d):
@@ -2422,22 +2422,22 @@ def biarc(sp1, sp2, z1, z2, depth=0):
     P0, P4 = P(sp1[1]), P(sp2[1])
     TS, TE, v = (P(sp1[2]) - P0), -(P(sp2[0]) - P4), P0 - P4
     tsa, tea, va = TS.angle(), TE.angle(), v.angle()
-    if TE.mag() < straight_distance_tolerance and TS.mag() < straight_distance_tolerance:
+    if TE.mag() < STRAIGHT_DISTANCE_TOLERANCE and TS.mag() < STRAIGHT_DISTANCE_TOLERANCE:
         # Both tangents are zerro - line straight
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
-    if TE.mag() < straight_distance_tolerance:
+    if TE.mag() < STRAIGHT_DISTANCE_TOLERANCE:
         TE = -(TS + v).unit()
         r = TS.mag() / v.mag() * 2
-    elif TS.mag() < straight_distance_tolerance:
+    elif TS.mag() < STRAIGHT_DISTANCE_TOLERANCE:
         TS = -(TE + v).unit()
         r = 1 / (TE.mag() / v.mag() * 2)
     else:
         r = TS.mag() / TE.mag()
     TS, TE = TS.unit(), TE.unit()
-    tang_are_parallel = ((tsa - tea) % math.pi < straight_tolerance or math.pi - (tsa - tea) % math.pi < straight_tolerance)
+    tang_are_parallel = ((tsa - tea) % math.pi < STRAIGHT_TOLERANCE or math.pi - (tsa - tea) % math.pi < STRAIGHT_TOLERANCE)
     if (tang_are_parallel and
-            ((v.mag() < straight_distance_tolerance or TE.mag() < straight_distance_tolerance or TS.mag() < straight_distance_tolerance) or
-             1 - abs(TS * v / (TS.mag() * v.mag())) < straight_tolerance)):
+            ((v.mag() < STRAIGHT_DISTANCE_TOLERANCE or TE.mag() < STRAIGHT_DISTANCE_TOLERANCE or TS.mag() < STRAIGHT_DISTANCE_TOLERANCE) or
+             1 - abs(TS * v / (TS.mag() * v.mag())) < STRAIGHT_TOLERANCE)):
         # Both tangents are parallel and start and end are the same - line straight
         # or one of tangents still smaller then tollerance
 
@@ -2486,7 +2486,7 @@ def biarc(sp1, sp2, z1, z2, depth=0):
 
     R1, a1 = calculate_arc_params(P0, P1, P2)
     R2, a2 = calculate_arc_params(P2, P3, P4)
-    if R1 is None or R2 is None or (R1 - P0).mag() < straight_tolerance or (R2 - P2).mag() < straight_tolerance:
+    if R1 is None or R2 is None or (R1 - P0).mag() < STRAIGHT_TOLERANCE or (R2 - P2).mag() < STRAIGHT_TOLERANCE:
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
 
     d = csp_to_arc_distance(sp1, sp2, [P0, P2, R1, a1], [P2, P4, R2, a2])
@@ -5125,8 +5125,8 @@ class Gcodetools(inkex.Effect):
             (nx2, ny2) = nxy2
             cosBis = math.sqrt(max(0, (1.0 + nx1 * nx2 - ny1 * ny2) / 2.0))
             # We can get correct sign of the sin, assuming cos is positive
-            if (abs(ny1 - ny2) < engraving_tolerance) or (abs(cosBis) < engraving_tolerance):
-                if (abs(nx1 - nx2) < engraving_tolerance):
+            if (abs(ny1 - ny2) < ENGRAVING_TOLERANCE) or (abs(cosBis) < ENGRAVING_TOLERANCE):
+                if (abs(nx1 - nx2) < ENGRAVING_TOLERANCE):
                     return (nx1, ny1, 0.0)
                 sinBis = math.copysign(1, ny1)
             else:
@@ -5196,7 +5196,7 @@ class Gcodetools(inkex.Effect):
             if dist < 0:
                 return max_dist
             denom = 1. - nx23 * nx1 - ny23 * ny1
-            if denom < engraving_tolerance:
+            if denom < ENGRAVING_TOLERANCE:
                 return max_dist
 
             # radius and centre are:
@@ -5234,7 +5234,7 @@ class Gcodetools(inkex.Effect):
             # Start by converting coordinates to be relative to x1,y1
             x2, y2 = x2 - x1, y2 - y1
             denom = nx ** 2 + ny ** 2 - 1
-            if denom <= engraving_tolerance:  # Not a corner bisector
+            if denom <= ENGRAVING_TOLERANCE:  # Not a corner bisector
                 if denom == -1:  # Find circle centre x1,y1
                     return math.sqrt(x2 ** 2 + y2 ** 2)
                 # if x2,y2 not in front of the normal...
@@ -5412,9 +5412,9 @@ class Gcodetools(inkex.Effect):
                         # get the xy distance of point 1 from the line 0-2
                         if length2 > length1 and length2 > length12:  # point 1 between them
                             xydist = abs((xy2[0] - x) * (xy1[1] - y) - (xy1[0] - x) * (xy2[1] - y)) / length2
-                            if xydist < engraving_tolerance:  # so far so good
+                            if xydist < ENGRAVING_TOLERANCE:  # so far so good
                                 wdist = w2 + (w - w2) * length1 / length2 - w1
-                                if abs(wdist) < engraving_tolerance:
+                                if abs(wdist) < ENGRAVING_TOLERANCE:
                                     # print_("pop",j,i,xy1)
                                     cspm.pop()
                                     wl.pop()
@@ -5521,7 +5521,7 @@ class Gcodetools(inkex.Effect):
                             # Remove zero length segments, assume closed path
                             i = 0  # LT was from i=1
                             while i < len(cspi[j]):
-                                if abs(cspi[j][i - 1][1][0] - cspi[j][i][1][0]) < engraving_tolerance and abs(cspi[j][i - 1][1][1] - cspi[j][i][1][1]) < engraving_tolerance:
+                                if abs(cspi[j][i - 1][1][0] - cspi[j][i][1][0]) < ENGRAVING_TOLERANCE and abs(cspi[j][i - 1][1][1] - cspi[j][i][1][1]) < ENGRAVING_TOLERANCE:
                                     cspi[j][i - 1][2] = cspi[j][i][2]
                                     del cspi[j][i]
                                 else:
@@ -5585,7 +5585,7 @@ class Gcodetools(inkex.Effect):
                                                 nx1 = bLT[seg][1] - bLT[seg + 1][1]
                                                 ny1 = bLT[seg + 1][0] - bLT[seg][0]
                                                 l1 = math.hypot(nx1, ny1)
-                                                if l1 < engraving_tolerance:
+                                                if l1 < ENGRAVING_TOLERANCE:
                                                     continue
                                                 nx1 = nx1 / l1  # normalise them
                                                 ny1 = ny1 / l1
@@ -5597,7 +5597,7 @@ class Gcodetools(inkex.Effect):
                                                 nx1 = bLT[seg + 1][1] - bLT[seg + 2][1]
                                                 ny1 = bLT[seg + 2][0] - bLT[seg + 1][0]
                                                 l1 = math.hypot(nx1, ny1)
-                                                if l1 < engraving_tolerance:
+                                                if l1 < ENGRAVING_TOLERANCE:
                                                     continue
                                                 nx1 = nx1 / l1  # normalise them
                                                 ny1 = ny1 / l1

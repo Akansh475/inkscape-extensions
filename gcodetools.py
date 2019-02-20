@@ -847,7 +847,7 @@ def csp_line_intersection(l1,l2,sp1,sp2):
 def csp_split_by_two_points(sp1,sp2,t1,t2) :
     if t1>t2 : t1, t2 = t2, t1
     if t1 == t2 :
-        sp1,sp2,sp3 =  csp_split(sp1,sp2,t)
+        sp1,sp2,sp3 =  csp_split(sp1,sp2,t1)
         return [sp1,sp2,sp2,sp3]
     elif t1 <= 1e-10 and t2 >= 1.-1e-10 :
         return [sp1,sp1,sp2,sp2]

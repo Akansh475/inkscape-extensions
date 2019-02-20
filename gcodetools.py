@@ -1639,7 +1639,7 @@ def print_(*arg):
 ################################################################################
 ### Point (x,y) operations
 ################################################################################
-class P:
+class P(object):
     def __init__(self, x, y=None):
         if not y==None:
             self.x, self.y = float(x), float(y)
@@ -1672,7 +1672,7 @@ class P:
     def l2(self): return self.x*self.x + self.y*self.y
 
 
-class Arc():
+class Arc(object):
     def __init__(self,st,end,c,a):
         self.st = P(st)
         self.end = P(end)
@@ -1731,7 +1731,7 @@ class Arc():
         return []
 
 
-class Line():
+class Line(object):
     def __init__(self,st,end):
         if st.__class__ == P :
             st = st.to_list()
@@ -1800,7 +1800,7 @@ class Line():
 
 
 
-class Biarc:
+class Biarc(object):
     def __init__(self, items=None):
         if items == None :
             self.items = []
@@ -2437,7 +2437,7 @@ def biarc_curve_clip_at_l(curve, l, clip_type = "strict") :
 
 
 
-class Postprocessor():
+class Postprocessor(object):
     def __init__(self, error_function_handler):
         self.error = error_function_handler
         self.functions = {
@@ -2706,7 +2706,7 @@ class Postprocessor():
 ################################################################################
 ### Polygon class
 ################################################################################
-class Polygon:
+class Polygon(object):
     def __init__(self, polygon=None):
         self.polygon = [] if polygon==None else polygon[:]
 
@@ -3009,7 +3009,7 @@ class Polygon:
         self.draw(color="Green", width=1)
 
 
-class Arangement_Genetic:
+class Arangement_Genetic(object):
     # gene = [fittness, order, rotation, xposition]
     # spieces = [gene]*shapes count
     # population = [spieces]

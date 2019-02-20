@@ -2951,15 +2951,15 @@ class Arangement_Genetic(object):
             genes_order = []
             specimen = [[0, 0., 0.] for i in range(self.genes_count)]
 
-            self.incest_mutation_multiplyer = 1.
-            self.incest_mutation_count_multiplyer = 1.
+            self.incest_mutation_multiplier = 1.
+            self.incest_mutation_count_multiplier = 1.
 
             if self.species_distance2(parent1, parent2) <= .01 / self.genes_count:
                 # OMG it's a incest :O!!!
                 # Damn you bastards!
                 self.inc += 1
-                self.incest_mutation_multiplyer = 2.
-                self.incest_mutation_count_multiplyer = 2.
+                self.incest_mutation_multiplier = 2.
+                self.incest_mutation_count_multiplier = 2.
             else:
                 pass
             start_gene = random.randint(0, self.genes_count)
@@ -2982,11 +2982,11 @@ class Arangement_Genetic(object):
                 specimen[i] = [parent2[j][0], parent1[i][1] * tr + parent2[i][1] * (1 - tr), parent1[i][2] * tp + parent2[i][2] * (1 - tp)]
                 genes_order += [parent2[j][0]]
 
-            for i in range(random.randint(self.mutation_genes_count[0], self.mutation_genes_count[0] * self.incest_mutation_count_multiplyer)):
-                if random.random() < self.order_mutate_factor * self.incest_mutation_multiplyer:
+            for i in range(random.randint(self.mutation_genes_count[0], self.mutation_genes_count[0] * self.incest_mutation_count_multiplier)):
+                if random.random() < self.order_mutate_factor * self.incest_mutation_multiplier:
                     i1, i2 = random.randint(0, self.genes_count - 1), random.randint(0, self.genes_count - 1)
                     specimen[i1][0], specimen[i2][0] = specimen[i2][0], specimen[i1][0]
-                if random.random() < self.move_mutation_factor * self.incest_mutation_multiplyer:
+                if random.random() < self.move_mutation_factor * self.incest_mutation_multiplier:
                     i1 = random.randint(0, self.genes_count - 1)
                     specimen[i1][1] = (specimen[i1][1] + random.random() * TAU * self.move_mutation_multiplier) % 1.
                     specimen[i1][2] = (specimen[i1][2] + random.random() * self.move_mutation_multiplier) % 1.

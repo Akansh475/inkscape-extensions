@@ -342,20 +342,6 @@ def csp_simple_bound(csp):
 def csp_segment_to_bez(sp1,sp2) :
     return sp1[1:]+sp2[:2]
 
-
-def bound_to_bound_distance(sp1,sp2,sp3,sp4) :
-    min_dist = 1e100
-    max_dist = 0
-    points1 = csp_segment_to_bez(sp1,sp2)
-    points2 = csp_segment_to_bez(sp3,sp4)
-    for i in range(4) :
-        for j in range(4) :
-            min_, max_ = line_to_line_min_max_distance_2(points1[i-1], points1[i], points2[j-1], points2[j])
-            min_dist = min(min_dist,min_)
-            max_dist = max(max_dist,max_)
-            print_("bound_to_bound", min_dist, max_dist)
-    return min_dist, max_dist
-
 def csp_to_point_distance(csp, p, dist_bounds = [0,1e100], tolerance=.01) :
     min_dist = [1e100,0,0,0]
     for j in range(len(csp)) :
@@ -2390,50 +2376,6 @@ def biarc_curve_segment_length(seg):
         return math.sqrt((seg[0][0]-seg[4][0])**2+(seg[0][1]-seg[4][1])**2)
     else:
         return 0
-
-
-def biarc_curve_clip_at_l(curve, l, clip_type = "strict") :
-    # get first subcurve and ceck it's length
-    subcurve, subcurve_l, moved = [], 0, False
-    for seg in curve:
-        if seg[1] == "move" and moved or seg[1] == "end" :
-            break
-        if seg[1] == "move" : moved = True
-        subcurve_l += biarc_curve_segment_length(seg)
-        if seg[1] == "arc" or seg[1] == "line" :
-            subcurve += [seg]
-
-    if subcurve_l < l and clip_type == "strict" : return []
-    lc = 0
-    if (subcurve[-1][4][0]-subcurve[0][0][0])**2 + (subcurve[-1][4][1]-subcurve[0][0][1])**2 < 10**-7 : subcurve_closed = True
-    i = 0
-    reverse = False
-    while lc<l :
-        seg = subcurve[i]
-        if reverse :
-            if seg[1] == "line" :
-                seg = [seg[4], "line", 0 , 0, seg[0], seg[5]] # Hmmm... Do we have to swap seg[5][0] and seg[5][1] (zstart and zend) or not?
-            elif seg[1] == "arc" :
-                seg = [seg[4], "arc", seg[2] , -seg[3], seg[0], seg[5]] # Hmmm... Do we have to swap seg[5][0] and seg[5][1] (zstart and zend) or not?
-        ls = biarc_curve_segment_length(seg)
-        if ls != 0 :
-            if l-lc>ls :
-                res += [seg]
-            else :
-                if seg[1] == "arc" :
-                    r  = math.sqrt((seg[0][0]-seg[2][0])**2+(seg[0][1]-seg[2][1])**2)
-                    x,y = seg[0][0]-seg[2][0], seg[0][1]-seg[2][1]
-                    a = seg[3]/ls*(l-lc)
-                    x,y = x*math.cos(a) - y*math.sin(a),  x*math.sin(a) + y*math.cos(a)
-                    x,y = x+seg[2][0], y+seg[2][1]
-                    res += [[ seg[0], "arc",  seg[2], a, [x,y], [seg[5][0],seg[5][1]/ls*(l-lc)]  ]]
-                if seg[1] == "line" :
-                    res += [[ seg[0], "line",  0, 0, [(seg[4][0]-seg[0][0])/ls*(l-lc),(seg[4][1]-seg[0][1])/ls*(l-lc)], [seg[5][0],seg[5][1]/ls*(l-lc)]  ]]
-        i += 1
-        if i >= len(subcurve) and not subcurve_closed:
-            reverse = not reverse
-        i = i%len(subcurve)
-    return res
 
 
 

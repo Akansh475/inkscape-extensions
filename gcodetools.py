@@ -275,7 +275,7 @@ def point_inside_csp(p,csp, on_the_path = True) :
             sp1, sp2 = subpath[i-1], subpath[i]
             ax,ay,bx,by,cx,cy,dx,dy = csp_parameterize(sp1,sp2)
             if  ax==0 and bx==0 and cx==0 and dx==x :
-                #we've got a special case here
+                # we've got a special case here
                 b = csp_true_bounds( [[sp1,sp2]])
                 if  b[1][1]<=y<=b[3][1] :
                     # points is on the path
@@ -286,7 +286,7 @@ def point_inside_csp(p,csp, on_the_path = True) :
             else:
                 for t in csp_line_intersection([x,y],[x,y+5],sp1,sp2) :
                     if t == 0 or t == 1 :
-                        #we've got another special case here
+                        # we've got another special case here
                         x1,y1 = csp_at_t(sp1,sp2,t)
                         if y1==y :
                             # the point is on the path
@@ -1794,7 +1794,7 @@ class Biarc(object):
             self.items = items
 
     def l(self) :
-        return sum([i.length() for i in items])
+        return sum([i.length() for i in self.items])
 
     def close(self) :
         for subitems in self.items:
@@ -2988,7 +2988,7 @@ class Arangement_Genetic(object):
         # for sp2 in top_spieces sum(|sp1-sp2|)/top_count
         sim = 0
         for sp2 in top :
-            sim += math.sqrt(species_distance2(sp1,sp2[1]))
+            sim += math.sqrt(self.species_distance2(sp1,sp2[1]))
         return sim/len(top)
 
 

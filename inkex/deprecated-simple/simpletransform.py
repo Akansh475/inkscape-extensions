@@ -1,115 +1,71 @@
 # COPYRIGHT
-"""DOCSTRING"""
+#
+# pylint: disable=invalid-name
+#
+"""
+Depreicated simpletransform replacements with documentation
+"""
+  
+from inkex.deprecated import deprecate
+from inkex.transforms import Transform
 
 import inkex, cubicsuperpath, bezmisc, simplestyle
 import copy, math, re
 
-def parseTransform(transf,mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
-    if transf=="" or transf==None:
-        return(mat)
-    stransf = transf.strip()
-    result=re.match("(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?",stransf)
-#-- translate --
-    if result.group(1)=="translate":
-        args=result.group(2).replace(',',' ').split()
-        dx=float(args[0])
-        if len(args)==1:
-            dy=0.0
-        else:
-            dy=float(args[1])
-        matrix=[[1,0,dx],[0,1,dy]]
-#-- scale --
-    if result.group(1)=="scale":
-        args=result.group(2).replace(',',' ').split()
-        sx=float(args[0])
-        if len(args)==1:
-            sy=sx
-        else:
-            sy=float(args[1])
-        matrix=[[sx,0,0],[0,sy,0]]
-#-- rotate --
-    if result.group(1)=="rotate":
-        args=result.group(2).replace(',',' ').split()
-        a=float(args[0])*math.pi/180
-        if len(args)==1:
-            cx,cy=(0.0,0.0)
-        else:
-            cx,cy=map(float,args[1:])
-        matrix=[[math.cos(a),-math.sin(a),cx],[math.sin(a),math.cos(a),cy]]
-        matrix=composeTransform(matrix,[[1,0,-cx],[0,1,-cy]])
-#-- skewX --
-    if result.group(1)=="skewX":
-        a=float(result.group(2))*math.pi/180
-        matrix=[[1,math.tan(a),0],[0,1,0]]
-#-- skewY --
-    if result.group(1)=="skewY":
-        a=float(result.group(2))*math.pi/180
-        matrix=[[1,0,0],[math.tan(a),1,0]]
-#-- matrix --
-    if result.group(1)=="matrix":
-        a11,a21,a12,a22,v1,v2=result.group(2).replace(',',' ').split()
-        matrix=[[float(a11),float(a12),float(v1)], [float(a21),float(a22),float(v2)]]
 
-    matrix=composeTransform(mat,matrix)
-    if result.end() < len(stransf):
-        return(parseTransform(stransf[result.end():], matrix))
-    else:
-        return matrix
+@deprecate
+def parseTransform(transf, mat=None):
+    """Transform(str).matrix"""
+    if mat is not None:
+        return (Transform(mat) * Transform(transf)).matrix
+    return Transform(transf).matrix
 
+@deprecate
 def formatTransform(mat):
-    return ("matrix(%f,%f,%f,%f,%f,%f)" % (mat[0][0], mat[1][0], mat[0][1], mat[1][1], mat[0][2], mat[1][2]))
+    """str(Transform(mat))"""
+    return str(Transform(mat))
 
+@deprecate
 def invertTransform(mat):
-    det = mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0]
-    if det !=0:  # det is 0 only in case of 0 scaling
-        # invert the rotation/scaling part
-        a11 =  mat[1][1]/det
-        a12 = -mat[0][1]/det
-        a21 = -mat[1][0]/det
-        a22 =  mat[0][0]/det
-        # invert the translational part
-        a13 = -(a11*mat[0][2] + a12*mat[1][2])
-        a23 = -(a21*mat[0][2] + a22*mat[1][2])
-        return [[a11,a12,a13],[a21,a22,a23]]
-    else:
-        return[[0,0,-mat[0][2]],[0,0,-mat[1][2]]]
+    """-Transform(mat)"""
+    return (-Transform(mat)).matrix
 
-def composeTransform(M1,M2):
-    a11 = M1[0][0]*M2[0][0] + M1[0][1]*M2[1][0]
-    a12 = M1[0][0]*M2[0][1] + M1[0][1]*M2[1][1]
-    a21 = M1[1][0]*M2[0][0] + M1[1][1]*M2[1][0]
-    a22 = M1[1][0]*M2[0][1] + M1[1][1]*M2[1][1]
+@deprecate
+def composeTransform(mat1, mat2):
+    """Transform(M1) * Transform(M2)"""
+    return (Transform(mat1) * Transform(mat2)).matrix
 
-    v1 = M1[0][0]*M2[0][2] + M1[0][1]*M2[1][2] + M1[0][2]
-    v2 = M1[1][0]*M2[0][2] + M1[1][1]*M2[1][2] + M1[1][2]
-    return [[a11,a12,v1],[a21,a22,v2]]
-
+@deprecate
 def composeParents(node, mat):
-    trans = node.get('transform')
-    if trans:
-        mat = composeTransform(parseTransform(trans), mat)
-    if node.getparent().tag == inkex.addNS('g','svg'):
-        mat = composeParents(node.getparent(), mat)
-    return mat
+    """elem.composed_transform() or elem.transform * Transform(mat)"""
+    return (node.transform * Transform(mat)).matrix
 
-def applyTransformToNode(mat,node):
-    m=parseTransform(node.get("transform"))
-    newtransf=formatTransform(composeTransform(mat,m))
-    node.set("transform", newtransf)
+@deprecate
+def applyTransformToNode(mat, node):
+    """elem.transform *= Transform(mat)"""
+    node.transform *= Transform(mat)
 
-def applyTransformToPoint(mat,pt):
-    x = mat[0][0]*pt[0] + mat[0][1]*pt[1] + mat[0][2]
-    y = mat[1][0]*pt[0] + mat[1][1]*pt[1] + mat[1][2]
-    pt[0]=x
-    pt[1]=y
+@deprecate
+def applyTransformToPoint(mat, pt):
+    """Transform(mat).apply_to_point(pt)"""
+    pt2 = Transform(mat).apply_to_point(pt)
+    # Apply in place as original method was modifying arrays in place.
+    # but don't do this in your code! This is not good code design.
+    pt[0] = pt2[0]
+    pt[1] = pt2[1]
+    return pt2
 
-def applyTransformToPath(mat,path):
+@deprecate
+def applyTransformToPath(mat, path):
+    """XXX No replacement coded yet, HELP!"""
     for comp in path:
         for ctl in comp:
             for pt in ctl:
                 applyTransformToPoint(mat,pt)
 
+@deprecate
 def fuseTransform(node):
+    """XXX No replacement coded yet, HELP!"""
     if node.get('d')==None:
         #FIXME: how do you raise errors?
         raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
@@ -127,7 +83,9 @@ def fuseTransform(node):
 ##-- Some functions to compute a rough bbox of a given list of objects.
 ##-- this should be shipped out in an separate file...
 
+@deprecate
 def boxunion(b1,b2):
+    """XXX No replacement coded yet, HELP!"""
     if b1 is None:
         return b2
     elif b2 is None:
@@ -135,7 +93,9 @@ def boxunion(b1,b2):
     else:
         return((min(b1[0],b2[0]), max(b1[1],b2[1]), min(b1[2],b2[2]), max(b1[3],b2[3])))
 
+@deprecate
 def roughBBox(path):
+    """XXX No replacement coded yet, HELP!"""
     xmin,xMax,ymin,yMax = path[0][0][0][0],path[0][0][0][0],path[0][0][0][1],path[0][0][0][1]
     for pathcomp in path:
         for ctl in pathcomp:
@@ -146,7 +106,9 @@ def roughBBox(path):
                 yMax = max(yMax,pt[1])
     return xmin,xMax,ymin,yMax
 
+@deprecate
 def refinedBBox(path):
+    """XXX No replacement coded yet, HELP!"""
     xmin,xMax,ymin,yMax = path[0][0][1][0],path[0][0][1][0],path[0][0][1][1],path[0][0][1][1]
     for pathcomp in path:
         for i in range(1, len(pathcomp)):
@@ -158,33 +120,15 @@ def refinedBBox(path):
             yMax = max(yMax, cmax)
     return xmin,xMax,ymin,yMax
 
+@deprecate
 def cubicExtrema(y0, y1, y2, y3):
-    cmin = min(y0, y3)
-    cmax = max(y0, y3)
-    d1 = y1 - y0
-    d2 = y2 - y1
-    d3 = y3 - y2
-    if (d1 - 2*d2 + d3):
-        if (d2*d2 > d1*d3):
-            t = (d1 - d2 + math.sqrt(d2*d2 - d1*d3))/(d1 - 2*d2 + d3)
-            if (t > 0) and (t < 1):
-                y = y0*(1-t)*(1-t)*(1-t) + 3*y1*t*(1-t)*(1-t) + 3*y2*t*t*(1-t) + y3*t*t*t
-                cmin = min(cmin, y)
-                cmax = max(cmax, y)
-            t = (d1 - d2 - math.sqrt(d2*d2 - d1*d3))/(d1 - 2*d2 + d3)
-            if (t > 0) and (t < 1):
-                y = y0*(1-t)*(1-t)*(1-t) + 3*y1*t*(1-t)*(1-t) + 3*y2*t*t*(1-t) + y3*t*t*t
-                cmin = min(cmin, y)
-                cmax = max(cmax, y)
-    elif (d3 - d1):
-        t = -d1/(d3 - d1)
-        if (t > 0) and (t < 1):
-            y = y0*(1-t)*(1-t)*(1-t) + 3*y1*t*(1-t)*(1-t) + 3*y2*t*t*(1-t) + y3*t*t*t
-            cmin = min(cmin, y)
-            cmax = max(cmax, y)
-    return cmin, cmax
+    """Import from inkex.transforms instead"""
+    from inkex.transforms import cubicExtrema
+    return cubicExtrema(y0, y1, y2, y3)
 
+@deprecate
 def computeBBox(aList,mat=[[1,0,0],[0,1,0]]):
+    """XXX No replacement coded yet, HELP!"""
     bbox=None
     for node in aList:
         m = parseTransform(node.get('transform'))
@@ -232,11 +176,11 @@ def computeBBox(aList,mat=[[1,0,0],[0,1,0]]):
         bbox=boxunion(computeBBox(node,m),bbox)
     return bbox
 
-
+@deprecate
 def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
+    """XXX No replacement coded yet, HELP!"""
     if node.getparent() is not None:
         applyTransformToPoint(invertTransform(composeParents(node, mat)), pt)
     return pt
-
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

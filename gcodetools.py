@@ -128,7 +128,7 @@ def isset(variable):
 ###
 ################################################################################
 
-math.pi2 = math.pi*2
+TAU = math.pi*2
 straight_tolerance = 0.0001
 straight_distance_tolerance = 0.0001
 engraving_tolerance = 0.0001
@@ -941,15 +941,15 @@ def arc_from_c_s_l(c,s,l) :
 def csp_from_arc(start, end, center, r, slope_st) :
     # Creates csp that approximise specified arc
     r = abs(r)
-    alpha = (atan2(end[0]-center[0],end[1]-center[1]) - atan2(start[0]-center[0],start[1]-center[1])) % math.pi2
+    alpha = (atan2(end[0]-center[0],end[1]-center[1]) - atan2(start[0]-center[0],start[1]-center[1])) % TAU
 
     sectors = int(abs(alpha)*2/math.pi)+1
     alpha_start = atan2(start[0]-center[0],start[1]-center[1])
     cos_,sin_ = math.cos(alpha_start), math.sin(alpha_start)
     k = (4.*math.tan(alpha/sectors/4.)/3.)
     if dot(slope_st , [- sin_*k*r, cos_*k*r]) < 0 :
-        if alpha>0 : alpha -= math.pi2
-        else: alpha += math.pi2
+        if alpha>0 : alpha -= TAU
+        else: alpha += TAU
     if abs(alpha*r)<0.001 :
         return []
 
@@ -978,8 +978,8 @@ def point_to_arc_distance(p, arc):
         i = c + (p-c).unit()*r
         alpha = ((i-c).angle() - (P0-c).angle())
         if a*alpha<0:
-            if alpha>0:    alpha = alpha-math.pi2
-            else: alpha = math.pi2+alpha
+            if alpha>0:    alpha = alpha-TAU
+            else: alpha = TAU+alpha
         if between(alpha,0,a) or min(abs(alpha),abs(alpha-a))<straight_tolerance :
             return (p-i).mag(), [i.x, i.y]
         else :
@@ -1467,10 +1467,10 @@ def small(a) :
 
 def atan2(*arg):
     if len(arg)==1 and ( type(arg[0]) == type([0.,0.]) or type(arg[0])==type((0.,0.)) ) :
-        return (math.pi/2 - math.atan2(arg[0][0], arg[0][1]) ) % math.pi2
+        return (math.pi/2 - math.atan2(arg[0][0], arg[0][1]) ) % TAU
     elif len(arg)==2 :
 
-        return (math.pi/2 - math.atan2(arg[0],arg[1]) ) % math.pi2
+        return (math.pi/2 - math.atan2(arg[0],arg[1]) ) % TAU
     else :
         raise ValueError("Bad argumets for atan! (%s)" % arg)
 
@@ -1678,8 +1678,8 @@ class Arc():
         self.end = P(end)
         self.c = P(c)
         self.r = (P(st)-P(c)).mag()
-        self.a = ( (self.st-self.c).angle() - (self.end-self.c).angle() ) % math.pi2
-        if a<0 : self.a -= math.pi2
+        self.a = ( (self.st-self.c).angle() - (self.end-self.c).angle() ) % TAU
+        if a<0 : self.a -= TAU
 
     def offset(self, r):
         if self.a>0 :
@@ -3131,7 +3131,7 @@ class Arangement_Genetic:
                     specimen[i1][0], specimen[i2][0] = specimen[i2][0], specimen[i1][0]
                 if random.random() < self.move_mutation_factor * self.incest_mutation_multiplyer:
                     i1 = random.randint(0,self.genes_count-1)
-                    specimen[i1][1] =  (specimen[i1][1]+random.random()*math.pi2*self.move_mutation_multiplier)%1.
+                    specimen[i1][1] =  (specimen[i1][1]+random.random()*TAU*self.move_mutation_multiplier)%1.
                     specimen[i1][2] =  (specimen[i1][2]+random.random()*self.move_mutation_multiplier)%1.
             self.population += [ [None,specimen] ]
 
@@ -3141,7 +3141,7 @@ class Arangement_Genetic:
         for p in spiece :
             time_ = time.time()
             poly = Polygon(copy.deepcopy(self.polygons[p[0]].polygon))
-            poly.rotate(p[1]*math.pi2)
+            poly.rotate(p[1]*TAU)
             w = poly.width()
             left = poly.bounds()[0]
             poly.move( -left + (self.width-w)*p[2],0)
@@ -3161,7 +3161,7 @@ class Arangement_Genetic:
 
     def test_spiece_centroid(self,spiece) :
         poly = Polygon(    self.polygons[spiece[0][0]].polygon[:])
-        poly.rotate(spiece[0][1]*math.pi2)
+        poly.rotate(spiece[0][1]*TAU)
         surface  = Polygon(poly.polygon)
         for p in spiece[1:] :
             poly = Polygon(self.polygons[p[0]].polygon[:])
@@ -3169,11 +3169,11 @@ class Arangement_Genetic:
             surface.move(-c[0],-c[1])
             c1 = poly.centroid()
             poly.move(-c1[0],-c1[1])
-            poly.rotate(p[1]*math.pi2+p[2]*math.pi2)
-            surface.rotate(p[2]*math.pi2)
+            poly.rotate(p[1]*TAU+p[2]*TAU)
+            surface.rotate(p[2]*TAU)
             poly.drop_down(surface)
             surface.add(poly)
-            surface.rotate(-p[2]*math.pi2)
+            surface.rotate(-p[2]*TAU)
         return surface
 
 
@@ -3808,10 +3808,10 @@ class Gcodetools(inkex.Effect):
                     c = s[2]
                     s[3] = s[3]*reverse_angle
 
-                    a =  ( (P(si[0])-P(c)).angle() - (P(s[0])-P(c)).angle() )%math.pi2 #s[3]
+                    a =  ( (P(si[0])-P(c)).angle() - (P(s[0])-P(c)).angle() )%TAU #s[3]
                     if s[3]*a<0:
-                            if a>0:    a = a-math.pi2
-                            else: a = math.pi2+a
+                            if a>0:    a = a-TAU
+                            else: a = TAU+a
                     r = math.sqrt( (sp[0]-c[0])**2 + (sp[1]-c[1])**2 )
                     a_st = ( math.atan2(sp[0]-c[0],- (sp[1]-c[1])) - math.pi/2 ) % (math.pi*2)
                     st = style['biarc%s' % (arcn%2)][:]
@@ -3926,9 +3926,9 @@ class Gcodetools(inkex.Effect):
 
         def calculate_angle(a, current_a):
             return  min(
-                        [abs(a-current_a%math.pi2+math.pi2), a+current_a-current_a%math.pi2+math.pi2],
-                        [abs(a-current_a%math.pi2-math.pi2), a+current_a-current_a%math.pi2-math.pi2],
-                        [abs(a-current_a%math.pi2),             a+current_a-current_a%math.pi2])[1]
+                        [abs(a-current_a%TAU+TAU), a+current_a-current_a%TAU+TAU],
+                        [abs(a-current_a%TAU-TAU), a+current_a-current_a%TAU-TAU],
+                        [abs(a-current_a%TAU),             a+current_a-current_a%TAU])[1]
         if len(curve)==0 : return ""
 
         try :

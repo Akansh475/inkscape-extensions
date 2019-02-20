@@ -77,13 +77,10 @@ import copy
 import sys
 import time
 import cmath
-import codecs
 import random
 import numpy
 # local library
 import inkex
-import simplestyle
-import simplepath
 import cubicsuperpath
 import simpletransform
 import inkex.bezier as bezmisc
@@ -3446,12 +3443,12 @@ class Gcodetools(inkex.Effect):
         print_("Paths hull computed in %s sec."%(time.time()-time_))
         print_("Got %s polygons having average %s edges each."% ( len(polygons), float(sum([ sum([len(poly) for poly in polygon.polygon]) for polygon in polygons ])) / len(polygons) ) )
         time_ = time.time()
-        
-#		material_width = self.options.arrangement_material_width
-#		population = Arangement_Genetic(polygons, material_width)
-#		population.add_random_species(1)
-#		population.test_population_centroid()
-##		return
+
+#        material_width = self.options.arrangement_material_width
+#        population = Arangement_Genetic(polygons, material_width)
+#        population.add_random_species(1)
+#        population.test_population_centroid()
+#        return
         material_width = self.options.arrangement_material_width
         population = Arangement_Genetic(polygons, material_width)
 
@@ -3718,7 +3715,7 @@ class Gcodetools(inkex.Effect):
             p = self.transform_csp(p, layer)
 
 
-            ### Sort to reduce Rapid distance	
+            # Sort to reduce Rapid distance
             k = list(range(1,len(p)))
             keys = [0]
             while len(k)>0:
@@ -4088,8 +4085,8 @@ class Gcodetools(inkex.Effect):
             print_(self.transform_matrix)
             print_(self.transform_matrix_reverse)
 
-            ###self.Zauto_scale[layer]  = math.sqrt( (self.transform_matrix[layer][0][0]**2 + self.transform_matrix[layer][1][1]**2)/2 )
-            ### Zautoscale is obsolete
+            # self.Zauto_scale[layer]  = math.sqrt( (self.transform_matrix[layer][0][0]**2 + self.transform_matrix[layer][1][1]**2)/2 )
+            # Zautoscale is obsolete
             self.Zauto_scale[layer] = 1
             print_("Z automatic scale = %s (computed according orientation points)" % self.Zauto_scale[layer])
 

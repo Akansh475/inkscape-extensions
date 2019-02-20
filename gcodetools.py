@@ -77,6 +77,7 @@ import random
 import re
 import sys
 import time
+from functools import partial
 
 # local library
 import inkex
@@ -4473,7 +4474,6 @@ class Gcodetools(inkex.Effect):
     #
     ################################################################################
     def path_to_gcode(self):
-        from functools import partial
         def get_boundaries(points):
             minx, miny, maxx, maxy = None, None, None, None
             out = [[], [], [], []]

@@ -1152,9 +1152,9 @@ def csp_parameterize(sp1, sp2):
 
 def csp_concat_subpaths(*s):
     def concat(s1, s2):
-        if s1 == []:
+        if not s1:
             return s2
-        if s2 == []:
+        if not s2:
             return s1
         if (s1[-1][1][0] - s2[0][1][0]) ** 2 + (s1[-1][1][1] - s2[0][1][1]) ** 2 > 0.00001:
             return s1[:-1] + [[s1[-1][0], s1[-1][1], s1[-1][1]], [s2[0][1], s2[0][1], s2[0][2]]] + s2[1:]
@@ -1671,7 +1671,7 @@ class Arc(object):
             inkex.addNS('type', 'sodipodi'): 'arc',
             "gcodetools": "Preview",
         }
-        if transform != []:
+        if transform:
             attr["transform"] = transform
         etree.SubElement(group, inkex.addNS('path', 'svg'), attr)
 
@@ -1711,7 +1711,7 @@ class Line(object):
                 'd': 'M {},{} L {},{}'.format(st[0], st[1], end[0], end[1]),
                 "gcodetools": "Preview",
                 }
-        if transform != []:
+        if transform:
             attr["transform"] = transform
         etree.SubElement(group, inkex.addNS('path', 'svg'), attr)
 
@@ -1811,7 +1811,7 @@ class Biarc(object):
             group = gcodetools.preview_groups[layer]
 
         transform = gcodetools.get_transforms(group)
-        if transform != []:
+        if transform:
             transform = gcodetools.reverse_transform(transform)
             transform = str(Transform(transform))
 
@@ -1878,7 +1878,7 @@ def csp_offset(csp, r):
                 else:  # This part will be clipped for sure... TODO Optimize it...
                     offset = offset_segment_recursion(sp[1], sp[2], r, offset_subdivision_depth, offset_tolerance)
 
-                if result == []:
+                if not result:
                     result = offset[:]
                 else:
                     if csp_subpaths_end_to_start_distance2(result, offset) < 0.0001:
@@ -1886,7 +1886,7 @@ def csp_offset(csp, r):
                     else:
 
                         intersection = csp_get_subapths_last_first_intersection(result, offset)
-                        if intersection != []:
+                        if intersection:
                             i, t1, j, t2 = intersection
                             sp1_, sp2_, sp3_ = csp_split(result[i - 1], result[i], t1)
                             result = result[:i - 1] + [sp1_, sp2_]
@@ -1919,7 +1919,7 @@ def csp_offset(csp, r):
             for j in range(1, len(s2)):
                 sp21, sp22 = s2[j - 1], s2[j]
                 intersection = csp_segments_true_intersection(sp11, sp12, sp21, sp22)
-                if intersection != []:
+                if intersection:
                     _break = True
                     break
             if _break:
@@ -1935,7 +1935,7 @@ def csp_offset(csp, r):
             if (P(prev[-1][1]) - P(next[0][1])).l2() < 0.001:
                 return prev, [], next
             intersection = csp_get_subapths_last_first_intersection(prev, next)
-            if intersection != []:
+            if intersection:
                 i, t1, j, t2 = intersection
                 sp1_, sp2_, sp3_ = csp_split(prev[i - 1], prev[i], t1)
                 sp3_, sp4_, sp5_ = csp_split(next[j - 1], next[j], t2)
@@ -1945,24 +1945,24 @@ def csp_offset(csp, r):
         start = (P(csp_at_t(sp1_l, sp2_l, 1.)) + r * P(csp_normalized_normal(sp1_l, sp2_l, 1.))).to_list()
         end = (P(csp_at_t(sp1, sp2, 0.)) + r * P(csp_normalized_normal(sp1, sp2, 0.))).to_list()
         arc = csp_from_arc(start, end, sp1[1], r, csp_normalized_slope(sp1_l, sp2_l, 1.))
-        if arc == []:
+        if not arc:
             return prev, [], next
         else:
             # Clip prev by arc
             if csp_subpaths_end_to_start_distance2(prev, arc) > 0.00001:
                 intersection = csp_get_subapths_last_first_intersection(prev, arc)
-                if intersection != []:
+                if intersection:
                     i, t1, j, t2 = intersection
                     sp1_, sp2_, sp3_ = csp_split(prev[i - 1], prev[i], t1)
                     sp3_, sp4_, sp5_ = csp_split(arc[j - 1], arc[j], t2)
                     prev = prev[:i - 1] + [sp1_, sp2_]
                     arc = [sp4_, sp5_] + arc[j + 1:]
             # Clip next by arc
-            if next == []:
+            if not next:
                 return prev, [], arc
             if csp_subpaths_end_to_start_distance2(arc, next) > 0.00001:
                 intersection = csp_get_subapths_last_first_intersection(arc, next)
-                if intersection != []:
+                if intersection:
                     i, t1, j, t2 = intersection
                     sp1_, sp2_, sp3_ = csp_split(arc[i - 1], arc[i], t1)
                     sp3_, sp4_, sp5_ = csp_split(next[j - 1], next[j], t2)
@@ -2040,7 +2040,7 @@ def csp_offset(csp, r):
         last_offset_len = 0
         for sp1, sp2 in zip(subpath, subpath[1:]):
             segment_offset = csp_offset_segment(sp1, sp2, r)
-            if subpath_offset == []:
+            if not subpath_offset:
                 subpath_offset = segment_offset
 
                 prev_l = len(subpath_offset)
@@ -2475,7 +2475,7 @@ class Postprocessor(object):
             gcode += "{}  = 0 ({} axis offset)\n".format(offset[c], c.upper())
 
         # Add scale parametrization
-        if planes == []:
+        if not planes:
             planes = ["g17"]
         if len(planes) > 1:  # have G02 and G03 in several planes scale_x = scale_y = scale_z required
             gcode += "#10 = 1 (Scale factor)\n"
@@ -3555,7 +3555,7 @@ class Gcodetools(inkex.Effect):
         s, arcn = '', 0
 
         transform = self.get_transforms(group)
-        if transform != []:
+        if transform:
             transform = self.reverse_transform(transform)
             transform = str(Transform(transform))
 
@@ -3576,7 +3576,7 @@ class Gcodetools(inkex.Effect):
                             'd': 'M {},{} L {},{}'.format(s[0][0], s[0][1], si[0][0], si[0][1]),
                             "gcodetools": "Preview",
                             }
-                    if transform != []:
+                    if transform:
                         attr["transform"] = transform
                     etree.SubElement(group, inkex.addNS('path', 'svg'), attr)
                 elif s[1] == 'arc':
@@ -3615,7 +3615,7 @@ class Gcodetools(inkex.Effect):
                         "gcodetools": "Preview",
                     }
 
-                    if transform != []:
+                    if transform:
                         attr["transform"] = transform
                     etree.SubElement(group, inkex.addNS('path', 'svg'), attr)
             s = si
@@ -3803,7 +3803,7 @@ class Gcodetools(inkex.Effect):
 
     def apply_transforms(self, g, csp, reverse=False):
         trans = self.get_transforms(g)
-        if trans != []:
+        if trans:
             if not reverse:
                 simpletransform.applyTransformToPath(trans, csp)
             else:
@@ -4032,7 +4032,7 @@ class Gcodetools(inkex.Effect):
 
                 elif i.get("gcodetools") == "Gcodetools graffiti reference point":
                     point = self.get_graffiti_reference_points(i)
-                    if point != []:
+                    if point:
                         self.graffiti_reference_points[layer] = self.graffiti_reference_points[layer] + [point[:]] if layer in self.graffiti_reference_points else [point]
                     else:
                         self.error(_("Warning! Found bad graffiti reference point in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))), "bad_orientation_points_in_some_layers")
@@ -4664,7 +4664,7 @@ class Gcodetools(inkex.Effect):
                         while (i < b[2] or last_one):
                             if i >= b[2]:
                                 last_one = False
-                            if lines[-1] == []:
+                            if not lines[-1]:
                                 lines[-1] += [[i, b[3]]]
 
                             if top:
@@ -5331,7 +5331,7 @@ class Gcodetools(inkex.Effect):
                                 x1a, y1a = n1[0]  # this point/start of this line
                                 nx, ny = n1[1]
                                 x1b, y1b = n2[0]  # next point/end of this line
-                                if n1[2] == True:  # We're at a corner
+                                if n1[2]:  # We're at a corner
                                     bits = 1
                                     bit0 = 0
                                     # lastr=r #Remember r from last line
@@ -5366,7 +5366,7 @@ class Gcodetools(inkex.Effect):
                                         if w < lastw:  # need to adjust it
                                             draw_point((x1, y1), (n0[0][0] + n0[1][0] * w, n0[0][1] + n0[1][1] * w), w, (lastw - w) / 2)
                                             save_point((n0[0][0] + n0[1][0] * w, n0[0][1] + n0[1][1] * w), w, i, j, iimin, jjmin)
-                                    if n1[2] == True:  # We're at a corner
+                                    if n1[2]:  # We're at a corner
                                         if n1[3] > 0:  # acute
                                             save_point((x1 + nx * w, y1 + ny * w), w, i, j, iimin, jjmin)
                                             draw_point((x1, y1), (x1, y1), 0, 0)
@@ -5397,7 +5397,7 @@ class Gcodetools(inkex.Effect):
                             # Each point is a list of [cx,cy,r,w]
                             # I have flattened it to a flat list of points.
 
-                            if self.options.engraving_draw_calculation_paths == True:
+                            if self.options.engraving_draw_calculation_paths:
                                 node = etree.SubElement(engraving_group, inkex.addNS('path', 'svg'), {
                                     "d": cubic_paths.formatCubicPath([cspm]),
                                     'style': styles["biarc_style_i"]['biarc1'],
@@ -5418,7 +5418,7 @@ class Gcodetools(inkex.Effect):
                     # LT5 if it is a path - ends here
                 # LT4 for each selected object in this layer - ends here
 
-                if cspe != []:
+                if cspe:
                     curve = self.parse_curve(cspe, layer, we, toolshape)  # convert to lines
                     self.draw_curve(curve, layer, engraving_group)
                     gcode += self.generate_gcode(curve, layer, self.options.Zsurface)
@@ -5444,7 +5444,7 @@ class Gcodetools(inkex.Effect):
             layer = self.current_layer if self.current_layer is not None else self.document.getroot()
 
         transform = self.get_transforms(layer)
-        if transform != []:
+        if transform:
             transform = self.reverse_transform(transform)
             transform = str(Transform(transform))
 
@@ -5457,7 +5457,7 @@ class Gcodetools(inkex.Effect):
                 graffiti_reference_points_count = 0
             axis = ["X", "Y", "Z", "A"][graffiti_reference_points_count % 4]
             attr = {'gcodetools': "Gcodetools graffiti reference point"}
-            if transform != []:
+            if transform:
                 attr["transform"] = transform
             g = etree.SubElement(layer, inkex.addNS('g', 'svg'), attr)
             etree.SubElement(g, inkex.addNS('path', 'svg'),
@@ -5479,7 +5479,7 @@ class Gcodetools(inkex.Effect):
                 self.error(_("Active layer already has orientation points! Remove them or select another layer!"), "active_layer_already_has_orientation_points")
 
             attr = {"gcodetools": "Gcodetools orientation group"}
-            if transform != []:
+            if transform:
                 attr["transform"] = transform
 
             orientation_group = etree.SubElement(layer, inkex.addNS('g', 'svg'), attr)
@@ -6132,7 +6132,7 @@ G01 Z1 (going to cutting z)\n""",
                     last_sp1, last_sp2 = sp1, sp2
 
                 # Add return to start_point
-                if polylines == []:
+                if not polylines:
                     continue
                 polylines += [["connect1", [[polylines[-1][1][-1][1] for i in range(3)], [start_point for i in range(3)]]]]
 
@@ -6307,7 +6307,7 @@ G01 Z1 (going to cutting z)\n""",
                         while abs(offset) <= abs(self.options.offset_radius):
                             offset_ = csp_offset(cubic_paths.parseCubicPath(path.get("d")), offset)
                             offsets_count += 1
-                            if offset_ != []:
+                            if offset_:
                                 for iii in offset_:
                                     draw_csp([iii], width=1)
                             else:

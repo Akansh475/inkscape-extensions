@@ -90,7 +90,7 @@ from inkex import cubic_paths
 from inkex.transforms import Transform
 import simpletransform
 
-inkex.localize()
+inkex.localize.localize()
 
 if sys.version_info[0] > 2:
     xrange = range

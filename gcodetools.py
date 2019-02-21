@@ -99,28 +99,6 @@ if sys.version_info[0] > 2:
 GCODETOOLS_CURRENT_VERSION = "1.7"
 
 
-def bezierslopeatt(b0_b1_b2_b3, t):
-    (bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3) = b0_b1_b2_b3
-    ax, ay, bx, by, cx, cy, x0, y0 = bezmisc.bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    dx = 3 * ax * (t ** 2) + 2 * bx * t + cx
-    dy = 3 * ay * (t ** 2) + 2 * by * t + cy
-    if dx == dy == 0:
-        dx = 6 * ax * t + 2 * bx
-        dy = 6 * ay * t + 2 * by
-        if dx == dy == 0:
-            dx = 6 * ax
-            dy = 6 * ay
-            if dx == dy == 0:
-                print_("Slope error x = {}*t^3+{}*t^2+{}*t+{}, y = {}*t^3+{}*t^2+{}*t+{},  t = {}, dx==dy==0".format(ax, bx, cx, dx, ay, by, cy, dy, t))
-                print_(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-                dx, dy = 1, 1
-
-    return dx, dy
-
-
-bezmisc.bezierslopeatt = bezierslopeatt
-
-
 def ireplace(self, old, new, count=0):
     pattern = re.compile(re.escape(old), re.I)
     return re.sub(pattern, new, self, count)

@@ -88,7 +88,6 @@ import inkex
 from inkex.bezier import bezierparameterize, bezierlength, beziertatlength
 from inkex import cubic_paths
 from inkex.transforms import Transform
-import simpletransform
 
 inkex.localize.localize()
 
@@ -3323,9 +3322,18 @@ class Gcodetools(inkex.Effect):
         trans = self.get_transforms(g)
         if trans:
             if not reverse:
-                simpletransform.applyTransformToPath(trans, csp)
+                # TODO: This was applyTransformToPath but was deprecated.   Candidate for refactoring.
+                for comp in csp:
+                    for ctl in comp:
+                        for pt in ctl:
+                            pt[0], pt[1] = Transform(trans).apply_to_point(pt)
+
             else:
-                simpletransform.applyTransformToPath(self.reverse_transform(trans), csp)
+                # TODO: This was applyTransformToPath but was deprecated.   Candidate for refactoring.
+                for comp in csp:
+                    for ctl in comp:
+                        for pt in ctl:
+                            pt[0], pt[1] = Transform(self.reverse_transform(trans)).apply_to_point(pt)
         return csp
 
     def transform_scalar(self, x, layer, reverse=False):
@@ -5144,7 +5152,13 @@ G01 Z1 (going to cutting z)\n""",
                     trans = self.get_transforms(path)
                     trans = (Transform(trans_) * Transform(trans if trans != [] else [[1., 0., 0.], [0., 1., 0.]])).matrix
                     csp = cubic_paths.parseCubicPath(path.get("d"))
-                    simpletransform.applyTransformToPath(trans, csp)
+
+                    # TODO: This was applyTransformToPath but was deprecated.   Candidate for refactoring.
+                    for comp in csp:
+                        for ctl in comp:
+                            for pt in ctl:
+                                pt[0], pt[1] = Transform(trans).apply_to_point(pt)
+
                     path_bounds = csp_simple_bound(csp)
                     trans = str(Transform(trans))
                     bounds = [min(bounds[0], path_bounds[0]), min(bounds[1], path_bounds[1]), max(bounds[2], path_bounds[2]), max(bounds[3], path_bounds[3])]

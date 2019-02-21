@@ -87,10 +87,10 @@ from lxml import etree
 import inkex
 from inkex.bezier import bezierparameterize, bezierlength, beziertatlength
 from inkex import cubic_paths
-from inkex.localize import _
 from inkex.transforms import Transform
 import simpletransform
 
+inkex.localize()
 
 if sys.version_info[0] > 2:
     xrange = range
@@ -1657,7 +1657,7 @@ class Line(object):
                 t1 = (-v1.x * (b.end.y - self.end.y) + v1.y * (b.end.x - self.end.x)) / x
                 t2 = (-v1.y * (self.st.x - b.st.x) + v1.x * (self.st.y - b.st.y)) / x
 
-                gcodetools.error((x, t1, t2), "warning")
+                gcodetools.error(str((x, t1, t2)))
                 if 0 <= t1 <= 1 and 0 <= t2 <= 1:
                     return [self.st + v1 * t1]
                 else:
@@ -2183,7 +2183,10 @@ class Postprocessor(object):
                 self.gcode += eval("re.sub({},line)".format(parameters)) + "\n"
 
         except Exception as ex:
-            self.error("Bad parameters for regexp. They should be as re.sub pattern and replacement parameters! For example: r\"G0(\\d)\", r\"G\\1\" \n(Parameters: '{}')\n {}".format(parameters, ex), "error")
+            self.error("Bad parameters for regexp. "
+                       "They should be as re.sub pattern and replacement parameters! "
+                       "For example: r\"G0(\\d)\", r\"G\\1\" \n"
+                       "(Parameters: '{}')\n {}".format(parameters, ex), "error")
 
     def remapi(self, parameters):
         self.remap(parameters, case_sensitive=True)
@@ -2234,11 +2237,11 @@ class Postprocessor(object):
                 r = re.search(r"(?i)(G02|G03)", s_wo_comments)
                 if r:
                     if plane == "g17" and scale[0] != scale[1]:
-                        self.error("Post-processor: Scale factors for X and Y axis are not the same. G02 and G03 codes will be corrupted.", "warning")
+                        self.error("Post-processor: Scale factors for X and Y axis are not the same. G02 and G03 codes will be corrupted.")
                     if plane == "g18" and scale[0] != scale[2]:
-                        self.error("Post-processor: Scale factors for X and Z axis are not the same. G02 and G03 codes will be corrupted.", "warning")
+                        self.error("Post-processor: Scale factors for X and Z axis are not the same. G02 and G03 codes will be corrupted.")
                     if plane == "g19" and scale[1] != scale[2]:
-                        self.error("Post-processor: Scale factors for Y and Z axis are not the same. G02 and G03 codes will be corrupted.", "warning")
+                        self.error("Post-processor: Scale factors for Y and Z axis are not the same. G02 and G03 codes will be corrupted.")
                     warned += [plane]
             # Transform
             for i in range(len(axis)):
@@ -2781,14 +2784,14 @@ class Gcodetools(inkex.Effect):
             self.set_markers()
             add_func = {"Round": add_arc, "Perpendicular": add_normal, "Tangent": add_tangent}[self.options.in_out_path_type]
             if self.options.in_out_path_type == "Round" and self.options.in_out_path_len > self.options.in_out_path_radius * 3 / 2 * math.pi:
-                self.error("In-out len is to big for in-out radius will cropp it to be r*3/2*pi!", "warning")
+                self.error("In-out len is to big for in-out radius will cropp it to be r*3/2*pi!")
 
             if self.selected_paths == {} and self.options.auto_select_paths:
                 self.selected_paths = self.paths
-                self.error(_("No paths are selected! Trying to work on all available paths."), "warning")
+                self.error(("No paths are selected! Trying to work on all available paths."))
 
             if self.selected_paths == {}:
-                self.error(_("Nothing is selected. Please select something."), "warning")
+                self.error(("Nothing is selected. Please select something."))
             a = self.options.plasma_prepare_corners_tolerance
             corner_tolerance = cross([1., 0.], [math.cos(a), math.sin(a)])
 
@@ -3172,7 +3175,7 @@ class Gcodetools(inkex.Effect):
                 self.footer = defaults['footer']
             self.header += self.options.unit + "\n"
         else:
-            self.error(_("Directory does not exist! Please specify existing directory at Preferences tab!"), "error")
+            self.error(("Directory does not exist! Please specify existing directory at Preferences tab!"), "error")
             return False
 
         if self.options.add_numeric_suffix_to_filename:
@@ -3202,7 +3205,7 @@ class Gcodetools(inkex.Effect):
             f = open(self.options.directory + self.options.file, "w")
             f.close()
         except:
-            self.error(_("Can not write to specified file!\n{}".format(self.options.directory + self.options.file)), "error")
+            self.error(("Can not write to specified file!\n{}".format(self.options.directory + self.options.file)), "error")
             return False
         return True
 
@@ -3349,14 +3352,14 @@ class Gcodetools(inkex.Effect):
                 if self.layers[i] in self.orientation_points:
                     break
             if self.layers[i] not in self.orientation_points:
-                self.error(_("Orientation points for '{}' layer have not been found! Please add orientation points using Orientation tab!").format(layer.get(inkex.addNS('label', 'inkscape'))), "no_orientation_points")
+                self.error(("Orientation points for '{}' layer have not been found! Please add orientation points using Orientation tab!").format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
             elif self.layers[i] in self.transform_matrix:
                 self.transform_matrix[layer] = self.transform_matrix[self.layers[i]]
                 self.Zcoordinates[layer] = self.Zcoordinates[self.layers[i]]
             else:
                 orientation_layer = self.layers[i]
                 if len(self.orientation_points[orientation_layer]) > 1:
-                    self.error(_("There are more than one orientation point groups in '{}' layer").format(orientation_layer.get(inkex.addNS('label', 'inkscape'))), "more_than_one_orientation_point_groups")
+                    self.error(("There are more than one orientation point groups in '{}' layer").format(orientation_layer.get(inkex.addNS('label', 'inkscape'))))
                 points = self.orientation_points[orientation_layer][0]
                 if len(points) == 2:
                     points += [[[(points[1][0][1] - points[0][0][1]) + points[0][0][0], -(points[1][0][0] - points[0][0][0]) + points[0][0][1]], [-(points[1][1][1] - points[0][1][1]) + points[0][1][0], points[1][1][0] - points[0][1][0] + points[0][1][1]]]]
@@ -3387,9 +3390,9 @@ class Gcodetools(inkex.Effect):
                         self.transform_matrix[layer] = [[m[j * 3 + i][0] for i in range(3)] for j in range(3)]
 
                     else:
-                        self.error(_("Orientation points are wrong! (if there are two orientation points they should not be the same. If there are three orientation points they should not be in a straight line.)"), "wrong_orientation_points")
+                        self.error(("Orientation points are wrong! (if there are two orientation points they should not be the same. If there are three orientation points they should not be in a straight line.)"), "error")
                 else:
-                    self.error(_("Orientation points are wrong! (if there are two orientation points they should not be the same. If there are three orientation points they should not be in a straight line.)"), "wrong_orientation_points")
+                    self.error(("Orientation points are wrong! (if there are two orientation points they should not be the same. If there are three orientation points they should not be in a straight line.)"), "error")
 
             self.transform_matrix_reverse[layer] = numpy.linalg.inv(self.transform_matrix[layer]).tolist()
             print_("\n Layer '{}' transformation matrixes:".format(layer.get(inkex.addNS('label', 'inkscape'))))
@@ -3415,47 +3418,23 @@ class Gcodetools(inkex.Effect):
                     csp[i][j][k] = self.transform(csp[i][j][k], layer, reverse)
         return csp
 
-    ################################################################################
-    # Errors handling function, notes are just printed into Logfile,
-    # warnings are printed into log file and warning message is displayed but
-    # extension continues working, errors causes log and execution is halted
-    # Notes, warnings and errors could be assigned to space or comma or dot
-    # sepparated strings (case is ignoreg).
-    ################################################################################
-    def error(self, s, type_="Warning"):
-        notes = "Note "
-        warnings = """
-                        Warning tools_warning
-                        orientation_warning
-                        bad_orientation_points_in_some_layers
-                        more_than_one_orientation_point_groups
-                        more_than_one_tool
-                        orientation_have_not_been_defined
-                        tool_have_not_been_defined
-                        selection_does_not_contain_paths
-                        selection_does_not_contain_paths_will_take_all
-                        selection_is_empty_will_comupe_drawing
-                        selection_contains_objects_that_are_not_paths
-                        Continue
-                        """
-        errors = """
-                        Error     
-                        wrong_orientation_points    
-                        area_tools_diameter_error
-                        no_tool_error
-                        active_layer_already_has_tool
-                        active_layer_already_has_orientation_points
-                    """
-        s = str(s)
-        if type_.lower() in re.split("[\s\n,\.]+", errors.lower()):
-            print_(s)
-            raise inkex.AbortExtension(s)
-        elif type_.lower() in re.split("[\s\n,\.]+", warnings.lower()):
+    def error(self, s, msg_type="warning"):
+        """
+        Errors handling function
+        warnings are printed into log file and warning message is displayed but
+        extension continues working,
+        errors causes log and execution is halted
+        """
+        if type_ == "warning":
             print_(s)
             inkex.errormsg(s + "\n")
-        elif type_.lower() in re.split("[\s\n,\.]+", notes.lower()):
+
+        elif type_ == "error":
             print_(s)
+            raise inkex.AbortExtension(s)
+
         else:
+            print_("Unknown message type: {}".format(type_))
             print_(s)
             raise inkex.AbortExtension(s)
 
@@ -3552,7 +3531,7 @@ class Gcodetools(inkex.Effect):
                         self.orientation_points[layer] = self.orientation_points[layer] + [points[:]] if layer in self.orientation_points else [points[:]]
                         print_("Found orientation points in '{}' layer: {}".format(layer.get(inkex.addNS('label', 'inkscape')), points))
                     else:
-                        self.error(_("Warning! Found bad orientation points in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))), "bad_orientation_points_in_some_layers")
+                        self.error(("Warning! Found bad orientation points in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))))
 
                 # Need to recognise old files ver 1.6.04 and earlier
                 elif i.get("gcodetools") == "Gcodetools tool definition" or i.get("gcodetools") == "Gcodetools tool definition":
@@ -3565,7 +3544,7 @@ class Gcodetools(inkex.Effect):
                     if point:
                         self.graffiti_reference_points[layer] = self.graffiti_reference_points[layer] + [point[:]] if layer in self.graffiti_reference_points else [point]
                     else:
-                        self.error(_("Warning! Found bad graffiti reference point in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))), "bad_orientation_points_in_some_layers")
+                        self.error(("Warning! Found bad graffiti reference point in '{}' layer. Resulting Gcode could be corrupt!").format(layer.get(inkex.addNS('label', 'inkscape'))))
 
                 elif i.tag == inkex.addNS('path', 'svg'):
                     if "gcodetools" not in i.keys():
@@ -3585,16 +3564,20 @@ class Gcodetools(inkex.Effect):
 
                 elif i.get("id") in self.svg.selected:
                     # xgettext:no-pango-format
-                    self.error(_("This extension works with Paths and Dynamic Offsets and groups of them only! All other objects will be ignored!\nSolution 1: press Path->Object to path or Shift+Ctrl+C.\nSolution 2: Path->Dynamic offset or Ctrl+J.\nSolution 3: export all contours to PostScript level 2 (File->Save As->.ps) and File->Import this file."), "selection_contains_objects_that_are_not_paths")
+                    self.error(("This extension works with Paths and Dynamic Offsets and groups of them only! "
+                                 "All other objects will be ignored!\n"
+                                 "Solution 1: press Path->Object to path or Shift+Ctrl+C.\n"
+                                 "Solution 2: Path->Dynamic offset or Ctrl+J.\n"
+                                 "Solution 3: export all contours to PostScript level 2 (File->Save As->.ps) and File->Import this file."))
 
         recursive_search(self.document.getroot(), self.document.getroot())
 
         if len(self.layers) == 1:
-            self.error(_("Document has no layers! Add at least one layer using layers panel (Ctrl+Shift+L)"), "Error")
+            self.error(("Document has no layers! Add at least one layer using layers panel (Ctrl+Shift+L)"), "error")
         root = self.document.getroot()
 
         if root in self.selected_paths or root in self.paths:
-            self.error(_("Warning! There are some paths in the root of the document, but not in any layer! Using bottom-most layer for them."), "tools_warning")
+            self.error(("Warning! There are some paths in the root of the document, but not in any layer! Using bottom-most layer for them."))
 
         if root in self.selected_paths:
             if self.layers[-1] in self.selected_paths:
@@ -3679,10 +3662,10 @@ class Gcodetools(inkex.Effect):
                         tool[key] = type(self.default_tool[key])(value)
                     except:
                         tool[key] = self.default_tool[key]
-                        self.error(_("Warning! Tool's and default tool's parameter's ({}) types are not the same ( type('{}') != type('{}') ).").format(key, value, self.default_tool[key]), "tools_warning")
+                        self.error(("Warning! Tool's and default tool's parameter's ({}) types are not the same ( type('{}') != type('{}') ).").format(key, value, self.default_tool[key]))
                 else:
                     tool[key] = value
-                    self.error(_("Warning! Tool has parameter that default tool has not ( '{}': '{}' ).").format(key, value), "tools_warning")
+                    self.error(("Warning! Tool has parameter that default tool has not ( '{}': '{}' ).").format(key, value))
         return tool
 
     def set_tool(self, layer):
@@ -3693,10 +3676,10 @@ class Gcodetools(inkex.Effect):
             if self.layers[i] != layer:
                 self.tools[layer] = self.tools[self.layers[i]]
             if len(self.tools[layer]) > 1:
-                self.error(_("Layer '{}' contains more than one tool!").format(self.layers[i].get(inkex.addNS('label', 'inkscape'))), "more_than_one_tool")
+                self.error(("Layer '{}' contains more than one tool!").format(self.layers[i].get(inkex.addNS('label', 'inkscape'))))
             return self.tools[layer]
         else:
-            self.error(_("Can not find tool for '{}' layer! Please add one with Tools library tab!").format(layer.get(inkex.addNS('label', 'inkscape'))), "no_tool_error")
+            self.error(("Can not find tool for '{}' layer! Please add one with Tools library tab!").format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
 
     ################################################################################
     #
@@ -3825,7 +3808,7 @@ class Gcodetools(inkex.Effect):
 
         if self.selected_paths == {} and self.options.auto_select_paths:
             paths = self.paths
-            self.error(_("No paths are selected! Trying to work on all available paths."), "warning")
+            self.error(("No paths are selected! Trying to work on all available paths."))
         else:
             paths = self.selected_paths
         self.check_dir()
@@ -3852,7 +3835,7 @@ class Gcodetools(inkex.Effect):
 
                 for path in paths[layer]:
                     if "d" not in path.keys():
-                        self.error(_("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"), "selection_contains_objects_that_are_not_paths")
+                        self.error(("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"))
                         continue
                     csp = cubic_paths.parseCubicPath(path.get("d"))
                     csp = self.apply_transforms(path, csp)
@@ -3963,7 +3946,7 @@ class Gcodetools(inkex.Effect):
     ################################################################################
     def dxfpoints(self):
         if self.selected_paths == {}:
-            self.error(_("Nothing is selected. Please select something to convert to drill point (dxfpoint) or clear point sign."), "warning")
+            self.error(("Nothing is selected. Please select something to convert to drill point (dxfpoint) or clear point sign."))
         for layer in self.layers:
             if layer in self.selected_paths:
                 for path in self.selected_paths[layer]:
@@ -3990,14 +3973,14 @@ class Gcodetools(inkex.Effect):
     def area_artefacts(self):
         if self.selected_paths == {} and self.options.auto_select_paths:
             paths = self.paths
-            self.error(_("No paths are selected! Trying to work on all available paths."), "warning")
+            self.error(("No paths are selected! Trying to work on all available paths."))
         else:
             paths = self.selected_paths
         for layer in paths:
             for path in paths[layer]:
                 parent = path.getparent()
                 if "d" not in path.keys():
-                    self.error(_("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"), "selection_contains_objects_that_are_not_paths")
+                    self.error(("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"))
                     continue
                 csp = cubic_paths.parseCubicPath(path.get("d"))
                 remove = []
@@ -4038,13 +4021,13 @@ class Gcodetools(inkex.Effect):
     ################################################################################
     def area(self):
         if len(self.selected_paths) <= 0:
-            self.error(_("This extension requires at least one selected path."), "warning")
+            self.error(("This extension requires at least one selected path."))
             return
         for layer in self.layers:
             if layer in self.selected_paths:
                 self.set_tool(layer)
                 if self.tools[layer][0]['diameter'] <= 0:
-                    self.error(_("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!").format(layer.get(inkex.addNS('label', 'inkscape'))), "area_tools_diameter_error")
+                    self.error(("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!").format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
 
                 for path in self.selected_paths[layer]:
                     print_(("doing path", path.get("style"), path.get("d")))
@@ -4055,7 +4038,7 @@ class Gcodetools(inkex.Effect):
                     print_(d)
                     if d is None:
                         print_("omitting non-path")
-                        self.error(_("Warning: omitting non-path"), "selection_contains_objects_that_are_not_paths")
+                        self.error(("Warning: omitting non-path"))
                         continue
                     csp = cubic_paths.parseCubicPath(d)
 
@@ -4141,13 +4124,13 @@ class Gcodetools(inkex.Effect):
         # convert degrees into rad
         self.options.area_fill_angle = self.options.area_fill_angle * math.pi / 180
         if len(self.selected_paths) <= 0:
-            self.error(_("This extension requires at least one selected path."), "warning")
+            self.error(("This extension requires at least one selected path."))
             return
         for layer in self.layers:
             if layer in self.selected_paths:
                 self.set_tool(layer)
                 if self.tools[layer][0]['diameter'] <= 0:
-                    self.error(_("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!").format(layer.get(inkex.addNS('label', 'inkscape'))), "area_tools_diameter_error")
+                    self.error(("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!").format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
                 tool = self.tools[layer][0]
                 for path in self.selected_paths[layer]:
                     lines = []
@@ -4156,7 +4139,7 @@ class Gcodetools(inkex.Effect):
                     d = path.get('d')
                     if d is None:
                         print_("omitting non-path")
-                        self.error(_("Warning: omitting non-path"), "selection_contains_objects_that_are_not_paths")
+                        self.error(("Warning: omitting non-path"))
                         continue
                     csp = cubic_paths.parseCubicPath(d)
                     csp = self.apply_transforms(path, csp)
@@ -4660,7 +4643,7 @@ class Gcodetools(inkex.Effect):
         cspe = []
         we = []
         if len(self.selected_paths) <= 0:
-            self.error(_("Please select at least one path to engrave and run again."), "warning")
+            self.error(("Please select at least one path to engrave and run again."))
             return
         if not self.check_dir():
             return
@@ -4669,7 +4652,7 @@ class Gcodetools(inkex.Effect):
         if self.options.unit == "G20 (All units in inches)":
             unit = " inches"
         elif self.options.unit != "G21 (All units in mm)":
-            self.error(_("Unknown unit selected. mm assumed"), "warning")
+            self.error(("Unknown unit selected. mm assumed"))
         print_("engraving_max_dist mm/inch", self.options.engraving_max_dist)
 
         # LT See if we can use this parameter for line and Bezier subdivision:
@@ -4690,7 +4673,7 @@ class Gcodetools(inkex.Effect):
                 if re.search('w', shape):
                     toolshape = eval('lambda w: ' + shape.strip('"'))
                 else:
-                    self.error(_("Tool '{}' has no shape. 45 degree cone assumed!").format(self.tools[layer][0]['name']), "Continue")
+                    self.error(("Tool '{}' has no shape. 45 degree cone assumed!").format(self.tools[layer][0]['name']))
                     toolshape = lambda w: w
                 # Get tool radius in pixels
                 toolr = self.tools[layer][0]['diameter'] * orientation_scale / 2
@@ -4760,12 +4743,12 @@ class Gcodetools(inkex.Effect):
                                 # I don't trust this function, so test result
                                 if abs(1 - math.hypot(nx1, ny1)) > 0.00001:
                                     print_("csp_normalised_normal error t=0", nx1, ny1, sp1, sp2)
-                                    self.error(_("csp_normalised_normal error. See log."), "warning")
+                                    self.error(("csp_normalised_normal error. See log."))
 
                                 nx0, ny0 = csp_normalized_normal(sp0, sp1, 1)
                                 if abs(1 - math.hypot(nx0, ny0)) > 0.00001:
                                     print_("csp_normalised_normal error t=1", nx0, ny0, sp1, sp2)
-                                    self.error(_("csp_normalised_normal error. See log."), "warning")
+                                    self.error(("csp_normalised_normal error. See log."))
                                 bx, by, s = bisect((nx0, ny0), (nx1, ny1))
                                 # record x,y,normal,ifCorner, sin(angle-turned/2)
                                 nlLT[-1] += [[[x0, y0], [bx, by], True, s]]
@@ -4950,7 +4933,7 @@ class Gcodetools(inkex.Effect):
             self.header += "(Material surface at Z=" + str(self.options.Zsurface) + unit + ")\n"
             self.export_gcode(gcode)
         else:
-            self.error(_("No need to engrave sharp angles."), "warning")
+            self.error(("No need to engrave sharp angles."))
 
     ################################################################################
     #
@@ -4995,7 +4978,7 @@ class Gcodetools(inkex.Effect):
             print_("Inserting orientation points")
 
             if layer in self.orientation_points:
-                self.error(_("Active layer already has orientation points! Remove them or select another layer!"), "active_layer_already_has_orientation_points")
+                self.error(("Active layer already has orientation points! Remove them or select another layer!"), "error")
 
             attr = {"gcodetools": "Gcodetools orientation group"}
             if transform:
@@ -5033,7 +5016,7 @@ class Gcodetools(inkex.Effect):
         if layer is None:
             layer = self.svg.get_current_layer() if self.svg.get_current_layer() is not None else self.document.getroot()
         if layer in self.tools:
-            self.error(_("Active layer already has a tool! Remove it or select another layer!"), "active_layer_already_has_tool")
+            self.error(("Active layer already has a tool! Remove it or select another layer!"), "error")
 
         if self.options.tools_library_type == "cylinder cutter":
             tool = {
@@ -5149,7 +5132,7 @@ G01 Z1 (going to cutting z)\n""",
     ################################################################################
     def check_tools_and_op(self):
         if len(self.svg.selected) <= 0:
-            self.error(_("Selection is empty! Will compute whole drawing."), "selection_is_empty_will_comupe_drawing")
+            self.error(("Selection is empty! Will compute whole drawing."))
             paths = self.paths
         else:
             paths = self.selected_paths
@@ -5200,7 +5183,11 @@ G01 Z1 (going to cutting z)\n""",
     # TODO Launch browser on help tab
     ################################################################################
     def help(self):
-        self.error(_("""Tutorials, manuals and support can be found at\nEnglish support forum:\n    http://www.cnc-club.ru/gcodetools\nand Russian support forum:\n    http://www.cnc-club.ru/gcodetoolsru"""), "warning")
+        self.error(("Tutorials, manuals and support can be found at\n"
+                    " English support forum:\n"
+                    "    http://www.cnc-club.ru/gcodetools\n"
+                    "and Russian support forum:\n"
+                    "    http://www.cnc-club.ru/gcodetoolsru"))
         return
 
     ################################################################################
@@ -5244,10 +5231,10 @@ G01 Z1 (going to cutting z)\n""",
         x = re.sub("^\s*([XYZxyz])\s*$", r"\1", x)
         z = re.sub("^\s*([XYZxyz])\s*$", r"\1", z)
         if x not in ["X", "Y", "Z", "x", "y", "z"] or z not in ["X", "Y", "Z", "x", "y", "z"]:
-            self.error(_("Lathe X and Z axis remap should be 'X', 'Y' or 'Z'. Exiting..."), "warning")
+            self.error(("Lathe X and Z axis remap should be 'X', 'Y' or 'Z'. Exiting..."))
             return
         if x.lower() == z.lower():
-            self.error(_("Lathe X and Z axis remap should be the same. Exiting..."), "warning")
+            self.error(("Lathe X and Z axis remap should be the same. Exiting..."))
             return
         if x.lower() + z.lower() in ["xy", "yx"]:
             gcode_plane_selection = "G17 (Using XY plane)\n"
@@ -5371,7 +5358,7 @@ G01 Z1 (going to cutting z)\n""",
     def lathe_modify_path(self):
         if self.selected_paths == {} and self.options.auto_select_paths:
             paths = self.paths
-            self.error(_("No paths are selected! Trying to work on all available paths."), "warning")
+            self.error(("No paths are selected! Trying to work on all available paths."))
         else:
             paths = self.selected_paths
 
@@ -5526,7 +5513,7 @@ G01 Z1 (going to cutting z)\n""",
             return
         if self.selected_paths == {} and self.options.auto_select_paths:
             paths = self.paths
-            self.error(_("No paths are selected! Trying to work on all available paths."), "warning")
+            self.error(("No paths are selected! Trying to work on all available paths."))
         else:
             paths = self.selected_paths
         self.tool = []
@@ -5719,7 +5706,7 @@ G01 Z1 (going to cutting z)\n""",
                 f.close()
 
             except:
-                self.error("Png module have not been found!", "warning")
+                self.error("Png module have not been found!")
 
     ################################################################################
     #
@@ -5760,17 +5747,19 @@ G01 Z1 (going to cutting z)\n""",
             self.test()
 
         elif self.options.active_tab not in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"orientation"', '"tools_library"', '"lathe"', '"offset"', '"graffiti"', '"lathe_modify_path"', '"plasma-prepare-path"']:
-            self.error(_("Select one of the action tabs - Path to Gcode, Area, Engraving, DXF points, Orientation, Offset, Lathe or Tools library.\n Current active tab id is {}".format(self.options.active_tab)), "error")
+            self.error(("Select one of the action tabs - "
+                         "Path to Gcode, Area, Engraving, DXF points, Orientation, Offset, Lathe or Tools library.\n"
+                        " Current active tab id is {}".format(self.options.active_tab)), "error")
         else:
             # Get all Gcodetools data from the scene.
             self.get_info()
             if self.options.active_tab in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"lathe"', '"graffiti"', '"plasma-prepare-path"']:
                 if self.orientation_points == {}:
-                    self.error(_("Orientation points have not been defined! A default set of orientation points has been automatically added."), "warning")
+                    self.error(("Orientation points have not been defined! A default set of orientation points has been automatically added."))
                     self.orientation(self.layers[min(1, len(self.layers) - 1)])
                     self.get_info()
                 if self.tools == {}:
-                    self.error(_("Cutting tool has not been defined! A default tool has been automatically added."), "warning")
+                    self.error(("Cutting tool has not been defined! A default tool has been automatically added."))
                     self.options.tools_library_type = "default"
                     self.tools_library(self.layers[min(1, len(self.layers) - 1)])
                     self.get_info()

@@ -2728,7 +2728,7 @@ class Gcodetools(inkex.Effect):
         if not no_headers:
             postprocessor.gcode = self.header + postprocessor.gcode + self.footer
 
-        with open(self.options.directory + self.options.file, "w") as f:
+        with open(os.path.join(self.options.directory,self.options.file), "w") as f:
             f.write(postprocessor.gcode)
 
     ################################################################################
@@ -3152,26 +3152,21 @@ class Gcodetools(inkex.Effect):
             s = si
 
     def check_dir(self):
-        if self.options.directory[-1] not in ["/", "\\"]:
-            if "\\" in self.options.directory:
-                self.options.directory += "\\"
-            else:
-                self.options.directory += "/"
         print_("Checking directory: '{}'".format(self.options.directory))
-        if (os.path.isdir(self.options.directory)):
-            if (os.path.isfile(self.options.directory + 'header')):
-                with open(self.options.directory + 'header', 'r') as f:
+        if os.path.isdir(self.options.directory):
+            if os.path.isfile(os.path.join(self.options.directory, 'header')):
+                with open(os.path.join(self.options.directory, 'header')) as f:
                     self.header = f.read()
             else:
                 self.header = defaults['header']
-            if (os.path.isfile(self.options.directory + 'footer')):
-                with open(self.options.directory + 'footer', 'r') as f:
+            if os.path.isfile(os.path.join(self.options.directory, 'footer')):
+                with open(os.path.join(self.options.directory, 'footer')) as f:
                     self.footer = f.read()
             else:
                 self.footer = defaults['footer']
             self.header += self.options.unit + "\n"
         else:
-            self.error(("Directory does not exist! Please specify existing directory at Preferences tab!"), "error")
+            self.error("Directory does not exist! Please specify existing directory at Preferences tab!", "error")
             return False
 
         if self.options.add_numeric_suffix_to_filename:
@@ -3191,14 +3186,8 @@ class Gcodetools(inkex.Effect):
             filename = name + "_" + ("0" * (4 - len(str(max_n + 1))) + str(max_n + 1)) + ext
             self.options.file = filename
 
-        if self.options.directory[-1] not in ["/", "\\"]:
-            if "\\" in self.options.directory:
-                self.options.directory += "\\"
-            else:
-                self.options.directory += "/"
-
         try:
-            with open(self.options.directory + self.options.file, "w") as f:
+            with open(os.path.join(self.options.directory, self.options.file), "w") as f:
                 pass
         except:
             self.error(("Can not write to specified file!\n{}".format(self.options.directory + self.options.file)), "error")
@@ -5697,7 +5686,7 @@ G01 Z1 (going to cutting z)\n""",
 
                 import png
                 writer = png.Writer(width=self.options.graffiti_preview_size, height=self.options.graffiti_preview_size, size=None, greyscale=False, alpha=True, bitdepth=8, palette=None, transparent=None, background=None, gamma=None, compression=None, interlace=False, bytes_per_sample=None, planes=None, colormap=None, maxval=None, chunk_limit=1048576)
-                with open(self.options.directory + self.options.file + ".png", 'wb') as f:
+                with open(os.path.join(self.options.directory, self.options.file + ".png"), 'wb') as f:
                     writer.write(f, self.graffiti_preview)
 
             except:

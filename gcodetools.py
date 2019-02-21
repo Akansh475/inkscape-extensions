@@ -68,7 +68,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # Gcodetools v 1.7
 #
 
-# standard library
+# standard libraries
 import cmath
 import copy
 import math
@@ -79,16 +79,18 @@ import sys
 import time
 from functools import partial
 
-# local library
+# 3rd party libraries
+import numpy
+from lxml import etree
+
+# local libraries
 import inkex
 import inkex.bezier as bezmisc
 from inkex import cubic_paths
-from inkex.transforms import Transform
-
 from inkex.localize import _
-import numpy
+from inkex.transforms import Transform
 import simpletransform
-from lxml import etree
+
 
 if sys.version_info[0] > 2:
     xrange = range

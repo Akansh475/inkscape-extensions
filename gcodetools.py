@@ -3190,7 +3190,7 @@ class Gcodetools(inkex.Effect):
             with open(os.path.join(self.options.directory, self.options.file), "w") as f:
                 pass
         except:
-            self.error(("Can not write to specified file!\n{}".format(self.options.directory + self.options.file)), "error")
+            self.error(("Can not write to specified file!\n{}".format(os.path.join(self.options.directory, self.options.file))), "error")
             return False
         return True
 
@@ -3301,7 +3301,7 @@ class Gcodetools(inkex.Effect):
     def get_transforms(self, g):
         root = self.document.getroot()
         trans = []
-        while (g != root):
+        while g != root:
             if 'transform' in g.keys():
                 t = g.get('transform')
                 t = Transform(t).matrix
@@ -3410,16 +3410,16 @@ class Gcodetools(inkex.Effect):
         extension continues working,
         errors causes log and execution is halted
         """
-        if type_ == "warning":
+        if msg_type == "warning":
             print_(s)
             inkex.errormsg(s + "\n")
 
-        elif type_ == "error":
+        elif msg_type == "error":
             print_(s)
             raise inkex.AbortExtension(s)
 
         else:
-            print_("Unknown message type: {}".format(type_))
+            print_("Unknown message type: {}".format(msg_type))
             print_(s)
             raise inkex.AbortExtension(s)
 
@@ -4522,7 +4522,7 @@ class Gcodetools(inkex.Effect):
                         ymin, ymax = y1 + r * ny - r, y1 + r * ny + r
                 # next ii
             # next jj
-            return (jjmin, iimin, r)
+            return jjmin, iimin, r
             # end of get_biggest
 
         def line_divide(xy0, j0, i0, xy1, j1, i1, n_xy, length):

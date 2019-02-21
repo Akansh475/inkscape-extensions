@@ -83,6 +83,8 @@ from functools import partial
 import inkex
 import inkex.bezier as bezmisc
 from inkex import cubic_paths
+from inkex.transforms import Transform
+
 from inkex.localize import _
 import numpy
 import simpletransform
@@ -1813,7 +1815,7 @@ class Biarc(object):
         transform = gcodetools.get_transforms(group)
         if transform != []:
             transform = gcodetools.reverse_transform(transform)
-            transform = simpletransform.formatTransform(transform)
+            transform = str(Transform(transform))
 
         a, b, c = [0., 0.], [1., 0.], [0., 1.]
         k = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
@@ -3558,7 +3560,7 @@ class Gcodetools(inkex.Effect):
         transform = self.get_transforms(group)
         if transform != []:
             transform = self.reverse_transform(transform)
-            transform = simpletransform.formatTransform(transform)
+            transform = str(Transform(transform))
 
         a, b, c = [0., 0.], [1., 0.], [0., 1.]
         k = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
@@ -3787,8 +3789,9 @@ class Gcodetools(inkex.Effect):
         while (g != root):
             if 'transform' in g.keys():
                 t = g.get('transform')
-                t = simpletransform.parseTransform(t)
-                trans = simpletransform.composeTransform(t, trans) if trans != [] else t
+                t = Transform(t).matrix
+                trans = (Transform(t) * Transform(trans)).matrix if trans != [] else t
+
                 print_(trans)
             g = g.getparent()
         return trans
@@ -5444,7 +5447,7 @@ class Gcodetools(inkex.Effect):
         transform = self.get_transforms(layer)
         if transform != []:
             transform = self.reverse_transform(transform)
-            transform = simpletransform.formatTransform(transform)
+            transform = str(Transform(transform))
 
         if self.options.orientation_points_count == "graffiti":
             print_(self.graffiti_reference_points)
@@ -5620,7 +5623,7 @@ G01 Z1 (going to cutting z)\n""",
 
         bg.set('d', "m -20,-20 l 400,0 0,{:f} -400,0 z ".format(y + 50))
         tool = []
-        tools_group.set("transform", simpletransform.formatTransform([[1, 0, self.view_center[0] - 150], [0, 1, self.view_center[1]]]))
+        tools_group.set("transform", str(Transform([[1, 0, self.view_center[0] - 150], [0, 1, self.view_center[1]]])))
 
     ################################################################################
     #
@@ -5655,11 +5658,11 @@ G01 Z1 (going to cutting z)\n""",
                     new.set("style", style)
 
                     trans = self.get_transforms(path)
-                    trans = simpletransform.composeTransform(trans_, trans if trans != [] else [[1., 0., 0.], [0., 1., 0.]])
+                    trans = (Transform(trans_) * Transform(trans if trans != [] else [[1., 0., 0.], [0., 1., 0.]])).matrix
                     csp = cubic_paths.parseCubicPath(path.get("d"))
                     simpletransform.applyTransformToPath(trans, csp)
                     path_bounds = csp_simple_bound(csp)
-                    trans = simpletransform.formatTransform(trans)
+                    trans = str(Transform(trans))
                     bounds = [min(bounds[0], path_bounds[0]), min(bounds[1], path_bounds[1]), max(bounds[2], path_bounds[2]), max(bounds[3], path_bounds[3])]
                     tools_bounds[layer] = [min(tools_bounds[layer][0], path_bounds[1]), max(tools_bounds[layer][1], path_bounds[3])]
 
@@ -5674,7 +5677,7 @@ G01 Z1 (going to cutting z)\n""",
                     g = copy.deepcopy(tool["self_group"])
                     g.attrib["gcodetools"] = "Check tools and OP asignment"
                     trans = [[1, 0.3, bounds[2]], [0, 0.5, tools_bounds[layer][0]]]
-                    g.set("transform", simpletransform.formatTransform(trans))
+                    g.set("transform", str(Transform(trans)))
                     group.insert(0, g)
 
     ################################################################################

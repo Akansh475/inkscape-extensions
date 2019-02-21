@@ -1511,12 +1511,11 @@ def cubic_solver(a, b, c, d):
 ################################################################################
 
 def print_(*arg):
-    f = open(options.log_filename, "ab")
-    for s in arg:
-        s = unicode(s).encode('unicode_escape') + b" "
-        f.write(s)
-    f.write(b"\n")
-    f.close()
+    with open(options.log_filename, "ab") as f:
+        for s in arg:
+            s = unicode(s).encode('unicode_escape') + b" "
+            f.write(s)
+        f.write(b"\n")
 
 
 ################################################################################
@@ -2729,9 +2728,8 @@ class Gcodetools(inkex.Effect):
         if not no_headers:
             postprocessor.gcode = self.header + postprocessor.gcode + self.footer
 
-        f = open(self.options.directory + self.options.file, "w")
-        f.write(postprocessor.gcode)
-        f.close()
+        with open(self.options.directory + self.options.file, "w") as f:
+            f.write(postprocessor.gcode)
 
     ################################################################################
     # In/out paths:
@@ -3162,15 +3160,13 @@ class Gcodetools(inkex.Effect):
         print_("Checking directory: '{}'".format(self.options.directory))
         if (os.path.isdir(self.options.directory)):
             if (os.path.isfile(self.options.directory + 'header')):
-                f = open(self.options.directory + 'header', 'r')
-                self.header = f.read()
-                f.close()
+                with open(self.options.directory + 'header', 'r') as f:
+                    self.header = f.read()
             else:
                 self.header = defaults['header']
             if (os.path.isfile(self.options.directory + 'footer')):
-                f = open(self.options.directory + 'footer', 'r')
-                self.footer = f.read()
-                f.close()
+                with open(self.options.directory + 'footer', 'r') as f:
+                    self.footer = f.read()
             else:
                 self.footer = defaults['footer']
             self.header += self.options.unit + "\n"
@@ -3202,8 +3198,8 @@ class Gcodetools(inkex.Effect):
                 self.options.directory += "/"
 
         try:
-            f = open(self.options.directory + self.options.file, "w")
-            f.close()
+            with open(self.options.directory + self.options.file, "w") as f:
+                pass
         except:
             self.error(("Can not write to specified file!\n{}".format(self.options.directory + self.options.file)), "error")
             return False
@@ -5701,9 +5697,8 @@ G01 Z1 (going to cutting z)\n""",
 
                 import png
                 writer = png.Writer(width=self.options.graffiti_preview_size, height=self.options.graffiti_preview_size, size=None, greyscale=False, alpha=True, bitdepth=8, palette=None, transparent=None, background=None, gamma=None, compression=None, interlace=False, bytes_per_sample=None, planes=None, colormap=None, maxval=None, chunk_limit=1048576)
-                f = open(self.options.directory + self.options.file + ".png", 'wb')
-                writer.write(f, self.graffiti_preview)
-                f.close()
+                with open(self.options.directory + self.options.file + ".png", 'wb') as f:
+                    writer.write(f, self.graffiti_preview)
 
             except:
                 self.error("Png module have not been found!")
@@ -5728,10 +5723,9 @@ G01 Z1 (going to cutting z)\n""",
             try:
                 if os.path.isfile(self.options.log_filename):
                     os.remove(self.options.log_filename)
-                f = open(self.options.log_filename, "a")
-                f.write("Gcodetools log file.\nStarted at {}.\n{}\n".format(time.strftime("%d.%m.%Y %H:%M:%S"), options.log_filename))
-                f.write("{} tab is active.\n".format(self.options.active_tab))
-                f.close()
+                with open(self.options.log_filename, "a") as f:
+                    f.write("Gcodetools log file.\nStarted at {}.\n{}\n".format(time.strftime("%d.%m.%Y %H:%M:%S"), options.log_filename))
+                    f.write("{} tab is active.\n".format(self.options.active_tab))
             except:
                 print_ = lambda *x: None
         else:

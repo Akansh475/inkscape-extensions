@@ -124,7 +124,6 @@ def ireplace(self, old, new, count=0):
     return re.sub(pattern, new, self, count)
 
 
-
 ################################################################################
 #
 # Styles and additional parameters
@@ -473,7 +472,6 @@ def csp_to_csp_distance(csp1, csp2, dist_bounds=(0, 1e100), tolerance=.01):
     return dist
 
 
-
 def csp_split(sp1, sp2, t=.5):
     [x1, y1], [x2, y2], [x3, y3], [x4, y4] = sp1[1], sp1[2], sp2[0], sp2[1]
     x12 = x1 + (x2 - x1) * t
@@ -776,6 +774,7 @@ def csp_segments(csp):
     if l > 0:
         seg = [seg[i] / l for i in xrange(len(seg))]
     return seg, l
+
 
 def csp_line_intersection(l1, l2, sp1, sp2):
     dd = l1[0]
@@ -1356,9 +1355,6 @@ def rotate_cw(d):
 
 def vectors_ccw(a, b):
     return a[0] * b[1] - b[0] * a[1] < 0
-
-
-
 
 
 ################################################################################
@@ -2061,8 +2057,6 @@ def csp_offset(csp, r):
 
         # Collect subpath's offset and save it to unclipped offset list.
         unclipped_offset[i] = subpath_offset[:]
-
-
 
     print_("Offsetted path in {}".format(time.time() - time_))
     time_ = time.time()
@@ -3090,6 +3084,7 @@ class Arangement_Genetic(object):
 
         for i in range(len(test_)):
             self.population[i][0] = test_[i]
+
 
 ################################################################################
 #
@@ -4768,7 +4763,6 @@ class Gcodetools(inkex.Effect):
                     csp_line = self.transform_csp(csp_line, layer, True)
 
                     self.draw_csp(csp_line, group=area_group)
-
 
     ################################################################################
     #

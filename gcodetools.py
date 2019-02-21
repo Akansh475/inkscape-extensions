@@ -4385,7 +4385,7 @@ class Gcodetools(inkex.Effect):
                         keys = range(len(curves))
                     for key in keys:
                         d = curves[key][0][1]
-                        for step in range(0, int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
+                        for step in range(0, 1 + int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
                             z = max(d, zs - abs(self.tools[layer][0]["depth step"] * (step + 1)))
 
                             gcode += gcode_comment_str("\nStart cutting path id: {}".format(curves[key][0][0]))
@@ -4399,7 +4399,7 @@ class Gcodetools(inkex.Effect):
 
                 else:  # pass by pass
                     mind = min([curve[0][1] for curve in curves])
-                    for step in range(0, int(math.ceil(abs((zs - mind) / self.tools[layer][0]["depth step"])))):
+                    for step in range(0, 1 + int(math.ceil(abs((zs - mind) / self.tools[layer][0]["depth step"])))):
                         z = zs - abs(self.tools[layer][0]["depth step"] * (step))
                         curves_ = []
                         for curve in curves:

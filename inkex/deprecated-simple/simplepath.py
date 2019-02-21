@@ -2,7 +2,9 @@
 #
 # pylint: disable=invalid-name
 #
-"""DOCSTRING"""
+"""
+Depreicated simplepath replacements with documentation
+"""
 
 from inkex.deprecated import deprecate
 from inkex.paths import Path

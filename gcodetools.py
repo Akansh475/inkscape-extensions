@@ -1414,7 +1414,7 @@ def draw_pointer(x, color="#f00", figure="cross", group=None, comment="", fill=N
         pointer_type = "Pointer"
     attrib["gcodetools"] = pointer_type
     if group is None:
-        group = options.self.current_layer
+        group = options.self.svg.get_current_layer()
     if text is not None:
         if font_size is None:
             font_size = 7
@@ -3821,7 +3821,7 @@ class Gcodetools(inkex.Effect):
             items.reverse()
             for i in items:
                 if selected:
-                    self.selected[i.get("id")] = i
+                    self.svg.selected[i.get("id")] = i
                 if i.tag == inkex.addNS("g", 'svg') and i.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
                     if i.get(inkex.addNS('label', 'inkscape')) == '3D':
                         self.my3Dlayer = i
@@ -3853,7 +3853,7 @@ class Gcodetools(inkex.Effect):
                 elif i.tag == inkex.addNS('path', 'svg'):
                     if "gcodetools" not in i.keys():
                         self.paths[layer] = self.paths[layer] + [i] if layer in self.paths else [i]
-                        if i.get("id") in self.selected:
+                        if i.get("id") in self.svg.selected:
                             self.selected_paths[layer] = self.selected_paths[layer] + [i] if layer in self.selected_paths else [i]
 
                 elif i.get("gcodetools") == "In-out reference point group":
@@ -3863,11 +3863,10 @@ class Gcodetools(inkex.Effect):
                         if j.get("gcodetools") == "In-out reference point":
                             self.in_out_reference_points.append(self.apply_transforms(j, cubic_paths.parseCubicPath(j.get("d")))[0][0][1])
 
-
                 elif i.tag == inkex.addNS("g", 'svg'):
-                    recursive_search(i, layer, (i.get("id") in self.selected))
+                    recursive_search(i, layer, (i.get("id") in self.svg.selected))
 
-                elif i.get("id") in self.selected:
+                elif i.get("id") in self.svg.selected:
                     # xgettext:no-pango-format
                     self.error(_("This extension works with Paths and Dynamic Offsets and groups of them only! All other objects will be ignored!\nSolution 1: press Path->Object to path or Shift+Ctrl+C.\nSolution 2: Path->Dynamic offset or Ctrl+J.\nSolution 3: export all contours to PostScript level 2 (File->Save As->.ps) and File->Import this file."), "selection_contains_objects_that_are_not_paths")
 
@@ -5244,7 +5243,7 @@ class Gcodetools(inkex.Effect):
     def orientation(self, layer=None):
 
         if layer is None:
-            layer = self.current_layer if self.current_layer is not None else self.document.getroot()
+            layer = self.svg.get_current_layer() if self.svg.get_current_layer() is not None else self.document.getroot()
 
         transform = self.get_transforms(layer)
         if transform:
@@ -5273,7 +5272,7 @@ class Gcodetools(inkex.Effect):
             draw_text(axis, graffiti_reference_points_count * 100 + 10, -10, group=g, gcodetools_tag="Gcodetools graffiti reference point text")
 
         elif self.options.orientation_points_count == "in-out reference point":
-            draw_pointer(group=self.current_layer, x=self.view_center, figure="arrow", pointer_type="In-out reference point", text="In-out point")
+            draw_pointer(group=self.svg.get_current_layer(), x=self.svg.get_center_position(), figure="arrow", pointer_type="In-out reference point", text="In-out point")
 
         else:
             print_("Inserting orientation points")
@@ -5286,7 +5285,7 @@ class Gcodetools(inkex.Effect):
                 attr["transform"] = transform
 
             orientation_group = etree.SubElement(layer, inkex.addNS('g', 'svg'), attr)
-            doc_height = self.unittouu(self.document.getroot().get('height'))
+            doc_height = self.svg.unittouu(self.document.getroot().get('height'))
             if self.document.getroot().get('height') == "100%":
                 doc_height = 1052.3622047
                 print_("Overruding height from 100 percents to {}".format(doc_height))
@@ -5315,7 +5314,7 @@ class Gcodetools(inkex.Effect):
     def tools_library(self, layer=None):
         # Add a tool to the drawing
         if layer is None:
-            layer = self.current_layer if self.current_layer is not None else self.document.getroot()
+            layer = self.svg.get_current_layer() if self.svg.get_current_layer() is not None else self.document.getroot()
         if layer in self.tools:
             self.error(_("Active layer already has a tool! Remove it or select another layer!"), "active_layer_already_has_tool")
 
@@ -5424,7 +5423,7 @@ G01 Z1 (going to cutting z)\n""",
             y += 15 * len(v) if key != 'name' else 20 * len(v)
 
         bg.set('d', "m -20,-20 l 400,0 0,{:f} -400,0 z ".format(y + 50))
-        tools_group.set("transform", str(Transform([[1, 0, self.view_center[0] - 150], [0, 1, self.view_center[1]]])))
+        tools_group.set("transform", str(Transform([[1, 0, self.svg.get_center_position()[0] - 150], [0, 1, self.svg.get_center_position()[1]]])))
 
     ################################################################################
     #
@@ -5432,7 +5431,7 @@ G01 Z1 (going to cutting z)\n""",
     #
     ################################################################################
     def check_tools_and_op(self):
-        if len(self.selected) <= 0:
+        if len(self.svg.selected) <= 0:
             self.error(_("Selection is empty! Will compute whole drawing."), "selection_is_empty_will_comupe_drawing")
             paths = self.paths
         else:
@@ -6133,4 +6132,4 @@ G01 Z1 (going to cutting z)\n""",
 
 if __name__ == '__main__':
     gcodetools = Gcodetools()
-    gcodetools.affect()
+    gcodetools.run()

@@ -2706,204 +2706,6 @@ class Polygon(object):
         self.draw(color="Green", width=1)
 
 
-class Arangement_Genetic(object):
-    # gene = [fittness, order, rotation, xposition]
-    # spieces = [gene]*shapes count
-    # population = [spieces]
-    def __init__(self, polygons, material_width):
-        self.population = []
-        self.genes_count = len(polygons)
-        self.polygons = polygons
-        self.width = material_width
-        self.mutation_factor = 0.1
-        self.order_mutate_factor = 1.
-        self.move_mutate_factor = 1.
-
-    def add_random_species(self, count):
-        for i in range(count):
-            specimen = []
-            order = list(range(self.genes_count))
-            random.shuffle(order)
-            for j in order:
-                specimen += [[j, random.random(), random.random()]]
-            self.population += [[None, specimen]]
-
-    def species_distance2(self, sp1, sp2):
-        # return distance, each component is normalized
-        s = 0
-        for j in range(self.genes_count):
-            s += ((sp1[j][0] - sp2[j][0]) / self.genes_count) ** 2 + ((sp1[j][1] - sp2[j][1])) ** 2 + ((sp1[j][2] - sp2[j][2])) ** 2
-        return s
-
-    def similarity(self, sp1, top):
-        # Define similarity as a simple distance between two points in len(gene)*len(spiece) -th dimensions
-        # for sp2 in top_spieces sum(|sp1-sp2|)/top_count
-        sim = 0
-        for sp2 in top:
-            sim += math.sqrt(self.species_distance2(sp1, sp2[1]))
-        return sim / len(top)
-
-    def leave_top_species(self, count):
-        self.population.sort()
-        res = [copy.deepcopy(self.population[0])]
-        del self.population[0]
-        for i in range(count - 1):
-            t = []
-            for j in range(20):
-                i1 = random.randint(0, len(self.population) - 1)
-                t += [[self.population[i1][0], i1]]
-            t.sort()
-            res += [copy.deepcopy(self.population[t[0][1]])]
-            del self.population[t[0][1]]
-        self.population = res
-
-    def populate_species(self, count, parent_count):
-        self.population.sort()
-        self.inc = 0
-        for c in range(count):
-            parent1 = random.randint(0, parent_count - 1)
-            parent2 = random.randint(0, parent_count - 1)
-            if parent1 == parent2:
-                parent2 = (parent2 + 1) % parent_count
-            parent1, parent2 = self.population[parent1][1], self.population[parent2][1]
-            genes_order = []
-            specimen = [[0, 0., 0.] for i in range(self.genes_count)]
-
-            self.incest_mutation_multiplier = 1.
-            self.incest_mutation_count_multiplier = 1.
-
-            if self.species_distance2(parent1, parent2) <= .01 / self.genes_count:
-                # OMG it's a incest :O!!!
-                # Damn you bastards!
-                self.inc += 1
-                self.incest_mutation_multiplier = 2.
-                self.incest_mutation_count_multiplier = 2.
-            else:
-                pass
-            start_gene = random.randint(0, self.genes_count)
-            end_gene = (max(1, random.randint(0, self.genes_count), int(self.genes_count / 4)) + start_gene) % self.genes_count
-            if end_gene < start_gene:
-                end_gene, start_gene = start_gene, end_gene
-                parent1, parent2 = parent2, parent1
-            for i in range(start_gene, end_gene):
-                tr = 1.  # - rotation_mutate_param
-                tp = 1.  # - xposition_mutate_param
-                specimen[i] = [parent1[i][0], parent1[i][1] * tr + parent2[i][1] * (1 - tr), parent1[i][2] * tp + parent2[i][2] * (1 - tp)]
-                genes_order += [parent1[i][0]]
-
-            for i in range(0, start_gene) + range(end_gene, self.genes_count):
-                tr = 0.  # rotation_mutate_param
-                tp = 0.  # xposition_mutate_param
-                j = i
-                while parent2[j][0] in genes_order:
-                    j = (j + 1) % self.genes_count
-                specimen[i] = [parent2[j][0], parent1[i][1] * tr + parent2[i][1] * (1 - tr), parent1[i][2] * tp + parent2[i][2] * (1 - tp)]
-                genes_order += [parent2[j][0]]
-
-            for i in range(random.randint(self.mutation_genes_count[0], self.mutation_genes_count[0] * self.incest_mutation_count_multiplier)):
-                if random.random() < self.order_mutate_factor * self.incest_mutation_multiplier:
-                    i1, i2 = random.randint(0, self.genes_count - 1), random.randint(0, self.genes_count - 1)
-                    specimen[i1][0], specimen[i2][0] = specimen[i2][0], specimen[i1][0]
-                if random.random() < self.move_mutation_factor * self.incest_mutation_multiplier:
-                    i1 = random.randint(0, self.genes_count - 1)
-                    specimen[i1][1] = (specimen[i1][1] + random.random() * TAU * self.move_mutation_multiplier) % 1.
-                    specimen[i1][2] = (specimen[i1][2] + random.random() * self.move_mutation_multiplier) % 1.
-            self.population += [[None, specimen]]
-
-    def test_spiece_drop_down(self, spiece):
-        surface = Polygon()
-        for p in spiece:
-            poly = Polygon(copy.deepcopy(self.polygons[p[0]].polygon))
-            poly.rotate(p[1] * TAU)
-            w = poly.width()
-            left = poly.bounds()[0]
-            poly.move(-left + (self.width - w) * p[2], 0)
-            poly.drop_down(surface)
-            surface.add(poly)
-        return surface
-
-    def test(self, test_function):
-        for i in range(len(self.population)):
-            if self.population[i][0] is None:
-                surface = test_function(self.population[i][1])
-                b = surface.bounds()
-                self.population[i][0] = (b[3] - b[1]) * (b[2] - b[0])
-        self.population.sort()
-
-    def test_spiece_centroid(self, spiece):
-        poly = Polygon(self.polygons[spiece[0][0]].polygon[:])
-        poly.rotate(spiece[0][1] * TAU)
-        surface = Polygon(poly.polygon)
-        for p in spiece[1:]:
-            poly = Polygon(self.polygons[p[0]].polygon[:])
-            c = surface.centroid()
-            surface.move(-c[0], -c[1])
-            c1 = poly.centroid()
-            poly.move(-c1[0], -c1[1])
-            poly.rotate(p[1] * TAU + p[2] * TAU)
-            surface.rotate(p[2] * TAU)
-            poly.drop_down(surface)
-            surface.add(poly)
-            surface.rotate(-p[2] * TAU)
-        return surface
-
-    def test_inline(self):
-        #
-        # Fast test function using weave's from scipy inline function
-        #
-        try:
-            converters is None
-        except:
-            try:
-                from scipy import weave
-                from scipy.weave import converters
-            except:
-                options.self.error("For this function Scipy is needed. See http://www.cnc-club.ru/gcodetools for details.", "error")
-
-        # Prepare vars
-        poly_, subpoly_, points_ = [], [], []
-        for poly in self.polygons:
-            p = poly.polygon
-            poly_ += [len(subpoly_), len(subpoly_) + len(p) * 2]
-            for subpoly in p:
-                subpoly_ += [len(points_), len(points_) + len(subpoly) * 2 + 2]
-                for point in subpoly:
-                    points_ += point
-                points_ += subpoly[0]  # Close subpolygon
-
-        test_ = []
-        population_ = []
-        for spiece in self.population:
-            test_.append(spiece[0] if spiece[0] is not None else -1)
-            for sp in spiece[1]:
-                population_ += sp
-
-        f = open('inline_test.c', 'r')
-        code = f.read()
-        f.close()
-
-        f = open('inline_test_functions.c', 'r')
-        functions = f.read()
-        f.close()
-
-        stdout_ = sys.stdout
-        s = ''
-        sys.stdout = s
-
-        test = weave.inline(
-                code,
-                ['points_', 'subpoly_', 'poly_', 'lp_', 'ls_', 'l_', 'lt_', 'test_', 'population_'],
-                compiler='gcc',
-                support_code=functions,
-        )
-        if s != '':
-            options.self.error(s, "warning")
-        sys.stdout = stdout_
-
-        for i in range(len(test_)):
-            self.population[i][0] = test_[i]
-
-
 ################################################################################
 #
 # Gcodetools class
@@ -3080,87 +2882,6 @@ class Gcodetools(inkex.Effect):
                         else:
                             draw_csp(res, width=1, style=styles["in_out_path_style"])
 
-    ################################################################################
-    # Arrangement: arranges paths by givven params
-    # TODO move it to the bottom
-    ################################################################################
-    def arrangement(self):
-        paths = self.selected_paths
-        polygons = []
-        time_ = time.time()
-        print_("Arrangement start at {}".format(time_))
-        original_paths = []
-        for layer in self.layers:
-            if layer in paths:
-                for path in paths[layer]:
-                    csp = cubic_paths.parseCubicPath(path.get("d"))
-                    polygon = Polygon()
-                    for subpath in csp:
-                        for sp1, sp2 in zip(subpath, subpath[1:]):
-                            polygon.add([csp_segment_convex_hull(sp1, sp2)])
-                    polygon.hull()
-                    original_paths += [path]
-                    polygons += [polygon]
-
-        print_("Paths hull computed in {} sec.".format(time.time() - time_))
-        print_("Got {} polygons having average {} edges each.".format(len(polygons), float(sum([sum([len(poly) for poly in polygon.polygon]) for polygon in polygons])) / len(polygons)))
-        time_ = time.time()
-
-        material_width = self.options.arrangement_material_width
-        population = Arangement_Genetic(polygons, material_width)
-
-        print_("Genetic algorithm start at {}".format(time_))
-        start_time = time.time()
-        time_ = time.time()
-
-        population.add_random_species(50)
-        print_("Initial population done in {}".format(time.time() - time_))
-        time_ = time.time()
-        population_count = self.options.arrangement_population_count
-        last_champ = -1
-        champions_count = 0
-
-        for i in range(population_count):
-            population.leave_top_species(20)
-            population.move_mutation_multiplier = random.random() / 2
-
-            population.order_mutation_factor = .2
-            population.move_mutation_factor = 1.
-            population.mutation_genes_count = [1, 2]
-            population.populate_species(250, 20)
-            print_("Populate done at {}".format(time.time() - time_))
-
-            if self.options.arrangement_inline_test:
-                population.test_inline()
-            else:
-                population.test(population.test_spiece_centroid)
-
-            print_("Test done at {}".format(time.time() - time_))
-            draw_new_champ = False
-            print_()
-
-            if population.population[0][0] != last_champ:
-                draw_new_champ = True
-                improve = last_champ - population.population[0][0]
-                last_champ = population.population[0][0] * 1
-
-            print_("Cicle {} done in {}".format(i, time.time() - time_))
-            time_ = time.time()
-            print_("{} incests been found".format(population.inc))
-            print_()
-
-            if i == 0 or i == population_count - 1 or draw_new_champ:
-                colors = ["blue"]
-
-                surface = population.test_spiece_centroid(population.population[0][1])
-                b = surface.bounds()
-                x, y = 400 * (champions_count % 10), 700 * int(champions_count / 10)
-                surface.move(x - b[0], y - b[1])
-                surface.draw(width=2, color=colors[0])
-                draw_text("Step = {}\nSquare = {:f}\nSquare improvement = {:f}\nTime from start = {:f}".format(i, (b[2] - b[0]) * (b[3] - b[1]), improve, time.time() - start_time), x, y - 50)
-                champions_count += 1
-
-        # Now we'll need apply transforms to original paths
 
     def __init__(self):
         super(Gcodetools, self).__init__()
@@ -3235,10 +2956,6 @@ class Gcodetools(inkex.Effect):
         add_argument("--offset-step", type=float, default=10., help="Offset step")
         add_argument("--offset-draw-clippend-path", type=inkex.inkbool, default=False, help="Draw clipped path")
         add_argument("--offset-just-get-distance", type=inkex.inkbool, default=False, help="Don't do offset just get distance")
-
-        add_argument("--arrangement-material-width", type=float, default=500, help="Materials width for arrangement")
-        add_argument("--arrangement-population-count", type=int, default=100, help="Genetic algorithm populations count")
-        add_argument("--arrangement-inline-test", type=inkex.inkbool, default=False, help="Use C-inline test (some additional packets will be needed)")
 
         add_argument("--postprocessor", default='', help="Postprocessor command.")
         add_argument("--postprocessor-custom", default='', help="Postprocessor custom command.")
@@ -6042,7 +5759,7 @@ G01 Z1 (going to cutting z)\n""",
         elif self.options.active_tab == '"test"':
             self.test()
 
-        elif self.options.active_tab not in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"orientation"', '"tools_library"', '"lathe"', '"offset"', '"arrangement"', '"graffiti"', '"lathe_modify_path"', '"plasma-prepare-path"']:
+        elif self.options.active_tab not in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"orientation"', '"tools_library"', '"lathe"', '"offset"', '"graffiti"', '"lathe_modify_path"', '"plasma-prepare-path"']:
             self.error(_("Select one of the action tabs - Path to Gcode, Area, Engraving, DXF points, Orientation, Offset, Lathe or Tools library.\n Current active tab id is {}".format(self.options.active_tab)), "error")
         else:
             # Get all Gcodetools data from the scene.
@@ -6119,8 +5836,6 @@ G01 Z1 (going to cutting z)\n""",
                 print_()
                 print_("Done in {}".format(time.time() - time_))
                 print_("Total offsets count {}".format(offsets_count))
-            elif self.options.active_tab == '"arrangement"':
-                self.arrangement()
 
             elif self.options.active_tab == '"plasma-prepare-path"':
                 self.plasma_prepare_path()

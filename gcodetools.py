@@ -351,11 +351,11 @@ def csp_segment_to_bez(sp1, sp2):
     return sp1[1:] + sp2[:2]
 
 
-def csp_to_point_distance(csp, p, dist_bounds=(0, 1e100), tolerance=.01):
+def csp_to_point_distance(csp, p, dist_bounds=(0, 1e100)):
     min_dist = [1e100, 0, 0, 0]
     for j in range(len(csp)):
         for i in range(1, len(csp[j])):
-            d = csp_seg_to_point_distance(csp[j][i - 1], csp[j][i], p, sample_points=5, tolerance=.01)
+            d = csp_seg_to_point_distance(csp[j][i - 1], csp[j][i], p, sample_points=5)
             if d[0] < dist_bounds[0]:
                 return [d[0], j, i, d[1]]
             else:
@@ -364,7 +364,7 @@ def csp_to_point_distance(csp, p, dist_bounds=(0, 1e100), tolerance=.01):
     return min_dist
 
 
-def csp_seg_to_point_distance(sp1, sp2, p, sample_points=5, tolerance=.01):
+def csp_seg_to_point_distance(sp1, sp2, p, sample_points=5):
     ax, ay, bx, by, cx, cy, dx, dy = csp_parameterize(sp1, sp2)
     dx, dy = dx - p[0], dy - p[1]
     if sample_points < 2:
@@ -392,21 +392,21 @@ def csp_seg_to_point_distance(sp1, sp2, p, sample_points=5, tolerance=.01):
 
 def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=(0, 1e100), sample_points=5, tolerance=.01):
     # check the ending points first
-    dist = csp_seg_to_point_distance(sp1, sp2, sp3[1], sample_points, tolerance)
+    dist = csp_seg_to_point_distance(sp1, sp2, sp3[1], sample_points)
     dist += [0.]
     if dist[0] <= dist_bounds[0]:
         return dist
-    d = csp_seg_to_point_distance(sp1, sp2, sp4[1], sample_points, tolerance)
+    d = csp_seg_to_point_distance(sp1, sp2, sp4[1], sample_points)
     if d[0] < dist[0]:
         dist = d + [1.]
         if dist[0] <= dist_bounds[0]:
             return dist
-    d = csp_seg_to_point_distance(sp3, sp4, sp1[1], sample_points, tolerance)
+    d = csp_seg_to_point_distance(sp3, sp4, sp1[1], sample_points)
     if d[0] < dist[0]:
         dist = [d[0], 0., d[1]]
         if dist[0] <= dist_bounds[0]:
             return dist
-    d = csp_seg_to_point_distance(sp3, sp4, sp2[1], sample_points, tolerance)
+    d = csp_seg_to_point_distance(sp3, sp4, sp2[1], sample_points)
     if d[0] < dist[0]:
         dist = [d[0], 1., d[1]]
         if dist[0] <= dist_bounds[0]:
@@ -1426,7 +1426,7 @@ def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=N
         span.text = str(s)
 
 
-def draw_csp(csp, stroke="#f00", fill="none", comment="", width=0.354, group=None, style=None, gcodetools_tag=None):
+def draw_csp(csp, stroke="#f00", fill="none", comment="", width=0.354, group=None, style=None):
     if style is None:
         style = "fill:{};fill-opacity:1;stroke:{};stroke-width:{}".format(fill, stroke, width)
     attributes = {'d': cubic_paths.formatCubicPath(csp),
@@ -2183,7 +2183,7 @@ def csp_offset(csp, r):
 
     r1, r2 = ((0.99 * r) ** 2, (1.01 * r) ** 2) if abs(r * .01) < 1 else ((abs(r) - 1) ** 2, (abs(r) + 1) ** 2)
     for s in joined_result[:]:
-        dist = csp_to_point_distance(original_csp, s[int(len(s) / 2)][1], dist_bounds=[r1, r2], tolerance=.000001)
+        dist = csp_to_point_distance(original_csp, s[int(len(s) / 2)][1], dist_bounds=[r1, r2])
         if not r1 < dist[0] < r2:
             joined_result.remove(s)
             if options.offset_draw_clippend_path:
@@ -3186,7 +3186,7 @@ class Gcodetools(inkex.Effect):
                                 if point_to_point_d2(subpath[0][1], subpath[-1][1]) < 1.e-10:
                                     d = [1e100, 1, 1, 1.]
                                     for p in self.in_out_reference_points:
-                                        d1 = csp_to_point_distance([subpath], p, dist_bounds=[0, max_dist], tolerance=.01)
+                                        d1 = csp_to_point_distance([subpath], p, dist_bounds=[0, max_dist])
                                         if d1[0] < d[0]:
                                             d = d1[:]
                                             p_ = p
@@ -4267,7 +4267,7 @@ class Gcodetools(inkex.Effect):
                 gcode += "(drilling dxfpoint)\nG00 Z{:f}\nG00 X{:f} Y{:f}\nG01 Z{:f} F{:f}\nG04 P{:f}\nG00 Z{:f}\n".format(self.options.Zsafe, point[0], point[1], self.Zcoordinates[layer][1], self.tools[layer][0]["penetration feed"], 0.2, self.options.Zsafe)
             return gcode
 
-        def get_path_properties(node, recursive=True, tags=None):
+        def get_path_properties(node, tags=None):
             if tags is None:
                 tags = {inkex.addNS('desc', 'svg'): "Description",
                         inkex.addNS('title', 'svg'): "Title"}

@@ -744,18 +744,6 @@ def cspseglength(sp1, sp2, tolerance=0.01):
     return bezierlength(bez, tolerance)
 
 
-def csp_segments(csp):
-    l, seg = 0, [0]
-    for sp in csp:
-        for i in xrange(1, len(sp)):
-            l += cspseglength(sp[i - 1], sp[i])
-            seg += [l]
-
-    if l > 0:
-        seg = [seg[i] / l for i in xrange(len(seg))]
-    return seg, l
-
-
 def csp_line_intersection(l1, l2, sp1, sp2):
     dd = l1[0]
     cc = l2[0] - l1[0]

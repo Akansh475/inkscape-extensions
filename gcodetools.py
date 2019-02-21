@@ -927,7 +927,6 @@ def csp_from_arc(start, end, center, r, slope_st):
 def point_to_arc_distance(p, arc):
     # Distance calculattion from point to arc
     P0, P2, c, a = arc
-    dist = None
     p = P(p)
     r = (P0 - c).mag()
     if r > 0:
@@ -2031,13 +2030,11 @@ def csp_offset(csp, r):
     ############################################################################
     # Create offsets for all segments in the path. And join them together inside each subpath.
     unclipped_offset = [[] for i in xrange(csp_len)]
-    offsets_original = [[] for i in xrange(csp_len)]
-    join_points = [[] for i in xrange(csp_len)]
+
     intersection = [[] for i in xrange(csp_len)]
     for i in xrange(csp_len):
         subpath = csp[i]
         subpath_offset = []
-        last_offset_len = 0
         for sp1, sp2 in zip(subpath, subpath[1:]):
             segment_offset = csp_offset_segment(sp1, sp2, r)
             if not subpath_offset:
@@ -2178,7 +2175,6 @@ def csp_offset(csp, r):
             if (minx[0] - maxx[0]) ** 2 + (miny[1] - maxy[1]) ** 2 < 0.1:
                 joined_result.remove(s)
     print_("Clipped and joined path in {}".format(time.time() - time_))
-    time_ = time.time()
 
     ########################################################################
     # Now to the Dummy cliping: remove parts from split offset if their
@@ -2945,7 +2941,6 @@ class Arangement_Genetic(object):
             if parent1 == parent2:
                 parent2 = (parent2 + 1) % parent_count
             parent1, parent2 = self.population[parent1][1], self.population[parent2][1]
-            i1, i2 = 0, 0
             genes_order = []
             specimen = [[0, 0., 0.] for i in range(self.genes_count)]
 
@@ -2993,7 +2988,6 @@ class Arangement_Genetic(object):
     def test_spiece_drop_down(self, spiece):
         surface = Polygon()
         for p in spiece:
-            time_ = time.time()
             poly = Polygon(copy.deepcopy(self.polygons[p[0]].polygon))
             poly.rotate(p[1] * TAU)
             w = poly.width()
@@ -3004,7 +2998,6 @@ class Arangement_Genetic(object):
         return surface
 
     def test(self, test_function):
-        time_ = time.time()
         for i in range(len(self.population)):
             if self.population[i][0] is None:
                 surface = test_function(self.population[i][1])
@@ -3059,8 +3052,6 @@ class Arangement_Genetic(object):
             test_.append(spiece[0] if spiece[0] is not None else -1)
             for sp in spiece[1]:
                 population_ += sp
-
-        lp_, ls_, l_, lt_ = len(poly_), len(subpoly_), len(points_), len(test_)
 
         f = open('inline_test.c', 'r')
         code = f.read()
@@ -3270,7 +3261,6 @@ class Gcodetools(inkex.Effect):
     ################################################################################
     def arrangement(self):
         paths = self.selected_paths
-        surface = Polygon()
         polygons = []
         time_ = time.time()
         print_("Arrangement start at {}".format(time_))
@@ -3301,7 +3291,6 @@ class Gcodetools(inkex.Effect):
         population.add_random_species(50)
         print_("Initial population done in {}".format(time.time() - time_))
         time_ = time.time()
-        pop = copy.deepcopy(population)
         population_count = self.options.arrangement_population_count
         last_champ = -1
         champions_count = 0
@@ -3593,7 +3582,6 @@ class Gcodetools(inkex.Effect):
                             a = TAU + a
                     r = math.sqrt((sp[0] - c[0]) ** 2 + (sp[1] - c[1]) ** 2)
                     a_st = (math.atan2(sp[0] - c[0], - (sp[1] - c[1])) - math.pi / 2) % (math.pi * 2)
-                    st = style['biarc{}'.format(arcn % 2)][:]
                     if a > 0:
                         a_end = a_st + a
                         st = style['biarc{}'.format(arcn % 2)]
@@ -4237,7 +4225,6 @@ class Gcodetools(inkex.Effect):
             ]
             minimal_way = []
             minimal_len = None
-            minimal_way_type = None
             for w in ways:
                 tpoints = points[:]
                 cw = []
@@ -4249,7 +4236,6 @@ class Gcodetools(inkex.Effect):
                 if minimal_len is None or curlen < minimal_len:
                     minimal_len = curlen
                     minimal_way = cw
-                    minimal_way_type = w
 
             return minimal_way
 
@@ -4469,7 +4455,6 @@ class Gcodetools(inkex.Effect):
         for layer in paths:
             for path in paths[layer]:
                 parent = path.getparent()
-                style = path.get("style") if "style" in path.keys() else ""
                 if "d" not in path.keys():
                     self.error(_("Warning: One or more paths do not have 'd' parameter, try to Ungroup (Ctrl+Shift+G) and Object to Path (Ctrl+Shift+C)!"), "selection_contains_objects_that_are_not_paths")
                     continue
@@ -5137,7 +5122,6 @@ class Gcodetools(inkex.Effect):
         # end of subfunction definitions. engraving() starts here:
         gcode = ''
         r, w, wmax = 0, 0, 0  # theoretical and tool-radius-limited radii in pixels
-        x1, y1, nx, ny = 0, 0, 0, 0
         cspe = []
         we = []
         if len(self.selected_paths) <= 0:
@@ -5621,7 +5605,6 @@ G01 Z1 (going to cutting z)\n""",
             y += 15 * len(v) if key != 'name' else 20 * len(v)
 
         bg.set('d', "m -20,-20 l 400,0 0,{:f} -400,0 z ".format(y + 50))
-        tool = []
         tools_group.set("transform", str(Transform([[1, 0, self.view_center[0] - 150], [0, 1, self.view_center[1]]])))
 
     ################################################################################
@@ -5648,7 +5631,6 @@ G01 Z1 (going to cutting z)\n""",
                 self.set_tool(layer)
                 tool = self.tools[layer][0]
                 tools_bounds[layer] = tools_bounds[layer] if layer in tools_bounds else [float("inf"), float("-inf")]
-                style = str(inkex.Style(tool["style"]))
                 for path in paths[layer]:
                     style = "fill:{}; fill-opacity:{}; stroke:#000044; stroke-width:1; marker-mid:url(#CheckToolsAndOPMarker);".format(tool["style"]["fill"] if "fill" in tool["style"] else "#00ff00",
                                                                                                                                        tool["style"]["fill-opacity"] if "fill-opacity" in tool["style"] else "0.5")
@@ -5866,8 +5848,6 @@ G01 Z1 (going to cutting z)\n""",
                     new_csp = []
                     for subpath in csp:
                         orientation = subpath[-1][1][0] > subpath[0][1][0]
-                        last_n = None
-                        last_o = 0
                         new_subpath = []
 
                         # Split segment at x' and y' == 0

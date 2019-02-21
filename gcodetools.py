@@ -350,7 +350,7 @@ def csp_segment_to_bez(sp1, sp2):
     return sp1[1:] + sp2[:2]
 
 
-def csp_to_point_distance(csp, p, dist_bounds=[0, 1e100], tolerance=.01):
+def csp_to_point_distance(csp, p, dist_bounds=(0, 1e100), tolerance=.01):
     min_dist = [1e100, 0, 0, 0]
     for j in range(len(csp)):
         for i in range(1, len(csp[j])):
@@ -389,7 +389,7 @@ def csp_seg_to_point_distance(sp1, sp2, p, sample_points=5, tolerance=.01):
     return d
 
 
-def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=[0, 1e100], sample_points=5, tolerance=.01):
+def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=(0, 1e100), sample_points=5, tolerance=.01):
     # check the ending points first
     dist = csp_seg_to_point_distance(sp1, sp2, sp3[1], sample_points, tolerance)
     dist += [0.]
@@ -452,7 +452,7 @@ def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=[0, 1e100], samp
     return dist
 
 
-def csp_to_csp_distance(csp1, csp2, dist_bounds=[0, 1e100], tolerance=.01):
+def csp_to_csp_distance(csp1, csp2, dist_bounds=(0, 1e100), tolerance=.01):
     dist = [1e100, 0, 0, 0, 0, 0, 0]
     for i1 in range(len(csp1)):
         for j1 in range(1, len(csp1[i1])):
@@ -4284,7 +4284,10 @@ class Gcodetools(inkex.Effect):
                 gcode += "(drilling dxfpoint)\nG00 Z{:f}\nG00 X{:f} Y{:f}\nG01 Z{:f} F{:f}\nG04 P{:f}\nG00 Z{:f}\n".format(self.options.Zsafe, point[0], point[1], self.Zcoordinates[layer][1], self.tools[layer][0]["penetration feed"], 0.2, self.options.Zsafe)
             return gcode
 
-        def get_path_properties(node, recursive=True, tags={inkex.addNS('desc', 'svg'): "Description", inkex.addNS('title', 'svg'): "Title"}):
+        def get_path_properties(node, recursive=True, tags=None):
+            if tags is None:
+                tags = {inkex.addNS('desc', 'svg'): "Description",
+                        inkex.addNS('title', 'svg'): "Title"}
             res = {}
             done = False
             root = self.document.getroot()

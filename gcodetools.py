@@ -2158,7 +2158,7 @@ def csp_offset(csp, r):
         if not clip:
             result += [s1[:]]
         elif options.offset_draw_clippend_path:
-            draw_csp([s1], color="Red", width=.1)
+            draw_csp([s1], width=.1)
             draw_pointer(csp_at_t(s2[-2], s2[-1], 1.) +
                          (P(csp_at_t(s2[-2], s2[-1], 1.)) + P(csp_normalized_normal(s2[-2], s2[-1], 1.)) * 10).to_list(), "Green", "line")
             draw_pointer(csp_at_t(s1[0], s1[1], 0.) +
@@ -2172,7 +2172,7 @@ def csp_offset(csp, r):
         if csp_subpaths_end_to_start_distance2(s, s) > 0.001:
             # Remove open parts
             if options.offset_draw_clippend_path:
-                draw_csp([s], color="Orange", width=1)
+                draw_csp([s], width=1)
                 draw_pointer(s[0][1], comment=csp_subpaths_end_to_start_distance2(s, s))
                 draw_pointer(s[-1][1], comment=csp_subpaths_end_to_start_distance2(s, s))
             joined_result.remove(s)
@@ -2713,7 +2713,7 @@ class Polygon(object):
 
     def draw(self, color="#075", width=.1, group=None):
         csp = [csp_subpath_line_to([], poly + [poly[0]]) for poly in self.polygon]
-        draw_csp(csp, color=color, width=width, group=group)
+        draw_csp(csp, width=width, group=group)
 
     def add(self, add):
         if type(add) == type([]):
@@ -6167,7 +6167,7 @@ G01 Z1 (going to cutting z)\n""",
                     if self.options.graffiti_create_linearization_preview:
                         t += 1
                         csp = [[polyline[i], polyline[i], polyline[i]] for i in range(len(polyline))]
-                        draw_csp(self.transform_csp([csp], layer, reverse=True), color="#00cc00;" if polyline_[0] == 'draw' else "#ff5555;")
+                        draw_csp(self.transform_csp([csp], layer, reverse=True))
 
                     # Export polyline to gcode
                     # we are making trnsform from XYZA coordinates to R1...Rn
@@ -6313,7 +6313,7 @@ G01 Z1 (going to cutting z)\n""",
                             offsets_count += 1
                             if offset_ != []:
                                 for iii in offset_:
-                                    draw_csp([iii], color="Green", width=1)
+                                    draw_csp([iii], width=1)
                             else:
                                 print_("------------Reached empty offset at radius {}".format(offset))
                                 break

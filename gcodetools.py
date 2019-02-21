@@ -4739,12 +4739,6 @@ class Gcodetools(inkex.Effect):
                         else:
                             i += 1
 
-                    # if we've used spiral method we'll try to save the order of cutting
-                    do_not_change_order = self.options.area_fill_method == 'spiral'
-                    # now let's try connect split lines
-                    # while len(splitted_line)>0 :
-                    # TODO
-
                     # and apply back transrormations to draw them
                     csp_line = csp_from_polyline(splitted_line)
                     csp_line = self.transform_csp(csp_line, layer, True)

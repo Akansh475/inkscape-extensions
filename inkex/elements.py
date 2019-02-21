@@ -227,3 +227,8 @@ class TextPath(BaseElement):
 class Tspan(BaseElement):
     """A tspan text element"""
     tag_name = 'tspan'
+
+class Marker(BaseElement):
+    """The <marker> element defines the graphic that is to be used for drawing arrowheads
+     or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
+    tag_name = 'marker'

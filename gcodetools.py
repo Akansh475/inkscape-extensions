@@ -5739,12 +5739,10 @@ G01 Z1 (going to cutting z)\n""",
         if self.options.active_tab == '"help"':
             self.help()
             return
+
         elif self.options.active_tab == '"about"':
             self.help()
             return
-
-        elif self.options.active_tab == '"test"':
-            self.test()
 
         elif self.options.active_tab not in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"orientation"', '"tools_library"', '"lathe"', '"offset"', '"graffiti"', '"lathe_modify_path"', '"plasma-prepare-path"']:
             self.error(("Select one of the action tabs - "

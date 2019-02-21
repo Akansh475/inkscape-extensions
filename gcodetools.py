@@ -1597,65 +1597,6 @@ class P(object):
         return self.x * self.x + self.y * self.y
 
 
-class Arc(object):
-    def __init__(self, st, end, c, a):
-        self.st = P(st)
-        self.end = P(end)
-        self.c = P(c)
-        self.r = (P(st) - P(c)).mag()
-        self.a = ((self.st - self.c).angle() - (self.end - self.c).angle()) % TAU
-        if a < 0:
-            self.a -= TAU
-
-    def offset(self, r):
-        if self.a > 0:
-            r += self.r
-        else:
-            r = self.r - r
-
-        if self.r != 0:
-            self.st = self.c + (self.st - self.c) * r / self.r
-            self.end = self.c + (self.end - self.c) * r / self.r
-            self.r = r
-
-    def length(self):
-        return abs(self.a * self.r)
-
-    def draw(self, group, style, layer, transform, num=0, reverse_angle=1):
-        st = P(gcodetools.transform(self.st.to_list(), layer, True))
-        c = P(gcodetools.transform(self.c.to_list(), layer, True))
-        a = self.a * reverse_angle
-        r = (st - c)
-        a_st = (math.atan2(r.x, -r.y) - math.pi / 2) % (math.pi * 2)
-        r = r.mag()
-        if a < 0:
-            a_end = a_st + a
-            style = style['biarc{}'.format(num % 2)]
-        else:
-            a_end = a_st
-            a_st = a_st + a
-            style = style['biarc{}_r'.format(num % 2)]
-
-        attr = {
-            'style': style,
-            inkex.addNS('cx', 'sodipodi'): str(c.x),
-            inkex.addNS('cy', 'sodipodi'): str(c.y),
-            inkex.addNS('rx', 'sodipodi'): str(r),
-            inkex.addNS('ry', 'sodipodi'): str(r),
-            inkex.addNS('start', 'sodipodi'): str(a_st),
-            inkex.addNS('end', 'sodipodi'): str(a_end),
-            inkex.addNS('open', 'sodipodi'): 'true',
-            inkex.addNS('type', 'sodipodi'): 'arc',
-            "gcodetools": "Preview",
-        }
-        if transform:
-            attr["transform"] = transform
-        etree.SubElement(group, inkex.addNS('path', 'svg'), attr)
-
-    def intersect(self, b):
-        return []
-
-
 class Line(object):
     def __init__(self, st, end):
         if st.__class__ == P:

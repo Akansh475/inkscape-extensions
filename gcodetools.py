@@ -85,7 +85,7 @@ from lxml import etree
 
 # local libraries
 import inkex
-import inkex.bezier as bezmisc
+from inkex.bezier import bezierparameterize, bezierlength, beziertatlength
 from inkex import cubic_paths
 from inkex.localize import _
 from inkex.transforms import Transform
@@ -477,7 +477,7 @@ def csp_true_bounds(csp):
     maxy = [float("-inf"), 0, 0, 0]
     for i in range(len(csp)):
         for j in range(1, len(csp[i])):
-            ax, ay, bx, by, cx, cy, x0, y0 = bezmisc.bezierparameterize((csp[i][j - 1][1], csp[i][j - 1][2], csp[i][j][0], csp[i][j][1]))
+            ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize((csp[i][j - 1][1], csp[i][j - 1][2], csp[i][j][0], csp[i][j][1]))
             roots = cubic_solver(0, 3 * ax, 2 * bx, cx) + [0, 1]
             for root in roots:
                 if type(root) is complex and abs(root.imag) < 1e-10:
@@ -514,8 +514,8 @@ def csp_segments_intersection(sp1, sp2, sp3, sp4):
     a, b = csp_segment_to_bez(sp1, sp2), csp_segment_to_bez(sp3, sp4)
 
     def polish_intersection(a, b, ta, tb, tolerance=INTERSECTION_TOLERANCE):
-        ax, ay, bx, by, cx, cy, dx, dy = bezmisc.bezierparameterize(a)
-        ax1, ay1, bx1, by1, cx1, cy1, dx1, dy1 = bezmisc.bezierparameterize(b)
+        ax, ay, bx, by, cx, cy, dx, dy = bezierparameterize(a)
+        ax1, ay1, bx1, by1, cx1, cy1, dx1, dy1 = bezierparameterize(b)
         i = 0
         F, F1 = [.0, .0], [[.0, .0], [.0, .0]]
         while i == 0 or (abs(F[0]) ** 2 + abs(F[1]) ** 2 > tolerance and i < 10):
@@ -669,7 +669,7 @@ def csp_max_curvature(sp1, sp2):
 
 
 def csp_curvature_at_t(sp1, sp2, t, depth=3):
-    ax, ay, bx, by, cx, cy, dx, dy = bezmisc.bezierparameterize(csp_segment_to_bez(sp1, sp2))
+    ax, ay, bx, by, cx, cy, dx, dy = bezierparameterize(csp_segment_to_bez(sp1, sp2))
 
     # curvature = (x'y''-y'x'') / (x'^2+y'^2)^1.5
 
@@ -735,13 +735,13 @@ def csp_at_t(sp1, sp2, t):
 
 def csp_at_length(sp1, sp2, l=0.5, tolerance=0.01):
     bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
-    t = bezmisc.beziertatlength(bez, l, tolerance)
+    t = beziertatlength(bez, l, tolerance)
     return csp_at_t(sp1, sp2, t)
 
 
 def cspseglength(sp1, sp2, tolerance=0.01):
     bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
-    return bezmisc.bezierlength(bez, tolerance)
+    return bezierlength(bez, tolerance)
 
 
 def csp_segments(csp):
@@ -770,7 +770,7 @@ def csp_line_intersection(l1, l2, sp1, sp2):
         coef1 = 1
         coef2 = aa / cc
     bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
-    ax, ay, bx, by, cx, cy, x0, y0 = bezmisc.bezierparameterize(bez)
+    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(bez)
     a = coef1 * ay - coef2 * ax
     b = coef1 * by - coef2 * bx
     c = coef1 * cy - coef2 * cx
@@ -1081,7 +1081,7 @@ def csp_reverse(csp):
 
 
 def csp_normalized_slope(sp1, sp2, t):
-    ax, ay, bx, by, cx, cy, dx, dy = bezmisc.bezierparameterize((sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:]))
+    ax, ay, bx, by, cx, cy, dx, dy = bezierparameterize((sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:]))
     if sp1[1] == sp2[1] == sp1[2] == sp2[0]:
         return [1., 0.]
     f1x = 3 * ax * t * t + 2 * bx * t + cx
@@ -1124,7 +1124,7 @@ def csp_normalized_normal(sp1, sp2, t):
 
 
 def csp_parameterize(sp1, sp2):
-    return bezmisc.bezierparameterize(csp_segment_to_bez(sp1, sp2))
+    return bezierparameterize(csp_segment_to_bez(sp1, sp2))
 
 
 def csp_concat_subpaths(*s):

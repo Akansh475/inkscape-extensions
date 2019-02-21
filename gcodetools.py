@@ -224,7 +224,7 @@ def gcode_comment_str(s, replace_new_line=False):
 
 
 def csp_from_polyline(line):
-    return [[[point[:] for k in range(3)] for point in subline] for subline in line]
+    return [[[point[:] for _ in range(3)] for point in subline] for subline in line]
 
 
 def csp_remove_zerro_segments(csp, tolerance=1e-7):
@@ -305,7 +305,7 @@ def csp_close_all_subpaths(csp, tolerance=0.000001):
     for i in range(len(csp)):
         if point_to_point_d2(csp[i][0][1], csp[i][-1][1]) > tolerance ** 2:
             csp[i][-1][2] = csp[i][-1][1][:]
-            csp[i] += [[csp[i][0][1][:] for j in range(3)]]
+            csp[i] += [[csp[i][0][1][:] for _ in range(3)]]
         else:
             if csp[i][0][1] != csp[i][-1][1]:
                 csp[i][-1][1] = csp[i][0][1][:]
@@ -5555,7 +5555,7 @@ G01 Z1 (going to cutting z)\n""",
                         minx, miny, maxx, maxy = min(minx, bounds[0]), min(miny, bounds[1]), max(maxx, bounds[2]), max(maxy, bounds[3])
 
         if self.options.graffiti_create_preview:
-            self.graffiti_preview = list([[255] * (4 * self.options.graffiti_preview_size) for i in range(self.options.graffiti_preview_size)])
+            self.graffiti_preview = list([[255] * (4 * self.options.graffiti_preview_size) for _ in range(self.options.graffiti_preview_size)])
             self.graffiti_preview_transform = [minx, miny, maxx, maxy]
 
         for layer in self.layers:
@@ -5566,8 +5566,8 @@ G01 Z1 (going to cutting z)\n""",
                     start_point = [float(r.group(1)), float(r.group(2))]
                 else:
                     start_point = [0., 0.]
-                last_sp1 = [[start_point[0], start_point[1] - 10] for i in range(3)]
-                last_sp2 = [start_point for i in range(3)]
+                last_sp1 = [[start_point[0], start_point[1] - 10] for _ in range(3)]
+                last_sp2 = [start_point for _ in range(3)]
 
                 self.set_tool(layer)
                 self.tool = self.tools[layer][0]
@@ -5635,7 +5635,7 @@ G01 Z1 (going to cutting z)\n""",
                 # Add return to start_point
                 if not polylines:
                     continue
-                polylines += [["connect1", [[polylines[-1][1][-1][1] for i in range(3)], [start_point for i in range(3)]]]]
+                polylines += [["connect1", [[polylines[-1][1][-1][1] for _ in range(3)], [start_point for _ in range(3)]]]]
 
                 # Make polilynes from polylines. They are still csp.
                 for i in range(len(polylines)):

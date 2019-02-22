@@ -4433,9 +4433,13 @@ class Gcodetools(inkex.Effect):
     # parent = self.selected_paths[layer][0].getparent()
     ################################################################################
     def engraving(self):
-        global cspm, wl
-        global nlLT, i, j
-        global gcode_3Dleft, gcode_3Dright
+        global cspm
+        global wl
+        global nlLT
+        global i
+        global j
+        global gcode_3Dleft
+        global gcode_3Dright
         global max_dist  # minimum of tool radius and user's requested maximum distance
         global eye_dist
         eye_dist = 100  # 3D constant. Try varying it for your eyes
@@ -4632,7 +4636,11 @@ class Gcodetools(inkex.Effect):
             """
             (x1, y1) = nxy1
             (nx, ny) = nxy2
-            global max_dist, nlLT, i, j
+            global max_dist
+            global nlLT
+            global i
+            global j
+
             n1 = nlLT[j][i - 1]  # current node
             jjmin = -1
             iimin = -1
@@ -4707,7 +4715,10 @@ class Gcodetools(inkex.Effect):
             (x0, y0) = xy0
             (x1, y1) = xy1
             (nx, ny) = n_xy
-            global nlLT, i, j, lmin
+            global nlLT
+            global i
+            global j
+            global lmin
             x2 = (x0 + x1) / 2
             y2 = (y0 + y1) / 2
             j2, i2, r2 = get_biggest((x2, y2), (nx, ny))
@@ -4724,10 +4735,11 @@ class Gcodetools(inkex.Effect):
             """LT Save this point and delete previous one if linear
 
             The point is, we generate tons of points but many may be in a straight 3D line.
-            There is no benefit in saving the imtermediate points.
+            There is no benefit in saving the intermediate points.
             """
             (x, y) = xy
-            global wl, cspm
+            global wl
+            global cspm
             x = round(x, 4)  # round to 4 decimals
             y = round(y, 4)  # round to 4 decimals
             w = round(w, 4)  # round to 4 decimals
@@ -4757,12 +4769,13 @@ class Gcodetools(inkex.Effect):
             """LT Draw this point as a circle with a 1px dot in the middle (x,y)
             and a 3D line from (x0,y0) down to x,y. 3D line thickness should be t/2
 
-            Note that points that are subsequently erased as being unneeded do get
+            Note that points tht are subsequently erased as being unneeded do get
             displayed, but this helps the user see the total area covered.
             """
             (x0, y0) = xy0
             (x, y) = xy
-            global gcode_3Dleft, gcode_3Dright
+            global gcode_3Dleft
+            global gcode_3Dright
             if self.options.engraving_draw_calculation_paths:
                 etree.SubElement(engraving_group, inkex.addNS('path', 'svg'),
                                  {"gcodetools": "Engraving calculation toolpath", 'style': "fill:#ff00ff; fill-opacity:0.46; stroke:#000000; stroke-width:0.1;", inkex.addNS('cx', 'sodipodi'): str(x), inkex.addNS('cy', 'sodipodi'): str(y), inkex.addNS('rx', 'sodipodi'): str(1), inkex.addNS('ry', 'sodipodi'): str(1), inkex.addNS('type', 'sodipodi'): 'arc'})

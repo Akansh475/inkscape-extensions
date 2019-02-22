@@ -227,7 +227,7 @@ def csp_from_polyline(line):
     return [[[point[:] for _ in range(3)] for point in subline] for subline in line]
 
 
-def csp_remove_zerro_segments(csp, tolerance=1e-7):
+def csp_remove_zero_segments(csp, tolerance=1e-7):
     res = []
     for subpath in csp:
         if len(subpath) > 0:
@@ -244,7 +244,7 @@ def point_inside_csp(p, csp, on_the_path=True):
     # we'll do the raytracing and see how many intersections are there on the ray's way.
     # if number of intersections is even then point is outside.
     # ray will be x=p.x and y=>p.y
-    # you can assign any value to on_the_path, by dfault if point is on the path
+    # you can assign any value to on_the_path, by default if point is on the path
     # function will return thai it's inside the path.
     x, y = p
     ray_intersections_count = 0
@@ -273,7 +273,7 @@ def point_inside_csp(p, csp, on_the_path=True):
                             return on_the_path
                         # if t == 0 we should have considered this case previously.
                         if t == 1:
-                            # we have to check the next segmant if it is on the same side of the ray
+                            # we have to check the next segment if it is on the same side of the ray
                             st_d = csp_normalized_slope(sp1, sp2, 1)[0]
                             if st_d == 0:
                                 st_d = csp_normalized_slope(sp1, sp2, 0.99)[0]
@@ -529,7 +529,7 @@ def csp_true_bounds(csp):
 ############################################################################
 # csp_segments_intersection(sp1,sp2,sp3,sp4)
 #
-# Returns array containing all intersections between two segmets of cubic
+# Returns array containing all intersections between two segments of cubic
 # super path. Results are [ta,tb], or [ta0, ta1, tb0, tb1, "Overlap"]
 # where ta, tb are values of t for the intersection point.
 ############################################################################
@@ -595,7 +595,7 @@ def csp_segments_intersection(sp1, sp2, sp3, sp4):
                 recursion(a, b1, ta0, ta1, tb0, tbm, depth_a, depth_b - 1)
             if bez_bounds_intersect(a, b2):
                 recursion(a, b2, ta0, ta1, tbm, tb1, depth_a, depth_b - 1)
-        else:  # Both segments have been subdevided enough. Let's get some intersections :).
+        else:  # Both segments have been subdivided enough. Let's get some intersections :).
             intersection, t1, t2 = straight_segments_intersection([a[0]] + [a[3]], [b[0]] + [b[3]])
             if intersection:
                 if intersection == "Overlap":
@@ -626,7 +626,7 @@ def csp_segments_true_intersection(sp1, sp2, sp3, sp4):
 
 
 def csp_get_t_at_curvature(sp1, sp2, c, sample_points=16):
-    # returns a list containning [t1,t2,t3,...,tn],  0<=ti<=1...
+    # returns a list containing [t1,t2,t3,...,tn],  0<=ti<=1...
     if sample_points < 2:
         sample_points = 2
     tolerance = .0000000001
@@ -734,7 +734,7 @@ def csp_curvature_at_t(sp1, sp2, t, depth=3):
 
 
 def csp_subpath_ccw(subpath):
-    # Remove all zerro length segments
+    # Remove all zero length segments
     s = 0
     if (P(subpath[-1][1]) - P(subpath[0][1])).l2() > 1e-10:
         subpath[-1][2] = subpath[-1][1]
@@ -1923,7 +1923,7 @@ def csp_offset(csp, r):
     # TODO Get rid of self intersections.
 
     original_csp = csp[:]
-    # Clip segments which has curvature>1/r. Because their offset will be selfintersecting and very nasty.
+    # Clip segments which has curvature>1/r. Because their offset will be self-intersecting and very nasty.
 
     print_("Offset prepared the path in {}".format(time.time() - time_))
     print_("Path length = {}".format(sum([len(i) for i in csp])))
@@ -1968,7 +1968,7 @@ def csp_offset(csp, r):
     ############################################################################
     # Now to the clipping.
     ############################################################################
-    # First of all find all intersection's between all segments of all offseted subpaths, including self intersections.
+    # First of all find all intersection's between all segments of all offset subpaths, including self intersections.
 
     # TODO define offset tolerance here
     global small_tolerance
@@ -2082,7 +2082,7 @@ def csp_offset(csp, r):
     print_("Clipped and joined path in {}".format(time.time() - time_))
 
     ########################################################################
-    # Now to the Dummy cliping: remove parts from split offset if their
+    # Now to the Dummy clipping: remove parts from split offset if their
     # centers are  closer to the original path than offset radius.
     ########################################################################
 
@@ -2138,7 +2138,7 @@ def biarc(sp1, sp2, z1, z2, depth=0):
     tea=  TE.angle()
     va = v.angle()
     if TE.mag() < STRAIGHT_DISTANCE_TOLERANCE and TS.mag() < STRAIGHT_DISTANCE_TOLERANCE:
-        # Both tangents are zerro - line straight
+        # Both tangents are zero - line straight
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
     if TE.mag() < STRAIGHT_DISTANCE_TOLERANCE:
         TE = -(TS + v).unit()
@@ -2155,7 +2155,7 @@ def biarc(sp1, sp2, z1, z2, depth=0):
             ((v.mag() < STRAIGHT_DISTANCE_TOLERANCE or TE.mag() < STRAIGHT_DISTANCE_TOLERANCE or TS.mag() < STRAIGHT_DISTANCE_TOLERANCE) or
              1 - abs(TS * v / (TS.mag() * v.mag())) < STRAIGHT_TOLERANCE)):
         # Both tangents are parallel and start and end are the same - line straight
-        # or one of tangents still smaller then tollerance
+        # or one of tangents still smaller then tolerance
 
         # Both tangents and v are parallel - line straight
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
@@ -2222,14 +2222,14 @@ def biarc(sp1, sp2, z1, z2, depth=0):
 
         l = (P0 - P2).l2()
         if l < EMC_TOLERANCE_EQUAL ** 2 or l < EMC_TOLERANCE_EQUAL ** 2 * R1.l2() / 100:
-            # arc should be straight otherwise it could be threated as full circle
+            # arc should be straight otherwise it could be treated as full circle
             arc1 = [sp1[1], 'line', 0, 0, [P2.x, P2.y], [z1, zm]]
         else:
             arc1 = [sp1[1], 'arc', [R1.x, R1.y], a1, [P2.x, P2.y], [z1, zm]]
 
         l = (P4 - P2).l2()
         if l < EMC_TOLERANCE_EQUAL ** 2 or l < EMC_TOLERANCE_EQUAL ** 2 * R2.l2() / 100:
-            # arc should be straight otherwise it could be threated as full circle
+            # arc should be straight otherwise it could be treated as full circle
             arc2 = [[P2.x, P2.y], 'line', 0, 0, [P4.x, P4.y], [zm, z2]]
         else:
             arc2 = [[P2.x, P2.y], 'arc', [R2.x, R2.y], a2, [P4.x, P4.y], [zm, z2]]
@@ -2923,7 +2923,7 @@ class Gcodetools(inkex.Effect):
 
                     for path in self.selected_paths[layer]:
                         csp = self.apply_transforms(path, cubic_paths.parseCubicPath(path.get("d")))
-                        csp = csp_remove_zerro_segments(csp)
+                        csp = csp_remove_zero_segments(csp)
                         res = []
 
                         for subpath in csp:
@@ -5143,7 +5143,7 @@ class Gcodetools(inkex.Effect):
             doc_height = self.svg.unittouu(self.document.getroot().get('height'))
             if self.document.getroot().get('height') == "100%":
                 doc_height = 1052.3622047
-                print_("Overruding height from 100 percents to {}".format(doc_height))
+                print_("Overriding height from 100 percents to {}".format(doc_height))
             if self.options.unit == "G21 (All units in mm)":
                 points = [[0., 0., self.options.Zsurface], [100., 0., self.options.Zdepth], [0., 100., 0.]]
             elif self.options.unit == "G20 (All units in inches)":
@@ -5282,7 +5282,7 @@ G01 Z1 (going to cutting z)\n""",
 
     ################################################################################
     #
-    # Check tools and OP asignment
+    # Check tools and OP assignment
     #
     ################################################################################
     def check_tools_and_op(self):
@@ -5335,7 +5335,7 @@ G01 Z1 (going to cutting z)\n""",
                 if layer in tools_bounds:
                     tool = self.tools[layer][0]
                     g = copy.deepcopy(tool["self_group"])
-                    g.attrib["gcodetools"] = "Check tools and OP asignment"
+                    g.attrib["gcodetools"] = "Check tools and OP assignment"
                     trans = [[1, 0.3, bounds[2]], [0, 0.5, tools_bounds[layer][0]]]
                     g.set("transform", str(Transform(trans)))
                     group.insert(0, g)
@@ -5447,7 +5447,7 @@ G01 Z1 (going to cutting z)\n""",
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [right, 0], [right, 10])
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [0, miny[1] - r], [10, miny[1] - r])
                                 # Join offsetted_subpath together
-                                # Hope there wont be any cicles
+                                # Hope there wont be any circles
                                 subpath = csp_join_subpaths(offsetted_subpath)[0]
 
                         # Create solid object from path and lathe_width
@@ -5563,7 +5563,7 @@ G01 Z1 (going to cutting z)\n""",
                                 if not orientation:
                                     o = 1 - o
 
-                                # Add first horisontal straight line if needed
+                                # Add first horizontal straight line if needed
                                 if not first_seg and new_subpath == []:
                                     new_subpath = [[[subpath[0][i][0] - width * o, subpath[0][i][1]] for i in range(3)]]
 
@@ -5576,7 +5576,7 @@ G01 Z1 (going to cutting z)\n""",
                                 )
                             first_seg = False
 
-                        # Add last horisontal straight line if needed
+                        # Add last horizontal straight line if needed
                         if a == 0 or a == math.pi:
                             new_subpath += [[[subpath[-1][i][0] - width * o, subpath[-1][i][1]] for i in range(3)]]
 
@@ -5825,7 +5825,7 @@ G01 Z1 (going to cutting z)\n""",
                     continue
                 polylines += [["connect1", [[polylines[-1][1][-1][1] for _ in range(3)], [start_point for _ in range(3)]]]]
 
-                # Make polilynes from polylines. They are still csp.
+                # Make polylines from polylines. They are still csp.
                 for i in range(len(polylines)):
                     polyline = []
                     l = 0
@@ -5855,8 +5855,8 @@ G01 Z1 (going to cutting z)\n""",
                         draw_csp(self.transform_csp([csp], layer, reverse=True))
 
                     # Export polyline to gcode
-                    # we are making trnsform from XYZA coordinates to R1...Rn
-                    # where R1...Rn are radius vectors from grafiti reference points
+                    # we are making transform from XYZA coordinates to R1...Rn
+                    # where R1...Rn are radius vectors from graffiti reference points
                     # to current (x,y) point. Also we need to assign custom feed rate
                     # for each segment. And we'll use only G01 gcode.
                     last_real_pos, g = get_gcode_coordinates(polyline[0], layer)

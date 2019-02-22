@@ -73,7 +73,6 @@ import cmath
 import copy
 import math
 import os
-import random
 import re
 import sys
 import time
@@ -85,8 +84,8 @@ from lxml import etree
 
 # local libraries
 import inkex
-from inkex.bezier import bezierparameterize, bezierlength, beziertatlength
 from inkex import cubic_paths
+from inkex.bezier import bezierlength, bezierparameterize, beziertatlength
 from inkex.transforms import Transform
 
 inkex.localize.localize()

@@ -251,7 +251,8 @@ def point_inside_csp(p, csp, on_the_path=True):
     for subpath in csp:
 
         for i in range(1, len(subpath)):
-            sp1, sp2 = subpath[i - 1], subpath[i]
+            sp1 = subpath[i - 1]
+            sp2 = subpath[i]
             ax, ay, bx, by, cx, cy, dx, dy = csp_parameterize(sp1, sp2)
             if ax == 0 and bx == 0 and cx == 0 and dx == x:
                 # we've got a special case here
@@ -280,7 +281,8 @@ def point_inside_csp(p, csp, on_the_path=True):
                             for j in range(1, len(subpath) + 1):
                                 if (i + j) % len(subpath) == 0:
                                     continue  # skip the closing segment
-                                sp11, sp22 = subpath[(i - 1 + j) % len(subpath)], subpath[(i + j) % len(subpath)]
+                                sp11 = subpath[(i - 1 + j) % len(subpath)]
+                                sp22 = subpath[(i + j) % len(subpath)]
                                 ax1, ay1, bx1, by1, cx1, cy1, dx1, dy1 = csp_parameterize(sp1, sp2)
                                 if ax1 == 0 and bx1 == 0 and cx1 == 0 and dx1 == x:
                                     continue  # this segment parallel to the ray, so skip it
@@ -313,7 +315,11 @@ def csp_close_all_subpaths(csp, tolerance=0.000001):
 
 
 def csp_simple_bound(csp):
-    minx, miny, maxx, maxy = None, None, None, None
+    minx =None
+    miny =None
+    maxx =None
+    maxy= None
+
     for subpath in csp:
         for sp in subpath:
             for p in sp:
@@ -343,7 +349,8 @@ def csp_to_point_distance(csp, p, dist_bounds=(0, 1e100)):
 
 def csp_seg_to_point_distance(sp1, sp2, p, sample_points=5):
     ax, ay, bx, by, cx, cy, dx, dy = csp_parameterize(sp1, sp2)
-    dx, dy = dx - p[0], dy - p[1]
+    dx = dx - p[0]
+    dy = dy - p[1]
     if sample_points < 2:
         sample_points = 2
     d = min([(p[0] - sp1[1][0]) ** 2 + (p[1] - sp1[1][1]) ** 2, 0.], [(p[0] - sp2[1][0]) ** 2 + (p[1] - sp2[1][1]) ** 2, 1.])
@@ -351,7 +358,8 @@ def csp_seg_to_point_distance(sp1, sp2, p, sample_points=5):
         t = float(k) / (sample_points - 1)
         i = 0
         while i == 0 or abs(f) > 0.000001 and i < 20:
-            t2, t3 = t ** 2, t ** 3
+            t2 = t ** 2
+            t3 = t ** 3
             f = (ax * t3 + bx * t2 + cx * t + dx) * (3 * ax * t2 + 2 * bx * t + cx) + (ay * t3 + by * t2 + cy * t + dy) * (3 * ay * t2 + 2 * by * t + cy)
             df = (6 * ax * t + 2 * bx) * (ax * t3 + bx * t2 + cx * t + dx) + (3 * ax * t2 + 2 * bx * t + cx) ** 2 + (6 * ay * t + 2 * by) * (ay * t3 + by * t2 + cy * t + dy) + (3 * ay * t2 + 2 * by * t + cy) ** 2
             if df != 0:
@@ -396,11 +404,20 @@ def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=(0, 1e100), samp
     #    try to find closes points using Newtons method
     for k in range(sample_points):
         for j in range(sample_points):
-            t1, t2 = float(k + 1) / (sample_points + 1), float(j) / (sample_points + 1)
-            t12, t13, t22, t23 = t1 * t1, t1 * t1 * t1, t2 * t2, t2 * t2 * t2
+            t1 = float(k + 1) / (sample_points + 1)
+            t2 =  float(j) / (sample_points + 1)
+
+            t12 = t1 * t1
+            t13 = t1 * t1 * t1
+            t22 = t2 * t2
+            t23 = t2 * t2 * t2
             i = 0
-            F1, F2, F = [0, 0], [[0, 0], [0, 0]], 1e100
-            x, y = ax1 * t13 + bx1 * t12 + cx1 * t1 + dx1 - (ax2 * t23 + bx2 * t22 + cx2 * t2 + dx2), ay1 * t13 + by1 * t12 + cy1 * t1 + dy1 - (ay2 * t23 + by2 * t22 + cy2 * t2 + dy2)
+
+            F1 = [0, 0]
+            F2 = [[0, 0], [0, 0]]
+            F = 1e100
+            x = ax1 * t13 + bx1 * t12 + cx1 * t1 + dx1 - (ax2 * t23 + bx2 * t22 + cx2 * t2 + dx2)
+            y =  ay1 * t13 + by1 * t12 + cy1 * t1 + dy1 - (ay2 * t23 + by2 * t22 + cy2 * t2 + dy2)
             while i < 2 or abs(F - Flast) > tolerance and i < 30:
                 f1x = 3 * ax1 * t12 + 2 * bx1 * t1 + cx1
                 f1y = 3 * ay1 * t12 + 2 * by1 * t1 + cy1
@@ -416,8 +433,12 @@ def csp_seg_to_csp_seg_distance(sp1, sp2, sp3, sp4, dist_bounds=(0, 1e100), samp
                 if F2 is not None:
                     t1 -= (F2[0][0] * F1[0] + F2[0][1] * F1[1])
                     t2 -= (F2[1][0] * F1[0] + F2[1][1] * F1[1])
-                    t12, t13, t22, t23 = t1 * t1, t1 * t1 * t1, t2 * t2, t2 * t2 * t2
-                    x, y = ax1 * t13 + bx1 * t12 + cx1 * t1 + dx1 - (ax2 * t23 + bx2 * t22 + cx2 * t2 + dx2), ay1 * t13 + by1 * t12 + cy1 * t1 + dy1 - (ay2 * t23 + by2 * t22 + cy2 * t2 + dy2)
+                    t12 = t1 * t1
+                    t13 = t1 * t1 * t1
+                    t22 = t2 * t2
+                    t23 = t2 * t2 * t2
+                    x = ax1 * t13 + bx1 * t12 + cx1 * t1 + dx1 - (ax2 * t23 + bx2 * t22 + cx2 * t2 + dx2)
+                    y =  ay1 * t13 + by1 * t12 + cy1 * t1 + dy1 - (ay2 * t23 + by2 * t22 + cy2 * t2 + dy2)
                     Flast = F
                     F = x * x + y * y
                 else:
@@ -452,7 +473,10 @@ def csp_to_csp_distance(csp1, csp2, dist_bounds=(0, 1e100), tolerance=.01):
 
 
 def csp_split(sp1, sp2, t=.5):
-    [x1, y1], [x2, y2], [x3, y3], [x4, y4] = sp1[1], sp1[2], sp2[0], sp2[1]
+    [x1, y1] =sp1[1]
+    [x2, y2] = sp1[2]
+    [x3, y3] = sp2[0]
+    [x4, y4] =sp2[1]
     x12 = x1 + (x2 - x1) * t
     y12 = y1 + (y2 - y1) * t
     x23 = x2 + (x3 - x2) * t
@@ -510,15 +534,20 @@ def csp_true_bounds(csp):
 # where ta, tb are values of t for the intersection point.
 ############################################################################
 def csp_segments_intersection(sp1, sp2, sp3, sp4):
-    a, b = csp_segment_to_bez(sp1, sp2), csp_segment_to_bez(sp3, sp4)
+    a = csp_segment_to_bez(sp1, sp2)
+    b = csp_segment_to_bez(sp3, sp4)
 
     def polish_intersection(a, b, ta, tb, tolerance=INTERSECTION_TOLERANCE):
         ax, ay, bx, by, cx, cy, dx, dy = bezierparameterize(a)
         ax1, ay1, bx1, by1, cx1, cy1, dx1, dy1 = bezierparameterize(b)
         i = 0
-        F, F1 = [.0, .0], [[.0, .0], [.0, .0]]
+        F = [.0, .0]
+        F1 = [[.0, .0], [.0, .0]]
         while i == 0 or (abs(F[0]) ** 2 + abs(F[1]) ** 2 > tolerance and i < 10):
-            ta3, ta2, tb3, tb2 = ta ** 3, ta ** 2, tb ** 3, tb ** 2
+            ta3 = ta ** 3
+            ta2 =  ta ** 2
+            tb3 = tb ** 3
+            tb2 = tb ** 2
             F[0] = ax * ta3 + bx * ta2 + cx * ta + dx - ax1 * tb3 - bx1 * tb2 - cx1 * tb - dx1
             F[1] = ay * ta3 + by * ta2 + cy * ta + dy - ay1 * tb3 - by1 * tb2 - cy1 * tb - dy1
             F1[0][0] = 3 * ax * ta2 + 2 * bx * ta + cx
@@ -541,7 +570,8 @@ def csp_segments_intersection(sp1, sp2, sp3, sp4):
         if a == b:
             bezier_intersection_recursive_result += [[ta0, tb0, ta1, tb1, "Overlap"]]
             return
-        tam, tbm = (ta0 + ta1) / 2, (tb0 + tb1) / 2
+        tam = (ta0 + ta1) / 2
+        tbm  = (tb0 + tb1) / 2
         if depth_a > 0 and depth_b > 0:
             a1, a2 = bez_split(a, 0.5)
             b1, b2 = bez_split(b, 0.5)
@@ -604,7 +634,8 @@ def csp_get_t_at_curvature(sp1, sp2, c, sample_points=16):
     ax, ay, bx, by, cx, cy, dx, dy = csp_parameterize(sp1, sp2)
     for k in range(sample_points):
         t = float(k) / (sample_points - 1)
-        i, F = 0, 1e100
+        i = 0
+        F = 1e100
         while i < 2 or abs(F) > tolerance and i < 17:
             try:  # some numerical calculation could exceed the limits
                 t2 = t * t
@@ -718,17 +749,34 @@ def csp_subpath_ccw(subpath):
 
 
 def csp_at_t(sp1, sp2, t):
-    ax, bx, cx, dx = sp1[1][0], sp1[2][0], sp2[0][0], sp2[1][0]
-    ay, by, cy, dy = sp1[1][1], sp1[2][1], sp2[0][1], sp2[1][1]
+    ax = sp1[1][0]
+    bx = sp1[2][0]
+    cx = sp2[0][0]
+    dx = sp2[1][0]
 
-    x1, y1 = ax + (bx - ax) * t, ay + (by - ay) * t
-    x2, y2 = bx + (cx - bx) * t, by + (cy - by) * t
-    x3, y3 = cx + (dx - cx) * t, cy + (dy - cy) * t
+    ay = sp1[1][1]
+    by = sp1[2][1]
+    cy = sp2[0][1]
+    dy = sp2[1][1]
 
-    x4, y4 = x1 + (x2 - x1) * t, y1 + (y2 - y1) * t
-    x5, y5 = x2 + (x3 - x2) * t, y2 + (y3 - y2) * t
+    x1 = ax + (bx - ax) * t
+    y1 = ay + (by - ay) * t
 
-    x, y = x4 + (x5 - x4) * t, y4 + (y5 - y4) * t
+    x2 = bx + (cx - bx) * t
+    y2 = by + (cy - by) * t
+
+    x3 = cx + (dx - cx) * t
+    y3 = cy + (dy - cy) * t
+
+    x4 = x1 + (x2 - x1) * t
+    y4 = y1 + (y2 - y1) * t
+
+    x5 = x2 + (x3 - x2) * t
+    y5 = y2 + (y3 - y2) * t
+
+    x = x4 + (x5 - x4) * t
+    y = y4 + (y5 - y4) * t
+
     return [x, y]
 
 
@@ -850,7 +898,8 @@ def arc_from_c_s_l(c, s, l):
     if r == 0:
         return []
     alpha = l / r
-    cos_, sin_ = math.cos(alpha), math.sin(alpha)
+    cos_ = math.cos(alpha)
+    sin_ = math.sin(alpha)
     e = [c[0] + (s[0] - c[0]) * cos_ - (s[1] - c[1]) * sin_, c[1] + (s[0] - c[0]) * sin_ + (s[1] - c[1]) * cos_]
     n = [c[0] - s[0], c[1] - s[1]]
     slope = rotate_cw(n) if l > 0 else rotate_ccw(n)
@@ -864,7 +913,8 @@ def csp_from_arc(start, end, center, r, slope_st):
 
     sectors = int(abs(alpha) * 2 / math.pi) + 1
     alpha_start = atan2(start[0] - center[0], start[1] - center[1])
-    cos_, sin_ = math.cos(alpha_start), math.sin(alpha_start)
+    cos_ = math.cos(alpha_start)
+    sin_ =  math.sin(alpha_start)
     k = (4. * math.tan(alpha / sectors / 4.) / 3.)
     if dot(slope_st, [- sin_ * k * r, cos_ * k * r]) < 0:
         if alpha > 0:
@@ -878,7 +928,8 @@ def csp_from_arc(start, end, center, r, slope_st):
     k = (4. * math.tan(alpha / sectors / 4.) / 3.)
     result = []
     for i in range(sectors + 1):
-        cos_, sin_ = math.cos(alpha_start + alpha * i / sectors), math.sin(alpha_start + alpha * i / sectors)
+        cos_ = math.cos(alpha_start + alpha * i / sectors)
+        sin_ = math.sin(alpha_start + alpha * i / sectors)
         sp = [[], [center[0] + cos_ * r, center[1] + sin_ * r], []]
         sp[0] = [sp[1][0] + sin_ * k * r, sp[1][1] - cos_ * k * r]
         sp[2] = [sp[1][0] - sin_ * k * r, sp[1][1] + cos_ * k * r]
@@ -905,7 +956,8 @@ def point_to_arc_distance(p, arc):
         if between(alpha, 0, a) or min(abs(alpha), abs(alpha - a)) < STRAIGHT_TOLERANCE:
             return (p - i).mag(), [i.x, i.y]
         else:
-            d1, d2 = (p - P0).mag(), (p - P2).mag()
+            d1  = (p - P0).mag()
+            d2 =  (p - P2).mag()
             if d1 < d2:
                 return d1, [P0.x, P0.y]
             else:
@@ -913,8 +965,11 @@ def point_to_arc_distance(p, arc):
 
 
 def csp_to_arc_distance(sp1, sp2, arc1, arc2, tolerance=0.01):  # arc = [start,end,center,alpha]
-    n, i = 10, 0
-    d, d1, dl = (0, (0, 0)), (0, (0, 0)), 0
+    n = 10
+    i = 0
+    d = (0, (0, 0))
+    d1 = (0, (0, 0))
+    dl = 0
     while i < 1 or (abs(d1[0] - dl[0]) > tolerance and i < 4):
         i += 1
         dl = d1 * 1
@@ -935,7 +990,8 @@ def csp_point_inside_bound(sp1, sp2, p):
     xmin = 1e100
     xmax = -1e100
     for i in range(4):
-        [x0, y0], [x1, y1] = bez[i - 1], bez[i]
+        [x0, y0] = bez[i - 1]
+        [x1, y1] = bez[i]
         xmin = min(xmin, x0)
         xmax = max(xmax, x0)
         if x0 - x1 != 0 and (y - y0) * (x1 - x0) >= (x - x0) * (y1 - y0) and x > min(x0, x1) and x <= max(x0, x1):
@@ -1217,7 +1273,10 @@ def triangle_cross(a, b, c):
 
 
 def csp_segment_convex_hull(sp1, sp2):
-    a, b, c, d = sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:]
+    a= sp1[1][:]
+    b= sp1[2][:]
+    c= sp2[0][:]
+    d= sp2[1][:]
 
     abc = triangle_cross(a, b, c)
     abd = triangle_cross(a, b, d)
@@ -1234,7 +1293,10 @@ def csp_segment_convex_hull(sp1, sp2):
     if cad == 0:
         return [b, min(c, a, d), max(c, a, d)]
 
-    m1, m2, m3 = abc * abd > 0, abc * bcd > 0, abc * cad > 0
+    m1 = abc * abd > 0
+    m2 = abc * bcd > 0
+    m3 = abc * cad > 0
+
     if m1 and m2 and m3:
         return [a, b, c]
     if m1 and m2 and not m3:
@@ -1438,7 +1500,14 @@ def draw_pointer(x, color="#f00", figure="cross", group=None, comment="", fill=N
 
 
 def straight_segments_intersection(a, b, true_intersection=True):  # (True intersection means check ta and tb are in [0,1])
-    ax, bx, cx, dx, ay, by, cy, dy = a[0][0], a[1][0], b[0][0], b[1][0], a[0][1], a[1][1], b[0][1], b[1][1]
+    ax = a[0][0]
+    bx = a[1][0]
+    cx = b[0][0]
+    dx = b[1][0]
+    ay = a[0][1]
+    by = a[1][1]
+    cy = b[0][1]
+    dy = b[1][1]
     if (ax == bx and ay == by) or (cx == dx and cy == dy):
         return False, 0, 0
     if (bx - ax) * (dy - cy) - (by - ay) * (dx - cx) == 0:  # Lines are parallel
@@ -1523,9 +1592,11 @@ def print_(*arg):
 class P(object):
     def __init__(self, x, y=None):
         if not y is None:
-            self.x, self.y = float(x), float(y)
+            self.x = float(x)
+            self.y = float(y)
         else:
-            self.x, self.y = float(x[0]), float(x[1])
+            self.x = float(x[0])
+            self.y = float(x[1])
 
     def __add__(self, other):
         return P(self.x + other.x, self.y + other.y)
@@ -1720,13 +1791,21 @@ def csp_offset(csp, r):
 
     def create_offset_segment(sp1, sp2, r):
         # See    Gernot Hoffmann "Bezier Curves"  p.34 -> 7.1 Bezier Offset Curves
-        p0, p1, p2, p3 = P(sp1[1]), P(sp1[2]), P(sp2[0]), P(sp2[1])
-        s0, s1, s3 = p1 - p0, p2 - p1, p3 - p2
+        p0 = P(sp1[1])
+        p1 = P(sp1[2])
+        p2 = P(sp2[0])
+        p3 = P(sp2[1])
+
+        s0 = p1 - p0
+        s1 = p2 - p1
+        s3 = p3 - p2
+
         n0 = s0.ccw().unit() if s0.l2() != 0 else P(csp_normalized_normal(sp1, sp2, 0))
         n3 = s3.ccw().unit() if s3.l2() != 0 else P(csp_normalized_normal(sp1, sp2, 1))
         n1 = s1.ccw().unit() if s1.l2() != 0 else (n0.unit() + n3.unit()).unit()
 
-        q0, q3 = p0 + r * n0, p3 + r * n3
+        q0 = p0 + r * n0
+        q3 = p3 + r * n3
         c = csp_curvature_at_t(sp1, sp2, 0)
         q1 = q0 + (p1 - p0) * (1 - (r * c if abs(c) < 100 else 0))
         c = csp_curvature_at_t(sp1, sp2, 1)
@@ -1737,9 +1816,11 @@ def csp_offset(csp, r):
     def csp_get_subapths_last_first_intersection(s1, s2):
         _break = False
         for i in range(1, len(s1)):
-            sp11, sp12 = s1[-i - 1], s1[-i]
+            sp11 = s1[-i - 1]
+            sp12=  s1[-i]
             for j in range(1, len(s2)):
-                sp21, sp22 = s2[j - 1], s2[j]
+                sp21 = s2[j - 1]
+                sp22 = s2[j]
                 intersection = csp_segments_true_intersection(sp11, sp12, sp21, sp22)
                 if intersection:
                     _break = True
@@ -1869,7 +1950,8 @@ def csp_offset(csp, r):
 
                 subpath_offset = csp_concat_subpaths(subpath_offset[:-prev_l + 1], prev, arc, next)
                 prev_l = len(next)
-            sp1_l, sp2_l = sp1[:], sp2[:]
+            sp1_l = sp1[:]
+            sp2_l =  sp2[:]
 
         # Join last and first offsets togother to close the curve
 
@@ -2004,7 +2086,13 @@ def csp_offset(csp, r):
     # centers are  closer to the original path than offset radius.
     ########################################################################
 
-    r1, r2 = ((0.99 * r) ** 2, (1.01 * r) ** 2) if abs(r * .01) < 1 else ((abs(r) - 1) ** 2, (abs(r) + 1) ** 2)
+    if abs(r * .01) < 1:
+        r1 = (0.99 * r) ** 2
+        r2 = (1.01 * r) ** 2
+    else:
+        r1 = (abs(r) - 1) ** 2
+        r2 = (abs(r) + 1) ** 2
+
     for s in joined_result[:]:
         dist = csp_to_point_distance(original_csp, s[int(len(s) / 2)][1], dist_bounds=[r1, r2])
         if not r1 < dist[0] < r2:
@@ -2031,7 +2119,8 @@ def biarc(sp1, sp2, z1, z2, depth=0):
     def biarc_split(sp1, sp2, z1, z2, depth):
         if depth < options.biarc_max_split_depth:
             sp1, sp2, sp3 = csp_split(sp1, sp2)
-            l1, l2 = cspseglength(sp1, sp2), cspseglength(sp2, sp3)
+            l1 = cspseglength(sp1, sp2)
+            l2 = cspseglength(sp2, sp3)
             if l1 + l2 == 0:
                 zm = z1
             else:
@@ -2040,9 +2129,14 @@ def biarc(sp1, sp2, z1, z2, depth=0):
         else:
             return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
 
-    P0, P4 = P(sp1[1]), P(sp2[1])
-    TS, TE, v = (P(sp1[2]) - P0), -(P(sp2[0]) - P4), P0 - P4
-    tsa, tea, va = TS.angle(), TE.angle(), v.angle()
+    P0 = P(sp1[1])
+    P4 = P(sp2[1])
+    TS = (P(sp1[2]) - P0)
+    TE = -(P(sp2[0]) - P4)
+    v = P0 - P4
+    tsa = TS.angle()
+    tea=  TE.angle()
+    va = v.angle()
     if TE.mag() < STRAIGHT_DISTANCE_TOLERANCE and TS.mag() < STRAIGHT_DISTANCE_TOLERANCE:
         # Both tangents are zerro - line straight
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
@@ -2054,7 +2148,8 @@ def biarc(sp1, sp2, z1, z2, depth=0):
         r = 1 / (TE.mag() / v.mag() * 2)
     else:
         r = TS.mag() / TE.mag()
-    TS, TE = TS.unit(), TE.unit()
+    TS = TS.unit()
+    TE = TE.unit()
     tang_are_parallel = ((tsa - tea) % math.pi < STRAIGHT_TOLERANCE or math.pi - (tsa - tea) % math.pi < STRAIGHT_TOLERANCE)
     if (tang_are_parallel and
             ((v.mag() < STRAIGHT_DISTANCE_TOLERANCE or TE.mag() < STRAIGHT_DISTANCE_TOLERANCE or TS.mag() < STRAIGHT_DISTANCE_TOLERANCE) or
@@ -2065,10 +2160,14 @@ def biarc(sp1, sp2, z1, z2, depth=0):
         # Both tangents and v are parallel - line straight
         return [[sp1[1], 'line', 0, 0, sp2[1], [z1, z2]]]
 
-    c, b, a = v * v, 2 * v * (r * TS + TE), 2 * r * (TS * TE - 1)
+    c = v * v
+    b= 2 * v * (r * TS + TE)
+    a = 2 * r * (TS * TE - 1)
     if v.mag() == 0:
         return biarc_split(sp1, sp2, z1, z2, depth)
-    asmall, bsmall, csmall = abs(a) < 10 ** -10, abs(b) < 10 ** -10, abs(c) < 10 ** -10
+    asmall  = abs(a) < 10 ** -10
+    bsmall= abs(b) < 10 ** -10
+    csmall= abs(c) < 10 ** -10
     if asmall and b != 0:
         beta = -c / b
     elif csmall and a != 0:
@@ -2096,7 +2195,9 @@ def biarc(sp1, sp2, z1, z2, depth=0):
         if (D - P1).mag() == 0:
             return None, None
         R = D - ((D - P0).mag() ** 2 / (D - P1).mag()) * (P1 - D).unit()
-        p0a, p1a, p2a = (P0 - R).angle() % (2 * math.pi), (P1 - R).angle() % (2 * math.pi), (P2 - R).angle() % (2 * math.pi)
+        p0a = (P0 - R).angle() % (2 * math.pi)
+        p1a =  (P1 - R).angle() % (2 * math.pi)
+        p2a = (P2 - R).angle() % (2 * math.pi)
         alpha = (p2a - p0a) % (2 * math.pi)
         if (p0a < p2a and (p1a < p0a or p2a < p1a)) or (p2a < p1a < p0a):
             alpha = -2 * math.pi + alpha
@@ -2166,7 +2267,8 @@ class Postprocessor(object):
         r = re.match(r"([A-Za-z0-9_]+)\s*\(\s*(.*)\)", command)
         if not r:
             self.error("Parse error while postprocessing.\n(Command: '{}')".format(command), "error")
-        function, parameters = r.group(1).lower(), r.group(2)
+        function  = r.group(1).lower()
+        parameters = r.group(2)
         if function in self.functions:
             print_("Postprocessor: executing function {}({})".format(function, parameters))
             self.functions[function](parameters)
@@ -2193,7 +2295,8 @@ class Postprocessor(object):
         # remap parameters should be like "x->y,y->x"
         parameters = parameters.replace("\,", ":#:#:coma:#:#:")
         parameters = parameters.split(",")
-        pattern, remap = [], []
+        pattern = []
+        remap = []
         for s in parameters:
             s = s.replace(":#:#:coma:#:#:", "\,")
             r = re.match("""\s*(\'|\")(.*)\\1\s*->\s*(\'|\")(.*)\\3\s*""", s)
@@ -2413,7 +2516,10 @@ class Polygon(object):
                 self.polygon[i][j][1] += y
 
     def bounds(self):
-        minx, miny, maxx, maxy = 1e400, 1e400, -1e400, -1e400
+        minx =1e400
+        miny = 1e400
+        maxx = -1e400
+        maxy = -1e400
         for poly in self.polygon:
             for p in poly:
                 if minx > p[0]:
@@ -2439,7 +2545,8 @@ class Polygon(object):
         ]
 
     def rotate(self, a):
-        cos, sin = math.cos(a), math.sin(a)
+        cos = math.cos(a)
+        sin =  math.sin(a)
         self.rotate_(sin, cos)
 
     def drop_into_direction(self, direction, surface):
@@ -2451,7 +2558,8 @@ class Polygon(object):
         if direction[0] ** 2 + direction[1] ** 2 < 1e-10:
             return
         direction = normalize(direction)
-        sin, cos = direction[0], -direction[1]
+        sin = direction[0]
+        cos = -direction[1]
         self.rotate_(-sin, cos)
         surface.rotate_(-sin, cos)
         self.drop_down(surface, zerro_plane=False)
@@ -2462,9 +2570,12 @@ class Polygon(object):
         centroids = []
         sa = 0
         for poly in self.polygon:
-            cx, cy, a = 0, 0, 0
+            cx = 0
+            cy= 0
+            a  =0
             for i in range(len(poly)):
-                [x1, y1], [x2, y2] = poly[i - 1], poly[i]
+                [x1, y1] = poly[i - 1]
+                [x2, y2] =poly[i]
                 cx += (x1 + x2) * (x1 * y2 - x2 * y1)
                 cy += (y1 + y2) * (x1 * y2 - x2 * y1)
                 a += (x1 * y2 - x2 * y1)
@@ -2476,7 +2587,8 @@ class Polygon(object):
                 centroids += [[cx, cy, a]]
         if sa == 0:
             return [0., 0.]
-        cx, cy = 0., 0.
+        cx = 0
+        cy = 0
         for c in centroids:
             cx += c[0] * c[2]
             cy += c[1] * c[2]
@@ -2505,7 +2617,8 @@ class Polygon(object):
             for i in range(len(poly)):
                 for poly1 in self.polygon:
                     for i1 in range(len(poly1)):
-                        st, end = poly[i - 1], poly[i]
+                        st = poly[i - 1]
+                        end = poly[i]
                         vertex = poly1[i1]
                         if st[0] <= vertex[0] <= end[0] or end[0] <= vertex[0] <= st[0]:
                             if st[0] == end[0]:
@@ -2515,7 +2628,8 @@ class Polygon(object):
                             if dist > d:
                                 dist = d
                         # and vice versa just change the sign because vertex now under the edge
-                        st, end = poly1[i1 - 1], poly1[i1]
+                        st = poly1[i1 - 1]
+                        end = poly1[i1]
                         vertex = poly[i]
                         if st[0] <= vertex[0] <= end[0] or end[0] <= vertex[0] <= st[0]:
                             if st[0] == end[0]:
@@ -2543,7 +2657,8 @@ class Polygon(object):
         inside = False
         for poly in self.polygon:
             for i in range(len(poly)):
-                st, end = poly[i - 1], poly[i]
+                st  = poly[i - 1]
+                end =  poly[i]
                 if p == st or p == end:
                     return True  # point is a vertex = point is on the edge
                 if st[0] > end[0]:
@@ -2565,12 +2680,14 @@ class Polygon(object):
             poly1 = self.polygon[i1]
             poly_ = []
             for j1 in range(len(poly1)):
-                s, e = poly1[j1 - 1], poly1[j1]
+                s = poly1[j1 - 1]
+                e = poly1[j1]
                 poly_ += [s]
 
                 # Check self intersections
                 for j2 in range(j1 + 1, len(poly1)):
-                    s1, e1 = poly1[j2 - 1], poly1[j2]
+                    s1 = poly1[j2 - 1]
+                    e1 = poly1[j2]
                     int_ = line_line_intersection_points(s, e, s1, e1)
                     for p in int_:
                         if point_to_point_d2(p, s) > 0.000001 and point_to_point_d2(p, e) > 0.000001:
@@ -2581,7 +2698,8 @@ class Polygon(object):
                         continue
                     poly2 = self.polygon[i2]
                     for j2 in range(len(poly2)):
-                        s1, e1 = poly2[j2 - 1], poly2[j2]
+                        s1  = poly2[j2 - 1]
+                        e1 = poly2[j2]
                         int_ = line_line_intersection_points(s, e, s1, e1)
                         for p in int_:
                             if point_to_point_d2(p, s) > 0.000001 and point_to_point_d2(p, e) > 0.000001:
@@ -2591,10 +2709,12 @@ class Polygon(object):
         edges = {}
         for poly in self.polygon:
             for i in range(len(poly)):
-                s, e = tuple(poly[i - 1]), tuple(poly[i])
+                s = tuple(poly[i - 1])
+                e = tuple(poly[i])
                 if point_to_point_d2(e, s) < 0.000001:
                     continue
-                break_s, break_e = False, False
+                break_s = False
+                break_e = False
                 for p in edges:
                     if point_to_point_d2(p, s) < 0.000001:
                         break_s = True
@@ -2664,7 +2784,8 @@ class Polygon(object):
             for p in edges:
 
                 cur = [(p[1][0] - p[0][0]) / p[2], (p[1][1] - p[0][1]) / p[2]]
-                cos, sin = dot(cur, last_edge), cross(cur, last_edge)
+                cos = dot(cur, last_edge)
+                sin = cross(cur, last_edge)
 
                 if angle_is_less(sin, cos, min_angle[0], min_angle[1]):
                     min_angle = [sin, cos]
@@ -2825,9 +2946,12 @@ class Gcodetools(inkex.Effect):
                                         del subpath[-1]
                                         max_cross = [-1e100, None]
                                         for j in range(len(subpath)):
-                                            sp1, sp2, sp3 = subpath[j - 2], subpath[j - 1], subpath[j]
+                                            sp1 = subpath[j - 2]
+                                            sp2 = subpath[j - 1]
+                                            sp3 =  subpath[j]
                                             if point_to_point_d2(sp2[1], p_) < max_dist ** 2:
-                                                s1, s2 = csp_normalized_slope(sp1, sp2, 1.), csp_normalized_slope(sp2, sp3, 0.)
+                                                s1 = csp_normalized_slope(sp1, sp2, 1.)
+                                                s2 = csp_normalized_slope(sp2, sp3, 0.)
                                                 max_cross = max(max_cross, [cross(s1, s2), j - 1])
                                         # return back last point
                                         subpath.append(subpath[0])
@@ -2851,10 +2975,12 @@ class Gcodetools(inkex.Effect):
                                 res_ = [subpath[0]]
                                 for sp2, sp3 in zip(subpath[1:], subpath[2:]):
                                     sp1 = res_[-1]
-                                    s1, s2 = csp_normalized_slope(sp1, sp2, 1.), csp_normalized_slope(sp2, sp3, 0.)
+                                    s1 = csp_normalized_slope(sp1, sp2, 1.)
+                                    s2 = csp_normalized_slope(sp2, sp3, 0.)
                                     if cross(s1, s2) > corner_tolerance:
                                         # got a corner to process
-                                        S1, S2 = P(s1), P(s2)
+                                        S1 = P(s1)
+                                        S2 = P(s2)
                                         N = (S1 - S2).unit() * plasma_l
                                         SP2 = P(sp2[1])
                                         P1 = (SP2 + N)
@@ -3083,23 +3209,29 @@ class Gcodetools(inkex.Effect):
                 self.preview_groups[layer] = etree.SubElement(self.layers[min(1, len(self.layers) - 1)], inkex.addNS('g', 'svg'), {"gcodetools": "Preview group"})
             group = self.preview_groups[layer]
 
-        s, arcn = '', 0
+        s = ''
+        arcn = 0
 
         transform = self.get_transforms(group)
         if transform:
             transform = self.reverse_transform(transform)
             transform = str(Transform(transform))
 
-        a, b, c = [0., 0.], [1., 0.], [0., 1.]
+        a = [0., 0.]
+        b = [1., 0.]
+        c = [0., 1.]
         k = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
-        a, b, c = self.transform(a, layer, True), self.transform(b, layer, True), self.transform(c, layer, True)
+        a = self.transform(a, layer, True)
+        b = self.transform(b, layer, True)
+        c= self.transform(c, layer, True)
         if ((b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])) * k > 0:
             reverse_angle = 1
         else:
             reverse_angle = -1
         for sk in curve:
             si = sk[:]
-            si[0], si[2] = self.transform(si[0], layer, True), (self.transform(si[2], layer, True) if type(si[2]) == type([]) and len(si[2]) == 2 else si[2])
+            si[0] = self.transform(si[0], layer, True)
+            si[2] = self.transform(si[2], layer, True) if type(si[2]) == type([]) and len(si[2]) == 2 else si[2]
 
             if s != '':
                 if s[1] == 'line':
@@ -3210,8 +3342,10 @@ class Gcodetools(inkex.Effect):
             c = [c[i] if i < len(c) else None for i in range(6)]
             if c[5] == 0:
                 c[5] = None
-            s, s1 = [" X", " Y", " Z", " I", " J", " K"], ["", "", "", "", "", ""]
-            m, a = [1, 1, self.options.Zscale * Zauto_scale, 1, 1, self.options.Zscale * Zauto_scale], [0, 0, self.options.Zoffset, 0, 0, 0]
+            s = [" X", " Y", " Z", " I", " J", " K"]
+            s1 =  ["", "", "", "", "", ""]
+            m = [1, 1, self.options.Zscale * Zauto_scale, 1, 1, self.options.Zscale * Zauto_scale]
+            a = [0, 0, self.options.Zoffset, 0, 0, 0]
             r = ''
             for i in range(6):
                 if c[i] is not None:
@@ -3237,13 +3371,16 @@ class Gcodetools(inkex.Effect):
         if tool != self.last_used_tool:
             g += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", tool["name"]))) + tool["tool change gcode"] + "\n"
 
-        lg, zs, f = 'G00', self.options.Zsafe, " F{:f}".format(tool['feed'])
+        lg = 'G00'
+        zs= self.options.Zsafe
+        f = " F{:f}".format(tool['feed'])
         current_a = 0
         go_to_safe_distance = "G00" + c([None, None, zs]) + "\n"
         penetration_feed = " F{}".format(tool['penetration feed'])
         for i in range(1, len(curve)):
             #    Creating Gcode for curve between s=curve[i-1] and si=curve[i] start at s[0] end at s[4]=si[0]
-            s, si = curve[i - 1], curve[i]
+            s = curve[i - 1]
+            si =  curve[i]
             feed = f if lg not in ['G01', 'G02', 'G03'] else ''
             if s[1] == 'move':
                 g += go_to_safe_distance + "G00" + c(si[0]) + "\n" + tool['gcode before path'] + "\n"
@@ -3278,7 +3415,8 @@ class Gcodetools(inkex.Effect):
                 if lg == "G00":
                     g += "G01" + c([None, None, s[5][0] + depth]) + penetration_feed + "(Penetrate)\n"
                 if (r[0] ** 2 + r[1] ** 2) > self.options.min_arc_radius ** 2:
-                    r1, r2 = (P(s[0]) - P(s[2])), (P(si[0]) - P(s[2]))
+                    r1 = (P(s[0]) - P(s[2]))
+                    r2 = (P(si[0]) - P(s[2]))
                     if abs(r1.mag() - r2.mag()) < 0.001:
                         g += ("G02" if s[3] < 0 else "G03") + c(si[0] + [s[5][1] + depth, (s[2][0] - s[0][0]), (s[2][1] - s[0][1])]) + feed + axis4 + "\n"
                     else:
@@ -3396,7 +3534,8 @@ class Gcodetools(inkex.Effect):
             self.Zauto_scale[layer] = 1
             print_("Z automatic scale = {} (computed according orientation points)".format(self.Zauto_scale[layer]))
 
-        x, y = source_point[0], source_point[1]
+        x = source_point[0]
+        y = source_point[1]
         if not reverse:
             t = self.transform_matrix[layer]
         else:
@@ -3589,7 +3728,8 @@ class Gcodetools(inkex.Effect):
     def get_orientation_points(self, g):
         items = g.getchildren()
         items.reverse()
-        p2, p3 = [], []
+        p2 = []
+        p3 = []
         p = None
         for i in items:
             if i.tag == inkex.addNS("g", 'svg') and i.get("gcodetools") == "Gcodetools orientation point (2 points)":
@@ -3681,7 +3821,10 @@ class Gcodetools(inkex.Effect):
     ################################################################################
     def path_to_gcode(self):
         def get_boundaries(points):
-            minx, miny, maxx, maxy = None, None, None, None
+            minx = None
+            miny = None
+            maxx = None
+            maxy = None
             out = [[], [], [], []]
             for p in points:
                 if minx == p[0]:
@@ -3861,7 +4004,8 @@ class Gcodetools(inkex.Effect):
                         dxfpoints += [[x, y]]
                     else:
 
-                        zd, zs = self.Zcoordinates[layer][1], self.Zcoordinates[layer][0]
+                        zd = self.Zcoordinates[layer][1]
+                        zs =  self.Zcoordinates[layer][0]
                         c = 1. - float(sum(colors[id_])) / 255 / 3
                         curves += [
                             [
@@ -4148,7 +4292,10 @@ class Gcodetools(inkex.Effect):
                     # Get path's bounds
                     b = [0.0, 0.0, 0.0, 0.0]  # [minx,miny,maxx,maxy]
                     for k in range(4):
-                        i, j, t = bounds[k][2], bounds[k][3], bounds[k][4]
+                        i = bounds[k][2]
+                        j = bounds[k][3]
+                        t =  bounds[k][4]
+
                         b[k] = csp_at_t(rotated_path[i][j - 1], rotated_path[i][j], t)[k % 2]
 
                     # Zig-zag
@@ -4179,8 +4326,10 @@ class Gcodetools(inkex.Effect):
                             i += r
                     else:
 
-                        w, h = b[2] - b[0] + self.options.area_fill_shift * r, b[3] - b[1] + self.options.area_fill_shift * r
-                        x, y = b[0] - self.options.area_fill_shift * r, b[1] - self.options.area_fill_shift * r
+                        w = b[2] - b[0] + self.options.area_fill_shift * r
+                        h =  b[3] - b[1] + self.options.area_fill_shift * r
+                        x = b[0] - self.options.area_fill_shift * r
+                        y = b[1] - self.options.area_fill_shift * r
                         lines[-1] += [[x, y]]
                         stage = 0
                         start = True
@@ -4224,7 +4373,8 @@ class Gcodetools(inkex.Effect):
                             continue
                         for i in range(len(csp)):
                             for j in range(1, len(csp[i])):
-                                sp1, sp2 = csp[i][j - 1], csp[i][j]
+                                sp1 = csp[i][j - 1]
+                                sp2 = csp[i][j]
                                 roots = csp_line_intersection(l1, l2, sp1, sp2)
                                 for t in roots:
                                     p = tuple(csp_at_t(sp1, sp2, t))
@@ -4249,7 +4399,8 @@ class Gcodetools(inkex.Effect):
                     while i < len(splitted_line):
                         # check if the middle point of the first lines segment is inside the path.
                         # and remove the subline if not.
-                        l1, l2 = splitted_line[i][0], splitted_line[i][1]
+                        l1 = splitted_line[i][0]
+                        l2 = splitted_line[i][1]
                         p = [(l1[0] + l2[0]) / 2, (l1[1] + l2[1]) / 2]
                         if not point_inside_csp(p, csp):
                             del splitted_line[i]
@@ -4412,7 +4563,8 @@ class Gcodetools(inkex.Effect):
             global max_dist
 
             # Start by converting coordinates to be relative to x1,y1
-            x2, y2 = x2 - x1, y2 - y1
+            x2 = x2 - x1
+            y2 = y2 - y1
             denom = nx ** 2 + ny ** 2 - 1
             if denom <= ENGRAVING_TOLERANCE:  # Not a corner bisector
                 if denom == -1:  # Find circle centre x1,y1
@@ -4488,8 +4640,10 @@ class Gcodetools(inkex.Effect):
             iimin = -1
             r = max_dist
             # set limits within which to look for lines
-            xmin, xmax = x1 + r * nx - r, x1 + r * nx + r
-            ymin, ymax = y1 + r * ny - r, y1 + r * ny + r
+            xmin = x1 + r * nx - r
+            xmax =  x1 + r * nx + r
+            ymin  = y1 + r * ny - r
+            ymax =  y1 + r * ny + r
             for jj in xrange(0, len(nlLT)):  # for every subpath of this object
                 for ii in xrange(0, len(nlLT[jj])):  # for every point and line
                     if nlLT[jj][ii - 1][2]:  # if a point
@@ -4516,8 +4670,10 @@ class Gcodetools(inkex.Effect):
                         if nlLT[jj][ii][3] > 0:  # acute, so use normal, not bisector
                             nx3 = nx23
                             ny3 = ny23
-                        x23min, x23max = min(x2, x3), max(x2, x3)
-                        y23min, y23max = min(y2, y3), max(y2, y3)
+                        x23min  = min(x2, x3)
+                        x23max = max(x2, x3)
+                        y23min  = min(y2, y3)
+                        y23max = max(y2, y3)
                         # see if line in range
                         if n1[2] == False and (x23max < xmin or x23min > xmax or y23max < ymin or y23min > ymax):
                             continue
@@ -4526,8 +4682,10 @@ class Gcodetools(inkex.Effect):
                         r = t1
                         iimin = ii
                         jjmin = jj
-                        xmin, xmax = x1 + r * nx - r, x1 + r * nx + r
-                        ymin, ymax = y1 + r * ny - r, y1 + r * ny + r
+                        xmin  = x1 + r * nx - r
+                        xmax =  x1 + r * nx + r
+                        ymin  = y1 + r * ny - r
+                        ymax = y1 + r * ny + r
                 # next ii
             # next jj
             return jjmin, iimin, r
@@ -4632,7 +4790,9 @@ class Gcodetools(inkex.Effect):
 
         # end of subfunction definitions. engraving() starts here:
         gcode = ''
-        r, w, wmax = 0, 0, 0  # theoretical and tool-radius-limited radii in pixels
+        r = 0 # theoretical and tool-radius-limited radii in pixels
+        w =  0
+        wmax = 0
         cspe = []
         we = []
         if len(self.selected_paths) <= 0:
@@ -4718,7 +4878,9 @@ class Gcodetools(inkex.Effect):
                             print_("csp is", csp)
                             nlLT.append([])
                             for i in range(0, len(csp)):  # LT for each point
-                                sp0, sp1, sp2 = csp[i - 2], csp[i - 1], csp[i]
+                                sp0 = csp[i - 2]
+                                sp1 = csp[i - 1]
+                                sp2 = csp[i]
                                 if self.options.engraving_draw_calculation_paths:
                                     # Copy it to 3D layer objects
                                     spl = []
@@ -5196,10 +5358,12 @@ G01 Z1 (going to cutting z)\n""",
         if len(subpath) < 2:
             return ""
         feed = " F {:f}".format(self.tool[feed_type])
-        x, z = self.options.lathe_x_axis_remap, self.options.lathe_z_axis_remap
+        x = self.options.lathe_x_axis_remap
+        z = self.options.lathe_z_axis_remap
         flip_angle = -1 if x.lower() + z.lower() in ["xz", "yx", "zy"] else 1
         alias = {"X": "I", "Y": "J", "Z": "K", "x": "i", "y": "j", "z": "k"}
-        i_, k_ = alias[x], alias[z]
+        i_ = alias[x]
+        k_ = alias[z]
         c = [[subpath[0][1], "move", 0, 0, 0]]
         for sp1, sp2 in zip(subpath, subpath[1:]):
             c += biarc(sp1, sp2, 0, 0)
@@ -5215,7 +5379,8 @@ G01 Z1 (going to cutting z)\n""",
             elif s[1] == 'arc':
                 r = [(s[2][0] - s[0][0]), (s[2][1] - s[0][1])]
                 if (r[0] ** 2 + r[1] ** 2) > self.options.min_arc_radius ** 2:
-                    r1, r2 = (P(s[0]) - P(s[2])), (P(s[4]) - P(s[2]))
+                    r1 = (P(s[0]) - P(s[2]))
+                    r2 = (P(s[4]) - P(s[2]))
                     if abs(r1.mag() - r2.mag()) < 0.001:
                         gcode += ("G02" if s[3] * flip_angle < 0 else "G03") + (" {} {:f} {} {:f} {} {:f} {} {:f}".format(x, s[4][0], z, s[4][1], i_, (s[2][0] - s[0][0]), k_, (s[2][1] - s[0][1]))) + feed + "\n"
                     else:
@@ -5226,7 +5391,8 @@ G01 Z1 (going to cutting z)\n""",
     def lathe(self):
         if not self.check_dir():
             return
-        x, z = self.options.lathe_x_axis_remap, self.options.lathe_z_axis_remap
+        x = self.options.lathe_x_axis_remap
+        z = self.options.lathe_z_axis_remap
         x = re.sub("^\s*([XYZxyz])\s*$", r"\1", x)
         z = re.sub("^\s*([XYZxyz])\s*$", r"\1", z)
         if x not in ["X", "Y", "Z", "x", "y", "z"] or z not in ["X", "Y", "Z", "x", "y", "z"]:
@@ -5241,7 +5407,8 @@ G01 Z1 (going to cutting z)\n""",
             gcode_plane_selection = "G18 (Using XZ plane)\n"
         if x.lower() + z.lower() in ["zy", "yz"]:
             gcode_plane_selection = "G19 (Using YZ plane)\n"
-        self.options.lathe_x_axis_remap, self.options.lathe_z_axis_remap = x, z
+        self.options.lathe_x_axis_remap = x
+        self.options.lathe_z_axis_remap = z
 
         paths = self.selected_paths
         self.tool = []
@@ -5271,7 +5438,8 @@ G01 Z1 (going to cutting z)\n""",
                                 bound = csp_simple_bound([subpath])
                                 minx, miny, maxx, maxy = csp_true_bounds([subpath])
                                 offsetted_subpath = csp_subpath_line_to(subpath[:], [[subpath[-1][1][0], miny[1] - r * 10], [subpath[0][1][0], miny[1] - r * 10], [subpath[0][1][0], subpath[0][1][1]]])
-                                left, right = subpath[-1][1][0], subpath[0][1][0]
+                                left = subpath[-1][1][0]
+                                right = subpath[0][1][0]
                                 if left > right:
                                     left, right = right, left
                                 offsetted_subpath = csp_offset([offsetted_subpath], r if not csp_subpath_ccw(offsetted_subpath) else -r)
@@ -5284,7 +5452,8 @@ G01 Z1 (going to cutting z)\n""",
 
                         # Create solid object from path and lathe_width
                         bound = csp_simple_bound([subpath])
-                        top_start, top_end = [subpath[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width], [subpath[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
+                        top_start = [subpath[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
+                        top_end = [subpath[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
 
                         gcode += ("G01 {} {:f} F {:f} \n".format(z, top_start[1], self.tool["passing feed"]))
                         gcode += ("G01 {} {:f} {} {:f} F {:f} \n".format(x, top_start[0], z, top_start[1], self.tool["passing feed"]))
@@ -5299,7 +5468,8 @@ G01 Z1 (going to cutting z)\n""",
                             current_width = self.options.lathe_width - step * i
                             intersections = []
                             for j in range(1, len(subpath)):
-                                sp1, sp2 = subpath[j - 1], subpath[j]
+                                sp1 = subpath[j - 1]
+                                sp2 =  subpath[j]
                                 intersections += [[j, k] for k in csp_line_intersection([bound[0] - 10, current_width], [bound[2] + 10, current_width], sp1, sp2)]
                                 intersections += [[j, k] for k in csp_line_intersection([bound[0] - 10, current_width + step], [bound[2] + 10, current_width + step], sp1, sp2)]
                             parts = csp_subpath_split_by_points(subpath, intersections)
@@ -5315,7 +5485,8 @@ G01 Z1 (going to cutting z)\n""",
                                     part = csp_subpath_line_to([], [part[0][1], part[-1][1]])
                                     gcode += self.generate_lathe_gcode(part, layer, "feed")
 
-                        top_start, top_end = [fine_cut[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width], [fine_cut[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
+                        top_start = [fine_cut[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
+                        top_end = [fine_cut[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
                         gcode += "\n(Fine cutting start)\n(Calculating fine cut using {})\n".format(self.options.lathe_create_fine_cut_using)
                         for i in range(self.options.lathe_fine_cut_count):
                             width = self.options.lathe_fine_cut_width * (1 - float(i + 1) / self.options.lathe_fine_cut_count)
@@ -5327,7 +5498,8 @@ G01 Z1 (going to cutting z)\n""",
                                 else:
                                     minx, miny, maxx, maxy = csp_true_bounds([fine_cut])
                                     offsetted_subpath = csp_subpath_line_to(fine_cut[:], [[fine_cut[-1][1][0], miny[1] - r * 10], [fine_cut[0][1][0], miny[1] - r * 10], [fine_cut[0][1][0], fine_cut[0][1][1]]])
-                                    left, right = fine_cut[-1][1][0], fine_cut[0][1][0]
+                                    left = fine_cut[-1][1][0]
+                                    right= fine_cut[0][1][0]
                                     if left > right:
                                         left, right = right, left
                                     offsetted_subpath = csp_offset([offsetted_subpath], width if not csp_subpath_ccw(offsetted_subpath) else -width)
@@ -5448,13 +5620,15 @@ G01 Z1 (going to cutting z)\n""",
             # Emit = dots per second
             l = math.sqrt(sum([(start[i] - end[i]) ** 2 for i in range(len(start))]))
             time_ = l / feed
-            c1, c2 = self.graffiti_reference_points[layer][0][0], self.graffiti_reference_points[layer][1][0]
+            c1 = self.graffiti_reference_points[layer][0][0]
+            c2 = self.graffiti_reference_points[layer][1][0]
             d = math.sqrt((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2)
             if d == 0:
                 raise ValueError("Error! Reference points should not be the same!")
             for i in range(int(time_ * emmit + 1)):
                 t = i / (time_ * emmit)
-                r1, r2 = start[0] * (1 - t) + end[0] * t, start[1] * (1 - t) + end[1] * t
+                r1 = start[0] * (1 - t) + end[0] * t
+                r2 = start[1] * (1 - t) + end[1] * t
                 a = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
                 h = math.sqrt(r1 ** 2 - a ** 2)
                 xa = c1[0] + a * (c2[0] - c1[0]) / d
@@ -5471,10 +5645,13 @@ G01 Z1 (going to cutting z)\n""",
                 graffiti_preview_draw_point(x, y, color)
 
         def create_connector(p1, p2, t1, t2):
-            P1, P2 = P(p1), P(p2)
-            N1, N2 = P(rotate_ccw(t1)), P(rotate_ccw(t2))
+            P1 = P(p1)
+            P2 = P(p2)
+            N1 = P(rotate_ccw(t1))
+            N2=  P(rotate_ccw(t2))
             r = self.options.graffiti_min_radius
-            C1, C2 = P1 + N1 * r, P2 + N2 * r
+            C1 = P1 + N1 * r
+            C2 = P2 + N2 * r
             # Get closest possible centers of arcs, also we define that arcs are both ccw or both not.
             dc, N1, N2, m = (
                 (
@@ -5490,14 +5667,16 @@ G01 Z1 (going to cutting z)\n""",
                 )
             )
             dc = math.sqrt(dc)
-            C1, C2 = P1 + N1 * r, P2 + N2 * r
+            C1 = P1 + N1 * r
+            C2 =  P2 + N2 * r
             Dc = C2 - C1
 
             if dc == 0:
                 # can be joined by one arc
                 return csp_from_arc(p1, p2, C1.to_list(), r, t1)
 
-            cos, sin = Dc.x / dc, Dc.y / dc
+            cos = Dc.x / dc
+            sin = Dc.y / dc
 
             p1_end = [C1.x - r * sin * m, C1.y + r * cos * m]
             p2_st = [C2.x - r * sin * m, C2.y + r * cos * m]
@@ -5521,8 +5700,10 @@ G01 Z1 (going to cutting z)\n""",
 (Using graffiti extension.)
 (Header end.)"""
 
-        minx, miny, maxx, maxy = float("inf"), float("inf"), float("-inf"), float("-inf")
-
+        minx = float("inf")
+        miny = float("inf")
+        maxx = float("-inf")
+        maxy = float("-inf")
         # Get all reference points and path's bounds to make preview
 
         for layer in self.layers:
@@ -5546,13 +5727,19 @@ G01 Z1 (going to cutting z)\n""",
 
                 if self.options.graffiti_create_preview:
                     for point in self.graffiti_reference_points[layer]:
-                        minx, miny, maxx, maxy = min(minx, point[0][0]), min(miny, point[0][1]), max(maxx, point[0][0]), max(maxy, point[0][1])
+                        minx =min(minx, point[0][0])
+                        miny =min(miny, point[0][1])
+                        maxx = max(maxx, point[0][0])
+                        maxy = max(maxy, point[0][1])
                     for path in paths[layer]:
                         csp = cubic_paths.parseCubicPath(path.get("d"))
                         csp = self.apply_transforms(path, csp)
                         csp = self.transform_csp(csp, layer)
                         bounds = csp_simple_bound(csp)
-                        minx, miny, maxx, maxy = min(minx, bounds[0]), min(miny, bounds[1]), max(maxx, bounds[2]), max(maxy, bounds[3])
+                        minx =min(minx, bounds[0])
+                        miny =min(miny, bounds[1])
+                        maxx =max(maxx, bounds[2])
+                        maxy =max(maxy, bounds[3])
 
         if self.options.graffiti_create_preview:
             self.graffiti_preview = list([[255] * (4 * self.options.graffiti_preview_size) for _ in range(self.options.graffiti_preview_size)])
@@ -5630,7 +5817,8 @@ G01 Z1 (going to cutting z)\n""",
                     polyline += [sp2]
                     polylines += [['draw', polyline[:]]]
 
-                    last_sp1, last_sp2 = sp1, sp2
+                    last_sp1 = sp1
+                    last_sp2 = sp2
 
                 # Add return to start_point
                 if not polylines:
@@ -5787,7 +5975,8 @@ G01 Z1 (going to cutting z)\n""",
                 if self.options.offset_just_get_distance:
                     for layer in self.selected_paths:
                         if len(self.selected_paths[layer]) == 2:
-                            csp1, csp2 = cubic_paths.parseCubicPath(self.selected_paths[layer][0].get("d")), cubic_paths.parseCubicPath(self.selected_paths[layer][1].get("d"))
+                            csp1 = cubic_paths.parseCubicPath(self.selected_paths[layer][0].get("d"))
+                            csp2 =  cubic_paths.parseCubicPath(self.selected_paths[layer][1].get("d"))
                             dist = csp_to_csp_distance(csp1, csp2)
                             print_(dist)
                             draw_pointer(list(csp_at_t(csp1[dist[1]][dist[2] - 1], csp1[dist[1]][dist[2]], dist[3]))

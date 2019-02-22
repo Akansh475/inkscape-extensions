@@ -40,7 +40,7 @@ from .units import discover_unit, convert_unit, render_unit
 from .utils import removeNS
 from .elements import ( # pylint: disable=unused-import
     BaseElement, OtherElements, Group, PathElement, Points, Rectangle, Image,
-    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide,
+    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide, Tspan, Marker
 )
 
 class SvgDocumentElement(BaseElement):

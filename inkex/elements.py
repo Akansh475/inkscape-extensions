@@ -30,6 +30,7 @@ from .transforms import Transform
 from .styles import Style
 from .utils import addNS, removeNS, NSS
 from .paths import Path
+from .transforms import BoundingBox
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
@@ -37,9 +38,14 @@ class BaseElement(etree.ElementBase):
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
 
+    @property
     def path(self):
         """Gets the outline or path of the element, this can be a simple bounding box for most"""
-        raise NotImplementedError("Path should be provided by svg element implementations.")
+        return Path(self.get_path())
+
+    def get_path(self):
+        raise NotImplementedError("Path should be provided by svg element {}."\
+            .format(type(self).__name__))
 
     def xpath(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
@@ -84,7 +90,7 @@ class BaseElement(etree.ElementBase):
 
     def bounding_box(self):
         """Returns the bounding box for the element as a BoundingBox object (x1, x2, y1, y2)"""
-        return Path(self.path).bounding_box()
+        return self.path.bounding_box()
 
     def get_center_position(self):
         """Returns object's center in terms of document units"""
@@ -104,16 +110,22 @@ class Group(BaseElement):
     """Any group element (layer or regular group)"""
     tag_name = 'g'
 
+    def bounding_box(self):
+        bbox = BoundingBox(None)
+        for child in self:
+            bbox += child.bounding_box()
+        return bbox
+
 
 class PathElement(BaseElement):
     """Provide a useful extension for path elements"""
     tag_name = 'path'
-    path = property(lambda self: self.get('d'))
+    get_path = lambda self: self.get('d')
 
 class Points(BaseElement):
     """Provide a useful extension for points elements"""
     tag_name = 'points'
-    path = property(lambda self: 'M' + self.get('points'))
+    get_path = lambda self: 'M' + self.get('points')
 
 class Rectangle(BaseElement):
     """Provide a useful extension for rectangle elements"""
@@ -123,8 +135,7 @@ class Rectangle(BaseElement):
     width = property(lambda self: float(self.get('width')))
     height = property(lambda self: float(self.get('height')))
 
-    @property
-    def path(self):
+    def get_path(self):
         """Calculate the path as the box around the rect"""
         return 'M {0.left},{0.top} h{0.width}v{0.height}h-{0.width}'.format(self)
 
@@ -145,8 +156,7 @@ class Circle(BaseElement):
     left = property(lambda self: self.center_x - self.radius_x)
     right = property(lambda self: self.center_x + self.radius_x)
 
-    @property
-    def path(self):
+    def get_path(self):
         """Calculte the arc path of this circle/elipse"""
         return ('M {0.left} {0.right} '\
                 'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '\

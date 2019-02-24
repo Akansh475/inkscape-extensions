@@ -265,6 +265,9 @@ class BoundingBox(object): # pylint: disable=too-few-public-methods
         yield self.y.minimum
         yield self.y.maximum
 
+    def __getitem__(self, index):
+        return list(self)[index]
+
     def __repr__(self):
         return "bbox:" + str(tuple(self))
 

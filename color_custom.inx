@@ -15,7 +15,8 @@
             </param>
         </page>
         <page name="Help" _gui-text="Help">
-            <_param name="instructions" type="description" xml:space="preserve">Allows you to evaluate different functions for each channel.
+            <_param name="instructions" type="description" xml:space="preserve">
+Allows you to evaluate different functions for each channel.
 r, g and b are the normalized values of the red, green and blue channels. The resulting RGB values are automatically clamped.
 
 Example (half the red, swap green and blue):

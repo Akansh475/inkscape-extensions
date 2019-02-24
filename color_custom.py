@@ -1,50 +1,55 @@
 #!/usr/bin/env python
+# coding=utf-8
+from __future__ import absolute_import, division
+
 import coloreffect
+
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
         coloreffect.ColorEffect.__init__(self)
         self.arg_parser.add_argument("--r",
-            dest="rFunction", default="r",
-            help="red channel function")
+                                     dest="rFunction", default="r",
+                                     help="red channel function")
         self.arg_parser.add_argument("--g",
-            dest="gFunction", default="g",
-            help="green channel function")
+                                     dest="gFunction", default="g",
+                                     help="green channel function")
         self.arg_parser.add_argument("--b",
-            dest="bFunction", default="b",
-            help="blue channel function")
+                                     dest="bFunction", default="b",
+                                     help="blue channel function")
         self.arg_parser.add_argument("--tab",
-            help="The selected UI-tab when OK was pressed")
+                                     help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--scale", type=float, default=1.0,
-            help="The input (r,g,b) range")
+                                     help="The input (r,g,b) range")
 
     def normalize(self, v):
-        if v<0:
+        if v < 0:
             return 0.0
-        if v > float(self.options.scale):
-            return float(self.options.scale)
+        if v > self.options.scale:
+            return self.options.scale
         return v
 
-    def _hexstr(self,r,g,b):
-        return '%02x%02x%02x' % (int(round(r)),int(round(g)),int(round(b)))
+    def _hexstr(self, r, g, b):
+        return '{:02x}{:02x}{:02x}'.format(int(round(r)), int(round(g)), int(round(b)))
 
-    def colmod(self,_r,_g,_b):
-        factor = 255.0/float(self.options.scale)
-        r=float(_r)/factor
-        g=float(_g)/factor
-        b=float(_b)/factor
+    def colmod(self, _r, _g, _b):
+        factor = 255 / self.options.scale
+        r = _r / factor
+        g = _g / factor
+        b = _b / factor
 
         # add stuff to be accessible from within the custom color function here.
-        safeenv = {'__builtins__':{},'r':r,'g':g,'b':b}
+        safeenv = {'__builtins__': {}, 'r': r, 'g': g, 'b': b}
 
         try:
-            r2=self.normalize(eval(self.options.rFunction,safeenv))
-            g2=self.normalize(eval(self.options.gFunction,safeenv))
-            b2=self.normalize(eval(self.options.bFunction,safeenv))
+            r2 = self.normalize(eval(self.options.rFunction, safeenv))
+            g2 = self.normalize(eval(self.options.gFunction, safeenv))
+            b2 = self.normalize(eval(self.options.bFunction, safeenv))
         except:
-            return self._hexstr(255.0,0.0,0.0)
-        return self._hexstr(r2*factor,g2*factor,b2*factor)
+            return self._hexstr(255.0, 0.0, 0.0)
+        return self._hexstr(r2 * factor, g2 * factor, b2 * factor)
+
 
 if __name__ == '__main__':
     c = C()
-    c.affect()
+    c.run()

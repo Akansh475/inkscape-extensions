@@ -1,27 +1,33 @@
 #!/usr/bin/env python
+# coding=utf-8
+from __future__ import absolute_import, division
 
 import coloreffect
 
-class C(coloreffect.ColorEffect):
-  def colmod(self,r,g,b):
-    FACTOR=0.9
-   
-    i=int(1.0/(1.0-FACTOR))
-    if r==0 and g==0 and b==0:
-      return '%02x%02x%02x' % (i,i,i)
-    if r>0 and r<i:
-      r=i
-    if g>0 and g<i:
-      g=i
-    if b>0 and b<i:
-      b=i;
 
-    r=min(int(round((r/FACTOR))), 255)
-    g=min(int(round((g/FACTOR))), 255)
-    b=min(int(round((b/FACTOR))), 255)
-   
-    return '%02x%02x%02x' % (r,g,b)
+class C(coloreffect.ColorEffect):
+    def colmod(self, r, g, b):
+        factor = 0.9
+
+        i = int(1 / (1 - factor))
+
+        if r == 0 and g == 0 and b == 0:
+            return '{:02x}{:02x}{:02x}'.format(i, i, i)
+
+        if 0 < r < i:
+            r = i
+        if 0 < g < i:
+            g = i
+        if 0 < b < i:
+            b = i
+
+        r = min(int(round((r / factor))), 255)
+        g = min(int(round((g / factor))), 255)
+        b = min(int(round((b / factor))), 255)
+
+        return '{:02x}{:02x}{:02x}'.format(r, g, b)
+
 
 if __name__ == '__main__':
     c = C()
-    c.affect()
+    c.run()

@@ -11,7 +11,7 @@ class C(coloreffect.ColorEffect):
     """
 
     def __init__(self):
-        coloreffect.ColorEffect.__init__(self)
+        super(C, self).__init__()
         self.arg_parser.add_argument("-f", "--from_color",
                                      default="000000", help="Replace color")
         self.arg_parser.add_argument("-t", "--to_color",

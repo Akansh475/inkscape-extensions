@@ -10,7 +10,7 @@ import inkex
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
-        coloreffect.ColorEffect.__init__(self)
+        super(C, self).__init__()
         self.arg_parser.add_argument("-y", "--hue_range", type=int,
                                      dest="hue_range", default=0,
                                      help="Hue range")

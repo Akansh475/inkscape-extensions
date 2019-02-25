@@ -7,7 +7,7 @@ import coloreffect
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
-        coloreffect.ColorEffect.__init__(self)
+        super(C, self).__init__()
         self.arg_parser.add_argument("-t", "--threshold",
                                      type=int, default=127,
                                      help="Threshold Color Level")

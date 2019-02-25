@@ -44,7 +44,7 @@ def eval_(node, namespace):
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
-        coloreffect.ColorEffect.__init__(self)
+        super(C, self).__init__()
         self.arg_parser.add_argument("-r", "--r",
                                      dest="rFunction", default="r",
                                      help="red channel function")

@@ -10,7 +10,7 @@ import inkex
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
-        coloreffect.ColorEffect.__init__(self)
+        super(C, self).__init__()
         self.arg_parser.add_argument("-x", "--hue",
                                      type=int, default=0,
                                      help="Adjust hue")
@@ -40,23 +40,28 @@ class C(coloreffect.ColorEffect):
 
     def colmod(self, r, g, b):
         hsl = inkex.rgb_to_hsl(r / 255, g / 255, b / 255)
+
         if self.options.random_hue:
             hsl[0] = random.random()
         elif self.options.hue:
-            hueval = hsl[0] + (self.options.hue / 360)
-            hsl[0] = hueval % 1
+            hue_val = hsl[0] + (self.options.hue / 360)
+            # Only return the fractional amount (i.e. 3.25 -> 0.25)
+            hsl[0] = hue_val % 1
+
         if self.options.random_saturation:
             hsl[1] = random.random()
         elif self.options.saturation:
-            satval = hsl[1] + (self.options.saturation / 100)
-            hsl[1] = self.clamp(0, satval, 1)
+            sat_val = hsl[1] + (self.options.saturation / 100)
+            hsl[1] = self.clamp(0, sat_val, 1)
+
         if self.options.random_lightness:
             hsl[2] = random.random()
         elif self.options.lightness:
-            lightval = hsl[2] + (self.options.lightness / 100)
-            hsl[2] = self.clamp(0, lightval, 1)
+            light_val = hsl[2] + (self.options.lightness / 100)
+            hsl[2] = self.clamp(0, light_val, 1)
+
         rgb = inkex.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
-        return '{:02x}{:02x}{:02x}'.format(rgb[0] * 255, rgb[1] * 255, rgb[2] * 255)
+        return '{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
 
 if __name__ == '__main__':

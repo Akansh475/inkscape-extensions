@@ -1,17 +1,19 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 Test Inkex path parsing functionality.
 """
 
 import re
-
-from tests.base import TestCase
 import unittest
 
-from inkex.paths import Path, PathCommand, InvalidPath
+from inkex.paths import InvalidPath, Path, PathCommand
+from tests.base import TestCase
+
 
 class PathTest(TestCase):
     """Test path API and calculations"""
+
     def _assertPath(self, path, want_string):
         """Test a normalized path string against a good value"""
         return self.assertEqual(re.sub('\\s+', ' ', str(path)), want_string)
@@ -40,7 +42,7 @@ class PathTest(TestCase):
         for path in (
                 'M 50,50 L 10,10 m 10 10 l 2.1,2',
                 'm 150 150 c 10 10 6 6 20 10 L 10 10',
-            ):
+        ):
             self._assertPath(Path(path), path.replace(',', ' '))
 
     def test_chained_conversion(self):
@@ -51,7 +53,7 @@ class PathTest(TestCase):
                 ('M 100 100 L 20 20 40 40 30 10 Z', 'M 100 100 L 20 20 L 40 40 L 30 10 Z'),
                 ('m 50 50 l 20 20 40 40', 'm 50 50 l 20 20 l 40 40'),
                 ('m 50 50 20 20', 'm 50 50 l 20 20'),
-            ):
+        ):
             self._assertPath(Path(path), ret)
 
     def test_points(self):
@@ -67,17 +69,31 @@ class PathTest(TestCase):
                 ('Q 40 20 12 99', ((40, 20), (12, 99),)),
                 ('A 1,2,3,4,5,10,20', ((10, 20),)),
                 ('Z', ()),
-            ):
+        ):
             self.assertEqual(Path(path)[0].points, ret)
 
-    def test_bounding_box(self):
-        """Test the bounding box calculations"""
-        self.assertEqual(Path('M 20,20 L 90,90 l 10,10 Z').bounding_box(), (10, 90, 10, 90))
+    def test_bounding_box_lines(self):
+        """
+        Test the bounding box calculations
 
-        self.assertEqual(
-            Path('M 85.355333,14.644651 A 50,50 0 0 1 85.355333,85.355341 50,50 0 0 1 14.644657,85'
-                 '.355341 50,50 0 0 1 14.644676,14.644651 50,50 0 0 1 85.355333,14.644651 Z')\
-                         .bounding_box(), (0, 0, 100, 100))
+        A diagonal line from 90,90 from 10,10  "\"
+
+        """
+        self.assertEqual((10, 90, 10, 90), Path('M 20,20 L 90,90 l 10,10 Z').bounding_box())
+
+    def test_bounding_box_circle(self):
+        """
+        Test the bounding box calculations
+
+        Bounding box around a circle with a radius of 50
+        it should be from 0,0 -> 100, 100
+        """
+        self.assertEqual((0, 0, 100, 100),
+                         Path('M 85.355333,14.644651 '
+                              'A 50,50 0 0 1 85.355333,85.355341'
+                              ' 50,50 0 0 1 14.644657,85.355341'
+                              ' 50,50 0 0 1 14.644676,14.644651'
+                              ' 50,50 0 0 1 85.355333,14.644651 Z').bounding_box())
 
     def test_adding_to_path(self):
         """Paths can be translated using addition"""
@@ -104,14 +120,13 @@ class PathTest(TestCase):
         ret = Path('M 10,10 L 30,30 C 20 20 10 10 10 10 l 10 10') * (2.5, 3)
         self._assertPath(ret, 'M 25 30 L 75 90 C 50 60 25 30 25 30 l 25 30')
 
-        ret = Path("M 29.867708,101.68274 A 14.867708,14.867708 0 0 1 15,116.55045 14.867708,"\
-            "14.867708 0 0 1 0.13229179,101.68274 14.867708,14.867708 0 0 1 15,86.815031 "\
-            "14.867708,14.867708 0 0 1 29.867708,101.68274 Z")
+        ret = Path("M 29.867708,101.68274 A 14.867708,14.867708 0 0 1 15,116.55045 14.867708,"
+                   "14.867708 0 0 1 0.13229179,101.68274 14.867708,14.867708 0 0 1 15,86.815031 "
+                   "14.867708,14.867708 0 0 1 29.867708,101.68274 Z")
         ret.scale(1.2, 0.8)
-        self._assertPath(ret, 'M 35.8412 81.3462 A 17.8412 17.8412 0 0 1 '\
-            '18 93.2404 A 17.8412 17.8412 0 0 1 0.15875 81.3462 A 17.8412 1'\
-            '7.8412 0 0 1 18 69.452 A 17.8412 17.8412 0 0 1 35.8412 81.3462 Z')
-
+        self._assertPath(ret, 'M 35.8412 81.3462 A 17.8412 17.8412 0 0 1 '
+                              '18 93.2404 A 17.8412 17.8412 0 0 1 0.15875 81.3462 A 17.8412 1'
+                              '7.8412 0 0 1 18 69.452 A 17.8412 17.8412 0 0 1 35.8412 81.3462 Z')
 
     def test_absolute(self):
         """Paths can be converted to absolute"""

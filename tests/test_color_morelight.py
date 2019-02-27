@@ -4,12 +4,13 @@
 import unittest
 
 from color_morelight import C
-from tests.base import TestCase
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
-class ColorMoreLightBasicTest(TestCase):
+class ColorMoreLightBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.e = C()
+        self.effect = C
+        self.e = self.effect()
 
     def test_default_values_black(self):
         args = [self.empty_svg]

@@ -2,12 +2,13 @@
 # coding=utf-8
 
 from color_custom import C
-from tests.base import TestCase
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
-class ColorCustomBasicTest(TestCase):
+class ColorCustomBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.e = C()
+        self.effect = C
+        self.e = self.effect()
 
     def test_default_values(self):
         """ The default ranges are set to 0, and thus the color should not change. """

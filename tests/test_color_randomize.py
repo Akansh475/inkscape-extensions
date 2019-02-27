@@ -4,7 +4,7 @@
 import unittest
 
 from color_randomize import C
-from tests.base import TestCase
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 def extract_hsl(hexcol):
@@ -12,9 +12,10 @@ def extract_hsl(hexcol):
     return Color('#' + hexcol).to_hsl().to_floats()
 
 
-class ColorRandomizeBasicTest(TestCase):
+class ColorRandomizeBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.e = C()
+        self.effect = C
+        self.e = self.effect()
 
     def test_default_values(self):
         """ The default ranges are set to 0, and thus the color and opacity should not change. """
@@ -26,9 +27,10 @@ class ColorRandomizeBasicTest(TestCase):
         self.assertEqual(5, opac)
 
 
-class ColorRandomizeColorModificationTest(TestCase):
+class ColorRandomizeColorModificationTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.e = C()
+        self.effect = C
+        self.e = self.effect()
 
     def test_no_change(self):
         """ The user selected 0% values, and thus the color should not change. """

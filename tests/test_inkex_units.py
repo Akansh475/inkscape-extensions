@@ -1,17 +1,16 @@
 #!/usr/bin/env python
+# coding=utf-8
 """Test units inkex module functionality"""
 
-import os
-import sys
-
-from inkex.units import (
-    parse_unit, are_near_relative, discover_unit, convert_unit, render_unit
-)
-from tests.base import TestCase
 import unittest
+
+from inkex.units import are_near_relative, convert_unit, discover_unit, parse_unit, render_unit
+from tests.base import TestCase
+
 
 class UnitsTest(TestCase):
     """Tests for Inkscape Units handling"""
+
     def test_parse_unit(self):
         """Test parsing a unit in a document"""
         self.assertEqual(parse_unit('50px'), (50.0, 'px'))
@@ -60,6 +59,7 @@ class UnitsTest(TestCase):
                 '.1e+3mm',
                 '+.1e+3mm'):
             self.assertEqual(parse_unit(value), (100, 'mm'))
+
 
 if __name__ == '__main__':
     unittest.main()

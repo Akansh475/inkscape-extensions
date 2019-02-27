@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005,2007,2008 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2008,2010 Alvin Penner, penner@vaxxine.com
@@ -54,7 +54,7 @@ except:
   #        return (u[i+1]-u[i])*(u[i+1]-u[i])/(u[i+1]-u[i-2])/(u[i+1]-u[i-1])
   #    else:
   #        return 0
-  
+
   #def get_fit(u, csp, col):
   #    return (1-u)**3*csp[0][col] + 3*(1-u)**2*u*csp[1][col] \
   #        + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
@@ -84,7 +84,7 @@ class DxfOutlines(inkex.Effect):
                                      default="all")
         self.OptionParser.add_option("--layer_name", action="store",
                                      type="string", dest="layer_name")
-                                     
+
         self.dxf = []
         self.handle = 255                       # handle for DXF ENTITY
         self.layers = ['0']
@@ -288,7 +288,7 @@ class DxfOutlines(inkex.Effect):
             layer = group.get(inkex.addNS('label', 'inkscape'))
             if self.options.layer_name and self.options.layer_option and self.options.layer_option=='name' and not layer.lower() in self.options.layer_name:
                 return
-              
+
             layer = layer.replace(' ', '_')
             if layer in self.layers:
                 self.layer = layer
@@ -316,7 +316,7 @@ class DxfOutlines(inkex.Effect):
         #Split user layer data into a list: "layerA,layerb,LAYERC" becomes ["layera", "layerb", "layerc"]
         if self.options.layer_name:
             self.options.layer_name = self.options.layer_name.lower().split(',')
-			
+
         #References:   Minimum Requirements for Creating a DXF File of a 3D Model By Paul Bourke
         #              NURB Curves: A Guide for the Uninitiated By Philip J. Schneider
         #              The NURBS Book By Les Piegl and Wayne Tiller (Springer, 1995)
@@ -356,7 +356,7 @@ class DxfOutlines(inkex.Effect):
         if self.options.POLY == 'true':
             self.LWPOLY_output()
         self.dxf_add(dxf_templates.r14_footer)
-		#Warn user if layer data seems wrong
+        #Warn user if layer data seems wrong
         if self.options.layer_name and self.options.layer_option and self.options.layer_option=='name':
             for layer in self.options.layer_name:
                 if not layer in self.layernames:

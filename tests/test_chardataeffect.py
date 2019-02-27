@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from chardataeffect import *
 
-class CharDataBasicTest(TestCase):
-    effect = CharDataEffect
+from chardataeffect import CharDataEffect
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class CharDataBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = CharDataEffect
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

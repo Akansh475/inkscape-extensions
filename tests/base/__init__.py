@@ -71,7 +71,7 @@ class StdRedirect(object): # pylint: disable=too-few-public-methods
         setattr(sys, self.name, self.std)
 
 class NoExtension(object): # pylint: disable=too-few-public-methods
-    """Test case must specify 'ext_model' to assertEffect."""
+    """Test case must specify 'self.effect' to assertEffect."""
     def __init__(self, *args, **kwargs):
         raise NotImplementedError(self.__doc__)
 
@@ -83,11 +83,11 @@ class TestCase(BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
-    ext_model = NoExtension
 
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
         self.temp_dir = None
+        self.effect = NoExtension
 
     def tearDown(self):
         if self.temp_dir and os.path.isdir(self.temp_dir):
@@ -130,7 +130,7 @@ class TestCase(BaseCase):
            filename should point to a starting svg document, default is empty_svg
         """
         contains = kwargs.pop('contains', None)
-        effect = kwargs.pop('effect', self.ext_model)()
+        effect = kwargs.pop('effect', self.effect)()
 
         args = [self.data_file(*filename)] if filename else [self.empty_svg] # pylint: disable=no-value-for-parameter
         args += kwargs.pop('args', [])
@@ -148,3 +148,13 @@ class TestCase(BaseCase):
             self.assertFalse(warnings, "Deprecated API is still being used!")
 
         return effect
+
+
+
+class InkscapeExtensionTestMixin(object):
+    def test_default_settings_cause_no_exception(self):
+        if self.effect is None:
+            self.skipTest('self.effect is not defined for this this test')
+        self.e = self.effect()
+        args = [self.empty_svg]
+        self.e.run(args)

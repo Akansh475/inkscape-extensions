@@ -32,142 +32,140 @@ import glob
 import re
 
 def propStrToDict(inStr):
-	dictio = {}
+    dictio = {}
 
-	for prop in inStr.split(";"):
-		values = prop.split(":")
+    for prop in inStr.split(";"):
+        values = prop.split(":")
 
-		if (len(values) == 2):
-			dictio[values[0].strip()] = values[1].strip()
+        if (len(values) == 2):
+            dictio[values[0].strip()] = values[1].strip()
 
-	return dictio
+    return dictio
 
 def dictToPropStr(dictio):
-	str = ""
+    str = ""
 
-	for key in dictio.keys():
-		str += " " + key + ":" + dictio[key] + ";" 
+    for key in dictio.keys():
+        str += " " + key + ":" + dictio[key] + ";"
 
-	return str[1:]
+    return str[1:]
 
 def setStyle(node, propKey, propValue):
-	props = {}
+    props = {}
 
-	if "style" in node.attrib:
-		props = propStrToDict(node.get("style"))
-	
-	props[propKey] = propValue
-	node.set("style", dictToPropStr(props))
+    if "style" in node.attrib:
+        props = propStrToDict(node.get("style"))
+
+    props[propKey] = propValue
+    node.set("style", dictToPropStr(props))
 
 class MyEffect(inkex.Effect):
-	inkscapeCommand = None
-	zipFile = None
+    inkscapeCommand = None
+    zipFile = None
 
-	def __init__(self):
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-		self.OptionParser.add_option('--type', action = 'store', type = 'string', dest = 'type', default = '')
-		self.OptionParser.add_option('--resolution', action = 'store', type = 'string', dest = 'resolution', default = '')
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--type', action = 'store', type = 'string', dest = 'type', default = '')
+        self.OptionParser.add_option('--resolution', action = 'store', type = 'string', dest = 'resolution', default = '')
 
-		# Register jessyink namespace.
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        # Register jessyink namespace.
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-		# Set inkscape command.
-		self.inkscapeCommand = self.findInkscapeCommand()
+        # Set inkscape command.
+        self.inkscapeCommand = self.findInkscapeCommand()
 
-		if (self.inkscapeCommand == None):
-			inkex.errormsg(_("Could not find Inkscape command.\n"))
-			sys.exit(1)
+        if (self.inkscapeCommand == None):
+            inkex.errormsg(_("Could not find Inkscape command.\n"))
+            sys.exit(1)
 
-	def output(self):
-		pass
+    def output(self):
+        pass
 
-	def effect(self):
-		# Remove any temporary files that might be left from last time.
-		self.removeJessyInkFilesInTempDir()
+    def effect(self):
+        # Remove any temporary files that might be left from last time.
+        self.removeJessyInkFilesInTempDir()
 
-		# Check whether the JessyInk-script is present (indicating that the presentation has not been properly exported).
-		scriptNodes = self.document.xpath("//svg:script[@jessyink:version]", namespaces=inkex.NSS)
+        # Check whether the JessyInk-script is present (indicating that the presentation has not been properly exported).
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version]", namespaces=inkex.NSS)
 
-		if len(scriptNodes) != 0:
-			inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        if len(scriptNodes) != 0:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-		zipFileDesc, zpFile = tempfile.mkstemp(suffix=".zip", prefix="jessyInk__")
+        zipFileDesc, zpFile = tempfile.mkstemp(suffix=".zip", prefix="jessyInk__")
 
-		output = zipfile.ZipFile(zpFile, "w", compression=zipfile.ZIP_STORED)
+        with zipfile.ZipFile(zpFile, "w", compression=zipfile.ZIP_STORED) as output:
 
-		# Find layers.
-		exportNodes = self.document.xpath("//svg:g[@inkscape:groupmode='layer']", namespaces=inkex.NSS)
+            # Find layers.
+            exportNodes = self.document.xpath("//svg:g[@inkscape:groupmode='layer']", namespaces=inkex.NSS)
 
-		if len(exportNodes) < 1:
-			sys.stderr.write("No layers found.")
+            if len(exportNodes) < 1:
+                sys.stderr.write("No layers found.")
 
-		for node in exportNodes:
-			setStyle(node, "display", "none")
+            for node in exportNodes:
+                setStyle(node, "display", "none")
 
-		for node in exportNodes:
-			setStyle(node, "display", "inherit")
-			setStyle(node, "opacity", "1")
-			self.takeSnapshot(output, node.attrib["{" + inkex.NSS["inkscape"] + "}label"])
-			setStyle(node, "display", "none")
-				
-		# Write temporary zip file to stdout.
-		output.close()
-		out = open(zpFile,'rb')
+            for node in exportNodes:
+                setStyle(node, "display", "inherit")
+                setStyle(node, "opacity", "1")
+                self.takeSnapshot(output, node.attrib["{" + inkex.NSS["inkscape"] + "}label"])
+                setStyle(node, "display", "none")
 
-		# Switch stdout to binary on Windows.
-		if sys.platform == "win32":
-			import os, msvcrt
-			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+        # Write temporary zip file to stdout.
+        with open(zpFile,'rb') as out:
 
-		# Output the file.
-		sys.stdout.write(out.read())
-		sys.stdout.close()
-		out.close()
+            # Switch stdout to binary on Windows.
+            if sys.platform == "win32":
+                import os, msvcrt
+                msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-		# Delete temporary files.
-		self.removeJessyInkFilesInTempDir()
+            # Output the file.
+            sys.stdout.write(out.read())
 
-	# Function to export the current state of the file using Inkscape.
-	def takeSnapshot(self, output, fileName):
-		# Write the svg file.
-		svgFileDesc, svgFile = tempfile.mkstemp(suffix=".svg", prefix="jessyInk__")
-		self.document.write(os.fdopen(svgFileDesc, "wb"))
-		
-		ext = str(self.options.type).lower()
+        # Delete temporary files.
+        self.removeJessyInkFilesInTempDir()
 
-		# Prepare output file.
-		outFileDesc, outFile = tempfile.mkstemp(suffix="." + ext, prefix="jessyInk__")
-				
-		proc = subprocess.Popen([self.inkscapeCommand + " --file=" + svgFile  + " --without-gui --export-dpi=" + str(self.options.resolution) + " --export-" + ext + "=" + outFile], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		stdout_value, stderr_value = proc.communicate()
-		
-		output.write(outFile, fileName + "." + ext)
+    # Function to export the current state of the file using Inkscape.
+    def takeSnapshot(self, output, fileName):
+        # Write the svg file.
+        svgFileDesc, svgFile = tempfile.mkstemp(suffix=".svg", prefix="jessyInk__")
+        self.document.write(os.fdopen(svgFileDesc, "wb"))
 
-	# Function to remove any temporary files created during the export.
-	def removeJessyInkFilesInTempDir(self):
-		for infile in glob.glob(os.path.join(tempfile.gettempdir(), 'jessyInk__*')):
-			try:
-				os.remove(infile)
-			except:
-				pass
-				
-	# Function to try and find the correct command to invoke Inkscape.
-	def findInkscapeCommand(self):
-		commands = []
-		commands.append("inkscape")
-		commands.append("C:\Program Files\Inkscape\inkscape.exe")
-		commands.append("/Applications/Inkscape.app/Contents/Resources/bin/inkscape")
+        ext = str(self.options.type).lower()
 
-		for command in commands:
-			proc = subprocess.Popen([command + " --without-gui --version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			stdout_value, stderr_value = proc.communicate()
+        # Prepare output file.
+        outFileDesc, outFile = tempfile.mkstemp(suffix="." + ext, prefix="jessyInk__")
 
-			if proc.returncode == 0:
-				return command
+        proc = subprocess.Popen([self.inkscapeCommand + " --file=" + svgFile  + " --without-gui --export-dpi=" + str(self.options.resolution) + " --export-" + ext + "=" + outFile], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout_value, stderr_value = proc.communicate()
 
-		return None
+        output.write(outFile, fileName + "." + ext)
 
-e = MyEffect()
-e.affect()
+    # Function to remove any temporary files created during the export.
+    def removeJessyInkFilesInTempDir(self):
+        for infile in glob.glob(os.path.join(tempfile.gettempdir(), 'jessyInk__*')):
+            try:
+                os.remove(infile)
+            except:
+                pass
+
+    # Function to try and find the correct command to invoke Inkscape.
+    def findInkscapeCommand(self):
+        commands = []
+        commands.append("inkscape")
+        commands.append("C:\Program Files\Inkscape\inkscape.exe")
+        commands.append("/Applications/Inkscape.app/Contents/Resources/bin/inkscape")
+
+        for command in commands:
+            proc = subprocess.Popen([command + " --without-gui --version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout_value, stderr_value = proc.communicate()
+
+            if proc.returncode == 0:
+                return command
+
+        return None
+if __name__ == '__main__':
+
+    e = MyEffect()
+    e.affect()

@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from interp import *
 
-class InterpBasicTest(TestCase):
-    effect = Interp
+from interp import Interp
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class InterpBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Interp
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

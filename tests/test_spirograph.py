@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from spirograph import *
 
-class SpirographBasicTest(TestCase):
-    effect = Spirograph
+from spirograph import Spirograph
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class SpirographBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Spirograph
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from jitternodes import *
 
-class JitterNodesBasicTest(TestCase):
-    effect = JitterNodes
+from jitternodes import JitterNodes
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class JitterNodesBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = JitterNodes
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

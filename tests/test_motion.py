@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from motion import *
 
-class MotionBasicTest(TestCase):
-    effect = Motion
+from motion import Motion
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class MotionBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Motion
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

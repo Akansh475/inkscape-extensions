@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from tar_layers import LayersOutput
 
-class LayersOutputBasicTest(TestCase):
-    effect = LayersOutput
+from tar_layers import LayersOutput
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class LayersOutputBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = LayersOutput
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

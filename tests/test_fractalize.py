@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from fractalize import *
 
-class PathFractalizeBasicTest(TestCase):
-    effect = PathFractalize
+from fractalize import PathFractalize
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class PathFractalizeBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = PathFractalize
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

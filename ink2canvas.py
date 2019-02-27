@@ -18,8 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 
 import inkex
-from ink2canvas.canvas import Canvas
-import ink2canvas.svg as svg
+from ink2canvas_lib.canvas import Canvas
+import ink2canvas_lib.svg as svg
 
 log = inkex.debug  #alias to debug method
 

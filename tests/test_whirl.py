@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from whirl import *
 
-class WhirlBasicTest(TestCase):
-    effect = Whirl
+from tests.base import InkscapeExtensionTestMixin, TestCase
+from whirl import Whirl
+
+
+class WhirlBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Whirl
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

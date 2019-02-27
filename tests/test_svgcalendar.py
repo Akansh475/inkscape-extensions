@@ -1,16 +1,20 @@
+# coding=utf-8
 """
 All tests for the svg calendar extension
 """
 import calendar
 from datetime import datetime
 
-from tests.base import TestCase
-
 from svgcalendar import SVGCalendar
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
-class CalendarArguments(TestCase):
+
+class CalendarArguments(InkscapeExtensionTestMixin, TestCase):
     """Test arguments to calendar extensions"""
-    ext_model = SVGCalendar
+
+    def setUp(self):
+        self.effect = SVGCalendar
+        self.e = self.effect()
 
     def test_default_names_list(self):
         """Test default names"""
@@ -78,9 +82,12 @@ class CalendarArguments(TestCase):
         self.assertEqual(calendar.firstweekday(), 0)
 
 
-class CalendarMethods(TestCase):
+class CalendarMethods(InkscapeExtensionTestMixin, TestCase):
     """Test calendar methods"""
-    ext_model = SVGCalendar
+
+    def setUp(self):
+        self.effect = SVGCalendar
+        self.e = self.effect()
 
     def test_recognize_a_weekend(self):
         """Recognise a weekend"""

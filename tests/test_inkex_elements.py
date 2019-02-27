@@ -1,12 +1,14 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 Test elements extra logic from svg xml lxml custom classes.
 """
-from inkex.transforms import Transform
-
-from tests.base import TestCase
 import unittest
+
+from inkex.transforms import Transform
+from tests.base import TestCase
 from tests.base.svg import svg_file
+
 
 class ElementTestCase(TestCase):
     """Base element test case"""
@@ -19,6 +21,7 @@ class ElementTestCase(TestCase):
     def test_print(self):
         """Print element as string"""
         self.assertEqual(str(self.elem), self.tag)
+
 
 class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
@@ -60,14 +63,14 @@ class RectTest(ElementTestCase):
     def test_compose_transform(self):
         """Composed transformation"""
         self.assertEqual(self.elem.transform, Transform('rotate(16.097889)'))
-        self.assertEqual(str(self.elem.composed_transform()), \
-            'matrix(0.754465 -0.863362 1.13818 1.31905 -461.593 215.193)')
+        self.assertEqual(str(self.elem.composed_transform()),
+                         'matrix(0.754465 -0.863362 1.13818 1.31905 -461.593 215.193)')
 
     def test_compose_stylesheet(self):
         """Test finding the composed stylesheet for the shape"""
         self.assertEqual(str(self.elem.style), 'fill:#0000ff;stroke-width:1px')
-        self.assertEqual(str(self.elem.composed_style()), \
-            'fill:#0000ff;stroke:#d88;stroke-width:1px')
+        self.assertEqual(str(self.elem.composed_style()),
+                         'fill:#0000ff;stroke:#d88;stroke-width:1px')
 
     def test_path(self):
         """Rectangle path"""
@@ -81,8 +84,9 @@ class CirtcleTest(ElementTestCase):
 
     def test_path(self):
         """Circle path"""
-        self.assertEqual(self.elem.get_path(),\
-            'M 50.0 150.0 A 50.0,50.0 0 1 0 150.0, 100.0 A 50.0,50.0 0 1 0 50.0, 100.0')
+        self.assertEqual(self.elem.get_path(),
+                         'M 50.0 150.0 A 50.0,50.0 0 1 0 150.0, 100.0 A 50.0,50.0 0 1 0 50.0, 100.0')
+
 
 class UseTest(ElementTestCase):
     """Test extra functionality on a use element"""
@@ -91,6 +95,7 @@ class UseTest(ElementTestCase):
     def test_path(self):
         """Use path follows ref"""
         self.assertEqual(str(self.elem.path), 'M 0 0 L 10 10 Z')
+
 
 if __name__ == '__main__':
     unittest.main()

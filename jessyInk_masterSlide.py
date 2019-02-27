@@ -27,37 +27,39 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 import inkex
 
 class JessyInk_MasterSlide(inkex.Effect):
-	def __init__(self):
-		# Call the base class constructor.
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-		self.OptionParser.add_option('--layerName', action = 'store', type = 'string', dest = 'layerName', default = '')
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--layerName', action = 'store', type = 'string', dest = 'layerName', default = '')
 
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-	def effect(self):
-		# Check version.
-		scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+    def effect(self):
+        # Check version.
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
 
-		if len(scriptNodes) != 1:
-			inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        if len(scriptNodes) != 1:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-		# Remove old master slide property
-		for node in self.document.xpath("//*[@jessyink:masterSlide='masterSlide']", namespaces=inkex.NSS):
-			del node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"]
+        # Remove old master slide property
+        for node in self.document.xpath("//*[@jessyink:masterSlide='masterSlide']", namespaces=inkex.NSS):
+            del node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"]
 
-		# Set new master slide.
-		if self.options.layerName != "":
-			nodes = self.document.xpath("//*[@inkscape:groupmode='layer' and @inkscape:label='" + self.options.layerName + "']", namespaces=inkex.NSS)
-			if len(nodes) == 0:
-				inkex.errormsg(_("Layer not found. Removed current master slide selection.\n"))
-			elif len(nodes) > 1:
-				inkex.errormsg(_("More than one layer with this name found. Removed current master slide selection.\n"))
-			else:
-				nodes[0].set("{" + inkex.NSS["jessyink"] + "}masterSlide","masterSlide")
+        # Set new master slide.
+        if self.options.layerName != "":
+            nodes = self.document.xpath("//*[@inkscape:groupmode='layer' and @inkscape:label='" + self.options.layerName + "']", namespaces=inkex.NSS)
+            if len(nodes) == 0:
+                inkex.errormsg(_("Layer not found. Removed current master slide selection.\n"))
+            elif len(nodes) > 1:
+                inkex.errormsg(_("More than one layer with this name found. Removed current master slide selection.\n"))
+            else:
+                nodes[0].set("{" + inkex.NSS["jessyink"] + "}masterSlide","masterSlide")
 
 # Create effect instance
-effect = JessyInk_MasterSlide()
-effect.affect()
+if __name__ == '__main__':
+
+    effect = JessyInk_MasterSlide()
+    effect.affect()
 

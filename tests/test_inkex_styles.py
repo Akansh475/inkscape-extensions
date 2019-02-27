@@ -1,15 +1,18 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 Test Inkex style parsing functionality.
 """
 
-from tests.base import TestCase
 import unittest
+
 from inkex.styles import Style
+from tests.base import TestCase
 
 
 class StyleTest(TestCase):
     """Test path API and calculations"""
+
     def test_new_style(self):
         """Create a style from a path string"""
         stl = Style("border-color: blue; border-width: 4px;")

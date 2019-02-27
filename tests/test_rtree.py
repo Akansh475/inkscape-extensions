@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from rtree import *
 
-class RTreeTurtleBasicTest(TestCase):
-    effect = RTreeTurtle
+from rtree import RTreeTurtle
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class RTreeTurtleBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = RTreeTurtle
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,12 +5,17 @@
 #    with the default parameters).
 #
 
-from tests.base import TestCase
 import unittest
-from summersnight import Project
 
-class EnvelopeBasicTest(TestCase):
-    effect = Project
+from summersnight import Project
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class EnvelopeBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Project
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

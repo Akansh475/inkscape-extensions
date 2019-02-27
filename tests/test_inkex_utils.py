@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding=utf-8
 """
 Unit test file for ../inkex.py
 """
@@ -9,12 +9,15 @@ Unit test file for ../inkex.py
 
 import unittest
 from argparse import ArgumentTypeError
-from tests.base import TestCase
+
+from inkex.utils import addNS, debug, errormsg, filename_arg, inkbool, to
 from tests.base import StdRedirect
-from inkex.utils import errormsg, addNS, inkbool, debug, to, filename_arg
+from tests.base import TestCase
+
 
 class InkexBasicTest(TestCase):
     """Test basic utiltiies of inkex"""
+
     def test_inkbool(self):
         """Inkscape boolean input"""
         self.assertEqual(inkbool('TRUE'), True)
@@ -33,20 +36,24 @@ class InkexBasicTest(TestCase):
 
     def test_to(self):
         """Decorator for generators"""
+
         @to(list)
         def mylist(a, b, c):
             """Yield as a list"""
             yield a
             yield c
             yield b
+
         self.assertEqual(type(mylist(1, 2, 3)), list)
         self.assertEqual(mylist(1, 2, 3), [1, 3, 2])
+
         @to(dict)
         def mydict(a, b, c):
             """Yield as a dictionary"""
             yield ('age', a)
             yield ('name', c)
             yield ('home', b)
+
         self.assertEqual(type(mydict(1, 2, 3)), dict)
         self.assertEqual(mydict(1, 2, 3), {'age': 1, 'name': 3, 'home': 2})
 
@@ -58,26 +65,26 @@ class InkexBasicTest(TestCase):
     def test_add_ns(self):
         """Test addNS function"""
         self.assertEqual(
-            addNS('inkscape:foo'),
-            '{http://www.inkscape.org/namespaces/inkscape}foo')
+                addNS('inkscape:foo'),
+                '{http://www.inkscape.org/namespaces/inkscape}foo')
         self.assertEqual(
-            addNS('bar', 'inkscape'),
-            '{http://www.inkscape.org/namespaces/inkscape}bar')
+                addNS('bar', 'inkscape'),
+                '{http://www.inkscape.org/namespaces/inkscape}bar')
         self.assertEqual(
-            addNS('url', 'rdf'),
-            '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}url')
+                addNS('url', 'rdf'),
+                '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}url')
         self.assertEqual(
-            addNS('{http://www.inkscape.org/namespaces/inkscape}bar'),
-            '{http://www.inkscape.org/namespaces/inkscape}bar')
+                addNS('{http://www.inkscape.org/namespaces/inkscape}bar'),
+                '{http://www.inkscape.org/namespaces/inkscape}bar')
         self.assertEqual(
-            addNS('http://www.inkscape.org/namespaces/inkscape:bar'),
-            '{http://www.inkscape.org/namespaces/inkscape}bar')
+                addNS('http://www.inkscape.org/namespaces/inkscape:bar'),
+                '{http://www.inkscape.org/namespaces/inkscape}bar')
         self.assertEqual(
-            addNS('car', 'http://www.inkscape.org/namespaces/inkscape'),
-            '{http://www.inkscape.org/namespaces/inkscape}car')
+                addNS('car', 'http://www.inkscape.org/namespaces/inkscape'),
+                '{http://www.inkscape.org/namespaces/inkscape}car')
         self.assertEqual(
-            addNS('{http://www.inkscape.org/namespaces/inkscape}bar', 'rdf'),
-            '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}bar')
+                addNS('{http://www.inkscape.org/namespaces/inkscape}bar', 'rdf'),
+                '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}bar')
 
     def test_ascii(self):
         """Parse ABCabc"""
@@ -96,6 +103,7 @@ class InkexBasicTest(TestCase):
         with StdRedirect('stderr') as err:
             errormsg(u'Àûïàèé')
             self.assertEqual(str(err), 'Àûïàèé\n')
+
 
 if __name__ == '__main__':
     unittest.main()

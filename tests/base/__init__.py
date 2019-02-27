@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2018 Martin Owens
 #
@@ -18,6 +19,7 @@
 """
 Provide tests with some base utility.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
@@ -26,11 +28,7 @@ import shutil
 import tempfile
 from unittest import TestCase as BaseCase
 
-# python 2.7 and python 3.5 support
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -49,23 +47,24 @@ class StdRedirect(object): # pylint: disable=too-few-public-methods
     def __init__(self, name='stdout', initial=None):
         self.name = name
         self.std = getattr(sys, self.name)
-        self.str = StringIO(initial)
+        self._str = StringIO(initial)
 
     def __enter__(self):
-        setattr(sys, self.name, self.str)
+        setattr(sys, self.name, self._str)
         return self
 
-    def __str__(self):
-        self.str.seek(0)
-        return self.str.read()
+    @property
+    def str(self):
+        self._str.seek(0)
+        return self._str.read()
 
     def __repr__(self):
         return "<StdRedirect {}>".format(self.name)
 
     def __iadd__(self, data):
-        self.str.seek(0, mode=2)
-        self.str.write(data)
-        self.str.seek(0, mode=1)
+        self._str.seek(0, mode=2)
+        self._str.write(data)
+        self._str.seek(0, mode=1)
 
     def __exit__(self, kind, value, traceback):
         setattr(sys, self.name, self.std)

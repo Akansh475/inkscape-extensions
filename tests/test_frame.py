@@ -19,6 +19,7 @@
 """
 An Inkscape frame extension test class.
 """
+from __future__ import absolute_import, print_function, unicode_literals
 
 import unittest
 
@@ -27,25 +28,25 @@ from frame import Frame
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
+
 class FrameTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
         self.effect = Frame
         self.e = self.effect()
 
     def get_frame(self, document):
-        return document.xpath('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]'
-                              , namespaces=inkex.NSS)[0]
+        return document.xpath('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]', namespaces=inkex.NSS)[0]
+
 
     def test_single_frame(self):
-        args = [
-            '--corner_radius=20'
-            , '--fill_color=-16777124'
-            , '--id=rect3006'
-            , '--position=inside'
-            , '--stroke_color=255'
-            , '--tab="stroke"'
-            , '--width=10'
-            , self.data_file('svg', 'single_box.svg')]
+        args = ['--corner_radius=20',
+                '--fill_color=-16777124',
+                '--id=rect3006',
+                '--position=inside',
+                '--stroke_color=255',
+                '--tab="stroke"',
+                '--width=10',
+                self.data_file('svg', 'single_box.svg')]
         uut = Frame()
         uut.run(args)
         new_frame = self.get_frame(uut.document)
@@ -62,6 +63,7 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
                         , 'Invalid stroke-opacity in "' + new_frame_style + '".')
         self.assertTrue('fill:#ff0000' in new_frame_style
                         , 'Invalid fill in "' + new_frame_style + '".')
+
 
     def test_single_frame_grouped(self):
         args = [

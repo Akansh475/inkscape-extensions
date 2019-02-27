@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2010 Nick Drobchenko, nick@cnc-club.ru
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
@@ -19,6 +20,8 @@
 """
 Basic common utility functions for calculated things
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 
 import os
 import sys
@@ -36,15 +39,15 @@ if PY3:
 
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc
 NSS = {
-    u'sodipodi' :u'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
-    u'cc'       :u'http://creativecommons.org/ns#',
-    u'ccOLD'    :u'http://web.resource.org/cc/',
-    u'svg'      :u'http://www.w3.org/2000/svg',
-    u'dc'       :u'http://purl.org/dc/elements/1.1/',
-    u'rdf'      :u'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-    u'inkscape' :u'http://www.inkscape.org/namespaces/inkscape',
-    u'xlink'    :u'http://www.w3.org/1999/xlink',
-    u'xml'      :u'http://www.w3.org/XML/1998/namespace'
+    'sodipodi' :'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
+    'cc'       :'http://creativecommons.org/ns#',
+    'ccOLD'    :'http://web.resource.org/cc/',
+    'svg'      :'http://www.w3.org/2000/svg',
+    'dc'       :'http://purl.org/dc/elements/1.1/',
+    'rdf'      :'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+    'inkscape' :'http://www.inkscape.org/namespaces/inkscape',
+    'xlink'    :'http://www.w3.org/1999/xlink',
+    'xml'      :'http://www.w3.org/XML/1998/namespace'
 }
 SSN = dict((b, a) for (a, b) in NSS.items())
 
@@ -57,7 +60,7 @@ def inkbool(value):
 
 def debug(what):
     """Print debug message if debugging is switched on"""
-    sys.stderr.write(str(what) + "\n")
+    sys.stderr.write(unicode(what) + "\n")
     return what
 
 def errormsg(msg):
@@ -73,12 +76,7 @@ def errormsg(msg):
          ...
          inkex.errormsg(_("This extension requires two selected paths."))
     """
-    if PY3:
-        sys.stderr.write(msg + "\n")
-    elif isinstance(msg, unicode):
-        sys.stderr.write(msg.encode("utf-8") + "\n")
-    else:
-        sys.stderr.write((unicode(msg, "utf-8", errors='replace') + "\n").encode("utf-8"))
+    sys.stderr.write(unicode(msg) + "\n")
 
 class AbortExtension(Exception):
     """Raised to print a message to the user without backtrace"""

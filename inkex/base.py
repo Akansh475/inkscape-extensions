@@ -18,6 +18,8 @@
 """
 The utimate base functionality for every inkscape extension.
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 
 import sys
 import copy
@@ -25,7 +27,8 @@ import copy
 from argparse import ArgumentParser
 
 from .utils import filename_arg, AbortExtension
-from .svg import etree, SVG_PARSER
+from .svg import SVG_PARSER
+from lxml import etree
 
 class InkscapeExtension(object):
     """
@@ -59,19 +62,15 @@ class InkscapeExtension(object):
 
     def run(self, args=None):
         """Main entrypoint for any Inkscape Extension"""
-        def binary(stream):
-            """For Python 3: Get the underlying binary handle if available"""
-            return getattr(stream, 'buffer', stream)
-
         if args is None:
             args = sys.argv[1:]
 
         self.options = self.arg_parser.parse_args(args)
         if self.options.input_file is None:
-            self.options.input_file = binary(sys.stdin)
+            self.options.input_file = sys.stdin
 
         if self.options.output is None:
-            self.options.output = binary(sys.stdout)
+            self.options.output = sys.stdout
 
         try:
             self.load_raw()
@@ -94,7 +93,7 @@ class InkscapeExtension(object):
         """Save to the output steam, use everything from self"""
         if self.has_changed(ret):
             if isinstance(self.options.output, str):
-                with open(self.options.output, 'wb') as stream:
+                with open(self.options.output, 'w') as stream:
                     self.save(stream)
             else:
                 self.save(self.options.output)
@@ -156,7 +155,7 @@ class SvgOutputMixin(object): # pylint: disable=too-few-public-methods
     """
     def save(self, stream):
         """Save the svg document to the given stream"""
-        self.document.write(stream)
+        stream.write(etree.tostring(self.document).decode())
 
 
 class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):

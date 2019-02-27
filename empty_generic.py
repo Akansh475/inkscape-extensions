@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 # Written by Tavmjong Bah
+from __future__ import absolute_import, print_function, unicode_literals
+
 
 import inkex
 from inkex.utils import inkbool

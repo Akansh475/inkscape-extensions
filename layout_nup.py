@@ -1,4 +1,5 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
 #
@@ -16,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+from __future__ import absolute_import, unicode_literals
 
 import sys
 import inkex
@@ -83,8 +85,8 @@ class Nup(inkex.Effect):
         node.attributes.setNamedItem(attr)
 
     def output(self):
-        sys.stdout.write(self.pf)
-        
+        sys.stdout.write(self.pf or "")
+
     def expandTuple(self, unit, x, length = 4):
         try:
             iter(x)

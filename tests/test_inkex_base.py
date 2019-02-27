@@ -1,5 +1,6 @@
 # coding=utf-8
 """Test base inkex module functionality"""
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
@@ -78,7 +79,7 @@ class InkscapeExtensionTest(TestCase):
         with StdRedirect() as output:
             with StdRedirect('stdin', 'dinner'):
                 ModExtension().run([])
-                self.assertEqual(str(output), 'dinner>flipple')
+                self.assertEqual(output.str, 'dinner>flipple')
 
 
 class SvgInputOutputTest(TestCase):

@@ -20,6 +20,8 @@
 Test how well we cover the code with tests.
 """
 
+from __future__ import absolute_import, print_function, unicode_literals
+
 import inspect
 import os
 import sys
@@ -67,8 +69,9 @@ class ScriptCoverageTest(TestCase):
 
         # Usually this will contain non-effect modules that are untested
         self.assertFalse(
-                bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(
-                        len(not_tested), '\n - '.join(not_tested), '\n + '.join(not_matched)))
+                bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(len(not_tested),
+                                                                                  '\n - '.join(not_tested),
+                                                                                  '\n + '.join(not_matched)))
 
     @replace_function(Effect, 'affect', NoMainError("{1}.py calls affect outside of __main__"))
     def get_effect_module(self, module):
@@ -140,6 +143,8 @@ class ScriptCoverageTest(TestCase):
                         alls.append(fname[5:-7].lower())
                     else:
                         tests.append(fname[5:-3].lower())
+                if "tests" in path:
+                    tests.append(fname[5:-3].lower())
                 else:
                     name = fname[:-3]
                     if path:

@@ -65,7 +65,7 @@ class ScourInkscape(inkex.base.InkscapeExtension):
         return stream
 
     def save(self, stream):
-        stream.write(self.document)
+        stream.write(self.document.decode())
 
     def effect(self):
         # version check if enabled in options

@@ -6,6 +6,7 @@ Unit test file for ../inkex.py
 # Revision history:
 #   * 2012-01-27 (jazzynico): check errormsg function.
 #
+from __future__ import absolute_import, print_function, unicode_literals
 
 import unittest
 from argparse import ArgumentTypeError
@@ -32,7 +33,7 @@ class InkexBasicTest(TestCase):
         """Debug messages go to stderr"""
         with StdRedirect('stderr') as err:
             debug("Hello World")
-            self.assertEqual(str(err), 'Hello World\n')
+            self.assertEqual(err.str, 'Hello World\n')
 
     def test_to(self):
         """Decorator for generators"""
@@ -90,19 +91,21 @@ class InkexBasicTest(TestCase):
         """Parse ABCabc"""
         with StdRedirect('stderr') as err:
             errormsg('ABCabc')
-            self.assertEqual(str(err), 'ABCabc\n')
+            self.assertEqual(err.str, 'ABCabc\n')
 
     def test_nonunicode_latin1(self):
-        """Parse Àûïàèé"""
+        # Py2 has issues with unicode in docstrings.   *sigh*
+        # """Parse Àûïàèé"""
         with StdRedirect('stderr') as err:
             errormsg('Àûïàèé')
-            self.assertEqual(str(err), 'Àûïàèé\n')
+            self.assertEqual(err.str, 'Àûïàèé\n')
 
     def test_unicode_latin1(self):
-        """Parse Àûïàèé (unicode)"""
+        # Py2 has issues with unicode in docstrings.   *sigh*
+        # """Parse Àûïàèé (unicode)"""
         with StdRedirect('stderr') as err:
-            errormsg(u'Àûïàèé')
-            self.assertEqual(str(err), 'Àûïàèé\n')
+            errormsg('Àûïàèé')
+            self.assertEqual(err.str, 'Àûïàèé\n')
 
 
 if __name__ == '__main__':

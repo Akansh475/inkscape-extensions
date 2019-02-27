@@ -27,50 +27,52 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 import inkex
 
 class JessyInk_Effects(inkex.Effect):
-	def __init__(self):
-		# Call the base class constructor.
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-		self.OptionParser.add_option('--effectInOrder', action = 'store', type = 'string', dest = 'effectInOrder', default = 1)
-		self.OptionParser.add_option('--effectInDuration', action = 'store', type = 'float', dest = 'effectInDuration', default = 0.8)
-		self.OptionParser.add_option('--effectIn', action = 'store', type = 'string', dest = 'effectIn', default = 'none')
-		self.OptionParser.add_option('--effectOutOrder', action = 'store', type = 'string', dest = 'effectOutOrder', default = 2)
-		self.OptionParser.add_option('--effectOutDuration', action = 'store', type = 'float', dest = 'effectOutDuration', default = 0.8)
-		self.OptionParser.add_option('--effectOut', action = 'store', type = 'string', dest = 'effectOut', default = 'none')
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--effectInOrder', action = 'store', type = 'string', dest = 'effectInOrder', default = 1)
+        self.OptionParser.add_option('--effectInDuration', action = 'store', type = 'float', dest = 'effectInDuration', default = 0.8)
+        self.OptionParser.add_option('--effectIn', action = 'store', type = 'string', dest = 'effectIn', default = 'none')
+        self.OptionParser.add_option('--effectOutOrder', action = 'store', type = 'string', dest = 'effectOutOrder', default = 2)
+        self.OptionParser.add_option('--effectOutDuration', action = 'store', type = 'float', dest = 'effectOutDuration', default = 0.8)
+        self.OptionParser.add_option('--effectOut', action = 'store', type = 'string', dest = 'effectOut', default = 'none')
 
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-	def effect(self):
-		# Check version.
-		scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+    def effect(self):
+        # Check version.
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
 
-		if len(scriptNodes) != 1:
-			inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        if len(scriptNodes) != 1:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-		if len(self.selected) == 0:
-			inkex.errormsg(_("No object selected. Please select the object you want to assign an effect to and then press apply.\n"))
+        if len(self.selected) == 0:
+            inkex.errormsg(_("No object selected. Please select the object you want to assign an effect to and then press apply.\n"))
 
-		for id, node in self.selected.items():
-			if (self.options.effectIn == "appear") or (self.options.effectIn == "fade") or (self.options.effectIn == "pop"):
-				node.set("{" + inkex.NSS["jessyink"] + "}effectIn","name:" + self.options.effectIn  + ";order:" + self.options.effectInOrder + ";length:" + str(int(self.options.effectInDuration * 1000)))
-				# Remove possible view argument.
-				if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
-					del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
-			else:
-				if "{" + inkex.NSS["jessyink"] + "}effectIn" in node.attrib:
-					del node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
-		
-			if (self.options.effectOut == "appear") or (self.options.effectOut == "fade") or (self.options.effectOut == "pop"):
-				node.set("{" + inkex.NSS["jessyink"] + "}effectOut","name:" + self.options.effectOut  + ";order:" + self.options.effectOutOrder + ";length:" + str(int(self.options.effectOutDuration * 1000)))
-				# Remove possible view argument.
-				if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
-					del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
-			else:
-				if "{" + inkex.NSS["jessyink"] + "}effectOut" in node.attrib:
-					del node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
+        for id, node in self.selected.items():
+            if (self.options.effectIn == "appear") or (self.options.effectIn == "fade") or (self.options.effectIn == "pop"):
+                node.set("{" + inkex.NSS["jessyink"] + "}effectIn","name:" + self.options.effectIn  + ";order:" + self.options.effectInOrder + ";length:" + str(int(self.options.effectInDuration * 1000)))
+                # Remove possible view argument.
+                if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
+                    del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+            else:
+                if "{" + inkex.NSS["jessyink"] + "}effectIn" in node.attrib:
+                    del node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
+
+            if (self.options.effectOut == "appear") or (self.options.effectOut == "fade") or (self.options.effectOut == "pop"):
+                node.set("{" + inkex.NSS["jessyink"] + "}effectOut","name:" + self.options.effectOut  + ";order:" + self.options.effectOutOrder + ";length:" + str(int(self.options.effectOutDuration * 1000)))
+                # Remove possible view argument.
+                if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
+                    del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+            else:
+                if "{" + inkex.NSS["jessyink"] + "}effectOut" in node.attrib:
+                    del node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
 
 # Create effect instance
-effect = JessyInk_Effects()
-effect.affect()
+if __name__ == '__main__':
+
+    effect = JessyInk_Effects()
+    effect.affect()
 

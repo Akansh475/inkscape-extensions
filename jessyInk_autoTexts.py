@@ -27,42 +27,44 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 import inkex
 
 class JessyInk_AutoTexts(inkex.Effect):
-	def __init__(self):
-		# Call the base class constructor.
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-		self.OptionParser.add_option('--autoText', action = 'store', type = 'string', dest = 'autoText', default = 'none')
-		
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--autoText', action = 'store', type = 'string', dest = 'autoText', default = 'none')
 
-	def effect(self):
-		# Check version.
-		scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-		if len(scriptNodes) != 1:
-			inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+    def effect(self):
+        # Check version.
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
 
-		if len(self.selected) == 0:
-			inkex.errormsg(_("To assign an effect, please select an object.\n\n"))
+        if len(scriptNodes) != 1:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-		for id, node in self.selected.items():
-			nodes = node.xpath("./svg:tspan", namespaces=inkex.NSS)
+        if len(self.selected) == 0:
+            inkex.errormsg(_("To assign an effect, please select an object.\n\n"))
 
-			if len(nodes) != 1:
-				inkex.errormsg(_("Node with id '{0}' is not a suitable text node and was therefore ignored.\n\n").format(str(id)))
-			else:
-				if self.options.autoText == "slideTitle":
-					nodes[0].set("{" + inkex.NSS["jessyink"] + "}autoText","slideTitle")
-				elif self.options.autoText == "slideNumber":
-					nodes[0].set("{" + inkex.NSS["jessyink"] + "}autoText","slideNumber")
-				elif self.options.autoText == "numberOfSlides":
-					nodes[0].set("{" + inkex.NSS["jessyink"] + "}autoText","numberOfSlides")
-				else:
-					if "{" + inkex.NSS["jessyink"] + "}autoText" in nodes[0].attrib:
-						del nodes[0].attrib["{" + inkex.NSS["jessyink"] + "}autoText"]
+        for id, node in self.selected.items():
+            nodes = node.xpath("./svg:tspan", namespaces=inkex.NSS)
 
-# Create effect instance
-effect = JessyInk_AutoTexts()
-effect.affect()
+            if len(nodes) != 1:
+                inkex.errormsg(_("Node with id '{0}' is not a suitable text node and was therefore ignored.\n\n").format(str(id)))
+            else:
+                if self.options.autoText == "slideTitle":
+                    nodes[0].set("{" + inkex.NSS["jessyink"] + "}autoText","slideTitle")
+                elif self.options.autoText == "slideNumber":
+                    nodes[0].set("{" + inkex.NSS["jessyink"] + "}autoText","slideNumber")
+                elif self.options.autoText == "numberOfSlides":
+                    nodes[0].set("{" + inkex.NSS["jessyink"] + "}autoText","numberOfSlides")
+                else:
+                    if "{" + inkex.NSS["jessyink"] + "}autoText" in nodes[0].attrib:
+                        del nodes[0].attrib["{" + inkex.NSS["jessyink"] + "}autoText"]
+
+if __name__ == '__main__':
+
+    # Create effect instance
+    effect = JessyInk_AutoTexts()
+    effect.affect()
 

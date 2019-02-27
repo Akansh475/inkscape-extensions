@@ -31,91 +31,93 @@ from lxml import etree
 from copy import deepcopy
 
 class JessyInk_Effects(inkex.Effect):
-	def __init__(self):
-		# Call the base class constructor.
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
 
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-	def effect(self):
-		# Check version.
-		scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+    def effect(self):
+        # Check version.
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
 
-		if len(scriptNodes) != 1:
-			inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        if len(scriptNodes) != 1:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-		baseView = self.document.xpath("//sodipodi:namedview[@id='base']", namespaces=inkex.NSS)
+        baseView = self.document.xpath("//sodipodi:namedview[@id='base']", namespaces=inkex.NSS)
 
-		if len(baseView) != 1:
-			inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
+        if len(baseView) != 1:
+            inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
 
-		layer = self.document.xpath("//svg:g[@id='" + baseView[0].attrib["{" + inkex.NSS["inkscape"] + "}current-layer"] + "']", namespaces=inkex.NSS)
+        layer = self.document.xpath("//svg:g[@id='" + baseView[0].attrib["{" + inkex.NSS["inkscape"] + "}current-layer"] + "']", namespaces=inkex.NSS)
 
-		if (len(layer) != 1):
-			inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
+        if (len(layer) != 1):
+            inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
 
-		# Parse template file.
-		tmplFile = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'jessyInk_video.svg'), 'r')
-		tmplRoot = etree.fromstring(tmplFile.read())
-		tmplFile.close()
+        # Parse template file.
+        tmplFile = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'jessyInk_video.svg'), 'r')
+        tmplRoot = etree.fromstring(tmplFile.read())
+        tmplFile.close()
 
-		elem = deepcopy(tmplRoot.xpath("//svg:g[@jessyink:element='core.video']", namespaces=inkex.NSS)[0])
-		nodeDict = findInternalLinks(elem, tmplRoot)
+        elem = deepcopy(tmplRoot.xpath("//svg:g[@jessyink:element='core.video']", namespaces=inkex.NSS)[0])
+        nodeDict = findInternalLinks(elem, tmplRoot)
 
-		deleteIds(elem)
+        deleteIds(elem)
 
-		idSubst = {}
+        idSubst = {}
 
-		for key in nodeDict:
-			idSubst[key] = getNewId("jessyink.core.video", self.document)
-			deleteIds(nodeDict[key])
-			nodeDict[key].attrib['id'] = idSubst[key]
-			elem.insert(0, nodeDict[key])
+        for key in nodeDict:
+            idSubst[key] = getNewId("jessyink.core.video", self.document)
+            deleteIds(nodeDict[key])
+            nodeDict[key].attrib['id'] = idSubst[key]
+            elem.insert(0, nodeDict[key])
 
-		for ndIter in elem.iter():
-			for attrIter in ndIter.attrib:
-				for entryIter in idSubst:
-					ndIter.attrib[attrIter] = ndIter.attrib[attrIter].replace("#" + entryIter, "#" + idSubst[entryIter])
+        for ndIter in elem.iter():
+            for attrIter in ndIter.attrib:
+                for entryIter in idSubst:
+                    ndIter.attrib[attrIter] = ndIter.attrib[attrIter].replace("#" + entryIter, "#" + idSubst[entryIter])
 
-		# Append element.
-		layer[0].append(elem)
+        # Append element.
+        layer[0].append(elem)
 
 def findInternalLinks(node, docRoot, nodeDict = {}):
-	for entry in re.findall("url\(#.*\)", etree.tostring(node)):
-		linkId = entry[5:len(entry) - 1]
+    for entry in re.findall("url\(#.*\)", etree.tostring(node)):
+        linkId = entry[5:len(entry) - 1]
 
-		if linkId not in nodeDict:
-			nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=inkex.NSS)[0])
-			nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
+        if linkId not in nodeDict:
+            nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=inkex.NSS)[0])
+            nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
 
-	for entry in node.iter():
-		if '{' + inkex.NSS['xlink'] + '}href' in entry.attrib:
-			linkId = entry.attrib['{' + inkex.NSS['xlink'] + '}href'][1:len(entry.attrib['{' + inkex.NSS['xlink'] + '}href'])]
-	
-			if linkId not in nodeDict:
-				nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=inkex.NSS)[0])
-				nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
+    for entry in node.iter():
+        if '{' + inkex.NSS['xlink'] + '}href' in entry.attrib:
+            linkId = entry.attrib['{' + inkex.NSS['xlink'] + '}href'][1:len(entry.attrib['{' + inkex.NSS['xlink'] + '}href'])]
 
-	return nodeDict
+            if linkId not in nodeDict:
+                nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=inkex.NSS)[0])
+                nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
+
+    return nodeDict
 
 def getNewId(prefix, docRoot):
-	import datetime
+    import datetime
 
-	number = datetime.datetime.now().microsecond
+    number = datetime.datetime.now().microsecond
 
-	while len(docRoot.xpath("//*[@id='" + prefix + str(number) + "']", namespaces=inkex.NSS)) > 0:
-		number += 1
+    while len(docRoot.xpath("//*[@id='" + prefix + str(number) + "']", namespaces=inkex.NSS)) > 0:
+        number += 1
 
-	return prefix + str(number)
+    return prefix + str(number)
 
 def deleteIds(node):
-	for entry in node.iter():
-		if 'id' in entry.attrib:
-			del entry.attrib['id']
+    for entry in node.iter():
+        if 'id' in entry.attrib:
+            del entry.attrib['id']
 
 # Create effect instance
-effect = JessyInk_Effects()
-effect.affect()
+if __name__ == '__main__':
+
+    effect = JessyInk_Effects()
+    effect.affect()
 

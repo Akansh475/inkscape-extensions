@@ -28,78 +28,80 @@ import inkex
 
 
 def propStrToList(str):
-	list = []
-	propList = str.split(";")
-	for prop in propList:
-		if not (len(prop) == 0):
-			list.append(prop.strip())
-	return list
+    list = []
+    propList = str.split(";")
+    for prop in propList:
+        if not (len(prop) == 0):
+            list.append(prop.strip())
+    return list
 
 def propListToDict(list):
-	dictio = {}
+    dictio = {}
 
-	for prop in list:
-		keyValue = prop.split(":")
+    for prop in list:
+        keyValue = prop.split(":")
 
-		if len(keyValue) == 2:
-			dictio[keyValue[0].strip()] = keyValue[1].strip()
+        if len(keyValue) == 2:
+            dictio[keyValue[0].strip()] = keyValue[1].strip()
 
-	return dictio
+    return dictio
 
 class JessyInk_Effects(inkex.Effect):
-	def __init__(self):
-		# Call the base class constructor.
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-		self.OptionParser.add_option('--viewOrder', action = 'store', type = 'string', dest = 'viewOrder', default = 1)
-		self.OptionParser.add_option('--viewDuration', action = 'store', type = 'float', dest = 'viewDuration', default = 0.8)
-		self.OptionParser.add_option('--removeView', action = 'store', type = 'inkbool', dest = 'removeView', default = False)
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--viewOrder', action = 'store', type = 'string', dest = 'viewOrder', default = 1)
+        self.OptionParser.add_option('--viewDuration', action = 'store', type = 'float', dest = 'viewDuration', default = 0.8)
+        self.OptionParser.add_option('--removeView', action = 'store', type = 'inkbool', dest = 'removeView', default = False)
 
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-	def effect(self):
-		# Check version.
-		scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+    def effect(self):
+        # Check version.
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
 
-		if len(scriptNodes) != 1:
-			inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        if len(scriptNodes) != 1:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-		rect = None
+        rect = None
 
-		for id, node in self.selected.items():
-			if rect == None:
-				rect = node
-			else:
-				inkex.errormsg(_("More than one object selected. Please select only one object.\n"))
-				exit()
+        for id, node in self.selected.items():
+            if rect == None:
+                rect = node
+            else:
+                inkex.errormsg(_("More than one object selected. Please select only one object.\n"))
+                exit()
 
-		if rect == None:
-			inkex.errormsg(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
-			exit()
+        if rect == None:
+            inkex.errormsg(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
+            exit()
 
-		if not self.options.removeView:
-			# Remove the view that currently has the requested order number.
-			for node in rect.xpath("ancestor::svg:g[@inkscape:groupmode='layer']/descendant::*[@jessyink:view]", namespaces=inkex.NSS):
-				propDict = propListToDict(propStrToList(node.attrib["{" + inkex.NSS["jessyink"] + "}view"]))
-	
-				if propDict["order"] == self.options.viewOrder:
-					del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
-			
-			# Set the new view.
-			rect.set("{" + inkex.NSS["jessyink"] + "}view","name:view;order:" + self.options.viewOrder + ";length:" + str(int(self.options.viewDuration * 1000)))
+        if not self.options.removeView:
+            # Remove the view that currently has the requested order number.
+            for node in rect.xpath("ancestor::svg:g[@inkscape:groupmode='layer']/descendant::*[@jessyink:view]", namespaces=inkex.NSS):
+                propDict = propListToDict(propStrToList(node.attrib["{" + inkex.NSS["jessyink"] + "}view"]))
 
-			# Remove possible effect arguments.
-			if "{" + inkex.NSS["jessyink"] + "}effectIn" in rect.attrib:
-				del rect.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
+                if propDict["order"] == self.options.viewOrder:
+                    del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
 
-			if "{" + inkex.NSS["jessyink"] + "}effectOut" in rect.attrib:
-				del rect.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
-		else:
-			if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
-				del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
-		
+            # Set the new view.
+            rect.set("{" + inkex.NSS["jessyink"] + "}view","name:view;order:" + self.options.viewOrder + ";length:" + str(int(self.options.viewDuration * 1000)))
+
+            # Remove possible effect arguments.
+            if "{" + inkex.NSS["jessyink"] + "}effectIn" in rect.attrib:
+                del rect.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
+
+            if "{" + inkex.NSS["jessyink"] + "}effectOut" in rect.attrib:
+                del rect.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
+        else:
+            if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
+                del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+
 # Create effect instance
-effect = JessyInk_Effects()
-effect.affect()
+if __name__ == '__main__':
+
+    effect = JessyInk_Effects()
+    effect.affect()
 

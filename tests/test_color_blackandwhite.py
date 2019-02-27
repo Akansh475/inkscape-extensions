@@ -4,12 +4,13 @@
 import unittest
 
 from color_blackandwhite import C
-from tests.base import TestCase
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
-class ColorBlackAndWhiteBasicTest(TestCase):
+class ColorBlackAndWhiteBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.e = C()
+        self.effect = C
+        self.e = self.effect()
 
     def test_default_values_black(self):
         """

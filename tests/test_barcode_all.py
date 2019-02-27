@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2018 Martin Owens
 #
@@ -19,11 +20,12 @@
 Test each available barcode type
 """
 
-from collections import defaultdict
-from tests.base import TestCase
 import unittest
+from collections import defaultdict
 
 from barcode import get_barcode
+from tests.base import TestCase
+
 
 class GetBarcodeTest(TestCase):
     """Render Barcode"""
@@ -65,6 +67,7 @@ class GetBarcodeTest(TestCase):
             coder = get_barcode(name, text=text)
             code2 = coder.encode(text)
             self.assertEqual(code, code2)
+
 
 if __name__ == '__main__':
     unittest.main()

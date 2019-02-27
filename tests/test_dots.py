@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from dots import *
 
-class DotsBasicTest(TestCase):
-    effect = Dots
+from dots import Dots
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class DotsBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Dots
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

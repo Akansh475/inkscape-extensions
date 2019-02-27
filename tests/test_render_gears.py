@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from render_gears import *
 
-class GearsBasicTest(TestCase):
-    effect = Gears
+from render_gears import Gears
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class GearsBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Gears
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

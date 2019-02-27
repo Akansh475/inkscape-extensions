@@ -1,13 +1,16 @@
+# coding=utf-8
 """Test base inkex module functionality"""
 
 import os
 import sys
 
 from inkex.base import InkscapeExtension, SvgThroughMixin
-from tests.base import TestCase, StdRedirect
+from tests.base import StdRedirect, TestCase
+
 
 class ModExtension(InkscapeExtension):
     """A non-svg extension that loads, saves and flipples"""
+
     def effect(self):
         self.document += '>flipple'
 
@@ -17,50 +20,56 @@ class ModExtension(InkscapeExtension):
     def save(self, stream):
         stream.write(self.document)
 
+
 class NoModSvgExtension(SvgThroughMixin, InkscapeExtension):
     """Test the loading and not-saving of non-modified svg files"""
+
     def effect(self):
         return True
 
+
 class ModSvgExtension(SvgThroughMixin, InkscapeExtension):
     """Test the loading and saving of svg files"""
+
     def effect(self):
         self.svg.set('attr', 'foo')
 
 
 class InkscapeExtensionTest(TestCase):
     """Tests for Inkscape Extensions"""
+
     def setUp(self):
-        self.obj = InkscapeExtension()
+        self.effect = InkscapeExtension
+        self.e = self.effect()
 
     def test_bare_bones(self):
         """What happens when we don't inherit"""
         with self.assertRaises(NotImplementedError):
-            self.obj.run([])
+            self.e.run([])
         with self.assertRaises(NotImplementedError):
-            self.obj.effect()
+            self.e.effect()
         with self.assertRaises(NotImplementedError):
-            self.obj.load(sys.stdin)
+            self.e.load(sys.stdin)
         with self.assertRaises(NotImplementedError):
-            self.obj.save(sys.stdout)
-        self.assertEqual(self.obj.name, 'InkscapeExtension')
+            self.e.save(sys.stdout)
+        self.assertEqual(self.e.name, 'InkscapeExtension')
 
     def test_compat(self):
         """Test a few old functions and how we handle them"""
         with self.assertRaises(AttributeError):
-            self.assertEqual(self.obj.OptionParser, None)
+            self.assertEqual(self.e.OptionParser, None)
         with self.assertRaises(AttributeError):
-            self.assertEqual(self.obj.affect(), None)
+            self.assertEqual(self.e.affect(), None)
 
     def test_arg_parser_defaults(self):
         """Test arguments for the base class are given defaults"""
-        options = self.obj.arg_parser.parse_args([])
+        options = self.e.arg_parser.parse_args([])
         self.assertEqual(options.input_file, None)
         self.assertEqual(options.output, None)
 
     def test_arg_parser_passed(self):
         """Test arguments for the base class are parsed"""
-        options = self.obj.arg_parser.parse_args(['--output', 'foo.txt', self.empty_svg])
+        options = self.e.arg_parser.parse_args(['--output', 'foo.txt', self.empty_svg])
         self.assertEqual(options.input_file, self.empty_svg)
         self.assertEqual(options.output, 'foo.txt')
 
@@ -74,6 +83,7 @@ class InkscapeExtensionTest(TestCase):
 
 class SvgInputOutputTest(TestCase):
     """Test SVG Input Mixin"""
+
     def test_input_mixin(self):
         """Test svg input gets loaded"""
         obj = NoModSvgExtension()

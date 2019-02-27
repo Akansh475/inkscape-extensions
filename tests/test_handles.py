@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from handles import *
 
-class HandlesBasicTest(TestCase):
-    effect = Handles
+from handles import Handles
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class HandlesBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Handles
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

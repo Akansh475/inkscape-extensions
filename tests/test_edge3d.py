@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase
 import unittest
-from edge3d import *
 
-class Edge3dBasicTest(TestCase):
-    effect = Edge3d
+from edge3d import Edge3d
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class Edge3dBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Edge3d
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

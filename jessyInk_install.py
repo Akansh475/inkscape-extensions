@@ -29,103 +29,105 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 import inkex
 
 def propStrToList(str):
-	list = []
-	propList = str.split(";")
-	for prop in propList:
-		if not (len(prop) == 0):
-			list.append(prop.strip())
-	return list
+    list = []
+    propList = str.split(";")
+    for prop in propList:
+        if not (len(prop) == 0):
+            list.append(prop.strip())
+    return list
 
 def listToPropStr(list):
-	str = ""
-	for prop in list:
-		str += " " + prop + ";" 
-	return str[1:]
+    str = ""
+    for prop in list:
+        str += " " + prop + ";"
+    return str[1:]
 
 class JessyInk_Install(inkex.Effect):
-	def __init__(self):
-		# Call the base class constructor.
-		inkex.Effect.__init__(self)
+    def __init__(self):
+        # Call the base class constructor.
+        inkex.Effect.__init__(self)
 
-		self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
 
-		inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-	def effect(self):
-		# Find and delete old script node
-		for node in self.document.xpath("//svg:script[@id='JessyInk']", namespaces=inkex.NSS):
-			node.getparent().remove(node)
-	
-		# Create new script node
-		scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
-		scriptElm.text = open(os.path.join(os.path.dirname(__file__),	"jessyInk.js")).read()
-		scriptElm.set("id","JessyInk")
-		scriptElm.set("{" + inkex.NSS["jessyink"] + "}version", '1.5.5')
-		self.document.getroot().append(scriptElm)
+    def effect(self):
+        # Find and delete old script node
+        for node in self.document.xpath("//svg:script[@id='JessyInk']", namespaces=inkex.NSS):
+            node.getparent().remove(node)
 
-		# Remove "jessyInkInit()" in the "onload" attribute, if present.
-		if self.document.getroot().get("onload"):
-			propList = propStrToList(self.document.getroot().get("onload"))
-		else:
-			propList = []
-	
-		for prop in propList:
-			if prop == "jessyInkInit()":
-				propList.remove("jessyInkInit()")
-	
-		if len(propList) > 0:
-			self.document.getroot().set("onload", listToPropStr(propList))
-		else:
-			if self.document.getroot().get("onload"):
-				del self.document.getroot().attrib["onload"]
+        # Create new script node
+        scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
+        scriptElm.text = open(os.path.join(os.path.dirname(__file__),	"jessyInk.js")).read()
+        scriptElm.set("id","JessyInk")
+        scriptElm.set("{" + inkex.NSS["jessyink"] + "}version", '1.5.5')
+        self.document.getroot().append(scriptElm)
 
-		# Update effect attributes.
-		for node in self.document.xpath("//*[@jessyInk_effectIn]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"] = node.attrib["jessyInk_effectIn"]
-			del node.attrib["jessyInk_effectIn"]
+        # Remove "jessyInkInit()" in the "onload" attribute, if present.
+        if self.document.getroot().get("onload"):
+            propList = propStrToList(self.document.getroot().get("onload"))
+        else:
+            propList = []
 
-		for node in self.document.xpath("//*[@jessyink:effectIn]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"] = node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"].replace("=", ":")
+        for prop in propList:
+            if prop == "jessyInkInit()":
+                propList.remove("jessyInkInit()")
 
-		for node in self.document.xpath("//*[@jessyInk_effectOut]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"] = node.attrib["jessyInk_effectOut"]
-			del node.attrib["jessyInk_effectOut"]
+        if len(propList) > 0:
+            self.document.getroot().set("onload", listToPropStr(propList))
+        else:
+            if self.document.getroot().get("onload"):
+                del self.document.getroot().attrib["onload"]
 
-		for node in self.document.xpath("//*[@jessyink:effectOut]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"] = node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"].replace("=", ":")
+        # Update effect attributes.
+        for node in self.document.xpath("//*[@jessyInk_effectIn]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"] = node.attrib["jessyInk_effectIn"]
+            del node.attrib["jessyInk_effectIn"]
 
-		# Update master slide assignment.
-		for node in self.document.xpath("//*[@jessyInk_masterSlide]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"] = node.attrib["jessyInk_masterSlide"]
-			del node.attrib["jessyInk_masterSlide"]
+        for node in self.document.xpath("//*[@jessyink:effectIn]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"] = node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"].replace("=", ":")
 
-		for node in self.document.xpath("//*[@jessyink:masterSlide]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"] = node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"].replace("=", ":")
+        for node in self.document.xpath("//*[@jessyInk_effectOut]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"] = node.attrib["jessyInk_effectOut"]
+            del node.attrib["jessyInk_effectOut"]
 
-		# Update transitions.
-		for node in self.document.xpath("//*[@jessyInk_transitionIn]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"] = node.attrib["jessyInk_transitionIn"]
-			del node.attrib["jessyInk_transitionIn"]
+        for node in self.document.xpath("//*[@jessyink:effectOut]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"] = node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"].replace("=", ":")
 
-		for node in self.document.xpath("//*[@jessyink:transitionIn]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"] = node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"].replace("=", ":")
+        # Update master slide assignment.
+        for node in self.document.xpath("//*[@jessyInk_masterSlide]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"] = node.attrib["jessyInk_masterSlide"]
+            del node.attrib["jessyInk_masterSlide"]
 
-		for node in self.document.xpath("//*[@jessyInk_transitionOut]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"] = node.attrib["jessyInk_transitionOut"]
-			del node.attrib["jessyInk_transitionOut"]
+        for node in self.document.xpath("//*[@jessyink:masterSlide]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"] = node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"].replace("=", ":")
 
-		for node in self.document.xpath("//*[@jessyink:transitionOut]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"] = node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"].replace("=", ":")
+        # Update transitions.
+        for node in self.document.xpath("//*[@jessyInk_transitionIn]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"] = node.attrib["jessyInk_transitionIn"]
+            del node.attrib["jessyInk_transitionIn"]
 
-		# Update auto texts.
-		for node in self.document.xpath("//*[@jessyInk_autoText]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"] = node.attrib["jessyInk_autoText"]
-			del node.attrib["jessyInk_autoText"]
+        for node in self.document.xpath("//*[@jessyink:transitionIn]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"] = node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"].replace("=", ":")
 
-		for node in self.document.xpath("//*[@jessyink:autoText]", namespaces=inkex.NSS):
-			node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"] = node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"].replace("=", ":")
+        for node in self.document.xpath("//*[@jessyInk_transitionOut]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"] = node.attrib["jessyInk_transitionOut"]
+            del node.attrib["jessyInk_transitionOut"]
+
+        for node in self.document.xpath("//*[@jessyink:transitionOut]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"] = node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"].replace("=", ":")
+
+        # Update auto texts.
+        for node in self.document.xpath("//*[@jessyInk_autoText]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"] = node.attrib["jessyInk_autoText"]
+            del node.attrib["jessyInk_autoText"]
+
+        for node in self.document.xpath("//*[@jessyink:autoText]", namespaces=inkex.NSS):
+            node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"] = node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"].replace("=", ":")
 
 # Create effect instance
-effect = JessyInk_Install()
-effect.affect()
+if __name__ == '__main__':
+
+    effect = JessyInk_Install()
+    effect.affect()
 

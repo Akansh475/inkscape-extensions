@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Unit test file for ../perspective.py
 # Revision history:
@@ -6,12 +7,17 @@
 #    with the default parameters).
 #
 
-from tests.base import TestCase
 import unittest
-from perspective import *
 
-class PerspectiveBasicTest(TestCase):
-    effect = Project
+from perspective import Project
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class PerspectiveBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Project
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

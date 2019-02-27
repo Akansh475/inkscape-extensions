@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-from tests.base import TestCase
 import unittest
-from grid_polar import *
 
-class GridPolarBasicTest(TestCase):
-    effect = GridPolar
+from grid_polar import GridPolar
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class GridPolarBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = GridPolar
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

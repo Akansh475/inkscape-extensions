@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2016 Richard White, rwhite8282@gmail.com
 #
@@ -19,19 +20,22 @@
 An Inkscape frame extension test class.
 """
 
-from tests.base import TestCase
 import unittest
 
 import inkex
-from frame import *
+from frame import Frame
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
-class FrameTest(TestCase):
-    effect = Frame
+
+class FrameTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Frame
+        self.e = self.effect()
 
     def get_frame(self, document):
         return document.xpath('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]'
-            , namespaces=inkex.NSS)[0] 
-  
+                              , namespaces=inkex.NSS)[0]
+
     def test_single_frame(self):
         args = [
             '--corner_radius=20'
@@ -49,17 +53,16 @@ class FrameTest(TestCase):
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
         new_frame_style = new_frame.attrib['style'].lower()
         self.assertTrue('fill-opacity:0.36' in new_frame_style
-            , 'Invalid fill-opacity in "' + new_frame_style + '".')
+                        , 'Invalid fill-opacity in "' + new_frame_style + '".')
         self.assertTrue('stroke:#000000' in new_frame_style
-            , 'Invalid stroke in "' + new_frame_style + '".')
+                        , 'Invalid stroke in "' + new_frame_style + '".')
         self.assertTrue('stroke-width:10.0' in new_frame_style
-            , 'Invalid stroke-width in "' + new_frame_style + '".')
+                        , 'Invalid stroke-width in "' + new_frame_style + '".')
         self.assertTrue('stroke-opacity:1.00' in new_frame_style
-            , 'Invalid stroke-opacity in "' + new_frame_style + '".')
+                        , 'Invalid stroke-opacity in "' + new_frame_style + '".')
         self.assertTrue('fill:#ff0000' in new_frame_style
-            , 'Invalid fill in "' + new_frame_style + '".')
+                        , 'Invalid fill in "' + new_frame_style + '".')
 
-    
     def test_single_frame_grouped(self):
         args = [
             '--corner_radius=20'
@@ -81,8 +84,7 @@ class FrameTest(TestCase):
         self.assertEqual('{http://www.w3.org/2000/svg}rect', group[0].tag)
         self.assertEqual('{http://www.w3.org/2000/svg}path', group[1].tag)
         self.assertEqual("Frame", group[1].xpath('@inkscape:label', namespaces=inkex.NSS)[0])
-    
-    
+
     def test_single_frame_clipped(self):
         args = [
             '--clip=True'

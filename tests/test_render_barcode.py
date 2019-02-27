@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2018 Martin Owens
 #
@@ -19,17 +20,19 @@
 Written to test the coding of generating barcodes.
 """
 
-from tests.base import TestCase
 import unittest
 
 from render_barcode import InsertBarcode
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
-class InsertBarcodeBasicTest(TestCase):
+
+class InsertBarcodeBasicTest(InkscapeExtensionTestMixin, TestCase):
     """Render Barcode"""
-    def test_without_parameters(self):
-        """With no existing svg document"""
-        self.assertEffectEmpty(InsertBarcode)
+
+    def setUp(self):
+        self.effect = InsertBarcode
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2018 Martin Owens
 #
@@ -19,16 +20,16 @@
 Test how well we cover the code with tests.
 """
 
+import inspect
 import os
 import sys
-import inspect
 import unittest
 
 from inkex.effect import Effect
 from inkex.utils import DependencyError
-
 from tests.base import TestCase
-from tests.base.mock import replace_function, ManualVerbosity
+from tests.base.mock import ManualVerbosity, replace_function
+
 
 class NoMainError(Exception):
     """Many effects try and call affect without even checking if they are running
@@ -66,8 +67,8 @@ class ScriptCoverageTest(TestCase):
 
         # Usually this will contain non-effect modules that are untested
         self.assertFalse(
-            bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(
-                len(not_tested), '\n - '.join(not_tested), '\n + '.join(not_matched)))
+                bool(not_tested), "Found {:d} not tested modules: {}\n{} ".format(
+                        len(not_tested), '\n - '.join(not_tested), '\n + '.join(not_matched)))
 
     @replace_function(Effect, 'affect', NoMainError("{1}.py calls affect outside of __main__"))
     def get_effect_module(self, module):
@@ -82,7 +83,7 @@ class ScriptCoverageTest(TestCase):
             if module in str(err):
                 return False
             self._current_result.addError(self, sys.exc_info())
-        except Exception: # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             self._current_result.addError(self, sys.exc_info())
 
     @replace_function(os, 'chdir', IOError("Hell no you cn't do that!"))
@@ -110,7 +111,7 @@ class ScriptCoverageTest(TestCase):
                         self._current_result.addSuccess(self)
                 except self.failureException:
                     self._current_result.addFailure(self, sys.exc_info())
-                except Exception: #pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except
                     self._current_result.addError(self, sys.exc_info())
 
         return mod_result is not None
@@ -127,7 +128,7 @@ class ScriptCoverageTest(TestCase):
         for path, _, files in os.walk(self.root_dir):
             if '.git' in path or path.endswith('__pycache__'):
                 continue
-            path = path[len(self.root_dir)+1:]
+            path = path[len(self.root_dir) + 1:]
             for fname in files:
                 if not fname.endswith('.py') or '__' in fname or fname == 'setup.py':
                     continue
@@ -162,4 +163,3 @@ class ScriptCoverageTest(TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

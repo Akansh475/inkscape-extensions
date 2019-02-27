@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from draw_from_triangle import *
 
-class DrawFromTriangleBasicTest(TestCase):
-    effect = Draw_From_Triangle
+from draw_from_triangle import Draw_From_Triangle
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class DrawFromTriangleBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Draw_From_Triangle
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

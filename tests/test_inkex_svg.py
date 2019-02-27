@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2018 Martin Owens
 #
@@ -20,13 +21,16 @@
 Test the svg interface for inkscape extensions.
 """
 
-from tests.base import TestCase
 import unittest
-from tests.base.svg import svg, uu_svg, svg_file
+
 from inkex.utils import addNS
+from tests.base import TestCase
+from tests.base.svg import svg, svg_file, uu_svg
+
 
 class BasicSvgTest(TestCase):
     """Basic svg tests"""
+
     def test_svg_load(self):
         """Test loading an svg with the right parser"""
         self.assertEqual(type(svg()).__name__, 'SvgDocumentElement')
@@ -79,6 +83,7 @@ class BasicSvgTest(TestCase):
 
 class NamedViewTest(TestCase):
     """Tests for the named view functionality"""
+
     def test_create_guide(self):
         """Test creating guides"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
@@ -94,6 +99,7 @@ class NamedViewTest(TestCase):
 
 class GetDocumentWidthTest(TestCase):
     """Tests for Effect.width."""
+
     def test_no_dimensions(self):
         """An empty width value should be default zero width"""
         self.assertEqual(svg().width, '0')
@@ -133,6 +139,7 @@ class GetDocumentWidthTest(TestCase):
 
 class GetDocumentHeightTest(TestCase):
     """Tests for Effect.height."""
+
     def test_no_dimensions(self):
         """Test height from blank svg"""
         self.assertEqual(svg().height, '0')
@@ -172,6 +179,7 @@ class GetDocumentHeightTest(TestCase):
 
 class GetDocumentUnitTest(TestCase):
     """Tests for Effect.unit."""
+
     def test_no_dimensions(self):
         """Default units with no arguments"""
         self.assertEqual(svg().unit, 'px')
@@ -254,13 +262,13 @@ class GetDocumentUnitTest(TestCase):
 class UserUnitTest(TestCase):
     """Tests for methods that are based on the value of unit."""
 
-    def assertToUserUnit(self, user_unit, test_value, expected): # pylint: disable=invalid-name
+    def assertToUserUnit(self, user_unit, test_value, expected):  # pylint: disable=invalid-name
         """Checks a user unit and a test_value against the expected result"""
         doc = uu_svg(user_unit)
         self.assertEqual(doc.unit, user_unit, msg=svg)
         self.assertAlmostEqual(doc.unittouu(test_value), expected)
 
-    def assertFromUserUnit(self, user_unit, value, unit, expected): # pylint: disable=invalid-name
+    def assertFromUserUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(uu_svg(user_unit).uutounit(value, unit), expected)
 
@@ -282,7 +290,7 @@ class UserUnitTest(TestCase):
 
     def test_unittouu_unitless_input(self):
         """Passing a unitless value to unittouu() should treat the units as 'px'."""
-        self.assertToUserUnit('in', '96', 1) # 1in == 96px
+        self.assertToUserUnit('in', '96', 1)  # 1in == 96px
 
     def test_unittouu_empty_input(self):
         """Passing an empty string to unittouu() should treat the value as zero."""
@@ -303,7 +311,7 @@ class UserUnitTest(TestCase):
                 '1000.0e-1pc',
                 '.1e+3pc',
                 '+.1e+3pc',
-            ):
+        ):
             # 100pc is ~3.937in
             self.assertToUserUnit('px', value, 1600)
 
@@ -332,11 +340,11 @@ class UserUnitTest(TestCase):
 
     def test_uutounit_cm_to_in(self):
         """Convert 1 user unit ('in') to 'cm'."""
-        self.assertFromUserUnit('in', 1, 'cm', 2.54) # 1in is ~2.54cm
+        self.assertFromUserUnit('in', 1, 'cm', 2.54)  # 1in is ~2.54cm
 
     def test_uutounit_m_to_yd(self):
         """Convert 1 user unit ('yd') to 'm'."""
-        self.assertFromUserUnit('yd', 1, 'm', 0.9144) # 1yd is ~0.9144m
+        self.assertFromUserUnit('yd', 1, 'm', 0.9144)  # 1yd is ~0.9144m
 
     def test_uutounit_identity(self):
         """If the input and output units are the same, the input and output

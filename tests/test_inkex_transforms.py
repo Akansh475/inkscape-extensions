@@ -1,13 +1,15 @@
+# coding=utf-8
 """
 Test Inkex transformational logic.
 """
 
+from inkex.transforms import BoundingBox, Scale, Transform
 from tests.base import TestCase
 
-from inkex.transforms import Transform, Scale, BoundingBox
 
 class TransformTest(TestCase):
     """Test transformation API and calculations"""
+
     def test_new_empty(self):
         """Create a transformation from two triplets matrix"""
         self.assertEqual(Transform(), ((1, 0, 0), (0, 1, 0)))
@@ -72,8 +74,10 @@ class TransformTest(TestCase):
         self.assertEqual(trans.apply_to_point((10, 10)), (20, 20))
         self.assertRaises(ValueError, trans.apply_to_point, '')
 
+
 class ScaleTest(TestCase):
     """Test scale class"""
+
     def test_creation(self):
         """Creating scales"""
         self.assertEqual(Scale(), (None, None))
@@ -93,6 +97,7 @@ class ScaleTest(TestCase):
 
 class BoundingBoxTest(TestCase):
     """Test bounding box calculations"""
+
     def test_bbox_sum(self):
         """Test adding bboxes together"""
         self.assertEqual(BoundingBox([0, 10, 0, 10]) + (-10, 0, -10, 0), (-10, 10, -10, 10))
@@ -103,12 +108,12 @@ class BoundingBoxTest(TestCase):
             BoundingBox([0, 0, 0, 5])])
         self.assertEqual(ret, (-5, 5, -5, 5))
 
-    #def setUp(self):
+    # def setUp(self):
     #    args = [self.data_file('svg', 'simpletransform.test.svg')]
     #    self.e = Effect()
     #    self.e.affect(args, False)
 
-    #def test_scaled_object(self):
+    # def test_scaled_object(self):
     #    "Object in the defs with 50,50 scaled by 0.5 when used"
     #    bbox = computeBBox(self.e.document.xpath("//svg:g", namespaces=NSS))
     #    text_bbox = "{} {} {} {}".format(bbox[0], bbox[1], bbox[2], bbox[3])

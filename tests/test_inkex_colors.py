@@ -1,12 +1,15 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
 
 from inkex.colors import Color, ColorError, is_color
+from tests.base import TestCase
+
 
 class ColorTest(TestCase):
     """Test for single transformations"""
+
     def test_empty(self):
         """Empty color (black)"""
         self.assertEqual(Color(), [0, 0, 0])
@@ -92,6 +95,7 @@ class ColorTest(TestCase):
         """Can detect colour format"""
         self.assertFalse(is_color("rgb[t, b, s]"))
         self.assertTrue(is_color('#fff'))
+
 
 if __name__ == '__main__':
     unittest.main()

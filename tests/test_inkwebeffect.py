@@ -1,11 +1,17 @@
 #!/usr/bin/env python
+# coding=utf-8
 
-from tests.base import TestCase
 import unittest
-from inkwebeffect import *
 
-class InkWebEffectBasicTest(TestCase):
-    effect = InkWebEffect
+from inkwebeffect import InkWebEffect
+from tests.base import InkscapeExtensionTestMixin, TestCase
+
+
+class InkWebEffectBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = InkWebEffect
+        self.e = self.effect()
+
 
 if __name__ == '__main__':
     unittest.main()

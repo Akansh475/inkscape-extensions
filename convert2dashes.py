@@ -23,7 +23,7 @@ It is a modification of the file addnodes.py
 """
 import inkex
 
-class SplitIt(inkex.Effect):
+class Dashit(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.not_converted = []
@@ -89,7 +89,6 @@ class SplitIt(inkex.Effect):
                 self.not_converted.append(node.get('id'))
 
 if __name__ == '__main__':
-    e = SplitIt()
-    e.affect()
+    Dashit().run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

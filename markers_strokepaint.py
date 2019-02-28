@@ -50,7 +50,7 @@ class MarkerStrokePaintEffect(inkex.Effect):
             "-s", "--stroke_color", type=int, dest="stroke_color", default=1364325887,
             help="Choose a custom fill color")
         self.arg_parser.add_argument(
-            "--tab", type=str, dest="tab",
+            "--tab", type=str, dest="tab", default='"custom"',
             help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument(
             "--colortab", type=str, dest="colortab",
@@ -110,25 +110,28 @@ class MarkerStrokePaintEffect(inkex.Effect):
                     stroke = "none";
 
             for mprop in mprops:
-                if mprop in style and style[mprop] != 'none'and style[mprop][:5] == 'url(#':
+                if mprop in style and style[mprop] != 'none' and style[mprop][:5] == 'url(#':
                     marker_id = style[mprop][5:-1]
-
                     try:
-                        old_mnode = self.xpathSingle('/svg:svg//svg:marker[@id="%s"]' % marker_id)
-                        if not self.options.modify:
-                            mnode = copy.deepcopy(old_mnode)
-                        else:
+                        old_mnode = self.svg.getElement('/svg:svg//svg:marker[@id="%s"]' % marker_id)
+                        if self.options.modify:
                             mnode = old_mnode
+                        else:
+                            mnode = copy.deepcopy(old_mnode)
                     except:
                         inkex.errormsg(_("unable to locate marker: %s") % marker_id)
                         continue
 
-                    new_id = self.uniqueId(marker_id, not self.options.modify)
+                    if self.options.modify:
+                        new_id = marker_id
+                    else:
+                        new_id = self.svg.get_unique_id(marker_id)
 
                     style[mprop] = "url(#%s)" % new_id
                     mnode.set('id', new_id)
                     mnode.set(inkex.addNS('stockid','inkscape'), new_id)
-                    defs.append(mnode)
+                    if not self.options.modify:
+                        defs.append(mnode)
 
                     children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
                     for child in children:

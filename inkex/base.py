@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (c) 2018 - Martin Owens <doctormo@gmail.com>
 #
@@ -16,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-The utimate base functionality for every inkscape extension.
+The ultimate base functionality for every inkscape extension.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -29,6 +30,12 @@ from argparse import ArgumentParser
 from .utils import filename_arg, AbortExtension
 from .svg import SVG_PARSER
 from lxml import etree
+
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    unicode = str
+
 
 class InkscapeExtension(object):
     """
@@ -83,7 +90,7 @@ class InkscapeExtension(object):
 
     def load_raw(self):
         """Load the input stream or filename, save everything to self"""
-        if isinstance(self.options.input_file, str):
+        if isinstance(self.options.input_file, (str, unicode)):
             self.file_io = open(self.options.input_file, 'rb')
             self.document = self.load(self.file_io)
         else:
@@ -92,7 +99,7 @@ class InkscapeExtension(object):
     def save_raw(self, ret):
         """Save to the output steam, use everything from self"""
         if self.has_changed(ret):
-            if isinstance(self.options.output, str):
+            if isinstance(self.options.output, (str, unicode)):
                 with open(self.options.output, 'w') as stream:
                     self.save(stream)
             else:

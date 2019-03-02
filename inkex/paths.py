@@ -24,7 +24,7 @@ import copy
 from math import atan2, sqrt, pi, cos, sin
 from operator import add, mul
 from .utils import strargs, classproperty, X, Y
-from .transforms import BoundingBox, Scale, cubicExtrema
+from .transforms import BoundingBox, Scale, cubic_extrema
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
@@ -183,7 +183,7 @@ class SmoothCurve(PathCommand):
 
     def bounding_box(self):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
-        return cubicExtrema(*self.all_x) + cubicExtrema(*self.all_y)
+        return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
 
 class Quadratic(PathCommand):
     """Quadratic Curved Line instruction"""
@@ -191,7 +191,7 @@ class Quadratic(PathCommand):
 
     def bounding_box(self):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
-        return cubicExtrema(*self.all_x) + cubicExtrema(*self.all_y)
+        return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
 
 class TepidQuadratic(PathCommand):
     """Smoothed Quadratic Line instruction"""

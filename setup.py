@@ -40,5 +40,6 @@ setup(
             'Programming Language :: Python :: 3.7',
         ],
         install_requires=['scour'],
-        tests_require=["pytest", "pytest-cov", "pytest-runner"]
+        setup_requires=["pytest-runner"],
+        tests_require=["pytest", "pytest-cov"]
 )

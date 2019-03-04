@@ -22,61 +22,24 @@ Provide tests with some base utility.
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-import sys
-import uuid
 import shutil
 import tempfile
+import uuid
 from unittest import TestCase as BaseCase
-
-from io import StringIO
 
 TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
-class StdRedirect(object): # pylint: disable=too-few-public-methods
-    """Capture printed output, or provide standard input
-
-    with StdRedirect('stdout') as out:
-        print("expected")
-        str(out) == 'expected'
-
-    with StdRedirect('stdin', 'data') as inp:
-        sys.stdin.read() == 'data'
-        imp += 'more data arrived'
-    """
-    def __init__(self, name='stdout', initial=None):
-        self.name = name
-        self.std = getattr(sys, self.name)
-        self._str = StringIO(initial)
-
-    def __enter__(self):
-        setattr(sys, self.name, self._str)
-        return self
-
-    @property
-    def str(self):
-        self._str.seek(0)
-        return self._str.read()
-
-    def __repr__(self):
-        return "<StdRedirect {}>".format(self.name)
-
-    def __iadd__(self, data):
-        self._str.seek(0, mode=2)
-        self._str.write(data)
-        self._str.seek(0, mode=1)
-
-    def __exit__(self, kind, value, traceback):
-        setattr(sys, self.name, self.std)
-
-class NoExtension(object): # pylint: disable=too-few-public-methods
+class NoExtension(object):  # pylint: disable=too-few-public-methods
     """Test case must specify 'self.effect' to assertEffect."""
+
     def __init__(self, *args, **kwargs):
         raise NotImplementedError(self.__doc__)
 
     def run(self, *args, **kwargs):
         """Fake run"""
         pass
+
 
 class TestCase(BaseCase):
     """
@@ -119,35 +82,29 @@ class TestCase(BaseCase):
         """Returns a common minimal svg file"""
         return self.data_file('svg', 'default-inkscape-SVG.svg')
 
-    def assertEffectEmpty(self, effect, **kwargs): # pylint: disable=invalid-name
+    def assertEffectEmpty(self, effect, **kwargs):  # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""
         self.assertEffect(effect=effect, **kwargs)
 
-    def assertEffect(self, *filename, **kwargs): # pylint: disable=invalid-name
+    def assertEffect(self, *filename, **kwargs):  # pylint: disable=invalid-name
         """Assert an effect, capturing the output to stdout.
 
            filename should point to a starting svg document, default is empty_svg
         """
-        contains = kwargs.pop('contains', None)
         effect = kwargs.pop('effect', self.effect)()
 
-        args = [self.data_file(*filename)] if filename else [self.empty_svg] # pylint: disable=no-value-for-parameter
+        args = [self.data_file(*filename)] if filename else [self.empty_svg]  # pylint: disable=no-value-for-parameter
         args += kwargs.pop('args', [])
         args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
 
-        with StdRedirect() as out:
-            effect.run(args)
-            if contains is not None:
-                self.assertIn(contains, out)
-            str(out)
+        effect.run(args)
 
         if os.environ.get('FAIL_ON_DEPRICATION', False):
             warnings = getattr(effect, 'warned_about', set())
-            effect.warned_about = set() # reset for next test
+            effect.warned_about = set()  # reset for next test
             self.assertFalse(warnings, "Deprecated API is still being used!")
 
         return effect
-
 
 
 class InkscapeExtensionTestMixin(object):

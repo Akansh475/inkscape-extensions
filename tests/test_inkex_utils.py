@@ -8,32 +8,30 @@ Unit test file for ../inkex.py
 #
 from __future__ import absolute_import, print_function, unicode_literals
 
-import unittest
 from argparse import ArgumentTypeError
 
+import pytest
+
 from inkex.utils import addNS, debug, errormsg, filename_arg, inkbool, to
-from tests.base import StdRedirect
-from tests.base import TestCase
 
 
-class InkexBasicTest(TestCase):
+class TestInkexBasic(object):
     """Test basic utiltiies of inkex"""
 
     def test_inkbool(self):
         """Inkscape boolean input"""
-        self.assertEqual(inkbool('TRUE'), True)
-        self.assertEqual(inkbool('true'), True)
-        self.assertEqual(inkbool('True'), True)
-        self.assertEqual(inkbool('FALSE'), False)
-        self.assertEqual(inkbool('false'), False)
-        self.assertEqual(inkbool('False'), False)
-        self.assertEqual(inkbool('Banana'), None)
+        assert inkbool('TRUE') is True
+        assert inkbool('true') is True
+        assert inkbool('True') is True
+        assert inkbool('FALSE') is False
+        assert inkbool('false') is False
+        assert inkbool('False') is False
+        assert inkbool('Banana') is None
 
-    def test_debug(self):
+    def test_debug(self, capsys):
         """Debug messages go to stderr"""
-        with StdRedirect('stderr') as err:
-            debug("Hello World")
-            self.assertEqual(err.str, 'Hello World\n')
+        debug("Hello World")
+        assert capsys.readouterr().err == 'Hello World\n'
 
     def test_to(self):
         """Decorator for generators"""
@@ -45,8 +43,8 @@ class InkexBasicTest(TestCase):
             yield c
             yield b
 
-        self.assertEqual(type(mylist(1, 2, 3)), list)
-        self.assertEqual(mylist(1, 2, 3), [1, 3, 2])
+        assert isinstance(mylist(1, 2, 3), list)
+        assert mylist(1, 2, 3) == [1, 3, 2]
 
         @to(dict)
         def mydict(a, b, c):
@@ -55,58 +53,38 @@ class InkexBasicTest(TestCase):
             yield ('name', c)
             yield ('home', b)
 
-        self.assertEqual(type(mydict(1, 2, 3)), dict)
-        self.assertEqual(mydict(1, 2, 3), {'age': 1, 'name': 3, 'home': 2})
+        assert isinstance(mydict(1, 2, 3), dict)
+        assert mydict(1, 2, 3) == {'age': 1, 'name': 3, 'home': 2}
 
     def test_filename(self):
         """Filename argument input"""
-        self.assertEqual(filename_arg(__file__), __file__)
-        self.assertRaises(ArgumentTypeError, filename_arg, 'doesntexist.txt')
+        assert filename_arg(__file__) == __file__
+        with pytest.raises(ArgumentTypeError):
+            filename_arg('doesntexist.txt')
 
     def test_add_ns(self):
         """Test addNS function"""
-        self.assertEqual(
-                addNS('inkscape:foo'),
-                '{http://www.inkscape.org/namespaces/inkscape}foo')
-        self.assertEqual(
-                addNS('bar', 'inkscape'),
-                '{http://www.inkscape.org/namespaces/inkscape}bar')
-        self.assertEqual(
-                addNS('url', 'rdf'),
-                '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}url')
-        self.assertEqual(
-                addNS('{http://www.inkscape.org/namespaces/inkscape}bar'),
-                '{http://www.inkscape.org/namespaces/inkscape}bar')
-        self.assertEqual(
-                addNS('http://www.inkscape.org/namespaces/inkscape:bar'),
-                '{http://www.inkscape.org/namespaces/inkscape}bar')
-        self.assertEqual(
-                addNS('car', 'http://www.inkscape.org/namespaces/inkscape'),
-                '{http://www.inkscape.org/namespaces/inkscape}car')
-        self.assertEqual(
-                addNS('{http://www.inkscape.org/namespaces/inkscape}bar', 'rdf'),
-                '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}bar')
+        assert addNS('inkscape:foo') == '{http://www.inkscape.org/namespaces/inkscape}foo'
+        assert addNS('bar', 'inkscape') == '{http://www.inkscape.org/namespaces/inkscape}bar'
+        assert addNS('url', 'rdf') == '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}url'
+        assert addNS('{http://www.inkscape.org/namespaces/inkscape}bar') == '{http://www.inkscape.org/namespaces/inkscape}bar'
+        assert addNS('http://www.inkscape.org/namespaces/inkscape:bar') == '{http://www.inkscape.org/namespaces/inkscape}bar'
+        assert addNS('car', 'http://www.inkscape.org/namespaces/inkscape') == '{http://www.inkscape.org/namespaces/inkscape}car'
+        assert addNS('{http://www.inkscape.org/namespaces/inkscape}bar', 'rdf') == '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}bar'
 
-    def test_ascii(self):
+    def test_ascii(self, capsys):
         """Parse ABCabc"""
-        with StdRedirect('stderr') as err:
-            errormsg('ABCabc')
-            self.assertEqual(err.str, 'ABCabc\n')
+        errormsg('ABCabc')
+        assert capsys.readouterr().err == 'ABCabc\n'
 
-    def test_nonunicode_latin1(self):
+    def test_nonunicode_latin1(self, capsys):
         # Py2 has issues with unicode in docstrings.   *sigh*
         # """Parse Àûïàèé"""
-        with StdRedirect('stderr') as err:
-            errormsg('Àûïàèé')
-            self.assertEqual(err.str, 'Àûïàèé\n')
+        errormsg('Àûïàèé')
+        assert capsys.readouterr().err, 'Àûïàèé\n'
 
-    def test_unicode_latin1(self):
+    def test_unicode_latin1(self, capsys):
         # Py2 has issues with unicode in docstrings.   *sigh*
         # """Parse Àûïàèé (unicode)"""
-        with StdRedirect('stderr') as err:
-            errormsg('Àûïàèé')
-            self.assertEqual(err.str, 'Àûïàèé\n')
-
-
-if __name__ == '__main__':
-    unittest.main()
+        errormsg('Àûïàèé')
+        assert capsys.readouterr().err, 'Àûïàèé\n'

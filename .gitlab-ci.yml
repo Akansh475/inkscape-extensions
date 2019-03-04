@@ -9,7 +9,7 @@ stages:
   - coverage
   - deploy
 variables:
-  GIT_DEPTH: "1"
+  GIT_DEPTH: "10"
   GIT_SUBMODULE_STRATEGY: recursive
 
 

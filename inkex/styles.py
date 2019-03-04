@@ -34,6 +34,8 @@ class Style(OrderedDict):
     @staticmethod
     def parse_str(style):
         """Create a dictionary from the value of an inline style attribute"""
+        if style is None:
+            style=""
         for directive in style.split(';'):
             if ':' in directive:
                 (name, value) = directive.split(':', 1)

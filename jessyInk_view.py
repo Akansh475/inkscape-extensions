@@ -72,11 +72,11 @@ class JessyInk_Effects(inkex.Effect):
                 rect = node
             else:
                 inkex.errormsg(_("More than one object selected. Please select only one object.\n"))
-                exit()
+                return
 
         if rect == None:
             inkex.errormsg(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
-            exit()
+            return
 
         if not self.options.removeView:
             # Remove the view that currently has the requested order number.

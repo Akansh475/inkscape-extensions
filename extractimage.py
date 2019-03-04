@@ -44,9 +44,9 @@ class MyEffect(inkex.Effect):
 
     def extractSelected(self, document, selected):
         self.document=document
-        self.selected=selected
+        self.svg.selected=selected
         if (self.options.ids):
-            for id, node in selected.iteritems():
+            for id, node in selected.items():
                 if node.tag == inkex.addNS('image','svg'):
                     self.extractImage(node)
 

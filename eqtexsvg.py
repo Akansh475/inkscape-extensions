@@ -31,6 +31,10 @@ import sys
 import tempfile
 import inkex
 
+from inkex.localize import localize
+
+localize()
+
 def parse_pkgs(pkgstring):
     pkglist = pkgstring.replace(" ","").split(",")
     header = ""
@@ -120,7 +124,7 @@ class EQTEXSVG(inkex.Effect):
             os.rmdir(base_dir)
 
         if self.options.formula == "":
-            return inkex.errormsg(_("empty LaTeX input. Nothing to be done"))
+            return inkex.errormsg("empty LaTeX input. Nothing to be done")
 
         add_header = parse_pkgs(self.options.packages)
         create_equation_tex(latex_file, self.options.formula, add_header)

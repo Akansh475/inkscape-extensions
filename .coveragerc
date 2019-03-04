@@ -1,0 +1,5 @@
+[run]
+omit = tests/*
+       inkex/deprecated-simple/*
+       inkex/deprecated.py
+       .tox/*

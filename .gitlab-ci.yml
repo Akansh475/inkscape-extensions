@@ -1,47 +1,89 @@
 # Dependencies are managed in the Dockerfile in the inkscape-ci-docker
 # Git repository. Change them there, wait a bit, and then we'll use
 # the new ones here in these builds.
-image: registry.gitlab.com/inkscape/inkscape-ci-docker/extensions
+image: registry.gitlab.com/cabalist/inkscape-ci-docker/master
 
+stages:
+  - build
+  - test
+  - coverage
+  - deploy
 variables:
-  GIT_DEPTH: "10"
+  GIT_DEPTH: "1"
   GIT_SUBMODULE_STRATEGY: recursive
 
 
-.test: &test
-  stage: build
+test:python27:
   script:
-    - ${COVERAGE} run --parallel-mode --omit=".*","tests/*","*deprecated*","/usr/*" setup.py test
+    - source /root/pyenv-init
+    - pyenv shell 2.7.14
+    - tox -e py27-normal
+    - ls -al
   artifacts:
-    paths:
-      - .coverage*
+    name: "$CI_JOB_NAME"
     when: always
+    paths:
+      - .coverage-*
+      - htmlcov
 
-test:python2:
-  <<: *test
-  variables:
-    COVERAGE: python2-coverage
+test:python35:
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.5.6
+    - tox -e py35-normal
+  artifacts:
+    name: "$CI_JOB_NAME"
+    when: always
+    paths:
+      - .coverage-*
+      - htmlcov
 
-test:python3:
-  <<: *test
-  variables:
-    COVERAGE: python3-coverage
+
+test:python36:
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.6.8
+    - tox -e py36-normal
+  artifacts:
+    name: "$CI_JOB_NAME"
+    when: always
+    paths:
+      - .coverage-*
+      - htmlcov
+
+test:python37:
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.7.2
+    - tox -e py37-normal
+  artifacts:
+    name: "$CI_JOB_NAME"
+    when: always
+    paths:
+      - .coverage-*
+      - htmlcov
 
 
 test:coverage:
-  dependencies:
-    - test:python2
-    - test:python3
-  when: always
+  stage: coverage
   script:
-    - python3-coverage combine
-    - python3-coverage report
-    - python3-coverage html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
+    - source /root/pyenv-init
+    - pyenv shell 3.7.2
+    - pip install coverage
+    - coverage combine .coverage-*
+    - coverage report -m
+    - coverage html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
     - echo -e "\n\n"
-              "Coverage report successfully created; you can access the full HTML report at\n"
-              "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
-              "\n\n"
-  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+      "Coverage report successfully created; you can access the full HTML report at\n"
+      "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
+      "\n\n"
+  dependencies:
+    - test:python27
+    - test:python35
+    - test:python36
+    - test:python37
+  when: always
+  coverage: '/TOTAL.+?(\d+%)/'
   artifacts:
     paths:
       - htmlcov/
@@ -54,9 +96,9 @@ sphinx:
     - sphinx-apidoc -F -o source inkex
     - python3 setup.py build_sphinx -s source
     - echo -e "\n\n"
-              "Documentation for inkex module successfully created; you can access the HTML version at\n"
-              "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/sphinx/html/index.html"
-              "\n\n"
+      "Documentation for inkex module successfully created; you can access the HTML version at\n"
+      "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/sphinx/html/index.html"
+      "\n\n"
   artifacts:
     paths:
       - build/sphinx/

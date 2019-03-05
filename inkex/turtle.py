@@ -95,18 +95,18 @@ class pTurtle(object):
         if size < minimum:
             return
         self.fd(size)
-        turn = random.uniform(20, 40) 
+        turn = random.uniform(20, 40)
         self.lt(turn)
-        self.rtree(size * random.uniform(0.5,0.9), minimum, pt) 
+        self.rtree(size * random.uniform(0.5,0.9), minimum, pt)
         self.rt(turn)
-        turn = random.uniform(20, 40) 
+        turn = random.uniform(20, 40)
         self.rt(turn)
-        self.rtree(size * random.uniform(0.5,0.9), minimum, pt) 
+        self.rtree(size * random.uniform(0.5,0.9), minimum, pt)
         self.lt(turn)
-        if pt: 
+        if pt:
             self.pu()
         self.bk(size)
-        if pt: 
+        if pt:
             self.pd()
 
     fd = forward
@@ -116,4 +116,3 @@ class pTurtle(object):
     pu = penup
     pd = pendown
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

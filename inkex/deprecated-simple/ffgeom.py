@@ -107,19 +107,19 @@ def intersectSegments(s1, s2):
     x2 = s1[1]['x']
     x3 = s2[0]['x']
     x4 = s2[1]['x']
-    
+
     y1 = s1[0]['y']
     y2 = s1[1]['y']
     y3 = s2[0]['y']
     y4 = s2[1]['y']
-    
+
     denom = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1))
     num1 = ((x4 - x3) * (y1 - y3)) - ((y4 - y3) * (x1 - x3))
     num2 = ((x2 - x1) * (y1 - y3)) - ((y2 - y1) * (x1 - x3))
 
     num = num1
 
-    if denom != 0: 
+    if denom != 0:
         x = x1 + ((num / denom) * (x2 - x1))
         y = y1 + ((num / denom) * (y2 - y1))
         return Point(x, y)
@@ -129,4 +129,3 @@ def dot(s1, s2):
     return s1.delta_x() * s2.delta_x() + s1.delta_y() * s2.delta_y()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

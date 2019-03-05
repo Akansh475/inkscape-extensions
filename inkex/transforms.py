@@ -302,4 +302,3 @@ def cubic_extrema(py0, py1, py2, py3):
 
     return cmin, cmax
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

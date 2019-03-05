@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
 #
@@ -70,7 +70,7 @@ class Embedder(inkex.Effect):
             absref=node.get(inkex.addNS('absref','sodipodi'))
             url=urlparse.urlparse(xlink)
             href=urllib.url2pathname(url.path)
-            
+
             path=''
             #path selection strategy:
             # 1. href if absolute
@@ -125,4 +125,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

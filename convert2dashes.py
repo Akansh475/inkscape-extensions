@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2009 Alvin Penner, penner@vaxxine.com
@@ -91,4 +91,3 @@ class Dashit(inkex.Effect):
 if __name__ == '__main__':
     Dashit().run()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

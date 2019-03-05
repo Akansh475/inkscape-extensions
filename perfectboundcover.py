@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 '''
 Copyright (C) 2007 John Bintz, jcoswell@cosellproductions.org
 
@@ -139,7 +139,7 @@ class PerfectBoundCover(inkex.Effect):
                 newguide.set("orientation", guide[0])
                 newguide.set("position", "%f" % (guide[1] * 96))
                 namedview[0].append(newguide)
-        
+
         '''
         for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
@@ -171,4 +171,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

@@ -228,4 +228,3 @@ if __name__ == '__main__':   #pragma: no cover
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

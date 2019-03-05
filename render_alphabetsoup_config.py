@@ -5,7 +5,7 @@
 #                           ( ('state4', ...),),
 #                           ) ),
 # )
-# 
+#
 # Translation of the above in CNF:
 # state0 -> state1
 # state0 -> state2 state3
@@ -13,7 +13,7 @@
 #
 # Semantics at state0:
 # Paste subtree image from state1 onto "file.svg".
-# Subtree image is translated by (dx, dy) (measured in units, not pixels!). 
+# Subtree image is translated by (dx, dy) (measured in units, not pixels!).
 # Subtree image is flipped top to bottom if v==1.
 # Subtree image is flipped left to right if h==1.
 #
@@ -35,13 +35,13 @@ syntax = {
                               (('UC', 0,0,0,0),),
                               )),
     # lowercase
-    'lc':    ("epsilon.svg", ((('barsym', 0,0,0,0),), #(2096714) (26) 
+    'lc':    ("epsilon.svg", ((('barsym', 0,0,0,0),), #(2096714) (26)
                               (('lc2', 0,0,0,0),),    #(830)    (19)
                               )),
     # uppercase
     'UC':    ("epsilon.svg", ((('UCb',  0,0,0,0),),   #(2160) (30)
                               (('UCu',  0,-5,0,0),),
-                              )), 
+                              )),
     'UCb':   ("epsilon.svg", ((('Bar', 0,0,0,0),),    #(21)  Psi T I KK Phi
                               (('Bar', 0,0,0,1),),    #
                               (('D',   0,0,0,0),),    #(39)  D O Q C G
@@ -60,7 +60,7 @@ syntax = {
                               )),
     'UCu':   ("epsilon.svg", ((('UCb', 0,0,1,1),),)),
     # for statistical balancing
-    'lc2':   ("epsilon.svg", ((('osym', 0,0,0,0),),   #(40)  o, c, e, ou 
+    'lc2':   ("epsilon.svg", ((('osym', 0,0,0,0),),   #(40)  o, c, e, ou
                               (('vsym', 0,0,0,0),),   #(40)  v, w, ^, y
                               (('dsym', 0,0,0,1),),   #(96)  x, z, 7, 2, yogh
                               (('lc3',  0,0,0,0),),   #(928) (5)
@@ -120,15 +120,15 @@ syntax = {
                           (('b', 0,0,0,0), ('vert', 0,0,1,0),),                    # h heng
                           (('n', 0,0,0,0), ('vert', 0,0,1,0),),                    # n m r eng u uu mu
                           (('b1', 0,0,0,0), ('b0', 0,0,1,0),),                     # thorn eject.
-                          (('b1', 0,0,0,0), ('n0', 0,0,1,0),),                     # b p q d 
-                          (('n1', 0,0,0,0), ('n0', 0,0,1,0),),                     # open-a 
+                          (('b1', 0,0,0,0), ('n0', 0,0,1,0),),                     # b p q d
+                          (('n1', 0,0,0,0), ('n0', 0,0,1,0),),                     # open-a
                           )),
     'vert':  ("epsilon.svg", ((('xtnd', 0,0,0,0),),
                               (('srf',  0,0,1,0),),
                               #(('xtnd', 0,0,0,1),),
                               #(('srf',  0,0,1,1),),
                               )),
-    'srf':   ("epsilon.svg", ((('lserif', 0,0,0,0),), 
+    'srf':   ("epsilon.svg", ((('lserif', 0,0,0,0),),
                               (('lserif', 0,0,0,1),),
                               (('serif',  0,0,0,0),),
                               (('tserif', 0,0,0,0),),
@@ -188,10 +188,10 @@ syntax = {
                             )),
     'f':     ("f.svg", ((('j',   0, 0,0,0),),
                         (('j',   0, 0,0,1),),
-                        (('srf', 0,-4,1,0),), 
+                        (('srf', 0,-4,1,0),),
                         )),
     'f0':    ("f.svg", ((('j',   0, 0,0,0),),
-                        (('srf', 0,-4,1,0),), 
+                        (('srf', 0,-4,1,0),),
                         )),
     'idot':  ("idot.svg", ((('serif',  0,0,1,0),),
                            (('lserif', 0,0,1,0),),
@@ -235,7 +235,7 @@ syntax = {
     'Xh':      ("Xh.svg",),
     'Xvt':     ("Xvt.svg",),
     'Xvb':     ("Xvb.svg",),
-                
+
 
     'Bar':     ("barcap.svg", ((('Bartop', 0,0,0,0), ('Barbot', 0,0,0,0), ('Barmid', 0,0,0,0),),
                             (('Bartop2', 0,0,0,0), ('Barbot2', 0,0,0,0),),
@@ -251,7 +251,7 @@ syntax = {
                                 )),
     'Bartop2': ("epsilon.svg", ((('Bartop', 0, 0,0,0),),
                                 (('Psi',    0,-5,1,0),),
-                                )),    
+                                )),
     'Barmid':  ("epsilon.svg", ((('Hm', 0,0,0,0), ('Eserif', 0,0,0,0), ('Hm', -7.5,0,0,1), ('Eserif', -7.5,0,0,1),),
                                 (('P',  -2.5,3,0,0), ('P', -5, 3,0,1),),
                                 (('P',    -5,3,0,1),), #points left
@@ -291,8 +291,8 @@ syntax = {
                               )),
     'Fterm': ("epsilon.svg", ((('Barterm', 0,0,0,0), ('Et', 0,0,0,0), ('Hm', 0,0,0,0), ('IBSerif', 0,0,0,0),),
                               (('Lterm',   0,0,0,0), ('Eserif', 0,0,0,1),),
-                              (('P',       0,0,0,1), ('R', 0,0,0,1),), 
-                              (('Ltserif', 0,0,0,1), ('R', 0,0,0,1),), 
+                              (('P',       0,0,0,1), ('R', 0,0,0,1),),
+                              (('Ltserif', 0,0,0,1), ('R', 0,0,0,1),),
                               (('Ltserif', 0,0,0,1), ('Rblock', 0,0,0,1),),
                               (('Uterm',   0,0,0,0), ('Ocross', 0,0,0,0),),
                               )),
@@ -343,7 +343,7 @@ syntax = {
     'Rblock':("Rblock.svg", ((('IBSerif', -0.5,0,0,1),),)),
     'Uterm': ("U.svg",      ((('IBSerif', -0.5,0,0,0),),)),
     'IBSerif':("IBSerif.svg",),
-    'ITSerif':("ITSerif.svg",),    
+    'ITSerif':("ITSerif.svg",),
     'Eserif':("Eserif.svg",),
     # V rules
     'V':     ("vcap.svg",       ((('V2', 0,0,0,0),),
@@ -372,15 +372,15 @@ syntax = {
     'n':     ("n.svg", ((('hlike', 0,0,0,0),),)),
     'n1':    ("n.svg", ((('loop', 0,0,0,0),),)),
     's':     ("s.svg", ((('crv',   0,0,0,0), ('crv',   5,0,1,1),),)),
-    'j':     ("j.svg", ((('crv',   0,-5,0,0),),)), 
+    'j':     ("j.svg", ((('crv',   0,-5,0,0),),)),
     '?':     ("question.svg", ((('crv', -2.5,-5,0,0),),)),
     'yogh':  ("yogh.svg",((('crv', -2.5,4,1,0),),)),
     #terminal rules
     '2':     ("2.svg",),
     '30':    ("3.svg",),
-    '7':     ("7.svg",),    
+    '7':     ("7.svg",),
     'a':     ("a.svg",),
-    'cserif':("cserif.svg",), 
+    'cserif':("cserif.svg",),
     'e':     ("e.svg",),
     'k':     ("k.svg",),
     'n0':    ("n.svg",),
@@ -413,10 +413,10 @@ alphabet = {
     '9':     ("start.[.UC.[.UCb.[.E.[.Eterm.[.Dterm.[.O.].Eserif.|.].Eterm2.[.P.|.Lterm2.-.].|.].|.].].]",
               "start.[.UC.[.UCb.[.E.[.Eterm.[.O.Ocross.].Eterm2.[.P.|.Lterm2.-.].|.].|.].].]",),
     '0':     ("start.[.UC.[.UCb.[.D.[.Dterm.[.O.].Dterm.[.O.].|.].].].]",),
-    'A':     ("start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Barterm.Et.Hm.IBSerif.].|.].].].]", # no flip needed 
-              "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].|.].].].]", 
-              "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].|.].|.].].]", 
-              "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Uterm.[.IBSerif.].Ocross.].|.].].].]",       
+    'A':     ("start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Barterm.Et.Hm.IBSerif.].|.].].].]", # no flip needed
+              "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].|.].].].]",
+              "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].|.].|.].].]",
+              "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Uterm.[.IBSerif.].Ocross.].|.].].].]",
               "start.[.UC.[.UCb.[.F.[.Fterm.[.Barterm.Et.Hm.IBSerif.].Fterm.[.Uterm.[.IBSerif.].Ocross.].|.].|.].].]",
               "start.[.UC.[.UCb.[.F.[.Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].Fterm.[.Uterm.[.IBSerif.].Ocross.].|.].|.].].]",
               "start.[.UC.[.UCb.[.F.[.Fterm.[.Uterm.[.IBSerif.].Ocross.].Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].|.].|.].].]",
@@ -489,7 +489,7 @@ alphabet = {
               "start.[.UC.[.UCb.[.F.[.Fterm.[.Lterm.[.Uterm.[.IBSerif.].].Eserif.|.].Fterm.[.P.|.R.[.IBSerif.|.].|.].|.].|.].].]",
               "start.[.UC.[.UCb.[.F.[.Fterm.[.P.|.R.[.IBSerif.|.].|.].Fterm.[.Barterm.Et.Hm.IBSerif.].|.].].].]",
               "start.[.UC.[.UCb.[.F.[.Fterm.[.Uterm.[.IBSerif.].Ocross.].Fterm.[.P.|.R.[.IBSerif.|.].|.].|.].|.].].]",),
-    'S':     ("start.[.UC.[.UCb.[.E.[.Eterm2.[.P.|.Lterm2.-.].|.Eterm2.[.P.|.Lterm2.-.].-.].|.].].]",),    
+    'S':     ("start.[.UC.[.UCb.[.E.[.Eterm2.[.P.|.Lterm2.-.].|.Eterm2.[.P.|.Lterm2.-.].-.].|.].].]",),
     'Sigma': ("start.[.UC.[.UCb.[.X.[.Xtb.[.Xnw.Xh.|.Lterm2.|.].Xtb.[.Xne.Xh.Lterm2.].-.|.].].].]",),
     'T':     ("start.[.UC.[.UCb.[.Bar.[.Bartop2.[.Bartop.[.Tt.].].Barbot2.[.Barbot.[.IBSerif.].].].].].]",
               "start.[.UC.[.UCb.[.Bar.[.Bartop.[.ITSerif.].Barbot.[.IBSerif.].Barmid.[.Hm.Eserif.Hm.|.Eserif.|.].].].].]",),
@@ -503,7 +503,7 @@ alphabet = {
     'V':     ("start.[.UC.[.UCb.[.V.[.V2.[.Vser.].].|.].].]",),
     'W':     ("start.[.UC.[.UCb.[.X.[.Xlr.[.Xne.-.|.Xvt.Xvb.ITSerif.].Xlr.[.Xnw.Xvt.Xvt.-.IBSerif.].-.|.].].].]",
               "start.[.UC.[.UCu.[.UCb.[.V.[.V2.[.M.[.IBSerif.IBSerif.|.].].].|.].-.|.].].]",),
-    'X':     ("start.[.UC.[.UCu.[.UCb.[.X.[.Xlr.[.Xne.-.|.Xnw.].Xlr.[.Xne.-.|.Xnw.].-.|.].].-.|.].].]", 
+    'X':     ("start.[.UC.[.UCu.[.UCb.[.X.[.Xlr.[.Xne.-.|.Xnw.].Xlr.[.Xne.-.|.Xnw.].-.|.].].-.|.].].]",
               "start.[.UC.[.UCb.[.H.[.Hterm.[.R.|.R.-.|.].Hterm.[.R.|.R.-.|.].|.].].].]",),
     'Xi':    ("start.[.UC.[.UCb.[.E.[.Eterm.[.Dterm2.[.Ltserif.|.Lbserif.|.].Eserif.|.].Eterm.[.Dterm2.[.Ltserif.|.Lbserif.|.].Eserif.|.].|.].|.].].]",),
     'Y':     ("start.[.UC.[.UCb.[.X.[.Xlr.[.Xne.-.|.Xnw.].Xlr2.[.Xne.-.|.].-.|.].].].]",),
@@ -513,9 +513,9 @@ alphabet = {
              "start.[.lc.[.barsym.[.bar.[.n1.[.loop.].n0.-.].-.|.].].]",
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.n0.-.loop2.[.loop.].].|.].].].].]",),
     'carat':("start.[.lc.[.lc2.[.vsym.[.v.[.vserl.vserr.].-.|.].].].]",),
-    'b':    ("start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.].n0.-.].].].]", 
+    'b':    ("start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.].n0.-.].].].]",
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.b0.[.f.].-.loop2.[.loop.].].-.].].].].]",
-             "start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.|.].n0.-.].].].]", 
+             "start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.|.].n0.-.].].].]",
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.b0.[.f.|.].-.loop2.[.loop.].].-.].].].].]",),
     'c':    ("start.[.lc.[.lc2.[.osym.[.o.[.loop2.[.elike.[.crv.-.|.crv.|.].|.].].].].].]",),
     'd':    ("start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.].n0.-.].].|.].]",
@@ -549,9 +549,9 @@ alphabet = {
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.b0.[.f.].-.loop2.[.loop.].].-.].-.].].].]",
              "start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.|.].n0.-.].].-.].]",
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.b0.[.f.|.].-.loop2.[.loop.].].-.].-.].].].]",),
-    'q':    ("start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.].n0.-.].].-.|.].]", 
+    'q':    ("start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.].n0.-.].].-.|.].]",
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.b0.[.f.].-.loop2.[.loop.].].-.].-.|.].].].]",
-             "start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.|.].n0.-.].].-.|.].]", 
+             "start.[.lc.[.barsym.[.bar.[.b1.[.loop.f.|.].n0.-.].].-.|.].]",
              "start.[.lc.[.lc2.[.lc3.[.asym.[.abase.[.b0.[.f.|.].-.loop2.[.loop.].].-.].-.|.].].].]",),
     'r':    ("start.[.lc.[.barsym.[.bar.[.n.[.hlike.[.crv.].].vert.-.].].].]",),
     's':    ("start.[.lc.[.lc2.[.lc3.[.ssym.[.s.[.crv.crv.-.|.].].].].].]",),
@@ -578,6 +578,5 @@ alphabet = {
 space = 4                                         # number of unit boxes to make a " " space in string
 units = 36                                        # pixels per unit box in font
 font = "alphabet_soup/"                           # location of font images
-    
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99
+

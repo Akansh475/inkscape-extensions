@@ -1,7 +1,7 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # This extension either adds nodes to a path so that
-#    a) no segment is longer than a maximum value 
+#    a) no segment is longer than a maximum value
 #    or
 #    b) so that each segment is divided into a given number of equal segments
 #
@@ -78,4 +78,3 @@ if __name__ == '__main__':
     e = SplitIt()
     e.run()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

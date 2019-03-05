@@ -40,7 +40,7 @@ class RubberStretch(pathmodifier.Diffeo):
         x0= (self.bbox[0]+self.bbox[1])/2
         y0=-(self.bbox[2]+self.bbox[3])/2
         w,h=(self.bbox[1]-self.bbox[0])/2,(self.bbox[3]-self.bbox[2])/2
-        
+
         x,y=(bpt[0]-x0),(bpt[1]-y0)
         sx=(1+b*(x/w+1)*(x/w-1))*2**(-a)
         sy=(1+b*(y/h+1)*(y/h-1))*2**(-a)
@@ -54,7 +54,7 @@ class RubberStretch(pathmodifier.Diffeo):
             dYdy=1/sx
             v[0]=dXdx*dx+dXdy*dy
             v[1]=dYdx*dx+dYdy*dy
-    
+
         #--spherify
         #s=((x*x+y*y)/(w*w+h*h))**(-a/2)
         #bpt[0]=x0+s*x
@@ -63,7 +63,7 @@ class RubberStretch(pathmodifier.Diffeo):
         #    dx,dy=v
         #    v[0]=(1-a/2/(x*x+y*y)*2*x*x)*s*dx+( -a/2/(x*x+y*y)*2*y*x)*s*dy
         #    v[1]=( -a/2/(x*x+y*y)*2*x*y)*s*dx+(1-a/2/(x*x+y*y)*2*y*y)*s*dy
-    
+
         for v in vects:
             v[0]+=bpt[0]
             v[1]+=bpt[1]
@@ -72,5 +72,4 @@ class RubberStretch(pathmodifier.Diffeo):
 
 if __name__ == '__main__':
     RubberStretch().run()
-    
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99
+

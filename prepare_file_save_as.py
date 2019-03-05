@@ -57,4 +57,3 @@ else:
     # Skip automatic testing for this module
     raise inkex.DependencyError("This extension is untestable because of 'inkscape Popen'.")
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

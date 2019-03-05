@@ -69,7 +69,7 @@ class Restack(inkex.Effect):
     def effect(self):
         if self.options.tab == '"help"':
             pass
-        elif len(self.selected) > 0:
+        elif len(self.svg.selected) > 0:
             if self.options.tab == '"positional"':
                 self.restack_positional()
             elif self.options.tab == '"z_order"':

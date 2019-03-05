@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Carsten Goetze c.goetze@tu-bs.de
 #
@@ -57,11 +57,11 @@ class PathFractalize(inkex.Effect):
                         dest="smooth", default="4.0",
                         help="Smoothness of the subdivision")
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
                 p = inkex.parsePath(d)
-                
+
                 a = []
                 first = 1
                 for cmd,params in p:
@@ -83,14 +83,14 @@ class PathFractalize(inkex.Effect):
 
     def fractalize(self,a,x1,y1,x2,y2,s,f):
         subdivPoint = calculateSubdivision(x1,y1,x2,y2,f)
-        
+
         if s > 0 :
             """ recursively subdivide the segment left of the subdivision point """
             self.fractalize(a,x1,y1,subdivPoint[-2],subdivPoint[-1],s-1,f)
             a.append(['L',subdivPoint])
             """ recursively subdivide the segment right of the subdivision point """
             self.fractalize(a,subdivPoint[-2],subdivPoint[-1],x2,y2,s-1,f)
-             
+
 if __name__ == '__main__':
     e = PathFractalize()
     e.affect()

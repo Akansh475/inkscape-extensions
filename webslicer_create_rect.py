@@ -62,7 +62,7 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
             self.options.dimension
 
     def effect(self):
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         self.validate_options()
         layer = self.get_slicer_layer(True)
         #TODO: get selected elements to define location and size

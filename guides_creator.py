@@ -285,8 +285,8 @@ class GuidesCreator(inkex.Effect):
         svg = self.document.getroot()
 
         # getting the width and height attributes of the canvas
-        width  = self.unittouu(svg.get('width'))
-        height = self.unittouu(svg.get('height'))
+        width  = self.svg.unittouu(svg.get('width'))
+        height = self.svg.unittouu(svg.get('height'))
 
         # getting edges coordinates
         h_orientation = '0,' + str(round(width,4))

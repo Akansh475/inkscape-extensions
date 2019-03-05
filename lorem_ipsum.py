@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2006 Jos Hirth, kaioa.com
 #
@@ -208,16 +208,16 @@ class MyEffect(inkex.Effect):
       else:
         text+=foo[random.randint(0,len(foo)-1)]
     return text
-  
+
   def addText(self, node):
     for i in range(self.options.num):
       para=inkex.etree.SubElement(node,inkex.addNS('flowPara','svg'))
       para.text = self.makePara()
       inkex.etree.SubElement(node,inkex.addNS('flowPara','svg'))
-  
+
   def effect(self):
     found=0
-    for id, node in self.selected.items():
+    for id, node in self.svg.selected.items():
       if node.tag == inkex.addNS('flowRoot','svg'):
         found+=1
         if found==1:

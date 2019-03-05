@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -104,14 +104,14 @@ class LSystem(inkex.Effect):
                 except KeyError:
                     level_string = level_string + c
             else:
-                level_string = level_string + c 
+                level_string = level_string + c
         return level_string
-            
+
     def effect(self):
-        self.options.step = self.unittouu(str(self.options.step) + 'px')
-        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.unittouu('1px')), 
-            'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
-            'stroke': '#000000', 'stroke-linecap': 'butt', 
+        self.options.step = self.svg.unittouu(str(self.options.step) + 'px')
+        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
+            'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+            'stroke': '#000000', 'stroke-linecap': 'butt',
             'fill': 'none'}
         attribs = {'style': str(inkex.Style(s)),'d':self.iterate()}
         inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'),attribs)

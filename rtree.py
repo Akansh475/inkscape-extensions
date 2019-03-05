@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2015 su_v, suv-sf@users.sf.net
@@ -39,18 +39,18 @@ class RTreeTurtle(inkex.Effect):
                         dest="pentoggle", default=False,
                         help="Lift pen for backward steps")
     def effect(self):
-        self.options.size = self.unittouu(str(self.options.size) + 'px')
-        self.options.minimum = self.unittouu(str(self.options.minimum) + 'px')
-        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.unittouu('1px')), 
-            'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
-            'stroke': '#000000', 'stroke-linecap': 'butt', 
+        self.options.size = self.svg.unittouu(str(self.options.size) + 'px')
+        self.options.minimum = self.svg.unittouu(str(self.options.minimum) + 'px')
+        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
+            'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+            'stroke': '#000000', 'stroke-linecap': 'butt',
             'fill': 'none'}
         t = pturtle.pTurtle()
         t.pu()
         t.setpos(inkex.computePointInNode(list(self.view_center), self.current_layer))
         t.pd()
         t.rtree(self.options.size, self.options.minimum, self.options.pentoggle)
-        
+
         attribs = {'d':t.getPath(),'style':str(inkex.Style(s))}
         inkex.etree.SubElement(self.current_layer, inkex.addNS('path','svg'), attribs)
 

@@ -83,7 +83,7 @@ class Frame(inkex.Effect):
                 return
         clip = inkex.etree.SubElement(self.defs, inkex.addNS('clipPath','svg'))
         clip.append(copy.deepcopy(clip_path))
-        clip_id = self.uniqueId('clipPath')
+        clip_id = self.svg.get_unique_id('clipPath')
         clip.set('id', clip_id)
         node.set('clip-path', 'url(#%s)' % str(clip_id))
 

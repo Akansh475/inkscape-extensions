@@ -67,9 +67,9 @@ class Gears(inkex.Effect):
     def effect(self):
 
         teeth = self.options.teeth
-        pitch = self.unittouu( str(self.options.pitch) + self.options.unit)
+        pitch = self.svg.unittouu( str(self.options.pitch) + self.options.unit)
         angle = self.options.angle  # Angle of tangent to tooth at circular pitch wrt radial line.
-        centerdiameter = self.unittouu( str(self.options.centerdiameter) + self.options.unit)
+        centerdiameter = self.svg.unittouu( str(self.options.centerdiameter) + self.options.unit)
 
         # print >>sys.stderr, "Teeth: %s\n"        % teeth
 
@@ -108,7 +108,7 @@ class Gears(inkex.Effect):
         # Dedendum: Radial distance from pitch circle to root diameter.
         dedendum = addendum + clearance
 
-        # Root diameter: Diameter of bottom of tooth spaces. 
+        # Root diameter: Diameter of bottom of tooth spaces.
         root_radius =  pitch_radius - dedendum
         root_diameter = root_radius * 2.0
 
@@ -165,11 +165,11 @@ class Gears(inkex.Effect):
         g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
 
         # Create SVG Path for gear
-        style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
+        style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px')) }
         gear_attribs = {'style':str(inkex.Style(style)), 'd':path}
         gear = inkex.etree.SubElement(g, inkex.addNS('path','svg'), gear_attribs )
         if(centerdiameter > 0.0):
-            center_attribs = {'style':str(inkex.Style(style)), 
+            center_attribs = {'style':str(inkex.Style(style)),
                 inkex.addNS('cx','sodipodi')        :'0.0',
                 inkex.addNS('cy','sodipodi')        :'0.0',
                 inkex.addNS('rx','sodipodi')        :str(centerdiameter/2),

@@ -339,8 +339,8 @@ class DxfOutlines(inkex.Effect):
         scale = eval(self.options.units)
         if not scale:
             scale = 25.4/96     # if no scale is specified, assume inch as baseunit
-        scale /= self.unittouu('1px')
-        h = self.unittouu(self.getDocumentHeight())
+        scale /= self.svg.unittouu('1px')
+        h = self.svg.unittouu(self.svg.width)
         doc = self.document.getroot()
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')
@@ -348,7 +348,7 @@ class DxfOutlines(inkex.Effect):
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            scale *= h / self.unittouu(self.addDocumentUnit(viewBox2[3]))
+            scale *= h / self.svg.unittouu(self.addDocumentUnit(viewBox2[3]))
         self.groupmat = [[[scale, 0.0, 0.0], [0.0, -scale, h*scale]]]
         self.process_group(doc)
         if self.options.ROBO == 'true':

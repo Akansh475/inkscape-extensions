@@ -245,7 +245,7 @@ class PathScatter(pathmodifier.Diffeo):
                     #!!!--> should it be given an id?
                     #seems to work without this!?!
                     myid = patternList[random.randint(0, len(patternList)-1)].tag.split('}')[-1]
-                    clone.set("id", self.uniqueId(myid))
+                    clone.set("id", self.svg.get_unique_id(myid))
                     self.gNode.append(clone)
 
                     inkex.applyTransformToNode(mat,clone)

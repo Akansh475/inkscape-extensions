@@ -68,7 +68,7 @@ class JessyInk_Effects(inkex.Effect):
 
         rect = None
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if rect == None:
                 rect = node
             else:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2012 Alvin Penner, penner@vaxxine.com
 #
@@ -40,7 +40,7 @@ if not sys.platform.startswith('win'):
 myspool = ctypes.WinDLL("winspool.drv")
 mygdi = ctypes.WinDLL("gdi32.dll")
 LOGBRUSH = ctypes.c_long * 3
-DM_IN_PROMPT = 4                        # call printer property sheet 
+DM_IN_PROMPT = 4                        # call printer property sheet
 DM_OUT_BUFFER = 2                       # write to DEVMODE structure
 
 class MyEffect(inkex.Effect):
@@ -60,7 +60,7 @@ class MyEffect(inkex.Effect):
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
                     rgb = inkex.Color(style['stroke']).to_rgb()
             if 'stroke-width' in style:
-                stroke = self.unittouu(style['stroke-width'])/self.unittouu('1px')
+                stroke = self.svg.unittouu(style['stroke-width'])/self.svg.unittouu('1px')
                 stroke = int(stroke*self.scale)
             if 'fill' in style:
                 if style['fill'] and style['fill'] != 'none' and style['fill'][0:3] != 'url':
@@ -197,8 +197,8 @@ class MyEffect(inkex.Effect):
             exit()                      # user clicked Cancel
 
         self.scale = (ord(pDevMode[58]) + 256.0*ord(pDevMode[59]))/96    # use PrintQuality from DEVMODE
-        self.scale /= self.unittouu('1px')
-        h = self.unittouu(self.document.getroot().xpath('@height', namespaces=inkex.NSS)[0])
+        self.scale /= self.svg.unittouu('1px')
+        h = self.svg.unittouu(self.document.getroot().xpath('@height', namespaces=inkex.NSS)[0])
         doc = self.document.getroot()
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')
@@ -206,7 +206,7 @@ class MyEffect(inkex.Effect):
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            self.scale *= h / self.unittouu(self.addDocumentUnit(viewBox2[3]))
+            self.scale *= h / self.svg.unittouu(self.addDocumentUnit(viewBox2[3]))
         self.groupmat = [[[self.scale, 0.0, 0.0], [0.0, self.scale, 0.0]]]
         self.process_group(doc)
         mygdi.EndDoc(self.hDC)

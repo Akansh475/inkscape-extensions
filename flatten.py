@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
 #
@@ -26,7 +26,7 @@ class MyEffect(inkex.Effect):
                         dest="flat", default=10.0,
                         help="Minimum flatness of the subdivided curves")
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
                 p = inkex.parseCubicPath(d)

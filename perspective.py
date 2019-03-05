@@ -28,6 +28,7 @@ except:
     bsubprocess = False
 
 import inkex
+from inkex import Transform
 
 X, Y = range(2)
 
@@ -52,16 +53,16 @@ class Project(inkex.Effect):
             return inkex.errormsg(_("This extension requires two selected paths."))
 
         #obj is selected second
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         doc = self.document.getroot()
-        h = self.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
+        h = self.svg.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')
         if viewBox:
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            scale *= self.unittouu(self.addDocumentUnit(viewBox2[3])) / h
+            scale *= self.svg.unittouu(self.addDocumentUnit(viewBox2[3])) / h
         obj = self.selected[self.options.ids[0]]
         envelope = self.selected[self.options.ids[1]]
         if obj.get(inkex.addNS('type','sodipodi')):
@@ -144,7 +145,7 @@ class Project(inkex.Effect):
                 csp[0] = self.project_point(csp[0], matrix)
                 csp[1] = self.project_point(csp[1], matrix)
                 csp[2] = self.project_point(csp[2], matrix)
-        mat = inkex.invertTransform(mat)
+        mat = -Transform(mat)
         inkex.applyTransformToPath(mat, point)
         path.set('d', str(inkex.Path(point)))
 

@@ -43,10 +43,10 @@ class JessyInk_AutoTexts(inkex.Effect):
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-        if len(self.selected) == 0:
+        if len(self.svg.selected) == 0:
             inkex.errormsg(_("To assign an effect, please select an object.\n\n"))
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             nodes = node.xpath("./svg:tspan", namespaces=inkex.NSS)
 
             if len(nodes) != 1:

@@ -63,8 +63,8 @@ class RackGear(inkex.Effect):
             help="Contact Angle")
 
     def effect(self):
-        length = self.unittouu(str(self.options.length) + 'px')
-        spacing = self.unittouu(str(self.options.spacing) + 'px')
+        length = self.svg.unittouu(str(self.options.length) + 'px')
+        spacing = self.svg.unittouu(str(self.options.spacing) + 'px')
         angle = radians(self.options.angle)
 
         # generate points: list of (x, y) pairs
@@ -83,16 +83,16 @@ class RackGear(inkex.Effect):
 
         # Embed gear in group to make animation easier:
         #  Translate group, Rotate path.
-        view_center = computePointInNode(list(self.view_center), self.current_layer)
+        view_center = computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
         t = 'translate(' + str(view_center[0]) + ',' + \
             str(view_center[1]) + ')'
         g_attribs = {
             inkex.addNS('label', 'inkscape'): 'RackGear' + str(length),
             'transform': t}
-        g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+        g = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
 
         # Create SVG Path for gear
-        style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px'))}
+        style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
         gear_attribs = {
             'style': str(inkex.Style(style)),
             'd': path}

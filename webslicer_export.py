@@ -309,8 +309,8 @@ class WebSlicer_Export(WebSlicer_Effect):
                 if len(el) == 5:
                     self.el_geo[el[0]] = { 'x':float(el[1]), 'y':float(el[2]),
                                            'w':float(el[3]), 'h':float(el[4]) }
-        doc_w = self.unittouu( self.document.getroot().get('width') )
-        doc_h = self.unittouu( self.document.getroot().get('height') )
+        doc_w = self.svg.unittouu( self.document.getroot().get('width') )
+        doc_h = self.svg.unittouu( self.document.getroot().get('height') )
         self.el_geo['webslicer-layer'] = { 'x':0, 'y':0, 'w':doc_w, 'h':doc_h }
 
 

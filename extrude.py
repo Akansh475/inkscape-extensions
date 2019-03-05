@@ -32,7 +32,7 @@ class Extrude(inkex.Effect):
 
     def effect(self):
         paths = []
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == '{http://www.w3.org/2000/svg}path':
                 paths.append(node)
         if len(paths) < 2:
@@ -70,7 +70,7 @@ class Extrude(inkex.Effect):
                         'fill': 'none',
                         'stroke': '#000000',
                         'stroke-opacity': 1,
-                        'stroke-width': self.unittouu('1px'),
+                        'stroke-width': self.svg.unittouu('1px'),
                     }
                     ele.set('style', str(inkex.Style(style)))
                 elif self.options.mode.lower() == 'polygons':
@@ -80,7 +80,7 @@ class Extrude(inkex.Effect):
                         'fill-opacity': 0.3,
                         'stroke': '#000000',
                         'stroke-opacity': 0.6,
-                        'stroke-width': self.unittouu('2px'),
+                        'stroke-width': self.svg.unittouu('2px'),
                     }
                     g.set('style', str(inkex.Style(style)))
                     paths[0].xpath('..')[0].append(g)

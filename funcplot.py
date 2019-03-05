@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 Tavmjong Bah, tavmjong@free.fr
 # Copyright (C) 2006 Georg Wiora, xorx@quarkbox.de
@@ -32,13 +32,13 @@ import inkex
 from inkex import inkbool
 
 
-def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom, 
+def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
     fx = "sin(x)", fpx = "cos(x)", fponum = True, times2pi = False, polar = False, isoscale = True, drawaxis = True, endpts = False):
 
     if times2pi == True:
         xstart = 2 * pi * xstart
-        xend   = 2 * pi * xend   
-      
+        xend   = 2 * pi * xend
+
     # coords and scales based on the source rect
     if xstart == xend:
         inkex.errormsg(_("x-interval cannot be zero. Please modify 'Start X value' or 'End X value'"))
@@ -93,7 +93,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
     third = step / 3.0
     ds = step * 0.001 # Step used in calculating derivatives
 
-    a = [] # path array 
+    a = [] # path array
     # add axis
     if drawaxis :
       # check for visibility of x-axis
@@ -108,7 +108,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
         a.append([' l ',[0, -height]])
 
     # initialize function and derivative for 0;
-    # they are carried over from one iteration to the next, to avoid extra function calculations. 
+    # they are carried over from one iteration to the next, to avoid extra function calculations.
     x0 =   xstart
     y0 = f(xstart)
     if polar :
@@ -124,7 +124,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
             yp1 = y1 * sin( x1 )
             x1 = xp1
             y1 = yp1
-        dx0 = (x1 - x0)/ds 
+        dx0 = (x1 - x0)/ds
         dy0 = (y1 - y0)/ds
     else: # derivative given by the user
         dx0 = 1 # Only works for rectangular coordinates
@@ -159,7 +159,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
             dy1 = fp(x1)
         # create curve
         a.append([' C ',
-                  [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)), 
+                  [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)),
                    coordx(x1 - (dx1 * third)), coordy(y1 - (dy1 * third)),
                    coordx(x1),                 coordy(y1)]
                   ])
@@ -185,11 +185,11 @@ class FuncPlot(inkex.Effect):
         self.arg_parser.add_argument("--times2pi",
                         action="store", type=inkbool,
                         dest="times2pi", default=True,
-                        help="Multiply x-range by 2*pi")    
+                        help="Multiply x-range by 2*pi")
         self.arg_parser.add_argument("--polar",
                         action="store", type=inkbool,
                         dest="polar", default=False,
-                        help="Plot using polar coordinates")    
+                        help="Plot using polar coordinates")
         self.arg_parser.add_argument("--ybottom",
                         action="store", type=float,
                         dest="ybottom", default=-1.0,
@@ -201,19 +201,19 @@ class FuncPlot(inkex.Effect):
         self.arg_parser.add_argument("-s", "--samples",
                         action="store", type=int,
                         dest="samples", default=8,
-                        help="Samples")    
+                        help="Samples")
         self.arg_parser.add_argument("--fofx",
                         action="store", type=str,
                         dest="fofx", default="sin(x)",
-                        help="f(x) for plotting")    
+                        help="f(x) for plotting")
         self.arg_parser.add_argument("--fponum",
                         action="store", type=inkbool,
                         dest="fponum", default=True,
-                        help="Calculate the first derivative numerically")    
+                        help="Calculate the first derivative numerically")
         self.arg_parser.add_argument("--fpofx",
                         action="store", type=str,
                         dest="fpofx", default="cos(x)",
-                        help="f'(x) for plotting") 
+                        help="f'(x) for plotting")
         self.arg_parser.add_argument("--clip",
                         action="store", type=inkbool,
                         dest="clip", default=False,
@@ -221,15 +221,15 @@ class FuncPlot(inkex.Effect):
         self.arg_parser.add_argument("--remove",
                         action="store", type=inkbool,
                         dest="remove", default=True,
-                        help="If True, source rectangle is removed") 
+                        help="If True, source rectangle is removed")
         self.arg_parser.add_argument("--isoscale",
                         action="store", type=inkbool,
                         dest="isoscale", default=True,
-                        help="If True, isotropic scaling is used") 
+                        help="If True, isotropic scaling is used")
         self.arg_parser.add_argument("--drawaxis",
                         action="store", type=inkbool,
                         dest="drawaxis", default=True,
-                        help="If True, axis are drawn") 
+                        help="If True, axis are drawn")
         self.arg_parser.add_argument("--endpts",
                         action="store", type=inkbool,
                         dest="endpts", default=False,
@@ -237,19 +237,19 @@ class FuncPlot(inkex.Effect):
         self.arg_parser.add_argument("--tab",
                         action="store", type=str,
                         dest="tab", default="sampling",
-                        help="The selected UI-tab when OK was pressed") 
+                        help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--funcplotuse",
                         action="store", type=str,
                         dest="funcplotuse", default="",
-                        help="dummy") 
+                        help="dummy")
         self.arg_parser.add_argument("--pythonfunctions",
                         action="store", type=str,
                         dest="pythonfunctions", default="",
-                        help="dummy") 
+                        help="dummy")
 
     def effect(self):
         newpath = None
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('rect','svg'):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.etree.Element(inkex.addNS('path','svg'))
@@ -262,20 +262,20 @@ class FuncPlot(inkex.Effect):
                 s = node.get('style')
                 if s:
                     newpath.set('style', s)
-                
+
                 t = node.get('transform')
                 if t:
                     newpath.set('transform', t)
-                    
+
                 # top and bottom were exchanged
                 newpath.set('d', inkex.formatPath(
                             drawfunction(self.options.xstart,
                                 self.options.xend,
                                 self.options.ybottom,
                                 self.options.ytop,
-                                self.options.samples, 
+                                self.options.samples,
                                 w,h,x,y+h,
-                                self.options.fofx, 
+                                self.options.fofx,
                                 self.options.fpofx,
                                 self.options.fponum,
                                 self.options.times2pi,
@@ -284,14 +284,14 @@ class FuncPlot(inkex.Effect):
                                 self.options.drawaxis,
                                 self.options.endpts)))
                 newpath.set('title', self.options.fofx)
-                
-                #newpath.setAttribute('desc', '!func;' + self.options.fofx + ';' 
+
+                #newpath.setAttribute('desc', '!func;' + self.options.fofx + ';'
                 #                                      + self.options.fpofx + ';'
                 #                                      + `self.options.fponum` + ';'
                 #                                      + `self.options.xstart` + ';'
                 #                                      + `self.options.xend` + ';'
                 #                                      + `self.options.samples`)
-                                
+
                 # add path into SVG structure
                 node.getparent().append(newpath)
                 # option whether to clip the path with rect or not.
@@ -301,7 +301,7 @@ class FuncPlot(inkex.Effect):
                         defs = inkex.etree.SubElement(self.document.getroot(),inkex.addNS('defs','svg'))
                     clip = inkex.etree.SubElement(defs,inkex.addNS('clipPath','svg'))
                     clip.append(deepcopy(node))
-                    clipId = self.uniqueId('clipPath')
+                    clipId = self.svg.get_unique_id('clipPath')
                     clip.set('id', clipId)
                     newpath.set('clip-path', 'url(#'+clipId+')')
                 # option whether to remove the rectangle or not.

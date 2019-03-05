@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2015 ~suv <suv-sf@users.sf.net>
 # Copyright (C) 2010 Alvin Penner
@@ -22,7 +22,7 @@
 #
 #TODO:
 # * should use the standard attributes for text
-# * Implement option to keep text orientation upright 
+# * Implement option to keep text orientation upright
 #    1. Find text direction i.e. path tangent,
 #    2. check direction >90 or <-90 Degrees
 #    3. rotate by 180 degrees around text center
@@ -41,7 +41,7 @@ import inkex
 from inkex import inkbool
 
 
-# On darwin, fall back to C in cases of 
+# On darwin, fall back to C in cases of
 # - incorrect locale IDs (see comments in bug #406662)
 # - https://bugs.python.org/issue18378
 try:
@@ -123,7 +123,7 @@ class Length(inkex.Effect):
         self.arg_parser.add_argument("--tab",
                         action="store", type=str,
                         dest="tab", default="sampling",
-                        help="The selected UI-tab when OK was pressed") 
+                        help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--measurehelp",
                         action="store", type=str,
                         dest="measurehelp", default="",
@@ -138,20 +138,20 @@ class Length(inkex.Effect):
             self.setPreset()
         # get number of digits
         prec = int(self.options.precision)
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         self.options.offset *= scale
         factor = 1.0
         doc = self.document.getroot()
         if doc.get('viewBox'):
             (viewx, viewy, vieww, viewh) = re.sub(' +|, +|,',' ',doc.get('viewBox')).strip().split(' ', 4)
-            factor = self.unittouu(doc.get('width'))/float(vieww)
-            if self.unittouu(doc.get('height'))/float(viewh) < factor:
-                factor = self.unittouu(doc.get('height'))/float(viewh)
-            factor /= self.unittouu('1px')
+            factor = self.svg.unittouu(doc.get('width'))/float(vieww)
+            if self.svg.unittouu(doc.get('height'))/float(viewh) < factor:
+                factor = self.svg.unittouu(doc.get('height'))/float(viewh)
+            factor /= self.svg.unittouu('1px')
             self.options.fontsize /= factor
-        factor *= scale/self.unittouu('1'+self.options.unit)
+        factor *= scale/self.svg.unittouu('1'+self.options.unit)
         # loop over all selected paths
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 mat = inkex.composeParents(node, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
                 p = inkex.parseCubicPath(node.get('d'))

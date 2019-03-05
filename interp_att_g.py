@@ -66,11 +66,11 @@ class InterpAttG(inkex.Effect):
     def getColorValues(self):
         sv = self.options.start_val.lstrip('#')
         ev = self.options.end_val.lstrip('#')
-        
+
         # index 0: start color, index 1: end color
         self.R, self.G, self.B = [0,0],[0,0],[0,0]
         raw_colors = [sv, ev]
-        
+
         for i in [0,1]:
             if re.search('\s|,', raw_colors[i]):
                 # There are separators. That must be an integer RGB color definition.
@@ -102,8 +102,8 @@ class InterpAttG(inkex.Effect):
         unit = self.options.unit
 
         if unit != 'none':
-            sv = self.unittouu(sv + unit)
-            ev = self.unittouu(ev + unit)
+            sv = self.svg.unittouu(sv + unit)
+            ev = self.svg.unittouu(ev + unit)
         else:
             sv = float(sv)
             ev = float(ev)
@@ -114,9 +114,9 @@ class InterpAttG(inkex.Effect):
     def getTotElements(self):
         self.tot_el = 0
         self.collection = None
-        if len( self.selected ) == 0:
+        if len( self.svg.selected ) == 0:
             return False
-        if len( self.selected ) > 1:
+        if len( self.svg.selected ) > 1:
             # multiple selection
             if self.options.zsort:
                 sorted_ids = self.document.get_z_selected()

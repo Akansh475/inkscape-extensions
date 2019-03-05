@@ -82,8 +82,8 @@ class Plot(inkex.Effect):
         if MAGIC:
             # reparse data for preview
             self.options.showMovements = True
-            self.options.docWidth = self.uutounit(self.unittouu(self.document.getroot().get('width')), "px")
-            self.options.docHeight = self.uutounit(self.unittouu(self.document.getroot().get('height')), "px")
+            self.options.docWidth = self.svg.uutounit(self.unittouu(self.document.getroot().get('width')), "px")
+            self.options.docHeight = self.svg.uutounit(self.unittouu(self.document.getroot().get('height')), "px")
             myHpglDecoder = hpgl_decoder.hpglDecoder(self.hpgl, self.options)
             doc, warnings = myHpglDecoder.getSvg()
             # deliver document to inkscape
@@ -265,11 +265,11 @@ class Plot(inkex.Effect):
             inkex.errormsg('  Viewbox Width: -')
             inkex.errormsg('  Viewbox Height: -')
         else:
-            inkex.errormsg('  Viewbox Width: ' + str(self.unittouu(self.addDocumentUnit(debugObject.debugValues['viewBoxWidth']))) + ' ' + self.getDocumentUnit())
-            inkex.errormsg('  Viewbox Height: ' + str(self.unittouu(self.addDocumentUnit(debugObject.debugValues['viewBoxHeight']))) + ' ' + self.getDocumentUnit())
+            inkex.errormsg('  Viewbox Width: ' + str(self.svg.unittouu(self.addDocumentUnit(debugObject.debugValues['viewBoxWidth']))) + ' ' + self.getDocumentUnit())
+            inkex.errormsg('  Viewbox Height: ' + str(self.svg.unittouu(self.addDocumentUnit(debugObject.debugValues['viewBoxHeight']))) + ' ' + self.getDocumentUnit())
         inkex.errormsg("\n" + self.options.commandLanguage + " properties:\n")
-        inkex.errormsg('  Drawing width: ' + str(self.unittouu(self.addDocumentUnit(str(debugObject.debugValues['drawingWidthUU'])))) + ' ' + self.getDocumentUnit())
-        inkex.errormsg('  Drawing height: ' + str(self.unittouu(self.addDocumentUnit(str(debugObject.debugValues['drawingHeightUU'])))) + ' ' + self.getDocumentUnit())
+        inkex.errormsg('  Drawing width: ' + str(self.svg.unittouu(self.addDocumentUnit(str(debugObject.debugValues['drawingWidthUU'])))) + ' ' + self.getDocumentUnit())
+        inkex.errormsg('  Drawing height: ' + str(self.svg.unittouu(self.addDocumentUnit(str(debugObject.debugValues['drawingHeightUU'])))) + ' ' + self.getDocumentUnit())
         inkex.errormsg('  Drawing width: ' + str(debugObject.debugValues['drawingWidth']) + ' plotter steps')
         inkex.errormsg('  Drawing height: ' + str(debugObject.debugValues['drawingHeight']) + ' plotter steps')
         inkex.errormsg('  Offset X: ' + str(debugObject.offsetX) + ' plotter steps')

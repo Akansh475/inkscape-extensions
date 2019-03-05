@@ -61,6 +61,6 @@ class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         self.document = doc
 
 if __name__ == '__main__':
-    HpglFile().affect()
+    HpglFile().run()
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

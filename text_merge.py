@@ -54,13 +54,13 @@ class Merge(inkex.Effect):
                         action="store", type=inkbool,
                         dest="keepstyle", default=False,
                         help="keep format")
-                        
+
     def effect(self):
-        if len(self.selected)==0:
+        if len(self.svg.selected)==0:
             for node in self.document.xpath('//svg:text | //svg:flowRoot', namespaces=inkex.NSS):
                 self.selected[node.get('id')] = node
-    
-        if len( self.selected ) > 0:
+
+        if len( self.svg.selected ) > 0:
             objlist = []
             svg = self.document.getroot()
             parentnode = self.current_layer
@@ -76,7 +76,7 @@ class Merge(inkex.Effect):
                     reader=csv.CSVParser().parse_string(f)    #there was a module cvs.py in earlier inkscape that behaved differently
                 except:
                     reader=csv.reader(f.split( os.linesep ))
-                err.close() 
+                err.close()
             else:
                 _,f,err = os.popen3('inkscape --query-all "%s"' % ( file ) )
                 reader=csv.reader( f )
@@ -145,26 +145,26 @@ class Merge(inkex.Effect):
 
             objlist.sort()
             #move them to the top of the object stack in this order.
-            
+
             if self.options.flowtext:
                 self.text_element = "flowRoot"
                 self.text_span = "flowPara"
             else:
                 self.text_element = "text"
                 self.text_span = "tspan"
-                
+
             self.textRoot=inkex.etree.SubElement(parentnode,inkex.addNS(self.text_element,'svg'),{inkex.addNS('space','xml'):'preserve'})
             self.textRoot.set(inkex.addNS('style', ''), 'font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;')
 
             for item in objlist:
                 self.recurse(self.selected[item[1]], self.textRoot)
-                
+
             if self.options.flowtext:
                 self.region=inkex.etree.SubElement(self.textRoot,inkex.addNS('flowRegion','svg'),{inkex.addNS('space','xml'):'preserve'})
                 self.rect=inkex.etree.SubElement(self.region,inkex.addNS('rect','svg'),{inkex.addNS('space','xml'):'preserve'})
                 self.rect.set(inkex.addNS('height', ''), '200')
                 self.rect.set(inkex.addNS('width', ''), '200')
-    
+
     def recurse(self, node, span):
         #istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}tspan')
         if node.tag != '{http://www.w3.org/2000/svg}flowRegion':
@@ -186,7 +186,7 @@ class Merge(inkex.Effect):
                 self.recurse(child, newspan)
             if (node.tail and node.tag != '{http://www.w3.org/2000/svg}text'):
                 newspan.tail = node.tail
-                
+
 
 if __name__ == '__main__':
     e = Merge()

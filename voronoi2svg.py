@@ -27,7 +27,7 @@ Create Voronoi diagram from seeds (midpoints of selected objects)
 
 import random
 import inkex
-from inkex import inkbool
+from inkex import inkbool, Transform
 from inkex.localize import _
 
 import voronoi
@@ -203,7 +203,7 @@ class Voronoi2svg(inkex.Effect):
 
         linestyle = {
                 'stroke'                    : '#000000',
-                'stroke-width'        : str(self.unittouu('1px')),
+                'stroke-width'        : str(self.svg.unittouu('1px')),
                 'fill'                        : 'none',
                 'stroke-linecap'    : 'round',
                 'stroke-linejoin' : 'round'
@@ -211,7 +211,7 @@ class Voronoi2svg(inkex.Effect):
 
         facestyle = {
                 'stroke'                    : '#000000',
-                'stroke-width'        : str(self.unittouu('1px')),
+                'stroke-width'        : str(self.svg.unittouu('1px')),
                 'fill'                        : 'none',
                 'stroke-linecap'    : 'round',
                 'stroke-linejoin' : 'round'
@@ -225,7 +225,7 @@ class Voronoi2svg(inkex.Effect):
         trans = self.getGlobalTransform(parentGroup)
         invtrans = None
         if trans:
-            invtrans = inkex.invertTransform(trans)
+            invtrans = -Transform(mat)
 
         #}}}
 
@@ -291,8 +291,8 @@ class Voronoi2svg(inkex.Effect):
             clipBox = ()
             if self.options.clipBox == 'Page':
                 svg = self.document.getroot()
-                w = self.unittouu(svg.get('width'))
-                h = self.unittouu(svg.get('height'))
+                w = self.svg.unittouu(svg.get('width'))
+                h = self.svg.unittouu(svg.get('height'))
                 clipBox = (0,w,0,h)
             else:
                 clipBox = (2*gBbox[0]-gBbox[1],
@@ -359,7 +359,7 @@ class Voronoi2svg(inkex.Effect):
                 if self.options.delaunayFillOptions == "delaunay-fill" or self.options.delaunayFillOptions == "delaunay-fill-random":
                     facestyle = {
                                 'stroke'                    : fills[triangle[random.randrange(0, 2)]],
-                                'stroke-width'        : str(self.unittouu('0.005px')),
+                                'stroke-width'        : str(self.svg.unittouu('0.005px')),
                                 'fill'                        : fills[triangle[random.randrange(0, 2)]],
                                 'stroke-linecap'    : 'round',
                                 'stroke-linejoin' : 'round'

@@ -66,7 +66,7 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
     def effect(self):
         self.get_base_elements()
-        if len(self.selected) == 0:
+        if len(self.svg.selected) == 0:
             return inkex.errormsg(_('You must to select some "Slicer rectangles" or other "Layout groups".'))
         for id,node in self.selected.items():
             if node not in self.layer_descendants:

@@ -25,7 +25,7 @@ import uuid
 from copy import deepcopy
 
 import inkex
-from inkex import NSS, addNS, etree, errormsg
+from inkex import NSS, addNS, etree, errormsg, Transform
 import simplepath, simplestyle, simpletransform
 import cubicsuperpath
 
@@ -833,10 +833,10 @@ class SynfigDocument(object):
         dest_br = [200, 200]
         dest_bl = [100, 200]
 
-        simpletransform.applyTransformToPoint(mtx, dest_tl)
-        simpletransform.applyTransformToPoint(mtx, dest_tr)
-        simpletransform.applyTransformToPoint(mtx, dest_br)
-        simpletransform.applyTransformToPoint(mtx, dest_bl)
+        dest_tl = Transform(mtx).apply_to_point(dest_tl)
+        dest_tr = Transform(mtx).apply_to_point(dest_tr)
+        dest_br = Transform(mtx).apply_to_point(dest_br)
+        dest_bl = Transform(mtx).apply_to_point(dest_bl)
 
         warp = self.create_layer("warp", name, params={
             "src_tl": self.coor_svg2sif(src_tl),

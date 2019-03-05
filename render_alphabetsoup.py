@@ -29,7 +29,7 @@ import sys
 
 import inkex
 import render_alphabetsoup_config
-from inkex import inkbool
+from inkex import inkbool, Transform
 
 syntax = render_alphabetsoup_config.syntax
 alphabet = render_alphabetsoup_config.alphabet
@@ -538,7 +538,7 @@ class AlphabetSoup(inkex.Effect):
                                      help="Generate random (unreadable) text")
 
     def effect(self):
-        zoom = self.unittouu(str(self.options.zoom) + 'px')
+        zoom = self.svg.unittouu(str(self.options.zoom) + 'px')
 
         if self.options.randomize:
             imagelist = generate_random_string(self.options.text, zoom)
@@ -560,7 +560,7 @@ class AlphabetSoup(inkex.Effect):
             # compensate preserved transforms of parent layer
             if self.current_layer.getparent() is not None:
                 mat = inkex.composeParents(self.current_layer, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-                inkex.applyTransformToNode(inkex.invertTransform(mat), new)
+                inkex.applyTransformToNode(-Transform(mat), new)
 
 
 if __name__ == '__main__':

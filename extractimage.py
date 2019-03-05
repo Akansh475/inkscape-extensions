@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 '''
 Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 
@@ -40,7 +40,7 @@ class MyEffect(inkex.Effect):
         # if slectedonly is enabled and there is a selection only extractselected
         # images. otherwise extract all images
         if (self.options.selectedonly):
-            self.extractSelected(self.document, self.selected)
+            self.extractSelected(self.document, self.svg.selected)
         else:
             self.extractAll(self.document)
 
@@ -57,7 +57,7 @@ class MyEffect(inkex.Effect):
         path = '//svg:image'
         for node in self.document.getroot().xpath(path, namespaces=inkex.NSS):
             self.extractImage(node)
-    
+
     def extractImage(self, node):
         mimesubext={
             'png'     : '.png',
@@ -68,7 +68,7 @@ class MyEffect(inkex.Effect):
             'icon'    : '.ico',
             'gif'     : '.gif'
         }
-        
+
         # exbed the first embedded image
         path = self.options.filepath
         if (path != ''):
@@ -93,7 +93,7 @@ class MyEffect(inkex.Effect):
                                         else:
                                             pathwext = os.path.join(os.path.expanduser("~"),pathwext)
                                     inkex.errormsg(_('Image extracted to: %s') % pathwext)
-                                    break 
+                                    break
                         #save
                         data = base64.decodestring(xlink[comma:])
                         open(pathwext,'wb').write(data)

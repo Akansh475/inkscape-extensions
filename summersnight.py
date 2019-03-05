@@ -18,6 +18,7 @@
 import os
 
 import inkex
+from inkex import Transform
 
 from ffgeom import *
 
@@ -37,16 +38,16 @@ class Project(inkex.Effect):
             return
 
         #obj is selected second
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         doc = self.document.getroot()
-        h = self.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
+        h = self.svg.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')
         if viewBox:
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            scale *= self.unittouu(self.addDocumentUnit(viewBox2[3])) / h
+            scale *= self.svg.unittouu(self.addDocumentUnit(viewBox2[3])) / h
         obj = self.selected[self.options.ids[0]]
         trafo = self.selected[self.options.ids[1]]
         if obj.get(inkex.addNS('type','sodipodi')):
@@ -116,7 +117,7 @@ class Project(inkex.Effect):
                 csp[0] = self.trafopoint(csp[0])
                 csp[1] = self.trafopoint(csp[1])
                 csp[2] = self.trafopoint(csp[2])
-        mat = inkex.invertTransform(mat)
+        mat = -Transform(mat)
         inkex.applyTransformToPath(mat, p)
         path.set('d',cubicsuperpath.formatPath(p))
 
@@ -126,12 +127,12 @@ class Project(inkex.Effect):
         vector = Segment(Point(self.q['x'],self.q['y']),Point(x,y))
         xratio = abs(vector.delta_x())/self.q['width']
         yratio = abs(vector.delta_y())/self.q['height']
-    
+
         horz = Segment(self.t1.pointAtRatio(xratio),self.t3.pointAtRatio(xratio))
         vert = Segment(self.t4.pointAtRatio(yratio),self.t2.pointAtRatio(yratio))
 
         p = intersectSegments(vert,horz)
-        return [p['x'],p['y']]    
+        return [p['x'],p['y']]
 
 
 if __name__ == '__main__':

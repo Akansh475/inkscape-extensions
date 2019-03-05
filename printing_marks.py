@@ -192,7 +192,7 @@ class PrintingMarks (inkex.Effect):
                 i += 0.1
 
     def get_selection_area(self):
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         sel_area = {}
         min_x, min_y, max_x, max_y = False, False, False, False
         for id in self.options.ids:
@@ -228,8 +228,8 @@ class PrintingMarks (inkex.Effect):
         self.area_h = max_y - min_y
 
     def effect(self):
-        self.mark_size = self.unittouu('1cm')
-        self.min_mark_margin = self.unittouu('3mm')
+        self.mark_size = self.svg.unittouu('1cm')
+        self.min_mark_margin = self.svg.unittouu('3mm')
 
         if self.options.where_to_crop == 'selection' :
             self.get_selection_area()
@@ -237,8 +237,8 @@ class PrintingMarks (inkex.Effect):
             #exit(1)
         else :
             svg = self.document.getroot()
-            self.area_w  = self.unittouu(svg.get('width'))
-            self.area_h  = self.unittouu(svg.attrib['height'])
+            self.area_w  = self.svg.unittouu(svg.get('width'))
+            self.area_h  = self.svg.unittouu(svg.attrib['height'])
             self.area_x1 = 0
             self.area_y1 = 0
             self.area_x2 = self.area_w
@@ -247,16 +247,14 @@ class PrintingMarks (inkex.Effect):
         # Get SVG document dimensions
         # self.width must be replaced by self.area_x2. same to others.
         svg = self.document.getroot()
-        #self.width  = width  = self.unittouu(svg.get('width'))
-        #self.height = height = self.unittouu(svg.attrib['height'])
 
         # Convert parameters to user unit
-        offset = self.unittouu(str(self.options.crop_offset) + \
+        offset = self.svg.unittouu(str(self.options.crop_offset) + \
                                 self.options.unit)
-        bt = self.unittouu(str(self.options.bleed_top)    + self.options.unit)
-        bb = self.unittouu(str(self.options.bleed_bottom) + self.options.unit)
-        bl = self.unittouu(str(self.options.bleed_left)   + self.options.unit)
-        br = self.unittouu(str(self.options.bleed_right)  + self.options.unit)
+        bt = self.svg.unittouu(str(self.options.bleed_top)    + self.options.unit)
+        bb = self.svg.unittouu(str(self.options.bleed_bottom) + self.options.unit)
+        bl = self.svg.unittouu(str(self.options.bleed_left)   + self.options.unit)
+        br = self.svg.unittouu(str(self.options.bleed_right)  + self.options.unit)
         # Bleed margin
         if bt < offset : bmt = 0
         else :           bmt = bt - offset

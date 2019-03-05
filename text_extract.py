@@ -52,11 +52,11 @@ class Extract(inkex.Effect):
                         help="vertical point to compare")
 
     def effect(self):
-        if len(self.selected)==0:
+        if len(self.svg.selected)==0:
             for node in self.document.xpath('//svg:text | //svg:flowRoot', namespaces=inkex.NSS):
                 self.selected[node.get('id')] = node
 
-        if len( self.selected ) > 0:
+        if len( self.svg.selected ) > 0:
             objlist = []
             svg = self.document.getroot()
             parentnode = self.current_layer

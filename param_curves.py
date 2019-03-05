@@ -171,7 +171,7 @@ class ParamCurves(inkex.Effect):
                                      help="dummy")
 
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('rect','svg'):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.etree.Element(inkex.addNS('path','svg'))

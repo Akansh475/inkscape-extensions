@@ -51,7 +51,7 @@ class PathModifier(inkex.Effect):
             #!!!--> should it be given an id?
             #seems to work without this!?!
             myid = node.tag.split('}')[-1]
-            clone.set("id", self.uniqueId(myid))
+            clone.set("id", self.svg.get_unique_id(myid))
             node.getparent().append(clone)
             clones[clone.get("id")]=clone
         return(clones)
@@ -63,7 +63,7 @@ class PathModifier(inkex.Effect):
         return(id)
 
     def expandGroups(self,aList, transferTransform=True):
-        for id, node in aList.items():      
+        for id, node in aList.items():
             if node.tag == inkex.addNS('g','svg') or node.tag=='g':
                 mat = simpletransform.parseTransform(node.get("transform"))
                 for child in node:
@@ -96,13 +96,13 @@ class PathModifier(inkex.Effect):
                 newid=newnode.get('id')
                 aList.update(self.expandGroupsUnlinkClones({newid:newnode},transferTransform,doReplace))
         return aList
-    
+
     def recursNewIds(self,node):
         if node.get('id'):
-            node.set('id',self.uniqueId(node.tag))
+            node.set('id',self.svg.get_unique_id(node.tag))
         for child in node:
             self.recursNewIds(child)
-            
+
     def refNode(self,node):
         if node.get(inkex.addNS('href','xlink')):
             refid=node.get(inkex.addNS('href','xlink'))
@@ -158,7 +158,7 @@ class PathModifier(inkex.Effect):
 
             newnode=inkex.etree.Element('path')
             newnode.set('d',d)
-            newnode.set('id', self.uniqueId('path'))
+            newnode.set('id', self.svg.get_unique_id('path'))
             newnode.set('style',node.get('style'))
             nnt = node.get('transform')
             if nnt:
@@ -172,7 +172,7 @@ class PathModifier(inkex.Effect):
 
     def groupToPath(self,node,doReplace=True):
         if node.tag == inkex.addNS('g','svg'):
-            newNode = inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'))    
+            newNode = inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'))
 
             newstyle = dict(inkex.Style.parse_str(node.get('style') or ""))
             newp = []
@@ -194,10 +194,10 @@ class PathModifier(inkex.Effect):
             return newNode
         else:
             raise AssertionError('Node is not a group')
-        
+
     def objectToPath(self,node,doReplace=True):
         #--TODO: support other object types!!!!
-        #--TODO: make sure inkex.cubic_paths supports A and Q commands... 
+        #--TODO: make sure inkex.cubic_paths supports A and Q commands...
         if node.tag == inkex.addNS('rect','svg'):
             return(self.rectToPath(node,doReplace))
         if node.tag == inkex.addNS('g','svg'):
@@ -227,7 +227,7 @@ class PathModifier(inkex.Effect):
 ################################
 #-- Action ----------
 ################################
-        
+
     #-- overwrite this method in subclasses...
     def effect(self):
         #self.duplicateNodes(self.selected)
@@ -250,7 +250,7 @@ class Diffeo(PathModifier):
 
     def applyDiffeo(self,bpt,vects=()):
         '''
-        bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt. 
+        bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.
         Defaults to identity!
         '''
         for v in vects:

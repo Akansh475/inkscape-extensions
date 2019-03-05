@@ -52,6 +52,8 @@ Many settings for appearance, lighting, rotation, etc are available.
 import re
 import sys
 import inkex
+from inkex import inkbool
+
 
 from math import floor, pi, acos, sqrt, cos, sin
 try:
@@ -350,105 +352,105 @@ class Obj(object): #a 3d object defined by the vertices and the faces (eg a poly
 class Poly3D(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--tab",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--tab",
+            action="store", type=str,
             dest="tab", default="object") 
 
 #MODEL FILE SETTINGS
-        self.OptionParser.add_option("--obj",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--obj",
+            action="store", type=str,
             dest="obj", default='cube')
-        self.OptionParser.add_option("--spec_file",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--spec_file",
+            action="store", type=str,
             dest="spec_file", default='great_rhombicuboct.obj')
-        self.OptionParser.add_option("--cw_wound",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("--cw_wound",
+            action="store", type=inkbool,
             dest="cw_wound", default='true')
-        self.OptionParser.add_option("--type",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--type",
+            action="store", type=str,
             dest="type", default='face')
 #VEIW SETTINGS
-        self.OptionParser.add_option("--r1_ax",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--r1_ax",
+            action="store", type=str,
             dest="r1_ax", default="X-Axis")
-        self.OptionParser.add_option("--r2_ax",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--r2_ax",
+            action="store", type=str,
             dest="r2_ax", default="X-Axis")
-        self.OptionParser.add_option("--r3_ax",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--r3_ax",
+            action="store", type=str,
             dest="r3_ax", default="X-Axis")
-        self.OptionParser.add_option("--r4_ax",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--r4_ax",
+            action="store", type=str,
             dest="r4_ax", default="X-Axis")
-        self.OptionParser.add_option("--r5_ax",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--r5_ax",
+            action="store", type=str,
             dest="r5_ax", default="X-Axis")
-        self.OptionParser.add_option("--r6_ax",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--r6_ax",
+            action="store", type=str,
             dest="r6_ax", default="X-Axis")
-        self.OptionParser.add_option("--r1_ang",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--r1_ang",
+            action="store", type=float,
             dest="r1_ang", default=0)
-        self.OptionParser.add_option("--r2_ang",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--r2_ang",
+            action="store", type=float,
             dest="r2_ang", default=0)
-        self.OptionParser.add_option("--r3_ang",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--r3_ang",
+            action="store", type=float,
             dest="r3_ang", default=0)
-        self.OptionParser.add_option("--r4_ang",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--r4_ang",
+            action="store", type=float,
             dest="r4_ang", default=0)
-        self.OptionParser.add_option("--r5_ang",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--r5_ang",
+            action="store", type=float,
             dest="r5_ang", default=0)
-        self.OptionParser.add_option("--r6_ang",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--r6_ang",
+            action="store", type=float,
             dest="r6_ang", default=0)
-        self.OptionParser.add_option("--scl",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--scl",
+            action="store", type=float,
             dest="scl", default=100.0)
 #STYLE SETTINGS
-        self.OptionParser.add_option("--show",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--show",
+            action="store", type=str,
             dest="show", default='faces')
-        self.OptionParser.add_option("--shade",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("--shade",
+            action="store", type=inkbool,
             dest="shade", default='true')
-        self.OptionParser.add_option("--f_r",
-            action="store", type="int", 
+        self.arg_parser.add_argument("--f_r",
+            action="store", type=int,
             dest="f_r", default=255)
-        self.OptionParser.add_option("--f_g",
-            action="store", type="int", 
+        self.arg_parser.add_argument("--f_g",
+            action="store", type=int,
             dest="f_g", default=0)
-        self.OptionParser.add_option("--f_b",
-            action="store", type="int", 
+        self.arg_parser.add_argument("--f_b",
+            action="store", type=int,
             dest="f_b", default=0)
-        self.OptionParser.add_option("--f_opac",
-            action="store", type="int", 
+        self.arg_parser.add_argument("--f_opac",
+            action="store", type=int,
             dest="f_opac", default=100)
-        self.OptionParser.add_option("--s_opac",
-            action="store", type="int", 
+        self.arg_parser.add_argument("--s_opac",
+            action="store", type=int,
             dest="s_opac", default=100)
-        self.OptionParser.add_option("--th",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--th",
+            action="store", type=float,
             dest="th", default=2)
-        self.OptionParser.add_option("--lv_x",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--lv_x",
+            action="store", type=float,
             dest="lv_x", default=1)
-        self.OptionParser.add_option("--lv_y",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--lv_y",
+            action="store", type=float,
             dest="lv_y", default=1)
-        self.OptionParser.add_option("--lv_z",
-            action="store", type="float", 
+        self.arg_parser.add_argument("--lv_z",
+            action="store", type=float,
             dest="lv_z", default=-2)
-        self.OptionParser.add_option("--back",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("--back",
+            action="store", type=inkbool,
             dest="back", default='false')
-        self.OptionParser.add_option("--norm",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("--norm",
+            action="store", type=inkbool,
             dest="norm", default='true')
-        self.OptionParser.add_option("--z_sort",
-            action="store", type="string", 
+        self.arg_parser.add_argument("--z_sort",
+            action="store", type=str,
             dest="z_sort", default='min')
             
             

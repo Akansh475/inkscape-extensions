@@ -48,12 +48,12 @@ def calculateSubdivision(x1,y1,x2,y2,smoothness):
 class PathFractalize(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--subdivs",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-s", "--subdivs",
+                        action="store", type=int,
                         dest="subdivs", default="6",
                         help="Number of subdivisons")
-        self.OptionParser.add_option("-f", "--smooth",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-f", "--smooth",
+                        action="store", type=float,
                         dest="smooth", default="4.0",
                         help="Smoothness of the subdivision")
     def effect(self):

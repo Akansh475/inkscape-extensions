@@ -38,16 +38,16 @@ import inkex
 class Extract(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-d", "--direction",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-d", "--direction",
+                        action="store", type=str,
                         dest="direction", default="tb",
                         help="direction to extract text")
-        self.OptionParser.add_option("-x", "--xanchor",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-x", "--xanchor",
+                        action="store", type=str,
                         dest="xanchor", default="m",
                         help="horizontal point to compare")
-        self.OptionParser.add_option("-y", "--yanchor",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-y", "--yanchor",
+                        action="store", type=str,
                         dest="yanchor", default="m",
                         help="vertical point to compare")
 

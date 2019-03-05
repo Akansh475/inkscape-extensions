@@ -35,7 +35,7 @@ class JessyInk_Effects(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

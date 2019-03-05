@@ -23,12 +23,12 @@ import inkex
 class Motion(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-a", "--angle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-a", "--angle",
+                        action="store", type=float,
                         dest="angle", default=45.0,
                         help="direction of the motion vector")
-        self.OptionParser.add_option("-m", "--magnitude",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-m", "--magnitude",
+                        action="store", type=float,
                         dest="magnitude", default=100.0,
                         help="magnitude of the motion vector")    
 

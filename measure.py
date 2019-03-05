@@ -38,6 +38,8 @@ import re
 import locale
 
 import inkex
+from inkex import inkbool
+
 
 # On darwin, fall back to C in cases of 
 # - incorrect locale IDs (see comments in bug #406662)
@@ -62,68 +64,68 @@ except:
 class Length(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--type",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--type",
+                        action="store", type=str,
                         dest="mtype", default="length",
                         help="Type of measurement")
-        self.OptionParser.add_option("--format",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--format",
+                        action="store", type=str,
                         dest="mformat", default="textonpath",
                         help="Text Orientation")
-        self.OptionParser.add_option("--presetFormat",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--presetFormat",
+                        action="store", type=str,
                         dest="presetFormat", default="TaP_start",
                         help="Preset text layout")
-        self.OptionParser.add_option("--startOffset",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--startOffset",
+                        action="store", type=str,
                         dest="startOffset", default="custom",
                         help="Text Offset along Path")
-        self.OptionParser.add_option("--startOffsetCustom",
-                        action="store", type="int",
+        self.arg_parser.add_argument("--startOffsetCustom",
+                        action="store", type=int,
                         dest="startOffsetCustom", default=50,
                         help="Text Offset along Path")
-        self.OptionParser.add_option("--anchor",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--anchor",
+                        action="store", type=str,
                         dest="anchor", default="start",
                         help="Text Anchor")
-        self.OptionParser.add_option("--position",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--position",
+                        action="store", type=str,
                         dest="position", default="start",
                         help="Text Position")
-        self.OptionParser.add_option("--angle",
-                        action="store", type="float",
+        self.arg_parser.add_argument("--angle",
+                        action="store", type=float,
                         dest="angle", default=0,
                         help="Angle")
-        self.OptionParser.add_option("-f", "--fontsize",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-f", "--fontsize",
+                        action="store", type=int,
                         dest="fontsize", default=20,
                         help="Size of length label text in px")
-        self.OptionParser.add_option("-o", "--offset",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-o", "--offset",
+                        action="store", type=float,
                         dest="offset", default=-6,
                         help="The distance above the curve")
-        self.OptionParser.add_option("-u", "--unit",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-u", "--unit",
+                        action="store", type=str,
                         dest="unit", default="mm",
                         help="The unit of the measurement")
-        self.OptionParser.add_option("-p", "--precision",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-p", "--precision",
+                        action="store", type=int,
                         dest="precision", default=2,
                         help="Number of significant digits after decimal point")
-        self.OptionParser.add_option("-s", "--scale",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-s", "--scale",
+                        action="store", type=float,
                         dest="scale", default=1,
                         help="Scale Factor (Drawing:Real Length)")
-        self.OptionParser.add_option("-r", "--orient",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-r", "--orient",
+                        action="store", type=inkbool,
                         dest="orient", default=True,
                         help="Keep orientation of text upright")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab", default="sampling",
                         help="The selected UI-tab when OK was pressed") 
-        self.OptionParser.add_option("--measurehelp",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--measurehelp",
+                        action="store", type=str,
                         dest="measurehelp", default="",
                         help="dummy")
 

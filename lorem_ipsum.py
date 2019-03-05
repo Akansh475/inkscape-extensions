@@ -176,21 +176,21 @@ foo=[
 class MyEffect(inkex.Effect):
   def __init__(self):
     inkex.Effect.__init__(self)
-    self.OptionParser.add_option("--title")
-    self.OptionParser.add_option("-n", "--numberofparagraphs",
-      action="store", type="int", 
+    self.arg_parser.add_argument("--title")
+    self.arg_parser.add_argument("-n", "--numberofparagraphs",
+      action="store", type=int,
       dest="num", default=5,
       help="Number of paragraphs to generate")
-    self.OptionParser.add_option("-c", "--sentencecount",
-      action="store", type="int", 
+    self.arg_parser.add_argument("-c", "--sentencecount",
+      action="store", type=int,
       dest="sentencecount", default=16,
       help="Number of Sentences")
-    self.OptionParser.add_option("-f", "--fluctuation",
-      action="store", type="int", 
+    self.arg_parser.add_argument("-f", "--fluctuation",
+      action="store", type=int,
       dest="fluctuation", default=4,
       help="+/-")
-    self.OptionParser.add_option("--tab",
-      action="store", type="string",
+    self.arg_parser.add_argument("--tab",
+      action="store", type=str,
       dest="tab",
       help="The selected UI-tab when OK was pressed")
 

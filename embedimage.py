@@ -30,13 +30,15 @@ else:
 
 import inkex
 from inkex.localize import _
+from inkex import inkbool
+
 
 
 class Embedder(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--selectedonly",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("-s", "--selectedonly",
+            action="store", type=inkbool,
             dest="selectedonly", default=False,
             help="embed only selected images")
 

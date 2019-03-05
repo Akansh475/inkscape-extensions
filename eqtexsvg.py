@@ -91,12 +91,12 @@ def svg_open(self,filename):
 class EQTEXSVG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-f", "--formule",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-f", "--formule",
+                        action="store", type=str,
                         dest="formula", default="",
                         help="LaTeX formula")
-        self.OptionParser.add_option("-p", "--packages",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-p", "--packages",
+                        action="store", type=str,
                         dest="packages", default="",
                         help="Additional packages")
     def effect(self):

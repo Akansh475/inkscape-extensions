@@ -29,28 +29,29 @@ except:
 
 import os
 import inkex
+from inkex import inkbool
 
 class Merge(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-d", "--direction",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-d", "--direction",
+                        action="store", type=str,
                         dest="direction", default="tb",
                         help="direction to merge text")
-        self.OptionParser.add_option("-x", "--xanchor",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-x", "--xanchor",
+                        action="store", type=str,
                         dest="xanchor", default="m",
                         help="horizontal point to compare")
-        self.OptionParser.add_option("-y", "--yanchor",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-y", "--yanchor",
+                        action="store", type=str,
                         dest="yanchor", default="m",
                         help="vertical point to compare")
-        self.OptionParser.add_option("-t", "--flowtext",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-t", "--flowtext",
+                        action="store", type=inkbool,
                         dest="flowtext", default=False,
                         help="use a flow text structure instead of a normal text element")
-        self.OptionParser.add_option("-k", "--keepstyle",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-k", "--keepstyle",
+                        action="store", type=inkbool,
                         dest="keepstyle", default=False,
                         help="keep format")
                         

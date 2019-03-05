@@ -20,44 +20,46 @@
 import re
 import math
 import inkex
+from inkex import inkbool
+
 
 class InterpAttG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-a", "--att",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-a", "--att",
+                        action="store", type=str,
                         dest="att", default="fill",
                         help="Attribute to be interpolated.")
-        self.OptionParser.add_option("-o", "--att-other",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-o", "--att-other",
+                        action="store", type=str,
                         dest="att_other",
                         help="Other attribute (for a limited UI).")
-        self.OptionParser.add_option("-t", "--att-other-type",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-t", "--att-other-type",
+                        action="store", type=str,
                         dest="att_other_type",
                         help="The other attribute type.")
-        self.OptionParser.add_option("-w", "--att-other-where",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-w", "--att-other-where",
+                        action="store", type=str,
                         dest="att_other_where",
                         help="That is a tag attribute or a style attribute?")
-        self.OptionParser.add_option("-s", "--start-val",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-s", "--start-val",
+                        action="store", type=str,
                         dest="start_val", default="#F00",
                         help="Initial interpolation value.")
-        self.OptionParser.add_option("-e", "--end-val",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-e", "--end-val",
+                        action="store", type=str,
                         dest="end_val", default="#00F",
                         help="End interpolation value.")
-        self.OptionParser.add_option("-u", "--unit",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-u", "--unit",
+                        action="store", type=str,
                         dest="unit", default="color",
                         help="Values unit.")
-        self.OptionParser.add_option("--zsort",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("--zsort",
+                        action="store", type=inkbool,
                         dest="zsort", default=True,
                         help="use z-order instead of selection order")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
@@ -145,25 +147,25 @@ class InterpAttG(inkex.Effect):
         else:
             self.inte_att = self.options.att
             if self.inte_att == 'width':
-                self.inte_att_type = 'float'
+                self.inte_att_type=float
                 self.where = 'tag'
             elif self.inte_att == 'height':
-                self.inte_att_type = 'float'
+                self.inte_att_type=float
                 self.where = 'tag'
             elif self.inte_att == 'scale':
-                self.inte_att_type = 'float'
+                self.inte_att_type=float
                 self.where = 'transform'
             elif self.inte_att == 'trans-x':
-                self.inte_att_type = 'float'
+                self.inte_att_type=float
                 self.where = 'transform'
             elif self.inte_att == 'trans-y':
-                self.inte_att_type = 'float'
+                self.inte_att_type=float
                 self.where = 'transform'
             elif self.inte_att == 'fill':
                 self.inte_att_type = 'color'
                 self.where = 'style'
             elif self.inte_att == 'opacity':
-                self.inte_att_type = 'float'
+                self.inte_att_type=float
                 self.where = 'style'
 
         self.getTotElements()

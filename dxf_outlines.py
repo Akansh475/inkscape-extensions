@@ -63,27 +63,27 @@ except:
 class DxfOutlines(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-R", "--ROBO", action="store",
-                                     type="string", dest="ROBO",
+        self.arg_parser.add_argument("-R", "--ROBO", action="store",
+                                     type=str, dest="ROBO",
                                      default=False)
-        self.OptionParser.add_option("-P", "--POLY", action="store",
-                                     type="string", dest="POLY",
+        self.arg_parser.add_argument("-P", "--POLY", action="store",
+                                     type=str, dest="POLY",
                                      default=True)
-        self.OptionParser.add_option("--units", action="store",
-                                     type="string", dest="units",
+        self.arg_parser.add_argument("--units", action="store",
+                                     type=str, dest="units",
                                      default="72./96") # Points
-        self.OptionParser.add_option("--encoding", action="store",
-                                     type="string", dest="char_encode",
+        self.arg_parser.add_argument("--encoding", action="store",
+                                     type=str, dest="char_encode",
                                      default="latin_1")
-        self.OptionParser.add_option("--tab", action="store",
-                                     type="string", dest="tab")
-        self.OptionParser.add_option("--inputhelp", action="store",
-                                     type="string", dest="inputhelp")
-        self.OptionParser.add_option("--layer_option", action="store",
-                                     type="string", dest="layer_option",
+        self.arg_parser.add_argument("--tab", action="store",
+                                     type=str, dest="tab")
+        self.arg_parser.add_argument("--inputhelp", action="store",
+                                     type=str, dest="inputhelp")
+        self.arg_parser.add_argument("--layer_option", action="store",
+                                     type=str, dest="layer_option",
                                      default="all")
-        self.OptionParser.add_option("--layer_name", action="store",
-                                     type="string", dest="layer_name")
+        self.arg_parser.add_argument("--layer_name", action="store",
+                                     type=str, dest="layer_name")
 
         self.dxf = []
         self.handle = 255                       # handle for DXF ENTITY

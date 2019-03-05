@@ -31,8 +31,8 @@ class JessyInk_AutoTexts(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--autoText', action = 'store', type = 'string', dest = 'autoText', default = 'none')
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--autoText', action = 'store', type=str, dest = 'autoText', default = 'none')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

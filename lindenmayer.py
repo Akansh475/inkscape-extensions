@@ -28,40 +28,40 @@ def stripme(s):
 class LSystem(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-o", "--order",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-o", "--order",
+                        action="store", type=int,
                         dest="order", default=3,
                         help="number of iteration")
-        self.OptionParser.add_option("-l", "--langle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-l", "--langle",
+                        action="store", type=float,
                         dest="langle", default=16.0,
                         help="angle for turning left")
-        self.OptionParser.add_option("-r", "--rangle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-r", "--rangle",
+                        action="store", type=float,
                         dest="rangle", default=16.0,
                         help="angle for turning right")
-        self.OptionParser.add_option("-s", "--step",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-s", "--step",
+                        action="store", type=float,
                         dest="step", default=25.0,
                         help="step size")
-        self.OptionParser.add_option("-p", "--randomizestep",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-p", "--randomizestep",
+                        action="store", type=float,
                         dest="randomizestep", default=0.0,
                         help="randomize step")
-        self.OptionParser.add_option("-z", "--randomizeangle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-z", "--randomizeangle",
+                        action="store", type=float,
                         dest="randomizeangle", default=0.0,
                         help="randomize angle")
-        self.OptionParser.add_option("-x", "--axiom",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-x", "--axiom",
+                        action="store", type=str,
                         dest="axiom", default="++F",
                         help="initial state of system")
-        self.OptionParser.add_option("-u", "--rules",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-u", "--rules",
+                        action="store", type=str,
                         dest="rules", default="F=FF-[-F+F+F]+[+F-F-F]",
                         help="replacement rules")
-        self.OptionParser.add_option("-t", "--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-t", "--tab",
+                        action="store", type=str,
                         dest="tab")
         self.stack = []
         self.turtle = pturtle.pTurtle()

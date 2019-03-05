@@ -44,24 +44,24 @@ def points_to_svgd(p):
 class Gears(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-t", "--teeth",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-t", "--teeth",
+                        action="store", type=int,
                         dest="teeth", default=24,
                         help="Number of teeth")
-        self.OptionParser.add_option("-p", "--pitch",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-p", "--pitch",
+                        action="store", type=float,
                         dest="pitch", default=20.0,
                         help="Circular Pitch (length of arc from one tooth to next)")
-        self.OptionParser.add_option("-a", "--angle",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-a", "--angle",
+                        action="store", type=float,
                         dest="angle", default=20.0,
                         help="Pressure Angle (common values: 14.5, 20, 25 degrees)")
-        self.OptionParser.add_option("-c", "--centerdiameter",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-c", "--centerdiameter",
+                        action="store", type=float,
                         dest="centerdiameter", default=10.0,
                         help="Diameter of central hole - 0.0 for no hole")
-        self.OptionParser.add_option("-u", "--unit",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-u", "--unit",
+                        action="store", type=str,
                         dest="unit", default="px",
                         help="unit of measure for circular pitch and center diameter")
     def effect(self):

@@ -24,24 +24,25 @@ import tempfile
 from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
 from inkex.localize import _
+from inkex import inkbool
 
 
 class WebSlicer_Export(WebSlicer_Effect):
 
     def __init__(self):
         WebSlicer_Effect.__init__(self)
-        self.OptionParser.add_option("--tab")
-        self.OptionParser.add_option("--dir",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab")
+        self.arg_parser.add_argument("--dir",
+                                     action="store", type=str,
                                      dest="dir",
                                      help="")
-        self.OptionParser.add_option("--create-dir",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--create-dir",
+                                     action="store", type=inkbool,
                                      default=False,
                                      dest="create_dir",
                                      help="")
-        self.OptionParser.add_option("--with-code",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--with-code",
+                                     action="store", type=inkbool,
                                      default=False,
                                      dest="with_code",
                                      help="")

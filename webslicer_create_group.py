@@ -25,28 +25,28 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
     def __init__(self):
         WebSlicer_Effect.__init__(self)
-        self.OptionParser.add_option("--html-id",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--html-id",
+                        action="store", type=str,
                         dest="html_id",
                         help="")
-        self.OptionParser.add_option("--html-class",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--html-class",
+                        action="store", type=str,
                         dest="html_class",
                         help="")
-        self.OptionParser.add_option("--width-unity",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--width-unity",
+                        action="store", type=str,
                         dest="width_unity",
                         help="")
-        self.OptionParser.add_option("--height-unity",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--height-unity",
+                        action="store", type=str,
                         dest="height_unity",
                         help="")
-        self.OptionParser.add_option("--bg-color",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--bg-color",
+                        action="store", type=str,
                         dest="bg_color",
                         help="")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 

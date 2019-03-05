@@ -25,28 +25,28 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
 
     def __init__(self):
         inkwebeffect.InkWebEffect.__init__(self)
-        self.OptionParser.add_option("-a", "--att",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-a", "--att",
+                        action="store", type=str,
                         dest="att", default="fill",
                         help="Attribute to set.")
-        self.OptionParser.add_option("-v", "--val",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-v", "--val",
+                        action="store", type=str,
                         dest="val", default="red",
                         help="Values to set.")
-        self.OptionParser.add_option("-w", "--when",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-w", "--when",
+                        action="store", type=str,
                         dest="when", default="onclick",
                         help="When it must to set?")
-        self.OptionParser.add_option("-c", "--compatibility",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-c", "--compatibility",
+                        action="store", type=str,
                         dest="compatibility", default="append",
                         help="Compatibility with previews code to this event.")
-        self.OptionParser.add_option("-t", "--from-and-to",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-t", "--from-and-to",
+                        action="store", type=str,
                         dest="from_and_to", default="g-to-one",
                         help='Who transmit to Who? "g-to-one" All set the last. "one-to-g" The first set all.')
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 

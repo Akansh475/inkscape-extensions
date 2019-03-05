@@ -18,22 +18,24 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import inkex
+from inkex import inkbool
+
 
 from inkex import turtle as pturtle
 
 class RTreeTurtle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--size",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-s", "--size",
+                        action="store", type=float,
                         dest="size", default=100.0,
                         help="initial branch size")
-        self.OptionParser.add_option("-m", "--minimum",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-m", "--minimum",
+                        action="store", type=float,
                         dest="minimum", default=4.0,
                         help="minimum branch size")
-        self.OptionParser.add_option("--pentoggle",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--pentoggle",
+                        action="store", type=inkbool,
                         dest="pentoggle", default=False,
                         help="Lift pen for backward steps")
     def effect(self):

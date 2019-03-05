@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE, STDOUT
 import math
 
 import inkex
-import inkex
+from inkex import inkbool
 
 class PrintingMarks (inkex.Effect):
     # Default parameters
@@ -38,60 +38,60 @@ class PrintingMarks (inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--where",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--where",
+                                     action="store", type=str,
                                      dest="where_to_crop", default=True,
                                      help="Apply crop marks to...")
-        self.OptionParser.add_option("--crop_marks",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--crop_marks",
+                                     action="store", type=inkbool,
                                      dest="crop_marks", default=True,
                                      help="Draw crop Marks?")
-        self.OptionParser.add_option("--bleed_marks",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--bleed_marks",
+                                     action="store", type=inkbool,
                                      dest="bleed_marks", default=False,
                                      help="Draw Bleed Marks?")
-        self.OptionParser.add_option("--registration_marks",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--registration_marks",
+                                     action="store", type=inkbool,
                                      dest="reg_marks", default=False,
                                      help="Draw Registration Marks?")
-        self.OptionParser.add_option("--star_target",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--star_target",
+                                     action="store", type=inkbool,
                                      dest="star_target", default=False,
                                      help="Draw Star Target?")
-        self.OptionParser.add_option("--colour_bars",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--colour_bars",
+                                     action="store", type=inkbool,
                                      dest="colour_bars", default=False,
                                      help="Draw Colour Bars?")
-        self.OptionParser.add_option("--page_info",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--page_info",
+                                     action="store", type=inkbool,
                                      dest="page_info", default=False,
                                      help="Draw Page Information?")
-        self.OptionParser.add_option("--unit",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--unit",
+                                     action="store", type=str,
                                      dest="unit", default="px",
                                      help="Draw measurement")
-        self.OptionParser.add_option("--crop_offset",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--crop_offset",
+                                     action="store", type=float,
                                      dest="crop_offset", default=0,
                                      help="Offset")
-        self.OptionParser.add_option("--bleed_top",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_top",
+                                     action="store", type=float,
                                      dest="bleed_top", default=0,
                                      help="Bleed Top Size")
-        self.OptionParser.add_option("--bleed_bottom",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_bottom",
+                                     action="store", type=float,
                                      dest="bleed_bottom", default=0,
                                      help="Bleed Bottom Size")
-        self.OptionParser.add_option("--bleed_left",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_left",
+                                     action="store", type=float,
                                      dest="bleed_left", default=0,
                                      help="Bleed Left Size")
-        self.OptionParser.add_option("--bleed_right",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_right",
+                                     action="store", type=float,
                                      dest="bleed_right", default=0,
                                      help="Bleed Right Size")
-        self.OptionParser.add_option("--tab",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                                     action="store", type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 

@@ -21,17 +21,19 @@ import base64
 import os
 # local library
 import inkex
+from inkex import inkbool
+
 
 class MyEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--desc")
-        self.OptionParser.add_option("-s", "--selectedonly",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("--desc")
+        self.arg_parser.add_argument("-s", "--selectedonly",
+            action="store", type=inkbool,
             dest="selectedonly", default=True,
             help="extract only selected images")
-        self.OptionParser.add_option("--filepath",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--filepath",
+                        action="store", type=str,
                         dest="filepath", default=None,
                         help="")
     def effect(self):

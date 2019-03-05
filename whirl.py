@@ -19,16 +19,17 @@
 
 import math
 import inkex
+from inkex import inkbool
 
 class Whirl(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-t", "--whirl",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-t", "--whirl",
+                        action="store", type=float,
                         dest="whirl", default=1.0,
                         help="amount of whirl")
-        self.OptionParser.add_option("-r", "--rotation",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-r", "--rotation",
+                        action="store", type=inkbool,
                         dest="rotation", default=True,
                         help="direction of rotation")
     def effect(self):

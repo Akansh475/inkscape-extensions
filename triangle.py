@@ -91,32 +91,32 @@ def draw_tri_from_3_sides(s_a, s_b, s_c, offset, width, parent): #draw a triangl
 class Triangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--s_a",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--s_a",
+                        action="store", type=float,
                         dest="s_a", default=100.0,
                         help="Side Length a")
-        self.OptionParser.add_option("--s_b",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--s_b",
+                        action="store", type=float,
                         dest="s_b", default=100.0,
                         help="Side Length b")
-        self.OptionParser.add_option("--s_c",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--s_c",
+                        action="store", type=float,
                         dest="s_c", default=100.0,
                         help="Side Length c")
-        self.OptionParser.add_option("--a_a",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--a_a",
+                        action="store", type=float,
                         dest="a_a", default=60.0,
                         help="Angle a")
-        self.OptionParser.add_option("--a_b",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--a_b",
+                        action="store", type=float,
                         dest="a_b", default=30.0,
                         help="Angle b")
-        self.OptionParser.add_option("--a_c",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--a_c",
+                        action="store", type=float,
                         dest="a_c", default=90.0,
                         help="Angle c")
-        self.OptionParser.add_option("--mode",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--mode",
+                        action="store", type=str,
                         dest="mode", default='3_sides',
                         help="Side Length c")
     

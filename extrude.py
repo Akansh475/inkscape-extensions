@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007
 #
@@ -23,11 +23,11 @@ import inkex
 class Extrude(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        opts = [('-m', '--mode', 'string', 'mode', 'Lines',
+        opts = [('-m', '--mode', str, 'mode', 'Lines',
                  'Join paths with lines or polygons'),
                 ]
         for o in opts:
-            self.OptionParser.add_option(o[0], o[1], action="store", type=o[2],
+            self.arg_parser.add_argument(o[0], o[1], action="store", type=o[2],
                                          dest=o[3], default=o[4], help=o[5])
 
     def effect(self):

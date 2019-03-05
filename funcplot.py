@@ -29,6 +29,8 @@ from random import *
 from copy import deepcopy
 
 import inkex
+from inkex import inkbool
+
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom, 
     fx = "sin(x)", fpx = "cos(x)", fponum = True, times2pi = False, polar = False, isoscale = True, drawaxis = True, endpts = False):
@@ -172,76 +174,76 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
 class FuncPlot(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--xstart",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--xstart",
+                        action="store", type=float,
                         dest="xstart", default=0.0,
                         help="Start x-value")
-        self.OptionParser.add_option("--xend",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--xend",
+                        action="store", type=float,
                         dest="xend", default=1.0,
                         help="End x-value")
-        self.OptionParser.add_option("--times2pi",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--times2pi",
+                        action="store", type=inkbool,
                         dest="times2pi", default=True,
                         help="Multiply x-range by 2*pi")    
-        self.OptionParser.add_option("--polar",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--polar",
+                        action="store", type=inkbool,
                         dest="polar", default=False,
                         help="Plot using polar coordinates")    
-        self.OptionParser.add_option("--ybottom",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--ybottom",
+                        action="store", type=float,
                         dest="ybottom", default=-1.0,
                         help="y-value of rectangle's bottom")
-        self.OptionParser.add_option("--ytop",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--ytop",
+                        action="store", type=float,
                         dest="ytop", default=1.0,
                         help="y-value of rectangle's top")
-        self.OptionParser.add_option("-s", "--samples",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-s", "--samples",
+                        action="store", type=int,
                         dest="samples", default=8,
                         help="Samples")    
-        self.OptionParser.add_option("--fofx",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--fofx",
+                        action="store", type=str,
                         dest="fofx", default="sin(x)",
                         help="f(x) for plotting")    
-        self.OptionParser.add_option("--fponum",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--fponum",
+                        action="store", type=inkbool,
                         dest="fponum", default=True,
                         help="Calculate the first derivative numerically")    
-        self.OptionParser.add_option("--fpofx",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--fpofx",
+                        action="store", type=str,
                         dest="fpofx", default="cos(x)",
                         help="f'(x) for plotting") 
-        self.OptionParser.add_option("--clip",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("--clip",
+                        action="store", type=inkbool,
                         dest="clip", default=False,
                         help="If True, clip with copy of source rectangle")
-        self.OptionParser.add_option("--remove",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--remove",
+                        action="store", type=inkbool,
                         dest="remove", default=True,
                         help="If True, source rectangle is removed") 
-        self.OptionParser.add_option("--isoscale",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--isoscale",
+                        action="store", type=inkbool,
                         dest="isoscale", default=True,
                         help="If True, isotropic scaling is used") 
-        self.OptionParser.add_option("--drawaxis",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--drawaxis",
+                        action="store", type=inkbool,
                         dest="drawaxis", default=True,
                         help="If True, axis are drawn") 
-        self.OptionParser.add_option("--endpts",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("--endpts",
+                        action="store", type=inkbool,
                         dest="endpts", default=False,
                         help="If True, end points are added")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab", default="sampling",
                         help="The selected UI-tab when OK was pressed") 
-        self.OptionParser.add_option("--funcplotuse",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--funcplotuse",
+                        action="store", type=str,
                         dest="funcplotuse", default="",
                         help="dummy") 
-        self.OptionParser.add_option("--pythonfunctions",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--pythonfunctions",
+                        action="store", type=str,
                         dest="pythonfunctions", default="",
                         help="dummy") 
 

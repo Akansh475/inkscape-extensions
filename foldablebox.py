@@ -22,37 +22,39 @@ __version__ = "0.2"
 from math import *
 
 import inkex
+from inkex import inkbool
+
 
 class FoldableBox(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-x", "--width",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-x", "--width",
+                        action="store", type=float,
                         dest="width", default=10.0,
                         help="The Box Width - in the X dimension")
-        self.OptionParser.add_option("-y", "--height",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-y", "--height",
+                        action="store", type=float,
                         dest="height", default=15.0,
                         help="The Box Height - in the Y dimension")
-        self.OptionParser.add_option("-z", "--depth",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-z", "--depth",
+                        action="store", type=float,
                         dest="depth", default=3.0,
                         help="The Box Depth - in the Z dimension")
-        self.OptionParser.add_option("-u", "--unit",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-u", "--unit",
+                        action="store", type=str,
                         dest="unit", default="cm",
                         help="The unit of the box dimensions")
-        self.OptionParser.add_option("-p", "--paper-thickness",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-p", "--paper-thickness",
+                        action="store", type=float,
                         dest="thickness", default=0.01,
                         help="Paper Thickness - sometimes that is important")
-        self.OptionParser.add_option("-t", "--tab-proportion",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-t", "--tab-proportion",
+                        action="store", type=float,
                         dest="tabProportion", default=0.6,
                         help="Inner tab proportion for upper tab")
-        self.OptionParser.add_option("-g", "--guide-line",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("-g", "--guide-line",
+                        action="store", type=inkbool,
                         dest="guideLine", default=True,
                         help="Add guide lines to help the drawing limits")
 

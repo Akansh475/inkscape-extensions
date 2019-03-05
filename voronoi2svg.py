@@ -27,6 +27,7 @@ Create Voronoi diagram from seeds (midpoints of selected objects)
 
 import random
 import inkex
+from inkex import inkbool
 from inkex.localize import _
 
 import voronoi
@@ -43,36 +44,36 @@ class Voronoi2svg(inkex.Effect):
 
         #{{{ Additional options
 
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
             "--tab",
             action="store",
-            type="string",
+            type=str,
             dest="tab")
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
             '--diagram-type',
             action = 'store',
-            type = 'choice', choices=['Voronoi','Delaunay','Both'],
+            type = str, choices=['Voronoi','Delaunay','Both'],
             default = 'Voronoi',
             dest='diagramType',
             help = 'Defines the type of the diagram')
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
             '--clip-box',
             action = 'store',
-            type = 'choice', choices=['Page','Automatic from seeds'],
+            type = str, choices=['Page','Automatic from seeds'],
             default = 'Page',
             dest='clipBox',
             help = 'Defines the bounding box of the Voronoi diagram')
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
             '--show-clip-box',
             action = 'store',
-            type = 'inkbool',
+            type=inkbool,
             default = False,
             dest='showClipBox',
             help = 'Set this to true to write the bounding box')
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
             '--delaunay-fill-options',
             action = 'store',
-            type = 'string',
+            type=str,
             default = "delaunay-no-fill",
             dest='delaunayFillOptions',
             help = 'Set the Delaunay triangles color options')
@@ -94,7 +95,7 @@ class Voronoi2svg(inkex.Effect):
             u = (line[2]-self.dot(line,v2))/tmp
             v = 1-u
             return (u*v1[0]+v*v2[0],u*v1[1]+v*v2[1],True)
-    
+
     def clipEdge(self,vertices, lines, edge, bbox):
         #bounding box corners
         bbc = []
@@ -150,7 +151,7 @@ class Voronoi2svg(inkex.Effect):
                         return [[start[0],start[1]],[point[0],point[1]]]
                     else:
                         return []
-                else: 
+                else:
                     if startWrite:
                         start = point
                 inside = not inside
@@ -165,7 +166,7 @@ class Voronoi2svg(inkex.Effect):
                     if inside:
                         start = point
                 startWrite = not startWrite
-                    
+
     #{{{ Transformation helpers
 
     def getGlobalTransform(self,node):
@@ -183,7 +184,7 @@ class Voronoi2svg(inkex.Effect):
                 return self.getGlobalTransform(parent)
             else:
                 return None
-        
+
 
     #}}}
 
@@ -207,7 +208,7 @@ class Voronoi2svg(inkex.Effect):
                 'stroke-linecap'    : 'round',
                 'stroke-linejoin' : 'round'
                 }
-        
+
         facestyle = {
                 'stroke'                    : '#000000',
                 'stroke-width'        : str(self.unittouu('1px')),
@@ -298,7 +299,7 @@ class Voronoi2svg(inkex.Effect):
                                      2*gBbox[1]-gBbox[0],
                                      2*gBbox[2]-gBbox[3],
                                      2*gBbox[3]-gBbox[2])
-            
+
             #Safebox adds points so that no Voronoi edge in clipBox is infinite
             safeBox = (2*clipBox[0]-clipBox[1],
                                  2*clipBox[1]-clipBox[0],

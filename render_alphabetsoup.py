@@ -28,6 +28,8 @@ import sys
 import re
 
 import inkex
+from inkex import inkbool
+
 import render_alphabetsoup_config
 
 syntax   = render_alphabetsoup_config.syntax
@@ -494,16 +496,16 @@ def tokenize(text):
 class AlphabetSoup(inkex.Effect):
 	def __init__(self):
 		inkex.Effect.__init__(self)
-		self.OptionParser.add_option("-t", "--text",
-						action="store", type="string", 
+		self.arg_parser.add_argument("-t", "--text",
+						action="store", type=str,
 						dest="text", default="Inkscape",
 						help="The text for alphabet soup")
-		self.OptionParser.add_option("-z", "--zoom",
-						action="store", type="float", 
+		self.arg_parser.add_argument("-z", "--zoom",
+						action="store", type=float,
 						dest="zoom", default="8.0",
 						help="The zoom on the output graphics")
-		self.OptionParser.add_option("-r", "--randomize",
-						action="store", type="inkbool", 
+		self.arg_parser.add_argument("-r", "--randomize",
+						action="store", type=inkbool,
 						dest="randomize", default=False,
 						help="Generate random (unreadable) text")
 

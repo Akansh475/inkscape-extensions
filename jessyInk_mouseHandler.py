@@ -34,8 +34,8 @@ class	JessyInk_CustomMouseHandler(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--mouseSettings', action = 'store', type = 'string', dest = 'mouseSettings', default = 'default')
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--mouseSettings', action = 'store', type=str, dest = 'mouseSettings', default = 'default')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

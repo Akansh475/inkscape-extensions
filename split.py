@@ -18,20 +18,22 @@
 #
 
 import inkex
+from inkex import inkbool
+
 
 class Split(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--splittype", 
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-s", "--splittype",
+                        action="store", type=str,
                         dest="split_type", default="word", 
                         help="type of split")
-        self.OptionParser.add_option("-p", "--preserve", 
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-p", "--preserve",
+                        action="store", type=inkbool,
                         dest="preserve", default="True", 
                         help="Preserve original")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 

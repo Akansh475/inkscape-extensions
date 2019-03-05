@@ -19,32 +19,34 @@
 
 import copy
 import inkex
+from inkex import inkbool
+
 
 class Interp(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-e", "--exponent",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-e", "--exponent",
+                        action="store", type=float,
                         dest="exponent", default=0.0,
                         help="values other than zero give non linear interpolation")
-        self.OptionParser.add_option("-s", "--steps",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-s", "--steps",
+                        action="store", type=int,
                         dest="steps", default=5,
                         help="number of interpolation steps")
-        self.OptionParser.add_option("-m", "--method",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-m", "--method",
+                        action="store", type=int,
                         dest="method", default=2,
                         help="method of interpolation")
-        self.OptionParser.add_option("-d", "--dup",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-d", "--dup",
+                        action="store", type=inkbool,
                         dest="dup", default=True,
                         help="duplicate endpaths")    
-        self.OptionParser.add_option("--style",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--style",
+                        action="store", type=inkbool,
                         dest="style", default=True,
                         help="try interpolation of some style properties")    
-        self.OptionParser.add_option("--zsort",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("--zsort",
+                        action="store", type=inkbool,
                         dest="zsort", default=False,
                         help="use z-order instead of selection order")
 

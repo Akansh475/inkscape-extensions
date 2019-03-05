@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_moresaturation import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -135,7 +131,3 @@ class ColorMoreSaturationBasicTest(InkscapeExtensionTestMixin, TestCase):
         # Fuschia
         col = self.e.colmod(255, 0, 255)
         self.assertEqual("ff00ff", col)
-
-
-if __name__ == '__main__':
-    unittest.main()

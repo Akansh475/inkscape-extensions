@@ -20,9 +20,6 @@
 """
 Test the svg interface for inkscape extensions.
 """
-
-import unittest
-
 from inkex.utils import addNS
 from tests.base import TestCase
 from tests.base.svg import svg, svg_file, uu_svg
@@ -390,7 +387,3 @@ class UserUnitTest(TestCase):
         )
         for value in inputs:
             self.assertEqual(doc.add_unit(value), '')
-
-
-if __name__ == '__main__':
-    unittest.main()

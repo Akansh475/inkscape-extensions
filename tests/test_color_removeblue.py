@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_removeblue import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -135,7 +131,3 @@ class ColorRemoveBlueBasicTest(InkscapeExtensionTestMixin, TestCase):
         # Fuschia
         col = self.e.colmod(255, 0, 255)
         self.assertEqual("ff0000", col)
-
-
-if __name__ == '__main__':
-    unittest.main()

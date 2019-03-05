@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_negative import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -135,7 +131,3 @@ class ColorNegativeBasicTest(InkscapeExtensionTestMixin, TestCase):
         # Fuschia
         col = self.e.colmod(255, 0, 255)
         self.assertEqual("00ff00", col)
-
-
-if __name__ == '__main__':
-    unittest.main()

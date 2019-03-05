@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_replace import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -47,7 +43,3 @@ class ColorRemoveBlueBasicTest(InkscapeExtensionTestMixin, TestCase):
         self.e.run(args)
         col = self.e.colmod(18, 52, 86)
         self.assertEqual("000000", col)
-
-
-if __name__ == '__main__':
-    unittest.main()

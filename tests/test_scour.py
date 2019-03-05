@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from output_scour import ScourInkscape
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -21,7 +17,3 @@ class ScourBasicTests(InkscapeExtensionTestMixin, TestCase):
 
         with open(output_expected, 'rb') as f:
             self.assertEqual(self.e.document, f.read())
-
-
-if __name__ == '__main__':
-    unittest.main()

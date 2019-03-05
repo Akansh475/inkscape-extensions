@@ -1,21 +1,18 @@
-#!/usr/bin/en
+# coding=utf-8
+from convert2dashes import Dashit
+from inkex import NSS
+from tests.base import InkscapeExtensionTestMixin, TestCase
 
-from tests.base import TestCase
-import unittest
-from convert2dashes import *
 
-class DashitBasicTest(TestCase):
-    effect = Dashit
+class DashitBasicTest(InkscapeExtensionTestMixin, TestCase):
+    def setUp(self):
+        self.effect = Dashit
+        self.e = self.effect()
 
     def test_basic(self):
-        args = [
-            '--id=dashme'
-            , self.data_file('svg', 'dash.svg')]
-        e = Dashit()
-        e.run(args)
-        old_dashes = e.original_document.xpath('//svg:path', namespaces=inkex.NSS)[0].path
-        new_dashes = e.document.xpath('//svg:path', namespaces=inkex.NSS)[0].path
-        self.assertTrue (len(new_dashes) > len (old_dashes))
-
-if __name__ == '__main__':
-    unittest.main()
+        args = ['--id=dashme',
+                self.data_file('svg', 'dash.svg')]
+        self.e.run(args)
+        old_dashes = self.e.original_document.xpath('//svg:path', namespaces=NSS)[0].path
+        new_dashes = self.e.document.xpath('//svg:path', namespaces=NSS)[0].path
+        assert len(new_dashes) > len(old_dashes)

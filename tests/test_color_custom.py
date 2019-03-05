@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf-8
 
 from color_custom import C

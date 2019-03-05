@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 # coding=utf-8
 """
 Test Inkex path parsing functionality.
 """
 
 import re
-import unittest
 
 from inkex.paths import InvalidPath, Path, PathCommand
 from tests.base import TestCase
@@ -161,7 +159,3 @@ class PathTest(TestCase):
         ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
         ret.rotate(-35, 0, 0)
         self._assertPath(ret, "M 0.348181 0.0613938 L 10.7753 -7.23976 L 18.0765 3.18737 L 7.64933 10.4885 Z")
-
-
-if __name__ == '__main__':
-    unittest.main()

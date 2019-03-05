@@ -1,12 +1,9 @@
-#!/usr/bin/env python
 # coding=utf-8
 """
 Unit test file for ../gimp_xcf.py
 Revision history:
   * 2012-01-26 (jazzynico): checks defaulf parameters and file handling.
 """
-
-import unittest
 
 from gimp_xcf import MyEffect
 from tests.base import InkscapeExtensionTestMixin, TestCase
@@ -39,7 +36,3 @@ class GimpXCFBasicTest(InkscapeExtensionTestMixin, TestCase):
         e = MyEffect()
         e.affect([self.data_file('svg', 'default-inkscape-SVG.svg')])
         self.assertEqual(e.valid, 0)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -21,7 +21,7 @@ import os
 import sys
 import tempfile
 # local library
-from webslicer_effect import *
+from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
 from inkex.localize import _
 

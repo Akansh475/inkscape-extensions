@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_lesslight import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -135,7 +131,3 @@ class ColorLessLightBasicTest(InkscapeExtensionTestMixin, TestCase):
         # Fuschia
         col = self.e.colmod(255, 0, 255)
         self.assertEqual("e500e5", col)
-
-
-if __name__ == '__main__':
-    unittest.main()

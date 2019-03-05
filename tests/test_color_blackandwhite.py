@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_blackandwhite import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -173,7 +169,3 @@ class ColorBlackAndWhiteBasicTest(InkscapeExtensionTestMixin, TestCase):
         # Silver
         col = self.e.colmod(192, 192, 192)
         self.assertEqual("ffffff", col)
-
-
-if __name__ == '__main__':
-    unittest.main()

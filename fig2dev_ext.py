@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-fig2dev-ext.py
+fig2dev_ext.py
 Python script for running fig2dev in Inkscape extensions
 
 Copyright (C) 2008 Stephen Silver

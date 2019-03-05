@@ -3,7 +3,6 @@
 """
 Test elements extra logic from svg xml lxml custom classes.
 """
-import unittest
 
 from inkex.transforms import Transform
 from tests.base import TestCase
@@ -95,7 +94,3 @@ class UseTest(ElementTestCase):
     def test_path(self):
         """Use path follows ref"""
         self.assertEqual(str(self.elem.path), 'M 0 0 L 10 10 Z')
-
-
-if __name__ == '__main__':
-    unittest.main()

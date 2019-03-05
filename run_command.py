@@ -21,6 +21,7 @@ Module for running SVG-generating commands in Inkscape extensions
 import os
 import sys
 import tempfile
+from subprocess import Popen, PIPE
 
 
 def run(command_format, prog_name):
@@ -41,35 +42,20 @@ def run(command_format, prog_name):
         os.chdir(tempfile.gettempdir())
     except IOError:
         pass
-    # In order to get a return code from the process, we use subprocess.Popen
-    # if it's available (Python 2.4 onwards) and otherwise use popen2.Popen3
-    # (Unix only).  As the Inkscape package for Windows includes Python 2.5,
-    # this should cover all supported platforms.
+
     try:
-        try:
-            from subprocess import Popen, PIPE
-            proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-            return_code = proc.wait()
-            out = proc.stdout.read()
-            err = proc.stderr.read()
-        except ImportError:
-            try:
-                from popen2 import Popen3
-                proc3 = Popen3(command, True)
-                proc3.wait()
-                return_code = proc3.poll()
-                out = proc3.fromchild.read()
-                err = proc3.childerr.read()
-            except ImportError:
-                # shouldn't happen...
-                msg = "Neither subprocess.Popen nor popen2.Popen3 is available"
+        proc = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+        return_code = proc.wait()
+        out = proc.stdout.read()
+        err = proc.stderr.read()
+
         if msg is None:
             if return_code:
-                msg = "%s failed:\n%s\n%s\n" % (prog_name, out, err)
+                msg = "{} failed:\n{}\n{}\n".format(prog_name, out, err)
             elif err:
-                sys.stderr.write("%s executed but logged the following error:\n%s\n%s\n" % (prog_name, out, err))
+                sys.stderr.write("{} executed but logged the following error:\n{}\n{}\n".format(prog_name, out, err))
     except Exception as inst:
-        msg = "Error attempting to run %s: %s" % (prog_name, str(inst))
+        msg = "Error attempting to run {}: {}".format(prog_name, str(inst))
 
     # If successful, copy the output file to stdout.
     if msg is None:
@@ -80,7 +66,7 @@ def run(command_format, prog_name):
             with open(svgfile, "rb") as fhl:
                 sys.stdout.write(fhl.read())
         except IOError as inst:
-            msg = "Error reading temporary file: %s" % str(inst)
+            msg = "Error reading temporary file: {}".format(str(inst))
 
     try:
         # Clean up.
@@ -91,5 +77,3 @@ def run(command_format, prog_name):
     # Output error message (if any) and exit.
     return msg
 
-
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

@@ -1,11 +1,7 @@
-#!/usr/bin/env python
 # coding=utf-8
 """
 Test Inkex style parsing functionality.
 """
-
-import unittest
-
 from inkex.styles import Style
 from tests.base import TestCase
 
@@ -31,7 +27,3 @@ class StyleTest(TestCase):
         stl = Style()
         stl['border-pain'] = 'green'
         self.assertEqual(str(stl), 'border-pain:green')
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf-8
 #
 # Copyright (C) 2016 Richard White, rwhite8282@gmail.com
@@ -21,12 +20,9 @@ An Inkscape frame extension test class.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-import unittest
-
 import inkex
 from frame import Frame
 from tests.base import InkscapeExtensionTestMixin, TestCase
-
 
 
 class FrameTest(InkscapeExtensionTestMixin, TestCase):
@@ -36,7 +32,6 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
 
     def get_frame(self, document):
         return document.xpath('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]', namespaces=inkex.NSS)[0]
-
 
     def test_single_frame(self):
         args = ['--corner_radius=20',
@@ -63,7 +58,6 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
                         , 'Invalid stroke-opacity in "' + new_frame_style + '".')
         self.assertTrue('fill:#ff0000' in new_frame_style
                         , 'Invalid fill in "' + new_frame_style + '".')
-
 
     def test_single_frame_grouped(self):
         args = [
@@ -107,7 +101,3 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
         self.assertEqual('url(#clipPath)', group[0].get('clip-path'))
         clip_path = uut.document.xpath('//svg:defs/svg:clipPath', namespaces=inkex.NSS)[0]
         self.assertEqual('{http://www.w3.org/2000/svg}clipPath', clip_path.tag)
-
-
-if __name__ == '__main__':
-    unittest.main()

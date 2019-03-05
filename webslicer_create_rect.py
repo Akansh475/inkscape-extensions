@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 # local library
-from webslicer_effect import *
+from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
 
 class WebSlicer_CreateRect(WebSlicer_Effect):

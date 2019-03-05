@@ -5,13 +5,13 @@
   <dependency type="executable" location="extensions">jessyInk_autoTexts.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" _gui-text="Settings">
-			<param name="autoText" type="optiongroup" _gui-text="Auto-Text:">
+            <param name="autoText" type="optiongroup" _gui-text="Auto-Text:">
         <_option value="none">None (remove)</_option>
         <_option value="slideTitle">Slide title</_option>
         <_option value="slideNumber">Slide number</_option>
         <_option value="numberOfSlides">Number of slides</_option>
-			</param>
-		</page>
+            </param>
+        </page>
     <page name="help" _gui-text="Help">
       <_param name="help_text" type="description">This extension allows you to install, update and remove auto-texts for a JessyInk presentation. Please see code.google.com/p/jessyink for more details.</_param>
     </page>

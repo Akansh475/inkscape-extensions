@@ -35,12 +35,12 @@
             <param name="color-nmd"      type="string" _gui-text="Next month day color:">#B0B0B0</param>
             <param name="color-weeknr"   type="string" _gui-text="Week number color:">#787878</param>
         </page>
-	<page name="fonts" _gui-text="Fonts">
+    <page name="fonts" _gui-text="Fonts">
             <param name="font-year"     type="string" _gui-text="Year font:">arial</param>
             <param name="font-month"    type="string" _gui-text="Month font:">arial</param>
             <param name="font-day-name" type="string" _gui-text="Weekday name font:">arial</param>
             <param name="font-day"      type="string" _gui-text="Day font:">arial</param>
-	</page>
+    </page>
         <page name="localization" _gui-text="Localization">
             <_param name="l10n-help" type="description">You may change the names for other languages:</_param>
             <_param name="month-names"  type="string" _gui-text="Month names:" xml:space="preserve">January February March April May June July August September October November December</_param>

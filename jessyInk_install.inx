@@ -6,9 +6,9 @@
   <dependency type="executable" location="extensions">jessyInk.js</dependency>
   <param name="tab" type="notebook">
     <page name="help" _gui-text="Help">
-			<_param name="help_text" type="description">This extension allows you to install or update the JessyInk script in order to turn your SVG file into a presentation. Please see code.google.com/p/jessyink for more details.</_param>
+            <_param name="help_text" type="description">This extension allows you to install or update the JessyInk script in order to turn your SVG file into a presentation. Please see code.google.com/p/jessyink for more details.</_param>
     </page>
-	</param>
+    </param>
   <effect>
     <object-type>all</object-type>
       <effects-menu>

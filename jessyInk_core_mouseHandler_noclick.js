@@ -16,18 +16,18 @@
 document.addEventListener("DOMContentLoaded",  jessyInk_core_mouseHandler_noclick_init, false);
 
 /** Initialisation function.
- *  
+ *
  *  This function looks for the objects of the appropriate sub-type and hands them to another function that will add the required methods.
  */
 function jessyInk_core_mouseHandler_noclick_init()
 {
-	var elems = document.getElementsByTagNameNS("https://launchpad.net/jessyink", "mousehandler");
+    var elems = document.getElementsByTagNameNS("https://launchpad.net/jessyink", "mousehandler");
 
-	for (var counter = 0; counter < elems.length; counter++)
-	{
-		if (elems[counter].getAttributeNS("https://launchpad.net/jessyink", "subtype") == "jessyInk_core_mouseHandler_noclick")
-			jessyInk_core_mouseHandler_noclick(elems[counter]);
-	}
+    for (var counter = 0; counter < elems.length; counter++)
+    {
+        if (elems[counter].getAttributeNS("https://launchpad.net/jessyink", "subtype") == "jessyInk_core_mouseHandler_noclick")
+            jessyInk_core_mouseHandler_noclick(elems[counter]);
+    }
 }
 
 /** Function to initialise an object.
@@ -36,18 +36,18 @@ function jessyInk_core_mouseHandler_noclick_init()
  */
 function jessyInk_core_mouseHandler_noclick(obj)
 {
-	/** Function supplying a custom mouse handler.
-	 *
-	 *  @returns A dictionary containing the new mouse handler functions.
-	 */
-	obj.getMouseHandler = function ()
-	{
-		var handlerDictio = new Object();
+    /** Function supplying a custom mouse handler.
+     *
+     *  @returns A dictionary containing the new mouse handler functions.
+     */
+    obj.getMouseHandler = function ()
+    {
+        var handlerDictio = new Object();
 
-		handlerDictio[SLIDE_MODE] = new Object();
-		handlerDictio[SLIDE_MODE][MOUSE_DOWN] = null;
+        handlerDictio[SLIDE_MODE] = new Object();
+        handlerDictio[SLIDE_MODE][MOUSE_DOWN] = null;
 
-		return handlerDictio;
-	}
+        return handlerDictio;
+    }
 }
 

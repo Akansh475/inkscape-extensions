@@ -202,7 +202,7 @@ class PathScatter(pathmodifier.Diffeo):
         width=bbox[1]-bbox[0]
         dx=width+self.options.space
 
-		#check if group and expand it
+        #check if group and expand it
         patternList = []
         if self.options.grouppick and (self.patternNode.tag == inkex.addNS('g','svg') or self.patternNode.tag=='g') :
             mat = simpletransform.parseTransform(self.patternNode.get("transform"))

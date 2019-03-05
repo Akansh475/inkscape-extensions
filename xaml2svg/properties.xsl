@@ -44,16 +44,16 @@ xmlns:msxsl="urn:schemas-microsoft-com:xslt">
       <boundingbox>
         <xsl:attribute name="x1">
           <xsl:value-of select="@Canvas.Left" />
-        </xsl:attribute>  
+        </xsl:attribute>
         <xsl:attribute name="x2">
           <xsl:value-of select="@Canvas.Left + @Width" />
-        </xsl:attribute>  
+        </xsl:attribute>
         <xsl:attribute name="y1">
           <xsl:value-of select="@Canvas.Top" />
-        </xsl:attribute>  
+        </xsl:attribute>
         <xsl:attribute name="y2">
           <xsl:value-of select="@Canvas.Top + @Height" />
-        </xsl:attribute>  
+        </xsl:attribute>
       </boundingbox>
     </xsl:when>
     <xsl:when test="count(*) &gt; 0">
@@ -65,19 +65,19 @@ xmlns:msxsl="urn:schemas-microsoft-com:xslt">
           <xsl:sort data-type="number" select="@x1" order="ascending"/>
           <xsl:if test="position() = 1"><xsl:value-of select="@x1" /></xsl:if>
         </xsl:for-each>
-      </xsl:attribute>  
+      </xsl:attribute>
       <xsl:attribute name="x2">
         <xsl:for-each select="msxsl:node-set($boundingboxes)/boundingbox">
           <xsl:sort data-type="number" select="@x2" order="descending"/>
           <xsl:if test="position() = 1"><xsl:value-of select="@x2" /></xsl:if>
         </xsl:for-each>
-      </xsl:attribute>  
+      </xsl:attribute>
       <xsl:attribute name="y1">
         <xsl:for-each select="msxsl:node-set($boundingboxes)/boundingbox">
           <xsl:sort data-type="number" select="@y1" order="ascending"/>
           <xsl:if test="position() = 1"><xsl:value-of select="@y1" /></xsl:if>
         </xsl:for-each>
-      </xsl:attribute>  
+      </xsl:attribute>
       <xsl:attribute name="y2">
         <xsl:for-each select="msxsl:node-set($boundingboxes)/boundingbox">
           <xsl:sort data-type="number" select="@y2" order="descending"/>
@@ -96,11 +96,11 @@ xmlns:msxsl="urn:schemas-microsoft-com:xslt">
       <svg>
         <xsl:if test="@Canvas.Left and @Canvas.Top and @Width and @Height">
           <xsl:attribute name="viewBox">
-	    <xsl:value-of select="concat(@Canvas.Left, ' ')" />
-	    <xsl:value-of select="concat(@Canvas.Top, ' ')" />
-	    <xsl:value-of select="concat(@Width - @Canvas.Left, ' ')" />
-	    <xsl:value-of select="@Height - @Canvas.Top" />
-	  </xsl:attribute>
+        <xsl:value-of select="concat(@Canvas.Left, ' ')" />
+        <xsl:value-of select="concat(@Canvas.Top, ' ')" />
+        <xsl:value-of select="concat(@Width - @Canvas.Left, ' ')" />
+        <xsl:value-of select="@Height - @Canvas.Top" />
+      </xsl:attribute>
         </xsl:if>
         <xsl:if test="@Canvas.Left"><xsl:attribute name="x"><xsl:value-of select="@Canvas.Left" /></xsl:attribute></xsl:if>
         <xsl:if test="@Canvas.Top"><xsl:attribute name="y"><xsl:value-of select="@Canvas.Top" /></xsl:attribute></xsl:if>
@@ -193,17 +193,17 @@ xmlns:msxsl="urn:schemas-microsoft-com:xslt">
       <xsl:when test="contains(@Clip, '{')"><xsl:attribute name="fill"><xsl:value-of select="concat('url(#', substring-before(substring-after(@Clip, '{'), '}'), ')')" /></xsl:attribute></xsl:when>
       <xsl:otherwise>
         <xsl:attribute name="clip-path"><xsl:value-of select="concat('url(#clippath_', generate-id(.),')')" /></xsl:attribute>
-	<defs>
-	  <clipPath>
-	    <xsl:attribute name="id"><xsl:value-of select="concat('clippath_', generate-id(.))" /></xsl:attribute>
-	    <path>
-	      <xsl:attribute name="d">
+    <defs>
+      <clipPath>
+        <xsl:attribute name="id"><xsl:value-of select="concat('clippath_', generate-id(.))" /></xsl:attribute>
+        <path>
+          <xsl:attribute name="d">
                 <xsl:choose>
                   <xsl:when test="contains(@Clip, 'F1')"><xsl:value-of select="substring-after(@Clip, 'F1')" /></xsl:when>
                   <xsl:otherwise><xsl:value-of select="@Clip" /></xsl:otherwise>
-                </xsl:choose>	
-	      </xsl:attribute></path>
-	  </clipPath>
+                </xsl:choose>
+          </xsl:attribute></path>
+      </clipPath>
         </defs>
       </xsl:otherwise>
     </xsl:choose>

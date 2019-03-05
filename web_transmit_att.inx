@@ -3,7 +3,7 @@
   <_name>Transmit Attributes</_name>
   <id>org.inkscape.web.transmit-att</id>
   <dependency type="executable" location="extensions">web_transmit_att.py</dependency>
-	<param name="tab" type="notebook">
+    <param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="att" type="string" _gui-text="Attribute to transmit:">fill</param>
             <param name="when" type="enum" _gui-text="When to transmit:">

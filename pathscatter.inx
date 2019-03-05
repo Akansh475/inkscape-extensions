@@ -4,7 +4,7 @@
     <id>math.univ-lille1.barraud.pathScatter</id>
     <dependency type="executable" location="extensions">pathmodifier.py</dependency>
     <dependency type="executable" location="extensions">pathscatter.py</dependency>
-	<param name="tab" type="notebook">
+    <param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="follow" type="boolean" _gui-text="Follow path orientation">false</param>
             <param name="stretch" type="boolean" _gui-text="Stretch spaces to fit skeleton length">false</param>

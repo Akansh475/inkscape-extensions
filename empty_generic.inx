@@ -18,9 +18,9 @@
 
     <param name="background" _gui-text="Canvas background:" type="enum">
         <item value="normal">Normal</item>
-	<item value="black">Black Opaque</item>
-	<item value="gray">Gray Opaque</item>
-	<item value="white">White Opaque</item>
+    <item value="black">Black Opaque</item>
+    <item value="gray">Gray Opaque</item>
+    <item value="white">White Opaque</item>
     </param>
 
     <param name="noborder" type="boolean" _gui-text="Hide border">false</param>

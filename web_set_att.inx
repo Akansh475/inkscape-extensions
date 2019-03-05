@@ -3,7 +3,7 @@
     <_name>Set Attributes</_name>
     <id>org.inkscape.web.set-att</id>
     <dependency type="executable" location="extensions">web_set_att.py</dependency>
-	<param name="tab" type="notebook">
+    <param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="att" type="string" _gui-text="Attribute to set:">fill stroke stroke-width</param>
             <param name="when" type="enum" _gui-text="When should the set be done:">

@@ -29,7 +29,7 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 import inkex
 
 
-class	JessyInk_CustomMouseHandler(inkex.Effect):
+class JessyInk_CustomMouseHandler(inkex.Effect):
     def __init__(self):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
@@ -53,7 +53,7 @@ class	JessyInk_CustomMouseHandler(inkex.Effect):
         if self.options.mouseSettings == "noclick":
             # Create new script node.
             scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
-            scriptElm.text = open(os.path.join(os.path.dirname(__file__),	"jessyInk_core_mouseHandler_noclick.js")).read()
+            scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_noclick.js")).read()
             groupElm = inkex.etree.Element(inkex.addNS("mousehandler", "jessyink"))
             groupElm.set("{" + inkex.NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_noclick")
             groupElm.append(scriptElm)
@@ -61,7 +61,7 @@ class	JessyInk_CustomMouseHandler(inkex.Effect):
         elif self.options.mouseSettings == "draggingZoom":
             # Create new script node.
             scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
-            scriptElm.text = open(os.path.join(os.path.dirname(__file__),	"jessyInk_core_mouseHandler_zoomControl.js")).read()
+            scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_zoomControl.js")).read()
             groupElm = inkex.etree.Element(inkex.addNS("mousehandler", "jessyink"))
             groupElm.set("{" + inkex.NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_zoomControl")
             groupElm.append(scriptElm)

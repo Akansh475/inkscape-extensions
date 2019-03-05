@@ -104,8 +104,8 @@ class MyEffect(inkex.Effect):
                 e = sub[i+1]
                 self.dxf_line(layer,[s[1],e[1]])
 
-    def dxf_path_to_point(self,layer,p):
-        bbox = inkex.roughBBox(p)
+    def dxf_path_to_point(self, layer, p):
+        bbox = list(inkex.Path(p).bounding_box())
         x = (bbox[0] + bbox[1]) / 2
         y = (bbox[2] + bbox[3]) / 2
         self.dxf_point(layer,x,y)

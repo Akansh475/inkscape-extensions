@@ -275,7 +275,7 @@ class BoundingBox(object): # pylint: disable=too-few-public-methods
         """Returns the middle of the bounding box"""
         return self.x.center(), self.y.center()
 
-def cubicExtrema(py0, py1, py2, py3):
+def cubic_extrema(py0, py1, py2, py3):
     """Returns the extreme value, given a set of bezier coords"""
     cmin, cmax = min(py0, py3), max(py0, py3)
     pd1 = py1 - py0
@@ -301,50 +301,5 @@ def cubicExtrema(py0, py1, py2, py3):
         cmin, cmax = _is_bigger(-pd1 / (pd3 - pd1))
 
     return cmin, cmax
-
-def pairwise(iterable):
-    "Iterate over a list with overlapping pairs (see itertools recipes)"
-    from itertools import tee
-    first, then = tee(iterable)
-    next(then, None)
-    return zip(first, then)
-
-def path_loop(path):
-     for pathcomp in path:
-        for ctl in pathcomp:
-            yield ctl
-
-def roughBBox(path):
-    """Returns a very basic bbox based on path points (no curve interpolation)"""
-    x, y = [], []
-    for ctl in path_loop(path):
-        for pt in ctl:
-            x.append(pt[X])
-            y.append(pt[Y])
-    return min(x), max(x), min(y), max(y)
-
-def computeBBox(elements, mat=((1,0,0),(0,1,0))):
-    from simpletransform import parseTransform
-    bbox=None
-    for node in elements:
-        m = parseTransform(node.get('transform'))
-        m = composeTransform(mat,m)
-        #TODO: text not supported!
- 
-        if d is not None:
-            p = inkex.parseCubicPath(d)
-            applyTransformToPath(m, p)
-            bbox=boxunion(refinedBBox(p), bbox)
-
-        elif node.tag == inkex.addNS('use','svg') or node.tag=='use':
-            refid=node.get(inkex.addNS('href','xlink'))
-            path = '//*[@id="%s"]' % refid[1:]
-            refnode = node.xpath(path)
-            bbox=boxunion(computeBBox(refnode,m),bbox)
-
-        bbox = boxunion(computeBBox(node,m), bbox)
-    return bbox
-
-
 
 # vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

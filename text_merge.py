@@ -35,23 +35,23 @@ class Merge(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-d", "--direction",
-                        action="store", type=str,
+                         type=str,
                         dest="direction", default="tb",
                         help="direction to merge text")
         self.arg_parser.add_argument("-x", "--xanchor",
-                        action="store", type=str,
+                         type=str,
                         dest="xanchor", default="m",
                         help="horizontal point to compare")
         self.arg_parser.add_argument("-y", "--yanchor",
-                        action="store", type=str,
+                         type=str,
                         dest="yanchor", default="m",
                         help="vertical point to compare")
         self.arg_parser.add_argument("-t", "--flowtext",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="flowtext", default=False,
                         help="use a flow text structure instead of a normal text element")
         self.arg_parser.add_argument("-k", "--keepstyle",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="keepstyle", default=False,
                         help="keep format")
 

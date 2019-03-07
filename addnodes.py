@@ -31,15 +31,15 @@ class SplitIt(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--segments",
-                        action="store", type=int,
+                        type=int,
                         dest="segments", default=2,
                         help="Number of segments to divide the path into")
         self.arg_parser.add_argument("--max",
-                        action="store", type=float,
+                        type=float,
                         dest="max", default=2,
                         help="Number of segments to divide the path into")
         self.arg_parser.add_argument("--method",
-                        action="store", type=str,
+                        type=str,
                         dest="method", default='',
                         help="The kind of division to perform")
 

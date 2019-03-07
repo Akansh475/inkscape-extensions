@@ -25,11 +25,11 @@ class SegmentStraightener(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-p", "--percent",
-                        action="store", type=float,
+                         type=float,
                         dest="percent", default=10.0,
                         help="move curve handles PERCENT percent closer to a straight line")
         self.arg_parser.add_argument("-b", "--behavior",
-                        action="store", type=int,
+                         type=int,
                         dest="behave", default=1,
                         help="straightening behavior for cubic segments")
 

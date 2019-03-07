@@ -66,15 +66,15 @@ class CompressedMediaOutput(inkex.Effect):
                             '{http://www.w3.org/2000/svg}flowPara',
                             '{http://www.w3.org/2000/svg}flowSpan']
         self.arg_parser.add_argument("--image_dir",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="image_dir", default="",
                                      help="Image directory")
         self.arg_parser.add_argument("--font_list",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="font_list", default=False,
                                      help="Add font list")
         self.arg_parser.add_argument("--tab",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 

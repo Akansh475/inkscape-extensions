@@ -39,59 +39,59 @@ class PrintingMarks (inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--where",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="where_to_crop", default=True,
                                      help="Apply crop marks to...")
         self.arg_parser.add_argument("--crop_marks",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="crop_marks", default=True,
                                      help="Draw crop Marks?")
         self.arg_parser.add_argument("--bleed_marks",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="bleed_marks", default=False,
                                      help="Draw Bleed Marks?")
         self.arg_parser.add_argument("--registration_marks",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="reg_marks", default=False,
                                      help="Draw Registration Marks?")
         self.arg_parser.add_argument("--star_target",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="star_target", default=False,
                                      help="Draw Star Target?")
         self.arg_parser.add_argument("--colour_bars",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="colour_bars", default=False,
                                      help="Draw Colour Bars?")
         self.arg_parser.add_argument("--page_info",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="page_info", default=False,
                                      help="Draw Page Information?")
         self.arg_parser.add_argument("--unit",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="unit", default="px",
                                      help="Draw measurement")
         self.arg_parser.add_argument("--crop_offset",
-                                     action="store", type=float,
+                                      type=float,
                                      dest="crop_offset", default=0,
                                      help="Offset")
         self.arg_parser.add_argument("--bleed_top",
-                                     action="store", type=float,
+                                      type=float,
                                      dest="bleed_top", default=0,
                                      help="Bleed Top Size")
         self.arg_parser.add_argument("--bleed_bottom",
-                                     action="store", type=float,
+                                      type=float,
                                      dest="bleed_bottom", default=0,
                                      help="Bleed Bottom Size")
         self.arg_parser.add_argument("--bleed_left",
-                                     action="store", type=float,
+                                      type=float,
                                      dest="bleed_left", default=0,
                                      help="Bleed Left Size")
         self.arg_parser.add_argument("--bleed_right",
-                                     action="store", type=float,
+                                      type=float,
                                      dest="bleed_right", default=0,
                                      help="Bleed Right Size")
         self.arg_parser.add_argument("--tab",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 

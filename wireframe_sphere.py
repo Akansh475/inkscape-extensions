@@ -82,22 +82,22 @@ class WireframeSphere(inkex.Effect):
 
         #PARSE OPTIONS
         self.arg_parser.add_argument("--num_lat",
-            action="store", type=int,
+             type=int,
             dest="NUM_LAT", default=19)
         self.arg_parser.add_argument("--num_long",
-            action="store", type=int,
+             type=int,
             dest="NUM_LONG", default=24)
         self.arg_parser.add_argument("--radius",
-            action="store", type=float,
+             type=float,
             dest="RADIUS", default=100.0)
         self.arg_parser.add_argument("--tilt",
-            action="store", type=float,
+             type=float,
             dest="TILT", default=35.0)
         self.arg_parser.add_argument("--rotation",
-            action="store", type=float,
+             type=float,
             dest="ROT_OFFSET", default=4)
         self.arg_parser.add_argument("--hide_back",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="HIDE_BACK", default=False)
 
     def effect(self):

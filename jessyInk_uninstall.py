@@ -38,13 +38,13 @@ class JessyInk_Uninstall(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
-        self.arg_parser.add_argument('--remove_script', action = 'store', type=inkbool, dest = 'remove_script', default = True)
-        self.arg_parser.add_argument('--remove_effects', action = 'store', type=inkbool, dest = 'remove_effects', default = True)
-        self.arg_parser.add_argument('--remove_masterSlide', action = 'store', type=inkbool, dest = 'remove_masterSlide', default = True)
-        self.arg_parser.add_argument('--remove_transitions', action = 'store', type=inkbool, dest = 'remove_transitions', default = True)
-        self.arg_parser.add_argument('--remove_autoTexts', action = 'store', type=inkbool, dest = 'remove_autoTexts', default = True)
-        self.arg_parser.add_argument('--remove_views', action = 'store', type=inkbool, dest = 'remove_views', default = True)
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
+        self.arg_parser.add_argument('--remove_script',  type=inkbool, dest = 'remove_script', default = True)
+        self.arg_parser.add_argument('--remove_effects',  type=inkbool, dest = 'remove_effects', default = True)
+        self.arg_parser.add_argument('--remove_masterSlide',  type=inkbool, dest = 'remove_masterSlide', default = True)
+        self.arg_parser.add_argument('--remove_transitions',  type=inkbool, dest = 'remove_transitions', default = True)
+        self.arg_parser.add_argument('--remove_autoTexts',  type=inkbool, dest = 'remove_autoTexts', default = True)
+        self.arg_parser.add_argument('--remove_views',  type=inkbool, dest = 'remove_views', default = True)
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

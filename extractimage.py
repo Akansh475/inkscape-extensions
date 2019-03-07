@@ -32,11 +32,11 @@ class ExtractImage(inkex.Effect):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--desc")
         self.arg_parser.add_argument("-s", "--selectedonly",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="selectedonly", default=True,
             help="extract only selected images")
         self.arg_parser.add_argument("--filepath",
-                        action="store", type=str,
+                         type=str,
                         dest="filepath", default=None,
                         help="")
     def effect(self):

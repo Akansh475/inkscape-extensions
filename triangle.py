@@ -92,31 +92,31 @@ class Triangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--s_a",
-                        action="store", type=float,
+                         type=float,
                         dest="s_a", default=100.0,
                         help="Side Length a")
         self.arg_parser.add_argument("--s_b",
-                        action="store", type=float,
+                         type=float,
                         dest="s_b", default=100.0,
                         help="Side Length b")
         self.arg_parser.add_argument("--s_c",
-                        action="store", type=float,
+                         type=float,
                         dest="s_c", default=100.0,
                         help="Side Length c")
         self.arg_parser.add_argument("--a_a",
-                        action="store", type=float,
+                         type=float,
                         dest="a_a", default=60.0,
                         help="Angle a")
         self.arg_parser.add_argument("--a_b",
-                        action="store", type=float,
+                         type=float,
                         dest="a_b", default=30.0,
                         help="Angle b")
         self.arg_parser.add_argument("--a_c",
-                        action="store", type=float,
+                         type=float,
                         dest="a_c", default=90.0,
                         help="Angle c")
         self.arg_parser.add_argument("--mode",
-                        action="store", type=str,
+                         type=str,
                         dest="mode", default='3_sides',
                         help="Side Length c")
 

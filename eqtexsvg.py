@@ -92,11 +92,11 @@ class EQTEXSVG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-f", "--formule",
-                        action="store", type=str,
+                         type=str,
                         dest="formula", default="",
                         help="LaTeX formula")
         self.arg_parser.add_argument("-p", "--packages",
-                        action="store", type=str,
+                         type=str,
                         dest="packages", default="",
                         help="Additional packages")
     def effect(self):

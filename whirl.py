@@ -25,11 +25,11 @@ class Whirl(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-t", "--whirl",
-                        action="store", type=float,
+                         type=float,
                         dest="whirl", default=1.0,
                         help="amount of whirl")
         self.arg_parser.add_argument("-r", "--rotation",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="rotation", default=True,
                         help="direction of rotation")
     def effect(self):

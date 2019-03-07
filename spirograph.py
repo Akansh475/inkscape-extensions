@@ -24,27 +24,27 @@ class Spirograph(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-R", "--primaryr",
-                        action="store", type=float,
+                         type=float,
                         dest="primaryr", default=60.0,
                         help="The radius of the outer gear")
         self.arg_parser.add_argument("-r", "--secondaryr",
-                        action="store", type=float,
+                         type=float,
                         dest="secondaryr", default=100.0,
                         help="The radius of the inner gear")
         self.arg_parser.add_argument("-d", "--penr",
-                        action="store", type=float,
+                         type=float,
                         dest="penr", default=50.0,
                         help="The distance of the pen from the inner gear")
         self.arg_parser.add_argument("-p", "--gearplacement",
-                        action="store", type=str,
+                         type=str,
                         dest="gearplacement", default="inside",
                         help="Selects whether the gear is inside or outside the ring")
         self.arg_parser.add_argument("-a", "--rotation",
-                        action="store", type=float,
+                         type=float,
                         dest="rotation", default=0.0,
                         help="The number of degrees to rotate the image by")
         self.arg_parser.add_argument("-q", "--quality",
-                        action="store", type=int,
+                         type=int,
                         dest="quality", default=16,
                         help="The quality of the calculated output")
 

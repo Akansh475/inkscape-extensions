@@ -56,70 +56,70 @@ class GridPolar(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab", default="circular_div")
         self.arg_parser.add_argument("--r_divs",
-                        action="store", type=int,
+                         type=int,
                         dest="r_divs", default=5,
                         help="Circular Divisions")
         self.arg_parser.add_argument("--dr",
-                        action="store", type=float,
+                         type=float,
                         dest="dr", default=50,
                         help="Circular Division Spacing")
         self.arg_parser.add_argument("--r_subdivs",
-                        action="store", type=int,
+                         type=int,
                         dest="r_subdivs", default=3,
                         help="Circular Subdivisions per Major division")
         self.arg_parser.add_argument("--r_log",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="r_log", default=False,
                         help="Logarithmic subdivisions if true")
         self.arg_parser.add_argument("--r_divs_th",
-                        action="store", type=float,
+                         type=float,
                         dest="r_divs_th", default=2,
                         help="Major Circular Division Line thickness")
         self.arg_parser.add_argument("--r_subdivs_th",
-                        action="store", type=float,
+                         type=float,
                         dest="r_subdivs_th", default=1,
                         help="Minor Circular Division Line thickness")
         self.arg_parser.add_argument("--a_divs",
-                        action="store", type=int,
+                         type=int,
                         dest="a_divs", default=24,
                         help="Angle Divisions")
         self.arg_parser.add_argument("--a_divs_cent",
-                        action="store", type=int,
+                         type=int,
                         dest="a_divs_cent", default=4,
                         help="Angle Divisions at Centre")
         self.arg_parser.add_argument("--a_subdivs",
-                        action="store", type=int,
+                         type=int,
                         dest="a_subdivs", default=1,
                         help="Angcular Subdivisions per Major division")
         self.arg_parser.add_argument("--a_subdivs_cent",
-                        action="store", type=int,
+                         type=int,
                         dest="a_subdivs_cent", default=1,
                         help="Angular Subdivisions end 'n' major circular divisions before the centre")
         self.arg_parser.add_argument("--a_divs_th",
-                        action="store", type=float,
+                         type=float,
                         dest="a_divs_th", default=2,
                         help="Major Angular Division Line thickness")
         self.arg_parser.add_argument("--a_subdivs_th",
-                        action="store", type=float,
+                         type=float,
                         dest="a_subdivs_th", default=1,
                         help="Minor Angular Division Line thickness")
         self.arg_parser.add_argument("--c_dot_dia",
-                        action="store", type=float,
+                         type=float,
                         dest="c_dot_dia", default=5.0,
                         help="Diameter of Centre Dot")
         self.arg_parser.add_argument("--a_labels",
-                        action="store", type=str,
+                         type=str,
                         dest="a_labels", default='deg',
                         help="The kind of labels to apply")
         self.arg_parser.add_argument("--a_label_size",
-                        action="store", type=int,
+                         type=int,
                         dest="a_label_size", default=18,
                         help="The nominal pixel size of the circumferential labels")
         self.arg_parser.add_argument("--a_label_outset",
-                        action="store", type=float,
+                         type=float,
                         dest="a_label_outset", default=24,
                         help="The radial outset of the circumferential labels")
 

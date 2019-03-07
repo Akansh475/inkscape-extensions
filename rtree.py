@@ -27,15 +27,15 @@ class RTreeTurtle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--size",
-                        action="store", type=float,
+                         type=float,
                         dest="size", default=100.0,
                         help="initial branch size")
         self.arg_parser.add_argument("-m", "--minimum",
-                        action="store", type=float,
+                         type=float,
                         dest="minimum", default=4.0,
                         help="minimum branch size")
         self.arg_parser.add_argument("--pentoggle",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="pentoggle", default=False,
                         help="Lift pen for backward steps")
     def effect(self):

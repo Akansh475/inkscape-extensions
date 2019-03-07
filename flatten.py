@@ -22,7 +22,7 @@ class MyEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-f", "--flatness",
-                        action="store", type=float,
+                         type=float,
                         dest="flat", default=10.0,
                         help="Minimum flatness of the subdivided curves")
     def effect(self):

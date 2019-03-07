@@ -353,104 +353,104 @@ class Poly3D(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
-            action="store", type=str,
+             type=str,
             dest="tab", default="object")
 
 #MODEL FILE SETTINGS
         self.arg_parser.add_argument("--obj",
-            action="store", type=str,
+             type=str,
             dest="obj", default='cube')
         self.arg_parser.add_argument("--spec_file",
-            action="store", type=str,
+             type=str,
             dest="spec_file", default='great_rhombicuboct.obj')
         self.arg_parser.add_argument("--cw_wound",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="cw_wound", default='true')
         self.arg_parser.add_argument("--type",
-            action="store", type=str,
+             type=str,
             dest="type", default='face')
 #VEIW SETTINGS
         self.arg_parser.add_argument("--r1_ax",
-            action="store", type=str,
+             type=str,
             dest="r1_ax", default="X-Axis")
         self.arg_parser.add_argument("--r2_ax",
-            action="store", type=str,
+             type=str,
             dest="r2_ax", default="X-Axis")
         self.arg_parser.add_argument("--r3_ax",
-            action="store", type=str,
+             type=str,
             dest="r3_ax", default="X-Axis")
         self.arg_parser.add_argument("--r4_ax",
-            action="store", type=str,
+             type=str,
             dest="r4_ax", default="X-Axis")
         self.arg_parser.add_argument("--r5_ax",
-            action="store", type=str,
+             type=str,
             dest="r5_ax", default="X-Axis")
         self.arg_parser.add_argument("--r6_ax",
-            action="store", type=str,
+             type=str,
             dest="r6_ax", default="X-Axis")
         self.arg_parser.add_argument("--r1_ang",
-            action="store", type=float,
+             type=float,
             dest="r1_ang", default=0)
         self.arg_parser.add_argument("--r2_ang",
-            action="store", type=float,
+             type=float,
             dest="r2_ang", default=0)
         self.arg_parser.add_argument("--r3_ang",
-            action="store", type=float,
+             type=float,
             dest="r3_ang", default=0)
         self.arg_parser.add_argument("--r4_ang",
-            action="store", type=float,
+             type=float,
             dest="r4_ang", default=0)
         self.arg_parser.add_argument("--r5_ang",
-            action="store", type=float,
+             type=float,
             dest="r5_ang", default=0)
         self.arg_parser.add_argument("--r6_ang",
-            action="store", type=float,
+             type=float,
             dest="r6_ang", default=0)
         self.arg_parser.add_argument("--scl",
-            action="store", type=float,
+             type=float,
             dest="scl", default=100.0)
 #STYLE SETTINGS
         self.arg_parser.add_argument("--show",
-            action="store", type=str,
+             type=str,
             dest="show", default='faces')
         self.arg_parser.add_argument("--shade",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="shade", default='true')
         self.arg_parser.add_argument("--f_r",
-            action="store", type=int,
+             type=int,
             dest="f_r", default=255)
         self.arg_parser.add_argument("--f_g",
-            action="store", type=int,
+             type=int,
             dest="f_g", default=0)
         self.arg_parser.add_argument("--f_b",
-            action="store", type=int,
+             type=int,
             dest="f_b", default=0)
         self.arg_parser.add_argument("--f_opac",
-            action="store", type=int,
+             type=int,
             dest="f_opac", default=100)
         self.arg_parser.add_argument("--s_opac",
-            action="store", type=int,
+             type=int,
             dest="s_opac", default=100)
         self.arg_parser.add_argument("--th",
-            action="store", type=float,
+             type=float,
             dest="th", default=2)
         self.arg_parser.add_argument("--lv_x",
-            action="store", type=float,
+             type=float,
             dest="lv_x", default=1)
         self.arg_parser.add_argument("--lv_y",
-            action="store", type=float,
+             type=float,
             dest="lv_y", default=1)
         self.arg_parser.add_argument("--lv_z",
-            action="store", type=float,
+             type=float,
             dest="lv_z", default=-2)
         self.arg_parser.add_argument("--back",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="back", default='false')
         self.arg_parser.add_argument("--norm",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="norm", default='true')
         self.arg_parser.add_argument("--z_sort",
-            action="store", type=str,
+             type=str,
             dest="z_sort", default='min')
 
 

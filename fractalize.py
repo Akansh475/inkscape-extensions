@@ -49,11 +49,11 @@ class PathFractalize(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--subdivs",
-                        action="store", type=int,
+                         type=int,
                         dest="subdivs", default="6",
                         help="Number of subdivisons")
         self.arg_parser.add_argument("-f", "--smooth",
-                        action="store", type=float,
+                         type=float,
                         dest="smooth", default="4.0",
                         help="Smoothness of the subdivision")
     def effect(self):

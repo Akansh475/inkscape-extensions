@@ -46,33 +46,33 @@ class Voronoi2svg(inkex.Effect):
 
         self.arg_parser.add_argument(
             "--tab",
-            action="store",
+            
             type=str,
             dest="tab")
         self.arg_parser.add_argument(
             '--diagram-type',
-            action = 'store',
+
             type = str, choices=['Voronoi','Delaunay','Both'],
             default = 'Voronoi',
             dest='diagramType',
             help = 'Defines the type of the diagram')
         self.arg_parser.add_argument(
             '--clip-box',
-            action = 'store',
+
             type = str, choices=['Page','Automatic from seeds'],
             default = 'Page',
             dest='clipBox',
             help = 'Defines the bounding box of the Voronoi diagram')
         self.arg_parser.add_argument(
             '--show-clip-box',
-            action = 'store',
+
             type=inkbool,
             default = False,
             dest='showClipBox',
             help = 'Set this to true to write the bounding box')
         self.arg_parser.add_argument(
             '--delaunay-fill-options',
-            action = 'store',
+
             type=str,
             default = "delaunay-no-fill",
             dest='delaunayFillOptions',

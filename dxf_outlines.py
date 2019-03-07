@@ -64,26 +64,26 @@ except:
 class DxfOutlines(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.arg_parser.add_argument("-R", "--ROBO", action="store",
+        self.arg_parser.add_argument("-R", "--ROBO",
                                      type=str, dest="ROBO",
                                      default=False)
-        self.arg_parser.add_argument("-P", "--POLY", action="store",
+        self.arg_parser.add_argument("-P", "--POLY",
                                      type=str, dest="POLY",
                                      default=True)
-        self.arg_parser.add_argument("--units", action="store",
+        self.arg_parser.add_argument("--units",
                                      type=str, dest="units",
                                      default="72./96") # Points
-        self.arg_parser.add_argument("--encoding", action="store",
+        self.arg_parser.add_argument("--encoding",
                                      type=str, dest="char_encode",
                                      default="latin_1")
-        self.arg_parser.add_argument("--tab", action="store",
+        self.arg_parser.add_argument("--tab",
                                      type=str, dest="tab")
-        self.arg_parser.add_argument("--inputhelp", action="store",
+        self.arg_parser.add_argument("--inputhelp",
                                      type=str, dest="inputhelp")
-        self.arg_parser.add_argument("--layer_option", action="store",
+        self.arg_parser.add_argument("--layer_option",
                                      type=str, dest="layer_option",
                                      default="all")
-        self.arg_parser.add_argument("--layer_name", action="store",
+        self.arg_parser.add_argument("--layer_name",
                                      type=str, dest="layer_name")
 
         self.dxf = []

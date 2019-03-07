@@ -29,39 +29,39 @@ class LSystem(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-o", "--order",
-                        action="store", type=int,
+                         type=int,
                         dest="order", default=3,
                         help="number of iteration")
         self.arg_parser.add_argument("-l", "--langle",
-                        action="store", type=float,
+                         type=float,
                         dest="langle", default=16.0,
                         help="angle for turning left")
         self.arg_parser.add_argument("-r", "--rangle",
-                        action="store", type=float,
+                         type=float,
                         dest="rangle", default=16.0,
                         help="angle for turning right")
         self.arg_parser.add_argument("-s", "--step",
-                        action="store", type=float,
+                         type=float,
                         dest="step", default=25.0,
                         help="step size")
         self.arg_parser.add_argument("-p", "--randomizestep",
-                        action="store", type=float,
+                         type=float,
                         dest="randomizestep", default=0.0,
                         help="randomize step")
         self.arg_parser.add_argument("-z", "--randomizeangle",
-                        action="store", type=float,
+                         type=float,
                         dest="randomizeangle", default=0.0,
                         help="randomize angle")
         self.arg_parser.add_argument("-x", "--axiom",
-                        action="store", type=str,
+                         type=str,
                         dest="axiom", default="++F",
                         help="initial state of system")
         self.arg_parser.add_argument("-u", "--rules",
-                        action="store", type=str,
+                         type=str,
                         dest="rules", default="F=FF-[-F+F+F]+[+F-F-F]",
                         help="replacement rules")
         self.arg_parser.add_argument("-t", "--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab")
         self.stack = []
         self.turtle = pturtle.pTurtle()

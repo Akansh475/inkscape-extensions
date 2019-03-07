@@ -61,27 +61,27 @@ class JitterNodes(inkex.Effect):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--title")
         self.arg_parser.add_argument("-x", "--radiusx",
-                        action="store", type=float,
+                         type=float,
                         dest="radiusx", default=10.0,
                         help="Randomly move nodes and handles within this radius, X")
         self.arg_parser.add_argument("-y", "--radiusy",
-                        action="store", type=float,
+                         type=float,
                         dest="radiusy", default=10.0,
                         help="Randomly move nodes and handles within this radius, Y")
         self.arg_parser.add_argument("-c", "--ctrl",
-                        action="store", type=inkex.utils.inkbool,
+                         type=inkex.utils.inkbool,
                         dest="ctrl", default=True,
                         help="Randomize control points")
         self.arg_parser.add_argument("-e", "--end",
-                        action="store", type=inkex.utils.inkbool,
+                         type=inkex.utils.inkbool,
                         dest="end", default=True,
                         help="Randomize nodes")
         self.arg_parser.add_argument("-d", "--dist",
-                        action="store", type=str,
+                         type=str,
                         dest="dist", default="Uniform",
                         help="Choose the distribution of the displacements")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 

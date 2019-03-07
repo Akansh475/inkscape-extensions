@@ -30,31 +30,31 @@ class FoldableBox(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-x", "--width",
-                        action="store", type=float,
+                         type=float,
                         dest="width", default=10.0,
                         help="The Box Width - in the X dimension")
         self.arg_parser.add_argument("-y", "--height",
-                        action="store", type=float,
+                         type=float,
                         dest="height", default=15.0,
                         help="The Box Height - in the Y dimension")
         self.arg_parser.add_argument("-z", "--depth",
-                        action="store", type=float,
+                         type=float,
                         dest="depth", default=3.0,
                         help="The Box Depth - in the Z dimension")
         self.arg_parser.add_argument("-u", "--unit",
-                        action="store", type=str,
+                         type=str,
                         dest="unit", default="cm",
                         help="The unit of the box dimensions")
         self.arg_parser.add_argument("-p", "--paper-thickness",
-                        action="store", type=float,
+                         type=float,
                         dest="thickness", default=0.01,
                         help="Paper Thickness - sometimes that is important")
         self.arg_parser.add_argument("-t", "--tab-proportion",
-                        action="store", type=float,
+                         type=float,
                         dest="tabProportion", default=0.6,
                         help="Inner tab proportion for upper tab")
         self.arg_parser.add_argument("-g", "--guide-line",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="guideLine", default=True,
                         help="Add guide lines to help the drawing limits")
 

@@ -33,55 +33,55 @@ class PerfectBoundCover(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--width",
-                        action="store", type=float,
+                         type=float,
                         dest="width", default=6.0,
                         help="cover width (in)")
         self.arg_parser.add_argument("--height",
-                        action="store", type=float,
+                         type=float,
                         dest="height", default=9.0,
                         help="cover height (in)")
         self.arg_parser.add_argument("--pages",
-                        action="store", type=int,
+                         type=int,
                         dest="pages", default=64,
                         help="number of pages")
         self.arg_parser.add_argument("--paperthicknessmeasurement",
-                        action="store", type=str,
+                         type=str,
                         dest="paperthicknessmeasurement", default=100.0,
                         help="paper thickness measurement")
         self.arg_parser.add_argument("--paperthickness",
-                        action="store", type=float,
+                         type=float,
                         dest="paperthickness", default=0.0,
                         help="paper thickness")
         self.arg_parser.add_argument("--coverthicknessmeasurement",
-                        action="store", type=str,
+                         type=str,
                         dest="coverthicknessmeasurement", default=100.0,
                         help="cover thickness measurement")
         self.arg_parser.add_argument("--coverthickness",
-                        action="store", type=float,
+                         type=float,
                         dest="coverthickness", default=0.0,
                         help="cover thickness")
         self.arg_parser.add_argument("--bleed",
-                        action="store", type=float,
+                         type=float,
                         dest="bleed", default=0.25,
                         help="cover bleed (in)")
         self.arg_parser.add_argument("--removeguides",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="removeguides", default=False,
                         help="remove guides")
         self.arg_parser.add_argument("--book",
-                        action="store", type=str,
+                         type=str,
                         dest="book", default=False,
                         help="dummy")
         self.arg_parser.add_argument("--cover",
-                        action="store", type=str,
+                         type=str,
                         dest="cover", default=False,
                         help="dummy")
         self.arg_parser.add_argument("--paper",
-                        action="store", type=str,
+                         type=str,
                         dest="paper", default=False,
                         help="dummy")
         self.arg_parser.add_argument("--warning",
-                        action="store", type=str,
+                         type=str,
                         dest="warning", default=False,
                         help="dummy")
     def effect(self):

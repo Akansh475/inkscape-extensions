@@ -25,7 +25,7 @@ class SVGFont2Layers(inkex.Effect):
         self.count=0
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--limitglyphs",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="limitglyphs", default=True,
                                      help="Load only the first 30 glyphs from the SVGFont (otherwise the loading process may take a very long time)")
 

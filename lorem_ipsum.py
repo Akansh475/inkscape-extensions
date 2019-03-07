@@ -178,19 +178,19 @@ class MyEffect(inkex.Effect):
     inkex.Effect.__init__(self)
     self.arg_parser.add_argument("--title")
     self.arg_parser.add_argument("-n", "--numberofparagraphs",
-      action="store", type=int,
+       type=int,
       dest="num", default=5,
       help="Number of paragraphs to generate")
     self.arg_parser.add_argument("-c", "--sentencecount",
-      action="store", type=int,
+       type=int,
       dest="sentencecount", default=16,
       help="Number of Sentences")
     self.arg_parser.add_argument("-f", "--fluctuation",
-      action="store", type=int,
+       type=int,
       dest="fluctuation", default=4,
       help="+/-")
     self.arg_parser.add_argument("--tab",
-      action="store", type=str,
+       type=str,
       dest="tab",
       help="The selected UI-tab when OK was pressed")
 

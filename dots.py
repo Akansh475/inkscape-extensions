@@ -24,23 +24,23 @@ class Dots(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-d", "--dotsize",
-                        action="store", type=str,
+                         type=str,
                         dest="dotsize", default="10px",
                         help="Size of the dots placed at path nodes")
         self.arg_parser.add_argument("-f", "--fontsize",
-                        action="store", type=str,
+                         type=str,
                         dest="fontsize", default="20",
                         help="Size of node label numbers")
         self.arg_parser.add_argument("-s", "--start",
-                        action="store", type=int,
+                         type=int,
                         dest="start", default="1",
                         help="First number in the sequence, assigned to the first node")
         self.arg_parser.add_argument("-t", "--step",
-                        action="store", type=int,
+                         type=int,
                         dest="step", default="1",
                         help="Numbering step between two nodes")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 

@@ -45,23 +45,23 @@ class Gears(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-t", "--teeth",
-                        action="store", type=int,
+                         type=int,
                         dest="teeth", default=24,
                         help="Number of teeth")
         self.arg_parser.add_argument("-p", "--pitch",
-                        action="store", type=float,
+                         type=float,
                         dest="pitch", default=20.0,
                         help="Circular Pitch (length of arc from one tooth to next)")
         self.arg_parser.add_argument("-a", "--angle",
-                        action="store", type=float,
+                         type=float,
                         dest="angle", default=20.0,
                         help="Pressure Angle (common values: 14.5, 20, 25 degrees)")
         self.arg_parser.add_argument("-c", "--centerdiameter",
-                        action="store", type=float,
+                         type=float,
                         dest="centerdiameter", default=10.0,
                         help="Diameter of central hole - 0.0 for no hole")
         self.arg_parser.add_argument("-u", "--unit",
-                        action="store", type=str,
+                         type=str,
                         dest="unit", default="px",
                         help="unit of measure for circular pitch and center diameter")
     def effect(self):

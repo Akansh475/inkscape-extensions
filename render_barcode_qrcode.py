@@ -1048,31 +1048,31 @@ class QRCodeInkscape(inkex.Effect):
 
         #PARSE OPTIONS
         self.arg_parser.add_argument("--text",
-            action="store", type=str,
+             type=str,
             dest="TEXT", default='www.inkscape.org')
         self.arg_parser.add_argument("--typenumber",
-            action="store", type=str,
+             type=str,
             dest="TYPENUMBER", default="0")
         self.arg_parser.add_argument("--correctionlevel",
-            action="store", type=str,
+             type=str,
             dest="CORRECTIONLEVEL", default="0")
         self.arg_parser.add_argument("--encoding",
-            action="store", type=str,
+             type=str,
             dest="input_encode", default="latin_1")
         self.arg_parser.add_argument("--modulesize",
-            action="store", type=float,
+             type=float,
             dest="MODULESIZE", default=10)
         self.arg_parser.add_argument("--invert",
-            action="store", type=inkex.inkbool,
+             type=inkex.inkbool,
             dest="invert_code", default="false")
         self.arg_parser.add_argument("--drawtype",
-            action="store", type=str,
+             type=str,
             dest="drawtype", default="greedy")
         self.arg_parser.add_argument("--smoothval",
-            action="store", type=float,
+             type=float,
             dest="smooth_value", default=0.2)
         self.arg_parser.add_argument("--symbolid",
-            action="store", type=str,
+             type=str,
             dest="symbol_id", default="")
 
 

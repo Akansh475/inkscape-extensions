@@ -33,16 +33,16 @@ class WebSlicer_Export(WebSlicer_Effect):
         WebSlicer_Effect.__init__(self)
         self.arg_parser.add_argument("--tab")
         self.arg_parser.add_argument("--dir",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="dir",
                                      help="")
         self.arg_parser.add_argument("--create-dir",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      default=False,
                                      dest="create_dir",
                                      help="")
         self.arg_parser.add_argument("--with-code",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      default=False,
                                      dest="with_code",
                                      help="")

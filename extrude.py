@@ -27,7 +27,7 @@ class Extrude(inkex.Effect):
                  'Join paths with lines or polygons'),
                 ]
         for o in opts:
-            self.arg_parser.add_argument(o[0], o[1], action="store", type=o[2],
+            self.arg_parser.add_argument(o[0], o[1],  type=o[2],
                                          dest=o[3], default=o[4], help=o[5])
 
     def effect(self):

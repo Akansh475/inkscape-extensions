@@ -24,12 +24,12 @@ class JessyInk_Transitions(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
-        self.arg_parser.add_argument('--layerName', action = 'store', type=str, dest = 'layerName', default = '')
-        self.arg_parser.add_argument('--effectIn', action = 'store', type=str, dest = 'effectIn', default = 'default')
-        self.arg_parser.add_argument('--effectInDuration', action = 'store', type=float, dest = 'effectInDuration', default = 0.8)
-        self.arg_parser.add_argument('--effectOut', action = 'store', type=str, dest = 'effectOut', default = 'default')
-        self.arg_parser.add_argument('--effectOutDuration', action = 'store', type=float, dest = 'effectOutDuration', default = 0.8)
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
+        self.arg_parser.add_argument('--layerName',  type=str, dest = 'layerName', default = '')
+        self.arg_parser.add_argument('--effectIn',  type=str, dest = 'effectIn', default = 'default')
+        self.arg_parser.add_argument('--effectInDuration',  type=float, dest = 'effectInDuration', default = 0.8)
+        self.arg_parser.add_argument('--effectOut',  type=str, dest = 'effectOut', default = 'default')
+        self.arg_parser.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

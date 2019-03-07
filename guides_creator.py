@@ -131,121 +131,121 @@ class GuidesCreator(inkex.Effect):
 
         # Define option for the tab.
         self.arg_parser.add_argument("--tab",
-                    action="store",type=str,
+                    type=str,
                     dest="tab", default="regular_guides",
                     help="")
 
         # Define string option "--preset" with default value 'custom'.
         self.arg_parser.add_argument('--guides_preset',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'guides_preset',default = 'custom',
                     help = 'Preset')
 
         # Define string option "--vertical_guides" with default value '0'.
         self.arg_parser.add_argument('--vertical_guides',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'vertical_guides',default = 0,
                     help = 'Vertical guides each:')
 
         # Define string option "--horizontal_guides" with default value '0'.
         self.arg_parser.add_argument('--horizontal_guides',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'horizontal_guides',default = 0,
                     help = 'Horizontal guides each:')
 
         # Define boolean option "--start_from_edges" with default value False.
         self.arg_parser.add_argument('--start_from_edges',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'start_from_edges',default = False,
                     help = 'Start from edges')
 
         # Define boolean option "--delete_existing_guides" with default value False.
         self.arg_parser.add_argument('--delete_existing_guides',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'delete_existing_guides',default = False,
                     help = 'Delete existing guides')
 
         # Define boolean option "--upper_left_corner" with default value False.
         self.arg_parser.add_argument('--ul',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'ul',default = False,
                     help = 'Upper left corner')
 
         # Define boolean option "--upper_right_corner" with default value False.
         self.arg_parser.add_argument('--ur',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'ur',default = False,
                     help = 'Upper right corner')
 
         # Define boolean option "--lower_left_corner" with default value False.
         self.arg_parser.add_argument('--ll',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'll',default = False,
                     help = 'Lower left corner')
 
         # Define boolean option "--upper_left_corner" with default value False.
         self.arg_parser.add_argument('--lr',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'lr',default = False,
                     help = 'Lower right corner')
 
         # Define boolean option "--delete_existing_guides2" with default value False.
         self.arg_parser.add_argument('--delete_existing_guides2',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'delete_existing_guides2',default = False,
                     help = 'Delete existing guides')
 
         # Define string option "--margins_preset" with default value 'custom'.
         self.arg_parser.add_argument('--margins_preset',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'margins_preset',default = 'custom',
                     help = 'Margins preset')
 
         # Define boolean option "--delete_existing_guides3" with default value False.
         self.arg_parser.add_argument('--delete_existing_guides3',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'delete_existing_guides3',default = False,
                     help = 'Delete existing guides')
 
         # Define string option "--vertical_subdivisions" with default value '0'.
         self.arg_parser.add_argument('--vertical_subdivisions',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'vertical_subdivisions',default = 0,
                     help = 'Vertical subdivisions')
 
         # Define string option "--horizontal_subdivisions" with default value '0'.
         self.arg_parser.add_argument('--horizontal_subdivisions',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'horizontal_subdivisions',default = 0,
                     help = 'Horizontal subdivisions')
 
         # Define string option "--header_margin" with default value '6'.
         self.arg_parser.add_argument('--header_margin',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'header_margin',default = 6,
                     help = 'Header margin')
 
         # Define string option "--footer_margin" with default value '6'.
         self.arg_parser.add_argument('--footer_margin',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'footer_margin',default = 6,
                     help = 'Footer margin')
 
         # Define string option "--left_margin" with default value '6'.
         self.arg_parser.add_argument('--left_margin',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'left_margin',default = 6,
                     help = 'Left margin')
 
         # Define string option "--right_margin" with default value '6'.
         self.arg_parser.add_argument('--right_margin',
-                    action = 'store',type=str,
+                    type=str,
                     dest = 'right_margin',default = 6,
                     help = 'Right margin')
 
         # Define boolean option "--start_from_edges2" with default value False.
         self.arg_parser.add_argument('--start_from_edges2',
-                    action = 'store',type=inkbool,
+                    type=inkbool,
                     dest = 'start_from_edges2',default = False,
                     help = 'Start from edges')
 

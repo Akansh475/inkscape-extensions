@@ -175,75 +175,75 @@ class FuncPlot(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--xstart",
-                        action="store", type=float,
+                         type=float,
                         dest="xstart", default=0.0,
                         help="Start x-value")
         self.arg_parser.add_argument("--xend",
-                        action="store", type=float,
+                         type=float,
                         dest="xend", default=1.0,
                         help="End x-value")
         self.arg_parser.add_argument("--times2pi",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="times2pi", default=True,
                         help="Multiply x-range by 2*pi")
         self.arg_parser.add_argument("--polar",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="polar", default=False,
                         help="Plot using polar coordinates")
         self.arg_parser.add_argument("--ybottom",
-                        action="store", type=float,
+                         type=float,
                         dest="ybottom", default=-1.0,
                         help="y-value of rectangle's bottom")
         self.arg_parser.add_argument("--ytop",
-                        action="store", type=float,
+                         type=float,
                         dest="ytop", default=1.0,
                         help="y-value of rectangle's top")
         self.arg_parser.add_argument("-s", "--samples",
-                        action="store", type=int,
+                         type=int,
                         dest="samples", default=8,
                         help="Samples")
         self.arg_parser.add_argument("--fofx",
-                        action="store", type=str,
+                         type=str,
                         dest="fofx", default="sin(x)",
                         help="f(x) for plotting")
         self.arg_parser.add_argument("--fponum",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="fponum", default=True,
                         help="Calculate the first derivative numerically")
         self.arg_parser.add_argument("--fpofx",
-                        action="store", type=str,
+                         type=str,
                         dest="fpofx", default="cos(x)",
                         help="f'(x) for plotting")
         self.arg_parser.add_argument("--clip",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="clip", default=False,
                         help="If True, clip with copy of source rectangle")
         self.arg_parser.add_argument("--remove",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="remove", default=True,
                         help="If True, source rectangle is removed")
         self.arg_parser.add_argument("--isoscale",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="isoscale", default=True,
                         help="If True, isotropic scaling is used")
         self.arg_parser.add_argument("--drawaxis",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="drawaxis", default=True,
                         help="If True, axis are drawn")
         self.arg_parser.add_argument("--endpts",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="endpts", default=False,
                         help="If True, end points are added")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab", default="sampling",
                         help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--funcplotuse",
-                        action="store", type=str,
+                         type=str,
                         dest="funcplotuse", default="",
                         help="dummy")
         self.arg_parser.add_argument("--pythonfunctions",
-                        action="store", type=str,
+                         type=str,
                         dest="pythonfunctions", default="",
                         help="dummy")
 

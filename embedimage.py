@@ -38,7 +38,7 @@ class Embedder(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--selectedonly",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="selectedonly", default=False,
             help="embed only selected images")
 

@@ -37,7 +37,7 @@ class    JessyInk_CustomKeyBindings(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
         self.arg_parser.add_argument('--slide_backWithEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')
         self.arg_parser.add_argument('--slide_nextWithEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')
         self.arg_parser.add_argument('--slide_backWithoutEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')

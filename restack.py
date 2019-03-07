@@ -38,31 +38,31 @@ class Restack(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-d", "--direction",
-                        action="store", type=str,
+                         type=str,
                         dest="direction", default="tb",
                         help="direction to restack")
         self.arg_parser.add_argument("-a", "--angle",
-                        action="store", type=float,
+                         type=float,
                         dest="angle", default=0.0,
                         help="arbitrary angle")
         self.arg_parser.add_argument("-x", "--xanchor",
-                        action="store", type=str,
+                         type=str,
                         dest="xanchor", default="m",
                         help="horizontal point to compare")
         self.arg_parser.add_argument("-y", "--yanchor",
-                        action="store", type=str,
+                         type=str,
                         dest="yanchor", default="m",
                         help="vertical point to compare")
         self.arg_parser.add_argument("--zsort",
-                        action="store", type=str,
+                         type=str,
                         dest="zsort", default="rev",
                         help="Restack mode based on Z-Order")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--nb_direction",
-                        action="store", type=str,
+                         type=str,
                         dest="nb_direction",
                         help="The selected UI-tab when OK was pressed")
 

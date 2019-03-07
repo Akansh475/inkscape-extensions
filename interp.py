@@ -26,27 +26,27 @@ class Interp(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-e", "--exponent",
-                        action="store", type=float,
+                         type=float,
                         dest="exponent", default=0.0,
                         help="values other than zero give non linear interpolation")
         self.arg_parser.add_argument("-s", "--steps",
-                        action="store", type=int,
+                         type=int,
                         dest="steps", default=5,
                         help="number of interpolation steps")
         self.arg_parser.add_argument("-m", "--method",
-                        action="store", type=int,
+                         type=int,
                         dest="method", default=2,
                         help="method of interpolation")
         self.arg_parser.add_argument("-d", "--dup",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="dup", default=True,
                         help="duplicate endpaths")
         self.arg_parser.add_argument("--style",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="style", default=True,
                         help="try interpolation of some style properties")
         self.arg_parser.add_argument("--zsort",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="zsort", default=False,
                         help="use z-order instead of selection order")
 

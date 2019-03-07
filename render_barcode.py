@@ -33,13 +33,13 @@ class InsertBarcode(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument(
-            "-l", "--height", action="store", type=int,
+            "-l", "--height",  type=int,
             dest="height", default=30, help="Barcode Height")
         self.arg_parser.add_argument(
-            "-t", "--type", action="store", type=str,
+            "-t", "--type",  type=str,
             dest="type", default='', help="Barcode Type")
         self.arg_parser.add_argument(
-            "-d", "--text", action="store", type=str,
+            "-d", "--text",  type=str,
             dest="text", default='', help="Text to print on barcode")
 
     def effect(self):

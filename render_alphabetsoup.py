@@ -525,15 +525,15 @@ class AlphabetSoup(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-t", "--text",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="text", default="Inkscape",
                                      help="The text for alphabet soup")
         self.arg_parser.add_argument("-z", "--zoom",
-                                     action="store", type=float,
+                                      type=float,
                                      dest="zoom", default="8.0",
                                      help="The zoom on the output graphics")
         self.arg_parser.add_argument("-r", "--randomize",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="randomize", default=False,
                                      help="Generate random (unreadable) text")
 

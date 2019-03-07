@@ -217,97 +217,97 @@ class Draw_From_Triangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab", default="sampling",
                         help="The selected UI-tab when OK was pressed")
 #PRESET POINT OPTIONS
         self.arg_parser.add_argument("--circumcircle",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_circumcircle", default=False)
         self.arg_parser.add_argument("--circumcentre",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_circumcentre", default=False)
         self.arg_parser.add_argument("--incircle",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_incircle", default=False)
         self.arg_parser.add_argument("--incentre",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_incentre", default=False)
         self.arg_parser.add_argument("--contact_tri",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_contact_tri", default=False)
         self.arg_parser.add_argument("--excircles",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_excircles", default=False)
         self.arg_parser.add_argument("--excentres",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_excentres", default=False)
         self.arg_parser.add_argument("--extouch_tri",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_extouch_tri", default=False)
         self.arg_parser.add_argument("--excentral_tri",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_excentral_tri", default=False)
         self.arg_parser.add_argument("--orthocentre",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_orthocentre", default=False)
         self.arg_parser.add_argument("--orthic_tri",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_orthic_tri", default=False)
         self.arg_parser.add_argument("--altitudes",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_altitudes", default=False)
         self.arg_parser.add_argument("--anglebisectors",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_anglebisectors", default=False)
         self.arg_parser.add_argument("--centroid",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_centroid", default=False)
         self.arg_parser.add_argument("--ninepointcentre",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_ninepointcentre", default=False)
         self.arg_parser.add_argument("--ninepointcircle",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_ninepointcircle", default=False)
         self.arg_parser.add_argument("--symmedians",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_symmedians", default=False)
         self.arg_parser.add_argument("--sym_point",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_sym_pt", default=False)
         self.arg_parser.add_argument("--sym_tri",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_sym_tri", default=False)
         self.arg_parser.add_argument("--gergonne_pt",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_gergonne_pt", default=False)
         self.arg_parser.add_argument("--nagel_pt",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_nagel_pt", default=False)
 #CUSTOM POINT OPTIONS
         self.arg_parser.add_argument("--mode",
-                        action="store", type=str,
+                         type=str,
                         dest="mode", default='trilin')
         self.arg_parser.add_argument("--cust_str",
-                        action="store", type=str,
+                         type=str,
                         dest="cust_str", default='s_a')
         self.arg_parser.add_argument("--cust_pt",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_cust_pt", default=False)
         self.arg_parser.add_argument("--cust_radius",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_cust_radius", default=False)
         self.arg_parser.add_argument("--radius",
-                        action="store", type=str,
+                         type=str,
                         dest="radius", default='s_a')
         self.arg_parser.add_argument("--isogonal_conj",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_isogonal_conj", default=False)
         self.arg_parser.add_argument("--isotomic_conj",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="do_isotomic_conj", default=False)
         self.arg_parser.add_argument("--report",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="report", default=False)
 
 

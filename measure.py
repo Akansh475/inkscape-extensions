@@ -65,67 +65,67 @@ class Length(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--type",
-                        action="store", type=str,
+                         type=str,
                         dest="mtype", default="length",
                         help="Type of measurement")
         self.arg_parser.add_argument("--format",
-                        action="store", type=str,
+                         type=str,
                         dest="mformat", default="textonpath",
                         help="Text Orientation")
         self.arg_parser.add_argument("--presetFormat",
-                        action="store", type=str,
+                         type=str,
                         dest="presetFormat", default="TaP_start",
                         help="Preset text layout")
         self.arg_parser.add_argument("--startOffset",
-                        action="store", type=str,
+                         type=str,
                         dest="startOffset", default="custom",
                         help="Text Offset along Path")
         self.arg_parser.add_argument("--startOffsetCustom",
-                        action="store", type=int,
+                         type=int,
                         dest="startOffsetCustom", default=50,
                         help="Text Offset along Path")
         self.arg_parser.add_argument("--anchor",
-                        action="store", type=str,
+                         type=str,
                         dest="anchor", default="start",
                         help="Text Anchor")
         self.arg_parser.add_argument("--position",
-                        action="store", type=str,
+                         type=str,
                         dest="position", default="start",
                         help="Text Position")
         self.arg_parser.add_argument("--angle",
-                        action="store", type=float,
+                         type=float,
                         dest="angle", default=0,
                         help="Angle")
         self.arg_parser.add_argument("-f", "--fontsize",
-                        action="store", type=int,
+                         type=int,
                         dest="fontsize", default=20,
                         help="Size of length label text in px")
         self.arg_parser.add_argument("-o", "--offset",
-                        action="store", type=float,
+                         type=float,
                         dest="offset", default=-6,
                         help="The distance above the curve")
         self.arg_parser.add_argument("-u", "--unit",
-                        action="store", type=str,
+                         type=str,
                         dest="unit", default="mm",
                         help="The unit of the measurement")
         self.arg_parser.add_argument("-p", "--precision",
-                        action="store", type=int,
+                         type=int,
                         dest="precision", default=2,
                         help="Number of significant digits after decimal point")
         self.arg_parser.add_argument("-s", "--scale",
-                        action="store", type=float,
+                         type=float,
                         dest="scale", default=1,
                         help="Scale Factor (Drawing:Real Length)")
         self.arg_parser.add_argument("-r", "--orient",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="orient", default=True,
                         help="Keep orientation of text upright")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab", default="sampling",
                         help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--measurehelp",
-                        action="store", type=str,
+                         type=str,
                         dest="measurehelp", default="",
                         help="dummy")
 

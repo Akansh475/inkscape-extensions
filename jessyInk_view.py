@@ -44,10 +44,10 @@ class JessyInk_Effects(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
-        self.arg_parser.add_argument('--viewOrder', action = 'store', type=str, dest = 'viewOrder', default = 1)
-        self.arg_parser.add_argument('--viewDuration', action = 'store', type=float, dest = 'viewDuration', default = 0.8)
-        self.arg_parser.add_argument('--removeView', action = 'store', type=inkbool, dest = 'removeView', default = False)
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
+        self.arg_parser.add_argument('--viewOrder',  type=str, dest = 'viewOrder', default = 1)
+        self.arg_parser.add_argument('--viewDuration',  type=float, dest = 'viewDuration', default = 0.8)
+        self.arg_parser.add_argument('--removeView',  type=inkbool, dest = 'removeView', default = False)
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

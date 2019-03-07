@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Pim Snel, pim@lingewoud.com
 # Copyright (C) 2008 Aaron Spike, aaron@ekips.org
@@ -39,20 +40,24 @@ creates a zip archive containing all images and the document
 """
 
 import os
-import sys
-import zipfile
 import shutil
+import sys
 import tempfile
-import locale
-
-if sys.version_info[0] < 3:
-    import urllib
-else:
-    import urllib.request as urllib
+import zipfile
 
 import inkex
 from inkex import inkbool
-from inkex.base import SvgThroughMixin, InkscapeExtension
+from inkex.base import InkscapeExtension, SvgThroughMixin
+
+try:  # PY2
+    from urllib import url2pathname
+    from urlparse import urlparse
+except ImportError:  # PY3
+    from urllib.parse import urlparse
+    from urllib.request import url2pathname
+
+inkex.localize.localize()
+
 
 class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
@@ -62,98 +67,93 @@ class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
         else:
             self.encoding = "latin-1"
         self.text_tags = ['{http://www.w3.org/2000/svg}tspan',
-                            '{http://www.w3.org/2000/svg}text',
-                            '{http://www.w3.org/2000/svg}flowRoot',
-                            '{http://www.w3.org/2000/svg}flowPara',
-                            '{http://www.w3.org/2000/svg}flowSpan']
+                          '{http://www.w3.org/2000/svg}text',
+                          '{http://www.w3.org/2000/svg}flowRoot',
+                          '{http://www.w3.org/2000/svg}flowPara',
+                          '{http://www.w3.org/2000/svg}flowSpan']
         self.arg_parser.add_argument("--image_dir",
-                                      type=str,
-                                     dest="image_dir", default="",
+                                     type=str,
+                                     dest="image_dir",
+                                     default="",
                                      help="Image directory")
         self.arg_parser.add_argument("--font_list",
-                                      type=inkbool,
-                                     dest="font_list", default=False,
+                                     type=inkbool,
+                                     dest="font_list",
+                                     default=False,
                                      help="Add font list")
         self.arg_parser.add_argument("--tab",
-                                      type=str,
+                                     type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 
     def output(self):
-        '''
+        """
         Writes the temporary compressed file to its destination
         and removes the temporary directory.
-        '''
-        out = open(self.zip_file,'rb')
-        if os.name == 'nt':
-            try:
-                import msvcrt
-                msvcrt.setmode(1, os.O_BINARY)
-            except:
-                pass
-        sys.stdout.write(out.read())
-        out.close()
+        """
+        with open(self.zip_file, 'rb') as out:
+            if os.name == 'nt':
+                try:
+                    import msvcrt
+                    msvcrt.setmode(1, os.O_BINARY)
+                except:
+                    pass
+            sys.stdout.write(out.read())
         shutil.rmtree(self.tmp_dir)
 
     def collect_images(self, docname, z):
-        '''
+        """
         Collects all images in the document
         and copy them to the temporary directory.
-        '''
-        if locale.getpreferredencoding():
-          dir_locale = locale.getpreferredencoding()
-        else:
-          dir_locale = "UTF-8"
-
+        """
         dir = self.options.image_dir
 
         for node in self.document.xpath('//svg:image', namespaces=inkex.NSS):
-            xlink = node.get(inkex.addNS('href',u'xlink'))
-            if (xlink[:4] != 'data'):
-                absref = node.get(inkex.addNS('absref',u'sodipodi'))
-                url = urlib.urlparse(xlink)
-                href = urllib.url2pathname(url.path)
+            xlink = node.get(inkex.addNS('href', u'xlink'))
+            if xlink[:4] != 'data':
+                absref = node.get(inkex.addNS('absref', u'sodipodi'))
+                url = urlparse(xlink)
+                href = url2pathname(url.path)
 
-                if (href != None and os.path.isfile(href)):
+                if href is not None and os.path.isfile(href):
                     absref = os.path.realpath(href)
 
                 image_path = os.path.join(dir, os.path.basename(absref))
 
-                if (os.path.isfile(absref)):
+                if os.path.isfile(absref):
                     shutil.copy(absref, self.tmp_dir)
                     z.write(absref, image_path.encode(self.encoding))
-                elif (os.path.isfile(os.path.join(self.tmp_dir, absref))):
+                elif os.path.isfile(os.path.join(self.tmp_dir, absref)):
                     # TODO: please explain why this clause is necessary
                     shutil.copy(os.path.join(self.tmp_dir, absref), self.tmp_dir)
                     z.write(os.path.join(self.tmp_dir, absref), image_path.encode(self.encoding))
                 else:
-                    inkex.errormsg(_('Could not locate file: %s') % absref)
+                    inkex.errormsg('Could not locate file: %s' % absref)
 
-                node.set(inkex.addNS('href',u'xlink'), image_path)
-                #node.set(inkex.addNS('absref',u'sodipodi'), image_path)
+                node.set(inkex.addNS('href', u'xlink'), image_path)
 
     def collect_SVG(self, docstripped, z):
-        '''
+        """
         Copy SVG document to the temporary directory
         and add it to the temporary compressed file
-        '''
+        """
         dst_file = os.path.join(self.tmp_dir, docstripped)
-        with open(dst_file,'wb') as stream:
+        with open(dst_file, 'wb') as stream:
             self.document.write(stream)
-        z.write(dst_file,docstripped+'.svg')
+        z.write(dst_file, docstripped + '.svg')
 
     def is_text(self, node):
-        '''
+        """
         Returns true if the tag in question is an element that
         can hold text.
-        '''
+        """
         return node.tag in self.text_tags
 
     def get_fonts(self, node):
-        '''
+        """
         Given a node, returns a list containing all the fonts that
         the node is using.
-        '''
+        """
         fonts = []
         s = ''
         if 'style' in node.attrib:
@@ -171,12 +171,11 @@ class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
         return fonts
 
     def list_fonts(self, z):
-        '''
+        """
         Walks through nodes, building a list of all fonts found, then
         reports to the user with that list.
         Based on Craig Marshall's replace_font.py
-        '''
-        items = []
+        """
         nodes = []
         items = self.document.getroot().getiterator()
         nodes.extend(filter(self.is_text, items))
@@ -189,42 +188,39 @@ class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
         # Write list to the temporary compressed file
         filename = 'fontlist.txt'
         dst_file = os.path.join(self.tmp_dir, filename)
-        stream = open(dst_file,'w')
-        if len(findings) == 0:
-            stream.write(_("Didn't find any fonts in this document/selection."))
-        else:
-            if len(findings) == 1:
-                stream.write(_("Found the following font only: %s") % findings[0])
+        with open(dst_file, 'w') as stream:
+            if len(findings) == 0:
+                stream.write("Didn't find any fonts in this document/selection.")
             else:
-                stream.write(_("Found the following fonts:\n%s") % '\n'.join(findings))
-        stream.close()
+                if len(findings) == 1:
+                    stream.write("Found the following font only: %s" % findings[0])
+                else:
+                    stream.write("Found the following fonts:\n%s" % '\n'.join(findings))
         z.write(dst_file, filename)
-
 
     def effect(self):
         docroot = self.document.getroot()
-        docname = docroot.get(inkex.addNS('docname',u'sodipodi'))
-        #inkex.errormsg(_('Locale: %s') % locale.getpreferredencoding())
+        docname = docroot.get(inkex.addNS('docname', u'sodipodi'))
+
         if docname is None:
             docname = self.options.input_file
+
         # TODO: replace whatever extension
         docstripped = os.path.basename(docname.replace('.zip', ''))
         docstripped = docstripped.replace('.svg', '')
         docstripped = docstripped.replace('.svgz', '')
+
         # Create os temp dir
         self.tmp_dir = tempfile.mkdtemp()
+
         # Create destination zip in same directory as the document
         self.zip_file = os.path.join(self.tmp_dir, docstripped) + '.zip'
-        z = zipfile.ZipFile(self.zip_file, 'w')
-
-        self.collect_images(docname, z)
-        self.collect_SVG(docstripped, z)
-        if self.options.font_list == True:
-            self.list_fonts(z)
-        z.close()
+        with zipfile.ZipFile(self.zip_file, 'w') as z:
+            self.collect_images(docname, z)
+            self.collect_SVG(docstripped, z)
+            if self.options.font_list:
+                self.list_fonts(z)
 
 
 if __name__ == '__main__':
     CompressedMediaOutput().run()
-
-

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2016 Richard White, rwhite8282@gmail.com
 #
@@ -21,11 +22,10 @@ An Inkscape extension that creates a frame around a selected object.
 """
 import copy
 
-from inkex.utils import inkbool
-import inkex
+from lxml import etree
 
-#from inkex.transforms import *
-#from inkex.styles import *
+import inkex
+from inkex.utils import inkbool
 
 
 def get_picker_data(value):
@@ -33,9 +33,9 @@ def get_picker_data(value):
     value -- The value returned from the color picker.
     Returns an object with color and opacity properties.
     """
-    val = '%08X' % (value & 0xFFFFFFFF)
+    val = '{:08X}'.format(value & 0xFFFFFFFF)
     color = '#' + val[0:-2].rjust(6, '0')
-    opacity = '%1.2f' % (float(int(val[6:].rjust(2, '0'), 16))/255)
+    opacity = '{:1.2f}'.format(float(int(val[6:].rjust(2, '0'), 16)) / 255)
     return type('', (object,), {'color': color, 'opacity': opacity})()
 
 
@@ -44,13 +44,14 @@ def size_box(box, delta):
     delta -- The amount the box should grow.
     Returns a box with an altered size.
     """
-    return ((box[0]-delta), (box[1]+delta), (box[2]-delta), (box[3]+delta))
+    return (box[0] - delta), (box[1] + delta), (box[2] - delta), (box[3] + delta)
 
 
 # Frame maker Inkscape effect extension
 class Frame(inkex.Effect):
     """ An Inkscape extension that creates a frame around a selected object.
     """
+
     def __init__(self):
         inkex.Effect.__init__(self)
         self.defs = None
@@ -67,7 +68,6 @@ class Frame(inkex.Effect):
         self.arg_parser.add_argument('--tab', type=str, dest='tab', default='object')
         self.arg_parser.add_argument('--width', type=float, dest='width', default=2.0)
 
-
     def add_clip(self, node, clip_path):
         """ Adds a new clip path node to the defs and sets
                 the clip-path on the node.
@@ -81,12 +81,11 @@ class Frame(inkex.Effect):
             else:
                 inkex.errormsg('Could not locate defs node for clip.')
                 return
-        clip = inkex.etree.SubElement(self.defs, inkex.addNS('clipPath','svg'))
+        clip = etree.SubElement(self.defs, inkex.addNS('clipPath', 'svg'))
         clip.append(copy.deepcopy(clip_path))
         clip_id = self.svg.get_unique_id('clipPath')
         clip.set('id', clip_id)
-        node.set('clip-path', 'url(#%s)' % str(clip_id))
-
+        node.set('clip-path', 'url(#{})'.format(str(clip_id)))
 
     def add_frame(self, parent, name, box, style, radius=0):
         """ Adds a new frame to the parent object.
@@ -97,27 +96,28 @@ class Frame(inkex.Effect):
             radius -- The corner radius of the frame.
             returns a new frame node.
         """
-        r = min([radius, (abs(box[1]-box[0])/2), (abs(box[3]-box[2])/2)])
-        if (radius > 0):
+        r = min([radius, (abs(box[1] - box[0]) / 2), (abs(box[3] - box[2]) / 2)])
+        if radius > 0:
             d = ' '.join(str(x) for x in
-                            ['M', box[0], (box[2]+r)
-                            ,'A', r, r, '0 0 1', (box[0]+r), box[2]
-                            ,'L', (box[1]-r), box[2]
-                            ,'A', r, r, '0 0 1', box[1], (box[2]+r)
-                            ,'L', box[1], (box[3]-r)
-                            ,'A', r, r, '0 0 1', (box[1]-r), box[3]
-                            ,'L', (box[0]+r), box[3]
-                            ,'A', r, r, '0 0 1', box[0], (box[3]-r), 'Z'])
+                         ['M', box[0], (box[2] + r),
+                          'A', r, r, '0 0 1', (box[0] + r), box[2],
+                          'L', (box[1] - r), box[2],
+                          'A', r, r, '0 0 1', box[1], (box[2] + r),
+                          'L', box[1], (box[3] - r),
+                          'A', r, r, '0 0 1', (box[1] - r), box[3],
+                          'L', (box[0] + r), box[3],
+                          'A', r, r, '0 0 1', box[0], (box[3] - r),
+                          'Z'])
         else:
             d = ' '.join(str(x) for x in
-                            ['M', box[0], box[2]
-                            ,'L', box[1], box[2]
-                            ,'L', box[1], box[3]
-                            ,'L', box[0], box[3], 'Z'])
+                         ['M', box[0], box[2],
+                          'L', box[1], box[2],
+                          'L', box[1], box[3],
+                          'L', box[0], box[3],
+                          'Z'])
 
-        attributes = {'style':style, inkex.addNS('label','inkscape'):name, 'd':d}
-        return inkex.etree.SubElement(parent, inkex.addNS('path','svg'), attributes )
-
+        attributes = {'style': style, inkex.addNS('label', 'inkscape'): name, 'd': d}
+        return etree.SubElement(parent, inkex.addNS('path', 'svg'), attributes)
 
     def effect(self):
         """Performs the effect."""
@@ -130,26 +130,27 @@ class Frame(inkex.Effect):
         parent = self.svg.get_current_layer()
         position = self.options.position
         width = self.options.width
-        style = str(inkex.Style({'stroke':stroke_data.color
-            , 'stroke-opacity':stroke_data.opacity
-            , 'stroke-width':str(width)
-            , 'fill': (fill_data.color or 'none')
-            , 'fill-opacity':fill_data.opacity}))
+        style = str(inkex.Style({'stroke': stroke_data.color,
+                                 'stroke-opacity': stroke_data.opacity,
+                                 'stroke-width': str(width),
+                                 'fill': (fill_data.color or 'none'),
+                                 'fill-opacity': fill_data.opacity}))
 
-        for id, node in self.svg.selected.items():
+        for id_, node in self.svg.selected.items():
             box = node.bounding_box()
             if 'outside' == position:
-                box = size_box(box, (width/2))
+                box = size_box(box, (width / 2))
             else:
-                box = size_box(box, -(width/2))
+                box = size_box(box, -(width / 2))
             name = 'Frame'
             frame = self.add_frame(parent, name, box, style, corner_radius)
             if self.options.clip:
                 self.add_clip(node, frame)
             if self.options.group:
-                group = inkex.etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
+                group = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
                 group.append(node)
                 group.append(frame)
+
 
 if __name__ == '__main__':
     Frame().run()

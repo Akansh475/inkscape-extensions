@@ -230,7 +230,7 @@ class PathModifier(inkex.Effect):
         # self.duplicateNodes(self.selected)
         # self.expandGroupsUnlinkClones(self.selected, True)
         self.objectsToPaths(self.svg.selected, True)
-        self.bbox = inkex.computeBBox(self.svg.selected.values())
+        self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path', 'svg'):
                 d = node.get('d')
@@ -274,7 +274,7 @@ class Diffeo(PathModifier):
         self.expandGroupsUnlinkClones(self.svg.selected, True)
         self.expandGroups(self.svg.selected, True)
         self.objectsToPaths(self.svg.selected, True)
-        self.bbox = inkex.computeBBox(self.svg.selected.values())
+        self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
                 d = node.get('d')

@@ -77,7 +77,7 @@ class Code39(Barcode):
         # into full ascii, but this feature is
         # not enabled here
         for char in '*' + self.text + '*':
-            if not ENCODE.has_key(char):
+            if char not in ENCODE:
                 char = '-'
             result = result + ENCODE[char] + '0'
 

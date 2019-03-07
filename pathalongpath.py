@@ -228,7 +228,7 @@ class PathAlongPath(pathmodifier.Diffeo):
                     flipxy(p0)
 
                 newp=[]
-                for skelnode in self.skeletons.itervalues():
+                for skelnode in self.skeletons.values():
                     self.curSekeleton=cubicsuperpath.parsePath(skelnode.get('d'))
                     if self.options.vertical:
                         flipxy(self.curSekeleton)

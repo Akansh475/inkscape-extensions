@@ -35,7 +35,7 @@ class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         self.arg_parser.add_argument('--docHeight', type=float, default=297.0, help='Height in mm')
 
     def load(self, stream):
-        return ';'.join(line.strip() for line in stream)
+        return b';'.join(line.strip() for line in stream).decode()
 
     def effect(self):
         # interpret HPGL data

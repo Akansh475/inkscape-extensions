@@ -34,6 +34,7 @@ The spec can be found here: http://www.autodesk.com/techpubs/autocad/acadr14/dxf
 
 from __future__ import print_function
 
+import sys
 import inkex
 import dxf_templates
 
@@ -95,7 +96,8 @@ class DxfOutlines(inkex.Effect):
             self.d = array([0], float)              # knot vector
         self.poly = [[0.0,0.0]]                 # LWPOLYLINE data
     def output(self):
-        print(''.join(self.dxf))
+        stdout = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
+        stdout.write(b''.join(self.dxf))
     def dxf_add(self, str):
         self.dxf.append(str.encode(self.options.char_encode))
     def dxf_line(self,csp):

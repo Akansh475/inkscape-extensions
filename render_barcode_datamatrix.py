@@ -283,7 +283,7 @@ def combine_interleaved( blocks, inter, nd, nc, size144):
         return blocks
     else:
         result = []
-        for i in range( len(blocks) / inter ):  #for each group of "inter" blocks -> one full datamatrix
+        for i in range( len(blocks) // inter ):  #for each group of "inter" blocks -> one full datamatrix
             data_codewords = [] #interleaved data blocks
 
             if size144:
@@ -294,10 +294,10 @@ def combine_interleaved( blocks, inter, nd, nc, size144):
                 nc_range = nc*inter
 
             for j in range(nd_range):  #for each codeword in the final list
-                data_codewords.append( blocks[i*inter + j%inter][j/inter] )
+                data_codewords.append( blocks[i*inter + j%inter][j // inter] )
 
             for j in range(nc_range):  #for each block, add the ecc codewords
-                data_codewords.append( blocks[i*inter + j%inter][nd + j/inter] )
+                data_codewords.append( blocks[i*inter + j%inter][nd + j // inter] )
 
             result.append(data_codewords)
         return result

@@ -204,7 +204,7 @@ class PathModifier(inkex.Effect):
             return(self.groupToPath(node,doReplace))
         elif node.tag == inkex.addNS('path','svg') or node.tag == 'path':
             #remove inkscape attributes, otherwise any modif of 'd' will be discarded!
-            for attName in node.attrib.keys():
+            for attName in list(node.attrib.keys()):
                 if ("sodipodi" in attName) or ("inkscape" in attName):
                     del node.attrib[attName]
             inkex.fuseTransform(node)
@@ -218,7 +218,7 @@ class PathModifier(inkex.Effect):
 
     def objectsToPaths(self,aList,doReplace=True):
         newSelection={}
-        for id,node in aList.items():
+        for id,node in list(aList.items()):
             newnode=self.objectToPath(node,doReplace)
             del aList[id]
             aList[newnode.get('id')]=newnode

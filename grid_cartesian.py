@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -35,7 +35,7 @@ def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
-    
+
 def draw_SVG_rect(x,y,w,h, width, fill, name, parent):
     style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill':fill}
     rect_attribs = {'style':str(inkex.Style(style)),
@@ -72,14 +72,14 @@ class GridCartesian(inkex.Effect):
         self.arg_parser.add_argument("--y_subsubdivs_th", action="store", type=float, dest="y_subsubdivs_th", default=0.3)
         self.arg_parser.add_argument("--y_div_unit", action="store", dest="y_div_unit", default="cm")
 
-    def effect(self):        
+    def effect(self):
         self.options.border_th = self.svg.unittouu(str(self.options.border_th) + self.options.border_th_unit)
 
         self.options.dx = self.svg.unittouu(str(self.options.dx) + self.options.dx_unit)
         self.options.x_divs_th = self.svg.unittouu(str(self.options.x_divs_th) + self.options.x_div_unit)
         self.options.x_subdivs_th = self.svg.unittouu(str(self.options.x_subdivs_th) + self.options.x_div_unit)
         self.options.x_subsubdivs_th = self.svg.unittouu(str(self.options.x_subsubdivs_th) + self.options.x_div_unit)
-        
+
         self.options.dy = self.svg.unittouu(str(self.options.dy) + self.options.dy_unit)
         self.options.y_divs_th = self.svg.unittouu(str(self.options.y_divs_th) + self.options.y_div_unit)
         self.options.y_subdivs_th = self.svg.unittouu(str(self.options.y_subdivs_th) + self.options.y_div_unit)
@@ -88,7 +88,7 @@ class GridCartesian(inkex.Effect):
         #find the pixel dimensions of the overall grid
         ymax = self.options.dy * self.options.y_divs
         xmax = self.options.dx * self.options.x_divs
-        
+
         # Embed grid in group
         #Put in in the centre of the current view
         view_center = inkex.computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
@@ -98,7 +98,7 @@ class GridCartesian(inkex.Effect):
                      str( self.options.x_divs )+':Y'+str( self.options.y_divs ),
                      'transform':t }
         grid = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
-        
+
         #Group for major x gridlines
         g_attribs = {inkex.addNS('label','inkscape'):'MajorXGridlines'}
         majglx = inkex.etree.SubElement(grid, 'g', g_attribs)
@@ -106,42 +106,42 @@ class GridCartesian(inkex.Effect):
         #Group for major y gridlines
         g_attribs = {inkex.addNS('label','inkscape'):'MajorYGridlines'}
         majgly = inkex.etree.SubElement(grid, 'g', g_attribs)
-        
+
         #Group for minor x gridlines
         if self.options.x_subdivs > 1:#if there are any minor x gridlines
             g_attribs = {inkex.addNS('label','inkscape'):'MinorXGridlines'}
             minglx = inkex.etree.SubElement(grid, 'g', g_attribs)
-        
+
         #Group for subminor x gridlines
         if self.options.x_subsubdivs > 1:#if there are any minor minor x gridlines
             g_attribs = {inkex.addNS('label','inkscape'):'SubMinorXGridlines'}
             mminglx = inkex.etree.SubElement(grid, 'g', g_attribs)
-        
+
         #Group for minor y gridlines
         if self.options.y_subdivs > 1:#if there are any minor y gridlines
             g_attribs = {inkex.addNS('label','inkscape'):'MinorYGridlines'}
             mingly = inkex.etree.SubElement(grid, 'g', g_attribs)
-        
+
         #Group for subminor y gridlines
         if self.options.y_subsubdivs > 1:#if there are any minor minor x gridlines
             g_attribs = {inkex.addNS('label','inkscape'):'SubMinorYGridlines'}
             mmingly = inkex.etree.SubElement(grid, 'g', g_attribs)
 
-            
+
         draw_SVG_rect(0, 0, xmax, ymax, self.options.border_th,
                       'none', 'Border', grid) #border rectangle
-        
+
         #DO THE X DIVISIONS======================================
         sd  = self.options.x_subdivs #sub divs per div
         ssd = self.options.x_subsubdivs #subsubdivs per subdiv
-        
+
         for i in range(0, self.options.x_divs): #Major x divisions
             if i>0: #don't draw first line (we made a proper border)
                 draw_SVG_line(self.options.dx*i, 0,
                               self.options.dx*i,ymax,
                               self.options.x_divs_th,
                               'MajorXDiv'+str(i), majglx)
-            
+
             if self.options.x_log: #log x subdivs
                 for j in range (1, sd):
                     if j>1: #the first loop is only for subsubdivs
@@ -149,7 +149,7 @@ class GridCartesian(inkex.Effect):
                                       self.options.dx*(i+log(j, sd)), ymax,
                                       self.options.x_subdivs_th,
                                       'MinorXDiv'+str(i)+':'+str(j), minglx)
-                                  
+
                     for k in range (1, ssd): #subsub divs
                         if (j <= self.options.x_half_freq) or (k%2 == 0):#only draw half the subsubdivs past the half-freq point
                             if (ssd%2 > 0) and (j > self.options.y_half_freq): #half frequency won't work with odd numbers of subsubdivs,
@@ -159,7 +159,7 @@ class GridCartesian(inkex.Effect):
                             draw_SVG_line(self.options.dx*(i+log(j+k/float(ssd2),sd )), 0,
                                           self.options.dx*(i+log(j+k/float(ssd2),sd )), ymax,
                                           self.options.x_subsubdivs_th,'SubminorXDiv'+str(i)+':'+str(j)+':'+str(k), mminglx)
-            
+
             else: #linear x subdivs
                 for j in range (0, sd):
                     if j>0: #not for the first loop (this loop is for the subsubdivs before the first subdiv)
@@ -167,24 +167,24 @@ class GridCartesian(inkex.Effect):
                                       self.options.dx*(i+j/float(sd)), ymax,
                                       self.options.x_subdivs_th,
                                       'MinorXDiv'+str(i)+':'+str(j), minglx)
-                    
+
                     for k in range (1, ssd): #subsub divs
                         draw_SVG_line(self.options.dx*(i+(j*ssd+k)/((float(sd)*ssd))) , 0,
                                       self.options.dx*(i+(j*ssd+k)/((float(sd)*ssd))) , ymax,
                                       self.options.x_subsubdivs_th,
                                       'SubminorXDiv'+str(i)+':'+str(j)+':'+str(k), mminglx)
-         
+
         #DO THE Y DIVISIONS========================================
         sd  = self.options.y_subdivs    #sub divs per div
         ssd = self.options.y_subsubdivs #subsubdivs per subdiv
-                                      
+
         for i in range(0, self.options.y_divs): #Major y divisions
             if i>0:#don't draw first line (we will make a border)
                 draw_SVG_line(0, self.options.dy*i,
                               xmax, self.options.dy*i,
                               self.options.y_divs_th,
                               'MajorYDiv'+str(i), majgly)
-            
+
             if self.options.y_log: #log y subdivs
                 for j in range (1, sd):
                     if j>1: #the first loop is only for subsubdivs
@@ -192,7 +192,7 @@ class GridCartesian(inkex.Effect):
                                       xmax, self.options.dy*(i+1-log(j,sd)),
                                       self.options.y_subdivs_th,
                                       'MinorXDiv'+str(i)+':'+str(j), mingly)
-                    
+
                     for k in range (1, ssd): #subsub divs
                         if (j <= self.options.y_half_freq) or (k%2 == 0):#only draw half the subsubdivs past the half-freq point
                             if (ssd%2 > 0) and (j > self.options.y_half_freq): #half frequency won't work with odd numbers of subsubdivs,
@@ -210,7 +210,7 @@ class GridCartesian(inkex.Effect):
                                       xmax, self.options.dy*(i+j/float(sd)),
                                       self.options.y_subdivs_th,
                                       'MinorXYiv'+str(i)+':'+str(j), mingly)
-                    
+
                     for k in range (1, ssd): #subsub divs
                         draw_SVG_line(0,    self.options.dy*(i+(j*ssd+k)/((float(sd)*ssd))),
                                       xmax, self.options.dy*(i+(j*ssd+k)/((float(sd)*ssd))),
@@ -224,4 +224,3 @@ if __name__ == '__main__':
     e.run()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

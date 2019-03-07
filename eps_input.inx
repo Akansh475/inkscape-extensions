@@ -4,8 +4,8 @@
     <id>org.inkscape.input.eps</id>
     <dependency type="extension">org.inkscape.input.pdf</dependency>    
     <dependency type="executable" location="path">ps2pdf</dependency>
-    <dependency type="executable" location="extensions">ps2pdf-ext.py</dependency>
-	<param name="dEPSCrop" type="boolean" gui-hidden="true">true</param>
+    <dependency type="executable" location="extensions">ps2pdf_ext.py</dependency>
+    <param name="dEPSCrop" type="boolean" gui-hidden="true">true</param>
     <input>
         <extension>.eps</extension>
         <mimetype>image/x-encapsulated-postscript</mimetype>
@@ -14,7 +14,7 @@
         <output_extension>org.inkscape.output.eps</output_extension>
     </input>
     <script>
-        <command reldir="extensions" interpreter="python">ps2pdf-ext.py</command>
+        <command reldir="extensions" interpreter="python">ps2pdf_ext.py</command>
         <helper_extension>org.inkscape.input.pdf</helper_extension>
     </script>
 </inkscape-extension>

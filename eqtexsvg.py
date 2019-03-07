@@ -31,6 +31,10 @@ import sys
 import tempfile
 import inkex
 
+from inkex.localize import localize
+
+localize()
+
 def parse_pkgs(pkgstring):
     pkglist = pkgstring.replace(" ","").split(",")
     header = ""
@@ -56,8 +60,8 @@ def create_equation_tex(filename, equation, add_header=""):
     tex.close()
 
 def svg_open(self,filename):
-    doc_width = self.unittouu(self.document.getroot().get('width'))
-    doc_height = self.unittouu(self.document.getroot().get('height'))
+    doc_width = self.svg.unittouu(self.document.getroot().get('width'))
+    doc_height = self.svg.unittouu(self.document.getroot().get('height'))
     doc_sizeH = min(doc_width,doc_height)
     doc_sizeW = max(doc_width,doc_height)
 
@@ -87,12 +91,12 @@ def svg_open(self,filename):
 class EQTEXSVG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-f", "--formule",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-f", "--formule",
+                        action="store", type=str,
                         dest="formula", default="",
                         help="LaTeX formula")
-        self.OptionParser.add_option("-p", "--packages",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-p", "--packages",
+                        action="store", type=str,
                         dest="packages", default="",
                         help="Additional packages")
     def effect(self):
@@ -120,7 +124,7 @@ class EQTEXSVG(inkex.Effect):
             os.rmdir(base_dir)
 
         if self.options.formula == "":
-            return inkex.errormsg(_("empty LaTeX input. Nothing to be done"))
+            return inkex.errormsg("empty LaTeX input. Nothing to be done")
 
         add_header = parse_pkgs(self.options.packages)
         create_equation_tex(latex_file, self.options.formula, add_header)
@@ -147,7 +151,7 @@ class EQTEXSVG(inkex.Effect):
                 if not line.startswith('pstoedit: version'):
                     sys.stderr.write(line + '\n')
             err_stream.close()
- 
+
         svg_open(self, svg_file)
 
         clean()
@@ -157,4 +161,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

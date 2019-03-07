@@ -21,27 +21,28 @@ import os
 import sys
 import tempfile
 # local library
-from webslicer_effect import *
+from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
 from inkex.localize import _
+from inkex import inkbool
 
 
 class WebSlicer_Export(WebSlicer_Effect):
 
     def __init__(self):
         WebSlicer_Effect.__init__(self)
-        self.OptionParser.add_option("--tab")
-        self.OptionParser.add_option("--dir",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab")
+        self.arg_parser.add_argument("--dir",
+                                     action="store", type=str,
                                      dest="dir",
                                      help="")
-        self.OptionParser.add_option("--create-dir",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--create-dir",
+                                     action="store", type=inkbool,
                                      default=False,
                                      dest="create_dir",
                                      help="")
-        self.OptionParser.add_option("--with-code",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--with-code",
+                                     action="store", type=inkbool,
                                      default=False,
                                      dest="with_code",
                                      help="")
@@ -308,8 +309,8 @@ class WebSlicer_Export(WebSlicer_Effect):
                 if len(el) == 5:
                     self.el_geo[el[0]] = { 'x':float(el[1]), 'y':float(el[2]),
                                            'w':float(el[3]), 'h':float(el[4]) }
-        doc_w = self.unittouu( self.document.getroot().get('width') )
-        doc_h = self.unittouu( self.document.getroot().get('height') )
+        doc_w = self.svg.unittouu( self.document.getroot().get('width') )
+        doc_h = self.svg.unittouu( self.document.getroot().get('height') )
         self.el_geo['webslicer-layer'] = { 'x':0, 'y':0, 'w':doc_w, 'h':doc_h }
 
 

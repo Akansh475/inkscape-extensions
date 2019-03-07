@@ -11,5 +11,5 @@
   <script>
     <command reldir="extensions" interpreter="python">next_glyph_layer.py</command>
   </script>
-	<options silent="true"></options>
+    <options silent="true"></options>
 </inkscape-extension>

@@ -38,25 +38,25 @@ import inkex
 class Extract(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-d", "--direction",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-d", "--direction",
+                        action="store", type=str,
                         dest="direction", default="tb",
                         help="direction to extract text")
-        self.OptionParser.add_option("-x", "--xanchor",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-x", "--xanchor",
+                        action="store", type=str,
                         dest="xanchor", default="m",
                         help="horizontal point to compare")
-        self.OptionParser.add_option("-y", "--yanchor",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-y", "--yanchor",
+                        action="store", type=str,
                         dest="yanchor", default="m",
                         help="vertical point to compare")
 
     def effect(self):
-        if len(self.selected)==0:
+        if len(self.svg.selected)==0:
             for node in self.document.xpath('//svg:text | //svg:flowRoot', namespaces=inkex.NSS):
                 self.selected[node.get('id')] = node
 
-        if len( self.selected ) > 0:
+        if len( self.svg.selected ) > 0:
             objlist = []
             svg = self.document.getroot()
             parentnode = self.current_layer
@@ -160,4 +160,3 @@ if __name__ == '__main__':
     e = Extract()
     e.affect()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

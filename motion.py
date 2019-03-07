@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -23,14 +23,14 @@ import inkex
 class Motion(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-a", "--angle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-a", "--angle",
+                        action="store", type=float,
                         dest="angle", default=45.0,
                         help="direction of the motion vector")
-        self.OptionParser.add_option("-m", "--magnitude",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-m", "--magnitude",
+                        action="store", type=float,
                         dest="magnitude", default=100.0,
-                        help="magnitude of the motion vector")    
+                        help="magnitude of the motion vector")
 
     def makeface(self, last, arg):
         (cmd, params) = arg
@@ -48,30 +48,30 @@ class Motion(inkex.Effect):
                 np[i] += self.vy
 
         a.append(['L',[np[-2],np[-1]]])
-        
+
         #reverse direction of path segment
         np[-2:] = last[0]+self.vx,last[1]+self.vy
         if cmd == 'C':
             c1 = np[:2], np[2:4] = np[2:4], np[:2]
         a.append([cmd,np[:]])
-            
+
         a.append(['Z',[]])
         face = inkex.etree.SubElement(self.facegroup,inkex.addNS('path','svg'),{'d':str(inkex.Path(a))})
-        
+
     def effect(self):
         self.vx = math.cos(math.radians(self.options.angle))*self.options.magnitude
         self.vy = math.sin(math.radians(self.options.angle))*self.options.magnitude
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 group = inkex.etree.SubElement(node.getparent(),inkex.addNS('g','svg'))
                 self.facegroup = inkex.etree.SubElement(group, inkex.addNS('g','svg'))
                 group.append(node)
-                
+
                 t = node.get('transform')
                 if t:
                     group.set('transform', t)
                     node.set('transform','')
-                    
+
                 s = node.get('style')
                 self.facegroup.set('style', s)
 
@@ -100,7 +100,7 @@ class Motion(inkex.Effect):
                     for seg in segments:
                         self.makeface(last,seg)
                         last = seg[1][-2:]
-                    
+
                     if cmd == 'M':
                         subPathStart = params[-2:]
                     if cmd == 'Z':
@@ -113,4 +113,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

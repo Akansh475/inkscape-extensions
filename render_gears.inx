@@ -14,12 +14,12 @@
     </param>
     <_param name="unit_text" type="description">Unit of measurement for both circular pitch and center diameter.</_param>
     <effect>
-	<object-type>all</object-type>
+    <object-type>all</object-type>
         <effects-menu>
             <submenu _name="Render">
                 <submenu _name="Gear"/>
             </submenu>
-        </effects-menu>						    		
+        </effects-menu>                                 
     </effect>
     <script>
         <command reldir="extensions" interpreter="python">render_gears.py</command>

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2012 Martin Owens
 #
@@ -19,25 +20,26 @@ This is a test framework setup.py only, not used for packaging.
 from setuptools import setup
 
 setup(
-    name             = 'inkscape-core-extensions',
-    version          = '0.0',
-    description      = 'Inkscape core extensions for testing',
-    long_description = 'N/A',
-    author           = 'Inkscape Authors',
-    url              = 'https://gitlab.com/inkscape/extensions',
-    author_email     = 'developers@inkscape.org',
-    test_suite       = 'tests',
-    platforms        = 'linux',
-    license          = 'GPLv2',
-    classifiers      = [
-      'Development Status :: 0 - Test Only',
-      'Intended Audience :: Developers',
-      'Programming Language :: Python',
-      'Programming Language :: Python :: 2.7',
-      'Programming Language :: Python :: 3.5',
-    ],
-    install_requires = [
-      'scour',
-    ],
- )
-
+        name='inkscape-core-extensions',
+        version='0.0',
+        description='Inkscape core extensions for testing',
+        long_description='N/A',
+        author='Inkscape Authors',
+        url='https://gitlab.com/inkscape/extensions',
+        author_email='developers@inkscape.org',
+        test_suite='tests',
+        platforms='linux',
+        license='GPLv2',
+        classifiers=[
+            'Development Status :: 0 - Test Only',
+            'Intended Audience :: Developers',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+        ],
+        install_requires=['scour'],
+        setup_requires=["pytest-runner"],
+        tests_require=["pytest", "pytest-cov"]
+)

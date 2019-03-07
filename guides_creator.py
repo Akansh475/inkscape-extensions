@@ -38,7 +38,7 @@ This basic extension allows you to automatically draw guides in inkscape.
 # # # # # # # #
 # TODO:  See http://code.google.com/p/inkscape-guides-creator/wiki/Roadmap
 # # # # # # # #
- 
+
 
 # # # extension's beginning # # #
 
@@ -54,6 +54,7 @@ from math import sqrt
 # We will use the inkex module with the predefined Effect base class.
 import inkex
 from inkex.styles import *
+from inkex import inkbool
 
 from xml.etree import ElementTree as ET
 
@@ -70,7 +71,7 @@ def printDebug(string):
     inkex.errormsg(_(str(string)))
 
 def drawVerticalGuides(division,w,h,edges,parent,vertical_shift=0):
-    if (division > 0): 
+    if (division > 0):
         if (edges):
             var = 1
         else:
@@ -80,7 +81,7 @@ def drawVerticalGuides(division,w,h,edges,parent,vertical_shift=0):
         # setting up the guide's attributes (id is generated automatically)
         position = str(round((w / division) + (v - var) * (w / division) + vertical_shift,4)) + ",0"
         orientation = str(round(h,4)) + ",0"
-        createGuide(position,orientation,parent)                
+        createGuide(position,orientation,parent)
 
 def drawHorizontalGuides(division,w,h,edges,parent,horizontal_shift=0):
     if (division > 0):
@@ -132,125 +133,125 @@ class GuidesCreator(inkex.Effect):
         inkex.Effect.__init__(self)
 
         # Define option for the tab.
-        self.OptionParser.add_option("--tab",
-                    action="store",type="string",
+        self.arg_parser.add_argument("--tab",
+                    action="store",type=str,
                     dest="tab", default="regular_guides",
                     help="")
 
         # Define string option "--preset" with default value 'custom'.
-        self.OptionParser.add_option('--guides_preset',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--guides_preset',
+                    action = 'store',type=str,
                     dest = 'guides_preset',default = 'custom',
                     help = 'Preset')
 
         # Define string option "--vertical_guides" with default value '0'.
-        self.OptionParser.add_option('--vertical_guides',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--vertical_guides',
+                    action = 'store',type=str,
                     dest = 'vertical_guides',default = 0,
                     help = 'Vertical guides each:')
 
         # Define string option "--horizontal_guides" with default value '0'.
-        self.OptionParser.add_option('--horizontal_guides',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--horizontal_guides',
+                    action = 'store',type=str,
                     dest = 'horizontal_guides',default = 0,
                     help = 'Horizontal guides each:')
 
         # Define boolean option "--start_from_edges" with default value False.
-        self.OptionParser.add_option('--start_from_edges',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--start_from_edges',
+                    action = 'store',type=inkbool,
                     dest = 'start_from_edges',default = False,
                     help = 'Start from edges')
 
         # Define boolean option "--delete_existing_guides" with default value False.
-        self.OptionParser.add_option('--delete_existing_guides',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--delete_existing_guides',
+                    action = 'store',type=inkbool,
                     dest = 'delete_existing_guides',default = False,
                     help = 'Delete existing guides')
 
         # Define boolean option "--upper_left_corner" with default value False.
-        self.OptionParser.add_option('--ul',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--ul',
+                    action = 'store',type=inkbool,
                     dest = 'ul',default = False,
                     help = 'Upper left corner')
 
         # Define boolean option "--upper_right_corner" with default value False.
-        self.OptionParser.add_option('--ur',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--ur',
+                    action = 'store',type=inkbool,
                     dest = 'ur',default = False,
                     help = 'Upper right corner')
 
         # Define boolean option "--lower_left_corner" with default value False.
-        self.OptionParser.add_option('--ll',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--ll',
+                    action = 'store',type=inkbool,
                     dest = 'll',default = False,
                     help = 'Lower left corner')
 
         # Define boolean option "--upper_left_corner" with default value False.
-        self.OptionParser.add_option('--lr',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--lr',
+                    action = 'store',type=inkbool,
                     dest = 'lr',default = False,
                     help = 'Lower right corner')
 
         # Define boolean option "--delete_existing_guides2" with default value False.
-        self.OptionParser.add_option('--delete_existing_guides2',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--delete_existing_guides2',
+                    action = 'store',type=inkbool,
                     dest = 'delete_existing_guides2',default = False,
                     help = 'Delete existing guides')
 
         # Define string option "--margins_preset" with default value 'custom'.
-        self.OptionParser.add_option('--margins_preset',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--margins_preset',
+                    action = 'store',type=str,
                     dest = 'margins_preset',default = 'custom',
                     help = 'Margins preset')
 
         # Define boolean option "--delete_existing_guides3" with default value False.
-        self.OptionParser.add_option('--delete_existing_guides3',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--delete_existing_guides3',
+                    action = 'store',type=inkbool,
                     dest = 'delete_existing_guides3',default = False,
                     help = 'Delete existing guides')
 
         # Define string option "--vertical_subdivisions" with default value '0'.
-        self.OptionParser.add_option('--vertical_subdivisions',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--vertical_subdivisions',
+                    action = 'store',type=str,
                     dest = 'vertical_subdivisions',default = 0,
                     help = 'Vertical subdivisions')
 
         # Define string option "--horizontal_subdivisions" with default value '0'.
-        self.OptionParser.add_option('--horizontal_subdivisions',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--horizontal_subdivisions',
+                    action = 'store',type=str,
                     dest = 'horizontal_subdivisions',default = 0,
                     help = 'Horizontal subdivisions')
 
         # Define string option "--header_margin" with default value '6'.
-        self.OptionParser.add_option('--header_margin',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--header_margin',
+                    action = 'store',type=str,
                     dest = 'header_margin',default = 6,
                     help = 'Header margin')
 
         # Define string option "--footer_margin" with default value '6'.
-        self.OptionParser.add_option('--footer_margin',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--footer_margin',
+                    action = 'store',type=str,
                     dest = 'footer_margin',default = 6,
                     help = 'Footer margin')
 
         # Define string option "--left_margin" with default value '6'.
-        self.OptionParser.add_option('--left_margin',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--left_margin',
+                    action = 'store',type=str,
                     dest = 'left_margin',default = 6,
                     help = 'Left margin')
 
         # Define string option "--right_margin" with default value '6'.
-        self.OptionParser.add_option('--right_margin',
-                    action = 'store',type = 'string',
+        self.arg_parser.add_argument('--right_margin',
+                    action = 'store',type=str,
                     dest = 'right_margin',default = 6,
                     help = 'Right margin')
 
         # Define boolean option "--start_from_edges2" with default value False.
-        self.OptionParser.add_option('--start_from_edges2',
-                    action = 'store',type = 'inkbool',
+        self.arg_parser.add_argument('--start_from_edges2',
+                    action = 'store',type=inkbool,
                     dest = 'start_from_edges2',default = False,
                     help = 'Start from edges')
-    
+
     def effect(self):
         # Get script's options value.
         tab = self.options.tab
@@ -284,8 +285,8 @@ class GuidesCreator(inkex.Effect):
         svg = self.document.getroot()
 
         # getting the width and height attributes of the canvas
-        width  = self.unittouu(svg.get('width'))
-        height = self.unittouu(svg.get('height'))
+        width  = self.svg.unittouu(svg.get('width'))
+        height = self.svg.unittouu(svg.get('height'))
 
         # getting edges coordinates
         h_orientation = '0,' + str(round(width,4))
@@ -307,13 +308,13 @@ class GuidesCreator(inkex.Effect):
 
                 # creating vertical guides
                 drawVerticalGuides(v_division,width,height,from_edges,nv)
-                        
+
                 # creating horizontal guides
                 drawHorizontalGuides(h_division,width,height,from_edges,nv)
 
             elif (guides_preset == 'golden'):
                 gold = (1 + sqrt(5)) / 2
-                    
+
                 # horizontal golden guides
                 position1 = '0,' + str(height / gold)
                 position2 = '0,'+  str(height - (height / gold))
@@ -348,7 +349,7 @@ class GuidesCreator(inkex.Effect):
                 deleteAllGuides(self.document)
 
             # diagonal
-            angle = 45                        
+            angle = 45
 
             # X axe
             left = 0
@@ -411,7 +412,7 @@ class GuidesCreator(inkex.Effect):
                 if (right_margin != 0):
                     x_right = (width / right_margin) * (right_margin - 1)
                     createGuide(str(x_right) + ',0',v_orientation,nv)
-                                
+
             elif (margins_preset == 'book_left'):
                 # 1/9th header
                 y_header = (height / 9) * 8

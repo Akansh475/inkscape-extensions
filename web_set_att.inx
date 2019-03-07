@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <_name>Set Attributes</_name>
     <id>org.inkscape.web.set-att</id>
-    <dependency type="executable" location="extensions">web-set-att.py</dependency>
-	<param name="tab" type="notebook">
+    <dependency type="executable" location="extensions">web_set_att.py</dependency>
+    <param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="att" type="string" _gui-text="Attribute to set:">fill stroke stroke-width</param>
             <param name="when" type="enum" _gui-text="When should the set be done:">
@@ -46,6 +46,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">web-set-att.py</command>
+        <command reldir="extensions" interpreter="python">web_set_att.py</command>
     </script>
 </inkscape-extension>

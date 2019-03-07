@@ -171,14 +171,14 @@ class Ungroup(inkex.Effect):
                 new_clippath = inkex.etree.SubElement(
                     self.xpathSingle('//svg:defs'), 'clipPath',
                     {'clipPathUnits': 'userSpaceOnUse',
-                     'id': self.uniqueId("clipPath")})
+                     'id': self.svg.get_unique_id("clipPath")})
                 clippath = self.getElementById(clippathurl[5:-1])
                 for c in clippath.iterchildren():
                     inkex.etree.SubElement(
                         new_clippath, 'use',
                         {inkex.addNS('href', 'xlink'): '#' + c.get("id"),
                          'transform': inverse_node_transform,
-                         'id': self.uniqueId("use")})
+                         'id': self.svg.get_unique_id("use")})
 
                 # Set the clippathurl to be the one with the inverse transform
                 clippathurl = "url(#" + new_clippath.get("id") + ")"

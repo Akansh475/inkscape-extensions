@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -21,7 +21,7 @@ import inkex
 
 class Handles(inkex.Effect):
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 p = inkex.parsePath(node.get('d'))
                 a =[]
@@ -34,7 +34,7 @@ class Handles(inkex.Effect):
                     if cmd == 'Q':
                         a.extend([['M', params[:2]], ['L', pen],
                             ['M', params[:2]], ['L', params[-2:]]])
-                    
+
                     if cmd == 'M':
                         subPathStart = params
 
@@ -42,18 +42,17 @@ class Handles(inkex.Effect):
                         pen = subPathStart
                     else:
                         pen = params[-2:]
-                    
+
                 if len(a) > 0:
-                    s = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px', 
-                        'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
-                        'stroke': '#000000', 'stroke-linecap': 'butt', 
+                    s = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px',
+                        'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+                        'stroke': '#000000', 'stroke-linecap': 'butt',
                         'fill': 'none'}
                     attribs = {'style':str(inkex.Style(s)),'d':str(inkex.Path(a))}
                     inkex.etree.SubElement(node.getparent(), inkex.addNS('path','svg'), attribs)
-                    
+
 if __name__ == '__main__':
     e = Handles()
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

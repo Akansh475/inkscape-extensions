@@ -219,4 +219,3 @@ def deprecate(func):
         return func(*args, **kwargs)
     return _inner
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

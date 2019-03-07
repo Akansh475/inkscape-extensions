@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -28,40 +28,40 @@ def stripme(s):
 class LSystem(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-o", "--order",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-o", "--order",
+                        action="store", type=int,
                         dest="order", default=3,
                         help="number of iteration")
-        self.OptionParser.add_option("-l", "--langle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-l", "--langle",
+                        action="store", type=float,
                         dest="langle", default=16.0,
                         help="angle for turning left")
-        self.OptionParser.add_option("-r", "--rangle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-r", "--rangle",
+                        action="store", type=float,
                         dest="rangle", default=16.0,
                         help="angle for turning right")
-        self.OptionParser.add_option("-s", "--step",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-s", "--step",
+                        action="store", type=float,
                         dest="step", default=25.0,
                         help="step size")
-        self.OptionParser.add_option("-p", "--randomizestep",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-p", "--randomizestep",
+                        action="store", type=float,
                         dest="randomizestep", default=0.0,
                         help="randomize step")
-        self.OptionParser.add_option("-z", "--randomizeangle",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-z", "--randomizeangle",
+                        action="store", type=float,
                         dest="randomizeangle", default=0.0,
                         help="randomize angle")
-        self.OptionParser.add_option("-x", "--axiom",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-x", "--axiom",
+                        action="store", type=str,
                         dest="axiom", default="++F",
                         help="initial state of system")
-        self.OptionParser.add_option("-u", "--rules",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("-u", "--rules",
+                        action="store", type=str,
                         dest="rules", default="F=FF-[-F+F+F]+[+F-F-F]",
                         help="replacement rules")
-        self.OptionParser.add_option("-t", "--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-t", "--tab",
+                        action="store", type=str,
                         dest="tab")
         self.stack = []
         self.turtle = pturtle.pTurtle()
@@ -104,14 +104,14 @@ class LSystem(inkex.Effect):
                 except KeyError:
                     level_string = level_string + c
             else:
-                level_string = level_string + c 
+                level_string = level_string + c
         return level_string
-            
+
     def effect(self):
-        self.options.step = self.unittouu(str(self.options.step) + 'px')
-        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.unittouu('1px')), 
-            'stroke-opacity': '1.0', 'fill-opacity': '1.0', 
-            'stroke': '#000000', 'stroke-linecap': 'butt', 
+        self.options.step = self.svg.unittouu(str(self.options.step) + 'px')
+        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
+            'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+            'stroke': '#000000', 'stroke-linecap': 'butt',
             'fill': 'none'}
         attribs = {'style': str(inkex.Style(s)),'d':self.iterate()}
         inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'),attribs)
@@ -121,4 +121,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

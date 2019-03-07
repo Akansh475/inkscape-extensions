@@ -70,8 +70,8 @@ def linearize(p,tolerance=0.001):
     '''
     This function receives a component of a 'cubicsuperpath' and returns two things:
     The path subdivided in many straight segments, and an array containing the length of each segment.
-    
-    We could work with bezier path as well, but bezier arc lengths are (re)computed for each point 
+
+    We could work with bezier path as well, but bezier arc lengths are (re)computed for each point
     in the deformed object. For complex paths, this might take a while.
     '''
     zero=0.000001
@@ -139,7 +139,7 @@ class PathAlongPath(pathmodifier.Diffeo):
 
     def lengthtotime(self,l):
         '''
-        Receives an arc length l, and returns the index of the segment in self.skelcomp 
+        Receives an arc length l, and returns the index of the segment in self.skelcomp
         containing the corresponding point, to gether with the position of the point on this segment.
 
         If the deformer is closed, do computations modulo the toal length.
@@ -210,7 +210,7 @@ class PathAlongPath(pathmodifier.Diffeo):
             self.options.stretch=True
 
         bbox=simpletransform.computeBBox(self.patterns.values())
-                    
+
         if self.options.vertical:
             #flipxy(bbox)...
             bbox=(-bbox[3],-bbox[2],-bbox[1],-bbox[0])
@@ -228,7 +228,7 @@ class PathAlongPath(pathmodifier.Diffeo):
                     flipxy(p0)
 
                 newp=[]
-                for skelnode in self.skeletons.itervalues(): 
+                for skelnode in self.skeletons.itervalues():
                     self.curSekeleton=cubicsuperpath.parsePath(skelnode.get('d'))
                     if self.options.vertical:
                         flipxy(self.curSekeleton)
@@ -279,5 +279,4 @@ if __name__ == '__main__':
     e = PathAlongPath()
     e.affect()
 
-                    
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99
+

@@ -1,7 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
 
 from inkex.colors import Color, ColorError, is_color
 from tests.base import TestCase
@@ -95,7 +92,3 @@ class ColorTest(TestCase):
         """Can detect colour format"""
         self.assertFalse(is_color("rgb[t, b, s]"))
         self.assertTrue(is_color('#fff'))
-
-
-if __name__ == '__main__':
-    unittest.main()

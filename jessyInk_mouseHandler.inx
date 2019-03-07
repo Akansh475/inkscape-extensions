@@ -5,12 +5,12 @@
   <dependency type="executable" location="extensions">jessyInk_mouseHandler.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" _gui-text="Mouse handler">
-			<param name="mouseSetting" type="optiongroup" _gui-text="Mouse settings:">
+            <param name="mouseSetting" type="optiongroup" _gui-text="Mouse settings:">
         <_option value="default">Default</_option>
         <_option value="noclick">No-click</_option>
         <_option value="draggingZoom">Dragging/zoom</_option>
-			</param>
-		</page>
+            </param>
+        </page>
     <page name="help" _gui-text="Help">
       <_param name="help_text" type="description">This extension allows you customize the mouse handler JessyInk uses. Please see code.google.com/p/jessyink for more details.</_param>
     </page>

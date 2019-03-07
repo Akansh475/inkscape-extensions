@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
 #
@@ -30,13 +30,15 @@ else:
 
 import inkex
 from inkex.localize import _
+from inkex import inkbool
+
 
 
 class Embedder(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--selectedonly",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("-s", "--selectedonly",
+            action="store", type=inkbool,
             dest="selectedonly", default=False,
             help="embed only selected images")
 
@@ -68,7 +70,7 @@ class Embedder(inkex.Effect):
             absref=node.get(inkex.addNS('absref','sodipodi'))
             url=urlparse.urlparse(xlink)
             href=urllib.url2pathname(url.path)
-            
+
             path=''
             #path selection strategy:
             # 1. href if absolute
@@ -123,4 +125,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

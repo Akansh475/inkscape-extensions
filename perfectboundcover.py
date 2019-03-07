@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 '''
 Copyright (C) 2007 John Bintz, jcoswell@cosellproductions.org
 
@@ -16,7 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
-import sys, inkex
+import inkex
+from inkex import inkbool
+
 
 def caliper_to_ppi(caliper):
     return 2 / caliper
@@ -30,56 +32,56 @@ def points_to_ppi(points):
 class PerfectBoundCover(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--width",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--width",
+                        action="store", type=float,
                         dest="width", default=6.0,
                         help="cover width (in)")
-        self.OptionParser.add_option("--height",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--height",
+                        action="store", type=float,
                         dest="height", default=9.0,
                         help="cover height (in)")
-        self.OptionParser.add_option("--pages",
-                        action="store", type="int",
+        self.arg_parser.add_argument("--pages",
+                        action="store", type=int,
                         dest="pages", default=64,
                         help="number of pages")
-        self.OptionParser.add_option("--paperthicknessmeasurement",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--paperthicknessmeasurement",
+                        action="store", type=str,
                         dest="paperthicknessmeasurement", default=100.0,
                         help="paper thickness measurement")
-        self.OptionParser.add_option("--paperthickness",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--paperthickness",
+                        action="store", type=float,
                         dest="paperthickness", default=0.0,
                         help="paper thickness")
-        self.OptionParser.add_option("--coverthicknessmeasurement",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--coverthicknessmeasurement",
+                        action="store", type=str,
                         dest="coverthicknessmeasurement", default=100.0,
                         help="cover thickness measurement")
-        self.OptionParser.add_option("--coverthickness",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--coverthickness",
+                        action="store", type=float,
                         dest="coverthickness", default=0.0,
                         help="cover thickness")
-        self.OptionParser.add_option("--bleed",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--bleed",
+                        action="store", type=float,
                         dest="bleed", default=0.25,
                         help="cover bleed (in)")
-        self.OptionParser.add_option("--removeguides",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--removeguides",
+                        action="store", type=inkbool,
                         dest="removeguides", default=False,
                         help="remove guides")
-        self.OptionParser.add_option("--book",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--book",
+                        action="store", type=str,
                         dest="book", default=False,
                         help="dummy")
-        self.OptionParser.add_option("--cover",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--cover",
+                        action="store", type=str,
                         dest="cover", default=False,
                         help="dummy")
-        self.OptionParser.add_option("--paper",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--paper",
+                        action="store", type=str,
                         dest="paper", default=False,
                         help="dummy")
-        self.OptionParser.add_option("--warning",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--warning",
+                        action="store", type=str,
                         dest="warning", default=False,
                         help="dummy")
     def effect(self):
@@ -137,7 +139,7 @@ class PerfectBoundCover(inkex.Effect):
                 newguide.set("orientation", guide[0])
                 newguide.set("position", "%f" % (guide[1] * 96))
                 namedview[0].append(newguide)
-        
+
         '''
         for id, node in self.selected.items():
             if node.tag == inkex.addNS('path','svg'):
@@ -169,4 +171,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

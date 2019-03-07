@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007
 #
@@ -23,16 +23,16 @@ import inkex
 class Extrude(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        opts = [('-m', '--mode', 'string', 'mode', 'Lines',
+        opts = [('-m', '--mode', str, 'mode', 'Lines',
                  'Join paths with lines or polygons'),
                 ]
         for o in opts:
-            self.OptionParser.add_option(o[0], o[1], action="store", type=o[2],
+            self.arg_parser.add_argument(o[0], o[1], action="store", type=o[2],
                                          dest=o[3], default=o[4], help=o[5])
 
     def effect(self):
         paths = []
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == '{http://www.w3.org/2000/svg}path':
                 paths.append(node)
         if len(paths) < 2:
@@ -70,7 +70,7 @@ class Extrude(inkex.Effect):
                         'fill': 'none',
                         'stroke': '#000000',
                         'stroke-opacity': 1,
-                        'stroke-width': self.unittouu('1px'),
+                        'stroke-width': self.svg.unittouu('1px'),
                     }
                     ele.set('style', str(inkex.Style(style)))
                 elif self.options.mode.lower() == 'polygons':
@@ -80,7 +80,7 @@ class Extrude(inkex.Effect):
                         'fill-opacity': 0.3,
                         'stroke': '#000000',
                         'stroke-opacity': 0.6,
-                        'stroke-width': self.unittouu('2px'),
+                        'stroke-width': self.svg.unittouu('2px'),
                     }
                     g.set('style', str(inkex.Style(style)))
                     paths[0].xpath('..')[0].append(g)

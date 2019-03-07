@@ -44,32 +44,32 @@ def points_to_svgd(p):
 class Gears(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-t", "--teeth",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-t", "--teeth",
+                        action="store", type=int,
                         dest="teeth", default=24,
                         help="Number of teeth")
-        self.OptionParser.add_option("-p", "--pitch",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-p", "--pitch",
+                        action="store", type=float,
                         dest="pitch", default=20.0,
                         help="Circular Pitch (length of arc from one tooth to next)")
-        self.OptionParser.add_option("-a", "--angle",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-a", "--angle",
+                        action="store", type=float,
                         dest="angle", default=20.0,
                         help="Pressure Angle (common values: 14.5, 20, 25 degrees)")
-        self.OptionParser.add_option("-c", "--centerdiameter",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-c", "--centerdiameter",
+                        action="store", type=float,
                         dest="centerdiameter", default=10.0,
                         help="Diameter of central hole - 0.0 for no hole")
-        self.OptionParser.add_option("-u", "--unit",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-u", "--unit",
+                        action="store", type=str,
                         dest="unit", default="px",
                         help="unit of measure for circular pitch and center diameter")
     def effect(self):
 
         teeth = self.options.teeth
-        pitch = self.unittouu( str(self.options.pitch) + self.options.unit)
+        pitch = self.svg.unittouu( str(self.options.pitch) + self.options.unit)
         angle = self.options.angle  # Angle of tangent to tooth at circular pitch wrt radial line.
-        centerdiameter = self.unittouu( str(self.options.centerdiameter) + self.options.unit)
+        centerdiameter = self.svg.unittouu( str(self.options.centerdiameter) + self.options.unit)
 
         # print >>sys.stderr, "Teeth: %s\n"        % teeth
 
@@ -108,7 +108,7 @@ class Gears(inkex.Effect):
         # Dedendum: Radial distance from pitch circle to root diameter.
         dedendum = addendum + clearance
 
-        # Root diameter: Diameter of bottom of tooth spaces. 
+        # Root diameter: Diameter of bottom of tooth spaces.
         root_radius =  pitch_radius - dedendum
         root_diameter = root_radius * 2.0
 
@@ -165,11 +165,11 @@ class Gears(inkex.Effect):
         g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
 
         # Create SVG Path for gear
-        style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
+        style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px')) }
         gear_attribs = {'style':str(inkex.Style(style)), 'd':path}
         gear = inkex.etree.SubElement(g, inkex.addNS('path','svg'), gear_attribs )
         if(centerdiameter > 0.0):
-            center_attribs = {'style':str(inkex.Style(style)), 
+            center_attribs = {'style':str(inkex.Style(style)),
                 inkex.addNS('cx','sodipodi')        :'0.0',
                 inkex.addNS('cy','sodipodi')        :'0.0',
                 inkex.addNS('rx','sodipodi')        :str(centerdiameter/2),
@@ -184,4 +184,3 @@ if __name__ == '__main__':
 
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

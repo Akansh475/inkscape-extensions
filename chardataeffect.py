@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2006 Jos Hirth, kaioa.com
 # Copyright (C) 2007 bulia byak
@@ -29,7 +29,7 @@ class CharDataEffect(inkex.Effect):
     newpar = True
 
     def effect(self):
-        if len(self.selected)==0:
+        if len(self.svg.selected)==0:
             self.recurse(self.document.getroot())
         else:
             for id,node in self.selected.items():

@@ -29,4 +29,3 @@ unCubicSuperPath = deprecate(cubic_paths.unCubicSuperPath)
 parsePath = deprecate(cubic_paths.parseCubicPath)
 formatPath = deprecate(cubic_paths.formatCubicPath)
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

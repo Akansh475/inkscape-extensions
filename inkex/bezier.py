@@ -98,7 +98,7 @@ def cspseglength(sp1,sp2, tolerance=0.001):
     return bezierlength(bez, tolerance)
 
 def csplength(csp):
-    total = 0 
+    total = 0
     lengths = []
     for sp in csp:
         lengths.append([])
@@ -221,7 +221,7 @@ def beziersplitatt(arg, t):
     m4=tpoint(m1,m2,t)
     m5=tpoint(m2,m3,t)
     m=tpoint(m4,m5,t)
-    
+
     return ((bx0,by0),m1,m4,m),(m,m5,m3,(bx3,by3))
 
 '''
@@ -311,7 +311,7 @@ def beziertatlength(arg, l=0.5, tolerance=0.001):
         if diff < 0:
             t += tdiv
         else:
-            t -= tdiv            
+            t -= tdiv
         curlen = Simpson(balf, 0.0, t, 4096, tolerance)
         diff = curlen - targetlen
     return t
@@ -324,7 +324,7 @@ def maxdist(arg):
     p3 = Point(p3x,p3y)
     s1 = Segment(p0,p3)
     return max(s1.distanceToPoint(p1),s1.distanceToPoint(p2))
-    
+
 
 def cspsubdiv(csp, flat):
     for sp in csp:
@@ -336,7 +336,7 @@ def subdiv(sp,flat,i=1):
         p1 = sp[i-1][2]
         p2 = sp[i][0]
         p3 = sp[i][1]
-    
+
         b = (p0,p1,p2,p3)
         m = maxdist(b)
         if m <= flat:
@@ -346,19 +346,19 @@ def subdiv(sp,flat,i=1):
             sp[i-1][2] = one[1]
             sp[i][0] = two[2]
             p = [one[2],one[3],two[1]]
-            sp[i:1] = [p] 
+            sp[i:1] = [p]
 
 
 #default bezier length method
 bezierlength = bezierlengthSimpson
 
 def csparea(csp):
-    area = 0.0 
+    area = 0.0
     for sp in csp:
         if len(sp) < 2: continue
         for i in range(len(sp)):            # calculate polygon area
             area += 0.5*sp[i-1][1][0]*(sp[i][1][1] - sp[i-2][1][1])
-        for i in range(1, len(sp)):         # add contribution from cubic Bezier 
+        for i in range(1, len(sp)):         # add contribution from cubic Bezier
             vec_x = numpy.matrix([sp[i-1][1][0], sp[i-1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.matrix([sp[i-1][1][1], sp[i-1][2][1], sp[i][0][1], sp[i][1][1]])
             area += 0.15*(vec_x*mat_area*vec_y.T)[0,0]
@@ -366,8 +366,8 @@ def csparea(csp):
 
 def cspcofm(csp):
     area = csparea(csp)
-    xc = 0.0 
-    yc = 0.0 
+    xc = 0.0
+    yc = 0.0
     if abs(area) < 1.e-8:
         inkex.errormsg(_("Area is zero, cannot calculate Center of Mass"))
         return 0, 0
@@ -520,4 +520,3 @@ if __name__ == '__main__':
         print(beziertatlength(curve,0.5))
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

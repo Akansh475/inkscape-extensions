@@ -25,6 +25,7 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 
 # We will use the inkex module with the predefined Effect base class.
 import inkex
+from inkex import inkbool
 
 
 def propStrToList(str):
@@ -51,10 +52,10 @@ class JessyInk_Effects(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--viewOrder', action = 'store', type = 'string', dest = 'viewOrder', default = 1)
-        self.OptionParser.add_option('--viewDuration', action = 'store', type = 'float', dest = 'viewDuration', default = 0.8)
-        self.OptionParser.add_option('--removeView', action = 'store', type = 'inkbool', dest = 'removeView', default = False)
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--viewOrder', action = 'store', type=str, dest = 'viewOrder', default = 1)
+        self.arg_parser.add_argument('--viewDuration', action = 'store', type=float, dest = 'viewDuration', default = 0.8)
+        self.arg_parser.add_argument('--removeView', action = 'store', type=inkbool, dest = 'removeView', default = False)
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -67,16 +68,16 @@ class JessyInk_Effects(inkex.Effect):
 
         rect = None
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if rect == None:
                 rect = node
             else:
                 inkex.errormsg(_("More than one object selected. Please select only one object.\n"))
-                exit()
+                return
 
         if rect == None:
             inkex.errormsg(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
-            exit()
+            return
 
         if not self.options.removeView:
             # Remove the view that currently has the requested order number.

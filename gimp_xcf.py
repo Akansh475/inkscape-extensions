@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2010-2012 Nicolas Dufour, nicoduf@yahoo.fr
@@ -25,6 +25,7 @@ import shutil
 import sys
 import tempfile
 import inkex
+from inkex import inkbool
 
 # We really shouldn't be doing this
 from subprocess import Popen, PIPE
@@ -50,23 +51,23 @@ class GimpXCFScriptFuError(GimpXCFError):
 class MyEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--tab",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                                     action="store", type=str,
                                      dest="tab")
-        self.OptionParser.add_option("-d", "--guides",
-                                     action="store", type="inkbool",
-                                     dest="saveGuides", default=False,
-                                     help="Save the Guides with the .XCF")
-        self.OptionParser.add_option("-r", "--grid",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("-d", "--guides",
+                                   action="store", type=inkbool,
+                                   dest="saveGuides", default=False,
+                                   help="Save the Guides with the .XCF")
+        self.arg_parser.add_argument("-r", "--grid",
+                                     action="store", type=inkbool,
                                      dest="saveGrid", default=False,
                                      help="Save the Grid with the .XCF")
-        self.OptionParser.add_option("-b", "--background",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("-b", "--background",
+                                     action="store", type=inkbool,
                                      dest="layerBackground", default=False,
                                      help="Add background color to each layer")
-        self.OptionParser.add_option("-i", "--dpi",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("-i", "--dpi",
+                                     action="store", type=str,
                                      dest="resolution", default="96",
                                      help="File resolution")
 
@@ -80,7 +81,7 @@ class MyEffect(inkex.Effect):
         """Returns the ratio between the SVG width and viewBox attributes.
         """
         documentscale = 1  # default to 1
-        svgwidth = self.getDocumentWidth()
+        svgwidth = self.svg.width
         viewboxstr = self.document.getroot().get('viewBox')
         if viewboxstr:
             param = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
@@ -90,7 +91,7 @@ class MyEffect(inkex.Effect):
             if p:
                 width = float(p.string[p.start():p.end()])
             else:
-                errormsg(_("SVG Width not set correctly! Assuming width = 100"))
+                inkex.errormsg("SVG Width not set correctly! Assuming width = 100")
 
             viewboxnumbers = []
             for t in viewboxstr.split():
@@ -101,23 +102,23 @@ class MyEffect(inkex.Effect):
             if len(viewboxnumbers) == 4:  # check for correct number of numbers
                 viewboxwidth = viewboxnumbers[2]
 
-            documentscale =  self.unittouu(str(width / viewboxwidth))
+            documentscale =  self.svg.unittouu(str(width / viewboxwidth))
 
         return documentscale
 
     def effect(self):
-        svg_file = self.args[-1]
+        svg_file = self.svg
         ttmp_orig = self.document.getroot()
         docname = ttmp_orig.get(inkex.addNS('docname',u'sodipodi'))
-        if docname is None: docname = self.args[-1]
-        
+        if docname is None: docname = self.svg
+
         doc_scale = self.getDocumentScale()
         res_scale = eval(self.options.resolution) / 96.0
         scale = doc_scale * res_scale
 
-        pageHeight = self.uutounit(self.unittouu(self.getDocumentHeight()), "px")
-        pageWidth = self.uutounit(self.unittouu(self.getDocumentWidth()), "px")
-        
+        pageHeight = self.svg.uutounit(self.svg.unittouu(self.svg.width), "px")
+        pageWidth = self.svg.uutounit(self.svg.unittouu(self.svg.width), "px")
+
         # Create os temp dir (to store exported pngs and Gimp log file)
         self.tmp_dir = tempfile.mkdtemp()
 
@@ -148,7 +149,7 @@ class MyEffect(inkex.Effect):
 
         # Grid
         gridSpacingFunc = ''
-        gridOriginFunc = '' 
+        gridOriginFunc = ''
         # GIMP only allows one rectangular grid
         gridXpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
         if (self.options.saveGrid and self.document.xpath(gridXpath, namespaces=inkex.NSS)):
@@ -294,7 +295,7 @@ class MyEffect(inkex.Effect):
             #err = p.stderr
             #f.write(script_fu.encode('utf-8'))
             #return_code = p.wait()
-            
+
             if False: #p.returncode != 0:
                 self.clear_tmp()
                 raise GimpXCFGimpNotInstalled

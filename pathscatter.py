@@ -202,7 +202,7 @@ class PathScatter(pathmodifier.Diffeo):
         width=bbox[1]-bbox[0]
         dx=width+self.options.space
 
-		#check if group and expand it
+        #check if group and expand it
         patternList = []
         if self.options.grouppick and (self.patternNode.tag == inkex.addNS('g','svg') or self.patternNode.tag=='g') :
             mat = simpletransform.parseTransform(self.patternNode.get("transform"))
@@ -245,7 +245,7 @@ class PathScatter(pathmodifier.Diffeo):
                     #!!!--> should it be given an id?
                     #seems to work without this!?!
                     myid = patternList[random.randint(0, len(patternList)-1)].tag.split('}')[-1]
-                    clone.set("id", self.uniqueId(myid))
+                    clone.set("id", self.svg.get_unique_id(myid))
                     self.gNode.append(clone)
 
                     inkex.applyTransformToNode(mat,clone)
@@ -258,4 +258,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

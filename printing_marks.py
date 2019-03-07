@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE, STDOUT
 import math
 
 import inkex
-import inkex
+from inkex import inkbool
 
 class PrintingMarks (inkex.Effect):
     # Default parameters
@@ -38,60 +38,60 @@ class PrintingMarks (inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--where",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--where",
+                                     action="store", type=str,
                                      dest="where_to_crop", default=True,
                                      help="Apply crop marks to...")
-        self.OptionParser.add_option("--crop_marks",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--crop_marks",
+                                     action="store", type=inkbool,
                                      dest="crop_marks", default=True,
                                      help="Draw crop Marks?")
-        self.OptionParser.add_option("--bleed_marks",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--bleed_marks",
+                                     action="store", type=inkbool,
                                      dest="bleed_marks", default=False,
                                      help="Draw Bleed Marks?")
-        self.OptionParser.add_option("--registration_marks",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--registration_marks",
+                                     action="store", type=inkbool,
                                      dest="reg_marks", default=False,
                                      help="Draw Registration Marks?")
-        self.OptionParser.add_option("--star_target",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--star_target",
+                                     action="store", type=inkbool,
                                      dest="star_target", default=False,
                                      help="Draw Star Target?")
-        self.OptionParser.add_option("--colour_bars",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--colour_bars",
+                                     action="store", type=inkbool,
                                      dest="colour_bars", default=False,
                                      help="Draw Colour Bars?")
-        self.OptionParser.add_option("--page_info",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--page_info",
+                                     action="store", type=inkbool,
                                      dest="page_info", default=False,
                                      help="Draw Page Information?")
-        self.OptionParser.add_option("--unit",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--unit",
+                                     action="store", type=str,
                                      dest="unit", default="px",
                                      help="Draw measurement")
-        self.OptionParser.add_option("--crop_offset",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--crop_offset",
+                                     action="store", type=float,
                                      dest="crop_offset", default=0,
                                      help="Offset")
-        self.OptionParser.add_option("--bleed_top",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_top",
+                                     action="store", type=float,
                                      dest="bleed_top", default=0,
                                      help="Bleed Top Size")
-        self.OptionParser.add_option("--bleed_bottom",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_bottom",
+                                     action="store", type=float,
                                      dest="bleed_bottom", default=0,
                                      help="Bleed Bottom Size")
-        self.OptionParser.add_option("--bleed_left",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_left",
+                                     action="store", type=float,
                                      dest="bleed_left", default=0,
                                      help="Bleed Left Size")
-        self.OptionParser.add_option("--bleed_right",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--bleed_right",
+                                     action="store", type=float,
                                      dest="bleed_right", default=0,
                                      help="Bleed Right Size")
-        self.OptionParser.add_option("--tab",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                                     action="store", type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 
@@ -192,7 +192,7 @@ class PrintingMarks (inkex.Effect):
                 i += 0.1
 
     def get_selection_area(self):
-        scale = self.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')    # convert to document units
         sel_area = {}
         min_x, min_y, max_x, max_y = False, False, False, False
         for id in self.options.ids:
@@ -228,8 +228,8 @@ class PrintingMarks (inkex.Effect):
         self.area_h = max_y - min_y
 
     def effect(self):
-        self.mark_size = self.unittouu('1cm')
-        self.min_mark_margin = self.unittouu('3mm')
+        self.mark_size = self.svg.unittouu('1cm')
+        self.min_mark_margin = self.svg.unittouu('3mm')
 
         if self.options.where_to_crop == 'selection' :
             self.get_selection_area()
@@ -237,8 +237,8 @@ class PrintingMarks (inkex.Effect):
             #exit(1)
         else :
             svg = self.document.getroot()
-            self.area_w  = self.unittouu(svg.get('width'))
-            self.area_h  = self.unittouu(svg.attrib['height'])
+            self.area_w  = self.svg.unittouu(svg.get('width'))
+            self.area_h  = self.svg.unittouu(svg.attrib['height'])
             self.area_x1 = 0
             self.area_y1 = 0
             self.area_x2 = self.area_w
@@ -247,16 +247,14 @@ class PrintingMarks (inkex.Effect):
         # Get SVG document dimensions
         # self.width must be replaced by self.area_x2. same to others.
         svg = self.document.getroot()
-        #self.width  = width  = self.unittouu(svg.get('width'))
-        #self.height = height = self.unittouu(svg.attrib['height'])
 
         # Convert parameters to user unit
-        offset = self.unittouu(str(self.options.crop_offset) + \
+        offset = self.svg.unittouu(str(self.options.crop_offset) + \
                                 self.options.unit)
-        bt = self.unittouu(str(self.options.bleed_top)    + self.options.unit)
-        bb = self.unittouu(str(self.options.bleed_bottom) + self.options.unit)
-        bl = self.unittouu(str(self.options.bleed_left)   + self.options.unit)
-        br = self.unittouu(str(self.options.bleed_right)  + self.options.unit)
+        bt = self.svg.unittouu(str(self.options.bleed_top)    + self.options.unit)
+        bb = self.svg.unittouu(str(self.options.bleed_bottom) + self.options.unit)
+        bl = self.svg.unittouu(str(self.options.bleed_left)   + self.options.unit)
+        br = self.svg.unittouu(str(self.options.bleed_right)  + self.options.unit)
         # Bleed margin
         if bt < offset : bmt = 0
         else :           bmt = bt - offset

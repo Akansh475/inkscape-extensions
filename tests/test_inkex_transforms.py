@@ -2,7 +2,6 @@
 """
 Test Inkex transformational logic.
 """
-
 from inkex.transforms import BoundingBox, Scale, Transform
 from tests.base import TestCase
 

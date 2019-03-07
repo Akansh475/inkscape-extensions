@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -24,32 +24,34 @@ import os
 import base64
 
 import inkex
+from inkex import inkbool
+
 
 class ExtractImage(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--desc")
-        self.OptionParser.add_option("-s", "--selectedonly",
-            action="store", type="inkbool", 
+        self.arg_parser.add_argument("--desc")
+        self.arg_parser.add_argument("-s", "--selectedonly",
+            action="store", type=inkbool,
             dest="selectedonly", default=True,
             help="extract only selected images")
-        self.OptionParser.add_option("--filepath",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--filepath",
+                        action="store", type=str,
                         dest="filepath", default=None,
                         help="")
     def effect(self):
         # if slectedonly is enabled and there is a selection only extractselected
         # images. otherwise extract all images
         if (self.options.selectedonly):
-            self.extractSelected(self.document, self.selected)
+            self.extractSelected(self.document, self.svg.selected)
         else:
             self.extractAll(self.document)
 
     def extractSelected(self, document, selected):
         self.document=document
-        self.selected=selected
+        self.svg.selected=selected
         if (self.options.ids):
-            for id, node in selected.iteritems():
+            for id, node in selected.items():
                 if node.tag == inkex.addNS('image','svg'):
                     self.extract_image(node)
 
@@ -128,4 +130,3 @@ if __name__ == '__main__':
     ExtractImage().run()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

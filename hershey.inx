@@ -29,11 +29,11 @@
 
         <_item value="gothiceng">Gothic English</_item>
         <_item value="gothicger">Gothic German</_item>
-        <_item value="gothicita">Gothic Italian</_item>	   
+        <_item value="gothicita">Gothic Italian</_item>    
 
         <_item value="greek">Greek 1-stroke</_item>
         <_item value="timesg">Greek medium</_item>
-        <_item value="cyrillic">Cyrillic</_item>		
+        <_item value="cyrillic">Cyrillic</_item>        
         <_item value="japanese">Japanese</_item> 
 
         <_item value="astrology">Astrology</_item>

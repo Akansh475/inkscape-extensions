@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -19,32 +19,34 @@
 
 import copy
 import inkex
+from inkex import inkbool
+
 
 class Interp(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-e", "--exponent",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-e", "--exponent",
+                        action="store", type=float,
                         dest="exponent", default=0.0,
                         help="values other than zero give non linear interpolation")
-        self.OptionParser.add_option("-s", "--steps",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-s", "--steps",
+                        action="store", type=int,
                         dest="steps", default=5,
                         help="number of interpolation steps")
-        self.OptionParser.add_option("-m", "--method",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-m", "--method",
+                        action="store", type=int,
                         dest="method", default=2,
                         help="method of interpolation")
-        self.OptionParser.add_option("-d", "--dup",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-d", "--dup",
+                        action="store", type=inkbool,
                         dest="dup", default=True,
-                        help="duplicate endpaths")    
-        self.OptionParser.add_option("--style",
-                        action="store", type="inkbool", 
+                        help="duplicate endpaths")
+        self.arg_parser.add_argument("--style",
+                        action="store", type=inkbool,
                         dest="style", default=True,
-                        help="try interpolation of some style properties")    
-        self.OptionParser.add_option("--zsort",
-                        action="store", type="inkbool",
+                        help="try interpolation of some style properties")
+        self.arg_parser.add_argument("--zsort",
+                        action="store", type=inkbool,
                         dest="zsort", default=False,
                         help="use z-order instead of selection order")
 
@@ -58,8 +60,8 @@ class Interp(inkex.Effect):
         for i in range(self.options.steps - 1):
             steps.append(steps[0] + steps[-1])
         steps = [step**exponent for step in steps]
-            
-        paths = {}            
+
+        paths = {}
         styles = {}
 
         if self.options.zsort:
@@ -107,20 +109,20 @@ class Interp(inkex.Effect):
                     if sst['stroke']=='none':
                         sst['stroke-width'] = '0.0'
                         sst['stroke-opacity'] = '0.0'
-                        sst['stroke'] = est['stroke'] 
+                        sst['stroke'] = est['stroke']
                     elif est['stroke']=='none':
                         est['stroke-width'] = '0.0'
                         est['stroke-opacity'] = '0.0'
-                        est['stroke'] = sst['stroke'] 
+                        est['stroke'] = sst['stroke']
                 if dofill:
                     if sst['fill']=='none':
                         sst['fill-opacity'] = '0.0'
-                        sst['fill'] = est['fill'] 
+                        sst['fill'] = est['fill']
                     elif est['fill']=='none':
                         est['fill-opacity'] = '0.0'
-                        est['fill'] = sst['fill'] 
+                        est['fill'] = sst['fill']
 
-                    
+
 
             if self.options.method == 2:
                 #subdivide both paths into segments of relatively equal lengths
@@ -203,7 +205,7 @@ class Interp(inkex.Effect):
                 #if swapped, swap them back
                 if lengthdiff > 0:
                     start, end = end, start
-            
+
             #break paths so that corresponding subpaths have an equal number of segments
             s = [[]]
             e = [[]]
@@ -222,11 +224,11 @@ class Interp(inkex.Effect):
                 else:
                     s.append(start.pop(0))
                     e.append(end.pop(0))
-    
+
             if self.options.dup:
-                steps = [0] + steps + [1]    
+                steps = [0] + steps + [1]
             #create an interpolated path for each interval
-            group = inkex.etree.SubElement(self.current_layer,inkex.addNS('g','svg'))    
+            group = inkex.etree.SubElement(self.current_layer,inkex.addNS('g','svg'))
             for time in steps:
                 interp = []
                 #process subpaths
@@ -267,4 +269,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

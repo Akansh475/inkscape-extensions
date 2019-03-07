@@ -171,7 +171,7 @@ class ParamCurves(inkex.Effect):
                                      help="dummy")
 
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('rect','svg'):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.etree.Element(inkex.addNS('path','svg'))
@@ -220,4 +220,3 @@ class ParamCurves(inkex.Effect):
 if __name__ == '__main__':
     ParamCurves().affect()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

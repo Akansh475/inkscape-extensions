@@ -6,7 +6,7 @@ import os
 import sys
 
 from inkex.base import InkscapeExtension, SvgThroughMixin
-from tests.base import StdRedirect, TestCase
+from tests.base import TestCase
 
 
 class ModExtension(InkscapeExtension):
@@ -73,13 +73,6 @@ class InkscapeExtensionTest(TestCase):
         options = self.e.arg_parser.parse_args(['--output', 'foo.txt', self.empty_svg])
         self.assertEqual(options.input_file, self.empty_svg)
         self.assertEqual(options.output, 'foo.txt')
-
-    def test_output(self):
-        """Test the ins and outs of an extension"""
-        with StdRedirect() as output:
-            with StdRedirect('stdin', 'dinner'):
-                ModExtension().run([])
-                self.assertEqual(output.str, 'dinner>flipple')
 
 
 class SvgInputOutputTest(TestCase):

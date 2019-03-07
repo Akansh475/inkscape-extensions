@@ -23,24 +23,24 @@ import sys
 class SetupTypographyCanvas(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-e", "--emsize",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-e", "--emsize",
+                        action="store", type=int,
                         dest="emsize", default=1000,
                         help="Em-size")
-        self.OptionParser.add_option("-a", "--ascender",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-a", "--ascender",
+                        action="store", type=int,
                         dest="ascender", default='750',
                         help="Ascender")
-        self.OptionParser.add_option("-c", "--caps",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-c", "--caps",
+                        action="store", type=int,
                         dest="caps", default='700',
                         help="Caps Height")
-        self.OptionParser.add_option("-x", "--xheight",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-x", "--xheight",
+                        action="store", type=int,
                         dest="xheight", default='500',
                         help="x-height")
-        self.OptionParser.add_option("-d", "--descender",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-d", "--descender",
+                        action="store", type=int,
                         dest="descender", default='250',
                         help="Descender")
 

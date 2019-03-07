@@ -1,17 +1,9 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
-from extractimage import MyEffect
+from extractimage import ExtractImage
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class ExtractImageBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = MyEffect
+        self.effect = ExtractImage
         self.e = self.effect()
-
-
-if __name__ == '__main__':
-    unittest.main()

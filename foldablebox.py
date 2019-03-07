@@ -22,55 +22,57 @@ __version__ = "0.2"
 from math import *
 
 import inkex
+from inkex import inkbool
+
 
 class FoldableBox(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-x", "--width",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-x", "--width",
+                        action="store", type=float,
                         dest="width", default=10.0,
                         help="The Box Width - in the X dimension")
-        self.OptionParser.add_option("-y", "--height",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-y", "--height",
+                        action="store", type=float,
                         dest="height", default=15.0,
                         help="The Box Height - in the Y dimension")
-        self.OptionParser.add_option("-z", "--depth",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-z", "--depth",
+                        action="store", type=float,
                         dest="depth", default=3.0,
                         help="The Box Depth - in the Z dimension")
-        self.OptionParser.add_option("-u", "--unit",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-u", "--unit",
+                        action="store", type=str,
                         dest="unit", default="cm",
                         help="The unit of the box dimensions")
-        self.OptionParser.add_option("-p", "--paper-thickness",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-p", "--paper-thickness",
+                        action="store", type=float,
                         dest="thickness", default=0.01,
                         help="Paper Thickness - sometimes that is important")
-        self.OptionParser.add_option("-t", "--tab-proportion",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-t", "--tab-proportion",
+                        action="store", type=float,
                         dest="tabProportion", default=0.6,
                         help="Inner tab proportion for upper tab")
-        self.OptionParser.add_option("-g", "--guide-line",
-                        action="store", type="inkbool",
+        self.arg_parser.add_argument("-g", "--guide-line",
+                        action="store", type=inkbool,
                         dest="guideLine", default=True,
                         help="Add guide lines to help the drawing limits")
 
     def effect(self):
 
-        docW = self.unittouu(self.document.getroot().get('width'))
-        docH = self.unittouu(self.document.getroot().get('height'))
+        docW = self.svg.unittouu(self.document.getroot().get('width'))
+        docH = self.svg.unittouu(self.document.getroot().get('height'))
 
-        boxW = self.unittouu( str(self.options.width)  + self.options.unit )
-        boxH = self.unittouu( str(self.options.height) + self.options.unit )
-        boxD = self.unittouu( str(self.options.depth)  + self.options.unit )
+        boxW = self.svg.unittouu( str(self.options.width)  + self.options.unit )
+        boxH = self.svg.unittouu( str(self.options.height) + self.options.unit )
+        boxD = self.svg.unittouu( str(self.options.depth)  + self.options.unit )
         tabProp = self.options.tabProportion
         tabH = boxD * tabProp
 
-        box_id = self.uniqueId('box')
-        self.box = g = inkex.etree.SubElement(self.current_layer, 'g', {'id':box_id})
+        box_id = self.svg.get_unique_id('box')
+        self.box = g = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', {'id':box_id})
 
-        line_style = str(inkex.Style({ 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }))
+        line_style = str(inkex.Style({ 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px')) }))
 
         #self.createGuide( 0, docH, 0 );
 
@@ -262,4 +264,3 @@ if __name__ == '__main__':   #pragma: no cover
     e = FoldableBox()
     e.affect()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

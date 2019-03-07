@@ -98,7 +98,7 @@ def ArcToPath(p1,params):
         applymat(mat, pts[1])
         applymat(mat, pts[2])
     return(p)
-    
+
 def CubicSuperPath(simplepath):
     csp = []
     subpath = -1
@@ -106,7 +106,7 @@ def CubicSuperPath(simplepath):
     last = []
     lastctrl = []
     for s in simplepath:
-        cmd, params = s        
+        cmd, params = s
         if cmd == 'M':
             if last:
                 csp[subpath].append([lastctrl[:],last[:],last[:]])
@@ -150,7 +150,7 @@ def CubicSuperPath(simplepath):
             lastctrl = subpathstart[:]
     #append final superpoint
     csp[subpath].append([lastctrl[:],last[:],last[:]])
-    return csp    
+    return csp
 
 def unCubicSuperPath(csp):
     a = []
@@ -170,4 +170,3 @@ def formatCubicPath(p):
     return formatPath(unCubicSuperPath(p))
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

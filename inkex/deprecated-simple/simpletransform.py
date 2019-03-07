@@ -4,7 +4,7 @@
 """
 Depreicated simpletransform replacements with documentation
 """
-  
+
 from inkex.deprecated import deprecate
 from inkex.transforms import Transform, BoundingBox, cubic_extrema
 from inkex.paths import Path
@@ -109,4 +109,3 @@ def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
         applyTransformToPoint(invertTransform(composeParents(node, mat)), pt)
     return pt
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

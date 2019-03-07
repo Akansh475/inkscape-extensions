@@ -32,12 +32,12 @@ class JessyInk_Transitions(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--layerName', action = 'store', type = 'string', dest = 'layerName', default = '')
-        self.OptionParser.add_option('--effectIn', action = 'store', type = 'string', dest = 'effectIn', default = 'default')
-        self.OptionParser.add_option('--effectInDuration', action = 'store', type = 'float', dest = 'effectInDuration', default = 0.8)
-        self.OptionParser.add_option('--effectOut', action = 'store', type = 'string', dest = 'effectOut', default = 'default')
-        self.OptionParser.add_option('--effectOutDuration', action = 'store', type = 'float', dest = 'effectOutDuration', default = 0.8)
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--layerName', action = 'store', type=str, dest = 'layerName', default = '')
+        self.arg_parser.add_argument('--effectIn', action = 'store', type=str, dest = 'effectIn', default = 'default')
+        self.arg_parser.add_argument('--effectInDuration', action = 'store', type=float, dest = 'effectInDuration', default = 0.8)
+        self.arg_parser.add_argument('--effectOut', action = 'store', type=str, dest = 'effectOut', default = 'default')
+        self.arg_parser.add_argument('--effectOutDuration', action = 'store', type=float, dest = 'effectOutDuration', default = 0.8)
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

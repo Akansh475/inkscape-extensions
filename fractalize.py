@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Carsten Goetze c.goetze@tu-bs.de
 #
@@ -48,20 +48,20 @@ def calculateSubdivision(x1,y1,x2,y2,smoothness):
 class PathFractalize(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--subdivs",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-s", "--subdivs",
+                        action="store", type=int,
                         dest="subdivs", default="6",
                         help="Number of subdivisons")
-        self.OptionParser.add_option("-f", "--smooth",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-f", "--smooth",
+                        action="store", type=float,
                         dest="smooth", default="4.0",
                         help="Smoothness of the subdivision")
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 d = node.get('d')
                 p = inkex.parsePath(d)
-                
+
                 a = []
                 first = 1
                 for cmd,params in p:
@@ -83,17 +83,16 @@ class PathFractalize(inkex.Effect):
 
     def fractalize(self,a,x1,y1,x2,y2,s,f):
         subdivPoint = calculateSubdivision(x1,y1,x2,y2,f)
-        
+
         if s > 0 :
             """ recursively subdivide the segment left of the subdivision point """
             self.fractalize(a,x1,y1,subdivPoint[-2],subdivPoint[-1],s-1,f)
             a.append(['L',subdivPoint])
             """ recursively subdivide the segment right of the subdivision point """
             self.fractalize(a,subdivPoint[-2],subdivPoint[-1],x2,y2,s-1,f)
-             
+
 if __name__ == '__main__':
     e = PathFractalize()
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

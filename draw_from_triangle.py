@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -12,7 +12,7 @@
 #       / a_c``--__
 #      /           ``--__ s_a
 # s_b /                  ``--__
-#    /a_a                    a_b`--__  
+#    /a_a                    a_b`--__
 #   /--------------------------------``B
 #  A              s_b
 #
@@ -35,6 +35,7 @@ import sys
 from math import *
 
 import inkex
+from inkex import inkbool
 
 
 #DRAWING ROUTINES
@@ -51,7 +52,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):#draw an SVG circl
     cx,cy = get_cartesian_pt(centre, params)
     circ_attribs = {'style':str(inkex.Style(circ_style)),
                     inkex.addNS('label','inkscape'):name,
-                    'cx':str(cx), 'cy':str(cy), 
+                    'cx':str(cx), 'cy':str(cy),
                     'r':str(r)}
     inkex.etree.SubElement(parent, inkex.addNS('circle','svg'), circ_attribs )
 
@@ -82,7 +83,7 @@ def draw_vertex_lines( vert_mat, params, width, name, parent):
     for i in range(3):
         oppositepoint = get_cartesian_pt( vert_mat[i], params)
         draw_SVG_line(params[3][-i%3], oppositepoint, width, name+':'+str(i), parent)
-        
+
 #MATHEMATICAL ROUTINES
 
 def distance(a, b):
@@ -112,7 +113,7 @@ def get_cartesian_tri(arg, params):
 def angle_from_3_sides(a, b, c): #return the angle opposite side c
     cosx = (a*a + b*b - c*c)/(2*a*b)  #use the cosine rule
     return acos(cosx)
-    
+
 def translate_string(string, os): #translates s_a, a_a, etc to params[x][y], with cyclic offset
     string = string.replace('s_a', 'params[0]['+str((os+0)%3)+']') #replace with ref. to the relvant values,
     string = string.replace('s_b', 'params[0]['+str((os+1)%3)+']') #cycled by i
@@ -132,16 +133,16 @@ def pt_from_tcf( tcf , params):#returns a trilinear triplet from a triangle cent
         func = eval('lambda params: ' + temp.strip('"')) #the function leading to the trilinar element
         trilin_pts.append(func(params))#evaluate the function for the first trilinear element
     return trilin_pts
-    
+
 #SVG DATA PROCESSING
-    
+
 def get_n_points_from_path( node, n):#returns a list of first n points (x,y) in an SVG path-representing node
 
     p = inkex.parsePath(node.get('d')) #parse the path
-    
+
     xi = [] #temporary storage for x and y (will combine at end)
     yi = []
-    
+
     for cmd,params in p:                    #a parsed path is made up of (cmd, params) pairs
         defs = inkex.pathdefs[cmd]
         for i in range(defs[1]):
@@ -157,9 +158,9 @@ def get_n_points_from_path( node, n):#returns a list of first n points (x,y) in 
     else:
         #inkex.errormsg(_('Error: Not enough nodes to gather coordinates.')) #fail silently and exit, rather than invoke an error console
         return [] #return a blank
-        
+
     return points
-    
+
 #EXTRA MATHS FUNCTIONS
 def sec(x):#secant(x)
     if x == pi/2 or x==-pi/2 or x == 3*pi/2 or x == -3*pi/2: #sec(x) is undefined
@@ -178,7 +179,7 @@ def cot(x):#cotangent(x)
         return 100000000000
     else:
         return 1/tan(x)
-        
+
 def report_properties( params ):#report to the Inkscape console using errormsg
     # TODO: unit identifier needs solution for arbitrary document scale
     unit = Draw_From_Triangle.getDocumentUnit(e)
@@ -206,7 +207,7 @@ class Style(object): #container for style information
         self.l_th  = Draw_From_Triangle.unittouu(e, '2px')
         self.l_fill= 'none'
         self.l_col = '#000000'
-        
+
         #circles
         self.c_th  = Draw_From_Triangle.unittouu(e, '2px')
         self.c_fill= 'none'
@@ -215,107 +216,107 @@ class Style(object): #container for style information
 class Draw_From_Triangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab", default="sampling",
-                        help="The selected UI-tab when OK was pressed") 
+                        help="The selected UI-tab when OK was pressed")
 #PRESET POINT OPTIONS
-        self.OptionParser.add_option("--circumcircle",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--circumcircle",
+                        action="store", type=inkbool,
                         dest="do_circumcircle", default=False)
-        self.OptionParser.add_option("--circumcentre",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--circumcentre",
+                        action="store", type=inkbool,
                         dest="do_circumcentre", default=False)
-        self.OptionParser.add_option("--incircle",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--incircle",
+                        action="store", type=inkbool,
                         dest="do_incircle", default=False)
-        self.OptionParser.add_option("--incentre",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--incentre",
+                        action="store", type=inkbool,
                         dest="do_incentre", default=False)
-        self.OptionParser.add_option("--contact_tri",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--contact_tri",
+                        action="store", type=inkbool,
                         dest="do_contact_tri", default=False)
-        self.OptionParser.add_option("--excircles",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--excircles",
+                        action="store", type=inkbool,
                         dest="do_excircles", default=False)
-        self.OptionParser.add_option("--excentres",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--excentres",
+                        action="store", type=inkbool,
                         dest="do_excentres", default=False)
-        self.OptionParser.add_option("--extouch_tri",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--extouch_tri",
+                        action="store", type=inkbool,
                         dest="do_extouch_tri", default=False)
-        self.OptionParser.add_option("--excentral_tri",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--excentral_tri",
+                        action="store", type=inkbool,
                         dest="do_excentral_tri", default=False)
-        self.OptionParser.add_option("--orthocentre",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--orthocentre",
+                        action="store", type=inkbool,
                         dest="do_orthocentre", default=False)
-        self.OptionParser.add_option("--orthic_tri",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--orthic_tri",
+                        action="store", type=inkbool,
                         dest="do_orthic_tri", default=False)
-        self.OptionParser.add_option("--altitudes",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--altitudes",
+                        action="store", type=inkbool,
                         dest="do_altitudes", default=False)
-        self.OptionParser.add_option("--anglebisectors",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--anglebisectors",
+                        action="store", type=inkbool,
                         dest="do_anglebisectors", default=False)
-        self.OptionParser.add_option("--centroid",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--centroid",
+                        action="store", type=inkbool,
                         dest="do_centroid", default=False)
-        self.OptionParser.add_option("--ninepointcentre",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--ninepointcentre",
+                        action="store", type=inkbool,
                         dest="do_ninepointcentre", default=False)
-        self.OptionParser.add_option("--ninepointcircle",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--ninepointcircle",
+                        action="store", type=inkbool,
                         dest="do_ninepointcircle", default=False)
-        self.OptionParser.add_option("--symmedians",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--symmedians",
+                        action="store", type=inkbool,
                         dest="do_symmedians", default=False)
-        self.OptionParser.add_option("--sym_point",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--sym_point",
+                        action="store", type=inkbool,
                         dest="do_sym_pt", default=False)
-        self.OptionParser.add_option("--sym_tri",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--sym_tri",
+                        action="store", type=inkbool,
                         dest="do_sym_tri", default=False)
-        self.OptionParser.add_option("--gergonne_pt",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--gergonne_pt",
+                        action="store", type=inkbool,
                         dest="do_gergonne_pt", default=False)
-        self.OptionParser.add_option("--nagel_pt",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--nagel_pt",
+                        action="store", type=inkbool,
                         dest="do_nagel_pt", default=False)
 #CUSTOM POINT OPTIONS
-        self.OptionParser.add_option("--mode",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--mode",
+                        action="store", type=str,
                         dest="mode", default='trilin')
-        self.OptionParser.add_option("--cust_str",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--cust_str",
+                        action="store", type=str,
                         dest="cust_str", default='s_a')
-        self.OptionParser.add_option("--cust_pt",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--cust_pt",
+                        action="store", type=inkbool,
                         dest="do_cust_pt", default=False)
-        self.OptionParser.add_option("--cust_radius",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--cust_radius",
+                        action="store", type=inkbool,
                         dest="do_cust_radius", default=False)
-        self.OptionParser.add_option("--radius",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--radius",
+                        action="store", type=str,
                         dest="radius", default='s_a')
-        self.OptionParser.add_option("--isogonal_conj",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--isogonal_conj",
+                        action="store", type=inkbool,
                         dest="do_isogonal_conj", default=False)
-        self.OptionParser.add_option("--isotomic_conj",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--isotomic_conj",
+                        action="store", type=inkbool,
                         dest="do_isotomic_conj", default=False)
-        self.OptionParser.add_option("--report",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("--report",
+                        action="store", type=inkbool,
                         dest="report", default=False)
 
 
     def effect(self):
-        
+
         so = self.options #shorthand
-        
+
         pts = [] #initialise in case nothing is selected and following loop is not executed
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
                 # find the (x,y) coordinates of the first 3 points of the path
                 pts = get_n_points_from_path( node, 3 )
@@ -330,23 +331,23 @@ class Draw_From_Triangle(inkex.Effect):
             group_attribs = {inkex.addNS('label','inkscape'):'TriangleElements',
                   'transform':group_translation }
             layer = inkex.etree.SubElement(self.current_layer, 'g', group_attribs)
-            
+
             #GET METRICS OF THE TRIANGLE
             #vertices in the local coordinates (set pt[0] to be the origin)
             vtx = [[0,0],
                    [pts[1][0]-pts[0][0],pts[1][1]-pts[0][1]],
                    [pts[2][0]-pts[0][0],pts[2][1]-pts[0][1]]]
-            
+
             s_a = distance(vtx[1],vtx[2])#get the scalar side lengths
             s_b = distance(vtx[0],vtx[1])
             s_c = distance(vtx[0],vtx[2])
             sides=(s_a,s_b,s_c)#side list for passing to functions easily and for indexing
-            
+
             a_a = angle_from_3_sides(s_b, s_c, s_a)#angles in radians
             a_b = angle_from_3_sides(s_a, s_c, s_b)
             a_c = angle_from_3_sides(s_a, s_b, s_c)
             angles=(a_a,a_b,a_c)
-            
+
             ab  = vector_from_to(vtx[0], vtx[1]) #vector from a to b
             ac  = vector_from_to(vtx[0], vtx[2]) #vector from a to c
             bc  = vector_from_to(vtx[1], vtx[2]) #vector from b to c
@@ -355,9 +356,9 @@ class Draw_From_Triangle(inkex.Effect):
             semiperim = (s_a+s_b+s_c)/2.0 #semiperimeter
             area      = sqrt( semiperim*(semiperim-s_a)*(semiperim-s_b)*(semiperim-s_c) ) #area of the triangle by heron's formula
             uvals = (area, semiperim) #useful values
-                    
+
             params = (sides, angles, vecs, vtx, uvals) #all useful triangle parameters in one object
-            
+
             if so.report:
                 report_properties( params )
 
@@ -369,7 +370,7 @@ class Draw_From_Triangle(inkex.Effect):
                     draw_SVG_circle(0, pt, params, st, 'Circumcentre', layer)
                 if so.do_circumcircle:
                     draw_SVG_circle(r, pt, params, st, 'Circumcircle', layer)
-            
+
             if so.do_incentre or so.do_incircle:
                 pt = [1,1,1]
                 if so.do_incentre:
@@ -377,33 +378,33 @@ class Draw_From_Triangle(inkex.Effect):
                 if so.do_incircle:
                     r  = area/semiperim
                     draw_SVG_circle(r, pt, params, st, 'Incircle', layer)
-            
+
             if so.do_contact_tri:
                 t1 = s_b*s_c/(-s_a+s_b+s_c)
                 t2 = s_a*s_c/( s_a-s_b+s_c)
                 t3 = s_a*s_b/( s_a+s_b-s_c)
                 v_mat = ( (0,t2,t3),(t1,0,t3),(t1,t2,0))
                 draw_SVG_tri(v_mat, params, st,'ContactTriangle',layer)
-                
+
             if so.do_extouch_tri:
                 t1 = (-s_a+s_b+s_c)/s_a
                 t2 = ( s_a-s_b+s_c)/s_b
                 t3 = ( s_a+s_b-s_c)/s_c
                 v_mat = ( (0,t2,t3),(t1,0,t3),(t1,t2,0))
                 draw_SVG_tri(v_mat, params, st,'ExtouchTriangle',layer)
-                          
+
             if so.do_orthocentre:
                 pt = pt_from_tcf('cos(a_b)*cos(a_c)', params)
                 draw_SVG_circle(0, pt, params, st, 'Orthocentre', layer)
-            
+
             if so.do_orthic_tri:
                 v_mat = [[0,sec(a_b),sec(a_c)],[sec(a_a),0,sec(a_c)],[sec(a_a),sec(a_b),0]]
                 draw_SVG_tri(v_mat, params, st,'OrthicTriangle',layer)
-            
+
             if so.do_centroid:
                 pt = [1/s_a,1/s_b,1/s_c]
                 draw_SVG_circle(0, pt, params, st, 'Centroid', layer)
-            
+
             if so.do_ninepointcentre or so.do_ninepointcircle:
                 pt = [cos(a_b-a_c),cos(a_c-a_a),cos(a_a-a_b)]
                 if so.do_ninepointcentre:
@@ -411,15 +412,15 @@ class Draw_From_Triangle(inkex.Effect):
                 if so.do_ninepointcircle:
                     r    = s_a*s_b*s_c/(8*area)
                     draw_SVG_circle(r, pt, params, st, 'NinePointCircle', layer)
-            
+
             if so.do_altitudes:
                 v_mat  = [[0,sec(a_b),sec(a_c)],[sec(a_a),0,sec(a_c)],[sec(a_a),sec(a_b),0]]
                 draw_vertex_lines( v_mat, params, st, 'Altitude', layer)
-            
+
             if so.do_anglebisectors:
                 v_mat  = ((0,1,1),(1,0,1),(1,1,0))
                 draw_vertex_lines(v_mat,params, st, 'AngleBisectors', layer)
-            
+
             if so.do_excircles or so.do_excentres or so.do_excentral_tri:
                 v_mat = ((-1,1,1),(1,-1,1),(1,1,-1))
                 if so.do_excentral_tri:
@@ -430,26 +431,26 @@ class Draw_From_Triangle(inkex.Effect):
                         draw_SVG_circle(r, v_mat[i], params, st, 'Excircle:'+str(i), layer)
                     if so.do_excentres:
                         draw_SVG_circle(0, v_mat[i], params, st, 'Excentre:'+str(i), layer)
-            
+
             if so.do_sym_tri or so.do_symmedians:
                 v_mat = ((0,s_b,s_c), (s_a, 0, s_c), (s_a, s_b, 0))
                 if so.do_sym_tri:
                     draw_SVG_tri(v_mat, params, st,'SymmedialTriangle',layer)
                 if so.do_symmedians:
                     draw_vertex_lines(v_mat,params, st, 'Symmedian', layer)
-            
+
             if so.do_sym_pt:
                 pt = (s_a,s_b,s_c)
                 draw_SVG_circle(0, pt, params, st, 'SymmmedianPoint', layer)
-            
+
             if so.do_gergonne_pt:
                 pt = pt_from_tcf('1/(s_a*(s_b+s_c-s_a))', params)
                 draw_SVG_circle(0, pt, params, st, 'GergonnePoint', layer)
-            
+
             if so.do_nagel_pt:
                 pt = pt_from_tcf('(s_b+s_c-s_a)/s_a', params)
                 draw_SVG_circle(0, pt, params, st, 'NagelPoint', layer)
-            
+
             if so.do_cust_pt or so.do_cust_radius or so.do_isogonal_conj or so.do_isotomic_conj:
                 pt = []#where we will store the point in trilinears
                 if so.mode == 'trilin':#if we are receiving from trilinears
@@ -461,7 +462,7 @@ class Draw_From_Triangle(inkex.Effect):
                 else:#we need a triangle function
                     string = so.cust_str #don't need to translate, as the pt_from_tcf function does that for us
                     pt = pt_from_tcf(string, params)#get the point from the tcf directly
-                    
+
                 if so.do_cust_pt:#draw the point
                     draw_SVG_circle(0, pt, params, st, 'CustomTrilinearPoint', layer)
                 if so.do_cust_radius:#draw the circle with given radius

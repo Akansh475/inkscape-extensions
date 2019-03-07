@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
 #
@@ -110,7 +110,7 @@ class Edge3d(inkex.Effect):
                         a = 'fill:none;stroke:#%02x%02x%02x;stroke-opacity:1;stroke-width:10;%s' % ((col,)*3 + (self.filtId,))
                         nn.set('style',a)
                         g.append(nn)
-        
+
     def getGroup(self, node):
         defs = self.document.getroot().xpath('//svg:defs', namespaces=inkex.NSS)
         if defs:
@@ -147,4 +147,3 @@ if __name__ == '__main__':
     Edge3d().run()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

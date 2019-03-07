@@ -10,6 +10,6 @@
         <_filetypetooltip>Exports the colors of this document as GIMP Palette</_filetypetooltip>
     </output>
     <script>
-    	<command reldir="extensions" interpreter="python">export_gimp_palette.py</command>
+        <command reldir="extensions" interpreter="python">export_gimp_palette.py</command>
     </script>
 </inkscape-extension>

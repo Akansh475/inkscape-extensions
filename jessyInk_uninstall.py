@@ -25,6 +25,7 @@ sys.path.append('C:\Program Files\Inkscape\share\extensions')
 
 # We will use the inkex module with the predefined Effect base class.
 import inkex
+from inkex import inkbool
 
 def propStrToList(str):
     list = []
@@ -45,13 +46,13 @@ class JessyInk_Uninstall(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--remove_script', action = 'store', type = 'inkbool', dest = 'remove_script', default = True)
-        self.OptionParser.add_option('--remove_effects', action = 'store', type = 'inkbool', dest = 'remove_effects', default = True)
-        self.OptionParser.add_option('--remove_masterSlide', action = 'store', type = 'inkbool', dest = 'remove_masterSlide', default = True)
-        self.OptionParser.add_option('--remove_transitions', action = 'store', type = 'inkbool', dest = 'remove_transitions', default = True)
-        self.OptionParser.add_option('--remove_autoTexts', action = 'store', type = 'inkbool', dest = 'remove_autoTexts', default = True)
-        self.OptionParser.add_option('--remove_views', action = 'store', type = 'inkbool', dest = 'remove_views', default = True)
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--remove_script', action = 'store', type=inkbool, dest = 'remove_script', default = True)
+        self.arg_parser.add_argument('--remove_effects', action = 'store', type=inkbool, dest = 'remove_effects', default = True)
+        self.arg_parser.add_argument('--remove_masterSlide', action = 'store', type=inkbool, dest = 'remove_masterSlide', default = True)
+        self.arg_parser.add_argument('--remove_transitions', action = 'store', type=inkbool, dest = 'remove_transitions', default = True)
+        self.arg_parser.add_argument('--remove_autoTexts', action = 'store', type=inkbool, dest = 'remove_autoTexts', default = True)
+        self.arg_parser.add_argument('--remove_views', action = 'store', type=inkbool, dest = 'remove_views', default = True)
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

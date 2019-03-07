@@ -3,7 +3,7 @@
     <_name>Interpolate Attribute in a group</_name>
     <id>org.inkscape.filter.interp-att-g</id>
     <dependency type="executable" location="extensions">interp_att_g.py</dependency>
-	<param name="tab" type="notebook">
+    <param name="tab" type="notebook">
         <page name="Options" _gui-text="Options">
             <param name="att" type="enum" _gui-text="Attribute to Interpolate:">
                 <_item value="width">Width</_item>

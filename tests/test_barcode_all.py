@@ -58,15 +58,35 @@ class GetBarcodeTest(TestCase):
         """Barcode UPCE"""
         self.barcode_test('Upce')
 
+    def test_render_barcode_code128(self):
+        """Barcode Code128"""
+        self.barcode_test('Code128')
+
+    def test_render_barcode_code25i(self):
+        """Barcode Code25i"""
+        self.barcode_test('Code25i')
+
+    def test_render_barcode_code39(self):
+        """Barcode Code39"""
+        self.barcode_test('Code39')
+
+    def test_render_barcode_code39Ext(self):
+        """Barcode Code39Ext"""
+        self.barcode_test('Code39Ext')
+
+    def test_render_barcode_Ean2(self):
+        """Barcode Ean2"""
+        self.barcode_test('Ean2')
+
     def barcode_test(self, name):
         """Base module for all barcode testing"""
+
+        assert self.data[name.lower()], "No test data available for {}".format(name)
         for datum in self.data[name.lower()]:
             (text, code) = datum
-            if not text or not code:
-                continue
             coder = get_barcode(name, text=text)
             code2 = coder.encode(text)
-            self.assertEqual(code, code2)
+            assert code == code2
 
 
 if __name__ == '__main__':

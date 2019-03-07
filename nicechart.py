@@ -229,13 +229,13 @@ class NiceChart(inkex.Effect):
 
         if draw_blur:
             # Get defs of Document
-            defs = self.xpathSingle('/svg:svg//svg:defs')
+            defs = self.svg.getElement('/svg:svg//svg:defs')
             if defs == None:
                 defs = inkex.etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
 
             # Create new Filter
             filt = inkex.etree.SubElement(defs,inkex.addNS('filter', 'svg'))
-            filtId = self.uniqueId('filter')
+            filtId = self.svg.get_unique_id('filter')
             self.filtId = 'filter:url(#%s);' % filtId
             for k, v in [('id', filtId), ('height', "3"),
                          ('width', "3"),

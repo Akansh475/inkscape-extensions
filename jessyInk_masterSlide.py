@@ -31,8 +31,8 @@ class JessyInk_MasterSlide(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--layerName', action = 'store', type = 'string', dest = 'layerName', default = '')
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--layerName', action = 'store', type=str, dest = 'layerName', default = '')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -23,29 +23,29 @@ class Dots(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-d", "--dotsize",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-d", "--dotsize",
+                        action="store", type=str,
                         dest="dotsize", default="10px",
                         help="Size of the dots placed at path nodes")
-        self.OptionParser.add_option("-f", "--fontsize",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-f", "--fontsize",
+                        action="store", type=str,
                         dest="fontsize", default="20",
                         help="Size of node label numbers")
-        self.OptionParser.add_option("-s", "--start",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-s", "--start",
+                        action="store", type=int,
                         dest="start", default="1",
                         help="First number in the sequence, assigned to the first node")
-        self.OptionParser.add_option("-t", "--step",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-t", "--step",
+                        action="store", type=int,
                         dest="step", default="1",
                         help="Numbering step between two nodes")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
     def effect(self):
-        selection = self.selected
+        selection = self.svg.selected
         if (selection):
             for id, node in selection.items():
                 if node.tag == inkex.addNS('path','svg'):
@@ -70,14 +70,14 @@ class Dots(inkex.Effect):
                 y = dy/dist
                 if x1 > x2: x *= -1
                 if y1 > y2: y *= -1
-                p[lastDot][1][-2] += x * self.unittouu(self.options.dotsize)
-                p[lastDot][1][-1] += y * self.unittouu(self.options.dotsize)
+                p[lastDot][1][-2] += x * self.svg.unittouu(self.options.dotsize)
+                p[lastDot][1][-1] += y * self.svg.unittouu(self.options.dotsize)
 
     def addDot(self, node):
         self.group = inkex.etree.SubElement( node.getparent(), inkex.addNS('g','svg') )
         self.dotGroup = inkex.etree.SubElement( self.group, inkex.addNS('g','svg') )
         self.numGroup = inkex.etree.SubElement( self.group, inkex.addNS('g','svg') )
-        
+
         try:
             t = node.get('transform')
             self.group.set('transform', t)
@@ -95,7 +95,7 @@ class Dots(inkex.Effect):
             if cmd != 'Z' and cmd != 'z':
                 dot_att = {
                   'style': style,
-                  'r':  str( self.unittouu(self.options.dotsize) / 2 ),
+                  'r':  str( self.svg.unittouu(self.options.dotsize) / 2 ),
                   'cx': str( params[-2] ),
                   'cy': str( params[-1] )
                 }
@@ -105,15 +105,15 @@ class Dots(inkex.Effect):
                   dot_att )
                 self.addText(
                   self.numGroup,
-                  params[-2] + ( self.unittouu(self.options.dotsize) / 2 ),
-                  params[-1] - ( self.unittouu(self.options.dotsize) / 2 ),
+                  params[-2] + ( self.svg.unittouu(self.options.dotsize) / 2 ),
+                  params[-1] - ( self.svg.unittouu(self.options.dotsize) / 2 ),
                   num )
                 num += self.options.step
         node.getparent().remove( node )
 
     def addText(self,node,x,y,text):
                 new = inkex.etree.SubElement(node,inkex.addNS('text','svg'))
-                s = {'font-size': self.unittouu(self.options.fontsize), 'fill-opacity': '1.0', 'stroke': 'none',
+                s = {'font-size': self.svg.unittouu(self.options.fontsize), 'fill-opacity': '1.0', 'stroke': 'none',
                     'font-weight': 'normal', 'font-style': 'normal', 'fill': '#999'}
                 new.set('style', str(inkex.Style(s)))
                 new.set('x', str(x))
@@ -125,4 +125,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2006 Jos Hirth, kaioa.com
 #
@@ -176,21 +176,21 @@ foo=[
 class MyEffect(inkex.Effect):
   def __init__(self):
     inkex.Effect.__init__(self)
-    self.OptionParser.add_option("--title")
-    self.OptionParser.add_option("-n", "--numberofparagraphs",
-      action="store", type="int", 
+    self.arg_parser.add_argument("--title")
+    self.arg_parser.add_argument("-n", "--numberofparagraphs",
+      action="store", type=int,
       dest="num", default=5,
       help="Number of paragraphs to generate")
-    self.OptionParser.add_option("-c", "--sentencecount",
-      action="store", type="int", 
+    self.arg_parser.add_argument("-c", "--sentencecount",
+      action="store", type=int,
       dest="sentencecount", default=16,
       help="Number of Sentences")
-    self.OptionParser.add_option("-f", "--fluctuation",
-      action="store", type="int", 
+    self.arg_parser.add_argument("-f", "--fluctuation",
+      action="store", type=int,
       dest="fluctuation", default=4,
       help="+/-")
-    self.OptionParser.add_option("--tab",
-      action="store", type="string",
+    self.arg_parser.add_argument("--tab",
+      action="store", type=str,
       dest="tab",
       help="The selected UI-tab when OK was pressed")
 
@@ -208,16 +208,16 @@ class MyEffect(inkex.Effect):
       else:
         text+=foo[random.randint(0,len(foo)-1)]
     return text
-  
+
   def addText(self, node):
     for i in range(self.options.num):
       para=inkex.etree.SubElement(node,inkex.addNS('flowPara','svg'))
       para.text = self.makePara()
       inkex.etree.SubElement(node,inkex.addNS('flowPara','svg'))
-  
+
   def effect(self):
     found=0
-    for id, node in self.selected.items():
+    for id, node in self.svg.selected.items():
       if node.tag == inkex.addNS('flowRoot','svg'):
         found+=1
         if found==1:

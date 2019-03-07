@@ -34,6 +34,8 @@ class Style(OrderedDict):
     @staticmethod
     def parse_str(style):
         """Create a dictionary from the value of an inline style attribute"""
+        if style is None:
+            style=""
         for directive in style.split(';'):
             if ':' in directive:
                 (name, value) = directive.split(':', 1)
@@ -55,4 +57,3 @@ class Style(OrderedDict):
         self.update(Style(other))
         return self
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

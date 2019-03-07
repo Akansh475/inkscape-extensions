@@ -1,9 +1,5 @@
-#!/usr/bin/env python
 # coding=utf-8
 """Test units inkex module functionality"""
-
-import unittest
-
 from inkex.units import are_near_relative, convert_unit, discover_unit, parse_unit, render_unit
 from tests.base import TestCase
 
@@ -59,7 +55,3 @@ class UnitsTest(TestCase):
                 '.1e+3mm',
                 '+.1e+3mm'):
             self.assertEqual(parse_unit(value), (100, 'mm'))
-
-
-if __name__ == '__main__':
-    unittest.main()

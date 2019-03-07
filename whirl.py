@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -19,16 +19,17 @@
 
 import math
 import inkex
+from inkex import inkbool
 
 class Whirl(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-t", "--whirl",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-t", "--whirl",
+                        action="store", type=float,
                         dest="whirl", default=1.0,
                         help="amount of whirl")
-        self.OptionParser.add_option("-r", "--rotation",
-                        action="store", type="inkbool", 
+        self.arg_parser.add_argument("-r", "--rotation",
+                        action="store", type=inkbool,
                         dest="rotation", default=True,
                         help="direction of rotation")
     def effect(self):
@@ -61,4 +62,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

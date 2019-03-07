@@ -127,5 +127,4 @@ if __name__ == '__main__':
         process_file(sys.argv[1])
     else:
         print('Usage: %s <dhw-file>' % sys.argv[0], file=sys.stderr)
-        
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99
+

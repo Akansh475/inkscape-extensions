@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 '''
 # local library
-from webslicer_effect import *
+from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
 from inkex.localize import _
 
@@ -25,28 +25,28 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
     def __init__(self):
         WebSlicer_Effect.__init__(self)
-        self.OptionParser.add_option("--html-id",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--html-id",
+                        action="store", type=str,
                         dest="html_id",
                         help="")
-        self.OptionParser.add_option("--html-class",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--html-class",
+                        action="store", type=str,
                         dest="html_class",
                         help="")
-        self.OptionParser.add_option("--width-unity",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--width-unity",
+                        action="store", type=str,
                         dest="width_unity",
                         help="")
-        self.OptionParser.add_option("--height-unity",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--height-unity",
+                        action="store", type=str,
                         dest="height_unity",
                         help="")
-        self.OptionParser.add_option("--bg-color",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--bg-color",
+                        action="store", type=str,
                         dest="bg_color",
                         help="")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
@@ -66,7 +66,7 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
     def effect(self):
         self.get_base_elements()
-        if len(self.selected) == 0:
+        if len(self.svg.selected) == 0:
             return inkex.errormsg(_('You must to select some "Slicer rectangles" or other "Layout groups".'))
         for id,node in self.selected.items():
             if node not in self.layer_descendants:

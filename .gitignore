@@ -11,3 +11,5 @@ source
 build
 old
 .mypy_cache
+.pytest_cache
+.idea

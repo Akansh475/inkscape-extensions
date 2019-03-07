@@ -1,8 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
-import unittest
-
 from color_randomize import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
@@ -104,7 +100,3 @@ class ColorRandomizeOpacityModificationTest(TestCase):
         self.e.run(args)
         opac = self.e.opacmod("toto")
         self.assertLessEqual(opac, "toto")
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -24,17 +24,17 @@ from inkex.bezier import percent_point
 class SegmentStraightener(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-p", "--percent",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("-p", "--percent",
+                        action="store", type=float,
                         dest="percent", default=10.0,
                         help="move curve handles PERCENT percent closer to a straight line")
-        self.OptionParser.add_option("-b", "--behavior",
-                        action="store", type="int", 
+        self.arg_parser.add_argument("-b", "--behavior",
+                        action="store", type=int,
                         dest="behave", default=1,
                         help="straightening behavior for cubic segments")
 
     def effect(self):
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path', 'svg'):
                 d = node.get('d')
                 p = inkex.parsePath(d)
@@ -44,13 +44,13 @@ class SegmentStraightener(inkex.Effect):
                     if cmd == 'C':
                         if self.options.behave <= 1:
                             #shorten handles towards end points
-                            params[:2] = percent_point(params[:2],last[:],self.options.percent)    
+                            params[:2] = percent_point(params[:2],last[:],self.options.percent)
                             params[2:4] = percent_point(params[2:4],params[-2:],self.options.percent)
                         else:
-                            #shorten handles towards thirds of the segment                            
+                            #shorten handles towards thirds of the segment
                             dest1 = percent_point(last[:],params[-2:],33.3)
                             dest2 = percent_point(params[-2:],last[:],33.3)
-                            params[:2] = percent_point(params[:2],dest1[:],self.options.percent)    
+                            params[:2] = percent_point(params[:2],dest1[:],self.options.percent)
                             params[2:4] = percent_point(params[2:4],dest2[:],self.options.percent)
                     elif cmd == 'Q':
                         dest = percent_point(last[:],params[-2:],50)
@@ -66,4 +66,3 @@ class SegmentStraightener(inkex.Effect):
 if __name__ == '__main__':
     SegmentStraightener().affect()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

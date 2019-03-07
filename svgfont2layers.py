@@ -17,16 +17,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
+from inkex import inkbool
 import inkex
 
 class SVGFont2Layers(inkex.Effect):
     def __init__(self):
         self.count=0
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--limitglyphs",
-                        action="store", type="inkbool",
-                        dest="limitglyphs", default=True,
-                        help="Load only the first 30 glyphs from the SVGFont (otherwise the loading process may take a very long time)")
+        self.arg_parser.add_argument("--limitglyphs",
+                                     action="store", type=inkbool,
+                                     dest="limitglyphs", default=True,
+                                     help="Load only the first 30 glyphs from the SVGFont (otherwise the loading process may take a very long time)")
 
     def create_horiz_guideline(self, label, y):
         namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))

@@ -828,9 +828,9 @@ class GridDrawer:
         self.smoothFactor = smooth_factor
         self.symbolId = symbol_id
         self.margin = margin
-        
+
         self.grid = None
-    
+
     def setGrid(self, grid):
         if len({len(g) for g in grid}) != 1:
            raise Exception("The array is not rectangular")
@@ -839,10 +839,10 @@ class GridDrawer:
 
     def rowCount(self):
         return len(self.grid) if self.grid is not None else 0
-    
+
     def colCount(self):
         return len(self.grid[0]) if self.rowCount() > 0 else 0
-   
+
     def isDark(self, col, row):
         inside = col >= 0 and row >= 0 and row < self.rowCount() and col < self.colCount()
         return False if not inside else self.grid[row][col] != self.invertCode
@@ -889,7 +889,7 @@ class GridDrawer:
             result += str(float(digBuffer) * self.boxsize)
 
         return result
-        
+
     def makeSVGPath(self, grp, pointStr):
         singlePath = self.getIconPathStr(pointStr)
         pathStr = ""
@@ -929,18 +929,18 @@ class GridDrawer:
     def createVertexesForAdvDrawer(self):
         dirTable = self.makeDirectionsTable()
         result = []
-        # Create vertex 
+        # Create vertex
         for r in range(self.rowCount() + 1):
             for c in range(self.colCount() + 1):
                 indx = (2**0 if self.isDark(c - 0, r - 1) else 0) + \
                        (2**1 if self.isDark(c - 1, r - 1) else 0) + \
                        (2**2 if self.isDark(c - 1, r - 0) else 0) + \
                        (2**3 if self.isDark(c - 0, r - 0) else 0)
-                
+
                 for d in dirTable[indx]:
                     result.append((c, r, d, len(dirTable[indx]) > 1))
-       
-        return result 
+
+        return result
 
     def getSmoothPosition(self, v, extraSmoothFactor=1.0):
       vn = self.moveByDirection(v)
@@ -949,7 +949,7 @@ class GridDrawer:
       return (v[0] * sc1 + vn[0] * sc, v[1] * sc1 + vn[1] * sc), (v[0] * sc + vn[0] * sc1, v[1] * sc + vn[1] * sc1)
 
     def makeSVGAdv(self, grp, greedy):
-        
+
         verts = self.createVertexesForAdvDrawer()
         qrPathStr = ""
         while len(verts) > 0:
@@ -967,15 +967,15 @@ class GridDrawer:
                 else:
                     if {verts[nextIndexes[0]][2], verts[nextIndexes[1]][2]} != {(verts[vertsIndexCur][2] - 1) % 4, (verts[vertsIndexCur][2] + 1) % 4}:
                        raise Exception("Bad next vertex directions " + str(verts[nextIndexes[0]]) + str(verts[nextIndexes[1]]))
-                    
+
                     # Greedy - CCW turn, proud and neutral CW turn
                     vertsIndexNext = nextIndexes[0] if (greedy == "g") == (verts[nextIndexes[0]][2] == (verts[vertsIndexCur][2] + 1) % 4) else nextIndexes[1]
-             
+
                 if vertsIndexNext == vertsIndexStart:
                   break
-                
+
                 vertsIndexCur = vertsIndexNext
-            
+
             posStart, _  = self.getSmoothPosition(verts[ringIndexes[0]])
             qrPathStr = qrPathStr + "M %f,%f " % self.getSVGPos(posStart[0], posStart[1])
             for ri in range(len(ringIndexes)):
@@ -984,7 +984,7 @@ class GridDrawer:
                 if vn[2] != vc[2]:
                     if (greedy != "n") or not vn[3]:
                         # Add bezier
-                        # Opt length http://spencermortensen.com/articles/bezier-circle/ 
+                        # Opt length http://spencermortensen.com/articles/bezier-circle/
                         # c = 0.552284749
                         ex = 1 - 0.552284749
                         _, bs = self.getSmoothPosition(vc)
@@ -1026,7 +1026,7 @@ class GridDrawer:
         if drawer is None:
             raise Exception("Unknown draw type: " + drawtype)
 
-        canvas_width = (self.colCount() + 2 * self.margin) * self.boxsize 
+        canvas_width = (self.colCount() + 2 * self.margin) * self.boxsize
         canvas_height = (self.rowCount() + 2 * self.margin) * self.boxsize
 
         # white background providing margin:
@@ -1036,16 +1036,16 @@ class GridDrawer:
         rect.set('width', str(canvas_width))
         rect.set('height', str(canvas_height))
         rect.set('style', 'fill:%s;stroke:none' % ("black" if self.invertCode else "white"))
-        
+
         qrg = inkex.etree.SubElement(grp, inkex.addNS('g', 'svg'))
         qrg.set('style', 'fill:%s;stroke:none' % ("white" if self.invertCode else "black"))
-        
+
         drawer(qrg)
 
 class QRCodeInkscape(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        
+
         #PARSE OPTIONS
         self.arg_parser.add_argument("--text",
             action="store", type=str,
@@ -1075,12 +1075,12 @@ class QRCodeInkscape(inkex.Effect):
             action="store", type=str,
             dest="symbol_id", default="")
 
-            
+
     def effect(self):
-        
+
         scale = self.svg.unittouu('1px')    # convert to document units
         so = self.options
-        
+
         if so.TEXT == '':  #abort if converting blank text
             inkex.errormsg( ('Please enter an input text'))
         elif so.drawtype == "symbol" and so.symbol_id == "":
@@ -1101,7 +1101,7 @@ class QRCodeInkscape(inkex.Effect):
             grp_attribs = {inkex.addNS('label','inkscape'):grp_name,
                            'transform':grp_transform }
             grp = inkex.etree.SubElement( self.svg.get_current_layer(), 'g', grp_attribs) #the group to put everything in
-            
+
             #GENERATE THE QRCODE
             if int(so.TYPENUMBER) == 0:
                 # Automatic QR code size
@@ -1118,9 +1118,8 @@ class QRCodeInkscape(inkex.Effect):
             qrDraw.setGrid(qr.modules)
             qrDraw.makeSVG(grp, so.drawtype)
 
-            
+
 if __name__ == '__main__':
     e = QRCodeInkscape()
     e.run()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

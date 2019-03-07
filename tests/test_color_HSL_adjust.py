@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 # coding=utf-8
-
 from color_HSL_adjust import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 

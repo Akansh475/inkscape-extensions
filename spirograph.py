@@ -23,35 +23,35 @@ import inkex
 class Spirograph(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-R", "--primaryr",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-R", "--primaryr",
+                        action="store", type=float,
                         dest="primaryr", default=60.0,
                         help="The radius of the outer gear")
-        self.OptionParser.add_option("-r", "--secondaryr",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-r", "--secondaryr",
+                        action="store", type=float,
                         dest="secondaryr", default=100.0,
                         help="The radius of the inner gear")
-        self.OptionParser.add_option("-d", "--penr",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-d", "--penr",
+                        action="store", type=float,
                         dest="penr", default=50.0,
                         help="The distance of the pen from the inner gear")
-        self.OptionParser.add_option("-p", "--gearplacement",
-                        action="store", type="string",
+        self.arg_parser.add_argument("-p", "--gearplacement",
+                        action="store", type=str,
                         dest="gearplacement", default="inside",
                         help="Selects whether the gear is inside or outside the ring")
-        self.OptionParser.add_option("-a", "--rotation",
-                        action="store", type="float",
+        self.arg_parser.add_argument("-a", "--rotation",
+                        action="store", type=float,
                         dest="rotation", default=0.0,
                         help="The number of degrees to rotate the image by")
-        self.OptionParser.add_option("-q", "--quality",
-                        action="store", type="int",
+        self.arg_parser.add_argument("-q", "--quality",
+                        action="store", type=int,
                         dest="quality", default=16,
                         help="The quality of the calculated output")
 
     def effect(self):
-        self.options.primaryr = self.unittouu(str(self.options.primaryr) + 'px')
-        self.options.secondaryr = self.unittouu(str(self.options.secondaryr) + 'px')
-        self.options.penr = self.unittouu(str(self.options.penr) + 'px')
+        self.options.primaryr = self.svg.unittouu(str(self.options.primaryr) + 'px')
+        self.options.secondaryr = self.svg.unittouu(str(self.options.secondaryr) + 'px')
+        self.options.penr = self.svg.unittouu(str(self.options.penr) + 'px')
 
         if self.options.secondaryr == 0:
             return
@@ -73,7 +73,7 @@ class Spirograph(inkex.Effect):
         rotation = - math.pi * self.options.rotation / 180;
 
         new = inkex.etree.Element(inkex.addNS('path','svg'))
-        s = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.unittouu('1px')) }
+        s = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px')) }
         new.set('style', str(inkex.Style(s)))
 
         pathString = ''
@@ -119,4 +119,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

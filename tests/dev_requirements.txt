@@ -1,0 +1,9 @@
+# Dev Requirements
+pytest
+pytest-cov
+
+# Code requirements
+lxml
+numpy
+scour
+

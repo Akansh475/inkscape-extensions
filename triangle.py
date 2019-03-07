@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -22,14 +22,14 @@ This extension allows you to draw a triangle given certain information
 
 Measurements of the triangle
 
-         C(x_c,y_c)                              
-        /`__                                     
-       / a_c``--__                               
-      /           ``--__ s_a                     
- s_b /                  ``--__                   
-    /a_a                    a_b`--__             
+         C(x_c,y_c)
+        /`__
+       / a_c``--__
+      /           ``--__ s_a
+ s_b /                  ``--__
+    /a_a                    a_b`--__
    /--------------------------------``B(x_b, y_b)
-  A(x_a,y_a)         s_b                         
+  A(x_a,y_a)         s_b
 """
 
 from math import *
@@ -47,7 +47,7 @@ def draw_SVG_tri(point1, point2, point3, offset, width, name, parent):
                        ' L '+str(point3[X]+offset[X])+','+str(point3[Y]+offset[Y])+
                        ' L '+str(point1[X]+offset[X])+','+str(point1[Y]+offset[Y])+' z'}
     inkex.etree.SubElement(parent, inkex.addNS('path','svg'), tri_attribs )
-    
+
 def angle_from_3_sides(a, b, c): #return the angle opposite side c
     cosx = (a*a + b*b - c*c)/(2*a*b)  #use the cosine rule
     return acos(cosx)
@@ -74,16 +74,16 @@ def is_valid_tri_from_sides(a,b,c):#check whether triangle with sides a,b,c is v
 def draw_tri_from_3_sides(s_a, s_b, s_c, offset, width, parent): #draw a triangle from three sides (with a given offset
     if is_valid_tri_from_sides(s_a,s_b,s_c):
         a_b = angle_from_3_sides(s_a, s_c, s_b)
-                
+
         a = (0,0)    #a is the origin
         b = v_add(a, (s_c, 0)) #point B is horizontal from the origin
         c = v_add(b, pt_on_circ(s_a, pi-a_b) ) #get point c
         c[1] = -c[1]
-        
+
         offx = max(b[0],c[0])/2 #b or c could be the furthest right
         offy = c[1]/2 #c is the highest point
         offset = ( offset[0]-offx , offset[1]-offy ) #add the centre of the triangle to the offset
-               
+
         draw_SVG_tri(a, b, c , offset, width, 'Triangle', parent)
     else:
         inkex.errormsg('Invalid Triangle Specifications.')
@@ -91,70 +91,70 @@ def draw_tri_from_3_sides(s_a, s_b, s_c, offset, width, parent): #draw a triangl
 class Triangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--s_a",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--s_a",
+                        action="store", type=float,
                         dest="s_a", default=100.0,
                         help="Side Length a")
-        self.OptionParser.add_option("--s_b",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--s_b",
+                        action="store", type=float,
                         dest="s_b", default=100.0,
                         help="Side Length b")
-        self.OptionParser.add_option("--s_c",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--s_c",
+                        action="store", type=float,
                         dest="s_c", default=100.0,
                         help="Side Length c")
-        self.OptionParser.add_option("--a_a",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--a_a",
+                        action="store", type=float,
                         dest="a_a", default=60.0,
                         help="Angle a")
-        self.OptionParser.add_option("--a_b",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--a_b",
+                        action="store", type=float,
                         dest="a_b", default=30.0,
                         help="Angle b")
-        self.OptionParser.add_option("--a_c",
-                        action="store", type="float", 
+        self.arg_parser.add_argument("--a_c",
+                        action="store", type=float,
                         dest="a_c", default=90.0,
                         help="Angle c")
-        self.OptionParser.add_option("--mode",
-                        action="store", type="string", 
+        self.arg_parser.add_argument("--mode",
+                        action="store", type=str,
                         dest="mode", default='3_sides',
                         help="Side Length c")
-    
+
     def effect(self):
-        
-        tri = self.current_layer
+
+        tri = self.svg.get_current_layer()
         offset = inkex.computePointInNode(list(self.view_center), self.current_layer) #the offset require to centre the triangle
-        self.options.s_a = self.unittouu(str(self.options.s_a) + 'px')
-        self.options.s_b = self.unittouu(str(self.options.s_b) + 'px')
-        self.options.s_c = self.unittouu(str(self.options.s_c) + 'px')
-        stroke_width = self.unittouu('2px')
-        
+        self.options.s_a = self.svg.unittouu(str(self.options.s_a) + 'px')
+        self.options.s_b = self.svg.unittouu(str(self.options.s_b) + 'px')
+        self.options.s_c = self.svg.unittouu(str(self.options.s_c) + 'px')
+        stroke_width = self.svg.unittouu('2px')
+
         if self.options.mode == '3_sides':
             s_a = self.options.s_a
             s_b = self.options.s_b
             s_c = self.options.s_c
             draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
-        
+
         elif self.options.mode == 's_ab_a_c':
             s_a = self.options.s_a
             s_b = self.options.s_b
             a_c = self.options.a_c*pi/180 #in rad
-            
+
             s_c = third_side_from_enclosed_angle(s_a,s_b,a_c)
             draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
-        
+
         elif self.options.mode == 's_ab_a_a':
             s_a = self.options.s_a
             s_b = self.options.s_b
             a_a = self.options.a_a*pi/180 #in rad
-            
+
             if (a_a < pi/2.0) and (s_a < s_b) and (s_a > s_b*sin(a_a) ): #this is an ambiguous case
                 ambiguous=True#we will give both answers
             else:
                 ambiguous=False
-            
+
             sin_a_b =  s_b*sin(a_a)/s_a
-            
+
             if (sin_a_b <= 1) and (sin_a_b >= -1):#check the solution is possible
                 a_b = asin(sin_a_b) #acute solution
                 a_c = pi - a_a - a_b
@@ -162,37 +162,37 @@ class Triangle(inkex.Effect):
             else:
                 sys.stderr.write('Error:Invalid Triangle Specifications.\n')#signal an error
                 error=True
-            
+
             if not(error) and (a_b < pi) and (a_c < pi): #check that the solution is valid, if so draw acute solution
                 s_c = third_side_from_enclosed_angle(s_a,s_b,a_c)
                 draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
-            
+
             if not(error) and ((a_b > pi) or (a_c > pi) or ambiguous):#we want the obtuse solution
                 a_b = pi - a_b
                 a_c = pi - a_a - a_b
                 s_c = third_side_from_enclosed_angle(s_a,s_b,a_c)
                 draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
-        
+
         elif self.options.mode == 's_a_a_ab':
             s_a = self.options.s_a
             a_a = self.options.a_a*pi/180 #in rad
             a_b = self.options.a_b*pi/180 #in rad
-            
+
             a_c = pi - a_a - a_b
             s_b = s_a*sin(a_b)/sin(a_a)
             s_c = s_a*sin(a_c)/sin(a_a)
-            
+
             draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
-        
+
         elif self.options.mode == 's_c_a_ab':
             s_c = self.options.s_c
             a_a = self.options.a_a*pi/180 #in rad
             a_b = self.options.a_b*pi/180 #in rad
-            
+
             a_c = pi - a_a - a_b
             s_a = s_c*sin(a_a)/sin(a_c)
             s_b = s_c*sin(a_b)/sin(a_c)
-            
+
             draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
 
 if __name__ == '__main__':
@@ -200,4 +200,3 @@ if __name__ == '__main__':
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

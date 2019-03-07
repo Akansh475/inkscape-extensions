@@ -28,12 +28,12 @@ Debug = False
 def draw_svg_text(char, face, offset, vertoffset, parent):
     style = { 'stroke': '#000000', 'fill': 'none' }
     pathString = face[char]
-    splitString = pathString.split()  
-    midpoint = offset - int(splitString[0]) 
+    splitString = pathString.split()
+    midpoint = offset - int(splitString[0])
     pathString = pathString[pathString.find("M"):] #portion after first move
     trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
     text_attribs = {'style':str(inkex.Style(style)), 'd':pathString, 'transform':trans}
-    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs) 
+    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
     return midpoint + int(splitString[1])   #new offset value
 
 
@@ -61,15 +61,15 @@ class Hershey( inkex.Effect ):
 
         scale = self.svg.unittouu('1px')    # convert to document units
         font = getattr(hersheydata, self.options.fontface)
-        clearfont = hersheydata.futural  
+        clearfont = hersheydata.futural
         #Baseline: modernized roman simplex from JHF distribution.
-        
+
         w = 0  #Initial spacing offset
         spacing = 3  # spacing between letters
 
         if self.options.action == "render":
             #evaluate text string
-            letterVals = [ord(q) - 32 for q in self.options.text] 
+            letterVals = [ord(q) - 32 for q in self.options.text]
             for q in letterVals:
                 if (q < 0) or (q > 95):
                     w += 2*spacing
@@ -82,7 +82,7 @@ class Hershey( inkex.Effect ):
                 w = 0
                 v = spacing * (15*p - 67 )
                 for q in range(0,10):
-                    r = p*10 + q 
+                    r = p*10 + q
                     if (r < 0) or (r > 95):
                         w += 5*spacing
                     else:
@@ -92,7 +92,7 @@ class Hershey( inkex.Effect ):
                 if w > wmax:
                     wmax = w
             w = wmax
-            
+
         #  Translate group to center of view, approximately
         view_center = self.svg.get_center_position()
         t = 'translate(' + str( view_center[0] - scale*w/2) + ',' + str( view_center[1] ) + ')'
@@ -106,4 +106,3 @@ if __name__ == '__main__':
     e = Hershey()
     e.affect()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

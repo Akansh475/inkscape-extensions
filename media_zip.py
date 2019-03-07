@@ -51,6 +51,7 @@ else:
     import urllib.request as urllib
 
 import inkex
+from inkex import inkbool
 
 class CompressedMediaOutput(inkex.Effect):
     def __init__(self):
@@ -64,16 +65,16 @@ class CompressedMediaOutput(inkex.Effect):
                             '{http://www.w3.org/2000/svg}flowRoot',
                             '{http://www.w3.org/2000/svg}flowPara',
                             '{http://www.w3.org/2000/svg}flowSpan']
-        self.OptionParser.add_option("--image_dir",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--image_dir",
+                                     action="store", type=str,
                                      dest="image_dir", default="",
                                      help="Image directory")
-        self.OptionParser.add_option("--font_list",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--font_list",
+                                     action="store", type=inkbool,
                                      dest="font_list", default=False,
                                      help="Add font list")
-        self.OptionParser.add_option("--tab",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                                     action="store", type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
 
@@ -227,4 +228,3 @@ if __name__ == '__main__':   #pragma: no cover
     e.affect()
 
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

@@ -21,6 +21,8 @@ An extension to export multiple svg files from a single svg file containing laye
 
 Each defs is duplicated for each svg outputted.
 """
+
+from __future__ import unicode_literals
 import os
 import sys
 import copy
@@ -28,14 +30,11 @@ import tarfile
 import calendar
 import time
 
-try:
-    # python2
-    from StringIO import StringIO
-except ImportError:
-    # python3
-    from io import StringIO
+from io import StringIO
 
 # Inkscape Libraries
+from lxml.etree import tostring
+
 import inkex
 
 GROUP = "{http://www.w3.org/2000/svg}g"
@@ -89,11 +88,11 @@ class LayersOutput(inkex.Effect):
 
     def io_document(self, name, doc):
         string = StringIO()
-        doc.write(string)
+        string.write(tostring(doc).decode())
         string.seek(0)
         info = tarfile.TarInfo(name=name+'.svg')
         info.mtime = calendar.timegm(time.gmtime())
-        info.size  = len(string.buf)
+        info.size  = string.tell()
         return dict(tarinfo=info, fileobj=string)
 
     def effect(self):
@@ -115,7 +114,7 @@ class LayersOutput(inkex.Effect):
             else:
                 template.getroot().append(layer)
             previous = layer
-            
+
             tar.addfile(**self.io_document(name, template))
 
 
@@ -123,4 +122,3 @@ if __name__ == '__main__':   #pragma: no cover
     e = LayersOutput()
     e.affect()
 
-# vim: expandtab shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=99

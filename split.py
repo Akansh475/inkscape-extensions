@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2009 Karlisson Bezerra, contato@nerdson.com
 #
@@ -18,20 +18,22 @@
 #
 
 import inkex
+from inkex import inkbool
+
 
 class Split(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("-s", "--splittype", 
-                        action="store", type="string", 
-                        dest="split_type", default="word", 
+        self.arg_parser.add_argument("-s", "--splittype",
+                        action="store", type=str,
+                        dest="split_type", default="word",
                         help="type of split")
-        self.OptionParser.add_option("-p", "--preserve", 
-                        action="store", type="inkbool", 
-                        dest="preserve", default="True", 
+        self.arg_parser.add_argument("-p", "--preserve",
+                        action="store", type=inkbool,
+                        dest="preserve", default="True",
                         help="Preserve original")
-        self.OptionParser.add_option("--tab",
-                        action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                        action="store", type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
@@ -40,7 +42,7 @@ class Split(inkex.Effect):
 
         lines = []
         count = 1
-        
+
         for n in node:
             if not (n.tag == inkex.addNS("flowPara", "svg") or n.tag == inkex.addNS("tspan", "svg")):
                 if n.tag == inkex.addNS("textPath", "svg"):
@@ -48,9 +50,9 @@ class Split(inkex.Effect):
                     break
                 else:
                     continue
-           
+
             text = inkex.etree.Element(inkex.addNS("text", "svg"), node.attrib)
-            
+
             #handling flowed text nodes
             if node.tag == inkex.addNS("flowRoot", "svg"):
                 try:
@@ -58,12 +60,12 @@ class Split(inkex.Effect):
                     fontsize = parseStyle(node.get("style"))["font-size"]
                 except:
                     fontsize = "12px"
-                fs = self.unittouu(fontsize)
-                
+                fs = self.svg.unittouu(fontsize)
+
                 #selects the flowRegion's child (svg:rect) to get @X and @Y
                 id = node.get("id")
                 flowref = self.xpathSingle('/svg:svg//*[@id="%s"]/svg:flowRegion[1]' % id)[0]
-                
+
                 if flowref.tag == inkex.addNS("rect", "svg"):
                     text.set("x", flowref.get("x"))
                     text.set("y", str(float(flowref.get("y")) + fs * count))
@@ -71,13 +73,13 @@ class Split(inkex.Effect):
                 else:
                     inkex.debug("This type of text element isn't supported. First unflow text.")
                     break
-                
+
                 #now let's convert flowPara into tspan
                 tspan = inkex.etree.Element(inkex.addNS("tspan", "svg"))
                 tspan.set(inkex.addNS("role","sodipodi"), "line")
                 tspan.text = n.text
                 text.append(tspan)
-            
+
             else:
                 from copy import copy
                 x = n.get("x") or node.get("x")
@@ -86,7 +88,7 @@ class Split(inkex.Effect):
                 text.set("x", x)
                 text.set("y", y)
                 text.append(copy(n))
-            
+
             lines.append(text)
 
         return lines
@@ -94,7 +96,7 @@ class Split(inkex.Effect):
 
     def split_words(self, node):
         """Returns a list of words"""
-        
+
         words = []
 
         #Function to recursively extract text
@@ -107,7 +109,7 @@ class Split(inkex.Effect):
                 if n.tail:
                     words.append(n.tail)
             return words
-        
+
         #if text has more than one line, iterates through elements
         lines = self.split_lines(node)
         if not lines:
@@ -117,36 +119,36 @@ class Split(inkex.Effect):
             #gets the position of text node
             x = float(line.get("x"))
             y = line.get("y")
-            
+
             #gets the font size. if element doesn't have a style attribute, it assumes font-size = 12px
             try:
                 from simplestyle import parseStyle
                 fontsize = parseStyle(line.get("style"))["font-size"]
             except:
                 fontsize = "12px"
-            fs = self.unittouu(fontsize)
+            fs = self.svg.unittouu(fontsize)
 
             #extract and returns a list of words
             words_list = "".join(plain_str(line)).split()
             prev_len = 0
-            
+
             #creates new text nodes for each string in words_list
             for word in words_list:
                 tspan = inkex.etree.Element(inkex.addNS("tspan", "svg"))
                 tspan.text = word
-                
+
                 text = inkex.etree.Element(inkex.addNS("text", "svg"), line.attrib)
                 tspan.set(inkex.addNS("role","sodipodi"), "line")
-                
+
                 #positioning new text elements
                 x = x + prev_len * fs
                 prev_len = len(word)
                 text.set("x", str(x))
                 text.set("y", str(y))
-                
+
                 text.append(tspan)
                 words.append(text)
-        
+
         return words
 
 
@@ -154,23 +156,23 @@ class Split(inkex.Effect):
         """Returns a list of letters"""
 
         letters = []
-        
+
         words = self.split_words(node)
         if not words:
             return letters
 
         for word in words:
-            
+
             x = float(word.get("x"))
             y = word.get("y")
-           
+
             #gets the font size. If element doesn't have a style attribute, it assumes font-size = 12px
             try:
                 import simplestyle
                 fontsize = dict(inkex.Style.parse_str(word.get("style")))["font-size"]
             except:
                 fontsize = "12px"
-            fs = self.unittouu(fontsize)
+            fs = self.svg.unittouu(fontsize)
 
             #for each letter in element string
             for letter in word[0].text:
@@ -181,7 +183,7 @@ class Split(inkex.Effect):
                 text.set("x", str(x))
                 text.set("y", str(y))
                 x += fs
-                
+
                 text.append(tspan)
                 letters.append(text)
         return letters
@@ -192,9 +194,9 @@ class Split(inkex.Effect):
 
         split_type = self.options.split_type
         preserve = self.options.preserve
-       
+
         #checks if the selected elements are text nodes
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if not (node.tag == inkex.addNS("text", "svg") or node.tag == inkex.addNS("flowRoot", "svg")):
                 inkex.debug("Please select only text elements.")
                 break
@@ -205,10 +207,10 @@ class Split(inkex.Effect):
                     nodes = self.split_words(node)
                 elif split_type == "letter":
                     nodes = self.split_letters(node)
-                
+
                 for n in nodes:
                     node.getparent().append(n)
-                        
+
                 #preserve original element
                 if not preserve and nodes:
                     parent = node.getparent()

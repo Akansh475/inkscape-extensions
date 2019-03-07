@@ -31,13 +31,13 @@ class JessyInk_Effects(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--tab', action = 'store', type = 'string', dest = 'what')
-        self.OptionParser.add_option('--effectInOrder', action = 'store', type = 'string', dest = 'effectInOrder', default = 1)
-        self.OptionParser.add_option('--effectInDuration', action = 'store', type = 'float', dest = 'effectInDuration', default = 0.8)
-        self.OptionParser.add_option('--effectIn', action = 'store', type = 'string', dest = 'effectIn', default = 'none')
-        self.OptionParser.add_option('--effectOutOrder', action = 'store', type = 'string', dest = 'effectOutOrder', default = 2)
-        self.OptionParser.add_option('--effectOutDuration', action = 'store', type = 'float', dest = 'effectOutDuration', default = 0.8)
-        self.OptionParser.add_option('--effectOut', action = 'store', type = 'string', dest = 'effectOut', default = 'none')
+        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--effectInOrder', action = 'store', type=str, dest = 'effectInOrder', default = 1)
+        self.arg_parser.add_argument('--effectInDuration', action = 'store', type=float, dest = 'effectInDuration', default = 0.8)
+        self.arg_parser.add_argument('--effectIn', action = 'store', type=str, dest = 'effectIn', default = 'none')
+        self.arg_parser.add_argument('--effectOutOrder', action = 'store', type=str, dest = 'effectOutOrder', default = 2)
+        self.arg_parser.add_argument('--effectOutDuration', action = 'store', type=float, dest = 'effectOutDuration', default = 0.8)
+        self.arg_parser.add_argument('--effectOut', action = 'store', type=str, dest = 'effectOut', default = 'none')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -48,10 +48,10 @@ class JessyInk_Effects(inkex.Effect):
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-        if len(self.selected) == 0:
+        if len(self.svg.selected) == 0:
             inkex.errormsg(_("No object selected. Please select the object you want to assign an effect to and then press apply.\n"))
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             if (self.options.effectIn == "appear") or (self.options.effectIn == "fade") or (self.options.effectIn == "pop"):
                 node.set("{" + inkex.NSS["jessyink"] + "}effectIn","name:" + self.options.effectIn  + ";order:" + self.options.effectInOrder + ";length:" + str(int(self.options.effectInDuration * 1000)))
                 # Remove possible view argument.

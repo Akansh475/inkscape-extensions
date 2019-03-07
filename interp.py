@@ -66,10 +66,10 @@ class Interp(inkex.Effect):
 
         if self.options.zsort:
             # work around selection order swapping with Live Preview
-            objects = self.document.get_z_selected()
+            objects = self.svg.get_z_selected()
         else:
             # use selection order (default)
-            objects = self.document.selected
+            objects = self.svg.selected
 
         for _id, node in objects.items():
             if node.tag ==inkex.addNS('path','svg'):

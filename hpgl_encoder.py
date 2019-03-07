@@ -98,9 +98,9 @@ class hpglEncoder(object):
             self.debugValues['viewBoxHeight'] = "-"
         viewBox = self.doc.get('viewBox')
         if viewBox:
-            viewBox2 = string.split(viewBox, ',')
+            viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
-                viewBox2 = string.split(viewBox, ' ')
+                viewBox2 = viewBox.split(' ')
             if self.options.debug:
                 self.debugValues['viewBoxWidth'] = viewBox2[2]
                 self.debugValues['viewBoxHeight'] = viewBox2[3]

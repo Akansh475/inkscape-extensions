@@ -149,7 +149,7 @@ class Nup(inkex.Effect):
         if not pgMargin or not pgPadding:
             return inkex.errormsg("No padding or margin available.")
 
-        pgEdge = map(sum,zip(pgMargin, pgPadding))
+        pgEdge = list(map(sum,zip(pgMargin, pgPadding)))
 
         top, right, bottom, left = 0,1,2,3
         width, height = 0,1

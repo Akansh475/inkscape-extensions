@@ -121,7 +121,8 @@ class MyEffect(inkex.Effect):
                 msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
             # Output the file.
-            sys.stdout.write(out.read())
+            stdout = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
+            stdout.write(out.read())
 
         # Delete temporary files.
         self.removeJessyInkFilesInTempDir()

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -31,8 +32,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-import sys
-from math import *
+from math import acos, cos, e, pi, sin, sqrt, tan
+
+from lxml import etree
 
 import inkex
 from inkex import inkbool
@@ -54,7 +56,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):#draw an SVG circl
                     inkex.addNS('label','inkscape'):name,
                     'cx':str(cx), 'cy':str(cy),
                     'r':str(r)}
-    inkex.etree.SubElement(parent, inkex.addNS('circle','svg'), circ_attribs )
+    etree.SubElement(parent, inkex.addNS('circle','svg'), circ_attribs )
 
 #draw an SVG triangle given in trilinar coords
 def draw_SVG_tri(vert_mat, params, style, name, parent):
@@ -66,7 +68,7 @@ def draw_SVG_tri(vert_mat, params, style, name, parent):
                        ' L '+str(p2[0])+','+str(p2[1])+
                        ' L '+str(p3[0])+','+str(p3[1])+
                        ' L '+str(p1[0])+','+str(p1[1])+' z'}
-    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), tri_attribs )
+    etree.SubElement(parent, inkex.addNS('path','svg'), tri_attribs )
 
 #draw an SVG line segment between the given (raw) points
 def draw_SVG_line(a, b, style, name, parent):
@@ -76,7 +78,7 @@ def draw_SVG_line(a, b, style, name, parent):
     line_attribs = {'style':str(inkex.Style(line_style)),
                     inkex.addNS('label','inkscape'):name,
                     'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
-    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
+    etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
 
 #lines from each vertex to a corresponding point in trilinears
 def draw_vertex_lines( vert_mat, params, width, name, parent):
@@ -184,14 +186,14 @@ def report_properties( params ):#report to the Inkscape console using errormsg
     # TODO: unit identifier needs solution for arbitrary document scale
     unit = Draw_From_Triangle.getDocumentUnit(e)
 
-    inkex.errormsg(_("Side Length 'a' ({0}): {1}").format(unit, str(params[0][0])) )
-    inkex.errormsg(_("Side Length 'b' ({0}): {1}").format(unit, str(params[0][1])) )
-    inkex.errormsg(_("Side Length 'c' ({0}): {1}").format(unit, str(params[0][2])) )
-    inkex.errormsg(_("Angle 'A' (radians): {}").format(str(params[1][0])) )
-    inkex.errormsg(_("Angle 'B' (radians): {}").format(str(params[1][1])) )
-    inkex.errormsg(_("Angle 'C' (radians): {}").format(params[1][2]) )
-    inkex.errormsg(_("Semiperimeter (px): {}").format(params[4][1]) )
-    inkex.errormsg(_("Area ({0}^2): {1}").format(unit, str(params[4][0])) )
+    inkex.errormsg("Side Length 'a' ({0}): {1}".format(unit, str(params[0][0])) )
+    inkex.errormsg("Side Length 'b' ({0}): {1}".format(unit, str(params[0][1])) )
+    inkex.errormsg("Side Length 'c' ({0}): {1}".format(unit, str(params[0][2])) )
+    inkex.errormsg("Angle 'A' (radians): {}".format(str(params[1][0])) )
+    inkex.errormsg("Angle 'B' (radians): {}".format(str(params[1][1])) )
+    inkex.errormsg("Angle 'C' (radians): {}".format(params[1][2]) )
+    inkex.errormsg("Semiperimeter (px): {}".format(params[4][1]) )
+    inkex.errormsg("Area ({0}^2): {1}".format(unit, str(params[4][0])) )
     return
 
 
@@ -330,7 +332,7 @@ class Draw_From_Triangle(inkex.Effect):
             group_translation = 'translate(' + str( pts[0][0] ) + ','+ str( pts[0][1] ) + ')'
             group_attribs = {inkex.addNS('label','inkscape'):'TriangleElements',
                   'transform':group_translation }
-            layer = inkex.etree.SubElement(self.current_layer, 'g', group_attribs)
+            layer = etree.SubElement(self.current_layer, 'g', group_attribs)
 
             #GET METRICS OF THE TRIANGLE
             #vertices in the local coordinates (set pt[0] to be the origin)

@@ -52,10 +52,11 @@ else:
 
 import inkex
 from inkex import inkbool
+from inkex.base import SvgThroughMixin, InkscapeExtension
 
-class CompressedMediaOutput(inkex.Effect):
+class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(CompressedMediaOutput, self).__init__()
         if os.name == 'nt':
             self.encoding = "cp437"
         else:
@@ -205,7 +206,7 @@ class CompressedMediaOutput(inkex.Effect):
         docname = docroot.get(inkex.addNS('docname',u'sodipodi'))
         #inkex.errormsg(_('Locale: %s') % locale.getpreferredencoding())
         if docname is None:
-            docname = self.args[-1]
+            docname = self.options.input_file
         # TODO: replace whatever extension
         docstripped = os.path.basename(docname.replace('.zip', ''))
         docstripped = docstripped.replace('.svg', '')

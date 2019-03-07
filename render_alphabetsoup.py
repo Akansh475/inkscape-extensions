@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2001-2002 Matt Chisholm matt@theory.org
 # Copyright (C) 2008 Joel Holdsworth joel@airwebreathe.org.uk
@@ -30,6 +31,7 @@ import sys
 import inkex
 import render_alphabetsoup_config
 from inkex import inkbool, Transform
+from inkex.paths import Path
 
 syntax = render_alphabetsoup_config.syntax
 alphabet = render_alphabetsoup_config.alphabet
@@ -52,7 +54,7 @@ def loadPath(svgPath):
     d = pathElement.get("d")
     width = float(root.get("width"))
     height = float(root.get("height"))
-    return inkex.parsePath(d), width, height  # Currently we only support a single path
+    return Path(d).to_arrays(), width, height  # Currently we only support a single path
 
 
 def combinePaths(pathA, pathB):
@@ -322,7 +324,7 @@ def draw(stack):  # draw a character based on a tree stack
                 dx = rule[i][1] * units
                 dy = rule[i][2] * units
                 # newbox = ((box[0]+dx),(box[1]+dy),(box[2]+dx),(box[3]+dy))
-                inkex.translatePath(currimg, dx, dy)
+                currimg = (Path(currimg) + (dx, dy)).to_arrays()
                 image = combinePaths(image, currimg)
 
         stack.pop(0)
@@ -332,8 +334,8 @@ def draw(stack):  # draw a character based on a tree stack
 def draw_crop_scale(stack, zoom):  # draw, crop and scale letter image
     image, width, height = draw(stack)
     bbox = getPathBoundingBox(image)
-    inkex.translatePath(image, -bbox[0], 0)
-    inkex.scalePath(image, zoom / units, zoom / units)
+    image = (Path(image) + (-bbox[0], 0)).to_arrays()
+    image = (Path(image) * (zoom / units, zoom / units)).to_arrays()
     return image, bbox[1] - bbox[0], bbox[3] - bbox[2]
 
 

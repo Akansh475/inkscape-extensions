@@ -57,8 +57,8 @@ class Whirl(inkex.Effect):
                             point[1] += view_center[1]
                 node.set('d', inkex.formatCubicPath(p))
 
+
 if __name__ == '__main__':
-    e = Whirl()
-    e.affect()
+    Whirl().run()
 
 

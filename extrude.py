@@ -99,6 +99,5 @@ class Extrude(inkex.Effect):
                             ele.set('d', str(inkex.Path(line)))
 
 
-if __name__ == '__main__':   #pragma: no cover
-    e = Extrude()
-    e.affect()
+if __name__ == '__main__':
+    Extrude().run()

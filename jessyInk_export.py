@@ -158,6 +158,4 @@ class MyEffect(inkex.Effect):
 
         return None
 if __name__ == '__main__':
-
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()

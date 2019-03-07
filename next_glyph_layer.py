@@ -50,6 +50,5 @@ class NextLayer(inkex.Effect):
 #TODO: loop
 
 if __name__ == '__main__':
-    e = NextLayer()
-    e.affect()
+    NextLayer().run()
 

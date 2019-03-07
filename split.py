@@ -216,6 +216,6 @@ class Split(inkex.Effect):
                     parent = node.getparent()
                     parent.remove(node)
 
+
 if __name__ == '__main__':
-    b = Split()
-    b.affect()
+    Split().run()

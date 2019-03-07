@@ -117,7 +117,6 @@ class LSystem(inkex.Effect):
         inkex.etree.SubElement(self.current_layer,inkex.addNS('path','svg'),attribs)
 
 if __name__ == '__main__':
-    e = LSystem()
-    e.affect()
+    LSystem().run()
 
 

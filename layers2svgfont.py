@@ -43,7 +43,7 @@ class Layers2SVGFont(inkex.Effect):
         for glyph in glyphs:
             if unicode_char == glyph.get("unicode"):
                 return glyph
-        return inkex.etree.SubElement(font, inkex.addNS('glyph', 'svg'))    
+        return inkex.etree.SubElement(font, inkex.addNS('glyph', 'svg'))
 
     def flip_cordinate_system(self, d, emsize, baseline):
         pathdata = inkex.parsePath(d)
@@ -89,7 +89,7 @@ class Layers2SVGFont(inkex.Effect):
 
                 #use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
                 #use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
-                #TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why? 
+                #TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
 
                 ############################
                 #Option 2:
@@ -112,7 +112,7 @@ class Layers2SVGFont(inkex.Effect):
                     d += " " + self.flip_cordinate_system(p.get("d"), emsize, baseline)
                 glyph.set("d", d)
 
+
 if __name__ == '__main__':
-    e = Layers2SVGFont()
-    e.affect()
+    Layers2SVGFont().run()
 

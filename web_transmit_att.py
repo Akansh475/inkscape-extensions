@@ -82,6 +82,5 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
         el.set( self.options.when, elEvCode )
 
 if __name__ == '__main__':
-    e = InkWebTransmitAtt()
-    e.affect()
+    InkWebTransmitAtt().run()
 

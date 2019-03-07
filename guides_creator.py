@@ -462,6 +462,4 @@ class GuidesCreator(inkex.Effect):
                 drawVerticalGuides(v_subdiv,rectangle_width,rectangle_height,0,nv,begin_from)
 
 if __name__ == '__main__':
-    # Create effect instance and apply it.
-    effect = GuidesCreator()
-    effect.affect()
+   GuidesCreator().run()

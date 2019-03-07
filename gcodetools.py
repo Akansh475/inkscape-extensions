@@ -6030,5 +6030,4 @@ G01 Z1 (going to cutting z)\n""",
 
 
 if __name__ == '__main__':
-    gcodetools = Gcodetools()
-    gcodetools.run()
+    Gcodetools().run()

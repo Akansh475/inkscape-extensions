@@ -103,6 +103,5 @@ class Hershey( inkex.Effect ):
 
 
 if __name__ == '__main__':
-    e = Hershey()
-    e.affect()
+    Hershey().run()
 

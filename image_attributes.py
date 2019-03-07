@@ -147,7 +147,6 @@ class SetAttrImage(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = SetAttrImage()
-    e.affect()
+    SetAttrImage().run()
 
 

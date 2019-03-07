@@ -206,7 +206,6 @@ class GridPolar(inkex.Effect):
                                        label_size, 'Label'+str(i), grid)
 
 if __name__ == '__main__':
-    e = GridPolar()
-    e.affect()
+    GridPolar().run()
 
 

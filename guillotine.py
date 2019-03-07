@@ -234,5 +234,4 @@ class Guillotine(inkex.Effect):
         self.export_slices(slices)
 
 if __name__ == "__main__":
-    e = Guillotine()
-    e.affect()
+    Guillotine().run()

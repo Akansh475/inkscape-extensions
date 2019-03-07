@@ -181,9 +181,8 @@ class JessyInk_Summary(inkex.Effect):
 
             orderNumber += 1
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Summary()
-    effect.affect()
+    JessyInk_Summary().run()
 

@@ -49,7 +49,7 @@ class PreviousLayer(inkex.Effect):
 
 #TODO: loop
 
+
 if __name__ == '__main__':
-    e = PreviousLayer()
-    e.affect()
+    PreviousLayer().run()
 

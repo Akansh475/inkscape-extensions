@@ -254,7 +254,6 @@ class PathScatter(pathmodifier.Diffeo):
         self.patternNode.getparent().remove(self.patternNode)
 
 if __name__ == '__main__':
-    e = PathScatter()
-    e.affect()
+    PathScatter().run()
 
 

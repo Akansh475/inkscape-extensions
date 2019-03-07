@@ -75,6 +75,5 @@ class SplitIt(inkex.Effect):
                 node.set('d',inkex.formatCubicPath(new))
 
 if __name__ == '__main__':
-    e = SplitIt()
-    e.run()
+    SplitIt().run()
 

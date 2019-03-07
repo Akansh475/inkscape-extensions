@@ -237,5 +237,4 @@ class ReplaceFont(inkex.Effect):
             sys.exit(0)
 
 if __name__ == "__main__":
-    e = ReplaceFont()
-    e.affect()
+    ReplaceFont().run()

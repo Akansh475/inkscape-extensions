@@ -55,7 +55,6 @@ class RTreeTurtle(inkex.Effect):
         inkex.etree.SubElement(self.current_layer, inkex.addNS('path','svg'), attribs)
 
 if __name__ == '__main__':
-    e = RTreeTurtle()
-    e.affect()
+    RTreeTurtle().run()
 
 

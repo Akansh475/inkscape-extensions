@@ -100,5 +100,4 @@ class RackGear(inkex.Effect):
             g, inkex.addNS('path', 'svg'), gear_attribs)
 
 if __name__ == '__main__':
-    e = RackGear()
-    e.affect()
+    RackGear().run()

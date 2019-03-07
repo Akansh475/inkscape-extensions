@@ -265,6 +265,5 @@ class Length(inkex.Effect):
                 node.set('transform', 'rotate(%s, %s, %s)' % (angle, x, y))
 
 if __name__ == '__main__':
-    e = Length()
-    e.affect()
+    Length().run()
 

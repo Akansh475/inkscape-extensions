@@ -50,9 +50,9 @@ class PrepareFileSave(inkex.Effect):
         f = p.communicate()[0]
         err.close()
 
+
 if __name__ == '__main__':
-    e = PrepareFileSave()
-    e.affect()
+    PrepareFileSave().run()
 else:
     # Skip automatic testing for this module
     raise inkex.DependencyError("This extension is untestable because of 'inkscape Popen'.")

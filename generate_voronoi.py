@@ -182,6 +182,5 @@ class Pattern(inkex.Effect):
                 node.attrib['style'] = str(inkex.Style(style))
 
 if __name__ == '__main__':
-    e = Pattern()
-    e.affect()
+    Pattern().run()
 

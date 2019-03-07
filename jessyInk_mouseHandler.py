@@ -59,8 +59,8 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
             groupElm.append(scriptElm)
             self.document.getroot().append(groupElm)
 
+
 # Create effect instance
 if __name__ == '__main__':
-    effect = JessyInk_CustomMouseHandler()
-    effect.affect()
+    JessyInk_CustomMouseHandler().run()
 

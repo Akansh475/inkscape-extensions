@@ -105,8 +105,8 @@ class JitterNodes(inkex.Effect):
                             csp[2]=randomize(csp[2], self.options.radiusx, self.options.radiusy, self.options.dist)
                 node.set('d',inkex.formatCubicPath(p))
 
+
 if __name__ == '__main__':
-    e = JitterNodes()
-    e.run()
+    JitterNodes().run()
 
 

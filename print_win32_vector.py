@@ -211,7 +211,7 @@ class MyEffect(inkex.Effect):
         self.process_group(doc)
         mygdi.EndDoc(self.hDC)
 
+
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()
 

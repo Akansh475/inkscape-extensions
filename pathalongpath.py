@@ -276,7 +276,6 @@ class PathAlongPath(pathmodifier.Diffeo):
                 node.set('d', cubicsuperpath.formatPath(newp))
 
 if __name__ == '__main__':
-    e = PathAlongPath()
-    e.affect()
+    PathAlongPath().run()
 
 

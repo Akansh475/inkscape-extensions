@@ -116,9 +116,8 @@ class JessyInk_Install(inkex.Effect):
         for node in self.document.xpath("//*[@jessyink:autoText]", namespaces=inkex.NSS):
             node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"] = node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"].replace("=", ":")
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Install()
-    effect.affect()
+    JessyInk_Install().run()
 

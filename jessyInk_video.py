@@ -108,9 +108,8 @@ def deleteIds(node):
         if 'id' in entry.attrib:
             del entry.attrib['id']
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Effects()
-    effect.affect()
+    JessyInk_Effects().run()
 

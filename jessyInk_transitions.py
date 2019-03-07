@@ -60,9 +60,8 @@ class JessyInk_Transitions(inkex.Effect):
         else:
             inkex.errormsg(_("Please enter a layer name.\n"))
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Transitions()
-    effect.affect()
+    JessyInk_Transitions().run()
 

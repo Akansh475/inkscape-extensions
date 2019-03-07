@@ -158,6 +158,5 @@ class Extract(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = Extract()
-    e.affect()
+    Extract().run()
 

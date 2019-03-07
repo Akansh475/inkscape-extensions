@@ -218,5 +218,4 @@ class C(SvgThroughMixin, InkscapeExtension):
 
 
 if __name__ == '__main__':
-    c = C()
-    c.run()
+    C().run()

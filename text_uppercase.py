@@ -6,6 +6,6 @@ class C(chardataeffect.CharDataEffect):
   def process_chardata(self,text, line=False, par=False):
     return text.upper()
 
+
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    C().run()

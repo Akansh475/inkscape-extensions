@@ -281,8 +281,7 @@ class Plot(inkex.Effect):
         inkex.errormsg("\n" + self.options.commandLanguage + " data:\n")
         inkex.errormsg(self.hpgl)
 
+
 if __name__ == '__main__':
-    # start extension
-    e = Plot()
-    e.affect()
+    Plot().run()
 

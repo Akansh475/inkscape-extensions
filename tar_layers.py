@@ -119,6 +119,5 @@ class LayersOutput(inkex.Effect):
 
 
 if __name__ == '__main__':   #pragma: no cover
-    e = LayersOutput()
-    e.affect()
+    LayersOutput().run()
 

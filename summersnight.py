@@ -136,7 +136,6 @@ class Project(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = Project()
-    e.affect()
+    Project().run()
 
 

@@ -218,5 +218,5 @@ class ParamCurves(inkex.Effect):
                     node.getparent().remove(node)
 
 if __name__ == '__main__':
-    ParamCurves().affect()
+    ParamCurves().run()
 

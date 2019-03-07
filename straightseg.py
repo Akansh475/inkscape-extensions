@@ -64,5 +64,5 @@ class SegmentStraightener(inkex.Effect):
                 node.set('d', str(inkex.Path(p)))
 
 if __name__ == '__main__':
-    SegmentStraightener().affect()
+    SegmentStraightener().run()
 

@@ -65,5 +65,4 @@ class C(coloreffect.ColorEffect):
 
 
 if __name__ == '__main__':
-    c = C()
-    c.run()
+    C().run()

@@ -196,7 +196,6 @@ class Triangle(inkex.Effect):
             draw_tri_from_3_sides(s_a, s_b, s_c, offset, stroke_width, tri)
 
 if __name__ == '__main__':
-    e = Triangle()
-    e.affect()
+    Triangle().run()
 
 

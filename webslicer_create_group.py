@@ -85,5 +85,4 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
 
 if __name__ == '__main__':
-    e = WebSlicer_CreateGroup()
-    e.affect()
+    WebSlicer_CreateGroup().run()

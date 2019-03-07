@@ -24,5 +24,4 @@ class C(chardataeffect.CharDataEffect):
     return ''.join(map(to_braille, text))
 
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    C().run()

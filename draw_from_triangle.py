@@ -482,6 +482,5 @@ class Draw_From_Triangle(inkex.Effect):
                     draw_SVG_circle(0, isotomic, params, st, 'CustomIsotomicConjugate', layer)
 
 
-if __name__ == '__main__':   #pragma: no cover
-    e = Draw_From_Triangle()
-    e.affect()
+if __name__ == '__main__':
+    Draw_From_Triangle().run()

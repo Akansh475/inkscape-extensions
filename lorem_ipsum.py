@@ -234,5 +234,4 @@ class MyEffect(inkex.Effect):
       self.addText(flowRoot)
 
 if __name__ == '__main__':
-  e = MyEffect()
-  e.affect()
+    MyEffect().run()

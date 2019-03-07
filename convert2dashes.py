@@ -88,6 +88,7 @@ class Dashit(inkex.Effect):
             else:
                 self.not_converted.append(node.get('id'))
 
+
 if __name__ == '__main__':
     Dashit().run()
 

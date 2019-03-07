@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2011 Felipe Correa da Silva Sanches
 #
@@ -86,6 +86,5 @@ class SetupTypographyCanvas(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = SetupTypographyCanvas()
-    e.affect()
+    SetupTypographyCanvas().run()
 

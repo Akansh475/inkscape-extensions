@@ -115,7 +115,6 @@ class Spirograph(inkex.Effect):
         self.current_layer.append(new)
 
 if __name__ == '__main__':
-    e = Spirograph()
-    e.affect()
+    Spirograph().run()
 
 

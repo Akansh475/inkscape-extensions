@@ -92,9 +92,8 @@ class JessyInk_Effects(inkex.Effect):
             if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
                 del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Effects()
-    effect.affect()
+    JessyInk_Effects().run()
 

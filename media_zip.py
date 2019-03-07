@@ -223,8 +223,7 @@ class CompressedMediaOutput(inkex.Effect):
         z.close()
 
 
-if __name__ == '__main__':   #pragma: no cover
-    e = CompressedMediaOutput()
-    e.affect()
+if __name__ == '__main__':
+    CompressedMediaOutput().run()
 
 

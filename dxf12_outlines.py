@@ -144,5 +144,4 @@ class MyEffect(inkex.Effect):
         self.dxf_add( r12_footer )
 
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()

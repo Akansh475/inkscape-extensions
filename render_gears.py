@@ -179,8 +179,7 @@ class Gears(inkex.Effect):
             center = inkex.etree.SubElement(g, inkex.addNS('path','svg'), center_attribs )
 
 if __name__ == '__main__':
-    e = Gears()
-    e.affect()
+    Gears().run()
 
 
 

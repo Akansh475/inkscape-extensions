@@ -423,6 +423,5 @@ class DPISwitcher(inkex.Effect):
 
 
 if __name__ == '__main__':
-    effect = DPISwitcher()
-    effect.affect()
+    DPISwitcher().run()
 

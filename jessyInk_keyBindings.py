@@ -239,9 +239,8 @@ class    JessyInk_CustomKeyBindings(inkex.Effect):
 
         return parts[1]
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_CustomKeyBindings()
-    effect.affect()
+    JessyInk_CustomKeyBindings().run()
 

@@ -1341,9 +1341,6 @@ class SynfigExport(SynfigPrep):
 
 
 if __name__ == '__main__':
-    try:
-        e = SynfigExport()
-        e.affect()
-    except MalformedSVGError as e:
-        errormsg(e)
+    SynfigExport().run()
+
 

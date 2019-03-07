@@ -49,9 +49,8 @@ class JessyInk_MasterSlide(inkex.Effect):
             else:
                 nodes[0].set("{" + inkex.NSS["jessyink"] + "}masterSlide","masterSlide")
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_MasterSlide()
-    effect.affect()
+    JessyInk_MasterSlide().run()
 

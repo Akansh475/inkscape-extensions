@@ -54,9 +54,7 @@ class JessyInk_AutoTexts(inkex.Effect):
                     if "{" + inkex.NSS["jessyink"] + "}autoText" in nodes[0].attrib:
                         del nodes[0].attrib["{" + inkex.NSS["jessyink"] + "}autoText"]
 
-if __name__ == '__main__':
 
-    # Create effect instance
-    effect = JessyInk_AutoTexts()
-    effect.affect()
+if __name__ == '__main__':
+    JessyInk_AutoTexts().run()
 

@@ -121,7 +121,6 @@ class Embedder(inkex.Effect):
                     inkex.errormsg(_("%s is not of type image/png, image/jpeg, image/bmp, image/gif, image/tiff, or image/x-icon") % path)
 
 if __name__ == '__main__':
-    e = Embedder()
-    e.affect()
+    Embedder().run()
 
 

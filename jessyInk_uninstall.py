@@ -124,9 +124,8 @@ class JessyInk_Uninstall(inkex.Effect):
             for node in self.document.xpath("//*[@jessyink:view]", namespaces=inkex.NSS):
                 del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
 
+
 # Create effect instance.
 if __name__ == '__main__':
-
-    effect = JessyInk_Uninstall()
-    effect.affect()
+    JessyInk_Uninstall().run()
 

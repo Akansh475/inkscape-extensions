@@ -374,8 +374,4 @@ class Voronoi2svg(inkex.Effect):
 
 
 if __name__ == "__main__":
-    e = Voronoi2svg()
-    e.affect()
-
-
-# vim: expandtab shiftwidth=2 tabstop=2 softtabstop=2 fileencoding=utf-8 textwidth=99
+    Voronoi2svg().run()

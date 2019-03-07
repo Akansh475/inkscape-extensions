@@ -120,8 +120,8 @@ class Dots(inkex.Effect):
                 new.set('y', str(y))
                 new.text = str(text)
 
+
 if __name__ == '__main__':
-    e = Dots()
-    e.affect()
+    Dots().run()
 
 

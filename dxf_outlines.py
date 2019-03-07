@@ -365,7 +365,6 @@ class DxfOutlines(inkex.Effect):
                     inkex.errormsg(_("Warning: Layer '%s' not found!") % (layer))
 
 if __name__ == '__main__':
-    e = DxfOutlines()
-    e.affect()
+    DxfOutlines().run()
 
 

@@ -532,7 +532,6 @@ class Poly3D(inkex.Effect):
             inkex.errormsg(_('Internal Error. No view type selected\n'))
 
 if __name__ == '__main__':
-    e = Poly3D()
-    e.affect()
+    Poly3D().run()
 
 

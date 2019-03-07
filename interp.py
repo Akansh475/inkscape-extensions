@@ -265,7 +265,6 @@ class Interp(inkex.Effect):
                 new = inkex.etree.SubElement(group,inkex.addNS('path','svg'), attribs)
 
 if __name__ == '__main__':
-    e = Interp()
-    e.affect()
+    Interp().run()
 
 

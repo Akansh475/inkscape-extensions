@@ -29,6 +29,5 @@ class FollowLink(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = FollowLink()
-    e.affect()
+    FollowLink().run()
 

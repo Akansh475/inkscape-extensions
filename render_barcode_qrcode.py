@@ -1120,6 +1120,5 @@ class QRCodeInkscape(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = QRCodeInkscape()
-    e.run()
+    QRCodeInkscape().run()
 

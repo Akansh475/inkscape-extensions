@@ -166,8 +166,8 @@ class PerfectBoundCover(inkex.Effect):
                 node.set('d',cubicsuperpath.formatPath(new))
             '''
 
+
 if __name__ == '__main__':
-    e = PerfectBoundCover()
-    e.affect()
+    PerfectBoundCover().run()
 
 

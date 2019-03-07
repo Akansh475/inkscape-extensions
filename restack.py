@@ -209,7 +209,6 @@ class Restack(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = Restack()
-    e.affect()
+    Restack().run()
 
 

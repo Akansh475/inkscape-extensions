@@ -43,6 +43,5 @@ class MyEffect(inkex.Effect):
                 node.set('d', str(inkex.Path(np)))
 
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()
 

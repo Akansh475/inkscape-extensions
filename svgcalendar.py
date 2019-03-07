@@ -285,7 +285,7 @@ class SVGCalendar(inkex.Effect):
 
     def create_month(self, m):
         txt_atts = {
-          'transform': 'translate(' + 
+          'transform': 'translate(' +
                                 str(self.year_margin + \
                                 (self.month_w + self.month_margin) * \
                                 self.month_x_pos) + \
@@ -392,5 +392,5 @@ class SVGCalendar(inkex.Effect):
             return inkex.errormsg(str(err))
 
 
-if __name__ == '__main__':   #pragma: no cover
+if __name__ == '__main__':
     SVGCalendar().run()

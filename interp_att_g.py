@@ -226,8 +226,5 @@ class InterpAttG(inkex.Effect):
         return True
 
 if __name__ == '__main__':
-    e = InterpAttG()
-    if e.affect():
-        exit(0)
-    else:
-        exit(1)
+    InterpAttG().run()
+

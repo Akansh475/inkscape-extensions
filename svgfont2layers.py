@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # Copyright (C) 2011 Felipe Correa da Silva Sanches <juca@members.fsf.org>
 #
@@ -55,7 +55,7 @@ class SVGFont2Layers(inkex.Effect):
 
         if self.defs is None:
             return inkex.errormsg("There are no svg fonts (no defs at all!)")
-        #TODO: detect files with multiple svg fonts declared. 
+        #TODO: detect files with multiple svg fonts declared.
         # Current code only reads the first svgfont instance
         font = self.defs.find(inkex.addNS('font', 'svg'))
         if font is None:
@@ -109,7 +109,7 @@ class SVGFont2Layers(inkex.Effect):
 
             #use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
             #use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
-            #TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why? 
+            #TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
 
             ############################
             #Option 2:
@@ -140,6 +140,5 @@ class SVGFont2Layers(inkex.Effect):
                 break
 
 if __name__ == '__main__':
-    e = SVGFont2Layers()
-    e.affect()
+    SVGFont2Layers().run()
 

@@ -50,6 +50,6 @@ class ExportGpl(inkex.Effect):
                 yield color
 
 if __name__ == '__main__':
-    ExportGpl().affect()
+    ExportGpl().run()
 
 

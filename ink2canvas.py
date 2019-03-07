@@ -87,5 +87,4 @@ class Ink2Canvas(inkex.Effect):
 
 
 if __name__ == "__main__":
-    ink = Ink2Canvas()
-    ink.affect()
+    Ink2Canvas().run()

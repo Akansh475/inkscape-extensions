@@ -52,7 +52,6 @@ class Handles(inkex.Effect):
                     inkex.etree.SubElement(node.getparent(), inkex.addNS('path','svg'), attribs)
 
 if __name__ == '__main__':
-    e = Handles()
-    e.affect()
+    Handles().run()
 
 

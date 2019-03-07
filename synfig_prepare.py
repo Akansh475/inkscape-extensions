@@ -490,11 +490,9 @@ class SynfigPrep(inkex.Effect):
                 if fill is not None:
                     fuse_subpaths(fill)
 
+
 if __name__ == '__main__':
-    try:
-        e = SynfigPrep()
-        e.affect()
-    except MalformedSVGError as e:
-        errormsg(e)
+    SynfigPrep().run()
+
 
 

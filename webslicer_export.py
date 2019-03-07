@@ -439,5 +439,4 @@ class WebSlicer_Export(WebSlicer_Effect):
 
 
 if __name__ == '__main__':
-    e = WebSlicer_Export()
-    e.affect()
+    WebSlicer_Export().run()

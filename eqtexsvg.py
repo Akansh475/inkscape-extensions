@@ -157,7 +157,6 @@ class EQTEXSVG(inkex.Effect):
         clean()
 
 if __name__ == '__main__':
-    e = EQTEXSVG()
-    e.affect()
+    EQTEXSVG().run()
 
 

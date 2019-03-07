@@ -109,7 +109,6 @@ class Motion(inkex.Effect):
                         last = params[-2:]
 
 if __name__ == '__main__':
-    e = Motion()
-    e.affect()
+    Motion().run()
 
 

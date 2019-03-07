@@ -64,7 +64,5 @@ class JessyInk_Effects(inkex.Effect):
 
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Effects()
-    effect.affect()
+    JessyInk_Effects().run()
 

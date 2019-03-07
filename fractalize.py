@@ -92,7 +92,6 @@ class PathFractalize(inkex.Effect):
             self.fractalize(a,subdivPoint[-2],subdivPoint[-1],x2,y2,s-1,f)
 
 if __name__ == '__main__':
-    e = PathFractalize()
-    e.affect()
+    PathFractalize().run()
 
 

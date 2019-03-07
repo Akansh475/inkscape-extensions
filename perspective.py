@@ -156,5 +156,5 @@ class Project(inkex.Effect):
                 (point[X] * matrix[2][0] + point[Y] * matrix[2][1] + matrix[2][2])]
 
 if __name__ == '__main__':
-    Project().affect()
+    Project().run()
 

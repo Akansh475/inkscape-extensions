@@ -311,7 +311,6 @@ class FuncPlot(inkex.Effect):
             inkex.errormsg(_("Please select a rectangle"))
 
 if __name__ == '__main__':
-    e = FuncPlot()
-    e.affect()
+    FuncPlot().run()
 
 

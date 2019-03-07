@@ -24,5 +24,4 @@ class C(chardataeffect.CharDataEffect):
     return r
 
 if __name__ == '__main__':
-    c = C()
-    c.affect()
+    C().run()

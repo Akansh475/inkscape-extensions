@@ -75,8 +75,7 @@ class HpglOutput(inkex.Effect):
         if self.hpgl != '':
             print(self.hpgl)
 
+
 if __name__ == '__main__':
-    # start extension
-    e = HpglOutput()
-    e.affect()
+    HpglOutput().run()
 

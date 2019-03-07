@@ -289,5 +289,4 @@ class Nup(inkex.Effect):
             return ElementTree.tostring(root)
 
 if __name__ == '__main__':
-    e = Nup()
-    e.affect()
+    Nup().run()

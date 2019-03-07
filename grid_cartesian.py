@@ -220,7 +220,6 @@ class GridCartesian(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = GridCartesian()
-    e.run()
+    GridCartesian().run()
 
 

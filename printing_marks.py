@@ -482,5 +482,4 @@ class PrintingMarks (inkex.Effect):
                        ' ' + self.options.unit
 
 if __name__ == '__main__':
-    e = PrintingMarks()
-    e.affect()
+    PrintingMarks().run()

@@ -102,5 +102,4 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
 
 
 if __name__ == '__main__':
-    e = WebSlicer_CreateRect()
-    e.affect()
+    WebSlicer_CreateRect().run()

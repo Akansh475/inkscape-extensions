@@ -143,6 +143,7 @@ class Edge3d(inkex.Effect):
 
         return g
 
+
 if __name__ == '__main__':
     Edge3d().run()
 

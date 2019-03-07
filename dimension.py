@@ -173,7 +173,6 @@ class Dimension(pathmodifier.PathModifier):
         layer.append(group)
 
 if __name__ == '__main__':
-    e = Dimension()
-    e.affect()
+    Dimension().run()
 
 

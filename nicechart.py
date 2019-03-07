@@ -649,5 +649,4 @@ class NiceChart(inkex.Effect):
             layer.append(headingtext)
 
 if __name__ == '__main__':
-    # Create effect instance and apply it.
     NiceChart().run()

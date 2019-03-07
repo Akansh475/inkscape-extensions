@@ -190,6 +190,5 @@ class Merge(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = Merge()
-    e.affect()
+    Merge().run()
 

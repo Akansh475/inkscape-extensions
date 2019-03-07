@@ -11,9 +11,8 @@ class Edge3dBasicTest(InkscapeExtensionTestMixin, TestCase):
         self.e = self.effect()
 
     def test_basic(self):
-        args = [
-            '--id=edgeme'
-            , self.data_file('svg', 'edge3d.svg')]
+        args = ['--id=edgeme',
+                self.data_file('svg', 'edge3d.svg')]
         e = Edge3d()
         e.run(args)
         old_paths = e.original_document.xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)

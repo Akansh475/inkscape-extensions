@@ -20,9 +20,8 @@ class MarkerStrokePaintBasicTest(InkscapeExtensionTestMixin, TestCase):
         self.assertTrue(0 < len(e.document.xpath('//svg:defs', namespaces=inkex.NSS)))
 
     def test_basic(self):
-        args = [
-            '--id=dimension'
-            , self.data_file('svg', 'markers.svg')]
+        args = ['--id=dimension',
+                self.data_file('svg', 'markers.svg')]
         e = MarkerStrokePaintEffect()
         e.run(args)
         old_markers = e.original_document.xpath('//svg:defs//svg:marker', namespaces=inkex.NSS)

@@ -48,28 +48,27 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
         new_frame_style = new_frame.attrib['style'].lower()
-        self.assertTrue('fill-opacity:0.36' in new_frame_style
-                        , 'Invalid fill-opacity in "' + new_frame_style + '".')
-        self.assertTrue('stroke:#000000' in new_frame_style
-                        , 'Invalid stroke in "' + new_frame_style + '".')
-        self.assertTrue('stroke-width:10.0' in new_frame_style
-                        , 'Invalid stroke-width in "' + new_frame_style + '".')
-        self.assertTrue('stroke-opacity:1.00' in new_frame_style
-                        , 'Invalid stroke-opacity in "' + new_frame_style + '".')
-        self.assertTrue('fill:#ff0000' in new_frame_style
-                        , 'Invalid fill in "' + new_frame_style + '".')
+        self.assertTrue('fill-opacity:0.36' in new_frame_style,
+                        'Invalid fill-opacity in "' + new_frame_style + '".')
+        self.assertTrue('stroke:#000000' in new_frame_style,
+                        'Invalid stroke in "' + new_frame_style + '".')
+        self.assertTrue('stroke-width:10.0' in new_frame_style,
+                        'Invalid stroke-width in "' + new_frame_style + '".')
+        self.assertTrue('stroke-opacity:1.00' in new_frame_style,
+                        'Invalid stroke-opacity in "' + new_frame_style + '".')
+        self.assertTrue('fill:#ff0000' in new_frame_style,
+                        'Invalid fill in "' + new_frame_style + '".')
 
     def test_single_frame_grouped(self):
-        args = [
-            '--corner_radius=20'
-            , '--fill_color=-16777124'
-            , '--group=True'
-            , '--id=rect3006'
-            , '--position=inside'
-            , '--stroke_color=255'
-            , '--tab="stroke"'
-            , '--width=10'
-            , self.data_file('svg', 'single_box.svg')]
+        args = ['--corner_radius=20',
+                '--fill_color=-16777124',
+                '--group=True',
+                '--id=rect3006',
+                '--position=inside',
+                '--stroke_color=255',
+                '--tab="stroke"',
+                '--width=10',
+                self.data_file('svg', 'single_box.svg')]
         uut = Frame()
         uut.run(args)
         new_frame = self.get_frame(uut.document)
@@ -82,16 +81,15 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
         self.assertEqual("Frame", group[1].xpath('@inkscape:label', namespaces=inkex.NSS)[0])
 
     def test_single_frame_clipped(self):
-        args = [
-            '--clip=True'
-            , '--corner_radius=20'
-            , '--fill_color=-16777124'
-            , '--id=rect3006'
-            , '--position=inside'
-            , '--stroke_color=255'
-            , '--tab="stroke"'
-            , '--width=10'
-            , self.data_file('svg', 'single_box.svg')]
+        args = ['--clip=True',
+                '--corner_radius=20',
+                '--fill_color=-16777124',
+                '--id=rect3006',
+                '--position=inside',
+                '--stroke_color=255',
+                '--tab="stroke"',
+                '--width=10',
+                self.data_file('svg', 'single_box.svg')]
         uut = Frame()
         uut.run(args)
         new_frame = self.get_frame(uut.document)

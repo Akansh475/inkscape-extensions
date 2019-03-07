@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -18,48 +19,59 @@
 #
 
 import copy
+
+from lxml import etree
+
 import inkex
 from inkex import inkbool
+from inkex.base import InkscapeExtension, SvgThroughMixin
+from inkex.paths import Path
 
 
-class Interp(inkex.Effect):
+class Interp(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Interp, self).__init__()
         self.arg_parser.add_argument("-e", "--exponent",
-                         type=float,
-                        dest="exponent", default=0.0,
-                        help="values other than zero give non linear interpolation")
+                                     type=float,
+                                     dest="exponent",
+                                     default=0.0,
+                                     help="values other than zero give non linear interpolation")
         self.arg_parser.add_argument("-s", "--steps",
-                         type=int,
-                        dest="steps", default=5,
-                        help="number of interpolation steps")
+                                     type=int,
+                                     dest="steps",
+                                     default=5,
+                                     help="number of interpolation steps")
         self.arg_parser.add_argument("-m", "--method",
-                         type=int,
-                        dest="method", default=2,
-                        help="method of interpolation")
+                                     type=int,
+                                     dest="method",
+                                     default=2,
+                                     help="method of interpolation")
         self.arg_parser.add_argument("-d", "--dup",
-                         type=inkbool,
-                        dest="dup", default=True,
-                        help="duplicate endpaths")
+                                     type=inkbool,
+                                     dest="dup",
+                                     default=True,
+                                     help="duplicate endpaths")
         self.arg_parser.add_argument("--style",
-                         type=inkbool,
-                        dest="style", default=True,
-                        help="try interpolation of some style properties")
+                                     type=inkbool,
+                                     dest="style",
+                                     default=True,
+                                     help="try interpolation of some style properties")
         self.arg_parser.add_argument("--zsort",
-                         type=inkbool,
-                        dest="zsort", default=False,
-                        help="use z-order instead of selection order")
+                                     type=inkbool,
+                                     dest="zsort",
+                                     default=False,
+                                     help="use z-order instead of selection order")
 
     def effect(self):
         exponent = self.options.exponent
-        if exponent>= 0:
-            exponent = 1.0 + exponent
+        if exponent >= 0:
+            exponent += 1.0
         else:
-            exponent = 1.0/(1.0 - exponent)
-        steps = [1.0/(self.options.steps + 1.0)]
+            exponent = 1.0 / (1.0 - exponent)
+        steps = [1.0 / (self.options.steps + 1.0)]
         for i in range(self.options.steps - 1):
             steps.append(steps[0] + steps[-1])
-        steps = [step**exponent for step in steps]
+        steps = [step ** exponent for step in steps]
 
         paths = {}
         styles = {}
@@ -72,60 +84,58 @@ class Interp(inkex.Effect):
             objects = self.svg.selected
 
         for _id, node in objects.items():
-            if node.tag ==inkex.addNS('path','svg'):
-                paths[_id] = cubicsuperpath.parsePath(node.get('d'))
+            if node.tag == inkex.addNS('path', 'svg'):
+                paths[_id] = inkex.Transform(node.get('d'))
                 styles[_id] = dict(inkex.Style.parse_str(node.get('style')))
                 trans = node.get('transform')
                 if trans:
-                    simpletransform.applyTransformToPath(simpletransform.parseTransform(trans), paths[_id])
+                    simpletransform.applyTransformToPath(inkex.Transform(trans).matrix, paths[_id])
             else:
                 objects.pop(_id)
 
-        sorted_ids = list(objects) # This should be fixed since it's an OrderedDict now
+        sorted_ids = list(objects)  # This should be fixed since it's an OrderedDict now
         for i in range(1, len(sorted_ids)):
-            start = copy.deepcopy(paths[sorted_ids[i-1]])
+            start = copy.deepcopy(paths[sorted_ids[i - 1]])
             end = copy.deepcopy(paths[sorted_ids[i]])
-            sst = copy.deepcopy(styles[sorted_ids[i-1]])
+            sst = copy.deepcopy(styles[sorted_ids[i - 1]])
             est = copy.deepcopy(styles[sorted_ids[i]])
             basestyle = copy.deepcopy(sst)
             if 'stroke-width' in basestyle:
-                basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width',sst,est,0)
+                basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width', sst, est, 0)
 
-            #prepare for experimental style tweening
+            # prepare for experimental style tweening
             if self.options.style:
                 dostroke = True
                 dofill = True
-                styledefaults = {'opacity':'1.0', 'stroke-opacity':'1.0', 'fill-opacity':'1.0',
-                        'stroke-width':'1.0', 'stroke':'none', 'fill':'none'}
+                styledefaults = {'opacity': '1.0', 'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+                                 'stroke-width': '1.0', 'stroke': 'none', 'fill': 'none'}
                 for key in styledefaults.keys():
-                    sst.setdefault(key,styledefaults[key])
-                    est.setdefault(key,styledefaults[key])
-                isnotplain = lambda x: not (x=='none' or x[:1]=='#')
-                if isnotplain(sst['stroke']) or isnotplain(est['stroke']) or (sst['stroke']=='none' and est['stroke']=='none'):
+                    sst.setdefault(key, styledefaults[key])
+                    est.setdefault(key, styledefaults[key])
+                isnotplain = lambda x: not (x == 'none' or x[:1] == '#')
+                if isnotplain(sst['stroke']) or isnotplain(est['stroke']) or (sst['stroke'] == 'none' and est['stroke'] == 'none'):
                     dostroke = False
-                if isnotplain(sst['fill']) or isnotplain(est['fill']) or (sst['fill']=='none' and est['fill']=='none'):
+                if isnotplain(sst['fill']) or isnotplain(est['fill']) or (sst['fill'] == 'none' and est['fill'] == 'none'):
                     dofill = False
                 if dostroke:
-                    if sst['stroke']=='none':
+                    if sst['stroke'] == 'none':
                         sst['stroke-width'] = '0.0'
                         sst['stroke-opacity'] = '0.0'
                         sst['stroke'] = est['stroke']
-                    elif est['stroke']=='none':
+                    elif est['stroke'] == 'none':
                         est['stroke-width'] = '0.0'
                         est['stroke-opacity'] = '0.0'
                         est['stroke'] = sst['stroke']
                 if dofill:
-                    if sst['fill']=='none':
+                    if sst['fill'] == 'none':
                         sst['fill-opacity'] = '0.0'
                         sst['fill'] = est['fill']
-                    elif est['fill']=='none':
+                    elif est['fill'] == 'none':
                         est['fill-opacity'] = '0.0'
                         est['fill'] = sst['fill']
 
-
-
             if self.options.method == 2:
-                #subdivide both paths into segments of relatively equal lengths
+                # subdivide both paths into segments of relatively equal lengths
                 slengths, stotal = inkex.csplength(start)
                 elengths, etotal = inkex.csplength(end)
                 lengths = {}
@@ -133,17 +143,17 @@ class Interp(inkex.Effect):
                 for sp in slengths:
                     for l in sp:
                         t += l / stotal
-                        lengths.setdefault(t,0)
+                        lengths.setdefault(t, 0)
                         lengths[t] += 1
                 t = 0
                 for sp in elengths:
                     for l in sp:
                         t += l / etotal
-                        lengths.setdefault(t,0)
+                        lengths.setdefault(t, 0)
                         lengths[t] += -1
-                sadd = [k for (k,v) in lengths.items() if v < 0]
+                sadd = [k for (k, v) in lengths.items() if v < 0]
                 sadd.sort()
-                eadd = [k for (k,v) in lengths.items() if v > 0]
+                eadd = [k for (k, v) in lengths.items() if v > 0]
                 eadd.sort()
 
                 t = 0
@@ -158,7 +168,7 @@ class Interp(inkex.Effect):
                         if sadd and t > sadd[0]:
                             while sadd and sadd[0] < t:
                                 nt = (sadd[0] - pt) / (t - pt)
-                                bezes = inkex.cspbezsplitatlength(s[-1][-1][:],start[0][0][:], nt)
+                                bezes = inkex.cspbezsplitatlength(s[-1][-1][:], start[0][0][:], nt)
                                 s[-1][-1:] = bezes[:2]
                                 start[0][0] = bezes[2]
                                 pt = sadd.pop(0)
@@ -175,7 +185,7 @@ class Interp(inkex.Effect):
                         if eadd and t > eadd[0]:
                             while eadd and eadd[0] < t:
                                 nt = (eadd[0] - pt) / (t - pt)
-                                bezes = inkex.cspbezsplitatlength(e[-1][-1][:],end[0][0][:], nt)
+                                bezes = inkex.cspbezsplitatlength(e[-1][-1][:], end[0][0][:], nt)
                                 e[-1][-1:] = bezes[:2]
                                 end[0][0] = bezes[2]
                                 pt = eadd.pop(0)
@@ -183,30 +193,30 @@ class Interp(inkex.Effect):
                 start = s[:]
                 end = e[:]
             else:
-                #which path has fewer segments?
+                # which path has fewer segments?
                 lengthdiff = inkex.numsegs(start) - inkex.numsegs(end)
-                #swap shortest first
+                # swap shortest first
                 if lengthdiff > 0:
                     start, end = end, start
-                #subdivide the shorter path
+                # subdivide the shorter path
                 for x in range(abs(lengthdiff)):
                     maxlen = 0
                     subpath = 0
                     segment = 0
                     for y in range(len(start)):
                         for z in range(1, len(start[y])):
-                            leng = inkex.bezlenapprx(start[y][z-1], start[y][z])
+                            leng = inkex.bezlenapprx(start[y][z - 1], start[y][z])
                             if leng > maxlen:
                                 maxlen = leng
                                 subpath = y
                                 segment = z
                     sp1, sp2 = start[subpath][segment - 1:segment + 1]
                     start[subpath][segment - 1:segment + 1] = inkex.cspbezsplit(sp1, sp2)
-                #if swapped, swap them back
+                # if swapped, swap them back
                 if lengthdiff > 0:
                     start, end = end, start
 
-            #break paths so that corresponding subpaths have an equal number of segments
+            # break paths so that corresponding subpaths have an equal number of segments
             s = [[]]
             e = [[]]
             while start and end:
@@ -227,44 +237,43 @@ class Interp(inkex.Effect):
 
             if self.options.dup:
                 steps = [0] + steps + [1]
-            #create an interpolated path for each interval
-            group = inkex.etree.SubElement(self.current_layer,inkex.addNS('g','svg'))
+            # create an interpolated path for each interval
+            group = etree.SubElement(self.svg.get_current_layer(), inkex.addNS('g', 'svg'))
             for time in steps:
                 interp = []
-                #process subpaths
-                for ssp,esp in zip(s, e):
+                # process subpaths
+                for ssp, esp in zip(s, e):
                     if not (ssp or esp):
                         break
                     interp.append([])
-                    #process superpoints
-                    for sp,ep in zip(ssp, esp):
+                    # process superpoints
+                    for sp, ep in zip(ssp, esp):
                         if not (sp or ep):
                             break
                         interp[-1].append([])
-                        #process points
-                        for p1,p2 in zip(sp, ep):
+                        # process points
+                        for p1, p2 in zip(sp, ep):
                             if not (sp or ep):
                                 break
                             interp[-1][-1].append(inkex.interppoints(p1, p2, time))
 
-                #remove final subpath if empty.
+                # remove final subpath if empty.
                 if not interp[-1]:
                     del interp[-1]
 
-                #basic style tweening
+                # basic style tweening
                 if self.options.style:
-                    basestyle['opacity'] = inkex.tweenstylefloat('opacity',sst,est,time)
+                    basestyle['opacity'] = inkex.tweenstylefloat('opacity', sst, est, time)
                     if dostroke:
-                        basestyle['stroke-opacity'] = inkex.tweenstylefloat('stroke-opacity',sst,est,time)
-                        basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width',sst,est,time)
-                        basestyle['stroke'] = inkex.tweenstylecolor('stroke',sst,est,time)
+                        basestyle['stroke-opacity'] = inkex.tweenstylefloat('stroke-opacity', sst, est, time)
+                        basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width', sst, est, time)
+                        basestyle['stroke'] = inkex.tweenstylecolor('stroke', sst, est, time)
                     if dofill:
-                        basestyle['fill-opacity'] = inkex.tweenstylefloat('fill-opacity',sst,est,time)
-                        basestyle['fill'] = inkex.tweenstylecolor('fill',sst,est,time)
-                attribs = {'style':str(inkex.Style(basestyle)),'d':cubicsuperpath.formatPath(interp)}
-                new = inkex.etree.SubElement(group,inkex.addNS('path','svg'), attribs)
+                        basestyle['fill-opacity'] = inkex.tweenstylefloat('fill-opacity', sst, est, time)
+                        basestyle['fill'] = inkex.tweenstylecolor('fill', sst, est, time)
+                attribs = {'style': str(inkex.Style(basestyle)), 'd': str(Path(interp))}
+                new = etree.SubElement(group, inkex.addNS('path', 'svg'), attribs)
+
 
 if __name__ == '__main__':
     Interp().run()
-
-

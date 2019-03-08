@@ -20,13 +20,7 @@
 Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
 
-import os
-
-try:
-    from subprocess import Popen, PIPE
-    bsubprocess = True
-except:
-    bsubprocess = False
+from subprocess import PIPE, Popen
 
 import inkex
 from inkex import Transform
@@ -39,6 +33,7 @@ try:
 except:
     np = None
 
+
 class Project(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
@@ -46,15 +41,15 @@ class Project(inkex.Effect):
     def effect(self):
         if np is None:
             return inkex.errormsg(
-                _("Failed to import the numpy or numpy.linalg modules."
-                  " These modules are required by this extension. Please install them."
-                  "  On a Debian-like system this can be done with the command, "
-                  "sudo apt-get install python-numpy."))
+                    _("Failed to import the numpy or numpy.linalg modules."
+                      " These modules are required by this extension. Please install them."
+                      "  On a Debian-like system this can be done with the command, "
+                      "sudo apt-get install python-numpy."))
         if len(self.options.ids) < 2:
             return inkex.errormsg(_("This extension requires two selected paths."))
 
-        #obj is selected second
-        scale = self.svg.unittouu('1px')    # convert to document units
+        # obj is selected second
+        scale = self.svg.unittouu('1px')  # convert to document units
         doc = self.document.getroot()
         h = self.svg.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
         # process viewBox height attribute to correct page scaling
@@ -66,11 +61,11 @@ class Project(inkex.Effect):
             scale *= self.svg.unittouu(self.addDocumentUnit(viewBox2[3])) / h
         obj = self.selected[self.options.ids[0]]
         envelope = self.selected[self.options.ids[1]]
-        if obj.get(inkex.addNS('type','sodipodi')):
-            return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type','sodipodi'))))
+        if obj.get(inkex.addNS('type', 'sodipodi')):
+            return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type', 'sodipodi'))))
 
-        if obj.tag == inkex.addNS('path','svg') or obj.tag == inkex.addNS('g','svg'):
-            if envelope.tag == inkex.addNS('path','svg'):
+        if obj.tag == inkex.addNS('path', 'svg') or obj.tag == inkex.addNS('g', 'svg'):
+            if envelope.tag == inkex.addNS('path', 'svg'):
                 mat = inkex.composeParents(envelope, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
                 path = inkex.parseCubicPath(envelope.get('d'))
                 if len(path) < 1 or len(path[0]) < 4:
@@ -82,59 +77,54 @@ class Project(inkex.Effect):
                     dp[i][0] = path[0][i][1][0]
                     dp[i][1] = path[0][i][1][1]
 
-                #query inkscape about the bounding box of obj
-                q = {'x':0,'y':0,'width':0,'height':0}
-                file = self.args[-1]
+                # query inkscape about the bounding box of obj
+                q = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
+                file = self.options.input_file
                 id = self.options.ids[0]
                 for query in q.keys():
-                    if bsubprocess:
-                        p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, id, file), shell=True, stdout=PIPE, stderr=PIPE)
-                        rc = p.wait()
-                        q[query] = scale*float(p.stdout.read())
-                        err = p.stderr.read()
-                    else:
-                        f,err = os.popen3('inkscape --query-%s --query-id=%s "%s"' % (query,id,file))[1:]
-                        q[query] = scale*float(f.read())
-                        f.close()
-                        err.close()
+                    p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, id, file), shell=True, stdout=PIPE, stderr=PIPE)
+                    rc = p.wait()
+                    q[query] = scale * float(p.stdout.read())
+                    err = p.stderr.read()
+
                 sp = np.array([[q['x'], q['y'] + q['height']], [q['x'], q['y']], [q['x'] + q['width'],
-                                q['y']], [q['x'] + q['width'], q['y'] + q['height']]], dtype=np.float64)
+                                                                                  q['y']], [q['x'] + q['width'], q['y'] + q['height']]], dtype=np.float64)
             else:
-                if envelope.tag == inkex.addNS('g','svg'):
+                if envelope.tag == inkex.addNS('g', 'svg'):
                     return inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
                 else:
                     return inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
         else:
             return inkex.errormsg(_("The first selected object is not a path.\nTry using the procedure Path->Object to Path."))
 
-        solmatrix = np.zeros((8,8), dtype=np.float64)
-        free_term = np.zeros((8), dtype=np.float64)
+        solmatrix = np.zeros((8, 8), dtype=np.float64)
+        free_term = np.zeros(8, dtype=np.float64)
         for i in (0, 1, 2, 3):
             solmatrix[i][0] = sp[i][0]
             solmatrix[i][1] = sp[i][1]
             solmatrix[i][2] = 1
-            solmatrix[i][6] = -dp[i][0]*sp[i][0]
-            solmatrix[i][7] = -dp[i][0]*sp[i][1]
-            solmatrix[i+4][3] = sp[i][0]
-            solmatrix[i+4][4] = sp[i][1]
-            solmatrix[i+4][5] = 1
-            solmatrix[i+4][6] = -dp[i][1]*sp[i][0]
-            solmatrix[i+4][7] = -dp[i][1]*sp[i][1]
+            solmatrix[i][6] = -dp[i][0] * sp[i][0]
+            solmatrix[i][7] = -dp[i][0] * sp[i][1]
+            solmatrix[i + 4][3] = sp[i][0]
+            solmatrix[i + 4][4] = sp[i][1]
+            solmatrix[i + 4][5] = 1
+            solmatrix[i + 4][6] = -dp[i][1] * sp[i][0]
+            solmatrix[i + 4][7] = -dp[i][1] * sp[i][1]
             free_term[i] = dp[i][0]
-            free_term[i+4] = dp[i][1]
+            free_term[i + 4] = dp[i][1]
 
         res = lin.solve(solmatrix, free_term)
-        projmatrix = np.array([[res[0],res[1],res[2]],[res[3],res[4],res[5]],[res[6],res[7],1.0]], dtype=np.float64)
-        if obj.tag == inkex.addNS("path",'svg'):
+        projmatrix = np.array([[res[0], res[1], res[2]], [res[3], res[4], res[5]], [res[6], res[7], 1.0]], dtype=np.float64)
+        if obj.tag == inkex.addNS("path", 'svg'):
             self.process_path(obj, projmatrix)
-        if obj.tag == inkex.addNS("g",'svg'):
-            self.process_group(obj,projmatrix)
+        if obj.tag == inkex.addNS("g", 'svg'):
+            self.process_group(obj, projmatrix)
 
     def process_group(self, group, matrix):
         for node in group:
-            if node.tag == inkex.addNS('path','svg'):
+            if node.tag == inkex.addNS('path', 'svg'):
                 self.process_path(node, matrix)
-            if node.tag == inkex.addNS('g','svg'):
+            if node.tag == inkex.addNS('g', 'svg'):
                 self.process_group(node, matrix)
 
     def process_path(self, path, matrix):
@@ -156,6 +146,6 @@ class Project(inkex.Effect):
                 (point[X] * matrix[1][0] + point[Y] * matrix[1][1] + matrix[1][2]) /
                 (point[X] * matrix[2][0] + point[Y] * matrix[2][1] + matrix[2][2])]
 
+
 if __name__ == '__main__':
     Project().run()
-

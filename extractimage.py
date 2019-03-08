@@ -43,7 +43,7 @@ class ExtractImage(inkex.Effect):
     def effect(self):
         # if slectedonly is enabled and there is a selection only extractselected
         # images. otherwise extract all images
-        if (self.options.selectedonly):
+        if self.options.selectedonly:
             self.extractSelected(self.document, self.svg.selected)
         else:
             self.extractAll(self.document)
@@ -51,7 +51,7 @@ class ExtractImage(inkex.Effect):
     def extractSelected(self, document, selected):
         self.document=document
         self.svg.selected=selected
-        if (self.options.ids):
+        if self.options.ids:
             for id, node in selected.items():
                 if node.tag == inkex.addNS('image','svg'):
                     self.extract_image(node)

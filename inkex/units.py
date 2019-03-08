@@ -53,7 +53,7 @@ def parse_unit(value, default_unit='px', default_value=None):
     """
     ret = BOTH_MATCH.match(str(value))
     if ret:
-        return (float(ret.groups()[0]), ret.groups()[-1] or default_unit)
+        return float(ret.groups()[0]), ret.groups()[-1] or default_unit
     return (default_value, default_unit) if default_value is not None else None
 
 

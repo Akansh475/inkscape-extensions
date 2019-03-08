@@ -29,7 +29,7 @@ def propStrToDict(inStr):
     for prop in inStr.split(";"):
         values = prop.split(":")
 
-        if (len(values) == 2):
+        if len(values) == 2:
             dictio[values[0].strip()] = values[1].strip()
 
     return dictio
@@ -68,7 +68,7 @@ class MyEffect(inkex.Effect):
         # Set inkscape command.
         self.inkscapeCommand = self.findInkscapeCommand()
 
-        if (self.inkscapeCommand == None):
+        if self.inkscapeCommand == None:
             inkex.errormsg(_("Could not find Inkscape command.\n"))
             sys.exit(1)
 

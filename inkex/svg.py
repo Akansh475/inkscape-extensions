@@ -94,7 +94,7 @@ class SvgDocumentElement(BaseElement):
             # y-coordinate flip, eliminate it when it's gone in Inkscape
             # doc_height = self.unittouu(self.height)
             # return (float(x), doc_height - float(y))
-        return (0.0, 0.0)
+        return 0.0, 0.0
 
     # This used to be called Effect.xpathSingle
     def getElement(self, xpath):  # pylint: disable=invalid-name

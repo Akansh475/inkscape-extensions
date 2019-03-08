@@ -78,24 +78,24 @@ class MarkerStrokePaintEffect(inkex.Effect):
             if self.options.tab == '"object"':
                 temp_stroke = style.get('stroke', '#000000')
                 temp_fill = style.get('fill', '#000000')
-                if (self.options.invert):
+                if self.options.invert:
                     fill = temp_stroke
                     stroke = temp_fill
                 else:
                     fill = temp_fill
                     stroke = temp_stroke
-                if (self.options.assign_alpha):
+                if self.options.assign_alpha:
                     temp_stroke_opacity = style.get('stroke-opacity', '1')
                     temp_fill_opacity = style.get('fill-opacity', '1')
-                    if (self.options.invert):
+                    if self.options.invert:
                         fill_opacity = temp_stroke_opacity
                         stroke_opacity = temp_fill_opacity
                     else:
                         fill_opacity = temp_fill_opacity
                         stroke_opacity = temp_stroke_opacity
-                if (self.options.fill_type == "solid"):
+                if self.options.fill_type == "solid":
                     fill = stroke
-                    if (self.options.assign_alpha):
+                    if self.options.assign_alpha:
                         fill_opacity = stroke_opacity
             # Choose custom colors
             elif self.options.tab == '"custom"':
@@ -103,15 +103,15 @@ class MarkerStrokePaintEffect(inkex.Effect):
                 fill_green = ((self.options.fill_color >> 16) & 255)
                 fill_blue = ((self.options.fill_color >> 8) & 255)
                 fill = "rgb(%s,%s,%s)" % (fill_red, fill_green, fill_blue)
-                fill_opacity = (((self.options.fill_color) & 255) / 255.)
+                fill_opacity = ((self.options.fill_color & 255) / 255.)
                 stroke_red = ((self.options.stroke_color >> 24) & 255)
                 stroke_green = ((self.options.stroke_color >> 16) & 255)
                 stroke_blue = ((self.options.stroke_color >> 8) & 255)
                 stroke = "rgb(%s,%s,%s)" % (stroke_red, stroke_green, stroke_blue)
-                stroke_opacity = (((self.options.stroke_color) & 255) / 255.)
-                if (not (self.options.assign_fill)):
+                stroke_opacity = ((self.options.stroke_color & 255) / 255.)
+                if not self.options.assign_fill:
                     fill = "none"
-                if (not (self.options.assign_stroke)):
+                if not self.options.assign_stroke:
                     stroke = "none"
 
             for mprop in mprops:
@@ -141,11 +141,11 @@ class MarkerStrokePaintEffect(inkex.Effect):
                     children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
                     for child in children:
                         cstyle = dict(inkex.Style.parse_str(child.get('style')))
-                        if (not ('stroke' in cstyle and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled")):
+                        if not ('stroke' in cstyle and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled"):
                             cstyle['stroke'] = stroke
                             if 'stroke_opacity' in locals():
                                 cstyle['stroke-opacity'] = stroke_opacity
-                        if (not ('fill' in cstyle and self.options.tab == '"object"' and cstyle['fill'] == 'none' and self.options.fill_type == "solid")):
+                        if not ('fill' in cstyle and self.options.tab == '"object"' and cstyle['fill'] == 'none' and self.options.fill_type == "solid"):
                             cstyle['fill'] = fill
                             if 'fill_opacity' in locals():
                                 cstyle['fill-opacity'] = fill_opacity

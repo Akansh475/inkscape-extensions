@@ -46,7 +46,7 @@ class JessyInk_Effects(inkex.Effect):
 
         layer = self.document.xpath("//svg:g[@id='" + baseView[0].attrib["{" + inkex.NSS["inkscape"] + "}current-layer"] + "']", namespaces=inkex.NSS)
 
-        if (len(layer) != 1):
+        if len(layer) != 1:
             inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
 
         # Parse template file.

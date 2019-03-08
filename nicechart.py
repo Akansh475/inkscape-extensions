@@ -221,7 +221,7 @@ class NiceChart(inkex.Effect):
 
         # Create a new layer.
         layer = etree.SubElement(svg, 'g')
-        layer.set(inkex.addNS('label', 'inkscape'), 'Chart-Layer: %s' % (what))
+        layer.set(inkex.addNS('label', 'inkscape'), 'Chart-Layer: %s' % what)
         layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
 
         # Check if a drop shadow should be drawn:
@@ -605,7 +605,7 @@ class NiceChart(inkex.Effect):
                         layer.append(text)
                     else:
                         path = etree.Element(inkex.addNS("path", "svg"))
-                        path.set("d", "m " + str((width) / 2 + offset + normedvalue / 2) + ","
+                        path.set("d", "m " + str(width / 2 + offset + normedvalue / 2) + ","
                                  + str(height / 2 + bar_width / 2) + " 0,"
                                  + str(bar_width / 2 + (font_size * i) + text_offset))  # line
                         path.set("style", "fill:none;stroke:" + font_color
@@ -613,7 +613,7 @@ class NiceChart(inkex.Effect):
                                  + "px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1")
                         layer.append(path)
                         text = etree.Element(inkex.addNS('text', 'svg'))
-                        text.set("x", str((width) / 2 + offset + normedvalue / 2 - font_size / 3))
+                        text.set("x", str(width / 2 + offset + normedvalue / 2 - font_size / 3))
                         text.set("y", str((height / 2) + bar_width + (font_size * (i + 1)) + text_offset))
                         text.set("style", "font-size:" + str(font_size)
                                  + "px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:"

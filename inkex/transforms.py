@@ -101,7 +101,7 @@ class Transform(object):
         """Add rotation to this transformation"""
         _cos, _sin = cos(radians(deg)), sin(radians(deg))
         self.__imul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
-        self.__imul__((((1.0, 0.0, -center_x), (0.0, 1.0, -center_y))))
+        self.__imul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
 
     def add_skewx(self, deg):
         """Add skew x to this transformation"""
@@ -296,12 +296,12 @@ def cubic_extrema(py0, py1, py2, py3):
         return cmin, cmax
 
     if pd1 - 2 * pd2 + pd3:
-        if (pd2 * pd2 > pd1 * pd3):
+        if pd2 * pd2 > pd1 * pd3:
             pds = sqrt(pd2 * pd2 - pd1 * pd3)
             cmin, cmax = _is_bigger((pd1 - pd2 + pds) / (pd1 - 2 * pd2 + pd3))
             cmin, cmax = _is_bigger((pd1 - pd2 - pds) / (pd1 - 2 * pd2 + pd3))
 
-    elif (pd3 - pd1):
+    elif pd3 - pd1:
         cmin, cmax = _is_bigger(-pd1 / (pd3 - pd1))
 
     return cmin, cmax

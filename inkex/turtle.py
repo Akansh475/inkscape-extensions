@@ -21,7 +21,7 @@ import random
 import math
 
 class pTurtle(object):
-    '''A Python path turtle'''
+    """A Python path turtle"""
     def __init__(self, home=(0,0)):
         self.__home = [home[0], home[1]]
         self.__pos = self.__home[:]

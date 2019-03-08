@@ -33,7 +33,7 @@
 # use aliasing workaround for stacked bars (e.g. let the rectangles overlap)
 
 # Example CSV file contents:
-'''
+"""
 Month;1978;1979;1980;1981
 January;2;1,3;0.1;2.3
 February;6.5;2.4;1.2;6.1
@@ -47,7 +47,7 @@ September;14;14.5;13.2;15.3
 October;11.9;13.9;11.5;9.2
 November;6.7;8.5;7;6.6
 December;6.4;2.2;6.3;3.5
-'''
+"""
 # The extension creates one chart for a single value column in one go,
 # e.g. chart all temperatures for all months of the year 1978 into one chart.
 # (for this, select column 0 for labels and column 1 for values).

@@ -198,7 +198,7 @@ def beziertatslope(arg, d):
     return retval
 
 def tpoint(p1, p2, t):
-    '''Linearly interpolate between p1 and p2.
+    """Linearly interpolate between p1 and p2.
 
     t = 0.0 returns p1, t = 1.0 returns p2.
 
@@ -209,7 +209,7 @@ def tpoint(p1, p2, t):
     :param p2: Second point as sequence of two floats
     :param t: Number between 0.0 and 1.0
     :type t: float
-    '''
+    """
     x1, y1 = p1
     x2, y2 = p2
     return x1 + t * (x2 - x1), y1 + t * (y2 - y1)

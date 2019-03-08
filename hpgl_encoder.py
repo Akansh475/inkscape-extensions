@@ -35,7 +35,7 @@ class hpglEncoder(object):
     TWO_PI = PI * 2
 
     def __init__(self, effect):
-        ''' options:
+        """ options:
                 "resolutionX":float
                 "resolutionY":float
                 "pen":int
@@ -52,7 +52,7 @@ class hpglEncoder(object):
                 "autoAlign":bool
                 "debug":bool
                 "convertObjects":bool
-        '''
+        """
         self.options = effect.options
         if self.options.convertObjects:
             self.doc = self.convertObjectsToPaths(effect.options.input_file, effect.document)

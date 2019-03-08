@@ -246,10 +246,10 @@ class Diffeo(PathModifier):
         inkex.Effect.__init__(self)
 
     def applyDiffeo(self, bpt, vects=()):
-        '''
+        """
         bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.
         Defaults to identity!
-        '''
+        """
         for v in vects:
             v[0] -= bpt[0]
             v[1] -= bpt[1]

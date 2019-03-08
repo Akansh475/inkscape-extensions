@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-'''
+"""
 Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
 
 This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ as painted on these lines.
 
 Now move and bend L to make it fit a skeleton, and see what happens to the normals:
 they move and rotate, deforming the pattern.
-'''
+"""
 # standard library
 import copy
 import math
@@ -68,13 +68,13 @@ def stretch(pathcomp,xscale,yscale,org):
             pt[1]=org[1]+(pt[1]-org[1])*yscale
 
 def linearize(p,tolerance=0.001):
-    '''
+    """
     This function receives a component of a 'cubicsuperpath' and returns two things:
     The path subdivided in many straight segments, and an array containing the length of each segment.
 
     We could work with bezier path as well, but bezier arc lengths are (re)computed for each point
     in the deformed object. For complex paths, this might take a while.
-    '''
+    """
     zero=0.000001
     i=0
     d=0
@@ -139,12 +139,12 @@ class PathAlongPath(pathmodifier.Diffeo):
         self.objectsToPaths(self.skeletons)
 
     def lengthtotime(self,l):
-        '''
+        """
         Receives an arc length l, and returns the index of the segment in self.skelcomp
         containing the corresponding point, to gether with the position of the point on this segment.
 
         If the deformer is closed, do computations modulo the toal length.
-        '''
+        """
         if self.skelcompIsClosed:
             l=l % sum(self.lengths)
         if l<=0:
@@ -157,10 +157,10 @@ class PathAlongPath(pathmodifier.Diffeo):
         return i, t
 
     def applyDiffeo(self,bpt,vects=()):
-        '''
+        """
         The kernel of this stuff:
         bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.
-        '''
+        """
         s=bpt[0]-self.skelcomp[0][0]
         i,t=self.lengthtotime(s)
         if i==len(self.skelcomp)-1:

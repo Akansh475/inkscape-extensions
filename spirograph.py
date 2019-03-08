@@ -23,11 +23,12 @@ import math
 from lxml import etree
 
 import inkex
+from inkex.base import SvgThroughMixin, InkscapeExtension
 
 
-class Spirograph(inkex.Effect):
+class Spirograph(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Spirograph, self).__init__()
         self.arg_parser.add_argument("-R", "--primaryr",
                                      type=float,
                                      dest="primaryr", default=60.0,
@@ -63,7 +64,7 @@ class Spirograph(inkex.Effect):
         if self.options.quality == 0:
             return
 
-        if (self.options.gearplacement.strip(' ').lower().startswith('outside')):
+        if self.options.gearplacement.strip(' ').lower().startswith('outside'):
             a = self.options.primaryr + self.options.secondaryr
             flip = -1
         else:
@@ -88,7 +89,7 @@ class Spirograph(inkex.Effect):
 
             theta = i * scale
 
-            view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
+            view_center = inkex.computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
             x = a * math.cos(theta + rotation) + \
                 self.options.penr * math.cos(ratio * theta + rotation) * flip + \
                 view_center[0]
@@ -96,15 +97,13 @@ class Spirograph(inkex.Effect):
                 self.options.penr * math.sin(ratio * theta + rotation) + \
                 view_center[1]
 
-            dx = (-a * math.sin(theta + rotation) - \
-                  ratio * self.options.penr * math.sin(ratio * theta + rotation) * flip) * scale / 3
-            dy = (a * math.cos(theta + rotation) - \
-                  ratio * self.options.penr * math.cos(ratio * theta + rotation)) * scale / 3
+            dx = (-a * math.sin(theta + rotation) - ratio * self.options.penr * math.sin(ratio * theta + rotation) * flip) * scale / 3
+            dy = (a * math.cos(theta + rotation) - ratio * self.options.penr * math.cos(ratio * theta + rotation)) * scale / 3
 
             if i <= 0:
-                pathString += 'M ' + str(x) + ',' + str(y) + ' C ' + str(x + dx) + ',' + str(y + dy) + ' '
+                pathString += 'M {},{} C {},{} '.format(str(x), str(y), str(x + dx), str(y + dy))
             else:
-                pathString += str(x - dx) + ',' + str(y - dy) + ' ' + str(x) + ',' + str(y)
+                pathString += '{},{} {},{}'.format(str(x - dx), str(y - dy), str(x), str(y))
 
                 if math.fmod(i / ratio, self.options.quality) == 0 and i % self.options.quality == 0:
                     pathString += 'Z'
@@ -113,10 +112,10 @@ class Spirograph(inkex.Effect):
                     if i == maxPointCount - 1:
                         pass  # we reached the allowed maximum of points, stop here
                     else:
-                        pathString += ' C ' + str(x + dx) + ',' + str(y + dy) + ' '
+                        pathString += ' C {},{} '.format(str(x + dx), str(y + dy))
 
         new.set('d', pathString)
-        self.current_layer.append(new)
+        self.svg.get_current_layer().append(new)
 
 
 if __name__ == '__main__':

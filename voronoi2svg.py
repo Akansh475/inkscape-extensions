@@ -27,140 +27,144 @@ Create Voronoi diagram from seeds (midpoints of selected objects)
 """
 
 import random
+
+import simpletransform
+from lxml import etree
+
 import inkex
-from inkex import inkbool, Transform
+import voronoi
+from inkex import Transform, inkbool
 from inkex.localize import _
 
-import voronoi
 
-
-class Point:
-    def __init__(self,x,y):
+class Point(object):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
+
 
 class Voronoi2svg(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
 
-        #{{{ Additional options
+        # {{{ Additional options
 
         self.arg_parser.add_argument(
-            "--tab",
+                "--tab",
 
-            type=str,
-            dest="tab")
+                type=str,
+                dest="tab")
         self.arg_parser.add_argument(
-            '--diagram-type',
+                '--diagram-type',
 
-            type = str, choices=['Voronoi','Delaunay','Both'],
-            default = 'Voronoi',
-            dest='diagramType',
-            help = 'Defines the type of the diagram')
+                type=str, choices=['Voronoi', 'Delaunay', 'Both'],
+                default='Voronoi',
+                dest='diagramType',
+                help='Defines the type of the diagram')
         self.arg_parser.add_argument(
-            '--clip-box',
+                '--clip-box',
 
-            type = str, choices=['Page','Automatic from seeds'],
-            default = 'Page',
-            dest='clipBox',
-            help = 'Defines the bounding box of the Voronoi diagram')
+                type=str, choices=['Page', 'Automatic from seeds'],
+                default='Page',
+                dest='clipBox',
+                help='Defines the bounding box of the Voronoi diagram')
         self.arg_parser.add_argument(
-            '--show-clip-box',
+                '--show-clip-box',
 
-            type=inkbool,
-            default = False,
-            dest='showClipBox',
-            help = 'Set this to true to write the bounding box')
+                type=inkbool,
+                default=False,
+                dest='showClipBox',
+                help='Set this to true to write the bounding box')
         self.arg_parser.add_argument(
-            '--delaunay-fill-options',
+                '--delaunay-fill-options',
 
-            type=str,
-            default = "delaunay-no-fill",
-            dest='delaunayFillOptions',
-            help = 'Set the Delaunay triangles color options')
-        #}}}
+                type=str,
+                default="delaunay-no-fill",
+                dest='delaunayFillOptions',
+                help='Set the Delaunay triangles color options')
+        # }}}
 
-    #{{{ Clipping a line by a bounding box
-    def dot(self,x,y):
-        return x[0]*y[0] + x[1]*y[1]
+    # {{{ Clipping a line by a bounding box
+    def dot(self, x, y):
+        return x[0] * y[0] + x[1] * y[1]
 
-    def intersectLineSegment(self,line,v1,v2):
-        s1 = self.dot(line,v1) - line[2]
-        s2 = self.dot(line,v2) - line[2]
-        if s1*s2 > 0:
-            return (0,0,False)
+    def intersectLineSegment(self, line, v1, v2):
+        s1 = self.dot(line, v1) - line[2]
+        s2 = self.dot(line, v2) - line[2]
+        if s1 * s2 > 0:
+            return 0, 0, False
         else:
-            tmp = self.dot(line,v1)-self.dot(line,v2)
+            tmp = self.dot(line, v1) - self.dot(line, v2)
             if tmp == 0:
-                return(0,0,False)
-            u = (line[2]-self.dot(line,v2))/tmp
-            v = 1-u
-            return (u*v1[0]+v*v2[0],u*v1[1]+v*v2[1],True)
+                return 0, 0, False
+            u = (line[2] - self.dot(line, v2)) / tmp
+            v = 1 - u
+            return u * v1[0] + v * v2[0], u * v1[1] + v * v2[1], True
 
-    def clipEdge(self,vertices, lines, edge, bbox):
-        #bounding box corners
+    def clipEdge(self, vertices, lines, edge, bbox):
+        # bounding box corners
         bbc = []
-        bbc.append((bbox[0],bbox[2]))
-        bbc.append((bbox[1],bbox[2]))
-        bbc.append((bbox[1],bbox[3]))
-        bbc.append((bbox[0],bbox[3]))
+        bbc.append((bbox[0], bbox[2]))
+        bbc.append((bbox[1], bbox[2]))
+        bbc.append((bbox[1], bbox[3]))
+        bbc.append((bbox[0], bbox[3]))
 
-        #record intersections of the line with bounding box edges
+        # record intersections of the line with bounding box edges
         line = (lines[edge[0]])
         interpoints = []
         for i in range(4):
-            p = self.intersectLineSegment(line,bbc[i],bbc[(i+1)%4])
-            if (p[2]):
+            p = self.intersectLineSegment(line, bbc[i], bbc[(i + 1) % 4])
+            if p[2]:
                 interpoints.append(p)
 
-        #if the edge has no intersection, return empty intersection
-        if (len(interpoints)<2):
+        # if the edge has no intersection, return empty intersection
+        if len(interpoints) < 2:
             return []
 
-        if (len(interpoints)>2): #happens when the edge crosses the corner of the box
-            interpoints = list(set(interpoints)) #remove doubles
+        if len(interpoints) > 2:  # happens when the edge crosses the corner of the box
+            interpoints = list(set(interpoints))  # remove doubles
 
-        #points of the edge
+        # points of the edge
         v1 = vertices[edge[1]]
-        interpoints.append((v1[0],v1[1],False))
+        interpoints.append((v1[0], v1[1], False))
         v2 = vertices[edge[2]]
-        interpoints.append((v2[0],v2[1],False))
+        interpoints.append((v2[0], v2[1], False))
 
-        #sorting the points in the widest range to get them in order on the line
+        # sorting the points in the widest range to get them in order on the line
         minx = interpoints[0][0]
         maxx = interpoints[0][0]
         miny = interpoints[0][1]
         maxy = interpoints[0][1]
         for point in interpoints:
-            minx = min(point[0],minx)
-            maxx = max(point[0],maxx)
-            miny = min(point[1],miny)
-            maxy = max(point[1],maxy)
+            minx = min(point[0], minx)
+            maxx = max(point[0], maxx)
+            miny = min(point[1], miny)
+            maxy = max(point[1], maxy)
 
-        if (maxx-minx) > (maxy-miny):
+        if (maxx - minx) > (maxy - miny):
             interpoints.sort()
         else:
             interpoints.sort(key=lambda pt: pt[1])
 
         start = []
-        inside = False #true when the part of the line studied is in the clip box
-        startWrite = False #true when the part of the line is in the edge segment
+        inside = False  # true when the part of the line studied is in the clip box
+        startWrite = False  # true when the part of the line is in the edge segment
         for point in interpoints:
-            if point[2]: #The point is a bounding box intersection
+            if point[2]:  # The point is a bounding box intersection
                 if inside:
                     if startWrite:
-                        return [[start[0],start[1]],[point[0],point[1]]]
+                        return [[start[0], start[1]], [point[0], point[1]]]
                     else:
                         return []
                 else:
                     if startWrite:
                         start = point
                 inside = not inside
-            else: #The point is a segment endpoint
+            else:  # The point is a segment endpoint
                 if startWrite:
                     if inside:
-                        #a vertex ends the line inside the bounding box
-                        return [[start[0],start[1]],[point[0],point[1]]]
+                        # a vertex ends the line inside the bounding box
+                        return [[start[0], start[1]], [point[0], point[1]]]
                     else:
                         return []
                 else:
@@ -168,16 +172,16 @@ class Voronoi2svg(inkex.Effect):
                         start = point
                 startWrite = not startWrite
 
-    #{{{ Transformation helpers
+    # {{{ Transformation helpers
 
-    def getGlobalTransform(self,node):
+    def getGlobalTransform(self, node):
         parent = node.getparent()
         myTrans = simpletransform.parseTransform(node.get('transform'))
         if myTrans:
             if parent is not None:
                 parentTrans = self.getGlobalTransform(parent)
                 if parentTrans:
-                    return simpletransform.composeTransform(parentTrans,myTrans)
+                    return simpletransform.composeTransform(parentTrans, myTrans)
                 else:
                     return myTrans
         else:
@@ -186,41 +190,40 @@ class Voronoi2svg(inkex.Effect):
             else:
                 return None
 
-
-    #}}}
+    # }}}
 
     def effect(self):
-        #saveout = sys.stdout
-        #sys.stdout = sys.stderr
-        #{{{ Check that elements have been selected
+        # saveout = sys.stdout
+        # sys.stdout = sys.stderr
+        # {{{ Check that elements have been selected
 
         if len(self.options.ids) == 0:
             inkex.errormsg(_("Please select objects!"))
             return
 
-        #}}}
+        # }}}
 
-        #{{{ Drawing styles
+        # {{{ Drawing styles
 
         linestyle = {
-                'stroke'                    : '#000000',
-                'stroke-width'        : str(self.svg.unittouu('1px')),
-                'fill'                        : 'none',
-                'stroke-linecap'    : 'round',
-                'stroke-linejoin' : 'round'
-                }
+            'stroke': '#000000',
+            'stroke-width': str(self.svg.unittouu('1px')),
+            'fill': 'none',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round'
+        }
 
         facestyle = {
-                'stroke'                    : '#000000',
-                'stroke-width'        : str(self.svg.unittouu('1px')),
-                'fill'                        : 'none',
-                'stroke-linecap'    : 'round',
-                'stroke-linejoin' : 'round'
-                }
+            'stroke': '#000000',
+            'stroke-width': str(self.svg.unittouu('1px')),
+            'fill': 'none',
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round'
+        }
 
-        #}}}
+        # }}}
 
-        #{{{ Handle the transformation of the current group
+        # {{{ Handle the transformation of the current group
         parentGroup = self.getParentNode(self.selected[self.options.ids[0]])
 
         trans = self.getGlobalTransform(parentGroup)
@@ -228,120 +231,118 @@ class Voronoi2svg(inkex.Effect):
         if trans:
             invtrans = -Transform(mat)
 
-        #}}}
+        # }}}
 
-        #{{{ Recovery of the selected objects
+        # {{{ Recovery of the selected objects
 
         pts = []
         nodes = []
         seeds = []
         fills = []
 
-
         for id in self.options.ids:
             node = self.selected[id]
             nodes.append(node)
             bbox = inkex.computeBBox([node])
             if bbox:
-                cx = 0.5*(bbox[0]+bbox[1])
-                cy = 0.5*(bbox[2]+bbox[3])
-                pt = [cx,cy]
+                cx = 0.5 * (bbox[0] + bbox[1])
+                cy = 0.5 * (bbox[2] + bbox[3])
+                pt = [cx, cy]
                 if trans:
-                    inkex.applyTransformToPoint(trans,pt)
-                pts.append(Point(pt[0],pt[1]))
+                    inkex.applyTransformToPoint(trans, pt)
+                pts.append(Point(pt[0], pt[1]))
                 fill = 'none'
                 if self.options.delaunayFillOptions != "delaunay-no-fill":
-                        if 'style' in node.attrib:
-                                style = node.get('style') # fixme: this will break for presentation attributes!
-                                if style:
-                                        declarations = style.split(';')
-                                        for i,decl in enumerate(declarations):
-                                                parts = decl.split(':', 2)
-                                                if len(parts) == 2:
-                                                        (prop, val) = parts
-                                                        prop = prop.strip().lower()
-                                                        if prop == 'fill':
-                                                                fill = val.strip()
-                        fills.append(fill)
-                seeds.append(Point(cx,cy))
+                    if 'style' in node.attrib:
+                        style = node.get('style')  # fixme: this will break for presentation attributes!
+                        if style:
+                            declarations = style.split(';')
+                            for i, decl in enumerate(declarations):
+                                parts = decl.split(':', 2)
+                                if len(parts) == 2:
+                                    (prop, val) = parts
+                                    prop = prop.strip().lower()
+                                    if prop == 'fill':
+                                        fill = val.strip()
+                    fills.append(fill)
+                seeds.append(Point(cx, cy))
 
-        #}}}
+        # }}}
 
-        #{{{ Creation of groups to store the result
+        # {{{ Creation of groups to store the result
 
         if self.options.diagramType != 'Delaunay':
             # Voronoi
-            groupVoronoi = inkex.etree.SubElement(parentGroup,inkex.addNS('g','svg'))
+            groupVoronoi = etree.SubElement(parentGroup, inkex.addNS('g', 'svg'))
             groupVoronoi.set(inkex.addNS('label', 'inkscape'), 'Voronoi')
             if invtrans:
-                inkex.applyTransformToNode(invtrans,groupVoronoi)
+                inkex.applyTransformToNode(invtrans, groupVoronoi)
         if self.options.diagramType != 'Voronoi':
             # Delaunay
-            groupDelaunay = inkex.etree.SubElement(parentGroup,inkex.addNS('g','svg'))
+            groupDelaunay = etree.SubElement(parentGroup, inkex.addNS('g', 'svg'))
             groupDelaunay.set(inkex.addNS('label', 'inkscape'), 'Delaunay')
 
-        #}}}
+        # }}}
 
-        #{{{ Clipping box handling
+        # {{{ Clipping box handling
 
         if self.options.diagramType != 'Delaunay':
-            #Clipping bounding box creation
+            # Clipping bounding box creation
             gBbox = inkex.computeBBox(nodes)
 
-            #Clipbox is the box to which the Voronoi diagram is restricted
-            clipBox = ()
+            # Clipbox is the box to which the Voronoi diagram is restricted
             if self.options.clipBox == 'Page':
                 svg = self.document.getroot()
                 w = self.svg.unittouu(svg.get('width'))
                 h = self.svg.unittouu(svg.get('height'))
-                clipBox = (0,w,0,h)
+                clipBox = (0, w, 0, h)
             else:
-                clipBox = (2*gBbox[0]-gBbox[1],
-                                     2*gBbox[1]-gBbox[0],
-                                     2*gBbox[2]-gBbox[3],
-                                     2*gBbox[3]-gBbox[2])
+                clipBox = (2 * gBbox[0] - gBbox[1],
+                           2 * gBbox[1] - gBbox[0],
+                           2 * gBbox[2] - gBbox[3],
+                           2 * gBbox[3] - gBbox[2])
 
-            #Safebox adds points so that no Voronoi edge in clipBox is infinite
-            safeBox = (2*clipBox[0]-clipBox[1],
-                                 2*clipBox[1]-clipBox[0],
-                                 2*clipBox[2]-clipBox[3],
-                                 2*clipBox[3]-clipBox[2])
-            pts.append(Point(safeBox[0],safeBox[2]))
-            pts.append(Point(safeBox[1],safeBox[2]))
-            pts.append(Point(safeBox[1],safeBox[3]))
-            pts.append(Point(safeBox[0],safeBox[3]))
+            # Safebox adds points so that no Voronoi edge in clipBox is infinite
+            safeBox = (2 * clipBox[0] - clipBox[1],
+                       2 * clipBox[1] - clipBox[0],
+                       2 * clipBox[2] - clipBox[3],
+                       2 * clipBox[3] - clipBox[2])
+            pts.append(Point(safeBox[0], safeBox[2]))
+            pts.append(Point(safeBox[1], safeBox[2]))
+            pts.append(Point(safeBox[1], safeBox[3]))
+            pts.append(Point(safeBox[0], safeBox[3]))
 
             if self.options.showClipBox:
-                #Add the clip box to the drawing
-                rect = inkex.etree.SubElement(groupVoronoi,inkex.addNS('rect','svg'))
-                rect.set('x',str(clipBox[0]))
-                rect.set('y',str(clipBox[2]))
-                rect.set('width',str(clipBox[1]-clipBox[0]))
-                rect.set('height',str(clipBox[3]-clipBox[2]))
-                rect.set('style',str(inkex.Style(linestyle)))
+                # Add the clip box to the drawing
+                rect = etree.SubElement(groupVoronoi, inkex.addNS('rect', 'svg'))
+                rect.set('x', str(clipBox[0]))
+                rect.set('y', str(clipBox[2]))
+                rect.set('width', str(clipBox[1] - clipBox[0]))
+                rect.set('height', str(clipBox[3] - clipBox[2]))
+                rect.set('style', str(inkex.Style(linestyle)))
 
-        #}}}
+        # }}}
 
-        #{{{ Voronoi diagram generation
+        # {{{ Voronoi diagram generation
 
         if self.options.diagramType != 'Delaunay':
-            vertices,lines,edges = voronoi.computeVoronoiDiagram(pts)
+            vertices, lines, edges = voronoi.computeVoronoiDiagram(pts)
             for edge in edges:
                 line = edge[0]
                 vindex1 = edge[1]
                 vindex2 = edge[2]
-                if (vindex1 <0) or (vindex2 <0):
-                    continue # infinite lines have no need to be handled in the clipped box
+                if (vindex1 < 0) or (vindex2 < 0):
+                    continue  # infinite lines have no need to be handled in the clipped box
                 else:
-                    segment = self.clipEdge(vertices,lines,edge,clipBox)
-                    #segment = [vertices[vindex1],vertices[vindex2]] # deactivate clipping
-                    if len(segment)>1:
+                    segment = self.clipEdge(vertices, lines, edge, clipBox)
+                    # segment = [vertices[vindex1],vertices[vindex2]] # deactivate clipping
+                    if len(segment) > 1:
                         v1 = segment[0]
                         v2 = segment[1]
-                        cmds = [['M',[v1[0],v1[1]]],['L',[v2[0],v2[1]]]]
-                        path = inkex.etree.Element(inkex.addNS('path','svg'))
-                        path.set('d',str(inkex.Path(cmds)))
-                        path.set('style',str(inkex.Style(linestyle)))
+                        cmds = [['M', [v1[0], v1[1]]], ['L', [v2[0], v2[1]]]]
+                        path = etree.Element(inkex.addNS('path', 'svg'))
+                        path.set('d', str(inkex.Path(cmds)))
+                        path.set('style', str(inkex.Style(linestyle)))
                         groupVoronoi.append(path)
 
         if self.options.diagramType != 'Voronoi':
@@ -353,25 +354,24 @@ class Voronoi2svg(inkex.Effect):
                 p1 = seeds[triangle[0]]
                 p2 = seeds[triangle[1]]
                 p3 = seeds[triangle[2]]
-                cmds = [['M',[p1.x,p1.y]],
-                                ['L',[p2.x,p2.y]],
-                                ['L',[p3.x,p3.y]],
-                                ['Z',[]]]
+                cmds = [['M', [p1.x, p1.y]],
+                        ['L', [p2.x, p2.y]],
+                        ['L', [p3.x, p3.y]],
+                        ['Z', []]]
                 if self.options.delaunayFillOptions == "delaunay-fill" or self.options.delaunayFillOptions == "delaunay-fill-random":
                     facestyle = {
-                                'stroke'                    : fills[triangle[random.randrange(0, 2)]],
-                                'stroke-width'        : str(self.svg.unittouu('0.005px')),
-                                'fill'                        : fills[triangle[random.randrange(0, 2)]],
-                                'stroke-linecap'    : 'round',
-                                'stroke-linejoin' : 'round'
-                                }
-                path = inkex.etree.Element(inkex.addNS('path','svg'))
-                path.set('d',str(inkex.Path(cmds)))
-                path.set('style',str(inkex.Style(facestyle)))
+                        'stroke': fills[triangle[random.randrange(0, 2)]],
+                        'stroke-width': str(self.svg.unittouu('0.005px')),
+                        'fill': fills[triangle[random.randrange(0, 2)]],
+                        'stroke-linecap': 'round',
+                        'stroke-linejoin': 'round'
+                    }
+                path = etree.Element(inkex.addNS('path', 'svg'))
+                path.set('d', str(inkex.Path(cmds)))
+                path.set('style', str(inkex.Style(facestyle)))
                 groupDelaunay.append(path)
                 i += 1
-        #sys.stdout = saveout
-        #}}}
+        # }}}
 
 
 if __name__ == "__main__":

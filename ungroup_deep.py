@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding=utf-8
 """
 see #inkscape on Freenode and
 https://github.com/nikitakit/svg2sif/blob/master/synfig_prepare.py#L370
@@ -8,21 +8,12 @@ for an example how to do the transform of parent to children.
 
 __version__ = "0.2"  # Works but in terms of maturity, still unsure
 
-from inkex import addNS
-import logging
 import simpletransform
-logging.basicConfig(format='%(levelname)s:%(funcName)s:%(message)s',
-                    level=logging.INFO)
+from lxml import etree
+from numpy import matrix
 
-try:
-    import inkex
-except ImportError:
-    raise ImportError("""No module named inkex in {0}.""".format(__file__))
-
-try:
-    from numpy import matrix
-except ImportError:
-    raise ImportError("""Cannot find numpy.matrix in {0}.""".format(__file__))
+import inkex
+from inkex import addNS
 
 SVG_NS = "http://www.w3.org/2000/svg"
 INKSCAPE_NS = "http://www.inkscape.org/namespaces/inkscape"
@@ -33,18 +24,18 @@ class Ungroup(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--startdepth",
-                                      type=int,
+                                     type=int,
                                      dest="startdepth", default=0,
                                      help="starting depth for ungrouping")
         self.arg_parser.add_argument("-m", "--maxdepth",
-                                      type=int,
+                                     type=int,
                                      dest="maxdepth", default=65535,
                                      help="maximum ungrouping depth")
         self.arg_parser.add_argument("-k", "--keepdepth",
-                                      type=int,
+                                     type=int,
                                      dest="keepdepth", default=0,
                                      help="levels of ungrouping to " +
-                                     "leave untouched")
+                                          "leave untouched")
 
     @staticmethod
     def _get_dimension(s="1024"):
@@ -90,17 +81,17 @@ class Ungroup(inkex.Effect):
             dw = self._get_dimension(node.get("width", vw))
             dh = self._get_dimension(node.get("height", vh))
             t = (
-                "translate(%f, %f) scale(%f, %f)" %
-                (-vx, -vy, dw / vw, dh / vh)
+                    "translate(%f, %f) scale(%f, %f)" %
+                    (-vx, -vy, dw / vw, dh / vh)
             )
             this_transform = simpletransform.parseTransform(
-                t, transform)
+                    t, transform)
             this_transform = simpletransform.parseTransform(
-                node.get("transform"), this_transform)
+                    node.get("transform"), this_transform)
             del node.attrib["viewBox"]
         else:
             this_transform = simpletransform.parseTransform(node.get(
-                "transform"), transform)
+                    "transform"), transform)
 
         # Set the node's transform attrib
         node.set("transform",
@@ -160,25 +151,25 @@ class Ungroup(inkex.Effect):
 
         if clippathurl:
             node_transform = simpletransform.parseTransform(
-                node.get("transform"))
+                    node.get("transform"))
             if node_transform:
                 # Clip-paths on nodes with a transform have the transform
                 # applied to the clipPath as well, which we don't want.  So, we
                 # create new clipPath element with references to all existing
                 # clippath subelements, but with the inverse transform applied
                 inverse_node_transform = simpletransform.formatTransform(
-                    self._invert_transform(node_transform))
-                new_clippath = inkex.etree.SubElement(
-                    self.xpathSingle('//svg:defs'), 'clipPath',
-                    {'clipPathUnits': 'userSpaceOnUse',
-                     'id': self.svg.get_unique_id("clipPath")})
+                        self._invert_transform(node_transform))
+                new_clippath = etree.SubElement(
+                        self.xpathSingle('//svg:defs'), 'clipPath',
+                        {'clipPathUnits': 'userSpaceOnUse',
+                         'id': self.svg.get_unique_id("clipPath")})
                 clippath = self.getElementById(clippathurl[5:-1])
                 for c in clippath.iterchildren():
-                    inkex.etree.SubElement(
-                        new_clippath, 'use',
-                        {inkex.addNS('href', 'xlink'): '#' + c.get("id"),
-                         'transform': inverse_node_transform,
-                         'id': self.svg.get_unique_id("use")})
+                    etree.SubElement(
+                            new_clippath, 'use',
+                            {inkex.addNS('href', 'xlink'): '#' + c.get("id"),
+                             'transform': inverse_node_transform,
+                             'id': self.svg.get_unique_id("use")})
 
                 # Set the clippathurl to be the one with the inverse transform
                 clippathurl = "url(#" + new_clippath.get("id") + ")"
@@ -260,7 +251,7 @@ class Ungroup(inkex.Effect):
                     depth += 1
                     for c in node.iterchildren():
                         q.append({'node': c, 'prev': current,
-                                 'depth': depth, 'height': None})
+                                  'depth': depth, 'height': None})
 
             # Return path
             else:

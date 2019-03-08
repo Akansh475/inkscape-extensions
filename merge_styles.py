@@ -22,10 +22,15 @@ Merges styles into class based styles and removes.
 """
 
 from collections import defaultdict
+
+from lxml import etree
+
 import inkex
+
 
 class Style(dict):
     """Controls the style/css mechanics for this effect"""
+
     def __init__(self, attr=None):
         super(Style, self).__init__()
         self.weights = defaultdict(int)
@@ -94,7 +99,7 @@ def get_styles(document):
         if node.tag == inkex.addNS('style', 'svg'):
             return node
         nodes.append(node)
-    ret = inkex.etree.SubElement(document.getroot(), 'style', {})
+    ret = etree.SubElement(document.getroot(), 'style', {})
     # Reorder to make the style element FIRST
     for node in nodes:
         document.getroot().append(node)
@@ -103,6 +108,7 @@ def get_styles(document):
 
 class MergeStyles(inkex.Effect):
     """Merge any styles which are the same for CSS"""
+
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-n", "--name", type=str, dest="name", default='',

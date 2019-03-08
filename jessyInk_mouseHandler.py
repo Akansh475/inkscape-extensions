@@ -16,9 +16,8 @@
 
 import os
 
-import sys
+from lxml import etree
 
-# We will use the inkex module with the predefined Effect base class.
 import inkex
 
 
@@ -27,8 +26,8 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-        self.arg_parser.add_argument('--mouseSettings',  type=str, dest = 'mouseSettings', default = 'default')
+        self.arg_parser.add_argument('--tab', type=str, dest='what')
+        self.arg_parser.add_argument('--mouseSettings', type=str, dest='mouseSettings', default='default')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -45,17 +44,17 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
 
         if self.options.mouseSettings == "noclick":
             # Create new script node.
-            scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
+            scriptElm = etree.Element(inkex.addNS("script", "svg"))
             scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_noclick.js")).read()
-            groupElm = inkex.etree.Element(inkex.addNS("mousehandler", "jessyink"))
+            groupElm = etree.Element(inkex.addNS("mousehandler", "jessyink"))
             groupElm.set("{" + inkex.NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_noclick")
             groupElm.append(scriptElm)
             self.document.getroot().append(groupElm)
         elif self.options.mouseSettings == "draggingZoom":
             # Create new script node.
-            scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
+            scriptElm = etree.Element(inkex.addNS("script", "svg"))
             scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_zoomControl.js")).read()
-            groupElm = inkex.etree.Element(inkex.addNS("mousehandler", "jessyink"))
+            groupElm = etree.Element(inkex.addNS("mousehandler", "jessyink"))
             groupElm.set("{" + inkex.NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_zoomControl")
             groupElm.append(scriptElm)
             self.document.getroot().append(groupElm)
@@ -64,4 +63,3 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
 # Create effect instance
 if __name__ == '__main__':
     JessyInk_CustomMouseHandler().run()
-

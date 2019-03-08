@@ -33,6 +33,8 @@ interest and that should be shipped out in separate files...
 import copy
 import random
 
+from lxml import etree
+
 import inkex
 
 
@@ -154,7 +156,7 @@ class PathModifier(inkex.Effect):
             d += 'L %f,%f ' % (x, y + ry)
             d += 'A %f,%f,%i,%i,%i,%f,%f ' % (rx, ry, 0, 0, 1, x + rx, y)
 
-            newnode = inkex.etree.Element('path')
+            newnode = etree.Element('path')
             newnode.set('d', d)
             newnode.set('id', self.svg.get_unique_id('path'))
             newnode.set('style', node.get('style'))
@@ -170,7 +172,7 @@ class PathModifier(inkex.Effect):
 
     def groupToPath(self, node, doReplace=True):
         if node.tag == inkex.addNS('g', 'svg'):
-            newNode = inkex.etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'))
+            newNode = etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'))
 
             newstyle = dict(inkex.Style.parse_str(node.get('style') or ""))
             newp = []

@@ -18,7 +18,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
+from lxml import etree
+
 import inkex
+
 
 class Layers2SVGFont(inkex.Effect):
     def __init__(self):
@@ -28,15 +31,15 @@ class Layers2SVGFont(inkex.Effect):
         namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))
         guides = namedview.findall(inkex.addNS('guide', 'sodipodi'))
         for guide in guides:
-            l=guide.get(inkex.addNS('label', 'inkscape'))
-            if l==label:
+            l = guide.get(inkex.addNS('label', 'inkscape'))
+            if l == label:
                 return int(guide.get("position").split(",")[index])
         return 0
 
     def get_or_create(self, parentnode, nodetype):
         node = parentnode.find(nodetype)
         if node is None:
-            node = inkex.etree.SubElement(parentnode, nodetype)
+            node = etree.SubElement(parentnode, nodetype)
         return node
 
     def get_or_create_glyph(self, font, unicode_char):
@@ -44,11 +47,11 @@ class Layers2SVGFont(inkex.Effect):
         for glyph in glyphs:
             if unicode_char == glyph.get("unicode"):
                 return glyph
-        return inkex.etree.SubElement(font, inkex.addNS('glyph', 'svg'))
+        return etree.SubElement(font, inkex.addNS('glyph', 'svg'))
 
     def flip_cordinate_system(self, d, emsize, baseline):
         pathdata = inkex.parsePath(d)
-        inkex.scalePath(pathdata, 1,-1)
+        inkex.scalePath(pathdata, 1, -1)
         inkex.translatePath(pathdata, 0, int(emsize) - int(baseline))
         return str(inkex.Path(pathdata))
 
@@ -85,26 +88,26 @@ class Layers2SVGFont(inkex.Effect):
                 glyph.set("unicode", unicode_char)
 
                 ############################
-                #Option 1:
+                # Option 1:
                 # Using clone (svg:use) as childnode of svg:glyph
 
-                #use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
-                #use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
-                #TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
+                # use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
+                # use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
+                # TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
 
                 ############################
-                #Option 2:
+                # Option 2:
                 # Using svg:paths as childnodes of svg:glyph
 
-                #paths = group.findall(inkex.addNS('path', 'svg'))
-                #for p in paths:
+                # paths = group.findall(inkex.addNS('path', 'svg'))
+                # for p in paths:
                 #    d = p.get("d")
                 #    d = self.flip_cordinate_system(d, emsize, baseline)
-                #    path = inkex.etree.SubElement(glyph, inkex.addNS('path', 'svg'))
+                #    path = etree.SubElement(glyph, inkex.addNS('path', 'svg'))
                 #    path.set("d", d)
 
                 ############################
-                #Option 3:
+                # Option 3:
                 # Using curve description in d attribute of svg:glyph
 
                 paths = group.findall(inkex.addNS('path', 'svg'))
@@ -116,4 +119,3 @@ class Layers2SVGFont(inkex.Effect):
 
 if __name__ == '__main__':
     Layers2SVGFont().run()
-

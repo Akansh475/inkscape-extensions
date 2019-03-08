@@ -19,27 +19,31 @@
 #
 
 import math
+
+from lxml import etree
+
 import inkex
+
 
 class Motion(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-a", "--angle",
-                         type=float,
-                        dest="angle", default=45.0,
-                        help="direction of the motion vector")
+                                     type=float,
+                                     dest="angle", default=45.0,
+                                     help="direction of the motion vector")
         self.arg_parser.add_argument("-m", "--magnitude",
-                         type=float,
-                        dest="magnitude", default=100.0,
-                        help="magnitude of the motion vector")
+                                     type=float,
+                                     dest="magnitude", default=100.0,
+                                     help="magnitude of the motion vector")
 
     def makeface(self, last, arg):
         (cmd, params) = arg
         a = []
-        a.append(['M',last[:]])
+        a.append(['M', last[:]])
         a.append([cmd, params[:]])
 
-        #translate path segment along vector
+        # translate path segment along vector
         np = params[:]
         defs = inkex.pathdefs[cmd]
         for i in range(defs[1]):
@@ -48,58 +52,58 @@ class Motion(inkex.Effect):
             elif defs[3][i] == 'y':
                 np[i] += self.vy
 
-        a.append(['L',[np[-2],np[-1]]])
+        a.append(['L', [np[-2], np[-1]]])
 
-        #reverse direction of path segment
-        np[-2:] = last[0]+self.vx,last[1]+self.vy
+        # reverse direction of path segment
+        np[-2:] = last[0] + self.vx, last[1] + self.vy
         if cmd == 'C':
             c1 = np[:2], np[2:4] = np[2:4], np[:2]
-        a.append([cmd,np[:]])
+        a.append([cmd, np[:]])
 
-        a.append(['Z',[]])
-        face = inkex.etree.SubElement(self.facegroup,inkex.addNS('path','svg'),{'d':str(inkex.Path(a))})
+        a.append(['Z', []])
+        face = etree.SubElement(self.facegroup, inkex.addNS('path', 'svg'), {'d': str(inkex.Path(a))})
 
     def effect(self):
-        self.vx = math.cos(math.radians(self.options.angle))*self.options.magnitude
-        self.vy = math.sin(math.radians(self.options.angle))*self.options.magnitude
+        self.vx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
+        self.vy = math.sin(math.radians(self.options.angle)) * self.options.magnitude
         for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path','svg'):
-                group = inkex.etree.SubElement(node.getparent(),inkex.addNS('g','svg'))
-                self.facegroup = inkex.etree.SubElement(group, inkex.addNS('g','svg'))
+            if node.tag == inkex.addNS('path', 'svg'):
+                group = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
+                self.facegroup = etree.SubElement(group, inkex.addNS('g', 'svg'))
                 group.append(node)
 
                 t = node.get('transform')
                 if t:
                     group.set('transform', t)
-                    node.set('transform','')
+                    node.set('transform', '')
 
                 s = node.get('style')
                 self.facegroup.set('style', s)
 
                 p = inkex.parsePath(node.get('d'))
-                for cmd,params in p:
+                for cmd, params in p:
                     tees = []
                     if cmd == 'C':
-                        bez = (last,params[:2],params[2:4],params[-2:])
-                        tees = [t for t in inkex.beziertatslope(bez,(self.vy,self.vx)) if 0<t<1]
+                        bez = (last, params[:2], params[2:4], params[-2:])
+                        tees = [t for t in inkex.beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
                         tees.sort()
 
                     segments = []
-                    if len(tees) == 0 and cmd in ['L','C']:
-                            segments.append([cmd,params[:]])
+                    if len(tees) == 0 and cmd in ['L', 'C']:
+                        segments.append([cmd, params[:]])
                     elif len(tees) == 1:
-                            one,two = inkex.beziersplitatt(bez,tees[0])
-                            segments.append([cmd,list(one[1]+one[2]+one[3])])
-                            segments.append([cmd,list(two[1]+two[2]+two[3])])
+                        one, two = inkex.beziersplitatt(bez, tees[0])
+                        segments.append([cmd, list(one[1] + one[2] + one[3])])
+                        segments.append([cmd, list(two[1] + two[2] + two[3])])
                     elif len(tees) == 2:
-                            one,two = inkex.beziersplitatt(bez,tees[0])
-                            two,three = inkex.beziersplitatt(two,tees[1])
-                            segments.append([cmd,list(one[1]+one[2]+one[3])])
-                            segments.append([cmd,list(two[1]+two[2]+two[3])])
-                            segments.append([cmd,list(three[1]+three[2]+three[3])])
+                        one, two = inkex.beziersplitatt(bez, tees[0])
+                        two, three = inkex.beziersplitatt(two, tees[1])
+                        segments.append([cmd, list(one[1] + one[2] + one[3])])
+                        segments.append([cmd, list(two[1] + two[2] + two[3])])
+                        segments.append([cmd, list(three[1] + three[2] + three[3])])
 
                     for seg in segments:
-                        self.makeface(last,seg)
+                        self.makeface(last, seg)
                         last = seg[1][-2:]
 
                     if cmd == 'M':
@@ -109,7 +113,6 @@ class Motion(inkex.Effect):
                     else:
                         last = params[-2:]
 
+
 if __name__ == '__main__':
     Motion().run()
-
-

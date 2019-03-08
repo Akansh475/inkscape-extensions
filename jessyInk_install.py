@@ -15,10 +15,11 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 
 import os
-import sys
 
-# We will use the inkex module with the predefined Effect base class.
+from lxml import etree
+
 import inkex
+
 
 def propStrToList(str):
     list = []
@@ -28,18 +29,20 @@ def propStrToList(str):
             list.append(prop.strip())
     return list
 
+
 def listToPropStr(list):
     str = ""
     for prop in list:
         str += " " + prop + ";"
     return str[1:]
 
+
 class JessyInk_Install(inkex.Effect):
     def __init__(self):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
+        self.arg_parser.add_argument('--tab', type=str, dest='what')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -49,9 +52,9 @@ class JessyInk_Install(inkex.Effect):
             node.getparent().remove(node)
 
         # Create new script node
-        scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
+        scriptElm = etree.Element(inkex.addNS("script", "svg"))
         scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk.js")).read()
-        scriptElm.set("id","JessyInk")
+        scriptElm.set("id", "JessyInk")
         scriptElm.set("{" + inkex.NSS["jessyink"] + "}version", '1.5.5')
         self.document.getroot().append(scriptElm)
 
@@ -121,4 +124,3 @@ class JessyInk_Install(inkex.Effect):
 # Create effect instance
 if __name__ == '__main__':
     JessyInk_Install().run()
-

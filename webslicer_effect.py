@@ -18,6 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
+from lxml import etree
+
 import inkex
 
 
@@ -38,12 +40,12 @@ class WebSlicer_Effect(inkex.Effect):
     def get_slicer_layer(self, force_creation=False):
         # Test if webslicer-layer layer existis
         layer = self.document.xpath(
-                     '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]',
-                     namespaces=inkex.NSS)
+                '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]',
+                namespaces=inkex.NSS)
         if len(layer) is 0:
             if force_creation:
                 # Create a new layer
-                layer = inkex.etree.SubElement(self.document.getroot(), 'g')
+                layer = etree.SubElement(self.document.getroot(), 'g')
                 layer.set('id', 'webslicer-layer')
                 layer.set(inkex.addNS('label', 'inkscape'), 'Web Slicer')
                 layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
@@ -58,7 +60,6 @@ class WebSlicer_Effect(inkex.Effect):
         for att in conf_atts:
             if not is_empty(getattr(self.options, att)):
                 conf_list.append(
-                    att.replace('_','-') +': '+ str(getattr(self.options, att))
+                        att.replace('_', '-') + ': ' + str(getattr(self.options, att))
                 )
-        return "\n".join( conf_list )
-
+        return "\n".join(conf_list)

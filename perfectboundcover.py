@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
+from lxml import etree
+
 import inkex
 from inkex import inkbool
 
@@ -24,74 +26,78 @@ from inkex import inkbool
 def caliper_to_ppi(caliper):
     return 2 / caliper
 
+
 def bond_weight_to_ppi(bond_weight):
     return caliper_to_ppi(bond_weight * .0002)
 
+
 def points_to_ppi(points):
     return caliper_to_ppi(points / 1000.0)
+
 
 class PerfectBoundCover(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--width",
-                         type=float,
-                        dest="width", default=6.0,
-                        help="cover width (in)")
+                                     type=float,
+                                     dest="width", default=6.0,
+                                     help="cover width (in)")
         self.arg_parser.add_argument("--height",
-                         type=float,
-                        dest="height", default=9.0,
-                        help="cover height (in)")
+                                     type=float,
+                                     dest="height", default=9.0,
+                                     help="cover height (in)")
         self.arg_parser.add_argument("--pages",
-                         type=int,
-                        dest="pages", default=64,
-                        help="number of pages")
+                                     type=int,
+                                     dest="pages", default=64,
+                                     help="number of pages")
         self.arg_parser.add_argument("--paperthicknessmeasurement",
-                         type=str,
-                        dest="paperthicknessmeasurement", default=100.0,
-                        help="paper thickness measurement")
+                                     type=str,
+                                     dest="paperthicknessmeasurement", default=100.0,
+                                     help="paper thickness measurement")
         self.arg_parser.add_argument("--paperthickness",
-                         type=float,
-                        dest="paperthickness", default=0.0,
-                        help="paper thickness")
+                                     type=float,
+                                     dest="paperthickness", default=0.0,
+                                     help="paper thickness")
         self.arg_parser.add_argument("--coverthicknessmeasurement",
-                         type=str,
-                        dest="coverthicknessmeasurement", default=100.0,
-                        help="cover thickness measurement")
+                                     type=str,
+                                     dest="coverthicknessmeasurement", default=100.0,
+                                     help="cover thickness measurement")
         self.arg_parser.add_argument("--coverthickness",
-                         type=float,
-                        dest="coverthickness", default=0.0,
-                        help="cover thickness")
+                                     type=float,
+                                     dest="coverthickness", default=0.0,
+                                     help="cover thickness")
         self.arg_parser.add_argument("--bleed",
-                         type=float,
-                        dest="bleed", default=0.25,
-                        help="cover bleed (in)")
+                                     type=float,
+                                     dest="bleed", default=0.25,
+                                     help="cover bleed (in)")
         self.arg_parser.add_argument("--removeguides",
-                         type=inkbool,
-                        dest="removeguides", default=False,
-                        help="remove guides")
+                                     type=inkbool,
+                                     dest="removeguides", default=False,
+                                     help="remove guides")
         self.arg_parser.add_argument("--book",
-                         type=str,
-                        dest="book", default=False,
-                        help="dummy")
+                                     type=str,
+                                     dest="book", default=False,
+                                     help="dummy")
         self.arg_parser.add_argument("--cover",
-                         type=str,
-                        dest="cover", default=False,
-                        help="dummy")
+                                     type=str,
+                                     dest="cover", default=False,
+                                     help="dummy")
         self.arg_parser.add_argument("--paper",
-                         type=str,
-                        dest="paper", default=False,
-                        help="dummy")
+                                     type=str,
+                                     dest="paper", default=False,
+                                     help="dummy")
         self.arg_parser.add_argument("--warning",
-                         type=str,
-                        dest="warning", default=False,
-                        help="dummy")
+                                     type=str,
+                                     dest="warning", default=False,
+                                     help="dummy")
+
     def effect(self):
         switch = {
-          "ppi": lambda x: x,
-          "caliper": lambda x: caliper_to_ppi(x),
-          "bond_weight": lambda x: bond_weight_to_ppi(x),
-          "points": lambda x: points_to_ppi(x),
-          "width": lambda x: x
+            "ppi": lambda x: x,
+            "caliper": lambda x: caliper_to_ppi(x),
+            "bond_weight": lambda x: bond_weight_to_ppi(x),
+            "points": lambda x: points_to_ppi(x),
+            "width": lambda x: x
         }
 
         if self.options.paperthickness > 0:
@@ -136,7 +142,7 @@ class PerfectBoundCover(inkex.Effect):
                     parent = node.getparent()
                     parent.remove(node)
             for guide in guides:
-                newguide = inkex.etree.Element(inkex.addNS('guide','sodipodi'))
+                newguide = etree.Element(inkex.addNS('guide', 'sodipodi'))
                 newguide.set("orientation", guide[0])
                 newguide.set("position", "%f" % (guide[1] * 96))
                 namedview[0].append(newguide)
@@ -170,5 +176,3 @@ class PerfectBoundCover(inkex.Effect):
 
 if __name__ == '__main__':
     PerfectBoundCover().run()
-
-

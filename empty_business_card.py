@@ -4,7 +4,11 @@
 # Written by Tavmjong Bah
 
 import re
+
+from lxml import etree
+
 import inkex
+
 
 class BusinessCard(inkex.Effect):
     def __init__(self):
@@ -24,13 +28,13 @@ class BusinessCard(inkex.Effect):
 
         root = self.document.getroot()
         root.set("id", "SVGRoot")
-        root.set("width",    width + width_unit)
+        root.set("width", width + width_unit)
         root.set("height", height + height_unit)
-        root.set("viewBox", "0 0 " + width + " " + height )
+        root.set("viewBox", "0 0 " + width + " " + height)
 
         namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
-            namedview = inkex.etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
+            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), width_unit)
 
@@ -38,8 +42,9 @@ class BusinessCard(inkex.Effect):
         height_int = int(self.svg.uutounit(float(height), 'px'))
 
         namedview.set(inkex.addNS('zoom', 'inkscape'), str(2))
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(width_int/2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(height_int/2.0))
+        namedview.set(inkex.addNS('cx', 'inkscape'), str(width_int / 2.0))
+        namedview.set(inkex.addNS('cy', 'inkscape'), str(height_int / 2.0))
+
 
 if __name__ == '__main__':
     BusinessCard().run()

@@ -17,39 +17,41 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
-# local library
-from webslicer_effect import WebSlicer_Effect, is_empty
+from lxml import etree
+
 import inkex
 from inkex.localize import _
+from webslicer_effect import WebSlicer_Effect, is_empty
+
 
 class WebSlicer_CreateGroup(WebSlicer_Effect):
 
     def __init__(self):
         WebSlicer_Effect.__init__(self)
         self.arg_parser.add_argument("--html-id",
-                         type=str,
-                        dest="html_id",
-                        help="")
+                                     type=str,
+                                     dest="html_id",
+                                     help="")
         self.arg_parser.add_argument("--html-class",
-                         type=str,
-                        dest="html_class",
-                        help="")
+                                     type=str,
+                                     dest="html_class",
+                                     help="")
         self.arg_parser.add_argument("--width-unity",
-                         type=str,
-                        dest="width_unity",
-                        help="")
+                                     type=str,
+                                     dest="width_unity",
+                                     help="")
         self.arg_parser.add_argument("--height-unity",
-                         type=str,
-                        dest="height_unity",
-                        help="")
+                                     type=str,
+                                     dest="height_unity",
+                                     help="")
         self.arg_parser.add_argument("--bg-color",
-                         type=str,
-                        dest="bg_color",
-                        help="")
+                                     type=str,
+                                     dest="bg_color",
+                                     help="")
         self.arg_parser.add_argument("--tab",
-                         type=str,
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+                                     type=str,
+                                     dest="tab",
+                                     help="The selected UI-tab when OK was pressed")
 
     def get_base_elements(self):
         self.layer = self.get_slicer_layer()
@@ -57,32 +59,30 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
             return inkex.errormsg(_('You must create and select some "Slicer rectangles" before trying to group.'))
         self.layer_descendants = self.get_descendants_in_array(self.layer)
 
-
     def get_descendants_in_array(self, el):
         descendants = el.getchildren()
         for e in descendants:
-            descendants.extend( self.get_descendants_in_array(e) )
+            descendants.extend(self.get_descendants_in_array(e))
         return descendants
-
 
     def effect(self):
         self.get_base_elements()
         if len(self.svg.selected) == 0:
             return inkex.errormsg(_('You must to select some "Slicer rectangles" or other "Layout groups".'))
-        for id,node in self.selected.items():
+        for id, node in self.selected.items():
             if node not in self.layer_descendants:
                 inkex.errormsg(_('Oops... The element "%s" is not in the Web Slicer layer') % id)
                 exit(2)
         g_parent = self.getParentNode(node)
-        group = inkex.etree.SubElement(g_parent, 'g')
-        desc = inkex.etree.SubElement(group, 'desc')
+        group = etree.SubElement(g_parent, 'g')
+        desc = etree.SubElement(group, 'desc')
         desc.text = self.get_conf_text_from_list(
-            [ 'html_id', 'html_class',
-              'width_unity', 'height_unity',
-              'bg_color' ] )
+                ['html_id', 'html_class',
+                 'width_unity', 'height_unity',
+                 'bg_color'])
 
-        for id,node in self.selected.items():
-            group.insert( 1, node )
+        for id, node in self.selected.items():
+            group.insert(1, node)
 
 
 if __name__ == '__main__':

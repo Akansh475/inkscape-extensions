@@ -18,34 +18,37 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-from inkex import inkbool
+from lxml import etree
+
 import inkex
+from inkex import inkbool
+
 
 class SVGFont2Layers(inkex.Effect):
     def __init__(self):
-        self.count=0
+        self.count = 0
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--limitglyphs",
-                                      type=inkbool,
+                                     type=inkbool,
                                      dest="limitglyphs", default=True,
                                      help="Load only the first 30 glyphs from the SVGFont (otherwise the loading process may take a very long time)")
 
     def create_horiz_guideline(self, label, y):
         namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))
-        guide = inkex.etree.SubElement(namedview, inkex.addNS('guide', 'sodipodi'))
+        guide = etree.SubElement(namedview, inkex.addNS('guide', 'sodipodi'))
         guide.set(inkex.addNS('label', 'inkscape'), label)
         guide.set("orientation", "0,1")
-        guide.set("position", "0,"+str(y))
+        guide.set("position", "0," + str(y))
 
     def get_or_create(self, parentnode, nodetype):
         node = parentnode.find(nodetype)
         if node is None:
-            node = inkex.etree.SubElement(parentnode, nodetype)
+            node = etree.SubElement(parentnode, nodetype)
         return node
 
     def flip_cordinate_system(self, d, emsize, baseline):
         pathdata = inkex.parsePath(d)
-        inkex.scalePath(pathdata, 1,-1)
+        inkex.scalePath(pathdata, 1, -1)
         inkex.translatePath(pathdata, 0, int(emsize) - int(baseline))
         return str(inkex.Path(pathdata))
 
@@ -56,7 +59,7 @@ class SVGFont2Layers(inkex.Effect):
 
         if self.defs is None:
             return inkex.errormsg("There are no svg fonts (no defs at all!)")
-        #TODO: detect files with multiple svg fonts declared.
+        # TODO: detect files with multiple svg fonts declared.
         # Current code only reads the first svgfont instance
         font = self.defs.find(inkex.addNS('font', 'svg'))
         if font is None:
@@ -68,11 +71,11 @@ class SVGFont2Layers(inkex.Effect):
 
         fontface = font.find(inkex.addNS('font-face', 'svg'))
 
-        #TODO: where should we save the font family name?
-        #fontfamily = fontface.get("font-family")
+        # TODO: where should we save the font family name?
+        # fontfamily = fontface.get("font-family")
         emsize = fontface.get("units-per-em")
 
-        #TODO: should we guarantee that <svg:font horiz-adv-x> equals <svg:font-face units-per-em> ?
+        # TODO: should we guarantee that <svg:font horiz-adv-x> equals <svg:font-face units-per-em> ?
         caps = fontface.get("cap-height")
         xheight = fontface.get("x-height")
         ascender = fontface.get("ascent")
@@ -85,7 +88,7 @@ class SVGFont2Layers(inkex.Effect):
         self.create_horiz_guideline("xheight", int(baseline) + int(xheight))
         self.create_horiz_guideline("descender", int(baseline) - int(descender))
 
-        #TODO: missing-glyph
+        # TODO: missing-glyph
         glyphs = font.findall(inkex.addNS('glyph', 'svg'))
         first_glyph = True
         for glyph in glyphs:
@@ -93,27 +96,27 @@ class SVGFont2Layers(inkex.Effect):
             if unicode_char is None:
                 continue
 
-            layer = inkex.etree.SubElement(self.svg, inkex.addNS('g', 'svg'))
+            layer = etree.SubElement(self.svg, inkex.addNS('g', 'svg'))
             layer.set(inkex.addNS('label', 'inkscape'), "GlyphLayer-" + unicode_char)
             layer.set(inkex.addNS('groupmode', 'inkscape'), "layer")
 
-      #glyph layers (except the first one) are innitially hidden
+            # glyph layers (except the first one) are innitially hidden
             if not first_glyph:
                 layer.set("style", "display:none")
             first_glyph = False
 
-            #TODO: interpret option 1
+            # TODO: interpret option 1
 
             ############################
-            #Option 1:
+            # Option 1:
             # Using clone (svg:use) as childnode of svg:glyph
 
-            #use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
-            #use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
-            #TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
+            # use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
+            # use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
+            # TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
 
             ############################
-            #Option 2:
+            # Option 2:
             # Using svg:paths as childnodes of svg:glyph
 
             paths = glyph.findall(inkex.addNS('path', 'svg'))
@@ -122,24 +125,24 @@ class SVGFont2Layers(inkex.Effect):
                 if d is None:
                     continue
                 d = self.flip_cordinate_system(d, emsize, baseline)
-                new_path = inkex.etree.SubElement(layer, inkex.addNS('path', 'svg'))
+                new_path = etree.SubElement(layer, inkex.addNS('path', 'svg'))
                 new_path.set("d", d)
 
             ############################
-            #Option 3:
+            # Option 3:
             # Using curve description in d attribute of svg:glyph
 
             d = glyph.get("d")
             if d is None:
                 continue
             d = self.flip_cordinate_system(d, emsize, baseline)
-            path = inkex.etree.SubElement(layer, inkex.addNS('path', 'svg'))
+            path = etree.SubElement(layer, inkex.addNS('path', 'svg'))
             path.set("d", d)
 
-            self.count+=1
-            if self.options.limitglyphs and self.count>=30:
+            self.count += 1
+            if self.options.limitglyphs and self.count >= 30:
                 break
+
 
 if __name__ == '__main__':
     SVGFont2Layers().run()
-

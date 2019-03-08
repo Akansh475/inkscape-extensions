@@ -18,9 +18,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-import sys
 import locale
+import sys
+
+from lxml import etree
+
 import inkex
+
 
 class NewGlyphLayer(inkex.Effect):
     def __init__(self):
@@ -37,22 +41,23 @@ class NewGlyphLayer(inkex.Effect):
         if isinstance(unicode_chars, bytes):
             unicode_chars = unicode_chars.decode(self.encoding)
 
-        #TODO: remove duplicate chars
+        # TODO: remove duplicate chars
 
         # Get access to main SVG document element
         svg = self.document.getroot()
 
         for char in unicode_chars:
             # Create a new layer.
-            layer = inkex.etree.SubElement(svg, 'g')
-            layer.set(inkex.addNS('label', 'inkscape'), u'GlyphLayer-'+char)
+            layer = etree.SubElement(svg, 'g')
+            layer.set(inkex.addNS('label', 'inkscape'), u'GlyphLayer-' + char)
             layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
-            layer.set('style', 'display:none') #initially not visible
+            layer.set('style', 'display:none')  # initially not visible
 
-            #TODO: make it optional ("Use current selection as template glyph")
+            # TODO: make it optional ("Use current selection as template glyph")
             # Move selection to the newly created layer
-            for id,node in self.selected.items():
+            for id, node in self.selected.items():
                 layer.append(node)
+
 
 if __name__ == '__main__':
     NewGlyphLayer().run()

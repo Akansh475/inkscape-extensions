@@ -4,10 +4,15 @@
 # Written by Tavmjong Bah
 
 import re
+
+from lxml import etree
+
 import inkex
+
 
 class EmptyDesktop(inkex.Effect):
     """An empty desktop template"""
+
     def __init__(self):
         super(EmptyDesktop, self).__init__()
         self.arg_parser.add_argument("-s", "--size", type=str, dest="desktop_size",
@@ -24,7 +29,7 @@ class EmptyDesktop(inkex.Effect):
 
         if size != "Custom":
             p = re.compile('([0-9]*)x([0-9]*)')
-            m = p.match( size )
+            m = p.match(size)
             if m is None:
                 return inkex.errormsg("Size must be provided!")
             width = int(m.group(1))
@@ -38,11 +43,12 @@ class EmptyDesktop(inkex.Effect):
 
         namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
-            namedview = inkex.etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
+            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), 'px')
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(width/2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(height/2.0))
+        namedview.set(inkex.addNS('cx', 'inkscape'), str(width / 2.0))
+        namedview.set(inkex.addNS('cy', 'inkscape'), str(height / 2.0))
+
 
 if __name__ == '__main__':
     EmptyDesktop().run()

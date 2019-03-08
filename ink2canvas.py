@@ -16,11 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+from lxml import etree
+
+import ink2canvas_lib.svg as svg
 import inkex
 from ink2canvas_lib.canvas import Canvas
-import ink2canvas_lib.svg as svg
 
-log = inkex.debug  #alias to debug method
+log = inkex.debug  # alias to debug method
 
 
 class Ink2Canvas(inkex.Effect):
@@ -58,7 +60,7 @@ class Ink2Canvas(inkex.Effect):
 
     def walk_tree(self, root):
         for node in root:
-            if node.tag is inkex.etree.Comment:
+            if node.tag is etree.Comment:
                 continue
             tag = self.get_tag_name(node)
             class_name = tag.capitalize()

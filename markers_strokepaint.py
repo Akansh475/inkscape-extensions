@@ -22,49 +22,52 @@
 
 import copy
 
+from lxml import etree
+
 import inkex
+
 
 class MarkerStrokePaintEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument(
-            "-m", "--modify", type=inkex.utils.inkbool, dest="modify", default=False,
-            help="Do not create a copy, modify the markers")
+                "-m", "--modify", type=inkex.utils.inkbool, dest="modify", default=False,
+                help="Do not create a copy, modify the markers")
         self.arg_parser.add_argument(
-            "-t", "--type", type=str, dest="fill_type", default="stroke",
-            help="Replace the markers' fill with the object stroke or fill color")
+                "-t", "--type", type=str, dest="fill_type", default="stroke",
+                help="Replace the markers' fill with the object stroke or fill color")
         self.arg_parser.add_argument(
-            "-a", "--alpha", type=inkex.utils.inkbool, dest="assign_alpha", default=True,
-            help="Assign the object fill and stroke alpha to the markers")
+                "-a", "--alpha", type=inkex.utils.inkbool, dest="assign_alpha", default=True,
+                help="Assign the object fill and stroke alpha to the markers")
         self.arg_parser.add_argument(
-            "-i", "--invert", type=inkex.utils.inkbool, dest="invert", default=False,
-            help="Invert fill and stroke colors")
+                "-i", "--invert", type=inkex.utils.inkbool, dest="invert", default=False,
+                help="Invert fill and stroke colors")
         self.arg_parser.add_argument(
-            "--assign_fill", type=inkex.utils.inkbool, dest="assign_fill", default=True,
-            help="Assign a fill color to the markers")
+                "--assign_fill", type=inkex.utils.inkbool, dest="assign_fill", default=True,
+                help="Assign a fill color to the markers")
         self.arg_parser.add_argument(
-            "-f", "--fill_color", type=int, dest="fill_color", default=1364325887,
-            help="Choose a custom fill color")
+                "-f", "--fill_color", type=int, dest="fill_color", default=1364325887,
+                help="Choose a custom fill color")
         self.arg_parser.add_argument(
-            "--assign_stroke", type=inkex.utils.inkbool, dest="assign_stroke", default=True,
-            help="Assign a stroke color to the markers")
+                "--assign_stroke", type=inkex.utils.inkbool, dest="assign_stroke", default=True,
+                help="Assign a stroke color to the markers")
         self.arg_parser.add_argument(
-            "-s", "--stroke_color", type=int, dest="stroke_color", default=1364325887,
-            help="Choose a custom fill color")
+                "-s", "--stroke_color", type=int, dest="stroke_color", default=1364325887,
+                help="Choose a custom fill color")
         self.arg_parser.add_argument(
-            "--tab", type=str, dest="tab", default='"custom"',
-            help="The selected UI-tab when OK was pressed")
+                "--tab", type=str, dest="tab", default='"custom"',
+                help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument(
-            "--colortab", type=str, dest="colortab",
-            help="The selected custom color tab when OK was pressed")
+                "--colortab", type=str, dest="colortab",
+                help="The selected custom color tab when OK was pressed")
 
     def effect(self):
         defs = self.svg.getElement('/svg:svg//svg:defs')
         if defs == None:
-            defs = inkex.etree.SubElement(self.document.getroot(),inkex.addNS('defs','svg'))
+            defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
 
         for id, node in self.svg.selected.items():
-            mprops = ['marker','marker-start','marker-mid','marker-end']
+            mprops = ['marker', 'marker-start', 'marker-mid', 'marker-end']
             try:
                 style = dict(inkex.Style.parse_str(node.get('style')))
             except:
@@ -98,17 +101,17 @@ class MarkerStrokePaintEffect(inkex.Effect):
             elif self.options.tab == '"custom"':
                 fill_red = ((self.options.fill_color >> 24) & 255)
                 fill_green = ((self.options.fill_color >> 16) & 255)
-                fill_blue = ((self.options.fill_color >>  8) & 255)
+                fill_blue = ((self.options.fill_color >> 8) & 255)
                 fill = "rgb(%s,%s,%s)" % (fill_red, fill_green, fill_blue)
                 fill_opacity = (((self.options.fill_color) & 255) / 255.)
                 stroke_red = ((self.options.stroke_color >> 24) & 255)
                 stroke_green = ((self.options.stroke_color >> 16) & 255)
-                stroke_blue = ((self.options.stroke_color >>  8) & 255)
+                stroke_blue = ((self.options.stroke_color >> 8) & 255)
                 stroke = "rgb(%s,%s,%s)" % (stroke_red, stroke_green, stroke_blue)
                 stroke_opacity = (((self.options.stroke_color) & 255) / 255.)
-                if (not(self.options.assign_fill)):
+                if (not (self.options.assign_fill)):
                     fill = "none"
-                if (not(self.options.assign_stroke)):
+                if (not (self.options.assign_stroke)):
                     stroke = "none"
 
             for mprop in mprops:
@@ -131,24 +134,24 @@ class MarkerStrokePaintEffect(inkex.Effect):
 
                     style[mprop] = "url(#%s)" % new_id
                     mnode.set('id', new_id)
-                    mnode.set(inkex.addNS('stockid','inkscape'), new_id)
+                    mnode.set(inkex.addNS('stockid', 'inkscape'), new_id)
                     if not self.options.modify:
                         defs.append(mnode)
 
                     children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
                     for child in children:
                         cstyle = dict(inkex.Style.parse_str(child.get('style')))
-                        if (not('stroke' in cstyle  and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled")):
+                        if (not ('stroke' in cstyle and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled")):
                             cstyle['stroke'] = stroke
                             if 'stroke_opacity' in locals():
                                 cstyle['stroke-opacity'] = stroke_opacity
-                        if (not('fill' in cstyle and self.options.tab == '"object"' and cstyle['fill'] == 'none' and self.options.fill_type == "solid")):
+                        if (not ('fill' in cstyle and self.options.tab == '"object"' and cstyle['fill'] == 'none' and self.options.fill_type == "solid")):
                             cstyle['fill'] = fill
                             if 'fill_opacity' in locals():
                                 cstyle['fill-opacity'] = fill_opacity
                         child.set('style', str(inkex.Style(cstyle)))
             node.set('style', str(inkex.Style(style)))
 
+
 if __name__ == '__main__':
     MarkerStrokePaintEffect().run()
-

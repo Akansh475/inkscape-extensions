@@ -33,6 +33,8 @@ Parametric Curves has no real description, even in the inx file, which is really
 
 from math import pi
 
+from lxml import etree
+
 import inkex
 from inkex.paths import Path
 from inkex.utils import inkbool
@@ -176,7 +178,7 @@ class ParamCurves(inkex.Effect):
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('rect', 'svg'):
                 # create new path with basic dimensions of selected rectangle
-                newpath = inkex.etree.Element(inkex.addNS('path', 'svg'))
+                newpath = etree.Element(inkex.addNS('path', 'svg'))
                 x = float(node.get('x'))
                 y = float(node.get('y'))
                 w = float(node.get('width'))

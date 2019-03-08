@@ -19,72 +19,72 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 # local library
 import inkwebeffect
-import inkex
 from inkex.localize import _
+
 
 class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
 
     def __init__(self):
         inkwebeffect.InkWebEffect.__init__(self)
         self.arg_parser.add_argument("-a", "--att",
-                         type=str,
-                        dest="att", default="fill",
-                        help="Attribute to set.")
+                                     type=str,
+                                     dest="att", default="fill",
+                                     help="Attribute to set.")
         self.arg_parser.add_argument("-v", "--val",
-                         type=str,
-                        dest="val", default="red",
-                        help="Values to set.")
+                                     type=str,
+                                     dest="val", default="red",
+                                     help="Values to set.")
         self.arg_parser.add_argument("-w", "--when",
-                         type=str,
-                        dest="when", default="onclick",
-                        help="When it must to set?")
+                                     type=str,
+                                     dest="when", default="onclick",
+                                     help="When it must to set?")
         self.arg_parser.add_argument("-c", "--compatibility",
-                         type=str,
-                        dest="compatibility", default="append",
-                        help="Compatibility with previews code to this event.")
+                                     type=str,
+                                     dest="compatibility", default="append",
+                                     help="Compatibility with previews code to this event.")
         self.arg_parser.add_argument("-t", "--from-and-to",
-                         type=str,
-                        dest="from_and_to", default="g-to-one",
-                        help='Who transmit to Who? "g-to-one" All set the last. "one-to-g" The first set all.')
+                                     type=str,
+                                     dest="from_and_to", default="g-to-one",
+                                     help='Who transmit to Who? "g-to-one" All set the last. "one-to-g" The first set all.')
         self.arg_parser.add_argument("--tab",
-                         type=str,
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+                                     type=str,
+                                     dest="tab",
+                                     help="The selected UI-tab when OK was pressed")
 
     def effect(self):
-      self.ensureInkWebSupport()
+        self.ensureInkWebSupport()
 
-      if len(self.options.ids) < 2:
-        return inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
+        if len(self.options.ids) < 2:
+            return inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
 
-      elFrom = []
-      idTo = []
-      if self.options.from_and_to == "g-to-one":
-        # All set the last
-        for selId in self.options.ids[:-1]:
-          elFrom.append( self.selected[selId] )
-        idTo.append( self.options.ids[-1] )
-      else:
-        # The first set all
-        elFrom.append( self.selected[ self.options.ids[0] ] )
-        for selId in self.options.ids[1:]:
-          idTo.append( selId )
+        elFrom = []
+        idTo = []
+        if self.options.from_and_to == "g-to-one":
+            # All set the last
+            for selId in self.options.ids[:-1]:
+                elFrom.append(self.selected[selId])
+            idTo.append(self.options.ids[-1])
+        else:
+            # The first set all
+            elFrom.append(self.selected[self.options.ids[0]])
+            for selId in self.options.ids[1:]:
+                idTo.append(selId)
 
-      evCode = "InkWeb.setAtt({el:['"+ "','".join(idTo) +"'], " + \
-                              "att:'"+ self.options.att +"', "  + \
-                              "val:'"+ self.options.val +"'})"
+        evCode = "InkWeb.setAtt({el:['{}'], att:'{}', val:'{}'})".format("','".join(idTo),
+                                                                         self.options.att,
+                                                                         self.options.val)
+        for el in elFrom:
+            prevEvCode = el.get(self.options.when)
+            if prevEvCode is None:
+                prevEvCode = ""
 
-      for el in elFrom:
-        prevEvCode = el.get( self.options.when )
-        if prevEvCode == None: prevEvCode = ""
+            if self.options.compatibility == 'append':
+                elEvCode = prevEvCode + ";\n" + evCode
+            if self.options.compatibility == 'prepend':
+                elEvCode = evCode + ";\n" + prevEvCode
 
-        if self.options.compatibility == 'append':
-          elEvCode = prevEvCode +";\n"+ evCode
-        if self.options.compatibility == 'prepend':
-          elEvCode = evCode +";\n"+ prevEvCode
+            el.set(self.options.when, elEvCode)
 
-        el.set( self.options.when, elEvCode )
 
 if __name__ == '__main__':
     InkWebTransmitAtt().run()
-

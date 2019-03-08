@@ -17,82 +17,84 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import random
 import math
+import random
+
 import inkex
 
-def calculateSubdivision(x1,y1,x2,y2,smoothness):
-    """ Calculate the vector from (x1,y1) to (x2,y2) """
+
+def calculateSubdivision(x1, y1, x2, y2, smoothness):
+    #Calculate the vector from (x1,y1) to (x2,y2)
     x3 = x2 - x1
     y3 = y2 - y1
-    """ Calculate the point half-way between the two points """
-    hx = x1 + x3/2
-    hy = y1 + y3/2
-    """ Calculate normalized vector perpendicular to the vector (x3,y3) """
-    length = math.sqrt(x3*x3 + y3*y3)
+    #Calculate the point half-way between the two points
+    hx = x1 + x3 / 2
+    hy = y1 + y3 / 2
+    #Calculate normalized vector perpendicular to the vector (x3,y3)
+    length = math.sqrt(x3 * x3 + y3 * y3)
     if length != 0:
-        nx = -y3/length
-        ny = x3/length
+        nx = -y3 / length
+        ny = x3 / length
     else:
         nx = 1
         ny = 0
-    """ Scale perpendicular vector by random factor """
-    r = random.uniform(-length/(1+smoothness),length/(1+smoothness))
+    #Scale perpendicular vector by random factor """
+    r = random.uniform(-length / (1 + smoothness), length / (1 + smoothness))
     nx = nx * r
     ny = ny * r
-    """ add scaled perpendicular vector to the half-way point to get the final
-        displaced subdivision point """
+    # add scaled perpendicular vector to the half-way point to get the final displaced subdivision point
     x = hx + nx
     y = hy + ny
     return [x, y]
+
 
 class PathFractalize(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--subdivs",
-                         type=int,
-                        dest="subdivs", default="6",
-                        help="Number of subdivisons")
+                                     type=int,
+                                     dest="subdivs", default="6",
+                                     help="Number of subdivisons")
         self.arg_parser.add_argument("-f", "--smooth",
-                         type=float,
-                        dest="smooth", default="4.0",
-                        help="Smoothness of the subdivision")
+                                     type=float,
+                                     dest="smooth", default="4.0",
+                                     help="Smoothness of the subdivision")
+
     def effect(self):
         for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path','svg'):
+            if node.tag == inkex.addNS('path', 'svg'):
                 d = node.get('d')
                 p = inkex.parsePath(d)
 
                 a = []
                 first = 1
-                for cmd,params in p:
+                for cmd, params in p:
                     if cmd != 'Z':
                         if first == 1:
                             x1 = params[-2]
                             y1 = params[-1]
-                            a.append(['M',params[-2:]])
+                            a.append(['M', params[-2:]])
                             first = 2
-                        else :
+                        else:
                             x2 = params[-2]
                             y2 = params[-1]
-                            self.fractalize(a,x1,y1,x2,y2,self.options.subdivs,self.options.smooth)
+                            self.fractalize(a, x1, y1, x2, y2, self.options.subdivs, self.options.smooth)
                             x1 = x2
                             y1 = y2
-                            a.append(['L',params[-2:]])
+                            a.append(['L', params[-2:]])
 
                 node.set('d', str(inkex.Path(a)))
 
-    def fractalize(self,a,x1,y1,x2,y2,s,f):
-        subdivPoint = calculateSubdivision(x1,y1,x2,y2,f)
+    def fractalize(self, a, x1, y1, x2, y2, s, f):
+        subdivPoint = calculateSubdivision(x1, y1, x2, y2, f)
 
-        if s > 0 :
+        if s > 0:
             """ recursively subdivide the segment left of the subdivision point """
-            self.fractalize(a,x1,y1,subdivPoint[-2],subdivPoint[-1],s-1,f)
-            a.append(['L',subdivPoint])
+            self.fractalize(a, x1, y1, subdivPoint[-2], subdivPoint[-1], s - 1, f)
+            a.append(['L', subdivPoint])
             """ recursively subdivide the segment right of the subdivision point """
-            self.fractalize(a,subdivPoint[-2],subdivPoint[-1],x2,y2,s-1,f)
+            self.fractalize(a, subdivPoint[-2], subdivPoint[-1], x2, y2, s - 1, f)
+
 
 if __name__ == '__main__':
     PathFractalize().run()
-
-

@@ -18,9 +18,10 @@ import sys
 
 # We will use the inkex module with the predefined Effect base class.
 import inkex
+from lxml import etree
 
 
-class    JessyInk_CustomKeyBindings(inkex.Effect):
+class JessyInk_CustomKeyBindings(inkex.Effect):
     modes = ('slide', 'index', 'drawing')
     keyCodes = ('LEFT', 'RIGHT', 'DOWN', 'UP', 'HOME', 'END', 'ENTER', 'SPACE', 'PAGE_UP', 'PAGE_DOWN', 'ESCAPE')
     slideActions = {}
@@ -33,58 +34,57 @@ class    JessyInk_CustomKeyBindings(inkex.Effect):
     indexCharCodes = {}
     indexKeyCodes = {}
 
-
     def __init__(self):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-        self.arg_parser.add_argument('--slide_backWithEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_nextWithEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_backWithoutEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_nextWithoutEffects', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_firstSlide', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_lastSlide', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_switchToIndexMode', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_switchToDrawingMode', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_setDuration', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_addSlide', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_toggleProgressBar', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_resetTimer', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--slide_export', action = 'callback', type=str, callback = self.slideOptions, default = '')
-        self.arg_parser.add_argument('--drawing_switchToSlideMode', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidthDefault', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth1', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth2', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth3', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth4', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth5', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth6', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth7', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth8', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathWidth9', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourBlue', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourCyan', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourGreen', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourBlack', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourMagenta', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourOrange', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourRed', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourWhite', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_pathColourYellow', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--drawing_undo', action = 'callback', type=str, callback = self.drawingOptions, default = '')
-        self.arg_parser.add_argument('--index_selectSlideToLeft', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_selectSlideToRight', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_selectSlideAbove', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_selectSlideBelow', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_previousPage', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_nextPage', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_firstSlide', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_lastSlide', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_switchToSlideMode', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_decreaseNumberOfColumns', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_increaseNumberOfColumns', action = 'callback', type=str, callback = self.indexOptions, default = '')
-        self.arg_parser.add_argument('--index_setNumberOfColumnsToDefault', action = 'callback', type=str, callback = self.indexOptions, default = '')
+        self.arg_parser.add_argument('--tab', type=str, dest='what')
+        self.arg_parser.add_argument('--slide_backWithEffects', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_nextWithEffects', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_backWithoutEffects', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_nextWithoutEffects', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_firstSlide', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_lastSlide', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_switchToIndexMode', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_switchToDrawingMode', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_setDuration', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_addSlide', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_toggleProgressBar', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_resetTimer', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--slide_export', action='callback', type=str, callback=self.slideOptions, default='')
+        self.arg_parser.add_argument('--drawing_switchToSlideMode', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidthDefault', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth1', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth2', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth3', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth4', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth5', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth6', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth7', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth8', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth9', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourBlue', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourCyan', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourGreen', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourBlack', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourMagenta', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourOrange', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourRed', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourWhite', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_pathColourYellow', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--drawing_undo', action='callback', type=str, callback=self.drawingOptions, default='')
+        self.arg_parser.add_argument('--index_selectSlideToLeft', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_selectSlideToRight', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_selectSlideAbove', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_selectSlideBelow', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_previousPage', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_nextPage', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_firstSlide', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_lastSlide', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_switchToSlideMode', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_decreaseNumberOfColumns', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_increaseNumberOfColumns', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--index_setNumberOfColumnsToDefault', action='callback', type=str, callback=self.indexOptions, default='')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -224,9 +224,9 @@ class    JessyInk_CustomKeyBindings(inkex.Effect):
         nodeText += "}" + "\n"
 
         # Create new script node
-        scriptElm = inkex.etree.Element(inkex.addNS("script", "svg"))
+        scriptElm = etree.Element(inkex.addNS("script", "svg"))
         scriptElm.text = nodeText
-        groupElm = inkex.etree.Element(inkex.addNS("g", "svg"))
+        groupElm = etree.Element(inkex.addNS("g", "svg"))
         groupElm.set("{" + inkex.NSS["jessyink"] + "}customKeyBindings", "customKeyBindings")
         groupElm.set("onload", "this.getCustomCharBindings = function() { return getCustomCharBindingsSub(); }; this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };")
         groupElm.append(scriptElm)
@@ -235,8 +235,8 @@ class    JessyInk_CustomKeyBindings(inkex.Effect):
     def getAction(self, varName):
         parts = varName.split('_')
 
-        if (len(parts) != 2):
-            raise StandardException("Error parsing variable name.")
+        if len(parts) != 2:
+            raise Exception("Error parsing variable name.")
 
         return parts[1]
 
@@ -244,4 +244,3 @@ class    JessyInk_CustomKeyBindings(inkex.Effect):
 # Create effect instance
 if __name__ == '__main__':
     JessyInk_CustomKeyBindings().run()
-

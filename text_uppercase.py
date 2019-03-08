@@ -3,9 +3,10 @@
 
 import chardataeffect
 
+
 class C(chardataeffect.CharDataEffect):
-  def process_chardata(self,text, line=False, par=False):
-    return text.upper()
+    def process_chardata(self, text, line=False, par=False):
+        return text.upper()
 
 
 if __name__ == '__main__':

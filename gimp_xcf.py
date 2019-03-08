@@ -25,24 +25,29 @@ import re
 import shutil
 import sys
 import tempfile
+
 import inkex
 from inkex import inkbool
 
-# We really shouldn't be doing this
-from subprocess import Popen, PIPE
 
 # Define extension exceptions
-class GimpXCFError(Exception): pass
+class GimpXCFError(Exception):
+    pass
 
-class GimpXCFExpectedIOError(GimpXCFError): pass
+
+class GimpXCFExpectedIOError(GimpXCFError):
+    pass
+
 
 class GimpXCFInkscapeNotInstalled(GimpXCFError):
     def __init__(self):
         inkex.errormsg(_('Inkscape must be installed and set in your path variable.'))
 
+
 class GimpXCFGimpNotInstalled(GimpXCFError):
     def __init__(self):
         inkex.errormsg(_('Gimp must be installed and set in your path variable.'))
+
 
 class GimpXCFScriptFuError(GimpXCFError):
     def __init__(self):
@@ -53,22 +58,22 @@ class MyEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
-                                      type=str,
+                                     type=str,
                                      dest="tab")
         self.arg_parser.add_argument("-d", "--guides",
-                                    type=inkbool,
-                                   dest="saveGuides", default=False,
-                                   help="Save the Guides with the .XCF")
+                                     type=inkbool,
+                                     dest="saveGuides", default=False,
+                                     help="Save the Guides with the .XCF")
         self.arg_parser.add_argument("-r", "--grid",
-                                      type=inkbool,
+                                     type=inkbool,
                                      dest="saveGrid", default=False,
                                      help="Save the Grid with the .XCF")
         self.arg_parser.add_argument("-b", "--background",
-                                      type=inkbool,
+                                     type=inkbool,
                                      dest="layerBackground", default=False,
                                      help="Add background color to each layer")
         self.arg_parser.add_argument("-i", "--dpi",
-                                      type=str,
+                                     type=str,
                                      dest="resolution", default="96",
                                      help="File resolution")
 
@@ -103,15 +108,16 @@ class MyEffect(inkex.Effect):
             if len(viewboxnumbers) == 4:  # check for correct number of numbers
                 viewboxwidth = viewboxnumbers[2]
 
-            documentscale =  self.svg.unittouu(str(width / viewboxwidth))
+            documentscale = self.svg.unittouu(str(width / viewboxwidth))
 
         return documentscale
 
     def effect(self):
         svg_file = self.svg
         ttmp_orig = self.document.getroot()
-        docname = ttmp_orig.get(inkex.addNS('docname',u'sodipodi'))
-        if docname is None: docname = self.svg
+        docname = ttmp_orig.get(inkex.addNS('docname', u'sodipodi'))
+        if docname is None:
+            docname = self.svg
 
         doc_scale = self.getDocumentScale()
         res_scale = eval(self.options.resolution) / 96.0
@@ -131,18 +137,18 @@ class MyEffect(inkex.Effect):
             guideXpath = "sodipodi:namedview/sodipodi:guide"
             for guideNode in self.document.xpath(guideXpath, namespaces=inkex.NSS):
                 ori = guideNode.get('orientation')
-                if  ori == '0,1':
+                if ori == '0,1':
                     # This is a horizontal guide
                     pos = self.uutounit(float(guideNode.get('position').split(',')[1]), "px") * doc_scale
                     # GIMP doesn't like guides that are outside of the image
-                    if pos > 0 and pos < pageHeight:
+                    if 0 < pos < pageHeight:
                         # The origin is at the top in GIMP land
                         hGuides.append(str(int(round((pageHeight - pos) * res_scale))))
                 elif ori == '1,0':
                     # This is a vertical guide
                     pos = self.uutounit(float(guideNode.get('position').split(',')[0]), "px") * doc_scale
                     # GIMP doesn't like guides that are outside of the image
-                    if pos > 0 and pos < pageWidth:
+                    if 0 < pos < pageWidth:
                         vGuides.append(str(int(round(pos * res_scale))))
 
         hGList = ' '.join(hGuides)
@@ -153,35 +159,35 @@ class MyEffect(inkex.Effect):
         gridOriginFunc = ''
         # GIMP only allows one rectangular grid
         gridXpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
-        if (self.options.saveGrid and self.document.xpath(gridXpath, namespaces=inkex.NSS)):
+        if self.options.saveGrid and self.document.xpath(gridXpath, namespaces=inkex.NSS):
             gridNode = self.xpathSingle(gridXpath)
-            if gridNode != None:
+            if gridNode is not None:
                 # These attributes could be nonexistent
                 spacingX = gridNode.get('spacingx')
-                if spacingX == None:
+                if spacingX is None:
                     spacingX = 1
                 else:
-                    spacingX = self.uutounit(float(spacingX),"px") * scale
+                    spacingX = self.uutounit(float(spacingX), "px") * scale
                 spacingY = gridNode.get('spacingy')
-                if spacingY == None:
+                if spacingY is None:
                     spacingY = 1
                 else:
-                    spacingY = self.uutounit(float(spacingY),"px") * scale
+                    spacingY = self.uutounit(float(spacingY), "px") * scale
                 originX = gridNode.get('originx')
-                if originX == None:
+                if originX is None:
                     originX = 0
                 else:
-                    originX = self.uutounit(float(originX),"px") * scale
+                    originX = self.uutounit(float(originX), "px") * scale
                 originY = gridNode.get('originy')
-                if originY == None:
+                if originY is None:
                     originY = 0
                 else:
-                    originY = self.uutounit(float(originY),"px") * doc_scale
-                    offsetY = pageHeight % (self.uutounit(float(spacingY),"px") * doc_scale)
+                    originY = self.uutounit(float(originY), "px") * doc_scale
+                    offsetY = pageHeight % (self.uutounit(float(spacingY), "px") * doc_scale)
                     originY = (pageHeight - originY) * res_scale
 
-                gridSpacingFunc = '(gimp-image-grid-set-spacing img %s %s)' % (int(round(float(spacingX))), int(round(float(spacingY))))
-                gridOriginFunc = '(gimp-image-grid-set-offset img %s %s)'% (int(round(float(originX))), int(round(float(originY))))
+                gridSpacingFunc = '(gimp-image-grid-set-spacing img {} {})'.format(int(round(float(spacingX))), int(round(float(spacingY))))
+                gridOriginFunc = '(gimp-image-grid-set-offset img {} {})'.format(int(round(float(originX))), int(round(float(originY))))
 
         # Layers
         area = '--export-area-page'
@@ -197,43 +203,39 @@ class MyEffect(inkex.Effect):
         self.valid = 0
         path = "/svg:svg/*[name()='g' or @style][@id]"
         for node in self.document.xpath(path, namespaces=inkex.NSS):
-            if len(node) > 0: # Get rid of empty layers
+            if len(node) > 0:  # Get rid of empty layers
                 self.valid = 1
                 id = node.get('id')
                 if node.get("{" + inkex.NSS["inkscape"] + "}label"):
                     name = node.get("{" + inkex.NSS["inkscape"] + "}label")
                 else:
                     name = id
-                filename = os.path.join(self.tmp_dir, "%s.png" % id)
-                command = "inkscape -i \"%s\" -j %s %s -e \"%s\" %s %s" % (id, area, opacity, filename, svg_file, resolution)
+                filename = os.path.join(self.tmp_dir, "{}.png".format(id))
+                command = "inkscape -i \"{}\" -j {} {} -e \"{}\" {} {}".format(id, area, opacity, filename, svg_file, resolution)
 
                 # XXX This must be replaced!
-                #p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                #return_code = p.wait()
-                #f = p.stdout
-                #err = p.stderr
-                #stdin = p.stdin
-                #f.read()
-                #f.close()
-                #err.close()
-                #stdin.close()
-
-                if False: #return_code != 0:
-                    self.clear_tmp()
-                    raise GimpXCFInkscapeNotInstalled
+                # p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+                # return_code = p.wait()
+                # f = p.stdout
+                # err = p.stderr
+                # stdin = p.stdin
+                # f.read()
+                # f.close()
+                # err.close()
+                # stdin.close()
 
                 if os.name == 'nt':
                     filename = filename.replace("\\", "/")
                 pngs.append(filename)
                 names.append(name)
 
-        if (self.valid == 0):
+        if self.valid == 0:
             self.clear_tmp()
             inkex.errormsg(_('This extension requires at least one non empty layer.'))
         else:
-            filelist = '"%s"' % '" "'.join(pngs)
-            namelist = '"%s"' % '" "'.join(names)
-            xcf = os.path.join(self.tmp_dir, "%s.xcf" % docname)
+            filelist = '"{}"'.format('" "'.join(pngs))
+            namelist = '"{}"'.format('" "'.join(names))
+            xcf = os.path.join(self.tmp_dir, "{}.xcf".format(docname))
             if os.name == 'nt':
                 xcf = xcf.replace("\\", "/")
             script_fu = """
@@ -254,13 +256,13 @@ class MyEffect(inkex.Effect):
   (
     (img (car (gimp-image-new 200 200 RGB)))
   )
-  (gimp-image-set-resolution img %s %s)
+  (gimp-image-set-resolution img {} {})
   (gimp-image-undo-disable img)
   (for-each
     (lambda (names)
       (png-to-layer img (car names) (cdr names))
     )
-    (map cons '(%s) '(%s))
+    (map cons '({}) '({}))
   )
 
   (gimp-image-resize-to-layers img)
@@ -269,45 +271,41 @@ class MyEffect(inkex.Effect):
     (lambda (hGuide)
       (gimp-image-add-hguide img hGuide)
     )
-    '(%s)
+    '({})
   )
 
   (for-each
     (lambda (vGuide)
       (gimp-image-add-vguide img vGuide)
     )
-    '(%s)
+    '({})
   )
 
-  %s
-  %s
+  {}
+  {}
 
   (gimp-image-undo-enable img)
-  (gimp-file-save RUN-NONINTERACTIVE img (car (gimp-image-get-active-layer img)) "%s" "%s"))
+  (gimp-file-save RUN-NONINTERACTIVE img (car (gimp-image-get-active-layer img)) "{}" "{}"))
 (gimp-quit 0)
-            """ % (self.options.resolution, self.options.resolution, filelist, namelist, hGList, vGList, gridSpacingFunc, gridOriginFunc, xcf, xcf)
+            """.format(self.options.resolution, self.options.resolution, filelist, namelist, hGList, vGList, gridSpacingFunc, gridOriginFunc, xcf, xcf)
 
             junk = os.path.join(self.tmp_dir, 'junk_from_gimp.txt')
-            command = 'gimp -i --batch-interpreter plug-in-script-fu-eval -b - > %s 2>&1' % junk
+            command = 'gimp -i --batch-interpreter plug-in-script-fu-eval -b - > {} 2>&1'.format(junk)
 
-            #p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            #f = p.stdin
-            #out = p.stdout
-            #err = p.stderr
-            #f.write(script_fu.encode('utf-8'))
-            #return_code = p.wait()
+            # p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            # f = p.stdin
+            # out = p.stdout
+            # err = p.stderr
+            # f.write(script_fu.encode('utf-8'))
+            # return_code = p.wait()
 
-            if False: #p.returncode != 0:
-                self.clear_tmp()
-                raise GimpXCFGimpNotInstalled
-
-            #f.close()
-            #err.close()
-            #out.close()
+            # f.close()
+            # err.close()
+            # out.close()
             # Uncomment these lines to see the output from gimp
-            #err = open(junk, 'r')
-            #inkex.debug(err.read())
-            #err.close()
+            # err = open(junk, 'r')
+            # inkex.debug(err.read())
+            # err.close()
 
             try:
                 x = open(xcf, 'rb')
@@ -331,4 +329,3 @@ class MyEffect(inkex.Effect):
 
 if __name__ == '__main__':
     MyEffect().run()
-

@@ -222,16 +222,16 @@ class ReplaceFont(inkex.Effect):
         if action == "find_replace":
             find = self.options.fr_find
             if find is None or find == "":
-                return inkex.errormsg(_("Please enter a search string in the find box."));
+                return inkex.errormsg(_("Please enter a search string in the find box."))
             find = find.strip().lower()
             replace = self.options.fr_replace
             if replace is None or replace == "":
-                return inkex.errormsg(_("Please enter a replacement font in the replace with box."));
+                return inkex.errormsg(_("Please enter a replacement font in the replace with box."))
             self.find_replace(relevant_items, find, replace)
         elif action == "replace_all":
             replace = self.options.r_replace
             if replace is None or replace == "":
-                return inkex.errormsg(_("Please enter a replacement font in the replace all box."));
+                return inkex.errormsg(_("Please enter a replacement font in the replace all box."))
             self.replace_all(relevant_items, replace)
         elif action == "list_only":
             self.list_all(relevant_items)

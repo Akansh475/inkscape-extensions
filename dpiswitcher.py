@@ -420,7 +420,7 @@ class DPISwitcher(inkex.Effect):
                     self.unitExponent = 1.0/(self.factor_a/self.__uuconv[self.units])
                 else:
                     self.unitExponent = 1.0/(self.factor_a/self.__uuconvLegacy[self.units])
-            self.scaleRoot(svg);
+            self.scaleRoot(svg)
 
 
 if __name__ == '__main__':

@@ -346,7 +346,7 @@ class Voronoi2svg(inkex.Effect):
 
         if self.options.diagramType != 'Voronoi':
             triangles = voronoi.computeDelaunayTriangulation(seeds)
-            i = 0;
+            i = 0
             if self.options.delaunayFillOptions == "delaunay-fill":
                 random.seed("inkscape")
             for triangle in triangles:
@@ -369,7 +369,7 @@ class Voronoi2svg(inkex.Effect):
                 path.set('d',str(inkex.Path(cmds)))
                 path.set('style',str(inkex.Style(facestyle)))
                 groupDelaunay.append(path)
-                i += 1;
+                i += 1
         #sys.stdout = saveout
         #}}}
 

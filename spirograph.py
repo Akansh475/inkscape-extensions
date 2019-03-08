@@ -71,7 +71,7 @@ class Spirograph(inkex.Effect):
             return
         scale = 2 * math.pi / (ratio * self.options.quality)
 
-        rotation = - math.pi * self.options.rotation / 180;
+        rotation = - math.pi * self.options.rotation / 180
 
         new = inkex.etree.Element(inkex.addNS('path','svg'))
         s = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px')) }

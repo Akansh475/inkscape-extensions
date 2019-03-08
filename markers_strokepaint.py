@@ -107,9 +107,9 @@ class MarkerStrokePaintEffect(inkex.Effect):
                 stroke = "rgb(%s,%s,%s)" % (stroke_red, stroke_green, stroke_blue)
                 stroke_opacity = (((self.options.stroke_color) & 255) / 255.)
                 if (not(self.options.assign_fill)):
-                    fill = "none";
+                    fill = "none"
                 if (not(self.options.assign_stroke)):
-                    stroke = "none";
+                    stroke = "none"
 
             for mprop in mprops:
                 if mprop in style and style[mprop] != 'none' and style[mprop][:5] == 'url(#':

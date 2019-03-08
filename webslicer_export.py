@@ -173,7 +173,7 @@ class WebSlicer_Export(WebSlicer_Effect):
         layer = self.get_slicer_layer()
         current_style = ('style' in layer.attrib) and layer.attrib['style'] or ''
         layer.attrib['style'] = 'display:none'
-        self.document.write( self.tmp_svg );
+        self.document.write( self.tmp_svg )
         layer.attrib['style'] = current_style
 
 

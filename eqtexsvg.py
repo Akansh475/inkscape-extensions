@@ -102,7 +102,7 @@ class EQTEXSVG(inkex.Effect):
                         help="Additional packages")
     def effect(self):
 
-        base_dir = tempfile.mkdtemp("", "inkscape-");
+        base_dir = tempfile.mkdtemp("", "inkscape-")
         latex_file = os.path.join(base_dir, "eq.tex")
         aux_file = os.path.join(base_dir, "eq.aux")
         log_file = os.path.join(base_dir, "eq.log")

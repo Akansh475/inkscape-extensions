@@ -34,45 +34,43 @@ This code contains snippets from existing effects in the Inkscape
 extensions library, and marker data from markers.svg.
 """
 
-import sys
-try:
-    from subprocess import Popen, PIPE
-    bsubprocess = True
-except:
-    bsubprocess = False
+from subprocess import PIPE, Popen
+
+from lxml import etree
 
 import inkex
-from inkex.localize import _
 import pathmodifier
+from inkex.localize import _
 
 
 class Dimension(pathmodifier.PathModifier):
     """Add dimentions as a path modifier"""
+
     def __init__(self):
         super(Dimension, self).__init__()
         self.arg_parser.add_argument(
-            "-x", "--xoffset", type=float, dest="xoffset", default=100.0,
-            help="x offset of the vertical dimension arrow")
+                "-x", "--xoffset", type=float, dest="xoffset", default=100.0,
+                help="x offset of the vertical dimension arrow")
         self.arg_parser.add_argument(
-            "-y", "--yoffset", type=float, dest="yoffset", default=100.0,
-            help="y offset of the horizontal dimension arrow")
+                "-y", "--yoffset", type=float, dest="yoffset", default=100.0,
+                help="y offset of the horizontal dimension arrow")
         self.arg_parser.add_argument(
-            "-t", "--type", type=str, dest="type", default="geometric",
-            help="Bounding box type")
+                "-t", "--type", type=str, dest="type", default="geometric",
+                help="Bounding box type")
 
     def addMarker(self, name, rotate):
         defs = self.xpathSingle('/svg:svg//svg:defs')
-        if defs == None:
-            defs = inkex.etree.SubElement(self.document.getroot(),inkex.addNS('defs','svg'))
-        marker = inkex.etree.SubElement(defs ,inkex.addNS('marker','svg'))
+        if defs is None:
+            defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
+        marker = etree.SubElement(defs, inkex.addNS('marker', 'svg'))
         marker.set('id', name)
         marker.set('orient', 'auto')
         marker.set('refX', '0.0')
         marker.set('refY', '0.0')
         marker.set('style', 'overflow:visible')
-        marker.set(inkex.addNS('stockid','inkscape'), name)
+        marker.set(inkex.addNS('stockid', 'inkscape'), name)
 
-        arrow = inkex.etree.Element("path")
+        arrow = etree.Element("path")
         arrow.set('d', 'M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z ')
         if rotate:
             arrow.set('transform', 'scale(0.8) rotate(180) translate(12.5,0)')
@@ -82,7 +80,7 @@ class Dimension(pathmodifier.PathModifier):
         marker.append(arrow)
 
     def dimHLine(self, y, xlat):
-        line = inkex.etree.Element("path")
+        line = etree.Element("path")
         x1 = self.bbox[0] - xlat[0] * self.xoffset
         x2 = self.bbox[1]
         y = y - xlat[1] * self.yoffset
@@ -90,7 +88,7 @@ class Dimension(pathmodifier.PathModifier):
         return line
 
     def dimVLine(self, x, xlat):
-        line = inkex.etree.Element("path")
+        line = etree.Element("path")
         x = x - xlat[0] * self.xoffset
         y1 = self.bbox[2] - xlat[1] * self.yoffset
         y2 = self.bbox[3]
@@ -98,9 +96,9 @@ class Dimension(pathmodifier.PathModifier):
         return line
 
     def effect(self):
-        scale = self.svg.unittouu('1px')    # convert to document units
-        self.xoffset = scale*self.options.xoffset
-        self.yoffset = scale*self.options.yoffset
+        scale = self.svg.unittouu('1px')  # convert to document units
+        self.xoffset = scale * self.options.xoffset
+        self.yoffset = scale * self.options.yoffset
 
         # query inkscape about the bounding box
         if len(self.options.ids) == 0:
@@ -108,21 +106,16 @@ class Dimension(pathmodifier.PathModifier):
         if self.options.type == "geometric":
             self.bbox = inkex.computeBBox(self.selected.values())
         else:
-            q = {'x':0,'y':0,'width':0,'height':0}
-            file = self.args[-1]
+            q = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
+            file = self.options.input_file
             id = self.options.ids[0]
             for query in q.keys():
-                if bsubprocess:
-                    p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query,id,file), shell=True, stdout=PIPE, stderr=PIPE)
-                    rc = p.wait()
-                    q[query] = scale*float(p.stdout.read())
-                    err = p.stderr.read()
-                else:
-                    f,err = os.popen3('inkscape --query-%s --query-id=%s "%s"' % (query,id,file))[1:]
-                    q[query] = scale*float(f.read())
-                    f.close()
-                    err.close()
-            self.bbox = (q['x'], q['x']+q['width'], q['y'], q['y']+q['height'])
+                p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, id, file), shell=True, stdout=PIPE, stderr=PIPE)
+                rc = p.wait()
+                q[query] = scale * float(p.stdout.read())
+                err = p.stderr.read()
+
+            self.bbox = (q['x'], q['x'] + q['width'], q['y'], q['y'] + q['height'])
 
         # Avoid ugly failure on rects and texts.
         try:
@@ -133,10 +126,10 @@ class Dimension(pathmodifier.PathModifier):
         layer = self.current_layer
 
         self.addMarker('Arrow1Lstart', False)
-        self.addMarker('Arrow1Lend',  True)
+        self.addMarker('Arrow1Lend', True)
 
-        group = inkex.etree.SubElement(layer, 'g')
-        # group = inkex.etree.Element("g")
+        group = etree.SubElement(layer, 'g')
+        # group = etree.Element("g")
         group.set('fill', 'none')
         group.set('stroke', 'black')
 
@@ -147,11 +140,11 @@ class Dimension(pathmodifier.PathModifier):
         group.append(line)
 
         line = self.dimVLine(self.bbox[0], [0, 2])
-        line.set('stroke-width', str(0.5*scale))
+        line.set('stroke-width', str(0.5 * scale))
         group.append(line)
 
         line = self.dimVLine(self.bbox[1], [0, 2])
-        line.set('stroke-width', str(0.5*scale))
+        line.set('stroke-width', str(0.5 * scale))
         group.append(line)
 
         line = self.dimVLine(self.bbox[0], [1, 0])
@@ -161,11 +154,11 @@ class Dimension(pathmodifier.PathModifier):
         group.append(line)
 
         line = self.dimHLine(self.bbox[2], [2, 0])
-        line.set('stroke-width', str(0.5*scale))
+        line.set('stroke-width', str(0.5 * scale))
         group.append(line)
 
         line = self.dimHLine(self.bbox[3], [2, 0])
-        line.set('stroke-width', str(0.5*scale))
+        line.set('stroke-width', str(0.5 * scale))
         group.append(line)
 
         for id, node in self.selected.items():
@@ -173,7 +166,6 @@ class Dimension(pathmodifier.PathModifier):
 
         layer.append(group)
 
+
 if __name__ == '__main__':
     Dimension().run()
-
-

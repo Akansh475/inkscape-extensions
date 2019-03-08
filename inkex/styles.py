@@ -23,8 +23,10 @@ and some color handling on top.
 
 from collections import OrderedDict
 
+
 class Style(OrderedDict):
     """A list of style directives"""
+
     def __init__(self, style=None, **kw):
         style = style or kw
         if isinstance(style, str):
@@ -36,7 +38,7 @@ class Style(OrderedDict):
     def parse_str(style):
         """Create a dictionary from the value of an inline style attribute"""
         if style is None:
-            style=""
+            style = ""
         for directive in style.split(';'):
             if ':' in directive:
                 (name, value) = directive.split(':', 1)
@@ -57,4 +59,3 @@ class Style(OrderedDict):
         """Add style to this style, the same as style.update(dict)"""
         self.update(Style(other))
         return self
-

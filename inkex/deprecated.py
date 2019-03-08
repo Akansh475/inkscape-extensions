@@ -68,7 +68,7 @@ class DeprecatedEffect(object):
 
     @property
     def OptionParser(self):
-        self._deprecated('OptionParser', _('{} or `optparse` is very old, it was ' 
+        self._deprecated('OptionParser', _('{} or `optparse` is very old, it was '
                                            'deprecated when python 2.7 came out in 2009 and is now replaced with '
                                            '`argparser`. You must change `self.OptionParser.add_option` to '
                                            '`self.arg_parser.add_argument` the arguments are similar.'))

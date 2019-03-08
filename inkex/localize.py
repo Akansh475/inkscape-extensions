@@ -21,11 +21,12 @@
 Allow extensions to translate messages.
 """
 
+import gettext
 import os
 import sys
-import gettext
 
 _ = gettext.gettext
+
 
 def localize():
     """Turn on localisation for any platform"""
@@ -55,5 +56,5 @@ def localize():
             trans = gettext.translation(domain, localdir, fallback=True)
         except KeyError:
             trans = gettext.translation(domain, fallback=True)
-    #sys.stderr.write(str(localdir) + "\n")
+    # sys.stderr.write(str(localdir) + "\n")
     trans.install()

@@ -20,10 +20,10 @@
 A helper module for creating Inkscape effect extensions
 """
 
-from .base import SvgThroughMixin, InkscapeExtension
+from .base import InkscapeExtension, SvgThroughMixin
 from .deprecated import DeprecatedEffect
+
 
 class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
     """An Inkscape effect, takes SVG in and outputs SVG"""
     pass
-

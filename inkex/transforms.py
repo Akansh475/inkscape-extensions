@@ -26,10 +26,10 @@ Provide transformation parsing to extensions
 """
 
 import re
-from math import cos, sin, tan, radians, sqrt
 from decimal import Decimal
+from math import cos, radians, sin, sqrt, tan
 
-from .utils import strargs, X, Y
+from .utils import X, Y, strargs
 
 
 class Transform(object):
@@ -77,12 +77,12 @@ class Transform(object):
     # [ a, c, e ]
     # [ b, d, f ]
     #
-    a = property(lambda self: self.matrix[0][0]) # pylint: disable=invalid-name
-    b = property(lambda self: self.matrix[1][0]) # pylint: disable=invalid-name
-    c = property(lambda self: self.matrix[0][1]) # pylint: disable=invalid-name
-    d = property(lambda self: self.matrix[1][1]) # pylint: disable=invalid-name
-    e = property(lambda self: self.matrix[0][2]) # pylint: disable=invalid-name
-    f = property(lambda self: self.matrix[1][2]) # pylint: disable=invalid-name
+    a = property(lambda self: self.matrix[0][0])  # pylint: disable=invalid-name
+    b = property(lambda self: self.matrix[1][0])  # pylint: disable=invalid-name
+    c = property(lambda self: self.matrix[0][1])  # pylint: disable=invalid-name
+    d = property(lambda self: self.matrix[1][1])  # pylint: disable=invalid-name
+    e = property(lambda self: self.matrix[0][2])  # pylint: disable=invalid-name
+    f = property(lambda self: self.matrix[1][2])  # pylint: disable=invalid-name
 
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg sixtlet"""
@@ -122,9 +122,9 @@ class Transform(object):
     def __repr__(self):
         """String Representation of this object"""
         return "{}((({}), ({})))".format(
-            type(self).__name__,
-            ', '.join(format(var, '.6g') for var in self.matrix[0]),
-            ', '.join(format(var, '.6g') for var in self.matrix[1]))
+                type(self).__name__,
+                ', '.join(format(var, '.6g') for var in self.matrix[0]),
+                ', '.join(format(var, '.6g') for var in self.matrix[1]))
 
     def __eq__(self, matrix):
         """Test if this transformation is equal to the given matrix"""
@@ -168,8 +168,9 @@ class Transform(object):
                 self.b * point[X] + self.d * point[Y] + self.f)
 
 
-class Scale(object): # pylint: disable=too-few-public-methods
+class Scale(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that reprisent the minimum and maximum values."""
+
     def __init__(self, value=None, *others):
         if isinstance(value, Scale):
             self.maximum = value.maximum
@@ -183,8 +184,8 @@ class Scale(object): # pylint: disable=too-few-public-methods
             self.minimum = None
             self.maximum = None
         else:
-            raise ValueError("Not a number for scaling: {} ({})"\
-                .format(str(value), type(value).__name__))
+            raise ValueError("Not a number for scaling: {} ({})" \
+                             .format(str(value), type(value).__name__))
 
         for item in others:
             self += item
@@ -205,7 +206,7 @@ class Scale(object): # pylint: disable=too-few-public-methods
         return self
 
     def __radd__(self, other):
-        if other != 0: # ignore sum() initial value
+        if other != 0:  # ignore sum() initial value
             return self + other
         return self
 
@@ -226,8 +227,9 @@ class Scale(object): # pylint: disable=too-few-public-methods
         return self.minimum + ((self.maximum - self.minimum) / 2)
 
 
-class BoundingBox(object): # pylint: disable=too-few-public-methods
+class BoundingBox(object):  # pylint: disable=too-few-public-methods
     """Some functions to compute a rough bbox of a given list of objects."""
+
     def __init__(self, x, y=None):
         if y is None:
             if isinstance(x, BoundingBox):
@@ -276,6 +278,7 @@ class BoundingBox(object): # pylint: disable=too-few-public-methods
         """Returns the middle of the bounding box"""
         return self.x.center(), self.y.center()
 
+
 def cubic_extrema(py0, py1, py2, py3):
     """Returns the extreme value, given a set of bezier coords"""
     cmin, cmax = min(py0, py3), max(py0, py3)
@@ -302,4 +305,3 @@ def cubic_extrema(py0, py1, py2, py3):
         cmin, cmax = _is_bigger(-pd1 / (pd3 - pd1))
 
     return cmin, cmax
-

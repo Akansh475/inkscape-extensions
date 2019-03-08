@@ -27,7 +27,7 @@ Convert to and from various units and find the closest matching unit.
 
 import re
 
- # a dictionary of unit to user unit conversion factors
+# a dictionary of unit to user unit conversion factors
 CONVERSIONS = {
     'in': 96.0,
     'pt': 1.33333333333,
@@ -39,11 +39,12 @@ CONVERSIONS = {
     'pc': 16.0,
     'yd': 3456.0,
     'ft': 1152.0,
-    '': 1.0, # Default px
+    '': 1.0,  # Default px
 }
 UNIT_MATCH = re.compile(r'({})'.format('|'.join(CONVERSIONS)))
 NUMBER_MATCH = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
 BOTH_MATCH = re.compile(r'^\s*{}\s*{}\s*$'.format(NUMBER_MATCH.pattern, UNIT_MATCH.pattern))
+
 
 def parse_unit(value, default_unit='px', default_value=None):
     """
@@ -90,4 +91,3 @@ def render_unit(value, unit):
         return "{:.6g}{:s}".format(value, unit)
     except TypeError:
         return ''
-

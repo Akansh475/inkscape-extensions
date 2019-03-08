@@ -164,8 +164,8 @@ class Circle(BaseElement):
 
     def get_path(self):
         """Calculte the arc path of this circle/elipse"""
-        return ('M {0.left} {0.right} ' 
-                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} ' 
+        return ('M {0.left} {0.right} '
+                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '
                 'A {0.radius_x},{0.radius_y} 0 1 0 {0.left}, {0.center_y}'
                 ).format(self)
 

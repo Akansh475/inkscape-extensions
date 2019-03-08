@@ -21,7 +21,6 @@ The ultimate base functionality for every inkscape extension.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-
 import sys
 import copy
 
@@ -42,6 +41,7 @@ class InkscapeExtension(object):
     The base class extension, provides argument parsing and basic
     variable handling features.
     """
+
     def __init__(self):
         self.file_io = None
         self.options = None
@@ -49,12 +49,12 @@ class InkscapeExtension(object):
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
         self.arg_parser.add_argument(
-            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-            help="Filename of the input file (default is stdin)", default=None)
+                "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
+                help="Filename of the input file (default is stdin)", default=None)
 
         self.arg_parser.add_argument(
-            "--output", type=str, default=None,
-            help="Optional output filename for saving the result (default is stdout).")
+                "--output", type=str, default=None,
+                help="Optional output filename for saving the result (default is stdout).")
 
         self.add_arguments(self.arg_parser)
 
@@ -65,7 +65,7 @@ class InkscapeExtension(object):
             pars.add_argument("--num-cool-things", type=int, default=3)
             pars.add_argument("--pos-in-doc", type=str, default="doobry")
         """
-        pass # No extra arguments by default so super is not required
+        pass  # No extra arguments by default so super is not required
 
     def run(self, args=None):
         """Main entrypoint for any Inkscape Extension"""
@@ -132,20 +132,21 @@ class InkscapeExtension(object):
         return type(self).__name__
 
 
-class SvgInputMixin(object): # pylint: disable=too-few-public-methods
+class SvgInputMixin(object):  # pylint: disable=too-few-public-methods
     """
     Expects the file input to be an svg document and will parse it.
     """
+
     def __init__(self):
         super(SvgInputMixin, self).__init__()
 
         self.arg_parser.add_argument(
-            "--id", action="append", type=str, dest="ids", default=[],
-            help="id attribute of object to manipulate")
+                "--id", action="append", type=str, dest="ids", default=[],
+                help="id attribute of object to manipulate")
 
         self.arg_parser.add_argument(
-            "--selected-nodes", action="append", type=str, dest="selected_nodes", default=[],
-            help="id:subpath:position of selected nodes, if any")
+                "--selected-nodes", action="append", type=str, dest="selected_nodes", default=[],
+                help="id:subpath:position of selected nodes, if any")
 
     def load(self, stream):
         """Load the stream as an svg xml etree and make a backup"""
@@ -156,10 +157,11 @@ class SvgInputMixin(object): # pylint: disable=too-few-public-methods
         return document
 
 
-class SvgOutputMixin(object): # pylint: disable=too-few-public-methods
+class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
     """
     Expects the output document to be an svg document and will write an etree xml.
     """
+
     def save(self, stream):
         """Save the svg document to the given stream"""
         stream.write(etree.tostring(self.document).decode())
@@ -169,6 +171,7 @@ class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
     """
     Combine the input and output svg document handling (usually for effects.
     """
+
     def has_changed(self, ret):
         """Return true if the svg document has changed"""
         original = etree.tostring(self.original_document)

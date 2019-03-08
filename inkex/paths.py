@@ -20,18 +20,21 @@
 functions for digesting paths into a simple list structure
 """
 
-import re
 import copy
-from math import atan2, sqrt, pi, cos, sin
+import re
+from math import atan2, cos, pi, sin, sqrt
 from operator import add, mul
-from .utils import strargs, classproperty, X, Y
+
 from .transforms import BoundingBox, Scale, cubic_extrema
+from .utils import X, Y, classproperty, strargs
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
 
+
 class InvalidPath(ValueError):
     """Raised when given an invalid path string"""
+
 
 class PathCommand(tuple):
     """A list of arguments that make up a segment, may return a list of
@@ -116,12 +119,12 @@ class PathCommand(tuple):
     def rotate(self, angle, center_x, center_y):
         """Rotate this path command around the given center, angle is given in degrees"""
         ans = []
-        for (x, y) in self.points: # pylint: disable=invalid-name
+        for (x, y) in self.points:  # pylint: disable=invalid-name
             offset_x = x - center_x
             offset_y = y - center_y
             theta = (atan2(offset_y, offset_x) + angle * pi / 180)
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
-            ans.extend([rad*cos(theta)+center_x, rad*sin(theta)+center_y])
+            ans.extend([rad * cos(theta) + center_x, rad * sin(theta) + center_y])
         return PathCommand(self.cmd, *ans)
 
     def get_pen(self, previous):
@@ -132,19 +135,23 @@ class PathCommand(tuple):
             return self.points[-1]
         return previous
 
+
 class Line(PathCommand):
     """Line instruction"""
     num = 2
+
 
 class ZClose(PathCommand):
     """Close instruction to finish a path"""
     next_cmd = 'Ll'
     num = 0
 
+
 class Move(PathCommand):
     """Move pen instruction without a line"""
     next_cmd = 'Ll'
     num = 2
+
 
 class Horz(PathCommand):
     """Horizontal Line instruction"""
@@ -165,6 +172,7 @@ class Horz(PathCommand):
         """Return this path command as a line instead"""
         return PathCommand('L', self[0], previous[1])
 
+
 class Vert(Horz):
     """Vertical Line instruction"""
     index = Y
@@ -174,9 +182,11 @@ class Vert(Horz):
         """Return this path command as a line instead"""
         return PathCommand('L', previous[0], self[0])
 
+
 class Curve(PathCommand):
     """Curved Line instruction"""
     num = 6
+
 
 class SmoothCurve(PathCommand):
     """Smoothed Curved Line instruction"""
@@ -186,6 +196,7 @@ class SmoothCurve(PathCommand):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
         return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
 
+
 class Quadratic(PathCommand):
     """Quadratic Curved Line instruction"""
     num = 4
@@ -194,9 +205,11 @@ class Quadratic(PathCommand):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
         return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
 
+
 class TepidQuadratic(PathCommand):
     """Smoothed Quadratic Line instruction"""
     num = 2
+
 
 class Arc(PathCommand):
     """Special Arc instruction"""
@@ -210,21 +223,21 @@ class Arc(PathCommand):
 
     def scale(self, coords):
         """Scale the Arc by the given coords"""
-        (x, y) = coords # pylint: disable=invalid-name
+        (x, y) = coords  # pylint: disable=invalid-name
         return PathCommand(self.cmd,
-                           self[0] * x,         # Radius
-                           self[1] * x,         # Radius
-                           (self[2], 0)[y < 0], # X-axis rotation angle
-                           self[3],             # Unknown param '0'
-                           (self[4], 1 - self[4])[x * y < 0], # sweep-flag
-                           self[5] * x,         # X coord
-                           self[6] * y,         # Y coord
-                          )
-
+                           self[0] * x,  # Radius
+                           self[1] * x,  # Radius
+                           (self[2], 0)[y < 0],  # X-axis rotation angle
+                           self[3],  # Unknown param '0'
+                           (self[4], 1 - self[4])[x * y < 0],  # sweep-flag
+                           self[5] * x,  # X coord
+                           self[6] * y,  # Y coord
+                           )
 
 
 class Path(list):
     """A list of segment commands which combine to draw a shape"""
+
     def __init__(self, path_d=None):
         super(Path, self).__init__()
         if isinstance(path_d, str):
@@ -248,12 +261,12 @@ class Path(list):
         elif isinstance(cmd, PathCommand):
             super(Path, self).append(cmd)
 
-    def translate(self, x, y): # pylint: disable=invalid-name
+    def translate(self, x, y):  # pylint: disable=invalid-name
         """Move all coords in this path by the given amount"""
         for i, seg in enumerate(self):
             self[i] = seg + (x, y)
 
-    def scale(self, x, y): # pylint: disable=invalid-name
+    def scale(self, x, y):  # pylint: disable=invalid-name
         """Scale all coords in this path by the given amounts"""
         for i, seg in enumerate(self):
             self[i] = seg * (x, y)

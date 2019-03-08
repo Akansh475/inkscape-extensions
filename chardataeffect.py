@@ -21,6 +21,7 @@
 #
 import inkex
 
+
 class CharDataEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
@@ -30,13 +31,13 @@ class CharDataEffect(inkex.Effect):
     newpar = True
 
     def effect(self):
-        if len(self.svg.selected)==0:
+        if len(self.svg.selected) == 0:
             self.recurse(self.document.getroot())
         else:
-            for id,node in self.selected.items():
+            for id, node in self.selected.items():
                 self.recurse(node)
 
-    def recurse(self,node):
+    def recurse(self, node):
         istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}text')
         if node.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role') == 'line':
             self.newline = True
@@ -44,7 +45,7 @@ class CharDataEffect(inkex.Effect):
             self.newline = True
             self.newpar = True
 
-        if node.text != None:
+        if node.text is not None:
             node.text = self.process_chardata(node.text, self.newline, self.newpar)
             self.newline = False
             self.newpar = False
@@ -52,9 +53,8 @@ class CharDataEffect(inkex.Effect):
         for child in node:
             self.recurse(child)
 
-        if node.tail != None:
+        if node.tail is not None:
             node.tail = self.process_chardata(node.tail, self.newline, self.newpar)
 
-    def process_chardata(self,text, line, par):
+    def process_chardata(self, text, line, par):
         pass
-

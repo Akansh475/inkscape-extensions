@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2013 Nicolas Dufour (jazzynico)
 # Direction code from the Restack extension, by Rob Antonishen

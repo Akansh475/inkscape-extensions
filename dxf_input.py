@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2008, 2009 Alvin Penner, penner@vaxxine.com
 # Copyright (C) 2009 Christian Mayer, inkscape@christianmayer.de

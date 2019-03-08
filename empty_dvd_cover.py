@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 # Written by Tavmjong Bah
 
@@ -49,7 +50,7 @@ class DvdCover(inkex.Effect):
         namedview = self.root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
             namedview = inkex.etree.SubElement(self.root, inkex.addNS('namedview', 'sodipodi'))
-         
+
         namedview.set(inkex.addNS('document-units', 'inkscape'), "mm")
 
         # Until units are supported in 'cx', etc.

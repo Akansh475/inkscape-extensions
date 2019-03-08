@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 synfig_prepare.py
 Simplifies SVG files in preparation for sif export.

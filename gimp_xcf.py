@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2010-2012 Nicolas Dufour, nicoduf@yahoo.fr

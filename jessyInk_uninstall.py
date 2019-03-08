@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 # Copyright 2008, 2009 Hannes Hochreiner
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

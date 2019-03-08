@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Carsten Goetze c.goetze@tu-bs.de
 #

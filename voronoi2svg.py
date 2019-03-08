@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2011 Vincent Nivoliers and contributors
 #
@@ -46,7 +47,7 @@ class Voronoi2svg(inkex.Effect):
 
         self.arg_parser.add_argument(
             "--tab",
-            
+
             type=str,
             dest="tab")
         self.arg_parser.add_argument(

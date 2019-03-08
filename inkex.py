@@ -1,5 +1,6 @@
+# coding=utf-8
 '''
-This file only exists to not break extensions which have 
+This file only exists to not break extensions which have
 
     <dependency type="executable" location="extensions">inkex.py</dependency>
 

@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 from string import Template
 import xml.etree.ElementTree as ET
@@ -15,7 +16,7 @@ else:
 
 templateWithType = Template('self.arg_parser.add_argument("--$param",  type=$type, dest="$param", default=$default)')
 templateWithoutType = Template('self.arg_parser.add_argument("--$param",  dest="$param", default=$default)')
-def handle_param_node(node):    
+def handle_param_node(node):
     if node.attrib["type"] == 'float':
         cmd = templateWithType.substitute(
             param=node.attrib["name"],

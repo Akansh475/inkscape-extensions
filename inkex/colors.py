@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2006 Jos Hirth, kaioa.com
 # Copyright (C) 2007 Aaron C. Spike

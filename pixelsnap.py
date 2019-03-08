@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 """
 TODO: This only snaps selected elements, and if those elements are part of a

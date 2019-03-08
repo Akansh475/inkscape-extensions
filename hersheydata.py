@@ -1,3 +1,4 @@
+# coding=utf-8
 # hersheydata.py
 #
 # This file prepared in 2011 by Windell H. Oskay, www.evilmadscientist.com

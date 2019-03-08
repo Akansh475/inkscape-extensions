@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2012 Jabiertxo Arraiza, jabier.arraiza@marker.es
 # Copyright (C) 2016 su_v, <suv-sf@users.sf.net>

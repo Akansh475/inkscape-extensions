@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 '''
 dm2svg.py - import a DHW file from ACECAD DigiMemo
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2012 Juan Pablo Carbajal ajuanpi-dev@gmail.com
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org

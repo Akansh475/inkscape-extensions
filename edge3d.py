@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
 #

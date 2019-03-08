@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 synfig_output.py
 An Inkscape extension for exporting Synfig files (.sif)

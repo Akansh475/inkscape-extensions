@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 synfig_fileformat.py
 Synfig file format utilities

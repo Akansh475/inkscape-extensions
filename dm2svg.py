@@ -46,7 +46,7 @@ def process_file(filename):
                 break
 
             if ord(tag) > 128:
-                if tag == '\x90':
+                if tag == b'\x90':
                     # Emit the current element and close the last layer
                     emit_element(svg_element)
                     emit_element('</g>')
@@ -55,7 +55,7 @@ def process_file(filename):
                     layer = 'layer%d' % (ord(f.read(1)) + 1)
                     timestamp = 0
                     svg_element = '<g inkscape:groupmode="layer" id="%s">' % layer
-                elif tag == '\x88':
+                elif tag == b'\x88':
                     # Read the timestamp next
                     timestamp += ord(f.read(1)) * 20
                 else:
@@ -65,11 +65,8 @@ def process_file(filename):
                     coords = []
 
                     # Pen down
-                    while True:
-                        coords.append(read_point(f, height))
-                        if ord(f.read(1)) >= 128:
-                            break
-                        f.seek(-1, 1)  # It wasn't the magic value, don't miss it
+                    for point in iter(lambda: read_point(f, height), None):
+                        coords.append(point)
 
                     # Pen up
                     coords.append(read_point(f, height))
@@ -83,7 +80,17 @@ def process_file(filename):
 
 
 def read_point(f, ymax):
-    x1, x2, y1, y2 = map(ord, f.read(4))
+    """If the next byte is a stop byte, return None. Otherwise read 4 bytes
+    (in total) and return a 2D point.
+    """
+    # read first byte, it might be a stop byte
+    x1 = struct.unpack('B', f.read(1))[0]
+
+    if x1 >= 0x80:
+        return None
+
+    x2, y1, y2 = struct.unpack('BBB', f.read(3))
+
     x = x1 | x2 << 7
     y = y1 | y2 << 7
 
@@ -92,6 +99,7 @@ def read_point(f, ymax):
 
 def emit_header(f):
     id, version, width, height, page_type = struct.unpack('<32sBHHBxx', f.read(40))
+    id = id.decode()
 
     print('''
 <svg viewBox="0 0 %(width)s %(height)s" fill="none" stroke="black" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"

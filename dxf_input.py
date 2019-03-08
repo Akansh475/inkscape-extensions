@@ -23,6 +23,8 @@ Input a DXF file >= (AutoCAD Release 13 == AC1012)
 """
 # thanks to Aaron Spike for inkex without which this would not have been possible
 
+from __future__ import absolute_import, unicode_literals
+
 import math
 import re
 import sys

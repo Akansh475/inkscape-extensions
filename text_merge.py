@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2013 Nicolas Dufour (jazzynico)
 # Direction code from the Restack extension, by Rob Antonishen
@@ -21,79 +22,69 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-try:
-    from subprocess import Popen, PIPE
-    bsubprocess = True
-except:
-    bsubprocess = False
-
+import csv
 import os
+from subprocess import PIPE, Popen
+
+from lxml import etree
+
 import inkex
 from inkex import inkbool
+
 
 class Merge(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-d", "--direction",
-                        action="store", type=str,
-                        dest="direction", default="tb",
-                        help="direction to merge text")
+                                     type=str,
+                                     dest="direction", default="tb",
+                                     help="direction to merge text")
         self.arg_parser.add_argument("-x", "--xanchor",
-                        action="store", type=str,
-                        dest="xanchor", default="m",
-                        help="horizontal point to compare")
+                                     type=str,
+                                     dest="xanchor", default="m",
+                                     help="horizontal point to compare")
         self.arg_parser.add_argument("-y", "--yanchor",
-                        action="store", type=str,
-                        dest="yanchor", default="m",
-                        help="vertical point to compare")
+                                     type=str,
+                                     dest="yanchor", default="m",
+                                     help="vertical point to compare")
         self.arg_parser.add_argument("-t", "--flowtext",
-                        action="store", type=inkbool,
-                        dest="flowtext", default=False,
-                        help="use a flow text structure instead of a normal text element")
+                                     type=inkbool,
+                                     dest="flowtext", default=False,
+                                     help="use a flow text structure instead of a normal text element")
         self.arg_parser.add_argument("-k", "--keepstyle",
-                        action="store", type=inkbool,
-                        dest="keepstyle", default=False,
-                        help="keep format")
+                                     type=inkbool,
+                                     dest="keepstyle", default=False,
+                                     help="keep format")
 
     def effect(self):
-        if len(self.svg.selected)==0:
+        if len(self.svg.selected) == 0:
             for node in self.document.xpath('//svg:text | //svg:flowRoot', namespaces=inkex.NSS):
                 self.selected[node.get('id')] = node
 
-        if len( self.svg.selected ) > 0:
+        if len(self.svg.selected) > 0:
             objlist = []
             svg = self.document.getroot()
-            parentnode = self.current_layer
-            file = self.args[ -1 ]
+            parentnode = self.svg.get_current_layer()
+            file = self.options.input_file
 
             # get all bounding boxes in file by calling inkscape again with the --query-all command line option
             # it returns a comma separated list structured id,x,y,w,h
-            if bsubprocess:
-                p = Popen('inkscape --query-all "%s"' % (file), shell=True, stdout=PIPE, stderr=PIPE,
-                        universal_newlines=True)
-                err = p.stderr
-                f = p.communicate()[0]
-                try:
-                    reader=csv.CSVParser().parse_string(f)    #there was a module cvs.py in earlier inkscape that behaved differently
-                except:
-                    reader=csv.reader(f.split( os.linesep ))
-                err.close()
-            else:
-                _,f,err = os.popen3('inkscape --query-all "%s"' % ( file ) )
-                reader=csv.reader( f )
-                err.close()
+            p = Popen('inkscape --query-all "%s"' % file, shell=True, stdout=PIPE, stderr=PIPE,
+                      universal_newlines=True)
+            err = p.stderr
+            f = p.communicate()[0]
 
-            #build a dictionary with id as the key
+            reader = csv.reader(f.split(os.linesep))
+            err.close()
+
+            # build a dictionary with id as the key
             dimen = dict()
             for line in reader:
                 if len(line) > 0:
-                    dimen[line[0]] = map( float, line[1:])
+                    dimen[line[0]] = map(float, line[1:])
 
-            if not bsubprocess: #close file if opened using os.popen3
-                f.close
-
-            #find the center of all selected objects **Not the average!
-            x,y,w,h = dimen[self.selected.keys()[0]]
+            # find the center of all selected objects **Not the average!
+            x, y, w, h = dimen[self.selected.keys()[0]]
             minx = x
             miny = y
             maxx = x + w
@@ -101,7 +92,7 @@ class Merge(inkex.Effect):
 
             for id, node in self.selected.items():
                 # get the bounding box
-                x,y,w,h = dimen[id]
+                x, y, w, h = dimen[id]
                 if x < minx:
                     minx = x
                 if (x + w) > maxx:
@@ -114,10 +105,10 @@ class Merge(inkex.Effect):
             midx = (minx + maxx) / 2
             midy = (miny + maxy) / 2
 
-            #calculate distances for each selected object
+            # calculate distances for each selected object
             for id, node in self.selected.items():
                 # get the bounding box
-                x,y,w,h = dimen[id]
+                x, y, w, h = dimen[id]
 
                 # calc the comparison coords
                 if self.options.xanchor == "l":
@@ -134,18 +125,18 @@ class Merge(inkex.Effect):
                 else:  # middle
                     cy = y + h / 2
 
-                #direction chosen
+                # direction chosen
                 if self.options.direction == "tb":
-                    objlist.append([cy,id])
+                    objlist.append([cy, id])
                 elif self.options.direction == "bt":
-                    objlist.append([-cy,id])
+                    objlist.append([-cy, id])
                 elif self.options.direction == "lr":
-                    objlist.append([cx,id])
+                    objlist.append([cx, id])
                 elif self.options.direction == "rl":
-                    objlist.append([-cx,id])
+                    objlist.append([-cx, id])
 
             objlist.sort()
-            #move them to the top of the object stack in this order.
+            # move them to the top of the object stack in this order.
 
             if self.options.flowtext:
                 self.text_element = "flowRoot"
@@ -154,42 +145,40 @@ class Merge(inkex.Effect):
                 self.text_element = "text"
                 self.text_span = "tspan"
 
-            self.textRoot=inkex.etree.SubElement(parentnode,inkex.addNS(self.text_element,'svg'),{inkex.addNS('space','xml'):'preserve'})
+            self.textRoot = etree.SubElement(parentnode, inkex.addNS(self.text_element, 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
             self.textRoot.set(inkex.addNS('style', ''), 'font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;')
 
             for item in objlist:
                 self.recurse(self.selected[item[1]], self.textRoot)
 
             if self.options.flowtext:
-                self.region=inkex.etree.SubElement(self.textRoot,inkex.addNS('flowRegion','svg'),{inkex.addNS('space','xml'):'preserve'})
-                self.rect=inkex.etree.SubElement(self.region,inkex.addNS('rect','svg'),{inkex.addNS('space','xml'):'preserve'})
+                self.region = etree.SubElement(self.textRoot, inkex.addNS('flowRegion', 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
+                self.rect = etree.SubElement(self.region, inkex.addNS('rect', 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
                 self.rect.set(inkex.addNS('height', ''), '200')
                 self.rect.set(inkex.addNS('width', ''), '200')
 
     def recurse(self, node, span):
-        #istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}tspan')
+        # istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}tspan')
         if node.tag != '{http://www.w3.org/2000/svg}flowRegion':
 
-            newspan=inkex.etree.SubElement(span,inkex.addNS(self.text_span,'svg'),{inkex.addNS('space','xml'):'preserve'})
+            newspan = etree.SubElement(span, inkex.addNS(self.text_span, 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
 
             if node.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role'):
                 newspan.set(inkex.addNS('role', 'sodipodi'), node.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role'))
-            if (node.tag == '{http://www.w3.org/2000/svg}text' or node.tag == '{http://www.w3.org/2000/svg}flowPara'):
+            if node.tag == '{http://www.w3.org/2000/svg}text' or node.tag == '{http://www.w3.org/2000/svg}flowPara':
                 newspan.set(inkex.addNS('role', 'sodipodi'), 'line')
 
             if self.options.keepstyle:
                 if node.get('style'):
                     newspan.set(inkex.addNS('style', ''), node.get('style'))
 
-            if node.text != None:
+            if node.text is not None:
                 newspan.text = node.text
             for child in node:
                 self.recurse(child, newspan)
-            if (node.tail and node.tag != '{http://www.w3.org/2000/svg}text'):
+            if node.tail and node.tag != '{http://www.w3.org/2000/svg}text':
                 newspan.tail = node.tail
 
 
 if __name__ == '__main__':
-    e = Merge()
-    e.affect()
-
+    Merge().run()

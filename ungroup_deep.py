@@ -33,15 +33,15 @@ class Ungroup(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--startdepth",
-                                     action="store", type=int,
+                                      type=int,
                                      dest="startdepth", default=0,
                                      help="starting depth for ungrouping")
         self.arg_parser.add_argument("-m", "--maxdepth",
-                                     action="store", type=int,
+                                      type=int,
                                      dest="maxdepth", default=65535,
                                      help="maximum ungrouping depth")
         self.arg_parser.add_argument("-k", "--keepdepth",
-                                     action="store", type=int,
+                                      type=int,
                                      dest="keepdepth", default=0,
                                      help="levels of ungrouping to " +
                                      "leave untouched")

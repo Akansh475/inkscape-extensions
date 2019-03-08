@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2001-2002 Matt Chisholm matt@theory.org
 # Copyright (C) 2008 Joel Holdsworth joel@airwebreathe.org.uk
@@ -27,9 +28,12 @@ import random
 import re
 import sys
 
+from lxml import etree
+
 import inkex
 import render_alphabetsoup_config
-from inkex import inkbool, Transform
+from inkex import Transform, inkbool
+from inkex.paths import Path
 
 syntax = render_alphabetsoup_config.syntax
 alphabet = render_alphabetsoup_config.alphabet
@@ -44,23 +48,23 @@ def loadPath(svgPath):
     )
     # __file__ is better then sys.argv[0] because this file may be a module
     # for another one.
-    tree = inkex.etree.parse(extensionDir + "/" + svgPath)
+    tree = etree.parse(extensionDir + "/" + svgPath)
     root = tree.getroot()
     pathElement = root.find('{http://www.w3.org/2000/svg}path')
-    if pathElement == None:
+    if pathElement is None:
         return None, 0, 0
     d = pathElement.get("d")
     width = float(root.get("width"))
     height = float(root.get("height"))
-    return inkex.parsePath(d), width, height  # Currently we only support a single path
+    return Path(d).to_arrays(), width, height  # Currently we only support a single path
 
 
 def combinePaths(pathA, pathB):
-    if pathA == None and pathB == None:
+    if pathA is None and pathB is None:
         return None
-    elif pathA == None:
+    elif pathA is None:
         return pathB
-    elif pathB == None:
+    elif pathB is None:
         return pathA
     else:
         return pathA + pathB
@@ -133,7 +137,7 @@ def findRealRoots(a, b, c, d):
         t = b / 3.0
         p, q = c - 3 * t ** 2, d - c * t + 2 * t ** 3
         u, v = solveQuadratic(1, q, -(p / 3.0) ** 3)
-        if type(u) == type(0j):  # Complex Cubic Root
+        if isinstance(u, complex):  # Complex Cubic Root
             r = math.sqrt(u.real ** 2 + u.imag ** 2)
             w = math.atan2(u.imag, u.real)
             y1 = 2 * cbrt(r) * math.cos(w / 3.0)
@@ -142,7 +146,7 @@ def findRealRoots(a, b, c, d):
 
         y2, y3 = solveQuadratic(1, y1, p + y1 ** 2)
 
-        if type(y2) == type(0j):  # Are y2 and y3 complex?
+        if isinstance(y2, complex):  # Are y2 and y3 complex?
             return [y1 - t]
         return [y1 - t, y2 - t, y3 - t]
     elif b != 0:
@@ -185,7 +189,7 @@ def getPathBoundingBox(sp):
                 c = (-3 * bx0 + 3 * bx1)
                 ts = findRealRoots(0, a, b, c)
                 for t in ts:
-                    if t >= 0 and t <= 1:
+                    if 0 <= t <= 1:
                         x = (-bx0 + 3 * bx1 - 3 * bx2 + bx3) * (t ** 3) + \
                             (3 * bx0 - 6 * bx1 + 3 * bx2) * (t ** 2) + \
                             (-3 * bx0 + 3 * bx1) * t + \
@@ -198,7 +202,7 @@ def getPathBoundingBox(sp):
                 c = (-3 * by0 + 3 * by1)
                 ts = findRealRoots(0, a, b, c)
                 for t in ts:
-                    if t >= 0 and t <= 1:
+                    if 0 <= t <= 1:
                         y = (-by0 + 3 * by1 - 3 * by2 + by3) * (t ** 3) + \
                             (3 * by0 - 6 * by1 + 3 * by2) * (t ** 2) + \
                             (-3 * by0 + 3 * by1) * t + \
@@ -232,13 +236,13 @@ def getPathBoundingBox(sp):
 
 def mxfm(image, width, height, stack):  # returns possibly transformed image
     tbimage = image
-    if (stack[0] == "-"):  # top-bottom flip
+    if stack[0] == "-":  # top-bottom flip
         flipTopBottom(tbimage, height)
         tbimage = reversePath(tbimage)
         stack.pop(0)
 
     lrimage = tbimage
-    if (stack[0] == "|"):  # left-right flip
+    if stack[0] == "|":  # left-right flip
         flipLeftRight(tbimage, width)
         lrimage = reversePath(lrimage)
         stack.pop(0)
@@ -247,7 +251,7 @@ def mxfm(image, width, height, stack):  # returns possibly transformed image
 
 def comparerule(rule, nodes):  # compare node list to nodes in rule
     for i in range(0, len(nodes)):  # range( a, b ) = (a, a+1, a+2 ... b-2, b-1)
-        if (nodes[i] == rule[i][0]):
+        if nodes[i] == rule[i][0]:
             pass
         else:
             return 0
@@ -259,26 +263,26 @@ def findrule(state, nodes):  # find the rule which generated this subtree
     nodelen = len(nodes)
     for rule in ruleset:
         rulelen = len(rule)
-        if ((rulelen == nodelen) and (comparerule(rule, nodes))):
+        if (rulelen == nodelen) and (comparerule(rule, nodes)):
             return rule
     return
 
 
 def generate(state):  # generate a random tree (in stack form)
     stack = [state]
-    if (len(syntax[state]) == 1):  # if this is a stop symbol
+    if len(syntax[state]) == 1:  # if this is a stop symbol
         return stack
     else:
         stack.append("[")
         path = random.randint(0, (len(syntax[state][1]) - 1))  # choose randomly from next states
         for symbol in syntax[state][1][path]:  # recurse down each non-terminal
-            if (symbol != 0):  # 0 denotes end of list ###
+            if symbol != 0:  # 0 denotes end of list ###
                 substack = generate(symbol[0])  # get subtree
                 for elt in substack:
                     stack.append(elt)
-                if (symbol[3]):
+                if symbol[3]:
                     stack.append("-")  # top-bottom flip
-                if (symbol[4]):
+                if symbol[4]:
                     stack.append("|")  # left-right flip
             # else:
             # inkex.debug("found end of list in generate( state =", state, ")") # this should be deprecated/never happen
@@ -291,8 +295,8 @@ def draw(stack):  # draw a character based on a tree stack
     # print state,
 
     image, width, height = loadPath(font + syntax[state][0])  # load the image
-    if (stack[0] != "["):  # terminal stack element
-        if (len(syntax[state]) == 1):  # this state is a terminal node
+    if stack[0] != "[":  # terminal stack element
+        if len(syntax[state]) == 1:  # this state is a terminal node
             return image, width, height
         else:
             substack = generate(state)  # generate random substack
@@ -302,10 +306,10 @@ def draw(stack):  # draw a character based on a tree stack
         stack.pop(0)
         images = []  # list of daughter images
         nodes = []  # list of daughter names
-        while (stack[0] != "]"):  # for all nodes in stack
+        while stack[0] != "]":  # for all nodes in stack
             newstate = stack[0]  # the new state
             newimage, width, height = draw(stack)  # draw the daughter state
-            if (newimage):
+            if newimage:
                 tfimage = mxfm(newimage, width, height, stack)  # maybe transform daughter state
                 images.append([tfimage, width, height])  # list of daughter images
                 nodes.append(newstate)  # list of daughter nodes
@@ -322,7 +326,7 @@ def draw(stack):  # draw a character based on a tree stack
                 dx = rule[i][1] * units
                 dy = rule[i][2] * units
                 # newbox = ((box[0]+dx),(box[1]+dy),(box[2]+dx),(box[3]+dy))
-                inkex.translatePath(currimg, dx, dy)
+                currimg = (Path(currimg) + (dx, dy)).to_arrays()
                 image = combinePaths(image, currimg)
 
         stack.pop(0)
@@ -332,8 +336,8 @@ def draw(stack):  # draw a character based on a tree stack
 def draw_crop_scale(stack, zoom):  # draw, crop and scale letter image
     image, width, height = draw(stack)
     bbox = getPathBoundingBox(image)
-    inkex.translatePath(image, -bbox[0], 0)
-    inkex.scalePath(image, zoom / units, zoom / units)
+    image = (Path(image) + (-bbox[0], 0)).to_arrays()
+    image = (Path(image) * (zoom / units, zoom / units)).to_arrays()
     return image, bbox[1] - bbox[0], bbox[3] - bbox[2]
 
 
@@ -344,31 +348,31 @@ def randomize_input_string(tokens, zoom):  # generate a glyph starting from each
         char = tokens[i]
         # if ( re.match("[a-zA-Z0-9?]", char)):
         if char in alphabet:
-            if ((i > 0) and (char == tokens[i - 1])):  # if this letter matches previous letter
+            if (i > 0) and (char == tokens[i - 1]):  # if this letter matches previous letter
                 imagelist.append(imagelist[len(stack) - 1])  # make them the same image
             else:  # generate image for letter
                 stack = alphabet[char][random.randint(0, (len(alphabet[char]) - 1))].split(".")
                 # stack = string.split( alphabet[char][random.randint(0,(len(alphabet[char])-2))] , "." )
                 imagelist.append(draw_crop_scale(stack, zoom))
-        elif (char == " "):  # add a " " space to the image list
+        elif char == " ":  # add a " " space to the image list
             imagelist.append(" ")
         else:  # this character is not in config.alphabet, skip it
-            sys.stderr.write('bad character "%s"\n' % char)
+            sys.stderr.write('bad character "{}"\n'.format(char))
     return imagelist
 
 
 def generate_random_string(tokens, zoom):  # generate a totally random glyph for each glyph in the input string
     imagelist = []
     for char in tokens:
-        if (char == " "):  # add a " " space to the image list
+        if char == " ":  # add a " " space to the image list
             imagelist.append(" ")
         else:
-            if (re.match("[a-z]", char)):  # generate lowercase letter
+            if re.match("[a-z]", char):  # generate lowercase letter
                 stack = generate("lc")
-            elif (re.match("[A-Z]", char)):  # generate uppercase letter
+            elif re.match("[A-Z]", char):  # generate uppercase letter
                 stack = generate("UC")
             else:  # this character is not in config.alphabet, skip it
-                sys.stderr.write('bad character"%s"\n' % char)
+                sys.stderr.write('bad character"{}"\n'.format(char))
                 stack = generate("start")
             imagelist.append(draw_crop_scale(stack, zoom))
 
@@ -386,15 +390,12 @@ def optikern(image, width, zoom):  # optical kerning algorithm
         xmax = None
 
         for cmd, params in image:
-
-            segmentBox = None
-
             if cmd == 'M':
                 # A move cannot contribute to the bounding box
                 last = params[:]
                 lastctrl = params[:]
             elif cmd == 'L':
-                if (y >= last[1] and y <= params[1]) or (y >= params[1] and y <= last[1]):
+                if (last[1] <= y <= params[1]) or (params[1] <= y <= last[1]):
                     if params[0] == last[0]:
                         x = params[0]
                     else:
@@ -406,9 +407,9 @@ def optikern(image, width, zoom):  # optical kerning algorithm
                             x = None
 
                     if x:
-                        if xmin == None or x < xmin:
+                        if xmin is None or x < xmin:
                             xmin = x
-                        if xmax == None or x > xmax:
+                        if xmax is None or x > xmax:
                             xmax = x
 
                 last = params[:]
@@ -426,14 +427,14 @@ def optikern(image, width, zoom):  # optical kerning algorithm
                     ts = findRealRoots(a, b, c, d)
 
                     for t in ts:
-                        if t >= 0 and t <= 1:
+                        if 0 <= t <= 1:
                             x = (-bx0 + 3 * bx1 - 3 * bx2 + bx3) * (t ** 3) + \
                                 (3 * bx0 - 6 * bx1 + 3 * bx2) * (t ** 2) + \
                                 (-3 * bx0 + 3 * bx1) * t + \
                                 bx0
-                            if xmin == None or x < xmin:
+                            if xmin is None or x < xmin:
                                 xmin = x
-                            if xmax == None or x > xmax:
+                            if xmax is None or x > xmax:
                                 xmax = x
 
                 last = params[-2:]
@@ -449,21 +450,21 @@ def optikern(image, width, zoom):  # optical kerning algorithm
                 last = params[-2:]
                 lastctrl = params[2:4]
 
-        if xmin != None and xmax != None:
+        if xmin is not None and xmax is not None:
             left.append(xmin)  # distance from left edge of region to left edge of bbox
             right.append(width - xmax)  # distance from right edge of region to right edge of bbox
         else:
             left.append(width)
             right.append(width)
 
-    return (left, right)
+    return left, right
 
 
 def layoutstring(imagelist, zoom):  # layout string of letter-images using optical kerning
     kernlist = []
     length = zoom
     for entry in imagelist:
-        if (entry == " "):  # leaving room for " " space characters
+        if entry == " ":  # leaving room for " " space characters
             length = length + (zoom * render_alphabetsoup_config.space)
         else:
             image, width, height = entry
@@ -474,7 +475,7 @@ def layoutstring(imagelist, zoom):  # layout string of letter-images using optic
 
     position = zoom
     for i in range(0, len(kernlist)):
-        while (imagelist[i] == " "):
+        while imagelist[i] == " ":
             position = position + (zoom * render_alphabetsoup_config.space)
             imagelist.pop(i)
         image, width, height = imagelist[i]
@@ -490,7 +491,7 @@ def layoutstring(imagelist, zoom):  # layout string of letter-images using optic
 
         position = position - kern  # move position back by kern amount
         thisimage = copy.deepcopy(image)
-        inkex.translatePath(thisimage, position, 0)
+        thisimage = (Path(thisimage) + (position, 0)).to_arrays()
         workspace = combinePaths(workspace, thisimage)
         position = position + width + zoom  # advance position by letter width
 
@@ -525,15 +526,15 @@ class AlphabetSoup(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-t", "--text",
-                                     action="store", type=str,
+                                     type=str,
                                      dest="text", default="Inkscape",
                                      help="The text for alphabet soup")
         self.arg_parser.add_argument("-z", "--zoom",
-                                     action="store", type=float,
+                                     type=float,
                                      dest="zoom", default="8.0",
                                      help="The zoom on the output graphics")
         self.arg_parser.add_argument("-r", "--randomize",
-                                     action="store", type=inkbool,
+                                     type=inkbool,
                                      dest="randomize", default=False,
                                      help="Generate random (unreadable) text")
 
@@ -551,18 +552,17 @@ class AlphabetSoup(inkex.Effect):
         if image:
             s = {'stroke': 'none', 'fill': '#000000'}
 
-            new = inkex.etree.Element(inkex.addNS('path', 'svg'))
+            new = etree.Element(inkex.addNS('path', 'svg'))
             new.set('style', str(inkex.Style(s)))
 
             new.set('d', str(inkex.Path(image)))
-            self.current_layer.append(new)
+            self.svg.get_current_layer().append(new)
 
             # compensate preserved transforms of parent layer
             if self.current_layer.getparent() is not None:
-                mat = inkex.composeParents(self.current_layer, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-                inkex.applyTransformToNode(-Transform(mat), new)
+                mat = (self.svg.get_current_layer().transform * Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
+                new.transform *= Transform(-Transform(mat))
 
 
 if __name__ == '__main__':
-    e = AlphabetSoup()
-    e.affect()
+    AlphabetSoup().run()

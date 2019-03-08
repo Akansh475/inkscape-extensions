@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -25,11 +26,11 @@ class Whirl(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-t", "--whirl",
-                        action="store", type=float,
+                         type=float,
                         dest="whirl", default=1.0,
                         help="amount of whirl")
         self.arg_parser.add_argument("-r", "--rotation",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="rotation", default=True,
                         help="direction of rotation")
     def effect(self):
@@ -57,8 +58,8 @@ class Whirl(inkex.Effect):
                             point[1] += view_center[1]
                 node.set('d', inkex.formatCubicPath(p))
 
+
 if __name__ == '__main__':
-    e = Whirl()
-    e.affect()
+    Whirl().run()
 
 

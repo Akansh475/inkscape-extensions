@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2014 Martin Owens, email@doctormo.org
 #
@@ -119,6 +120,5 @@ class LayersOutput(inkex.Effect):
 
 
 if __name__ == '__main__':   #pragma: no cover
-    e = LayersOutput()
-    e.affect()
+    LayersOutput().run()
 

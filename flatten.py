@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
 #
@@ -22,7 +23,7 @@ class MyEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-f", "--flatness",
-                        action="store", type=float,
+                         type=float,
                         dest="flat", default=10.0,
                         help="Minimum flatness of the subdivided curves")
     def effect(self):
@@ -43,6 +44,5 @@ class MyEffect(inkex.Effect):
                 node.set('d', str(inkex.Path(np)))
 
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()
 

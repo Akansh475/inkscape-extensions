@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-'''
+# coding=utf-8
+"""
 dm2svg.py - import a DHW file from ACECAD DigiMemo
 
 Copyright (C) 2009 Kevin Lindsey, https://github.com/thelonious/DM2SVG
@@ -19,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
 
 from __future__ import print_function
 from __future__ import absolute_import

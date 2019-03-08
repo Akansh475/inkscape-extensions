@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-'''
+# coding=utf-8
+"""
 Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
 
 This program is free software; you can redistribute it and/or modify
@@ -15,10 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
 # local library
 import inkwebeffect
-import inkex
 from inkex.localize import _
 
 
@@ -27,61 +27,58 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
     def __init__(self):
         inkwebeffect.InkWebEffect.__init__(self)
         self.arg_parser.add_argument("-a", "--att",
-                        action="store", type=str,
-                        dest="att", default="fill",
-                        help="Attribute to transmitted.")
+                                     type=str,
+                                     dest="att", default="fill",
+                                     help="Attribute to transmitted.")
         self.arg_parser.add_argument("-w", "--when",
-                        action="store", type=str,
-                        dest="when", default="onclick",
-                        help="When it must to transmit?")
+                                     type=str,
+                                     dest="when", default="onclick",
+                                     help="When it must to transmit?")
         self.arg_parser.add_argument("-c", "--compatibility",
-                        action="store", type=str,
-                        dest="compatibility", default="append",
-                        help="Compatibility with previews code to this event.")
+                                     type=str,
+                                     dest="compatibility", default="append",
+                                     help="Compatibility with previews code to this event.")
         self.arg_parser.add_argument("-t", "--from-and-to",
-                        action="store", type=str,
-                        dest="from_and_to", default="g-to-one",
-                        help='Who transmit to Who? "g-to-one" All tramsmit to the last. "one-to-g" The first transmit to all.')
+                                     type=str,
+                                     dest="from_and_to", default="g-to-one",
+                                     help='Who transmit to Who? "g-to-one" All tramsmit to the last. "one-to-g" The first transmit to all.')
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+                                     type=str,
+                                     dest="tab",
+                                     help="The selected UI-tab when OK was pressed")
 
     def effect(self):
-      self.ensureInkWebSupport()
+        self.ensureInkWebSupport()
 
-      if len(self.options.ids) < 2:
-        return inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
+        if len(self.options.ids) < 2:
+            return inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
 
-      elFrom = []
-      idTo = []
-      if self.options.from_and_to == "g-to-one":
-        # All tramsmit to the last
-        for selId in self.options.ids[:-1]:
-          elFrom.append( self.selected[selId] )
-        idTo.append( self.options.ids[-1] )
-      else:
-        # The first transmit to all
-        elFrom.append( self.selected[ self.options.ids[0] ] )
-        for selId in self.options.ids[1:]:
-          idTo.append( selId )
+        elFrom = []
+        idTo = []
+        if self.options.from_and_to == "g-to-one":
+            # All tramsmit to the last
+            for selId in self.options.ids[:-1]:
+                elFrom.append(self.selected[selId])
+            idTo.append(self.options.ids[-1])
+        else:
+            # The first transmit to all
+            elFrom.append(self.selected[self.options.ids[0]])
+            for selId in self.options.ids[1:]:
+                idTo.append(selId)
 
-      evCode = "InkWeb.transmitAtt({from:this, " + \
-                                   "to:['"+ "','".join(idTo) +"'], " + \
-                                   "att:'"+ self.options.att +"'})"
+        evCode = "InkWeb.transmitAtt({from:this, to:['{}'], att:'{}'})".format("','".join(idTo), self.options.att)
+        for el in elFrom:
+            prevEvCode = el.get(self.options.when)
+            if prevEvCode is None:
+                prevEvCode = ""
 
-      for el in elFrom:
-        prevEvCode = el.get( self.options.when )
-        if prevEvCode == None: prevEvCode = ""
+            if self.options.compatibility == 'append':
+                elEvCode = prevEvCode + ";\n" + evCode
+            if self.options.compatibility == 'prepend':
+                elEvCode = evCode + ";\n" + prevEvCode
 
-        if self.options.compatibility == 'append':
-          elEvCode = prevEvCode +";\n"+ evCode
-        if self.options.compatibility == 'prepend':
-          elEvCode = evCode +";\n"+ prevEvCode
+            el.set(self.options.when, elEvCode)
 
-        el.set( self.options.when, elEvCode )
 
 if __name__ == '__main__':
-    e = InkWebTransmitAtt()
-    e.affect()
-
+    InkWebTransmitAtt().run()

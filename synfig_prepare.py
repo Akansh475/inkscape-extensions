@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 """
 synfig_prepare.py
 Simplifies SVG files in preparation for sif export.
@@ -20,34 +21,38 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
-import os, tempfile
+import os
+import tempfile
+from subprocess import PIPE, Popen
+
+import simplepath
+import simpletransform
+from lxml import etree
 
 import inkex
-from inkex import NSS, addNS, etree, errormsg
-import simplepath, simplestyle, simpletransform
+from inkex import NSS, addNS
+
 
 ###### Utility Classes ####################################
 
 class MalformedSVGError(Exception):
     """Raised when the SVG document is invalid or contains unsupported features"""
+
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return """SVG document is invalid or contains unsupported features
 
 Error message: %s
 
 The SVG to Synfig converter is designed to handle SVG files that were created using Inkscape. Unsupported features are most likely to occur in SVG files written by other programs.
-"""     % repr(self.value)
+""" % repr(self.value)
 
-try:
-    from subprocess import Popen, PIPE
-    bsubprocess = True
-except:
-    bsubprocess = False
 
 class InkscapeActionGroup(object):
     """A class for calling Inkscape to perform operations on a document"""
+
     def __init__(self, svg_document=None):
         self.command = ""
         self.init_args = ""
@@ -79,14 +84,14 @@ class InkscapeActionGroup(object):
         For a list of verbs, run `inkscape --verb-list`
         """
         if self.has_selection:
-            self.command += "--verb=%s " % (verb)
+            self.command += "--verb=%s " % verb
 
             if not self.has_action:
                 self.has_action = True
 
     def select_id(self, object_id):
         """Select object with given id"""
-        self.command += "--select=%s " % (object_id)
+        self.command += "--select=%s " % object_id
         if not self.has_selection:
             self.has_selection = True
 
@@ -129,13 +134,10 @@ class InkscapeActionGroup(object):
             return
 
         cmd = self.init_args + " " + self.command + "--verb=FileSave --verb=FileQuit"
-        if bsubprocess:
-            p = Popen('inkscape "%s" %s' % (filename, cmd), shell=True, stdout=PIPE, stderr=PIPE)
-            rc = p.wait()
-            f = p.stdout
-            err = p.stderr
-        else:
-            _, f, err = os.popen3( "inkscape %s %s" % ( filename, cmd ) )
+        p = Popen('inkscape "{}" {}'.format(filename, cmd), shell=True, stdout=PIPE, stderr=PIPE)
+        rc = p.wait()
+        f = p.stdout
+        err = p.stderr
 
         f.close()
         err.close()
@@ -169,8 +171,10 @@ class InkscapeActionGroup(object):
         # Return the new document
         return new_svg_doc
 
+
 class SynfigExportActionGroup(InkscapeActionGroup):
     """An action group with stock commands designed for Synfig exporting"""
+
     def __init__(self, svg_document=None):
         InkscapeActionGroup.__init__(self, svg_document)
         self.set_init_args("--verb=UnlockAllInAllLayers")
@@ -193,7 +197,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
             "svg:polyline",
             "svg:polygon",
             "svg:text"
-            ]
+        ]
 
         # Build an xpath command to select these nodes
         xpath_cmd = " | ".join(["//" + np for np in non_paths])
@@ -212,6 +216,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
         self.verb("EditUnlinkClone")
         self.deselect()
 
+
 ###### Utility Functions ##################################
 
 ### Path related
@@ -225,7 +230,7 @@ def fuse_subpaths(path_node):
         return
 
     i = 0
-    initial_point = [ path[i][1][-2], path[i][1][-1] ]
+    initial_point = [path[i][1][-2], path[i][1][-1]]
     return_stack = []
     while i < len(path):
         # Remove any terminators: they are redundant
@@ -239,32 +244,32 @@ def fuse_subpaths(path_node):
             continue
 
         # This element begins a new path - it should be a moveto
-        assert(path[i][0] == 'M')
+        assert (path[i][0] == 'M')
 
         # Swap it for a lineto
         path[i][0] = 'L'
 
         # If the old subpath has not been closed yet, close it
-        if path[i-1][1][-2] != initial_point[0] or path[i-1][1][-2] != initial_point[1]:
+        if path[i - 1][1][-2] != initial_point[0] or path[i - 1][1][-2] != initial_point[1]:
             path.insert(i, ['L', initial_point])
             i += 1
 
         # Set the initial point of this subpath
-        initial_point = [ path[i-1][1][-2], path[i-1][1][-1] ]
+        initial_point = [path[i - 1][1][-2], path[i - 1][1][-1]]
 
         # Append this point to the return stack
         return_stack.append(initial_point)
-    #end while
+    # end while
 
     # Now pop the entire return stack
-    while return_stack != []:
+    while return_stack:
         el = ['L', return_stack.pop()]
         path.insert(i, el)
         i += 1
 
-
     path_d = str(inkex.Path(path))
     path_node.set("d", path_d)
+
 
 def split_fill_and_stroke(path_node):
     """Split a path into two paths, one filled and one stroked
@@ -277,7 +282,7 @@ def split_fill_and_stroke(path_node):
     # If there is only stroke or only fill, don't split anything
     if "fill" in style.keys() and style["fill"] == "none":
         if "stroke" not in style.keys() or style["stroke"] == "none":
-            return [None, None] # Path has neither stroke nor fill
+            return [None, None]  # Path has neither stroke nor fill
         else:
             return [None, path_node]
     if "stroke" not in style.keys() or style["stroke"] == "none":
@@ -324,8 +329,8 @@ def split_fill_and_stroke(path_node):
 
     # Next split apart the style attribute
     style_group = {}
-    style_fill = {"stroke":"none", "fill":"#000000"}
-    style_stroke = {"fill":"none", "stroke":"none"}
+    style_fill = {"stroke": "none", "fill": "#000000"}
+    style_stroke = {"fill": "none", "stroke": "none"}
 
     for key in style.keys():
         if key.startswith("fill"):
@@ -352,17 +357,17 @@ def split_fill_and_stroke(path_node):
     if nodetypes is not None:
         fill.set(addNS("nodetypes", "sodipodi"), nodetypes)
         stroke.set(addNS("nodetypes", "sodipodi"), nodetypes)
-    fill.set("id", path_id+"-fill")
-    stroke.set("id", path_id+"-stroke")
+    fill.set("id", path_id + "-fill")
+    stroke.set("id", path_id + "-stroke")
     if transform is not None:
         fill.set("transform", transform)
         stroke.set("transform", transform)
-
 
     # Replace the original node with the group
     path_node.getparent().replace(path_node, group)
 
     return [fill, stroke]
+
 
 ### Object related
 
@@ -371,18 +376,17 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
 
     # Don't enter non-graphical portions of the document
     if (node.tag == addNS("namedview", "sodipodi")
-        or node.tag == addNS("defs", "svg")
-        or node.tag == addNS("metadata", "svg")
-        or node.tag == addNS("foreignObject", "svg")):
+            or node.tag == addNS("defs", "svg")
+            or node.tag == addNS("metadata", "svg")
+            or node.tag == addNS("foreignObject", "svg")):
         return
-
 
     # Compose the transformations
     if node.tag == addNS("svg", "svg") and node.get("viewBox"):
         vx, vy, vw, vh = [get_dimension(x) for x in node.get("viewBox").split()]
         dw = get_dimension(node.get("width", vw))
         dh = get_dimension(node.get("height", vh))
-        t = "translate(%f, %f) scale(%f, %f)" % (-vx, -vy, dw/vw, dh/vh)
+        t = "translate(%f, %f) scale(%f, %f)" % (-vx, -vy, dw / vw, dh / vh)
         this_transform = simpletransform.parseTransform(t, parent_transform)
         this_transform = simpletransform.parseTransform(node.get("transform"), this_transform)
         del node.attrib["viewBox"]
@@ -391,9 +395,9 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
 
     # Compose the style attribs
     this_style = dict(inkex.Style.parse_str(node.get("style", "")))
-    remaining_style = {} # Style attributes that are not propagated
+    remaining_style = {}  # Style attributes that are not propagated
 
-    non_propagated = ["filter"] # Filters should remain on the topmost ancestor
+    non_propagated = ["filter"]  # Filters should remain on the topmost ancestor
     for key in non_propagated:
         if key in this_style.keys():
             remaining_style[key] = this_style[key]
@@ -412,9 +416,9 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
             del node.attrib[attrib]
 
     if (node.tag == addNS("svg", "svg")
-        or node.tag == addNS("g", "svg")
-        or node.tag == addNS("a", "svg")
-        or node.tag == addNS("switch", "svg")):
+            or node.tag == addNS("g", "svg")
+            or node.tag == addNS("a", "svg")
+            or node.tag == addNS("switch", "svg")):
         # Leave only non-propagating style attributes
         if len(remaining_style) == 0:
             if "style" in node.keys():
@@ -439,6 +443,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
         node.set("style", str(inkex.Style(this_style)))
         node.set("transform", simpletransform.formatTransform(this_transform))
 
+
 ### Style related
 
 def get_dimension(s="1024"):
@@ -457,19 +462,20 @@ def get_dimension(s="1024"):
     elif s[-2:] == "px":
         return float(s[:-2])
     elif s[-2:] == "pt":
-        return float(s[:-2])*1.333
+        return float(s[:-2]) * 1.333
     elif s[-2:] == "em":
-        return float(s[:-2])*16
+        return float(s[:-2]) * 16
     elif s[-2:] == "mm":
-        return float(s[:-2])*3.779
+        return float(s[:-2]) * 3.779
     elif s[-2:] == "pc":
-        return float(s[:-2])*16
+        return float(s[:-2]) * 16
     elif s[-2:] == "cm":
-        return float(s[:-2])*37.79
+        return float(s[:-2]) * 37.79
     elif s[-2:] == "in":
-        return float(s[:-2])*96
+        return float(s[:-2]) * 96
     else:
         return 1024
+
 
 ###### Main Class #########################################
 class SynfigPrep(inkex.Effect):
@@ -490,11 +496,6 @@ class SynfigPrep(inkex.Effect):
                 if fill is not None:
                     fuse_subpaths(fill)
 
+
 if __name__ == '__main__':
-    try:
-        e = SynfigPrep()
-        e.affect()
-    except MalformedSVGError as e:
-        errormsg(e)
-
-
+    SynfigPrep().run()

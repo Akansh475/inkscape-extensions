@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 # Copyright 2008, 2009 Hannes Hochreiner
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,7 +39,7 @@ class JessyInk_Install(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -116,9 +117,8 @@ class JessyInk_Install(inkex.Effect):
         for node in self.document.xpath("//*[@jessyink:autoText]", namespaces=inkex.NSS):
             node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"] = node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"].replace("=", ":")
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Install()
-    effect.affect()
+    JessyInk_Install().run()
 

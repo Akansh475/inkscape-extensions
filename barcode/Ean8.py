@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2010 Martin Owens
 #
@@ -21,6 +22,7 @@ Python barcode renderer for EAN8 barcodes. Designed for use with Inkscape.
 
 from .BaseEan import EanBarcode
 
+
 class Ean8(EanBarcode):
     """Provide an EAN8 barcode generator"""
     name = 'ean8'
@@ -31,7 +33,6 @@ class Ean8(EanBarcode):
         """Encode an ean8 barcode"""
         self.text = self.space(num[:4], 3, num[4:])
         return self.enclose(
-            self.encode_left(num[:4]),
-            self.encode_right(num[4:])
+                self.encode_left(num[:4]),
+                self.encode_right(num[4:])
         )
-

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2010 Craig Marshall, craig9 [at] gmail.com
 #
@@ -35,13 +36,13 @@ text_tags = ['{http://www.w3.org/2000/svg}tspan',
 font_attributes = ['font-family', '-inkscape-font-specification']
 
 def set_font(node, new_font, style=None):
-    '''
+    """
     Sets the font attribute in the style attribute of node, using the
     font name stored in new_font. If the style dict is open already,
     it can be passed in, otherwise it will be optned anyway.
 
     Returns a dirty boolean flag
-    '''
+    """
     dirty = False
     if not style:
         style = get_style(node)
@@ -54,12 +55,12 @@ def set_font(node, new_font, style=None):
     return dirty
 
 def find_replace_font(node, find, replace):
-    '''
+    """
     Searches the relevant font attributes/styles of node for find, and
     replaces them with replace.
 
     Returns a dirty boolean flag
-    '''
+    """
     dirty = False
     style = get_style(node)
     if style:
@@ -70,38 +71,38 @@ def find_replace_font(node, find, replace):
     return dirty
 
 def is_styled_text(node):
-    '''
+    """
     Returns true if the tag in question is a "styled" element that
     can hold text.
-    '''
+    """
     return node.tag in text_tags and 'style' in node.attrib
 
 def is_text(node):
-    '''
+    """
     Returns true if the tag in question is an element that
     can hold text.
-    '''
+    """
     return node.tag in text_tags
 
 
 def get_style(node):
-    '''
+    """
     Sugar coated way to get style dict from a node
-    '''
+    """
     if 'style' in node.attrib:
         return dict(inkex.Style.parse_str(node.attrib['style']))
 
 def set_style(node, style):
-    '''
+    """
     Sugar coated way to set the style dict, for node
-    '''
+    """
     node.attrib['style'] = str(inkex.Style(style))
 
 def get_fonts(node):
-    '''
+    """
     Given a node, returns a list containing all the fonts that
     the node is using.
-    '''
+    """
     fonts = []
     s = get_style(node)
     if not s:
@@ -112,17 +113,17 @@ def get_fonts(node):
     return fonts
 
 def report_replacements(num):
-    '''
+    """
     Sends a message to the end user showing success of failure
     of the font replacement
-    '''
+    """
     if num == 0:
         inkex.errormsg(_('Couldn\'t find anything using that font, please ensure the spelling and spacing is correct.'))
 
 def report_findings(findings):
-    '''
+    """
     Tells the user which fonts were found, if any
-    '''
+    """
     if len(findings) == 0:
         inkex.errormsg(_("Didn't find any fonts in this document/selection."))
     else:
@@ -132,9 +133,9 @@ def report_findings(findings):
             inkex.errormsg(_("Found the following fonts:\n%s") % '\n'.join(findings))
 
 class ReplaceFont(inkex.Effect):
-    '''
+    """
     Replaces all instances of one font with another
-    '''
+    """
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--fr_find", type=str, dest="fr_find",
@@ -149,20 +150,20 @@ class ReplaceFont(inkex.Effect):
                                      default=None, help="")
 
     def find_child_text_items(self, node):
-        '''
+        """
         Recursive method for appending all text-type elements
         to self.selected_items
-        '''
+        """
         if is_text(node):
             self.selected_items.append(node)
             for child in node:
                 self.find_child_text_items(child)
 
     def relevant_items(self, scope):
-        '''
+        """
         Depending on the scope, returns all text elements, or all
         selected text elements including nested children
-        '''
+        """
         items = []
         to_return = []
         if scope == "selection_only":
@@ -178,10 +179,10 @@ class ReplaceFont(inkex.Effect):
         return to_return
 
     def find_replace(self, nodes, find, replace):
-        '''
+        """
         Walks through nodes, replacing fonts as it goes according
         to find and replace
-        '''
+        """
         replacements = 0
         for node in nodes:
             if find_replace_font(node, find, replace):
@@ -189,9 +190,9 @@ class ReplaceFont(inkex.Effect):
         report_replacements(replacements)
 
     def replace_all(self, nodes, replace):
-        '''
+        """
         Walks through nodes, setting fonts indiscriminately.
-        '''
+        """
         replacements = 0
         for node in nodes:
             if set_font(node, replace):
@@ -199,10 +200,10 @@ class ReplaceFont(inkex.Effect):
         report_replacements(replacements)
 
     def list_all(self, nodes):
-        '''
+        """
         Walks through nodes, building a list of all fonts found, then
         reports to the user with that list
-        '''
+        """
         fonts_found = []
         for node in nodes:
             for f in get_fonts(node):
@@ -221,21 +222,20 @@ class ReplaceFont(inkex.Effect):
         if action == "find_replace":
             find = self.options.fr_find
             if find is None or find == "":
-                return inkex.errormsg(_("Please enter a search string in the find box."));
+                return inkex.errormsg(_("Please enter a search string in the find box."))
             find = find.strip().lower()
             replace = self.options.fr_replace
             if replace is None or replace == "":
-                return inkex.errormsg(_("Please enter a replacement font in the replace with box."));
+                return inkex.errormsg(_("Please enter a replacement font in the replace with box."))
             self.find_replace(relevant_items, find, replace)
         elif action == "replace_all":
             replace = self.options.r_replace
             if replace is None or replace == "":
-                return inkex.errormsg(_("Please enter a replacement font in the replace all box."));
+                return inkex.errormsg(_("Please enter a replacement font in the replace all box."))
             self.replace_all(relevant_items, replace)
         elif action == "list_only":
             self.list_all(relevant_items)
             sys.exit(0)
 
 if __name__ == "__main__":
-    e = ReplaceFont()
-    e.affect()
+    ReplaceFont().run()

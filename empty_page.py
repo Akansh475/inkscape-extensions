@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 # Rewritten by Tavmjong Bah to add correct viewBox, inkscape:cx, etc. attributes
 

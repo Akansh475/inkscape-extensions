@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2014  Ryan Lerch     (multiple difference)
 #              2016  Maren Hachmann <marenhachmannATyahoo.com> (refactoring, extend to multibool)
@@ -50,9 +51,9 @@ class PrepareFileSave(inkex.Effect):
         f = p.communicate()[0]
         err.close()
 
+
 if __name__ == '__main__':
-    e = PrepareFileSave()
-    e.affect()
+    PrepareFileSave().run()
 else:
     # Skip automatic testing for this module
     raise inkex.DependencyError("This extension is untestable because of 'inkscape Popen'.")

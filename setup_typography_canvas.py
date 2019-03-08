@@ -1,4 +1,5 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2011 Felipe Correa da Silva Sanches
 #
@@ -24,23 +25,23 @@ class SetupTypographyCanvas(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-e", "--emsize",
-                        action="store", type=int,
+                         type=int,
                         dest="emsize", default=1000,
                         help="Em-size")
         self.arg_parser.add_argument("-a", "--ascender",
-                        action="store", type=int,
+                         type=int,
                         dest="ascender", default='750',
                         help="Ascender")
         self.arg_parser.add_argument("-c", "--caps",
-                        action="store", type=int,
+                         type=int,
                         dest="caps", default='700',
                         help="Caps Height")
         self.arg_parser.add_argument("-x", "--xheight",
-                        action="store", type=int,
+                         type=int,
                         dest="xheight", default='500',
                         help="x-height")
         self.arg_parser.add_argument("-d", "--descender",
-                        action="store", type=int,
+                         type=int,
                         dest="descender", default='250',
                         help="Descender")
 
@@ -86,6 +87,5 @@ class SetupTypographyCanvas(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = SetupTypographyCanvas()
-    e.affect()
+    SetupTypographyCanvas().run()
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 Terry Brown, terry_n_brown@yahoo.com
 #
@@ -43,7 +44,7 @@ class Edge3d(inkex.Effect):
                  'stroke-width for path pieces'),
                 ]
         for o in opts:
-            self.arg_parser.add_argument(o[0], o[1], action="store", type=o[2],
+            self.arg_parser.add_argument(o[0], o[1],  type=o[2],
                                          dest=o[3], default=o[4], help=o[5])
         self.filtId = ''
 
@@ -142,6 +143,7 @@ class Edge3d(inkex.Effect):
             g.append(node)
 
         return g
+
 
 if __name__ == '__main__':
     Edge3d().run()

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-'''
+# coding=utf-8
+"""
 Copyright (C) 2010 Aurelio A. Heckert, aurium (a) gmail dot com
 
 This program is free software; you can redistribute it and/or modify
@@ -15,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
 # local library
 from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
@@ -102,5 +103,4 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
 
 
 if __name__ == '__main__':
-    e = WebSlicer_CreateRect()
-    e.affect()
+    WebSlicer_CreateRect().run()

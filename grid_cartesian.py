@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -24,53 +25,57 @@ There is a wide range of options including subdivision, subsubdivions and logari
 All elements are grouped with similar elements (eg all x-subdivs)
 """
 
-import sys
-from math import *
+from math import log
+
+from lxml import etree
 
 import inkex
 
-def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
-    style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill': 'none' }
-    line_attribs = {'style':str(inkex.Style(style)),
-                    inkex.addNS('label','inkscape'):name,
-                    'd':'M '+str(x1)+','+str(y1)+' L '+str(x2)+','+str(y2)}
-    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
 
-def draw_SVG_rect(x,y,w,h, width, fill, name, parent):
-    style = { 'stroke': '#000000', 'stroke-width':str(width), 'fill':fill}
-    rect_attribs = {'style':str(inkex.Style(style)),
-                    inkex.addNS('label','inkscape'):name,
-                    'x':str(x), 'y':str(y), 'width':str(w), 'height':str(h)}
-    inkex.etree.SubElement(parent, inkex.addNS('rect','svg'), rect_attribs )
+def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
+    style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
+    line_attribs = {'style': str(inkex.Style(style)),
+                    inkex.addNS('label', 'inkscape'): name,
+                    'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
+    etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
+
+
+def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
+    style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
+    rect_attribs = {'style': str(inkex.Style(style)),
+                    inkex.addNS('label', 'inkscape'): name,
+                    'x': str(x), 'y': str(y), 'width': str(w), 'height': str(h)}
+    etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
+
 
 class GridCartesian(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.arg_parser.add_argument("--border_th", action="store", type=float, dest="border_th", default=3)
-        self.arg_parser.add_argument("--border_th_unit", action="store", dest="border_th_unit", default="cm")
-        self.arg_parser.add_argument("--tab", action="store", dest="tab", default="x_tab")
-        self.arg_parser.add_argument("--x_divs", action="store", type=int, dest="x_divs", default=6)
-        self.arg_parser.add_argument("--dx", action="store", type=float, dest="dx", default=100.0)
-        self.arg_parser.add_argument("--dx_unit", action="store", dest="dx_unit", default="cm")
-        self.arg_parser.add_argument("--x_subdivs", action="store", type=int, dest="x_subdivs", default=2)
-        self.arg_parser.add_argument("--x_log", action="store", type=inkex.inkbool, dest="x_log", default="false")
-        self.arg_parser.add_argument("--x_subsubdivs", action="store", type=int, dest="x_subsubdivs", default=5)
-        self.arg_parser.add_argument("--x_half_freq", action="store", type=int, dest="x_half_freq", default=4)
-        self.arg_parser.add_argument("--x_divs_th", action="store", type=float, dest="x_divs_th", default=2)
-        self.arg_parser.add_argument("--x_subdivs_th", action="store", type=float, dest="x_subdivs_th", default=1)
-        self.arg_parser.add_argument("--x_subsubdivs_th", action="store", type=float, dest="x_subsubdivs_th", default=0.3)
-        self.arg_parser.add_argument("--x_div_unit", action="store", dest="x_div_unit", default="cm")
-        self.arg_parser.add_argument("--y_divs", action="store", type=int, dest="y_divs", default=5)
-        self.arg_parser.add_argument("--dy", action="store", type=float, dest="dy", default=100.0)
-        self.arg_parser.add_argument("--dy_unit", action="store", dest="dy_unit", default="cm")
-        self.arg_parser.add_argument("--y_subdivs", action="store", type=int, dest="y_subdivs", default=1)
-        self.arg_parser.add_argument("--y_log", action="store", type=inkex.inkbool, dest="y_log", default="false")
-        self.arg_parser.add_argument("--y_subsubdivs", action="store", type=int, dest="y_subsubdivs", default=5)
-        self.arg_parser.add_argument("--y_half_freq", action="store", type=int, dest="y_half_freq", default=4)
-        self.arg_parser.add_argument("--y_divs_th", action="store", type=float, dest="y_divs_th", default=2)
-        self.arg_parser.add_argument("--y_subdivs_th", action="store", type=float, dest="y_subdivs_th", default=1)
-        self.arg_parser.add_argument("--y_subsubdivs_th", action="store", type=float, dest="y_subsubdivs_th", default=0.3)
-        self.arg_parser.add_argument("--y_div_unit", action="store", dest="y_div_unit", default="cm")
+        self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3)
+        self.arg_parser.add_argument("--border_th_unit", dest="border_th_unit", default="cm")
+        self.arg_parser.add_argument("--tab", dest="tab", default="x_tab")
+        self.arg_parser.add_argument("--x_divs", type=int, dest="x_divs", default=6)
+        self.arg_parser.add_argument("--dx", type=float, dest="dx", default=100.0)
+        self.arg_parser.add_argument("--dx_unit", dest="dx_unit", default="cm")
+        self.arg_parser.add_argument("--x_subdivs", type=int, dest="x_subdivs", default=2)
+        self.arg_parser.add_argument("--x_log", type=inkex.inkbool, dest="x_log", default="false")
+        self.arg_parser.add_argument("--x_subsubdivs", type=int, dest="x_subsubdivs", default=5)
+        self.arg_parser.add_argument("--x_half_freq", type=int, dest="x_half_freq", default=4)
+        self.arg_parser.add_argument("--x_divs_th", type=float, dest="x_divs_th", default=2)
+        self.arg_parser.add_argument("--x_subdivs_th", type=float, dest="x_subdivs_th", default=1)
+        self.arg_parser.add_argument("--x_subsubdivs_th", type=float, dest="x_subsubdivs_th", default=0.3)
+        self.arg_parser.add_argument("--x_div_unit", dest="x_div_unit", default="cm")
+        self.arg_parser.add_argument("--y_divs", type=int, dest="y_divs", default=5)
+        self.arg_parser.add_argument("--dy", type=float, dest="dy", default=100.0)
+        self.arg_parser.add_argument("--dy_unit", dest="dy_unit", default="cm")
+        self.arg_parser.add_argument("--y_subdivs", type=int, dest="y_subdivs", default=1)
+        self.arg_parser.add_argument("--y_log", type=inkex.inkbool, dest="y_log", default="false")
+        self.arg_parser.add_argument("--y_subsubdivs", type=int, dest="y_subsubdivs", default=5)
+        self.arg_parser.add_argument("--y_half_freq", type=int, dest="y_half_freq", default=4)
+        self.arg_parser.add_argument("--y_divs_th", type=float, dest="y_divs_th", default=2)
+        self.arg_parser.add_argument("--y_subdivs_th", type=float, dest="y_subdivs_th", default=1)
+        self.arg_parser.add_argument("--y_subsubdivs_th", type=float, dest="y_subsubdivs_th", default=0.3)
+        self.arg_parser.add_argument("--y_div_unit", dest="y_div_unit", default="cm")
 
     def effect(self):
         self.options.border_th = self.svg.unittouu(str(self.options.border_th) + self.options.border_th_unit)
@@ -85,142 +90,136 @@ class GridCartesian(inkex.Effect):
         self.options.y_subdivs_th = self.svg.unittouu(str(self.options.y_subdivs_th) + self.options.y_div_unit)
         self.options.y_subsubdivs_th = self.svg.unittouu(str(self.options.y_subsubdivs_th) + self.options.y_div_unit)
 
-        #find the pixel dimensions of the overall grid
+        # find the pixel dimensions of the overall grid
         ymax = self.options.dy * self.options.y_divs
         xmax = self.options.dx * self.options.x_divs
 
         # Embed grid in group
-        #Put in in the centre of the current view
+        # Put in in the centre of the current view
         view_center = inkex.computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
-        t = 'translate(' + str( view_center[0]- xmax/2.0) + ',' + \
-                           str( view_center[1]- ymax/2.0) + ')'
-        g_attribs = {inkex.addNS('label','inkscape'):'GridCartesian:X' + \
-                     str( self.options.x_divs )+':Y'+str( self.options.y_divs ),
-                     'transform':t }
-        grid = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
+        t = 'translate(' + str(view_center[0] - xmax / 2.0) + ',' + \
+            str(view_center[1] - ymax / 2.0) + ')'
+        g_attribs = {inkex.addNS('label', 'inkscape'): 'GridCartesian:X' + str(self.options.x_divs) + ':Y' + str(self.options.y_divs),
+                     'transform': t}
+        grid = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
 
-        #Group for major x gridlines
-        g_attribs = {inkex.addNS('label','inkscape'):'MajorXGridlines'}
-        majglx = inkex.etree.SubElement(grid, 'g', g_attribs)
+        # Group for major x gridlines
+        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorXGridlines'}
+        majglx = etree.SubElement(grid, 'g', g_attribs)
 
-        #Group for major y gridlines
-        g_attribs = {inkex.addNS('label','inkscape'):'MajorYGridlines'}
-        majgly = inkex.etree.SubElement(grid, 'g', g_attribs)
+        # Group for major y gridlines
+        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorYGridlines'}
+        majgly = etree.SubElement(grid, 'g', g_attribs)
 
-        #Group for minor x gridlines
-        if self.options.x_subdivs > 1:#if there are any minor x gridlines
-            g_attribs = {inkex.addNS('label','inkscape'):'MinorXGridlines'}
-            minglx = inkex.etree.SubElement(grid, 'g', g_attribs)
+        # Group for minor x gridlines
+        if self.options.x_subdivs > 1:  # if there are any minor x gridlines
+            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorXGridlines'}
+            minglx = etree.SubElement(grid, 'g', g_attribs)
 
-        #Group for subminor x gridlines
-        if self.options.x_subsubdivs > 1:#if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label','inkscape'):'SubMinorXGridlines'}
-            mminglx = inkex.etree.SubElement(grid, 'g', g_attribs)
+        # Group for subminor x gridlines
+        if self.options.x_subsubdivs > 1:  # if there are any minor minor x gridlines
+            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorXGridlines'}
+            mminglx = etree.SubElement(grid, 'g', g_attribs)
 
-        #Group for minor y gridlines
-        if self.options.y_subdivs > 1:#if there are any minor y gridlines
-            g_attribs = {inkex.addNS('label','inkscape'):'MinorYGridlines'}
-            mingly = inkex.etree.SubElement(grid, 'g', g_attribs)
+        # Group for minor y gridlines
+        if self.options.y_subdivs > 1:  # if there are any minor y gridlines
+            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorYGridlines'}
+            mingly = etree.SubElement(grid, 'g', g_attribs)
 
-        #Group for subminor y gridlines
-        if self.options.y_subsubdivs > 1:#if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label','inkscape'):'SubMinorYGridlines'}
-            mmingly = inkex.etree.SubElement(grid, 'g', g_attribs)
-
+        # Group for subminor y gridlines
+        if self.options.y_subsubdivs > 1:  # if there are any minor minor x gridlines
+            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorYGridlines'}
+            mmingly = etree.SubElement(grid, 'g', g_attribs)
 
         draw_SVG_rect(0, 0, xmax, ymax, self.options.border_th,
-                      'none', 'Border', grid) #border rectangle
+                      'none', 'Border', grid)  # border rectangle
 
-        #DO THE X DIVISIONS======================================
-        sd  = self.options.x_subdivs #sub divs per div
-        ssd = self.options.x_subsubdivs #subsubdivs per subdiv
+        # DO THE X DIVISIONS======================================
+        sd = self.options.x_subdivs  # sub divs per div
+        ssd = self.options.x_subsubdivs  # subsubdivs per subdiv
 
-        for i in range(0, self.options.x_divs): #Major x divisions
-            if i>0: #don't draw first line (we made a proper border)
-                draw_SVG_line(self.options.dx*i, 0,
-                              self.options.dx*i,ymax,
+        for i in range(0, self.options.x_divs):  # Major x divisions
+            if i > 0:  # don't draw first line (we made a proper border)
+                draw_SVG_line(self.options.dx * i, 0,
+                              self.options.dx * i, ymax,
                               self.options.x_divs_th,
-                              'MajorXDiv'+str(i), majglx)
+                              'MajorXDiv' + str(i), majglx)
 
-            if self.options.x_log: #log x subdivs
-                for j in range (1, sd):
-                    if j>1: #the first loop is only for subsubdivs
-                        draw_SVG_line(self.options.dx*(i+log(j, sd)), 0,
-                                      self.options.dx*(i+log(j, sd)), ymax,
+            if self.options.x_log:  # log x subdivs
+                for j in range(1, sd):
+                    if j > 1:  # the first loop is only for subsubdivs
+                        draw_SVG_line(self.options.dx * (i + log(j, sd)), 0,
+                                      self.options.dx * (i + log(j, sd)), ymax,
                                       self.options.x_subdivs_th,
-                                      'MinorXDiv'+str(i)+':'+str(j), minglx)
+                                      'MinorXDiv' + str(i) + ':' + str(j), minglx)
 
-                    for k in range (1, ssd): #subsub divs
-                        if (j <= self.options.x_half_freq) or (k%2 == 0):#only draw half the subsubdivs past the half-freq point
-                            if (ssd%2 > 0) and (j > self.options.y_half_freq): #half frequency won't work with odd numbers of subsubdivs,
-                                ssd2 = ssd+1 #make even
+                    for k in range(1, ssd):  # subsub divs
+                        if (j <= self.options.x_half_freq) or (k % 2 == 0):  # only draw half the subsubdivs past the half-freq point
+                            if (ssd % 2 > 0) and (j > self.options.y_half_freq):  # half frequency won't work with odd numbers of subsubdivs,
+                                ssd2 = ssd + 1  # make even
                             else:
-                                ssd2 = ssd #no change
-                            draw_SVG_line(self.options.dx*(i+log(j+k/float(ssd2),sd )), 0,
-                                          self.options.dx*(i+log(j+k/float(ssd2),sd )), ymax,
-                                          self.options.x_subsubdivs_th,'SubminorXDiv'+str(i)+':'+str(j)+':'+str(k), mminglx)
+                                ssd2 = ssd  # no change
+                            draw_SVG_line(self.options.dx * (i + log(j + k / float(ssd2), sd)), 0,
+                                          self.options.dx * (i + log(j + k / float(ssd2), sd)), ymax,
+                                          self.options.x_subsubdivs_th, 'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mminglx)
 
-            else: #linear x subdivs
-                for j in range (0, sd):
-                    if j>0: #not for the first loop (this loop is for the subsubdivs before the first subdiv)
-                        draw_SVG_line(self.options.dx*(i+j/float(sd)), 0,
-                                      self.options.dx*(i+j/float(sd)), ymax,
+            else:  # linear x subdivs
+                for j in range(0, sd):
+                    if j > 0:  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
+                        draw_SVG_line(self.options.dx * (i + j / float(sd)), 0,
+                                      self.options.dx * (i + j / float(sd)), ymax,
                                       self.options.x_subdivs_th,
-                                      'MinorXDiv'+str(i)+':'+str(j), minglx)
+                                      'MinorXDiv' + str(i) + ':' + str(j), minglx)
 
-                    for k in range (1, ssd): #subsub divs
-                        draw_SVG_line(self.options.dx*(i+(j*ssd+k)/((float(sd)*ssd))) , 0,
-                                      self.options.dx*(i+(j*ssd+k)/((float(sd)*ssd))) , ymax,
+                    for k in range(1, ssd):  # subsub divs
+                        draw_SVG_line(self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), 0,
+                                      self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), ymax,
                                       self.options.x_subsubdivs_th,
-                                      'SubminorXDiv'+str(i)+':'+str(j)+':'+str(k), mminglx)
+                                      'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mminglx)
 
-        #DO THE Y DIVISIONS========================================
-        sd  = self.options.y_subdivs    #sub divs per div
-        ssd = self.options.y_subsubdivs #subsubdivs per subdiv
+        # DO THE Y DIVISIONS========================================
+        sd = self.options.y_subdivs  # sub divs per div
+        ssd = self.options.y_subsubdivs  # subsubdivs per subdiv
 
-        for i in range(0, self.options.y_divs): #Major y divisions
-            if i>0:#don't draw first line (we will make a border)
-                draw_SVG_line(0, self.options.dy*i,
-                              xmax, self.options.dy*i,
+        for i in range(0, self.options.y_divs):  # Major y divisions
+            if i > 0:  # don't draw first line (we will make a border)
+                draw_SVG_line(0, self.options.dy * i,
+                              xmax, self.options.dy * i,
                               self.options.y_divs_th,
-                              'MajorYDiv'+str(i), majgly)
+                              'MajorYDiv' + str(i), majgly)
 
-            if self.options.y_log: #log y subdivs
-                for j in range (1, sd):
-                    if j>1: #the first loop is only for subsubdivs
-                        draw_SVG_line(0,    self.options.dy*(i+1-log(j,sd)),
-                                      xmax, self.options.dy*(i+1-log(j,sd)),
+            if self.options.y_log:  # log y subdivs
+                for j in range(1, sd):
+                    if j > 1:  # the first loop is only for subsubdivs
+                        draw_SVG_line(0, self.options.dy * (i + 1 - log(j, sd)),
+                                      xmax, self.options.dy * (i + 1 - log(j, sd)),
                                       self.options.y_subdivs_th,
-                                      'MinorXDiv'+str(i)+':'+str(j), mingly)
+                                      'MinorXDiv' + str(i) + ':' + str(j), mingly)
 
-                    for k in range (1, ssd): #subsub divs
-                        if (j <= self.options.y_half_freq) or (k%2 == 0):#only draw half the subsubdivs past the half-freq point
-                            if (ssd%2 > 0) and (j > self.options.y_half_freq): #half frequency won't work with odd numbers of subsubdivs,
-                                ssd2 = ssd+1
+                    for k in range(1, ssd):  # subsub divs
+                        if (j <= self.options.y_half_freq) or (k % 2 == 0):  # only draw half the subsubdivs past the half-freq point
+                            if (ssd % 2 > 0) and (j > self.options.y_half_freq):  # half frequency won't work with odd numbers of subsubdivs,
+                                ssd2 = ssd + 1
                             else:
-                                ssd2 = ssd #no change
-                            draw_SVG_line(0,    self.options.dx*(i+1-log(j+k/float(ssd2),sd )),
-                                          xmax, self.options.dx*(i+1-log(j+k/float(ssd2),sd )),
+                                ssd2 = ssd  # no change
+                            draw_SVG_line(0, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
+                                          xmax, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
                                           self.options.y_subsubdivs_th,
-                                          'SubminorXDiv'+str(i)+':'+str(j)+':'+str(k), mmingly)
-            else: #linear y subdivs
-                for j in range (0, self.options.y_subdivs):
-                    if j>0:#not for the first loop (this loop is for the subsubdivs before the first subdiv)
-                        draw_SVG_line(0,    self.options.dy*(i+j/float(sd)),
-                                      xmax, self.options.dy*(i+j/float(sd)),
+                                          'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)
+            else:  # linear y subdivs
+                for j in range(0, self.options.y_subdivs):
+                    if j > 0:  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
+                        draw_SVG_line(0, self.options.dy * (i + j / float(sd)),
+                                      xmax, self.options.dy * (i + j / float(sd)),
                                       self.options.y_subdivs_th,
-                                      'MinorXYiv'+str(i)+':'+str(j), mingly)
+                                      'MinorXYiv' + str(i) + ':' + str(j), mingly)
 
-                    for k in range (1, ssd): #subsub divs
-                        draw_SVG_line(0,    self.options.dy*(i+(j*ssd+k)/((float(sd)*ssd))),
-                                      xmax, self.options.dy*(i+(j*ssd+k)/((float(sd)*ssd))),
+                    for k in range(1, ssd):  # subsub divs
+                        draw_SVG_line(0, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
+                                      xmax, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
                                       self.options.y_subsubdivs_th,
-                                      'SubminorXDiv'+str(i)+':'+str(j)+':'+str(k), mmingly)
-
+                                      'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)
 
 
 if __name__ == '__main__':
-    e = GridCartesian()
-    e.run()
-
-
+    GridCartesian().run()

@@ -20,7 +20,6 @@
 Test each available barcode type
 """
 
-import unittest
 from collections import defaultdict
 
 from barcode import get_barcode
@@ -87,7 +86,3 @@ class GetBarcodeTest(TestCase):
             coder = get_barcode(name, text=text)
             code2 = coder.encode(text)
             assert code == code2
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -19,10 +19,10 @@ class C(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
         super(C, self).__init__()
         self.arg_parser.add_argument("-w", "--width",
-                                     action="store", type=int,
+                                      type=int,
                                      dest="desktop_width", default=100, help="Custom width")
         self.arg_parser.add_argument("-z", "--height",
-                                     action="store", type=int,
+                                      type=int,
                                      dest="desktop_height", default=100, help="Custom height")
 
     def effect(self):
@@ -218,5 +218,4 @@ class C(SvgThroughMixin, InkscapeExtension):
 
 
 if __name__ == '__main__':
-    c = C()
-    c.run()
+    C().run()

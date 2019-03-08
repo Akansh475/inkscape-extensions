@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 Tavmjong Bah, tavmjong@free.fr
 # Copyright (C) 2006 Georg Wiora, xorx@quarkbox.de
@@ -24,59 +25,59 @@
 #  * 22-Dec-2006: Wiora : Added axis and isotropic scaling
 #  * 21-Jun-2007: Tavmjong: Added polar coordinates
 #
-from math import *
-from random import *
 from copy import deepcopy
+from math import cos, pi, sin
+
+from lxml import etree
 
 import inkex
 from inkex import inkbool
 
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
-    fx = "sin(x)", fpx = "cos(x)", fponum = True, times2pi = False, polar = False, isoscale = True, drawaxis = True, endpts = False):
-
-    if times2pi == True:
+                 fx="sin(x)", fpx="cos(x)", fponum=True, times2pi=False, polar=False, isoscale=True, drawaxis=True, endpts=False):
+    if times2pi:
         xstart = 2 * pi * xstart
-        xend   = 2 * pi * xend
+        xend = 2 * pi * xend
 
     # coords and scales based on the source rect
     if xstart == xend:
-        inkex.errormsg(_("x-interval cannot be zero. Please modify 'Start X value' or 'End X value'"))
+        inkex.errormsg("x-interval cannot be zero. Please modify 'Start X value' or 'End X value'")
         return []
     scalex = width / (xend - xstart)
     xoff = left
-    coordx = lambda x: (x - xstart) * scalex + xoff  #convert x-value to coordinate
-    if polar :  # Set scale so that left side of rectangle is -1, right side is +1.
-                # (We can't use xscale for both range and scale.)
-        centerx = left + width/2.0
-        polar_scalex = width/2.0
-        coordx = lambda x: x * polar_scalex + centerx  #convert x-value to coordinate
+    coordx = lambda x: (x - xstart) * scalex + xoff  # convert x-value to coordinate
+    if polar:  # Set scale so that left side of rectangle is -1, right side is +1.
+        # (We can't use xscale for both range and scale.)
+        centerx = left + width / 2.0
+        polar_scalex = width / 2.0
+        coordx = lambda x: x * polar_scalex + centerx  # convert x-value to coordinate
 
     if ytop == ybottom:
-        inkex.errormsg(_("y-interval cannot be zero. Please modify 'Y value of rectangle's top' or 'Y value of rectangle's bottom'"))
+        inkex.errormsg("y-interval cannot be zero. Please modify 'Y value of rectangle's top' or 'Y value of rectangle's bottom'")
         return []
     scaley = height / (ytop - ybottom)
     yoff = bottom
-    coordy = lambda y: (ybottom - y) * scaley + yoff  #convert y-value to coordinate
+    coordy = lambda y: (ybottom - y) * scaley + yoff  # convert y-value to coordinate
 
     # Check for isotropic scaling and use smaller of the two scales, correct ranges
     if isoscale and not polar:
-      if scaley<scalex:
-        # compute zero location
-        xzero = coordx(0)
-        # set scale
-        scalex = scaley
-        # correct x-offset
-        xstart = (left-xzero)/scalex
-        xend = (left+width-xzero)/scalex
-      else :
-        # compute zero location
-        yzero = coordy(0)
-        # set scale
-        scaley = scalex
-        # correct x-offset
-        ybottom = (yzero-bottom)/scaley
-        ytop = (bottom+height-yzero)/scaley
+        if scaley < scalex:
+            # compute zero location
+            xzero = coordx(0)
+            # set scale
+            scalex = scaley
+            # correct x-offset
+            xstart = (left - xzero) / scalex
+            xend = (left + width - xzero) / scalex
+        else:
+            # compute zero location
+            yzero = coordy(0)
+            # set scale
+            scaley = scalex
+            # correct x-offset
+            ybottom = (yzero - bottom) / scaley
+            ytop = (bottom + height - yzero) / scaley
 
     # functions specified by the user
     try:
@@ -89,176 +90,177 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
         return []
 
     # step is the distance between nodes on x
-    step = (xend - xstart) / (samples-1)
+    step = (xend - xstart) / (samples - 1)
     third = step / 3.0
-    ds = step * 0.001 # Step used in calculating derivatives
+    ds = step * 0.001  # Step used in calculating derivatives
 
-    a = [] # path array
+    a = []  # path array
     # add axis
-    if drawaxis :
-      # check for visibility of x-axis
-      if ybottom<=0 and ytop>=0:
-        # xaxis
-        a.append(['M ',[left, coordy(0)]])
-        a.append([' l ',[width, 0]])
-      # check for visibility of y-axis
-      if xstart<=0 and xend>=0:
-        # xaxis
-        a.append([' M ',[coordx(0),bottom]])
-        a.append([' l ',[0, -height]])
+    if drawaxis:
+        # check for visibility of x-axis
+        if ybottom <= 0 <= ytop:
+            # xaxis
+            a.append(['M ', [left, coordy(0)]])
+            a.append([' l ', [width, 0]])
+        # check for visibility of y-axis
+        if xstart <= 0 <= xend:
+            # xaxis
+            a.append([' M ', [coordx(0), bottom]])
+            a.append([' l ', [0, -height]])
 
     # initialize function and derivative for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
-    x0 =   xstart
+    x0 = xstart
     y0 = f(xstart)
-    if polar :
-        xp0 = y0 * cos( x0 )
-        yp0 = y0 * sin( x0 )
+    if polar:
+        xp0 = y0 * cos(x0)
+        yp0 = y0 * sin(x0)
         x0 = xp0
         y0 = yp0
-    if fponum or polar: # numerical derivative, using 0.001*step as the small differential
-        x1 = xstart + ds # Second point AFTER first point (Good for first point)
+    if fponum or polar:  # numerical derivative, using 0.001*step as the small differential
+        x1 = xstart + ds  # Second point AFTER first point (Good for first point)
         y1 = f(x1)
-        if polar :
-            xp1 = y1 * cos( x1 )
-            yp1 = y1 * sin( x1 )
+        if polar:
+            xp1 = y1 * cos(x1)
+            yp1 = y1 * sin(x1)
             x1 = xp1
             y1 = yp1
-        dx0 = (x1 - x0)/ds
-        dy0 = (y1 - y0)/ds
-    else: # derivative given by the user
-        dx0 = 1 # Only works for rectangular coordinates
+        dx0 = (x1 - x0) / ds
+        dy0 = (y1 - y0) / ds
+    else:  # derivative given by the user
+        dx0 = 1  # Only works for rectangular coordinates
         dy0 = fp(xstart)
 
     # Start curve
     if endpts:
-        a.append([' M ',[left, coordy(0)]])
-        a.append([' L ',[coordx(x0), coordy(y0)]])
+        a.append([' M ', [left, coordy(0)]])
+        a.append([' L ', [coordx(x0), coordy(y0)]])
     else:
-        a.append([' M ',[coordx(x0), coordy(y0)]]) # initial moveto
+        a.append([' M ', [coordx(x0), coordy(y0)]])  # initial moveto
 
-    for i in range(int(samples-1)):
-        x1 = (i+1) * step + xstart
-        x2 = x1 - ds # Second point BEFORE first point (Good for last point)
+    for i in range(int(samples - 1)):
+        x1 = (i + 1) * step + xstart
+        x2 = x1 - ds  # Second point BEFORE first point (Good for last point)
         y1 = f(x1)
         y2 = f(x2)
-        if polar :
-            xp1 = y1 * cos( x1 )
-            yp1 = y1 * sin( x1 )
-            xp2 = y2 * cos( x2 )
-            yp2 = y2 * sin( x2 )
+        if polar:
+            xp1 = y1 * cos(x1)
+            yp1 = y1 * sin(x1)
+            xp2 = y2 * cos(x2)
+            yp2 = y2 * sin(x2)
             x1 = xp1
             y1 = yp1
             x2 = xp2
             y2 = yp2
-        if fponum or polar: # numerical derivative
-            dx1 = (x1 - x2)/ds
-            dy1 = (y1 - y2)/ds
-        else: # derivative given by the user
-            dx1 = 1 # Only works for rectangular coordinates
+        if fponum or polar:  # numerical derivative
+            dx1 = (x1 - x2) / ds
+            dy1 = (y1 - y2) / ds
+        else:  # derivative given by the user
+            dx1 = 1  # Only works for rectangular coordinates
             dy1 = fp(x1)
         # create curve
         a.append([' C ',
                   [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)),
                    coordx(x1 - (dx1 * third)), coordy(y1 - (dy1 * third)),
-                   coordx(x1),                 coordy(y1)]
+                   coordx(x1), coordy(y1)]
                   ])
-        x0  = x1  # Next segment's start is this segments end
-        y0  = y1
-        dx0 = dx1 # Assume the function is smooth everywhere, so carry over the derivative too
+        x0 = x1  # Next segment's start is this segments end
+        y0 = y1
+        dx0 = dx1  # Assume the function is smooth everywhere, so carry over the derivative too
         dy0 = dy1
     if endpts:
-        a.append([' L ',[left + width, coordy(0)]])
+        a.append([' L ', [left + width, coordy(0)]])
     return a
+
 
 class FuncPlot(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--xstart",
-                        action="store", type=float,
-                        dest="xstart", default=0.0,
-                        help="Start x-value")
+                                     type=float,
+                                     dest="xstart", default=0.0,
+                                     help="Start x-value")
         self.arg_parser.add_argument("--xend",
-                        action="store", type=float,
-                        dest="xend", default=1.0,
-                        help="End x-value")
+                                     type=float,
+                                     dest="xend", default=1.0,
+                                     help="End x-value")
         self.arg_parser.add_argument("--times2pi",
-                        action="store", type=inkbool,
-                        dest="times2pi", default=True,
-                        help="Multiply x-range by 2*pi")
+                                     type=inkbool,
+                                     dest="times2pi", default=True,
+                                     help="Multiply x-range by 2*pi")
         self.arg_parser.add_argument("--polar",
-                        action="store", type=inkbool,
-                        dest="polar", default=False,
-                        help="Plot using polar coordinates")
+                                     type=inkbool,
+                                     dest="polar", default=False,
+                                     help="Plot using polar coordinates")
         self.arg_parser.add_argument("--ybottom",
-                        action="store", type=float,
-                        dest="ybottom", default=-1.0,
-                        help="y-value of rectangle's bottom")
+                                     type=float,
+                                     dest="ybottom", default=-1.0,
+                                     help="y-value of rectangle's bottom")
         self.arg_parser.add_argument("--ytop",
-                        action="store", type=float,
-                        dest="ytop", default=1.0,
-                        help="y-value of rectangle's top")
+                                     type=float,
+                                     dest="ytop", default=1.0,
+                                     help="y-value of rectangle's top")
         self.arg_parser.add_argument("-s", "--samples",
-                        action="store", type=int,
-                        dest="samples", default=8,
-                        help="Samples")
+                                     type=int,
+                                     dest="samples", default=8,
+                                     help="Samples")
         self.arg_parser.add_argument("--fofx",
-                        action="store", type=str,
-                        dest="fofx", default="sin(x)",
-                        help="f(x) for plotting")
+                                     type=str,
+                                     dest="fofx", default="sin(x)",
+                                     help="f(x) for plotting")
         self.arg_parser.add_argument("--fponum",
-                        action="store", type=inkbool,
-                        dest="fponum", default=True,
-                        help="Calculate the first derivative numerically")
+                                     type=inkbool,
+                                     dest="fponum", default=True,
+                                     help="Calculate the first derivative numerically")
         self.arg_parser.add_argument("--fpofx",
-                        action="store", type=str,
-                        dest="fpofx", default="cos(x)",
-                        help="f'(x) for plotting")
+                                     type=str,
+                                     dest="fpofx", default="cos(x)",
+                                     help="f'(x) for plotting")
         self.arg_parser.add_argument("--clip",
-                        action="store", type=inkbool,
-                        dest="clip", default=False,
-                        help="If True, clip with copy of source rectangle")
+                                     type=inkbool,
+                                     dest="clip", default=False,
+                                     help="If True, clip with copy of source rectangle")
         self.arg_parser.add_argument("--remove",
-                        action="store", type=inkbool,
-                        dest="remove", default=True,
-                        help="If True, source rectangle is removed")
+                                     type=inkbool,
+                                     dest="remove", default=True,
+                                     help="If True, source rectangle is removed")
         self.arg_parser.add_argument("--isoscale",
-                        action="store", type=inkbool,
-                        dest="isoscale", default=True,
-                        help="If True, isotropic scaling is used")
+                                     type=inkbool,
+                                     dest="isoscale", default=True,
+                                     help="If True, isotropic scaling is used")
         self.arg_parser.add_argument("--drawaxis",
-                        action="store", type=inkbool,
-                        dest="drawaxis", default=True,
-                        help="If True, axis are drawn")
+                                     type=inkbool,
+                                     dest="drawaxis", default=True,
+                                     help="If True, axis are drawn")
         self.arg_parser.add_argument("--endpts",
-                        action="store", type=inkbool,
-                        dest="endpts", default=False,
-                        help="If True, end points are added")
+                                     type=inkbool,
+                                     dest="endpts", default=False,
+                                     help="If True, end points are added")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
-                        dest="tab", default="sampling",
-                        help="The selected UI-tab when OK was pressed")
+                                     type=str,
+                                     dest="tab", default="sampling",
+                                     help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--funcplotuse",
-                        action="store", type=str,
-                        dest="funcplotuse", default="",
-                        help="dummy")
+                                     type=str,
+                                     dest="funcplotuse", default="",
+                                     help="dummy")
         self.arg_parser.add_argument("--pythonfunctions",
-                        action="store", type=str,
-                        dest="pythonfunctions", default="",
-                        help="dummy")
+                                     type=str,
+                                     dest="pythonfunctions", default="",
+                                     help="dummy")
 
     def effect(self):
         newpath = None
         for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('rect','svg'):
+            if node.tag == inkex.addNS('rect', 'svg'):
                 # create new path with basic dimensions of selected rectangle
-                newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+                newpath = etree.Element(inkex.addNS('path', 'svg'))
                 x = float(node.get('x'))
                 y = float(node.get('y'))
                 w = float(node.get('width'))
                 h = float(node.get('height'))
 
-                #copy attributes of rect
+                # copy attributes of rect
                 s = node.get('style')
                 if s:
                     newpath.set('style', s)
@@ -269,23 +271,23 @@ class FuncPlot(inkex.Effect):
 
                 # top and bottom were exchanged
                 newpath.set('d', inkex.formatPath(
-                            drawfunction(self.options.xstart,
-                                self.options.xend,
-                                self.options.ybottom,
-                                self.options.ytop,
-                                self.options.samples,
-                                w,h,x,y+h,
-                                self.options.fofx,
-                                self.options.fpofx,
-                                self.options.fponum,
-                                self.options.times2pi,
-                                self.options.polar,
-                                self.options.isoscale,
-                                self.options.drawaxis,
-                                self.options.endpts)))
+                        drawfunction(self.options.xstart,
+                                     self.options.xend,
+                                     self.options.ybottom,
+                                     self.options.ytop,
+                                     self.options.samples,
+                                     w, h, x, y + h,
+                                     self.options.fofx,
+                                     self.options.fpofx,
+                                     self.options.fponum,
+                                     self.options.times2pi,
+                                     self.options.polar,
+                                     self.options.isoscale,
+                                     self.options.drawaxis,
+                                     self.options.endpts)))
                 newpath.set('title', self.options.fofx)
 
-                #newpath.setAttribute('desc', '!func;' + self.options.fofx + ';'
+                # newpath.setAttribute('desc', '!func;' + self.options.fofx + ';'
                 #                                      + self.options.fpofx + ';'
                 #                                      + `self.options.fponum` + ';'
                 #                                      + `self.options.xstart` + ';'
@@ -297,21 +299,19 @@ class FuncPlot(inkex.Effect):
                 # option whether to clip the path with rect or not.
                 if self.options.clip:
                     defs = self.xpathSingle('/svg:svg//svg:defs')
-                    if defs == None:
-                        defs = inkex.etree.SubElement(self.document.getroot(),inkex.addNS('defs','svg'))
-                    clip = inkex.etree.SubElement(defs,inkex.addNS('clipPath','svg'))
+                    if defs is None:
+                        defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
+                    clip = etree.SubElement(defs, inkex.addNS('clipPath', 'svg'))
                     clip.append(deepcopy(node))
                     clipId = self.svg.get_unique_id('clipPath')
                     clip.set('id', clipId)
-                    newpath.set('clip-path', 'url(#'+clipId+')')
+                    newpath.set('clip-path', 'url(#' + clipId + ')')
                 # option whether to remove the rectangle or not.
                 if self.options.remove:
                     node.getparent().remove(node)
         if newpath is None:
-            inkex.errormsg(_("Please select a rectangle"))
+            inkex.errormsg("Please select a rectangle")
+
 
 if __name__ == '__main__':
-    e = FuncPlot()
-    e.affect()
-
-
+    FuncPlot().run()

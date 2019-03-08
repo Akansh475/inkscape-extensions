@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
 #
@@ -27,39 +28,39 @@ class InterpAttG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-a", "--att",
-                        action="store", type=str,
+                         type=str,
                         dest="att", default="fill",
                         help="Attribute to be interpolated.")
         self.arg_parser.add_argument("-o", "--att-other",
-                        action="store", type=str,
+                         type=str,
                         dest="att_other",
                         help="Other attribute (for a limited UI).")
         self.arg_parser.add_argument("-t", "--att-other-type",
-                        action="store", type=str,
+                         type=str,
                         dest="att_other_type",
                         help="The other attribute type.")
         self.arg_parser.add_argument("-w", "--att-other-where",
-                        action="store", type=str,
+                         type=str,
                         dest="att_other_where",
                         help="That is a tag attribute or a style attribute?")
         self.arg_parser.add_argument("-s", "--start-val",
-                        action="store", type=str,
+                         type=str,
                         dest="start_val", default="#F00",
                         help="Initial interpolation value.")
         self.arg_parser.add_argument("-e", "--end-val",
-                        action="store", type=str,
+                         type=str,
                         dest="end_val", default="#00F",
                         help="End interpolation value.")
         self.arg_parser.add_argument("-u", "--unit",
-                        action="store", type=str,
+                         type=str,
                         dest="unit", default="color",
                         help="Values unit.")
         self.arg_parser.add_argument("--zsort",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="zsort", default=True,
                         help="use z-order instead of selection order")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
@@ -226,8 +227,5 @@ class InterpAttG(inkex.Effect):
         return True
 
 if __name__ == '__main__':
-    e = InterpAttG()
-    if e.affect():
-        exit(0)
-    else:
-        exit(1)
+    InterpAttG().run()
+

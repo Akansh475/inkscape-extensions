@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2009 Karlisson Bezerra, contato@nerdson.com
 #
@@ -25,15 +26,15 @@ class Split(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--splittype",
-                        action="store", type=str,
+                         type=str,
                         dest="split_type", default="word",
                         help="type of split")
         self.arg_parser.add_argument("-p", "--preserve",
-                        action="store", type=inkbool,
+                         type=inkbool,
                         dest="preserve", default="True",
                         help="Preserve original")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
@@ -216,6 +217,6 @@ class Split(inkex.Effect):
                     parent = node.getparent()
                     parent.remove(node)
 
+
 if __name__ == '__main__':
-    b = Split()
-    b.affect()
+    Split().run()

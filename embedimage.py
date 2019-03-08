@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
 #
@@ -38,7 +39,7 @@ class Embedder(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--selectedonly",
-            action="store", type=inkbool,
+             type=inkbool,
             dest="selectedonly", default=False,
             help="embed only selected images")
 
@@ -121,7 +122,6 @@ class Embedder(inkex.Effect):
                     inkex.errormsg(_("%s is not of type image/png, image/jpeg, image/bmp, image/gif, image/tiff, or image/x-icon") % path)
 
 if __name__ == '__main__':
-    e = Embedder()
-    e.affect()
+    Embedder().run()
 
 

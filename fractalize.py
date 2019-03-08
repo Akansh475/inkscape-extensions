@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Carsten Goetze c.goetze@tu-bs.de
 #
@@ -49,11 +50,11 @@ class PathFractalize(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--subdivs",
-                        action="store", type=int,
+                         type=int,
                         dest="subdivs", default="6",
                         help="Number of subdivisons")
         self.arg_parser.add_argument("-f", "--smooth",
-                        action="store", type=float,
+                         type=float,
                         dest="smooth", default="4.0",
                         help="Smoothness of the subdivision")
     def effect(self):
@@ -92,7 +93,6 @@ class PathFractalize(inkex.Effect):
             self.fractalize(a,subdivPoint[-2],subdivPoint[-1],x2,y2,s-1,f)
 
 if __name__ == '__main__':
-    e = PathFractalize()
-    e.affect()
+    PathFractalize().run()
 
 

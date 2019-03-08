@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
 # Copyright (C) 2010 Alvin Penner, penner@vaxxine.com

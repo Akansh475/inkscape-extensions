@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2007 Martin Owens
 #
@@ -28,7 +29,8 @@ map = {}
 i = 0
 for char in encode:
     map[char] = i
-    i = i + 1
+    i += 1
+
 
 # Extended encoding maps for full ASCII Code93
 def getMap(array):
@@ -36,15 +38,17 @@ def getMap(array):
     y = 0
     for x in array:
         result[chr(x)] = encode[y]
-        y = y + 1
+        y += 1
 
-    return result;
+    return result
+
 
 # MapA is eclectic, but B, C, D are all ASCII ranges
-mapA = getMap([27,28,29,30,31,59,60,61,62,63,91,92,93,94,95,123,124,125,126,127,0,64,96,127,127,127]) # %
-mapB = getMap(range(1, 26)) # $
-mapC = getMap(range(33, 58)) # /
-mapD = getMap(range(97, 122)) # +
+mapA = getMap([27, 28, 29, 30, 31, 59, 60, 61, 62, 63, 91, 92, 93, 94, 95, 123, 124, 125, 126, 127, 0, 64, 96, 127, 127, 127])  # %
+mapB = getMap(range(1, 26))  # $
+mapC = getMap(range(33, 58))  # /
+mapD = getMap(range(97, 122))  # +
+
 
 class Code39Ext(Code39):
     def encode(self, text):
@@ -61,5 +65,4 @@ class Code39Ext(Code39):
                 char = '+' + mapD[char]
             result = result + char
 
-        return Code39.encode(self, result);
-
+        return Code39.encode(self, result)

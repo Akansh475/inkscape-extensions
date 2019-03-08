@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2010 Martin Owens
 #
@@ -21,12 +22,14 @@ Base module for rendering barcodes for Inkscape.
 
 import itertools
 import sys
+
 from lxml import etree
 
 (TEXT_POS_BOTTOM, TEXT_POS_TOP) = range(2)
 (WHITE_BAR, BLACK_BAR, TALL_BAR) = range(3)
 TEXT_TEMPLATE = 'font-size:%dpx;text-align:center;text-anchor:middle;'
 SVG_URI = u'http://www.w3.org/2000/svg'
+
 
 # pylint: disable=abstract-class-not-used
 class Barcode(object):
@@ -38,7 +41,7 @@ class Barcode(object):
     def error(self, text, msg):
         """Cause an error to be reported"""
         sys.stderr.write(
-            "Error encoding '%s' as %s barcode: %s\n" % (text, self.name, msg))
+                "Error encoding '{}' as {} barcode: {}\n".format(text, self.name, msg))
         return "ERROR"
 
     def encode(self, text):
@@ -72,17 +75,17 @@ class Barcode(object):
         index = 0
         while name in self.known_ids:
             index += 1
-            name = 'barcode%d' % index
+            name = 'barcode{:d}'.format(index)
         self.known_ids.append(name)
         return name
 
     def add_extra_barcode(self, barcode, **kw):
         """Add an extra barcode along side this one, used for ean13 extras"""
-        from . import getBarcode
+        from . import get_barcode
         kw['height'] = self.height
         kw['document'] = self.document
         kw['scale'] = None
-        self._extra.append(getBarcode(barcode, **kw).generate())
+        self._extra.append(get_barcode(barcode, **kw).generate())
 
     def generate(self):
         """Generate the actual svg from the coding"""
@@ -94,15 +97,13 @@ class Barcode(object):
         name = self.get_id('barcode')
 
         # use an svg group element to contain the barcode
-        barcode = etree.Element('{%s}g' % SVG_URI)
+        barcode = etree.Element(u'{{{}}}g'.format(SVG_URI))
         barcode.set('id', name)
         barcode.set('style', 'fill: black;')
         if self.scale:
-            barcode.set('transform', 'translate(%d,%d) scale(%f)' % (
-                self.pos_x, self.pos_y, self.scale))
+            barcode.set('transform', 'translate({:d},{:d}) scale({:f})'.format(self.pos_x, self.pos_y, self.scale))
         else:
-            barcode.set('transform', 'translate(%d,%d)' % (
-                self.pos_x, self.pos_y))
+            barcode.set('transform', 'translate({:d},{:d})'.format(self.pos_x, self.pos_y))
 
         bar_id = 1
         bar_offset = 0
@@ -117,12 +118,12 @@ class Barcode(object):
 
             if style['write']:
                 tops.add(style['top'])
-                rect = etree.SubElement(barcode, '{%s}rect' % SVG_URI)
+                rect = etree.SubElement(barcode, u'{{{}}}rect'.format(SVG_URI))
                 rect.set('x', str(bar_offset))
                 rect.set('y', str(style['top']))
                 if self.pos_text == TEXT_POS_TOP:
                     rect.set('y', str(style['top'] + self.font_size))
-                rect.set('id', "%s_bar%d" % (name, bar_id))
+                rect.set('id', "{}_bar{:d}".format(name, bar_id))
                 rect.set('width', str(width))
                 rect.set('height', str(style['height']))
             bar_offset += width
@@ -134,14 +135,14 @@ class Barcode(object):
 
         bar_width = bar_offset
         # Add text at the bottom of the barcode
-        text = etree.SubElement(barcode, '{%s}text' % SVG_URI)
+        text = etree.SubElement(barcode, u'{{{}}}text'.format(SVG_URI))
         text.set('x', str(int(bar_width / 2)))
         text.set('y', str(min(tops) + self.font_size - 1))
         if self.pos_text == TEXT_POS_BOTTOM:
             text.set('y', str(self.height + max(tops) + self.font_size))
         text.set('style', TEXT_TEMPLATE % self.font_size)
         text.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
-        text.set('id', '%s_text' % name)
+        text.set('id', '{}_text'.format(name))
         text.text = str(self.text)
         return barcode
 
@@ -151,7 +152,7 @@ class Barcode(object):
 
     def get_style(self, index):
         """Returns the styles that should be applied to each bar"""
-        result = {'width' : 1, 'top' : 0, 'write' : True}
+        result = {'width': 1, 'top': 0, 'write': True}
         if index == BLACK_BAR:
             result['height'] = int(self.height)
         if index == TALL_BAR:
@@ -159,4 +160,3 @@ class Barcode(object):
         if index == WHITE_BAR:
             result['write'] = False
         return result
-

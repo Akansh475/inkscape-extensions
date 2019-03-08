@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2009 Alvin Penner, penner@vaxxine.com
@@ -87,6 +88,7 @@ class Dashit(inkex.Effect):
                         del node.attrib[inkex.addNS('type', 'sodipodi')]
             else:
                 self.not_converted.append(node.get('id'))
+
 
 if __name__ == '__main__':
     Dashit().run()

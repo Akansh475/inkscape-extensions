@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -25,11 +26,11 @@ class SegmentStraightener(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-p", "--percent",
-                        action="store", type=float,
+                         type=float,
                         dest="percent", default=10.0,
                         help="move curve handles PERCENT percent closer to a straight line")
         self.arg_parser.add_argument("-b", "--behavior",
-                        action="store", type=int,
+                         type=int,
                         dest="behave", default=1,
                         help="straightening behavior for cubic segments")
 
@@ -64,5 +65,5 @@ class SegmentStraightener(inkex.Effect):
                 node.set('d', str(inkex.Path(p)))
 
 if __name__ == '__main__':
-    SegmentStraightener().affect()
+    SegmentStraightener().run()
 

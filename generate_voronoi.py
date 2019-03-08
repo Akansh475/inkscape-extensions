@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2010 Alvin Penner, penner@vaxxine.com
 #
@@ -182,6 +183,5 @@ class Pattern(inkex.Effect):
                 node.attrib['style'] = str(inkex.Style(style))
 
 if __name__ == '__main__':
-    e = Pattern()
-    e.affect()
+    Pattern().run()
 

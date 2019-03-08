@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2010 Martin Owens
 #
@@ -25,6 +26,7 @@ from .BaseEan import EanBarcode
 # But flipped around and with the first 111000 instead of 000000.
 FAMS = ['111000', '110100', '110010', '110001', '101100',
         '100110', '100011', '101010', '101001', '100101']
+
 
 class Upce(EanBarcode):
     """Generate EAN6/UPC-E barcode generator"""
@@ -96,4 +98,3 @@ class Upce(EanBarcode):
             return '0' + number[:4] + '00000' + number[4]
         else:
             return '0' + number[:5] + '0000' + number[5]
-

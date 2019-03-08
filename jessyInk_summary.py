@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 # Copyright 2008, 2009 Hannes Hochreiner
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -43,7 +44,7 @@ class JessyInk_Summary(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -181,9 +182,8 @@ class JessyInk_Summary(inkex.Effect):
 
             orderNumber += 1
 
+
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Summary()
-    effect.affect()
+    JessyInk_Summary().run()
 

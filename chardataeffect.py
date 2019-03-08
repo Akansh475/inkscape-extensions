@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2006 Jos Hirth, kaioa.com
 # Copyright (C) 2007 bulia byak

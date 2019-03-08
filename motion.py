@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -24,11 +25,11 @@ class Motion(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-a", "--angle",
-                        action="store", type=float,
+                         type=float,
                         dest="angle", default=45.0,
                         help="direction of the motion vector")
         self.arg_parser.add_argument("-m", "--magnitude",
-                        action="store", type=float,
+                         type=float,
                         dest="magnitude", default=100.0,
                         help="magnitude of the motion vector")
 
@@ -109,7 +110,6 @@ class Motion(inkex.Effect):
                         last = params[-2:]
 
 if __name__ == '__main__':
-    e = Motion()
-    e.affect()
+    Motion().run()
 
 

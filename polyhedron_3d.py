@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
@@ -51,17 +52,20 @@ Many settings for appearance, lighting, rotation, etc are available.
 
 import re
 import sys
+from math import acos, cos, floor, pi, sin, sqrt
+
 import inkex
 from inkex import inkbool
 
+from lxml import etree
 
-from math import floor, pi, acos, sqrt, cos, sin
 try:
     import numpy
 except:
     numpy = None
 
-#FILE IO ROUTINES
+
+# FILE IO ROUTINES
 def get_filename(self_options):
     if self_options.obj == 'from_file':
         file = self_options.spec_file
@@ -69,6 +73,7 @@ def get_filename(self_options):
         file = self_options.obj + '.obj'
 
     return file
+
 
 def objfile(name):
     import os.path
@@ -80,156 +85,170 @@ def objfile(name):
     path = os.path.join(path, 'Poly3DObjects', name)
     return path
 
+
 def get_obj_data(obj, name):
     infile = open(objfile(name))
 
-    #regular expressions
+    # regular expressions
     getname = '(.[nN]ame:\\s*)(.*)'
-    floating = '([\-\+\\d*\.e]*)'   #a possibly non-integer number, with +/- and exponent.
-    getvertex = '(v\\s+)'+floating+'\\s+'+floating+'\\s+'+floating
+    floating = '([\-\+\\d*\.e]*)'  # a possibly non-integer number, with +/- and exponent.
+    getvertex = '(v\\s+)' + floating + '\\s+' + floating + '\\s+' + floating
     getedgeline = '(l\\s+)(.*)'
     getfaceline = '(f\\s+)(.*)'
-    getnextint = '(\\d+)([/\\d]*)(.*)'#we need to deal with 123\343\123 or 123\\456 as equivalent to 123 (we are ignoring the other options in the obj file)
+    getnextint = '(\\d+)([/\\d]*)(.*)'  # we need to deal with 123\343\123 or 123\\456 as equivalent to 123 (we are ignoring the other options in the obj file)
 
     for line in infile:
-        if line[0]=='#':                    #we have a comment line
-            m = re.search(getname, line)        #check to see if this line contains a name
+        if line[0] == '#':  # we have a comment line
+            m = re.search(getname, line)  # check to see if this line contains a name
             if m:
-                obj.name = m.group(2)           #if it does, set the property
-        elif line[0] == 'v':                #we have a vertex (maybe)
-            m = re.search(getvertex, line)      #check to see if this line contains a valid vertex
-            if m:                               #we have a valid vertex
-                obj.vtx.append( [float(m.group(2)), float(m.group(3)), float(m.group(4)) ] )
-        elif line[0] == 'l':                #we have a line (maybe)
-            m = re.search(getedgeline, line)    #check to see if this line begins 'l '
-            if m:                               #we have a line beginning 'l '
-                vtxlist = []    #buffer
+                obj.name = m.group(2)  # if it does, set the property
+        elif line[0] == 'v':  # we have a vertex (maybe)
+            m = re.search(getvertex, line)  # check to see if this line contains a valid vertex
+            if m:  # we have a valid vertex
+                obj.vtx.append([float(m.group(2)), float(m.group(3)), float(m.group(4))])
+        elif line[0] == 'l':  # we have a line (maybe)
+            m = re.search(getedgeline, line)  # check to see if this line begins 'l '
+            if m:  # we have a line beginning 'l '
+                vtxlist = []  # buffer
                 while line:
                     m2 = re.search(getnextint, line)
                     if m2:
-                        vtxlist.append( int(m2.group(1)) )
-                        line = m2.group(3)#remainder
+                        vtxlist.append(int(m2.group(1)))
+                        line = m2.group(3)  # remainder
                     else:
                         line = None
-                if len(vtxlist) > 1:#we need at least 2 vertices to make an edge
-                    for i in range (len(vtxlist)-1):#we can have more than one vertex per line - get adjacent pairs
-                        obj.edg.append( ( vtxlist[i], vtxlist[i+1] ) )#get the vertex pair between that vertex and the next
-        elif line[0] == 'f':                #we have a face (maybe)
+                if len(vtxlist) > 1:  # we need at least 2 vertices to make an edge
+                    for i in range(len(vtxlist) - 1):  # we can have more than one vertex per line - get adjacent pairs
+                        obj.edg.append((vtxlist[i], vtxlist[i + 1]))  # get the vertex pair between that vertex and the next
+        elif line[0] == 'f':  # we have a face (maybe)
             m = re.search(getfaceline, line)
-            if m:                               #we have a line beginning 'f '
-                vtxlist = []#buffer
+            if m:  # we have a line beginning 'f '
+                vtxlist = []  # buffer
                 while line:
                     m2 = re.search(getnextint, line)
                     if m2:
-                        vtxlist.append( int(m2.group(1)) )
-                        line = m2.group(3)#remainder
+                        vtxlist.append(int(m2.group(1)))
+                        line = m2.group(3)  # remainder
                     else:
                         line = None
-                if len(vtxlist) > 2:            #we need at least 3 vertices to make an edge
+                if len(vtxlist) > 2:  # we need at least 3 vertices to make an edge
                     obj.fce.append(vtxlist)
 
-    if obj.name == '':#no name was found, use filename, without extension (.obj)
+    if obj.name == '':  # no name was found, use filename, without extension (.obj)
         obj.name = name[0:-4]
 
-#RENDERING AND SVG OUTPUT FUNCTIONS
+
+# RENDERING AND SVG OUTPUT FUNCTIONS
 
 def draw_SVG_dot(point, st, name, parent):
     (cx, cy) = point
-    style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'fill': st.fill, 'stroke-opacity':st.s_opac, 'fill-opacity':st.f_opac}
-    circ_attribs = {'style':str(inkex.Style(style)),
-                    inkex.addNS('label','inkscape'):name,
-                    'r':str(st.r),
-                    'cx':str(cx), 'cy':str(-cy)}
-    inkex.etree.SubElement(parent, inkex.addNS('circle','svg'), circ_attribs )
+    style = {'stroke': '#000000', 'stroke-width': str(st.th), 'fill': st.fill, 'stroke-opacity': st.s_opac, 'fill-opacity': st.f_opac}
+    circ_attribs = {'style': str(inkex.Style(style)),
+                    inkex.addNS('label', 'inkscape'): name,
+                    'r': str(st.r),
+                    'cx': str(cx), 'cy': str(-cy)}
+    etree.SubElement(parent, inkex.addNS('circle', 'svg'), circ_attribs)
+
 
 def draw_SVG_line(point1, point2, st, name, parent):
     (x1, y1) = point1
     (x2, y2) = point2
-    style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'stroke-linecap':st.linecap}
-    line_attribs = {'style':str(inkex.Style(style)),
-                    inkex.addNS('label','inkscape'):name,
-                    'd':'M '+str(x1)+','+str(-y1)+' L '+str(x2)+','+str(-y2)}
-    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
+    style = {'stroke': '#000000', 'stroke-width': str(st.th), 'stroke-linecap': st.linecap}
+    line_attribs = {'style': str(inkex.Style(style)),
+                    inkex.addNS('label', 'inkscape'): name,
+                    'd': 'M ' + str(x1) + ',' + str(-y1) + ' L ' + str(x2) + ',' + str(-y2)}
+    etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
+
 
 def draw_SVG_poly(pts, face, st, name, parent):
-    style = { 'stroke': '#000000', 'stroke-width':str(st.th), 'stroke-linejoin':st.linejoin, \
-              'stroke-opacity':st.s_opac, 'fill': st.fill, 'fill-opacity':st.f_opac}
+    style = {'stroke': '#000000', 'stroke-width': str(st.th), 'stroke-linejoin': st.linejoin,
+             'stroke-opacity': st.s_opac, 'fill': st.fill, 'fill-opacity': st.f_opac}
     for i in range(len(face)):
-        if i == 0:#for first point
-            d = 'M'#move to
+        if i == 0:  # for first point
+            d = 'M'  # move to
         else:
-            d = d + 'L'#line to
-        d = d+ str(pts[face[i]-1][0]) + ',' + str(-pts[face[i]-1][1])#add point
-    d = d + 'z' #close the polygon
+            d += 'L'  # line to
+        d = d + str(pts[face[i] - 1][0]) + ',' + str(-pts[face[i] - 1][1])  # add point
+    d += 'z'  # close the polygon
 
-    line_attribs = {'style':str(inkex.Style(style)),
-                    inkex.addNS('label','inkscape'):name,'d': d}
-    inkex.etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
+    line_attribs = {'style': str(inkex.Style(style)),
+                    inkex.addNS('label', 'inkscape'): name, 'd': d}
+    etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
 
-def draw_edges( edge_list, pts, st, parent ):
-    for edge in edge_list:#for every edge
-        pt_1 = pts[ edge[0]-1 ][0:2] #the point at the start
-        pt_2 = pts[ edge[1]-1 ][0:2] #the point at the end
-        name = 'Edge'+str(edge[0])+'-'+str(edge[1])
-        draw_SVG_line(pt_1,pt_2,st, name, parent)#plot edges
 
-def draw_faces( faces_data, pts, obj, shading, fill_col,st, parent):
-    for face in faces_data:#for every polygon that has been sorted
+def draw_edges(edge_list, pts, st, parent):
+    for edge in edge_list:  # for every edge
+        pt_1 = pts[edge[0] - 1][0:2]  # the point at the start
+        pt_2 = pts[edge[1] - 1][0:2]  # the point at the end
+        name = 'Edge' + str(edge[0]) + '-' + str(edge[1])
+        draw_SVG_line(pt_1, pt_2, st, name, parent)  # plot edges
+
+
+def draw_faces(faces_data, pts, obj, shading, fill_col, st, parent):
+    for face in faces_data:  # for every polygon that has been sorted
         if shading:
-            st.fill = get_darkened_colour(fill_col, face[1]/pi)#darken proportionally to angle to lighting vector
+            st.fill = get_darkened_colour(fill_col, face[1] / pi)  # darken proportionally to angle to lighting vector
         else:
-            st.fill = get_darkened_colour(fill_col, 1)#do not darken colour
+            st.fill = get_darkened_colour(fill_col, 1)  # do not darken colour
 
-        face_no = face[3]#the number of the face to draw
-        draw_SVG_poly(pts, obj.fce[ face_no ], st, 'Face:'+str(face_no), parent)
+        face_no = face[3]  # the number of the face to draw
+        draw_SVG_poly(pts, obj.fce[face_no], st, 'Face:' + str(face_no), parent)
+
 
 def get_darkened_colour(rgb, factor):
-#return a hex triplet of colour, reduced in lightness proportionally to a value between 0 and 1
-    return  '#' + "%02X" % floor( factor*rgb[0] ) \
-                + "%02X" % floor( factor*rgb[1] ) \
-                + "%02X" % floor( factor*rgb[2] ) #make the colour string
+    # return a hex triplet of colour, reduced in lightness proportionally to a value between 0 and 1
+    return '#' + "%02X" % floor(factor * rgb[0]) \
+           + "%02X" % floor(factor * rgb[1]) \
+           + "%02X" % floor(factor * rgb[2])  # make the colour string
+
 
 def make_rotation_log(options):
-#makes a string recording the axes and angles of each rotation, so an object can be repeated
-    return   options.r1_ax+str('%.2f'%options.r1_ang)+':'+\
-             options.r2_ax+str('%.2f'%options.r2_ang)+':'+\
-             options.r3_ax+str('%.2f'%options.r3_ang)+':'+\
-             options.r1_ax+str('%.2f'%options.r4_ang)+':'+\
-             options.r2_ax+str('%.2f'%options.r5_ang)+':'+\
-             options.r3_ax+str('%.2f'%options.r6_ang)
+    # makes a string recording the axes and angles of each rotation, so an object can be repeated
+    return options.r1_ax + str('%.2f' % options.r1_ang) + ':' + \
+           options.r2_ax + str('%.2f' % options.r2_ang) + ':' + \
+           options.r3_ax + str('%.2f' % options.r3_ang) + ':' + \
+           options.r1_ax + str('%.2f' % options.r4_ang) + ':' + \
+           options.r2_ax + str('%.2f' % options.r5_ang) + ':' + \
+           options.r3_ax + str('%.2f' % options.r6_ang)
+
 
 def get_angle(vector1, vector2):
     """returns the angle between two vectors"""
     return acos(numpy.dot(vector1, vector2))
 
+
 def length(vector):
     """return the pythagorean length of a vector"""
     return sqrt(numpy.dot(vector, vector))
+
 
 def normalise(vector):
     """return the unit vector pointing in the same direction as the argument"""
     return numpy.array(vector) / length(vector)
 
+
 def get_normal(pts, face):
     """normal vector for the plane passing though the first three elements of face of pts"""
-    #n = pt[0]->pt[1] x pt[0]->pt[3]
+    # n = pt[0]->pt[1] x pt[0]->pt[3]
     return numpy.cross(
-        (numpy.array(pts[face[0]-1]) - numpy.array(pts[face[1] - 1])),
-        (numpy.array(pts[face[0]-1]) - numpy.array(pts[face[2] - 1])),
+            (numpy.array(pts[face[0] - 1]) - numpy.array(pts[face[1] - 1])),
+            (numpy.array(pts[face[0] - 1]) - numpy.array(pts[face[2] - 1])),
     ).flatten()
+
 
 def get_unit_normal(pts, face, cw_wound):
     """returns the unit normal for the plane passing through the first three points of face, taking account of winding"""
     if cw_wound:
-        winding = -1 #if it is clockwise wound, reverse the vector direction
+        winding = -1  # if it is clockwise wound, reverse the vector direction
     else:
-        winding = 1 #else leave alone
+        winding = 1  # else leave alone
 
     return winding * normalise(get_normal(pts, face))
 
+
 def rotate(matrix, angle, axis):
     """choose the correct rotation matrix to use"""
-    if   axis == 'x':
+    if axis == 'x':
         matrix = rot_x(matrix, angle)
     elif axis == 'y':
         matrix = rot_y(matrix, angle)
@@ -237,302 +256,312 @@ def rotate(matrix, angle, axis):
         matrix = rot_z(matrix, angle)
     return matrix
 
-def rot_z( matrix , a):#rotate around the z-axis by a radians
-    trans_mat = numpy.mat(numpy.array( [[ cos(a) , -sin(a) ,    0   ],
-                                        [ sin(a) ,  cos(a) ,    0   ],
-                                        [   0    ,    0    ,    1   ]]))
-    return trans_mat*matrix
 
-def rot_y( matrix , a):#rotate around the y-axis by a radians
-    trans_mat = numpy.mat(numpy.array( [[ cos(a) ,    0    , sin(a) ],
-                                        [   0    ,    1    ,    0   ],
-                                        [-sin(a) ,    0    , cos(a) ]]))
-    return trans_mat*matrix
+def rot_z(matrix, a):  # rotate around the z-axis by a radians
+    trans_mat = numpy.mat(numpy.array([[cos(a), -sin(a), 0],
+                                       [sin(a), cos(a), 0],
+                                       [0, 0, 1]]))
+    return trans_mat * matrix
 
-def rot_x( matrix, a):#rotate around the x-axis by a radians
-    trans_mat = numpy.mat(numpy.array( [[   1    ,    0    ,    0   ],
-                                        [   0    ,  cos(a) ,-sin(a) ],
-                                        [   0    ,  sin(a) , cos(a) ]]))
-    return trans_mat*matrix
 
-def get_transformed_pts( vtx_list, trans_mat):#translate the points according to the matrix
+def rot_y(matrix, a):  # rotate around the y-axis by a radians
+    trans_mat = numpy.mat(numpy.array([[cos(a), 0, sin(a)],
+                                       [0, 1, 0],
+                                       [-sin(a), 0, cos(a)]]))
+    return trans_mat * matrix
+
+
+def rot_x(matrix, a):  # rotate around the x-axis by a radians
+    trans_mat = numpy.mat(numpy.array([[1, 0, 0],
+                                       [0, cos(a), -sin(a)],
+                                       [0, sin(a), cos(a)]]))
+    return trans_mat * matrix
+
+
+def get_transformed_pts(vtx_list, trans_mat):  # translate the points according to the matrix
     transformed_pts = []
     for vtx in vtx_list:
-        transformed_pts.append((trans_mat * numpy.mat(vtx).T).T.tolist()[0] )#transform the points at add to the list
+        transformed_pts.append((trans_mat * numpy.mat(vtx).T).T.tolist()[0])  # transform the points at add to the list
     return transformed_pts
 
-def get_max_z(pts, face): #returns the largest z_value of any point in the face
-    max_z = pts[ face[0]-1 ][2]
+
+def get_max_z(pts, face):  # returns the largest z_value of any point in the face
+    max_z = pts[face[0] - 1][2]
     for i in range(1, len(face)):
-        if pts[ face[0]-1 ][2] >= max_z:
-            max_z = pts[ face[0]-1 ][2]
+        if pts[face[0] - 1][2] >= max_z:
+            max_z = pts[face[0] - 1][2]
     return max_z
 
-def get_min_z(pts, face): #returns the smallest z_value of any point in the face
-    min_z = pts[ face[0]-1 ][2]
+
+def get_min_z(pts, face):  # returns the smallest z_value of any point in the face
+    min_z = pts[face[0] - 1][2]
     for i in range(1, len(face)):
-        if pts[ face[i]-1 ][2] <= min_z:
-            min_z = pts[ face[i]-1 ][2]
+        if pts[face[i] - 1][2] <= min_z:
+            min_z = pts[face[i] - 1][2]
     return min_z
 
-def get_cent_z(pts, face): #returns the centroid z_value of any point in the face
+
+def get_cent_z(pts, face):  # returns the centroid z_value of any point in the face
     sum = 0
     for i in range(len(face)):
-            sum += pts[ face[i]-1 ][2]
-    return sum/len(face)
+        sum += pts[face[i] - 1][2]
+    return sum / len(face)
 
-def get_z_sort_param(pts, face, method): #returns the z-sorting parameter specified by 'method' ('max', 'min', 'cent')
+
+def get_z_sort_param(pts, face, method):  # returns the z-sorting parameter specified by 'method' ('max', 'min', 'cent')
     z_sort_param = ''
-    if  method == 'max':
-        z_sort_param  = get_max_z(pts, face)
+    if method == 'max':
+        z_sort_param = get_max_z(pts, face)
     elif method == 'min':
-        z_sort_param  = get_min_z(pts, face)
+        z_sort_param = get_min_z(pts, face)
     else:
-        z_sort_param  = get_cent_z(pts, face)
+        z_sort_param = get_cent_z(pts, face)
     return z_sort_param
 
-#OBJ DATA MANIPULATION
-def remove_duplicates(list):#removes the duplicates from a list
-    list.sort()#sort the list
+
+# OBJ DATA MANIPULATION
+def remove_duplicates(list):  # removes the duplicates from a list
+    list.sort()  # sort the list
 
     last = list[-1]
-    for i in range(len(list)-2, -1, -1):
-        if last==list[i]:
+    for i in range(len(list) - 2, -1, -1):
+        if last == list[i]:
             del list[i]
         else:
             last = list[i]
     return list
 
-def make_edge_list(face_list):#make an edge vertex list from an existing face vertex list
+
+def make_edge_list(face_list):  # make an edge vertex list from an existing face vertex list
     edge_list = []
-    for i in range(len(face_list)):#for every face
-        edges = len(face_list[i]) #number of edges around that face
-        for j in range(edges):#for every vertex in that face
-            new_edge = [face_list[i][j], face_list[i][(j+1)%edges] ]
-            new_edge.sort() #put in ascending order of vertices (to ensure we spot duplicates)
-            edge_list.append( new_edge )#get the vertex pair between that vertex and the next
+    for i in range(len(face_list)):  # for every face
+        edges = len(face_list[i])  # number of edges around that face
+        for j in range(edges):  # for every vertex in that face
+            new_edge = [face_list[i][j], face_list[i][(j + 1) % edges]]
+            new_edge.sort()  # put in ascending order of vertices (to ensure we spot duplicates)
+            edge_list.append(new_edge)  # get the vertex pair between that vertex and the next
 
     return remove_duplicates(edge_list)
 
-class Style(object): #container for style information
-    def __init__(self,options):
+
+class Style(object):  # container for style information
+    def __init__(self, options):
         self.th = options.th
-        self.fill= '#ff0000'
+        self.fill = '#ff0000'
         self.col = '#000000'
         self.r = 2
-        self.f_opac = str(options.f_opac/100.0)
-        self.s_opac = str(options.s_opac/100.0)
+        self.f_opac = str(options.f_opac / 100.0)
+        self.s_opac = str(options.s_opac / 100.0)
         self.linecap = 'round'
         self.linejoin = 'round'
 
-class Obj(object): #a 3d object defined by the vertices and the faces (eg a polyhedron)
-#edges can be generated from this information
+
+class Obj(object):  # a 3d object defined by the vertices and the faces (eg a polyhedron)
+    # edges can be generated from this information
     def __init__(self):
         self.vtx = []
         self.edg = []
         self.fce = []
-        self.name=''
+        self.name = ''
 
     def set_type(self, options):
         if options.type == 'face':
-            if self.fce != []:
+            if self.fce:
                 self.type = 'face'
             else:
                 inkex.errormsg(_('No face data found in specified file.'))
                 inkex.errormsg(_('Try selecting "Edge Specified" in the Model File tab.\n'))
                 self.type = 'error'
         else:
-            if self.edg != []:
+            if self.edg:
                 self.type = 'edge'
             else:
                 inkex.errormsg(_('No edge data found in specified file.'))
                 inkex.errormsg(_('Try selecting "Face Specified" in the Model File tab.\n'))
                 self.type = 'error'
 
+
 class Poly3D(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
-            action="store", type=str,
-            dest="tab", default="object")
+                                     type=str,
+                                     dest="tab", default="object")
 
-#MODEL FILE SETTINGS
+        # MODEL FILE SETTINGS
         self.arg_parser.add_argument("--obj",
-            action="store", type=str,
-            dest="obj", default='cube')
+                                     type=str,
+                                     dest="obj", default='cube')
         self.arg_parser.add_argument("--spec_file",
-            action="store", type=str,
-            dest="spec_file", default='great_rhombicuboct.obj')
+                                     type=str,
+                                     dest="spec_file", default='great_rhombicuboct.obj')
         self.arg_parser.add_argument("--cw_wound",
-            action="store", type=inkbool,
-            dest="cw_wound", default='true')
+                                     type=inkbool,
+                                     dest="cw_wound", default='true')
         self.arg_parser.add_argument("--type",
-            action="store", type=str,
-            dest="type", default='face')
-#VEIW SETTINGS
+                                     type=str,
+                                     dest="type", default='face')
+        # VEIW SETTINGS
         self.arg_parser.add_argument("--r1_ax",
-            action="store", type=str,
-            dest="r1_ax", default="X-Axis")
+                                     type=str,
+                                     dest="r1_ax", default="X-Axis")
         self.arg_parser.add_argument("--r2_ax",
-            action="store", type=str,
-            dest="r2_ax", default="X-Axis")
+                                     type=str,
+                                     dest="r2_ax", default="X-Axis")
         self.arg_parser.add_argument("--r3_ax",
-            action="store", type=str,
-            dest="r3_ax", default="X-Axis")
+                                     type=str,
+                                     dest="r3_ax", default="X-Axis")
         self.arg_parser.add_argument("--r4_ax",
-            action="store", type=str,
-            dest="r4_ax", default="X-Axis")
+                                     type=str,
+                                     dest="r4_ax", default="X-Axis")
         self.arg_parser.add_argument("--r5_ax",
-            action="store", type=str,
-            dest="r5_ax", default="X-Axis")
+                                     type=str,
+                                     dest="r5_ax", default="X-Axis")
         self.arg_parser.add_argument("--r6_ax",
-            action="store", type=str,
-            dest="r6_ax", default="X-Axis")
+                                     type=str,
+                                     dest="r6_ax", default="X-Axis")
         self.arg_parser.add_argument("--r1_ang",
-            action="store", type=float,
-            dest="r1_ang", default=0)
+                                     type=float,
+                                     dest="r1_ang", default=0)
         self.arg_parser.add_argument("--r2_ang",
-            action="store", type=float,
-            dest="r2_ang", default=0)
+                                     type=float,
+                                     dest="r2_ang", default=0)
         self.arg_parser.add_argument("--r3_ang",
-            action="store", type=float,
-            dest="r3_ang", default=0)
+                                     type=float,
+                                     dest="r3_ang", default=0)
         self.arg_parser.add_argument("--r4_ang",
-            action="store", type=float,
-            dest="r4_ang", default=0)
+                                     type=float,
+                                     dest="r4_ang", default=0)
         self.arg_parser.add_argument("--r5_ang",
-            action="store", type=float,
-            dest="r5_ang", default=0)
+                                     type=float,
+                                     dest="r5_ang", default=0)
         self.arg_parser.add_argument("--r6_ang",
-            action="store", type=float,
-            dest="r6_ang", default=0)
+                                     type=float,
+                                     dest="r6_ang", default=0)
         self.arg_parser.add_argument("--scl",
-            action="store", type=float,
-            dest="scl", default=100.0)
-#STYLE SETTINGS
+                                     type=float,
+                                     dest="scl", default=100.0)
+        # STYLE SETTINGS
         self.arg_parser.add_argument("--show",
-            action="store", type=str,
-            dest="show", default='faces')
+                                     type=str,
+                                     dest="show", default='faces')
         self.arg_parser.add_argument("--shade",
-            action="store", type=inkbool,
-            dest="shade", default='true')
+                                     type=inkbool,
+                                     dest="shade", default='true')
         self.arg_parser.add_argument("--f_r",
-            action="store", type=int,
-            dest="f_r", default=255)
+                                     type=int,
+                                     dest="f_r", default=255)
         self.arg_parser.add_argument("--f_g",
-            action="store", type=int,
-            dest="f_g", default=0)
+                                     type=int,
+                                     dest="f_g", default=0)
         self.arg_parser.add_argument("--f_b",
-            action="store", type=int,
-            dest="f_b", default=0)
+                                     type=int,
+                                     dest="f_b", default=0)
         self.arg_parser.add_argument("--f_opac",
-            action="store", type=int,
-            dest="f_opac", default=100)
+                                     type=int,
+                                     dest="f_opac", default=100)
         self.arg_parser.add_argument("--s_opac",
-            action="store", type=int,
-            dest="s_opac", default=100)
+                                     type=int,
+                                     dest="s_opac", default=100)
         self.arg_parser.add_argument("--th",
-            action="store", type=float,
-            dest="th", default=2)
+                                     type=float,
+                                     dest="th", default=2)
         self.arg_parser.add_argument("--lv_x",
-            action="store", type=float,
-            dest="lv_x", default=1)
+                                     type=float,
+                                     dest="lv_x", default=1)
         self.arg_parser.add_argument("--lv_y",
-            action="store", type=float,
-            dest="lv_y", default=1)
+                                     type=float,
+                                     dest="lv_y", default=1)
         self.arg_parser.add_argument("--lv_z",
-            action="store", type=float,
-            dest="lv_z", default=-2)
+                                     type=float,
+                                     dest="lv_z", default=-2)
         self.arg_parser.add_argument("--back",
-            action="store", type=inkbool,
-            dest="back", default='false')
+                                     type=inkbool,
+                                     dest="back", default='false')
         self.arg_parser.add_argument("--norm",
-            action="store", type=inkbool,
-            dest="norm", default='true')
+                                     type=inkbool,
+                                     dest="norm", default='true')
         self.arg_parser.add_argument("--z_sort",
-            action="store", type=str,
-            dest="z_sort", default='min')
-
+                                     type=str,
+                                     dest="z_sort", default='min')
 
     def effect(self):
         if numpy is None:
             return inkex.errormsg(_("Failed to import the numpy module. This module is required by this extension. Please install it and try again.  On a Debian-like system this can be done with the command 'sudo apt-get install python-numpy'."))
-        so = self.options#shorthand
+        so = self.options  # shorthand
 
-        #INITIALISE AND LOAD DATA
+        # INITIALISE AND LOAD DATA
 
-        obj = Obj() #create the object
-        file = get_filename(so)#get the file to load data from
-        get_obj_data(obj, file)#load data from the obj file
-        obj.set_type(so)#set the type (face or edge) as per the settings
+        obj = Obj()  # create the object
+        file = get_filename(so)  # get the file to load data from
+        get_obj_data(obj, file)  # load data from the obj file
+        obj.set_type(so)  # set the type (face or edge) as per the settings
 
-        scale = self.svg.unittouu('1px')    # convert to document units
-        st = Style(so) #initialise style
-        fill_col = (so.f_r, so.f_g, so.f_b) #colour tuple for the face fill
-        lighting = normalise( (so.lv_x,-so.lv_y,so.lv_z) ) #unit light vector
+        scale = self.svg.unittouu('1px')  # convert to document units
+        st = Style(so)  # initialise style
+        fill_col = (so.f_r, so.f_g, so.f_b)  # colour tuple for the face fill
+        lighting = normalise((so.lv_x, -so.lv_y, so.lv_z))  # unit light vector
 
-        #INKSCAPE GROUP TO CONTAIN THE POLYHEDRON
+        # INKSCAPE GROUP TO CONTAIN THE POLYHEDRON
 
-        #Put in in the centre of the current view
+        # Put in in the centre of the current view
         view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
-        poly_transform = 'translate(' + str( view_center[0]) + ',' + str( view_center[1]) + ')'
+        poly_transform = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
         if scale != 1:
             poly_transform += ' scale(' + str(scale) + ')'
-        #we will put all the rotations in the object name, so it can be repeated in
-        poly_name = obj.name+':'+make_rotation_log(so)
-        poly_attribs = {inkex.addNS('label','inkscape'):poly_name,
-                        'transform':poly_transform }
-        poly = inkex.etree.SubElement(self.current_layer, 'g', poly_attribs)#the group to put everything in
+        # we will put all the rotations in the object name, so it can be repeated in
+        poly_name = obj.name + ':' + make_rotation_log(so)
+        poly_attribs = {inkex.addNS('label', 'inkscape'): poly_name,
+                        'transform': poly_transform}
+        poly = etree.SubElement(self.current_layer, 'g', poly_attribs)  # the group to put everything in
 
-        #TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
+        # TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
 
-        trans_mat = numpy.mat(numpy.identity(3, float)) #init. trans matrix as identity matrix
-        for i in range(1, 7):#for each rotation
-            axis  = eval('so.r'+str(i)+'_ax')
-            angle = eval('so.r'+str(i)+'_ang') *pi/180
+        trans_mat = numpy.mat(numpy.identity(3, float))  # init. trans matrix as identity matrix
+        for i in range(1, 7):  # for each rotation
+            axis = eval('so.r' + str(i) + '_ax')
+            angle = eval('so.r' + str(i) + '_ang') * pi / 180
             trans_mat = rotate(trans_mat, angle, axis)
-        trans_mat = trans_mat*so.scl #scale by linear factor (do this only after the transforms to reduce round-off)
+        trans_mat = trans_mat * so.scl  # scale by linear factor (do this only after the transforms to reduce round-off)
 
-        transformed_pts = get_transformed_pts(obj.vtx, trans_mat) #the points as projected in the z-axis onto the viewplane
+        transformed_pts = get_transformed_pts(obj.vtx, trans_mat)  # the points as projected in the z-axis onto the viewplane
 
-        #RENDERING OF THE OBJECT
+        # RENDERING OF THE OBJECT
 
         if so.show == 'vtx':
             for i in range(len(transformed_pts)):
-                draw_SVG_dot([transformed_pts[i][0],transformed_pts[i][1]], st, 'Point'+str(i), poly)#plot points using transformed_pts x and y coords
+                draw_SVG_dot([transformed_pts[i][0], transformed_pts[i][1]], st, 'Point' + str(i), poly)  # plot points using transformed_pts x and y coords
 
         elif so.show == 'edg':
-            if obj.type == 'face':#we must generate the edge list from the faces
+            if obj.type == 'face':  # we must generate the edge list from the faces
                 edge_list = make_edge_list(obj.fce)
-            else:#we already have an edge list
+            else:  # we already have an edge list
                 edge_list = obj.edg
 
-            draw_edges( edge_list, transformed_pts, st, poly)
+            draw_edges(edge_list, transformed_pts, st, poly)
 
         elif so.show == 'fce':
-            if obj.type == 'face':#we have a face list
+            if obj.type == 'face':  # we have a face list
 
                 z_list = []
 
                 for i in range(len(obj.fce)):
-                    face = obj.fce[i] #the face we are dealing with
-                    norm = get_unit_normal(transformed_pts, face, so.cw_wound) #get the normal vector to the face
-                    angle = get_angle( norm, lighting )#get the angle between the normal and the lighting vector
+                    face = obj.fce[i]  # the face we are dealing with
+                    norm = get_unit_normal(transformed_pts, face, so.cw_wound)  # get the normal vector to the face
+                    angle = get_angle(norm, lighting)  # get the angle between the normal and the lighting vector
                     z_sort_param = get_z_sort_param(transformed_pts, face, so.z_sort)
 
-                    if so.back or norm[2] > 0: # include all polygons or just the front-facing ones as needed
-                        z_list.append((z_sort_param, angle, norm, i))#record the maximum z-value of the face and angle to light, along with the face ID and normal
+                    if so.back or norm[2] > 0:  # include all polygons or just the front-facing ones as needed
+                        z_list.append((z_sort_param, angle, norm, i))  # record the maximum z-value of the face and angle to light, along with the face ID and normal
 
-                z_list.sort(lambda x, y: cmp(x[0],y[0])) #sort by ascending sort parameter of the face
-                draw_faces( z_list, transformed_pts, obj, so.shade, fill_col, st, poly)
+                z_list.sort(lambda x, y: cmp(x[0], y[0]))  # sort by ascending sort parameter of the face
+                draw_faces(z_list, transformed_pts, obj, so.shade, fill_col, st, poly)
 
-            else:#we cannot generate a list of faces from the edges without a lot of computation
+            else:  # we cannot generate a list of faces from the edges without a lot of computation
                 inkex.errormsg(_('Face Data Not Found. Ensure file contains face data, and check the file is imported as "Face-Specified" under the "Model File" tab.\n'))
         else:
             inkex.errormsg(_('Internal Error. No view type selected\n'))
 
+
 if __name__ == '__main__':
-    e = Poly3D()
-    e.affect()
-
-
+    Poly3D().run()

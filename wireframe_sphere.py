@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2009 John Beard john.j.beard@gmail.com
 #
@@ -48,168 +49,168 @@ sphere were opaque.
 #                        Hidden lines of latitude still not properly calculated.
 #                        Prolate and oblate spheroids not considered.
 
-# standard library
-from math import *
-# local library
+from math import acos, atan, cos, pi, sin, tan
+
 import inkex
 from inkex.utils import inkbool
 
-#SVG OUTPUT FUNCTIONS ================================================
-def draw_SVG_ellipse(r_xy, c_xy, width, parent, start_end=(0,2*pi),transform='' ):
+from lxml import etree
 
+
+# SVG OUTPUT FUNCTIONS ================================================
+def draw_SVG_ellipse(r_xy, c_xy, width, parent, start_end=(0, 2 * pi), transform=''):
     (rx, ry) = r_xy
     (cx, cy) = c_xy
-    style = {   'stroke'        : '#000000',
-                'stroke-width'  : str(width),
-                'fill'          : 'none'            }
-    circ_attribs = {'style':str(inkex.Style(style)),
-        inkex.addNS('cx','sodipodi')        :str(cx),
-        inkex.addNS('cy','sodipodi')        :str(cy),
-        inkex.addNS('rx','sodipodi')        :str(rx),
-        inkex.addNS('ry','sodipodi')        :str(ry),
-        inkex.addNS('start','sodipodi')     :str(start_end[0]),
-        inkex.addNS('end','sodipodi')       :str(start_end[1]),
-        inkex.addNS('open','sodipodi')      :'true',    #all ellipse sectors we will draw are open
-        inkex.addNS('type','sodipodi')      :'arc',
-        'transform'                         :transform
+    style = {'stroke': '#000000',
+             'stroke-width': str(width),
+             'fill': 'none'}
+    circ_attribs = {'style': str(inkex.Style(style)),
+                    inkex.addNS('cx', 'sodipodi'): str(cx),
+                    inkex.addNS('cy', 'sodipodi'): str(cy),
+                    inkex.addNS('rx', 'sodipodi'): str(rx),
+                    inkex.addNS('ry', 'sodipodi'): str(ry),
+                    inkex.addNS('start', 'sodipodi'): str(start_end[0]),
+                    inkex.addNS('end', 'sodipodi'): str(start_end[1]),
+                    inkex.addNS('open', 'sodipodi'): 'true',  # all ellipse sectors we will draw are open
+                    inkex.addNS('type', 'sodipodi'): 'arc',
+                    'transform': transform
 
-            }
-    circ = inkex.etree.SubElement(parent, inkex.addNS('path','svg'), circ_attribs )
+                    }
+    circ = etree.SubElement(parent, inkex.addNS('path', 'svg'), circ_attribs)
+
 
 class WireframeSphere(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
 
-        #PARSE OPTIONS
+        # PARSE OPTIONS
         self.arg_parser.add_argument("--num_lat",
-            action="store", type=int,
-            dest="NUM_LAT", default=19)
+                                     type=int,
+                                     dest="NUM_LAT", default=19)
         self.arg_parser.add_argument("--num_long",
-            action="store", type=int,
-            dest="NUM_LONG", default=24)
+                                     type=int,
+                                     dest="NUM_LONG", default=24)
         self.arg_parser.add_argument("--radius",
-            action="store", type=float,
-            dest="RADIUS", default=100.0)
+                                     type=float,
+                                     dest="RADIUS", default=100.0)
         self.arg_parser.add_argument("--tilt",
-            action="store", type=float,
-            dest="TILT", default=35.0)
+                                     type=float,
+                                     dest="TILT", default=35.0)
         self.arg_parser.add_argument("--rotation",
-            action="store", type=float,
-            dest="ROT_OFFSET", default=4)
+                                     type=float,
+                                     dest="ROT_OFFSET", default=4)
         self.arg_parser.add_argument("--hide_back",
-            action="store", type=inkbool,
-            dest="HIDE_BACK", default=False)
+                                     type=inkbool,
+                                     dest="HIDE_BACK", default=False)
 
     def effect(self):
 
         so = self.options
 
-        #PARAMETER PROCESSING
+        # PARAMETER PROCESSING
 
-        if so.NUM_LONG % 2 != 0: #lines of longitude are odd : abort
-            inkex.errormsg(_('Please enter an even number of lines of longitude.'))
+        if so.NUM_LONG % 2 != 0:  # lines of longitude are odd : abort
+            inkex.errormsg('Please enter an even number of lines of longitude.')
         else:
-            if so.TILT < 0:            # if the tilt is backwards
-                flip = ' scale(1, -1)' # apply a vertical flip to the whole sphere
+            if so.TILT < 0:  # if the tilt is backwards
+                flip = ' scale(1, -1)'  # apply a vertical flip to the whole sphere
             else:
-                flip = '' #no flip
+                flip = ''  # no flip
 
-            so.RADIUS     = self.svg.unittouu(str(so.RADIUS) + 'px')
-            so.TILT       =  abs(so.TILT)*(pi/180)  #Convert to radians
-            so.ROT_OFFSET = so.ROT_OFFSET*(pi/180)  #Convert to radians
-            stroke_width  = self.svg.unittouu('1px')
+            so.RADIUS = self.svg.unittouu(str(so.RADIUS) + 'px')
+            so.TILT = abs(so.TILT) * (pi / 180)  # Convert to radians
+            so.ROT_OFFSET *= pi / 180  # Convert to radians
+            stroke_width = self.svg.unittouu('1px')
 
-            EPSILON = 0.001 #add a tiny value to the ellipse radii, so that if we get a zero radius, the ellipse still shows up as a line
+            EPSILON = 0.001  # add a tiny value to the ellipse radii, so that if we get a zero radius, the ellipse still shows up as a line
 
-            #INKSCAPE GROUP TO CONTAIN EVERYTHING
+            # INKSCAPE GROUP TO CONTAIN EVERYTHING
 
             centre = self.svg.get_center_position()
-            grp_transform = 'translate' + str( centre ) + flip
+            grp_transform = 'translate' + str(centre) + flip
             grp_name = 'WireframeSphere'
-            grp_attribs = {inkex.addNS('label','inkscape'):grp_name,
-                           'transform':grp_transform }
-            grp = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', grp_attribs)#the group to put everything in
+            grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name,
+                           'transform': grp_transform}
+            grp = etree.SubElement(self.svg.get_current_layer(), 'g', grp_attribs)  # the group to put everything in
 
-            #LINES OF LONGITUDE
+            # LINES OF LONGITUDE
 
-            if so.NUM_LONG > 0:      #only process longitudes if we actually want some
+            if so.NUM_LONG > 0:  # only process longitudes if we actually want some
 
-                #GROUP FOR THE LINES OF LONGITUDE
+                # GROUP FOR THE LINES OF LONGITUDE
                 grp_name = 'Lines of Longitude'
-                grp_attribs = {inkex.addNS('label','inkscape'):grp_name}
-                grp_long = inkex.etree.SubElement(grp, 'g', grp_attribs)
+                grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name}
+                grp_long = etree.SubElement(grp, 'g', grp_attribs)
 
-                delta_long = 360.0/so.NUM_LONG      #angle between neighbouring lines of longitude in degrees
+                delta_long = 360.0 / so.NUM_LONG  # angle between neighbouring lines of longitude in degrees
 
                 for i in range(0, so.NUM_LONG // 2):
-                    long_angle = so.ROT_OFFSET + (i*delta_long)*(pi/180.0); #The longitude of this particular line in radians
+                    long_angle = so.ROT_OFFSET + (i * delta_long) * (pi / 180.0)  # The longitude of this particular line in radians
                     if long_angle > pi:
-                        long_angle -= 2*pi
-                    width      = so.RADIUS * cos(long_angle)
-                    height     = so.RADIUS * sin(long_angle) * sin(so.TILT)       #the rise is scaled by the sine of the tilt
+                        long_angle -= 2 * pi
+                    width = so.RADIUS * cos(long_angle)
+                    height = so.RADIUS * sin(long_angle) * sin(so.TILT)  # the rise is scaled by the sine of the tilt
                     # length     = sqrt(width*width+height*height)  #by pythagorean theorem
                     # inverse    = sin(acos(length/so.RADIUS))
-                    inverse    = abs(sin(long_angle)) * cos(so.TILT)
+                    inverse = abs(sin(long_angle)) * cos(so.TILT)
 
-                    minorRad   = so.RADIUS * inverse
-                    minorRad=minorRad + EPSILON
+                    minorRad = so.RADIUS * inverse
+                    minorRad += EPSILON
 
-                    #calculate the rotation of the ellipse to get it to pass through the pole (in degrees)
-                    rotation = atan(height/width)*(180.0/pi)
-                    transform = "rotate("+str(rotation)+')' #generate the transform string
-                    #the rotation will be applied about the group centre (the centre of the sphere)
+                    # calculate the rotation of the ellipse to get it to pass through the pole (in degrees)
+                    rotation = atan(height / width) * (180.0 / pi)
+                    transform = "rotate(" + str(rotation) + ')'  # generate the transform string
+                    # the rotation will be applied about the group centre (the centre of the sphere)
 
                     # remove the hidden side of the ellipses if required
                     # this is always exactly half the ellipse, but we need to find out which half
-                    start_end = (0, 2*pi)   #Default start and end angles -> full ellipse
+                    start_end = (0, 2 * pi)  # Default start and end angles -> full ellipse
                     if so.HIDE_BACK:
-                        if long_angle <= pi/2:           #cut out the half ellispse that is hidden
-                            start_end = (pi/2, 3*pi/2)
+                        if long_angle <= pi / 2:  # cut out the half ellispse that is hidden
+                            start_end = (pi / 2, 3 * pi / 2)
                         else:
-                            start_end = (3*pi/2, pi/2)
+                            start_end = (3 * pi / 2, pi / 2)
 
-                    #finally, draw the line of longitude
-                    #the centre is always at the centre of the sphere
-                    draw_SVG_ellipse( ( minorRad, so.RADIUS ), (0,0), stroke_width, grp_long , start_end,transform)
+                    # finally, draw the line of longitude
+                    # the centre is always at the centre of the sphere
+                    draw_SVG_ellipse((minorRad, so.RADIUS), (0, 0), stroke_width, grp_long, start_end, transform)
 
             # LINES OF LATITUDE
             if so.NUM_LAT > 0:
 
-                #GROUP FOR THE LINES OF LATITUDE
+                # GROUP FOR THE LINES OF LATITUDE
                 grp_name = 'Lines of Latitude'
-                grp_attribs = {inkex.addNS('label','inkscape'):grp_name}
-                grp_lat = inkex.etree.SubElement(grp, 'g', grp_attribs)
+                grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name}
+                grp_lat = etree.SubElement(grp, 'g', grp_attribs)
 
+                so.NUM_LAT += 1  # Account for the fact that we loop over N-1 elements
+                delta_lat = 180.0 / so.NUM_LAT  # Angle between the line of latitude (subtended at the centre)
 
-                so.NUM_LAT = so.NUM_LAT + 1     #Account for the fact that we loop over N-1 elements
-                delta_lat = 180.0/so.NUM_LAT    #Angle between the line of latitude (subtended at the centre)
+                for i in range(1, so.NUM_LAT):
+                    lat_angle = ((delta_lat * i) * (pi / 180))  # The angle of this line of latitude (from a pole)
 
-                for i in range(1,so.NUM_LAT):
-                    lat_angle=((delta_lat*i)*(pi/180))            #The angle of this line of latitude (from a pole)
+                    majorRad = so.RADIUS * sin(lat_angle)  # The width of the LoLat (no change due to projection)
+                    minorRad = so.RADIUS * sin(lat_angle) * sin(so.TILT)  # The projected height of the line of latitude
+                    minorRad += EPSILON
 
-                    majorRad=so.RADIUS*sin(lat_angle)                 #The width of the LoLat (no change due to projection)
-                    minorRad=so.RADIUS*sin(lat_angle) * sin(so.TILT)     #The projected height of the line of latitude
-                    minorRad=minorRad + EPSILON
-
-                    cy=so.RADIUS*cos(lat_angle) * cos(so.TILT) #The projected y position of the LoLat
-                    cx=0                                    #The x position is just the center of the sphere
+                    cy = so.RADIUS * cos(lat_angle) * cos(so.TILT)  # The projected y position of the LoLat
+                    cx = 0  # The x position is just the center of the sphere
 
                     if so.HIDE_BACK:
-                        if lat_angle > so.TILT:                     #this LoLat is partially or fully visible
-                            if lat_angle > pi-so.TILT:               #this LoLat is fully visible
-                                draw_SVG_ellipse((majorRad, minorRad), (cx,cy), stroke_width, grp_lat)
-                            else: #this LoLat is partially visible
-                                proportion = -(acos( tan(lat_angle - pi/2)/tan(pi/2 - so.TILT)) )/pi + 1
-                                start_end = ( pi/2 - proportion*pi, pi/2 + proportion*pi ) #make the start and end angles (mirror image around pi/2)
-                                draw_SVG_ellipse((majorRad, minorRad), (cx,cy), stroke_width, grp_lat, start_end)
+                        if lat_angle > so.TILT:  # this LoLat is partially or fully visible
+                            if lat_angle > pi - so.TILT:  # this LoLat is fully visible
+                                draw_SVG_ellipse((majorRad, minorRad), (cx, cy), stroke_width, grp_lat)
+                            else:  # this LoLat is partially visible
+                                proportion = -(acos(tan(lat_angle - pi / 2) / tan(pi / 2 - so.TILT))) / pi + 1
+                                start_end = (pi / 2 - proportion * pi, pi / 2 + proportion * pi)  # make the start and end angles (mirror image around pi/2)
+                                draw_SVG_ellipse((majorRad, minorRad), (cx, cy), stroke_width, grp_lat, start_end)
 
-                    else: #just draw the full lines of latitude
-                        draw_SVG_ellipse((majorRad, minorRad), (cx,cy), stroke_width, grp_lat)
+                    else:  # just draw the full lines of latitude
+                        draw_SVG_ellipse((majorRad, minorRad), (cx, cy), stroke_width, grp_lat)
 
+            # THE HORIZON CIRCLE
+            draw_SVG_ellipse((so.RADIUS, so.RADIUS), (0, 0), stroke_width, grp)  # circle, centred on the sphere centre
 
-            #THE HORIZON CIRCLE
-            draw_SVG_ellipse((so.RADIUS, so.RADIUS), (0,0), stroke_width, grp) #circle, centred on the sphere centre
 
 if __name__ == '__main__':
     WireframeSphere().run()
-

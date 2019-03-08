@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2010 Craig Marshall, craig9 [at] gmail.com
 #
@@ -38,20 +39,18 @@ etc.
 # standard library
 import locale
 import os
-import sys
-try:
-    from subprocess import Popen, PIPE
-    bsubprocess = True
-except:
-    bsubprocess = False
+from subprocess import PIPE, Popen
+
 # local library
 import inkex
 from inkex.utils import inkbool
 
 locale.setlocale(locale.LC_ALL, '')
 
+
 class Guillotine(inkex.Effect):
     """Exports slices made using guides"""
+
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--directory", type=str, dest="directory")
@@ -59,9 +58,9 @@ class Guillotine(inkex.Effect):
         self.arg_parser.add_argument("--ignore", type=inkbool, dest="ignore")
 
     def get_guides(self):
-        '''
+        """
         Returns all guide elements as an iterable collection
-        '''
+        """
         root = self.document.getroot()
         guides = []
         xpath = self.document.xpath("//sodipodi:guide",
@@ -80,10 +79,10 @@ class Guillotine(inkex.Effect):
         return guides
 
     def get_all_horizontal_guides(self):
-        '''
+        """
         Returns all horizontal guides as a list of floats stored as
         strings. Each value is the position from 0 in pixels.
-        '''
+        """
         guides = []
         for g in self.get_guides():
             if g['orientation'] == 'horizontal':
@@ -91,10 +90,10 @@ class Guillotine(inkex.Effect):
         return guides
 
     def get_all_vertical_guides(self):
-        '''
+        """
         Returns all vertical guides as a list of floats stored as
         strings. Each value is the position from 0 in pixels.
-        '''
+        """
         guides = []
         for g in self.get_guides():
             if g['orientation'] == 'vertical':
@@ -102,11 +101,11 @@ class Guillotine(inkex.Effect):
         return guides
 
     def get_horizontal_slice_positions(self):
-        '''
+        """
         Make a sorted list of all horizontal guide positions,
         including 0 and the document height, but not including
         those outside of the canvas
-        '''
+        """
         root = self.document.getroot()
         horizontals = ['0']
         height = self.svg.unittouu(root.attrib['height'])
@@ -118,11 +117,11 @@ class Guillotine(inkex.Effect):
         return horizontals
 
     def get_vertical_slice_positions(self):
-        '''
+        """
         Make a sorted list of all vertical guide positions,
         including 0 and the document width, but not including
         those outside of the canvas.
-        '''
+        """
         root = self.document.getroot()
         verticals = ['0']
         width = self.svg.unittouu(root.attrib['width'])
@@ -134,32 +133,32 @@ class Guillotine(inkex.Effect):
         return verticals
 
     def get_slices(self):
-        '''
+        """
         Returns a list of all "slices" as denoted by the guides
         on the page. Each slice is really just a 4 element list of
         floats (stored as strings), consisting of the X and Y start
         position and the X and Y end position.
-        '''
+        """
         hs = self.get_horizontal_slice_positions()
         vs = self.get_vertical_slice_positions()
         slices = []
-        for i in range(len(hs)-1):
-            for j in range(len(vs)-1):
-                slices.append([vs[j], hs[i], vs[j+1], hs[i+1]])
+        for i in range(len(hs) - 1):
+            for j in range(len(vs) - 1):
+                slices.append([vs[j], hs[i], vs[j + 1], hs[i + 1]])
         return slices
 
     def get_filename_parts(self):
-        '''
+        """
         Attempts to get directory and image as passed in by the inkscape
         dialog. If the boolean ignore flag is set, then it will ignore
         these settings and try to use the settings from the export
         filename.
-        '''
+        """
 
-        if self.options.ignore == False:
+        if not self.options.ignore:
             if self.options.image == "" or self.options.image is None:
                 raise inkex.AbortExtension("Please enter an image name")
-            return (self.options.directory, self.options.image)
+            return self.options.directory, self.options.image
         else:
             '''
             First get the export-filename from the document, if the
@@ -178,8 +177,8 @@ class Guillotine(inkex.Effect):
                         "need to have previously exported the document. "
                         "Otherwise no export hints exist!")
             dirname, filename = os.path.split(export_file)
-            filename = filename.rsplit(".", 1)[0] # Without extension
-            return (dirname, filename)
+            filename = filename.rsplit(".", 1)[0]  # Without extension
+            return dirname, filename
 
     def check_dir_exists(self, dir):
         if not os.path.isdir(dir):
@@ -189,30 +188,28 @@ class Guillotine(inkex.Effect):
         return locale.format("%.f", float(str), 0)
 
     def export_slice(self, s, filename):
-        '''
+        """
         Runs inkscape's command line interface and exports the image
         slice from the 4 coordinates in s, and saves as the filename
         given.
-        '''
-        svg_file = self.args[-1]
-        command = "inkscape -a %s:%s:%s:%s -e \"%s\" \"%s\" " % (self.get_localised_string(s[0]), self.get_localised_string(s[1]), self.get_localised_string(s[2]), self.get_localised_string(s[3]), filename, svg_file)
-        if bsubprocess:
-            p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-            return_code = p.wait()
-            f = p.stdout
-            err = p.stderr
-        else:
-            _, f, err = os.open3(command)
+        """
+        svg_file = self.options.input_file
+        command = "inkscape -a {}:{}:{}:{} -e \"{}\" \"{}\" ".format(self.get_localised_string(s[0]), self.get_localised_string(s[1]), self.get_localised_string(s[2]), self.get_localised_string(s[3]), filename, svg_file)
+        p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+        return_code = p.wait()
+        f = p.stdout
+        err = p.stderr
+
         f.close()
 
     def export_slices(self, slices):
-        '''
+        """
         Takes the slices list and passes each one with a calculated
         filename/directory into export_slice.
-        '''
+        """
         dirname, filename = self.get_filename_parts()
         output_files = list()
-        if dirname == '' or dirname == None:
+        if dirname == '' or dirname is None:
             dirname = './'
 
         dirname = os.path.expanduser(dirname)
@@ -227,12 +224,12 @@ class Guillotine(inkex.Effect):
             output_files.append(f)
             self.export_slice(s, f)
             i += 1
-        inkex.errormsg(_("The sliced bitmaps have been saved as:") + "\n\n" + "\n".join(output_files))
+        inkex.errormsg("The sliced bitmaps have been saved as:" + "\n\n" + "\n".join(output_files))
 
     def effect(self):
         slices = self.get_slices()
         self.export_slices(slices)
 
+
 if __name__ == "__main__":
-    e = Guillotine()
-    e.affect()
+    Guillotine().run()

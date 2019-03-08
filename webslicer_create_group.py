@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-'''
+# coding=utf-8
+"""
 Copyright (C) 2010 Aurelio A. Heckert, aurium (a) gmail dot com
 
 This program is free software; you can redistribute it and/or modify
@@ -15,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
 # local library
 from webslicer_effect import WebSlicer_Effect, is_empty
 import inkex
@@ -26,27 +27,27 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
     def __init__(self):
         WebSlicer_Effect.__init__(self)
         self.arg_parser.add_argument("--html-id",
-                        action="store", type=str,
+                         type=str,
                         dest="html_id",
                         help="")
         self.arg_parser.add_argument("--html-class",
-                        action="store", type=str,
+                         type=str,
                         dest="html_class",
                         help="")
         self.arg_parser.add_argument("--width-unity",
-                        action="store", type=str,
+                         type=str,
                         dest="width_unity",
                         help="")
         self.arg_parser.add_argument("--height-unity",
-                        action="store", type=str,
+                         type=str,
                         dest="height_unity",
                         help="")
         self.arg_parser.add_argument("--bg-color",
-                        action="store", type=str,
+                         type=str,
                         dest="bg_color",
                         help="")
         self.arg_parser.add_argument("--tab",
-                        action="store", type=str,
+                         type=str,
                         dest="tab",
                         help="The selected UI-tab when OK was pressed")
 
@@ -85,5 +86,4 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
 
 if __name__ == '__main__':
-    e = WebSlicer_CreateGroup()
-    e.affect()
+    WebSlicer_CreateGroup().run()

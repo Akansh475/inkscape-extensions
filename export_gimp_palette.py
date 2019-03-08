@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (c) 2009 - Jos Hirth, kaioa.com
 #
@@ -50,6 +51,6 @@ class ExportGpl(inkex.Effect):
                 yield color
 
 if __name__ == '__main__':
-    ExportGpl().affect()
+    ExportGpl().run()
 
 

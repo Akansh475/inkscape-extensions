@@ -32,7 +32,7 @@ class GenericTemplate(inkex.Effect):
 
         namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
-            namedview = inkex.etree.SubElement( root, inkex.addNS('namedview', 'sodipodi') );
+            namedview = inkex.etree.SubElement( root, inkex.addNS('namedview', 'sodipodi') )
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), unit)
 

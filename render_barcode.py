@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2007 Martin Owens
 #
@@ -22,45 +23,44 @@ Barcode module provided for outside or scripting.
 """
 
 import sys
-import inkex
 
 from barcode import get_barcode
+from inkex.base import InkscapeExtension, SvgThroughMixin
 
-class InsertBarcode(inkex.Effect):
+
+class InsertBarcode(SvgThroughMixin, InkscapeExtension):
     """
     Raw barcode Effect class, see Barcode base class.
     """
+
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(InsertBarcode, self).__init__()
         self.arg_parser.add_argument(
-            "-l", "--height", action="store", type=int,
-            dest="height", default=30, help="Barcode Height")
+                "-l", "--height", type=int,
+                dest="height", default=30, help="Barcode Height")
         self.arg_parser.add_argument(
-            "-t", "--type", action="store", type=str,
-            dest="type", default='', help="Barcode Type")
+                "-t", "--type", type=str,
+                dest="type", default='', help="Barcode Type")
         self.arg_parser.add_argument(
-            "-d", "--text", action="store", type=str,
-            dest="text", default='', help="Text to print on barcode")
+                "-d", "--text", type=str,
+                dest="text", default='', help="Text to print on barcode")
 
     def effect(self):
         layer = self.svg.get_current_layer()
         (pos_x, pos_y) = layer.get_center_position()
-        #inkex.computePointInNode(
-        #    self.svg.get_center_position(), self.svg.get_current_layer())
 
-        barcode = get_barcode(
-            self.options.type,
-            text=self.options.text,
-            height=self.options.height,
-            document=self.document,
-            x=pos_x, y=pos_y,
-            scale=self.svg.unittouu('1px'),
-        ).generate()
+        barcode = get_barcode(self.options.type,
+                              text=self.options.text,
+                              height=self.options.height,
+                              document=self.document,
+                              x=pos_x, y=pos_y,
+                              scale=self.svg.unittouu('1px'),
+                              ).generate()
         if barcode is not None:
             self.svg.get_current_layer().append(barcode)
         else:
             sys.stderr.write("No barcode was generated\n")
 
+
 if __name__ == '__main__':
     InsertBarcode().run()
-

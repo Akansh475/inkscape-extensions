@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 from string import Template
 import xml.etree.ElementTree as ET
@@ -13,9 +14,9 @@ else:
     folder = os.path.dirname(os.path.realpath(__file__))
     inpath = os.path.normpath(os.path.join(folder, args.input))
 
-templateWithType = Template('self.arg_parser.add_argument("--$param", action="store", type=$type, dest="$param", default=$default)')
-templateWithoutType = Template('self.arg_parser.add_argument("--$param", action="store", dest="$param", default=$default)')
-def handle_param_node(node):    
+templateWithType = Template('self.arg_parser.add_argument("--$param",  type=$type, dest="$param", default=$default)')
+templateWithoutType = Template('self.arg_parser.add_argument("--$param",  dest="$param", default=$default)')
+def handle_param_node(node):
     if node.attrib["type"] == 'float':
         cmd = templateWithType.substitute(
             param=node.attrib["name"],

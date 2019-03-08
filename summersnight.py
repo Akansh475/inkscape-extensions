@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
 #
@@ -136,7 +137,6 @@ class Project(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = Project()
-    e.affect()
+    Project().run()
 
 

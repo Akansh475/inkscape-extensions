@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
 # Copyright (C) 2010-2012 Nicolas Dufour, nicoduf@yahoo.fr
@@ -52,22 +53,22 @@ class MyEffect(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="tab")
         self.arg_parser.add_argument("-d", "--guides",
-                                   action="store", type=inkbool,
+                                    type=inkbool,
                                    dest="saveGuides", default=False,
                                    help="Save the Guides with the .XCF")
         self.arg_parser.add_argument("-r", "--grid",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="saveGrid", default=False,
                                      help="Save the Grid with the .XCF")
         self.arg_parser.add_argument("-b", "--background",
-                                     action="store", type=inkbool,
+                                      type=inkbool,
                                      dest="layerBackground", default=False,
                                      help="Add background color to each layer")
         self.arg_parser.add_argument("-i", "--dpi",
-                                     action="store", type=str,
+                                      type=str,
                                      dest="resolution", default="96",
                                      help="File resolution")
 
@@ -329,6 +330,5 @@ class MyEffect(inkex.Effect):
 
 
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()
 

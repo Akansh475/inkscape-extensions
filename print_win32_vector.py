@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2012 Alvin Penner, penner@vaxxine.com
 #
@@ -211,7 +212,7 @@ class MyEffect(inkex.Effect):
         self.process_group(doc)
         mygdi.EndDoc(self.hDC)
 
+
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()
 

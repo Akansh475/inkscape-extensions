@@ -77,7 +77,7 @@ class Hershey( inkex.Effect ):
                     w = draw_svg_text(q, font, w, 0, g)
         else:
             #Generate glyph table
-            wmax = 0;
+            wmax = 0
             for p in range(0,10):
                 w = 0
                 v = spacing * (15*p - 67 )
@@ -103,6 +103,5 @@ class Hershey( inkex.Effect ):
 
 
 if __name__ == '__main__':
-    e = Hershey()
-    e.affect()
+    Hershey().run()
 

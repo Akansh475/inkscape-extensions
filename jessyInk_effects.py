@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 # Copyright 2008, 2009 Hannes Hochreiner
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,13 +24,13 @@ class JessyInk_Effects(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
-        self.arg_parser.add_argument('--tab', action = 'store', type=str, dest = 'what')
-        self.arg_parser.add_argument('--effectInOrder', action = 'store', type=str, dest = 'effectInOrder', default = 1)
-        self.arg_parser.add_argument('--effectInDuration', action = 'store', type=float, dest = 'effectInDuration', default = 0.8)
-        self.arg_parser.add_argument('--effectIn', action = 'store', type=str, dest = 'effectIn', default = 'none')
-        self.arg_parser.add_argument('--effectOutOrder', action = 'store', type=str, dest = 'effectOutOrder', default = 2)
-        self.arg_parser.add_argument('--effectOutDuration', action = 'store', type=float, dest = 'effectOutDuration', default = 0.8)
-        self.arg_parser.add_argument('--effectOut', action = 'store', type=str, dest = 'effectOut', default = 'none')
+        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
+        self.arg_parser.add_argument('--effectInOrder',  type=str, dest = 'effectInOrder', default = 1)
+        self.arg_parser.add_argument('--effectInDuration',  type=float, dest = 'effectInDuration', default = 0.8)
+        self.arg_parser.add_argument('--effectIn',  type=str, dest = 'effectIn', default = 'none')
+        self.arg_parser.add_argument('--effectOutOrder',  type=str, dest = 'effectOutOrder', default = 2)
+        self.arg_parser.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
+        self.arg_parser.add_argument('--effectOut',  type=str, dest = 'effectOut', default = 'none')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -64,7 +65,5 @@ class JessyInk_Effects(inkex.Effect):
 
 # Create effect instance
 if __name__ == '__main__':
-
-    effect = JessyInk_Effects()
-    effect.affect()
+    JessyInk_Effects().run()
 

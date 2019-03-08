@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2006 Julien Vitard <julienvitard@gmail.com>
 #
@@ -92,16 +93,16 @@ class EQTEXSVG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-f", "--formule",
-                        action="store", type=str,
+                         type=str,
                         dest="formula", default="",
                         help="LaTeX formula")
         self.arg_parser.add_argument("-p", "--packages",
-                        action="store", type=str,
+                         type=str,
                         dest="packages", default="",
                         help="Additional packages")
     def effect(self):
 
-        base_dir = tempfile.mkdtemp("", "inkscape-");
+        base_dir = tempfile.mkdtemp("", "inkscape-")
         latex_file = os.path.join(base_dir, "eq.tex")
         aux_file = os.path.join(base_dir, "eq.aux")
         log_file = os.path.join(base_dir, "eq.log")
@@ -157,7 +158,6 @@ class EQTEXSVG(inkex.Effect):
         clean()
 
 if __name__ == '__main__':
-    e = EQTEXSVG()
-    e.affect()
+    EQTEXSVG().run()
 
 

@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2014 Martin Owens
 #
@@ -22,6 +23,7 @@ Renderer for barcodes, SVG extension for Inkscape.
 For supported barcodes see Barcode module directory.
 """
 
+
 # This lists all known Barcodes missing from this package
 # ===== UPC-Based Extensions ====== #
 # Code11
@@ -38,10 +40,9 @@ For supported barcodes see Barcode module directory.
 # PDF417-Truncated
 # PDF417-GLI
 
-import sys
-
 class NoBarcode(object):
     """Simple class for no barcode"""
+
     def __init__(self, msg):
         self.msg = msg
 
@@ -52,6 +53,7 @@ class NoBarcode(object):
     def generate(self):
         """Generate actual svg from the barcode pattern"""
         return None
+
 
 def get_barcode(code, **kw):
     """Gets a barcode from a list of available barcode formats"""

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2009 Michel Chatelain.
 #               2007 Tavmjong Bah, tavmjong@free.fr
@@ -36,39 +37,39 @@ import inkex
 from inkex.paths import Path
 from inkex.utils import inkbool
 
-def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, height, left, bottom,
-    fx="cos(3*t)", fy="sin(5*t)", times2pi = False, isoscale = True, drawaxis = True):
 
-    if times2pi == True:
-        t_start = 2 * pi * t_start
-        t_end   = 2 * pi * t_end
+def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, height, left, bottom,
+                 fx="cos(3*t)", fy="sin(5*t)", times2pi=False, isoscale=True, drawaxis=True):
+    if times2pi:
+        t_start *= 2 * pi
+        t_end *= 2 * pi
 
     # coords and scales based on the source rect
     scalex = width / (xright - xleft)
     xoff = left
-    coordx = lambda x: (x - xleft) * scalex + xoff  #convert x-value to coordinate
+    coordx = lambda x: (x - xleft) * scalex + xoff  # convert x-value to coordinate
     scaley = height / (ytop - ybottom)
     yoff = bottom
-    coordy = lambda y: (ybottom - y) * scaley + yoff  #convert y-value to coordinate
+    coordy = lambda y: (ybottom - y) * scaley + yoff  # convert y-value to coordinate
 
     # Check for isotropic scaling and use smaller of the two scales, correct ranges
     if isoscale:
-      if scaley<scalex:
-        # compute zero location
-        xzero = coordx(0)
-        # set scale
-        scalex = scaley
-        # correct x-offset
-        xleft = (left-xzero)/scalex
-        xright = (left+width-xzero)/scalex
-      else :
-        # compute zero location
-        yzero = coordy(0)
-        # set scale
-        scaley = scalex
-        # correct x-offset
-        ybottom = (yzero-bottom)/scaley
-        ytop = (bottom+height-yzero)/scaley
+        if scaley < scalex:
+            # compute zero location
+            xzero = coordx(0)
+            # set scale
+            scalex = scaley
+            # correct x-offset
+            xleft = (left - xzero) / scalex
+            xright = (left + width - xzero) / scalex
+        else:
+            # compute zero location
+            yzero = coordy(0)
+            # set scale
+            scaley = scalex
+            # correct x-offset
+            ybottom = (yzero - bottom) / scaley
+            ytop = (bottom + height - yzero) / scaley
 
     # functions specified by the user
     if fx != "":
@@ -77,23 +78,23 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
         f2 = eval('lambda t: ' + fy.strip('"'))
 
     # step is increment of t
-    step = (t_end - t_start) / (samples-1)
+    step = (t_end - t_start) / (samples - 1)
     third = step / 3.0
-    ds = step * 0.001 # Step used in calculating derivatives
+    ds = step * 0.001  # Step used in calculating derivatives
 
-    a = [] # path array
+    a = []  # path array
     # add axis
-    if drawaxis :
-      # check for visibility of x-axis
-      if ybottom<=0 and ytop>=0:
-        # xaxis
-        a.append(['M ',[left, coordy(0)]])
-        a.append([' l ',[width, 0]])
-      # check for visibility of y-axis
-      if xleft<=0 and xright>=0:
-        # xaxis
-        a.append([' M ',[coordx(0),bottom]])
-        a.append([' l ',[0, -height]])
+    if drawaxis:
+        # check for visibility of x-axis
+        if ybottom <= 0 <= ytop:
+            # xaxis
+            a.append(['M ', [left, coordy(0)]])
+            a.append([' l ', [width, 0]])
+        # check for visibility of y-axis
+        if xleft <= 0 <= xright:
+            # xaxis
+            a.append([' M ', [coordx(0), bottom]])
+            a.append([' l ', [0, -height]])
 
     # initialize functions and derivatives for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
@@ -101,38 +102,39 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
     y0 = f2(t_start)
 
     # numerical derivatives, using 0.001*step as the small differential
-    t1 = t_start + ds # Second point AFTER first point (Good for first point)
+    t1 = t_start + ds  # Second point AFTER first point (Good for first point)
     x1 = f1(t1)
     y1 = f2(t1)
-    dx0 = (x1 - x0)/ds
-    dy0 = (y1 - y0)/ds
+    dx0 = (x1 - x0) / ds
+    dy0 = (y1 - y0) / ds
 
     # Start curve
-    a.append([' M ',[coordx(x0), coordy(y0)]]) # initial moveto
-    for i in range(int(samples-1)):
-        t1 = (i+1) * step + t_start
-        t2 = t1 - ds # Second point BEFORE first point (Good for last point)
+    a.append([' M ', [coordx(x0), coordy(y0)]])  # initial moveto
+    for i in range(int(samples - 1)):
+        t1 = (i + 1) * step + t_start
+        t2 = t1 - ds  # Second point BEFORE first point (Good for last point)
         x1 = f1(t1)
         x2 = f1(t2)
         y1 = f2(t1)
         y2 = f2(t2)
 
         # numerical derivatives
-        dx1 = (x1 - x2)/ds
-        dy1 = (y1 - y2)/ds
+        dx1 = (x1 - x2) / ds
+        dy1 = (y1 - y2) / ds
 
         # create curve
         a.append([' C ',
                   [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)),
                    coordx(x1 - (dx1 * third)), coordy(y1 - (dy1 * third)),
-                   coordx(x1),                 coordy(y1)]
+                   coordx(x1), coordy(y1)]
                   ])
-        t0  = t1  # Next segment's start is this segments end
-        x0  = x1
-        y0  = y1
-        dx0 = dx1 # Assume the functions are smooth everywhere, so carry over the derivatives too
+        t0 = t1  # Next segment's start is this segments end
+        x0 = x1
+        y0 = y1
+        dx0 = dx1  # Assume the functions are smooth everywhere, so carry over the derivatives too
         dy0 = dy1
     return a
+
 
 class ParamCurves(inkex.Effect):
     def __init__(self):
@@ -172,15 +174,15 @@ class ParamCurves(inkex.Effect):
 
     def effect(self):
         for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('rect','svg'):
+            if node.tag == inkex.addNS('rect', 'svg'):
                 # create new path with basic dimensions of selected rectangle
-                newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+                newpath = inkex.etree.Element(inkex.addNS('path', 'svg'))
                 x = float(node.get('x'))
                 y = float(node.get('y'))
                 w = float(node.get('width'))
                 h = float(node.get('height'))
 
-                #copy attributes of rect
+                # copy attributes of rect
                 s = node.get('style')
                 if s:
                     newpath.set('style', s)
@@ -191,22 +193,22 @@ class ParamCurves(inkex.Effect):
 
                 # top and bottom were exchanged
                 newpath.set('d', Path(
-                            drawfunction(self.options.t_start,
-                                self.options.t_end,
-                                self.options.xleft,
-                                self.options.xright,
-                                self.options.ybottom,
-                                self.options.ytop,
-                                self.options.samples,
-                                w,h,x,y+h,
-                                self.options.fofx,
-                                self.options.fofy,
-                                self.options.times2pi,
-                                self.options.isoscale,
-                                self.options.drawaxis)))
+                        drawfunction(self.options.t_start,
+                                     self.options.t_end,
+                                     self.options.xleft,
+                                     self.options.xright,
+                                     self.options.ybottom,
+                                     self.options.ytop,
+                                     self.options.samples,
+                                     w, h, x, y + h,
+                                     self.options.fofx,
+                                     self.options.fofy,
+                                     self.options.times2pi,
+                                     self.options.isoscale,
+                                     self.options.drawaxis)))
                 newpath.set('title', self.options.fofx + " " + self.options.fofy)
 
-                #newpath.set('desc', '!func;' + self.options.fofx + ';' + self.options.fofy + ';'
+                # newpath.set('desc', '!func;' + self.options.fofx + ';' + self.options.fofy + ';'
                 #                                      + `self.options.t_start` + ';'
                 #                                      + `self.options.t_end` + ';'
                 #                                      + `self.options.samples`)
@@ -217,6 +219,6 @@ class ParamCurves(inkex.Effect):
                 if self.options.remove:
                     node.getparent().remove(node)
 
-if __name__ == '__main__':
-    ParamCurves().affect()
 
+if __name__ == '__main__':
+    ParamCurves().run()

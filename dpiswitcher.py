@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2012 Jabiertxo Arraiza, jabier.arraiza@marker.es
 # Copyright (C) 2016 su_v, <suv-sf@users.sf.net>
@@ -419,10 +420,9 @@ class DPISwitcher(inkex.Effect):
                     self.unitExponent = 1.0/(self.factor_a/self.__uuconv[self.units])
                 else:
                     self.unitExponent = 1.0/(self.factor_a/self.__uuconvLegacy[self.units])
-            self.scaleRoot(svg);
+            self.scaleRoot(svg)
 
 
 if __name__ == '__main__':
-    effect = DPISwitcher()
-    effect.affect()
+    DPISwitcher().run()
 

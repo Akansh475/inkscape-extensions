@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 #
 # Copyright (C) 2005,2007 Aaron Spike, aaron@ekips.org
 # - template dxf_outlines.dxf added Feb 2008 by Alvin Penner, penner@vaxxine.com
@@ -144,5 +145,4 @@ class MyEffect(inkex.Effect):
         self.dxf_add( r12_footer )
 
 if __name__ == '__main__':
-    e = MyEffect()
-    e.affect()
+    MyEffect().run()

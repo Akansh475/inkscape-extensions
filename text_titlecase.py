@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 import chardataeffect
 
 class TitleCase(chardataeffect.CharDataEffect):
@@ -25,5 +26,4 @@ class TitleCase(chardataeffect.CharDataEffect):
     return r
 
 if __name__ == '__main__':
-    c = TitleCase()
-    c.affect()
+    TitleCase().run()

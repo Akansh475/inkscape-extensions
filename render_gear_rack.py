@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-'''
+# coding=utf-8
+"""
 Copyright (C) 2013 Brett Graham (hahahaha @ hahaha.org)
 
 This program is free software; you can redistribute it and/or modify
@@ -15,23 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-'''
+"""
+
+from math import acos, cos, radians, sin, sqrt, tan
+
+from lxml import etree
+from simpletransform import computePointInNode
 
 import inkex
-import simplestyle
-from simpletransform import computePointInNode
-from math import *
 
 
 def involute_intersect_angle(Rb, R):
     Rb, R = float(Rb), float(R)
-    return (sqrt(R**2 - Rb**2) / (Rb)) - (acos(Rb / R))
+    return (sqrt(R ** 2 - Rb ** 2) / (Rb)) - (acos(Rb / R))
 
 
 def point_on_circle(radius, angle):
     x = radius * cos(angle)
     y = radius * sin(angle)
-    return (x, y)
+    return x, y
 
 
 def points_to_svgd(p):
@@ -40,9 +43,9 @@ def points_to_svgd(p):
     """
     f = p[0]
     p = p[1:]
-    svgd = 'M%.3f,%.3f' % f
+    svgd = 'M{:.3f},{:.3f}'.format(f[0], f[1])
     for x in p:
-        svgd += 'L%.3f,%.3f' % x
+        svgd += 'L{:.3f},{:.3f}'.format(x[0], x[1])
     return svgd
 
 
@@ -50,17 +53,17 @@ class RackGear(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument(
-            "-l", "--length", type=float,
-            dest="length", default=100.,
-            help="Rack Length")
+                "-l", "--length", type=float,
+                dest="length", default=100.,
+                help="Rack Length")
         self.arg_parser.add_argument(
-            "-s", "--spacing", type=float,
-            dest="spacing", default=10.,
-            help="Tooth Spacing")
+                "-s", "--spacing", type=float,
+                dest="spacing", default=10.,
+                help="Tooth Spacing")
         self.arg_parser.add_argument(
-            "-a", "--angle", type=float,
-            dest="angle", default=20.,
-            help="Contact Angle")
+                "-a", "--angle", type=float,
+                dest="angle", default=20.,
+                help="Contact Angle")
 
     def effect(self):
         length = self.svg.unittouu(str(self.options.length) + 'px')
@@ -84,21 +87,20 @@ class RackGear(inkex.Effect):
         # Embed gear in group to make animation easier:
         #  Translate group, Rotate path.
         view_center = computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
-        t = 'translate(' + str(view_center[0]) + ',' + \
-            str(view_center[1]) + ')'
+        t = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
         g_attribs = {
             inkex.addNS('label', 'inkscape'): 'RackGear' + str(length),
             'transform': t}
-        g = inkex.etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
+        g = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
 
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
         gear_attribs = {
             'style': str(inkex.Style(style)),
             'd': path}
-        gear = inkex.etree.SubElement(
-            g, inkex.addNS('path', 'svg'), gear_attribs)
+        gear = etree.SubElement(
+                g, inkex.addNS('path', 'svg'), gear_attribs)
+
 
 if __name__ == '__main__':
-    e = RackGear()
-    e.affect()
+    RackGear().run()

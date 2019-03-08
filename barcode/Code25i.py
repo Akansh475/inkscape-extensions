@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2010 Geoffrey Mosini
 #
@@ -38,6 +39,7 @@ ENCODE = {
 
 class Code25i(Barcode):
     """Convert a text into string binary of black and white markers"""
+
     # Start and stop code are already encoded into white (0) and black(1) bars
     def encode(self, number):
         if not number.isdigit():
@@ -53,8 +55,8 @@ class Code25i(Barcode):
         encoded = '1010'
         for i in range(size):
             # First in the pair is encoded in black (1), second in white (0)
-            black = ENCODE[number[i*2]]
-            white = ENCODE[number[i*2+1]]
+            black = ENCODE[number[i * 2]]
+            white = ENCODE[number[i * 2 + 1]]
             for j in range(5):
                 if black[j] == '1':
                     encoded += '11'
@@ -65,4 +67,3 @@ class Code25i(Barcode):
                 else:
                     encoded += '0'
         return encoded + '1101'
-

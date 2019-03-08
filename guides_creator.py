@@ -42,10 +42,7 @@ This basic extension allows you to automatically draw guides in inkscape.
 
 # # # extension's beginning # # #
 
-# These two lines are only needed if you don't put the script directly into
-# the installation directory
 import sys
-sys.path.append('/usr/share/inkscape/extensions')
 
 from xml.etree import ElementTree as ET
 # for golden number formulae

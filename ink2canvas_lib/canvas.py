@@ -17,17 +17,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-import inkex
 import simplestyle
 
-class Canvas:
+
+class Canvas(object):
     """Canvas API helper class"""
 
-    def __init__(self, parent, width, height, context = "ctx"):
+    def __init__(self, parent, width, height, context="ctx"):
         self.obj = context
-        self.code = []  #stores the code
+        self.code = []  # stores the code
         self.style = {}
-        self.styleCache = {}  #stores the previous style applied
+        self.styleCache = {}  # stores the previous style applied
         self.parent = parent
         self.width = width
         self.height = height
@@ -96,7 +96,7 @@ class Canvas:
             pos = float(stop.get("offset"))
             self.addColorStop(href, pos, color)
         """
-        return None #href
+        return None  # href
 
     def setOpacity(self, value):
         self.write("ctx.globalAlpha = %.1f;" % float(value))
@@ -146,18 +146,18 @@ class Canvas:
         data = (x1, y1, x2, y2, x, y)
         self.write("ctx.bezierCurveTo(%f, %f, %f, %f, %f, %f);" % data)
 
-    def rect(self, x, y, w, h, rx = 0, ry = 0):
+    def rect(self, x, y, w, h, rx=0, ry=0):
         if rx or ry:
-            #rounded rectangle, starts top-left anticlockwise
+            # rounded rectangle, starts top-left anticlockwise
             self.moveTo(x, y + ry)
-            self.lineTo(x, y+h-ry)
-            self.quadraticCurveTo(x, y+h, x+rx, y+h)
-            self.lineTo(x+w-rx, y+h)
-            self.quadraticCurveTo(x+w, y+h, x+w, y+h-ry)
-            self.lineTo(x+w, y+ry)
-            self.quadraticCurveTo(x+w, y, x+w-rx, y)
-            self.lineTo(x+rx, y)
-            self.quadraticCurveTo(x, y, x, y+ry)
+            self.lineTo(x, y + h - ry)
+            self.quadraticCurveTo(x, y + h, x + rx, y + h)
+            self.lineTo(x + w - rx, y + h)
+            self.quadraticCurveTo(x + w, y + h, x + w, y + h - ry)
+            self.lineTo(x + w, y + ry)
+            self.quadraticCurveTo(x + w, y, x + w - rx, y)
+            self.lineTo(x + rx, y)
+            self.quadraticCurveTo(x, y, x, y + ry)
         else:
             self.write("ctx.rect(%f, %f, %f, %f);" % (x, y, w, h))
 
@@ -192,4 +192,3 @@ class Canvas:
             self.write("ctx.fill();")
         if "stroke" in self.style and self.style["stroke"] != "none":
             self.write("ctx.stroke();")
-        #self.write("%s.closePath();" % self.obj)

@@ -75,7 +75,7 @@ class JessyInk_Effects(inkex.Effect):
         layer[0].append(elem)
 
 def findInternalLinks(node, docRoot, nodeDict = {}):
-    for entry in re.findall(b"url\(#.*\)", etree.tostring(node)):
+    for entry in re.findall(br"url\(#.*\)", etree.tostring(node)):
         entry = entry.decode()
         linkId = entry[5:len(entry) - 1]
 

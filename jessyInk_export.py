@@ -146,7 +146,7 @@ class MyEffect(inkex.Effect):
     def findInkscapeCommand(self):
         commands = []
         commands.append("inkscape")
-        commands.append("C:\Program Files\Inkscape\inkscape.exe")
+        commands.append(r"C:\Program Files\Inkscape\inkscape.exe")
         commands.append("/Applications/Inkscape.app/Contents/Resources/bin/inkscape")
 
         for command in commands:

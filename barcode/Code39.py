@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2007 Martin Owens
 #
@@ -25,7 +26,7 @@ ENCODE = {
     '0': '000110100',
     '1': '100100001',
     '2': '001100001',
-    '3': '101100000', 
+    '3': '101100000',
     '4': '000110001',
     '5': '100110000',
     '6': '001110000',
@@ -68,8 +69,10 @@ ENCODE = {
     ' ': '011000100',
 }
 
+
 class Code39(Barcode):
     """Convert a text into string binary of black and white markers"""
+
     def encode(self, text):
         self.text = text.upper()
         result = ''
@@ -84,7 +87,7 @@ class Code39(Barcode):
         # Now we need to encode the code39, best read
         # the code to understand what it's up to:
         encoded = ''
-        colour = '1' # 1 = Black, 0 = White
+        colour = '1'  # 1 = Black, 0 = White
         for data in result:
             if data == '1':
                 encoded = encoded + colour + colour
@@ -93,4 +96,3 @@ class Code39(Barcode):
             colour = colour == '1' and '0' or '1'
 
         return encoded
-

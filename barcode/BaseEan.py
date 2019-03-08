@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2010 Martin Owens
 #
@@ -32,6 +33,7 @@ MAPPING = [
 # This chooses which of the two encodings above to use.
 FAMILIES = ('000000', '001011', '001101', '001110', '010011',
             '011001', '011100', '010101', '010110', '011010')
+
 
 class EanBarcode(Barcode):
     """Simple base class for all EAN type barcodes"""
@@ -105,12 +107,11 @@ class EanBarcode(Barcode):
                 if sep in lengths:
                     # Generate a barcode along side this one.
                     self.add_extra_barcode(self.extras[extra], text=code[sep:],
-                        x=self.pos_x + 400 * self.scale, text_pos=TEXT_POS_TOP)
+                                           x=self.pos_x + 400 * self.scale, text_pos=TEXT_POS_TOP)
                     code = code[:sep]
 
         if len(code) not in lengths:
-            return self.error(code, 'Wrong size %d, must be %s digits' %
-                (len(code), ', '.join([str(length) for length in lengths])))
+            return self.error(code, 'Wrong size {:d}, must be {} digits'.format(len(code), ', '.join([str(length) for length in lengths])))
 
         if self.checks:
             if len(code) not in self.checks:
@@ -150,4 +151,3 @@ class EanBarcode(Barcode):
     def verify_checksum(self, number):
         """Verify any checksum"""
         return self.get_checksum(number[:-1]) == number[-1]
-

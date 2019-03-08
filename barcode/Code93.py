@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2007 Martin Owens
 #
@@ -30,21 +31,23 @@ PALLET.append('MARKER')
 
 MAP = dict((PALLET[i], i) for i in range(len(PALLET)))
 
+
 def get_map(array):
     """Extended ENCODE maps for full ASCII Code93"""
     result = {}
     pos = 10
     for char in array:
         result[chr(char)] = PALLET[pos]
-        pos = pos + 1
+        pos += 1
     return result
+
 
 # MapA is eclectic, but B, C, D are all ASCII ranges
 MAP_A = get_map([27, 28, 29, 30, 31, 59, 60, 61, 62, 63, 91, 92, 93, 94, 95,
-                 123, 124, 125, 126, 127, 0, 64, 96, 127, 127, 127]) # %
-MAP_B = get_map(range(1, 26)) # $
-MAP_C = get_map(range(33, 58)) # /
-MAP_D = get_map(range(97, 122)) # +
+                 123, 124, 125, 126, 127, 0, 64, 96, 127, 127, 127])  # %
+MAP_B = get_map(range(1, 26))  # $
+MAP_C = get_map(range(33, 58))  # /
+MAP_D = get_map(range(97, 122))  # +
 
 ENCODE = [
     '100010100', '101001000', '101000100', '101000010', '100101000',
@@ -59,6 +62,7 @@ ENCODE = [
     '111010110', '100110010', '101011110', ''
 ]
 
+
 class Code93(Barcode):
     def encode(self, text):
         # start marker
@@ -68,8 +72,8 @@ class Code93(Barcode):
         text = self.encode_ascii(text)
 
         # Calculate the checksums
-        text.append(self.checksum(text, 20)) # C
-        text.append(self.checksum(text, 15)) # K
+        text.append(self.checksum(text, 20))  # C
+        text.append(self.checksum(text, 15))  # K
 
         # Now convert text into the ENCODE bits (black and white stripes)
         for char in text:
@@ -85,7 +89,7 @@ class Code93(Barcode):
         for char in text:
             check = check + (MAP[char] * weight)
             # Reset the weight is required
-            weight = weight - 1
+            weight -= 1
             if weight == 0:
                 weight = mod
 
@@ -110,4 +114,3 @@ class Code93(Barcode):
                 result.append('(+)')
                 result.append(MAP_D[char])
         return result
-

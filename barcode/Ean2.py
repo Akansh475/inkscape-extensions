@@ -1,3 +1,4 @@
+# coding=utf-8
 #
 # Copyright (C) 2016 Martin Owens
 #
@@ -24,6 +25,7 @@ from .BaseEan import EanBarcode
 FAMS = ['00', '01', '10', '11']
 START = '01011'
 
+
 class Ean2(EanBarcode):
     """Provide an Ean5 barcode generator"""
     length = 2
@@ -35,4 +37,3 @@ class Ean2(EanBarcode):
         self.text = ' '.join(self.space(num))
         family = ((num[0] * 10) + num[1]) % 4
         return START + '01'.join(self.encode_interleaved(family, num, FAMS))
-

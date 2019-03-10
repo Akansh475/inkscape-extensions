@@ -129,7 +129,7 @@ def export_SPLINE():
                         vals[groups['20']].insert(i - 1, (1.0 - a1) * vals[groups['20']][i - 2] + a1 * vals[groups['20']][i - 1])
             ctrls = len(vals[groups['10']])
             path = 'M %f,%f' % (vals[groups['10']][0], vals[groups['20']][0])
-            for i in range(0, (ctrls - 1) / 3):
+            for i in range(0, (ctrls - 1) // 3):
                 path += ' C %f,%f %f,%f %f,%f' % (vals[groups['10']][3 * i + 1], vals[groups['20']][3 * i + 1], vals[groups['10']][3 * i + 2], vals[groups['20']][3 * i + 2], vals[groups['10']][3 * i + 3], vals[groups['20']][3 * i + 3])
             if vals[groups['70']][0] & 1:  # closed path
                 path += ' z'
@@ -372,7 +372,7 @@ def generate_gcodetools_point(xc, yc):
 
 entities = {'MTEXT': export_MTEXT, 'TEXT': export_MTEXT, 'POINT': export_POINT, 'LINE': export_LINE, 'SPLINE': export_SPLINE, 'CIRCLE': export_CIRCLE, 'ARC': export_ARC, 'ELLIPSE': export_ELLIPSE, 'LEADER': export_LEADER, 'LWPOLYLINE': export_LWPOLYLINE, 'HATCH': export_HATCH, 'DIMENSION': export_DIMENSION, 'INSERT': export_INSERT, 'BLOCK': export_BLOCK, 'ENDBLK': export_ENDBLK, 'ATTDEF': export_ATTDEF, 'VIEWPORT': False, 'ENDSEC': False}
 groups = {'1': 0, '2': 1, '3': 2, '6': 3, '8': 4, '10': 5, '11': 6, '13': 7, '14': 8, '20': 9, '21': 10, '23': 11, '24': 12, '40': 13, '41': 14, '42': 15, '50': 16, '51': 17, '62': 18, '70': 19, '72': 20, '73': 21, '92': 22, '93': 23, '230': 24, '370': 25}
-colors = {1: '#FF0000', 2: '#FFFF00', 3: '#00FF00', 4: '#00FFFF', 5: '#0000FF', 6: '#FF00FF', 7: '#FFFFFF', 8: '#808080',
+colors = {1: '#FF0000', 2: '#FFFF00', 3: '#00FF00', 4: '#00FFFF', 5: '#0000FF', 6: '#FF00FF', 7: '#000000', 8: '#808080',
           9: '#C0C0C0', 10: '#FF0000', 11: '#FF7F7F', 12: '#CC0000', 13: '#CC6666', 14: '#990000', 15: '#994C4C', 16: '#7F0000', 17: '#7F3F3F',
           18: '#4C0000', 19: '#4C2626', 20: '#FF3F00', 21: '#FF9F7F', 22: '#CC3300', 23: '#CC7F66', 24: '#992600', 25: '#995F4C', 26: '#7F1F00',
           27: '#7F4F3F', 28: '#4C1300', 29: '#4C2F26', 30: '#FF7F00', 31: '#FFBF7F', 32: '#CC6600', 33: '#CC9966', 34: '#994C00', 35: '#99724C',

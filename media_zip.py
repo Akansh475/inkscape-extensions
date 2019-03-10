@@ -59,7 +59,7 @@ except ImportError:  # PY3
 inkex.localize.localize()
 
 
-class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
+class CompressedMediaOutput(inkex.Effect):
     def __init__(self):
         super(CompressedMediaOutput, self).__init__()
         if os.name == 'nt':
@@ -98,7 +98,8 @@ class CompressedMediaOutput(SvgThroughMixin, InkscapeExtension):
                     msvcrt.setmode(1, os.O_BINARY)
                 except:
                     pass
-            sys.stdout.write(out.read())
+            stdout = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
+            stdout.write(out.read())
         shutil.rmtree(self.tmp_dir)
 
     def collect_images(self, docname, z):

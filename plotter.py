@@ -112,7 +112,7 @@ class Plot(inkex.Effect):
             hpglInit += ';FS%d' % self.options.force
         if self.options.speed > 0:
             hpglInit += ';VS%d' % self.options.speed
-        self.hpgl = hpglInit + self.hpgl + ';PU0,0;SP0;IN; '
+        self.hpgl = hpglInit + self.hpgl + ';SP0;PU0,0;IN; '
 
     def convertToDmpl(self):
         # convert HPGL to DMPL
@@ -135,7 +135,7 @@ class Plot(inkex.Effect):
         if self.options.speed > 0:
             dmplInit += 'V%d' % self.options.speed
         dmplInit += 'EC1'
-        self.hpgl = dmplInit + self.hpgl[1:] + ',U0,0,P0,Z '
+        self.hpgl = dmplInit + self.hpgl[1:] + ',P0,U0,0,Z '
 
     def convertToKNK(self):
         # convert HPGL to KNK Plotter Language
@@ -144,7 +144,7 @@ class Plot(inkex.Effect):
             hpglInit += ';FS%d' % self.options.force
         if self.options.speed > 0:
             hpglInit += ';VS%d' % self.options.speed
-        self.hpgl = hpglInit + self.hpgl + ';PU0,0;SP0;@ '
+        self.hpgl = hpglInit + self.hpgl + ';SP0;PU0,0;@ '
 
     def sendHpglToParallel(self):
         port = open(self.options.parallelPort, "w")

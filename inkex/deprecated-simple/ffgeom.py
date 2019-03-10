@@ -18,24 +18,32 @@
 """Deprecated ffgeom API"""
 
 from inkex.deprecated import deprecate
-from inkex.paths import Move
 
+import math
 try:
     NaN = float('NaN')
 except ValueError:
     PosInf = 1e300000
     NaN = PosInf/PosInf
 
-@deprecate
-class Point(Move):
+class Point:
     precision = 5
-    number_template = "{:5g}"
-
+    def __init__(self, x, y):
+        self.__coordinates = {'x' : float(x), 'y' : float(y)}
+    def __getitem__(self, key):
+        return self.__coordinates[key]
+    def __setitem__(self, key, value):
+        self.__coordinates[key] = float(value)
+    def __repr__(self):
+        return '(%s, %s)' % (round(self['x'],self.precision),round(self['y'],self.precision))
+    def copy(self):
+        return Point(self['x'],self['y'])
     def translate(self, x, y):
-        return super(Point, self).translate([x, y])
-
+        self['x'] += x
+        self['y'] += y
     def move(self, x, y):
-        return super(Point, self).translate([x - self.x, y - self.y])
+        self['x'] = float(x)
+        self['y'] = float(y)
 
 class Segment:
     def __init__(self, e0, e1):

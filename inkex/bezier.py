@@ -345,6 +345,7 @@ def beziertatlength(arg, l=0.5, tolerance=0.001):
 
 
 def maxdist(arg):
+    from ffgeom import Point, Segment
     ((p0x, p0y), (p1x, p1y), (p2x, p2y), (p3x, p3y)) = arg
     p0 = Point(p0x, p0y)
     p1 = Point(p1x, p1y)

@@ -55,7 +55,7 @@ def ArcToPath(p1, params):
     teta = teta * pi / 180.0
     B = [x2, y2]
     if rx == 0 or ry == 0 or A == B:
-        return ([[A[:], A[:], A[:]], [B[:], B[:], B[:]]])
+        return [[A[:], A[:], A[:]], [B[:], B[:], B[:]]]
     mat = matprod((rotmat(teta), [[1 / rx, 0], [0, 1 / ry]], rotmat(-teta)))
     applymat(mat, A)
     applymat(mat, B)
@@ -103,7 +103,7 @@ def ArcToPath(p1, params):
         applymat(mat, pts[0])
         applymat(mat, pts[1])
         applymat(mat, pts[2])
-    return (p)
+    return p
 
 
 def CubicSuperPath(simplepath):

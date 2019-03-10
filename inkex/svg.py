@@ -27,10 +27,9 @@
 Provide a way to load lxml attributes with an svg API on top.
 """
 
-import sys
 import inspect
 import random
-
+import sys
 from collections import OrderedDict
 
 import lxml
@@ -93,17 +92,17 @@ class SvgDocumentElement(BaseElement):
             return (self.unittouu(namedview.center_x),
                     self.unittouu(namedview.center_y))
             # y-coordinate flip, eliminate it when it's gone in Inkscape
-            #doc_height = self.unittouu(self.height)
-            #return (float(x), doc_height - float(y))
-        return (0.0, 0.0)
+            # doc_height = self.unittouu(self.height)
+            # return (float(x), doc_height - float(y))
+        return 0.0, 0.0
 
     # This used to be called Effect.xpathSingle
-    def getElement(self, xpath): # pylint: disable=invalid-name
+    def getElement(self, xpath):  # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
         el_list = self.xpath(xpath)
         return el_list[0] if el_list else None
 
-    def getElementById(self, eid, elm='*'): # pylint: disable=invalid-name
+    def getElementById(self, eid, elm='*'):  # pylint: disable=invalid-name
         """Get an element in this svg document by it's ID attribute"""
         return self.getElement('//{}[@id="{}"]'.format(elm, eid))
 
@@ -128,12 +127,12 @@ class SvgDocumentElement(BaseElement):
         return ret
 
     @property
-    def width(self): #getDocumentWidth(self):
+    def width(self):  # getDocumentWidth(self):
         """Fault tolerance for lazily defined SVG"""
         return self.get('width') or self.get_viewbox()[2] or '0'
 
     @property
-    def height(self): #getDocumentHeight(self):
+    def height(self):  # getDocumentHeight(self):
         """Returns a string corresponding to the height of the document, as
         defined in the SVG file. If it is not defined, returns the height
         as defined by the viewBox attribute. If viewBox is not defined,
@@ -150,7 +149,7 @@ class SvgDocumentElement(BaseElement):
         viewbox = self.get_viewbox()
         if viewbox and set(viewbox) != {0}:
             return discover_unit(self.width, viewbox[2], default='px')
-        return 'px' # Default is px
+        return 'px'  # Default is px
 
     def unittouu(self, value):
         """Convert a unit value into the document's units"""
@@ -172,7 +171,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
     """
     _lookups = []
 
-    def lookup(self, node_type, document, namespace, name): # pylint: disable=unused-argument
+    def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
         """Choose what kind of functionality our element will have"""
         for cls in self.get_lookups():
             nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
@@ -180,12 +179,12 @@ class SvgClassLookup(etree.CustomElementClassLookup):
             if name.lower() in tags:
                 return cls
             if name.lower() == (tag or '').lower() and \
-                  (not namespace or not nsp or nsp == namespace):
+                    (not namespace or not nsp or nsp == namespace):
                 return cls
 
         import inkex
         inkex.errormsg("Failed to look up element: {}:{} ({})".format(
-            node_type, name, namespace))
+                node_type, name, namespace))
 
     def get_lookups(self):
         """Scan for and cache a list of available classes"""
@@ -193,9 +192,10 @@ class SvgClassLookup(etree.CustomElementClassLookup):
             module = sys.modules[__name__]
             self._lookups = [
                 cls for _, cls in inspect.getmembers(module) \
-                  if inspect.isclass(cls) and issubclass(cls, etree.ElementBase)
+                if inspect.isclass(cls) and issubclass(cls, etree.ElementBase)
             ]
         return self._lookups
+
 
 SVG_PARSER = lxml.etree.XMLParser(huge_tree=True)
 SVG_PARSER.setElementClassLookup(SvgClassLookup())

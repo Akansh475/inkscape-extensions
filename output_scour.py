@@ -69,10 +69,10 @@ class ScourInkscape(inkex.base.InkscapeExtension):
 
     def effect(self):
         # version check if enabled in options
-        if (self.options.scour_version_warn_old):
+        if self.options.scour_version_warn_old:
             scour_version = scour.__version__
             scour_version_min = self.options.scour_version
-            if (StrictVersion(scour_version) < StrictVersion(scour_version_min)):
+            if StrictVersion(scour_version) < StrictVersion(scour_version_min):
                 inkex.errormsg("The extension 'Optimized SVG Output' is designed for Scour " + scour_version_min + " and later "
                                "but you're using the older version Scour " + scour_version + ".")
                 inkex.errormsg("This usually works just fine but not all options available in the UI might be supported "

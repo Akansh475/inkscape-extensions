@@ -95,7 +95,7 @@ def linearize(p, tolerance=0.001):
     new = [p[i][1] for i in range(0, len(p) - 1) if lengths[i] > zero]
     new.append(p[-1][1])
     lengths = [l for l in lengths if l > zero]
-    return (new, lengths)
+    return new, lengths
 
 
 class PathScatter(pathmodifier.Diffeo):

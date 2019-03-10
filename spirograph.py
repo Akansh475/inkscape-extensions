@@ -19,35 +19,40 @@
 #
 
 import math
-import inkex
 
-class Spirograph(inkex.Effect):
+from lxml import etree
+
+import inkex
+from inkex.base import SvgThroughMixin, InkscapeExtension
+
+
+class Spirograph(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Spirograph, self).__init__()
         self.arg_parser.add_argument("-R", "--primaryr",
-                         type=float,
-                        dest="primaryr", default=60.0,
-                        help="The radius of the outer gear")
+                                     type=float,
+                                     dest="primaryr", default=60.0,
+                                     help="The radius of the outer gear")
         self.arg_parser.add_argument("-r", "--secondaryr",
-                         type=float,
-                        dest="secondaryr", default=100.0,
-                        help="The radius of the inner gear")
+                                     type=float,
+                                     dest="secondaryr", default=100.0,
+                                     help="The radius of the inner gear")
         self.arg_parser.add_argument("-d", "--penr",
-                         type=float,
-                        dest="penr", default=50.0,
-                        help="The distance of the pen from the inner gear")
+                                     type=float,
+                                     dest="penr", default=50.0,
+                                     help="The distance of the pen from the inner gear")
         self.arg_parser.add_argument("-p", "--gearplacement",
-                         type=str,
-                        dest="gearplacement", default="inside",
-                        help="Selects whether the gear is inside or outside the ring")
+                                     type=str,
+                                     dest="gearplacement", default="inside",
+                                     help="Selects whether the gear is inside or outside the ring")
         self.arg_parser.add_argument("-a", "--rotation",
-                         type=float,
-                        dest="rotation", default=0.0,
-                        help="The number of degrees to rotate the image by")
+                                     type=float,
+                                     dest="rotation", default=0.0,
+                                     help="The number of degrees to rotate the image by")
         self.arg_parser.add_argument("-q", "--quality",
-                         type=int,
-                        dest="quality", default=16,
-                        help="The quality of the calculated output")
+                                     type=int,
+                                     dest="quality", default=16,
+                                     help="The quality of the calculated output")
 
     def effect(self):
         self.options.primaryr = self.svg.unittouu(str(self.options.primaryr) + 'px')
@@ -59,7 +64,7 @@ class Spirograph(inkex.Effect):
         if self.options.quality == 0:
             return
 
-        if(self.options.gearplacement.strip(' ').lower().startswith('outside')):
+        if self.options.gearplacement.strip(' ').lower().startswith('outside'):
             a = self.options.primaryr + self.options.secondaryr
             flip = -1
         else:
@@ -73,8 +78,8 @@ class Spirograph(inkex.Effect):
 
         rotation = - math.pi * self.options.rotation / 180
 
-        new = inkex.etree.Element(inkex.addNS('path','svg'))
-        s = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px')) }
+        new = etree.Element(inkex.addNS('path', 'svg'))
+        s = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
         new.set('style', str(inkex.Style(s)))
 
         pathString = ''
@@ -84,7 +89,7 @@ class Spirograph(inkex.Effect):
 
             theta = i * scale
 
-            view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
+            view_center = inkex.computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
             x = a * math.cos(theta + rotation) + \
                 self.options.penr * math.cos(ratio * theta + rotation) * flip + \
                 view_center[0]
@@ -92,30 +97,26 @@ class Spirograph(inkex.Effect):
                 self.options.penr * math.sin(ratio * theta + rotation) + \
                 view_center[1]
 
-            dx = (-a * math.sin(theta + rotation) - \
-                ratio * self.options.penr * math.sin(ratio * theta + rotation) * flip) * scale / 3
-            dy = (a * math.cos(theta + rotation) - \
-                ratio * self.options.penr * math.cos(ratio * theta + rotation)) * scale / 3
+            dx = (-a * math.sin(theta + rotation) - ratio * self.options.penr * math.sin(ratio * theta + rotation) * flip) * scale / 3
+            dy = (a * math.cos(theta + rotation) - ratio * self.options.penr * math.cos(ratio * theta + rotation)) * scale / 3
 
             if i <= 0:
-                pathString += 'M ' + str(x) + ',' + str(y) + ' C ' + str(x + dx) + ',' + str(y + dy) + ' '
+                pathString += 'M {},{} C {},{} '.format(str(x), str(y), str(x + dx), str(y + dy))
             else:
-                pathString += str(x - dx) + ',' + str(y - dy) + ' ' + str(x) + ',' + str(y)
+                pathString += '{},{} {},{}'.format(str(x - dx), str(y - dy), str(x), str(y))
 
                 if math.fmod(i / ratio, self.options.quality) == 0 and i % self.options.quality == 0:
                     pathString += 'Z'
                     break
                 else:
                     if i == maxPointCount - 1:
-                        pass # we reached the allowed maximum of points, stop here
+                        pass  # we reached the allowed maximum of points, stop here
                     else:
-                        pathString += ' C ' + str(x + dx) + ',' + str(y + dy) + ' '
-
+                        pathString += ' C {},{} '.format(str(x + dx), str(y + dy))
 
         new.set('d', pathString)
-        self.current_layer.append(new)
+        self.svg.get_current_layer().append(new)
+
 
 if __name__ == '__main__':
     Spirograph().run()
-
-

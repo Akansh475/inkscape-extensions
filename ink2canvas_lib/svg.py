@@ -17,12 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-import inkex
+from __future__ import unicode_literals
+
 import simplestyle
 from simplepath import parsePath
 from simpletransform import parseTransform
 
-class Element:
+import inkex
+
+
+class Element(object):
     def attr(self, val, ns=""):
         if ns:
             val = inkex.addNS(val, ns)
@@ -45,7 +49,7 @@ class LinearGradientDef(GradientDef):
         y1 = self.attr("y1")
         x2 = self.attr("x2")
         y2 = self.attr("y2")
-        #self.createLinearGradient(href, x1, y1, x2, y2)
+        # self.createLinearGradient(href, x1, y1, x2, y2)
 
     def draw(self):
         pass
@@ -56,10 +60,11 @@ class RadialGradientDef(GradientDef):
         cx = self.attr("cx")
         cy = self.attr("cy")
         r = self.attr("r")
-        #self.createRadialGradient(href, cx, cy, r, cx, cy, r)
+        # self.createRadialGradient(href, cx, cy, r, cx, cy, r)
 
     def draw(self):
         pass
+
 
 class AbstractShape(Element):
     def __init__(self, command, node, ctx):
@@ -72,8 +77,8 @@ class AbstractShape(Element):
 
     def get_style(self):
         style = simplestyle.parseStyle(self.attr("style"))
-        #remove any trailing space in dict keys/values
-        style = dict([(str.strip(k), str.strip(v)) for k,v in style.items()])
+        # remove any trailing space in dict keys/values
+        style = dict([(str.strip(k), str.strip(v)) for k, v in style.items()])
         return style
 
     def set_style(self, style):
@@ -84,7 +89,7 @@ class AbstractShape(Element):
             method = "set" + "".join(tmp_list)
             if hasattr(self.ctx, method) and style[key] != "none":
                 getattr(self.ctx, method)(style[key])
-        #saves style to compare in next iteration
+        # saves style to compare in next iteration
         self.ctx.style_cache = style
 
     def has_transform(self):
@@ -103,8 +108,7 @@ class AbstractShape(Element):
         style = self.get_style()
         if "fill" in style:
             fill = style["fill"]
-            return fill.startswith("url(#linear") or \
-                   fill.startswith("url(#radial")
+            return fill.startswith("url(#linear") or fill.startswith("url(#radial")
         return False
 
     def get_gradient_href(self):
@@ -128,7 +132,7 @@ class AbstractShape(Element):
         self.ctx.beginPath()
         if self.has_transform():
             trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix) # unpacks argument list
+            self.ctx.transform(*trans_matrix)  # unpacks argument list
         if self.has_gradient():
             self.gradient.draw()
         self.set_style(style)
@@ -143,7 +147,7 @@ class AbstractShape(Element):
 
 class G(AbstractShape):
     def draw(self):
-        #get layer label, if exists
+        # get layer label, if exists
         gtype = self.attr("groupmode", "inkscape") or "group"
         if self.has_transform():
             trans_matrix = self.get_transform()
@@ -189,12 +193,12 @@ class Ellipse(AbstractShape):
         self.ctx.beginPath()
         if self.has_transform():
             trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix) # unpacks argument list
+            self.ctx.transform(*trans_matrix)  # unpacks argument list
         self.set_style(style)
 
         KAPPA = 4 * ((math.sqrt(2) - 1) / 3)
         self.ctx.moveTo(cx, cy - ry)
-        self.ctx.bezierCurveTo(cx + (KAPPA * rx), cy - ry,  cx + rx, cy - (KAPPA * ry), cx + rx, cy)
+        self.ctx.bezierCurveTo(cx + (KAPPA * rx), cy - ry, cx + rx, cy - (KAPPA * ry), cx + rx, cy)
         self.ctx.bezierCurveTo(cx + rx, cy + (KAPPA * ry), cx + (KAPPA * rx), cy + ry, cx, cy + ry)
         self.ctx.bezierCurveTo(cx - (KAPPA * rx), cy + ry, cx - rx, cy + (KAPPA * ry), cx - rx, cy)
         self.ctx.bezierCurveTo(cx - rx, cy - (KAPPA * ry), cx - (KAPPA * rx), cy - ry, cx, cy - ry)
@@ -203,7 +207,7 @@ class Ellipse(AbstractShape):
 
 class Path(AbstractShape):
     def get_data(self):
-        #path data is already converted to float
+        # path data is already converted to float
         return parsePath(self.attr("d"))
 
     def pathMoveTo(self, data):
@@ -221,7 +225,7 @@ class Path(AbstractShape):
         self.currentPosition = x, y
 
     def pathArcTo(self, data):
-        #http://www.w3.org/TR/SVG11/implnote.html#ArcImplementationNotes
+        # http://www.w3.org/TR/SVG11/implnote.html#ArcImplementationNotes
         # code adapted from http://code.google.com/p/canvg/
         import math
         x1 = self.currentPosition[0]
@@ -234,47 +238,52 @@ class Path(AbstractShape):
         arcflag = data[3]
         sweepflag = data[4]
 
-        #compute (x1', y1')
+        # compute (x1', y1')
         _x1 = math.cos(angle) * (x1 - x2) / 2.0 + math.sin(angle) * (y1 - y2) / 2.0
         _y1 = -math.sin(angle) * (x1 - x2) / 2.0 + math.cos(angle) * (y1 - y2) / 2.0
 
-        #adjust radii
-        l = _x1**2 / rx**2 + _y1**2 / ry**2
+        # adjust radii
+        l = _x1 ** 2 / rx ** 2 + _y1 ** 2 / ry ** 2
         if l > 1:
             rx *= math.sqrt(l)
             ry *= math.sqrt(l)
 
-        #compute (cx', cy')
-        numr = (rx**2 * ry**2) - (rx**2 * _y1**2) - (ry**2 * _x1**2)
-        demr = (rx**2 * _y1**2) + (ry**2 * _x1**2)
+        # compute (cx', cy')
+        numr = (rx ** 2 * ry ** 2) - (rx ** 2 * _y1 ** 2) - (ry ** 2 * _x1 ** 2)
+        demr = (rx ** 2 * _y1 ** 2) + (ry ** 2 * _x1 ** 2)
         sig = -1 if arcflag == sweepflag else 1
-        sig = sig * math.sqrt(numr / demr)
-        if math.isnan(sig): sig = 0;
+        sig *= math.sqrt(numr / demr)
+        if math.isnan(sig):
+            sig = 0
         _cx = sig * rx * _y1 / ry
         _cy = sig * -ry * _x1 / rx
 
-        #compute (cx, cy) from (cx', cy')
+        # compute (cx, cy) from (cx', cy')
         cx = (x1 + x2) / 2.0 + math.cos(angle) * _cx - math.sin(angle) * _cy
         cy = (y1 + y2) / 2.0 + math.sin(angle) * _cx + math.cos(angle) * _cy
 
-        #compute startAngle & endAngle
-        #vector magnitude
-        m = lambda v: math.sqrt(v[0]**2 + v[1]**2)
-        #ratio between two vectors
+        # compute startAngle & endAngle
+        # vector magnitude
+        m = lambda v: math.sqrt(v[0] ** 2 + v[1] ** 2)
+        # ratio between two vectors
         r = lambda u, v: (u[0] * v[0] + u[1] * v[1]) / (m(u) * m(v))
-        #angle between two vectors
-        a = lambda u, v: (-1 if u[0]*v[1] < u[1]*v[0] else 1) * math.acos(r(u,v))
-        #initial angle
-        a1 = a([1,0], [(_x1 - _cx) / rx, (_y1 - _cy)/ry])
-        #angle delta
+        # angle between two vectors
+        a = lambda u, v: (-1 if u[0] * v[1] < u[1] * v[0] else 1) * math.acos(r(u, v))
+        # initial angle
+        a1 = a([1, 0], [(_x1 - _cx) / rx, (_y1 - _cy) / ry])
+        # angle delta
         u = [(_x1 - _cx) / rx, (_y1 - _cy) / ry]
         v = [(-_x1 - _cx) / rx, (-_y1 - _cy) / ry]
         ad = a(u, v)
-        if r(u,v) <= -1: ad = math.pi
-        if r(u,v) >= 1: ad = 0
+        if r(u, v) <= -1:
+            ad = math.pi
+        if r(u, v) >= 1:
+            ad = 0
 
-        if sweepflag == 0 and ad > 0: ad = ad - 2 * math.pi;
-        if sweepflag == 1 and ad < 0: ad = ad + 2 * math.pi;
+        if sweepflag == 0 and ad > 0:
+            ad -= 2 * math.pi
+        if sweepflag == 1 and ad < 0:
+            ad += 2 * math.pi
 
         r = rx if rx > ry else ry
         sx = 1 if rx > ry else rx / ry
@@ -284,7 +293,7 @@ class Path(AbstractShape):
         self.ctx.rotate(angle)
         self.ctx.scale(sx, sy)
         self.ctx.arc(0, 0, r, a1, a1 + ad, 1 - sweepflag)
-        self.ctx.scale(1/sx, 1/sy)
+        self.ctx.scale(1 / sx, 1 / sy)
         self.ctx.rotate(-angle)
         self.ctx.translate(-cx, -cy)
         self.currentPosition = x2, y2
@@ -296,14 +305,14 @@ class Path(AbstractShape):
         self.ctx.beginPath()
         if self.has_transform():
             trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix) # unpacks argument list
+            self.ctx.transform(*trans_matrix)  # unpacks argument list
         self.set_style(style)
 
         """Draws path commands"""
         path_command = {"M": self.pathMoveTo,
-                       "L": self.pathLineTo,
-                       "C": self.pathCurveTo,
-                       "A": self.pathArcTo}
+                        "L": self.pathLineTo,
+                        "C": self.pathCurveTo,
+                        "A": self.pathArcTo}
         for pt in path:
             comm, data = pt
             if comm in path_command:
@@ -318,7 +327,7 @@ class Line(Path):
         y1 = self.attr("y1")
         x2 = self.attr("x2")
         y2 = self.attr("y2")
-        return (("M", (x1, y1)), ("L", (x2, y2)))
+        return ("M", (x1, y1)), ("L", (x2, y2))
 
 
 class Polygon(Path):
@@ -326,10 +335,10 @@ class Polygon(Path):
         points = self.attr("points").strip().split(" ")
         points = map(lambda x: x.split(","), points)
         comm = []
-        for pt in points:           # creating path command similar
+        for pt in points:  # creating path command similar
             pt = map(float, pt)
             comm.append(["L", pt])
-        comm[0][0] = "M"            # first command must be a 'M' => moveTo
+        comm[0][0] = "M"  # first command must be a 'M' => moveTo
         return comm
 
 
@@ -340,7 +349,7 @@ class Polyline(Polygon):
 class Text(AbstractShape):
     def text_helper(self, tspan):
         if not len(tspan):
-            return unicode(tspan.text)
+            return tspan.text
         for ts in tspan:
             return ts.text + self.text_helper(ts) + ts.tail
 
@@ -362,7 +371,7 @@ class Text(AbstractShape):
         style = self.get_style()
         if self.has_transform():
             trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix) # unpacks argument list
+            self.ctx.transform(*trans_matrix)  # unpacks argument list
         self.set_style(style)
         self.set_text_style(style)
 

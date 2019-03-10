@@ -19,7 +19,10 @@
 #
 """Join paths with lines or polygons"""
 
+from lxml import etree
+
 import inkex
+
 
 class Extrude(inkex.Effect):
     def __init__(self):
@@ -28,7 +31,7 @@ class Extrude(inkex.Effect):
                  'Join paths with lines or polygons'),
                 ]
         for o in opts:
-            self.arg_parser.add_argument(o[0], o[1],  type=o[2],
+            self.arg_parser.add_argument(o[0], o[1], type=o[2],
                                          dest=o[3], default=o[4], help=o[5])
 
     def effect(self):
@@ -61,10 +64,10 @@ class Extrude(inkex.Effect):
                 if self.options.mode.lower() == 'lines':
                     line = []
                     for comp in verts:
-                        for n,v in enumerate(comp):
+                        for n, v in enumerate(comp):
                             line += [('M', v[0])]
                             line += [('L', v[1])]
-                    ele = inkex.etree.Element('{http://www.w3.org/2000/svg}path')
+                    ele = etree.Element('{http://www.w3.org/2000/svg}path')
                     paths[0].xpath('..')[0].append(ele)
                     ele.set('d', str(inkex.Path(line)))
                     style = {
@@ -75,7 +78,7 @@ class Extrude(inkex.Effect):
                     }
                     ele.set('style', str(inkex.Style(style)))
                 elif self.options.mode.lower() == 'polygons':
-                    g = inkex.etree.Element('{http://www.w3.org/2000/svg}g')
+                    g = etree.Element('{http://www.w3.org/2000/svg}g')
                     style = {
                         'fill': '#000000',
                         'fill-opacity': 0.3,
@@ -86,16 +89,17 @@ class Extrude(inkex.Effect):
                     g.set('style', str(inkex.Style(style)))
                     paths[0].xpath('..')[0].append(g)
                     for comp in verts:
-                        for n,v in enumerate(comp):
-                            nn = n+1
-                            if nn == len(comp): nn = 0
+                        for n, v in enumerate(comp):
+                            nn = n + 1
+                            if nn == len(comp):
+                                nn = 0
                             line = []
                             line += [('M', comp[n][0])]
                             line += [('L', comp[n][1])]
                             line += [('L', comp[nn][1])]
                             line += [('L', comp[nn][0])]
                             line += [('L', comp[n][0])]
-                            ele = inkex.etree.Element('{http://www.w3.org/2000/svg}path')
+                            ele = etree.Element('{http://www.w3.org/2000/svg}path')
                             g.append(ele)
                             ele.set('d', str(inkex.Path(line)))
 

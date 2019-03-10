@@ -30,19 +30,23 @@ This extension need, to work properly:
 import os
 import sys
 import tempfile
-import inkex
 
+from lxml import etree
+
+import inkex
 from inkex.localize import localize
 
 localize()
 
+
 def parse_pkgs(pkgstring):
-    pkglist = pkgstring.replace(" ","").split(",")
+    pkglist = pkgstring.replace(" ", "").split(",")
     header = ""
     for pkg in pkglist:
         header += "\\usepackage{%s}\n" % pkg
 
     return header
+
 
 def create_equation_tex(filename, equation, add_header=""):
     tex = open(filename, 'w')
@@ -60,46 +64,49 @@ def create_equation_tex(filename, equation, add_header=""):
     tex.write("\n\\end{document}\n")
     tex.close()
 
-def svg_open(self,filename):
+
+def svg_open(self, filename):
     doc_width = self.svg.unittouu(self.document.getroot().get('width'))
     doc_height = self.svg.unittouu(self.document.getroot().get('height'))
-    doc_sizeH = min(doc_width,doc_height)
-    doc_sizeW = max(doc_width,doc_height)
+    doc_sizeH = min(doc_width, doc_height)
+    doc_sizeW = max(doc_width, doc_height)
 
     def clone_and_rewrite(self, node_in):
-        in_tag = node_in.tag.rsplit('}',1)[-1]
+        in_tag = node_in.tag.rsplit('}', 1)[-1]
         if in_tag != 'svg':
-            node_out = inkex.etree.Element(inkex.addNS(in_tag,'svg'))
+            node_out = etree.Element(inkex.addNS(in_tag, 'svg'))
             for name in node_in.attrib:
                 node_out.set(name, node_in.attrib[name])
         else:
-            node_out = inkex.etree.Element(inkex.addNS('g','svg'))
+            node_out = etree.Element(inkex.addNS('g', 'svg'))
         for c in node_in.iterchildren():
-            c_tag = c.tag.rsplit('}',1)[-1]
+            c_tag = c.tag.rsplit('}', 1)[-1]
             if c_tag in ('g', 'path', 'polyline', 'polygon'):
                 child = clone_and_rewrite(self, c)
                 if c_tag == 'g':
-                    child.set('transform','matrix('+str(doc_sizeH/700.)+',0,0,'+str(-doc_sizeH/700.)+','+str(-doc_sizeH*0.25)+','+str(doc_sizeW*0.75)+')')
+                    child.set('transform', 'matrix(' + str(doc_sizeH / 700.) + ',0,0,' + str(-doc_sizeH / 700.) + ',' + str(-doc_sizeH * 0.25) + ',' + str(doc_sizeW * 0.75) + ')')
                 node_out.append(child)
 
         return node_out
 
-    doc = inkex.etree.parse(filename)
+    doc = etree.parse(filename)
     svg = doc.getroot()
     group = clone_and_rewrite(self, svg)
     self.current_layer.append(group)
+
 
 class EQTEXSVG(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-f", "--formule",
-                         type=str,
-                        dest="formula", default="",
-                        help="LaTeX formula")
+                                     type=str,
+                                     dest="formula", default="",
+                                     help="LaTeX formula")
         self.arg_parser.add_argument("-p", "--packages",
-                         type=str,
-                        dest="packages", default="",
-                        help="Additional packages")
+                                     type=str,
+                                     dest="packages", default="",
+                                     help="Additional packages")
+
     def effect(self):
 
         base_dir = tempfile.mkdtemp("", "inkscape-")
@@ -157,7 +164,6 @@ class EQTEXSVG(inkex.Effect):
 
         clean()
 
+
 if __name__ == '__main__':
     EQTEXSVG().run()
-
-

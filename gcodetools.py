@@ -4421,14 +4421,14 @@ class Gcodetools(inkex.Effect):
     # layer number n appears in XML as <svg:g id="layern" inkscape:label="layername">
     #
     # to create it, use
-    # Mylayer=inkex.etree.SubElement(self.document.getroot(), 'g') #Create a generic element
+    # Mylayer=etree.SubElement(self.document.getroot(), 'g') #Create a generic element
     # Mylayer.set(inkex.addNS('label', 'inkscape'), "layername")   #Gives it a name
     # Mylayer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')   #Tells Inkscape it's a layer
     #
     # group appears in XML as <svg:g id="gnnnnn"> where nnnnn is a number
     #
     # to create it, use
-    # Mygroup=inkex.etree.SubElement(parent, inkex.addNS('g','svg'), {"gcodetools":"My group label"})
+    # Mygroup=etree.SubElement(parent, inkex.addNS('g','svg'), {"gcodetools":"My group label"})
     # where parent may be the layer or a parent group. To get the parent group, you can use
     # parent = self.selected_paths[layer][0].getparent()
     ################################################################################

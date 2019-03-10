@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
-# local library
-from webslicer_effect import WebSlicer_Effect, is_empty
+from lxml import etree
+
 import inkex
+from webslicer_effect import WebSlicer_Effect, is_empty
+
 
 class WebSlicer_CreateRect(WebSlicer_Effect):
 
@@ -40,66 +42,64 @@ class WebSlicer_CreateRect(WebSlicer_Effect):
         # inkscape param workaround
         self.arg_parser.add_argument("--tab")
 
-
     def unique_slice_name(self):
         name = self.options.name
-        el = self.document.xpath( '//*[@id="'+name+'"]', namespaces=inkex.NSS )
+        el = self.document.xpath('//*[@id="' + name + '"]', namespaces=inkex.NSS)
         if len(el) > 0:
-            if name[-3:] == '-00': name = name[:-3]
+            if name[-3:] == '-00':
+                name = name[:-3]
             num = 0
             num_s = '00'
             while len(el) > 0:
                 num += 1
                 num_s = str(num)
-                if len(num_s)==1 : num_s = '0'+num_s
-                el = self.document.xpath( '//*[@id="'+name+'-'+num_s+'"]',
-                                          namespaces=inkex.NSS )
-            self.options.name = name+'-'+num_s
-
+                if len(num_s) == 1:
+                    num_s = '0' + num_s
+                el = self.document.xpath('//*[@id="' + name + '-' + num_s + '"]',
+                                         namespaces=inkex.NSS)
+            self.options.name = name + '-' + num_s
 
     def validate_options(self):
         self.options.format = self.options.format.lower()
-        if not is_empty( self.options.dimension ):
+        if not is_empty(self.options.dimension):
             self.options.dimension
 
     def effect(self):
-        scale = self.svg.unittouu('1px')    # convert to document units
+        scale = self.svg.unittouu('1px')  # convert to document units
         self.validate_options()
         layer = self.get_slicer_layer(True)
-        #TODO: get selected elements to define location and size
-        rect = inkex.etree.SubElement(layer, 'rect')
+        # TODO: get selected elements to define location and size
+        rect = etree.SubElement(layer, 'rect')
         if is_empty(self.options.name):
             self.options.name = 'slice-00'
         self.unique_slice_name()
         rect.set('id', self.options.name)
         rect.set('fill', 'red')
         rect.set('opacity', '0.5')
-        rect.set('x', str(-scale*100))
-        rect.set('y', str(-scale*100))
-        rect.set('width', str(scale*200))
-        rect.set('height', str(scale*200))
-        desc = inkex.etree.SubElement(rect, 'desc')
-        conf_txt = "format:"+ self.options.format +"\n"
+        rect.set('x', str(-scale * 100))
+        rect.set('y', str(-scale * 100))
+        rect.set('width', str(scale * 200))
+        rect.set('height', str(scale * 200))
+        desc = etree.SubElement(rect, 'desc')
+        conf_txt = "format:" + self.options.format + "\n"
         if not is_empty(self.options.dpi):
-            conf_txt += "dpi:"     + str(self.options.dpi) +"\n"
+            conf_txt += "dpi:" + str(self.options.dpi) + "\n"
         if not is_empty(self.options.html_id):
             conf_txt += "html-id:" + self.options.html_id
-        desc.text = self.get_conf_text_from_list( self.get_conf_list() )
-
+        desc.text = self.get_conf_text_from_list(self.get_conf_list())
 
     def get_conf_list(self):
-        conf_list = [ 'format' ]
+        conf_list = ['format']
         if self.options.format == 'gif':
-            conf_list.extend( [ 'gif_type', 'palette_size' ] )
+            conf_list.extend(['gif_type', 'palette_size'])
         if self.options.format == 'jpg':
-            conf_list.extend( [ 'quality' ] )
-        conf_list.extend( [
-                'dpi', 'dimension',
-                'bg_color', 'html_id', 'html_class',
-                'layout_disposition', 'layout_position_anchor'
-            ] )
+            conf_list.extend(['quality'])
+        conf_list.extend([
+            'dpi', 'dimension',
+            'bg_color', 'html_id', 'html_class',
+            'layout_disposition', 'layout_position_anchor'
+        ])
         return conf_list
-
 
 
 if __name__ == '__main__':

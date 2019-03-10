@@ -33,6 +33,8 @@ interest and that should be shipped out in separate files...
 import copy
 import random
 
+from lxml import etree
+
 import inkex
 
 
@@ -54,13 +56,13 @@ class PathModifier(inkex.Effect):
             clone.set("id", self.svg.get_unique_id(myid))
             node.getparent().append(clone)
             clones[clone.get("id")] = clone
-        return (clones)
+        return clones
 
     def uniqueId(self, prefix):
         id = "%s%04i" % (prefix, random.randint(0, 9999))
         while len(self.document.getroot().xpath('//*[@id="%s"]' % id, namespaces=inkex.NSS)):
             id = "%s%04i" % (prefix, random.randint(0, 9999))
-        return (id)
+        return id
 
     def expandGroups(self, aList, transferTransform=True):
         for id, node in aList.items():
@@ -73,7 +75,7 @@ class PathModifier(inkex.Effect):
                 if transferTransform and node.get("transform"):
                     del node.attrib["transform"]
                 del aList[id]
-        return (aList)
+        return aList
 
     def expandGroupsUnlinkClones(self, aList, transferTransform=True, doReplace=True):
         for id in list(aList):
@@ -154,7 +156,7 @@ class PathModifier(inkex.Effect):
             d += 'L %f,%f ' % (x, y + ry)
             d += 'A %f,%f,%i,%i,%i,%f,%f ' % (rx, ry, 0, 0, 1, x + rx, y)
 
-            newnode = inkex.etree.Element('path')
+            newnode = etree.Element('path')
             newnode.set('d', d)
             newnode.set('id', self.svg.get_unique_id('path'))
             newnode.set('style', node.get('style'))
@@ -170,7 +172,7 @@ class PathModifier(inkex.Effect):
 
     def groupToPath(self, node, doReplace=True):
         if node.tag == inkex.addNS('g', 'svg'):
-            newNode = inkex.etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'))
+            newNode = etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'))
 
             newstyle = dict(inkex.Style.parse_str(node.get('style') or ""))
             newp = []
@@ -197,9 +199,9 @@ class PathModifier(inkex.Effect):
         # --TODO: support other object types!!!!
         # --TODO: make sure inkex.cubic_paths supports A and Q commands...
         if node.tag == inkex.addNS('rect', 'svg'):
-            return (self.rectToPath(node, doReplace))
+            return self.rectToPath(node, doReplace)
         if node.tag == inkex.addNS('g', 'svg'):
-            return (self.groupToPath(node, doReplace))
+            return self.groupToPath(node, doReplace)
         elif node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
             # remove inkscape attributes, otherwise any modif of 'd' will be discarded!
             for attName in list(node.attrib.keys()):

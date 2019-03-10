@@ -42,15 +42,15 @@ TODO:
 
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
-# standard libraries
-import sys
-import re
 import math
+import re
+import sys
+
+import simpletransform
 from lxml import etree
-# local libraries
+
 import inkex
 
 # globals
@@ -80,6 +80,7 @@ GRAPHICS_ELEMENTS = [
     'text',
     'use',
 ]
+
 
 def is_3dbox(element):
     """Check whether element is an Inkscape 3dbox type."""
@@ -124,7 +125,7 @@ def get_linked(doc, element):
     if element is not None:
         href = element.get(inkex.addNS('href', 'xlink'), None)
     if href is not None:
-        linked_id = href[href.find('#')+1:]
+        linked_id = href[href.find('#') + 1:]
         path = '//*[@id="%s"]' % linked_id
         el_list = doc.xpath(path, namespaces=inkex.NSS)
         if isinstance(el_list, list) and len(el_list):
@@ -159,8 +160,8 @@ def check_text_on_path(svg, element, scale_x, scale_y):
                 element.set('transform', inkex.formatTransform(mat))
             # scale font size
             mat = simpletransform.parseTransform(
-                'scale({},{})'.format(scale_x, scale_y))
-            det = abs(mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0])
+                    'scale({},{})'.format(scale_x, scale_y))
+            det = abs(mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0])
             descrim = math.sqrt(abs(det))
             prop = 'font-size'
             # outer text
@@ -198,11 +199,11 @@ class DPISwitcher(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument(
-            "--switcher", type=str, dest="switcher", default="0",
-            help="Select the DPI switch you want")
+                "--switcher", type=str, dest="switcher", default="0",
+                help="Select the DPI switch you want")
         self.arg_parser.add_argument("--action", type=str, dest="action", default=None)
-        self.factor_a = 90.0/96.0
-        self.factor_b = 96.0/90.0
+        self.factor_a = 90.0 / 96.0
+        self.factor_b = 96.0 / 90.0
         self.units = "px"
         self.unitExponent = 1.0
 
@@ -245,13 +246,13 @@ class DPISwitcher(inkex.Effect):
         param = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
         p = param.match(length)
         u = unitmatch.search(length)
-        val = 100       # fallback: assume default length of 100
-        unit = 'px'     # fallback: assume 'px' unit
+        val = 100  # fallback: assume default length of 100
+        unit = 'px'  # fallback: assume 'px' unit
         if p:
             val = float(p.string[p.start():p.end()])
         if u:
             unit = u.string[u.start():u.end()]
-        return (val, unit)
+        return val, unit
 
     def convert_length(self, val, unit):
         """Convert length to self.units if unit differs."""
@@ -265,7 +266,7 @@ class DPISwitcher(inkex.Effect):
                 val_px = val * self.__uuconv[unit]
                 val = val_px / (self.__uuconv[doc_unit] / self.__uuconv['px'])
                 unit = doc_unit
-        return (val, unit)
+        return val, unit
 
     def check_attr_unit(self, element, attr, unit_list):
         """Check unit of attribute value, match to units in *unit_list*."""
@@ -296,9 +297,9 @@ class DPISwitcher(inkex.Effect):
 
         # update viewBox
         if svg.get('viewBox'):
-            viewboxstring = re.sub(' +|, +|,',' ', svg.get('viewBox'))
+            viewboxstring = re.sub(' +|, +|,', ' ', svg.get('viewBox'))
             viewboxlist = [float(i) for i in viewboxstring.strip().split(' ', 4)]
-            svg.set('viewBox','{} {} {} {}'.format(*[(val * self.factor_a) for val in viewboxlist]))
+            svg.set('viewBox', '{} {} {} {}'.format(*[(val * self.factor_a) for val in viewboxlist]))
 
         # update guides, grids
         if self.options.switcher == "1":
@@ -344,7 +345,7 @@ class DPISwitcher(inkex.Effect):
         guides = svg.xpath(xpathStr, namespaces=inkex.NSS)
         for guide in guides:
             point = guide.get("position").split(",")
-            guide.set("position", str(float(point[0].strip()) * self.factor_a ) + "," + str(float(point[1].strip()) * self.factor_a ))
+            guide.set("position", str(float(point[0].strip()) * self.factor_a) + "," + str(float(point[1].strip()) * self.factor_a))
 
     def scaleGrid(self, svg):
         xpathStr = '//inkscape:grid'
@@ -352,16 +353,16 @@ class DPISwitcher(inkex.Effect):
         for grid in grids:
             grid.set("units", "px")
             if grid.get("spacingx"):
-                spacingx = str(float(re.sub("[a-zA-Z]", "",  grid.get("spacingx"))) * self.factor_a) + "px"
+                spacingx = str(float(re.sub("[a-zA-Z]", "", grid.get("spacingx"))) * self.factor_a) + "px"
                 grid.set("spacingx", str(spacingx))
             if grid.get("spacingy"):
-                spacingy = str(float(re.sub("[a-zA-Z]", "",  grid.get("spacingy"))) * self.factor_a) + "px"
+                spacingy = str(float(re.sub("[a-zA-Z]", "", grid.get("spacingy"))) * self.factor_a) + "px"
                 grid.set("spacingy", str(spacingy))
             if grid.get("originx"):
-                originx = str(float(re.sub("[a-zA-Z]", "",  grid.get("originx"))) * self.factor_a) + "px"
+                originx = str(float(re.sub("[a-zA-Z]", "", grid.get("originx"))) * self.factor_a) + "px"
                 grid.set("originx", str(originx))
             if grid.get("originy"):
-                originy = str(float(re.sub("[a-zA-Z]", "",  grid.get("originy"))) * self.factor_a) + "px"
+                originy = str(float(re.sub("[a-zA-Z]", "", grid.get("originy"))) * self.factor_a) + "px"
                 grid.set("originy", str(originy))
 
     def effect(self):
@@ -389,7 +390,7 @@ class DPISwitcher(inkex.Effect):
             namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
             if not namedview:
                 return inkex.errormsg("No document named view available.")
-            docunits =  namedview.get(inkex.addNS('document-units', 'inkscape'))
+            docunits = namedview.get(inkex.addNS('document-units', 'inkscape'))
             if docunits:
                 print("document-units: " + docunits)
             units = namedview.get('units')
@@ -405,11 +406,11 @@ class DPISwitcher(inkex.Effect):
             i = 1
             for grid in grids:
                 print("Grid number " + str(i) + ": Units: " + grid.get("units"))
-                i = i+1
+                i += 1
         else:
             if self.options.switcher == "0":
-                self.factor_a = 96.0/90.0
-                self.factor_b = 90.0/96.0
+                self.factor_a = 96.0 / 90.0
+                self.factor_b = 90.0 / 96.0
             namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
             if namedview is None:
                 return inkex.errormsg("No document named view available.")
@@ -417,12 +418,11 @@ class DPISwitcher(inkex.Effect):
             self.units = self.parse_length(svg.get('width'))[1]
             if self.units and self.units != "px" and self.units != "" and self.units != "%":
                 if self.options.switcher == "0":
-                    self.unitExponent = 1.0/(self.factor_a/self.__uuconv[self.units])
+                    self.unitExponent = 1.0 / (self.factor_a / self.__uuconv[self.units])
                 else:
-                    self.unitExponent = 1.0/(self.factor_a/self.__uuconvLegacy[self.units])
+                    self.unitExponent = 1.0 / (self.factor_a / self.__uuconvLegacy[self.units])
             self.scaleRoot(svg)
 
 
 if __name__ == '__main__':
     DPISwitcher().run()
-

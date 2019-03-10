@@ -4,10 +4,15 @@
 # Written by Tavmjong Bah
 
 import re
+
+from lxml import etree
+
 import inkex
+
 
 class EmptyVideo(inkex.Effect):
     """Empty video template"""
+
     def __init__(self):
         super(EmptyVideo, self).__init__()
         self.arg_parser.add_argument("-s", "--size", type=str, dest="video_size",
@@ -24,7 +29,7 @@ class EmptyVideo(inkex.Effect):
 
         if size != "Custom":
             p = re.compile('([0-9]*)x([0-9]*)')
-            m = p.match( size )
+            m = p.match(size)
             if m is None:
                 return inkex.errormsg("Size must be specified!")
             width = int(m.group(1))
@@ -38,11 +43,12 @@ class EmptyVideo(inkex.Effect):
 
         namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
-            namedview = inkex.etree.SubElement( root, inkex.addNS('namedview', 'sodipodi'))
+            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), 'px')
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(width/2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(height/2.0))
+        namedview.set(inkex.addNS('cx', 'inkscape'), str(width / 2.0))
+        namedview.set(inkex.addNS('cy', 'inkscape'), str(height / 2.0))
+
 
 if __name__ == '__main__':
     EmptyVideo().run()

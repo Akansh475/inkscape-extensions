@@ -108,7 +108,7 @@ class JessyInk_Summary(inkex.Effect):
         autoTexts = {"slideNumber" : slideNumber, "numberOfSlides" : numberOfSlides, "slideTitle" : slideTitle}
         autoTextNodes = node.xpath(".//*[@jessyink:autoText]", namespaces=inkex.NSS)
 
-        if (len(autoTextNodes) > 0):
+        if len(autoTextNodes) > 0:
             inkex.errormsg(_("\n{0}Auto-texts:").format(prefix))
 
             for atNode in autoTextNodes:

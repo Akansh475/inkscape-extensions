@@ -24,13 +24,15 @@ give path, transform, and property access easily.
 """
 
 import math
+
 from lxml import etree
 
-from .transforms import Transform
-from .styles import Style
-from .utils import addNS, removeNS, NSS
 from .paths import Path
+from .styles import Style
 from .transforms import BoundingBox
+from .transforms import Transform
+from .utils import NSS, addNS, removeNS
+
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
@@ -44,14 +46,14 @@ class BaseElement(etree.ElementBase):
         return Path(self.get_path())
 
     def get_path(self):
-        raise NotImplementedError("Path should be provided by svg element {}."\
-            .format(type(self).__name__))
+        raise NotImplementedError("Path should be provided by svg element {}."
+                                  .format(type(self).__name__))
 
-    def xpath(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
+    def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
         return super(BaseElement, self).xpath(pattern, namespaces=namespaces)
 
-    def findall(self, pattern, namespaces=NSS): # pylint: disable=dangerous-default-value
+    def findall(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
@@ -102,9 +104,11 @@ class BaseElement(etree.ElementBase):
         # supression mechanisms to turn off xml's over engineering.
         return str(self.tag).split('}')[-1]
 
+
 class OtherElements(BaseElement):
     """A bunch of other svg elements"""
     tag_names = ['work', 'rdf', 'format', 'type', 'desc', 'font', 'font-face', 'filter', 'fegaussianblur']
+
 
 class Group(BaseElement):
     """Any group element (layer or regular group)"""
@@ -122,10 +126,12 @@ class PathElement(BaseElement):
     tag_name = 'path'
     get_path = lambda self: self.get('d')
 
+
 class Points(BaseElement):
     """Provide a useful extension for points elements"""
     tag_name = 'points'
     get_path = lambda self: 'M' + self.get('points')
+
 
 class Rectangle(BaseElement):
     """Provide a useful extension for rectangle elements"""
@@ -158,10 +164,11 @@ class Circle(BaseElement):
 
     def get_path(self):
         """Calculte the arc path of this circle/elipse"""
-        return ('M {0.left} {0.right} '\
-                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '\
+        return ('M {0.left} {0.right} '
+                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '
                 'A {0.radius_x},{0.radius_y} 0 1 0 {0.left}, {0.center_y}'
-               ).format(self)
+                ).format(self)
+
 
 class Ellipse(Circle):
     """Provide a similar extension to the Circle interface"""
@@ -172,15 +179,17 @@ class Use(BaseElement):
     """A 'use' element that links to another in the document"""
     tag_name = 'use'
 
-    path = property(lambda self: self.ref().path) # pylint: disable=no-member
+    path = property(lambda self: self.ref().path)  # pylint: disable=no-member
 
     def ref(self):
         """Returns the referred to element if available"""
         return self.root.getElementById(self.get('xlink:href').strip('#'))
 
+
 class Defs(BaseElement):
     """An header defs element, one per document"""
     tag_name = 'defs'
+
 
 class NamedView(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""
@@ -213,9 +222,10 @@ class Guide(BaseElement):
         self.set('position', "{:g},{:g}".format(pos_x, pos_y))
         if angle is not None:
             self.set('orientation', "{:g},{:g}".format(
-                math.sin(math.radians(angle)),
-                -math.cos(math.radians(angle))
+                    math.sin(math.radians(angle)),
+                    -math.cos(math.radians(angle))
             ))
+
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""
@@ -226,6 +236,7 @@ class TextElement(BaseElement):
     """A Text element"""
     tag_name = 'text'
 
+
 class TextPath(BaseElement):
     """A textPath element"""
     tag_name = 'textPath'
@@ -234,9 +245,11 @@ class TextPath(BaseElement):
         """Adds a superscript tspan element"""
         self.append(Tspan(text, style="font-size:65%;baseline-shift:super"))
 
+
 class Tspan(BaseElement):
     """A tspan text element"""
     tag_name = 'tspan'
+
 
 class Marker(BaseElement):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads

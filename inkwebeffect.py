@@ -22,7 +22,10 @@ import os
 import re
 import sys
 
+from lxml import etree
+
 import inkex
+
 
 class InkWebEffect(inkex.Effect):
     def __init__(self):
@@ -33,22 +36,17 @@ class InkWebEffect(inkex.Effect):
         pass
 
     def mustAddInkWebJSCode(self, scriptEl):
-        if not scriptEl.text: return True
-        if len(scriptEl.text) == 0: return True
-        if re.search(self.reUpdateJS, scriptEl.text): return True
+        if not scriptEl.text:
+            return True
+        if len(scriptEl.text) == 0:
+            return True
+        if re.search(self.reUpdateJS, scriptEl.text):
+            return True
         return False
 
     def addInkWebJSCode(self, scriptEl):
-        js = open( os.path.join(sys.path[0], "inkweb.js"), 'r' )
-        if hasattr(inkex.etree, "CDATA"):
-            scriptEl.text = \
-                inkex.etree.CDATA(
-                    "\n/* inkweb.js - InkWebEffect:AutoUpdate */\n" + js.read()
-                )
-        else:
-            scriptEl.text = \
-                    "\n/* inkweb.js - InkWebEffect:AutoUpdate */\n" + js.read()
-        js.close()
+        with open(os.path.join(sys.path[0], "inkweb.js")) as js:
+            scriptEl.text = etree.CDATA("\n/* inkweb.js - InkWebEffect:AutoUpdate */\n" + js.read())
 
     def ensureInkWebSupport(self):
         # Search for the script tag with the inkweb.js code:
@@ -60,11 +58,10 @@ class InkWebEffect(inkex.Effect):
 
         if scriptEl is None:
             root = self.document.getroot()
-            scriptEl = inkex.etree.Element( "script" )
-            scriptEl.set( "id", "inkwebjs" )
-            scriptEl.set( "type", "text/javascript" )
-            root.insert( 0, scriptEl )
+            scriptEl = etree.Element("script")
+            scriptEl.set("id", "inkwebjs")
+            scriptEl.set("type", "text/javascript")
+            root.insert(0, scriptEl)
 
         if self.mustAddInkWebJSCode(scriptEl):
             self.addInkWebJSCode(scriptEl)
-

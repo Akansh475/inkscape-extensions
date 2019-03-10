@@ -16,20 +16,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # standard libraries
-import math
+from __future__ import unicode_literals
 
-import sys
-if sys.version_info[0] < 3:
-    from StringIO import StringIO
-else:
-    from io import StringIO
+from io import StringIO
+
+from lxml import etree
 
 # local library
 import inkex
 from inkex.localize import _
 
 
-class hpglDecoder:
+class hpglDecoder(object):
 
     def __init__(self, hpglString, options):
         """ options:
@@ -41,8 +39,8 @@ class hpglDecoder:
         """
         self.hpglString = hpglString
         self.options = options
-        self.scaleX = options.resolutionX / 25.4 # dots/inch to dots/mm
-        self.scaleY = options.resolutionY / 25.4 # dots/inch to dots/mm
+        self.scaleX = options.resolutionX / 25.4  # dots/inch to dots/mm
+        self.scaleY = options.resolutionY / 25.4  # dots/inch to dots/mm
         self.warning = ''
         self.textMovements = _("Movements")
         self.textPenNumber = _("Pen ")
@@ -52,11 +50,11 @@ class hpglDecoder:
     def getSvg(self):
         actualLayer = 0
         # prepare document
-        self.doc = inkex.etree.parse(StringIO('<svg xmlns:sodipodi="' + inkex.NSS['sodipodi'] + '" xmlns:inkscape="' + inkex.NSS['inkscape'] + '" width="%smm" height="%smm" viewBox="0 0 %s %s"></svg>' %
-            (self.options.docWidth, self.options.docHeight, self.options.docWidth, self.options.docHeight)))
-        inkex.etree.SubElement(self.doc.getroot(), inkex.addNS('namedview', 'sodipodi'), {inkex.addNS('document-units', 'inkscape'): 'mm'})
+        self.doc = etree.parse(StringIO('<svg xmlns:sodipodi="' + inkex.NSS['sodipodi'] + '" xmlns:inkscape="' + inkex.NSS['inkscape'] + '" width="%smm" height="%smm" viewBox="0 0 %s %s"></svg>' %
+                                        (self.options.docWidth, self.options.docHeight, self.options.docWidth, self.options.docHeight)))
+        etree.SubElement(self.doc.getroot(), inkex.addNS('namedview', 'sodipodi'), {inkex.addNS('document-units', 'inkscape'): 'mm'})
         if self.options.showMovements:
-            self.layers[0] = inkex.etree.SubElement(self.doc.getroot(), 'g', {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): self.textMovements, 'id': self.textMovements})
+            self.layers[0] = etree.SubElement(self.doc.getroot(), 'g', {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): self.textMovements, 'id': self.textMovements})
         # cut stream into commands
         hpglData = self.hpglString.split(';')
         # if number of commands is under needed minimum, no data was found
@@ -79,7 +77,7 @@ class hpglDecoder:
                     self.parametersToPath(command[2:], actualLayer + 1, False)
                 else:
                     self.warning = 'UNKNOWN_COMMANDS'
-        return (self.doc, self.warning)
+        return self.doc, self.warning
 
     def parametersToPath(self, parameters, layerNum, isPU):
         # split params and sanity check them
@@ -97,10 +95,8 @@ class hpglDecoder:
                 try:
                     self.layers[layerNum]
                 except KeyError:
-                    self.layers[layerNum] = inkex.etree.SubElement(self.doc.getroot(), 'g',
-                        {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): self.textPenNumber + str(layerNum - 1), 'id': self.textPenNumber + str(layerNum - 1)})
+                    self.layers[layerNum] = etree.SubElement(self.doc.getroot(), 'g',
+                                                             {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): self.textPenNumber + str(layerNum - 1), 'id': self.textPenNumber + str(layerNum - 1)})
                 path = 'M %f,%f L %s' % (self.oldCoordinates[0], self.oldCoordinates[1], ','.join(parameters))
-                inkex.etree.SubElement(self.layers[layerNum], 'path', {'d': path, 'style': 'stroke:#' + ('ff0000' if isPU else '000000') + '; stroke-width:0.2; fill:none;'})
+                etree.SubElement(self.layers[layerNum], 'path', {'d': path, 'style': 'stroke:#' + ('ff0000' if isPU else '000000') + '; stroke-width:0.2; fill:none;'})
             self.oldCoordinates = (float(parameters[-2]), float(parameters[-1]))
-
-

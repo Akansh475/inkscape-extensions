@@ -128,7 +128,7 @@ class hpglEncoder(object):
         #    inkex.errormsg(err)
         return document.getroot()
         #else:
-        #    return inkex.etree.parse(tempfile).getroot()
+        #    return etree.parse(tempfile).getroot()
 
     def getHpgl(self):
         # dryRun to find edges

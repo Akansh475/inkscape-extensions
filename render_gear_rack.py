@@ -28,7 +28,7 @@ import inkex
 
 def involute_intersect_angle(Rb, R):
     Rb, R = float(Rb), float(R)
-    return (sqrt(R ** 2 - Rb ** 2) / (Rb)) - (acos(Rb / R))
+    return (sqrt(R ** 2 - Rb ** 2) / Rb) - (acos(Rb / R))
 
 
 def point_on_circle(radius, angle):

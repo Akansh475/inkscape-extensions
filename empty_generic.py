@@ -4,9 +4,11 @@
 # Written by Tavmjong Bah
 from __future__ import absolute_import, print_function, unicode_literals
 
+from lxml import etree
 
 import inkex
 from inkex.utils import inkbool
+
 
 class GenericTemplate(inkex.Effect):
     def __init__(self):
@@ -32,14 +34,14 @@ class GenericTemplate(inkex.Effect):
 
         namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
-            namedview = inkex.etree.SubElement( root, inkex.addNS('namedview', 'sodipodi') )
+            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), unit)
 
         # Until units are supported in 'cx', etc.
-        namedview.set(inkex.addNS('zoom', 'inkscape'), str(512.0/self.svg.uutounit(width, 'px')))
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(self.svg.uutounit(width, 'px')/2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(self.svg.uutounit(height, 'px')/2.0))
+        namedview.set(inkex.addNS('zoom', 'inkscape'), str(512.0 / self.svg.uutounit(width, 'px')))
+        namedview.set(inkex.addNS('cx', 'inkscape'), str(self.svg.uutounit(width, 'px') / 2.0))
+        namedview.set(inkex.addNS('cy', 'inkscape'), str(self.svg.uutounit(height, 'px') / 2.0))
 
         if self.options.generic_background == "white":
             namedview.set('pagecolor', "#ffffff")
@@ -79,6 +81,7 @@ class GenericTemplate(inkex.Effect):
         #             del namedview.attrib[ inkex.addNS('current-layer', 'inkscape') ]
         #         except:
         #             pass
+
 
 if __name__ == '__main__':
     GenericTemplate().run()

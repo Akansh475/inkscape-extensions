@@ -3,11 +3,15 @@
 
 # Rewritten by Tavmjong Bah to add correct viewBox, inkscape:cx, etc. attributes
 
+from lxml import etree
+
 import inkex
 from inkex.utils import inkbool
 
+
 class EmptyPage(inkex.Effect):
     """An empty page extension"""
+
     def __init__(self):
         super(EmptyPage, self).__init__()
         self.arg_parser.add_argument("-s", "--size", type=str, dest="page_size",
@@ -20,7 +24,7 @@ class EmptyPage(inkex.Effect):
                                      default=False)
 
     def effect(self):
-        width    = 300
+        width = 300
         height = 300
         units = 'px'
 
@@ -55,14 +59,13 @@ class EmptyPage(inkex.Effect):
 
         namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
         if namedview is None:
-            namedview = inkex.etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
+            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
 
         namedview.set(inkex.addNS('document-units', 'inkscape'), units)
 
         # Until units are supported in 'cx', etc.
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(self.svg.uutounit(width, 'px')/2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(self.svg.uutounit(height, 'px')/2.0))
-
+        namedview.set(inkex.addNS('cx', 'inkscape'), str(self.svg.uutounit(width, 'px') / 2.0))
+        namedview.set(inkex.addNS('cy', 'inkscape'), str(self.svg.uutounit(height, 'px') / 2.0))
 
         if self.options.page_background == "white":
             namedview.set('pagecolor', "#ffffff")
@@ -86,6 +89,7 @@ class EmptyPage(inkex.Effect):
             pagecolor = namedview.get('pagecolor')
             namedview.set('bordercolor', pagecolor)
             namedview.set('borderopacity', "0")
+
 
 if __name__ == '__main__':
     EmptyPage().run()

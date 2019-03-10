@@ -18,44 +18,45 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+from lxml import etree
+
 import inkex
 from inkex import inkbool
-
-
 from inkex import turtle as pturtle
+
 
 class RTreeTurtle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--size",
-                         type=float,
-                        dest="size", default=100.0,
-                        help="initial branch size")
+                                     type=float,
+                                     dest="size", default=100.0,
+                                     help="initial branch size")
         self.arg_parser.add_argument("-m", "--minimum",
-                         type=float,
-                        dest="minimum", default=4.0,
-                        help="minimum branch size")
+                                     type=float,
+                                     dest="minimum", default=4.0,
+                                     help="minimum branch size")
         self.arg_parser.add_argument("--pentoggle",
-                         type=inkbool,
-                        dest="pentoggle", default=False,
-                        help="Lift pen for backward steps")
+                                     type=inkbool,
+                                     dest="pentoggle", default=False,
+                                     help="Lift pen for backward steps")
+
     def effect(self):
         self.options.size = self.svg.unittouu(str(self.options.size) + 'px')
         self.options.minimum = self.svg.unittouu(str(self.options.minimum) + 'px')
         s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
-            'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-            'stroke': '#000000', 'stroke-linecap': 'butt',
-            'fill': 'none'}
+             'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+             'stroke': '#000000', 'stroke-linecap': 'butt',
+             'fill': 'none'}
         t = pturtle.pTurtle()
         t.pu()
         t.setpos(inkex.computePointInNode(list(self.view_center), self.current_layer))
         t.pd()
         t.rtree(self.options.size, self.options.minimum, self.options.pentoggle)
 
-        attribs = {'d':t.getPath(),'style':str(inkex.Style(s))}
-        inkex.etree.SubElement(self.current_layer, inkex.addNS('path','svg'), attribs)
+        attribs = {'d': t.getPath(), 'style': str(inkex.Style(s))}
+        etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'), attribs)
+
 
 if __name__ == '__main__':
     RTreeTurtle().run()
-
-

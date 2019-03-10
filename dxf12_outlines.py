@@ -24,9 +24,12 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-
 import re
+
+import simpletransform
+
 import inkex
+from inkex.bezier import cspsubdiv
 
 r12_header = ''' 0 
 SECTION
@@ -61,6 +64,7 @@ ENDSEC
  0 
 EOF'''
 
+
 class MyEffect(inkex.Effect):
 
     def __init__(self):
@@ -79,70 +83,71 @@ class MyEffect(inkex.Effect):
     def dxf_insert_code(self, code, value):
         self.dxf += code + "\n" + value + "\n"
 
-    def dxf_line(self,layer,csp):
-        self.dxf_insert_code(   '0', 'LINE' )
-        self.dxf_insert_code(   '8', layer )
-        ######self.dxf_insert_code(  '62', '1' )  #Change the Line Color
-        self.dxf_insert_code(  '10', '%f' % csp[0][0] )
-        self.dxf_insert_code(  '20', '%f' % csp[0][1] )
-        self.dxf_insert_code(  '11', '%f' % csp[1][0] )
-        self.dxf_insert_code(  '21', '%f' % csp[1][1] )
+    def dxf_line(self, layer, csp):
+        self.dxf_insert_code('0', 'LINE')
+        self.dxf_insert_code('8', layer)
+        # self.dxf_insert_code(  '62', '1' )  #Change the Line Color
+        self.dxf_insert_code('10', '{:f}'.format(csp[0][0]))
+        self.dxf_insert_code('20', '{:f}'.format(csp[0][1]))
+        self.dxf_insert_code('11', '{:f}'.format(csp[1][0]))
+        self.dxf_insert_code('21', '{:f}'.format(csp[1][1]))
 
-    def dxf_path_to_lines(self,layer,p):
+    def dxf_path_to_lines(self, layer, p):
         f = self.flatness
         is_flat = 0
         while is_flat < 1:
             try:
-                cspsubdiv.cspsubdiv(p, self.flatness)
+                cspsubdiv(p, self.flatness)
                 is_flat = 1
             except:
                 f += 0.1
 
         for sub in p:
-            for i in range(len(sub)-1):
+            for i in range(len(sub) - 1):
                 self.handle += 1
                 s = sub[i]
-                e = sub[i+1]
-                self.dxf_line(layer,[s[1],e[1]])
+                e = sub[i + 1]
+                self.dxf_line(layer, [s[1], e[1]])
 
     def dxf_path_to_point(self, layer, p):
         bbox = list(inkex.Path(p).bounding_box())
         x = (bbox[0] + bbox[1]) / 2
         y = (bbox[2] + bbox[3]) / 2
-        self.dxf_point(layer,x,y)
+        self.dxf_point(layer, x, y)
 
     def effect(self):
-        self.dxf_insert_code( '999', '"DXF R12 Output" (www.mydxf.blogspot.com)' )
-        self.dxf_add( r12_header )
+        self.dxf_insert_code('999', '"DXF R12 Output" (www.mydxf.blogspot.com)')
+        self.dxf_add(r12_header)
 
-        scale = 25.4/90.0
+        scale = 25.4 / 90.0
         h = self.svg.unittouu(self.svg.height)
 
         path = '//svg:path'
         for node in self.document.getroot().xpath(path, namespaces=inkex.NSS):
 
-            layer = node.getparent().get(inkex.addNS('label','inkscape'))
-            if layer == None:
-               layer = 'Layer 1'
+            layer = node.getparent().get(inkex.addNS('label', 'inkscape'))
+            if layer is None:
+                layer = 'Layer 1'
 
             d = node.get('d')
             p = inkex.parseCubicPath(d)
 
             t = node.get('transform')
-            if t != None:
+            if t is not None:
                 m = simpletransform.parseTransform(t)
-                inkex.applyTransformToPath(m,p)
+                inkex.applyTransformToPath(m, p)
 
-            m = [[scale,0,0],[0,-scale,h*scale]]
-            inkex.applyTransformToPath(m,p)
+            m = [[scale, 0, 0], [0, -scale, h * scale]]
+            inkex.applyTransformToPath(m, p)
 
-            if re.search('drill$',layer,re.I) == None:
-            #if layer == 'Brackets Drill':
-                self.dxf_path_to_lines(layer,p)
+            if re.search('drill$', layer, re.I) is None:
+                # if layer == 'Brackets Drill':
+                self.dxf_path_to_lines(layer, p)
             else:
-                self.dxf_path_to_point(layer,p)
+                self.dxf_path_to_point(layer, p)
 
-        self.dxf_add( r12_footer )
+        self.dxf_add(r12_footer)
+
 
 if __name__ == '__main__':
     MyEffect().run()

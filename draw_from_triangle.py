@@ -101,14 +101,14 @@ def distance(a, b):
 
 def vector_from_to(a, b):
     """get the vector from (x0,y0) to (x1,y1)"""
-    return (b[X] - a[X], b[Y], a[Y])
+    return b[X] - a[X], b[Y], a[Y]
 
 
 def get_cartesian_pt(t, p):  # get the cartesian coordinates from a trilinear set
     denom = p[0][0] * t[0] + p[0][1] * t[1] + p[0][2] * t[2]
     c1 = p[0][1] * t[1] / denom
     c2 = p[0][2] * t[2] / denom
-    return (c1 * p[2][1][0] + c2 * p[2][0][0], c1 * p[2][1][1] + c2 * p[2][0][1])
+    return c1 * p[2][1][0] + c2 * p[2][0][0], c1 * p[2][1][1] + c2 * p[2][0][1]
 
 
 def get_cartesian_tri(arg, params):
@@ -117,7 +117,7 @@ def get_cartesian_tri(arg, params):
     p1 = get_cartesian_pt((t11, t12, t13), params)
     p2 = get_cartesian_pt((t21, t22, t23), params)
     p3 = get_cartesian_pt((t31, t32, t33), params)
-    return (p1, p2, p3)
+    return p1, p2, p3
 
 
 def angle_from_3_sides(a, b, c):  # return the angle opposite side c

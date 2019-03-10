@@ -236,6 +236,10 @@ class TextElement(BaseElement):
     """A Text element"""
     tag_name = 'text'
 
+    def bounding_box(self):
+        """TODO"""
+        return BoundingBox(None)
+
 
 class TextPath(BaseElement):
     """A textPath element"""

@@ -187,7 +187,7 @@ class Length(inkex.Effect):
                         tx, ty = cspcofm(p)
                         anchor = 'middle'
                     elif self.options.position == "center":
-                        bbox = inkex.computeBBox([node])
+                        bbox = node.bounding_box()
                         tx = bbox[0] + (bbox[1] - bbox[0]) / 2.0
                         ty = bbox[2] + (bbox[3] - bbox[2]) / 2.0
                         anchor = 'middle'

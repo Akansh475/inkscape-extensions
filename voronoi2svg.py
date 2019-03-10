@@ -243,7 +243,7 @@ class Voronoi2svg(inkex.Effect):
         for id in self.options.ids:
             node = self.selected[id]
             nodes.append(node)
-            bbox = inkex.computeBBox([node])
+            bbox = node.bounding_box()
             if bbox:
                 cx = 0.5 * (bbox[0] + bbox[1])
                 cy = 0.5 * (bbox[2] + bbox[3])
@@ -288,7 +288,7 @@ class Voronoi2svg(inkex.Effect):
 
         if self.options.diagramType != 'Delaunay':
             # Clipping bounding box creation
-            gBbox = inkex.computeBBox(nodes)
+            gBbox = simpletransform.computeBBox(nodes)
 
             # Clipbox is the box to which the Voronoi diagram is restricted
             if self.options.clipBox == 'Page':

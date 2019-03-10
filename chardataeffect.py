@@ -21,6 +21,14 @@
 #
 import inkex
 
+TEXT_TAGS = (
+    inkex.addNS('svg:flowPara'),
+    inkex.addNS('svg:flowDiv'),
+    inkex.addNS('svg:text'),
+)
+
+SODIPODI_ROLE = inkex.addNS('sodipodi:role')
+
 
 class CharDataEffect(inkex.Effect):
     def __init__(self):
@@ -31,17 +39,14 @@ class CharDataEffect(inkex.Effect):
     newpar = True
 
     def effect(self):
-        if len(self.svg.selected) == 0:
-            self.recurse(self.document.getroot())
-        else:
-            for id, node in self.selected.items():
-                self.recurse(node)
+        nodes = self.svg.selected or {None: self.document.getroot()}
+        for node in nodes.values():
+            self.recurse(node)
 
     def recurse(self, node):
-        istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}text')
-        if node.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role') == 'line':
+        if node.get(SODIPODI_ROLE) == 'line':
             self.newline = True
-        elif istext:
+        elif node.tag in TEXT_TAGS:
             self.newline = True
             self.newpar = True
 
@@ -57,4 +62,4 @@ class CharDataEffect(inkex.Effect):
             node.tail = self.process_chardata(node.tail, self.newline, self.newpar)
 
     def process_chardata(self, text, line, par):
-        pass
+        raise NotImplementedError

@@ -35,6 +35,8 @@ import ctypes
 
 import inkex
 
+import simpletransform
+
 if not sys.platform.startswith('win'):
     raise inkex.DependencyError("sorry, this will run only on Windows, exiting...")
 
@@ -89,7 +91,7 @@ class MyEffect(inkex.Effect):
         trans = node.get('transform')
         if trans:
             mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
-        inkex.applyTransformToPath(mat, p)
+        simpletransform.applyTransformToPath(mat, p)
         hPen = mygdi.CreatePen(0, stroke, color)
         mygdi.SelectObject(self.hDC, hPen)
         self.emit_path(p)

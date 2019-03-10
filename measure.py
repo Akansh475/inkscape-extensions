@@ -42,6 +42,8 @@ import inkex
 from inkex import inkbool
 from lxml import etree
 
+import simpletransform
+
 # On darwin, fall back to C in cases of
 # - incorrect locale IDs (see comments in bug #406662)
 # - https://bugs.python.org/issue18378
@@ -157,7 +159,7 @@ class Length(inkex.Effect):
             if node.tag == inkex.addNS('path', 'svg'):
                 mat = inkex.composeParents(node, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
                 p = inkex.parseCubicPath(node.get('d'))
-                inkex.applyTransformToPath(mat, p)
+                simpletransform.applyTransformToPath(mat, p)
                 if self.options.mtype == "length":
                     slengths, stotal = csplength(p)
                     self.group = etree.SubElement(node.getparent(), inkex.addNS('text', 'svg'))

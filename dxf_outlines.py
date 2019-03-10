@@ -227,7 +227,7 @@ class DxfOutlines(inkex.Effect):
         trans = node.get('transform')
         if trans:
             mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
-        inkex.applyTransformToPath(mat, p)
+        simpletransform.applyTransformToPath(mat, p)
         for sub in p:
             for i in range(len(sub) - 1):
                 s = sub[i]

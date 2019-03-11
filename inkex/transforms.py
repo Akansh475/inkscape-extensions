@@ -167,8 +167,8 @@ class Transform(object):
         return (self.a * point[X] + self.c * point[Y] + self.e,
                 self.b * point[X] + self.d * point[Y] + self.f)
 
-    def compute_point(self, pt, node):
-        return Transform(node.transform.__imul__(self.matrix)).__neg__().apply_to_point(pt)
+    def compute_point(self, point, node):
+        return Transform(node.transform.__imul__(self.matrix)).__neg__().apply_to_point(point)
 
 
 

@@ -29,10 +29,9 @@ import sys
 from itertools import product
 
 from lxml import etree
-# TODO: Remove this deprecated API
-from simpletransform import computePointInNode
 
 import inkex
+from inkex.transforms import Transform
 
 
 class QRCode(object):
@@ -1103,7 +1102,7 @@ class QRCodeInkscape(inkex.Effect):
                 text_bytes = so.TEXT
                 text_str = so.TEXT.decode('utf-8')
 
-            center = tuple(computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer()))  # Put in in the center of the current view
+            center = tuple(Transform().compute_point(list(self.svg.get_center_position()), self.svg.get_current_layer()))
             grp_transform = 'translate' + str(center) + ' scale(%f)' % scale
             grp_name = 'QR Code: ' + text_str
             grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name,
@@ -1112,7 +1111,7 @@ class QRCodeInkscape(inkex.Effect):
 
             # GENERATE THE QRCODE
             if int(so.TYPENUMBER) == 0:
-                # Automatic QR code size
+                # Automatic QR code size`
                 qr = QRCode.getMinimumQRCode(text_bytes, int(so.CORRECTIONLEVEL))
             else:
                 # Manual QR code size

@@ -4,6 +4,7 @@ Test Inkex transformational logic.
 """
 from inkex.transforms import BoundingBox, Scale, Transform
 from tests.base import TestCase
+from tests.base.svg import svg, svg_file
 
 
 class TransformTest(TestCase):
@@ -72,6 +73,12 @@ class TransformTest(TestCase):
         trans = Transform('translate(10, 10)')
         self.assertEqual(trans.apply_to_point((10, 10)), (20, 20))
         self.assertRaises(ValueError, trans.apply_to_point, '')
+
+    def test_compute_point(self):
+        """Test computing a point in a node"""
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        self.assertEqual(Transform().compute_point(list(doc.get_center_position()), doc.get_current_layer()), (30.714286, 520.0))
+        self.assertEqual(Transform().compute_point(list(svg().get_center_position()), svg()), (0, 0))
 
 
 class ScaleTest(TestCase):

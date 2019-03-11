@@ -40,6 +40,16 @@ class BaseElement(etree.ElementBase):
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
 
+    @classmethod
+    def _subclasses(cls):
+        """Get subclasses, recursively
+        @rtype generator
+        """
+        for subcls in cls.__subclasses__():
+            yield subcls
+            for subsubcls in subcls._subclasses():
+                yield subsubcls
+
     @property
     def path(self):
         """Gets the outline or path of the element, this can be a simple bounding box for most"""
@@ -107,7 +117,20 @@ class BaseElement(etree.ElementBase):
 
 class OtherElements(BaseElement):
     """A bunch of other svg elements"""
-    tag_names = ['work', 'rdf', 'format', 'type', 'desc', 'font', 'font-face', 'filter', 'fegaussianblur']
+    tag_names = [
+        'desc',
+        'fegaussianblur',
+        'filter',
+        'flowPara',
+        'flowRegion',
+        'flowRoot',
+        'font',
+        'font-face',
+        'format',
+        'rdf',
+        'type',
+        'work',
+    ]
 
 
 class Group(BaseElement):
@@ -255,3 +278,8 @@ class Marker(BaseElement):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads
      or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
     tag_name = 'marker'
+
+
+class Grid(BaseElement):
+    """A namedview grid child"""
+    tag_name = 'inkscape:grid'

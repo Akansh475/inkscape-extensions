@@ -27,7 +27,6 @@
 Provide a way to load lxml attributes with an svg API on top.
 """
 
-import inspect
 import random
 import sys
 from collections import OrderedDict
@@ -176,9 +175,9 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         for cls in self.get_lookups():
             nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
             tags = getattr(cls, 'tag_names', [])
-            if name.lower() in tags:
+            if name in tags:
                 return cls
-            if name.lower() == (tag or '').lower() and \
+            if name == (tag or '') and \
                     (not namespace or not nsp or nsp == namespace):
                 return cls
 
@@ -189,11 +188,8 @@ class SvgClassLookup(etree.CustomElementClassLookup):
     def get_lookups(self):
         """Scan for and cache a list of available classes"""
         if not self._lookups:
-            module = sys.modules[__name__]
-            self._lookups = [
-                cls for _, cls in inspect.getmembers(module) \
-                if inspect.isclass(cls) and issubclass(cls, etree.ElementBase)
-            ]
+            self._lookups = set(BaseElement._subclasses())
+
         return self._lookups
 
 

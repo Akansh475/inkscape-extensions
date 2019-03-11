@@ -4,20 +4,14 @@
 import chardataeffect
 
 
+def _process_letter(c):
+    return c.upper() if c.islower() else c.lower()
+
+
 class C(chardataeffect.CharDataEffect):
 
     def process_chardata(self, text, line, par):
-        r = ""
-        for i in range(len(text)):
-            c = text[i]
-            if c.islower():
-                r = r + c.upper()
-            elif c.isupper():
-                r = r + c.lower()
-            else:
-                r = r + c
-
-        return r
+        return ''.join(map(_process_letter, text))
 
 
 if __name__ == '__main__':

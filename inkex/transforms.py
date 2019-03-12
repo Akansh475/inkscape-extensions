@@ -122,9 +122,9 @@ class Transform(object):
     def __repr__(self):
         """String Representation of this object"""
         return "{}((({}), ({})))".format(
-                type(self).__name__,
-                ', '.join(format(var, '.6g') for var in self.matrix[0]),
-                ', '.join(format(var, '.6g') for var in self.matrix[1]))
+            type(self).__name__,
+            ', '.join(format(var, '.6g') for var in self.matrix[0]),
+            ', '.join(format(var, '.6g') for var in self.matrix[1]))
 
     def __eq__(self, matrix):
         """Test if this transformation is equal to the given matrix"""
@@ -166,10 +166,6 @@ class Transform(object):
             raise ValueError("Will not transform string '{}'".format(point))
         return (self.a * point[X] + self.c * point[Y] + self.e,
                 self.b * point[X] + self.d * point[Y] + self.f)
-
-    def compute_point(self, point, node):
-        return Transform(node.transform.__imul__(self.matrix)).__neg__().apply_to_point(point)
-
 
 
 class Scale(object):  # pylint: disable=too-few-public-methods

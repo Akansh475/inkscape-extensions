@@ -1102,7 +1102,7 @@ class QRCodeInkscape(inkex.Effect):
                 text_bytes = so.TEXT
                 text_str = so.TEXT.decode('utf-8')
 
-            center = tuple(Transform().compute_point(list(self.svg.get_center_position()), self.svg.get_current_layer()))
+            center = tuple(self.svg.get_center_position())
             grp_transform = 'translate' + str(center) + ' scale(%f)' % scale
             grp_name = 'QR Code: ' + text_str
             grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name,

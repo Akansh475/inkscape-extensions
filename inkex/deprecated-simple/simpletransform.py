@@ -105,5 +105,5 @@ def computeBBox(aList, mat=[[1,0,0],[0,1,0]]):
 
 @deprecate
 def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
-    """Transform().compute_point(pt, node)"""
-    return Transform().compute_point(pt, node)
+    """(-Transform(node.transform * mat)).apply_to_point(pt)"""
+    return (-Transform(node.transform * mat)).apply_to_point(pt)

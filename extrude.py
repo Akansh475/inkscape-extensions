@@ -50,7 +50,7 @@ class Extrude(inkex.Effect):
             if 'transform' in paths[i].keys():
                 trans = paths[i].get('transform')
                 trans = simpletransform.parseTransform(trans)
-                inkex.applyTransformToPath(trans, pts[i])
+                simpletransform.applyTransformToPath(trans, pts[i])
 
         for n1 in range(0, len(paths)):
             for n2 in range(n1 + 1, len(paths)):

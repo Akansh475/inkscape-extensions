@@ -135,10 +135,10 @@ class MyEffect(inkex.Effect):
             t = node.get('transform')
             if t is not None:
                 m = simpletransform.parseTransform(t)
-                inkex.applyTransformToPath(m, p)
+                simpletransform.applyTransformToPath(m, p)
 
             m = [[scale, 0, 0], [0, -scale, h * scale]]
-            inkex.applyTransformToPath(m, p)
+            simpletransform.applyTransformToPath(m, p)
 
             if re.search('drill$', layer, re.I) is None:
                 # if layer == 'Brackets Drill':

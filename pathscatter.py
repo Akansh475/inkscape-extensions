@@ -195,7 +195,7 @@ class PathScatter(pathmodifier.Diffeo):
         self.prepareSelectionList()
 
         # center at (0,0)
-        bbox = inkex.computeBBox([self.patternNode])
+        bbox = self.patternNode.bounding_box()
         mat = [[1, 0, -(bbox[0] + bbox[1]) / 2], [0, 1, -(bbox[2] + bbox[3]) / 2]]
         if self.options.vertical:
             bbox = [-bbox[3], -bbox[2], bbox[0], bbox[1]]

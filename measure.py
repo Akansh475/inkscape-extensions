@@ -44,6 +44,8 @@ import inkex
 from inkex import inkbool
 from inkex.bezier import csparea, cspcofm, csplength
 
+import simpletransform
+
 # On darwin, fall back to C in cases of
 # - incorrect locale IDs (see comments in bug #406662)
 # - https://bugs.python.org/issue18378
@@ -143,7 +145,7 @@ class Length(inkex.Effect):
             if node.tag == inkex.addNS('path', 'svg'):
                 mat = inkex.composeParents(node, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
                 p = inkex.parseCubicPath(node.get('d'))
-                inkex.applyTransformToPath(mat, p)
+                simpletransform.applyTransformToPath(mat, p)
                 if self.options.mtype == "length":
                     slengths, stotal = csplength(p)
                     self.group = etree.SubElement(node.getparent(), inkex.addNS('text', 'svg'))
@@ -171,7 +173,7 @@ class Length(inkex.Effect):
                         tx, ty = cspcofm(p)
                         anchor = 'middle'
                     elif self.options.position == "center":
-                        bbox = inkex.computeBBox([node])
+                        bbox = node.bounding_box()
                         tx = bbox[0] + (bbox[1] - bbox[0]) / 2.0
                         ty = bbox[2] + (bbox[3] - bbox[2]) / 2.0
                         anchor = 'middle'

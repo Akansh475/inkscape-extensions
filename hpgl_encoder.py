@@ -263,7 +263,7 @@ class hpglEncoder(object):
         if path:
             # parse and transform path
             path = inkex.parseCubicPath(path)
-            inkex.applyTransformToPath(mat, path)
+            simpletransform.applyTransformToPath(mat, path)
             inkex.cspsubdiv(path, self.flat)
             # path to HPGL commands
             oldPosX = 0.0

@@ -19,11 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 from __future__ import unicode_literals
 
+import inkex
+
 import simplestyle
 from simplepath import parsePath
 from simpletransform import parseTransform
-
-import inkex
 
 
 class Element(object):
@@ -78,14 +78,14 @@ class AbstractShape(Element):
     def get_style(self):
         style = simplestyle.parseStyle(self.attr("style"))
         # remove any trailing space in dict keys/values
-        style = dict([(str.strip(k), str.strip(v)) for k, v in style.items()])
+        style = dict([(k.strip(), v.strip()) for k, v in style.items()])
         return style
 
     def set_style(self, style):
         """Translates style properties names into method calls"""
         self.ctx.style = style
         for key in style:
-            tmp_list = map(str.capitalize, key.split("-"))
+            tmp_list = [s.capitalize() for s in key.split("-")]
             method = "set" + "".join(tmp_list)
             if hasattr(self.ctx, method) and style[key] != "none":
                 getattr(self.ctx, method)(style[key])
@@ -336,7 +336,7 @@ class Polygon(Path):
         points = map(lambda x: x.split(","), points)
         comm = []
         for pt in points:  # creating path command similar
-            pt = map(float, pt)
+            pt = list(map(float, pt))
             comm.append(["L", pt])
         comm[0][0] = "M"  # first command must be a 'M' => moveTo
         return comm

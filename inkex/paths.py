@@ -178,6 +178,9 @@ class Vert(Horz):
     index = Y
     points = property(lambda self: ((None, self[0]),))
 
+    all_x = property(lambda self: [])
+    all_y = property(lambda self: self[:1])
+
     def to_line(self, previous):
         """Return this path command as a line instead"""
         return PathCommand('L', previous[0], self[0])
@@ -252,7 +255,9 @@ class Path(list):
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
-        return sum([seg.bounding_box() for seg in self if seg])
+        acopy = copy.copy(self)
+        acopy.to_absolute()
+        return sum([seg.bounding_box() for seg in acopy if seg])
 
     def append(self, cmd):
         """Append a command to this path including any chained commands"""

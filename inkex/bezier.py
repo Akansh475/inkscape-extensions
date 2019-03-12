@@ -26,6 +26,33 @@ import math
 
 import numpy
 
+from .utils import errormsg
+
+MAT_AREA = numpy.matrix([[0, 2, 1, -3],
+                         [-2, 0, 1, 1],
+                         [-1, -1, 0, 2],
+                         [3, -1, -2, 0]])
+
+MAT_COFM_0 = numpy.matrix([[0, 35, 10, -45],
+                           [-35, 0, 12, 23],
+                           [-10, -12, 0, 22],
+                           [45, -23, -22, 0]])
+
+MAT_COFM_1 = numpy.matrix([[0, 15, 3, -18],
+                           [-15, 0, 9, 6],
+                           [-3, -9, 0, 12],
+                           [18, -6, -12, 0]])
+
+MAT_COFM_2 = numpy.matrix([[0, 12, 6, -18],
+                           [-12, 0, 9, 3],
+                           [-6, -9, 0, 15],
+                           [18, -3, -15, 0]])
+
+MAT_COFM_3 = numpy.matrix([[0, 22, 23, -45],
+                           [-22, 0, 12, 10],
+                           [-23, -12, 0, 35],
+                           [45, -10, -35, 0]])
+
 X, Y = range(2)
 
 
@@ -242,27 +269,6 @@ def beziersplitatt(arg, t):
     return ((bx0, by0), m1, m4, m), (m, m5, m3, (bx3, by3))
 
 
-'''
-Approximating the arc length of a bezier curve
-according to <http://www.cit.gu.edu.au/~anthony/info/graphics/bezier.curves>
-
-if:
-    L1 = |P0 P1| +|P1 P2| +|P2 P3| 
-    L0 = |P0 P3|
-then: 
-    L = 1/2*L0 + 1/2*L1
-    ERR = L1-L0
-ERR approaches 0 as the number of subdivisions (m) increases
-    2^-4m
-
-Reference:
-Jens Gravesen <gravesen@mat.dth.dk>
-"Adaptive subdivision and the length of Bezier curves"
-mat-report no. 1992-10, Mathematical Institute, The Technical
-University of Denmark. 
-'''
-
-
 def Gravesen_addifclose(b, len, error=0.001):
     box = 0
     for i in range(1, 4):
@@ -277,6 +283,25 @@ def Gravesen_addifclose(b, len, error=0.001):
 
 
 def bezierlengthGravesen(b, error=0.001):
+    """
+    Approximating the arc length of a bezier curve
+    according to <http://www.cit.gu.edu.au/~anthony/info/graphics/bezier.curves>
+
+    if:
+        L1 = |P0 P1| +|P1 P2| +|P2 P3|
+        L0 = |P0 P3|
+    then:
+        L = 1/2*L0 + 1/2*L1
+        ERR = L1-L0
+    ERR approaches 0 as the number of subdivisions (m) increases
+        2^-4m
+
+    Reference:
+    Jens Gravesen <gravesen@mat.dth.dk>
+    "Adaptive subdivision and the length of Bezier curves"
+    mat-report no. 1992-10, Mathematical Institute, The Technical
+    University of Denmark.
+    """
     len = [0]
     Gravesen_addifclose(b, len, error)
     return len[0]
@@ -379,10 +404,6 @@ def subdiv(sp, flat, i=1):
             sp[i:1] = [p]
 
 
-# default bezier length method
-bezierlength = bezierlengthSimpson
-
-
 def csparea(csp):
     area = 0.0
     for sp in csp:
@@ -393,7 +414,7 @@ def csparea(csp):
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
             vec_x = numpy.matrix([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.matrix([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
-            area += 0.15 * (vec_x * mat_area * vec_y.T)[0, 0]
+            area += 0.15 * (vec_x * MAT_AREA * vec_y.T)[0, 0]
     return -area
 
 
@@ -402,7 +423,7 @@ def cspcofm(csp):
     xc = 0.0
     yc = 0.0
     if abs(area) < 1.e-8:
-        inkex.errormsg(_("Area is zero, cannot calculate Center of Mass"))
+        errormsg(_("Area is zero, cannot calculate Center of Mass"))
         return 0, 0
     for sp in csp:
         for i in range(len(sp)):  # calculate polygon moment
@@ -411,149 +432,11 @@ def cspcofm(csp):
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
             vec_x = numpy.matrix([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.matrix([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
-            vec_t = numpy.matrix([(vec_x * mat_cofm_0 * vec_y.T)[0, 0], (vec_x * mat_cofm_1 * vec_y.T)[0, 0], (vec_x * mat_cofm_2 * vec_y.T)[0, 0], (vec_x * mat_cofm_3 * vec_y.T)[0, 0]])
+            vec_t = numpy.matrix([(vec_x * MAT_COFM_0 * vec_y.T)[0, 0], (vec_x * MAT_COFM_1 * vec_y.T)[0, 0], (vec_x * MAT_COFM_2 * vec_y.T)[0, 0], (vec_x * MAT_COFM_3 * vec_y.T)[0, 0]])
             xc += (vec_x * vec_t.T)[0, 0] / 280
             yc += (vec_y * vec_t.T)[0, 0] / 280
     return -xc / area, -yc / area
 
 
-def bezierparameterize(arg):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    # parametric bezier
-    x0 = bx0
-    y0 = by0
-    cx = 3 * (bx1 - x0)
-    bx = 3 * (bx2 - bx1) - cx
-    ax = bx3 - x0 - cx - bx
-    cy = 3 * (by1 - y0)
-    by = 3 * (by2 - by1) - cy
-    ay = by3 - y0 - cy - by
-
-    return ax, ay, bx, by, cx, cy, x0, y0
-    # ax,ay,bx,by,cx,cy,x0,y0=bezierparameterize(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)))
-
-
-def linebezierintersect(arg_a, arg_b):
-    ((lx1, ly1), (lx2, ly2)) = arg_a
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg_b
-    # parametric line
-    dd = lx1
-    cc = lx2 - lx1
-    bb = ly1
-    aa = ly2 - ly1
-
-    if aa:
-        coef1 = cc / aa
-        coef2 = 1
-    else:
-        coef1 = 1
-        coef2 = aa / cc
-
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    # cubic intersection coefficients
-    a = coef1 * ay - coef2 * ax
-    b = coef1 * by - coef2 * bx
-    c = coef1 * cy - coef2 * cx
-    d = coef1 * (y0 - bb) - coef2 * (x0 - dd)
-
-    roots = rootWrapper(a, b, c, d)
-    retval = []
-    for i in roots:
-        if type(i) is complex and i.imag == 0:
-            i = i.real
-        if type(i) is not complex and 0 <= i <= 1:
-            retval.append(bezierpointatt(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)), i))
-    return retval
-
-
-def bezierpointatt(arg, t):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    x = ax * (t ** 3) + bx * (t ** 2) + cx * t + x0
-    y = ay * (t ** 3) + by * (t ** 2) + cy * t + y0
-    return x, y
-
-
-def bezierslopeatt(arg, t):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    dx = 3 * ax * (t ** 2) + 2 * bx * t + cx
-    dy = 3 * ay * (t ** 2) + 2 * by * t + cy
-    return dx, dy
-
-
-def beziertatslope(arg, d):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    (dy, dx) = d
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    # quadratic coefficients of slope formula
-    if dx:
-        slope = 1.0 * (dy / dx)
-        a = 3 * ay - 3 * ax * slope
-        b = 2 * by - 2 * bx * slope
-        c = cy - cx * slope
-    elif dy:
-        slope = 1.0 * (dx / dy)
-        a = 3 * ax - 3 * ay * slope
-        b = 2 * bx - 2 * by * slope
-        c = cx - cy * slope
-    else:
-        return []
-
-    roots = rootWrapper(0, a, b, c)
-    retval = []
-    for i in roots:
-        if type(i) is complex and i.imag == 0:
-            i = i.real
-        if type(i) is not complex and 0 <= i <= 1:
-            retval.append(i)
-    return retval
-
-
-def beziersplitatt(arg, t):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    m1 = tpoint((bx0, by0), (bx1, by1), t)
-    m2 = tpoint((bx1, by1), (bx2, by2), t)
-    m3 = tpoint((bx2, by2), (bx3, by3), t)
-    m4 = tpoint(m1, m2, t)
-    m5 = tpoint(m2, m3, t)
-    m = tpoint(m4, m5, t)
-
-    return ((bx0, by0), m1, m4, m), (m, m5, m3, (bx3, by3))
-
-
-def numlengths(csplen):
-    retval = 0
-    for sp in csplen:
-        for l in sp:
-            if l > 0:
-                retval += 1
-    return retval
-
-
-if __name__ == '__main__':
-    # print(linebezierintersect(((,),(,)),((,),(,),(,),(,))))
-    # print(linebezierintersect(((0,1),(0,-1)),((-1,0),(-.5,0),(.5,0),(1,0))))
-    tol = 0.00000001
-    curves = [((0, 0), (1, 5), (4, 5), (5, 5)),
-              ((0, 0), (0, 0), (5, 0), (10, 0)),
-              ((0, 0), (0, 0), (5, 1), (10, 0)),
-              ((-10, 0), (0, 0), (10, 0), (10, 10)),
-              ((15, 10), (0, 0), (10, 0), (-5, 10))]
-    '''
-    for curve in curves:
-        timing.start()
-        g = bezierlengthGravesen(curve,tol)
-        timing.finish()
-        gt = timing.micro()
-
-        timing.start()
-        s = bezierlengthSimpson(curve,tol)
-        timing.finish()
-        st = timing.micro()
-
-        print g, gt
-        print s, st
-    '''
-    for curve in curves:
-        print(beziertatlength(curve, 0.5))
+# default bezier length method
+bezierlength = bezierlengthSimpson

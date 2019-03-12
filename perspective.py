@@ -25,8 +25,6 @@ from subprocess import PIPE, Popen
 import inkex
 from inkex import Transform
 
-import simpletransform
-
 X, Y = range(2)
 
 try:
@@ -72,8 +70,8 @@ class Project(inkex.Effect):
                 path = inkex.parseCubicPath(envelope.get('d'))
                 if len(path) < 1 or len(path[0]) < 4:
                     return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
-
-                simpletransform.applyTransformToPath(mat, path)
+                # XXX New API needed for applying transforms to paths
+                #simpletransform.applyTransformToPath(mat, path)
                 dp = np.zeros((4, 2), dtype=np.float64)
                 for i in range(4):
                     dp[i][0] = path[0][i][1][0]
@@ -132,14 +130,14 @@ class Project(inkex.Effect):
     def process_path(self, path, matrix):
         mat = inkex.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         point = inkex.parseCubicPath(path.get('d'))
-        simpletransform.applyTransformToPath(mat, point)
+        #simpletransform.applyTransformToPath(mat, point)
         for subs in point:
             for csp in subs:
                 csp[0] = self.project_point(csp[0], matrix)
                 csp[1] = self.project_point(csp[1], matrix)
                 csp[2] = self.project_point(csp[2], matrix)
         mat = -Transform(mat)
-        simpletransform.applyTransformToPath(mat, point)
+        #simpletransform.applyTransformToPath(mat, point)
         path.set('d', str(inkex.Path(point)))
 
     def project_point(self, point, matrix):

@@ -42,8 +42,6 @@ import inkex
 import pathmodifier
 from inkex.localize import _
 
-import simpletransform
-
 
 class Dimension(pathmodifier.PathModifier):
     """Add dimentions as a path modifier"""
@@ -106,7 +104,7 @@ class Dimension(pathmodifier.PathModifier):
         if len(self.options.ids) == 0:
             return inkex.errormsg(_("Please select an object."))
         if self.options.type == "geometric":
-            self.bbox = simpletransform.computeBBox(self.selected.values())
+            self.bbox = self.svg.get_selected_bbox()
         else:
             q = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
             file = self.options.input_file

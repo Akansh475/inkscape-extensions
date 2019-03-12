@@ -60,6 +60,12 @@ class BasicSvgTest(TestCase):
         doc.set_selected('bananas')
         self.assertEqual(doc.selected['bananas'], doc)
 
+    def test_selected_bbox(self):
+        """Can we get a bounding box from the selected items"""
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        doc.set_selected('path3904', 'path3902')
+        self.assertEqual(doc.get_selected_bbox(), (27.135259, 580.05892, 87.411314, 524.91176))
+
     def test_svg_nameview(self):
         """Can get the sodipodi nameview element"""
         doc = svg()

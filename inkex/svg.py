@@ -77,6 +77,10 @@ class SvgDocumentElement(BaseElement):
         sel = self.selected
         return OrderedDict((_id, sel[_id]) for _id in self.xpath('//@id') if _id in sel)
 
+    def get_selected_bbox(self):
+        """Gets the bounding box of the selected items"""
+        return sum([node.bounding_box() for node in self.selected.values()])
+
     def get_current_layer(self):
         """Returns the currently selected layer"""
         layer = self.getElementById(self.namedview.current_layer, 'svg:g')

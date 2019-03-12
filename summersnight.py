@@ -21,7 +21,6 @@ import os
 import inkex
 from inkex import Transform
 
-import simpletransform
 from ffgeom import *
 
 try:
@@ -63,7 +62,7 @@ class Project(inkex.Effect):
                 if len(trafo[0]) < 4:
                     inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
                     exit()
-                simpletransform.applyTransformToPath(mat, trafo)
+                #simpletransform.applyTransformToPath(mat, trafo)
                 trafo = [[Point(csp[1][0],csp[1][1]) for csp in subs] for subs in trafo][0][:4]
 
                 #vectors pointing away from the trafo origin
@@ -113,14 +112,14 @@ class Project(inkex.Effect):
         mat = inkex.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         d = path.get('d')
         p = cubicsuperpath.parsePath(d)
-        simpletransform.applyTransformToPath(mat, p)
+        #simpletransform.applyTransformToPath(mat, p)
         for subs in p:
             for csp in subs:
                 csp[0] = self.trafopoint(csp[0])
                 csp[1] = self.trafopoint(csp[1])
                 csp[2] = self.trafopoint(csp[2])
         mat = -Transform(mat)
-        simpletransform.applyTransformToPath(mat, p)
+        #simpletransform.applyTransformToPath(mat, p)
         path.set('d',cubicsuperpath.formatPath(p))
 
     def trafopoint(self, xy):

@@ -27,7 +27,7 @@ import math
 import string
 
 import inkex
-import simpletransform
+from inkex.transforms import Transform
 
 
 class hpglEncoder(object):
@@ -132,8 +132,8 @@ class hpglEncoder(object):
 
     def getHpgl(self):
         # dryRun to find edges
-        groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0], [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
-        groupmat = simpletransform.composeTransform(groupmat, simpletransform.parseTransform('rotate(' + self.options.orientation + ')'))
+        groupmat = Transform([[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0], [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]])
+        groupmat.add_rotate(self.options.orientation)
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         self.processGroups(self.doc, groupmat)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
@@ -180,7 +180,7 @@ class hpglEncoder(object):
         # initialize transformation matrix and cache
         groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, -self.divergenceX + self.offsetX],
             [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, -self.divergenceY + self.offsetY]]
-        groupmat = simpletransform.composeTransform(groupmat, simpletransform.parseTransform('rotate(' + self.options.orientation + ')'))
+        groupmat.add_rotate(self.options.orientation)
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
@@ -243,11 +243,7 @@ class hpglEncoder(object):
 
     def mergeTransform(self, doc, matrix):
         # get and merge two matrixes into one
-        trans = doc.get('transform')
-        if trans:
-            return simpletransform.composeTransform(matrix, simpletransform.parseTransform(trans))
-        else:
-            return matrix
+        return doc.transform + Transform(matrix)
 
     def isGroupVisible(self, group):
         style = group.get('style')
@@ -263,7 +259,8 @@ class hpglEncoder(object):
         if path:
             # parse and transform path
             path = inkex.parseCubicPath(path)
-            simpletransform.applyTransformToPath(mat, path)
+            # XXX New API needed for applying transforms to paths
+            # simpletransform.applyTransformToPath(mat, path)
             inkex.cspsubdiv(path, self.flat)
             # path to HPGL commands
             oldPosX = 0.0

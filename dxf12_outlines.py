@@ -26,8 +26,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
-import simpletransform
-
 import inkex
 from inkex.bezier import cspsubdiv
 
@@ -129,22 +127,23 @@ class MyEffect(inkex.Effect):
             if layer is None:
                 layer = 'Layer 1'
 
-            d = node.get('d')
-            p = inkex.parseCubicPath(d)
+            # XXX New API needed here to transform a path to a matrix
+            #d = node.get('d')
+            #p = inkex.parseCubicPath(d)
 
-            t = node.get('transform')
-            if t is not None:
-                m = simpletransform.parseTransform(t)
-                simpletransform.applyTransformToPath(m, p)
+            #t = node.get('transform')
+            #if t is not None:
+            #    m = simpletransform.parseTransform(t)
+            #    simpletransform.applyTransformToPath(m, p)
 
-            m = [[scale, 0, 0], [0, -scale, h * scale]]
-            simpletransform.applyTransformToPath(m, p)
+            #m = [[scale, 0, 0], [0, -scale, h * scale]]
+            #simpletransform.applyTransformToPath(m, p)
 
-            if re.search('drill$', layer, re.I) is None:
+            #if re.search('drill$', layer, re.I) is None:
                 # if layer == 'Brackets Drill':
-                self.dxf_path_to_lines(layer, p)
-            else:
-                self.dxf_path_to_point(layer, p)
+            #    self.dxf_path_to_lines(layer, p)
+            #else:
+            #    self.dxf_path_to_point(layer, p)
 
         self.dxf_add(r12_footer)
 

@@ -28,7 +28,6 @@ Create Voronoi diagram from seeds (midpoints of selected objects)
 
 import random
 
-import simpletransform
 from lxml import etree
 
 import inkex
@@ -176,12 +175,12 @@ class Voronoi2svg(inkex.Effect):
 
     def getGlobalTransform(self, node):
         parent = node.getparent()
-        myTrans = simpletransform.parseTransform(node.get('transform'))
+        myTrans = node.transform
         if myTrans:
             if parent is not None:
                 parentTrans = self.getGlobalTransform(parent)
                 if parentTrans:
-                    return simpletransform.composeTransform(parentTrans, myTrans)
+                    return parentTrans + myTrans
                 else:
                     return myTrans
         else:
@@ -288,7 +287,7 @@ class Voronoi2svg(inkex.Effect):
 
         if self.options.diagramType != 'Delaunay':
             # Clipping bounding box creation
-            gBbox = simpletransform.computeBBox(nodes)
+            gBbox = sum([node.bounding_box() for node in nodes])
 
             # Clipbox is the box to which the Voronoi diagram is restricted
             if self.options.clipBox == 'Page':

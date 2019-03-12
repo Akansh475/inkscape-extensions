@@ -38,7 +38,7 @@ from __future__ import print_function
 import sys
 import dxf_templates
 import inkex
-import simpletransform
+from inkex.transforms import Transform
 
 import numpy
 from numpy.linalg import solve
@@ -224,10 +224,9 @@ class DxfOutlines(inkex.Effect):
             p = inkex.parseCubicPath(d)
         else:
             return
-        trans = node.get('transform')
-        if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
-        simpletransform.applyTransformToPath(mat, p)
+        mat = Transform(mat) + node.transform
+        # XXX New API needed here for transform path
+        #simpletransform.applyTransformToPath(mat, p)
         for sub in p:
             for i in range(len(sub) - 1):
                 s = sub[i]
@@ -246,16 +245,16 @@ class DxfOutlines(inkex.Effect):
         trans = node.get('transform')
         x = node.get('x')
         y = node.get('y')
-        mat = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        mat = Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
+            mat += Transform(trans)
         if x:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat += Transform([[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat += Transform([[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], mat))
+            self.groupmat.append(self.groupmat[-1] + mat)
         # get referenced node
         refid = node.get(inkex.addNS('href', 'xlink'))
         refnode = self.getElementById(refid[1:])
@@ -287,7 +286,7 @@ class DxfOutlines(inkex.Effect):
                 self.layer = layer
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], simpletransform.parseTransform(trans)))
+            self.groupmat.append(self.groupmat[-1] + Transform(trans))
         for node in group:
             if node.tag == inkex.addNS('g', 'svg'):
                 self.process_group(node)

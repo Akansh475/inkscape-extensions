@@ -43,14 +43,13 @@ class Extrude(inkex.Effect):
             inkex.errormsg(_('Need at least 2 paths selected'))
             return
 
-        pts = [cubicsuperpath.parsePath(paths[i].get('d'))
-               for i in range(len(paths))]
+        pts = [node.path for node in paths]
 
         for i in range(len(paths)):
             if 'transform' in paths[i].keys():
-                trans = paths[i].get('transform')
-                trans = simpletransform.parseTransform(trans)
-                simpletransform.applyTransformToPath(trans, pts[i])
+                trans = paths[i].transform
+                # XXX Need new API for applying tranform to a path
+                #simpletransform.applyTransformToPath(trans, pts[i])
 
         for n1 in range(0, len(paths)):
             for n2 in range(n1 + 1, len(paths)):

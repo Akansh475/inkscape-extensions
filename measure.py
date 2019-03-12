@@ -38,9 +38,11 @@ http://mathworld.wolfram.com/GreensTheorem.html
 import locale
 import re
 
+from lxml import etree
+
 import inkex
 from inkex import inkbool
-from lxml import etree
+from inkex.bezier import csparea, cspcofm, csplength
 
 # On darwin, fall back to C in cases of
 # - incorrect locale IDs (see comments in bug #406662)
@@ -49,18 +51,6 @@ try:
     locale.setlocale(locale.LC_ALL, '')
 except locale.Error:
     locale.setlocale(locale.LC_ALL, 'C')
-
-# third party
-try:
-    import numpy
-
-    mat_area = numpy.matrix([[0, 2, 1, -3], [-2, 0, 1, 1], [-1, -1, 0, 2], [3, -1, -2, 0]])
-    mat_cofm_0 = numpy.matrix([[0, 35, 10, -45], [-35, 0, 12, 23], [-10, -12, 0, 22], [45, -23, -22, 0]])
-    mat_cofm_1 = numpy.matrix([[0, 15, 3, -18], [-15, 0, 9, 6], [-3, -9, 0, 12], [18, -6, -12, 0]])
-    mat_cofm_2 = numpy.matrix([[0, 12, 6, -18], [-12, 0, 9, 3], [-6, -9, 0, 15], [18, -3, -15, 0]])
-    mat_cofm_3 = numpy.matrix([[0, 22, 23, -45], [-22, 0, 12, 10], [-23, -12, 0, 35], [45, -10, -35, 0]])
-except:
-    numpy = None
 
 
 class Length(inkex.Effect):
@@ -132,10 +122,6 @@ class Length(inkex.Effect):
                                      help="dummy")
 
     def effect(self):
-        if numpy is None:
-            inkex.errormsg(_("Failed to import the numpy modules. These modules are required by this extension. Please install them and try again.  On a Debian-like system this can be done with the command, sudo apt-get install python-numpy."))
-            return
-
         if self.options.mformat == '"presets"':
             self.setPreset()
         # get number of digits

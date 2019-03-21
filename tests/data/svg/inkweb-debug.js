@@ -1,5 +1,5 @@
 /*
-**  InkWeb Debuger - help the development with InkWeb.
+**  InkWeb Debugger - help the development with InkWeb.
 **
 **  Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
 **

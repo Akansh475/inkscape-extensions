@@ -5,7 +5,7 @@
 **
 **  ********* Bugs and New Fetures *************************************
 **   If you found any bug on this script or if you want to propose a
-**   new feature, please report it in the inkscape bug traker
+**   new feature, please report it in the inkscape bug tracker
 **   https://bugs.launchpad.net/inkscape/+filebug
 **   and assign that to Aurium.
 **  ********************************************************************

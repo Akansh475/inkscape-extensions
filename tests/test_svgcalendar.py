@@ -62,7 +62,7 @@ class CalendarArguments(InkscapeExtensionTestMixin, TestCase):
         self.assertEqual(effect.options.day_names[6], 'SAB')
 
     def test_converted_year_zero(self):
-        """Year equal to 0 is converted to currect year"""
+        """Year equal to 0 is converted to correct year"""
         effect = self.assertEffect(args=['--year=0'])
         self.assertEqual(effect.options.year, datetime.today().year)
 

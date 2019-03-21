@@ -94,7 +94,7 @@ class ExtractImage(inkex.Effect):
         xlink = node.get(inkex.addNS('href', 'xlink'))
         if not xlink.startswith('data:'):
             inkex.errormsg("Not an image element")
-            return # Not embeded data
+            return # Not embedded data
 
         data = xlink[5:]
         if ',' not in data or ';' not in data:

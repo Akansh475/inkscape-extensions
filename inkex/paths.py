@@ -286,7 +286,7 @@ class Path(list):
         pen = (0.0, 0.0)
         for i, seg in enumerate(self):
             if seg.num == 1:
-                # Vertical and Horzontal lines can not be rotated
+                # Vertical and Horizontal lines can not be rotated
                 seg = seg.to_line(pen)
             if seg.num:
                 pen = self[i].get_pen(pen)

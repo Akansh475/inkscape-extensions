@@ -2887,7 +2887,7 @@ class Gcodetools(inkex.Effect):
                 return csp_subpath_line_to([], [sp2[1], p])
 
         if not self.options.in_out_path and not self.options.plasma_prepare_corners and self.options.in_out_path_do_not_add_reference_point:
-            self.error("Warning! Extension is not said to do anything! Enable one of Create in-out paths or Prepare corners checkboxes or disable Do not add in-out referense point!")
+            self.error("Warning! Extension is not said to do anything! Enable one of Create in-out paths or Prepare corners checkboxes or disable Do not add in-out reference point!")
             return
 
         # Add in-out-reference point if there is no one yet.

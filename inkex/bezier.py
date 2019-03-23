@@ -28,42 +28,15 @@ import numpy
 
 from .utils import errormsg
 
-MAT_AREA = numpy.matrix([[0, 2, 1, -3],
-                         [-2, 0, 1, 1],
-                         [-1, -1, 0, 2],
-                         [3, -1, -2, 0]])
-
-MAT_COFM_0 = numpy.matrix([[0, 35, 10, -45],
-                           [-35, 0, 12, 23],
-                           [-10, -12, 0, 22],
-                           [45, -23, -22, 0]])
-
-MAT_COFM_1 = numpy.matrix([[0, 15, 3, -18],
-                           [-15, 0, 9, 6],
-                           [-3, -9, 0, 12],
-                           [18, -6, -12, 0]])
-
-MAT_COFM_2 = numpy.matrix([[0, 12, 6, -18],
-                           [-12, 0, 9, 3],
-                           [-6, -9, 0, 15],
-                           [18, -3, -15, 0]])
-
-MAT_COFM_3 = numpy.matrix([[0, 22, 23, -45],
-                           [-22, 0, 12, 10],
-                           [-23, -12, 0, 35],
-                           [45, -10, -35, 0]])
-
-X, Y = range(2)
-
 
 def pointdistance(point_a, point_b):
     """The size of the line between two points"""
-    return math.sqrt(((point_b[X] - point_a[X]) ** 2) + ((point_b[Y] - point_a[Y]) ** 2))
+    return math.sqrt(((point_b[0] - point_a[0]) ** 2) + ((point_b[1] - point_a[1]) ** 2))
 
 
 def between_point(point_a, point_b, time=0.5):
     """Returns the point between point a and point b"""
-    return point_a[X] + time * (point_b[X] - point_a[X]), point_a[Y] + time * (point_b[Y] - point_a[Y])
+    return point_a[0] + time * (point_b[0] - point_a[0]), point_a[1] + time * (point_b[1] - point_a[1])
 
 
 def percent_point(point_a, point_b, percent=50.0):
@@ -405,6 +378,10 @@ def subdiv(sp, flat, i=1):
 
 
 def csparea(csp):
+    MAT_AREA = numpy.matrix([[0, 2, 1, -3],
+                             [-2, 0, 1, 1],
+                             [-1, -1, 0, 2],
+                             [3, -1, -2, 0]])
     area = 0.0
     for sp in csp:
         if len(sp) < 2:
@@ -419,6 +396,25 @@ def csparea(csp):
 
 
 def cspcofm(csp):
+    MAT_COFM_0 = numpy.matrix([[0, 35, 10, -45],
+                               [-35, 0, 12, 23],
+                               [-10, -12, 0, 22],
+                               [45, -23, -22, 0]])
+
+    MAT_COFM_1 = numpy.matrix([[0, 15, 3, -18],
+                               [-15, 0, 9, 6],
+                               [-3, -9, 0, 12],
+                               [18, -6, -12, 0]])
+
+    MAT_COFM_2 = numpy.matrix([[0, 12, 6, -18],
+                               [-12, 0, 9, 3],
+                               [-6, -9, 0, 15],
+                               [18, -3, -15, 0]])
+
+    MAT_COFM_3 = numpy.matrix([[0, 22, 23, -45],
+                               [-22, 0, 12, 10],
+                               [-23, -12, 0, 35],
+                               [45, -10, -35, 0]])
     area = csparea(csp)
     xc = 0.0
     yc = 0.0

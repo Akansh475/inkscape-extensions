@@ -7,12 +7,12 @@ import string
 
 from tests.base import InkscapeExtensionTestMixin, TestCase
 from tests.base.word import word_generator
-from text_lowercase import C
+from text_lowercase import Lowercase
 
 
 class LowerCase(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = C
+        self.effect = Lowercase
         self.e = self.effect()
 
     def test_uppercase(self):

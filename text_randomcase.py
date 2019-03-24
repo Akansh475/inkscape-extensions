@@ -3,29 +3,26 @@
 
 import random
 
-import chardataeffect
+from chardataeffect import CharEffectBase
 
+class RandomCase(CharEffectBase):
+    """Randomise the case of the text (with bias)"""
+    previous_case = 1
 
-class C(chardataeffect.CharDataEffect):
-    def process_chardata(self, text, line, par):
-        r = ""
-        a = 1
-        for i in range(len(text)):
-            c = text[i]
-            # bias the randomness towards inversion of the previous case:
-            if a > 0:
-                a = random.choice([-2, -1, 1])
-            else:
-                a = random.choice([-1, 1, 2])
-            if a > 0 and c.isalpha():
-                r = r + c.upper()
-            elif a < 0 and c.isalpha():
-                r = r + c.lower()
-            else:
-                r = r + c
+    def map_char(self, char):
+        # bias the randomness towards inversion of the previous case:
+        if self.previous_case > 0:
+            case = random.choice([-2, -1, 1])
+        else:
+            case = random.choice([-1, 1, 2])
 
-        return r
-
+        if char.isalpha():
+            self.previous_case = case
+            if case > 0:
+                return char.upper()
+            elif case < 0:
+                return char.lower()
+        return char
 
 if __name__ == '__main__':
-    C().run()
+    RandomCase().run()

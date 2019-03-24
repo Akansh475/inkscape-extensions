@@ -5,14 +5,14 @@ Test string uppercase extension
 
 import string
 
-from text_uppercase import C
+from text_uppercase import Uppercase
 from .base import InkscapeExtensionTestMixin, TestCase
 from .base.word import word_generator
 
 
 class UpperCase(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = C
+        self.effect = Uppercase
         self.e = self.effect()
 
     def test_lowercase(self):

@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import chardataeffect
+from chardataeffect import CharEffectBase
 
-
-class C(chardataeffect.CharDataEffect):
-    def process_chardata(self, text, line=False, par=False):
+class Uppercase(CharEffectBase):
+    def process_chardata(self, text):
         return text.upper()
 
-
 if __name__ == '__main__':
-    C().run()
+    Uppercase().run()

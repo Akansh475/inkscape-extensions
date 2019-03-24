@@ -1,9 +1,8 @@
 # coding=utf-8
 from tests.base import InkscapeExtensionTestMixin, TestCase
-from text_flipcase import C
+from text_flipcase import FlipCase
 
 
 class TestFlipCaseBasic(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = C
-        self.e = self.effect()
+        self.effect = FlipCase

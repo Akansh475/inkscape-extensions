@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
-import chardataeffect
 
+from chardataeffect import CharEffectBase
 
-class TitleCase(chardataeffect.CharDataEffect):
-
-    def process_chardata(self, text, line, par):
+class TitleCase(CharEffectBase):
+    def process_chardata(self, text):
         return text.title()
 
 if __name__ == '__main__':

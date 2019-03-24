@@ -1,41 +1,36 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import chardataeffect
+from chardataeffect import CharEffectBase
 
 
-class C(chardataeffect.CharDataEffect):
+class SentanceCase(CharEffectBase):
     sentence_start = True
     was_punctuation = False
 
-    def process_chardata(self, text, line, par):
-        r = ""
-        # inkex.debug(text+str(line)+str(par))
-        for c in text:
-            if c == '.' or c == '!' or c == '?':
-                self.was_punctuation = True
-            elif ((c.isspace() or line) and self.was_punctuation) or par:
-                self.sentence_start = True
-                self.was_punctuation = False
-            elif c == '"' or c == ')':
-                pass
-            else:
-                self.was_punctuation = False
+    def map_char(self, char):
+        """Turn the char into a sentance using class state"""
+        if char in '.!?':
+            self.was_punctuation = True
+        elif ((char.isspace() or self.newline) and self.was_punctuation) or self.newpar:
+            self.sentence_start = True
+            self.was_punctuation = False
+        elif char in '")':
+            pass
+        else:
+            self.was_punctuation = False
 
-            if not c.isspace():
-                line = False
-                par = False
+        if not char.isspace():
+            self.newline = False
+            self.newpar = False
 
-            if self.sentence_start and c.isalpha():
-                r = r + c.upper()
-                self.sentence_start = False
-            elif not self.sentence_start and c.isalpha():
-                r = r + c.lower()
-            else:
-                r = r + c
-
-        return r
+        if self.sentence_start and char.isalpha():
+            self.sentence_start = False
+            return char.upper()
+        elif not self.sentence_start and char.isalpha():
+            return char.lower()
+        return char
 
 
 if __name__ == '__main__':
-    C().run()
+    SentanceCase().run()

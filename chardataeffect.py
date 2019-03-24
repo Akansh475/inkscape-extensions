@@ -30,7 +30,8 @@ TEXT_TAGS = (
 SODIPODI_ROLE = inkex.addNS('sodipodi:role')
 
 
-class CharDataEffect(inkex.Effect):
+class CharEffectBase(inkex.Effect):
+    """Base class for all char effects"""
     def __init__(self):
         inkex.Effect.__init__(self)
         self.visited = []
@@ -44,6 +45,7 @@ class CharDataEffect(inkex.Effect):
             self.recurse(node)
 
     def recurse(self, node):
+        """Reverse the node text"""
         if node.get(SODIPODI_ROLE) == 'line':
             self.newline = True
         elif node.tag in TEXT_TAGS:
@@ -51,7 +53,7 @@ class CharDataEffect(inkex.Effect):
             self.newpar = True
 
         if node.text is not None:
-            node.text = self.process_chardata(node.text, self.newline, self.newpar)
+            node.text = self.process_chardata(node.text)
             self.newline = False
             self.newpar = False
 
@@ -59,7 +61,13 @@ class CharDataEffect(inkex.Effect):
             self.recurse(child)
 
         if node.tail is not None:
-            node.tail = self.process_chardata(node.tail, self.newline, self.newpar)
+            node.tail = self.process_chardata(node.tail)
 
-    def process_chardata(self, text, line, par):
-        raise NotImplementedError
+    def process_chardata(self, text):
+        """Replacable chardata method for processing the text"""
+        return ''.join(map(self.map_char, text))
+
+    @staticmethod
+    def map_char(char):
+        """Replaceable map_char method for processing each letter"""
+        raise NotImplementedError("Please provide a process_chardata or map_char static method.")

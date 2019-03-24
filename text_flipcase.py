@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import chardataeffect
+from chardataeffect import CharEffectBase
 
 
-def _process_letter(c):
-    return c.upper() if c.islower() else c.lower()
-
-
-class C(chardataeffect.CharDataEffect):
-
-    def process_chardata(self, text, line, par):
-        return ''.join(map(_process_letter, text))
-
+class FlipCase(CharEffectBase):
+    """Change the case, cHANGE THE CASE"""
+    @staticmethod
+    def map_char(char):
+        return char.upper() if char.islower() else char.lower()
 
 if __name__ == '__main__':
-    C().run()
+    FlipCase().run()

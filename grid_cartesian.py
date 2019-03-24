@@ -30,6 +30,7 @@ from math import log
 from lxml import etree
 
 import inkex
+from inkex.elements import Group
 
 
 def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
@@ -48,7 +49,7 @@ def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
     etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
 
 
-class GridCartesian(inkex.Effect):
+class GridCartesian(inkex.GenerateExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3)
@@ -77,7 +78,7 @@ class GridCartesian(inkex.Effect):
         self.arg_parser.add_argument("--y_subsubdivs_th", type=float, dest="y_subsubdivs_th", default=0.3)
         self.arg_parser.add_argument("--y_div_unit", dest="y_div_unit", default="cm")
 
-    def effect(self):
+    def generate(self):
         self.options.border_th = self.svg.unittouu(str(self.options.border_th) + self.options.border_th_unit)
 
         self.options.dx = self.svg.unittouu(str(self.options.dx) + self.options.dx_unit)
@@ -96,12 +97,9 @@ class GridCartesian(inkex.Effect):
 
         # Embed grid in group
         # Put in in the centre of the current view
-        view_center = inkex.computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
-        t = 'translate(' + str(view_center[0] - xmax / 2.0) + ',' + \
-            str(view_center[1] - ymax / 2.0) + ')'
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'GridCartesian:X' + str(self.options.x_divs) + ':Y' + str(self.options.y_divs),
-                     'transform': t}
-        grid = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
+
+        g_attribs = {inkex.addNS('label', 'inkscape'): 'GridCartesian:X' + str(self.options.x_divs) + ':Y' + str(self.options.y_divs)}
+        grid = Group(**g_attribs)
 
         # Group for major x gridlines
         g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorXGridlines'}
@@ -219,6 +217,8 @@ class GridCartesian(inkex.Effect):
                                       xmax, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
                                       self.options.y_subsubdivs_th,
                                       'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)
+
+        return grid
 
 
 if __name__ == '__main__':

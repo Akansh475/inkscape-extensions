@@ -24,6 +24,7 @@ import sys
 import hpgl_encoder
 import inkex
 
+from inkex.localize import _
 
 class HpglOutput(inkex.Effect):
 
@@ -68,10 +69,10 @@ class HpglOutput(inkex.Effect):
             hpglInit += ';VS%d' % self.options.speed
         self.hpgl = hpglInit + self.hpgl + ';SP0;PU0,0;IN; '
 
-    def output(self):
-        # print to file
+    def save_raw(self, stream):
+        """print to hpgl file"""
         if self.hpgl != '':
-            print(self.hpgl)
+            stream.write(self.hpgl)
 
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
-
+from inkex.elements import Group
 
 def draw_SVG_circle(r, cx, cy, width, fill, name, parent):
     style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
@@ -59,7 +59,7 @@ def draw_SVG_label_centred(x, y, string, font_size, name, parent):
     label.text = string
 
 
-class GridPolar(inkex.Effect):
+class GridPolar(inkex.GenerateExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
@@ -130,7 +130,7 @@ class GridPolar(inkex.Effect):
                                      dest="a_label_outset", default=24,
                                      help="The radial outset of the circumferential labels")
 
-    def effect(self):
+    def generate(self):
 
         self.options.dr = self.svg.unittouu(str(self.options.dr) + 'px')
         self.options.r_divs_th = self.svg.unittouu(str(self.options.r_divs_th) + 'px')
@@ -142,13 +142,9 @@ class GridPolar(inkex.Effect):
         self.options.a_label_outset = self.svg.unittouu(str(self.options.a_label_outset) + 'px')
 
         # Embed grid in group
-        # Put in in the centre of the current view
-        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
-        t = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'GridPolar:R' +
-                                                       str(self.options.r_divs) + ':A' + str(self.options.a_divs),
-                     'transform': t}
-        grid = etree.SubElement(self.current_layer, 'g', g_attribs)
+        g_attribs = {inkex.addNS('label', 'inkscape'):
+            'GridPolar:R' + str(self.options.r_divs) + ':A' + str(self.options.a_divs)}
+        grid = Group(**g_attribs)
 
         dr = self.options.dr  # Distance between neighbouring circles
         dtheta = 2 * pi / self.options.a_divs_cent  # Angular change between adjacent radial lines at centre
@@ -211,6 +207,8 @@ class GridPolar(inkex.Effect):
                                        cos(i * dtheta + pi / 2.0) * label_radius + numeral_size / 2.0,  # centre the text vertically
                                        str(i * 360 / self.options.a_divs),
                                        label_size, 'Label' + str(i), grid)
+
+        return grid
 
 
 if __name__ == '__main__':

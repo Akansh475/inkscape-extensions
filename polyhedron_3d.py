@@ -56,6 +56,7 @@ from math import acos, cos, floor, pi, sin, sqrt
 
 import inkex
 from inkex import inkbool
+from inkex.elements import Group
 
 from lxml import etree
 
@@ -381,7 +382,7 @@ class Obj(object):  # a 3d object defined by the vertices and the faces (eg a po
                 self.type = 'error'
 
 
-class Poly3D(inkex.Effect):
+class Poly3D(inkex.GenerateExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
@@ -485,7 +486,7 @@ class Poly3D(inkex.Effect):
                                      type=str,
                                      dest="z_sort", default='min')
 
-    def effect(self):
+    def generate(self):
         if numpy is None:
             return inkex.errormsg(_("Failed to import the numpy module. This module is required by this extension. Please install it and try again.  On a Debian-like system this can be done with the command 'sudo apt-get install python-numpy'."))
         so = self.options  # shorthand
@@ -504,16 +505,12 @@ class Poly3D(inkex.Effect):
 
         # INKSCAPE GROUP TO CONTAIN THE POLYHEDRON
 
-        # Put in in the centre of the current view
-        view_center = inkex.computePointInNode(list(self.view_center), self.current_layer)
-        poly_transform = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
-        if scale != 1:
-            poly_transform += ' scale(' + str(scale) + ')'
         # we will put all the rotations in the object name, so it can be repeated in
         poly_name = obj.name + ':' + make_rotation_log(so)
-        poly_attribs = {inkex.addNS('label', 'inkscape'): poly_name,
-                        'transform': poly_transform}
-        poly = etree.SubElement(self.current_layer, 'g', poly_attribs)  # the group to put everything in
+        poly_attribs = {inkex.addNS('label', 'inkscape'): poly_name}
+        if scale != 1:
+            poly_attribs['transform'] = 'scale(' + str(scale) + ')'
+        poly = Group(**poly_attribs)
 
         # TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
 
@@ -561,6 +558,7 @@ class Poly3D(inkex.Effect):
                 inkex.errormsg(_('Face Data Not Found. Ensure file contains face data, and check the file is imported as "Face-Specified" under the "Model File" tab.\n'))
         else:
             inkex.errormsg(_('Internal Error. No view type selected\n'))
+        return poly
 
 
 if __name__ == '__main__':

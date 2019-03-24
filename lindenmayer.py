@@ -79,7 +79,8 @@ class LSystem(inkex.Effect):
 
     def __compose_path(self, string):
         self.turtle.pu()
-        self.turtle.setpos(inkex.computePointInNode(list(self.view_center), self.current_layer))
+        point = self.svg.get_current_layer().get_center_position()
+        self.turtle.setpos(point)
         self.turtle.pd()
         for c in string:
             if c in 'ABCDEF':

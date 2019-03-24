@@ -29,7 +29,6 @@ import string
 import inkex
 from inkex.transforms import Transform
 
-
 class hpglEncoder(object):
     PI = math.pi
     TWO_PI = PI * 2
@@ -133,7 +132,7 @@ class hpglEncoder(object):
     def getHpgl(self):
         # dryRun to find edges
         groupmat = Transform([[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0], [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]])
-        groupmat.add_rotate(self.options.orientation)
+        groupmat.add_rotate(int(self.options.orientation))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         self.processGroups(self.doc, groupmat)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
@@ -243,7 +242,7 @@ class hpglEncoder(object):
 
     def mergeTransform(self, doc, matrix):
         # get and merge two matrixes into one
-        return doc.transform + Transform(matrix)
+        return doc.transform * Transform(matrix)
 
     def isGroupVisible(self, group):
         style = group.get('style')

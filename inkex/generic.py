@@ -67,6 +67,10 @@ class GenerateExtension(EffectExtension):
     def effect(self):
         layer = self.svg.get_current_layer()
         (pos_x, pos_y) = layer.get_center_position()
+        if pos_x is None:
+            pos_x = 0
+        if pos_y is None:
+            pos_y = 0
         fragment = self.generate()
         if fragment is not None:
             container = Group(transform='translate({:d},{:d})'.format(pos_x, pos_y))

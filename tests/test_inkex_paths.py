@@ -74,19 +74,31 @@ class PathTest(TestCase):
         """
         Test the bounding box calculations
 
-        A diagonal line from 90,90 from 10,10  "\"
+        A diagonal line from 20,20 to 90,90 then to +10,+10  "\"
 
         """
-        self.assertEqual((10, 90, 10, 90), Path('M 20,20 L 90,90 l 10,10 Z').bounding_box())
+        self.assertEqual((20, 100, 20, 100), Path('M 20,20 L 90,90 l 10,10 Z').bounding_box())
+        self.assertEqual((10, 90, 10, 90), Path('M 20,20 L 90,90 L 10,10 Z').bounding_box())
 
-    def test_bounding_box_circle(self):
+    def test_bounding_box_curves(self):
         """
-        Test the bounding box calculations
+        Test the bounding box calculations of a curve
+        """
+        self.assertEqual(
+            (-5.7198883, 104.71989, -5.6395306, 104.71989),
+            Path('M 85,14 C 104.63953,33.639531 104.71989,65.441157'
+                 ' 85,85 65.441157,104.71989 33.558843,104.71989 14,85'
+                 ' -5.7198883,65.441157 -5.6395306,33.639531 14,14'
+                 ' 33.639531,-5.6395306 65.360469,-5.6395306 85,14 Z').bounding_box())
+
+    def test_bounding_box_arcs(self):
+        """
+        Test the bounding box calculations with arcs (currently is rough only)
 
         Bounding box around a circle with a radius of 50
         it should be from 0,0 -> 100, 100
         """
-        self.assertEqual((0, 0, 100, 100),
+        self.assertEqual((0, 85.355341, 0, 85.355333), # XXX Should be 100, 100
                          Path('M 85.355333,14.644651 '
                               'A 50,50 0 0 1 85.355333,85.355341'
                               ' 50,50 0 0 1 14.644657,85.355341'

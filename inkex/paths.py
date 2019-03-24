@@ -20,8 +20,10 @@
 functions for digesting paths into a simple list structure
 """
 
-import copy
 import re
+import copy
+import warnings
+
 from math import atan2, cos, pi, sin, sqrt
 from operator import add, mul
 
@@ -218,6 +220,12 @@ class Arc(PathCommand):
     """Special Arc instruction"""
     num = 7
     points = property(lambda self: (self[-2:],))
+
+    def bounding_box(self):
+        """Returns a bounding box for curved lines, similar to refinedBBox"""
+        warnings.warn("Bad calculation for arc bounding box requested.")
+        # This probably needs to be run through inkex.cubic_paths.ArcToPath
+        return super(Arc, self).bounding_box()
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""

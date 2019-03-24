@@ -38,6 +38,7 @@ class Motion(inkex.Effect):
                                      help="magnitude of the motion vector")
 
     def makeface(self, last, arg):
+        import simplepath
         (cmd, params) = arg
         a = []
         a.append(['M', last[:]])
@@ -45,7 +46,7 @@ class Motion(inkex.Effect):
 
         # translate path segment along vector
         np = params[:]
-        defs = inkex.pathdefs[cmd]
+        defs = simplepath.pathdefs[cmd]
         for i in range(defs[1]):
             if defs[3][i] == 'x':
                 np[i] += self.vx

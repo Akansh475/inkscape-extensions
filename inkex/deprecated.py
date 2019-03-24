@@ -220,3 +220,12 @@ def deprecate(func):
         return func(*args, **kwargs)
 
     return _inner
+
+class DepricatedDict(dict):
+    @deprecate
+    def __getitem__(self, key):
+        return super(DepricatedDict, self).__getitem__(key)
+
+    @deprecate
+    def __iter__(self):
+        return super(DepricatedDict, self).__iter__()

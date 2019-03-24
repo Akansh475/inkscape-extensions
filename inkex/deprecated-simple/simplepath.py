@@ -7,8 +7,21 @@
 Depreicated simplepath replacements with documentation
 """
 
-from inkex.deprecated import deprecate
+from inkex.deprecated import deprecate, DepricatedDict
 from inkex.paths import Path
+
+pathdefs = DepricatedDict({
+    'M':['L', 2, [float, float], ['x', 'y']],
+    'L':['L', 2, [float, float], ['x', 'y']],
+    'H':['H', 1, [float], ['x']],
+    'V':['V', 1, [float], ['y']],
+    'C':['C', 6, [float, float, float, float, float, float], ['x', 'y', 'x', 'y', 'x', 'y']],
+    'S':['S', 4, [float, float, float, float], ['x', 'y', 'x', 'y']],
+    'Q':['Q', 4, [float, float, float, float], ['x', 'y', 'x', 'y']],
+    'T':['T', 2, [float, float], ['x', 'y']],
+    'A':['A', 7, [float, float, float, int, int, float, float], ['r', 'r', 'a', 0, 's', 'x', 'y']],
+    'Z':['L', 0, [], []]
+})
 
 @deprecate
 def parsePath(d):

@@ -151,13 +151,14 @@ def pt_from_tcf(tcf, params):  # returns a trilinear triplet from a triangle cen
 
 def get_n_points_from_path(node, n):  # returns a list of first n points (x,y) in an SVG path-representing node
 
+    import simplepath
     p = inkex.parsePath(node.get('d'))  # parse the path
 
     xi = []  # temporary storage for x and y (will combine at end)
     yi = []
 
     for cmd, params in p:  # a parsed path is made up of (cmd, params) pairs
-        defs = inkex.pathdefs[cmd]
+        defs = simplepath.pathdefs[cmd]
         for i in range(defs[1]):
             if defs[3][i] == 'x' and len(xi) < n:  # only collect the first three
                 xi.append(params[i])

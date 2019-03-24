@@ -34,6 +34,7 @@ import inkex
 import render_alphabetsoup_config
 from inkex import Transform, inkbool
 from inkex.paths import Path
+from inkex.elements import PathElement
 
 syntax = render_alphabetsoup_config.syntax
 alphabet = render_alphabetsoup_config.alphabet
@@ -100,16 +101,18 @@ def reversePath(sp):
 
 
 def flipLeftRight(sp, width):
+    import simplepath
     for cmd, params in sp:
-        defs = inkex.pathdefs[cmd]
+        defs = simplepath.pathdefs[cmd]
         for i in range(defs[1]):
             if defs[3][i] == 'x':
                 params[i] = width - params[i]
 
 
 def flipTopBottom(sp, height):
+    import simplepath
     for cmd, params in sp:
-        defs = inkex.pathdefs[cmd]
+        defs = simplepath.pathdefs[cmd]
         for i in range(defs[1]):
             if defs[3][i] == 'y':
                 params[i] = height - params[i]
@@ -552,14 +555,15 @@ class AlphabetSoup(inkex.Effect):
         if image:
             s = {'stroke': 'none', 'fill': '#000000'}
 
-            new = etree.Element(inkex.addNS('path', 'svg'))
-            new.set('style', str(inkex.Style(s)))
+            new = PathElement(
+                style=str(inkex.Style(s)),
+                d=str(Path(image)))
 
-            new.set('d', str(inkex.Path(image)))
-            self.svg.get_current_layer().append(new)
+            layer = self.svg.get_current_layer()
+            layer.append(new)
 
             # compensate preserved transforms of parent layer
-            if self.current_layer.getparent() is not None:
+            if layer.getparent() is not None:
                 mat = (self.svg.get_current_layer().transform * Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
                 new.transform *= Transform(-Transform(mat))
 

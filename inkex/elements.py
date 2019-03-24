@@ -106,7 +106,8 @@ class BaseElement(etree.ElementBase):
 
     def get_center_position(self):
         """Returns object's center in terms of document units"""
-        return self.bounding_box().center()
+        x, y = self.bounding_box().center()
+        return x or 0, y or 0
 
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to

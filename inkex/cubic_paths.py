@@ -50,22 +50,41 @@ def norm(pt):
 
 
 def ArcToPath(p1, params):
+    """Approximates an arc with cubic bezier segments.
+    
+    Arguments:
+    p1 -- starting point (absolute coords)
+    params -- arcs parameters as per https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+
+    Returns a list of triplets of points : [control_point_before, node, control_point_after]
+    (first and last returned triplets are [p1, p1, *] and [*, p2, p2])
+    """
+
     A = p1[:]
     rx, ry, teta, longflag, sweepflag, x2, y2 = params[:]
     teta = teta * pi / 180.0
     B = [x2, y2]
+    # Degenerate ellipse
     if rx == 0 or ry == 0 or A == B:
         return [[A[:], A[:], A[:]], [B[:], B[:], B[:]]]
+
+    # turn coordinates so that the ellipse morph into a *unit circle* (not 0-centered)
     mat = matprod((rotmat(teta), [[1 / rx, 0], [0, 1 / ry]], rotmat(-teta)))
     applymat(mat, A)
     applymat(mat, B)
+
     k = [-(B[1] - A[1]), B[0] - A[0]]
     d = k[0] * k[0] + k[1] * k[1]
     k[0] /= sqrt(d)
     k[1] /= sqrt(d)
     d = sqrt(max(0, 1 - d / 4))
-    if longflag == sweepflag:
+    # k is the unit normal to AB vector, pointing to center O
+    # d is distance from center to AB segment (distance from O to the midpoint of AB)
+    # for the last line, remember this is a unit circle, and kd vector is ortogonal to AB (Pythagorean thm)
+
+    if longflag == sweepflag: #top-right ellipse in SVG example https://www.w3.org/TR/SVG/images/paths/arcs02.svg
         d *= -1
+
     O = [(B[0] + A[0]) / 2 + d * k[0], (B[1] + A[1]) / 2 + d * k[1]]
     OA = [A[0] - O[0], A[1] - O[1]]
     OB = [B[0] - O[0], B[1] - O[1]]
@@ -75,6 +94,7 @@ def ArcToPath(p1, params):
     end = acos(OB[0] / norm(OB))
     if OB[1] < 0:
         end *= -1
+    # start and end are the angles from center of the circle to A and to B respectively
 
     if sweepflag and start > end:
         end += 2 * pi
@@ -83,11 +103,8 @@ def ArcToPath(p1, params):
 
     NbSectors = int(abs(start - end) * 2 / pi) + 1
     dTeta = (end - start) / NbSectors
-    # v=dTeta*2/pi*0.552
-    # v=dTeta*2/pi*4*(sqrt(2)-1)/3
     v = 4 * tan(dTeta / 4) / 3
-    # if not sweepflag:
-    #    v*=-1
+    # I would use v = tan(dTeta/2)*4*(sqrt(2)-1)/3 ?
     p = []
     for i in range(0, NbSectors + 1, 1):
         angle = start + i * dTeta
@@ -98,6 +115,7 @@ def ArcToPath(p1, params):
     p[0][0] = p[0][1][:]
     p[-1][2] = p[-1][1][:]
 
+    # go back to the original coordinate system
     mat = matprod((rotmat(teta), [[rx, 0], [0, ry]], rotmat(-teta)))
     for pts in p:
         applymat(mat, pts[0])

@@ -48,7 +48,7 @@ class Extrude(inkex.Effect):
         for i in range(len(paths)):
             if 'transform' in paths[i].keys():
                 trans = paths[i].transform
-                # XXX Need new API for applying tranform to a path
+                # XXX Need new API for applying transform to a path
                 #simpletransform.applyTransformToPath(trans, pts[i])
 
         for n1 in range(0, len(paths)):

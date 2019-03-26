@@ -260,7 +260,7 @@ def point_inside_csp(p, csp, on_the_path=True):
                     # points is on the path
                     return on_the_path
                 else:
-                    # we can skip this segment because it wont influence the answer.
+                    # we can skip this segment because it won't influence the answer.
                     pass
             else:
                 for t in csp_line_intersection([x, y], [x, y + 5], sp1, sp2):
@@ -727,7 +727,7 @@ def csp_curvature_at_t(sp1, sp2, t, depth=3):
         if t1 < 0:
             return -1e100
         if depth > 0:
-            # little hack ;^) hope it wont influence anything...
+            # little hack ;^) hope it won't influence anything...
             return csp_curvature_at_t(sp1, sp2, t * 1.004, depth - 1)
         return 1e100
 
@@ -4769,7 +4769,7 @@ class Gcodetools(inkex.Effect):
             """LT Draw this point as a circle with a 1px dot in the middle (x,y)
             and a 3D line from (x0,y0) down to x,y. 3D line thickness should be t/2
 
-            Note that points tht are subsequently erased as being unneeded do get
+            Note that points that are subsequently erased as being unneeded do get
             displayed, but this helps the user see the total area covered.
             """
             (x0, y0) = xy0
@@ -5458,7 +5458,7 @@ G01 Z1 (going to cutting z)\n""",
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [right, 0], [right, 10])
                                 offsetted_subpath = csp_clip_by_line(offsetted_subpath, [0, miny[1] - r], [10, miny[1] - r])
                                 # Join offsetted_subpath together
-                                # Hope there wont be any circles
+                                # Hope there won't be any circles
                                 subpath = csp_join_subpaths(offsetted_subpath)[0]
 
                         # Create solid object from path and lathe_width

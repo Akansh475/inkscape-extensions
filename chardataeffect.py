@@ -64,7 +64,7 @@ class CharEffectBase(inkex.Effect):
             node.tail = self.process_chardata(node.tail)
 
     def process_chardata(self, text):
-        """Replacable chardata method for processing the text"""
+        """Replaceable chardata method for processing the text"""
         return ''.join(map(self.map_char, text))
 
     @staticmethod

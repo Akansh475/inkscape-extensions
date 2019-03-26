@@ -9,7 +9,7 @@ class SentanceCase(CharEffectBase):
     was_punctuation = False
 
     def map_char(self, char):
-        """Turn the char into a sentance using class state"""
+        """Turn the char into a sentence using class state"""
         if char in '.!?':
             self.was_punctuation = True
         elif ((char.isspace() or self.newline) and self.was_punctuation) or self.newpar:

@@ -44,7 +44,7 @@ from inkex.localize import _
 
 
 class Dimension(pathmodifier.PathModifier):
-    """Add dimentions as a path modifier"""
+    """Add dimensions as a path modifier"""
 
     def __init__(self):
         super(Dimension, self).__init__()

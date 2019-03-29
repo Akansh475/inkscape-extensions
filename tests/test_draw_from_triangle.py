@@ -1,9 +1,9 @@
 # coding=utf-8
-from draw_from_triangle import Draw_From_Triangle
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from draw_from_triangle import DrawFromTriangle
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
+class DrawFromTriangleBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = DrawFromTriangle
 
-class DrawFromTriangleBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = Draw_From_Triangle
         self.e = self.effect()

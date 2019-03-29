@@ -1,9 +1,8 @@
 # coding=utf-8
 from empty_desktop import EmptyDesktop
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class TestEmptyDesktopBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = EmptyDesktop
-        self.e = self.effect()
+class TestEmptyDesktopBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = EmptyDesktop
+    comparisons = [('--size=100x50', )]

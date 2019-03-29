@@ -45,10 +45,10 @@ class Compare(object):
 class CompareNumericFuzzy(Compare):
     @staticmethod
     def filter(contents):
-        func = lambda m: '%.3f' % (float(m.group(0)))
-        contents = re.sub(r'\d+\.\d+', func, contents)             # 1.2345678 -> 1.2346
-        contents = re.sub(r'(\d\.\d+?)0+\b', r'\1', contents)     # 1.2300 -> 1.23, 50.0000 -> 50.0
-        contents = re.sub(r'(\d)\.0+(?=\D|\b)', r'\1', contents)  # 50.0 -> 50
+        func = lambda m: b'%.3f' % (float(m.group(0)))
+        contents = re.sub(br'\d+\.\d+', func, contents)             # 1.2345678 -> 1.2346
+        contents = re.sub(br'(\d\.\d+?)0+\b', br'\1', contents)     # 1.2300 -> 1.23, 50.0000 -> 50.0
+        contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)  # 50.0 -> 50
         return contents
 
 class CompareWithPathSpace(Compare):
@@ -57,14 +57,14 @@ class CompareWithPathSpace(Compare):
     def filter(contents):
         def func(match):
             """We've found a path command, process it"""
-            new = re.sub(r'\s*([LZMHVCSQTAatqscvhmzl])\s*', r' \1 ', match.group(1))
-            return ' d="' + new + '"'
-        return re.sub(r' d="([^"]*)"', func, contents)
+            new = re.sub(br'\s*([LZMHVCSQTAatqscvhmzl])\s*', br' \1 ', match.group(1))
+            return b' d="' + new + b'"'
+        return re.sub(br' d="([^"]*)"', func, contents)
 
 class CompareRandomDigits(Compare):
     @staticmethod
     def filter(contents):
-        return re.sub(r'\d+', '0', contents)    # 123 -> 0
+        return re.sub(br'\d+', b'0', contents)    # 123 -> 0
 
 class CompareSize(Compare):
     @staticmethod
@@ -86,21 +86,21 @@ class CompareOrderIndependentStyle(Compare):
     def filter(contents):
         contents = CompareNumericFuzzy.filter(contents)
         def func(m):
-            sty = ';'.join(sorted(m.group(1).split(';')))
-            return 'style="%s"' % (sty,)
-        return re.sub(r'style="([^"]*)"', func, contents)
+            sty = b';'.join(sorted(m.group(1).split(b';')))
+            return b'style="%s"' % (sty,)
+        return re.sub(br'style="([^"]*)"', func, contents)
 
 class CompareOrderIndependentStyleAndPath(Compare):
     @staticmethod
     def filter(contents):
         contents = CompareOrderIndependentStyle.filter(contents)
         def func(m):
-            d = 'X'.join(sorted(re.split(r'[A-Z]', m.group(1))))
-            return 'd="%s"' % (d,)
-        return re.sub(r'\bd="([^"]*)"', func, contents)
+            d = b'X'.join(sorted(re.split(br'[A-Z]', m.group(1))))
+            return b'd="%s"' % (d,)
+        return re.sub(br'\bd="([^"]*)"', func, contents)
 
 class CompareOrderIndependentTags(Compare):
     @staticmethod
     def filter(contents):
-        return sorted(re.split(r'>\s*<', contents))
+        return sorted(re.split(br'>\s*<', contents))
 

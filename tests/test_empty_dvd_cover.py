@@ -1,9 +1,9 @@
 # coding=utf-8
 from empty_dvd_cover import DvdCover
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy
 
-
-class TestDvdCoverBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = DvdCover
-        self.e = self.effect()
+class TestDvdCoverBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = DvdCover
+    compare_filters = [CompareNumericFuzzy()]
+    comparisons = [('-s', '10', '-b', '10')]

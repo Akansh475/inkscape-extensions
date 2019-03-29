@@ -54,8 +54,8 @@ def xmldiff(x1, x2):
         #return reporter('tail: %r != %r' % (x1.tail, x2.tail))
 
     # Get children and pad with nulls
-    children_a = list(x1.getchildren())
-    children_b = list(x2.getchildren())
+    children_a = list(x1)
+    children_b = list(x2)
     children_a += [None] * (len(children_a) - len(children_b))
     children_b += [None] * (len(children_b) - len(children_a))
 

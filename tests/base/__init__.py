@@ -30,7 +30,7 @@ import tempfile
 import hashlib
 import uuid
 
-from io import StringIO
+from io import BytesIO
 import xml.etree.ElementTree as xml
 
 from unittest import TestCase as BaseCase
@@ -113,7 +113,7 @@ class TestCase(BaseCase):
         args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
 
         # Output is redirected to this string io buffer
-        output = StringIO()
+        output = BytesIO()
         effect.test_output = output
         effect.run(args, output=output)
 
@@ -126,13 +126,14 @@ class TestCase(BaseCase):
 
 
 class InkscapeExtensionTestMixin(object):
-    def test_default_settings_cause_no_exception(self):
+    def setUp(self):
+        super(InkscapeExtensionTestMixin, self).setUp()
         if self.effect is None:
             self.skipTest('self.effect is not defined for this this test')
         self.e = self.effect()
-        args = [self.empty_svg]
-        self.e.run(args)
 
+    def test_default_settings_cause_no_exception(self):
+        self.e.run([self.empty_svg])
 
 class ComparisonMixin(object):
     """
@@ -176,19 +177,22 @@ class ComparisonMixin(object):
         with open(outfile, 'r') as fhl:
             data_b = self._apply_compare_filters(fhl.read())
 
-        if data_a.startswith('<') and data_b.startswith('<'):
+        if data_a.startswith(b'<') and data_b.startswith(b'<'):
             # Compare two svg files
-            xml_a = xml.parse(StringIO(data_a))
-            xml_b = xml.parse(StringIO(data_b))
+            xml_a = xml.parse(BytesIO(data_a))
+            xml_b = xml.parse(BytesIO(data_b))
             # Late importing
             ret = xmldiff(xml_a.getroot(), xml_b.getroot())
-            self.assertTrue(ret, "SVG Output Difference: {}".format(
+            self.assertTrue(ret, "SVG Output Difference: {} <- {}".format(
+                outfile,
                 xml.tostring(xml_a.getroot()).decode('utf-8')))
         else:
             # compare any content (non svg)
             self.assertEqual(data_a, data_b)
 
     def _apply_compare_filters(self, data):
+        if isinstance(data, str):
+            data = data.encode('utf-8')
         for cfilter in self.compare_filters:
             data = cfilter(data)
         return data

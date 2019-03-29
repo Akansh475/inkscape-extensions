@@ -1,9 +1,9 @@
 # coding=utf-8
 from embedimage import Embedder
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class EmbedderBasicTest(InkscapeExtensionTestMixin, TestCase):
+class EmbedderBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = Embedder
     def setUp(self):
-        self.effect = Embedder
         self.e = self.effect()

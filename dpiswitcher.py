@@ -48,10 +48,10 @@ import math
 import re
 import sys
 
-import simpletransform
 from lxml import etree
 
 import inkex
+from inkex.transforms import Transform
 
 # globals
 SKIP_CONTAINERS = [
@@ -154,13 +154,9 @@ def check_text_on_path(svg, element, scale_x, scale_y):
             skip = True
             # scale offset
             if 'transform' in element.attrib:
-                mat = simpletransform.parseTransform(element.get('transform'))
-                mat[0][2] *= scale_x
-                mat[1][2] *= scale_y
-                element.set('transform', inkex.formatTransform(mat))
+                element.transform.add_scale(scale_x, scale_y)
             # scale font size
-            mat = simpletransform.parseTransform(
-                    'scale({},{})'.format(scale_x, scale_y))
+            mat = Transform('scale({},{})'.format(scale_x, scale_y)).matrix
             det = abs(mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0])
             descrim = math.sqrt(abs(det))
             prop = 'font-size'
@@ -188,10 +184,7 @@ def check_use(svg, element, scale_x, scale_y):
             skip = True
             # scale offset
             if 'transform' in element.attrib:
-                mat = simpletransform.parseTransform(element.get('transform'))
-                mat[0][2] *= scale_x
-                mat[1][2] *= scale_y
-                element.set('transform', inkex.formatTransform(mat))
+                element.transform.add_scale(scale_x, scale_y)
     return skip
 
 

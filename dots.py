@@ -93,7 +93,7 @@ class Dots(inkex.Effect):
             pass
 
         style = str(inkex.Style({'stroke': 'none', 'fill': '#000'}))
-        p = inkex.parsePath(node.get('d'))
+        p = node.path.to_arrays()
 
         self.separateLastAndFirst(p)
 

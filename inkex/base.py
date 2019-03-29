@@ -67,7 +67,7 @@ class InkscapeExtension(object):
         """
         pass  # No extra arguments by default so super is not required
 
-    def run(self, args=None):
+    def run(self, args=None, output=None):
         """Main entrypoint for any Inkscape Extension"""
         if args is None:
             args = sys.argv[1:]
@@ -77,7 +77,7 @@ class InkscapeExtension(object):
             self.options.input_file = sys.stdin
 
         if self.options.output is None:
-            self.options.output = sys.stdout
+            self.options.output = (output or sys.stdout)
 
         try:
             self.load_raw()

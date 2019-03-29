@@ -131,6 +131,7 @@ class OtherElements(BaseElement):
         'rdf',
         'type',
         'work',
+        'style',
     ]
 
 

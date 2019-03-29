@@ -39,6 +39,7 @@ from lxml import etree
 import inkex
 from inkex import inkbool
 
+(X, Y) = range(2)
 
 # DRAWING ROUTINES
 
@@ -149,31 +150,35 @@ def pt_from_tcf(tcf, params):  # returns a trilinear triplet from a triangle cen
 
 # SVG DATA PROCESSING
 
-def get_n_points_from_path(node, n):  # returns a list of first n points (x,y) in an SVG path-representing node
+def get_n_points_from_path(node, n):
+    """returns a list of first n points (x,y) in an SVG path-representing node"""
+    points = [(seg.all_x[0], seg.all_y[0]) for seg in node.path]
+    if len(points) < 3:
+        return []
+    return points[:3]
 
-    import simplepath
-    p = inkex.parsePath(node.get('d'))  # parse the path
+    #p = node.path
 
-    xi = []  # temporary storage for x and y (will combine at end)
-    yi = []
+    #xi = []  # temporary storage for x and y (will combine at end)
+    #yi = []
 
-    for cmd, params in p:  # a parsed path is made up of (cmd, params) pairs
-        defs = simplepath.pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'x' and len(xi) < n:  # only collect the first three
-                xi.append(params[i])
-            elif defs[3][i] == 'y' and len(yi) < n:  # only collect the first three
-                yi.append(params[i])
+    #for cmd, params in p:  # a parsed path is made up of (cmd, params) pairs
+    #    defs = simplepath.pathdefs[cmd]
+    #    for i in range(defs[1]):
+    #        if defs[3][i] == 'x' and len(xi) < n:  # only collect the first three
+    #            xi.append(params[i])
+    #        elif defs[3][i] == 'y' and len(yi) < n:  # only collect the first three
+    #            yi.append(params[i])
 
-    if len(xi) == n and len(yi) == n:
-        points = []  # returned pairs of points
-        for i in range(n):
-            points.append([xi[i], yi[i]])
-    else:
+    #if len(xi) == n and len(yi) == n:
+    #    points = []  # returned pairs of points
+    #    for i in range(n):
+    #        points.append([xi[i], yi[i]])
+    #else:
         # inkex.errormsg(_('Error: Not enough nodes to gather coordinates.')) #fail silently and exit, rather than invoke an error console
-        return []  # return a blank
+    #    return []  # return a blank
 
-    return points
+    #return points
 
 
 # EXTRA MATHS FUNCTIONS
@@ -200,7 +205,7 @@ def cot(x):  # cotangent(x)
 
 def report_properties(params):  # report to the Inkscape console using errormsg
     # TODO: unit identifier needs solution for arbitrary document scale
-    unit = Draw_From_Triangle.getDocumentUnit(e)
+    unit = DrawFromTriangle.getDocumentUnit(e)
 
     inkex.errormsg("Side Length 'a' ({0}): {1}".format(unit, str(params[0][0])))
     inkex.errormsg("Side Length 'b' ({0}): {1}".format(unit, str(params[0][1])))
@@ -214,25 +219,25 @@ def report_properties(params):  # report to the Inkscape console using errormsg
 
 
 class Style(object):  # container for style information
-    def __init__(self, options):
+    def __init__(self, svg, options):
         # dot markers
-        self.d_rad = Draw_From_Triangle.unittouu(e, '4px')  # dot marker radius
-        self.d_th = Draw_From_Triangle.unittouu(e, '2px')  # stroke width
+        self.d_rad = svg.unittouu('4px')  # dot marker radius
+        self.d_th = svg.unittouu('2px')  # stroke width
         self.d_fill = '#aaaaaa'  # fill colour
         self.d_col = '#000000'  # stroke colour
 
         # lines
-        self.l_th = Draw_From_Triangle.unittouu(e, '2px')
+        self.l_th = svg.unittouu('2px')
         self.l_fill = 'none'
         self.l_col = '#000000'
 
         # circles
-        self.c_th = Draw_From_Triangle.unittouu(e, '2px')
+        self.c_th = svg.unittouu('2px')
         self.c_fill = 'none'
         self.c_col = '#000000'
 
 
-class Draw_From_Triangle(inkex.Effect):
+class DrawFromTriangle(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--tab",
@@ -340,14 +345,14 @@ class Draw_From_Triangle(inkex.Effect):
                 pts = get_n_points_from_path(node, 3)
 
         if len(pts) == 3:  # if we have right number of nodes, else skip and end program
-            st = Style(so)  # style for dots, lines and circles
+            st = Style(self.svg, so)  # style for dots, lines and circles
 
             # CREATE A GROUP TO HOLD ALL GENERATED ELEMENTS IN
             # Hold relative to point A (pt[0])
             group_translation = 'translate(' + str(pts[0][0]) + ',' + str(pts[0][1]) + ')'
             group_attribs = {inkex.addNS('label', 'inkscape'): 'TriangleElements',
                              'transform': group_translation}
-            layer = etree.SubElement(self.current_layer, 'g', group_attribs)
+            layer = etree.SubElement(self.svg.get_current_layer(), 'g', group_attribs)
 
             # GET METRICS OF THE TRIANGLE
             # vertices in the local coordinates (set pt[0] to be the origin)
@@ -500,4 +505,4 @@ class Draw_From_Triangle(inkex.Effect):
 
 
 if __name__ == '__main__':
-    Draw_From_Triangle().run()
+    DrawFromTriangle().run()

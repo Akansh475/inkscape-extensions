@@ -146,6 +146,7 @@ class Transform(object):
     def __imul__(self, matrix):
         """In place multiplication of transformat matricies"""
         self.matrix = (self * matrix).matrix
+        return self
 
     def __neg__(self):
         """Returns an inverted transformation"""

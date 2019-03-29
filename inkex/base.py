@@ -164,8 +164,11 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
 
     def save(self, stream):
         """Save the svg document to the given stream"""
-        stream.write(etree.tostring(self.document).decode())
-
+        document = etree.tostring(self.document)
+        try:
+            stream.write(document)
+        except TypeError:
+            stream.write(document.decode())
 
 class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
     """

@@ -39,12 +39,13 @@ import sys
 import dxf_templates
 import inkex
 from inkex.transforms import Transform
+from inkex.generic import OutputExtension
 
 import numpy
 from numpy.linalg import solve
 
 
-class DxfOutlines(inkex.Effect):
+class DxfOutlines(OutputExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-R", "--ROBO",
@@ -79,9 +80,8 @@ class DxfOutlines(inkex.Effect):
             self.d = numpy.array([0], float)  # knot vector
         self.poly = [[0.0, 0.0]]  # LWPOLYLINE data
 
-    def output(self):
-        stdout = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
-        stdout.write(b''.join(self.dxf))
+    def save(self, stream):
+        stream.write(b''.join(self.dxf))
 
     def dxf_add(self, str):
         self.dxf.append(str.encode(self.options.char_encode))
@@ -224,7 +224,7 @@ class DxfOutlines(inkex.Effect):
             p = inkex.parseCubicPath(d)
         else:
             return
-        mat = Transform(mat) + node.transform
+        mat = Transform(mat) * node.transform
         # XXX New API needed here for transform path
         #simpletransform.applyTransformToPath(mat, p)
         for sub in p:
@@ -247,17 +247,17 @@ class DxfOutlines(inkex.Effect):
         y = node.get('y')
         mat = Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         if trans:
-            mat += Transform(trans)
+            mat *= Transform(trans)
         if x:
-            mat += Transform([[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat *= Transform([[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat += Transform([[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat *= Transform([[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(self.groupmat[-1] + mat)
+            self.groupmat.append(Transform(self.groupmat[-1]) * mat)
         # get referenced node
         refid = node.get(inkex.addNS('href', 'xlink'))
-        refnode = self.getElementById(refid[1:])
+        refnode = self.svg.getElementById(refid[1:])
         if refnode is not None:
             if refnode.tag == inkex.addNS('g', 'svg'):
                 self.process_group(refnode)
@@ -286,7 +286,7 @@ class DxfOutlines(inkex.Effect):
                 self.layer = layer
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(self.groupmat[-1] + Transform(trans))
+            self.groupmat.append(Transform(self.groupmat[-1]) * Transform(trans))
         for node in group:
             if node.tag == inkex.addNS('g', 'svg'):
                 self.process_group(node)
@@ -340,7 +340,7 @@ class DxfOutlines(inkex.Effect):
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            scale *= h / self.svg.unittouu(self.addDocumentUnit(viewBox2[3]))
+            scale *= h / self.svg.unittouu(self.svg.add_unit(viewBox2[3]))
         self.groupmat = [[[scale, 0.0, 0.0], [0.0, -scale, h * scale]]]
         self.process_group(doc)
         if self.options.ROBO == 'true':

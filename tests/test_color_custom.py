@@ -1,12 +1,16 @@
 # coding=utf-8
 
 from color_custom import C
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class ColorCustomBasicTest(InkscapeExtensionTestMixin, TestCase):
+class ColorCustomBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = C
+    comparisons = [
+        ('--scale=100', '--r=100', '--g=50', '--b=0'),
+    ]
+
     def setUp(self):
-        self.effect = C
         self.e = self.effect()
 
     def test_default_values(self):

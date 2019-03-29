@@ -1,9 +1,13 @@
 # coding=utf-8
 from color_replace import C
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class ColorRemoveBlueBasicTest(InkscapeExtensionTestMixin, TestCase):
+class ColorRemoveBlueBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    comparisons = [
+        ('-f', 'FFFF00', '-t', '0000FF'),
+    ]
+
     def setUp(self):
         self.effect = C
         self.e = self.effect()

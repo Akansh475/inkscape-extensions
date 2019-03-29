@@ -1,10 +1,12 @@
 # coding=utf-8
 from convert2dashes import Dashit
 from inkex import NSS
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class DashitBasicTest(InkscapeExtensionTestMixin, TestCase):
+class DashitBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    comparisons = ([],)
+
     def setUp(self):
         self.effect = Dashit
         self.e = self.effect()

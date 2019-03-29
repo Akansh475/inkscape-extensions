@@ -1,9 +1,8 @@
 # coding=utf-8
 from color_lesshue import C
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class ColorLessHueBasicTest(InkscapeExtensionTestMixin, TestCase):
+class ColorLessHueBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
         self.effect = C
         self.e = self.effect()

@@ -1,12 +1,17 @@
 # coding=utf-8
 from addnodes import SplitIt
 from inkex import NSS
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
+class SplitItBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = SplitIt
+    compare_filters = [
+        CompareWithPathSpace(),
+        CompareNumericFuzzy(),
+    ]
 
-class SplitItBasicTest(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = SplitIt
         self.e = self.effect()
 
     def test_basic(self):

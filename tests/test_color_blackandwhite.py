@@ -1,11 +1,11 @@
 # coding=utf-8
 from color_blackandwhite import C
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class ColorBlackAndWhiteBasicTest(InkscapeExtensionTestMixin, TestCase):
+class ColorBlackAndWhiteBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = C
     def setUp(self):
-        self.effect = C
         self.e = self.effect()
 
     def test_default_values_black(self):

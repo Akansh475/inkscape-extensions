@@ -1,9 +1,11 @@
 # coding=utf-8
 from dpiswitcher import DPISwitcher
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy
 
+class TestDPISwitcherBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = DPISwitcher
+    compare_filters = [CompareNumericFuzzy()]
 
-class TestDPISwitcherBasic(InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
-        self.effect = DPISwitcher
         self.e = self.effect()

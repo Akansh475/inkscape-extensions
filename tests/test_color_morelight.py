@@ -1,9 +1,9 @@
 # coding=utf-8
 from color_morelight import C
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
-class ColorMoreLightBasicTest(InkscapeExtensionTestMixin, TestCase):
+class ColorMoreLightBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     def setUp(self):
         self.effect = C
         self.e = self.effect()

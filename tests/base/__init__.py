@@ -30,14 +30,10 @@ import tempfile
 import hashlib
 import uuid
 
+from io import StringIO
 import xml.etree.ElementTree as xml
 
 from unittest import TestCase as BaseCase
-
-try:
-    from io import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 from .xmldiff import xmldiff
 

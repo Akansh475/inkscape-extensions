@@ -21,6 +21,10 @@
 
 from lxml import etree
 
+from inkex.localize import _
+
+from inkex.elements import PathElement, Group
+from inkex.paths import Path
 import inkex
 
 
@@ -36,8 +40,8 @@ class Extrude(inkex.Effect):
 
     def effect(self):
         paths = []
-        for id, node in self.svg.selected.items():
-            if node.tag == '{http://www.w3.org/2000/svg}path':
+        for node in self.svg.selected.values():
+            if isinstance(node, PathElement):
                 paths.append(node)
         if len(paths) < 2:
             inkex.errormsg(_('Need at least 2 paths selected'))
@@ -57,6 +61,7 @@ class Extrude(inkex.Effect):
                 for i in range(0, min(map(len, pts))):
                     comp = []
                     for j in range(0, min(len(pts[n1][i]), len(pts[n2][i]))):
+                        print("COMP {}".format(pts))
                         comp.append([pts[n1][i][j][1][-2:], pts[n2][i][j][1][-2:]])
                     verts.append(comp)
 
@@ -66,9 +71,9 @@ class Extrude(inkex.Effect):
                         for n, v in enumerate(comp):
                             line += [('M', v[0])]
                             line += [('L', v[1])]
-                    ele = etree.Element('{http://www.w3.org/2000/svg}path')
+                    ele = PathElement()
                     paths[0].xpath('..')[0].append(ele)
-                    ele.set('d', str(inkex.Path(line)))
+                    ele.set('d', str(Path(line)))
                     style = {
                         'fill': 'none',
                         'stroke': '#000000',
@@ -77,7 +82,7 @@ class Extrude(inkex.Effect):
                     }
                     ele.set('style', str(inkex.Style(style)))
                 elif self.options.mode.lower() == 'polygons':
-                    g = etree.Element('{http://www.w3.org/2000/svg}g')
+                    g = Group()
                     style = {
                         'fill': '#000000',
                         'fill-opacity': 0.3,
@@ -98,9 +103,9 @@ class Extrude(inkex.Effect):
                             line += [('L', comp[nn][1])]
                             line += [('L', comp[nn][0])]
                             line += [('L', comp[n][0])]
-                            ele = etree.Element('{http://www.w3.org/2000/svg}path')
+                            ele = PathElement()
                             g.append(ele)
-                            ele.set('d', str(inkex.Path(line)))
+                            ele.set('d', str(Path(line)))
 
 
 if __name__ == '__main__':

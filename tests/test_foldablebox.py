@@ -1,12 +1,11 @@
 # coding=utf-8
 from foldablebox import FoldableBox
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareOrderIndependentStyle
 
-
-class FoldableBoxArguments(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = FoldableBox
-        self.e = self.effect()
+class FoldableBoxArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = FoldableBox
+    compare_filters = [CompareOrderIndependentStyle()]
 
     def test_basic_box_elements(self):
         self.e.run([self.empty_svg])

@@ -18,8 +18,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 import inkex
+from inkex.elements import PathElement
+from inkex.paths import Path
 
-class MyEffect(inkex.Effect):
+class Flatten(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-f", "--flatness",
@@ -27,8 +29,8 @@ class MyEffect(inkex.Effect):
                         dest="flat", default=10.0,
                         help="Minimum flatness of the subdivided curves")
     def effect(self):
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path','svg'):
+        for node in self.svg.selected.values():
+            if isinstance(node, PathElement):
                 d = node.get('d')
                 p = inkex.parseCubicPath(d)
                 inkex.cspsubdiv(p, self.options.flat)
@@ -41,8 +43,8 @@ class MyEffect(inkex.Effect):
                             cmd = 'M'
                         first = False
                         np.append([cmd,[csp[1][0],csp[1][1]]])
-                node.set('d', str(inkex.Path(np)))
+                node.set('d', str(Path(np)))
 
 if __name__ == '__main__':
-    MyEffect().run()
+    Flatten().run()
 

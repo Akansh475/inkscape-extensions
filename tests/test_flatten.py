@@ -1,9 +1,8 @@
 # coding=utf-8
-from flatten import MyEffect
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from flatten import Flatten
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
-
-class MyEffectBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = MyEffect
-        self.e = self.effect()
+class FlattenBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
+    effect = Flatten

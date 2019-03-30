@@ -32,6 +32,7 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
+from inkex.paths import Path
 
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
@@ -100,13 +101,13 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
         # check for visibility of x-axis
         if ybottom <= 0 <= ytop:
             # xaxis
-            a.append(['M ', [left, coordy(0)]])
-            a.append([' l ', [width, 0]])
+            a.append(['M', [left, coordy(0)]])
+            a.append(['l', [width, 0]])
         # check for visibility of y-axis
         if xstart <= 0 <= xend:
             # xaxis
-            a.append([' M ', [coordx(0), bottom]])
-            a.append([' l ', [0, -height]])
+            a.append(['M', [coordx(0), bottom]])
+            a.append(['l', [0, -height]])
 
     # initialize function and derivative for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
@@ -133,10 +134,10 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
 
     # Start curve
     if endpts:
-        a.append([' M ', [left, coordy(0)]])
-        a.append([' L ', [coordx(x0), coordy(y0)]])
+        a.append(['M', [left, coordy(0)]])
+        a.append(['L', [coordx(x0), coordy(y0)]])
     else:
-        a.append([' M ', [coordx(x0), coordy(y0)]])  # initial moveto
+        a.append(['M', [coordx(x0), coordy(y0)]])  # initial moveto
 
     for i in range(int(samples - 1)):
         x1 = (i + 1) * step + xstart
@@ -159,7 +160,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
             dx1 = 1  # Only works for rectangular coordinates
             dy1 = fp(x1)
         # create curve
-        a.append([' C ',
+        a.append(['C',
                   [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)),
                    coordx(x1 - (dx1 * third)), coordy(y1 - (dy1 * third)),
                    coordx(x1), coordy(y1)]
@@ -169,7 +170,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
         dx0 = dx1  # Assume the function is smooth everywhere, so carry over the derivative too
         dy0 = dy1
     if endpts:
-        a.append([' L ', [left + width, coordy(0)]])
+        a.append(['L', [left + width, coordy(0)]])
     return a
 
 
@@ -270,7 +271,7 @@ class FuncPlot(inkex.Effect):
                     newpath.set('transform', t)
 
                 # top and bottom were exchanged
-                newpath.set('d', inkex.formatPath(
+                newpath.set('d', str(Path(
                         drawfunction(self.options.xstart,
                                      self.options.xend,
                                      self.options.ybottom,
@@ -284,7 +285,7 @@ class FuncPlot(inkex.Effect):
                                      self.options.polar,
                                      self.options.isoscale,
                                      self.options.drawaxis,
-                                     self.options.endpts)))
+                                     self.options.endpts))))
                 newpath.set('title', self.options.fofx)
 
                 # newpath.setAttribute('desc', '!func;' + self.options.fofx + ';'

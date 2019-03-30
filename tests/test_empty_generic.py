@@ -1,9 +1,8 @@
 # coding=utf-8
 from empty_generic import GenericTemplate
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy
 
-
-class TestGenericTemplateBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = GenericTemplate
-        self.e = self.effect()
+class TestGenericTemplateBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = GenericTemplate
+    compare_filters = [CompareNumericFuzzy()]

@@ -34,19 +34,22 @@ from io import BytesIO
 import xml.etree.ElementTree as xml
 
 from unittest import TestCase as BaseCase
+from inkex.base import InkscapeExtension
 
 from .xmldiff import xmldiff
 
+if False: # pylint: disable=using-constant-test
+    from typing import Type
+
 TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-
-class NoExtension(object):  # pylint: disable=too-few-public-methods
+class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
     """Test case must specify 'self.effect' to assertEffect."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs): # pylint: disable=super-init-not-called
         raise NotImplementedError(self.__doc__)
 
-    def run(self, *args, **kwargs):
+    def run(self, args=None, output=None):
         """Fake run"""
         pass
 
@@ -55,7 +58,7 @@ class TestCase(BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
-    effect = NoExtension
+    effect = NoExtension # type: Type[InkscapeExtension]
 
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)

@@ -2,10 +2,10 @@
 """
 Test Inkex transformational logic.
 """
-from inkex.transforms import BoundingBox, Scale, Transform
+from inkex.transforms import (
+    BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform
+)
 from tests.base import TestCase
-from tests.base.svg import svg, svg_file
-
 
 class TransformTest(TestCase):
     """Test transformation API and calculations"""
@@ -73,6 +73,18 @@ class TransformTest(TestCase):
         trans = Transform('translate(10, 10)')
         self.assertEqual(trans.apply_to_point((10, 10)), (20, 20))
         self.assertRaises(ValueError, trans.apply_to_point, '')
+
+    def test_translate(self):
+        """Test making translate specific items"""
+        self.assertEqual(str(TranslateTransform(10.6, 99.9)), "translate(10.6, 99.9)")
+
+    def test_scale(self):
+        """Test making scale specific items"""
+        self.assertEqual(str(ScaleTransform(1.0, 2.2)), "scale(1, 2.2)")
+
+    def test_rotate(self):
+        """Test making rotate specific items"""
+        self.assertEqual(str(RotateTransform(45, 10, 10)), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
 
 class ScaleTest(TestCase):

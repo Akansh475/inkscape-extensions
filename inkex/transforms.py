@@ -117,7 +117,12 @@ class Transform(object):
 
     def __str__(self):
         """Format the given matrix into a string repr for svg"""
-        return "matrix({})".format(" ".join(format(var, '.6g') for var in self.to_sixlet()))
+        sixlet = tuple(self.to_sixlet())
+        if sixlet[:4] == (1, 0, 0, 1):
+            return "translate({:.6g}, {:.6g})".format(*sixlet[4:])
+        elif sixlet[4:] == (0, 0) and sixlet[1:3] == (0, 0):
+            return "scale({:.6g}, {:.6g})".format(sixlet[0], sixlet[3])
+        return "matrix({})".format(" ".join(format(var, '.6g') for var in sixlet))
 
     def __repr__(self):
         """String Representation of this object"""
@@ -167,6 +172,24 @@ class Transform(object):
             raise ValueError("Will not transform string '{}'".format(point))
         return (self.a * point[X] + self.c * point[Y] + self.e,
                 self.b * point[X] + self.d * point[Y] + self.f)
+
+class TranslateTransform(Transform):
+    """A quick and easy to use Translate definition"""
+    def __init__(self, pos_x, pos_y=0.0):
+        super(TranslateTransform, self).__init__()
+        self.add_translate(pos_x, pos_y)
+
+class ScaleTransform(Transform):
+    """A quick and easy to use Scale definition"""
+    def __init__(self, scale_x, scale_y=None):
+        super(ScaleTransform, self).__init__()
+        self.add_scale(scale_x, scale_y)
+
+class RotateTransform(Transform):
+    """A quick and easy to use Rotate definiiton"""
+    def __init__(self, deg, center_x=0.0, center_y=0.0):
+        super(RotateTransform, self).__init__()
+        self.add_rotate(deg, center_x, center_y)
 
 
 class Scale(object):  # pylint: disable=too-few-public-methods

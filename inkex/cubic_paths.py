@@ -189,10 +189,10 @@ def unCubicSuperPath(csp):
 
 
 def parseCubicPath(d):
-    from simplepath import parsePath
-    return CubicSuperPath(parsePath(d))
+    from .paths import Path
+    return CubicSuperPath(Path(d).to_arrays())
 
 
 def formatCubicPath(p):
-    from simplepath import formatPath
-    return formatPath(unCubicSuperPath(p))
+    from .paths import Path
+    return str(Path(unCubicSuperPath(p)))

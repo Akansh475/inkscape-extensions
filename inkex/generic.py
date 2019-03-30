@@ -26,6 +26,7 @@ use in their code. See below for the different types.
 from .utils import errormsg
 from .elements import Group
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin
+from .transforms import TranslateTransform
 from .deprecated import DeprecatedEffect
 
 class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
@@ -79,7 +80,7 @@ class GenerateExtension(EffectExtension):
             pos_y = 0
         fragment = self.generate()
         if fragment is not None:
-            container = Group(transform='translate({:d},{:d})'.format(pos_x, pos_y))
+            container = Group(transform=str(TranslateTransform(pos_x, pos_y)))
             container.append(fragment)
             layer.append(container)
         else:

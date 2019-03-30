@@ -23,34 +23,32 @@ Export a gimp pallet file (.gpl)
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-import inkex
+from inkex.generic import OutputExtension
+from inkex.colors import Color
 
 DOCNAME = 'sodipodi:docname'
 TAGS = ('fill', 'stroke', 'stop-color', 'flood-color', 'lighting-color')
 
-class ExportGpl(inkex.Effect):
-    def effect(self):
-        svg = self.document.getroot()
-
-        print('GIMP Palette\nName: %s\n#' % (svg.get(inkex.addNS("docname", "sodipodi"))))
-        colors = dict(self.walk(svg))
+class ExportGpl(OutputExtension):
+    def save(self, stream):
+        name = self.svg.name.replace('.svg', '')
+        stream.write('GIMP Palette\nName: {}\n#\n'.format(name).encode('utf-8'))
+        colors = dict(self.walk(self.svg))
         for key, value in sorted(colors.items()):
-            print(key + value)
+            stream.write("{} {}\n".format(key, value).encode('utf-8'))
 
     def walk(self, node):
         """Walks over all svg dom nodes"""
-        styles = dict(inkex.Style.parse_str(node.get('style', '')))
+        styles = getattr(node, 'style', None) #dict(inkex.Style.parse_str(node.get('style', '')))
         for tag in TAGS:
-            col = styles.get(tag, None)
-            if col is not None and inkex.is_color(col):
-                parsed = inkex.Color(col).to_rgb()
-                yield ('%3i %3i %3i ' % tuple(parsed[:3]), str(parsed).upper())
+            if styles and tag in styles:
+                col = Color(styles.get(tag, None))
+                if col:
+                    yield ("{:3d} {:3d} {:3d}".format(*col.to_rgb()), str(str(col)).upper())
 
-        for child in node.iterchildren():
+        for child in node:
             for color in self.walk(child):
                 yield color
 
 if __name__ == '__main__':
     ExportGpl().run()
-
-

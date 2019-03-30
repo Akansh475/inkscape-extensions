@@ -170,9 +170,9 @@ SVG_COLOR = {
     'white': '#ffffff',
     'whitesmoke': '#f5f5f5',
     'yellow': '#ffff00',
-    'yellowgreen': '#9acd32'
+    'yellowgreen': '#9acd32',
+    'none': None,
 }
-
 
 def is_color(color):
     """Determine if its a color we can use. If not, leave it unchanged."""
@@ -199,8 +199,10 @@ class Color(list):
         super(Color, self).__init__()
         if isinstance(color, str):
             space, color = self.parse_str(color)
-        elif color is None:
-            color = (0, 0, 0)
+
+        # Empty list means 'none', or no color
+        if color is None:
+            color = []
 
         if not isinstance(color, (list, tuple)):
             raise ColorError("Not a known a color value")
@@ -232,6 +234,8 @@ class Color(list):
         """Creates a rgb int array"""
         # Handle pre-defined svg color values
         color = SVG_COLOR.get(color.lower(), color)
+        if color is None:
+            return 'rgb', None
 
         # Next handle short colors (css: #abc -> #aabbcc)
         if color.startswith('#'):
@@ -253,6 +257,9 @@ class Color(list):
 
     def __str__(self):
         """int array to #rrggbb"""
+        if not self:
+            # TODO, return named color if name was 'set' previously.
+            return 'none'
         if self.space == 'rgb':
             return '#{0:02x}{1:02x}{2:02x}'.format(*self)
         elif self.space == 'hsl':
@@ -261,6 +268,8 @@ class Color(list):
 
     def to_hsl(self):
         """Turn this color into a Hue/Saturation/Lightness colour space"""
+        if not self and self.space == 'rgb':
+            return self.to_rgb().to_hsl()
         if self.space == 'hsl':
             return self
         elif self.space == 'rgb':
@@ -269,6 +278,8 @@ class Color(list):
 
     def to_rgb(self):
         """Turn this color into a Red/Green/Blue colour space"""
+        if not self and self.space == 'rgb':
+            return Color([0, 0, 0])
         if self.space == 'rgb':
             return self
         elif self.space == 'hsl':

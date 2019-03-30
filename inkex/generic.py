@@ -45,7 +45,13 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
 
     Used in functions for `Save As`
     """
-    pass
+    def effect(self):
+        """Effect isn't needed for a lot of Output extensions"""
+        pass
+
+    def save(self):
+        """But save certainly is, we give a more exact message here"""
+        raise NotImplementedError("Output extensions require a save(stream) method!")
 
 class InputExtension(SvgOutputMixin, InkscapeExtension):
     """

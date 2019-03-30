@@ -110,6 +110,11 @@ class SvgDocumentElement(BaseElement):
         return self.getElement('//{}[@id="{}"]'.format(elm, eid))
 
     @property
+    def name(self):
+        """Returns the Document Name"""
+        return self.get('sodipodi:docname', '')
+
+    @property
     def namedview(self):
         """Return the sp namedview meta information element"""
         nvs = self.xpath('//sodipodi:namedview')

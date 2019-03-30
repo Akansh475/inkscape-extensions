@@ -9,13 +9,16 @@ class ColorTest(TestCase):
 
     def test_empty(self):
         """Empty color (black)"""
-        self.assertEqual(Color(), [0, 0, 0])
+        self.assertEqual(Color(), [])
+        self.assertEqual(Color().to_rgb(), [0, 0, 0])
+        self.assertEqual(Color().to_hsl(), [0, 0, 0])
+        self.assertEqual(str(Color(None)), 'none')
+        self.assertEqual(str(Color('none')), 'none')
 
     def test_errors(self):
         """Color parsing errors"""
         self.assertRaises(ColorError, Color, {})
         self.assertRaises(ValueError, Color, [0, 0, 0, 0])
-        self.assertRaises(ColorError, Color(None, space='nop').__str__)
         self.assertRaises(ColorError, Color(None, space='nop').to_rgb)
         self.assertRaises(ColorError, Color(None, space='nop').to_hsl)
 

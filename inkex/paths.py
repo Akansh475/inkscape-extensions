@@ -65,7 +65,7 @@ class PathCommand(tuple):
 
     @classmethod
     def __new__(cls, _, cmd, *args):
-        if cmd.upper() == cls.this_cmd:
+        if cmd.upper().strip() == cls.this_cmd:
             if len(args) < cls.num:
                 raise InvalidPath("Bad arguments {}({})".format(cmd, args))
             obj = tuple.__new__(cls, args[:cls.num])

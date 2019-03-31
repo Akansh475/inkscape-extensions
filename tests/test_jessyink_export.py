@@ -1,10 +1,9 @@
-#!/usr/bin/en
 # coding=utf-8
-from jessyInk_export import MyEffect
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from jessyInk_export import JessyInkExport
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareSize
 
-
-class JessyInkExportBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = MyEffect
-        self.e = self.effect()
+class JessyInkExportBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = JessyInkExport
+    comparisons = [()]
+    compare_filters = [CompareSize()]

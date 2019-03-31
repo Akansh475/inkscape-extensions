@@ -7,11 +7,8 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 # The current files directory
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
 class ScourBasicTests(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = ScourInkscape
-        self.e = self.effect()
+    effect_class = ScourInkscape
 
     def test_working(self):
         input = os.path.join(dir_path, "data/svg/default-inkscape-SVG.svg")

@@ -4,4 +4,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class JessyInkCustomMouseHandlerBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = JessyInk_CustomMouseHandler
+    effect_class = JessyInk_CustomMouseHandler

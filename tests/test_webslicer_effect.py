@@ -5,6 +5,4 @@ from webslicer_effect import WebSlicer_Effect
 
 
 class TestWebSlicerEffectBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = WebSlicer_Effect
-        self.e = self.effect()
+    effect_class = WebSlicer_Effect

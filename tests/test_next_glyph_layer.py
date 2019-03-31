@@ -3,4 +3,4 @@ from next_glyph_layer import NextLayer
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestNextLayerBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = NextLayer
+    effect_class = NextLayer

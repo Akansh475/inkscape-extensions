@@ -5,6 +5,4 @@ from webslicer_create_group import WebSlicer_CreateGroup
 
 
 class TestWebSlicerCreateGroupBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = WebSlicer_CreateGroup
-        self.e = self.effect()
+    effect_class = WebSlicer_CreateGroup

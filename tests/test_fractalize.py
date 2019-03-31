@@ -4,6 +4,4 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class PathFractalizeBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = PathFractalize
-        self.e = self.effect()
+    effect_class = PathFractalize

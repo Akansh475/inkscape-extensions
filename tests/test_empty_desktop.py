@@ -4,5 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class TestEmptyDesktopBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = EmptyDesktop
+    effect_class = EmptyDesktop
     comparisons = [('--size=100x50', )]

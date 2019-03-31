@@ -4,5 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 class MotionBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Motion
+    effect_class = Motion
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]

@@ -4,6 +4,4 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class TestPatternBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Pattern
-        self.e = self.effect()
+    effect_class = Pattern

@@ -2,8 +2,5 @@
 from seamless_pattern import C
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
-
 class SeamlessPatternBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = C
-        self.e = self.effect()
+    effect_class = C

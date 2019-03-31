@@ -5,4 +5,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class GuidesCreatorBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = GuidesCreator
+    effect_class = GuidesCreator

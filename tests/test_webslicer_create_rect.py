@@ -5,6 +5,4 @@ from webslicer_create_rect import WebSlicer_CreateRect
 
 
 class TestWebSlicerCreateRectBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = WebSlicer_CreateRect
-        self.e = self.effect()
+    effect_class = WebSlicer_CreateRect

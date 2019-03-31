@@ -13,5 +13,5 @@ class FilterOutJessyInkId(Compare):
         return re.sub(br'jessyink.core.video\d+', b'jessyink.core.videoX', contents)
 
 class JessyInkEffectsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = JessyInk_Effects
+    effect_class = JessyInk_Effects
     compare_filters = [FilterOutJessyInkId()]

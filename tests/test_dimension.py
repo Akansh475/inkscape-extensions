@@ -4,6 +4,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class TestDimensionBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Dimension
-        self.e = self.effect()
+    effect_class = Dimension

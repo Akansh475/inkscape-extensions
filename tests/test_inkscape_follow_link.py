@@ -3,4 +3,4 @@ from inkscape_follow_link import FollowLink
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestFollowLinkBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = FollowLink
+    effect_class = FollowLink

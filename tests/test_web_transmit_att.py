@@ -4,6 +4,4 @@ from web_transmit_att import InkWebTransmitAtt
 
 
 class TestInkWebTransmitAttBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = InkWebTransmitAtt
-        self.e = self.effect()
+    effect_class = InkWebTransmitAtt

@@ -4,8 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareNumericFuzzy
 
 class TestDPISwitcherBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = DPISwitcher
+    effect_class = DPISwitcher
     compare_filters = [CompareNumericFuzzy()]
-
-    def setUp(self):
-        self.e = self.effect()

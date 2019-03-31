@@ -8,13 +8,9 @@ from datetime import datetime
 from svgcalendar import SVGCalendar
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
-
 class CalendarArguments(InkscapeExtensionTestMixin, TestCase):
     """Test arguments to calendar extensions"""
-
-    def setUp(self):
-        self.effect = SVGCalendar
-        self.e = self.effect()
+    effect_class = SVGCalendar
 
     def test_default_names_list(self):
         """Test default names"""
@@ -84,10 +80,7 @@ class CalendarArguments(InkscapeExtensionTestMixin, TestCase):
 
 class CalendarMethods(InkscapeExtensionTestMixin, TestCase):
     """Test calendar methods"""
-
-    def setUp(self):
-        self.effect = SVGCalendar
-        self.e = self.effect()
+    effect_class = SVGCalendar
 
     def test_recognize_a_weekend(self):
         """Recognise a weekend"""

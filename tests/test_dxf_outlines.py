@@ -4,7 +4,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class DFXOutlineBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = DxfOutlines
-
-    def setUp(self):
-        self.e = self.effect()
+    effect_class = DxfOutlines

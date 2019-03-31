@@ -44,7 +44,7 @@ if False: # pylint: disable=using-constant-test
 TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
-    """Test case must specify 'self.effect' to assertEffect."""
+    """Test case must specify 'self.effect_class' to assertEffect."""
 
     def __init__(self, *args, **kwargs): # pylint: disable=super-init-not-called
         raise NotImplementedError(self.__doc__)
@@ -109,7 +109,7 @@ class TestCase(BaseCase):
 
            filename should point to a starting svg document, default is empty_svg
         """
-        effect = kwargs.pop('effect', self.effect)()
+        effect = kwargs.pop('effect', self.effect_class)()
 
         args = [self.data_file(*filename)] if filename else [self.empty_svg]  # pylint: disable=no-value-for-parameter
         args += kwargs.pop('args', [])
@@ -131,12 +131,12 @@ class TestCase(BaseCase):
 class InkscapeExtensionTestMixin(object):
     def setUp(self):
         super(InkscapeExtensionTestMixin, self).setUp()
-        if self.effect is None:
-            self.skipTest('self.effect is not defined for this this test')
-        self.e = self.effect()
+        if self.effect_class is None:
+            self.skipTest('self.effect_class is not defined for this this test')
+        self.effect = self.effect_class()
 
     def test_default_settings_cause_no_exception(self):
-        self.e.run([self.empty_svg])
+        self.effect.run([self.empty_svg])
 
 class ComparisonMixin(object):
     """

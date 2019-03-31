@@ -4,6 +4,4 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class TestNupBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Nup
-        self.e = self.effect()
+    effect_class = Nup

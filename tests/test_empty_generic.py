@@ -4,5 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareNumericFuzzy
 
 class TestGenericTemplateBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = GenericTemplate
+    effect_class = GenericTemplate
     compare_filters = [CompareNumericFuzzy()]

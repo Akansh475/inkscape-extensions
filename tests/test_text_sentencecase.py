@@ -3,5 +3,4 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 from text_sentencecase import SentanceCase
 
 class TestSentenceCaseBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = SentanceCase
+    effect_class = SentanceCase

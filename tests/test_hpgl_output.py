@@ -4,4 +4,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class HPGLOutputBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = HpglOutput
+    effect_class = HpglOutput

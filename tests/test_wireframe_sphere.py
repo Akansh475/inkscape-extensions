@@ -5,6 +5,4 @@ from wireframe_sphere import WireframeSphere
 
 
 class TestWireframeSphereBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = WireframeSphere
-        self.e = self.effect()
+    effect_class = WireframeSphere

@@ -6,4 +6,4 @@ from tests.base.filters import CompareOrderIndependentStyle
 
 class TestGridIsometricBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareOrderIndependentStyle()]
-    effect = GridIsometric
+    effect_class = GridIsometric

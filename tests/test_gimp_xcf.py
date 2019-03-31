@@ -10,9 +10,7 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class GimpXCFBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = MyEffect
-        self.e = self.effect()
+    effect_class = MyEffect
 
     def _test_expected_file(self):
         """multilayered-test.svg provides 3 layers and a sublayer (all non empty)"""

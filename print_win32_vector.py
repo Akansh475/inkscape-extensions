@@ -35,11 +35,13 @@ import ctypes
 
 import inkex
 
-if not sys.platform.startswith('win'):
-    raise inkex.DependencyError("sorry, this will run only on Windows, exiting...")
+if sys.platform.startswith('win'):
+    myspool = ctypes.WinDLL("winspool.drv")
+    mygdi = ctypes.WinDLL("gdi32.dll")
+else:
+    myspool = None
+    mygdi = None
 
-myspool = ctypes.WinDLL("winspool.drv")
-mygdi = ctypes.WinDLL("gdi32.dll")
 LOGBRUSH = ctypes.c_long * 3
 DM_IN_PROMPT = 4                        # call printer property sheet
 DM_OUT_BUFFER = 2                       # write to DEVMODE structure
@@ -211,7 +213,5 @@ class MyEffect(inkex.Effect):
         self.process_group(doc)
         mygdi.EndDoc(self.hDC)
 
-
 if __name__ == '__main__':
     MyEffect().run()
-

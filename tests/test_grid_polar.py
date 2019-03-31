@@ -5,4 +5,4 @@ from tests.base.filters import CompareOrderIndependentStyle
 
 class GridPolarBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareOrderIndependentStyle()]
-    effect = GridPolar
+    effect_class = GridPolar

@@ -22,10 +22,5 @@ Written to test the coding of generating barcodes.
 from render_barcode import InsertBarcode
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
-
 class InsertBarcodeBasicTest(InkscapeExtensionTestMixin, TestCase):
-    """Render Barcode"""
-
-    def setUp(self):
-        self.effect = InsertBarcode
-        self.e = self.effect()
+    effect_class = InsertBarcode

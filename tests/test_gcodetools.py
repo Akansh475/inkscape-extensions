@@ -5,7 +5,7 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareOrderIndependentBytes
 
 class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Gcodetools
+    effect_class = Gcodetools
     comparisons = [(
         '--id=p1', '--active-tab="area"', '--max-area-curves=100',
         '--area-inkscape-radius=-10', '--area-tool-overlap=0',

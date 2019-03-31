@@ -7,18 +7,19 @@ from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 
 class Edge3dBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Edge3d
+    effect_class = Edge3d
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
 
     def test_basic(self):
         args = ['--id=edgeme',
                 self.data_file('svg', 'edge3d.svg')]
-        self.e.run(args)
-        old_paths = self.e.original_document.xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)
-        new_paths = self.e.document.xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)
+        self.effect.run(args)
+        old_paths = self.effect.original_document\
+            .xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)
+        new_paths = self.effect.document.xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)
         self.assertTrue(len(old_paths) == 1)
         self.assertTrue(len(new_paths) == 1)
-        old_paths = self.e.original_document.xpath('//svg:path', namespaces=inkex.NSS)
-        new_paths = self.e.document.xpath('//svg:path', namespaces=inkex.NSS)
+        old_paths = self.effect.original_document.xpath('//svg:path', namespaces=inkex.NSS)
+        new_paths = self.effect.document.xpath('//svg:path', namespaces=inkex.NSS)
         self.assertTrue(len(old_paths) == 1)
         self.assertTrue(len(new_paths) == 4)

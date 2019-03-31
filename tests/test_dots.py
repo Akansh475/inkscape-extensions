@@ -4,6 +4,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class DotsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Dots
-        self.e = self.effect()
+    effect_class = Dots

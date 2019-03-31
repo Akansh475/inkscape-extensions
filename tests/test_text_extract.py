@@ -2,8 +2,5 @@
 from tests.base import InkscapeExtensionTestMixin, TestCase
 from text_extract import Extract
 
-
 class TestExtractBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Extract
-        self.e = self.effect()
+    effect_class = Extract

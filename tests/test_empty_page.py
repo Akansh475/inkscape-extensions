@@ -4,5 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareNumericFuzzy
 
 class TestEmptyPageBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = EmptyPage
+    effect_class = EmptyPage
     compare_filters = [CompareNumericFuzzy()]

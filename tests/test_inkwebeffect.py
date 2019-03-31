@@ -4,6 +4,4 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class InkWebEffectBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = InkWebEffect
-        self.e = self.effect()
+    effect_class = InkWebEffect

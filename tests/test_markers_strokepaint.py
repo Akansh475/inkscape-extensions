@@ -10,9 +10,7 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class MarkerStrokePaintBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = MarkerStrokePaintEffect
-        self.e = self.effect()
+    effect_class = MarkerStrokePaintEffect
 
     def test_empty_defs(self):
         e = MarkerStrokePaintEffect()

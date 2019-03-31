@@ -4,5 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareOrderIndependentStyle
 
 class LSystemBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = LSystem
+    effect_class = LSystem
     compare_filters = [CompareOrderIndependentStyle()]

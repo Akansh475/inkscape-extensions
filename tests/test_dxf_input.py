@@ -12,12 +12,9 @@ class TestDxfInputBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_file = 'r12.dxf'
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
-    effect = DxfInput
+    effect_class = DxfInput
 
     def _apply_compare_filters(self, data):
         """Remove the full pathnames"""
         data = super(TestDxfInputBasic, self)._apply_compare_filters(data)
         return data.replace(os.path.join(TEST_ROOT, 'data') + '/', '')
-
-    def setUp(self):
-        self.e = self.effect()

@@ -3,4 +3,4 @@ from layers2svgfont import Layers2SVGFont
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestLayers2SVGFontBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Layers2SVGFont
+    effect_class = Layers2SVGFont

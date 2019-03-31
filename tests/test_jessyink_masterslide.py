@@ -3,4 +3,4 @@ from jessyInk_masterSlide import JessyInk_MasterSlide
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class JessyInkMasterSlideBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = JessyInk_MasterSlide
+    effect_class = JessyInk_MasterSlide

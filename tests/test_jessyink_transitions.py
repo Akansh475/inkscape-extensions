@@ -4,5 +4,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class JessyInkTransitionsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = JessyInk_Transitions
+    effect_class = JessyInk_Transitions
     comparisons = [('--layerName', 'Slide2')]

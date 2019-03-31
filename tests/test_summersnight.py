@@ -7,8 +7,5 @@
 from summersnight import Project
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
-
 class EnvelopeBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Project
-        self.e = self.effect()
+    effect_class = Project

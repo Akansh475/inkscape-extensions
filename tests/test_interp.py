@@ -3,4 +3,4 @@ from interp import Interp
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class InterpBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Interp
+    effect_class = Interp

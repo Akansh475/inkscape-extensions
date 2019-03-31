@@ -26,9 +26,7 @@ from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class FrameTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Frame
-        self.e = self.effect()
+    effect_class = Frame
 
     def get_frame(self, document):
         return document.xpath('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]', namespaces=inkex.NSS)[0]

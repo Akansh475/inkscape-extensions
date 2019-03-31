@@ -52,7 +52,7 @@ class GroupTest(ElementTestCase):
         self.assertEqual(str(self.elem.transform), 'matrix(1.44985 0 0 1.36417 -107.03 -167.362)')
         self.elem.transform = 'translate(12, 14)'
         self.assertEqual(self.elem.transform, Transform('translate(12, 14)'))
-        self.assertEqual(str(self.elem.transform), 'matrix(1 0 0 1 12 14)')
+        self.assertEqual(str(self.elem.transform), 'translate(12, 14)')
 
 
 class RectTest(ElementTestCase):

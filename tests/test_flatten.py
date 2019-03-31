@@ -5,4 +5,4 @@ from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 class FlattenBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
-    effect = Flatten
+    effect_class = Flatten

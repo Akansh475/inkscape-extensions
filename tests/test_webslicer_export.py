@@ -5,6 +5,4 @@ from webslicer_export import WebSlicer_Export
 
 
 class TestWebSlicerExportBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = WebSlicer_Export
-        self.e = self.effect()
+    effect_class = WebSlicer_Export

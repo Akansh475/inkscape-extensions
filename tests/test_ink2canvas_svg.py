@@ -5,5 +5,5 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareOrderIndependentLines
 
 class Ink2CanvasBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Ink2Canvas
+    effect_class = Ink2Canvas
     compare_filters = [CompareOrderIndependentLines()]

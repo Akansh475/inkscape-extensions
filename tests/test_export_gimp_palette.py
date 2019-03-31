@@ -3,4 +3,4 @@ from export_gimp_palette import ExportGpl
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestExportGplBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = ExportGpl
+    effect_class = ExportGpl

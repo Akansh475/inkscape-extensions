@@ -4,6 +4,6 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareOrderIndependentLines
 
 class TestMergeStylesBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = MergeStyles
+    effect_class = MergeStyles
     comparisons = [('--id=r3', '--id=c3')]
     compare_filters = [CompareOrderIndependentLines()]

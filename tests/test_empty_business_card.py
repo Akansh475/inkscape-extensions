@@ -4,7 +4,4 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class TestBusinessCardBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = BusinessCard
-
-    def setUp(self):
-        self.e = self.effect()
+    effect_class = BusinessCard

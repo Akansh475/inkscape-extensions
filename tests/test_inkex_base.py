@@ -38,10 +38,10 @@ class ModSvgExtension(SvgThroughMixin, InkscapeExtension):
 
 class InkscapeExtensionTest(TestCase):
     """Tests for Inkscape Extensions"""
+    effect_class = InkscapeExtension
 
     def setUp(self):
-        self.effect = InkscapeExtension
-        self.e = self.effect()
+        self.e = self.effect_class()
 
     def test_bare_bones(self):
         """What happens when we don't inherit"""

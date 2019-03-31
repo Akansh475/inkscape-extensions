@@ -4,4 +4,4 @@ from handles import Handles
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class HandlesBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect = Handles
+    effect_class = Handles

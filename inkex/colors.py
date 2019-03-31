@@ -191,6 +191,7 @@ class Color(list):
     red = property(lambda self: self.to_rgb()[0])
     green = property(lambda self: self.to_rgb()[1])
     blue = property(lambda self: self.to_rgb()[2])
+    alpha = property(lambda self: self.to_rgba()[3])
     hue = property(lambda self: self.to_hsl()[0])
     saturation = property(lambda self: self.to_hsl()[1])
     lightness = property(lambda self: self.to_hsl()[2])
@@ -221,13 +222,17 @@ class Color(list):
             if val.endswith('%'):
                 val = float(val.strip('%')) / 100
             else:
-                val = int(float(val))
+                val = float(val)
 
-        if isinstance(val, float) and val <= 1.0:
+        end_type = int
+        if len(self) == 3: # Alpha value
+            val = min([1.0, val])
+            end_type = float
+        elif isinstance(val, float) and val <= 1.0:
             val *= 255
 
         if isinstance(val, (int, float)):
-            super(Color, self).append(int(val))
+            super(Color, self).append(end_type(val))
 
     @staticmethod
     def parse_str(color):
@@ -262,6 +267,10 @@ class Color(list):
             return 'none'
         if self.space == 'rgb':
             return '#{0:02x}{1:02x}{2:02x}'.format(*self)
+        if self.space == 'rgba':
+            if self[3] == 1.0:
+                return 'rgb({:g}, {:g}, {:g})'.format(*self[:3])
+            return 'rgba({:g}, {:g}, {:g}, {:g})'.format(*self)
         elif self.space == 'hsl':
             return 'hsl({0:g}, {1:g}, {2:g})'.format(*self)
         raise ColorError("Can't print colour space '{}'".format(self.space))
@@ -282,9 +291,17 @@ class Color(list):
             return Color([0, 0, 0])
         if self.space == 'rgb':
             return self
+        if self.space == 'rgba':
+            return Color(self[:3], space='rgb')
         elif self.space == 'hsl':
             return Color(hsl_to_rgb(*self.to_floats()), space='rgb')
         raise ColorError("Unknown color conversion {}->rgb".format(self.space))
+
+    def to_rgba(self, alpha=1.0):
+        """Turn this color isn't an RGB with Alpha colour space"""
+        if self.space == 'rgba':
+            return self
+        return Color(self.to_rgb() + [alpha], 'rgba')
 
     def to_floats(self):
         """Returns the colour values as percentage floats (0.0 - 1.0)"""

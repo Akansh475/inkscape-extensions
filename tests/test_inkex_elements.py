@@ -48,10 +48,24 @@ class PathElementTestCase(ElementTestCase):
     def test_original_path(self):
         """LPE paths can return their original paths"""
         svg = svg_file(self.data_file('svg', 'with-lpe.svg'))
-        self.assertEqual(str(svg.getElementById('lpe').path), 'M 30 30 L -10 -10 Z')
-        self.assertEqual(str(svg.getElementById('lpe').original_path()), 'M 20 20 L 10 10 Z')
-        self.assertEqual(str(svg.getElementById('nolpe').path), 'M 30 30 L -10 -10 Z')
-        self.assertEqual(str(svg.getElementById('nolpe').original_path()), 'M 30 30 L -10 -10 Z')
+        lpe = svg.getElementById('lpe')
+        nolpe = svg.getElementById('nolpe')
+        self.assertEqual(str(lpe.path), 'M 30 30 L -10 -10 Z')
+        self.assertEqual(str(lpe.original_path), 'M 20 20 L 10 10 Z')
+        self.assertEqual(str(nolpe.path), 'M 30 30 L -10 -10 Z')
+        self.assertEqual(str(nolpe.original_path), 'M 30 30 L -10 -10 Z')
+
+        lpe.original_path = "M 60 60 L 5 5"
+        self.assertEqual(lpe.get('inkscape:original-d'), 'M 60 60 L 5 5')
+        self.assertEqual(lpe.get('d'), 'M 30 30 L -10 -10 Z')
+
+        lpe.path = "M 60 60 L 15 15 Z"
+        self.assertEqual(lpe.get('d'), 'M 60 60 L 15 15 Z')
+
+        nolpe.original_path = "M 60 60 L 5 5"
+        self.assertEqual(nolpe.get('inkscape:original-d', None), None)
+        self.assertEqual(nolpe.get('d'), 'M 60 60 L 5 5')
+
 
 
 class GroupTest(ElementTestCase):

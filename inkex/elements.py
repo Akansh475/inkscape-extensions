@@ -55,8 +55,16 @@ class BaseElement(etree.ElementBase):
         """Gets the outline or path of the element, this can be a simple bounding box for most"""
         return Path(self.get_path())
 
+    @path.setter
+    def path(self, path):
+        self.set_path(path)
+
     def get_path(self):
         raise NotImplementedError("Path should be provided by svg element {}."
+                                  .format(type(self).__name__))
+
+    def set_path(self):
+        raise NotImplementedError("Path should be set by svg element {}."
                                   .format(type(self).__name__))
 
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
@@ -154,15 +162,27 @@ class PathElement(BaseElement):
     tag_name = 'path'
     get_path = lambda self: self.get('d')
 
+    def set_path(self, path):
+        """Set the given data as a path as the 'd' attribute"""
+        self.set('d', str(Path(path)))
+
     def apply_transform(self):
         """Apply the internal transformation to this node and delete"""
         if 'transform' in self.attrib:
             self.path.transform(self.transform)
             del self.attrib['transform']
 
+    @property
     def original_path(self):
         """Returns the original path if this is an LPE, or the path if not"""
         return Path(self.get('inkscape:original-d', self.path))
+
+    @original_path.setter
+    def original_path(self, path):
+        if addNS('inkscape:original-d') in self.attrib:
+            self.set('inkscape:original-d', str(Path(path)))
+        else:
+            self.path = path
 
 class Points(BaseElement):
     """Provide a useful extension for points elements"""

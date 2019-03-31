@@ -1,10 +1,6 @@
-#!/usr/bin/en
 # coding=utf-8
 from jessyInk_keyBindings import JessyInk_CustomKeyBindings
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class JessyInkCustomKeyBindingsBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = JessyInk_CustomKeyBindings
-        self.e = self.effect()
+class JessyInkCustomKeyBindingsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = JessyInk_CustomKeyBindings

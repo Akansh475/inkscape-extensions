@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-# coding=utf-8
+#
 # Copyright 2008, 2009 Hannes Hochreiner
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -13,12 +14,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
+#
 
-import sys
+import argparse
 
-# We will use the inkex module with the predefined Effect base class.
-import inkex
 from lxml import etree
+
+import inkex
+from inkex.localize import _
 
 
 class JessyInk_CustomKeyBindings(inkex.Effect):
@@ -38,53 +41,69 @@ class JessyInk_CustomKeyBindings(inkex.Effect):
         # Call the base class constructor.
         inkex.Effect.__init__(self)
 
+        effect = self
+        class SlideAction(argparse.Action):
+            def __call__(self, parser, namespace, values, option_string=None):
+                for value in values:
+                    effect.slideOptions(self.dest, option_string, value, parser)
+
+        class DrawingAction(argparse.Action):
+            def __call__(self, parser, namespace, values, option_string=None):
+                for value in values:
+                    effect.drawingOptions(self.dest, option_string, value, parser)
+
+        class IndexAction(argparse.Action):
+            def __call__(self, parser, namespace, values, option_string=None):
+                for value in values:
+                    effect.indexOptions(self.dest, option_string, value, parser)
+
         self.arg_parser.add_argument('--tab', type=str, dest='what')
-        self.arg_parser.add_argument('--slide_backWithEffects', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_nextWithEffects', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_backWithoutEffects', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_nextWithoutEffects', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_firstSlide', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_lastSlide', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_switchToIndexMode', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_switchToDrawingMode', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_setDuration', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_addSlide', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_toggleProgressBar', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_resetTimer', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--slide_export', action='callback', type=str, callback=self.slideOptions, default='')
-        self.arg_parser.add_argument('--drawing_switchToSlideMode', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidthDefault', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth1', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth2', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth3', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth4', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth5', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth6', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth7', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth8', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathWidth9', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourBlue', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourCyan', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourGreen', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourBlack', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourMagenta', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourOrange', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourRed', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourWhite', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_pathColourYellow', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--drawing_undo', action='callback', type=str, callback=self.drawingOptions, default='')
-        self.arg_parser.add_argument('--index_selectSlideToLeft', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_selectSlideToRight', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_selectSlideAbove', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_selectSlideBelow', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_previousPage', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_nextPage', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_firstSlide', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_lastSlide', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_switchToSlideMode', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_decreaseNumberOfColumns', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_increaseNumberOfColumns', action='callback', type=str, callback=self.indexOptions, default='')
-        self.arg_parser.add_argument('--index_setNumberOfColumnsToDefault', action='callback', type=str, callback=self.indexOptions, default='')
+        self.arg_parser.add_argument('--slide_backWithEffects', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_nextWithEffects', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_backWithoutEffects', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_nextWithoutEffects', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_firstSlide', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_lastSlide', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_switchToIndexMode', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_switchToDrawingMode', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_setDuration', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_addSlide', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_toggleProgressBar', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_resetTimer', action=SlideAction, default='')
+        self.arg_parser.add_argument('--slide_export', action=SlideAction, default='')
+        self.arg_parser.add_argument('--drawing_switchToSlideMode', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidthDefault', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth1', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth2', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth3', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth4', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth5', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth6', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth7', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth8', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathWidth9', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourBlue', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourCyan', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourGreen', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourBlack', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourMagenta', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourOrange', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourRed', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourWhite', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_pathColourYellow', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--drawing_undo', action=DrawingAction, default='')
+        self.arg_parser.add_argument('--index_selectSlideToLeft', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_selectSlideToRight', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_selectSlideAbove', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_selectSlideBelow', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_previousPage', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_nextPage', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_firstSlide', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_lastSlide', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_switchToSlideMode', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_decreaseNumberOfColumns', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_increaseNumberOfColumns', action=IndexAction, default='')
+        self.arg_parser.add_argument('--index_setNumberOfColumnsToDefault', action=IndexAction, default='')
 
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

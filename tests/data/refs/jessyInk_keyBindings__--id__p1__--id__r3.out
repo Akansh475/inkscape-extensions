@@ -40,19 +40,19 @@ layout-position-anchor: tl</desc>
 </script>
 <svg:g ns1:customKeyBindings="customKeyBindings" onload="this.getCustomCharBindings = function() { return getCustomCharBindingsSub(); }; this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };"><svg:script>function getCustomKeyBindingsSub()
 {
-	var keyDict = new Object();
-	keyDict[SLIDE_MODE] = new Object();
-	keyDict[INDEX_MODE] = new Object();
-	keyDict[DRAWING_MODE] = new Object();
-	return keyDict;
+    var keyDict = new Object();
+    keyDict[SLIDE_MODE] = new Object();
+    keyDict[INDEX_MODE] = new Object();
+    keyDict[DRAWING_MODE] = new Object();
+    return keyDict;
 }
 
 function getCustomCharBindingsSub()
 {
-	var charDict = new Object();
-	charDict[SLIDE_MODE] = new Object();
-	charDict[INDEX_MODE] = new Object();
-	charDict[DRAWING_MODE] = new Object();
-	return charDict;
+    var charDict = new Object();
+    charDict[SLIDE_MODE] = new Object();
+    charDict[INDEX_MODE] = new Object();
+    charDict[DRAWING_MODE] = new Object();
+    return charDict;
 }
 </svg:script></svg:g></svg>

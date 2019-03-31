@@ -74,12 +74,12 @@ class CompareSize(Compare):
 class CompareOrderIndependentBytes(Compare):
     @staticmethod
     def filter(contents):
-        return sorted(contents)
+        return b"\n".join(sorted(contents))
 
 class CompareOrderIndependentLines(Compare):
     @staticmethod
     def filter(contents):
-        return sorted(contents.splitlines())
+        return b"\n".join(sorted(contents.splitlines()))
 
 class CompareOrderIndependentStyle(Compare):
     @staticmethod
@@ -102,5 +102,5 @@ class CompareOrderIndependentStyleAndPath(Compare):
 class CompareOrderIndependentTags(Compare):
     @staticmethod
     def filter(contents):
-        return sorted(re.split(br'>\s*<', contents))
+        return b"\n".join(sorted(re.split(br'>\s*<', contents)))
 

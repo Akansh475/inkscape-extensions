@@ -1,10 +1,6 @@
-#!/usr/bin/en
 # coding=utf-8
 from jessyInk_masterSlide import JessyInk_MasterSlide
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class JessyInkMasterSlideBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = JessyInk_MasterSlide
-        self.e = self.effect()
+class JessyInkMasterSlideBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = JessyInk_MasterSlide

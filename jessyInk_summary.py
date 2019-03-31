@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-# coding=utf-8
+#
 # Copyright 2008, 2009 Hannes Hochreiner
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -14,10 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 
-import sys
 
-# We will use the inkex module with the predefined Effect base class.
 import inkex
+from inkex.localize import _
 
 
 def propStrToList(str):

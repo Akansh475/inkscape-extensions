@@ -4,6 +4,6 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareSize
 
 class JessyInkExportBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    compare_filters = [CompareSize()]
     effect = JessyInkExport
     comparisons = [()]
-    compare_filters = [CompareSize()]

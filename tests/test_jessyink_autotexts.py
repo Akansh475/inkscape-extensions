@@ -1,10 +1,8 @@
 #!/usr/bin/en
 # coding=utf-8
 from jessyInk_autoTexts import JessyInk_AutoTexts
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class JessyInkAutoTextsBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = JessyInk_AutoTexts
-        self.e = self.effect()
+class JessyInkAutoTextsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = JessyInk_AutoTexts
+    comparisons = [('--autoText', 'slideTitle', '--id', 't1')]

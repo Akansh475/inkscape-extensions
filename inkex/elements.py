@@ -145,6 +145,9 @@ class Group(BaseElement):
             bbox += child.bounding_box()
         return bbox
 
+class Anchor(Group):
+    """An anchor or link tag"""
+    tag_name = 'a'
 
 class PathElement(BaseElement):
     """Provide a useful extension for path elements"""

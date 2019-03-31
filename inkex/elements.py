@@ -160,6 +160,10 @@ class PathElement(BaseElement):
             self.path.transform(self.transform)
             del self.attrib['transform']
 
+    def original_path(self):
+        """Returns the original path if this is an LPE, or the path if not"""
+        return Path(self.get('inkscape:original-d', self.path))
+
 class Points(BaseElement):
     """Provide a useful extension for points elements"""
     tag_name = 'points'

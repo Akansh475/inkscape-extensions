@@ -42,6 +42,17 @@ class CoreElementTestCase(ElementTestCase):
         self.svg.set_selected('X', 'Y', 'Z', 'A')
         self.assertEqual(tuple(self.svg.get_z_selected()), ('A',))
 
+class PathElementTestCase(ElementTestCase):
+    tag = 'path'
+
+    def test_original_path(self):
+        """LPE paths can return their original paths"""
+        svg = svg_file(self.data_file('svg', 'with-lpe.svg'))
+        self.assertEqual(str(svg.getElementById('lpe').path), 'M 30 30 L -10 -10 Z')
+        self.assertEqual(str(svg.getElementById('lpe').original_path()), 'M 20 20 L 10 10 Z')
+        self.assertEqual(str(svg.getElementById('nolpe').path), 'M 30 30 L -10 -10 Z')
+        self.assertEqual(str(svg.getElementById('nolpe').original_path()), 'M 30 30 L -10 -10 Z')
+
 
 class GroupTest(ElementTestCase):
     """Test extra functionality on a group element"""

@@ -105,6 +105,10 @@ class PathCommand(tuple):
         """Returns a list of points in this path command, x and y only"""
         return tuple(zip(self.all_x, self.all_y))
 
+    def copy(self):
+        """Make a copy of this segment"""
+        return PathCommand(self.cmd, *self[:])
+
     def bounding_box(self):
         """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
         return BoundingBox(Scale(*self.all_x), Scale(*self.all_y))
@@ -336,6 +340,10 @@ class Path(list):
 
     def to_arrays(self):
         """Duplicates the original output of parsePath, returning arrays of segment data"""
-        acopy = copy.copy(self)
+        acopy = self.copy()
         acopy.to_absolute()
         return [[seg.cmd, list(seg)] for seg in acopy]
+
+    def copy(self):
+        """Make a copy"""
+        return copy.copy(self)

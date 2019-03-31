@@ -154,6 +154,11 @@ class PathElement(BaseElement):
     tag_name = 'path'
     get_path = lambda self: self.get('d')
 
+    def apply_transform(self):
+        """Apply the internal transformation to this node and delete"""
+        if 'transform' in self.attrib:
+            self.path.transform(self.transform)
+            del self.attrib['transform']
 
 class Points(BaseElement):
     """Provide a useful extension for points elements"""

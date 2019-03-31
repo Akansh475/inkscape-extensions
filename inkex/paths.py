@@ -27,7 +27,7 @@ import warnings
 from math import atan2, cos, pi, sin, sqrt
 from operator import add, mul
 
-from .transforms import BoundingBox, Scale, cubic_extrema
+from .transforms import Transform, BoundingBox, Scale, cubic_extrema
 from .utils import X, Y, classproperty, strargs
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
@@ -133,6 +133,16 @@ class PathCommand(tuple):
             ans.extend([rad * cos(theta) + center_x, rad * sin(theta) + center_y])
         return PathCommand(self.cmd, *ans)
 
+    def transform(self, transform, raw=False):
+        """Apply a matrix transform to this path and return a new path"""
+        transform = Transform(transform)
+        points = list(self.points)
+        for index, (x, y) in enumerate(points):
+            points[index] = transform.apply_to_point([x, y])
+        if raw:
+            return points
+        return PathCommand(self.cmd, *[coord for point in points for coord in point])
+
     def get_pen(self, previous):
         """Where will the pen be after this command"""
         if not self.isabsolute():
@@ -173,6 +183,9 @@ class Horz(PathCommand):
     def translate(self, coords, opr=add):
         """Translate this Horz path by the given coords X/Y"""
         return PathCommand(self.cmd, opr(self[0], coords[self.index]))
+
+    def transform(self, transform):
+        return self.to_line().transform(transform)
 
     def to_line(self, previous):
         """Return this path command as a line instead"""
@@ -235,6 +248,11 @@ class Arc(PathCommand):
         """Translate or scale this path command by the given coords X/Y"""
         lst = self[:5] + (opr(self[5], coords[X]), opr(self[6], coords[Y]))
         return PathCommand(self.cmd, *lst)
+
+    def transform(self, transform):
+        """Transform this arc along with the given transformation"""
+        points = super(Arc, self).transform(transform, raw=True)
+        return PathCommand(self.cmd, *(self[:-2] + list(points)))
 
     def scale(self, coords):
         """Scale the Arc by the given coords"""
@@ -303,6 +321,12 @@ class Path(list):
             if seg.num:
                 pen = self[i].get_pen(pen)
                 self[i] = seg.rotate(angle, center_x, center_y)
+
+    def transform(self, transform):
+        """Convert to new path"""
+        for i, seg in enumerate(self):
+            self[i] = seg.transform(transform)
+        return self
 
     def to_absolute(self, factor=1):
         """Convert this path to use only absolute coordinates"""

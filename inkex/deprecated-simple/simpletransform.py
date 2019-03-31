@@ -56,27 +56,13 @@ def applyTransformToPoint(mat, pt):
 
 @deprecate
 def applyTransformToPath(mat, path):
-    """XXX No replacement coded yet, HELP!"""
-    for comp in path:
-        for ctl in comp:
-            for pt in ctl:
-                applyTransformToPoint(mat, pt)
+    """Path(path).transform(mat)"""
+    return Path(path).transform(Transform(mat)).to_arrays()
 
 @deprecate
 def fuseTransform(node):
-    """XXX No replacement coded yet, HELP!"""
-    if node.get('d')==None:
-        #FIXME: how do you raise errors?
-        raise AssertionError('can not fuse "transform" of elements that have no "d" attribute')
-    t = node.get("transform")
-    if t == None:
-        return
-    m = parseTransform(t)
-    d = node.get('d')
-    p = cubicsuperpath.parsePath(d)
-    applyTransformToPath(m,p)
-    node.set('d', cubicsuperpath.formatPath(p))
-    del node.attrib["transform"]
+    """node.apply_transform()"""
+    return node.apply_transform()
 
 @deprecate
 def boxunion(b1, b2):

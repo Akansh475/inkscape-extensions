@@ -1,9 +1,9 @@
 # coding=utf-8
-from grid_isometric import GridPolar
-from tests.base import InkscapeExtensionTestMixin, TestCase
 
+from grid_isometric import GridIsometric
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareOrderIndependentStyle
 
-class TestGridPolarBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = GridPolar
-        self.e = self.effect()
+class TestGridIsometricBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    compare_filters = [CompareOrderIndependentStyle()]
+    effect = GridIsometric

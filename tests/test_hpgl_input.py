@@ -1,9 +1,8 @@
 # coding=utf-8
 from hpgl_input import HpglFile
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class TestHpglFileBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = HpglFile
-        self.e = self.effect()
+class TestHpglFileBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = HpglFile
+    compare_file = 'ref_test.hpgl'
+    comparisons = [()]

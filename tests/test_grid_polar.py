@@ -1,9 +1,8 @@
 # coding=utf-8
 from grid_polar import GridPolar
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareOrderIndependentStyle
 
-
-class GridPolarBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = GridPolar
-        self.e = self.effect()
+class GridPolarBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    compare_filters = [CompareOrderIndependentStyle()]
+    effect = GridPolar

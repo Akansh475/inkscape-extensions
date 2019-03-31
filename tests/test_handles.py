@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 from handles import Handles
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class HandlesBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Handles
-        self.e = self.effect()
+class HandlesBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = Handles

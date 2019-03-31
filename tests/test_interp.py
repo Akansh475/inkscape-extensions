@@ -1,9 +1,6 @@
 # coding=utf-8
 from interp import Interp
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class InterpBasicTest(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = Interp
-        self.e = self.effect()
+class InterpBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = Interp

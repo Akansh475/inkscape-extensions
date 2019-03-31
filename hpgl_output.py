@@ -23,10 +23,11 @@ import sys
 # local libraries
 import hpgl_encoder
 import inkex
+from inkex.generic import OutputExtension
 
 from inkex.localize import _
 
-class HpglOutput(inkex.Effect):
+class HpglOutput(OutputExtension):
 
     def __init__(self):
         inkex.Effect.__init__(self)
@@ -47,17 +48,17 @@ class HpglOutput(inkex.Effect):
         self.arg_parser.add_argument('--autoAlign',     type=inkex.inkbool, default=True,   help='Auto align')
         self.arg_parser.add_argument('--convertObjects',type=inkex.inkbool, default=True,   help='Convert objects to paths')
 
-    def effect(self):
+    def save(self, stream):
         self.options.debug = False
         # get hpgl data
         myHpglEncoder = hpgl_encoder.hpglEncoder(self)
         try:
-            self.hpgl, debugObject = myHpglEncoder.getHpgl()
+            hpgl, debugObject = myHpglEncoder.getHpgl()
         except Exception as inst:
             if inst.args[0] == 'NO_PATHS':
                 # issue error if no paths found
                 inkex.errormsg(_("No paths where found. Please convert all objects you want to save into paths."))
-                self.hpgl = ''
+                hpgl = ''
                 return
             else:
                 raise
@@ -67,14 +68,9 @@ class HpglOutput(inkex.Effect):
             hpglInit += ';FS%d' % self.options.force
         if self.options.speed > 0:
             hpglInit += ';VS%d' % self.options.speed
-        self.hpgl = hpglInit + self.hpgl + ';SP0;PU0,0;IN; '
-
-    def save_raw(self, stream):
-        """print to hpgl file"""
-        if self.hpgl != '':
-            stream.write(self.hpgl)
+        hpgl = hpglInit + hpgl + ';SP0;PU0,0;IN; '
+        stream.write(hpgl.encode('utf-8'))
 
 
 if __name__ == '__main__':
     HpglOutput().run()
-

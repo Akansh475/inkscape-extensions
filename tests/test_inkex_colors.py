@@ -11,6 +11,7 @@ class ColorTest(TestCase):
         """Empty color (black)"""
         self.assertEqual(Color(), [])
         self.assertEqual(Color().to_rgb(), [0, 0, 0])
+        self.assertEqual(Color().to_rgba(), [0, 0, 0, 1.0])
         self.assertEqual(Color().to_hsl(), [0, 0, 0])
         self.assertEqual(str(Color(None)), 'none')
         self.assertEqual(str(Color('none')), 'none')
@@ -39,6 +40,7 @@ class ColorTest(TestCase):
         self.assertEqual(color.hue, 254)
         self.assertEqual(color.saturation, 255)
         self.assertEqual(color.lightness, 128)
+        self.assertEqual(color.alpha, 1.0)
 
     def test_rgb_to_hsl(self):
         """RGB to HSL Color"""
@@ -62,6 +64,18 @@ class ColorTest(TestCase):
         self.assertEqual(Color('rgb(50%,0%,1%)'), [127, 0, 2])
         self.assertEqual(Color('rgb(66.667%,0%,6.667%)'), [170, 0, 17])
 
+    def test_rgba_color(self):
+        """Parse RGBA colours"""
+        self.assertEqual(Color('rgba(45,50,55,1.0)'), [45, 50, 55, 1.0])
+        self.assertEqual(Color('rgba(45,50,55,1.5)'), [45, 50, 55, 1.0])
+        self.assertEqual(Color('rgba(66.667%,0%,6.667%,0.5)'), [170, 0, 17, 0.5])
+        color = Color('rgba(255,127,255,0.5)')
+        self.assertEqual(str(color), 'rgba(255, 127, 255, 0.5)')
+        self.assertEqual(str(color.to_rgb()), '#ff7fff')
+        self.assertEqual(color.to_rgb().to_rgba(0.75), [255, 127, 255, 0.75])
+        color[3] = 1.0
+        self.assertEqual(str(color), 'rgb(255, 127, 255)')
+
     def test_hsl_color(self):
         """Parse HSL colors"""
         color = Color('hsl(4.0, 128, 99)')
@@ -83,6 +97,7 @@ class ColorTest(TestCase):
         self.assertEqual(color.to_rgb(), [5, 4, 15])
         color = Color('hsl(0, 131, 10)')
         self.assertEqual(color.to_rgb(), [15, 4, 4])
+        self.assertEqual(color.to_rgba(), [15, 4, 4, 1.0])
 
     def test_hsl_grey(self):
         """Parse HSL Grey"""

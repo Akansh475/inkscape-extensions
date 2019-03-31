@@ -103,8 +103,8 @@ class hpglEncoder(object):
             if self.options.debug:
                 self.debugValues['viewBoxWidth'] = viewBox2[2]
                 self.debugValues['viewBoxHeight'] = viewBox2[3]
-            self.viewBoxTransformX = self.docWidth / effect.unittouu(effect.addDocumentUnit(viewBox2[2]))
-            self.viewBoxTransformY = self.docHeight / effect.unittouu(effect.addDocumentUnit(viewBox2[3]))
+            self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox2[2]))
+            self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox2[3]))
 
     def convertObjectsToPaths(self, file, document):
         tempfile = os.path.splitext(file)[0] + "-prepare.svg"
@@ -177,9 +177,9 @@ class hpglEncoder(object):
             self.offsetX += self.toolOffset
             self.offsetY += self.toolOffset
         # initialize transformation matrix and cache
-        groupmat = [[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, -self.divergenceX + self.offsetX],
-            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, -self.divergenceY + self.offsetY]]
-        groupmat.add_rotate(self.options.orientation)
+        groupmat = Transform([[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, -self.divergenceX + self.offsetX],
+            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, -self.divergenceY + self.offsetY]])
+        groupmat.add_rotate(int(self.options.orientation))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:

@@ -45,9 +45,9 @@ def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
     etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
 
 
-class GridPolar(inkex.Effect):
+class GridIsometric(inkex.Effect):
     def __init__(self):
-        super(GridPolar, self).__init__()
+        super(GridIsometric, self).__init__()
         self.arg_parser.add_argument("--x_divs", type=int, dest="x_divs", default=5,
                                      help="Major X Divisions")
         self.arg_parser.add_argument("--y_divs", type=int, dest="y_divs", default=5,
@@ -361,4 +361,4 @@ class GridPolar(inkex.Effect):
 
 
 if __name__ == '__main__':
-    GridPolar().run()
+    GridIsometric().run()

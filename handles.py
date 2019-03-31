@@ -20,14 +20,15 @@
 
 from lxml import etree
 
+from inkex.elements import PathElement
 import inkex
 
 
 class Handles(inkex.Effect):
     def effect(self):
         for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path', 'svg'):
-                p = inkex.parsePath(node.get('d'))
+            if isinstance(node, PathElement):
+                p = node.path.to_arrays()
                 a = []
                 pen = None
                 subPathStart = None

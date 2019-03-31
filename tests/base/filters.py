@@ -61,11 +61,6 @@ class CompareWithPathSpace(Compare):
             return b' d="' + new + b'"'
         return re.sub(br' d="([^"]*)"', func, contents)
 
-class CompareRandomDigits(Compare):
-    @staticmethod
-    def filter(contents):
-        return re.sub(br'\d+', b'0', contents)    # 123 -> 0
-
 class CompareSize(Compare):
     @staticmethod
     def filter(contents):

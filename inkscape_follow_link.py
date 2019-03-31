@@ -5,6 +5,7 @@ import threading
 import webbrowser
 
 import inkex
+from inkex.elements import Anchor
 
 class VisitWebSiteWithoutLockingInkscape(threading.Thread):
     def __init__(self, url):
@@ -20,8 +21,8 @@ class FollowLink(inkex.Effect):
 
     def effect(self):
         if self.options.ids:
-            for id, node in self.selected.items():
-                if node.tag == inkex.addNS('a','svg'):
+            for node in self.svg.selected.values():
+                if isinstance(node, Anchor):
                     self.url = node.get(inkex.addNS('href','xlink'))
                     vwswli = VisitWebSiteWithoutLockingInkscape(self.url)
                     vwswli.start()

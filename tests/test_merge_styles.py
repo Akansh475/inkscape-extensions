@@ -1,9 +1,9 @@
 # coding=utf-8
 from merge_styles import MergeStyles
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareOrderIndependentLines
 
-
-class TestMergeStylesBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = MergeStyles
-        self.e = self.effect()
+class TestMergeStylesBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = MergeStyles
+    comparisons = [('--id=r3', '--id=c3')]
+    compare_filters = [CompareOrderIndependentLines()]

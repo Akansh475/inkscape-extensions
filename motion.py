@@ -23,7 +23,7 @@ import math
 from lxml import etree
 
 import inkex
-
+from inkex.paths import PathCommand
 
 class Motion(inkex.Effect):
     def __init__(self):
@@ -37,36 +37,34 @@ class Motion(inkex.Effect):
                                      dest="magnitude", default=100.0,
                                      help="magnitude of the motion vector")
 
-    def makeface(self, last, arg):
-        import simplepath
-        (cmd, params) = arg
+    def makeface(self, last, segment):
+        """translate path segment along vector"""
         a = []
         a.append(['M', last[:]])
-        a.append([cmd, params[:]])
+        a.append([segment.cmd, segment[:]])
 
-        # translate path segment along vector
-        np = params[:]
-        defs = simplepath.pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'x':
-                np[i] += self.vx
-            elif defs[3][i] == 'y':
-                np[i] += self.vy
+        npt = segment.translate([self.vx, self.vy])
+        #defs = simplepath.pathdefs[cmd]
+        #for i in range(defs[1]):
+        #        np[i] += self.vx
+        #    elif defs[3][i] == 'y':
+        #        np[i] += self.vy
 
-        a.append(['L', [np[-2], np[-1]]])
+        a.append(['L', [npt[-2], npt[-1]]])
 
         # reverse direction of path segment
-        np[-2:] = last[0] + self.vx, last[1] + self.vy
-        if cmd == 'C':
-            c1 = np[:2], np[2:4] = np[2:4], np[:2]
-        a.append([cmd, np[:]])
+        npt = PathCommand(npt.cmd, *(npt[:-2] + (last[0] + self.vx, last[1] + self.vy)))
+        if segment.cmd == 'C':
+            npt = PathCommand('C', *[npt[2], npt[3], npt[0], npt[1], npt[4], npt[5]])
+        a.append([segment.cmd, npt[:]])
 
         a.append(['Z', []])
-        face = etree.SubElement(self.facegroup, inkex.addNS('path', 'svg'), {'d': str(inkex.Path(a))})
+        etree.SubElement(self.facegroup, inkex.addNS('path', 'svg'), {'d': str(inkex.Path(a))})
 
     def effect(self):
         self.vx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
         self.vy = math.sin(math.radians(self.options.angle)) * self.options.magnitude
+        last = None
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path', 'svg'):
                 group = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
@@ -81,38 +79,37 @@ class Motion(inkex.Effect):
                 s = node.get('style')
                 self.facegroup.set('style', s)
 
-                p = inkex.parsePath(node.get('d'))
-                for cmd, params in p:
+                for segment in node.path:
                     tees = []
-                    if cmd == 'C':
-                        bez = (last, params[:2], params[2:4], params[-2:])
+                    if segment.cmd == 'C':
+                        bez = (last, segment[:2], segment[2:4], segment[-2:])
                         tees = [t for t in inkex.beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
                         tees.sort()
 
                     segments = []
-                    if len(tees) == 0 and cmd in ['L', 'C']:
-                        segments.append([cmd, params[:]])
+                    if len(tees) == 0 and segment.cmd in ['L', 'C']:
+                        segments.append(segment) # PathCommand(segment.cmd, params[:]))
                     elif len(tees) == 1:
                         one, two = inkex.beziersplitatt(bez, tees[0])
-                        segments.append([cmd, list(one[1] + one[2] + one[3])])
-                        segments.append([cmd, list(two[1] + two[2] + two[3])])
+                        segments.append(PathCommand(segment.cmd, *list(one[1] + one[2] + one[3])))
+                        segments.append(PathCommand(segment.cmd, *list(two[1] + two[2] + two[3])))
                     elif len(tees) == 2:
                         one, two = inkex.beziersplitatt(bez, tees[0])
                         two, three = inkex.beziersplitatt(two, tees[1])
-                        segments.append([cmd, list(one[1] + one[2] + one[3])])
-                        segments.append([cmd, list(two[1] + two[2] + two[3])])
-                        segments.append([cmd, list(three[1] + three[2] + three[3])])
+                        segments.append(PathCommand(segment.cmd, *list(one[1] + one[2] + one[3])))
+                        segments.append(PathCommand(segment.cmd, *list(two[1] + two[2] + two[3])))
+                        segments.append(PathCommand(segment.cmd, *list(three[1] + three[2] + three[3])))
 
                     for seg in segments:
                         self.makeface(last, seg)
-                        last = seg[1][-2:]
+                        last = seg[-2:]
 
-                    if cmd == 'M':
-                        subPathStart = params[-2:]
-                    if cmd == 'Z':
+                    if segment.cmd == 'M':
+                        subPathStart = segment[-2:]
+                    if segment.cmd == 'Z':
                         last = subPathStart
                     else:
-                        last = params[-2:]
+                        last = segment[-2:]
 
 
 if __name__ == '__main__':

@@ -1,9 +1,6 @@
 # coding=utf-8
 from next_glyph_layer import NextLayer
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class TestNextLayerBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = NextLayer
-        self.e = self.effect()
+class TestNextLayerBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect = NextLayer

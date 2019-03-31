@@ -31,7 +31,7 @@
 Parametric Curves has no real description, even in the inx file, which is really odd.
 """
 
-from math import pi
+from math import pi, cos, sin, tan
 
 from lxml import etree
 
@@ -39,6 +39,14 @@ import inkex
 from inkex.paths import Path
 from inkex.utils import inkbool
 
+def maths_eval(user_function):
+    """Try and make the eval safer"""
+    func = 'lambda t: ' + (user_function.strip('"') or 't')
+    return eval( # pylint: disable=eval-used
+        func,
+        {
+            'pi': pi, 'sin': sin, 'cos': cos, 'tan': tan,
+        }, {})
 
 def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, height, left, bottom,
                  fx="cos(3*t)", fy="sin(5*t)", times2pi=False, isoscale=True, drawaxis=True):
@@ -74,10 +82,8 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
             ytop = (bottom + height - yzero) / scaley
 
     # functions specified by the user
-    if fx != "":
-        f1 = eval('lambda t: ' + fx.strip('"'))
-    if fy != "":
-        f2 = eval('lambda t: ' + fy.strip('"'))
+    f1 = maths_eval(fx)
+    f2 = maths_eval(fy)
 
     # step is increment of t
     step = (t_end - t_start) / (samples - 1)
@@ -100,6 +106,7 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
 
     # initialize functions and derivatives for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
+    print("RET: {}".format(f1(1)))
     x0 = f1(t_start)
     y0 = f2(t_start)
 
@@ -194,7 +201,7 @@ class ParamCurves(inkex.Effect):
                     newpath.set('transform', t)
 
                 # top and bottom were exchanged
-                newpath.set('d', Path(
+                newpath.set('d', str(Path(
                         drawfunction(self.options.t_start,
                                      self.options.t_end,
                                      self.options.xleft,
@@ -207,7 +214,7 @@ class ParamCurves(inkex.Effect):
                                      self.options.fofy,
                                      self.options.times2pi,
                                      self.options.isoscale,
-                                     self.options.drawaxis)))
+                                     self.options.drawaxis))))
                 newpath.set('title', self.options.fofx + " " + self.options.fofy)
 
                 # newpath.set('desc', '!func;' + self.options.fofx + ';' + self.options.fofy + ';'

@@ -156,14 +156,14 @@ class PathModifier(inkex.Effect):
             d += 'L %f,%f ' % (x, y + ry)
             d += 'A %f,%f,%i,%i,%i,%f,%f ' % (rx, ry, 0, 0, 1, x + rx, y)
 
-            newnode = etree.Element('path')
+            newnode = PathElement()
             newnode.set('d', d)
             newnode.set('id', self.svg.get_unique_id('path'))
             newnode.set('style', node.get('style'))
             nnt = node.get('transform')
             if nnt:
                 newnode.set('transform', nnt)
-                inkex.fuseTransform(newnode)
+                newnode.apply_transform()
             if doReplace:
                 parent = node.getparent()
                 parent.insert(parent.index(node), newnode)
@@ -207,7 +207,7 @@ class PathModifier(inkex.Effect):
             for attName in list(node.attrib.keys()):
                 if ("sodipodi" in attName) or ("inkscape" in attName):
                     del node.attrib[attName]
-            inkex.fuseTransform(node)
+            node.apply_transform()
             return node
         elif node.tag == inkex.addNS('use', 'svg') or node.tag == 'use':
             newNode = self.unlinkClone(node, doReplace)

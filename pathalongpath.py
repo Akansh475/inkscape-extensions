@@ -1,24 +1,23 @@
 #!/usr/bin/env python
-# coding=utf-8
+#
+# Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# barraud@math.univ-lille1.fr
+#
 """
-Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-barraud@math.univ-lille1.fr
-
-Quick description:
 This script deforms an object (the pattern) along other paths (skeletons)...
 The first selected object is the pattern
 the last selected ones are the skeletons.
@@ -33,15 +32,14 @@ they move and rotate, deforming the pattern.
 """
 import copy
 
-import bezmisc
-import cubicsuperpath
-import simpletransform
-
 import inkex
+from inkex.bezier import pointdistance, beziersplitatt, tpoint
+from inkex.paths import Path
+
 import pathmodifier
 from inkex.localize import _
 from inkex.utils import inkbool
-
+from inkex.cubic_paths import CubicSuperPath, unCubicSuperPath
 
 def flipxy(path):
     for pathcomp in path:
@@ -79,12 +77,13 @@ def linearize(p, tolerance=0.001):
     d = 0
     lengths = []
     while i < len(p) - 1:
-        box = bezmisc.pointdistance(p[i][1], p[i][2])
-        box += bezmisc.pointdistance(p[i][2], p[i + 1][0])
-        box += bezmisc.pointdistance(p[i + 1][0], p[i + 1][1])
-        chord = bezmisc.pointdistance(p[i][1], p[i + 1][1])
+        print("C", i, p[i])
+        box = pointdistance(p[i][1], p[i][2])
+        box += pointdistance(p[i][2], p[i + 1][0])
+        box += pointdistance(p[i + 1][0], p[i + 1][1])
+        chord = pointdistance(p[i][1], p[i + 1][1])
         if (box - chord) > tolerance:
-            b1, b2 = bezmisc.beziersplitatt([p[i][1], p[i][2], p[i + 1][0], p[i + 1][1]], 0.5)
+            b1, b2 = beziersplitatt([p[i][1], p[i][2], p[i + 1][0], p[i + 1][1]], 0.5)
             p[i][2][0], p[i][2][1] = b1[1]
             p[i + 1][0][0], p[i + 1][0][1] = b2[2]
             p.insert(i + 1, [[b1[2][0], b1[2][1]], [b1[3][0], b1[3][1]], [b2[1][0], b2[1][1]]])
@@ -120,9 +119,9 @@ class PathAlongPath(pathmodifier.Diffeo):
 
     def prepareSelectionList(self):
 
-        idList = self.document.get_z_selected()
+        idList = self.svg.get_z_selected()
         _id = list(idList)[-1]
-        self.patterns = {_id: self.selected[_id]}
+        self.patterns = {_id: self.svg.selected[_id]}
 
         #        ##first selected->pattern, all but first selected-> skeletons
         #        id = self.options.ids[-1]
@@ -132,9 +131,9 @@ class PathAlongPath(pathmodifier.Diffeo):
             self.patterns = self.duplicateNodes(self.patterns)
         self.expandGroupsUnlinkClones(self.patterns, True, True)
         self.objectsToPaths(self.patterns)
-        del self.selected[_id]
+        del self.svg.selected[_id]
 
-        self.skeletons = self.selected
+        self.skeletons = self.svg.selected
         self.expandGroupsUnlinkClones(self.skeletons, True, False)
         self.objectsToPaths(self.skeletons)
 
@@ -164,11 +163,11 @@ class PathAlongPath(pathmodifier.Diffeo):
         s = bpt[0] - self.skelcomp[0][0]
         i, t = self.lengthtotime(s)
         if i == len(self.skelcomp) - 1:
-            x, y = bezmisc.tpoint(self.skelcomp[i - 1], self.skelcomp[i], 1 + t)
+            x, y = tpoint(self.skelcomp[i - 1], self.skelcomp[i], 1 + t)
             dx = (self.skelcomp[i][0] - self.skelcomp[i - 1][0]) / self.lengths[-1]
             dy = (self.skelcomp[i][1] - self.skelcomp[i - 1][1]) / self.lengths[-1]
         else:
-            x, y = bezmisc.tpoint(self.skelcomp[i], self.skelcomp[i + 1], t)
+            x, y = tpoint(self.skelcomp[i], self.skelcomp[i + 1], t)
             dx = (self.skelcomp[i + 1][0] - self.skelcomp[i][0]) / self.lengths[i]
             dy = (self.skelcomp[i + 1][1] - self.skelcomp[i][1]) / self.lengths[i]
 
@@ -210,7 +209,8 @@ class PathAlongPath(pathmodifier.Diffeo):
             self.options.repeat = True
             self.options.stretch = True
 
-        bbox = simpletransform.computeBBox(self.patterns.values())
+        bbox = sum([node.bounding_box() for node in self.patterns.values()])
+        #bbox = simpletransform.computeBBox(self.patterns.values())
 
         if self.options.vertical:
             # flipxy(bbox)...
@@ -224,16 +224,17 @@ class PathAlongPath(pathmodifier.Diffeo):
         for id, node in self.patterns.items():
             if node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
                 d = node.get('d')
-                p0 = cubicsuperpath.parsePath(d)
+                p0 = CubicSuperPath(node.path.to_arrays())
                 if self.options.vertical:
                     flipxy(p0)
 
                 newp = []
                 for skelnode in self.skeletons.values():
-                    self.curSekeleton = cubicsuperpath.parsePath(skelnode.get('d'))
+                    self.curSekeleton = CubicSuperPath(skelnode.path.to_arrays())
                     if self.options.vertical:
                         flipxy(self.curSekeleton)
                     for comp in self.curSekeleton:
+                        print(self.curSekeleton)
                         p = copy.deepcopy(p0)
                         self.skelcomp, self.lengths = linearize(comp)
                         # !!!!>----> TODO: really test if path is closed! end point==start point is not enough!
@@ -273,7 +274,8 @@ class PathAlongPath(pathmodifier.Diffeo):
                             flipxy(p)
                         newp += p
 
-                node.set('d', cubicsuperpath.formatPath(newp))
+                print("Setting path: {}".format(str(Path(unCubicSuperPath(newp)))))
+                node.set('d', str(Path(unCubicSuperPath(newp))))
 
 
 if __name__ == '__main__':

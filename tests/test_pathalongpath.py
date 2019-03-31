@@ -1,9 +1,9 @@
 # coding=utf-8
 from pathalongpath import PathAlongPath
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
-
-class TestPathAlongPathBasic(InkscapeExtensionTestMixin, TestCase):
-    def setUp(self):
-        self.effect = PathAlongPath
-        self.e = self.effect()
+class TestPathAlongPathBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
+    comparisons = [('--copymode=Single', '--id=p1', '--id=p2')]
+    effect = PathAlongPath

@@ -18,21 +18,23 @@
 
 from lxml import etree
 
-import ink2canvas_lib.svg as svg
 import inkex
+from inkex.generic import OutputExtension
+
+import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
 
 log = inkex.debug  # alias to debug method
 
 
-class Ink2Canvas(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-        self.canvas = None
-
-    def output(self):
-        import sys
-        sys.stdout.write(self.canvas.output())
+class Ink2Canvas(OutputExtension):
+    def save(self, stream):
+        svg_root = self.document.getroot()
+        width = self.svg.unittouu(svg_root.get("width"))
+        height = self.svg.unittouu(svg_root.get("height"))
+        canvas = Canvas(self, width, height)
+        self.walk_tree(svg_root, canvas)
+        stream.write(canvas.output().encode('utf-8'))
 
     def get_tag_name(self, node):
         # remove namespace part from "{http://www.w3.org/2000/svg}elem"
@@ -41,10 +43,10 @@ class Ink2Canvas(inkex.Effect):
     def get_gradient_defs(self, elem):
         url_id = elem.get_gradient_href()
         # get the gradient element
-        gradient = self.xpathSingle("//*[@id='%s']" % url_id)
+        gradient = self.svg.getElementById(url_id)
         # get the color stops
         url_stops = gradient.get(inkex.addNS("href", "xlink"))
-        gstops = self.xpathSingle("//svg:linearGradient[@id='%s']" % url_stops[1:])
+        gstops = self.svg.getElement("//svg:linearGradient[@id='%s']" % url_stops[1:])
         colors = []
         for stop in gstops:
             colors.append(stop.get("style"))
@@ -58,7 +60,7 @@ class Ink2Canvas(inkex.Effect):
             pass
         return
 
-    def walk_tree(self, root):
+    def walk_tree(self, root, canvas):
         for node in root:
             if node.tag is etree.Comment:
                 continue
@@ -70,21 +72,13 @@ class Ink2Canvas(inkex.Effect):
             clip = None
             # creates a instance of 'elem'
             # similar to 'elem = Rect(tag, node, ctx)'
-            elem = getattr(svg, class_name)(tag, node, self.canvas)
+            elem = getattr(svg, class_name)(tag, node, canvas)
             if elem.has_gradient():
                 gradient = self.get_gradient_defs(elem)
             elem.start(gradient)
             elem.draw()
-            self.walk_tree(node)
+            self.walk_tree(node, canvas)
             elem.end()
-
-    def effect(self):
-        """Applies the effect"""
-        svg_root = self.document.getroot()
-        width = self.svg.unittouu(svg_root.get("width"))
-        height = self.svg.unittouu(svg_root.get("height"))
-        self.canvas = Canvas(self, width, height)
-        self.walk_tree(svg_root)
 
 
 if __name__ == "__main__":

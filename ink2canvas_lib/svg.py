@@ -1,30 +1,31 @@
 # coding=utf-8
+#
+# Copyright (C) 2011 Karlisson Bezerra <contact@hacktoon.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 """
-Copyright (C) 2011 Karlisson Bezerra <contact@hacktoon.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Element parsing and context for ink2canvas extensions
 """
 
 from __future__ import unicode_literals
 
 import inkex
-
-import simplestyle
-from simplepath import parsePath
-from simpletransform import parseTransform
-
+from inkex.paths import Path as InkexPath
+from inkex.styles import Style
+from inkex.transforms import Transform
 
 class Element(object):
     def attr(self, val, ns=""):
@@ -76,10 +77,7 @@ class AbstractShape(Element):
         return
 
     def get_style(self):
-        style = simplestyle.parseStyle(self.attr("style"))
-        # remove any trailing space in dict keys/values
-        style = dict([(k.strip(), v.strip()) for k, v in style.items()])
-        return style
+        return Style(self.attr("style"))
 
     def set_style(self, style):
         """Translates style properties names into method calls"""
@@ -99,10 +97,7 @@ class AbstractShape(Element):
         data = self.node.get("transform")
         if not data:
             return
-        matrix = parseTransform(data)
-        m11, m21, dx = matrix[0]
-        m12, m22, dy = matrix[1]
-        return m11, m12, m21, m22, dx, dy
+        return Transform(data).to_sixlet()
 
     def has_gradient(self):
         style = self.get_style()
@@ -208,7 +203,7 @@ class Ellipse(AbstractShape):
 class Path(AbstractShape):
     def get_data(self):
         # path data is already converted to float
-        return parsePath(self.attr("d"))
+        return InkexPath(self.attr("d")).to_arrays()
 
     def pathMoveTo(self, data):
         self.ctx.moveTo(data[0], data[1])

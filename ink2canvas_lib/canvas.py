@@ -1,24 +1,26 @@
 # coding=utf-8
+#
+# Copyright (C) 2011 Karlisson Bezerra <contact@hacktoon.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 """
-Copyright (C) 2011 Karlisson Bezerra <contact@hacktoon.com>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Convas module for ink2canvas extension
 """
 
-import simplestyle
-
+from inkex.colors import Color
 
 class Canvas(object):
     """Canvas API helper class"""
@@ -78,13 +80,8 @@ class Canvas(object):
     def addColorStop(self, href, pos, color):
         self.write("%s.addColorStop(%f, %s);" % (href, pos, color))
 
-    def getColor(self, rgb, a):
-        r, g, b = simplestyle.parseColor(rgb)
-        a = float(a)
-        if a < 1:
-            return "'rgba(%d, %d, %d, %.1f)'" % (r, g, b, a)
-        else:
-            return "'rgb(%d, %d, %d)'" % (r, g, b)
+    def getColor(self, rgb, alpha):
+        return "'{}'".format(str(Color(rgb).to_rgba(alpha)))
 
     def setGradient(self, href):
         """
@@ -118,7 +115,7 @@ class Canvas(object):
         self.write("ctx.strokeStyle = %s;" % self.getColor(value, alpha))
 
     def setStrokeWidth(self, value):
-        self.write("ctx.lineWidth = %f;" % self.parent.unittouu(value))
+        self.write("ctx.lineWidth = %f;" % self.parent.svg.unittouu(value))
 
     def setStrokeLinecap(self, value):
         self.write("ctx.lineCap = '%s';" % value)

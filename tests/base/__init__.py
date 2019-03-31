@@ -176,7 +176,13 @@ class ComparisonMixin(object):
         if not os.path.isfile(outfile):
             raise IOError("Comparison file {} not found".format(outfile))
 
-        data_a = self._apply_compare_filters(effect.test_output.getvalue())
+        data_a = effect.test_output.getvalue()
+        if os.environ.get('EXPORT_COMPARE', False):
+            with open(outfile + '.export', 'wb') as fhl:
+                fhl.write(data_a)
+                print("Written output: {}.export".format(outfile))
+        data_a = self._apply_compare_filters(data_a)
+
         with open(outfile, 'rb') as fhl:
             data_b = self._apply_compare_filters(fhl.read())
 

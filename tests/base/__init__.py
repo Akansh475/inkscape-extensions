@@ -177,10 +177,11 @@ class ComparisonMixin(object):
             raise IOError("Comparison file {} not found".format(outfile))
 
         data_a = self._apply_compare_filters(effect.test_output.getvalue())
-        with open(outfile, 'r') as fhl:
+        with open(outfile, 'rb') as fhl:
             data_b = self._apply_compare_filters(fhl.read())
 
-        if data_a.startswith(b'<') and data_b.startswith(b'<'):
+        if isinstance(data_a, bytes) and isinstance(data_b, bytes) \
+            and data_a.startswith(b'<') and data_b.startswith(b'<'):
             # Compare two svg files
             xml_a = xml.parse(BytesIO(data_a))
             xml_b = xml.parse(BytesIO(data_b))

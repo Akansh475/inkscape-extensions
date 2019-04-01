@@ -261,8 +261,12 @@ class Scale(object):  # pylint: disable=too-few-public-methods
 
 class BoundingBox(object):  # pylint: disable=too-few-public-methods
     """Some functions to compute a rough bbox of a given list of objects."""
-    width = property(lambda self: self.x.size())
-    height = property(lambda self: self.y.size())
+    width = property(lambda self: self.x.size)
+    height = property(lambda self: self.y.size)
+    top = property(lambda self: self.y.minimum)
+    left = property(lambda self: self.x.minimum)
+    bottom = property(lambda self: self.y.maximum)
+    right = property(lambda self: self.x.maximum)
 
     def __init__(self, x, y=None):
         if y is None:

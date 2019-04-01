@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 #
 # Copyright (C) 2007-2011 Rob Antonishen; rob.antonishen@gmail.com
 #
@@ -22,18 +21,21 @@
 # THE SOFTWARE.
 #
 
-import csv
+#import csv
 import math
-import os
+#import os
 import random
-from subprocess import PIPE, Popen
+#from subprocess import PIPE, Popen
 
 import inkex
+from inkex.svg import SvgDocumentElement
+from inkex.generic import EffectExtension
+from inkex.localize import _
 
 
-class Restack(inkex.Effect):
+class Restack(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Restack, self).__init__()
         self.arg_parser.add_argument("-d", "--direction",
                                      type=str,
                                      dest="direction", default="tb",
@@ -55,137 +57,88 @@ class Restack(inkex.Effect):
                                      dest="zsort", default="rev",
                                      help="Restack mode based on Z-Order")
         self.arg_parser.add_argument("--tab",
-                                     type=str,
+                                     type=str, default='z_order',
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
         self.arg_parser.add_argument("--nb_direction",
-                                     type=str,
+                                     type=str, default='',
                                      dest="nb_direction",
                                      help="The selected UI-tab when OK was pressed")
 
     def effect(self):
-        if self.options.tab == '"help"':
-            pass
-        elif len(self.svg.selected) > 0:
-            if self.options.tab == '"positional"':
-                self.restack_positional()
-            elif self.options.tab == '"z_order"':
-                self.restack_z_order()
-        else:
-            inkex.errormsg(_("There is no selection to restack."))
-
-    def restack_positional(self):
-        objects = {}
-        objlist = []
-        file = self.options.input_file
-
-        if self.options.nb_direction == '"custom"':
-            self.options.direction = "aa"
+        if not self.svg.selected:
+            return inkex.errormsg(_("There is no selection to restack."))
 
         # process selection to get list of objects to be arranged
-        firstobject = self.selected[self.options.ids[0]]
-        if len(self.selected) == 1 and firstobject.tag == inkex.addNS('g', 'svg'):
-            parentnode = firstobject
-            for child in parentnode.iterchildren():
-                objects[child.get('id')] = child
-        else:
-            parentnode = self.current_layer
-            objects = self.selected
+        parentnode = None
+        for node in self.svg.selected.values():
+            if isinstance(node, SvgDocumentElement):
+                parentnode = node
+                self.svg.set_selection(*list(node))
 
-        # get all bounding boxes in file by calling inkscape again with the --query-all command line option
-        # it returns a comma separated list structured id,x,y,w,h
-        p = Popen('inkscape --query-all "{}"'.format(file), shell=True, stdout=PIPE, stderr=PIPE,
-                  universal_newlines=True)
-        err = p.stderr
-        f = p.communicate()[0]
+        if parentnode is None:
+            parentnode = self.svg.get_current_layer()
 
-        reader = csv.reader(f.split(os.linesep))
-        err.close()
+        if 'positional' in self.options.tab:
+            return self.restack_positional(parentnode)
+        elif 'z_order' in self.options.tab:
+            return self.restack_z_order(parentnode)
 
-        # build a dictionary with id as the key
-        dimen = dict()
-        for line in reader:
-            if len(line) > 0:
-                dimen[line[0]] = map(float, line[1:])
+    def restack_positional(self, parentnode):
+        objlist = []
 
-        # find the center of all selected objects **Not the average!
-        x, y, w, h = dimen[objects.keys()[0]]
-        minx = x
-        miny = y
-        maxx = x + w
-        maxy = y + h
-
-        for id, node in objects.items():
-            # get the bounding box
-            x, y, w, h = dimen[id]
-            if x < minx:
-                minx = x
-            if (x + w) > maxx:
-                maxx = x + w
-            if y < miny:
-                miny = y
-            if (y + h) > maxy:
-                maxy = y + h
-
-        midx = (minx + maxx) / 2
-        midy = (miny + maxy) / 2
+        if 'custom' in self.options.nb_direction:
+            self.options.direction = "aa"
 
         # calculate distances for each selected object
-        for id, node in objects.items():
+        for node in self.svg.selected.values():
             # get the bounding box
-            x, y, w, h = dimen[id]
+            #x, y, w, h = dimen[key]
+            bbox = node.bounding_box()
 
             # calc the comparison coords
             if self.options.xanchor == "l":
-                cx = x
+                cx = bbox.x.minimum
             elif self.options.xanchor == "r":
-                cx = x + w
+                cx = bbox.x.maximum
             else:  # middle
-                cx = x + w / 2
+                cx = bbox.x.center
 
             if self.options.yanchor == "t":
-                cy = y
+                cy = bbox.y.minimum
             elif self.options.yanchor == "b":
-                cy = y + h
+                cy = bbox.y.maximum
             else:  # middle
-                cy = y + h / 2
+                cy = bbox.y.center
 
             # direction chosen
             if self.options.direction == "tb" or (self.options.direction == "aa" and self.options.angle == 270):
-                objlist.append([cy, id])
+                objlist.append([cy, node])
             elif self.options.direction == "bt" or (self.options.direction == "aa" and self.options.angle == 90):
-                objlist.append([-cy, id])
+                objlist.append([-cy, node])
             elif self.options.direction == "lr" or (self.options.direction == "aa" and (self.options.angle == 0 or self.options.angle == 360)):
-                objlist.append([cx, id])
+                objlist.append([cx, node])
             elif self.options.direction == "rl" or (self.options.direction == "aa" and self.options.angle == 180):
-                objlist.append([-cx, id])
+                objlist.append([-cx, node])
             elif self.options.direction == "aa":
                 distance = math.hypot(cx, cy) * (math.cos(math.radians(-self.options.angle) - math.atan2(cy, cx)))
-                objlist.append([distance, id])
+                objlist.append([distance, node])
             elif self.options.direction == "ro":
-                distance = math.hypot(midx - cx, midy - cy)
-                objlist.append([distance, id])
+                selbox = self.svg.get_selected_bbox()
+                distance = math.hypot(selbox.x.center - cx, selbox.y.center - cy)
+                objlist.append([distance, node])
             elif self.options.direction == "ri":
-                distance = -math.hypot(midx - cx, midy - cy)
-                objlist.append([distance, id])
+                distance = -math.hypot(selbox.x.center - cx, selbox.y.center - cy)
+                objlist.append([distance, node])
 
         objlist.sort()
         # move them to the top of the object stack in this order.
-        for item in objlist:
-            parentnode.append(objects[item[1]])
+        for _, node in objlist:
+            parentnode.append(node)
+        return True
 
-    def restack_z_order(self):
-        parentnode = None
-        objects = []
-        if len(self.selected) == 1:
-            firstobject = self.selected[self.options.ids[0]]
-            if firstobject.tag == inkex.addNS('g', 'svg'):
-                parentnode = firstobject
-                for child in parentnode.iterchildren(reversed=False):
-                    objects.append(child)
-        else:
-            parentnode = self.current_layer
-            objects = self.document.get_z_selected().values()
+    def restack_z_order(self, parentnode):
+        objects = list(self.svg.selected.values())
         if self.options.zsort == "rev":
             objects.reverse()
         elif self.options.zsort == "rand":
@@ -193,6 +146,7 @@ class Restack(inkex.Effect):
         if parentnode is not None:
             for item in objects:
                 parentnode.append(item)
+        return True
 
 
 if __name__ == '__main__':

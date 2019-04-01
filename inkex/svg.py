@@ -69,6 +69,11 @@ class SvgDocumentElement(BaseElement):
         """Sets the currently selected elements to these ids"""
         self.selected = OrderedDict()
         for elem_id in ids:
+            if isinstance(elem_id, BaseElement):
+                # Selection is a list of nodes to select
+                self.selected[elem_id.get('id')] = elem_id
+                continue
+            # Selection is a text element id, find it (or them).
             for node in self.xpath('//*[@id="{}"]'.format(elem_id)):
                 self.selected[elem_id] = node
 

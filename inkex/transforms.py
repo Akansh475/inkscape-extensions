@@ -214,6 +214,10 @@ class Scale(object):  # pylint: disable=too-few-public-methods
         for item in others:
             self += item
 
+    def __bool__(self):
+        return self.minimum is not None and self.maximum is not None
+    __nonzero__ = __bool__
+
     def __add__(self, other):
         return Scale(other) + self
 
@@ -279,6 +283,10 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
                     x, y = x[:2], x[2:]
         self.x = Scale(x)
         self.y = Scale(y)
+
+    def __bool__(self):
+        return bool(self.x) and bool(self.y)
+    __nonzero__ = __bool__
 
     def __add__(self, other):
         new = BoundingBox(self.x, self.y)

@@ -149,6 +149,10 @@ class OtherElements(BaseElement):
         'style',
     ]
 
+    def bounding_box(self):
+        """Other elements have no bounding box"""
+        return BoundingBox(None)
+
 
 class Group(BaseElement):
     """Any group element (layer or regular group)"""

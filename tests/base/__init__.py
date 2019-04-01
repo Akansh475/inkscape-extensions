@@ -58,7 +58,7 @@ class TestCase(BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
-    effect = NoExtension # type: Type[InkscapeExtension]
+    effect_class = NoExtension # type: Type[InkscapeExtension]
 
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
@@ -209,7 +209,7 @@ class ComparisonMixin(object):
 
     def get_compare_outfile(self, args):
         """Generate an output file for the arguments given"""
-        effect_name = self.effect.__module__
+        effect_name = self.effect_class.__module__
         opstr = re.sub(r'[^\w-]', '__', '__'.join(args).replace(self.temp_dir, 'TMP_DIR'))
         if opstr:
             if len(opstr) > 127:

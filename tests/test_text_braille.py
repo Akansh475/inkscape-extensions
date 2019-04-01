@@ -1,6 +1,6 @@
 # coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from text_braille import Braille
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-class TestBrailleBasic(InkscapeExtensionTestMixin, TestCase):
+class TestBrailleBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Braille

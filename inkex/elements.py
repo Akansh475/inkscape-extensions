@@ -117,6 +117,13 @@ class BaseElement(etree.ElementBase):
         x, y = self.bounding_box().center()
         return x or 0, y or 0
 
+    def decendants(self):
+        """Walks the element tree and yields all elements, parent first"""
+        yield self
+        for child in self:
+            for decendant in child.decendants():
+                yield decendant
+
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to
         # namespaces, basically over printing details and providing no

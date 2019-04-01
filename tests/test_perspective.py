@@ -7,7 +7,8 @@
 #    with the default parameters).
 #
 from perspective import Project
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-class PerspectiveBasicTest(InkscapeExtensionTestMixin, TestCase):
+class PerspectiveBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Project
+    comparisons = [('--id=p1', '--id=p2')]

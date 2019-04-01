@@ -64,8 +64,6 @@ from __future__ import print_function
 
 import sys
 
-import simplepath
-import simpletransform
 # *** numpy causes issue #4 on Mac OS 10.6.2. I use it for
 # matrix inverse -- my linear algebra's a bit rusty, but I could implement my
 # own matrix inverse function if necessary, I guess.
@@ -79,10 +77,9 @@ from numpy import matrix
 # sys.path += ['/usr/local/share/inkscape/extensions']               # If you're using a custom Linux installation
 # sys.path += ['C:\\Program Files\\Inkscape\\share\\extensions']     # If you're using a standard Windows installation
 
-try:
-    import inkex
-except ImportError:
-    raise ImportError("No module named inkex.\nPlease edit the file {} and see the section titled 'INKEX MODULE'".format(__file__))
+import inkex
+from inkex.elements import PathElement, Group
+from inkex.transforms import Transform
 
 Precision = 5  # number of digits of precision for comparing float numbers
 
@@ -173,7 +170,8 @@ class PixelSnapEffect(inkex.Effect):
         if stroke_width == 0:
             return 0  # if there's no stroke, no need to worry about the transform
 
-        transform = self.transform(elem, parent_transform=parent_transform)
+        transform = elem.transform * Transform(parent_transform)
+
         if abs(abs(transform[0][0]) - abs(transform[1][1])) > (10 ** -Precision):
             raise TransformError("Selection contains non-symetric scaling")  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 2 functions, or maybe returning a tuple
 
@@ -200,7 +198,7 @@ class PixelSnapEffect(inkex.Effect):
             return stroke_width
 
     def snap_stroke(self, elem, parent_transform=None):
-        transform = self.transform(elem, parent_transform=parent_transform)
+        transform = elem.transform * Transform(parent_transform)
 
         stroke_width = self.stroke_width(elem)
         if stroke_width == 0:
@@ -215,38 +213,19 @@ class PixelSnapEffect(inkex.Effect):
             stroke_width = transform_dimensions(transform, width=stroke_width, inverse=True)
             self.stroke_width(elem, stroke_width)
 
-    def transform(self, elem, setval=None, parent_transform=None):
-        """ Gets this element's transform. Use setval=matrix to
-            set this element's transform.
-            You can only specify parent_transform when getting.
-        """
-        transform = elem.attrib.get('transform', '').strip()
-
-        if transform:
-            transform = simpletransform.parseTransform(transform)
-        else:
-            transform = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        if parent_transform:
-            transform = simpletransform.composeTransform(parent_transform, transform)
-
-        if setval:
-            elem.attrib['transform'] = simpletransform.formatTransform(setval)
-        else:
-            return transform
-
     def snap_transform(self, elem):
         # Only snaps the x/y translation of the transform, nothing else.
         # Scale transforms are handled only in snap_rect()
         # Doesn't take any parent_transform into account -- assumes
         # that the parent's transform has already been snapped.
-        transform = self.transform(elem)
+        transform = elem.transform.matrix
         if transform[0][1] or transform[1][0]:
             return  # if we've got any skew/rotation, get outta here
 
         transform[0][2] = round(transform[0][2])
         transform[1][2] = round(transform[1][2])
 
-        self.transform(elem, transform)
+        elem.transform *= Transform(transform)
 
     def transform_path_node(self, transform, path, i):
         """ Modifies a segment so that every point is transformed, including handles
@@ -301,48 +280,11 @@ class PixelSnapEffect(inkex.Effect):
         if setval is None:
             return [x, y]
 
-    def path_bounding_box(self, elem, parent_transform=None):
-        """ Returns [min_x, min_y], [max_x, max_y] of the transformed
-            element. (It doesn't make any sense to return the untransformed
-            bounding box, with the intent of transforming it later, because
-            the min/max points will be completely different points)
-
-            The returned bounding box includes stroke-width offset.
-
-            This function uses a simplistic algorithm & doesn't take curves
-            or arcs into account, just node positions.
-        """
-        # If we have a Live Path Effect, modify original-d. If anyone clamours
-        # for it, we could make an option to ignore paths with Live Path Effects
-        original_d = u'{{{}}}original-d'.format(inkex.NSS['inkscape'])
-        path = simplepath.parsePath(elem.attrib.get(original_d, elem.attrib['d']))
-
-        transform = self.transform(elem, parent_transform=parent_transform)
-        offset = self.elem_offset(elem, parent_transform)
-
-        min_x = min_y = max_x = max_y = 0
-        for i in range(len(path)):
-            x, y = self.pathxy(path, i)
-            x, y = transform_point(transform, (x, y))
-
-            if i == 0:
-                min_x = max_x = x
-                min_y = max_y = y
-            else:
-                min_x = min(x, min_x)
-                min_y = min(y, min_y)
-                max_x = max(x, max_x)
-                max_y = max(y, max_y)
-
-        return (min_x - offset, min_y - offset), (max_x + offset, max_y + offset)
-
     def snap_path_scale(self, elem, parent_transform=None):
-        # If we have a Live Path Effect, modify original-d. If anyone clamours
-        # for it, we could make an option to ignore paths with Live Path Effects
-        original_d = u'{{{}}}original-d'.format(inkex.NSS['inkscape'])
-        path = simplepath.parsePath(elem.attrib.get(original_d, elem.attrib['d']))
-        transform = self.transform(elem, parent_transform=parent_transform)
-        min_xy, max_xy = self.path_bounding_box(elem, parent_transform)
+
+        path = elem.original_path.to_arrays()
+        transform = elem.transform * Transform(parent_transform)
+        min_xy, max_xy = elem.bounding_box()
 
         width = max_xy[0] - min_xy[0]
         height = max_xy[1] - min_xy[1]
@@ -365,19 +307,12 @@ class PixelSnapEffect(inkex.Effect):
                                      path, i)
             self.transform_path_node([[1, 0, +min_xy[0]], [0, 1, +min_xy[1]]], path, i)  # uncenter transform
 
-        path = str(inkex.Path(path))
-        if original_d in elem.attrib:
-            elem.attrib[original_d] = path
-        else:
-            elem.attrib['d'] = path
+        elem.original_path = path
 
     def snap_path_pos(self, elem, parent_transform=None):
-        # If we have a Live Path Effect, modify original-d. If anyone clamours
-        # for it, we could make an option to ignore paths with Live Path Effects
-        original_d = u'{{{}}}original-d'.format(inkex.NSS['inkscape'])
-        path = simplepath.parsePath(elem.attrib.get(original_d, elem.attrib['d']))
-        transform = self.transform(elem, parent_transform=parent_transform)
-        min_xy, max_xy = self.path_bounding_box(elem, parent_transform)
+        path = elem.original_path.to_arrays()
+        transform = elem.transform * Transform(parent_transform)
+        min_xy, max_xy = elem.bounding_box()
 
         fractional_offset = min_xy[0] - round(min_xy[0]), min_xy[1] - round(min_xy[1]) - self.document_offset
         fractional_offset = transform_dimensions(transform, fractional_offset[0], fractional_offset[1], inverse=True)
@@ -394,12 +329,9 @@ class PixelSnapEffect(inkex.Effect):
             elem.attrib['d'] = path
 
     def snap_path(self, elem, parent_transform=None):
-        # If we have a Live Path Effect, modify original-d. If anyone clamours
-        # for it, we could make an option to ignore paths with Live Path Effects
-        original_d = u'{{{}}}original-d'.format(inkex.NSS['inkscape'])
-        path = simplepath.parsePath(elem.attrib.get(original_d, elem.attrib['d']))
+        path = elem.original_path
 
-        transform = self.transform(elem, parent_transform=parent_transform)
+        transform = elem.transform * Transform(parent_transform)
 
         if transform[0][1] or transform[1][0]:  # if we've got any skew/rotation, get outta here
             raise TransformError("Selection contains transformations with skew/rotation")
@@ -464,7 +396,7 @@ class PixelSnapEffect(inkex.Effect):
             elem.attrib['d'] = path
 
     def snap_rect(self, elem, parent_transform=None):
-        transform = self.transform(elem, parent_transform=parent_transform)
+        transform = elem.transform * Transform(parent_transform)
 
         if transform[0][1] or transform[1][0]:  # if we've got any skew/rotation, get outta here
             raise TransformError("Selection contains transformations with skew/rotation")
@@ -502,7 +434,7 @@ class PixelSnapEffect(inkex.Effect):
     def pixel_snap(self, elem, parent_transform=None):
         if elemtype(elem, 'g'):
             self.snap_transform(elem)
-            transform = self.transform(elem, parent_transform=parent_transform)
+            transform = elem.transform * Transform(parent_transform)
             for e in elem:
                 try:
                     self.pixel_snap(e, transform)

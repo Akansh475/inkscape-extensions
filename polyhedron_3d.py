@@ -57,6 +57,7 @@ from math import acos, cos, floor, pi, sin, sqrt
 import inkex
 from inkex import inkbool
 from inkex.elements import Group
+from inkex.localize import _
 
 from lxml import etree
 
@@ -74,7 +75,6 @@ def get_filename(self_options):
         file = self_options.obj + '.obj'
 
     return file
-
 
 def objfile(name):
     import os.path
@@ -551,7 +551,7 @@ class Poly3D(inkex.GenerateExtension):
                     if so.back or norm[2] > 0:  # include all polygons or just the front-facing ones as needed
                         z_list.append((z_sort_param, angle, norm, i))  # record the maximum z-value of the face and angle to light, along with the face ID and normal
 
-                z_list.sort(lambda x, y: cmp(x[0], y[0]))  # sort by ascending sort parameter of the face
+                z_list.sort(key=lambda x: x[0])  # sort by ascending sort parameter of the face
                 draw_faces(z_list, transformed_pts, obj, so.shade, fill_col, st, poly)
 
             else:  # we cannot generate a list of faces from the edges without a lot of computation

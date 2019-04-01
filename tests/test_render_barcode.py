@@ -20,7 +20,12 @@
 Written to test the coding of generating barcodes.
 """
 from render_barcode import InsertBarcode
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-class InsertBarcodeBasicTest(InkscapeExtensionTestMixin, TestCase):
+class InsertBarcodeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = InsertBarcode
+    comparisons = [
+        ('--type', 'Ean2', '--text', '55'),
+        ('--type', 'Code93', '--text', '3332222'),
+        ('--type', 'Upce', '--text', '123456'),
+    ]

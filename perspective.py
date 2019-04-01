@@ -24,6 +24,7 @@ from subprocess import PIPE, Popen
 
 import inkex
 from inkex import Transform
+from inkex.localize import _
 
 X, Y = range(2)
 

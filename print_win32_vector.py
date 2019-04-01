@@ -34,6 +34,10 @@ import sys
 import ctypes
 
 import inkex
+from inkex.cubic_paths import parseCubicPath
+from inkex.transforms import Transform
+from inkex.paths import Path
+from inkex.localize import _
 
 if sys.platform.startswith('win'):
     myspool = ctypes.WinDLL("winspool.drv")
@@ -74,7 +78,7 @@ class MyEffect(inkex.Effect):
             d = node.get('d')
             if not d:
                 return
-            p = inkex.parseCubicPath(d)
+            p = parseCubicPath(d)
         elif node.tag == inkex.addNS('rect','svg'):
             x = float(node.get('x'))
             y = float(node.get('y'))
@@ -89,8 +93,7 @@ class MyEffect(inkex.Effect):
         else:
             return
         mat += node.transform
-        # XXX Need new API for transforming paths
-        #simpletransform.applyTransformToPath(mat, p)
+        p = Path(p).transform(Transform(mat)).to_arrays()
         hPen = mygdi.CreatePen(0, stroke, color)
         mygdi.SelectObject(self.hDC, hPen)
         self.emit_path(p)
@@ -123,16 +126,16 @@ class MyEffect(inkex.Effect):
         trans = node.get('transform')
         x = node.get('x')
         y = node.get('y')
-        mat = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        mat = Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         if trans:
-            mat = simpletransform.composeTransform(mat, simpletransform.parseTransform(trans))
+            mat *= Transform(trans)
         if x:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat *= Transform([[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat = simpletransform.composeTransform(mat, [[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat *= Transform([[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], mat))
+            self.groupmat.append(Transform(self.groupmat[-1]) * mat)
         # get referenced node
         refid = node.get(inkex.addNS('href','xlink'))
         refnode = self.getElementById(refid[1:])
@@ -157,7 +160,7 @@ class MyEffect(inkex.Effect):
                         return
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(simpletransform.composeTransform(self.groupmat[-1], simpletransform.parseTransform(trans)))
+            self.groupmat.append(Transform(self.groupmat[-1]) * Transform(trans))
         for node in group:
             if node.tag == inkex.addNS('g','svg'):
                 self.process_group(node)

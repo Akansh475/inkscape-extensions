@@ -16,23 +16,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-import os
 
 import inkex
-from inkex import Transform
+from inkex.generic import EffectExtension
+from inkex.localize import _
+from inkex.elements import PathElement, Group
+from inkex.paths import Path
+from inkex.cubic_paths import CubicSuperPath, unCubicSuperPath
 
-from ffgeom import *
+from ffgeom import Point, Segment, intersectSegments
 
-try:
-    from subprocess import Popen, PIPE
-    bsubprocess = True
-except:
-    bsubprocess = False
-
-class Project(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
+class Project(EffectExtension):
     def effect(self):
         if len(self.options.ids) < 2:
             inkex.errormsg(_("This extension requires two selected paths. \nThe second path must be exactly four nodes long."))
@@ -48,92 +42,69 @@ class Project(inkex.Effect):
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            scale *= self.svg.unittouu(self.addDocumentUnit(viewBox2[3])) / h
-        obj = self.selected[self.options.ids[0]]
-        trafo = self.selected[self.options.ids[1]]
+            scale *= self.svg.unittouu(self.svg.add_unit(viewBox2[3])) / h
+
+        obj = self.svg.selected[self.options.ids[0]]
+        trafo = self.svg.selected[self.options.ids[1]]
+
         if obj.get(inkex.addNS('type','sodipodi')):
-            inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type','sodipodi'))))
-            exit()
-        if obj.tag == inkex.addNS('path','svg') or obj.tag == inkex.addNS('g','svg'):
-            if trafo.tag == inkex.addNS('path','svg'):
-                #distil trafo into four node points
-                mat = inkex.composeParents(trafo, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-                trafo = cubicsuperpath.parsePath(trafo.get('d'))
+            return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type','sodipodi'))))
+        if isinstance(obj, (PathElement, Group)):
+            if isinstance(trafo, PathElement):
+                # distil trafo into four node points
+                trafo.apply_transform()
+                trafo = CubicSuperPath(trafo.path.to_arrays())
                 if len(trafo[0]) < 4:
-                    inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
-                    exit()
-                #simpletransform.applyTransformToPath(mat, trafo)
-                trafo = [[Point(csp[1][0],csp[1][1]) for csp in subs] for subs in trafo][0][:4]
+                    return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
+                trafo = [[Point(csp[1][0], csp[1][1]) for csp in subs] for subs in trafo][0][:4]
 
                 #vectors pointing away from the trafo origin
-                self.t1 = Segment(trafo[0],trafo[1])
-                self.t2 = Segment(trafo[1],trafo[2])
-                self.t3 = Segment(trafo[3],trafo[2])
-                self.t4 = Segment(trafo[0],trafo[3])
+                self.t1 = Segment(trafo[0], trafo[1])
+                self.t2 = Segment(trafo[1], trafo[2])
+                self.t3 = Segment(trafo[3], trafo[2])
+                self.t4 = Segment(trafo[0], trafo[3])
+                self.bbox = obj.bounding_box()
 
-                #query inkscape about the bounding box of obj
-                self.q = {'x':0,'y':0,'width':0,'height':0}
-                file = self.args[-1]
-                id = self.options.ids[0]
-                for query in self.q.keys():
-                    if bsubprocess:
-                        p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query,id,file), shell=True, stdout=PIPE, stderr=PIPE)
-                        rc = p.wait()
-                        self.q[query] = scale*float(p.stdout.read())
-                        err = p.stderr.read()
-                    else:
-                        f,err = os.popen3('inkscape --query-%s --query-id=%s "%s"' % (query,id,file))[1:]
-                        self.q[query] = scale*float(f.read())
-                        f.close()
-                        err.close()
-
-                if obj.tag == inkex.addNS("path",'svg'):
-                    self.process_path(obj)
-                if obj.tag == inkex.addNS("g",'svg'):
-                    self.process_group(obj)
+                self.process_group([obj])
             else:
-                if trafo.tag == inkex.addNS('g','svg'):
+                if isinstance(trafo, Group):
                     inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
                 else:
                     inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
-                exit()
         else:
             inkex.errormsg(_("The first selected object is not a path.\nTry using the procedure Path->Object to Path."))
-            exit()
 
-    def process_group(self,group):
+    def process_group(self, group):
         for node in group:
-            if node.tag == inkex.addNS('path','svg'):
+            if isinstance(node, PathElement):
                 self.process_path(node)
-            if node.tag == inkex.addNS('g','svg'):
+            elif isinstance(node, Group):
                 self.process_group(node)
 
-    def process_path(self,path):
-        mat = inkex.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-        d = path.get('d')
-        p = cubicsuperpath.parsePath(d)
+    def process_path(self, node):
+        node.apply_transform()
+        points = CubicSuperPath(node.path.to_arrays())
         #simpletransform.applyTransformToPath(mat, p)
-        for subs in p:
+        for subs in points:
             for csp in subs:
                 csp[0] = self.trafopoint(csp[0])
                 csp[1] = self.trafopoint(csp[1])
                 csp[2] = self.trafopoint(csp[2])
-        mat = -Transform(mat)
-        #simpletransform.applyTransformToPath(mat, p)
-        path.set('d',cubicsuperpath.formatPath(p))
+
+        node.path = Path(unCubicSuperPath(points))
 
     def trafopoint(self, xy):
         """Transform algorithm thanks to Jose Hevia (freon)"""
         (x, y) = xy
-        vector = Segment(Point(self.q['x'],self.q['y']),Point(x,y))
-        xratio = abs(vector.delta_x())/self.q['width']
-        yratio = abs(vector.delta_y())/self.q['height']
+        vector = Segment(Point(self.bbox.left, self.bbox.top), Point(x, y))
+        xratio = abs(vector.delta_x()) / self.bbox.width
+        yratio = abs(vector.delta_y()) / self.bbox.height
 
-        horz = Segment(self.t1.pointAtRatio(xratio),self.t3.pointAtRatio(xratio))
-        vert = Segment(self.t4.pointAtRatio(yratio),self.t2.pointAtRatio(yratio))
+        horz = Segment(self.t1.pointAtRatio(xratio), self.t3.pointAtRatio(xratio))
+        vert = Segment(self.t4.pointAtRatio(yratio), self.t2.pointAtRatio(yratio))
 
-        p = intersectSegments(vert,horz)
-        return [p['x'],p['y']]
+        point = intersectSegments(vert, horz)
+        return [point['x'], point['y']]
 
 
 if __name__ == '__main__':

@@ -19,7 +19,6 @@
 #
 
 from lxml import etree
-from simplestyle import parseStyle
 
 import inkex
 from inkex import inkbool
@@ -60,7 +59,7 @@ class Split(inkex.Effect):
             # handling flowed text nodes
             if node.tag == inkex.addNS("flowRoot", "svg"):
                 try:
-                    fontsize = parseStyle(node.get("style"))["font-size"]
+                    fontsize = node.style["font-size"]
                 except:
                     fontsize = "12px"
                 fs = self.svg.unittouu(fontsize)
@@ -124,7 +123,7 @@ class Split(inkex.Effect):
 
             # gets the font size. if element doesn't have a style attribute, it assumes font-size = 12px
             try:
-                fontsize = parseStyle(line.get("style"))["font-size"]
+                fontsize = line.style["font-size"]
             except:
                 fontsize = "12px"
             fs = self.svg.unittouu(fontsize)

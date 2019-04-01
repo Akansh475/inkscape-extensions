@@ -6,10 +6,10 @@ Test string uppercase extension
 import string
 
 from text_uppercase import Uppercase
-from .base import InkscapeExtensionTestMixin, TestCase
+from .base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from .base.word import word_generator
 
-class UpperCase(InkscapeExtensionTestMixin, TestCase):
+class UpperCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Uppercase
 
     def test_lowercase(self):

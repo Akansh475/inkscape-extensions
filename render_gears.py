@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 #
 # Copyright (C) 2007 Aaron Spike  (aaron @ ekips.org)
 # Copyright (C) 2007 Tavmjong Bah (tavmjong @ free.fr)
@@ -18,6 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+Generate gears in SVG
+"""
 
 from math import acos, cos, pi, radians, sin, sqrt
 

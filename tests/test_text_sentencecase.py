@@ -1,6 +1,6 @@
 # coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from text_sentencecase import SentanceCase
 
-class TestSentenceCaseBasic(InkscapeExtensionTestMixin, TestCase):
+class TestSentenceCaseBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = SentanceCase

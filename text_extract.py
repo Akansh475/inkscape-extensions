@@ -24,9 +24,6 @@
 #
 
 import copy
-import csv
-import os
-from subprocess import PIPE, Popen
 
 from lxml import etree
 
@@ -50,86 +47,49 @@ class Extract(inkex.Effect):
                                      help="vertical point to compare")
 
     def effect(self):
-        if len(self.svg.selected) == 0:
+        if not self.svg.selected:
             for node in self.document.xpath('//svg:text | //svg:flowRoot', namespaces=inkex.NSS):
-                self.selected[node.get('id')] = node
+                self.svg.selected[node.get('id')] = node
 
-        if len(self.svg.selected) > 0:
+        if self.svg.selected:
             objlist = []
-            svg = self.document.getroot()
-            parentnode = self.svg.get_current_layer()
-            file = self.options.input_file
-
-            # get all bounding boxes in file by calling inkscape again with the --query-all command line option
-            # it returns a comma separated list structured id,x,y,w,h
-            p = Popen('inkscape --query-all "{}"'.format(file), shell=True, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-            err = p.stderr
-            f = p.communicate()[0]
-            reader = csv.reader(f.split(os.linesep))
-            err.close()
-
-            # build a dictionary with id as the key
-            dimen = dict()
-            for line in reader:
-                if len(line) > 0:
-                    dimen[line[0]] = map(float, line[1:])
-
-            # find the center of all selected objects **Not the average!
-            x, y, w, h = dimen[self.selected.keys()[0]]
-            minx = x
-            miny = y
-            maxx = x + w
-            maxy = y + h
-
-            for id, node in self.selected.items():
-                # get the bounding box
-                x, y, w, h = dimen[id]
-                if x < minx:
-                    minx = x
-                if (x + w) > maxx:
-                    maxx = x + w
-                if y < miny:
-                    miny = y
-                if (y + h) > maxy:
-                    maxy = y + h
-
-            midx = (minx + maxx) / 2
-            midy = (miny + maxy) / 2
 
             # calculate distances for each selected object
-            for id, node in self.selected.items():
+            for node in self.svg.selected.values():
                 # get the bounding box
-                x, y, w, h = dimen[id]
+                bbox = node.bounding_box()
+                if not bbox:
+                    continue
 
                 # calc the comparison coords
                 if self.options.xanchor == "l":
-                    cx = x
+                    cx = bbox.left
                 elif self.options.xanchor == "r":
-                    cx = x + w
+                    cx = bbox.right
                 else:  # middle
-                    cx = x + w / 2
+                    cx = bbox.center()[0]
 
                 if self.options.yanchor == "t":
-                    cy = y
+                    cy = bbox.top
                 elif self.options.yanchor == "b":
-                    cy = y + h
+                    cy = bbox.bottom
                 else:  # middle
-                    cy = y + h / 2
+                    cy = bbox.center()[1]
 
                 # direction chosen
                 if self.options.direction == "tb":
-                    objlist.append([cy, id])
+                    objlist.append([cy, node])
                 elif self.options.direction == "bt":
-                    objlist.append([-cy, id])
+                    objlist.append([-cy, node])
                 elif self.options.direction == "lr":
-                    objlist.append([cx, id])
+                    objlist.append([cx, node])
                 elif self.options.direction == "rl":
-                    objlist.append([-cx, id])
+                    objlist.append([-cx, node])
 
-            objlist.sort()
+            objlist.sort(key=lambda x: x[0])
             # move them to the top of the object stack in this order.
-            for item in objlist:
-                self.recurse(copy.deepcopy(self.selected[item[1]]))
+            for _, node in objlist:
+                self.recurse(copy.deepcopy(node))
 
     def recurse(self, node):
         istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}text')

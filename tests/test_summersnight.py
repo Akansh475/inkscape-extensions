@@ -5,7 +5,10 @@
 #    with the default parameters).
 #
 from summersnight import Project
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 
-class EnvelopeBasicTest(InkscapeExtensionTestMixin, TestCase):
+class EnvelopeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Project
+    comparisons = [('--id=p1', '--id=p2')]
+    compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]

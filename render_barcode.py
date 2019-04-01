@@ -22,13 +22,10 @@ Inkscape's general barcode extension. Run from within inkscape or use the
 Barcode module provided for outside or scripting.
 """
 
-import sys
-
 from barcode import get_barcode
-from inkex.base import InkscapeExtension, SvgThroughMixin
+from inkex.generic import GenerateExtension
 
-
-class InsertBarcode(SvgThroughMixin, InkscapeExtension):
+class InsertBarcode(GenerateExtension):
     """
     Raw barcode Effect class, see Barcode base class.
     """
@@ -36,31 +33,27 @@ class InsertBarcode(SvgThroughMixin, InkscapeExtension):
     def __init__(self):
         super(InsertBarcode, self).__init__()
         self.arg_parser.add_argument(
-                "-l", "--height", type=int,
-                dest="height", default=30, help="Barcode Height")
+            "-l", "--height", type=int,
+            dest="height", default=30, help="Barcode Height")
         self.arg_parser.add_argument(
-                "-t", "--type", type=str,
-                dest="type", default='', help="Barcode Type")
+            "-t", "--type", type=str,
+            dest="type", default='', help="Barcode Type")
         self.arg_parser.add_argument(
-                "-d", "--text", type=str,
-                dest="text", default='', help="Text to print on barcode")
+            "-d", "--text", type=str,
+            dest="text", default='', help="Text to print on barcode")
 
-    def effect(self):
+    def generate(self):
         layer = self.svg.get_current_layer()
         (pos_x, pos_y) = layer.get_center_position()
 
-        barcode = get_barcode(self.options.type,
-                              text=self.options.text,
-                              height=self.options.height,
-                              document=self.document,
-                              x=pos_x, y=pos_y,
-                              scale=self.svg.unittouu('1px'),
-                              ).generate()
-        if barcode is not None:
-            self.svg.get_current_layer().append(barcode)
-        else:
-            sys.stderr.write("No barcode was generated\n")
-
+        return get_barcode(
+            self.options.type,
+            text=self.options.text,
+            height=self.options.height,
+            document=self.document,
+            x=pos_x, y=pos_y,
+            scale=self.svg.unittouu('1px'),
+        ).generate()
 
 if __name__ == '__main__':
     InsertBarcode().run()

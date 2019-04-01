@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from text_merge import Merge
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-class TestMergeBasic(InkscapeExtensionTestMixin, TestCase):
+class TestMergeBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Merge

@@ -5,11 +5,11 @@ Test the lowercase effect
 
 import string
 
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.word import word_generator
 from text_lowercase import Lowercase
 
-class LowerCase(InkscapeExtensionTestMixin, TestCase):
+class LowerCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Lowercase
 
     def test_uppercase(self):

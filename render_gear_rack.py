@@ -1,29 +1,30 @@
 #!/usr/bin/env python
-# coding=utf-8
+#
+# Copyright (C) 2013 Brett Graham (hahahaha @ hahaha.org)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 """
-Copyright (C) 2013 Brett Graham (hahahaha @ hahaha.org)
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Generate a gear rack as SVG.
 """
 
 from math import acos, cos, radians, sin, sqrt, tan
 
-from lxml import etree
-from simpletransform import computePointInNode
-
 import inkex
+from inkex.elements import PathElement
+from inkex.generic import GenerateExtension
 
 
 def involute_intersect_angle(Rb, R):
@@ -49,23 +50,23 @@ def points_to_svgd(p):
     return svgd
 
 
-class RackGear(inkex.Effect):
+class RackGear(GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(RackGear, self).__init__()
         self.arg_parser.add_argument(
-                "-l", "--length", type=float,
-                dest="length", default=100.,
-                help="Rack Length")
+            "-l", "--length", type=float,
+            dest="length", default=100.,
+            help="Rack Length")
         self.arg_parser.add_argument(
-                "-s", "--spacing", type=float,
-                dest="spacing", default=10.,
-                help="Tooth Spacing")
+            "-s", "--spacing", type=float,
+            dest="spacing", default=10.,
+            help="Tooth Spacing")
         self.arg_parser.add_argument(
-                "-a", "--angle", type=float,
-                dest="angle", default=20.,
-                help="Contact Angle")
+            "-a", "--angle", type=float,
+            dest="angle", default=20.,
+            help="Contact Angle")
 
-    def effect(self):
+    def generate(self):
         length = self.svg.unittouu(str(self.options.length) + 'px')
         spacing = self.svg.unittouu(str(self.options.spacing) + 'px')
         angle = radians(self.options.angle)
@@ -86,21 +87,16 @@ class RackGear(inkex.Effect):
 
         # Embed gear in group to make animation easier:
         #  Translate group, Rotate path.
-        view_center = computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
-        t = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
-        g_attribs = {
-            inkex.addNS('label', 'inkscape'): 'RackGear' + str(length),
-            'transform': t}
-        g = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
+        #view_center = computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
+        #t = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
+        #g_attribs = {
+        #    inkex.addNS('label', 'inkscape'): 'RackGear' + str(length),
+        #    'transform': t}
+        #g = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
 
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
-        gear_attribs = {
-            'style': str(inkex.Style(style)),
-            'd': path}
-        gear = etree.SubElement(
-                g, inkex.addNS('path', 'svg'), gear_attribs)
-
+        return PathElement(style=str(inkex.Style(style)), d=str(path))
 
 if __name__ == '__main__':
     RackGear().run()

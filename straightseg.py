@@ -21,6 +21,7 @@ import inkex
 
 from inkex.bezier import percent_point
 
+from inkex.elements import PathElement
 
 class SegmentStraightener(inkex.Effect):
     def __init__(self):
@@ -35,10 +36,9 @@ class SegmentStraightener(inkex.Effect):
                         help="straightening behavior for cubic segments")
 
     def effect(self):
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path', 'svg'):
-                d = node.get('d')
-                p = inkex.parsePath(d)
+        for node in self.svg.selected.values():
+            if isinstance(node, PathElement):
+                p = node.path.to_arrays()
                 last = []
                 subPathStart = []
                 for cmd,params in p:

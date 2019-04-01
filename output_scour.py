@@ -6,8 +6,11 @@ import platform
 
 from distutils.version import StrictVersion
 
+from lxml import etree
+
 import inkex
 from inkex import inkbool
+from inkex.generic import OutputExtension
 
 try:
     import scour
@@ -26,7 +29,7 @@ Please make sure it is installed (e.g. using 'pip install scour'
 """)
 
 
-class ScourInkscape(inkex.base.InkscapeExtension):
+class ScourInkscape(OutputExtension):
 
     def __init__(self):
         super(ScourInkscape, self).__init__()
@@ -61,13 +64,7 @@ class ScourInkscape(inkex.base.InkscapeExtension):
         self.arg_parser.add_argument("--scour-version",            type=str,      dest="scour_version")
         self.arg_parser.add_argument("--scour-version-warn-old",   type=inkbool,  dest="scour_version_warn_old")
 
-    def load(self, stream):
-        return stream
-
     def save(self, stream):
-        stream.write(self.document.decode())
-
-    def effect(self):
         # version check if enabled in options
         if self.options.scour_version_warn_old:
             scour_version = scour.__version__
@@ -84,15 +81,14 @@ class ScourInkscape(inkex.base.InkscapeExtension):
 
         # do the scouring
         try:
-            self.document = scourString(self.document.read(), self.options).encode("UTF-8")
+            stream.write(scourString(etree.tostring(self.document), self.options).encode('utf-8'))
         except Exception as e:
+            raise
             inkex.errormsg("Error during optimization.")
             inkex.errormsg("\nDetails:\n" + str(e))
             inkex.errormsg("\nOS version: " + platform.platform())
             inkex.errormsg("Python version: " + sys.version)
             inkex.errormsg("Scour version: " + scour.__version__)
-            sys.exit()
-
 
 if __name__ == '__main__':
     ScourInkscape().run()

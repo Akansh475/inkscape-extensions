@@ -1,6 +1,6 @@
 # coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from text_extract import Extract
 
-class TestExtractBasic(InkscapeExtensionTestMixin, TestCase):
+class TestExtractBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Extract

@@ -244,15 +244,25 @@ class Scale(object):  # pylint: disable=too-few-public-methods
     def __repr__(self):
         return "scale:" + str(tuple(self))
 
+    @property
     def center(self):
         """Pick the middle of the line"""
         if self.minimum is None or self.maximum is None:
             return None
         return self.minimum + ((self.maximum - self.minimum) / 2)
 
+    @property
+    def size(self):
+        """Return the size difference minimum and manximum"""
+        if self.minimum is None or self.maximum is None:
+            return None
+        return self.maximum - self.minimum
+
 
 class BoundingBox(object):  # pylint: disable=too-few-public-methods
     """Some functions to compute a rough bbox of a given list of objects."""
+    width = property(lambda self: self.x.size())
+    height = property(lambda self: self.y.size())
 
     def __init__(self, x, y=None):
         if y is None:
@@ -300,7 +310,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
 
     def center(self):
         """Returns the middle of the bounding box"""
-        return self.x.center(), self.y.center()
+        return self.x.center, self.y.center
 
 
 def cubic_extrema(py0, py1, py2, py3):

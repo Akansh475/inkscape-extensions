@@ -102,9 +102,16 @@ class ScaleTest(TestCase):
 
     def test_center(self):
         """Center of a scale"""
-        self.assertEqual(Scale().center(), None)
-        self.assertEqual(Scale(0, 10).center(), 5)
-        self.assertEqual(Scale(-10, 10).center(), 0)
+        self.assertEqual(Scale().center, None)
+        self.assertEqual(Scale(0, 10).center, 5)
+        self.assertEqual(Scale(-10, 10).center, 0)
+
+    def test_size(self):
+        """Size of the scale"""
+        self.assertEqual(Scale().size, None)
+        self.assertEqual(Scale(10, 30).size, 20)
+        self.assertEqual(Scale(-10, 10).size, 20)
+        self.assertEqual(Scale(-30, -10).size, 20)
 
 
 class BoundingBoxTest(TestCase):

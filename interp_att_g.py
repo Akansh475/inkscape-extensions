@@ -73,9 +73,9 @@ class InterpAttG(inkex.Effect):
         raw_colors = [sv, ev]
 
         for i in [0,1]:
-            if re.search('\s|,', raw_colors[i]):
+            if re.search('\\s|,', raw_colors[i]):
                 # There are separators. That must be an integer RGB color definition.
-                raw_colors[i] = re.split( '[\s,]+', raw_colors[i])
+                raw_colors[i] = re.split( '[\\s,]+', raw_colors[i])
                 self.R[i] = int(raw_colors[i][0])
                 self.G[i] = int(raw_colors[i][1])
                 self.B[i] = int(raw_colors[i][2])

@@ -1490,7 +1490,7 @@ def draw_pointer(x, color="#f00", figure="cross", group=None, comment="", fill=N
         if fill is None:
             fill = "#12b3ff"
         fill_opacity = "0.8"
-        d = "m {},{} ".format(x[0], x[1]) + re.sub("([0-9\-.e]+)", (lambda match: str(float(match.group(1)) * size * 2.)), "0.88464,-0.40404 c -0.0987,-0.0162 -0.186549,-0.0589 -0.26147,-0.1173 l 0.357342,-0.35625 c 0.04631,-0.039 0.0031,-0.13174 -0.05665,-0.12164 -0.0029,-1.4e-4 -0.0058,-1.4e-4 -0.0087,0 l -2.2e-5,2e-5 c -0.01189,0.004 -0.02257,0.0119 -0.0305,0.0217 l -0.357342,0.35625 c -0.05818,-0.0743 -0.102813,-0.16338 -0.117662,-0.26067 l -0.409636,0.88193 z")
+        d = "m {},{} ".format(x[0], x[1]) + re.sub("([0-9\\-.e]+)", (lambda match: str(float(match.group(1)) * size * 2.)), "0.88464,-0.40404 c -0.0987,-0.0162 -0.186549,-0.0589 -0.26147,-0.1173 l 0.357342,-0.35625 c 0.04631,-0.039 0.0031,-0.13174 -0.05665,-0.12164 -0.0029,-1.4e-4 -0.0058,-1.4e-4 -0.0087,0 l -2.2e-5,2e-5 c -0.01189,0.004 -0.02257,0.0119 -0.0305,0.0217 l -0.357342,0.35625 c -0.05818,-0.0743 -0.102813,-0.16338 -0.117662,-0.26067 l -0.409636,0.88193 z")
         attrib.update({"d": d, "style": "fill:{};stroke:none;fill-opacity:{};".format(fill, fill_opacity), "comment": str(comment)})
         etree.SubElement(group, inkex.addNS('path', 'svg'), attrib)
     else:
@@ -2292,13 +2292,13 @@ class Postprocessor(object):
 
     def remap(self, parameters, case_sensitive=False):
         # remap parameters should be like "x->y,y->x"
-        parameters = parameters.replace("\,", ":#:#:coma:#:#:")
+        parameters = parameters.replace("\\,", ":#:#:coma:#:#:")
         parameters = parameters.split(",")
         pattern = []
         remap = []
         for s in parameters:
-            s = s.replace(":#:#:coma:#:#:", "\,")
-            r = re.match("""\s*(\'|\")(.*)\\1\s*->\s*(\'|\")(.*)\\3\s*""", s)
+            s = s.replace(":#:#:coma:#:#:", "\\,")
+            r = re.match("""\\s*(\'|\")(.*)\\1\\s*->\\s*(\'|\")(.*)\\3\\s*""", s)
             if not r:
                 self.error("Bad parameters for remap.\n(Parameters: '{}')".format(parameters), "error")
             pattern += [r.group(2)]
@@ -3367,7 +3367,7 @@ class Gcodetools(inkex.Effect):
         print_(curve)
 
         if tool != self.last_used_tool:
-            g += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", tool["name"]))) + tool["tool change gcode"] + "\n"
+            g += ("(Change tool to {})\n".format(re.sub("\"'\\(\\)\\\\", " ", tool["name"]))) + tool["tool change gcode"] + "\n"
 
         lg = 'G00'
         zs = self.options.Zsafe
@@ -3982,7 +3982,7 @@ class Gcodetools(inkex.Effect):
                             return "None"
 
                     if self.options.comment_gcode != "":
-                        comment = re.sub("\[([A-Za-z_\-\:]+)\]", partial(set_comment, path=path), self.options.comment_gcode)
+                        comment = re.sub("\\[([A-Za-z_\\-\\:]+)\\]", partial(set_comment, path=path), self.options.comment_gcode)
                         comment = comment.replace(":newline:", "\n")
                         comment = gcode_comment_str(comment)
                     else:
@@ -4088,7 +4088,7 @@ class Gcodetools(inkex.Effect):
                     if self.options.dxfpoints_action == 'replace':
 
                         path.set("dxfpoint", "1")
-                        r = re.match("^\s*.\s*(\S+)", path.get("d"))
+                        r = re.match("^\\s*.\\s*(\\S+)", path.get("d"))
                         if r is not None:
                             print_(("got path=", r.group(1)))
                             path.set("d", "m {} 2.9375,-6.343750000001 0.8125,1.90625 6.843748640396,-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.812500000001 z".format(r.group(1)))
@@ -5282,7 +5282,7 @@ G01 Z1 (going to cutting z)\n""",
             g = etree.SubElement(tools_group, inkex.addNS('g', 'svg'), {'gcodetools': "Gcodetools tool parameter"})
             draw_text(key, 0, y, group=g, gcodetools_tag="Gcodetools tool definition field name", font_size=10 if key != 'name' else 20)
             param = tool[key]
-            if type(param) == str and re.match("^\s*$", param):
+            if type(param) == str and re.match("^\\s*$", param):
                 param = "(None)"
             draw_text(param, 150, y, group=g, gcodetools_tag="Gcodetools tool definition field value", font_size=10 if key != 'name' else 20)
             v = str(param).split("\n")
@@ -5404,8 +5404,8 @@ G01 Z1 (going to cutting z)\n""",
             return
         x = self.options.lathe_x_axis_remap
         z = self.options.lathe_z_axis_remap
-        x = re.sub("^\s*([XYZxyz])\s*$", r"\1", x)
-        z = re.sub("^\s*([XYZxyz])\s*$", r"\1", z)
+        x = re.sub("^\\s*([XYZxyz])\\s*$", r"\1", x)
+        z = re.sub("^\\s*([XYZxyz])\\s*$", r"\1", z)
         if x not in ["X", "Y", "Z", "x", "y", "z"] or z not in ["X", "Y", "Z", "x", "y", "z"]:
             self.error("Lathe X and Z axis remap should be 'X', 'Y' or 'Z'. Exiting...")
             return
@@ -5432,7 +5432,7 @@ G01 Z1 (going to cutting z)\n""",
                     self.tool["passing feed"] = float(self.tool["passing feed"] if "passing feed" in self.tool else self.tool["feed"])
                     self.tool["feed"] = float(self.tool["feed"])
                     self.tool["fine feed"] = float(self.tool["fine feed"] if "fine feed" in self.tool else self.tool["feed"])
-                    gcode += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", self.tool["name"]))) + self.tool["tool change gcode"] + "\n"
+                    gcode += ("(Change tool to {})\n".format(re.sub("\"'\\(\\)\\\\", " ", self.tool["name"]))) + self.tool["tool change gcode"] + "\n"
 
                 for path in paths[layer]:
                     csp = self.transform_csp(cubic_paths.parseCubicPath(path.get("d")), layer)
@@ -5759,7 +5759,7 @@ G01 Z1 (going to cutting z)\n""",
         for layer in self.layers:
             if layer in paths:
 
-                r = re.match("\s*\(\s*([0-9\-,.]+)\s*;\s*([0-9\-,.]+)\s*\)\s*", self.options.graffiti_start_pos)
+                r = re.match("\\s*\\(\\s*([0-9\\-,.]+)\\s*;\\s*([0-9\\-,.]+)\\s*\\)\\s*", self.options.graffiti_start_pos)
                 if r:
                     start_point = [float(r.group(1)), float(r.group(2))]
                 else:
@@ -5771,7 +5771,7 @@ G01 Z1 (going to cutting z)\n""",
                 self.tool = self.tools[layer][0]
                 # Change tool every layer. (Probably layer = color so it'll be
                 # better to change it even if the tool has not been changed)
-                gcode += ("(Change tool to {})\n".format(re.sub("\"'\(\)\\\\", " ", self.tool["name"]))) + self.tool["tool change gcode"] + "\n"
+                gcode += ("(Change tool to {})\n".format(re.sub("\"'\\(\\)\\\\", " ", self.tool["name"]))) + self.tool["tool change gcode"] + "\n"
 
                 subpaths = []
                 for path in paths[layer]:

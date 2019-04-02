@@ -1,7 +1,7 @@
 # coding=utf-8
 from pixelsnap import PixelSnapEffect
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.fitlers import CompareOrderIndependentStyle
+from tests.base.filters import CompareOrderIndependentStyle
 
 class TestPixelSnapEffectBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = PixelSnapEffect

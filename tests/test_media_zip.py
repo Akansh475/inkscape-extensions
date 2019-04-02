@@ -1,6 +1,9 @@
 # coding=utf-8
 from media_zip import CompressedMediaOutput
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareSize
 
-class CompressedMediaOutputBasicTest(InkscapeExtensionTestMixin, TestCase):
+class CmoBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = CompressedMediaOutput
+    compare_filters = [CompareSize()]
+    comparisons = [()]

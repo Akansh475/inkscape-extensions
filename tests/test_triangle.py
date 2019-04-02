@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-# coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from triangle import Triangle
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy
 
-class TriangleBasicTest(InkscapeExtensionTestMixin, TestCase):
+class TriangleBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Triangle
+    compare_filters = [CompareNumericFuzzy()]

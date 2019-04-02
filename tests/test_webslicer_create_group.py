@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from webslicer_create_group import WebSlicer_CreateGroup
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class TestWebSlicerCreateGroupBasic(InkscapeExtensionTestMixin, TestCase):
+class TestWebSlicerCreateGroupBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = WebSlicer_CreateGroup
+    comparisons = [('--id', 'slicerect1')]

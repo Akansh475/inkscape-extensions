@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from webslicer_create_rect import WebSlicer_CreateRect
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class TestWebSlicerCreateRectBasic(InkscapeExtensionTestMixin, TestCase):
+class TestWebSlicerCreateRectBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = WebSlicer_CreateRect

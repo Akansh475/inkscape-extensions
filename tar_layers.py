@@ -32,44 +32,11 @@ import io
 import calendar
 import time
 
-if sys.version_info[0] > 2:
-    basestring = str
+from inkex.generic import OutputExtension
+from inkex.elements import Group
 
-# Inkscape Libraries
-import inkex
-
-GROUP = "{http://www.w3.org/2000/svg}g"
-LABEL = "{http://www.inkscape.org/namespaces/inkscape}label"
-GROUPMODE = "{http://www.inkscape.org/namespaces/inkscape}groupmode"
-
-
-def oprint(item):
-    """DEBUG print an object"""
-    for name in dir(item):
-        value = getattr(item, name)
-        if callable(value):
-            yield "%s()" % name
-        else:
-            yield "%s = %s" % (name, str(value))
-
-def fprint(data):
-    """DEBUG print something"""
-    if isinstance(data, basestring):
-        sys.stderr.write("DEBUG: %s\n" % data)
-    else:
-        return fprint("%s(%s)\n    " % (str(data), type(data).__name__) \
-                + "\n    ".join(oprint(data)))
-
-
-class LayersOutput(inkex.Effect):
+class LayersOutput(OutputExtension):
     """Entry point to our layers export"""
-    def __init__(self):
-        inkex.Effect.__init__(self)
-        if os.name == 'nt':
-            self.encoding = "cp437"
-        else:
-            self.encoding = "latin-1"
-
     def make_template(self):
         """Returns the current document as a new empty document with the same defs"""
         newdoc = copy.deepcopy(self.document)
@@ -79,13 +46,8 @@ class LayersOutput(inkex.Effect):
 
     def layers(self, document):
         for node in document.getroot().iterchildren():
-            if self.is_layer(node):
-                name = node.attrib.get(LABEL, None)
-                if name:
-                    yield (name, node)
-
-    def is_layer(self, node):
-        return node.tag == GROUP and node.attrib.get(GROUPMODE,'').lower() == 'layer'
+            if isinstance(node, Group) and node.is_layer() and node.label:
+                yield (node.label, node)
 
     def io_document(self, name, doc):
         string = io.BytesIO()
@@ -96,10 +58,9 @@ class LayersOutput(inkex.Effect):
         string.seek(0)
         return dict(tarinfo=info, fileobj=string)
 
-    def effect(self):
-        # open output tar file as a stream (to stdout)
-        out = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
-        tar = tarfile.open(fileobj=out, mode='w|')
+    def save(self, stream):
+        """Save the tar file output"""
+        tar = tarfile.open(fileobj=stream, mode='w|')
 
         # Switch stdout to binary on Windows.
         if sys.platform == "win32":

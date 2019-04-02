@@ -223,12 +223,14 @@ class Voronoi2svg(inkex.Effect):
         # }}}
 
         # {{{ Handle the transformation of the current group
-        parentGroup = self.getParentNode(self.selected[self.options.ids[0]])
+        for child in self.svg.selected.values():
+            parentGroup = child.getparent()
+            break
 
         trans = self.getGlobalTransform(parentGroup)
         invtrans = None
         if trans:
-            invtrans = -Transform(mat)
+            invtrans = -Transform(trans)
 
         # }}}
 
@@ -239,8 +241,7 @@ class Voronoi2svg(inkex.Effect):
         seeds = []
         fills = []
 
-        for id in self.options.ids:
-            node = self.selected[id]
+        for node in self.svg.selected.values():
             nodes.append(node)
             bbox = node.bounding_box()
             if bbox:
@@ -248,7 +249,7 @@ class Voronoi2svg(inkex.Effect):
                 cy = 0.5 * (bbox[2] + bbox[3])
                 pt = [cx, cy]
                 if trans:
-                    inkex.applyTransformToPoint(trans, pt)
+                    pt = trans.apply_to_point(pt)
                 pts.append(Point(pt[0], pt[1]))
                 fill = 'none'
                 if self.options.delaunayFillOptions != "delaunay-no-fill":
@@ -275,7 +276,7 @@ class Voronoi2svg(inkex.Effect):
             groupVoronoi = etree.SubElement(parentGroup, inkex.addNS('g', 'svg'))
             groupVoronoi.set(inkex.addNS('label', 'inkscape'), 'Voronoi')
             if invtrans:
-                inkex.applyTransformToNode(invtrans, groupVoronoi)
+                groupVoronoi.transform *= invtrans
         if self.options.diagramType != 'Voronoi':
             # Delaunay
             groupDelaunay = etree.SubElement(parentGroup, inkex.addNS('g', 'svg'))

@@ -47,7 +47,7 @@ import zipfile
 
 import inkex
 from inkex import inkbool
-from inkex.base import InkscapeExtension, SvgThroughMixin
+from inkex.generic import OutputExtension
 
 try:  # PY2
     from urllib import url2pathname
@@ -59,7 +59,7 @@ except ImportError:  # PY3
 inkex.localize.localize()
 
 
-class CompressedMediaOutput(inkex.Effect):
+class CompressedMediaOutput(OutputExtension):
     def __init__(self):
         super(CompressedMediaOutput, self).__init__()
         if os.name == 'nt':
@@ -85,22 +85,6 @@ class CompressedMediaOutput(inkex.Effect):
                                      type=str,
                                      dest="tab",
                                      help="The selected UI-tab when OK was pressed")
-
-    def output(self):
-        """
-        Writes the temporary compressed file to its destination
-        and removes the temporary directory.
-        """
-        with open(self.zip_file, 'rb') as out:
-            if os.name == 'nt':
-                try:
-                    import msvcrt
-                    msvcrt.setmode(1, os.O_BINARY)
-                except:
-                    pass
-            stdout = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
-            stdout.write(out.read())
-        shutil.rmtree(self.tmp_dir)
 
     def collect_images(self, docname, z):
         """
@@ -199,7 +183,7 @@ class CompressedMediaOutput(inkex.Effect):
                     stream.write("Found the following fonts:\n%s" % '\n'.join(findings))
         z.write(dst_file, filename)
 
-    def effect(self):
+    def save(self, stream):
         docroot = self.document.getroot()
         docname = docroot.get(inkex.addNS('docname', u'sodipodi'))
 
@@ -215,8 +199,7 @@ class CompressedMediaOutput(inkex.Effect):
         self.tmp_dir = tempfile.mkdtemp()
 
         # Create destination zip in same directory as the document
-        self.zip_file = os.path.join(self.tmp_dir, docstripped) + '.zip'
-        with zipfile.ZipFile(self.zip_file, 'w') as z:
+        with zipfile.ZipFile(stream, 'w') as z:
             self.collect_images(docname, z)
             self.collect_SVG(docstripped, z)
             if self.options.font_list:

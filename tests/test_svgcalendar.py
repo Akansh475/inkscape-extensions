@@ -6,11 +6,13 @@ import calendar
 from datetime import datetime
 
 from svgcalendar import SVGCalendar
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareOrderIndependentStyle, CompareNumericFuzzy
 
-class CalendarArguments(InkscapeExtensionTestMixin, TestCase):
+class CalendarArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     """Test arguments to calendar extensions"""
     effect_class = SVGCalendar
+    compare_filters = [CompareOrderIndependentStyle(), CompareNumericFuzzy()]
 
     def test_default_names_list(self):
         """Test default names"""

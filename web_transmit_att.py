@@ -1,23 +1,22 @@
 #!/usr/bin/env python
-# coding=utf-8
-"""
-Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
+#
+# Copyright (C) 2009 Aurelio A. Heckert, aurium (a) gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-"""
-# local library
 import inkwebeffect
 from inkex.localize import _
 
@@ -58,7 +57,7 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
         if self.options.from_and_to == "g-to-one":
             # All tramsmit to the last
             for selId in self.options.ids[:-1]:
-                elFrom.append(self.selected[selId])
+                elFrom.append(self.svg.selected[selId])
             idTo.append(self.options.ids[-1])
         else:
             # The first transmit to all
@@ -66,7 +65,7 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
             for selId in self.options.ids[1:]:
                 idTo.append(selId)
 
-        evCode = "InkWeb.transmitAtt({from:this, to:['{}'], att:'{}'})".format("','".join(idTo), self.options.att)
+        evCode = "InkWeb.transmitAtt({{from:this, to:['{}'], att:'{}'}})".format("','".join(idTo), self.options.att)
         for el in elFrom:
             prevEvCode = el.get(self.options.when)
             if prevEvCode is None:

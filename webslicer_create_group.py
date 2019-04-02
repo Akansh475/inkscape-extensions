@@ -1,33 +1,33 @@
 #!/usr/bin/env python
-# coding=utf-8
-"""
-Copyright (C) 2010 Aurelio A. Heckert, aurium (a) gmail dot com
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-"""
+#
+# Copyright (C) 2010 Aurelio A. Heckert, aurium (a) gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 from lxml import etree
 
 import inkex
 from inkex.localize import _
-from webslicer_effect import WebSlicer_Effect, is_empty
+from inkex.generic import EffectExtension
+from webslicer_effect import WebSlicerMixin, is_empty
 
 
-class WebSlicer_CreateGroup(WebSlicer_Effect):
+class WebSlicer_CreateGroup(WebSlicerMixin, EffectExtension):
 
     def __init__(self):
-        WebSlicer_Effect.__init__(self)
+        super(WebSlicer_CreateGroup, self).__init__()
         self.arg_parser.add_argument("--html-id",
                                      type=str,
                                      dest="html_id",
@@ -67,13 +67,12 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
 
     def effect(self):
         self.get_base_elements()
-        if len(self.svg.selected) == 0:
+        if not self.svg.selected:
             return inkex.errormsg(_('You must to select some "Slicer rectangles" or other "Layout groups".'))
-        for id, node in self.selected.items():
+        for key, node in self.svg.selected.items():
             if node not in self.layer_descendants:
-                inkex.errormsg(_('Oops... The element "%s" is not in the Web Slicer layer') % id)
-                exit(2)
-        g_parent = self.getParentNode(node)
+                return inkex.errormsg(_('Oops... The element "%s" is not in the Web Slicer layer') % key)
+        g_parent = node.getparent()
         group = etree.SubElement(g_parent, 'g')
         desc = etree.SubElement(group, 'desc')
         desc.text = self.get_conf_text_from_list(
@@ -81,7 +80,7 @@ class WebSlicer_CreateGroup(WebSlicer_Effect):
                  'width_unity', 'height_unity',
                  'bg_color'])
 
-        for id, node in self.selected.items():
+        for node in self.svg.selected.values():
             group.insert(1, node)
 
 

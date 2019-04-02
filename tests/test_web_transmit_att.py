@@ -1,7 +1,7 @@
 # coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from web_transmit_att import InkWebTransmitAtt
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class TestInkWebTransmitAttBasic(InkscapeExtensionTestMixin, TestCase):
+class TestInkWebTransmitAttBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = InkWebTransmitAtt
+    comparisons = [('--id=p1', '--id=r3')]

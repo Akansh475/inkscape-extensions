@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from webslicer_export import WebSlicer_Export
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-
-class TestWebSlicerExportBasic(InkscapeExtensionTestMixin, TestCase):
+class TestWebSlicerExportBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = WebSlicer_Export
+
+    @property
+    def comparisons(self):
+        return [('--dir', self.temp_dir)]

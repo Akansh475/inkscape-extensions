@@ -101,6 +101,28 @@ import sys
 TOLERANCE = 1e-9
 BIG_FLOAT = 1e38
 
+class CmpMixin(object):
+    """Upgrade python2 cmp to python3 cmp"""
+    def __cmp__(self, other):
+        raise NotImplementedError("Shouldn't there be a __cmp__ method?")
+
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) == -1
+
+    def __le__(self, other):
+        return self.__cmp__(other) in (-1, 0)
+
+    def __gt__(self, other):
+        return self.__cmp__(other) == 1
+
+    def __ge__(self, other):
+        return self.__cmp__(other) in (0, 1)
 
 # ------------------------------------------------------------------
 class Context(object):
@@ -190,7 +212,7 @@ def voronoi(siteList, context):
         if not priorityQ.isEmpty():
             minpt = priorityQ.getMinPt()
 
-        if newsite and (priorityQ.isEmpty() or cmp(newsite, minpt) < 0):
+        if newsite and (priorityQ.isEmpty() or newsite < minpt):
             # newsite is smallest -  this is a site event
             context.outSite(newsite)
 
@@ -321,7 +343,7 @@ def isEqual(a, b, relativeError=TOLERANCE):
 
 
 # ------------------------------------------------------------------
-class Site(object):
+class Site(CmpMixin):
     def __init__(self, x=0.0, y=0.0, sitenum=0):
         self.x = x
         self.y = y
@@ -339,8 +361,7 @@ class Site(object):
             return -1
         elif self.x > other.x:
             return 1
-        else:
-            return 0
+        return 0
 
     def distance(self, other):
         dx = self.x - other.x
@@ -410,7 +431,7 @@ class Edge(object):
 
 
 # ------------------------------------------------------------------
-class Halfedge(object):
+class Halfedge(CmpMixin):
     def __init__(self, edge=None, pm=Edge.LE):
         self.left = None  # left Halfedge in the edge list
         self.right = None  # right Halfedge in the edge list
@@ -521,7 +542,7 @@ class Halfedge(object):
 
         xint = (e1.c * e2.b - e2.c * e1.b) / d
         yint = (e2.c * e1.a - e1.c * e2.a) / d
-        if cmp(e1.reg[1], e2.reg[1]) < 0:
+        if e1.reg[1] < e2.reg[1]:
             he = self
             e = e1
         else:
@@ -640,10 +661,10 @@ class PriorityQueue(object):
         he.vertex = site
         he.ystar = site.y + offset
         last = self.hash[self.getBucket(he)]
-        next = last.qnext
-        while (next is not None) and cmp(he, next) > 0:
-            last = next
-            next = last.qnext
+        nxt = last.qnext
+        while (nxt is not None) and he > nxt:
+            last = nxt
+            nxt = last.qnext
         he.qnext = last.qnext
         last.qnext = he
         self.count += 1

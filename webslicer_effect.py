@@ -1,54 +1,45 @@
 #!/usr/bin/env python
-# coding=utf-8
+#
+# Copyright (C) 2010 Aurelio A. Heckert, aurium (a) gmail dot com
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 """
-Copyright (C) 2010 Aurelio A. Heckert, aurium (a) gmail dot com
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Common elements between webslicer extensions
 """
-
-from lxml import etree
 
 import inkex
-
+from inkex.elements import Group
 
 def is_empty(val):
-    if val is None:
-        return True
-    else:
-        return len(str(val)) == 0
+    return val in ('', None)
 
 
-class WebSlicer_Effect(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
-    def effect(self):
-        pass
-
+class WebSlicerMixin(object):
     def get_slicer_layer(self, force_creation=False):
         # Test if webslicer-layer layer existis
         layer = self.document.xpath(
                 '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]',
                 namespaces=inkex.NSS)
-        if len(layer) is 0:
+        if not layer:
             if force_creation:
                 # Create a new layer
-                layer = etree.SubElement(self.document.getroot(), 'g')
-                layer.set('id', 'webslicer-layer')
-                layer.set(inkex.addNS('label', 'inkscape'), 'Web Slicer')
-                layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
+                layer = Group(id='webslicer-layer')
+                layer.set('inkscape:label', 'Web Slicer')
+                layer.set('inkscape:groupmode', 'layer')
+                self.document.getroot().append(layer)
             else:
                 layer = None
         else:

@@ -1,8 +1,8 @@
-#!/usr/bin/env python
 # coding=utf-8
-from tests.base import InkscapeExtensionTestMixin, TestCase
 from wireframe_sphere import WireframeSphere
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tests.base.filters import CompareNumericFuzzy
 
-
-class TestWireframeSphereBasic(InkscapeExtensionTestMixin, TestCase):
+class TestWireframeSphereBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = WireframeSphere
+    compare_filters = [CompareNumericFuzzy()]

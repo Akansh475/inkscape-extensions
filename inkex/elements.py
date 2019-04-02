@@ -124,6 +124,11 @@ class BaseElement(etree.ElementBase):
             for decendant in child.decendants():
                 yield decendant
 
+    @property
+    def label(self):
+        """Returns the inkscape label"""
+        return self.get('inkscape:label', None)
+
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to
         # namespaces, basically over printing details and providing no
@@ -157,12 +162,18 @@ class OtherElements(BaseElement):
 class Group(BaseElement):
     """Any group element (layer or regular group)"""
     tag_name = 'g'
+    is_layer = lambda self: self.groupmode == 'layer'
 
     def bounding_box(self):
         bbox = BoundingBox(None)
         for child in self:
             bbox += child.bounding_box()
         return bbox
+
+    @property
+    def groupmode(self):
+        """Return the type of group this is"""
+        return self.get('inkscape:groupmode', 'group')
 
 class Anchor(Group):
     """An anchor or link tag"""
@@ -299,6 +310,9 @@ class Metadata(BaseElement):
     """Inkscape Metadata element"""
     tag_name = 'metadata'
 
+class ForeignObject(BaseElement):
+    """SVG foreignObject element"""
+    tag_name = 'foreignObject'
 
 class TextElement(BaseElement):
     """A Text element"""
@@ -328,7 +342,14 @@ class Marker(BaseElement):
      or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
     tag_name = 'marker'
 
+class Switch(BaseElement):
+    """A switch element"""
+    tag_name = 'switch'
 
 class Grid(BaseElement):
     """A namedview grid child"""
     tag_name = 'inkscape:grid'
+
+class Script(BaseElement):
+    """A javascript tag in SVG"""
+    tag_name = 'script'

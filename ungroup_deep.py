@@ -6,21 +6,21 @@ https://github.com/nikitakit/svg2sif/blob/master/synfig_prepare.py#L370
 for an example how to do the transform of parent to children.
 """
 
-__version__ = "0.2"  # Works but in terms of maturity, still unsure
-
-import simpletransform
 from lxml import etree
-from numpy import matrix
 
 import inkex
-from inkex import addNS
+from inkex.styles import Style
+from inkex.svg import SvgDocumentElement
+from inkex.generic import EffectExtension
+from inkex.elements import (
+    Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject
+)
 
 SVG_NS = "http://www.w3.org/2000/svg"
 INKSCAPE_NS = "http://www.inkscape.org/namespaces/inkscape"
 
 
-class Ungroup(inkex.Effect):
-
+class Ungroup(EffectExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-s", "--startdepth",
@@ -34,68 +34,8 @@ class Ungroup(inkex.Effect):
         self.arg_parser.add_argument("-k", "--keepdepth",
                                      type=int,
                                      dest="keepdepth", default=0,
-                                     help="levels of ungrouping to " +
+                                     help="levels of ungrouping to "\
                                           "leave untouched")
-
-    @staticmethod
-    def _get_dimension(s="1024"):
-        """Convert an SVG length string from arbitrary units to pixels"""
-        if s == "":
-            return 0
-        try:
-            last = int(s[-1])
-        except ValueError:
-            last = None
-
-        if type(last) == int:
-            return float(s)
-        elif s[-1] == "%":
-            return 1024
-        elif s[-2:] == "px":
-            return float(s[:-2])
-        elif s[-2:] == "pt":
-            return float(s[:-2]) * 1.33
-        elif s[-2:] == "em":
-            return float(s[:-2]) * 16
-        elif s[-2:] == "mm":
-            return float(s[:-2]) * 3.779
-        elif s[-2:] == "pc":
-            return float(s[:-2]) * 16
-        elif s[-2:] == "cm":
-            return float(s[:-2]) * 37.79
-        elif s[-2:] == "in":
-            return float(s[:-2]) * 96
-        else:
-            return 1024
-
-    def _merge_transform(self, node, transform):
-        """Propagate style and transform to remove inheritance
-        Originally from
-        https://github.com/nikitakit/svg2sif/blob/master/synfig_prepare.py#L370
-        """
-
-        # Compose the transformations
-        if node.tag == addNS("svg", "svg") and node.get("viewBox"):
-            vx, vy, vw, vh = [self._get_dimension(x)
-                              for x in node.get("viewBox").split()]
-            dw = self._get_dimension(node.get("width", vw))
-            dh = self._get_dimension(node.get("height", vh))
-            t = (
-                    "translate(%f, %f) scale(%f, %f)" %
-                    (-vx, -vy, dw / vw, dh / vh)
-            )
-            this_transform = simpletransform.parseTransform(
-                    t, transform)
-            this_transform = simpletransform.parseTransform(
-                    node.get("transform"), this_transform)
-            del node.attrib["viewBox"]
-        else:
-            this_transform = simpletransform.parseTransform(node.get(
-                    "transform"), transform)
-
-        # Set the node's transform attrib
-        node.set("transform",
-                 simpletransform.formatTransform(this_transform))
 
     @staticmethod
     def _merge_style(node, style):
@@ -105,7 +45,7 @@ class Ungroup(inkex.Effect):
         """
 
         # Compose the style attribs
-        this_style = dict(inkex.Style.parse_str(node.get("style", "")))
+        this_style = node.style
         remaining_style = {}  # Style attributes that are not propagated
 
         # Filters should remain on the top ancestor
@@ -127,16 +67,13 @@ class Ungroup(inkex.Effect):
                 this_style[attrib] = node.get(attrib)
                 del node.attrib[attrib]
 
-        if (node.tag == addNS("svg", "svg")
-                or node.tag == addNS("g", "svg")
-                or node.tag == addNS("a", "svg")
-                or node.tag == addNS("switch", "svg")):
+        if isinstance(node, (SvgDocumentElement, Anchor, Group, Switch)):
             # Leave only non-propagating style attributes
-            if len(remaining_style) == 0:
+            if not remaining_style:
                 if "style" in node.keys():
                     del node.attrib["style"]
             else:
-                node.set("style", str(inkex.Style(remaining_style)))
+                node.set("style", str(Style(remaining_style)))
 
         else:
             # This element is not a container
@@ -145,30 +82,27 @@ class Ungroup(inkex.Effect):
             this_style.update(remaining_style)
 
             # Set the element's style attribs
-            node.set("style", str(inkex.Style(this_style)))
+            node.set("style", str(Style(this_style)))
 
     def _merge_clippath(self, node, clippathurl):
 
         if clippathurl:
-            node_transform = simpletransform.parseTransform(
-                    node.get("transform"))
+            node_transform = node.transform
             if node_transform:
                 # Clip-paths on nodes with a transform have the transform
                 # applied to the clipPath as well, which we don't want.  So, we
                 # create new clipPath element with references to all existing
                 # clippath subelements, but with the inverse transform applied
-                inverse_node_transform = simpletransform.formatTransform(
-                        self._invert_transform(node_transform))
                 new_clippath = etree.SubElement(
-                        self.xpathSingle('//svg:defs'), 'clipPath',
-                        {'clipPathUnits': 'userSpaceOnUse',
-                         'id': self.svg.get_unique_id("clipPath")})
-                clippath = self.getElementById(clippathurl[5:-1])
+                    self.svg.getElement('//svg:defs'), 'clipPath',
+                    {'clipPathUnits': 'userSpaceOnUse',
+                     'id': self.svg.get_unique_id("clipPath")})
+                clippath = self.svg.getElementById(clippathurl[5:-1])
                 for c in clippath.iterchildren():
                     etree.SubElement(
                             new_clippath, 'use',
                             {inkex.addNS('href', 'xlink'): '#' + c.get("id"),
-                             'transform': inverse_node_transform,
+                             'transform': str(-node_transform),
                              'id': self.svg.get_unique_id("use")})
 
                 # Set the clippathurl to be the one with the inverse transform
@@ -178,38 +112,31 @@ class Ungroup(inkex.Effect):
             # Find end of clip-path chain and add reference there
             node_clippathurl = node.get("clip-path")
             while node_clippathurl:
-                node = self.getElementById(node_clippathurl[5:-1])
+                node = self.svg.getElementById(node_clippathurl[5:-1])
                 node_clippathurl = node.get("clip-path")
             node.set("clip-path", clippathurl)
-
-    @staticmethod
-    def _invert_transform(transform):
-        # duplicate list to avoid modifying it
-        return matrix(transform + [[0, 0, 1]]).I.tolist()[0:2]
 
     # Flatten a group into same z-order as parent, propagating attribs
     def _ungroup(self, node):
         node_parent = node.getparent()
         node_index = list(node_parent).index(node)
+        node_style = node.style
 
-        if node.get("style") is not None:
-            node_style = dict(inkex.Style.parse_str(node.get("style")))
-        else:
-            node_style = ""
-
-        node_transform = simpletransform.parseTransform(node.get("transform"))
+        node_transform = node.transform
         node_clippathurl = node.get('clip-path')
-        for c in reversed(list(node)):
-            self._merge_transform(c, node_transform)
+        for child in reversed(list(node)):
+
+            child.transform *= node_transform
+
             if node.get("style") is not None:
-                self._merge_style(c, node_style)
-            self._merge_clippath(c, node_clippathurl)
-            node_parent.insert(node_index, c)
+                self._merge_style(child, node_style)
+            self._merge_clippath(child, node_clippathurl)
+            node_parent.insert(node_index, child)
         node_parent.remove(node)
 
     # Put all ungrouping restrictions here
     def _want_ungroup(self, node, depth, height):
-        if (node.tag == addNS("g", "svg") and
+        if (isinstance(node, Group) and
                 node.getparent() is not None and
                 height > self.options.keepdepth and
                 self.options.startdepth <= depth <=
@@ -236,21 +163,18 @@ class Ungroup(inkex.Effect):
             # Recursion path
             if height is None:
                 # Don't enter non-graphical portions of the document
-                if (node.tag == addNS("namedview", "sodipodi")
-                        or node.tag == addNS("defs", "svg")
-                        or node.tag == addNS("metadata", "svg")
-                        or node.tag == addNS("foreignObject", "svg")):
+                if isinstance(node, (NamedView, Defs, Metadata, ForeignObject)):
                     q.pop()
 
                 # Base case: Leaf node
-                if node.tag != addNS("g", "svg") or not len(node):
+                if not isinstance(node, Group) or not list(node):
                     current['height'] = 0
 
                 # Recursive case: Group element with children
                 else:
                     depth += 1
-                    for c in node.iterchildren():
-                        q.append({'node': c, 'prev': current,
+                    for child in node.iterchildren():
+                        q.append({'node': child, 'prev': current,
                                   'depth': depth, 'height': None})
 
             # Return path
@@ -270,12 +194,12 @@ class Ungroup(inkex.Effect):
                 q.pop()
 
     def effect(self):
-        if len(self.svg.selected):
-            for (key, elem) in self.svg.selected.items():
-                self._deep_ungroup(elem)
+        if self.svg.selected:
+            for node in self.svg.selected.values():
+                self._deep_ungroup(node)
         else:
-            for elem in self.document.getroot():
-                self._deep_ungroup(elem)
+            for node in self.document.getroot():
+                self._deep_ungroup(node)
 
 
 if __name__ == '__main__':

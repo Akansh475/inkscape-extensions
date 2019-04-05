@@ -22,6 +22,7 @@
 
 import cmath
 import copy
+import itertools
 import math
 import os
 import random
@@ -100,23 +101,28 @@ def reversePath(sp):
     return rp
 
 
-def flipLeftRight(sp, width):
-    import simplepath
-    for cmd, params in sp:
-        defs = simplepath.pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'x':
-                params[i] = width - params[i]
+def _lr_cb(p, width):
+    p.scale(-1, 1)
+    p.translate(width, 0)
 
+
+def _tp_cb(p, height):
+    p.scale(1, -1)
+    p.translate(0, height)
+
+def flip(sp, cb, param):
+    # print('flip before +' + str(sp))
+    p = Path(sp)
+    cb(p, param)
+    sp.clear()
+    sp.extend([pp.cmd, list(itertools.chain.from_iterable(list(x) for x in pp.points))] for pp in p)
+    # print('flip after +' + str(sp))
+
+def flipLeftRight(sp, width):
+    return flip(sp, _lr_cb, width)
 
 def flipTopBottom(sp, height):
-    import simplepath
-    for cmd, params in sp:
-        defs = simplepath.pathdefs[cmd]
-        for i in range(defs[1]):
-            if defs[3][i] == 'y':
-                params[i] = height - params[i]
-
+    return flip(sp, _tp_cb, height)
 
 def solveQuadratic(a, b, c):
     det = b * b - 4.0 * a * c

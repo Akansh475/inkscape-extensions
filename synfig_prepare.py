@@ -27,6 +27,8 @@ from subprocess import PIPE, Popen
 
 import simplepath
 import simpletransform
+from inkex.transforms import Transform, BoundingBox, cubic_extrema
+
 from lxml import etree
 
 import inkex
@@ -391,7 +393,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
         this_transform = simpletransform.parseTransform(node.get("transform"), this_transform)
         del node.attrib["viewBox"]
     else:
-        this_transform = simpletransform.parseTransform(node.get("transform"), parent_transform)
+        this_transform = Transform(parent_transform) * node.transform
 
     # Compose the style attribs
     this_style = dict(inkex.Style.parse_str(node.get("style", "")))

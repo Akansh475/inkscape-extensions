@@ -27,6 +27,7 @@ Provide some documentation to existing extensions about why they're failing.
 
 import os
 import sys
+import traceback
 import warnings
 from argparse import ArgumentParser
 
@@ -216,7 +217,7 @@ def deprecate(func):
     """
 
     def _inner(*args, **kwargs):
-        warnings.warn('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), DeprecationWarning)
+        warnings.warn('{0.__module__}.{0.__name__} -> {0.__doc__} ; {1}'.format(func, traceback.format_stack()), category=DeprecationWarning)
         return func(*args, **kwargs)
 
     return _inner

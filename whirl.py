@@ -35,7 +35,7 @@ class Whirl(inkex.Effect):
                         help="direction of rotation")
     def effect(self):
         view_center = self.svg.get_current_layer().get_center_position()
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             rotation = -1
             if self.options.rotation == True:
                 rotation = 1

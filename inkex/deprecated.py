@@ -217,7 +217,10 @@ def deprecate(func):
     """
 
     def _inner(*args, **kwargs):
-        warnings.warn('{0.__module__}.{0.__name__} -> {0.__doc__} ; {1}'.format(func, traceback.format_stack()), category=DeprecationWarning)
+        tbd = traceback.format_stack() if os.environ.get('DEP_TRACE', False) else ''
+        warnings.warn(
+            '{0.__module__}.{0.__name__} -> {0.__doc__} ; {1}'.format(func, tbd),
+            stacklevel=2, category=DeprecationWarning)
         return func(*args, **kwargs)
 
     return _inner

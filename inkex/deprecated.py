@@ -45,6 +45,17 @@ SIMPLE_DIR = os.path.join(INKEX_DIR, 'deprecated-simple')
 if os.path.isdir(SIMPLE_DIR):
     sys.path.append(SIMPLE_DIR)
 
+try:
+    DEPRICATION_LEVEL = int(os.environ.get('INKEX_DEPRICATION_LEVEL', 1))
+except ValueError:
+    DEPRICATION_LEVEL = 1
+
+def _depricated(msg, stack=2):
+    """Internal method for raising a deprication warning"""
+    if DEPRICATION_LEVEL > 1:
+        msg += ' ; ' + traceback.format_stack()
+    if DEPRICATION_LEVEL:
+        warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 
 class DeprecatedEffect(object):
     """An Inkscape effect, takes SVG in and outputs SVG, providing a deprecated layer"""
@@ -64,8 +75,9 @@ class DeprecatedEffect(object):
     @classmethod
     def _deprecated(cls, name, msg=_('{} is deprecated and should be removed'), stack=3):
         """Give the user a warning about their extension using a deprecated API"""
-        msg = msg.format('Effect.' + name, cls=cls.__module__ + '.' + cls.__name__)
-        warnings.warn(msg, DeprecationWarning, stacklevel=stack)
+        _depricated(
+            msg.format('Effect.' + name, cls=cls.__module__ + '.' + cls.__name__),
+            stack=stack)
 
     @property
     def OptionParser(self):
@@ -217,12 +229,8 @@ def deprecate(func):
     """
 
     def _inner(*args, **kwargs):
-        tbd = traceback.format_stack() if os.environ.get('DEP_TRACE', False) else ''
-        warnings.warn(
-            '{0.__module__}.{0.__name__} -> {0.__doc__} ; {1}'.format(func, tbd),
-            stacklevel=2, category=DeprecationWarning)
+        _depricated('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), stack=2)
         return func(*args, **kwargs)
-
     return _inner
 
 class DepricatedDict(dict):

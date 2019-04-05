@@ -46,15 +46,15 @@ if os.path.isdir(SIMPLE_DIR):
     sys.path.append(SIMPLE_DIR)
 
 try:
-    DEPRICATION_LEVEL = int(os.environ.get('INKEX_DEPRICATION_LEVEL', 1))
+    DEPRECATION_LEVEL = int(os.environ.get('INKEX_DEPRECATION_LEVEL', 1))
 except ValueError:
-    DEPRICATION_LEVEL = 1
+    DEPRECATION_LEVEL = 1
 
 def _depricated(msg, stack=2):
     """Internal method for raising a deprication warning"""
-    if DEPRICATION_LEVEL > 1:
+    if DEPRECATION_LEVEL > 1:
         msg += ' ; ' + traceback.format_stack()
-    if DEPRICATION_LEVEL:
+    if DEPRECATION_LEVEL:
         warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 
 class DeprecatedEffect(object):

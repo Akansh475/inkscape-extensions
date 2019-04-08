@@ -17,4 +17,4 @@ class TestDxfInputBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     def _apply_compare_filters(self, data):
         """Remove the full pathnames"""
         data = super(TestDxfInputBasic, self)._apply_compare_filters(data)
-        return data.replace(os.path.join(TEST_ROOT, 'data') + '/', '')
+        return data.replace((os.path.join(TEST_ROOT, 'data') + '/').encode('utf-8'), b'')

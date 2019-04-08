@@ -2,9 +2,9 @@
 # coding=utf-8
 from extrude import Extrude
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentStyleAndPath
+from tests.base.filters import CompareOrderIndependentStyleAndPath, CompareWithPathSpace
 
 class ExtrudeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Extrude
     comparisons = [('--id=p1', '--id=p2')]
-    compare_filters = [CompareOrderIndependentStyleAndPath()]
+    compare_filters = [CompareWithPathSpace(), CompareOrderIndependentStyleAndPath()]

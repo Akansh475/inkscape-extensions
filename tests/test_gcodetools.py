@@ -2,7 +2,6 @@
 
 from gcodetools import Gcodetools
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentBytes
 
 class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Gcodetools
@@ -21,4 +20,3 @@ class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
         '--add-numeric-suffix-to-filename=true', '--directory=/home',
         '--Zsafe=5', '--unit=G21 (All units in mm)', '--postprocessor= ',
         '--create-log=false')]
-    compare_filters = [CompareOrderIndependentBytes()]

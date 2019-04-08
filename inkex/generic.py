@@ -23,8 +23,10 @@ This provides the basic generic types of extensions which most writers should
 use in their code. See below for the different types.
 """
 
+import types
+
 from .utils import errormsg
-from .elements import Group
+from .elements import BaseElement, Group
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin
 from .transforms import TranslateTransform
 from .deprecated import DeprecatedEffect
@@ -72,16 +74,20 @@ class GenerateExtension(EffectExtension):
         raise NotImplementedError("Generate extensions must provide generate()")
 
     def effect(self):
+
         layer = self.svg.get_current_layer()
-        (pos_x, pos_y) = layer.get_center_position()
+        (pos_x, pos_y) = self.svg.get_center_position()
         if pos_x is None:
             pos_x = 0
         if pos_y is None:
             pos_y = 0
         fragment = self.generate()
-        if fragment is not None:
+        if isinstance(fragment, types.GeneratorType):
             container = Group(transform=str(TranslateTransform(pos_x, pos_y)))
-            container.append(fragment)
             layer.append(container)
+            for child in fragment:
+                container.append(child)
+        elif isinstance(fragment, BaseElement):
+            layer.append(fragment)
         else:
             errormsg("Nothing was generated\n")

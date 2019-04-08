@@ -233,6 +233,7 @@ class PathElement(BaseElement):
         """Apply the internal transformation to this node and delete"""
         if 'transform' in self.attrib:
             self.path.transform(self.transform)
+            self.set('d', str(self.path))
             self.set('transform', Transform())
 
     @property

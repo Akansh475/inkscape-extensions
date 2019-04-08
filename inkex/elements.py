@@ -39,6 +39,10 @@ class BaseElement(etree.ElementBase):
     tag_name = 'none'
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
+    WRAPPED_ATTRS = {
+        'transform': Transform,
+        'style': Style,
+    }
 
     @classmethod
     def _subclasses(cls):
@@ -49,6 +53,47 @@ class BaseElement(etree.ElementBase):
             yield subcls
             for subsubcls in subcls._subclasses():
                 yield subsubcls
+
+    def __getattr__(self, name):
+        """Get the attribute, but load it if it's not available yet"""
+        if name in self.WRAPPED_ATTRS:
+            # The reason we do this here and not in _init is because lxml
+            # is inconsistant about when elements are initialised.
+            # So we make this a lazy property.
+            value = self.WRAPPED_ATTRS[name](self.attrib.get(name, None))
+            setattr(self, name, value)
+            return value
+        super(BaseElement, self).__getattr__(name)
+
+    def unwrap_attributes(self, *args, **kwargs):
+        """Get the classes back out and save them to the attrib structure"""
+        for child in self:
+            if hasattr(child, 'unwrap_attributes'):
+                child.unwrap_attributes()
+
+        for name in self.WRAPPED_ATTRS:
+            stored = getattr(self, name)
+            if stored:
+                self.set(name, str(stored))
+            else:
+                self.attrib.pop(name, None)
+
+    def get(self, name, default=None):
+        """Get element attribute named, with addNS support."""
+        if name in self.WRAPPED_ATTRS:
+            value = getattr(self, name, None)
+            # We check the boolean nature of the value, because empty
+            # transformations and style attributes are equiv to not-existing
+            return str(value) if value else default
+        return super(BaseElement, self).get(addNS(name), default)
+
+    def set(self, name, value):
+        """Set element attribute named, with addNS support."""
+        if name in self.WRAPPED_ATTRS:
+            # Always keep the local wrapped class up to date.
+            setattr(self, name, self.WRAPPED_ATTRS[name](value))
+            value = str(getattr(self, name))
+        return super(BaseElement, self).set(addNS(name), value)
 
     @property
     def path(self):
@@ -75,14 +120,6 @@ class BaseElement(etree.ElementBase):
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
-    def get(self, name, default=None):
-        """Get element attribute named, with addNS support."""
-        return super(BaseElement, self).get(addNS(name), default)
-
-    def set(self, name, value):
-        """Set element attribute named, with addNS support."""
-        return super(BaseElement, self).set(addNS(name), value)
-
     @property
     def root(self):
         """Get the root document element from any element descendent"""
@@ -90,16 +127,11 @@ class BaseElement(etree.ElementBase):
             return self.getparent().root
         return self
 
-    transform = property(lambda self: Transform(self.get('transform', None)),
-                         lambda self, matrix: self.set('transform', str(Transform(matrix))))
-
     def composed_transform(self):
         """Calculate every transform down to the root document node"""
         if self.getparent() is not None:
             return self.transform * self.getparent().composed_transform()
         return self.transform
-
-    style = property(lambda self: Style(self.get('style', None)))
 
     def composed_style(self):
         """Calculate the final styles applied to this element"""
@@ -192,7 +224,7 @@ class PathElement(BaseElement):
         """Apply the internal transformation to this node and delete"""
         if 'transform' in self.attrib:
             self.path.transform(self.transform)
-            del self.attrib['transform']
+            self.set('transform', Transform())
 
     @property
     def original_path(self):

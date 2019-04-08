@@ -42,6 +42,13 @@ class CoreElementTestCase(ElementTestCase):
         self.svg.set_selected('X', 'Y', 'Z', 'A')
         self.assertEqual(tuple(self.svg.get_z_selected()), ('A',))
 
+    def test_transform(self):
+        """In-place modified transforms are retained"""
+        elem = self.svg.getElementById('D')
+        self.assertEqual(str(elem.transform), 'translate(30, 10)')
+        elem.transform.add_translate(-10, 10)
+        self.assertEqual(str(elem.transform), 'translate(20, 20)')
+
 class PathElementTestCase(ElementTestCase):
     tag = 'path'
 

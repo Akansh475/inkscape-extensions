@@ -164,6 +164,11 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
 
     def save(self, stream):
         """Save the svg document to the given stream"""
+        # Some SVG attributes are wrapped in classes (for ease of use)
+        # so we need to unwrap them all and propergate their values
+        # into the attribute tree. (there's no way in lxml, to build
+        # this functionality into the BaseElement class)
+        self.svg.unwrap_attributes()
         document = etree.tostring(self.document)
         try:
             stream.write(document)

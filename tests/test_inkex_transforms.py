@@ -86,6 +86,14 @@ class TransformTest(TestCase):
         """Test making rotate specific items"""
         self.assertEqual(str(RotateTransform(45, 10, 10)), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
+    def test_add_transform(self):
+        """Quickly add known transforms"""
+        tr = Transform()
+        tr.add_scale(5.0, 1.0)
+        self.assertEqual(str(tr), 'scale(5, 1)')
+        tr.add_translate(10, 10)
+        self.assertEqual(str(tr), 'matrix(5 0 0 1 50 10)')
+
 
 class ScaleTest(TestCase):
     """Test scale class"""

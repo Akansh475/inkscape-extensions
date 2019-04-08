@@ -7,11 +7,10 @@ Test elements extra logic from svg xml lxml custom classes.
 from lxml import etree
 from lxml import objectify
 
-from inkex.transforms import Transform
+from inkex.transforms import Transform, ScaleTransform
 from inkex.styles import Style
 from tests.base import TestCase
 from tests.base.svg import svg_file
-
 
 class ElementTestCase(TestCase):
     """Base element test case"""
@@ -53,6 +52,15 @@ class CoreElementTestCase(ElementTestCase):
         elem.transform.add_translate(-10, 10)
         self.assertEqual(str(elem.transform), 'translate(20, 20)')
 
+    def test_scale(self):
+        """In-place scaling from blank transform"""
+        elem = self.svg.getElementById('F')
+        self.assertEqual(elem.transform, Transform())
+        self.assertEqual(elem.get('transform'), None)
+        elem.transform.add_scale(1.0666666666666667, 1.0666666666666667)
+        self.assertEqual(elem.get('transform'), ScaleTransform(1.06667))
+        self.assertIn(b'transform', etree.tostring(elem))
+
     def test_in_place_updates(self):
         """Do style and transforms update correctly"""
         elem = self.svg.getElementById('D')
@@ -62,7 +70,6 @@ class CoreElementTestCase(ElementTestCase):
         elem.transform = Transform()
         self.assertEqual(elem.transform, Transform())
         self.assertEqual(elem.get('transform'), None)
-        elem.unwrap_attributes()
         self.assertNotIn(b'transform', etree.tostring(elem))
 
 class PathElementTestCase(ElementTestCase):
@@ -111,7 +118,7 @@ class RectTest(ElementTestCase):
         """Composed transformation"""
         self.assertEqual(self.elem.transform, Transform('rotate(16.097889)'))
         self.assertEqual(str(self.elem.composed_transform()),
-                         'matrix(0.754465 -0.863362 1.13818 1.31905 -461.593 215.193)')
+                         'matrix(0.754465 -0.863362 1.13818 1.31905 -461.592 215.193)')
 
     def test_compose_stylesheet(self):
         """Test finding the composed stylesheet for the shape"""

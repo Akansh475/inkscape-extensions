@@ -60,23 +60,32 @@ class BaseElement(etree.ElementBase):
             # The reason we do this here and not in _init is because lxml
             # is inconsistant about when elements are initialised.
             # So we make this a lazy property.
-            value = self.WRAPPED_ATTRS[name](self.attrib.get(name, None))
+            def _set_attr(new_item):
+                if new_item:
+                    self.set(name, str(new_item))
+                else:
+                    self.attrib.pop(name, None)
+
+            value = self.WRAPPED_ATTRS[name](self.attrib.get(name, None), callback=_set_attr)
             setattr(self, name, value)
             return value
-        super(BaseElement, self).__getattr__(name)
+        raise AttributeError("Can't find attribute {}".format(name))
 
-    def unwrap_attributes(self, *args, **kwargs):
-        """Get the classes back out and save them to the attrib structure"""
-        for child in self:
-            if hasattr(child, 'unwrap_attributes'):
-                child.unwrap_attributes()
-
-        for name in self.WRAPPED_ATTRS:
-            stored = getattr(self, name)
-            if stored:
-                self.set(name, str(stored))
+    def __setattr__(self, name, value):
+        """Set the attribute, update the attrib if needed"""
+        if name in self.WRAPPED_ATTRS:
+            # Don't call hasattr or getattr (infinate loop)
+            if name in self.__dict__:
+                del self.__dict__[name].callback
+            # Don't call self.set or self.get (infinate loop)
+            if value:
+                self.attrib[name] = str(value)
             else:
                 self.attrib.pop(name, None)
+            if name in self.__dict__:
+                delattr(self, name)
+        else:
+            super(BaseElement, self).__setattr__(name, value)
 
     def get(self, name, default=None):
         """Get element attribute named, with addNS support."""

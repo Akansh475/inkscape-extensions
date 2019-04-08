@@ -54,7 +54,8 @@ class Transform(object):
     """
     TRM = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
 
-    def __init__(self, matrix=None):
+    def __init__(self, matrix=None, callback=None):
+        self.callback = None
         self.matrix = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
         if matrix is not None:
             # We parse a given string as an svg transformation instruction
@@ -71,6 +72,8 @@ class Transform(object):
                 self.matrix = tuple(matrix[::2]), tuple(matrix[1::2])
             else:
                 raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+        # Set callback last, so it doesn't kick off just setting up the internal value
+        self.callback = callback
 
     # These provide quick access to the svg matrix:
     #
@@ -157,6 +160,8 @@ class Transform(object):
     def __imul__(self, matrix):
         """In place multiplication of transformat matricies"""
         self.matrix = (self * matrix).matrix
+        if self.callback is not None:
+            self.callback(self)
         return self
 
     def __neg__(self):

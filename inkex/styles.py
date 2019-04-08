@@ -27,7 +27,8 @@ from collections import OrderedDict
 class Style(OrderedDict):
     """A list of style directives"""
 
-    def __init__(self, style=None, **kw):
+    def __init__(self, style=None, callback=None, **kw):
+        self.callback = callback
         style = style or kw
         if isinstance(style, str):
             style = self.parse_str(style)
@@ -58,4 +59,6 @@ class Style(OrderedDict):
     def __iadd__(self, other):
         """Add style to this style, the same as style.update(dict)"""
         self.update(Style(other))
+        if self.callback is not None:
+            self.callback(self)
         return self

@@ -431,10 +431,5 @@ class WebSlicer_Export(WebSlicerMixin, OutputExtension):
             code += '}\n'
         return code
 
-    def output(self):
-        # Cancel document serialization to stdout
-        pass
-
-
 if __name__ == '__main__':
     WebSlicer_Export().run()

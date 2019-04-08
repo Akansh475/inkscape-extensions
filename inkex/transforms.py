@@ -84,6 +84,10 @@ class Transform(object):
     e = property(lambda self: self.matrix[0][2])  # pylint: disable=invalid-name
     f = property(lambda self: self.matrix[1][2])  # pylint: disable=invalid-name
 
+    def __bool__(self):
+        return self != Transform()
+    __nonzero__ = __bool__
+
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg sixtlet"""
         self.__imul__(Transform(args))
@@ -119,6 +123,8 @@ class Transform(object):
         """Format the given matrix into a string repr for svg"""
         sixlet = tuple(self.to_sixlet())
         if sixlet[:4] == (1, 0, 0, 1):
+            if sixlet[4:] == (0, 0):
+                return ""
             return "translate({:.6g}, {:.6g})".format(*sixlet[4:])
         elif sixlet[4:] == (0, 0) and sixlet[1:3] == (0, 0):
             return "scale({:.6g}, {:.6g})".format(sixlet[0], sixlet[3])

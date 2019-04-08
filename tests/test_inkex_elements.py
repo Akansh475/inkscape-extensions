@@ -4,7 +4,11 @@
 Test elements extra logic from svg xml lxml custom classes.
 """
 
+from lxml import etree
+from lxml import objectify
+
 from inkex.transforms import Transform
+from inkex.styles import Style
 from tests.base import TestCase
 from tests.base.svg import svg_file
 
@@ -48,6 +52,18 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(str(elem.transform), 'translate(30, 10)')
         elem.transform.add_translate(-10, 10)
         self.assertEqual(str(elem.transform), 'translate(20, 20)')
+
+    def test_in_place_updates(self):
+        """Do style and transforms update correctly"""
+        elem = self.svg.getElementById('D')
+        self.assertEqual(type(elem.transform), Transform)
+        self.assertEqual(type(elem.style), Style)
+        self.assertTrue(elem.transform)
+        elem.transform = Transform()
+        self.assertEqual(elem.transform, Transform())
+        self.assertEqual(elem.get('transform'), None)
+        elem.unwrap_attributes()
+        self.assertNotIn(b'transform', etree.tostring(elem))
 
 class PathElementTestCase(ElementTestCase):
     tag = 'path'

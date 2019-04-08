@@ -102,6 +102,8 @@ class BaseElement(etree.ElementBase):
             # Always keep the local wrapped class up to date.
             setattr(self, name, self.WRAPPED_ATTRS[name](value))
             value = str(getattr(self, name))
+            if not value:
+                return
         return super(BaseElement, self).set(addNS(name), value)
 
     @property

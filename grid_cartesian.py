@@ -30,6 +30,7 @@ from math import log
 from lxml import etree
 
 import inkex
+from inkex.generic import GenerateExtension
 from inkex.elements import Group
 
 
@@ -49,9 +50,9 @@ def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
     etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
 
 
-class GridCartesian(inkex.GenerateExtension):
+class GridCartesian(GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(GridCartesian, self).__init__()
         self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3)
         self.arg_parser.add_argument("--border_th_unit", dest="border_th_unit", default="cm")
         self.arg_parser.add_argument("--tab", dest="tab", default="x_tab")
@@ -100,6 +101,9 @@ class GridCartesian(inkex.GenerateExtension):
 
         g_attribs = {inkex.addNS('label', 'inkscape'): 'GridCartesian:X' + str(self.options.x_divs) + ':Y' + str(self.options.y_divs)}
         grid = Group(**g_attribs)
+
+        (pos_x, pos_y) = self.svg.get_center_position()
+        grid.transform.add_translate(pos_x - xmax / 2.0, pos_y - ymax / 2.0)
 
         # Group for major x gridlines
         g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorXGridlines'}

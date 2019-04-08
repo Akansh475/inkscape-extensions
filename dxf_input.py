@@ -33,6 +33,7 @@ from io import StringIO
 from lxml import etree
 
 import inkex
+from inkex.generic import InputExtension
 
 if sys.version_info[0] < 3:
     from urllib import quote
@@ -405,7 +406,7 @@ colors = {1: '#FF0000', 2: '#FFFF00', 3: '#00FF00', 4: '#00FFFF', 5: '#0000FF', 
           251: '#5B5B5B', 252: '#848484', 253: '#ADADAD', 254: '#D6D6D6', 255: '#FFFFFF'}
 
 
-class DxfInput(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
+class DxfInput(InputExtension):
     def __init__(self):
         super(DxfInput, self).__init__()
         p = self.arg_parser

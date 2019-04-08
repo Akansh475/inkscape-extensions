@@ -96,7 +96,7 @@ class RackGear(GenerateExtension):
 
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
-        return PathElement(style=str(inkex.Style(style)), d=str(path))
+        yield PathElement(style=str(inkex.Style(style)), d=str(path))
 
 if __name__ == '__main__':
     RackGear().run()

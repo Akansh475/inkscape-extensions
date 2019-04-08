@@ -50,7 +50,7 @@ class RTreeTurtle(inkex.Effect):
              'fill': 'none'}
         t = pturtle.pTurtle()
         t.pu()
-        point = self.svg.get_current_layer().get_center_position()
+        point = self.svg.get_center_position()
         t.setpos(point)
         t.pd()
         t.rtree(self.options.size, self.options.minimum, self.options.pentoggle)

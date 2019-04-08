@@ -43,8 +43,7 @@ class InsertBarcode(GenerateExtension):
             dest="text", default='', help="Text to print on barcode")
 
     def generate(self):
-        layer = self.svg.get_current_layer()
-        (pos_x, pos_y) = layer.get_center_position()
+        (pos_x, pos_y) = self.svg.get_center_position()
 
         return get_barcode(
             self.options.type,

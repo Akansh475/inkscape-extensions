@@ -23,13 +23,15 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 from subprocess import PIPE, Popen
 
 import inkex
-from inkex import Transform
+from inkex.paths import Path
+from inkex.elements import PathElement, Group
+from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 from inkex.localize import _
 
 X, Y = range(2)
 
 try:
-    from numpy import np
+    import numpy as np
     import numpy.linalg as lin
 except:
     np = None
@@ -59,39 +61,35 @@ class Project(inkex.Effect):
             viewBox2 = viewBox.split(',')
             if len(viewBox2) < 4:
                 viewBox2 = viewBox.split(' ')
-            scale *= self.svg.unittouu(self.addDocumentUnit(viewBox2[3])) / h
-        obj = self.selected[self.options.ids[0]]
-        envelope = self.selected[self.options.ids[1]]
+            scale *= self.svg.unittouu(self.svg.add_unit(viewBox2[3])) / h
+        obj = self.svg.selected[self.options.ids[0]]
+        envelope = self.svg.selected[self.options.ids[1]]
         if obj.get(inkex.addNS('type', 'sodipodi')):
             return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type', 'sodipodi'))))
 
-        if obj.tag == inkex.addNS('path', 'svg') or obj.tag == inkex.addNS('g', 'svg'):
-            if envelope.tag == inkex.addNS('path', 'svg'):
-                mat = inkex.composeParents(envelope, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-                path = inkex.parseCubicPath(envelope.get('d'))
+        if isinstance(obj, (PathElement, Group)):
+            if isinstance(envelope, PathElement):
+                path = envelope.path.transform(envelope.composed_transform())
+                path = parseCubicPath(str(path))
+
                 if len(path) < 1 or len(path[0]) < 4:
                     return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
-                # XXX New API needed for applying transforms to paths
-                #simpletransform.applyTransformToPath(mat, path)
+
                 dp = np.zeros((4, 2), dtype=np.float64)
                 for i in range(4):
                     dp[i][0] = path[0][i][1][0]
                     dp[i][1] = path[0][i][1][1]
 
                 # query inkscape about the bounding box of obj
-                q = {'x': 0, 'y': 0, 'width': 0, 'height': 0}
-                file = self.options.input_file
-                id = self.options.ids[0]
-                for query in q.keys():
-                    p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, id, file), shell=True, stdout=PIPE, stderr=PIPE)
-                    rc = p.wait()
-                    q[query] = scale * float(p.stdout.read())
-                    err = p.stderr.read()
+                bbox = obj.bounding_box()
 
-                sp = np.array([[q['x'], q['y'] + q['height']], [q['x'], q['y']], [q['x'] + q['width'],
-                                                                                  q['y']], [q['x'] + q['width'], q['y'] + q['height']]], dtype=np.float64)
+                sp = np.array([
+                    [bbox.left, bbox.bottom],
+                    [bbox.left, bbox.top],
+                    [bbox.right, bbox.top],
+                    [bbox.right, bbox.bottom]], dtype=np.float64)
             else:
-                if envelope.tag == inkex.addNS('g', 'svg'):
+                if isinstance(envelope, Group):
                     return inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
                 else:
                     return inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
@@ -128,18 +126,17 @@ class Project(inkex.Effect):
             if node.tag == inkex.addNS('g', 'svg'):
                 self.process_group(node, matrix)
 
-    def process_path(self, path, matrix):
-        mat = inkex.composeParents(path, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-        point = inkex.parseCubicPath(path.get('d'))
-        #simpletransform.applyTransformToPath(mat, point)
+    def process_path(self, element, matrix):
+        mat = element.composed_transform()
+        path = element.path.transform(mat)
+        point = parseCubicPath(str(path))
         for subs in point:
             for csp in subs:
                 csp[0] = self.project_point(csp[0], matrix)
                 csp[1] = self.project_point(csp[1], matrix)
                 csp[2] = self.project_point(csp[2], matrix)
-        mat = -Transform(mat)
-        #simpletransform.applyTransformToPath(mat, point)
-        path.set('d', str(inkex.Path(point)))
+        path = Path(unCubicSuperPath(point))
+        element.path = path.transform(-mat)
 
     def project_point(self, point, matrix):
         return [(point[X] * matrix[0][0] + point[Y] * matrix[0][1] + matrix[0][2]) /

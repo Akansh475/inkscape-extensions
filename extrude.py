@@ -23,6 +23,7 @@ from lxml import etree
 
 from inkex.localize import _
 
+from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 from inkex.elements import PathElement, Group
 from inkex.paths import Path
 import inkex
@@ -47,13 +48,10 @@ class Extrude(inkex.Effect):
             inkex.errormsg(_('Need at least 2 paths selected'))
             return
 
-        pts = [node.path for node in paths]
+        for path in paths:
+            path.apply_transform()
 
-        for i in range(len(paths)):
-            if 'transform' in paths[i].keys():
-                trans = paths[i].transform
-                # XXX Need new API for applying transform to a path
-                #simpletransform.applyTransformToPath(trans, pts[i])
+        pts = [parseCubicPath(node.path) for node in paths]
 
         for n1 in range(0, len(paths)):
             for n2 in range(n1 + 1, len(paths)):
@@ -61,7 +59,6 @@ class Extrude(inkex.Effect):
                 for i in range(0, min(map(len, pts))):
                     comp = []
                     for j in range(0, min(len(pts[n1][i]), len(pts[n2][i]))):
-                        print("COMP {}".format(pts))
                         comp.append([pts[n1][i][j][1][-2:], pts[n2][i][j][1][-2:]])
                     verts.append(comp)
 

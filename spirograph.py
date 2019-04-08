@@ -89,7 +89,7 @@ class Spirograph(SvgThroughMixin, InkscapeExtension):
 
             theta = i * scale
 
-            view_center = self.svg.get_current_layer().get_center_position()
+            view_center = self.svg.get_center_position()
             x = a * math.cos(theta + rotation) + \
                 self.options.penr * math.cos(ratio * theta + rotation) * flip + \
                 view_center[0]

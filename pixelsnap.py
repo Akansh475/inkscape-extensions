@@ -100,12 +100,7 @@ def elemtype(elem, matches):
 
 
 def invert_transform(transform):
-    transform = transform[:]  # duplicate list to avoid modifying it
-    transform += [[0, 0, 1]]
-    inverse = matrix(transform).I.tolist()
-    inverse.pop()
-    return inverse
-
+    return (-Transform(transform)).matrix
 
 def transform_point(transform, pt, inverse=False):
     """ Better than simpletransform.applyTransformToPoint,
@@ -170,7 +165,7 @@ class PixelSnapEffect(inkex.Effect):
         if stroke_width == 0:
             return 0  # if there's no stroke, no need to worry about the transform
 
-        transform = elem.transform * Transform(parent_transform)
+        transform = (elem.transform * Transform(parent_transform)).matrix
 
         if abs(abs(transform[0][0]) - abs(transform[1][1])) > (10 ** -Precision):
             raise TransformError("Selection contains non-symetric scaling")  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 2 functions, or maybe returning a tuple
@@ -199,6 +194,7 @@ class PixelSnapEffect(inkex.Effect):
 
     def snap_stroke(self, elem, parent_transform=None):
         transform = elem.transform * Transform(parent_transform)
+        transform = transform.matrix
 
         stroke_width = self.stroke_width(elem)
         if stroke_width == 0:
@@ -219,6 +215,8 @@ class PixelSnapEffect(inkex.Effect):
         # Doesn't take any parent_transform into account -- assumes
         # that the parent's transform has already been snapped.
         transform = elem.transform.matrix
+        transform = [list(transform[0]), list(transform[1])]
+
         if transform[0][1] or transform[1][0]:
             return  # if we've got any skew/rotation, get outta here
 
@@ -284,17 +282,16 @@ class PixelSnapEffect(inkex.Effect):
 
         path = elem.original_path.to_arrays()
         transform = elem.transform * Transform(parent_transform)
-        min_xy, max_xy = elem.bounding_box()
-
-        width = max_xy[0] - min_xy[0]
-        height = max_xy[1] - min_xy[1]
+        bbox = elem.bounding_box()
 
         # In case somebody tries to snap a 0-high element,
         # or a curve/arc with all nodes in a line, and of course
         # because we should always check for divide-by-zero!
-        if width == 0 or height == 0:
+        if not bbox.width or not bbox.height:
             return
 
+        width, height = bbox.width, bbox.height
+        min_xy, max_xy = bbox.minimum, bbox.maximum
         rescale = round(width) / width, round(height) / height
 
         min_xy = transform_point(transform, min_xy, inverse=True)
@@ -312,7 +309,8 @@ class PixelSnapEffect(inkex.Effect):
     def snap_path_pos(self, elem, parent_transform=None):
         path = elem.original_path.to_arrays()
         transform = elem.transform * Transform(parent_transform)
-        min_xy, max_xy = elem.bounding_box()
+        bbox = elem.bounding_box()
+        min_xy, max_xy = bbox.minimum, bbox.maximum
 
         fractional_offset = min_xy[0] - round(min_xy[0]), min_xy[1] - round(min_xy[1]) - self.document_offset
         fractional_offset = transform_dimensions(transform, fractional_offset[0], fractional_offset[1], inverse=True)
@@ -323,15 +321,15 @@ class PixelSnapEffect(inkex.Effect):
                                      path, i)
 
         path = str(inkex.Path(path))
-        if original_d in elem.attrib:
-            elem.attrib[original_d] = path
+        if elem.get('inkscape:original-d'):
+            elem.set('inkscape:original-d', path)
         else:
-            elem.attrib['d'] = path
+            elem.set('d', path)
 
     def snap_path(self, elem, parent_transform=None):
-        path = elem.original_path
+        path = elem.original_path.to_arrays()
 
-        transform = elem.transform * Transform(parent_transform)
+        transform = (elem.transform * Transform(parent_transform)).matrix
 
         if transform[0][1] or transform[1][0]:  # if we've got any skew/rotation, get outta here
             raise TransformError("Selection contains transformations with skew/rotation")
@@ -390,13 +388,13 @@ class PixelSnapEffect(inkex.Effect):
                                      path, i)
 
         path = str(inkex.Path(path))
-        if original_d in elem.attrib:
-            elem.attrib[original_d] = path
+        if elem.get('inkscape:original-d'):
+            elem.set('inkscape:original-d', path)
         else:
-            elem.attrib['d'] = path
+            elem.set('d', path)
 
     def snap_rect(self, elem, parent_transform=None):
-        transform = elem.transform * Transform(parent_transform)
+        transform = (elem.transform * Transform(parent_transform)).matrix
 
         if transform[0][1] or transform[1][0]:  # if we've got any skew/rotation, get outta here
             raise TransformError("Selection contains transformations with skew/rotation")

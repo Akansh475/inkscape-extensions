@@ -20,9 +20,10 @@
 
 import random
 
-from lxml import etree
-
 import inkex
+from inkex.generic import GenerateExtension
+from inkex.elements import PathElement
+from inkex.styles import Style
 from inkex import turtle as pturtle
 
 
@@ -30,7 +31,7 @@ def stripme(s):
     return s.strip()
 
 
-class LSystem(inkex.Effect):
+class LSystem(GenerateExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument("-o", "--order",
@@ -79,7 +80,7 @@ class LSystem(inkex.Effect):
 
     def __compose_path(self, string):
         self.turtle.pu()
-        point = self.svg.get_current_layer().get_center_position()
+        point = self.svg.get_center_position()
         self.turtle.setpos(point)
         self.turtle.pd()
         for c in string:
@@ -115,14 +116,13 @@ class LSystem(inkex.Effect):
                 level_string = level_string + c
         return level_string
 
-    def effect(self):
+    def generate(self):
         self.options.step = self.svg.unittouu(str(self.options.step) + 'px')
-        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
+        sty = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
              'stroke-opacity': '1.0', 'fill-opacity': '1.0',
              'stroke': '#000000', 'stroke-linecap': 'butt',
              'fill': 'none'}
-        attribs = {'style': str(inkex.Style(s)), 'd': self.iterate()}
-        etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'), attribs)
+        return PathElement(style=str(Style(sty)), d=self.iterate())
 
 
 if __name__ == '__main__':

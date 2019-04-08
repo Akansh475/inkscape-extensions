@@ -35,15 +35,30 @@ The spec can be found here: http://www.autodesk.com/techpubs/autocad/acadr14/dxf
 
 from __future__ import print_function
 
-import sys
 import dxf_templates
 import inkex
+from inkex.paths import Path
 from inkex.transforms import Transform
 from inkex.generic import OutputExtension
+from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 
 import numpy
 from numpy.linalg import solve
 
+def get_matrix(u, i, j):
+    if j == i + 2:
+        return (u[i]-u[i-1])*(u[i]-u[i-1])/(u[i+2]-u[i-1])/(u[i+1]-u[i-1])
+    elif j == i + 1:
+        return ((u[i]-u[i-1])*(u[i+2]-u[i])/(u[i+2]-u[i-1]) \
+             + (u[i+1]-u[i])*(u[i]-u[i-2])/(u[i+1]-u[i-2]))/(u[i+1]-u[i-1])
+    elif j == i:
+        return (u[i+1]-u[i])*(u[i+1]-u[i])/(u[i+1]-u[i-2])/(u[i+1]-u[i-1])
+    else:
+        return 0
+
+def get_fit(u, csp, col):
+    return (1-u)**3*csp[0][col] + 3*(1-u)**2*u*csp[1][col] \
+        + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
 
 class DxfOutlines(OutputExtension):
     def __init__(self):
@@ -194,39 +209,40 @@ class DxfOutlines(OutputExtension):
             d = node.get('d')
             if not d:
                 return
-            p = inkex.parseCubicPath(d)
+            p = parseCubicPath(d)
         elif node.tag == inkex.addNS('rect', 'svg'):
             x = float(node.get('x', 0))
             y = float(node.get('y', 0))
             width = float(node.get('width'))
             height = float(node.get('height'))
             d = "m %s,%s %s,%s %s,%s %s,%s z" % (x, y, width, 0, 0, height, -width, 0)
-            p = inkex.parseCubicPath(d)
+            p = parseCubicPath(d)
         elif node.tag == inkex.addNS('line', 'svg'):
             x1 = float(node.get('x1', 0))
             x2 = float(node.get('x2', 0))
             y1 = float(node.get('y1', 0))
             y2 = float(node.get('y2', 0))
             d = "M %s,%s L %s,%s" % (x1, y1, x2, y2)
-            p = inkex.parseCubicPath(d)
+            p = parseCubicPath(d)
         elif node.tag == inkex.addNS('circle', 'svg'):
             cx = float(node.get('cx', 0))
             cy = float(node.get('cy', 0))
             r = float(node.get('r'))
             d = "m %s,%s a %s,%s 0 0 1 %s,%s %s,%s 0 0 1 %s,%s z" % (cx + r, cy, r, r, -2 * r, 0, r, r, 2 * r, 0)
-            p = inkex.parseCubicPath(d)
+            p = parseCubicPath(d)
         elif node.tag == inkex.addNS('ellipse', 'svg'):
             cx = float(node.get('cx', 0))
             cy = float(node.get('cy', 0))
             rx = float(node.get('rx'))
             ry = float(node.get('ry'))
             d = "m %s,%s a %s,%s 0 0 1 %s,%s %s,%s 0 0 1 %s,%s z" % (cx + rx, cy, rx, ry, -2 * rx, 0, rx, ry, 2 * rx, 0)
-            p = inkex.parseCubicPath(d)
+            p = parseCubicPath(d)
         else:
             return
-        mat = Transform(mat) * node.transform
-        # XXX New API needed here for transform path
-        #simpletransform.applyTransformToPath(mat, p)
+
+        path = Path(unCubicSuperPath(p)).transform(Transform(mat) * node.transform)
+        p = parseCubicPath(str(path))
+
         for sub in p:
             for i in range(len(sub) - 1):
                 s = sub[i]

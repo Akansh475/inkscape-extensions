@@ -5289,7 +5289,8 @@ G01 Z1 (going to cutting z)\n""",
             y += 15 * len(v) if key != 'name' else 20 * len(v)
 
         bg.set('d', "m -20,-20 l 400,0 0,{:f} -400,0 z ".format(y + 50))
-        tools_group.set("transform", str(Transform([[1, 0, self.svg.get_center_position()[0] - 150], [0, 1, self.svg.get_center_position()[1]]])))
+        tools_group.transform.add_translate(*self.svg.get_center_position())
+        tools_group.transform.add_translate(-150, 0)
 
     ################################################################################
     #

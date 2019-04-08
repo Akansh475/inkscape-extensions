@@ -61,7 +61,7 @@ def draw_SVG_label_centred(x, y, string, font_size, name, parent):
 
 class GridPolar(inkex.GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(GridPolar, self).__init__()
         self.arg_parser.add_argument("--tab",
                                      type=str,
                                      dest="tab", default="circular_div")
@@ -145,6 +145,9 @@ class GridPolar(inkex.GenerateExtension):
         g_attribs = {inkex.addNS('label', 'inkscape'):
             'GridPolar:R' + str(self.options.r_divs) + ':A' + str(self.options.a_divs)}
         grid = Group(**g_attribs)
+
+        (pos_x, pos_y) = self.svg.get_center_position()
+        grid.transform.add_translate(pos_x, pos_y)
 
         dr = self.options.dr  # Distance between neighbouring circles
         dtheta = 2 * pi / self.options.a_divs_cent  # Angular change between adjacent radial lines at centre

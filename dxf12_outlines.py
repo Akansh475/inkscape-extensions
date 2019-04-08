@@ -25,8 +25,10 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import re
-
 import inkex
+from inkex.generic import OutputExtension
+from inkex.transforms import Transform
+from inkex.cubic_paths import parseCubicPath
 from inkex.bezier import cspsubdiv
 
 r12_header = ''' 0 
@@ -63,23 +65,18 @@ ENDSEC
 EOF'''
 
 
-class MyEffect(inkex.Effect):
-
+class DxfTwelve(OutputExtension):
+    """Create dxf12 output from the svg"""
     def __init__(self):
-
-        inkex.Effect.__init__(self)
-        self.dxf = ''
+        super(DxfTwelve, self).__init__()
         self.handle = 255
         self.flatness = 0.1
 
-    def output(self):
-        print(self.dxf)
-
-    def dxf_add(self, str):
-        self.dxf += str
+    def dxf_add(self, line):
+        self._stream.write(line)
 
     def dxf_insert_code(self, code, value):
-        self.dxf += code + "\n" + value + "\n"
+        self.dxf_add(code + "\n" + value + "\n")
 
     def dxf_line(self, layer, csp):
         self.dxf_insert_code('0', 'LINE')
@@ -113,7 +110,8 @@ class MyEffect(inkex.Effect):
         y = (bbox[2] + bbox[3]) / 2
         self.dxf_point(layer, x, y)
 
-    def effect(self):
+    def save(self, stream):
+        self._stream = stream
         self.dxf_insert_code('999', '"DXF R12 Output" (www.mydxf.blogspot.com)')
         self.dxf_add(r12_header)
 
@@ -127,26 +125,19 @@ class MyEffect(inkex.Effect):
             if layer is None:
                 layer = 'Layer 1'
 
-            # XXX New API needed here to transform a path to a matrix
-            #d = node.get('d')
-            #p = inkex.parseCubicPath(d)
+            node.transform *= Transform([[scale, 0, 0], [0, -scale, h * scale]])
+            node.apply_transform()
+            d = node.get('d')
+            p = parseCubicPath(d)
 
-            #t = node.get('transform')
-            #if t is not None:
-            #    m = simpletransform.parseTransform(t)
-            #    simpletransform.applyTransformToPath(m, p)
-
-            #m = [[scale, 0, 0], [0, -scale, h * scale]]
-            #simpletransform.applyTransformToPath(m, p)
-
-            #if re.search('drill$', layer, re.I) is None:
+            if re.search('drill$', layer, re.I) is None:
                 # if layer == 'Brackets Drill':
-            #    self.dxf_path_to_lines(layer, p)
-            #else:
-            #    self.dxf_path_to_point(layer, p)
+                self.dxf_path_to_lines(layer, p)
+            else:
+                self.dxf_path_to_point(layer, p)
 
         self.dxf_add(r12_footer)
 
 
 if __name__ == '__main__':
-    MyEffect().run()
+    DxfTwelve().run()

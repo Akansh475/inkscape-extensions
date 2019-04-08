@@ -185,7 +185,7 @@ class Horz(PathCommand):
         return PathCommand(self.cmd, opr(self[0], coords[self.index]))
 
     def transform(self, transform):
-        return self.to_line().transform(transform)
+        raise ValueError("Hozontal lines can't be transformed directly.")
 
     def to_line(self, previous):
         """Return this path command as a line instead"""
@@ -325,6 +325,9 @@ class Path(list):
     def transform(self, transform):
         """Convert to new path"""
         for i, seg in enumerate(self):
+            if isinstance(seg, (Horz, Vert)):
+                previous = self[i-1] if i else (0, 0)
+                seg = seg.to_line(previous)
             self[i] = seg.transform(transform)
         return self
 

@@ -23,15 +23,12 @@ Base module for rendering barcodes for Inkscape.
 import itertools
 import sys
 
-from lxml import etree
+from inkex.elements import Group, TextElement, Rectangle
 
 (TEXT_POS_BOTTOM, TEXT_POS_TOP) = range(2)
 (WHITE_BAR, BLACK_BAR, TALL_BAR) = range(3)
 TEXT_TEMPLATE = 'font-size:%dpx;text-align:center;text-anchor:middle;'
-SVG_URI = u'http://www.w3.org/2000/svg'
 
-
-# pylint: disable=abstract-class-not-used
 class Barcode(object):
     """Provide a base class for all barcode renderers"""
     default_height = 30
@@ -97,13 +94,13 @@ class Barcode(object):
         name = self.get_id('barcode')
 
         # use an svg group element to contain the barcode
-        barcode = etree.Element(u'{{{}}}g'.format(SVG_URI))
+        barcode = Group()
         barcode.set('id', name)
         barcode.set('style', 'fill: black;')
+
+        barcode.transform.add_translate(self.pos_x, self.pos_y)
         if self.scale:
-            barcode.set('transform', 'translate({:d},{:d}) scale({:f})'.format(self.pos_x, self.pos_y, self.scale))
-        else:
-            barcode.set('transform', 'translate({:d},{:d})'.format(self.pos_x, self.pos_y))
+            barcode.transform.add_scale(self.scale)
 
         bar_id = 1
         bar_offset = 0
@@ -118,7 +115,7 @@ class Barcode(object):
 
             if style['write']:
                 tops.add(style['top'])
-                rect = etree.SubElement(barcode, u'{{{}}}rect'.format(SVG_URI))
+                rect = Rectangle()
                 rect.set('x', str(bar_offset))
                 rect.set('y', str(style['top']))
                 if self.pos_text == TEXT_POS_TOP:
@@ -126,6 +123,7 @@ class Barcode(object):
                 rect.set('id', "{}_bar{:d}".format(name, bar_id))
                 rect.set('width', str(width))
                 rect.set('height', str(style['height']))
+                barcode.append(rect)
             bar_offset += width
             bar_id += 1
 
@@ -135,15 +133,16 @@ class Barcode(object):
 
         bar_width = bar_offset
         # Add text at the bottom of the barcode
-        text = etree.SubElement(barcode, u'{{{}}}text'.format(SVG_URI))
+        text = TextElement()
         text.set('x', str(int(bar_width / 2)))
         text.set('y', str(min(tops) + self.font_size - 1))
         if self.pos_text == TEXT_POS_BOTTOM:
             text.set('y', str(self.height + max(tops) + self.font_size))
         text.set('style', TEXT_TEMPLATE % self.font_size)
-        text.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
+        text.set('xml:space', 'preserve')
         text.set('id', '{}_text'.format(name))
         text.text = str(self.text)
+        barcode.append(text)
         return barcode
 
     def graphical_array(self, code):

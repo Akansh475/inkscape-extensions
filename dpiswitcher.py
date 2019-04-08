@@ -51,6 +51,7 @@ import sys
 from lxml import etree
 
 import inkex
+from inkex.generic import EffectExtension
 from inkex.transforms import Transform
 
 # globals
@@ -188,7 +189,7 @@ def check_use(svg, element, scale_x, scale_y):
     return skip
 
 
-class DPISwitcher(inkex.Effect):
+class DPISwitcher(EffectExtension):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.arg_parser.add_argument(
@@ -359,15 +360,7 @@ class DPISwitcher(inkex.Effect):
                 grid.set("originy", str(originy))
 
     def effect(self):
-        saveout = sys.stdout
-        sys.stdout = sys.stderr
-        try:
-            self._effect_stderr()
-        finally:
-            sys.stdout = saveout
-
-    def _effect_stderr(self):
-        svg = self.document.getroot()
+        svg = self.svg
         if self.options.action == '"page_info"':
             print(":::SVG document related info:::")
             print("version: " + str(svg.get(inkex.addNS('version', 'inkscape'))))
@@ -404,10 +397,10 @@ class DPISwitcher(inkex.Effect):
             if self.options.switcher == "0":
                 self.factor_a = 96.0 / 90.0
                 self.factor_b = 90.0 / 96.0
-            namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
+            namedview = svg.namedview
             if namedview is None:
                 return inkex.errormsg("No document named view available.")
-            namedview.set(inkex.addNS('document-units', 'inkscape'), "px")
+            namedview.set('inkscape:document-units', "px")
             self.units = self.parse_length(svg.get('width'))[1]
             if self.units and self.units != "px" and self.units != "" and self.units != "%":
                 if self.options.switcher == "0":

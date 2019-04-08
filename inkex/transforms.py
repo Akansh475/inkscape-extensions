@@ -325,6 +325,16 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         yield self.y.minimum
         yield self.y.maximum
 
+    @property
+    def minimum(self):
+        """Return the minimum x,y coords"""
+        return (self.x.minimum, self.y.minimum)
+
+    @property
+    def maximum(self):
+        """Return the maximum x,y coords"""
+        return (self.x.maximum, self.y.maximum)
+
     def __getitem__(self, index):
         return list(self)[index]
 

@@ -79,21 +79,20 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
         self.assertEqual("Frame", group[1].xpath('@inkscape:label', namespaces=inkex.NSS)[0])
 
     def test_single_frame_clipped(self):
-        args = ['--clip=True',
-                '--corner_radius=20',
-                '--fill_color=-16777124',
-                '--id=rect3006',
-                '--position=inside',
-                '--stroke_color=255',
-                '--tab="stroke"',
-                '--width=10',
-                self.data_file('svg', 'single_box.svg')]
-        uut = Frame()
-        uut.run(args)
+        uut = self.assertEffect(
+            'svg', 'single_box.svg',
+            clip=True,
+            corner_radius=20,
+            fill_color=-16777124,
+            id='rect3006',
+            position='inside',
+            stroke_color=255,
+            tab="stroke",
+            width=10)
         new_frame = self.get_frame(uut.document)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
-        group = new_frame.getparent()
-        self.assertEqual('url(#clipPath)', group[0].get('clip-path'))
+        orig = list(uut.svg.selected.values())[0]
+        self.assertEqual('url(#clipPath)', orig.get('clip-path'))
         clip_path = uut.document.xpath('//svg:defs/svg:clipPath', namespaces=inkex.NSS)[0]
         self.assertEqual('{http://www.w3.org/2000/svg}clipPath', clip_path.tag)

@@ -62,7 +62,7 @@ def get_fit(u, csp, col):
 
 class DxfOutlines(OutputExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(DxfOutlines, self).__init__()
         self.arg_parser.add_argument("-R", "--ROBO",
                                      type=str, dest="ROBO",
                                      default=False)

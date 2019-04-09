@@ -39,9 +39,6 @@ import inkex
 
 
 class PathModifier(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
     ##################################
     # -- Selectionlists manipulation --
     ##################################
@@ -244,9 +241,6 @@ class PathModifier(inkex.Effect):
 
 
 class Diffeo(PathModifier):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
     def applyDiffeo(self, bpt, vects=()):
         """
         bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.

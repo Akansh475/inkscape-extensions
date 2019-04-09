@@ -81,7 +81,7 @@ def draw_SVG_ellipse(r_xy, c_xy, width, parent, start_end=(0, 2 * pi), transform
 
 class WireframeSphere(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(WireframeSphere, self).__init__()
 
         # PARSE OPTIONS
         self.arg_parser.add_argument("--num_lat",

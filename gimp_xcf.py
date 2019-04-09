@@ -23,12 +23,14 @@
 import os
 import re
 import shutil
-import sys
 import tempfile
+
+from subprocess import Popen, PIPE
 
 import inkex
 from inkex import inkbool
-
+from inkex.generic import OutputExtension
+from inkex.localize import _
 
 # Define extension exceptions
 class GimpXCFError(Exception):
@@ -54,9 +56,9 @@ class GimpXCFScriptFuError(GimpXCFError):
         inkex.errormsg(_('An error occurred while processing the XCF file.'))
 
 
-class MyEffect(inkex.Effect):
+class GimpOutput(OutputExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(GimpOutput, self).__init__()
         self.arg_parser.add_argument("--tab",
                                      type=str,
                                      dest="tab")
@@ -76,9 +78,6 @@ class MyEffect(inkex.Effect):
                                      type=str,
                                      dest="resolution", default="96",
                                      help="File resolution")
-
-    def output(self):
-        pass
 
     def clear_tmp(self):
         shutil.rmtree(self.tmp_dir)
@@ -112,7 +111,7 @@ class MyEffect(inkex.Effect):
 
         return documentscale
 
-    def effect(self):
+    def save(self, stream):
         svg_file = self.svg
         ttmp_orig = self.document.getroot()
         docname = ttmp_orig.get(inkex.addNS('docname', u'sodipodi'))
@@ -160,30 +159,30 @@ class MyEffect(inkex.Effect):
         # GIMP only allows one rectangular grid
         gridXpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
         if self.options.saveGrid and self.document.xpath(gridXpath, namespaces=inkex.NSS):
-            gridNode = self.xpathSingle(gridXpath)
+            gridNode = self.svg.getElement(gridXpath)
             if gridNode is not None:
                 # These attributes could be nonexistent
                 spacingX = gridNode.get('spacingx')
                 if spacingX is None:
                     spacingX = 1
                 else:
-                    spacingX = self.uutounit(float(spacingX), "px") * scale
+                    spacingX = self.svg.uutounit(float(spacingX), "px") * scale
                 spacingY = gridNode.get('spacingy')
                 if spacingY is None:
                     spacingY = 1
                 else:
-                    spacingY = self.uutounit(float(spacingY), "px") * scale
+                    spacingY = self.svg.uutounit(float(spacingY), "px") * scale
                 originX = gridNode.get('originx')
                 if originX is None:
                     originX = 0
                 else:
-                    originX = self.uutounit(float(originX), "px") * scale
+                    originX = self.svg.uutounit(float(originX), "px") * scale
                 originY = gridNode.get('originy')
                 if originY is None:
                     originY = 0
                 else:
-                    originY = self.uutounit(float(originY), "px") * doc_scale
-                    offsetY = pageHeight % (self.uutounit(float(spacingY), "px") * doc_scale)
+                    originY = self.svg.uutounit(float(originY), "px") * doc_scale
+                    offsetY = pageHeight % (self.svg.uutounit(float(spacingY), "px") * doc_scale)
                     originY = (pageHeight - originY) * res_scale
 
                 gridSpacingFunc = '(gimp-image-grid-set-spacing img {} {})'.format(int(round(float(spacingX))), int(round(float(spacingY))))
@@ -213,16 +212,15 @@ class MyEffect(inkex.Effect):
                 filename = os.path.join(self.tmp_dir, "{}.png".format(id))
                 command = "inkscape -i \"{}\" -j {} {} -e \"{}\" {} {}".format(id, area, opacity, filename, svg_file, resolution)
 
-                # XXX This must be replaced!
-                # p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                # return_code = p.wait()
-                # f = p.stdout
-                # err = p.stderr
-                # stdin = p.stdin
-                # f.read()
-                # f.close()
-                # err.close()
-                # stdin.close()
+                p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+                return_code = p.wait()
+                f = p.stdout
+                err = p.stderr
+                stdin = p.stdin
+                f.read()
+                f.close()
+                err.close()
+                stdin.close()
 
                 if os.name == 'nt':
                     filename = filename.replace("\\", "/")
@@ -292,40 +290,8 @@ class MyEffect(inkex.Effect):
             junk = os.path.join(self.tmp_dir, 'junk_from_gimp.txt')
             command = 'gimp -i --batch-interpreter plug-in-script-fu-eval -b - > {} 2>&1'.format(junk)
 
-            # p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            # f = p.stdin
-            # out = p.stdout
-            # err = p.stderr
-            # f.write(script_fu.encode('utf-8'))
-            # return_code = p.wait()
-
-            # f.close()
-            # err.close()
-            # out.close()
-            # Uncomment these lines to see the output from gimp
-            # err = open(junk, 'r')
-            # inkex.debug(err.read())
-            # err.close()
-
-            try:
-                x = open(xcf, 'rb')
-            except:
-                self.clear_tmp()
-                raise GimpXCFScriptFuError
-
-            if os.name == 'nt':
-                try:
-                    import msvcrt
-                    msvcrt.setmode(1, os.O_BINARY)
-                except:
-                    pass
-            try:
-                stdout = sys.stdout if sys.version_info[0] < 3 else sys.stdout.buffer
-                stdout.write(x.read())
-            finally:
-                x.close()
-                self.clear_tmp()
+            stream.write(xcf)
 
 
 if __name__ == '__main__':
-    MyEffect().run()
+    GimpOutput().run()

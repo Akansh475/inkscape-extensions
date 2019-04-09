@@ -29,12 +29,12 @@ or third-party applications.
 # local library
 import inkex
 from inkex.utils import inkbool
-import simplestyle
+from inkex.generic import EffectExtension
 
 
 class SetAttrImage(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(SetAttrImage, self).__init__()
         # main options
         self.arg_parser.add_argument("--fix_scaling", type=inkbool,
                                      dest="fix_scaling", default=True)
@@ -149,5 +149,3 @@ class SetAttrImage(inkex.Effect):
 
 if __name__ == '__main__':
     SetAttrImage().run()
-
-

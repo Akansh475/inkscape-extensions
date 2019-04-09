@@ -44,7 +44,7 @@ class Point(object):
 
 class Voronoi2svg(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Voronoi2svg, self).__init__()
 
         # {{{ Additional options
 

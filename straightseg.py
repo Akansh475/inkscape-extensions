@@ -25,7 +25,7 @@ from inkex.elements import PathElement
 
 class SegmentStraightener(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(SegmentStraightener, self).__init__()
         self.arg_parser.add_argument("-p", "--percent",
                          type=float,
                         dest="percent", default=10.0,

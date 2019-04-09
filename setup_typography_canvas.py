@@ -25,7 +25,7 @@ import inkex
 
 class SetupTypographyCanvas(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(SetupTypographyCanvas, self).__init__()
         self.arg_parser.add_argument("-e", "--emsize",
                                      type=int,
                                      dest="emsize", default=1000,

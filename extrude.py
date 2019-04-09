@@ -26,12 +26,13 @@ from inkex.localize import _
 from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 from inkex.elements import PathElement, Group
 from inkex.paths import Path
+from inkex.generic import EffectExtension
 import inkex
 
 
-class Extrude(inkex.Effect):
+class Extrude(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Extrude, self).__init__()
         opts = [('-m', '--mode', str, 'mode', 'Lines',
                  'Join paths with lines or polygons'),
                 ]

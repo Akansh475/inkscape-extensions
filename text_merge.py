@@ -34,7 +34,7 @@ from inkex import inkbool
 
 class Merge(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Merge, self).__init__()
         self.arg_parser.add_argument("-d", "--direction",
                                      type=str,
                                      dest="direction", default="tb",

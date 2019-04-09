@@ -6,13 +6,14 @@
 from lxml import etree
 
 import inkex
+from inkex.generic import EffectExtension
 
 
-class DvdCover(inkex.Effect):
+class DvdCover(EffectExtension):
     """Create an empty DVD Cover"""
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(DvdCover, self).__init__()
         self.arg_parser.add_argument("-s", "--spine", type=float, dest="dvd_cover_spine",
                                      default="14", help="Dvd spine width (mm)")
         self.arg_parser.add_argument("-b", "--bleed", type=float, dest="dvd_cover_bleed",

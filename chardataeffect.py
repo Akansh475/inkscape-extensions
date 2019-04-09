@@ -33,7 +33,7 @@ SODIPODI_ROLE = inkex.addNS('sodipodi:role')
 class CharEffectBase(inkex.Effect):
     """Base class for all char effects"""
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(CharEffectBase, self).__init__()
         self.visited = []
 
     newline = True

@@ -22,7 +22,7 @@ INKSCAPE_NS = "http://www.inkscape.org/namespaces/inkscape"
 
 class Ungroup(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Ungroup, self).__init__()
         self.arg_parser.add_argument("-s", "--startdepth",
                                      type=int,
                                      dest="startdepth", default=0,

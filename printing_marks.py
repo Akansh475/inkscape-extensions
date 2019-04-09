@@ -40,7 +40,7 @@ class PrintingMarks(inkex.Effect):
     stroke_width = 0.25
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(PrintingMarks, self).__init__()
         self.arg_parser.add_argument("--where",
                                      type=str,
                                      dest="where_to_crop", default=True,

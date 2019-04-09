@@ -37,9 +37,6 @@ import shutil
 import inkex
 
 class PrepareFileSave(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
     def effect(self):
         file = self.args[-1]
         tempfile = os.path.splitext(file)[0] + "-prepare.svg"

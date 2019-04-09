@@ -52,7 +52,7 @@ DM_OUT_BUFFER = 2                       # write to DEVMODE structure
 
 class MyEffect(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(MyEffect, self).__init__()
         self.visibleLayers = True       # print only visible layers
 
     def process_shape(self, node, mat):

@@ -26,7 +26,7 @@ import inkex
 
 class Dashit(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Dashit, self).__init__()
         self.not_converted = []
 
     def effect(self):

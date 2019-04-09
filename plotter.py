@@ -1,41 +1,34 @@
 #!/usr/bin/env python
 # coding=utf-8
-"""
-Copyright (C) 2013 Sebastian Wüst, sebi@timewaster.de
+#
+# Copyright (C) 2013 Sebastian Wüst, sebi@timewaster.de
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-"""
-
-# standard library
-import re
-import string
 import sys
-# local libraries
-import gettext
-import hpgl_decoder
+
 import hpgl_encoder
 
 import inkex
 from inkex.localize import _
 from inkex.utils import inkbool
 
-
 class Plot(inkex.Effect):
-
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Plot, self).__init__()
         self.arg_parser.add_argument('--tab',               type=str,     dest='tab')
         self.arg_parser.add_argument('--portType',          type=str,     dest='portType',          default='serial',       help='Port type')
         self.arg_parser.add_argument('--parallelPort',      type=str,     dest='parallelPort',      default='/dev/usb/lp2', help='Parallel port')

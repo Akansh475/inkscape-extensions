@@ -30,7 +30,7 @@ from inkex.localize import _
 class HpglOutput(OutputExtension):
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(HpglOutput, self).__init__()
         self.arg_parser.add_argument('--tab')
         self.arg_parser.add_argument('--resolutionX',   type=float,         default=1016.0, help='Resolution X (dpi)')
         self.arg_parser.add_argument('--resolutionY',   type=float,         default=1016.0, help='Resolution Y (dpi)')

@@ -24,7 +24,7 @@ from inkex import inkbool
 
 class Whirl(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Whirl, self).__init__()
         self.arg_parser.add_argument("-t", "--whirl",
                          type=float,
                         dest="whirl", default=1.0,

@@ -23,10 +23,8 @@ Generate gears in SVG
 
 from math import acos, cos, pi, radians, sin, sqrt
 
-from lxml import etree
-
 import inkex
-from inkex.elements import Group
+from inkex.elements import PathElement
 
 
 def involute_intersect_angle(Rb, R):
@@ -52,7 +50,7 @@ def points_to_svgd(p):
 
 class Gears(inkex.GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Gears, self).__init__()
         self.arg_parser.add_argument("-t", "--teeth",
                                      type=int,
                                      dest="teeth", default=24,
@@ -165,15 +163,12 @@ class Gears(inkex.GenerateExtension):
 
         path = points_to_svgd(points)
 
-        # Embed gear in group to make animation easier:
-        #  Translate group, Rotate path.
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'Gear' + str(teeth)}
-        g = Group(**g_attribs)
-
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
         gear_attribs = {'style': str(inkex.Style(style)), 'd': path}
-        gear = etree.SubElement(g, inkex.addNS('path', 'svg'), gear_attribs)
+        gear = PathElement(**gear_attribs)
+        yield gear
+
         if centerdiameter > 0.0:
             center_attribs = {'style': str(inkex.Style(style)),
                               inkex.addNS('cx', 'sodipodi'): '0.0',
@@ -182,8 +177,7 @@ class Gears(inkex.GenerateExtension):
                               inkex.addNS('ry', 'sodipodi'): str(centerdiameter / 2),
                               inkex.addNS('type', 'sodipodi'): 'arc'
                               }
-            center = etree.SubElement(g, inkex.addNS('path', 'svg'), center_attribs)
-        return g
+            yield PathElement(**center_attribs)
 
 
 if __name__ == '__main__':

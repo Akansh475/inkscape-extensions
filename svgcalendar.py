@@ -47,7 +47,7 @@ if sys.version_info[0] > 2:
 
 class SVGCalendar(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(SVGCalendar, self).__init__()
         self.arg_parser.add_argument("--tab", type=str, dest="tab")
         self.arg_parser.add_argument(
                 "--month", type=int, dest="month", default=0,

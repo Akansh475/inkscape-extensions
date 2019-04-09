@@ -191,7 +191,7 @@ def check_use(svg, element, scale_x, scale_y):
 
 class DPISwitcher(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(DPISwitcher, self).__init__()
         self.arg_parser.add_argument(
                 "--switcher", type=str, dest="switcher", default="0",
                 help="Select the DPI switch you want")

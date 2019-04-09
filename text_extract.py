@@ -32,7 +32,7 @@ import inkex
 
 class Extract(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Extract, self).__init__()
         self.arg_parser.add_argument("-d", "--direction",
                                      type=str,
                                      dest="direction", default="tb",

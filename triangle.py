@@ -101,7 +101,7 @@ def draw_tri_from_3_sides(s_a, s_b, s_c, offset, width, parent):  # draw a trian
 
 class Triangle(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Triangle, self).__init__()
         self.arg_parser.add_argument("--s_a",
                                      type=float,
                                      dest="s_a", default=100.0,

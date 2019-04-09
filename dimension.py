@@ -59,7 +59,7 @@ class Dimension(pathmodifier.PathModifier):
                 help="Bounding box type")
 
     def addMarker(self, name, rotate):
-        defs = self.xpathSingle('/svg:svg//svg:defs')
+        defs = self.svg.getElement('/svg:svg//svg:defs')
         if defs is None:
             defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
         marker = etree.SubElement(defs, inkex.addNS('marker', 'svg'))
@@ -123,7 +123,7 @@ class Dimension(pathmodifier.PathModifier):
         except TypeError:
             return inkex.errormsg(_('Unable to process this object.  Try changing it into a path first.'))
 
-        layer = self.current_layer
+        layer = self.svg.get_current_layer()
 
         self.addMarker('Arrow1Lstart', False)
         self.addMarker('Arrow1Lend', True)
@@ -161,7 +161,7 @@ class Dimension(pathmodifier.PathModifier):
         line.set('stroke-width', str(0.5 * scale))
         group.append(line)
 
-        for id, node in self.selected.items():
+        for id, node in self.svg.selected.items():
             group.append(node)
 
         layer.append(group)

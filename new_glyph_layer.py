@@ -28,7 +28,7 @@ import inkex
 
 class NewGlyphLayer(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(NewGlyphLayer, self).__init__()
         self.arg_parser.add_argument("-u", "--unicodechars", type=str, dest="unicodechars",
                                      default='', help="Unicode chars")
         self.encoding = sys.stdin.encoding

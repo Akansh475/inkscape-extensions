@@ -33,7 +33,7 @@ def stripme(s):
 
 class LSystem(GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(LSystem, self).__init__()
         self.arg_parser.add_argument("-o", "--order",
                                      type=int,
                                      dest="order", default=3,

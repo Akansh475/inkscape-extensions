@@ -55,7 +55,7 @@ except locale.Error:
 
 class Length(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Length, self).__init__()
         self.arg_parser.add_argument("--type",
                                      type=str,
                                      dest="mtype", default="length",

@@ -37,7 +37,7 @@ def points_to_ppi(points):
 
 class PerfectBoundCover(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(PerfectBoundCover, self).__init__()
         self.arg_parser.add_argument("--width",
                                      type=float,
                                      dest="width", default=6.0,

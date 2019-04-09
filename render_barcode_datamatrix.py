@@ -657,7 +657,7 @@ def render_data_matrix(module_arrays, size, spacing, parent):
 
 class DataMatrix(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(DataMatrix, self).__init__()
         self.arg_parser.add_argument("--text", type=str, dest="TEXT", default='Inkscape')
         self.arg_parser.add_argument("--symbol", type=str, dest="SYMBOL", default='')
         self.arg_parser.add_argument("--rows", type=int, dest="ROWS", default=10)

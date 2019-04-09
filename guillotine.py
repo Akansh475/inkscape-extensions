@@ -44,6 +44,7 @@ from subprocess import PIPE, Popen
 # local library
 import inkex
 from inkex.utils import inkbool
+from inkex.generic import EffectExtension
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -52,7 +53,7 @@ class Guillotine(inkex.Effect):
     """Exports slices made using guides"""
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Guillotine, self).__init__()
         self.arg_parser.add_argument("--directory", type=str, dest="directory")
         self.arg_parser.add_argument("--image", type=str, dest="image")
         self.arg_parser.add_argument("--ignore", type=inkbool, dest="ignore")

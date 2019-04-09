@@ -384,7 +384,7 @@ class Obj(object):  # a 3d object defined by the vertices and the faces (eg a po
 
 class Poly3D(inkex.GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Poly3D, self).__init__()
         self.arg_parser.add_argument("--tab",
                                      type=str,
                                      dest="tab", default="object")
@@ -507,10 +507,12 @@ class Poly3D(inkex.GenerateExtension):
 
         # we will put all the rotations in the object name, so it can be repeated in
         poly_name = obj.name + ':' + make_rotation_log(so)
-        poly_attribs = {inkex.addNS('label', 'inkscape'): poly_name}
+        poly = Group()
+        poly.set('inkscape:label', poly_name)
+        (pos_x, pos_y) = self.svg.get_center_position()
+        poly.transform.add_translate(pos_x, pos_y)
         if scale != 1:
-            poly_attribs['transform'] = 'scale(' + str(scale) + ')'
-        poly = Group(**poly_attribs)
+            poly.transform.add_scale(scale)
 
         # TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
 

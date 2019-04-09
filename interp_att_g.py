@@ -19,14 +19,13 @@
 #
 
 import re
-import math
 import inkex
 from inkex import inkbool
+from inkex.generic import EffectExtension
 
-
-class InterpAttG(inkex.Effect):
+class InterpAttG(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(InterpAttG, self).__init__()
         self.arg_parser.add_argument("-a", "--att",
                          type=str,
                         dest="att", default="fill",

@@ -31,7 +31,7 @@ from inkex.localize import _
 class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
 
     def __init__(self):
-        inkwebeffect.InkWebEffect.__init__(self)
+        super(InkWebTransmitAtt, self).__init__()
         self.arg_parser.add_argument("-a", "--att",
                                      type=str,
                                      dest="att", default="fill",

@@ -24,11 +24,12 @@ import sys
 from lxml import etree
 
 import inkex
+from inkex.generic import OutputExtension
 
 
-class Nup(inkex.Effect):
+class Nup(OutputExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Nup, self).__init__()
         opts = [('--unit', str, 'unit', 'px', ''),
                 ('--rows', int, 'rows', '2', ''),
                 ('--cols', int, 'cols', '2', ''),
@@ -61,14 +62,14 @@ class Nup(inkex.Effect):
             self.arg_parser.add_argument(o[0], type=o[1],
                                          dest=o[2], default=o[3], help=o[4])
 
-    def effect(self):
+    def save(self, stream):
         showList = []
         for i in ['showHolder', 'showCrosses', 'showInner', 'showOuter',
                   'showInnerBox', 'showOuterBox', ]:
             if getattr(self.options, i):
                 showList.append(i.lower().replace('show', ''))
         o = self.options
-        self.pf = self.GenerateNup(
+        ret = self.GenerateNup(
                 unit=o.unit,
                 pgSize=(o.pgSizeX, o.pgSizeY),
                 pgMargin=(o.pgMarginTop, o.pgMarginRight, o.pgMarginBottom, o.pgMarginLeft),
@@ -79,14 +80,13 @@ class Nup(inkex.Effect):
                 padding=(o.paddingTop, o.paddingRight, o.paddingBottom, o.paddingLeft),
                 show=showList,
         )
+        if ret:
+            stream.write(ret)
 
     def setAttr(self, node, name, value):
         attr = node.ownerDocument.createAttribute(name)
         attr.value = value
         node.attributes.setNamedItem(attr)
-
-    def output(self):
-        sys.stdout.write(self.pf or "")
 
     def expandTuple(self, unit, x, length=4):
         try:
@@ -288,8 +288,7 @@ class Nup(inkex.Effect):
 
         if returnTree:
             return doc
-        else:
-            return etree.tostring(root)
+        return etree.tostring(root)
 
 
 if __name__ == '__main__':

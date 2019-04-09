@@ -147,7 +147,7 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
 
 class ParamCurves(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(ParamCurves, self).__init__()
         self.arg_parser.add_argument("--t_start", type=float, dest="t_start", default=0.0,
                                      help="Start t-value")
         self.arg_parser.add_argument("--t_end", type=float, dest="t_end", default=1.0,

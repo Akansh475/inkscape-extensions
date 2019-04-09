@@ -8,11 +8,12 @@ from lxml import etree
 
 import inkex
 from inkex.utils import inkbool
+from inkex.generic import EffectExtension
 
 
-class GenericTemplate(inkex.Effect):
+class GenericTemplate(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(GenericTemplate, self).__init__()
         self.arg_parser.add_argument("-w", "--width", type=int, dest="generic_width", default="1920", help="Custom width")
         self.arg_parser.add_argument("-z", "--height", type=int, dest="generic_height", default="1080", help="Custom height")
         self.arg_parser.add_argument("-u", "--unit", type=str, dest="generic_unit", default="px", help="SVG Unit")

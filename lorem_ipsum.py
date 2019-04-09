@@ -180,7 +180,7 @@ foo = [
 
 class MyEffect(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(MyEffect, self).__init__()
         self.arg_parser.add_argument("--title")
         self.arg_parser.add_argument("-n", "--numberofparagraphs",
                                      type=int,

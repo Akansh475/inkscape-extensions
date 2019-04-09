@@ -85,15 +85,6 @@ class RackGear(GenerateExtension):
 
         path = points_to_svgd(points)
 
-        # Embed gear in group to make animation easier:
-        #  Translate group, Rotate path.
-        #view_center = computePointInNode(list(self.svg.get_center_position()), self.svg.get_current_layer())
-        #t = 'translate(' + str(view_center[0]) + ',' + str(view_center[1]) + ')'
-        #g_attribs = {
-        #    inkex.addNS('label', 'inkscape'): 'RackGear' + str(length),
-        #    'transform': t}
-        #g = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
-
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
         yield PathElement(style=str(inkex.Style(style)), d=str(path))

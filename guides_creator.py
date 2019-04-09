@@ -47,7 +47,7 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
-
+from inkex.generic import EffectExtension
 
 def drawVerticalGuides(division, w, h, edges, parent, vertical_shift=0):
     if division > 0:
@@ -111,11 +111,10 @@ def deleteAllGuides(document):
         nv.remove(element)
 
 
-class GuidesCreator(inkex.Effect):
+class GuidesCreator(EffectExtension):
     def __init__(self):
         """Defines options of the script."""
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
+        super(GuidesCreator, self).__init__()
 
         # Define option for the tab.
         self.arg_parser.add_argument("--tab",

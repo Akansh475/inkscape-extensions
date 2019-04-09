@@ -24,12 +24,13 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
+from inkex.generic import EffectExtension
 
 
-class FoldableBox(inkex.Effect):
+class FoldableBox(EffectExtension):
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(FoldableBox, self).__init__()
         self.arg_parser.add_argument("-x", "--width",
                                      type=float,
                                      dest="width",

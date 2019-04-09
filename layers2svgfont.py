@@ -21,12 +21,9 @@
 from lxml import etree
 
 import inkex
+from inkex.generic import EffectExtension
 
-
-class Layers2SVGFont(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
+class Layers2SVGFont(EffectExtension):
     def guideline_value(self, label, index):
         namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))
         guides = namedview.findall(inkex.addNS('guide', 'sodipodi'))
@@ -49,11 +46,12 @@ class Layers2SVGFont(inkex.Effect):
                 return glyph
         return etree.SubElement(font, inkex.addNS('glyph', 'svg'))
 
-    def flip_cordinate_system(self, d, emsize, baseline):
-        pathdata = inkex.parsePath(d)
-        inkex.scalePath(pathdata, 1, -1)
-        inkex.translatePath(pathdata, 0, int(emsize) - int(baseline))
-        return str(inkex.Path(pathdata))
+    def flip_cordinate_system(self, path, emsize, baseline):
+        path = path.copy()
+        path.transform.add_scale(1, -1)
+        path.transform.add_translate(0, int(emsize) - int(baseline))
+        path.apply_tranform()
+        return str(path.path)
 
     def effect(self):
         # Get access to main SVG document element
@@ -113,7 +111,7 @@ class Layers2SVGFont(inkex.Effect):
                 paths = group.findall(inkex.addNS('path', 'svg'))
                 d = ""
                 for p in paths:
-                    d += " " + self.flip_cordinate_system(p.get("d"), emsize, baseline)
+                    d += " " + self.flip_cordinate_system(p, emsize, baseline)
                 glyph.set("d", d)
 
 

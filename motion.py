@@ -27,7 +27,7 @@ from inkex.paths import PathCommand
 
 class Motion(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Motion, self).__init__()
         self.arg_parser.add_argument("-a", "--angle",
                                      type=float,
                                      dest="angle", default=45.0,

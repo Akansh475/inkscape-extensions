@@ -19,15 +19,15 @@
 #
 import math
 
-from lxml import etree
-
 import inkex
+from inkex.generic import EffectExtension
+from inkex.elements import Group, TextElement, Circle
 
 
-class Dots(inkex.Effect):
+class Dots(EffectExtension):
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Dots, self).__init__()
         self.arg_parser.add_argument("-d", "--dotsize",
                                      type=str,
                                      dest="dotsize", default="10px",
@@ -82,13 +82,17 @@ class Dots(inkex.Effect):
             p[lastDot][1][-1] += y * self.svg.unittouu(self.options.dotsize)
 
     def addDot(self, node):
-        self.group = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
-        self.dotGroup = etree.SubElement(self.group, inkex.addNS('g', 'svg'))
-        self.numGroup = etree.SubElement(self.group, inkex.addNS('g', 'svg'))
+        self.group = Group()
+        node.getparent().append(self.group)
+        self.dotGroup = Group()
+        self.group.append(self.dotGroup)
+        self.numGroup = Group()
+        self.group.append(self.numGroup)
 
         try:
             t = node.get('transform')
-            self.group.set('transform', t)
+            if t:
+                self.group.set('transform', t)
         except:
             pass
 
@@ -106,20 +110,16 @@ class Dots(inkex.Effect):
                     'cx': str(params[-2]),
                     'cy': str(params[-1])
                 }
-                etree.SubElement(
-                        self.dotGroup,
-                        inkex.addNS('circle', 'svg'),
-                        dot_att)
-                self.addText(
-                        self.numGroup,
-                        params[-2] + (self.svg.unittouu(self.options.dotsize) / 2),
-                        params[-1] - (self.svg.unittouu(self.options.dotsize) / 2),
-                        num)
-                num += self.options.step
+                self.dotGroup.append(Circle(**dot_att))
+                self.numGroup.append(self.addText(
+                    params[-2] + (self.svg.unittouu(self.options.dotsize) / 2),
+                    params[-1] - (self.svg.unittouu(self.options.dotsize) / 2),
+                    num))
+            num += self.options.step
         node.getparent().remove(node)
 
-    def addText(self, node, x, y, text):
-        new = etree.SubElement(node, inkex.addNS('text', 'svg'))
+    def addText(self, x, y, text):
+        new = TextElement()
         s = {'font-size': self.svg.unittouu(self.options.fontsize),
              'fill-opacity': '1.0',
              'stroke': 'none',
@@ -130,6 +130,7 @@ class Dots(inkex.Effect):
         new.set('x', str(x))
         new.set('y', str(y))
         new.text = str(text)
+        return new
 
 
 if __name__ == '__main__':

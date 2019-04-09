@@ -26,8 +26,8 @@ from inkex import inkbool
 
 class SVGFont2Layers(inkex.Effect):
     def __init__(self):
+        super(SVGFont2Layers, self).__init__()
         self.count = 0
-        inkex.Effect.__init__(self)
         self.arg_parser.add_argument("--limitglyphs",
                                      type=inkbool,
                                      dest="limitglyphs", default=True,

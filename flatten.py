@@ -20,10 +20,11 @@
 import inkex
 from inkex.elements import PathElement
 from inkex.paths import Path
+from inkex.generic import EffectExtension
 
-class Flatten(inkex.Effect):
+class Flatten(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Flatten, self).__init__()
         self.arg_parser.add_argument("-f", "--flatness",
                          type=float,
                         dest="flat", default=10.0,

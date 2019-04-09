@@ -31,7 +31,8 @@ from itertools import product
 from lxml import etree
 
 import inkex
-from inkex.transforms import Transform
+from inkex.generic import GenerateExtension
+from inkex.elements import Group, Rectangle, Use, PathElement
 
 
 class QRCode(object):
@@ -864,23 +865,25 @@ class GridDrawer(object):
             for c in range(self.colCount()):
                 if self.isDark(c, r):
                     x, y = self.getSVGPos(c, r)
-                    rect = etree.SubElement(grp, inkex.addNS("rect", 'svg'))
+                    rect = Rectangle()
                     rect.set('x', str(x))
                     rect.set('y', str(y))
                     rect.set('width', str(self.boxsize))
                     rect.set('height', str(self.boxsize))
+                    grp.append(rect)
 
     def makeSVGSymbol(self, grp):
         for r in range(self.rowCount()):
             for c in range(self.colCount()):
                 if self.isDark(c, r):
                     x, y = self.getSVGPos(c, r)
-                    symbol = etree.SubElement(grp, inkex.addNS("use", 'svg'))
+                    symbol = Use()
                     symbol.set(inkex.addNS('href', 'xlink'), self.symbolId)
                     symbol.set('x', str(x))
                     symbol.set('y', str(y))
                     symbol.set('width', str(self.boxsize))
                     symbol.set('height', str(self.boxsize))
+                    grp.append(symbol)
 
     def getIconPathStr(self, pointStr):
         result = ""
@@ -908,8 +911,9 @@ class GridDrawer(object):
                     x, y = self.getSVGPos(c, r)
                     pathStr += "M %f,%f " % (x, y) + singlePath + " z "
 
-        path = etree.SubElement(grp, inkex.addNS('path', 'svg'))
+        path = PathElement()
         path.set('d', pathStr)
+        grp.append(path)
 
     def makeSVGCircle(self, grp):
         s = 'm 0.5,0.5 ' \
@@ -1013,8 +1017,9 @@ class GridDrawer(object):
             for i in sorted(ringIndexes, reverse=True):
                 del verts[i]
 
-        path = etree.SubElement(grp, inkex.addNS('path', 'svg'))
+        path = PathElement()
         path.set('d', qrPathStr)
+        grp.append(path)
 
     def getSVGDrawer(self, drawtype):
         drawerDict = {"neutral": lambda g: self.makeSVGAdv(g, "n"),
@@ -1037,22 +1042,24 @@ class GridDrawer(object):
         canvas_height = (self.rowCount() + 2 * self.margin) * self.boxsize
 
         # white background providing margin:
-        rect = etree.SubElement(grp, inkex.addNS('rect', 'svg'))
+        rect = Rectangle()
         rect.set('x', '0')
         rect.set('y', '0')
         rect.set('width', str(canvas_width))
         rect.set('height', str(canvas_height))
         rect.set('style', 'fill:%s;stroke:none' % ("black" if self.invertCode else "white"))
+        grp.append(rect)
 
-        qrg = etree.SubElement(grp, inkex.addNS('g', 'svg'))
+        qrg = Group()
         qrg.set('style', 'fill:%s;stroke:none' % ("white" if self.invertCode else "black"))
-
         drawer(qrg)
 
+        grp.append(qrg)
 
-class QRCodeInkscape(inkex.Effect):
+
+class QRCodeInkscape(GenerateExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(QRCodeInkscape, self).__init__()
 
         # PARSE OPTIONS
         self.arg_parser.add_argument("--text",
@@ -1083,7 +1090,7 @@ class QRCodeInkscape(inkex.Effect):
                                      type=str,
                                      dest="symbol_id", default="")
 
-    def effect(self):
+    def generate(self):
 
         scale = self.svg.unittouu('1px')  # convert to document units
         so = self.options
@@ -1102,12 +1109,12 @@ class QRCodeInkscape(inkex.Effect):
                 text_bytes = so.TEXT
                 text_str = so.TEXT.decode('utf-8')
 
-            center = tuple(self.svg.get_center_position())
-            grp_transform = 'translate' + str(center) + ' scale(%f)' % scale
-            grp_name = 'QR Code: ' + text_str
-            grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name,
-                           'transform': grp_transform}
-            grp = etree.SubElement(self.svg.get_current_layer(), 'g', grp_attribs)  # the group to put everything in
+            grp = Group()
+            grp.set('inkscape:label', 'QR Code: ' + text_str)
+            pos_x, pos_y = self.svg.get_center_position()
+            grp.transform.add_translate(pos_x, pos_y)
+            if scale:
+                grp.transform.add_scale(scale)
 
             # GENERATE THE QRCODE
             if int(so.TYPENUMBER) == 0:
@@ -1124,6 +1131,7 @@ class QRCodeInkscape(inkex.Effect):
             qrDraw = GridDrawer(int(so.MODULESIZE), so.invert_code, so.smooth_value, so.symbol_id, 4)
             qrDraw.setGrid(qr.modules)
             qrDraw.makeSVG(grp, so.drawtype)
+            return grp
 
 
 if __name__ == '__main__':

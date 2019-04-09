@@ -26,7 +26,7 @@ from lxml import etree
 
 import inkex
 from inkex.utils import inkbool
-
+from inkex.generic import EffectExtension
 
 def get_picker_data(value):
     """ Returns color data in style string format.
@@ -48,12 +48,12 @@ def size_box(box, delta):
 
 
 # Frame maker Inkscape effect extension
-class Frame(inkex.Effect):
+class Frame(EffectExtension):
     """ An Inkscape extension that creates a frame around a selected object.
     """
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Frame, self).__init__()
         self.defs = None
 
         # Parse the options.

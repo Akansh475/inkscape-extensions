@@ -38,9 +38,6 @@ except:
 
 
 class Project(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
     def effect(self):
         if np is None:
             return inkex.errormsg(

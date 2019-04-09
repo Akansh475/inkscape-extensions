@@ -24,13 +24,13 @@ from math import atan2, degrees
 import inkex
 import inkex.utils
 from inkex.paths import Path
-
+from inkex.generic import EffectExtension
 
 from lxml import etree
 
-class Edge3d(inkex.Effect):
+class Edge3d(EffectExtension):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Edge3d, self).__init__()
         self.arg_parser.add_argument('-a', '--angle',
                                      type=float,
                                      dest='angle',

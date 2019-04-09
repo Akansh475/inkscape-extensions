@@ -29,7 +29,7 @@ import inkex
 
 class MarkerStrokePaintEffect(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(MarkerStrokePaintEffect, self).__init__()
         self.arg_parser.add_argument(
                 "-m", "--modify", type=inkex.utils.inkbool, dest="modify", default=False,
                 help="Do not create a copy, modify the markers")

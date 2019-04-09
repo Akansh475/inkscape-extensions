@@ -21,9 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import inkex
 
 class NextLayer(inkex.Effect):
-    def __init__(self):
-        inkex.Effect.__init__(self)
-
     def effect(self):
 
         # Get access to main SVG document element

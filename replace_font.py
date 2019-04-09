@@ -137,7 +137,7 @@ class ReplaceFont(inkex.Effect):
     Replaces all instances of one font with another
     """
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(ReplaceFont, self).__init__()
         self.arg_parser.add_argument("--fr_find", type=str, dest="fr_find",
                                      default=None, help="")
         self.arg_parser.add_argument("--fr_replace", type=str, dest="fr_replace",

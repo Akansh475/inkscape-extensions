@@ -23,6 +23,7 @@ from lxml import etree
 
 import hersheydata  # data file w/ Hershey font data
 import inkex
+from inkex.generic import EffectExtension
 
 Debug = False
 
@@ -41,7 +42,7 @@ def draw_svg_text(char, face, offset, vertoffset, parent):
 
 class Hershey(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Hershey, self).__init__()
         self.arg_parser.add_argument("--tab",  # NOTE: value is not used.
                                      default="splash",
                                      help="The active tab when Apply was pressed")

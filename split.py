@@ -26,7 +26,7 @@ from inkex import inkbool
 
 class Split(inkex.Effect):
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(Split, self).__init__()
         self.arg_parser.add_argument("-s", "--splittype",
                                      type=str,
                                      dest="split_type", default="word",

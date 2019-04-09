@@ -114,7 +114,7 @@ def flip(sp, cb, param):
     # print('flip before +' + str(sp))
     p = Path(sp)
     cb(p, param)
-    sp.clear()
+    del sp[:]
     sp.extend([pp.cmd, list(itertools.chain.from_iterable(list(x) for x in pp.points))] for pp in p)
     # print('flip after +' + str(sp))
 

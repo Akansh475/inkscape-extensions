@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import re
+import sys
 import shutil
 import tempfile
 import hashlib
@@ -201,7 +202,7 @@ class ComparisonMixin(object):
             self.assertEqual(data_a, data_b)
 
     def _apply_compare_filters(self, data):
-        if isinstance(data, str):
+        if sys.version_info[0] == 3 and isinstance(data, str):
             data = data.encode('utf-8')
         for cfilter in self.compare_filters:
             data = cfilter(data)

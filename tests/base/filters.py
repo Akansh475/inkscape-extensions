@@ -69,7 +69,7 @@ class CompareSize(Compare):
 class CompareOrderIndependentBytes(Compare):
     @staticmethod
     def filter(contents):
-        return b"\n".join(sorted(contents))
+        return b"\n".join([bytes(i) for i in sorted(contents)])
 
 class CompareOrderIndependentLines(Compare):
     @staticmethod

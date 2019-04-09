@@ -57,7 +57,7 @@ class JessyInkExport(OutputExtension):
     inkscapeCommand = None
 
     def __init__(self):
-        inkex.Effect.__init__(self)
+        super(JessyInkExport, self).__init__()
 
         self.arg_parser.add_argument('--tab', type=str, dest='what')
         self.arg_parser.add_argument('--type', type=str, dest='type', default='png')

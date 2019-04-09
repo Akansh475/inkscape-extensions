@@ -1,14 +1,13 @@
 # coding=utf-8
 from color_randomize import C
-from tests.base import InkscapeExtensionTestMixin, TestCase
-
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 def extract_hsl(hexcol):
     from inkex.colors import Color
     return Color('#' + hexcol).to_hsl().to_floats()
 
 
-class ColorRandomizeBasicTest(InkscapeExtensionTestMixin, TestCase):
+class ColorRandomizeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = C
 
     def test_default_values(self):

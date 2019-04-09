@@ -5,12 +5,12 @@ Revision history:
   * 2012-01-26 (jazzynico): checks defaulf parameters and file handling.
 """
 
-from gimp_xcf import MyEffect
+from gimp_xcf import GimpOutput
 from tests.base import InkscapeExtensionTestMixin, TestCase
 
 
 class GimpXCFBasicTest(InkscapeExtensionTestMixin, TestCase):
-    effect_class = MyEffect
+    effect_class = GimpOutput
 
     def _test_expected_file(self):
         """multilayered-test.svg provides 3 layers and a sublayer (all non empty)"""

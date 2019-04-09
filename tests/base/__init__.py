@@ -29,6 +29,7 @@ import sys
 import shutil
 import tempfile
 import hashlib
+import random
 import uuid
 
 from io import BytesIO
@@ -149,6 +150,11 @@ class ComparisonMixin(object):
         (),
         ('--id=p1', '--id=r3'),
     ]
+
+    def setUp(self): # pylint: disable=invalid-name
+        """Make sure every test is seeded the same way"""
+        super(ComparisonMixin, self).setUp()
+        random.seed(0x35f)
 
     def test_all_comparisons(self):
         """Testing all comparisons"""

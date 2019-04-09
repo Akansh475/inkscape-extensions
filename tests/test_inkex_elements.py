@@ -56,7 +56,7 @@ class CoreElementTestCase(ElementTestCase):
         """In-place scaling from blank transform"""
         elem = self.svg.getElementById('F')
         self.assertEqual(elem.transform, Transform())
-        self.assertEqual(elem.get('transform'), '')
+        self.assertEqual(elem.get('transform'), None)
         elem.transform.add_scale(1.0666666666666667, 1.0666666666666667)
         self.assertEqual(elem.get('transform'), ScaleTransform(1.06667))
         self.assertIn(b'transform', etree.tostring(elem))
@@ -69,7 +69,7 @@ class CoreElementTestCase(ElementTestCase):
         self.assertTrue(elem.transform)
         elem.transform = Transform()
         self.assertEqual(elem.transform, Transform())
-        self.assertEqual(elem.get('transform'), '')
+        self.assertEqual(elem.get('transform'), None)
         self.assertNotIn(b'transform', etree.tostring(elem))
 
 class PathElementTestCase(ElementTestCase):

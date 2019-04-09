@@ -88,7 +88,7 @@ class Transform(object):
     f = property(lambda self: self.matrix[1][2])  # pylint: disable=invalid-name
 
     def __bool__(self):
-        return self != Transform()
+        return not self.__eq__(Transform())
     __nonzero__ = __bool__
 
     def add_matrix(self, *args):

@@ -93,7 +93,8 @@ class BaseElement(etree.ElementBase):
             value = getattr(self, name, None)
             # We check the boolean nature of the value, because empty
             # transformations and style attributes are equiv to not-existing
-            return str(value) if value else default
+            ret = str(value) if value else (default or None)
+            return ret
         return super(BaseElement, self).get(addNS(name), default)
 
     def set(self, name, value):

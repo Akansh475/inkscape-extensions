@@ -33,16 +33,14 @@ interest and that should be shipped out in separate files...
 import copy
 import random
 
-from lxml import etree
-
 import inkex
+from inkex.localize import _
+from inkex.elements import PathElement, Group, Use
+from inkex.generic import EffectExtension
+from inkex.cubic_paths import parseCubicPath, formatCubicPath
 
-
-class PathModifier(inkex.Effect):
-    ##################################
-    # -- Selectionlists manipulation --
-    ##################################
-
+class PathModifier(EffectExtension):
+    """Select list manipulation"""
     def duplicateNodes(self, aList):
         clones = {}
         for id, node in aList.items():
@@ -64,10 +62,10 @@ class PathModifier(inkex.Effect):
     def expandGroups(self, aList, transferTransform=True):
         for id, node in aList.items():
             if node.tag == inkex.addNS('g', 'svg') or node.tag == 'g':
-                mat = simpletransform.parseTransform(node.get("transform"))
+                mat = node.transform
                 for child in node:
                     if transferTransform:
-                        inkex.applyTransformToNode(mat, child)
+                        child.transform *= mat
                     aList.update(self.expandGroups({child.get('id'): child}))
                 if transferTransform and node.get("transform"):
                     del node.attrib["transform"]
@@ -75,17 +73,16 @@ class PathModifier(inkex.Effect):
         return aList
 
     def expandGroupsUnlinkClones(self, aList, transferTransform=True, doReplace=True):
-        for id in list(aList):
-            node = aList[id]
-            if node.tag == inkex.addNS('g', 'svg') or node.tag == 'g':
+        for elem_id, node in aList.items():
+            if isinstance(node, Group):
                 self.expandGroups(aList, transferTransform)
                 self.expandGroupsUnlinkClones(aList, transferTransform, doReplace)
                 # Hum... not very efficient if there are many clones of groups...
 
-            elif node.tag == inkex.addNS('use', 'svg') or node.tag == 'use':
+            elif isinstance(node, Use):
                 refnode = self.refNode(node)
                 newnode = self.unlinkClone(node, doReplace)
-                del aList[id]
+                del aList[elem_id]
 
                 style = dict(inkex.Style.parse_str(node.get('style') or ""))
                 refstyle = dict(inkex.Style.parse_str(refnode.get('style') or ""))
@@ -115,7 +112,7 @@ class PathModifier(inkex.Effect):
         if node.tag == inkex.addNS('use', 'svg') or node.tag == 'use':
             newNode = copy.deepcopy(self.refNode(node))
             self.recursNewIds(newNode)
-            inkex.applyTransformToNode(simpletransform.parseTransform(node.get('transform')), newNode)
+            newNode.transform *= node.transform
 
             if doReplace:
                 parent = node.getparent()
@@ -169,7 +166,8 @@ class PathModifier(inkex.Effect):
 
     def groupToPath(self, node, doReplace=True):
         if node.tag == inkex.addNS('g', 'svg'):
-            newNode = etree.SubElement(self.current_layer, inkex.addNS('path', 'svg'))
+            newNode = PathElement()
+            self.svg.get_current_layer().append(newNode)
 
             newstyle = dict(inkex.Style.parse_str(node.get('style') or ""))
             newp = []
@@ -182,7 +180,7 @@ class PathModifier(inkex.Effect):
             newNode.set('d', inkex.formatCubicPath(newp))
             newNode.set('style', str(inkex.Style(newstyle)))
 
-            self.current_layer.remove(newNode)
+            self.svg.get_current_layer().remove(newNode)
             if doReplace:
                 parent = node.getparent()
                 parent.insert(parent.index(node), newNode)
@@ -224,8 +222,8 @@ class PathModifier(inkex.Effect):
     # -- Action ----------
     ################################
 
-    # -- overwrite this method in subclasses...
     def effect(self):
+        raise NotImplementedError("overwrite this method in subclasses")
         # self.duplicateNodes(self.selected)
         # self.expandGroupsUnlinkClones(self.selected, True)
         self.objectsToPaths(self.svg.selected, True)
@@ -271,16 +269,16 @@ class Diffeo(PathModifier):
         self.expandGroups(self.svg.selected, True)
         self.objectsToPaths(self.svg.selected, True)
         self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
+        for node in self.svg.selected.values():
+            if isinstance(node, PathElement):
                 d = node.get('d')
-                p = inkex.parseCubicPath(d)
+                p = parseCubicPath(d)
 
                 for sub in p:
                     for ctlpt in sub:
                         self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
 
-                node.set('d', inkex.formatCubicPath(p))
+                node.set('d', formatCubicPath(p))
 
 
 if __name__ == '__main__':

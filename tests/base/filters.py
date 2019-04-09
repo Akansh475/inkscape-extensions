@@ -51,6 +51,12 @@ class CompareNumericFuzzy(Compare):
         contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)  # 50.0 -> 50
         return contents
 
+class CompareWithoutIds(Compare):
+    """Remove all ids from the svg"""
+    @staticmethod
+    def filter(contents):
+        return re.sub(br' id="([^"]*)"', b'', contents)
+
 class CompareWithPathSpace(Compare):
     """Make sure that path segment commands have spaces around them"""
     @staticmethod

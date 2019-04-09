@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 # coding=utf-8
+#
+# Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# barraud@math.univ-lille1.fr
 """
-Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-barraud@math.univ-lille1.fr
-
-Quick description:
 This script deforms an object (the pattern) along other paths (skeletons)...
 The first selected object is the pattern
 the last selected ones are the skeletons.
@@ -34,14 +33,13 @@ they move and rotate, deforming the pattern.
 import copy
 import random
 
-from lxml import etree
-
 import inkex
 import pathmodifier
 from inkex.localize import _
 from inkex.utils import inkbool
-import simpletransform
-
+from inkex.transforms import Transform
+from inkex.cubic_paths import parseCubicPath
+from inkex.elements import Group, Use
 
 def flipxy(path):
     for pathcomp in path:
@@ -100,7 +98,7 @@ def linearize(p, tolerance=0.001):
 
 class PathScatter(pathmodifier.Diffeo):
     def __init__(self):
-        pathmodifier.Diffeo.__init__(self)
+        super(PathScatter, self).__init__()
         self.arg_parser.add_argument("--title")
         self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0, help="normal offset")
         self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0, help="tangential offset")
@@ -124,28 +122,28 @@ class PathScatter(pathmodifier.Diffeo):
 
     def prepareSelectionList(self):
 
-        idList = self.document.get_z_selected()
+        id_list = list(self.svg.get_z_selected())
 
         # first selected->pattern, all but first selected-> skeletons
         # id = self.options.ids[-1]
-        id = idList[-1]
-        self.patternNode = self.selected[id]
+        sid = id_list[-1]
+        self.patternNode = self.svg.selected[sid]
 
-        self.gNode = etree.Element('{http://www.w3.org/2000/svg}g')
+        self.gNode = Group()
         self.patternNode.getparent().append(self.gNode)
 
         if self.options.copymode == "copy":
-            duplist = self.duplicateNodes({id: self.patternNode})
+            duplist = self.duplicateNodes({sid: self.patternNode})
             self.patternNode = list(duplist.values())[0]
 
         # TODO: allow 4th option: duplicate the first copy and clone the next ones.
         if "%s" % self.options.copymode == "clone":
-            self.patternNode = etree.Element('{http://www.w3.org/2000/svg}use')
-            self.patternNode.set('{http://www.w3.org/1999/xlink}href', "#%s" % id)
+            self.patternNode = Use()
+            self.patternNode.set('xlink:href', "#" + sid)
             self.gNode.append(self.patternNode)
 
-        self.skeletons = self.selected
-        del self.skeletons[id]
+        self.skeletons = dict(self.svg.selected)
+        del self.skeletons[sid]
         self.expandGroupsUnlinkClones(self.skeletons, True, False)
         self.objectsToPaths(self.skeletons, False)
 
@@ -199,19 +197,19 @@ class PathScatter(pathmodifier.Diffeo):
         mat = [[1, 0, -(bbox[0] + bbox[1]) / 2], [0, 1, -(bbox[2] + bbox[3]) / 2]]
         if self.options.vertical:
             bbox = [-bbox[3], -bbox[2], bbox[0], bbox[1]]
-            mat = simpletransform.composeTransform([[0, -1, 0], [1, 0, 0]], mat)
+            mat = (Transform([[0, -1, 0], [1, 0, 0]]) * Transform(mat)).matrix
         mat[1][2] += self.options.noffset
-        inkex.applyTransformToNode(mat, self.patternNode)
+        self.patternNode.transform *= mat
 
         width = bbox[1] - bbox[0]
         dx = width + self.options.space
 
         # check if group and expand it
         patternList = []
-        if self.options.grouppick and (self.patternNode.tag == inkex.addNS('g', 'svg') or self.patternNode.tag == 'g'):
-            mat = simpletransform.parseTransform(self.patternNode.get("transform"))
+        if self.options.grouppick and isinstance(self.patternNode, Group):
+            mat = self.patternNode.transform
             for child in self.patternNode:
-                inkex.applyTransformToNode(mat, child)
+                child.transform *= mat
                 patternList.append(child)
         else:
             patternList.append(self.patternNode)
@@ -219,7 +217,7 @@ class PathScatter(pathmodifier.Diffeo):
 
         counter = 0
         for skelnode in self.skeletons.values():
-            self.curSekeleton = parsecubicPath(skelnode.get('d'))
+            self.curSekeleton = parseCubicPath(skelnode.get('d'))
             for comp in self.curSekeleton:
                 self.skelcomp, self.lengths = linearize(comp)
                 # !!!!>----> TODO: really test if path is closed! end point==start point is not enough!
@@ -251,9 +249,9 @@ class PathScatter(pathmodifier.Diffeo):
                     clone.set("id", self.svg.get_unique_id(myid))
                     self.gNode.append(clone)
 
-                    inkex.applyTransformToNode(mat, clone)
-
+                    clone.transform *= mat
                     s += dx
+
         self.patternNode.getparent().remove(self.patternNode)
 
 

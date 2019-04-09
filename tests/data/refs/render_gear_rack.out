@@ -14,7 +14,7 @@ dpi: 96
 layout-disposition: bg-el-norepeat
 layout-position-anchor: tl</desc>
     </rect>
-  <g transform="translate(202.7349,518.83014)" inkscape:label="RackGear100.0"><path d="M0.000,0.000L3.640,10.000L10.000,10.000L13.640,0.000L20.000,0.000L23.640,10.000L30.000,10.000L33.640,0.000L40.000,0.000L43.640,10.000L50.000,10.000L53.640,0.000L60.000,0.000L63.640,10.000L70.000,10.000L73.640,0.000L80.000,0.000L83.640,10.000L90.000,10.000L93.640,0.000" style="stroke:#000000;stroke-width:1.0;fill:none"/></g></g>
+  <svg:g transform="translate(202.735, 481.17)"><path d="M0.000,0.000L3.640,10.000L10.000,10.000L13.640,0.000L20.000,0.000L23.640,10.000L30.000,10.000L33.640,0.000L40.000,0.000L43.640,10.000L50.000,10.000L53.640,0.000L60.000,0.000L63.640,10.000L70.000,10.000L73.640,0.000L80.000,0.000L83.640,10.000L90.000,10.000L93.640,0.000" style="stroke:#000000;fill:none;stroke-width:1.0"/></svg:g></g>
   <g inkscape:groupmode="layer" id="layer2" inkscape:label="Slide2" style="display:inline">
     <circle style="display:inline;fill:#000080;stroke:none" id="c1" cx="150" cy="450" r="50" inkscape:label="#path3736"/>
     <ellipse style="display:inline;fill:none;stroke:#ff0000;stroke-width:16" id="c2" cx="400" cy="450" rx="100" ry="50" inkscape:label="#path3738"/>

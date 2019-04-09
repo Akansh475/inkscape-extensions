@@ -129,6 +129,15 @@ class SvgDocumentElement(BaseElement):
             self.insert(0, nvs[0])
         return nvs[0]
 
+    @property
+    def defs(self):
+        """Return the svg defs meta element container"""
+        defs = self.xpath('//svg:defs')
+        if not defs:
+            defs = [Defs()]
+            self.insert(0, defs[0])
+        return defs[0]
+
     def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""
         try:

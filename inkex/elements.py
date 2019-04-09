@@ -309,6 +309,9 @@ class Use(BaseElement):
         """Returns the referred to element if available"""
         return self.root.getElementById(self.get('xlink:href').strip('#'))
 
+class ClipPath(BaseElement):
+    """A path used to clip objects"""
+    tag_name = 'clipPath'
 
 class Defs(BaseElement):
     """An header defs element, one per document"""

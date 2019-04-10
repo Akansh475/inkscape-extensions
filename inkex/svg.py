@@ -91,6 +91,10 @@ class SvgDocumentElement(BaseElement):
         ret = sum([node.bounding_box() for node in self.selected.values()])
         return BoundingBox(None) if ret == 0 else ret
 
+    def get_page_bbox(self):
+        """Gets the page dimentions as a bbox"""
+        return BoundingBox((0, float(self.width)), (0, float(self.height)))
+
     def get_first_selected(self):
         """Returns the first item in the selected list"""
         if self.selected:

@@ -9,6 +9,7 @@ from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
 class Edge3dBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Edge3d
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
+    comparisons = [('--id=p1', '--id=r3'),]
 
     def test_basic(self):
         args = ['--id=edgeme',

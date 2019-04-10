@@ -28,7 +28,6 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import random
-import sys
 from collections import OrderedDict
 
 import lxml
@@ -36,6 +35,7 @@ from lxml import etree
 
 from .units import discover_unit, convert_unit, render_unit
 from .utils import removeNS
+from .transforms import BoundingBox
 from .elements import ( # pylint: disable=unused-import
     BaseElement, OtherElements, Group, PathElement, Points, Rectangle, Image,
     Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide, Tspan, Marker
@@ -84,7 +84,8 @@ class SvgDocumentElement(BaseElement):
 
     def get_selected_bbox(self):
         """Gets the bounding box of the selected items"""
-        return sum([node.bounding_box() for node in self.selected.values()])
+        ret = sum([node.bounding_box() for node in self.selected.values()])
+        return BoundingBox(None) if ret == 0 else ret
 
     def get_current_layer(self):
         """Returns the currently selected layer"""

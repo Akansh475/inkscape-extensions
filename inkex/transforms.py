@@ -249,6 +249,17 @@ class Scale(object):  # pylint: disable=too-few-public-methods
             return self + other
         return self
 
+    def __mul__(self, other):
+        new = Scale(self)
+        if other is not None:
+            new *= other
+        return new
+
+    def __imul__(self, other):
+        self.minimum *= other
+        self.maximum *= other
+        return self
+
     def __iter__(self):
         yield self.minimum
         yield self.maximum
@@ -316,8 +327,21 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
             return self + other
         return self
 
+    def __mul__(self, other):
+        new = BoundingBox(self.x, self.y)
+        if other is not None:
+            new *= other
+        return new
+
+    def __imul__(self, other):
+        self.x *= other
+        self.y *= other
+        return self
+
     def __eq__(self, other):
-        return tuple(self) == tuple(other)
+        if isinstance(other, (tuple, BoundingBox)):
+            return tuple(self) == tuple(other)
+        return False
 
     def __iter__(self):
         yield self.x.minimum

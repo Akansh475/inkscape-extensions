@@ -28,12 +28,13 @@ class Style(OrderedDict):
     """A list of style directives"""
 
     def __init__(self, style=None, callback=None, **kw):
-        self.callback = callback
+        self.callback = None
         style = style or kw
         if isinstance(style, str):
             style = self.parse_str(style)
         # Should accept dict, Style, parsed string, list etc.
         super(Style, self).__init__(style)
+        self.callback = callback
 
     @staticmethod
     def parse_str(style):
@@ -58,7 +59,16 @@ class Style(OrderedDict):
 
     def __iadd__(self, other):
         """Add style to this style, the same as style.update(dict)"""
-        self.update(Style(other))
+        self.update(other)
+        return self
+
+    def update(self, other):
+        """Make sure callback is called when updating"""
+        super(Style, self).update(Style(other))
         if self.callback is not None:
             self.callback(self)
-        return self
+
+    def __setitem__(self, key, value):
+        super(Style, self).__setitem__(key, value)
+        if self.callback is not None:
+            self.callback(self)

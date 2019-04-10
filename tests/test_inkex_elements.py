@@ -62,7 +62,7 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.get('transform'), ScaleTransform(1.06667))
         self.assertIn(b'transform', etree.tostring(elem))
 
-    def test_in_place_updates(self):
+    def test_in_place_transforms(self):
         """Do style and transforms update correctly"""
         elem = self.svg.getElementById('D')
         self.assertEqual(type(elem.transform), Transform)
@@ -72,6 +72,16 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.transform, Transform())
         self.assertEqual(elem.get('transform'), None)
         self.assertNotIn(b'transform', etree.tostring(elem))
+
+    def test_in_place_style(self):
+        """Do styles update when we set them"""
+        elem = self.svg.getElementById('D')
+        elem.style['fill'] = 'purpleberry'
+        self.assertEqual(elem.get('style'), 'fill:purpleberry')
+        elem.style = Style(stroke='gammon')
+        self.assertEqual(elem.get('style'), 'stroke:gammon')
+        elem.style.update('grape:2;strawberry:nice;')
+        self.assertEqual(elem.get('style'), 'stroke:gammon;grape:2;strawberry:nice')
 
     def test_random_id(self):
         """Test setting a random id"""

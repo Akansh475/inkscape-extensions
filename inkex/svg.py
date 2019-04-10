@@ -57,13 +57,17 @@ class SvgDocumentElement(BaseElement):
             self.ids = set(self.xpath('//@id'))
         return self.ids
 
-    def get_unique_id(self, old_id):
+    def get_unique_id(self, prefix, size=4):
         """Generate a new id from an existing old_id"""
         ids = self.get_ids()
-        while old_id in ids:
-            old_id += str(random.randint(0, 9))
-        self.ids.add(old_id)
-        return old_id
+        new_id = None
+        _from = 10 ** size - 1
+        _to = 10 ** size
+        while new_id is None or new_id in ids:
+            # Do not use randint because py2/3 incompatibility
+            new_id = prefix + str(int(random.random() * _from - _to) + _to)
+        self.ids.add(new_id)
+        return new_id
 
     def set_selected(self, *ids):
         """Sets the currently selected elements to these ids"""
@@ -86,6 +90,12 @@ class SvgDocumentElement(BaseElement):
         """Gets the bounding box of the selected items"""
         ret = sum([node.bounding_box() for node in self.selected.values()])
         return BoundingBox(None) if ret == 0 else ret
+
+    def get_first_selected(self):
+        """Returns the first item in the selected list"""
+        if self.selected:
+            return list(self.selected.values())[0]
+        return None
 
     def get_current_layer(self):
         """Returns the currently selected layer"""

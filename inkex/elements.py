@@ -112,6 +112,20 @@ class BaseElement(etree.ElementBase):
                 return
         return super(BaseElement, self).set(addNS(name), value)
 
+    def add(self, *children):
+        """
+        Like append, but will do multiple children and well return
+        children or only child
+        """
+        for child in children:
+            self.append(child)
+        return children if len(children) > 1 else children[0]
+
+    def set_random_id(self, suffix=None, size=4):
+        """Sets the id attribute if it's not already set"""
+        root = self.getroottree().getroot()
+        self.set('id', root.get_unique_id(suffix, size=size))
+
     @property
     def path(self):
         """Gets the outline or path of the element, this can be a simple bounding box for most"""

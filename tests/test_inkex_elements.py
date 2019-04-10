@@ -5,8 +5,8 @@ Test elements extra logic from svg xml lxml custom classes.
 """
 
 from lxml import etree
-from lxml import objectify
 
+from inkex.elements import Pattern
 from inkex.transforms import Transform, ScaleTransform
 from inkex.styles import Style
 from tests.base import TestCase
@@ -17,6 +17,7 @@ class ElementTestCase(TestCase):
     tag = 'svg'
 
     def setUp(self):
+        super(ElementTestCase, self).setUp()
         self.svg = svg_file(self.data_file('svg', 'complextransform.test.svg'))
         self.elem = self.svg.getElement('//svg:{}'.format(self.tag))
 
@@ -72,6 +73,14 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.get('transform'), None)
         self.assertNotIn(b'transform', etree.tostring(elem))
 
+    def test_random_id(self):
+        """Test setting a random id"""
+        elem = self.svg.getElementById('D')
+        elem.set_random_id('Thing')
+        self.assertEqual(elem.get('id'), 'Thing5815')
+        elem.set_random_id('Thing', size=2)
+        self.assertEqual(elem.get('id'), 'Thing85')
+
 class PathElementTestCase(ElementTestCase):
     tag = 'path'
 
@@ -96,7 +105,15 @@ class PathElementTestCase(ElementTestCase):
         self.assertEqual(nolpe.get('inkscape:original-d', None), None)
         self.assertEqual(nolpe.get('d'), 'M 60 60 L 5 5')
 
+class PatternTestCase(ElementTestCase):
+    tag = 'pattern'
 
+    def test_pattern_transform(self):
+        """Patterns have a transformation of their own"""
+        pattern = Pattern()
+        self.assertEqual(pattern.patternTransform, Transform())
+        pattern.patternTransform.add_translate(10, 10)
+        self.assertEqual(pattern.get('patternTransform'), 'translate(10, 10)')
 
 class GroupTest(ElementTestCase):
     """Test extra functionality on a group element"""

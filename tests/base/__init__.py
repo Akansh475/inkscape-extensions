@@ -66,6 +66,17 @@ class TestCase(BaseCase):
         super(TestCase, self).__init__(*args, **kw)
         self._temp_dir = None
 
+    def setUp(self): # pylint: disable=invalid-name
+        """Make sure every test is seeded the same way"""
+        super(TestCase, self).setUp()
+        try:
+            # python3, with version 1 to get the same numbers
+            # as in python2 during tests.
+            random.seed(0x35f, version=1)
+        except TypeError:
+            # But of course this kwarg doesn't exist in python2
+            random.seed(0x35f)
+
     def tearDown(self):
         if self._temp_dir and os.path.isdir(self._temp_dir):
             shutil.rmtree(self._temp_dir)
@@ -150,17 +161,6 @@ class ComparisonMixin(object):
         (),
         ('--id=p1', '--id=r3'),
     ]
-
-    def setUp(self): # pylint: disable=invalid-name
-        """Make sure every test is seeded the same way"""
-        super(ComparisonMixin, self).setUp()
-        try:
-            # python3, with version 1 to get the same numbers
-            # as in python2 during tests.
-            random.seed(0x35f, version=1)
-        except TypeError:
-            # But of course this kwarg doesn't exist in python2
-            random.seed(0x35f)
 
     def test_all_comparisons(self):
         """Testing all comparisons"""

@@ -39,10 +39,14 @@ class BaseElement(etree.ElementBase):
     tag_name = 'none'
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
-    WRAPPED_ATTRS = {
-        'transform': Transform,
-        'style': Style,
-    }
+    WRAPPED_ATTRS = (
+        ('transform', Transform),
+        ('style', Style),
+    )
+    # We do this because python2 and python3 have different ways
+    # of combining two dictionaries that are incompatible.
+    # This allows us to update these with inheritance.
+    wrapped_attrs = property(lambda self: dict(self.WRAPPED_ATTRS))
 
     @classmethod
     def _subclasses(cls):
@@ -56,7 +60,8 @@ class BaseElement(etree.ElementBase):
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it's not available yet"""
-        if name in self.WRAPPED_ATTRS:
+        if name in self.wrapped_attrs:
+            cls = self.wrapped_attrs[name]
             # The reason we do this here and not in _init is because lxml
             # is inconsistant about when elements are initialised.
             # So we make this a lazy property.
@@ -66,14 +71,14 @@ class BaseElement(etree.ElementBase):
                 else:
                     self.attrib.pop(name, None)
 
-            value = self.WRAPPED_ATTRS[name](self.attrib.get(name, None), callback=_set_attr)
+            value = cls(self.attrib.get(name, None), callback=_set_attr)
             setattr(self, name, value)
             return value
         raise AttributeError("Can't find attribute {}".format(name))
 
     def __setattr__(self, name, value):
         """Set the attribute, update the attrib if needed"""
-        if name in self.WRAPPED_ATTRS:
+        if name in self.wrapped_attrs:
             # Don't call hasattr or getattr (infinate loop)
             if name in self.__dict__:
                 del self.__dict__[name].callback
@@ -89,7 +94,7 @@ class BaseElement(etree.ElementBase):
 
     def get(self, name, default=None):
         """Get element attribute named, with addNS support."""
-        if name in self.WRAPPED_ATTRS:
+        if name in self.wrapped_attrs:
             value = getattr(self, name, None)
             # We check the boolean nature of the value, because empty
             # transformations and style attributes are equiv to not-existing
@@ -250,6 +255,11 @@ class PathElement(BaseElement):
             self.set('inkscape:original-d', str(Path(path)))
         else:
             self.path = path
+
+class Pattern(BaseElement):
+    """Patern element which is used in the def to control repeating fills"""
+    tag_name = 'pattern'
+    WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
 class Points(BaseElement):
     """Provide a useful extension for points elements"""

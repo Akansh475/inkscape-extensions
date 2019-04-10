@@ -210,7 +210,7 @@ class Color(list):
 
         self.space = space
         for val in color:
-            self.append(val)
+            self.append(max(val, 0))
 
     def append(self, val):
         """Append a value to the local list"""
@@ -306,6 +306,8 @@ class Color(list):
     def to_floats(self):
         """Returns the colour values as percentage floats (0.0 - 1.0)"""
         return [val / 255.0 for val in self]
+
+
 
 
 def rgb_to_hsl(red, green, blue):

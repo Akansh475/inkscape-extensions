@@ -203,7 +203,6 @@ class OtherElements(BaseElement):
     """A bunch of other svg elements"""
     tag_names = [
         'desc',
-        'fegaussianblur',
         'filter',
         'flowPara',
         'flowRegion',
@@ -221,6 +220,14 @@ class OtherElements(BaseElement):
         """Other elements have no bounding box"""
         return BoundingBox(None)
 
+class FilterPrimitive(BaseElement):
+    """A bunch of different filter primitives"""
+    tag_names = [
+        'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite',
+        'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feFlood',
+        'feGaussianBlur', 'feImage', 'feMerge', 'feMorphology', 'feOffset',
+        'feSpecularLighting', 'feTile', 'feTurbulence'
+    ]
 
 class Group(BaseElement):
     """Any group element (layer or regular group)"""

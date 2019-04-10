@@ -210,7 +210,7 @@ class Color(list):
 
         self.space = space
         for val in color:
-            self.append(max(val, 0))
+            self.append(val)
 
     def append(self, val):
         """Append a value to the local list"""
@@ -232,7 +232,7 @@ class Color(list):
             val *= 255
 
         if isinstance(val, (int, float)):
-            super(Color, self).append(end_type(val))
+            super(Color, self).append(max(end_type(val), 0))
 
     @staticmethod
     def parse_str(color):

@@ -29,6 +29,7 @@ from operator import add, mul
 
 from .transforms import Transform, BoundingBox, Scale, cubic_extrema
 from .utils import X, Y, classproperty, strargs
+from .cubic_paths import CubicSuperPath, unCubicSuperPath, ArcToPath
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
@@ -240,9 +241,13 @@ class Arc(PathCommand):
 
     def bounding_box(self):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
-        warnings.warn("Bad calculation for arc bounding box requested.")
-        # This probably needs to be run through inkex.cubic_paths.ArcToPath
-        return super(Arc, self).bounding_box()
+        raise ValueError("Arcs can not have bounding boxes, convert to bezier first.")
+
+    def to_curves(self, previous=(0, 0)):
+        """Convert this arc into bezier curves"""
+        cubic = ArcToPath(list(previous), list(self))
+        for seg in unCubicSuperPath([cubic]):
+            yield PathCommand(seg[0], *seg[1])
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""
@@ -285,9 +290,7 @@ class Path(list):
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
-        acopy = copy.copy(self)
-        acopy.to_absolute()
-        return sum([seg.bounding_box() for seg in acopy if seg])
+        return sum([seg.bounding_box() for seg in self.to_absolute(curves=True) if seg])
 
     def append(self, cmd):
         """Append a command to this path including any chained commands"""
@@ -331,14 +334,28 @@ class Path(list):
             self[i] = seg.transform(transform)
         return self
 
-    def to_absolute(self, factor=1):
+    def reverse(self):
+        """Returns a reversed path"""
+        pass
+
+    def to_absolute(self, factor=1, curves=False):
         """Convert this path to use only absolute coordinates"""
         pen = (0.0, 0.0)
-        for i, seg in enumerate(self):
-            if seg.isrelative() != (factor == -1):
-                self[i] = seg.translate((pen[0] * factor, pen[1] * factor))
-                self[i].cmd = self[i].cmd.swapcase()
-            pen = self[i].get_pen(pen)
+        new_path = Path()
+        for seg in self:
+            if curves and isinstance(seg, Arc):
+                # Force arcs to curves here
+                segs = list(seg.to_curves(pen))
+            elif seg.isrelative() != (factor == -1):
+                segs = [PathCommand(
+                    seg.cmd.swapcase(),
+                    *seg.translate((pen[0] * factor, pen[1] * factor)))]
+            else:
+                segs = [seg]
+
+            new_path.extend(segs)
+            pen = new_path[-1].get_pen(pen)
+        return new_path
 
     def to_relative(self):
         """Convert this path to use only relative coordinates"""

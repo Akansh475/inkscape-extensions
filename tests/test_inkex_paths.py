@@ -98,7 +98,7 @@ class PathTest(TestCase):
         Bounding box around a circle with a radius of 50
         it should be from 0,0 -> 100, 100
         """
-        self.assertEqual((0, 85.355341, 0, 85.355333), # XXX Should be 100, 100
+        self.assertEqual((-3.94453839208415e-06, 99.99999988134624, -4.881549508464545, 104.88155417512705),
                          Path('M 85.355333,14.644651 '
                               'A 50,50 0 0 1 85.355333,85.355341'
                               ' 50,50 0 0 1 14.644657,85.355341'
@@ -141,26 +141,21 @@ class PathTest(TestCase):
     def test_absolute(self):
         """Paths can be converted to absolute"""
         ret = Path("M 100 100 l 10 10 10 10 10 10")
-        ret.to_absolute()
-        self._assertPath(ret, "M 100 100 L 110 110 L 120 120 L 130 130")
+        self._assertPath(ret.to_absolute(), "M 100 100 L 110 110 L 120 120 L 130 130")
 
         ret = Path("M 100 100 h 10 10 10 v 10 10 10")
-        ret.to_absolute()
-        self._assertPath(ret, "M 100 100 H 110 H 120 H 130 V 110 V 120 V 130")
+        self._assertPath(ret.to_absolute(), "M 100 100 H 110 H 120 H 130 V 110 V 120 V 130")
 
         ret = Path("M 150,150 a 76,55 0 1 1 283,128")
-        ret.to_absolute()
-        self._assertPath(ret, "M 150 150 A 76 55 0 1 1 433 278")
+        self._assertPath(ret.to_absolute(), "M 150 150 A 76 55 0 1 1 433 278")
 
     def test_relative(self):
         """Paths can be converted to relative"""
         ret = Path("M 100 100 L 110 120 140 140 300 300")
-        ret.to_relative()
-        self._assertPath(ret, "m 100 100 l 10 20 l 30 20 l 160 160")
+        self._assertPath(ret.to_relative(), "m 100 100 l 10 20 l 30 20 l 160 160")
 
         ret = Path("M 150,150 A 76,55 0 1 1 433,278")
-        ret.to_relative()
-        self._assertPath(ret, "m 150 150 a 76 55 0 1 1 283 128")
+        self._assertPath(ret.to_relative(), "m 150 150 a 76 55 0 1 1 283 128")
 
     def test_rotate(self):
         """Paths can be rotated"""

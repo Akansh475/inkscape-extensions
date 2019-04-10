@@ -23,9 +23,8 @@ Example filltext sentences generated over at http://lipsum.com/
 
 import random
 
-from lxml import etree
-
-import inkex
+from inkex.elements import Group, FlowRoot, FlowRegion, FlowPara, Rectangle
+from inkex.generic import EffectExtension
 
 foo = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ',
@@ -178,9 +177,9 @@ foo = [
 ]
 
 
-class MyEffect(inkex.Effect):
+class LorumImpsum(EffectExtension):
     def __init__(self):
-        super(MyEffect, self).__init__()
+        super(LorumImpsum, self).__init__()
         self.arg_parser.add_argument("--title")
         self.arg_parser.add_argument("-n", "--numberofparagraphs",
                                      type=int,
@@ -216,28 +215,33 @@ class MyEffect(inkex.Effect):
 
     def addText(self, node):
         for i in range(self.options.num):
-            para = etree.SubElement(node, inkex.addNS('flowPara', 'svg'))
+            para = node.add(FlowPara())
             para.text = self.makePara()
-            etree.SubElement(node, inkex.addNS('flowPara', 'svg'))
+            node.append(FlowPara())
 
     def effect(self):
         found = 0
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('flowRoot', 'svg'):
+        for node in self.svg.selected.values():
+            if isinstance(node, FlowRoot):
                 found += 1
                 if found == 1:
                     self.addText(node)
+
         if found == 0:
-            # inkex.debug('No "flowRoot" elements selected. Unable to add text.')
-            svg = self.document.getroot()
-            gattribs = {inkex.addNS('label', 'inkscape'): 'lorem ipsum', inkex.addNS('groupmode', 'inkscape'): 'layer'}
-            g = etree.SubElement(svg, inkex.addNS('g', 'svg'), gattribs)
-            flowRoot = etree.SubElement(g, inkex.addNS('flowRoot', 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
-            flowRegion = etree.SubElement(flowRoot, inkex.addNS('flowRegion', 'svg'))
-            rattribs = {'x': '0', 'y': '0', 'width': svg.get('width'), 'height': svg.get('height')}
-            rect = etree.SubElement(flowRegion, inkex.addNS('rect', 'svg'), rattribs)
-            self.addText(flowRoot)
+            group = self.svg.add(Group())
+            group.set('inkscape:label', 'lorum ipsum')
+            group.set('inkscape:groupmode', 'layer')
+            root = group.add(FlowRoot())
+            root.set('xml:space', 'preserve')
+            region = root.add(FlowRegion())
+
+            region.add(Rectangle(x='0', y='0',\
+                width=str(self.svg.width),\
+                height=str(self.svg.height)))
+
+            self.addText(root)
+            self.svg.append(group)
 
 
 if __name__ == '__main__':
-    MyEffect().run()
+    LorumImpsum().run()

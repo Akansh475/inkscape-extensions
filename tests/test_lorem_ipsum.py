@@ -1,6 +1,7 @@
 # coding=utf-8
-from lorem_ipsum import MyEffect
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from lorem_ipsum import LorumImpsum
+from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
-class MyEffectBasicTest(InkscapeExtensionTestMixin, TestCase):
-    effect_class = MyEffect
+class LorumImpsumBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect_class = LorumImpsum
+    comparisons = [()]

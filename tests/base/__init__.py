@@ -154,7 +154,13 @@ class ComparisonMixin(object):
     def setUp(self): # pylint: disable=invalid-name
         """Make sure every test is seeded the same way"""
         super(ComparisonMixin, self).setUp()
-        random.seed(0x35f)
+        try:
+            # python3, with version 1 to get the same numbers
+            # as in python2 during tests.
+            random.seed(0x35f, version=1)
+        except TypeError:
+            # But of course this kwarg doesn't exist in python2
+            random.seed(0x35f)
 
     def test_all_comparisons(self):
         """Testing all comparisons"""

@@ -104,9 +104,9 @@ class BaseElement(etree.ElementBase):
 
     def set(self, name, value):
         """Set element attribute named, with addNS support."""
-        if name in self.WRAPPED_ATTRS:
+        if name in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
-            setattr(self, name, self.WRAPPED_ATTRS[name](value))
+            setattr(self, name, self.wrapped_attrs[name](value))
             value = str(getattr(self, name))
             if not value:
                 return
@@ -125,7 +125,7 @@ class BaseElement(etree.ElementBase):
         raise NotImplementedError("Path should be provided by svg element {}."
                                   .format(type(self).__name__))
 
-    def set_path(self):
+    def set_path(self, path):
         raise NotImplementedError("Path should be set by svg element {}."
                                   .format(type(self).__name__))
 

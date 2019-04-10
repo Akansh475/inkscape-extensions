@@ -21,11 +21,8 @@
 # THE SOFTWARE.
 #
 
-#import csv
 import math
-#import os
 import random
-#from subprocess import PIPE, Popen
 
 import inkex
 from inkex.svg import SvgDocumentElement

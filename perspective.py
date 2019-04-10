@@ -20,12 +20,11 @@
 Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
 
-from subprocess import PIPE, Popen
-
 import inkex
 from inkex.paths import Path
 from inkex.elements import PathElement, Group
 from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
+from inkex.generic import EffectExtension
 from inkex.localize import _
 
 X, Y = range(2)
@@ -37,7 +36,7 @@ except:
     np = None
 
 
-class Project(inkex.Effect):
+class Project(EffectExtension):
     def effect(self):
         if np is None:
             return inkex.errormsg(

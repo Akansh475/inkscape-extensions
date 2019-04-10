@@ -27,7 +27,6 @@ printing marks in Inkscape.
 """
 
 import math
-from subprocess import PIPE, Popen
 
 from lxml import etree
 
@@ -172,7 +171,7 @@ class PrintingMarks(inkex.Effect):
             'id': name,
             'transform': 'translate(' + str(cx) + ',' + str(cy) +
                          ') rotate(' + str(rotate) + ')'})
-        l = min(self.mark_size / 3, max(self.area_w, self.area_h) / 45)
+        l = min(self.mark_size / 3, max(bbox.width, bbox.height) / 45)
         for bar in [{'c': '*', 'stroke': '#000', 'x': 0, 'y': -(l + 1)},
                     {'c': 'r', 'stroke': '#0FF', 'x': 0, 'y': 0},
                     {'c': 'g', 'stroke': '#F0F', 'x': (l * 11) + 1, 'y': -(l + 1)},
@@ -197,66 +196,17 @@ class PrintingMarks(inkex.Effect):
                 r = etree.SubElement(g, 'rect', r_att)
                 i += 0.1
 
-    def get_selection_area(self):
-        scale = self.svg.unittouu('1px')  # convert to document units
-        sel_area = {}
-        min_x, min_y, max_x, max_y = False, False, False, False
-        for id in self.options.ids:
-            sel_area[id] = {}
-            for att in ["x", "y", "width", "height"]:
-                args = ["inkscape", "-I", id, "--query-" + att, self.svg_file]
-                sel_area[id][att] = scale * float(Popen(args, stdout=PIPE, stderr=PIPE).communicate()[0])
-            current_min_x = sel_area[id]["x"]
-            current_min_y = sel_area[id]["y"]
-            current_max_x = sel_area[id]["x"] + sel_area[id]["width"]
-            current_max_y = sel_area[id]["y"] + sel_area[id]["height"]
-            if not min_x:
-                min_x = current_min_x
-            if not min_y:
-                min_y = current_min_y
-            if not max_x:
-                max_x = current_max_x
-            if not max_y:
-                max_y = current_max_y
-            if current_min_x < min_x:
-                min_x = current_min_x
-            if current_min_y < min_y:
-                min_y = current_min_y
-            if current_max_x > max_x:
-                max_x = current_max_x
-            if current_max_y > max_y:
-                max_y = current_max_y
-            # inkex.errormsg( '>> '+ id +
-            #                ' min_x:'+ str(min_x) +
-            #                ' min_y:'+ str(min_y) +
-            #                ' max_x:'+ str(max_x) +
-            #                ' max_y:'+ str(max_y) )
-        self.area_x1 = min_x
-        self.area_y1 = min_y
-        self.area_x2 = max_x
-        self.area_y2 = max_y
-        self.area_w = max_x - min_x
-        self.area_h = max_y - min_y
-
     def effect(self):
         self.mark_size = self.svg.unittouu('1cm')
         self.min_mark_margin = self.svg.unittouu('3mm')
 
         if self.options.where_to_crop == 'selection':
-            self.get_selection_area()
-            # inkex.errormsg('Sory, the crop to selection is a TODO feature')
-            # exit(1)
+            bbox = self.svg.get_selected_bbox()
         else:
-            svg = self.document.getroot()
-            self.area_w = self.svg.unittouu(svg.get('width'))
-            self.area_h = self.svg.unittouu(svg.attrib['height'])
-            self.area_x1 = 0
-            self.area_y1 = 0
-            self.area_x2 = self.area_w
-            self.area_y2 = self.area_h
+            bbox = self.svg.get_page_bbox()
 
         # Get SVG document dimensions
-        # self.width must be replaced by self.area_x2. same to others.
+        # self.width must be replaced by bbox.right. same to others.
         svg = self.document.getroot()
 
         # Convert parameters to user unit
@@ -285,14 +235,14 @@ class PrintingMarks(inkex.Effect):
             bmr = br - offset
 
         # Define the new document limits
-        offset_left = self.area_x1 - offset
-        offset_right = self.area_x2 + offset
-        offset_top = self.area_y1 - offset
-        offset_bottom = self.area_y2 + offset
+        offset_left = bbox.left - offset
+        offset_right = bbox.right + offset
+        offset_top = bbox.top - offset
+        offset_bottom = bbox.bottom + offset
 
         # Get middle positions
-        middle_vertical = self.area_y1 + (self.area_h / 2)
-        middle_horizontal = self.area_x1 + (self.area_w / 2)
+        middle_vertical = bbox.top + (bbox.height / 2)
+        middle_horizontal = bbox.left + (bbox.width / 2)
 
         # Test if printing-marks layer existis
         layer = self.document.xpath(
@@ -315,35 +265,35 @@ class PrintingMarks(inkex.Effect):
             g_crops = etree.SubElement(layer, 'g', g_attribs)
 
             # Top left Mark
-            self.draw_crop_line(self.area_x1, offset_top,
-                                self.area_x1, offset_top - self.mark_size,
+            self.draw_crop_line(bbox.left, offset_top,
+                                bbox.left, offset_top - self.mark_size,
                                 'cropTL1', g_crops)
-            self.draw_crop_line(offset_left, self.area_y1,
-                                offset_left - self.mark_size, self.area_y1,
+            self.draw_crop_line(offset_left, bbox.top,
+                                offset_left - self.mark_size, bbox.top,
                                 'cropTL2', g_crops)
 
             # Top right Mark
-            self.draw_crop_line(self.area_x2, offset_top,
-                                self.area_x2, offset_top - self.mark_size,
+            self.draw_crop_line(bbox.right, offset_top,
+                                bbox.right, offset_top - self.mark_size,
                                 'cropTR1', g_crops)
-            self.draw_crop_line(offset_right, self.area_y1,
-                                offset_right + self.mark_size, self.area_y1,
+            self.draw_crop_line(offset_right, bbox.top,
+                                offset_right + self.mark_size, bbox.top,
                                 'cropTR2', g_crops)
 
             # Bottom left Mark
-            self.draw_crop_line(self.area_x1, offset_bottom,
-                                self.area_x1, offset_bottom + self.mark_size,
+            self.draw_crop_line(bbox.left, offset_bottom,
+                                bbox.left, offset_bottom + self.mark_size,
                                 'cropBL1', g_crops)
-            self.draw_crop_line(offset_left, self.area_y2,
-                                offset_left - self.mark_size, self.area_y2,
+            self.draw_crop_line(offset_left, bbox.bottom,
+                                offset_left - self.mark_size, bbox.bottom,
                                 'cropBL2', g_crops)
 
             # Bottom right Mark
-            self.draw_crop_line(self.area_x2, offset_bottom,
-                                self.area_x2, offset_bottom + self.mark_size,
+            self.draw_crop_line(bbox.right, offset_bottom,
+                                bbox.right, offset_bottom + self.mark_size,
                                 'cropBR1', g_crops)
-            self.draw_crop_line(offset_right, self.area_y2,
-                                offset_right + self.mark_size, self.area_y2,
+            self.draw_crop_line(offset_right, bbox.bottom,
+                                offset_right + self.mark_size, bbox.bottom,
                                 'cropBR2', g_crops)
 
         # Bleed Mark
@@ -354,35 +304,35 @@ class PrintingMarks(inkex.Effect):
             g_bleed = etree.SubElement(layer, 'g', g_attribs)
 
             # Top left Mark
-            self.draw_bleed_line(self.area_x1 - bl, offset_top - bmt,
-                                 self.area_x1 - bl, offset_top - bmt - self.mark_size,
+            self.draw_bleed_line(bbox.left - bl, offset_top - bmt,
+                                 bbox.left - bl, offset_top - bmt - self.mark_size,
                                  'bleedTL1', g_bleed)
-            self.draw_bleed_line(offset_left - bml, self.area_y1 - bt,
-                                 offset_left - bml - self.mark_size, self.area_y1 - bt,
+            self.draw_bleed_line(offset_left - bml, bbox.top - bt,
+                                 offset_left - bml - self.mark_size, bbox.top - bt,
                                  'bleedTL2', g_bleed)
 
             # Top right Mark
-            self.draw_bleed_line(self.area_x2 + br, offset_top - bmt,
-                                 self.area_x2 + br, offset_top - bmt - self.mark_size,
+            self.draw_bleed_line(bbox.right + br, offset_top - bmt,
+                                 bbox.right + br, offset_top - bmt - self.mark_size,
                                  'bleedTR1', g_bleed)
-            self.draw_bleed_line(offset_right + bmr, self.area_y1 - bt,
-                                 offset_right + bmr + self.mark_size, self.area_y1 - bt,
+            self.draw_bleed_line(offset_right + bmr, bbox.top - bt,
+                                 offset_right + bmr + self.mark_size, bbox.top - bt,
                                  'bleedTR2', g_bleed)
 
             # Bottom left Mark
-            self.draw_bleed_line(self.area_x1 - bl, offset_bottom + bmb,
-                                 self.area_x1 - bl, offset_bottom + bmb + self.mark_size,
+            self.draw_bleed_line(bbox.left - bl, offset_bottom + bmb,
+                                 bbox.left - bl, offset_bottom + bmb + self.mark_size,
                                  'bleedBL1', g_bleed)
-            self.draw_bleed_line(offset_left - bml, self.area_y2 + bb,
-                                 offset_left - bml - self.mark_size, self.area_y2 + bb,
+            self.draw_bleed_line(offset_left - bml, bbox.bottom + bb,
+                                 offset_left - bml - self.mark_size, bbox.bottom + bb,
                                  'bleedBL2', g_bleed)
 
             # Bottom right Mark
-            self.draw_bleed_line(self.area_x2 + br, offset_bottom + bmb,
-                                 self.area_x2 + br, offset_bottom + bmb + self.mark_size,
+            self.draw_bleed_line(bbox.right + br, offset_bottom + bmb,
+                                 bbox.right + br, offset_bottom + bmb + self.mark_size,
                                  'bleedBR1', g_bleed)
-            self.draw_bleed_line(offset_right + bmr, self.area_y2 + bb,
-                                 offset_right + bmr + self.mark_size, self.area_y2 + bb,
+            self.draw_bleed_line(offset_right + bmr, bbox.bottom + bb,
+                                 offset_right + bmr + self.mark_size, bbox.bottom + bb,
                                  'bleedBR2', g_bleed)
 
         # Registration Mark
@@ -394,26 +344,26 @@ class PrintingMarks(inkex.Effect):
 
             # Left Mark
             cx = max(bml + offset, self.min_mark_margin)
-            self.draw_reg_marks(self.area_x1 - cx - (self.mark_size / 2),
+            self.draw_reg_marks(bbox.left - cx - (self.mark_size / 2),
                                 middle_vertical - self.mark_size * 1.5,
                                 '0', 'regMarkL', g_center)
 
             # Right Mark
             cx = max(bmr + offset, self.min_mark_margin)
-            self.draw_reg_marks(self.area_x2 + cx + (self.mark_size / 2),
+            self.draw_reg_marks(bbox.right + cx + (self.mark_size / 2),
                                 middle_vertical - self.mark_size * 1.5,
                                 '180', 'regMarkR', g_center)
 
             # Top Mark
             cy = max(bmt + offset, self.min_mark_margin)
             self.draw_reg_marks(middle_horizontal,
-                                self.area_y1 - cy - (self.mark_size / 2),
+                                bbox.top - cy - (self.mark_size / 2),
                                 '90', 'regMarkT', g_center)
 
             # Bottom Mark
             cy = max(bmb + offset, self.min_mark_margin)
             self.draw_reg_marks(middle_horizontal,
-                                self.area_y2 + cy + (self.mark_size / 2),
+                                bbox.bottom + cy + (self.mark_size / 2),
                                 '-90', 'regMarkB', g_center)
 
         # Star Target
@@ -423,27 +373,27 @@ class PrintingMarks(inkex.Effect):
                          'id': 'StarTarget'}
             g_center = etree.SubElement(layer, 'g', g_attribs)
 
-            if self.area_h < self.area_w:
+            if bbox.height < bbox.width:
                 # Left Star
                 cx = max(bml + offset, self.min_mark_margin)
-                self.draw_star_target(self.area_x1 - cx - (self.mark_size / 2),
+                self.draw_star_target(bbox.left - cx - (self.mark_size / 2),
                                       middle_vertical,
                                       'starTargetL', g_center)
                 # Right Star
                 cx = max(bmr + offset, self.min_mark_margin)
-                self.draw_star_target(self.area_x2 + cx + (self.mark_size / 2),
+                self.draw_star_target(bbox.right + cx + (self.mark_size / 2),
                                       middle_vertical,
                                       'starTargetR', g_center)
             else:
                 # Top Star
                 cy = max(bmt + offset, self.min_mark_margin)
                 self.draw_star_target(middle_horizontal - self.mark_size * 1.5,
-                                      self.area_y1 - cy - (self.mark_size / 2),
+                                      bbox.top - cy - (self.mark_size / 2),
                                       'starTargetT', g_center)
                 # Bottom Star
                 cy = max(bmb + offset, self.min_mark_margin)
                 self.draw_star_target(middle_horizontal - self.mark_size * 1.5,
-                                      self.area_y2 + cy + (self.mark_size / 2),
+                                      bbox.bottom + cy + (self.mark_size / 2),
                                       'starTargetB', g_center)
 
         # Colour Bars
@@ -453,16 +403,16 @@ class PrintingMarks(inkex.Effect):
                          'id': 'PrintingColourBars'}
             g_center = etree.SubElement(layer, 'g', g_attribs)
 
-            if self.area_h > self.area_w:
+            if bbox.height > bbox.width:
                 # Left Bars
                 cx = max(bml + offset, self.min_mark_margin)
-                self.draw_coluor_bars(self.area_x1 - cx - (self.mark_size / 2),
+                self.draw_coluor_bars(bbox.left - cx - (self.mark_size / 2),
                                       middle_vertical + self.mark_size,
                                       90,
                                       'PrintingColourBarsL', g_center)
                 # Right Bars
                 cx = max(bmr + offset, self.min_mark_margin)
-                self.draw_coluor_bars(self.area_x2 + cx + (self.mark_size / 2),
+                self.draw_coluor_bars(bbox.right + cx + (self.mark_size / 2),
                                       middle_vertical + self.mark_size,
                                       90,
                                       'PrintingColourBarsR', g_center)
@@ -470,13 +420,13 @@ class PrintingMarks(inkex.Effect):
                 # Top Bars
                 cy = max(bmt + offset, self.min_mark_margin)
                 self.draw_coluor_bars(middle_horizontal + self.mark_size,
-                                      self.area_y1 - cy - (self.mark_size / 2),
+                                      bbox.top - cy - (self.mark_size / 2),
                                       0,
                                       'PrintingColourBarsT', g_center)
                 # Bottom Bars
                 cy = max(bmb + offset, self.min_mark_margin)
                 self.draw_coluor_bars(middle_horizontal + self.mark_size,
-                                      self.area_y2 + cy + (self.mark_size / 2),
+                                      bbox.bottom + cy + (self.mark_size / 2),
                                       0,
                                       'PrintingColourBarsB', g_center)
 
@@ -490,13 +440,13 @@ class PrintingMarks(inkex.Effect):
             txt_attribs = {
                 'style': 'font-size:12px;font-style:normal;font-weight:normal;fill:#000000;font-family:Bitstream Vera Sans,sans-serif;text-anchor:middle;text-align:center',
                 'x': str(middle_horizontal),
-                'y': str(self.area_y2 + y_margin + self.mark_size + 20)
+                'y': str(bbox.bottom + y_margin + self.mark_size + 20)
             }
             txt = etree.SubElement(g_pag_info, 'text', txt_attribs)
             txt.text = 'Page size: ' + \
-                       str(round(self.uutounit(self.area_w, self.options.unit), 2)) + \
+                       str(round(self.uutounit(bbox.width, self.options.unit), 2)) + \
                        'x' + \
-                       str(round(self.uutounit(self.area_h, self.options.unit), 2)) + \
+                       str(round(self.uutounit(bbox.height, self.options.unit), 2)) + \
                        ' ' + self.options.unit
 
 

@@ -150,7 +150,10 @@ class PatternEffect(EffectExtension):
                     ytemp = (c.lines[edge[0]][2] - bbox.width * c.lines[edge[0]][0]) / c.lines[edge[0]][1]
                 [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], xtemp, ytemp, bbox.width, bbox.height)
             elif edge[2] >= 0:  # only one vertex
-                if c.lines[edge[0]][1] == 0:  # vertical line
+                if edge[0] >= len(c.lines):
+                    xtemp = 0
+                    ytemp = 0
+                elif c.lines[edge[0]][1] == 0:  # vertical line
                     xtemp = c.lines[edge[0]][2] / c.lines[edge[0]][0]
                     if c.vertices[edge[2]][1] > bbox.height / 2:
                         ytemp = bbox.height

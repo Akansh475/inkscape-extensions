@@ -50,15 +50,11 @@ class hpglEncoder(object):
                 "precut":bool
                 "autoAlign":bool
                 "debug":bool
-                "convertObjects":bool
         """
         self.options = effect.options
-        if self.options.convertObjects:
-            self.doc = self.convertObjectsToPaths(effect.options.input_file, effect.document)
-        else:
-            self.doc = effect.document.getroot()
-        self.docWidth = effect.svg.unittouu(self.doc.get('width'))
-        self.docHeight = effect.svg.unittouu(self.doc.get('height'))
+        self.doc = effect.svg
+        self.docWidth = effect.svg.unittouu(effect.svg.get('width'))
+        self.docHeight = effect.svg.unittouu(effect.svg.get('height'))
         self.hpgl = ''
         self.divergenceX = 'False'
         self.divergenceY = 'False'
@@ -95,39 +91,14 @@ class hpglEncoder(object):
         if self.options.debug:
             self.debugValues['viewBoxWidth'] = "-"
             self.debugValues['viewBoxHeight'] = "-"
-        viewBox = self.doc.get('viewBox')
-        if viewBox:
-            viewBox2 = viewBox.split(',')
-            if len(viewBox2) < 4:
-                viewBox2 = viewBox.split(' ')
+        viewBox = effect.svg.get_viewbox()
+        if viewBox and viewBox[2] and viewBox[3]:
             if self.options.debug:
-                self.debugValues['viewBoxWidth'] = viewBox2[2]
-                self.debugValues['viewBoxHeight'] = viewBox2[3]
-            self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox2[2]))
-            self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox2[3]))
-
-    def convertObjectsToPaths(self, file, document):
-        tempfile = os.path.splitext(file)[0] + "-prepare.svg"
-        # tempfile is needed here only because we want to force the extension to be .svg
-        # so that we can open and close it silently
-        #shutil.copy2(file, tempfile)
-
-        #command = 'inkscape --verb=EditSelectAllInAllLayers --verb=EditUnlinkClone --verb=ObjectToPath --verb=FileSave --verb=FileQuit ' + tempfile
-
-        #if find_executable('xvfb-run'):
-        #    command = 'xvfb-run ' + command
-
-        # Unfortunately this briefly pops up the GUI and cannot be done with -z, see https://bugs.launchpad.net/inkscape/+bug/843260
-        #p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-        #(out, err) = p.communicate()
-
-        #if p.returncode != 0:
-        #    inkex.errormsg(_("Failed to convert objects to paths. Continued without converting."))
-        #    inkex.errormsg(out)
-        #    inkex.errormsg(err)
-        return document.getroot()
-        #else:
-        #    return etree.parse(tempfile).getroot()
+                self.debugValues['viewBoxWidth'] = viewBox[2]
+                self.debugValues['viewBoxHeight'] = viewBox[3]
+            print(viewBox)
+            self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
+            self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
 
     def getHpgl(self):
         # dryRun to find edges

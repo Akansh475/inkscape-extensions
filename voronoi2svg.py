@@ -109,6 +109,8 @@ class Voronoi2svg(inkex.Effect):
         bbc.append((bbox[0], bbox[3]))
 
         # record intersections of the line with bounding box edges
+        if edge[0] >= len(lines):
+            return []
         line = (lines[edge[0]])
         interpoints = []
         for i in range(4):

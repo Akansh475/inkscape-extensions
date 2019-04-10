@@ -217,14 +217,27 @@ class OtherElements(BaseElement):
         """Other elements have no bounding box"""
         return BoundingBox(None)
 
+
 class FlowRegion(BaseElement):
     tag_name = 'flowRegion'
+
+    def get_path(self):
+        # XXX: These empty paths mean the bbox for text elements will be nothing.
+        return Path()
 
 class FlowRoot(BaseElement):
     tag_name = 'flowRoot'
 
+    def get_path(self):
+        # XXX: These empty paths mean the bbox for text elements will be nothing.
+        return Path()
+
 class FlowPara(BaseElement):
     tag_name = 'flowPara'
+
+    def get_path(self):
+        # XXX: These empty paths mean the bbox for text elements will be nothing.
+        return Path()
 
 class FilterPrimitive(BaseElement):
     """A bunch of different filter primitives"""

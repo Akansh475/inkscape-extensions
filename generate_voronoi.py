@@ -22,13 +22,14 @@
 #
 
 import random
-from subprocess import PIPE, Popen
-
-from lxml import etree
 
 import inkex
-import voronoi
 from inkex.localize import _
+from inkex.elements import PathElement, Pattern
+from inkex.generic import EffectExtension
+
+import voronoi
+
 
 
 def clip_line(x1, y1, x2, y2, w, h):
@@ -69,9 +70,9 @@ def clip_line(x1, y1, x2, y2, w, h):
     return [x1, y1, x2, y2]
 
 
-class Pattern(inkex.Effect):
+class PatternEffect(EffectExtension):
     def __init__(self):
-        super(Pattern, self).__init__()
+        super(PatternEffect, self).__init__()
         self.arg_parser.add_argument("--size", type=int, dest="size", default=10,
                                      help="Average size of cell (px)")
         self.arg_parser.add_argument("--border", type=int, dest="border", default=0,
@@ -85,46 +86,42 @@ class Pattern(inkex.Effect):
         scale = self.svg.unittouu('1px')  # convert to document units
         self.options.size *= scale
         self.options.border *= scale
-        q = {'x': 0, 'y': 0, 'width': 0, 'height': 0}  # query the bounding box of ids[0]
-        for query in q.keys():
-            p = Popen('inkscape --query-%s --query-id=%s "%s"' % (query, self.options.ids[0], self.args[-1]), shell=True, stdout=PIPE, stderr=PIPE)
-            rc = p.wait()
-            q[query] = scale * float(p.stdout.read())
-        mat = inkex.composeParents(self.selected[self.options.ids[0]], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-        defs = self.xpathSingle('/svg:svg//svg:defs')
-        pattern = etree.SubElement(defs, inkex.addNS('pattern', 'svg'))
-        pattern.set('id', 'Voronoi' + str(random.randint(1, 9999)))
-        pattern.set('width', str(q['width']))
-        pattern.set('height', str(q['height']))
-        pattern.set('patternTransform', 'translate(%s,%s)' % (q['x'] - mat[0][2], q['y'] - mat[1][2]))
+        obj = self.svg.get_first_selected()
+        bbox = obj.bounding_box()
+        mat = obj.composed_transform().matrix
+        pattern = self.svg.defs.add(Pattern())
+        pattern.set_random_id('Voronoi')
+        pattern.set('width', str(bbox.width))
+        pattern.set('height', str(bbox.height))
         pattern.set('patternUnits', 'userSpaceOnUse')
+        pattern.patternTransform.add_translate(bbox.left - mat[0][2], bbox.top - mat[1][2])
 
         # generate random pattern of points
         c = voronoi.Context()
         pts = []
         b = float(self.options.border)  # width of border
-        for i in range(int(q['width'] * q['height'] / self.options.size / self.options.size)):
-            x = random.random() * q['width']
-            y = random.random() * q['height']
+        for i in range(int(bbox.width * bbox.height / self.options.size / self.options.size)):
+            x = random.random() * bbox.width
+            y = random.random() * bbox.height
             if b > 0:  # duplicate border area
                 pts.append(voronoi.Site(x, y))
                 if x < b:
-                    pts.append(voronoi.Site(x + q['width'], y))
+                    pts.append(voronoi.Site(x + bbox.width, y))
                     if y < b:
-                        pts.append(voronoi.Site(x + q['width'], y + q['height']))
-                    if y > q['height'] - b:
-                        pts.append(voronoi.Site(x + q['width'], y - q['height']))
-                if x > q['width'] - b:
-                    pts.append(voronoi.Site(x - q['width'], y))
+                        pts.append(voronoi.Site(x + bbox.width, y + bbox.height))
+                    if y > bbox.height - b:
+                        pts.append(voronoi.Site(x + bbox.width, y - bbox.height))
+                if x > bbox.width - b:
+                    pts.append(voronoi.Site(x - bbox.width, y))
                     if y < b:
-                        pts.append(voronoi.Site(x - q['width'], y + q['height']))
-                    if y > q['height'] - b:
-                        pts.append(voronoi.Site(x - q['width'], y - q['height']))
+                        pts.append(voronoi.Site(x - bbox.width, y + bbox.height))
+                    if y > bbox.height - b:
+                        pts.append(voronoi.Site(x - bbox.width, y - bbox.height))
                 if y < b:
-                    pts.append(voronoi.Site(x, y + q['height']))
-                if y > q['height'] - b:
-                    pts.append(voronoi.Site(x, y - q['height']))
-            elif x > -b and y > -b and x < q['width'] + b and y < q['height'] + b:
+                    pts.append(voronoi.Site(x, y + bbox.height))
+                if y > bbox.height - b:
+                    pts.append(voronoi.Site(x, y - bbox.height))
+            elif x > -b and y > -b and x < bbox.width + b and y < bbox.height + b:
                 pts.append(voronoi.Site(x, y))  # leave border area blank
             # dot = etree.SubElement(pattern, inkex.addNS('rect','svg'))
             # dot.set('x', str(x-1))
@@ -140,38 +137,37 @@ class Pattern(inkex.Effect):
         path = ""
         for edge in c.edges:
             if edge[1] >= 0 and edge[2] >= 0:  # two vertices
-                [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], c.vertices[edge[2]][0], c.vertices[edge[2]][1], q['width'], q['height'])
+                [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], c.vertices[edge[2]][0], c.vertices[edge[2]][1], bbox.width, bbox.height)
             elif edge[1] >= 0:  # only one vertex
                 if c.lines[edge[0]][1] == 0:  # vertical line
                     xtemp = c.lines[edge[0]][2] / c.lines[edge[0]][0]
-                    if c.vertices[edge[1]][1] > q['height'] / 2:
-                        ytemp = q['height']
+                    if c.vertices[edge[1]][1] > bbox.height / 2:
+                        ytemp = bbox.height
                     else:
                         ytemp = 0
                 else:
-                    xtemp = q['width']
-                    ytemp = (c.lines[edge[0]][2] - q['width'] * c.lines[edge[0]][0]) / c.lines[edge[0]][1]
-                [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], xtemp, ytemp, q['width'], q['height'])
+                    xtemp = bbox.width
+                    ytemp = (c.lines[edge[0]][2] - bbox.width * c.lines[edge[0]][0]) / c.lines[edge[0]][1]
+                [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], xtemp, ytemp, bbox.width, bbox.height)
             elif edge[2] >= 0:  # only one vertex
                 if c.lines[edge[0]][1] == 0:  # vertical line
                     xtemp = c.lines[edge[0]][2] / c.lines[edge[0]][0]
-                    if c.vertices[edge[2]][1] > q['height'] / 2:
-                        ytemp = q['height']
+                    if c.vertices[edge[2]][1] > bbox.height / 2:
+                        ytemp = bbox.height
                     else:
                         ytemp = 0
                 else:
                     xtemp = 0
                     ytemp = c.lines[edge[0]][2] / c.lines[edge[0]][1]
-                [x1, y1, x2, y2] = clip_line(xtemp, ytemp, c.vertices[edge[2]][0], c.vertices[edge[2]][1], q['width'], q['height'])
+                [x1, y1, x2, y2] = clip_line(xtemp, ytemp, c.vertices[edge[2]][0], c.vertices[edge[2]][1], bbox.width, bbox.height)
             if x1 or x2 or y1 or y2:
                 path += 'M %.3f,%.3f %.3f,%.3f ' % (x1, y1, x2, y2)
 
         patternstyle = {'stroke': '#000000', 'stroke-width': str(scale)}
         attribs = {'d': path, 'style': str(inkex.Style(patternstyle))}
-        etree.SubElement(pattern, inkex.addNS('path', 'svg'), attribs)
+        pattern.append(PathElement(**attribs))
 
         # link selected object to pattern
-        obj = self.selected[self.options.ids[0]]
         style = {}
         if 'style' in obj.attrib:
             style = dict(inkex.Style.parse_str(obj.attrib['style']))
@@ -187,4 +183,4 @@ class Pattern(inkex.Effect):
 
 
 if __name__ == '__main__':
-    Pattern().run()
+    PatternEffect().run()

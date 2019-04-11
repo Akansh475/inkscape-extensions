@@ -89,16 +89,11 @@ class BaseElement(etree.ElementBase):
     def __setattr__(self, name, value):
         """Set the attribute, update the attrib if needed"""
         if name in self.wrapped_attrs:
-            # Don't call hasattr or getattr (infinate loop)
-            if name in self.__dict__:
-                del self.__dict__[name].callback
             # Don't call self.set or self.get (infinate loop)
             if value:
                 self.attrib[name] = str(value)
             else:
                 self.attrib.pop(name, None)
-            if name in self.__dict__:
-                delattr(self, name)
         else:
             super(BaseElement, self).__setattr__(name, value)
 
@@ -194,8 +189,9 @@ class BaseElement(etree.ElementBase):
         """Walks the element tree and yields all elements, parent first"""
         yield self
         for child in self:
-            for decendant in child.decendants():
-                yield decendant
+            if hasattr(child, 'decendants'):
+                for decendant in child.decendants():
+                    yield decendant
 
     @property
     def label(self):

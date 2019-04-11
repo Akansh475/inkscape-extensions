@@ -6,7 +6,11 @@ Test elements extra logic from svg xml lxml custom classes.
 
 from lxml import etree
 
-from inkex.elements import Pattern
+from inkex.elements import (
+    BaseElement, OtherElements,
+    Group, Pattern, Guide,
+    TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
+)
 from inkex.transforms import Transform, ScaleTransform
 from inkex.styles import Style
 from tests.base import TestCase
@@ -29,6 +33,35 @@ class ElementTestCase(TestCase):
 class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
     tag = 'g'
+
+    def test_attr(self):
+        """Access attributes"""
+        elem = BaseElement()
+        self.assertRaises(AttributeError, getattr, elem, 'foo')
+        self.assertRaises(NotImplementedError, elem.get_path)
+        self.assertRaises(NotImplementedError, elem.set_path, 1)
+
+    def test_findall(self):
+        """Findall elements in svg"""
+        groups = self.svg.findall('svg:g')
+        self.assertEqual(len(groups), 1)
+
+    def test_add(self):
+        """Can add single or multiple elements with passthrough"""
+        elem = self.svg.getElementById('D')
+        group = elem.add(Group(id='foo'))
+        self.assertEqual(group.get('id'), 'foo')
+        groups = elem.add(Group(id='f1'), Group(id='f2'))
+        self.assertEqual(len(groups), 2)
+        self.assertEqual(groups[0].get('id'), 'f1')
+        self.assertEqual(groups[1].get('id'), 'f2')
+
+    def test_creation(self):
+        """Create elements with attributes"""
+        group = Group(attrib={'inkscape:label': 'Foo'})
+        self.assertEqual(group.get('inkscape:label'), 'Foo')
+        group = Group(inkscape__label="Bar")
+        self.assertEqual(group.label, 'Bar')
 
     def test_sort_selected(self):
         """Are the selected items sorted"""
@@ -72,6 +105,23 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.transform, Transform())
         self.assertEqual(elem.get('transform'), None)
         self.assertNotIn(b'transform', etree.tostring(elem))
+        elem.transform.add_translate(10, 10)
+        self.assertIn(b'transform', etree.tostring(elem))
+        elem.transform.add_translate(-10, -10)
+        self.assertNotIn(b'transform', etree.tostring(elem))
+
+    def test_update_consistant(self):
+        """Update doesn't keep callbacks around"""
+        elem = self.svg.getElementById('D')
+        tr_a = Transform(translate=(10, 10))
+        tr_b = Transform(translate=(-20, 15))
+        elem.transform = tr_a
+        elem.transform = tr_b
+        self.assertEqual(str(elem.transform), 'translate(-20, 15)')
+        tr_a.add_translate(10, 10)
+        self.assertEqual(str(elem.transform), 'translate(-20, 15)')
+        elem.set('transform', None)
+        self.assertEqual(elem.get('transform'), None)
 
     def test_in_place_style(self):
         """Do styles update when we set them"""
@@ -90,6 +140,32 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.get('id'), 'Thing5815')
         elem.set_random_id('Thing', size=2)
         self.assertEqual(elem.get('id'), 'Thing85')
+
+    def test_bounding_box(self):
+        """Elements can have bounding boxes"""
+        elem = self.svg.getElementById('D')
+        self.assertEqual(elem.bounding_box(), (30.0, 70.0, 120.0, 160.0))
+        self.assertEqual(elem.get_center_position(), (50.0, 140.0))
+        self.assertFalse(OtherElements('desc').bounding_box())
+        self.assertFalse(TextElement().bounding_box())
+        group = Group(elem)
+        self.assertEqual(elem.bounding_box(), group.bounding_box())
+
+
+    def test_path(self):
+        """Test getting paths"""
+        self.assertFalse(FlowRegion().get_path())
+        self.assertFalse(FlowRoot().get_path())
+        self.assertFalse(FlowPara().get_path())
+
+    def test_decendants(self):
+        """Elements can walk their decendants"""
+        ids = tuple(elem.get('id') for elem in self.svg.decendants())
+        self.assertEqual(ids, (
+            None, None, 'path1', None,
+            'base', 'metadata7',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G'
+        ))
 
 class PathElementTestCase(ElementTestCase):
     tag = 'path'
@@ -136,6 +212,11 @@ class GroupTest(ElementTestCase):
         self.assertEqual(self.elem.transform, Transform('translate(12, 14)'))
         self.assertEqual(str(self.elem.transform), 'translate(12, 14)')
 
+    def test_groupmode(self):
+        """Get groupmode is layer"""
+        self.assertEqual(self.svg.getElementById('A').groupmode, 'layer')
+        self.assertEqual(self.svg.getElementById('C').groupmode, 'group')
+
 
 class RectTest(ElementTestCase):
     """Test extra functionality on a rectangle element"""
@@ -158,6 +239,18 @@ class RectTest(ElementTestCase):
         self.assertEqual(self.elem.get_path(), 'M 200.0,200.0 h100.0v100.0h-100.0')
         self.assertEqual(str(self.elem.path), 'M 200 200 h 100 v 100 h -100')
 
+class PathTest(ElementTestCase):
+    """Test path extra functionality"""
+    tag = 'path'
+
+    def test_apply_transform(self):
+        """Transformation can be applied to path"""
+        path = self.svg.getElementById('D')
+        path.transform = Transform(translate=(10, 10))
+        self.assertEqual(path.get('d'), 'M30,130 L60,130 L60,120 L70,140 L60,160 L60,150 L30,150')
+        path.apply_transform()
+        self.assertEqual(path.get('d'), 'M 30 130 L 60 130 L 60 120 L 70 140 L 60 160 L 60 150 L 30 150')
+        self.assertFalse(path.transform)
 
 class CirtcleTest(ElementTestCase):
     """Test extra functionality on a circle element"""
@@ -168,6 +261,21 @@ class CirtcleTest(ElementTestCase):
         self.assertEqual(self.elem.get_path(),
                          'M 50.0 150.0 A 50.0,50.0 0 1 0 150.0, 100.0 A 50.0,50.0 0 1 0 50.0, 100.0')
 
+class NamedViewTest(ElementTestCase):
+    """Test the sodipodi namedview tag"""
+    def test_guides(self):
+        """Create a guide and see a list of them"""
+        self.svg.namedview.add(Guide(0, 0, 0))
+        self.svg.namedview.add(Guide(0, 0, 90))
+        self.assertEqual(len(self.svg.namedview.get_guides()), 2)
+
+class TextTest(ElementTestCase):
+    """Test all text functions"""
+    def test_append_superscript(self):
+        """Test adding superscript"""
+        tp = TextPath()
+        tp.append_superscript('th')
+        self.assertEqual(len(tp), 1)
 
 class UseTest(ElementTestCase):
     """Test extra functionality on a use element"""

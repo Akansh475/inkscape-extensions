@@ -114,6 +114,7 @@ def addNS(tag, ns=None):  # pylint: disable=invalid-name
     if tag.startswith('{') and ns:
         _, tag = removeNS(tag)
     if not tag.startswith('{'):
+        tag = tag.replace('__', ':')
         if ':' in tag:
             (ns, tag) = tag.rsplit(':', 1)
         if ns in NSS:

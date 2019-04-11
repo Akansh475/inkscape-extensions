@@ -48,6 +48,16 @@ class BaseElement(etree.ElementBase):
     # This allows us to update these with inheritance.
     wrapped_attrs = property(lambda self: dict(self.WRAPPED_ATTRS))
 
+    def __init__(self, *children, **kwargs):
+        newkw = {'nsmap': kwargs.pop('nsmap', None)}
+        super(BaseElement, self).__init__(*children, **newkw)
+        # We covert the setting of all attributes so that we can
+        # better control them, both namespaces and value types.
+        for key, value in kwargs.pop('attrib', {}).items():
+            self.set(key, value)
+        for key, value in kwargs.items():
+            self.set(key, value)
+
     @classmethod
     def _subclasses(cls):
         """Get subclasses, recursively

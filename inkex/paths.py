@@ -22,7 +22,6 @@ functions for digesting paths into a simple list structure
 
 import re
 import copy
-import warnings
 
 from math import atan2, cos, pi, sin, sqrt
 from operator import add, mul
@@ -105,10 +104,6 @@ class PathCommand(tuple):
     def points(self):
         """Returns a list of points in this path command, x and y only"""
         return tuple(zip(self.all_x, self.all_y))
-
-    def copy(self):
-        """Make a copy of this segment"""
-        return PathCommand(self.cmd, *self[:])
 
     def bounding_box(self):
         """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
@@ -217,6 +212,7 @@ class SmoothCurve(PathCommand):
 
     def bounding_box(self):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
+        raise NotImplementedError("This requires the previous coords too")
         return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
 
 
@@ -226,7 +222,8 @@ class Quadratic(PathCommand):
 
     def bounding_box(self):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
-        return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
+        raise NotImplementedError("This requires the previous coords too")
+        return cubic_extrema(*self.all_y) + cubic_extrema(*self.all_y)
 
 
 class TepidQuadratic(PathCommand):
@@ -256,8 +253,8 @@ class Arc(PathCommand):
 
     def transform(self, transform):
         """Transform this arc along with the given transformation"""
-        points = super(Arc, self).transform(transform, raw=True)
-        return PathCommand(self.cmd, *(self[:-2] + list(points)))
+        points = super(Arc, self).transform(transform, raw=True)[0]
+        return PathCommand(self.cmd, *(self[:-2] + tuple(points)))
 
     def scale(self, coords):
         """Scale the Arc by the given coords"""
@@ -384,9 +381,7 @@ class Path(list):
 
     def to_arrays(self):
         """Duplicates the original output of parsePath, returning arrays of segment data"""
-        acopy = self.copy()
-        acopy.to_absolute()
-        return [[seg.cmd, list(seg)] for seg in acopy]
+        return [[seg.cmd, list(seg)] for seg in self.to_absolute()]
 
     def copy(self):
         """Make a copy"""

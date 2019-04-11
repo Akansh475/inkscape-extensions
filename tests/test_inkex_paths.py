@@ -6,6 +6,7 @@ Test Inkex path parsing functionality.
 import re
 
 from inkex.paths import InvalidPath, Path, PathCommand
+from inkex.transforms import Transform
 from tests.base import TestCase
 
 
@@ -25,6 +26,10 @@ class PathTest(TestCase):
         self._assertPath(Path('& 10 10 M 20 20'), 'M 20 20')
         self.assertRaises(InvalidPath, PathCommand, '&')
         self.assertRaises(InvalidPath, PathCommand, 'Z', 40)
+
+    def test_copy(self):
+        """Make a copy of a path"""
+        self.assertEqual(str(Path('M 10 10').copy()), 'M 10 10')
 
     def test_repr(self):
         """Path representation"""
@@ -51,6 +56,7 @@ class PathTest(TestCase):
                 ('M 100 100 L 20 20 40 40 30 10 Z', 'M 100 100 L 20 20 L 40 40 L 30 10 Z'),
                 ('m 50 50 l 20 20 40 40', 'm 50 50 l 20 20 l 40 40'),
                 ('m 50 50 20 20', 'm 50 50 l 20 20'),
+                ((('m', (50, 50)), ('l', (20, 20))), 'm 50 50 l 20 20'),
         ):
             self._assertPath(Path(path), ret)
 
@@ -98,12 +104,16 @@ class PathTest(TestCase):
         Bounding box around a circle with a radius of 50
         it should be from 0,0 -> 100, 100
         """
-        self.assertEqual((-3.94453839208415e-06, 99.99999988134624, -4.881549508464545, 104.88155417512705),
-                         Path('M 85.355333,14.644651 '
-                              'A 50,50 0 0 1 85.355333,85.355341'
-                              ' 50,50 0 0 1 14.644657,85.355341'
-                              ' 50,50 0 0 1 14.644676,14.644651'
-                              ' 50,50 0 0 1 85.355333,14.644651 Z').bounding_box())
+        path = Path('M 85.355333,14.644651 '
+                     'A 50,50 0 0 1 85.355333,85.355341'
+                    ' 50,50 0 0 1 14.644657,85.355341'
+                    ' 50,50 0 0 1 14.644676,14.644651'
+                    ' 50,50 0 0 1 85.355333,14.644651 Z')
+        self.assertEqual((-3.94453839208415e-06, 99.99999988134624,
+                          -4.881549508464545, 104.88155417512705), path.bounding_box())
+        self.assertRaises(ValueError, path[1].bounding_box)
+        #self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
+        #self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())
 
     def test_adding_to_path(self):
         """Paths can be translated using addition"""
@@ -166,3 +176,35 @@ class PathTest(TestCase):
         ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
         ret.rotate(-35, 0, 0)
         self._assertPath(ret, "M 0.348181 0.0613938 L 10.7753 -7.23976 L 18.0765 3.18737 L 7.64933 10.4885 Z")
+
+        ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
+        ret.rotate(90, 10, -10)
+        self._assertPath(ret, "M -0.249999 -19.75 L -0.249999 -7.02083 L -12.9792 -7.02083 L -12.9792 -19.75 Z")
+
+        ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
+        ret.rotate(90)
+        self._assertPath(ret, "M 12.9792 0.249999 L 12.9792 12.9792 L 0.249999 12.9792 L 0.249999 0.249999 Z")
+
+    def test_to_arrays(self):
+        """Return the full path as a bunch of arrays"""
+        ret = Path("M 100 100 L 110 120 H 20 C 120 0 6 10 10 2 Z").to_arrays()
+        self.assertEqual(len(ret), 5)
+        self.assertEqual(ret[0][0], 'M')
+        self.assertEqual(ret[1][0], 'L')
+        self.assertEqual(ret[2][0], 'H')
+        self.assertEqual(ret[3][0], 'C')
+
+    def test_transform(self):
+        """Transform by a whole matrix"""
+        ret = Path("M 100 100 L 110 120 L 140 140 L 300 300")
+        ret.transform(Transform(translate=(10, 10)))
+        self.assertEqual(str(ret), 'M 110 110 L 120 130 L 150 150 L 310 310')
+        ret.transform(Transform(translate=(-10, -10)))
+        self.assertEqual(str(ret), 'M 100 100 L 110 120 L 140 140 L 300 300')
+        ret = Path('M 5 5 H 10 V 15')
+        ret.transform(Transform(rotate=-10))
+        self.assertEqual(str(ret), 'M 5.79228 4.0558 L 10.5524 2.2577 L 12.9968 12.9397')
+        ret = Path("M 10 10 A 50,50 0 0 1 85.355333,85.355341 L 100 0")
+        ret.transform(Transform(scale=10))
+        self.assertEqual(str(ret), 'M 100 100 A 50 50 0 0 1 853.553 853.553 L 1000 0')
+        self.assertRaises(ValueError, PathCommand('H', 10).transform, Transform())

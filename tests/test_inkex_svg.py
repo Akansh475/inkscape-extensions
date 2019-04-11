@@ -21,9 +21,9 @@
 Test the svg interface for inkscape extensions.
 """
 from inkex.utils import addNS
+from inkex.elements import Guide
 from tests.base import TestCase
 from tests.base.svg import svg, svg_file, uu_svg
-
 
 class BasicSvgTest(TestCase):
     """Basic svg tests"""
@@ -98,7 +98,7 @@ class NamedViewTest(TestCase):
         namedview = doc.namedview
         self.assertEqual(len(namedview.get_guides()), 0)
 
-        namedview.create_guide(50, 50, angle=45)
+        namedview.add(Guide(50, 50, angle=45))
         self.assertEqual(len(namedview.get_guides()), 1)
         guide, = namedview.get_guides()
         self.assertEqual(guide.get('position'), '50,50')

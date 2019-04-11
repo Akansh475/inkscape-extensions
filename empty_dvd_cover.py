@@ -7,7 +7,7 @@ from lxml import etree
 
 import inkex
 from inkex.generic import EffectExtension
-
+from inkex.elements import Guide
 
 class DvdCover(EffectExtension):
     """Create an empty DVD Cover"""
@@ -20,18 +20,10 @@ class DvdCover(EffectExtension):
                                      default="3", help="Bleed (extra area around image")
 
     def create_horizontal_guideline(self, name, position):
-        self.create_guideline(name, "0,1", 0, position)
+        return self.svg.add(Guide(0, position, (0, 1), inkscape__label=name))
 
     def create_vertical_guideline(self, name, position):
-        self.create_guideline(name, "1,0", position, 0)
-
-    def create_guideline(self, label, orientation, x, y):
-        namedview = self.root.find(inkex.addNS('namedview', 'sodipodi'))
-        guide = etree.SubElement(namedview, inkex.addNS('guide', 'sodipodi'))
-        guide.set("orientation", orientation)
-        guide.set("position", str(x) + "," + str(y))
-        # No need to set label (causes translation problems, etc.)
-        # guide.set(inkex.addNS('label', 'inkscape'), label)
+        return self.svg.add(Guide(position, 0, (1, 0), inkscape__label=name))
 
     def effect(self):
 

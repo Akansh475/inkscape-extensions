@@ -390,11 +390,6 @@ class NamedView(BaseElement):
         """Returns a list of guides"""
         return self.findall('sodipodi:guide')
 
-    def create_guide(self, pos_x, pos_y, angle):
-        """Create a guide in this namedView section"""
-        self.append(Guide(pos_x, pos_y, angle))
-
-
 class Guide(BaseElement):
     """An inkscape guide"""
     tag_name = 'sodipodi:guide'
@@ -405,14 +400,18 @@ class Guide(BaseElement):
             self.move_to(*args)
 
     def move_to(self, pos_x, pos_y, angle=None):
-        """Move this guide to the given position"""
-        self.set('position', "{:g},{:g}".format(pos_x, pos_y))
-        if angle is not None:
-            self.set('orientation', "{:g},{:g}".format(
-                    math.sin(math.radians(angle)),
-                    -math.cos(math.radians(angle))
-            ))
+        """
+        Move this guide to the given x,y position,
 
+        Angle can either be a float or integer, which will change the orientation.
+        Or a pair of numbers (tuple) which will be set as the orientation directly.
+        """
+        self.set('position', "{:g},{:g}".format(pos_x, pos_y))
+        if isinstance(angle, (float, int)):
+            # Generate orientation from angle
+            angle = (math.sin(math.radians(angle)), -math.cos(math.radians(angle)))
+        if isinstance(angle, (tuple, list)) and len(angle) == 2:
+            self.set('orientation', "{:g},{:g}".format(*angle))
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""

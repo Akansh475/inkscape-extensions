@@ -22,6 +22,8 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
+from inkex.paths import Path
+from inkex.elements import Guide
 
 
 class SVGFont2Layers(inkex.Effect):
@@ -34,11 +36,7 @@ class SVGFont2Layers(inkex.Effect):
                                      help="Load only the first 30 glyphs from the SVGFont (otherwise the loading process may take a very long time)")
 
     def create_horiz_guideline(self, label, y):
-        namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))
-        guide = etree.SubElement(namedview, inkex.addNS('guide', 'sodipodi'))
-        guide.set(inkex.addNS('label', 'inkscape'), label)
-        guide.set("orientation", "0,1")
-        guide.set("position", "0," + str(y))
+        return Guide(0, y, (0,1), inkscape__label=label)
 
     def get_or_create(self, parentnode, nodetype):
         node = parentnode.find(nodetype)
@@ -47,10 +45,10 @@ class SVGFont2Layers(inkex.Effect):
         return node
 
     def flip_cordinate_system(self, d, emsize, baseline):
-        pathdata = inkex.parsePath(d)
-        inkex.scalePath(pathdata, 1, -1)
-        inkex.translatePath(pathdata, 0, int(emsize) - int(baseline))
-        return str(inkex.Path(pathdata))
+        path = Path(d)
+        path.scale(1, -1)
+        path.translate(0, int(emsize) - int(baseline))
+        return str(path)
 
     def effect(self):
         # Get access to main SVG document element

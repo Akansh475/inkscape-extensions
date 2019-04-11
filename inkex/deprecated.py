@@ -34,6 +34,7 @@ from argparse import ArgumentParser
 import inkex
 import inkex.utils
 from inkex.localize import _
+from inkex.elements import Guide
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -152,8 +153,8 @@ class DeprecatedEffect(object):
 
     def createGuide(self, posX, posY, angle):
         self._deprecated('createGuide', _('{} is now a method of the namedview '
-                                          'element object. Use `self.svg.namedview.create_guide(x, y, a)` instead'))
-        return self.svg.namedview.create_guide(posX, posY, angle)
+                                          'element object. Use `self.svg.namedview.add(Guide(x, y, a))` instead'))
+        return self.svg.namedview.add(Guide(posX, posY, angle))
 
     def affect(self, args=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility

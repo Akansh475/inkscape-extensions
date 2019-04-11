@@ -27,7 +27,7 @@ from math import atan2, cos, pi, sin, sqrt
 from operator import add, mul
 
 from .transforms import Transform, BoundingBox, Scale, cubic_extrema
-from .utils import X, Y, classproperty, strargs
+from .utils import X, Y, classproperty, strargs, pairwise
 from .cubic_paths import CubicSuperPath, unCubicSuperPath, ArcToPath
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
@@ -105,7 +105,7 @@ class PathCommand(tuple):
         """Returns a list of points in this path command, x and y only"""
         return tuple(zip(self.all_x, self.all_y))
 
-    def bounding_box(self):
+    def bounding_box(self, prev):
         """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
         return BoundingBox(Scale(*self.all_x), Scale(*self.all_y))
 
@@ -139,7 +139,7 @@ class PathCommand(tuple):
             return points
         return PathCommand(self.cmd, *[coord for point in points for coord in point])
 
-    def get_pen(self, previous):
+    def get_pen(self, previous=(0, 0)):
         """Where will the pen be after this command"""
         if not self.isabsolute():
             self = self.translate(previous)
@@ -210,7 +210,7 @@ class SmoothCurve(PathCommand):
     """Smoothed Curved Line instruction"""
     num = 4
 
-    def bounding_box(self):
+    def bounding_box(self, prev):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
         raise NotImplementedError("This requires the previous coords too")
         return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
@@ -220,10 +220,10 @@ class Quadratic(PathCommand):
     """Quadratic Curved Line instruction"""
     num = 4
 
-    def bounding_box(self):
+    def bounding_box(self, prev):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
         raise NotImplementedError("This requires the previous coords too")
-        return cubic_extrema(*self.all_y) + cubic_extrema(*self.all_y)
+        #return cubic_extrema(*self.all_y) + cubic_extrema(*self.all_y)
 
 
 class TepidQuadratic(PathCommand):
@@ -236,9 +236,13 @@ class Arc(PathCommand):
     num = 7
     points = property(lambda self: (self[-2:],))
 
-    def bounding_box(self):
+    def bounding_box(self, prev):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
-        raise ValueError("Arcs can not have bounding boxes, convert to bezier first.")
+        bbox = BoundingBox(None)
+        for seg in self.to_curves(prev.get_pen()):
+            bbox += seg.bounding_box(prev)
+            prev = seg
+        return bbox
 
     def to_curves(self, previous=(0, 0)):
         """Convert this arc into bezier curves"""
@@ -287,7 +291,9 @@ class Path(list):
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
-        return sum([seg.bounding_box() for seg in self.to_absolute(curves=True) if seg])
+        return sum([seg.bounding_box(prev) \
+            for prev, seg in pairwise(self.to_absolute(curves=True)) \
+                if seg])
 
     def append(self, cmd):
         """Append a command to this path including any chained commands"""

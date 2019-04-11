@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
+from itertools import tee
 from argparse import ArgumentTypeError
 
 
@@ -152,3 +153,9 @@ def filename_arg(name):
     if not os.path.isfile(filename):
         raise ArgumentTypeError("File not found: {}".format(name))
     return filename
+
+def pairwise(iterable):
+    "Iterate over a list with overlapping pairs (see itertools recipies)"
+    first, then = tee(iterable)
+    start = next(then, None)
+    return [(None, start)] + list(zip(first, then))

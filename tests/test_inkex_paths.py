@@ -111,7 +111,8 @@ class PathTest(TestCase):
                     ' 50,50 0 0 1 85.355333,14.644651 Z')
         self.assertEqual((-3.94453839208415e-06, 99.99999988134624,
                           -4.881549508464545, 104.88155417512705), path.bounding_box())
-        self.assertRaises(ValueError, path[1].bounding_box)
+        self.assertEqual(path[1].bounding_box(path[0]), (
+            85.355333, 99.99999988134624, 14.644650999999998, 85.355341))
         #self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
         #self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())
 

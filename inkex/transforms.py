@@ -54,7 +54,7 @@ class Transform(object):
     """
     TRM = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
 
-    def __init__(self, matrix=None, callback=None):
+    def __init__(self, matrix=None, callback=None, **extra):
         self.callback = None
         self.matrix = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
         if matrix is not None:
@@ -72,6 +72,15 @@ class Transform(object):
                 self.matrix = tuple(matrix[::2]), tuple(matrix[1::2])
             else:
                 raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+        elif extra:
+            for key in list(extra):
+                if hasattr(self, 'add_' + key):
+                    value = extra.pop(key)
+                    func = getattr(self, 'add_' + key)
+                    if isinstance(value, tuple):
+                        func(*value)
+                    else:
+                        func(value)
         # Set callback last, so it doesn't kick off just setting up the internal value
         self.callback = callback
 

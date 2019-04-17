@@ -401,7 +401,21 @@ def cubic_extrema(py0, py1, py2, py3):
             cmin, cmax = _is_bigger((pd1 - pd2 + pds) / (pd1 - 2 * pd2 + pd3))
             cmin, cmax = _is_bigger((pd1 - pd2 - pds) / (pd1 - 2 * pd2 + pd3))
 
-    elif pd3 - pd1:
-        cmin, cmax = _is_bigger(-pd1 / (pd3 - pd1))
+    elif pd2 - pd1:
+        cmin, cmax = _is_bigger(-pd1 / (2 * (pd2 - pd1)))
 
     return cmin, cmax
+
+def quadratic_extrema(py0, py1, py2):
+    def _is_bigger(point):
+        if (point > 0) and (point < 1):
+            pyx = py0 * (1 - point) * (1 - point) + \
+                  2 * py1 * point * (1 - point) + \
+                  py2 * point * point
+            return min(cmin, pyx), max(cmax, pyx)
+        return cmin, cmax
+    cmin, cmax = min(py0, py2), max(py0, py2)
+    if py0+py2-2*py1:
+       cmin, cmax = _is_bigger((py0-py1)/(py0+py2-2*py1))
+    return cmin, cmax
+

@@ -32,6 +32,10 @@ compare_filters = [
 import re
 
 class Compare(object):
+    """
+    Comparison base class, this acts as a passthrough unless
+    the filter staticmethod is overwritten.
+    """
     def __init__(self, **options):
         self.options = options
 
@@ -40,15 +44,23 @@ class Compare(object):
 
     @staticmethod
     def filter(contents):
+        """Replace this filter method with your own filtering"""
         return contents
 
 class CompareNumericFuzzy(Compare):
+    """
+    Turn all numbers into shorter standard formats
+
+    1.2345678 -> 1.2346
+    1.2300 -> 1.23, 50.0000 -> 50.0
+    50.0 -> 50
+    """
     @staticmethod
     def filter(contents):
         func = lambda m: b'%.3f' % (float(m.group(0)))
-        contents = re.sub(br'\d+\.\d+', func, contents)             # 1.2345678 -> 1.2346
-        contents = re.sub(br'(\d\.\d+?)0+\b', br'\1', contents)     # 1.2300 -> 1.23, 50.0000 -> 50.0
-        contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)  # 50.0 -> 50
+        contents = re.sub(br'\d+\.\d+', func, contents)
+        contents = re.sub(br'(\d\.\d+?)0+\b', br'\1', contents)
+        contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)
         return contents
 
 class CompareWithoutIds(Compare):
@@ -68,40 +80,47 @@ class CompareWithPathSpace(Compare):
         return re.sub(br' d="([^"]*)"', func, contents)
 
 class CompareSize(Compare):
+    """Compare the length of the contents instead of the contents"""
     @staticmethod
     def filter(contents):
         return len(contents)
 
 class CompareOrderIndependentBytes(Compare):
+    """Take all the bytes and sort them"""
     @staticmethod
     def filter(contents):
-        return b"\n".join([bytes(i) for i in sorted(contents)])
+        return b"".join([bytes(i) for i in sorted(contents)])
 
 class CompareOrderIndependentLines(Compare):
+    """Take all the lines and sort them"""
     @staticmethod
     def filter(contents):
         return b"\n".join(sorted(contents.splitlines()))
 
 class CompareOrderIndependentStyle(Compare):
+    """Take all styles and sort the results"""
     @staticmethod
     def filter(contents):
         contents = CompareNumericFuzzy.filter(contents)
-        def func(m):
-            sty = b';'.join(sorted(m.group(1).split(b';')))
+        def func(match):
+            """Search and replace function for sorting"""
+            sty = b';'.join(sorted(match.group(1).split(b';')))
             return b'style="%s"' % (sty,)
         return re.sub(br'style="([^"]*)"', func, contents)
 
 class CompareOrderIndependentStyleAndPath(Compare):
+    """Take all styles and paths and sort them both"""
     @staticmethod
     def filter(contents):
         contents = CompareOrderIndependentStyle.filter(contents)
-        def func(m):
-            d = b'X'.join(sorted(re.split(br'[A-Z]', m.group(1))))
-            return b'd="%s"' % (d,)
+        def func(match):
+            """Search and replace function for sorting"""
+            path = b'X'.join(sorted(re.split(br'[A-Z]', match.group(1))))
+            return b'd="%s"' % (path,)
         return re.sub(br'\bd="([^"]*)"', func, contents)
 
 class CompareOrderIndependentTags(Compare):
+    """Sorts all the XML tags"""
     @staticmethod
     def filter(contents):
         return b"\n".join(sorted(re.split(br'>\s*<', contents)))
-

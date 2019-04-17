@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
 #
-# pylint: disable=protected-access
+# pylint: disable=protected-access,too-few-public-methods
 """
 Any mocking utilities required by testing. Mocking is when you need the test
 to exercise a piece of code, but that code may or does call on something
@@ -33,7 +33,7 @@ class ManualVerbosity(object):
         self.okay = okay
         self.dots = dots
 
-    def flip(self, exc_type=None, exc_val=None, exc_tb=None):
+    def flip(self, exc_type=None, exc_val=None, exc_tb=None): # pylint: disable=unused-argument
         """Swap the stored verbosity with the original"""
         self.okay, self.result.showAll = self.result.showAll, self.okay
         self.dots, self.result.dots = self.result.dots, self.okay

@@ -41,7 +41,8 @@ from inkex.base import InkscapeExtension
 from .xmldiff import xmldiff
 
 if False: # pylint: disable=using-constant-test
-    from typing import Type
+    from typing import Type, List
+    from .filters import Compare
 
 TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -142,13 +143,16 @@ class TestCase(BaseCase):
 
 
 class InkscapeExtensionTestMixin(object):
-    def setUp(self):
+    """Automatically setup self.effect for each test and test with an empty svg"""
+    def setUp(self): # pylint: disable=invalid-name
+        """Check if there's an effect_class set and create self.effect is it is"""
         super(InkscapeExtensionTestMixin, self).setUp()
         if self.effect_class is None:
             self.skipTest('self.effect_class is not defined for this this test')
         self.effect = self.effect_class()
 
-    def test_default_settings_cause_no_exception(self):
+    def test_default_settings(self):
+        """Extension works with empty svg file"""
         self.effect.run([self.empty_svg])
 
 class ComparisonMixin(object):
@@ -156,7 +160,7 @@ class ComparisonMixin(object):
     Add comparison tests to any existing test suite.
     """
     compare_file = 'ref_test.svg'
-    compare_filters = []
+    compare_filters = [] # type: List[Compare]
     comparisons = [
         (),
         ('--id=p1', '--id=r3'),

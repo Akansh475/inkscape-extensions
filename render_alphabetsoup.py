@@ -353,6 +353,7 @@ def draw_crop_scale(stack, zoom):  # draw, crop and scale letter image
 def randomize_input_string(tokens, zoom):  # generate a glyph starting from each token in the input string
     imagelist = []
 
+    stack = None
     for i in range(0, len(tokens)):
         char = tokens[i]
         # if ( re.match("[a-zA-Z0-9?]", char)):
@@ -571,7 +572,7 @@ class AlphabetSoup(inkex.Effect):
             # compensate preserved transforms of parent layer
             if layer.getparent() is not None:
                 mat = (self.svg.get_current_layer().transform * Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
-                new.transform *= Transform(-Transform(mat))
+                new.transform *= -Transform(mat)
 
 
 if __name__ == '__main__':

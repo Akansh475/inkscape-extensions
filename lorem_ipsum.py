@@ -203,14 +203,15 @@ class LorumImpsum(EffectExtension):
     def makePara(self):
         _min = max(1, self.options.sentencecount - self.options.fluctuation)
         _max = max(2, self.options.sentencecount + self.options.fluctuation)
-        scount = random.randint(_min, _max)
+        scount = int(random.random() * _max + _min)
         text = ''
         for i in range(scount):
             if self.first_sentence == 1:
                 text += foo[0]
                 self.first_sentence = 0
             else:
-                text += foo[random.randint(0, len(foo) - 1)]
+                index = int(random.random() * (len(foo) - 1))
+                text += foo[index]
         return text
 
     def addText(self, node):

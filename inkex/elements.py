@@ -390,8 +390,8 @@ class Guide(BaseElement):
     """An inkscape guide"""
     tag_name = 'sodipodi:guide'
 
-    def __init__(self, *args):
-        super(Guide, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(Guide, self).__init__(**kwargs)
         if args:
             self.move_to(*args)
 
@@ -402,12 +402,19 @@ class Guide(BaseElement):
         Angle can either be a float or integer, which will change the orientation.
         Or a pair of numbers (tuple) which will be set as the orientation directly.
         """
-        self.set('position', "{:g},{:g}".format(pos_x, pos_y))
+        self.set('position', "{:g},{:g}".format(float(pos_x), float(pos_y)))
+        if isinstance(angle, str):
+            if ',' not in angle:
+                angle = float(angle)
+
         if isinstance(angle, (float, int)):
             # Generate orientation from angle
             angle = (math.sin(math.radians(angle)), -math.cos(math.radians(angle)))
+
         if isinstance(angle, (tuple, list)) and len(angle) == 2:
-            self.set('orientation', "{:g},{:g}".format(*angle))
+            angle = "{:g},{:g}".format(*angle)
+
+        self.set('orientation', angle)
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""

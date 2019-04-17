@@ -18,10 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-from lxml import etree
-
 import inkex
-
+from inkex.elements import Guide
 
 class SetupTypographyCanvas(inkex.Effect):
     def __init__(self):

@@ -173,6 +173,7 @@ SVG_COLOR = {
     'yellowgreen': '#9acd32',
     'none': None,
 }
+COLOR_SVG = dict([(value, name) for name, value in SVG_COLOR.items()])
 
 def is_color(color):
     """Determine if its a color we can use. If not, leave it unchanged."""
@@ -238,7 +239,9 @@ class Color(list):
     def parse_str(color):
         """Creates a rgb int array"""
         # Handle pre-defined svg color values
-        color = SVG_COLOR.get(color.lower(), color)
+        if color and color.lower() in SVG_COLOR:
+            return 'named', Color.parse_str(SVG_COLOR[color.lower()])[1]
+
         if color is None:
             return 'rgb', None
 
@@ -263,8 +266,12 @@ class Color(list):
     def __str__(self):
         """int array to #rrggbb"""
         if not self:
-            # TODO, return named color if name was 'set' previously.
             return 'none'
+        if self.space == 'named':
+            rgbhex = '#{0:02x}{1:02x}{2:02x}'.format(*self)
+            if rgbhex in COLOR_SVG:
+                return COLOR_SVG[rgbhex]
+            self.space = 'rgb'
         if self.space == 'rgb':
             return '#{0:02x}{1:02x}{2:02x}'.format(*self)
         if self.space == 'rgba':
@@ -277,7 +284,7 @@ class Color(list):
 
     def to_hsl(self):
         """Turn this color into a Hue/Saturation/Lightness colour space"""
-        if not self and self.space == 'rgb':
+        if not self and self.space in ('rgb', 'named'):
             return self.to_rgb().to_hsl()
         if self.space == 'hsl':
             return self
@@ -287,11 +294,11 @@ class Color(list):
 
     def to_rgb(self):
         """Turn this color into a Red/Green/Blue colour space"""
-        if not self and self.space == 'rgb':
+        if not self and self.space in ('rgb', 'named'):
             return Color([0, 0, 0])
         if self.space == 'rgb':
             return self
-        if self.space == 'rgba':
+        if self.space in ('rgba', 'named'):
             return Color(self[:3], space='rgb')
         elif self.space == 'hsl':
             return Color(hsl_to_rgb(*self.to_floats()), space='rgb')
@@ -306,8 +313,6 @@ class Color(list):
     def to_floats(self):
         """Returns the colour values as percentage floats (0.0 - 1.0)"""
         return [val / 255.0 for val in self]
-
-
 
 
 def rgb_to_hsl(red, green, blue):

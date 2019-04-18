@@ -26,7 +26,7 @@ class ColorTest(TestCase):
     def test_namedcolor(self):
         """Named Color"""
         self.assertEqual(Color('red'), [255, 0, 0])
-        self.assertEqual(str(Color('red')), '#ff0000')
+        self.assertEqual(str(Color('red')), 'red')
 
     def test_rgb_hex(self):
         """RGB Hex Color"""

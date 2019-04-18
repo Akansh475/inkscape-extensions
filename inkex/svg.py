@@ -41,7 +41,11 @@ from .elements import ( # pylint: disable=unused-import
     Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide, Tspan, Marker
 )
 
-class SvgDocumentElement(BaseElement):
+if False: # pylint: disable=using-constant-test
+    import typing # pylint: disable=unused-import
+
+
+class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     """Provide access to the document level svg functionality"""
     tag_name = 'svg'
 
@@ -119,7 +123,6 @@ class SvgDocumentElement(BaseElement):
             # return (float(x), doc_height - float(y))
         return 0.0, 0.0
 
-    # This used to be called Effect.xpathSingle
     def getElement(self, xpath):  # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
         el_list = self.xpath(xpath)
@@ -206,7 +209,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
     We choose what kind of Elements we should return for each element, providing useful
     SVG based API to our extensions system.
     """
-    _lookups = []
+    _lookups = set({}) # type: typing.Set[str]
 
     def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
         """Choose what kind of functionality our element will have"""
@@ -221,12 +224,13 @@ class SvgClassLookup(etree.CustomElementClassLookup):
 
         import inkex
         inkex.errormsg("Failed to look up element: {}:{} ({})".format(
-                node_type, name, namespace))
+            node_type, name, namespace))
+        return None
 
     def get_lookups(self):
         """Scan for and cache a list of available classes"""
         if not self._lookups:
-            self._lookups = set(BaseElement._subclasses())
+            self._lookups = set(BaseElement.get_subclasses())
 
         return self._lookups
 

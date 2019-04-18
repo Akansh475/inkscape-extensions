@@ -33,7 +33,6 @@ from .transforms import BoundingBox
 from .transforms import Transform
 from .utils import NSS, addNS, removeNS
 
-
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
     tag_name = 'none'
@@ -43,6 +42,7 @@ class BaseElement(etree.ElementBase):
         ('transform', Transform),
         ('style', Style),
     )
+
     # We do this because python2 and python3 have different ways
     # of combining two dictionaries that are incompatible.
     # This allows us to update these with inheritance.
@@ -59,13 +59,13 @@ class BaseElement(etree.ElementBase):
             self.set(key, value)
 
     @classmethod
-    def _subclasses(cls):
+    def get_subclasses(cls):
         """Get subclasses, recursively
         @rtype generator
         """
         for subcls in cls.__subclasses__():
             yield subcls
-            for subsubcls in subcls._subclasses():
+            for subsubcls in subcls.get_subclasses():
                 yield subsubcls
 
     def __getattr__(self, name):
@@ -79,12 +79,14 @@ class BaseElement(etree.ElementBase):
                 if new_item:
                     self.set(name, str(new_item))
                 else:
-                    self.attrib.pop(name, None)
+                    self.attrib.pop(name, None) # pylint: disable=no-member
 
+            # pylint: disable=no-member
             value = cls(self.attrib.get(name, None), callback=_set_attr)
             setattr(self, name, value)
             return value
-        raise AttributeError("Can't find attribute {}".format(name))
+        raise AttributeError("Can't find attribute {}.{}"
+                             .format(type(self).__name__, name))
 
     def __setattr__(self, name, value):
         """Set the attribute, update the attrib if needed"""
@@ -93,7 +95,7 @@ class BaseElement(etree.ElementBase):
             if value:
                 self.attrib[name] = str(value)
             else:
-                self.attrib.pop(name, None)
+                self.attrib.pop(name, None) # pylint: disable=no-member
         else:
             super(BaseElement, self).__setattr__(name, value)
 
@@ -115,7 +117,7 @@ class BaseElement(etree.ElementBase):
             value = str(getattr(self, name))
             if not value:
                 return
-        return super(BaseElement, self).set(addNS(name), value)
+        super(BaseElement, self).set(addNS(name), value)
 
     def add(self, *children):
         """
@@ -132,21 +134,19 @@ class BaseElement(etree.ElementBase):
         self.set('id', root.get_unique_id(suffix, size=size))
 
     @property
-    def path(self):
-        """Gets the outline or path of the element, this can be a simple bounding box for most"""
-        return Path(self.get_path())
+    def root(self):
+        """Get the root document element from any element descendent"""
+        if self.getparent() is not None:
+            return self.getparent().root
+        return self
 
-    @path.setter
-    def path(self, path):
-        self.set_path(path)
-
-    def get_path(self):
-        raise NotImplementedError("Path should be provided by svg element {}."
-                                  .format(type(self).__name__))
-
-    def set_path(self, path):
-        raise NotImplementedError("Path should be set by svg element {}."
-                                  .format(type(self).__name__))
+    def decendants(self):
+        """Walks the element tree and yields all elements, parent first"""
+        yield self
+        for child in self:
+            if hasattr(child, 'decendants'):
+                for decendant in child.decendants():
+                    yield decendant
 
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
@@ -156,24 +156,47 @@ class BaseElement(etree.ElementBase):
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
+    def __str__(self):
+        # We would do more here, but lxml is VERY unpleseant when it comes to
+        # namespaces, basically over printing details and providing no
+        # supression mechanisms to turn off xml's over engineering.
+        return str(self.tag).split('}')[-1]
+
+
+class ShapeElement(BaseElement):
+    """Elements which have a visible reprisentation on the canvas"""
     @property
-    def root(self):
-        """Get the root document element from any element descendent"""
-        if self.getparent() is not None:
-            return self.getparent().root
-        return self
+    def path(self):
+        """Gets the outline or path of the element, this can be a simple bounding box for most"""
+        return Path(self.get_path())
+
+    @path.setter
+    def path(self, path):
+        self.set_path(path)
+
+    def get_path(self):
+        """Generate a path for this object which can inform the bounding box"""
+        raise NotImplementedError("Path should be provided by svg element {}."
+                                  .format(type(self).__name__))
+
+    def set_path(self, path):
+        """Set the path for this object (if possible)"""
+        raise AttributeError("Path can not be set on this type of element: {} <- {}."
+                             .format(type(self).__name__, path))
 
     def composed_transform(self):
         """Calculate every transform down to the root document node"""
-        if self.getparent() is not None:
-            return self.transform * self.getparent().composed_transform()
+        parent = self.getparent()
+        if parent is not None and isinstance(parent, ShapeElement):
+            return self.transform * parent.composed_transform()
         return self.transform
 
     def composed_style(self):
         """Calculate the final styles applied to this element"""
         # FUTURE: We could compose styles from class/css too.
-        if self.getparent() is not None:
-            return self.getparent().composed_style() + self.style
+        parent = self.getparent()
+        if parent is not None and isinstance(parent, ShapeElement):
+            return parent.composed_style() + self.style
         return self.style
 
     def bounding_box(self):
@@ -185,24 +208,10 @@ class BaseElement(etree.ElementBase):
         x, y = self.bounding_box().center()
         return x or 0, y or 0
 
-    def decendants(self):
-        """Walks the element tree and yields all elements, parent first"""
-        yield self
-        for child in self:
-            if hasattr(child, 'decendants'):
-                for decendant in child.decendants():
-                    yield decendant
-
     @property
     def label(self):
         """Returns the inkscape label"""
         return self.get('inkscape:label', None)
-
-    def __str__(self):
-        # We would do more here, but lxml is VERY unpleseant when it comes to
-        # namespaces, basically over printing details and providing no
-        # supression mechanisms to turn off xml's over engineering.
-        return str(self.tag).split('}')[-1]
 
 
 class OtherElements(BaseElement):
@@ -219,26 +228,25 @@ class OtherElements(BaseElement):
         'style',
     ]
 
-    def bounding_box(self):
-        """Other elements have no bounding box"""
-        return BoundingBox(None)
 
-
-class FlowRegion(BaseElement):
+class FlowRegion(ShapeElement):
+    """SVG Flow Region (SVG 2.0)"""
     tag_name = 'flowRegion'
 
     def get_path(self):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
-class FlowRoot(BaseElement):
+class FlowRoot(ShapeElement):
+    """SVG Flow Root (SVG 2.0)"""
     tag_name = 'flowRoot'
 
     def get_path(self):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
-class FlowPara(BaseElement):
+class FlowPara(ShapeElement):
+    """SVG Flow Paragraph (SVG 2.0)"""
     tag_name = 'flowPara'
 
     def get_path(self):
@@ -254,15 +262,19 @@ class FilterPrimitive(BaseElement):
         'feSpecularLighting', 'feTile', 'feTurbulence'
     ]
 
-class Group(BaseElement):
+class Group(ShapeElement):
     """Any group element (layer or regular group)"""
     tag_name = 'g'
     is_layer = lambda self: self.groupmode == 'layer'
 
+    def get_path(self):
+        return Path()
+
     def bounding_box(self):
         bbox = BoundingBox(None)
         for child in self:
-            bbox += child.bounding_box()
+            if isinstance(child, ShapeElement):
+                bbox += child.bounding_box()
         return bbox
 
     @property
@@ -274,7 +286,7 @@ class Anchor(Group):
     """An anchor or link tag"""
     tag_name = 'a'
 
-class PathElement(BaseElement):
+class PathElement(ShapeElement):
     """Provide a useful extension for path elements"""
     tag_name = 'path'
     get_path = lambda self: self.get('d')
@@ -307,13 +319,13 @@ class Pattern(BaseElement):
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
-class Points(BaseElement):
+class Points(ShapeElement):
     """Provide a useful extension for points elements"""
     tag_name = 'points'
     get_path = lambda self: 'M' + self.get('points')
 
 
-class Rectangle(BaseElement):
+class Rectangle(ShapeElement):
     """Provide a useful extension for rectangle elements"""
     tag_name = 'rect'
     left = property(lambda self: float(self.get('x', '0')))
@@ -331,7 +343,7 @@ class Image(Rectangle):
     tag_name = 'image'
 
 
-class Circle(BaseElement):
+class Circle(ShapeElement):
     """Provide a useful extension for circle elements"""
     tag_name = 'circle'
     radius = property(lambda self: self.get('r'))
@@ -347,7 +359,7 @@ class Circle(BaseElement):
         return ('M {0.left} {0.right} '
                 'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '
                 'A {0.radius_x},{0.radius_y} 0 1 0 {0.left}, {0.center_y}'
-                ).format(self)
+               ).format(self)
 
 
 class Ellipse(Circle):
@@ -355,17 +367,17 @@ class Ellipse(Circle):
     tag_name = 'ellipse'
 
 
-class Use(BaseElement):
+class Use(ShapeElement):
     """A 'use' element that links to another in the document"""
     tag_name = 'use'
 
-    path = property(lambda self: self.ref().path)  # pylint: disable=no-member
+    get_path = lambda self: self.ref().get_path()
 
     def ref(self):
         """Returns the referred to element if available"""
         return self.root.getElementById(self.get('xlink:href').strip('#'))
 
-class ClipPath(BaseElement):
+class ClipPath(Group):
     """A path used to clip objects"""
     tag_name = 'clipPath'
 
@@ -424,16 +436,14 @@ class ForeignObject(BaseElement):
     """SVG foreignObject element"""
     tag_name = 'foreignObject'
 
-class TextElement(BaseElement):
+class TextElement(ShapeElement):
     """A Text element"""
     tag_name = 'text'
 
-    def bounding_box(self):
-        """TODO"""
-        return BoundingBox(None)
+    def get_path(self):
+        return Path()
 
-
-class TextPath(BaseElement):
+class TextPath(ShapeElement):
     """A textPath element"""
     tag_name = 'textPath'
 
@@ -441,13 +451,17 @@ class TextPath(BaseElement):
         """Adds a superscript tspan element"""
         self.append(Tspan(text, style="font-size:65%;baseline-shift:super"))
 
+    def get_path(self):
+        return Path()
 
-class Tspan(BaseElement):
+class Tspan(ShapeElement):
     """A tspan text element"""
     tag_name = 'tspan'
 
+    def get_path(self):
+        return Path()
 
-class Marker(BaseElement):
+class Marker(Group):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads
      or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
     tag_name = 'marker'

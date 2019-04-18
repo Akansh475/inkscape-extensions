@@ -7,7 +7,7 @@ Test elements extra logic from svg xml lxml custom classes.
 from lxml import etree
 
 from inkex.elements import (
-    BaseElement, OtherElements,
+    BaseElement, ShapeElement, OtherElements,
     Group, Pattern, Guide,
     TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
 )
@@ -36,10 +36,10 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_attr(self):
         """Access attributes"""
-        elem = BaseElement()
+        elem = ShapeElement()
         self.assertRaises(AttributeError, getattr, elem, 'foo')
         self.assertRaises(NotImplementedError, elem.get_path)
-        self.assertRaises(NotImplementedError, elem.set_path, 1)
+        self.assertRaises(AttributeError, elem.set_path, 1)
 
     def test_findall(self):
         """Findall elements in svg"""
@@ -146,7 +146,6 @@ class CoreElementTestCase(ElementTestCase):
         elem = self.svg.getElementById('D')
         self.assertEqual(elem.bounding_box(), (30.0, 70.0, 120.0, 160.0))
         self.assertEqual(elem.get_center_position(), (50.0, 140.0))
-        self.assertFalse(OtherElements('desc').bounding_box())
         self.assertFalse(TextElement().bounding_box())
         group = Group(elem)
         self.assertEqual(elem.bounding_box(), group.bounding_box())

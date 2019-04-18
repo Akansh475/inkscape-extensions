@@ -28,6 +28,7 @@ import math
 
 import numpy
 
+from .transforms import Segment
 from .utils import errormsg
 from .localize import _
 
@@ -326,18 +327,10 @@ def beziertatlength(bez, l=0.5, tolerance=0.001):
         diff = curlen - targetlen
     return time
 
-
 def maxdist(bez):
     """Get maximum distance within bezier curve"""
-    from ffgeom import Point, Segment
-    ((p0x, p0y), (p1x, p1y), (p2x, p2y), (p3x, p3y)) = bez
-    p0 = Point(p0x, p0y)
-    p1 = Point(p1x, p1y)
-    p2 = Point(p2x, p2y)
-    p3 = Point(p3x, p3y)
-    s1 = Segment(p0, p3)
-    return max(s1.distanceToPoint(p1), s1.distanceToPoint(p2))
-
+    seg = Segment((bez[0], bez[3]))
+    return max(seg.distance_to_point(*bez[1]), seg.distance_to_point(*bez[2]))
 
 def cspsubdiv(csp, flat):
     """Sub-divide cubic sub-paths"""

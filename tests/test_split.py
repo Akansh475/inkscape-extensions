@@ -4,6 +4,7 @@ from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from tests.base.filters import CompareOrderIndependentTags
 
 class TestSplitBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    """Test split effect"""
     effect_class = Split
     comparisons = [('--id=t1', '--id=t3')]
     compare_filters = [CompareOrderIndependentTags()]

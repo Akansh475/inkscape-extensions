@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+# pylint: disable=invalid-name,too-many-locals
+#
 """
 Bezier calculations
 """
@@ -27,7 +29,9 @@ import math
 import numpy
 
 from .utils import errormsg
+from .localize import _
 
+# bez = ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3))
 
 def pointdistance(point_a, point_b):
     """The size of the line between two points"""
@@ -36,7 +40,8 @@ def pointdistance(point_a, point_b):
 
 def between_point(point_a, point_b, time=0.5):
     """Returns the point between point a and point b"""
-    return point_a[0] + time * (point_b[0] - point_a[0]), point_a[1] + time * (point_b[1] - point_a[1])
+    return point_a[0] + time * (point_b[0] - point_a[0]),\
+           point_a[1] + time * (point_b[1] - point_a[1])
 
 
 def percent_point(point_a, point_b, percent=50.0):
@@ -44,12 +49,13 @@ def percent_point(point_a, point_b, percent=50.0):
     return between_point(point_a, point_b, percent / 100.0)
 
 
-def rootWrapper(a, b, c, d):
-    if a:
+def root_wrapper(root_a, root_b, root_c, root_d):
+    """Get the Cubic function, moic formular of roots, simple root"""
+    if root_a:
         # Monics formula see http://en.wikipedia.org/wiki/Cubic_function#Monic_formula_of_roots
-        a, b, c = (b / a, c / a, d / a)
-        m = 2.0 * a ** 3 - 9.0 * a * b + 27.0 * c
-        k = a ** 2 - 3.0 * b
+        mono_a, mono_b, mono_c = (root_b / root_a, root_c / root_a, root_d / root_a)
+        m = 2.0 * mono_a ** 3 - 9.0 * mono_a * mono_b + 27.0 * mono_c
+        k = mono_a ** 2 - 3.0 * mono_b
         n = m ** 2 - 4.0 * k ** 3
         w1 = -.5 + .5 * cmath.sqrt(-3.0)
         w2 = -.5 - .5 * cmath.sqrt(-3.0)
@@ -65,28 +71,30 @@ def rootWrapper(a, b, c, d):
                 n1 = -pow(-(m - math.sqrt(n)) / 2, 1. / 3)
             else:
                 n1 = pow((m - math.sqrt(n)) / 2, 1. / 3)
-        x1 = -1. / 3 * (a + m1 + n1)
-        x2 = -1. / 3 * (a + w1 * m1 + w2 * n1)
-        x3 = -1. / 3 * (a + w2 * m1 + w1 * n1)
-        return x1, x2, x3
-    elif b:
-        det = c ** 2.0 - 4.0 * b * d
+        return (-1. / 3 * (mono_a + m1 + n1),
+                -1. / 3 * (mono_a + w1 * m1 + w2 * n1),
+                -1. / 3 * (mono_a + w2 * m1 + w1 * n1))
+    elif root_b:
+        det = root_c ** 2.0 - 4.0 * root_b * root_d
         if det:
-            return (-c + cmath.sqrt(det)) / (2.0 * b), (-c - cmath.sqrt(det)) / (2.0 * b)
-        else:
-            return -c / (2.0 * b),
-    elif c:
-        return 1.0 * (-d / c),
+            return (
+                (-root_c + cmath.sqrt(det)) / (2.0 * root_b),
+                (-root_c - cmath.sqrt(det)) / (2.0 * root_b))
+        return (-root_c / (2.0 * root_b),)
+    elif root_c:
+        return (1.0 * (-root_d / root_c),)
     return ()
 
 
 def bezlenapprx(sp1, sp2):
+    """Return the aproximate length between two beziers"""
     return pointdistance(sp1[1], sp1[2]) \
            + pointdistance(sp1[2], sp2[0]) \
            + pointdistance(sp2[0], sp2[1])
 
 
 def cspbezsplit(sp1, sp2, time=0.5):
+    """Split a cubic bezier at the time period"""
     m1 = tpoint(sp1[1], sp1[2], time)
     m2 = tpoint(sp1[2], sp2[0], time)
     m3 = tpoint(sp2[0], sp2[1], time)
@@ -96,18 +104,21 @@ def cspbezsplit(sp1, sp2, time=0.5):
     return [[sp1[0][:], sp1[1][:], m1], [m4, m, m5], [m3, sp2[1][:], sp2[2][:]]]
 
 
-def cspbezsplitatlength(sp1, sp2, l=0.5, tolerance=0.001):
+def cspbezsplitatlength(sp1, sp2, length=0.5, tolerance=0.001):
+    """Split a cubic bezier at length"""
     bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
-    time = beziertatlength(bez, l, tolerance)
+    time = beziertatlength(bez, length, tolerance)
     return cspbezsplit(sp1, sp2, time)
 
 
 def cspseglength(sp1, sp2, tolerance=0.001):
+    """Get cubic bezier segment length"""
     bez = (sp1[1][:], sp1[2][:], sp2[0][:], sp2[1][:])
     return bezierlength(bez, tolerance)
 
 
 def csplength(csp):
+    """Get cubic bezier length"""
     total = 0
     lengths = []
     for sp in csp:
@@ -119,8 +130,9 @@ def csplength(csp):
     return lengths, total
 
 
-def bezierparameterize(arg):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
+def bezierparameterize(bez):
+    """Return the bezier parameter size"""
+    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = bez
     # parametric bezier
     x0 = bx0
     y0 = by0
@@ -132,12 +144,11 @@ def bezierparameterize(arg):
     ay = by3 - y0 - cy - by
 
     return ax, ay, bx, by, cx, cy, x0, y0
-    # ax,ay,bx,by,cx,cy,x0,y0=bezierparameterize(((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3)))
 
 
-def linebezierintersect(arg_a, arg_b):
+def linebezierintersect(arg_a, bez):
+    """Where a line and bezier intersect"""
     ((lx1, ly1), (lx2, ly2)) = arg_a
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg_b
     # parametric line
     dd = lx1
     cc = lx2 - lx1
@@ -151,43 +162,43 @@ def linebezierintersect(arg_a, arg_b):
         coef1 = 1
         coef2 = aa / cc
 
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
+    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(bez)
     # cubic intersection coefficients
     a = coef1 * ay - coef2 * ax
     b = coef1 * by - coef2 * bx
     c = coef1 * cy - coef2 * cx
     d = coef1 * (y0 - bb) - coef2 * (x0 - dd)
 
-    roots = rootWrapper(a, b, c, d)
+    roots = root_wrapper(a, b, c, d)
     retval = []
     for i in roots:
-        if type(i) is complex and i.imag == 0:
+        if isinstance(i, complex) and i.imag == 0:
             i = i.real
-        if type(i) is not complex and 0 <= i <= 1:
-            retval.append(bezierpointatt(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)), i))
+        if not isinstance(i, complex) and 0 <= i <= 1:
+            retval.append(bezierpointatt(bez, i))
     return retval
 
 
-def bezierpointatt(arg, t):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
+def bezierpointatt(bez, t):
+    """Get coords at the given time point along a bezier curve"""
+    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(bez)
     x = ax * (t ** 3) + bx * (t ** 2) + cx * t + x0
     y = ay * (t ** 3) + by * (t ** 2) + cy * t + y0
     return x, y
 
 
-def bezierslopeatt(arg, t):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
+def bezierslopeatt(bez, t):
+    """Get sloap at the given time point along a bezier curve"""
+    ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
     dx = 3 * ax * (t ** 2) + 2 * bx * t + cx
     dy = 3 * ay * (t ** 2) + 2 * by * t + cy
     return dx, dy
 
 
-def beziertatslope(arg, d):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
+def beziertatslope(bez, d):
+    """Reverse; get time from sloap along a bezier curve"""
+    ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
     (dy, dx) = d
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
     # quadratic coefficients of slope formula
     if dx:
         slope = 1.0 * (dy / dx)
@@ -202,12 +213,12 @@ def beziertatslope(arg, d):
     else:
         return []
 
-    roots = rootWrapper(0, a, b, c)
+    roots = root_wrapper(0, a, b, c)
     retval = []
     for i in roots:
-        if type(i) is complex and i.imag == 0:
+        if isinstance(i, complex) and i.imag == 0:
             i = i.real
-        if type(i) is not complex and 0 <= i <= 1:
+        if not isinstance(i, complex) and 0 <= i <= 1:
             retval.append(i)
     return retval
 
@@ -230,8 +241,9 @@ def tpoint(p1, p2, t):
     return x1 + t * (x2 - x1), y1 + t * (y2 - y1)
 
 
-def beziersplitatt(arg, t):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
+def beziersplitatt(bez, t):
+    """Split bezier at given time"""
+    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = bez
     m1 = tpoint((bx0, by0), (bx1, by1), t)
     m2 = tpoint((bx1, by1), (bx2, by2), t)
     m3 = tpoint((bx2, by2), (bx3, by3), t)
@@ -242,60 +254,38 @@ def beziersplitatt(arg, t):
     return ((bx0, by0), m1, m4, m), (m, m5, m3, (bx3, by3))
 
 
-def Gravesen_addifclose(b, len, error=0.001):
+def addifclose(bez, l, error=0.001):
+    """Gravesen, Add if the line is closed, in-place addition to array l"""
     box = 0
     for i in range(1, 4):
-        box += pointdistance(b[i - 1], b[i])
-    chord = pointdistance(b[0], b[3])
+        box += pointdistance(bez[i - 1], bez[i])
+    chord = pointdistance(bez[0], bez[3])
     if (box - chord) > error:
-        first, second = beziersplitatt(b, 0.5)
-        Gravesen_addifclose(first, len, error)
-        Gravesen_addifclose(second, len, error)
+        first, second = beziersplitatt(bez, 0.5)
+        addifclose(first, l, error)
+        addifclose(second, l, error)
     else:
-        len[0] += (box / 2.0) + (chord / 2.0)
+        l[0] += (box / 2.0) + (chord / 2.0)
 
 
-def bezierlengthGravesen(b, error=0.001):
-    """
-    Approximating the arc length of a bezier curve
-    according to <http://www.cit.gu.edu.au/~anthony/info/graphics/bezier.curves>
-
-    if:
-        L1 = |P0 P1| +|P1 P2| +|P2 P3|
-        L0 = |P0 P3|
-    then:
-        L = 1/2*L0 + 1/2*L1
-        ERR = L1-L0
-    ERR approaches 0 as the number of subdivisions (m) increases
-        2^-4m
-
-    Reference:
-    Jens Gravesen <gravesen@mat.dth.dk>
-    "Adaptive subdivision and the length of Bezier curves"
-    mat-report no. 1992-10, Mathematical Institute, The Technical
-    University of Denmark.
-    """
-    len = [0]
-    Gravesen_addifclose(b, len, error)
-    return len[0]
+# balfax, balfbx, balfcx, balfay, balfby, balfcy = 0, 0, 0, 0, 0, 0
 
 
-# balf = Bezier Arc Length Function
-balfax, balfbx, balfcx, balfay, balfby, balfcy = 0, 0, 0, 0, 0, 0
-
-
-def balf(t):
-    retval = (balfax * (t ** 2) + balfbx * t + balfcx) ** 2 + (balfay * (t ** 2) + balfby * t + balfcy) ** 2
+def balf(t, args):
+    """Bezier Arc Length Function"""
+    ax, bx, cx, ay, by, cy = args
+    retval = (ax * (t ** 2) + bx * t + cx) ** 2 + (ay * (t ** 2) + by * t + cy) ** 2
     return math.sqrt(retval)
 
 
-def Simpson(f, a, b, n_limit, tolerance):
+def simpson(a, b, n_limit, tolerance, balarg):
+    """It's not known what this function does..."""
     n = 2
     multiplier = (b - a) / 6.0
-    endsum = f(a) + f(b)
+    endsum = balf(a, balarg) + balf(b, balarg)
     interval = (b - a) / 2.0
     asum = 0.0
-    bsum = f(a + interval)
+    bsum = balf(a + interval, balarg)
     est1 = multiplier * (endsum + (2.0 * asum) + (4.0 * bsum))
     est0 = 2.0 * est1
     # print(multiplier, endsum, interval, asum, bsum, est1, est0)
@@ -307,44 +297,40 @@ def Simpson(f, a, b, n_limit, tolerance):
         bsum = 0.0
         est0 = est1
         for i in range(1, n, 2):
-            bsum += f(a + (i * interval))
+            bsum += balf(a + (i * interval), balarg)
             est1 = multiplier * (endsum + (2.0 * asum) + (4.0 * bsum))
     # print(multiplier, endsum, interval, asum, bsum, est1, est0)
     return est1
 
 
-def bezierlengthSimpson(arg, tolerance=0.001):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    global balfax, balfbx, balfcx, balfay, balfby, balfcy
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    balfax, balfbx, balfcx, balfay, balfby, balfcy = 3 * ax, 2 * bx, cx, 3 * ay, 2 * by, cy
-    return Simpson(balf, 0.0, 1.0, 4096, tolerance)
+def bezierlength(bez, tolerance=0.001, time=1.0):
+    """Get length of bezier curve"""
+    ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
+    return simpson(0.0, time, 4096, tolerance, [3 * ax, 2 * bx, cx, 3 * ay, 2 * by, cy])
 
 
-def beziertatlength(arg, l=0.5, tolerance=0.001):
-    ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = arg
-    global balfax, balfbx, balfcx, balfay, balfby, balfcy
-    ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)))
-    balfax, balfbx, balfcx, balfay, balfby, balfcy = 3 * ax, 2 * bx, cx, 3 * ay, 2 * by, cy
-    t = 1.0
-    tdiv = t
-    curlen = Simpson(balf, 0.0, t, 4096, tolerance)
+def beziertatlength(bez, l=0.5, tolerance=0.001):
+    """Get bezier curve time at the length specified"""
+    curlen = bezierlength(bez, tolerance, 1.0)
+    time = 1.0
+    tdiv = time
     targetlen = l * curlen
     diff = curlen - targetlen
     while abs(diff) > tolerance:
         tdiv /= 2.0
         if diff < 0:
-            t += tdiv
+            time += tdiv
         else:
-            t -= tdiv
-        curlen = Simpson(balf, 0.0, t, 4096, tolerance)
+            time -= tdiv
+        curlen = bezierlength(bez, tolerance, time)
         diff = curlen - targetlen
-    return t
+    return time
 
 
-def maxdist(arg):
+def maxdist(bez):
+    """Get maximum distance within bezier curve"""
     from ffgeom import Point, Segment
-    ((p0x, p0y), (p1x, p1y), (p2x, p2y), (p3x, p3y)) = arg
+    ((p0x, p0y), (p1x, p1y), (p2x, p2y), (p3x, p3y)) = bez
     p0 = Point(p0x, p0y)
     p1 = Point(p1x, p1y)
     p2 = Point(p2x, p2y)
@@ -354,23 +340,25 @@ def maxdist(arg):
 
 
 def cspsubdiv(csp, flat):
+    """Sub-divide cubic sub-paths"""
     for sp in csp:
         subdiv(sp, flat)
 
 
 def subdiv(sp, flat, i=1):
+    """sub divide bezier curve"""
     while i < len(sp):
         p0 = sp[i - 1][1]
         p1 = sp[i - 1][2]
         p2 = sp[i][0]
         p3 = sp[i][1]
 
-        b = (p0, p1, p2, p3)
-        m = maxdist(b)
-        if m <= flat:
+        bez = (p0, p1, p2, p3)
+        mdist = maxdist(bez)
+        if mdist <= flat:
             i += 1
         else:
-            one, two = beziersplitatt(b, 0.5)
+            one, two = beziersplitatt(bez, 0.5)
             sp[i - 1][2] = one[1]
             sp[i][0] = two[2]
             p = [one[2], one[3], two[1]]
@@ -378,6 +366,7 @@ def subdiv(sp, flat, i=1):
 
 
 def csparea(csp):
+    """Get area in cubic sub-path"""
     MAT_AREA = numpy.matrix([[0, 2, 1, -3],
                              [-2, 0, 1, 1],
                              [-1, -1, 0, 2],
@@ -386,8 +375,8 @@ def csparea(csp):
     for sp in csp:
         if len(sp) < 2:
             continue
-        for i in range(len(sp)):  # calculate polygon area
-            area += 0.5 * sp[i - 1][1][0] * (sp[i][1][1] - sp[i - 2][1][1])
+        for x, coord in enumerate(sp):  # calculate polygon area
+            area += 0.5 * sp[x - 1][1][0] * (coord[1][1] - sp[x - 2][1][1])
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
             vec_x = numpy.matrix([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.matrix([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
@@ -396,6 +385,7 @@ def csparea(csp):
 
 
 def cspcofm(csp):
+    """Get cubic sub-path coefficient"""
     MAT_COFM_0 = numpy.matrix([[0, 35, 10, -45],
                                [-35, 0, 12, 23],
                                [-10, -12, 0, 22],
@@ -422,17 +412,20 @@ def cspcofm(csp):
         errormsg(_("Area is zero, cannot calculate Center of Mass"))
         return 0, 0
     for sp in csp:
-        for i in range(len(sp)):  # calculate polygon moment
-            xc += sp[i - 1][1][1] * (sp[i - 2][1][0] - sp[i][1][0]) * (sp[i - 2][1][0] + sp[i - 1][1][0] + sp[i][1][0]) / 6
-            yc += sp[i - 1][1][0] * (sp[i][1][1] - sp[i - 2][1][1]) * (sp[i - 2][1][1] + sp[i - 1][1][1] + sp[i][1][1]) / 6
+        for x, coord in enumerate(sp):  # calculate polygon moment
+            xc += sp[x - 1][1][1] * (sp[x - 2][1][0] - coord[1][0]) \
+                * (sp[x - 2][1][0] + sp[x - 1][1][0] + coord[1][0]) / 6
+            yc += sp[x - 1][1][0] * (coord[1][1] - sp[x - 2][1][1]) \
+                * (sp[x - 2][1][1] + sp[x - 1][1][1] + coord[1][1]) / 6
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
             vec_x = numpy.matrix([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.matrix([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
-            vec_t = numpy.matrix([(vec_x * MAT_COFM_0 * vec_y.T)[0, 0], (vec_x * MAT_COFM_1 * vec_y.T)[0, 0], (vec_x * MAT_COFM_2 * vec_y.T)[0, 0], (vec_x * MAT_COFM_3 * vec_y.T)[0, 0]])
+            vec_t = numpy.matrix([
+                (vec_x * MAT_COFM_0 * vec_y.T)[0, 0],
+                (vec_x * MAT_COFM_1 * vec_y.T)[0, 0],
+                (vec_x * MAT_COFM_2 * vec_y.T)[0, 0],
+                (vec_x * MAT_COFM_3 * vec_y.T)[0, 0]
+            ])
             xc += (vec_x * vec_t.T)[0, 0] / 280
             yc += (vec_y * vec_t.T)[0, 0] / 280
     return -xc / area, -yc / area
-
-
-# default bezier length method
-bezierlength = bezierlengthSimpson

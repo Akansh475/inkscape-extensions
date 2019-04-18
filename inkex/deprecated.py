@@ -82,10 +82,12 @@ class DeprecatedEffect(object):
 
     @property
     def OptionParser(self):
-        self._deprecated('OptionParser', _('{} or `optparse` is very old, it was '
-                                           'deprecated when python 2.7 came out in 2009 and is now replaced with '
-                                           '`argparser`. You must change `self.OptionParser.add_option` to '
-                                           '`self.arg_parser.add_argument` the arguments are similar.'))
+        self._deprecated(
+            'OptionParser',
+            _('{} or `optparse` is very old, it was '
+              'deprecated when python 2.7 came out in 2009 and is now replaced with '
+              '`argparser`. You must change `self.OptionParser.add_option` to '
+              '`self.arg_parser.add_argument` the arguments are similar.'))
         return self
 
     def add_option(self, *args, **kw):
@@ -108,20 +110,19 @@ class DeprecatedEffect(object):
 
     @property
     def current_layer(self):
-        self._deprecated('current_layer', _('{} is now a method in the svg '
-                                            'document. Use `self.svg.get_current_layer()` instead.'))
+        self._deprecated('current_layer',\
+            _('{} is now a method in the svg. Use `self.svg.get_current_layer()` instead.'))
         return self.svg.get_current_layer()
 
     @property
     def view_center(self):
-        self._deprecated('view_center', _('{} is now a method in the svg '
-                                          'document. Use `self.svg.get_center_position()` instead.'))
+        self._deprecated('view_center',\
+            _('{} is now a method in the svg. Use `self.svg.get_center_position()` instead.'))
         return self.svg.get_center_position()
 
     @property
     def selected(self):
-        self._deprecated('selected', _('{} is now a dictionary in the svg '
-                                       'document. Use self.svg.selected instead.'))
+        self._deprecated('selected', _('{} is now a dict in the svg. Use `self.svg.selected`.'))
         return self.svg.selected
 
     @property
@@ -131,8 +132,8 @@ class DeprecatedEffect(object):
         return self.svg.get_ids()
 
     def getElementById(self, eid):
-        self._deprecated('getElementById', _('{} is now a method in the svg '
-                                             'document. Use `self.svg.getElementById(eid)` instead.'))
+        self._deprecated('getElementById',\
+            _('{} is now a method in the svg. Use `self.svg.getElementById(eid)` instead.'))
         return self.svg.getElementById(eid)
 
     def xpathSingle(self, xpath):
@@ -141,19 +142,20 @@ class DeprecatedEffect(object):
         return self.svg.getElement(xpath)
 
     def getParentNode(self, node):
-        self._deprecated('getParentNode', _('{} should never have existed. '
-                                            'lxml always had a getparent() method and that should be used '
-                                            'instead of this custom Effect method.'))
+        self._deprecated('getParentNode',\
+            _('{} should never have existed. lxml always had a getparent() '
+              'method and that should be used instead of this custom Effect method.'))
         return node.getparent()
 
     def getNamedView(self):
-        self._deprecated('getNamedView', _('{} is now a property of the svg '
-                                           'document. Use `self.svg.namedview` to access this element'))
+        self._deprecated('getNamedView',\
+            _('{} is now a property of the svg. Use `self.svg.namedview` to access this element'))
         return self.svg.namedview
 
     def createGuide(self, posX, posY, angle):
-        self._deprecated('createGuide', _('{} is now a method of the namedview '
-                                          'element object. Use `self.svg.namedview.add(Guide(x, y, a))` instead'))
+        self._deprecated('createGuide',\
+            _('{} is now a method of the namedview element object. '
+              'Use `self.svg.namedview.add(Guide(x, y, a))` instead'))
         return self.svg.namedview.add(Guide(posX, posY, angle))
 
     def affect(self, args=sys.argv[1:]):  # pylint: disable=dangerous-default-value
@@ -164,11 +166,9 @@ class DeprecatedEffect(object):
     def save_raw(self, ret):
         # Derived class may implement "output()"
         if hasattr(self, 'output'):
-            self._deprecated('output', 'Use `save()` or `save_raw()` instead of `output()`', stack=5)
-            self.output()
-            return
-
-        inkex.base.InkscapeExtension.save_raw(self, ret)
+            self._deprecated('output', 'Use `save()` or `save_raw()` instead.', stack=5)
+            return getattr(self, 'output')()
+        return inkex.base.InkscapeExtension.save_raw(self, ret)
 
     def uniqueId(self, old_id, make_new_id=True):
         self._deprecated('uniqueId', _('{} is now a method in the svg document. '

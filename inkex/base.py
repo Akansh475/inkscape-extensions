@@ -25,15 +25,14 @@ import sys
 import copy
 
 from argparse import ArgumentParser
+from lxml import etree
 
 from .utils import filename_arg, AbortExtension
 from .svg import SVG_PARSER
-from lxml import etree
 
-PY3 = sys.version_info[0] == 3
-
-if PY3:
-    unicode = str
+if sys.version_info[0] == 3:  #PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
+    basestring = str  # pylint: disable=redefined-builtin,invalid-name
 
 
 class InkscapeExtension(object):
@@ -49,12 +48,12 @@ class InkscapeExtension(object):
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
         self.arg_parser.add_argument(
-                "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-                help="Filename of the input file (default is stdin)", default=None)
+            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
+            help="Filename of the input file (default is stdin)", default=None)
 
         self.arg_parser.add_argument(
-                "--output", type=str, default=None,
-                help="Optional output filename for saving the result (default is stdout).")
+            "--output", type=str, default=None,
+            help="Optional output filename for saving the result (default is stdout).")
 
         self.add_arguments(self.arg_parser)
 
@@ -117,7 +116,7 @@ class InkscapeExtension(object):
         """Apply some effects on the document or local context"""
         raise NotImplementedError("No effect handle for {}".format(self.name))
 
-    def has_changed(self, ret):
+    def has_changed(self, ret): # pylint: disable=no-self-use
         """Return true if the output should be saved"""
         return ret is not False
 
@@ -141,12 +140,12 @@ class SvgInputMixin(object):  # pylint: disable=too-few-public-methods
         super(SvgInputMixin, self).__init__()
 
         self.arg_parser.add_argument(
-                "--id", action="append", type=str, dest="ids", default=[],
-                help="id attribute of object to manipulate")
+            "--id", action="append", type=str, dest="ids", default=[],
+            help="id attribute of object to manipulate")
 
         self.arg_parser.add_argument(
-                "--selected-nodes", action="append", type=str, dest="selected_nodes", default=[],
-                help="id:subpath:position of selected nodes, if any")
+            "--selected-nodes", action="append", type=str, dest="selected_nodes", default=[],
+            help="id:subpath:position of selected nodes, if any")
 
     def load(self, stream):
         """Load the stream as an svg xml etree and make a backup"""
@@ -175,7 +174,7 @@ class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
     Combine the input and output svg document handling (usually for effects.
     """
 
-    def has_changed(self, ret):
+    def has_changed(self, ret): # pylint: disable=unused-argument
         """Return true if the svg document has changed"""
         original = etree.tostring(self.original_document)
         result = etree.tostring(self.document)

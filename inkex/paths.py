@@ -26,9 +26,9 @@ import copy
 from math import atan2, cos, pi, sin, sqrt
 from operator import add, mul
 
-from .transforms import Transform, BoundingBox, Scale, cubic_extrema
+from .transforms import Transform, BoundingBox, Scale
 from .utils import X, Y, classproperty, strargs, pairwise
-from .cubic_paths import CubicSuperPath, unCubicSuperPath, ArcToPath
+from .cubic_paths import unCubicSuperPath, ArcToPath
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
@@ -53,7 +53,7 @@ class PathCommand(tuple):
 
     # The next command, this is for automatic chains where the next command
     # isn't given, just a bunch on numbers which we automatically parse.
-    next_cmd = classproperty(lambda cls: (cls.this_cmd, cls.this_cmd.lower()))
+    next_cmd = '' # Automatically this command if not set.
 
     # Returns True/False if the command is relative/absolute
     # based on the case of the command
@@ -72,7 +72,8 @@ class PathCommand(tuple):
             obj.cmd = cmd
             if len(args) > cls.num:
                 # pylint: disable=no-value-for-parameter
-                nxt = PathCommand(cls.next_cmd[obj.cmd.islower()], *args[cls.num:])
+                nxtcmd = cls.next_cmd if cls.next_cmd else (cls.this_cmd, cls.this_cmd.lower())
+                nxt = PathCommand(nxtcmd[obj.cmd.islower()], *args[cls.num:])
                 return [obj] + nxt if isinstance(nxt, list) else [obj, nxt]
             return obj
         try:
@@ -105,7 +106,7 @@ class PathCommand(tuple):
         """Returns a list of points in this path command, x and y only"""
         return tuple(zip(self.all_x, self.all_y))
 
-    def bounding_box(self, prev):
+    def bounding_box(self, prev): # pylint: disable=unused-argument
         """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
         return BoundingBox(Scale(*self.all_x), Scale(*self.all_y))
 
@@ -127,7 +128,7 @@ class PathCommand(tuple):
             theta = (atan2(offset_y, offset_x) + angle * pi / 180)
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
             ans.extend([rad * cos(theta) + center_x, rad * sin(theta) + center_y])
-        return PathCommand(self.cmd, *ans)
+        return PathCommand(self.cmd, *ans) # pylint: disable=no-value-for-parameter
 
     def transform(self, transform, raw=False):
         """Apply a matrix transform to this path and return a new path"""
@@ -168,19 +169,19 @@ class Move(PathCommand):
 class Horz(PathCommand):
     """Horizontal Line instruction"""
     num = 1
-    index = X
+    cmd_index = X
     points = property(lambda self: ((self[0], None),))
 
-    def get_pen(self, previous):
+    def get_pen(self, previous=(0, 0)):
         """When getting the pen for Horz moves, we return the combined point"""
         pen = super(Horz, self).get_pen(previous)
         return tuple(pen[i] is None and previous[i] or pen[i] for i in (0, 1))
 
     def translate(self, coords, opr=add):
         """Translate this Horz path by the given coords X/Y"""
-        return PathCommand(self.cmd, opr(self[0], coords[self.index]))
+        return PathCommand(self.cmd, opr(self[0], coords[self.cmd_index]))
 
-    def transform(self, transform):
+    def transform(self, transform, raw=False):
         raise ValueError("Hozontal lines can't be transformed directly.")
 
     def to_line(self, previous):
@@ -190,7 +191,7 @@ class Horz(PathCommand):
 
 class Vert(Horz):
     """Vertical Line instruction"""
-    index = Y
+    cmd_index = Y
     points = property(lambda self: ((None, self[0]),))
 
     all_x = property(lambda self: [])
@@ -213,7 +214,7 @@ class SmoothCurve(PathCommand):
     def bounding_box(self, prev):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
         raise NotImplementedError("This requires the previous coords too")
-        return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
+        #return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
 
 
 class Quadratic(PathCommand):
@@ -255,7 +256,7 @@ class Arc(PathCommand):
         lst = self[:5] + (opr(self[5], coords[X]), opr(self[6], coords[Y]))
         return PathCommand(self.cmd, *lst)
 
-    def transform(self, transform):
+    def transform(self, transform, raw=True):
         """Transform this arc along with the given transformation"""
         points = super(Arc, self).transform(transform, raw=True)[0]
         return PathCommand(self.cmd, *(self[:-2] + tuple(points)))
@@ -271,7 +272,7 @@ class Arc(PathCommand):
                            (self[4], 1 - self[4])[x * y < 0],  # sweep-flag
                            self[5] * x,  # X coord
                            self[6] * y,  # Y coord
-                           )
+                          )
 
 
 class Path(list):

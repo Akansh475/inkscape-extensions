@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,unused-argument
 """Deprecated bezmisc API"""
 
 from inkex.deprecated import deprecate
@@ -28,10 +28,17 @@ beziertatslope = deprecate(bezier.beziertatslope)
 tpoint = deprecate(bezier.tpoint)
 beziersplitatt = deprecate(bezier.beziersplitatt)
 pointdistance = deprecate(bezier.pointdistance)
-Gravesen_addifclose = deprecate(bezier.Gravesen_addifclose)
-bezierlengthGravesen = deprecate(bezier.bezierlengthGravesen)
+Gravesen_addifclose = deprecate(bezier.addifclose)
 balf = deprecate(bezier.balf)
-Simpson = deprecate(bezier.Simpson)
-bezierlengthSimpson = deprecate(bezier.bezierlengthSimpson)
+bezierlengthSimpson = deprecate(bezier.bezierlength)
 beziertatlength = deprecate(bezier.beziertatlength)
 bezierlength = bezierlengthSimpson
+
+@deprecate
+def Simpson(func, a, b, n_limit, tolerance):
+    """bezier.simpson(a, b, n_limit, tolerance, balf_arguments)"""
+    raise AttributeError(
+        """Because bezmisc.Simpson used global variables, it's not possible to
+        call the replacement code automatically. In fact it's unlikely you were
+        using the code or functionality you think you were since it's a highly
+        broken way of writing python.""")

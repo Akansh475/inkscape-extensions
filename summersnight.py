@@ -18,13 +18,12 @@
 #
 
 import inkex
-from inkex.generic import EffectExtension
 from inkex.localize import _
-from inkex.elements import PathElement, Group
 from inkex.paths import Path
+from inkex.transforms import Segment
+from inkex.generic import EffectExtension
+from inkex.elements import PathElement, Group
 from inkex.cubic_paths import CubicSuperPath, unCubicSuperPath
-
-from ffgeom import Point, Segment, intersectSegments
 
 class Project(EffectExtension):
     def effect(self):
@@ -56,13 +55,13 @@ class Project(EffectExtension):
                 trafo = CubicSuperPath(trafo.path.to_arrays())
                 if len(trafo[0]) < 4:
                     return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
-                trafo = [[Point(csp[1][0], csp[1][1]) for csp in subs] for subs in trafo][0][:4]
+                trafo = [[(csp[1][0], csp[1][1]) for csp in subs] for subs in trafo][0][:4]
 
                 #vectors pointing away from the trafo origin
-                self.t1 = Segment(trafo[0], trafo[1])
-                self.t2 = Segment(trafo[1], trafo[2])
-                self.t3 = Segment(trafo[3], trafo[2])
-                self.t4 = Segment(trafo[0], trafo[3])
+                self.t1 = Segment((trafo[0], trafo[1]))
+                self.t2 = Segment((trafo[1], trafo[2]))
+                self.t3 = Segment((trafo[3], trafo[2]))
+                self.t4 = Segment((trafo[0], trafo[3]))
                 self.bbox = obj.bounding_box()
 
                 self.process_group([obj])
@@ -96,15 +95,12 @@ class Project(EffectExtension):
     def trafopoint(self, xy):
         """Transform algorithm thanks to Jose Hevia (freon)"""
         (x, y) = xy
-        vector = Segment(Point(self.bbox.left, self.bbox.top), Point(x, y))
-        xratio = abs(vector.delta_x()) / self.bbox.width
-        yratio = abs(vector.delta_y()) / self.bbox.height
-
-        horz = Segment(self.t1.pointAtRatio(xratio), self.t3.pointAtRatio(xratio))
-        vert = Segment(self.t4.pointAtRatio(yratio), self.t2.pointAtRatio(yratio))
-
-        point = intersectSegments(vert, horz)
-        return [point['x'], point['y']]
+        vector = Segment(((self.bbox.left, self.bbox.top), (x, y)))
+        xratio = vector.width / self.bbox.width
+        yratio = vector.height / self.bbox.height
+        horz = Segment((self.t1.point_at_ratio(xratio), self.t3.point_at_ratio(xratio)))
+        vert = Segment((self.t4.point_at_ratio(yratio), self.t2.point_at_ratio(yratio)))
+        return vert.intersect(horz)
 
 
 if __name__ == '__main__':

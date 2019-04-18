@@ -14,127 +14,74 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,missing-docstring
 """Deprecated ffgeom API"""
 
-from inkex.deprecated import deprecate
+from collections import namedtuple
 
-import math
+from inkex.deprecated import deprecate
+from inkex.transforms import Segment as NewSeg
+
 try:
     NaN = float('NaN')
 except ValueError:
     PosInf = 1e300000
     NaN = PosInf/PosInf
 
-class Point:
-    precision = 5
-    def __init__(self, x, y):
-        self.__coordinates = {'x' : float(x), 'y' : float(y)}
+class Point(namedtuple('Point', 'x y')):
+    __slots__ = ()
     def __getitem__(self, key):
-        return self.__coordinates[key]
-    def __setitem__(self, key, value):
-        self.__coordinates[key] = float(value)
-    def __repr__(self):
-        return '(%s, %s)' % (round(self['x'],self.precision),round(self['y'],self.precision))
-    def copy(self):
-        return Point(self['x'],self['y'])
-    def translate(self, x, y):
-        self['x'] += x
-        self['y'] += y
-    def move(self, x, y):
-        self['x'] = float(x)
-        self['y'] = float(y)
+        if isinstance(key, str):
+            key = 'xy'.index(key)
+        return super(Point, self).__getitem__(key)
 
-class Segment:
+class Segment(NewSeg):
+    @deprecate
     def __init__(self, e0, e1):
-        self.__endpoints = [e0, e1]
+        """inkex.transforms.Segment(((x1, y1), (x2, y2)))"""
+        if isinstance(e0, dict):
+            e0 = (e0['x'], e0['y'])
+        if isinstance(e1, dict):
+            e1 = (e1['x'], e1['y'])
+        super(Segment, self).__init__((e0, e1))
+
     def __getitem__(self, key):
-        return self.__endpoints[key]
-    def __setitem__(self, key, value):
-        self.__endpoints[key] = value
-    def __repr__(self):
-        return repr(self.__endpoints)
-    def copy(self):
-        return Segment(self[0],self[1])
-    def translate(self, x, y):
-        self[0].translate(x,y)
-        self[1].translate(x,y)
-    def move(self,e0,e1):
-        self[0] = e0
-        self[1] = e1
-    def delta_x(self):
-        return self[1]['x'] - self[0]['x']
-    def delta_y(self):
-        return self[1]['y'] - self[0]['y']
-    #alias functions
+        if key:
+            return {'x': self.x.maximum, 'y': self.y.maximum}
+        return {'x': self.x.minimum, 'y': self.y.minimum}
+
+    delta_x = lambda self: self.width
+    delta_y = lambda self: self.height
     run = delta_x
     rise = delta_y
-    def slope(self):
-        if self.delta_x() != 0:
-            return self.delta_x() / self.delta_y()
-        return NaN
-    def intercept(self):
-        if self.delta_x() != 0:
-            return self[1]['y'] - (self[0]['x'] * self.slope())
-        return NaN
+
     def distanceToPoint(self, p):
-        s2 = Segment(self[0],p)
-        c1 = dot(s2,self)
-        if c1 <= 0:
-            return Segment(p,self[0]).length()
-        c2 = dot(self,self)
-        if c2 <= c1:
-            return Segment(p,self[1]).length()
-        return self.perpDistanceToPoint(p)
+        return self.distance_to_point(p['x'], p['y'])
+
     def perpDistanceToPoint(self, p):
-        len = self.length()
-        if len == 0: return NaN
-        return math.fabs(((self[1]['x'] - self[0]['x']) * (self[0]['y'] - p['y'])) - \
-            ((self[0]['x'] - p['x']) * (self[1]['y'] - self[0]['y']))) / len
+        return self.perp_distance(p['x'], p['y'])
+
     def angle(self):
-        return math.pi * (math.atan2(self.delta_y(), self.delta_x())) / 180
+        return super(Segment, self).angle
+
     def length(self):
-        return math.sqrt((self.delta_x() ** 2) + (self.delta_y() ** 2))
-    def pointAtLength(self, len):
-        if self.length() == 0: return Point(NaN, NaN)
-        ratio = len / self.length()
-        x = self[0]['x'] + (ratio * self.delta_x())
-        y = self[0]['y'] + (ratio * self.delta_y())
-        return Point(x, y)
+        return super(Segment, self).length
+
+    def pointAtLength(self, length):
+        return self.point_at_length(length)
+
     def pointAtRatio(self, ratio):
-        if self.length() == 0: return Point(NaN, NaN)
-        x = self[0]['x'] + (ratio * self.delta_x())
-        y = self[0]['y'] + (ratio * self.delta_y())
-        return Point(x, y)
+        return self.point_at_ratio(ratio)
+
     def createParallel(self, p):
-        return Segment(Point(p['x'] + self.delta_x(), p['y'] + self.delta_y()), p)
-    def intersect(self, s):
-        return intersectSegments(self, s)
+        self.parallel(p['x'], p['y'])
 
+@deprecate
 def intersectSegments(s1, s2):
-    x1 = s1[0]['x']
-    x2 = s1[1]['x']
-    x3 = s2[0]['x']
-    x4 = s2[1]['x']
+    """transforms.Segment(s1).intersect(s2)"""
+    return Point(*s1.intersect(s2))
 
-    y1 = s1[0]['y']
-    y2 = s1[1]['y']
-    y3 = s2[0]['y']
-    y4 = s2[1]['y']
-
-    denom = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1))
-    num1 = ((x4 - x3) * (y1 - y3)) - ((y4 - y3) * (x1 - x3))
-    num2 = ((x2 - x1) * (y1 - y3)) - ((y2 - y1) * (x1 - x3))
-
-    num = num1
-
-    if denom != 0:
-        x = x1 + ((num / denom) * (x2 - x1))
-        y = y1 + ((num / denom) * (y2 - y1))
-        return Point(x, y)
-    return Point(NaN, NaN)
-
+@deprecate
 def dot(s1, s2):
-    return s1.delta_x() * s2.delta_x() + s1.delta_y() * s2.delta_y()
-
-
+    """transforms.Segment(s1).dot(s2)"""
+    return s1.dot(s2)

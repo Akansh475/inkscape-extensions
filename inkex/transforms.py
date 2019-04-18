@@ -435,6 +435,18 @@ class Segment(BoundingBox):
         return (self.left + (ratio * self.width),
                 self.top + (ratio * self.height))
 
+    def point_at_length(self, length):
+        """Get the point as the length along the line"""
+        if self.length == 0:
+            return (None, None)
+        ratio = length / self.length
+        return (self.left + (ratio * self.width),
+                self.top+ (ratio * self.height))
+
+    def parallel(self, x, y):
+        """Create parallel Segment"""
+        return Segment(((x + self.width, y + self.height), (x, y)))
+
     def intersect(self, other):
         """Get the intersection betwene two segments"""
         other = Segment(other)

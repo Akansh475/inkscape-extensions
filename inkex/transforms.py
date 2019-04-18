@@ -27,10 +27,9 @@ Provide transformation parsing to extensions
 
 import re
 from decimal import Decimal
-from math import cos, radians, sin, sqrt, tan
+from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 
 from .utils import X, Y, strargs
-
 
 class Transform(object):
     """A transformation object which will always reduce to a matrix and can
@@ -295,7 +294,16 @@ class Scale(object):  # pylint: disable=too-few-public-methods
 
 
 class BoundingBox(object):  # pylint: disable=too-few-public-methods
-    """Some functions to compute a rough bbox of a given list of objects."""
+    """
+    Some functions to compute a rough bbox of a given list of objects.
+
+    BoundingBox() - Empty bounding box, bool == False
+    BoundingBox(x)
+    BoundingBox(x, y)
+    BoundingBox((x1, x2, y1, y2))
+    BoundingBox((x1, x2), (y1, y2))
+    BoundingBox(((x1, y1), (x2, y2)))
+    """
     width = property(lambda self: self.x.size)
     height = property(lambda self: self.y.size)
     top = property(lambda self: self.y.minimum)
@@ -303,13 +311,17 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     bottom = property(lambda self: self.y.maximum)
     right = property(lambda self: self.x.maximum)
 
-    def __init__(self, x, y=None):
+    def __init__(self, x=None, y=None):
         if y is None:
             if isinstance(x, BoundingBox):
                 x, y = x.x, x.y
             elif isinstance(x, (list, tuple)):
                 if len(x) == 2:
-                    x, y = x
+                    if isinstance(x[0], (list, tuple)):
+                        y = x[0][1], x[1][1]
+                        x = x[0][0], x[1][0]
+                    else:
+                        x, y = x
                 elif len(x) == 4:
                     x, y = x[:2], x[2:]
         self.x = Scale(x)
@@ -372,11 +384,73 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         return list(self)[index]
 
     def __repr__(self):
-        return "bbox:" + str(tuple(self))
+        return "BoundingBox({})".format(str(tuple(self)))
 
     def center(self):
         """Returns the middle of the bounding box"""
         return self.x.center, self.y.center
+
+class Segment(BoundingBox):
+    """
+    A segment and a bounding box are functionally the same, except that
+    the coords mean something slightly different.
+
+    Segment(x1, x2, y1, y2)
+    Segment(((x1, y1), (x2, y2)))
+    """
+    @property
+    def length(self):
+        """Get the length from the top left to the bottom right of the line"""
+        return sqrt((self.width ** 2) + (self.height ** 2))
+
+    @property
+    def angle(self):
+        """Get the angle of the line created by this segment"""
+        return pi * (atan2(self.height, self.width)) / 180
+
+    def distance_to_point(self, x, y):
+        """Get the distance to the given point (x, y)"""
+        segment2 = Segment((self.minimum, (x, y)))
+        dot2 = segment2.dot(self)
+        if dot2 <= 0:
+            return Segment(((x, y), self.minimum)).length
+        if self.dot(self) <= dot2:
+            return Segment(((x, y), self.maximum)).length
+        return self.perp_distance(x, y)
+
+    def perp_distance(self, x, y):
+        """Perpendicular distance to the given point"""
+        if self.length == 0:
+            return None
+        return fabs((self.width * (self.top - y)) - ((self.left - x) * self.height)) / self.length
+
+    def dot(self, other):
+        """Get the dot of the segment (what is dot, we don't know)"""
+        return self.width * other.width + self.height * other.height
+
+    def point_at_ratio(self, ratio):
+        """Get the point at the given ratio along the line"""
+        if self.length == 0:
+            return (None, None)
+        return (self.left + (ratio * self.width),
+                self.top + (ratio * self.height))
+
+    def intersect(self, other):
+        """Get the intersection betwene two segments"""
+        other = Segment(other)
+        denom = (other.height * self.width) - (other.width * self.height)
+        num = (other.width * (self.top - other.top)) - (other.height * (self.left - other.left))
+        #num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
+
+        if denom != 0:
+            return (
+                self.left + ((num / denom) * (other.right - self.left)),
+                self.top + ((num / denom) * (other.top - self.top))
+            )
+        return (None, None)
+
+    def __repr__(self):
+        return "Segment(({0.minimum}, {0.maximum}))".format(self)
 
 
 def cubic_extrema(py0, py1, py2, py3):

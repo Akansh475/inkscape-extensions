@@ -124,6 +124,14 @@ class ScaleTest(TestCase):
 
 class BoundingBoxTest(TestCase):
     """Test bounding box calculations"""
+    def test_bbox(self):
+        """Creating bounding boxes"""
+        self.assertEqual(BoundingBox((15)), (15, 15, None, None))
+        self.assertEqual(BoundingBox(1, 3), (1, 1, 3, 3))
+        self.assertEqual(BoundingBox((1, 3)), (1, 1, 3, 3))
+        self.assertEqual(BoundingBox((1, 2), (3, 4)), (1, 2, 3, 4))
+        self.assertEqual(BoundingBox(((1, 2), (3, 4))), (1, 3, 2, 4))
+        self.assertEqual(BoundingBox((1, 2, 3, 4)), (1, 2, 3, 4))
 
     def test_bbox_sum(self):
         """Test adding bboxes together"""
@@ -134,14 +142,3 @@ class BoundingBoxTest(TestCase):
             BoundingBox([0, 0, -5, 0]),
             BoundingBox([0, 0, 0, 5])])
         self.assertEqual(ret, (-5, 5, -5, 5))
-
-    # def setUp(self):
-    #    args = [self.data_file('svg', 'simpletransform.test.svg')]
-    #    self.e = Effect()
-    #    self.e.affect(args, False)
-
-    # def test_scaled_object(self):
-    #    "Object in the defs with 50,50 scaled by 0.5 when used"
-    #    bbox = computeBBox(self.e.document.xpath("//svg:g", namespaces=NSS))
-    #    text_bbox = "{} {} {} {}".format(bbox[0], bbox[1], bbox[2], bbox[3])
-    #    self.assertEqual("0.0 25.0 0.0 25.0", text_bbox)

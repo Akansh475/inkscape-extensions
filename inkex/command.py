@@ -87,6 +87,19 @@ def write_svg(svg, *filename):
             raise ValueError("Not sure what type of SVG data this is.")
     return filename
 
+
+def to_arg(arg):
+    """Convert a python argument to a command line argument"""
+    if isinstance(arg, (tuple, list)):
+        (arg, val) = arg
+        arg = '-' + arg
+        if len(arg) > 2:
+            arg = '-' + arg
+        if val is True:
+            return arg
+        return '{}={}'.format(arg, str(val))
+    return str(arg)
+
 def call(program, *positionals, **arguments):
     """
     Generic caller to open any program and return it's stdout.
@@ -95,32 +108,26 @@ def call(program, *positionals, **arguments):
 
     Will raise ProgramRunError() if return code is not 0.
     """
-    inkprog = which(program)
+    prog = which(program)
 
     stdin = arguments.pop('stdin', None)
     if isinstance(stdin, str):
         stdin = stdin.encode('utf-8')
     inpipe = PIPE if stdin else None
 
-    args = [inkprog]
+    args = [prog]
     for arg, value in arguments.items():
         arg = arg.replace('_', '-').strip()
 
-        arg = '-' + arg
-        if len(arg) > 2:
-            arg = '-' + arg
-
-        if value is True:
-            args.append(arg)
-            continue
-
-        if not isinstance(value, list):
+        if isinstance(value, tuple):
+            value = list(value)
+        elif not isinstance(value, list):
             value = [value]
 
         for val in value:
-            args.append('{}={}'.format(arg, str(val)))
+            args.append(to_arg((arg, val)))
 
-    args += list(positionals)
+    args += [to_arg(pos) for pos in positionals]
 
     process = Popen(
         args,

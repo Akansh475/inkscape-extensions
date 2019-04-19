@@ -24,9 +24,14 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
+import shutil
+
 from itertools import tee
 from argparse import ArgumentTypeError
 
+# When python2 support is gone, enable tempfile's version
+# from tempfile import TemporaryDirectory
+from tempfile import mkdtemp
 
 (X, Y) = range(2)
 
@@ -48,6 +53,18 @@ NSS = {
 }
 SSN = dict((b, a) for (a, b) in NSS.items())
 
+class TemporaryDirectory(object): # pylint: disable=too-few-public-methods
+    """Tiny replacement for python3's version."""
+    def __init__(self, suffix="", prefix="tmp"):
+        self.suffix = suffix
+        self.prefix = prefix
+        self.path = None
+    def __enter__(self):
+        self.path = mkdtemp(self.suffix, self.prefix, None)
+        return self.path
+    def __exit__(self, exc, value, traceback):
+        if os.path.isdir(self.path):
+            shutil.rmtree(self.path)
 
 def inkbool(value):
     """Turn a boolean string into a python boolean"""
@@ -55,7 +72,7 @@ def inkbool(value):
         return True
     elif value.upper() == 'FALSE':
         return False
-
+    return None
 
 def debug(what):
     """Print debug message if debugging is switched on"""

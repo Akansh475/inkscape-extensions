@@ -52,7 +52,7 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
         """Effect isn't needed for a lot of Output extensions"""
         pass
 
-    def save(self):
+    def save(self, stream):
         """But save certainly is, we give a more exact message here"""
         raise NotImplementedError("Output extensions require a save(stream) method!")
 

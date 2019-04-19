@@ -15,46 +15,25 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
+#
+"""
+JessyInk Export to zipfile multiple layers.
+"""
 
-import os
-import sys
-import subprocess
 import zipfile
 
 import inkex
 from inkex.localize import _
+from inkex.base import TempDirMixin
 from inkex.generic import OutputExtension
+from inkex.command import take_snapshot
 
-def propStrToDict(inStr):
-    dictio = {}
 
-    for prop in inStr.split(";"):
-        values = prop.split(":")
-
-        if len(values) == 2:
-            dictio[values[0].strip()] = values[1].strip()
-
-    return dictio
-
-def dictToPropStr(dictio):
-    str = ""
-
-    for key in dictio.keys():
-        str += " " + key + ":" + dictio[key] + ";"
-
-    return str[1:]
-
-def setStyle(node, propKey, propValue):
-    props = {}
-
-    if "style" in node.attrib:
-        props = propStrToDict(node.get("style"))
-
-    props[propKey] = propValue
-    node.set("style", dictToPropStr(props))
-
-class JessyInkExport(OutputExtension):
-    inkscapeCommand = None
+class JessyInkExport(TempDirMixin, OutputExtension):
+    """
+    JessyInkExport Output Extension saves to a zipfile each of the layers.
+    """
+    dir_prefix = 'jessyInk-'
 
     def __init__(self):
         super(JessyInkExport, self).__init__()
@@ -66,80 +45,44 @@ class JessyInkExport(OutputExtension):
         # Register jessyink namespace.
         inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-        # Set inkscape command.
-        self.inkscapeCommand = self.findInkscapeCommand()
-
-        if self.inkscapeCommand == None:
-            inkex.errormsg(_("Could not find Inkscape command.\n"))
-            sys.exit(1)
-
     def save(self, stream):
+        # Check whether the JessyInk-script is present (indicating
+        # that the presentation has not been properly exported).
+        script = self.svg.xpath("//svg:script[@jessyink:version]")
 
-        # Check whether the JessyInk-script is present (indicating that the presentation has not been properly exported).
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version]", namespaces=inkex.NSS)
-
-        if len(scriptNodes) != 0:
-            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        if script:
+            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has"
+                             " a different version than the JessyInk extensions. Please"
+                             " select \"install/update...\" from the \"JessyInk\" sub-menu"
+                             " of the \"Extensions\" menu to install or update the JessyInk"
+                             " script.\n\n"))
 
         with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as output:
 
             # Find layers.
-            exportNodes = self.document.xpath("//svg:g[@inkscape:groupmode='layer']", namespaces=inkex.NSS)
+            layers = self.svg.xpath("//svg:g[@inkscape:groupmode='layer']")
 
-            if len(exportNodes) < 1:
+            if len(layers) < 1:
                 inkex.errormsg("No layers found.")
                 return
 
-            for node in exportNodes:
-                setStyle(node, "display", "none")
+            for node in layers:
+                # Make all layers invisible
+                node.style['display'] = "none"
 
-            for node in exportNodes:
-                setStyle(node, "display", "inherit")
-                setStyle(node, "opacity", "1")
-                self.takeSnapshot(output, node.attrib["{" + inkex.NSS["inkscape"] + "}label"])
-                setStyle(node, "display", "none")
+            for node in layers:
+                # Show only one layer at a time.
+                node.style.update("display:inherit;opacity:1")
 
-    # Function to export the current state of the file using Inkscape.
-    def takeSnapshot(self, output, fileName):
-        # Write the svg file.
-        import tempfile
-        desc, svg_file = tempfile.mkstemp(suffix=".svg", prefix="jessyInk__")
-        self.document.write(os.fdopen(desc, "wb"))
+                name = node.get('inkscape:label')
+                newname = "{}.{}".format(name, self.options.type)
+                filename = take_snapshot(self.document, dirname=self.tempdir,
+                                         name=name, ext=self.options.type,
+                                         dpi=self.options.resolution)
+                output.write(filename, newname)
 
-        ext = str(self.options.type).lower()
+                node.style['display'] = "none"
 
-        # Prepare output file.
-        _, out_file = tempfile.mkstemp(suffix="." + ext, prefix="jessyInk__")
 
-        proc = subprocess.Popen([
-            self.inkscapeCommand,
-            svg_file,
-            "--without-gui",
-            "--export-dpi=" + str(self.options.resolution),
-            "--export-" + ext + "=" + out_file])
-
-        proc.wait()
-
-        output.write(out_file, fileName + "." + ext)
-
-        # clean up after ourselves
-        if os.path.isfile(out_file):
-            os.unlink(out_file)
-
-    # Function to try and find the correct command to invoke Inkscape.
-    def findInkscapeCommand(self):
-        commands = []
-        commands.append("inkscape")
-        commands.append(r"C:\Program Files\Inkscape\inkscape.exe")
-        commands.append("/Applications/Inkscape.app/Contents/Resources/bin/inkscape")
-
-        for command in commands:
-            proc = subprocess.Popen([command + " --without-gui --version"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout_value, stderr_value = proc.communicate()
-
-            if proc.returncode == 0:
-                return command
-
-        return None
 if __name__ == '__main__':
     JessyInkExport().run()

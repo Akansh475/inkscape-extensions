@@ -19,44 +19,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+Export to Gimp's XCF file format including Grids and Guides.
+"""
 
 import os
-import re
-import shutil
-import tempfile
-
-from subprocess import Popen, PIPE
+from collections import OrderedDict
 
 import inkex
 from inkex import inkbool
-from inkex.generic import OutputExtension
 from inkex.localize import _
+from inkex.base import TempDirMixin
+from inkex.generic import OutputExtension
+from inkex.command import take_snapshot, call
 
-# Define extension exceptions
-class GimpXCFError(Exception):
-    pass
+class GimpOutput(TempDirMixin, OutputExtension):
+    """
+    Provide a quick and dirty way of using gimp to output an xcf from Inkscape.
 
+    Both Inkscape and Gimp must be installed for this extension to work.
+    """
+    dir_prefix = 'gimp-out-'
 
-class GimpXCFExpectedIOError(GimpXCFError):
-    pass
-
-
-class GimpXCFInkscapeNotInstalled(GimpXCFError):
-    def __init__(self):
-        inkex.errormsg(_('Inkscape must be installed and set in your path variable.'))
-
-
-class GimpXCFGimpNotInstalled(GimpXCFError):
-    def __init__(self):
-        inkex.errormsg(_('Gimp must be installed and set in your path variable.'))
-
-
-class GimpXCFScriptFuError(GimpXCFError):
-    def __init__(self):
-        inkex.errormsg(_('An error occurred while processing the XCF file.'))
-
-
-class GimpOutput(OutputExtension):
     def __init__(self):
         super(GimpOutput, self).__init__()
         self.arg_parser.add_argument("--tab",
@@ -75,168 +59,90 @@ class GimpOutput(OutputExtension):
                                      dest="layerBackground", default=False,
                                      help="Add background color to each layer")
         self.arg_parser.add_argument("-i", "--dpi",
-                                     type=str,
+                                     type=float,
                                      dest="resolution", default="96",
                                      help="File resolution")
 
-    def clear_tmp(self):
-        shutil.rmtree(self.tmp_dir)
+    def get_guides(self):
+        """Generate a list of horzontal and vertical only guides"""
+        doc_scale = self.svg.scale
+        res_scale = self.options.resolution / 96.0
+        page_height = self.svg.uutounit(self.svg.unittouu(self.svg.height), "px")
+        page_width = self.svg.uutounit(self.svg.unittouu(self.svg.width), "px")
 
-    def getDocumentScale(self):
-        """Returns the ratio between the SVG width and viewBox attributes.
-        """
-        documentscale = 1  # default to 1
-        svgwidth = self.svg.width
-        viewboxstr = self.document.getroot().get('viewBox')
-        if viewboxstr:
-            param = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
-            p = param.match(svgwidth)
-            width = 100  # default
-            viewboxwidth = 100  # default
-            if p:
-                width = float(p.string[p.start():p.end()])
-            else:
-                inkex.errormsg("SVG Width not set correctly! Assuming width = 100")
+        horz_guides = []
+        vert_guides = []
+        # Grab all guide tags in the namedview tag
+        for guide in self.svg.xpath("sodipodi:namedview/sodipodi:guide"):
+            if guide.is_horizontal:
+                # This is a horizontal guide
+                pos = self.svg.uutounit(float(guide.point[1]), "px") * doc_scale
+                # GIMP doesn't like guides that are outside of the image
+                if 0 < pos < page_height:
+                    # The origin is at the top in GIMP land
+                    horz_guides.append(str(int(round(pos * res_scale))))
+            elif guide.is_vertical:
+                # This is a vertical guide
+                pos = self.svg.uutounit(float(guide.point[0]), "px") * doc_scale
+                # GIMP doesn't like guides that are outside of the image
+                if 0 < pos < page_width:
+                    vert_guides.append(str(int(round(pos * res_scale))))
 
-            viewboxnumbers = []
-            for t in viewboxstr.split():
-                try:
-                    viewboxnumbers.append(float(t))
-                except ValueError:
-                    pass
-            if len(viewboxnumbers) == 4:  # check for correct number of numbers
-                viewboxwidth = viewboxnumbers[2]
+        return ('h', ' '.join(horz_guides)), ('v', ' '.join(vert_guides))
 
-            documentscale = self.svg.unittouu(str(width / viewboxwidth))
+    def get_grid(self):
+        """Get the grid if asked for and return as gimpfu script"""
+        scale = (self.svg.scale) * (self.options.resolution / 96.0)
+        # GIMP only allows one rectangular grid
+        xpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
+        if self.svg.xpath(xpath):
+            node = self.svg.getElement(xpath)
+            print("attribs: {}".format(node.attrib))
+            for attr, default, target in (('spacing', 1, 'spacing'), ('origin', 0, 'offset')):
+                fmt = {'target': target}
+                for dim in 'xy':
+                    # These attributes could be nonexistent
+                    unit = float(node.get(attr + dim, default))
+                    unit = self.svg.uutounit(unit, "px") * scale
+                    fmt[dim] = int(round(float(unit)))
+                yield '(gimp-image-grid-set-{target} img {x} {y})'.format(**fmt)
 
-        return documentscale
+    @property
+    def docname(self):
+        """Get the document name suitable for export"""
+        return self.svg.get(inkex.addNS('docname', u'sodipodi')) or 'document'
 
     def save(self, stream):
-        svg_file = self.svg
-        ttmp_orig = self.document.getroot()
-        docname = ttmp_orig.get(inkex.addNS('docname', u'sodipodi'))
-        if docname is None:
-            docname = self.svg
 
-        doc_scale = self.getDocumentScale()
-        res_scale = eval(self.options.resolution) / 96.0
-        scale = doc_scale * res_scale
+        pngs = OrderedDict()
+        valid = False
 
-        pageHeight = self.svg.uutounit(self.svg.unittouu(self.svg.width), "px")
-        pageWidth = self.svg.uutounit(self.svg.unittouu(self.svg.width), "px")
+        for node in self.svg.xpath("/svg:svg/*[name()='g' or @style][@id]"):
+            if not len(node): # pylint: disable=len-as-condition
+                # Ignore empty layers
+                continue
 
-        # Create os temp dir (to store exported pngs and Gimp log file)
-        self.tmp_dir = tempfile.mkdtemp()
+            valid = True
+            node_id = node.get('id')
+            name = node.get("inkscape:label", node_id)
 
-        # Guides
-        hGuides = []
-        vGuides = []
-        if self.options.saveGuides:
-            # Grab all guide tags in the namedview tag
-            guideXpath = "sodipodi:namedview/sodipodi:guide"
-            for guideNode in self.document.xpath(guideXpath, namespaces=inkex.NSS):
-                ori = guideNode.get('orientation')
-                if ori == '0,1':
-                    # This is a horizontal guide
-                    pos = self.uutounit(float(guideNode.get('position').split(',')[1]), "px") * doc_scale
-                    # GIMP doesn't like guides that are outside of the image
-                    if 0 < pos < pageHeight:
-                        # The origin is at the top in GIMP land
-                        hGuides.append(str(int(round((pageHeight - pos) * res_scale))))
-                elif ori == '1,0':
-                    # This is a vertical guide
-                    pos = self.uutounit(float(guideNode.get('position').split(',')[0]), "px") * doc_scale
-                    # GIMP doesn't like guides that are outside of the image
-                    if 0 < pos < pageWidth:
-                        vGuides.append(str(int(round(pos * res_scale))))
+            pngs[name] = take_snapshot(
+                self.document,
+                dirname=self.tempdir,
+                name=name,
+                dpi=self.options.resolution,
+                export_id=node_id,
+                export_id_only=True,
+                export_area_page=True,
+                export_background_opacity=int(bool(self.options.layerBackground))
+            )
 
-        hGList = ' '.join(hGuides)
-        vGList = ' '.join(vGuides)
-
-        # Grid
-        gridSpacingFunc = ''
-        gridOriginFunc = ''
-        # GIMP only allows one rectangular grid
-        gridXpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
-        if self.options.saveGrid and self.document.xpath(gridXpath, namespaces=inkex.NSS):
-            gridNode = self.svg.getElement(gridXpath)
-            if gridNode is not None:
-                # These attributes could be nonexistent
-                spacingX = gridNode.get('spacingx')
-                if spacingX is None:
-                    spacingX = 1
-                else:
-                    spacingX = self.svg.uutounit(float(spacingX), "px") * scale
-                spacingY = gridNode.get('spacingy')
-                if spacingY is None:
-                    spacingY = 1
-                else:
-                    spacingY = self.svg.uutounit(float(spacingY), "px") * scale
-                originX = gridNode.get('originx')
-                if originX is None:
-                    originX = 0
-                else:
-                    originX = self.svg.uutounit(float(originX), "px") * scale
-                originY = gridNode.get('originy')
-                if originY is None:
-                    originY = 0
-                else:
-                    originY = self.svg.uutounit(float(originY), "px") * doc_scale
-                    offsetY = pageHeight % (self.svg.uutounit(float(spacingY), "px") * doc_scale)
-                    originY = (pageHeight - originY) * res_scale
-
-                gridSpacingFunc = '(gimp-image-grid-set-spacing img {} {})'.format(int(round(float(spacingX))), int(round(float(spacingY))))
-                gridOriginFunc = '(gimp-image-grid-set-offset img {} {})'.format(int(round(float(originX))), int(round(float(originY))))
-
-        # Layers
-        area = '--export-area-page'
-        opacity = '--export-background-opacity='
-        resolution = '--export-dpi=' + self.options.resolution
-
-        if self.options.layerBackground:
-            opacity += "1"
-        else:
-            opacity += "0"
-        pngs = []
-        names = []
-        self.valid = 0
-        path = "/svg:svg/*[name()='g' or @style][@id]"
-        for node in self.document.xpath(path, namespaces=inkex.NSS):
-            if len(node) > 0:  # Get rid of empty layers
-                self.valid = 1
-                id = node.get('id')
-                if node.get("{" + inkex.NSS["inkscape"] + "}label"):
-                    name = node.get("{" + inkex.NSS["inkscape"] + "}label")
-                else:
-                    name = id
-                filename = os.path.join(self.tmp_dir, "{}.png".format(id))
-                command = "inkscape -i \"{}\" -j {} {} -e \"{}\" {} {}".format(id, area, opacity, filename, svg_file, resolution)
-
-                p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                return_code = p.wait()
-                f = p.stdout
-                err = p.stderr
-                stdin = p.stdin
-                f.read()
-                f.close()
-                err.close()
-                stdin.close()
-
-                if os.name == 'nt':
-                    filename = filename.replace("\\", "/")
-                pngs.append(filename)
-                names.append(name)
-
-        if self.valid == 0:
-            self.clear_tmp()
+        if not valid:
             inkex.errormsg(_('This extension requires at least one non empty layer.'))
-        else:
-            filelist = '"{}"'.format('" "'.join(pngs))
-            namelist = '"{}"'.format('" "'.join(names))
-            xcf = os.path.join(self.tmp_dir, "{}.xcf".format(docname))
-            if os.name == 'nt':
-                xcf = xcf.replace("\\", "/")
-            script_fu = """
+            return
+
+        xcf = os.path.join(self.tempdir, "{}.xcf".format(self.docname))
+        script_fu = """
 (tracing 1)
 (define
   (png-to-layer img png_filename layer_name)
@@ -254,43 +160,49 @@ class GimpOutput(OutputExtension):
   (
     (img (car (gimp-image-new 200 200 RGB)))
   )
-  (gimp-image-set-resolution img {} {})
+  (gimp-image-set-resolution img {dpi} {dpi})
   (gimp-image-undo-disable img)
   (for-each
     (lambda (names)
       (png-to-layer img (car names) (cdr names))
     )
-    (map cons '({}) '({}))
+    (map cons '("{files}") '("{names}"))
   )
 
   (gimp-image-resize-to-layers img)
+""".format(
+    dpi=self.options.resolution,
+    files='" "'.join(pngs.values()),
+    names='" "'.join(list(pngs))
+)
 
+        if self.options.saveGuides:
+            for dim, guides in self.get_guides():
+                script_fu += """
   (for-each
-    (lambda (hGuide)
-      (gimp-image-add-hguide img hGuide)
+    (lambda ({d}Guide)
+      (gimp-image-add-{d}guide img {d}Guide)
     )
-    '({})
-  )
+    '({g})
+  )""".format(d=dim, g=guides)
 
-  (for-each
-    (lambda (vGuide)
-      (gimp-image-add-vguide img vGuide)
-    )
-    '({})
-  )
+        # Grid
+        if self.options.saveGrid:
+            print("Want to save grid")
+            for fu_let in self.get_grid():
+                print("Found grid fu: {}".format(fu_let))
+                script_fu += "\n" + fu_let + "\n"
 
-  {}
-  {}
-
+        script_fu += """
   (gimp-image-undo-enable img)
-  (gimp-file-save RUN-NONINTERACTIVE img (car (gimp-image-get-active-layer img)) "{}" "{}"))
+  (gimp-file-save RUN-NONINTERACTIVE img (car (gimp-image-get-active-layer img)) "{xcf}" "{xcf}"))
 (gimp-quit 0)
-            """.format(self.options.resolution, self.options.resolution, filelist, namelist, hGList, vGList, gridSpacingFunc, gridOriginFunc, xcf, xcf)
+            """.format(xcf=xcf)
 
-            junk = os.path.join(self.tmp_dir, 'junk_from_gimp.txt')
-            command = 'gimp -i --batch-interpreter plug-in-script-fu-eval -b - > {} 2>&1'.format(junk)
+        call('gimp', "-b", "-", i=True, batch_interpreter="plug-in-script-fu-eval", stdin=script_fu)
 
-            stream.write(xcf)
+        with open(xcf, 'rb') as fhl:
+            stream.write(fhl.read())
 
 
 if __name__ == '__main__':

@@ -35,18 +35,13 @@ from subprocess import Popen, PIPE
 import os
 import shutil
 import inkex
+from inkex.base import TempDirMixin
+from inkex.generic import EffectExtension
+from inkex.command import inkscape_command
 
-class PrepareFileSave(inkex.Effect):
+class PrepareFileSave(TempDirMixin, EffectExtension):
     def effect(self):
-        file = self.args[-1]
-        tempfile = os.path.splitext(file)[0] + "-prepare.svg"
-        # tempfile is needed here only because we want to force the extension to be .svg
-        # so that we can open and close it silently
-        shutil.copy2(file, tempfile)
-        p = Popen('inkscape --verb=EditSelectAllInAllLayers --verb=EditUnlinkClone --verb=ObjectToPath --verb=FileSaveACopy --verb=FileSave --verb=FileQuit '+tempfile, shell=True, stdout=PIPE, stderr=PIPE)
-        err = p.stderr
-        f = p.communicate()[0]
-        err.close()
+        inkscape_command(self.svg, 'EditSelectAllInAllLayers', 'EditUnlinkClone', 'ObjectToPath', 'FileSaveACopy')
 
 if __name__ == '__main__':
     PrepareFileSave().run()

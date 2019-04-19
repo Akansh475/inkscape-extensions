@@ -21,9 +21,12 @@ The ultimate base functionality for every inkscape extension.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import os
 import sys
 import copy
+import shutil
 
+from tempfile import mkdtemp
 from argparse import ArgumentParser
 from lxml import etree
 
@@ -129,6 +132,29 @@ class InkscapeExtension(object):
     def name(self):
         """Return a fixed name for this extension"""
         return type(self).__name__
+
+
+class TempDirMixin(object):
+    """
+    Provide a temporary directory for extensions to stash files.
+    """
+    dir_suffix = ''
+    dir_prefix = 'inktmp'
+
+    def __init__(self, *args, **kwargs):
+        self.tempdir = None
+        super(TempDirMixin, self).__init__(*args, **kwargs)
+
+    def load_raw(self):
+        """Create the temporary directory"""
+        self.tempdir = mkdtemp(self.dir_suffix, self.dir_prefix, None)
+        super(TempDirMixin, self).load_raw()
+
+    def clean_up(self):
+        """Delete the temporary directory"""
+        if self.tempdir and os.path.isdir(self.tempdir):
+            shutil.rmtree(self.tempdir)
+        super(TempDirMixin, self).clean_up()
 
 
 class SvgInputMixin(object):  # pylint: disable=too-few-public-methods

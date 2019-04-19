@@ -39,17 +39,17 @@ etc.
 # standard library
 import locale
 import os
-from subprocess import PIPE, Popen
 
 # local library
 import inkex
 from inkex.utils import inkbool
 from inkex.generic import EffectExtension
+from inkex.command import inkscape
 
 locale.setlocale(locale.LC_ALL, '')
 
 
-class Guillotine(inkex.Effect):
+class Guillotine(EffectExtension):
     """Exports slices made using guides"""
 
     def __init__(self):
@@ -168,10 +168,8 @@ class Guillotine(inkex.Effect):
             consisting of the directory to export to, and the filename
             without extension.
             '''
-            svg = self.document.getroot()
-            att = '{http://www.inkscape.org/namespaces/inkscape}export-filename'
             try:
-                export_file = svg.attrib[att]
+                export_file = self.svg.get('inkscape:export-filename')
             except KeyError:
                 raise inkex.AbortExtension(
                         "To use the export hints option, you "
@@ -188,20 +186,14 @@ class Guillotine(inkex.Effect):
     def get_localised_string(self, str):
         return locale.format("%.f", float(str), 0)
 
-    def export_slice(self, s, filename):
+    def export_slice(self, sli, filename):
         """
         Runs inkscape's command line interface and exports the image
         slice from the 4 coordinates in s, and saves as the filename
         given.
         """
-        svg_file = self.options.input_file
-        command = "inkscape -a {}:{}:{}:{} -e \"{}\" \"{}\" ".format(self.get_localised_string(s[0]), self.get_localised_string(s[1]), self.get_localised_string(s[2]), self.get_localised_string(s[3]), filename, svg_file)
-        p = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
-        return_code = p.wait()
-        f = p.stdout
-        err = p.stderr
-
-        f.close()
+        coords = ":".join([self.get_localised_string(dim) for dim in sli])
+        inkscape(self.options.input_file, a=coords, e=filename)
 
     def export_slices(self, slices):
         """

@@ -6,28 +6,15 @@ Revision history:
 """
 
 from gimp_xcf import GimpOutput
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from tests.base import ComparisonMixin, TestCase
 
-
-class GimpXCFBasicTest(InkscapeExtensionTestMixin, TestCase):
+class GimpXcfBasicTest(ComparisonMixin, TestCase):
+    """Test the Gimp XCF file saving functionality"""
     effect_class = GimpOutput
+    comparisons = [()]
 
-    def _test_expected_file(self):
-        """multilayered-test.svg provides 3 layers and a sublayer (all non empty)"""
-        self.e.run([self.data_file('svg', 'multilayered-test.svg')])
-        # self.assertRaises(GimpXCFExpectedIOError, e.affect, args, False)
-
-    def _test_empty_file(self):
-        # empty-SVG.svg contains an emply svg element (no layer, no object).
-        # The file must have at least one non empty layer and thus the
-        # extension rejects it and send an error message.
-        self.e.run([self.data_file('svg', 'minimal-blank.svg')])
-        self.assertEqual(self.e.valid, 0)
-
-    def _test_empty_layer_file(self):
-        # default-inkscape-SVG.svg is a copy of the default Inkscape
-        # template, with one empty layer.
-        # The file must have at least one non empty layer and thus the
-        # extension rejects it and send an error message.
-        self.e.run([self.data_file('svg', 'default-inkscape-SVG.svg')])
-        self.assertEqual(self.e.valid, 0)
+class GimpXcfGuidesTest(ComparisonMixin, TestCase):
+    """Test that Gimp XCF output can include guides and grids"""
+    effect_class = GimpOutput
+    compare_file = 'ref_guides.svg'
+    comparisons = [('-d=true', '-r=true'),]

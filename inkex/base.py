@@ -71,24 +71,29 @@ class InkscapeExtension(object):
 
     def run(self, args=None, output=None):
         """Main entrypoint for any Inkscape Extension"""
-        if args is None:
-            args = sys.argv[1:]
-
-        self.options = self.arg_parser.parse_args(args)
-        if self.options.input_file is None:
-            self.options.input_file = sys.stdin
-
-        if self.options.output is None:
-            self.options.output = (output or sys.stdout)
-
         try:
-            self.load_raw()
-            ret = self.effect()
-            self.save_raw(ret)
-        except AbortExtension as err:
-            err.write()
-            ret = False
-        self.clean_up()
+            if args is None:
+                args = sys.argv[1:]
+
+            self.options = self.arg_parser.parse_args(args)
+            if self.options.input_file is None:
+                self.options.input_file = sys.stdin
+
+            if self.options.output is None:
+                self.options.output = (output or sys.stdout)
+
+            try:
+                self.load_raw()
+                ret = self.effect()
+                self.save_raw(ret)
+            except AbortExtension as err:
+                err.write()
+                ret = False
+        except Exception:
+            self.clean_up()
+            raise
+        else:
+            self.clean_up()
 
     def load_raw(self):
         """Load the input stream or filename, save everything to self"""

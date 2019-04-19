@@ -38,7 +38,7 @@ from .utils import removeNS
 from .transforms import BoundingBox
 from .elements import ( # pylint: disable=unused-import
     BaseElement, OtherElements, Group, PathElement, Points, Rectangle, Image,
-    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Guide, Tspan, Marker
+    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Tspan, Marker
 )
 
 if False: # pylint: disable=using-constant-test
@@ -178,6 +178,14 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         as defined by the viewBox attribute. If viewBox is not defined,
         returns the string '0'."""
         return self.get('height') or self.get_viewbox()[3] or '0'
+
+    @property
+    def scale(self):
+        """Return the ratio between the page width and the viewBox width"""
+        try:
+            return float(self.width) / float(self.get_viewbox()[2])
+        except (ValueError, ZeroDivisionError):
+            return 1.0
 
     @property
     def unit(self):

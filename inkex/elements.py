@@ -407,6 +407,10 @@ class Guide(BaseElement):
         if args:
             self.move_to(*args)
 
+    is_horizontal = property(lambda self: self.get('orientation') in ('0,1', '0,-1'))
+    is_vertical = property(lambda self: self.get('orientation') == '1,0')
+    point = property(lambda self: self.get('position').split(','))
+
     def move_to(self, pos_x, pos_y, angle=None):
         """
         Move this guide to the given x,y position,

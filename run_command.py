@@ -65,7 +65,7 @@ def run(command_format, prog_name):
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
         try:
             with open(svgfile, "rb") as fhl:
-                sys.stdout.write(fhl.read())
+                sys.stdout.write(fhl.read().decode(sys.stdout.encoding))
         except IOError as inst:
             msg = "Error reading temporary file: {}".format(str(inst))
 

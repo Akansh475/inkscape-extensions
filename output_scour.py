@@ -12,6 +12,10 @@ import inkex
 from inkex import inkbool
 from inkex.generic import OutputExtension
 
+if sys.version_info[0] == 3:  #PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
+    basestring = str  # pylint: disable=redefined-builtin,invalid-name
+
 try:
     import scour
     try:
@@ -81,7 +85,12 @@ class ScourInkscape(OutputExtension):
 
         # do the scouring
         try:
-            stream.write(scourString(etree.tostring(self.document), self.options).encode('utf-8'))
+            mystr = scourString(etree.tostring(self.document), self.options)
+            try:
+                stream.write(mystr)
+            except Exception as e:
+                mybytes = mystr.encode('utf-8') if isinstance(mystr, (str, unicode)) else mystr
+                stream.write(mybytes)
         except Exception as e:
             raise
             inkex.errormsg("Error during optimization.")

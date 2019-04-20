@@ -80,7 +80,8 @@ class InkscapeExtension(object):
                 self.options.input_file = sys.stdin
 
             if self.options.output is None:
-                self.options.output = (output or sys.stdout)
+                # assert output
+                self.options.output = (output or sys.stdout.buffer)
 
             try:
                 self.load_raw()
@@ -107,7 +108,7 @@ class InkscapeExtension(object):
         """Save to the output steam, use everything from self"""
         if self.has_changed(ret):
             if isinstance(self.options.output, (str, unicode)):
-                with open(self.options.output, 'w') as stream:
+                with open(self.options.output, 'wb') as stream:
                     self.save(stream)
             else:
                 self.save(self.options.output)

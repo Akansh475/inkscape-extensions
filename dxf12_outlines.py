@@ -73,7 +73,7 @@ class DxfTwelve(OutputExtension):
         self.flatness = 0.1
 
     def dxf_add(self, line):
-        self._stream.write(line)
+        self._stream.write(line.encode('utf-8'))
 
     def dxf_insert_code(self, code, value):
         self.dxf_add(code + "\n" + value + "\n")

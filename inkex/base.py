@@ -26,7 +26,6 @@ import sys
 import copy
 import shutil
 
-from tempfile import mkdtemp
 from argparse import ArgumentParser
 from lxml import etree
 
@@ -153,6 +152,7 @@ class TempDirMixin(object):
 
     def load_raw(self):
         """Create the temporary directory"""
+        from tempfile import mkdtemp
         self.tempdir = mkdtemp(self.dir_suffix, self.dir_prefix, None)
         super(TempDirMixin, self).load_raw()
 

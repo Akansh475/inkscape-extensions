@@ -31,7 +31,6 @@ from argparse import ArgumentTypeError
 
 # When python2 support is gone, enable tempfile's version
 # from tempfile import TemporaryDirectory
-from tempfile import mkdtemp
 
 (X, Y) = range(2)
 
@@ -60,6 +59,7 @@ class TemporaryDirectory(object): # pylint: disable=too-few-public-methods
         self.prefix = prefix
         self.path = None
     def __enter__(self):
+        from tempfile import mkdtemp
         self.path = mkdtemp(self.suffix, self.prefix, None)
         return self.path
     def __exit__(self, exc, value, traceback):

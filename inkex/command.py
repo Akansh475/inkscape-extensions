@@ -100,21 +100,30 @@ def to_arg(arg):
         return '{}={}'.format(arg, str(val))
     return str(arg)
 
-def call(program, *positionals, **arguments):
+def to_args(prog, *positionals, **arguments):
     """
-    Generic caller to open any program and return it's stdout.
+    Convert positional arguments and key word arguments
+    into a list of strings which Popen will understand.
 
-    stdout = call('executable', arg1, arg2, dash_dash_arg='foo', d=True, ...)
+    Values can be:
 
-    Will raise ProgramRunError() if return code is not 0.
+    args = *[
+        'strait_up_string',
+        '--or_manual_kwarg=1',
+        ('ordered list', 'version of kwargs (as below)'),
+        ...
+    ]
+    kwargs = **{
+        'name': 'val',          # --name="val"'
+        'name': ['foo', 'bar'], # --name=foo --name=bar
+        'name': True,           # --name
+        'n': 'v',               # -n=v
+        'n': True,              # -n
+    }
+
+    All args appear after the kwargs, so if you need args before,
+    use the ordered list tuple and don't use kwargs.
     """
-    prog = which(program)
-
-    stdin = arguments.pop('stdin', None)
-    if isinstance(stdin, str):
-        stdin = stdin.encode('utf-8')
-    inpipe = PIPE if stdin else None
-
     args = [prog]
     for arg, value in arguments.items():
         arg = arg.replace('_', '-').strip()
@@ -128,9 +137,16 @@ def call(program, *positionals, **arguments):
             args.append(to_arg((arg, val)))
 
     args += [to_arg(pos) for pos in positionals]
+    return args
+
+def _call(program, *args, **kwargs):
+    stdin = kwargs.pop('stdin', None)
+    if isinstance(stdin, str):
+        stdin = stdin.encode('utf-8')
+    inpipe = PIPE if stdin else None
 
     process = Popen(
-        args,
+        to_args(which(program), *args, **kwargs),
         shell=False, # Never have shell=True
         stdin=inpipe, # StdIn not used (yet)
         stdout=PIPE, # Grab any output (return it)
@@ -141,11 +157,21 @@ def call(program, *positionals, **arguments):
         return stdout
     raise ProgramRunError("Return Code: {}: {}\n{}".format(process.returncode, stderr, stdout))
 
-def inkscape(svg_file, **arguments):
+def call(program, *args, **kwargs):
+    """
+    Generic caller to open any program and return it's stdout.
+
+    stdout = call('executable', arg1, arg2, dash_dash_arg='foo', d=True, ...)
+
+    Will raise ProgramRunError() if return code is not 0.
+    """
+    return _call(program, *args, **kwargs)
+
+def inkscape(svg_file, **kwargs):
     """
     Call inkscape with the given svg_file and the given arguments
     """
-    return call('inkscape', svg_file, without_gui=True, **arguments)
+    return call('inkscape', svg_file, without_gui=True, **kwargs)
 
 def inkscape_command(svg, *verbs):
     """

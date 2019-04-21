@@ -39,6 +39,7 @@ from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
 
 from .xmldiff import xmldiff
+from .mock import MockCommandMixin
 
 if False: # pylint: disable=using-constant-test
     from typing import Type, List
@@ -57,7 +58,7 @@ class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
         pass
 
 
-class TestCase(BaseCase):
+class TestCase(MockCommandMixin, BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
@@ -79,6 +80,7 @@ class TestCase(BaseCase):
             random.seed(0x35f)
 
     def tearDown(self):
+        super(TestCase, self).tearDown()
         if self._temp_dir and os.path.isdir(self._temp_dir):
             shutil.rmtree(self._temp_dir)
 

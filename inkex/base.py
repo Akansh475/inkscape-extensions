@@ -32,9 +32,11 @@ from lxml import etree
 from .utils import filename_arg, AbortExtension
 from .svg import SVG_PARSER
 
+stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
     basestring = str  # pylint: disable=redefined-builtin,invalid-name
+    stdout = sys.stdout.buffer
 
 
 class InkscapeExtension(object):
@@ -80,7 +82,7 @@ class InkscapeExtension(object):
 
             if self.options.output is None:
                 # assert output
-                self.options.output = (output or sys.stdout.buffer)
+                self.options.output = (output or stdout)
 
             try:
                 self.load_raw()

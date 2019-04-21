@@ -97,7 +97,6 @@ class GimpOutput(TempDirMixin, OutputExtension):
         xpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
         if self.svg.xpath(xpath):
             node = self.svg.getElement(xpath)
-            print("attribs: {}".format(node.attrib))
             for attr, default, target in (('spacing', 1, 'spacing'), ('origin', 0, 'offset')):
                 fmt = {'target': target}
                 for dim in 'xy':
@@ -188,9 +187,7 @@ class GimpOutput(TempDirMixin, OutputExtension):
 
         # Grid
         if self.options.saveGrid:
-            print("Want to save grid")
             for fu_let in self.get_grid():
-                print("Found grid fu: {}".format(fu_let))
                 script_fu += "\n" + fu_let + "\n"
 
         script_fu += """

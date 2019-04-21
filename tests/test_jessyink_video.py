@@ -4,7 +4,7 @@ import re
 
 from jessyInk_video import JessyInk_Effects
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import Compare
+from tests.base.filters import Compare, CompareOrderIndependentBytes
 
 class FilterOutJessyInkId(Compare):
     """Filter out jessyink ids specifically"""
@@ -14,4 +14,4 @@ class FilterOutJessyInkId(Compare):
 
 class JessyInkEffectsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = JessyInk_Effects
-    compare_filters = [FilterOutJessyInkId()]
+    compare_filters = [FilterOutJessyInkId(), CompareOrderIndependentBytes()]

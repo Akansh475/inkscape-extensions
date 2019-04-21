@@ -34,9 +34,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.parser import Parser as EmailParser
 
-from typing import List, Tuple, Callable, Any # pylint: disable=unused-import
-
 import inkex.command
+
+if False: # pylint: disable=using-constant-test
+    from typing import List, Tuple, Callable, Any # pylint: disable=unused-import
 
 TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 FIXED_BOUNDARY = '--CALLDATA--//--CALLDATA--'

@@ -8,7 +8,7 @@ from lxml import etree
 
 from inkex.elements import (
     BaseElement, ShapeElement, OtherElements,
-    Group, Pattern, Guide,
+    Group, Pattern, Guide, Polyline,
     TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
 )
 from inkex.transforms import Transform, ScaleTransform
@@ -189,6 +189,15 @@ class PathElementTestCase(ElementTestCase):
         nolpe.original_path = "M 60 60 L 5 5"
         self.assertEqual(nolpe.get('inkscape:original-d', None), None)
         self.assertEqual(nolpe.get('d'), 'M 60 60 L 5 5')
+
+class PolylineElementTestCase(TestCase):
+    """Test the polyline elements support"""
+    def test_polyline_points(self):
+        """Basic tests for points attribute as a path"""
+        pol = Polyline(points='10,10 50,50 10,15 15,10')
+        self.assertEqual(str(pol.path), 'M 10 10 L 50 50 L 10 15 L 15 10')
+        pol.path = "M 10 10 L 30 9 L 1 2 C 10 45 3 4 45 60 M 35 35"
+        self.assertEqual(pol.get('points'), '10,10 30,9 1,2 45,60 35,35')
 
 class PatternTestCase(ElementTestCase):
     tag = 'pattern'

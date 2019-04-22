@@ -288,7 +288,10 @@ class Path(list):
                 if isinstance(item, PathCommand):
                     self.append(item)
                 elif isinstance(item, (list, tuple)) and len(item) == 2:
-                    self.append(PathCommand(item[0], *item[1]))
+                    if isinstance(item[1], (list, tuple)):
+                        self.append(PathCommand(item[0], *item[1]))
+                    else:
+                        self.append(PathCommand('L', *item))
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""

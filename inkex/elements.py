@@ -314,6 +314,17 @@ class PathElement(ShapeElement):
         else:
             self.path = path
 
+class Polyline(ShapeElement):
+    """Like a path, but made up of strait lines only"""
+    tag_name = 'polyline'
+
+    def get_path(self):
+        return Path('M' + self.get('points'))
+
+    def set_path(self, path):
+        points = ['{:g},{:g}'.format(*seg.points[-1]) for seg in Path(path) if seg]
+        self.set('points', ' '.join(points))
+
 class Pattern(BaseElement):
     """Patern element which is used in the def to control repeating fills"""
     tag_name = 'pattern'

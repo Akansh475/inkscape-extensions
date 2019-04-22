@@ -60,6 +60,11 @@ class PathTest(TestCase):
         ):
             self._assertPath(Path(path), ret)
 
+    def test_create_from_points(self):
+        """Paths can be made of simple list of tuples"""
+        arg = ((10, 10), (4, 5), (16, -9), (20, 20))
+        self.assertEqual(str(Path(arg)), 'L 10 10 L 4 5 L 16 -9 L 20 20')
+
     def test_points(self):
         """Test how x,y points are extracted"""
         for path, ret in (

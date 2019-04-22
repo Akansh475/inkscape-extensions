@@ -84,17 +84,11 @@ class InkscapeExtension(object):
                 # assert output
                 self.options.output = (output or stdout)
 
-            try:
-                self.load_raw()
-                ret = self.effect()
-                self.save_raw(ret)
-            except AbortExtension as err:
-                err.write()
-                ret = False
-        except Exception:
-            self.clean_up()
-            raise
-        else:
+            self.load_raw()
+            self.save_raw(self.effect())
+        except AbortExtension as err:
+            err.write()
+        finally:
             self.clean_up()
 
     def load_raw(self):

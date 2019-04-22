@@ -19,8 +19,13 @@
 """
 Written to test the coding of generating barcodes.
 """
+from collections import defaultdict
+
+from barcode import get_barcode
 from render_barcode import InsertBarcode
+
 from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+
 
 class InsertBarcodeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = InsertBarcode
@@ -29,3 +34,68 @@ class InsertBarcodeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCa
         ('--type', 'Code93', '--text', '3332222'),
         ('--type', 'Upce', '--text', '123456'),
     ]
+
+class GetBarcodeTest(TestCase):
+    """Test each available barcode type"""
+    data = defaultdict(list)
+
+    @classmethod
+    def setUpClass(cls):
+        with open(cls.data_file('render_barcode.data'), 'r') as fhl:
+            for line in fhl:
+                (btype, text, code) = line.strip().split(':', 2)
+                cls.data[btype].append((text, code))
+
+    def test_render_barcode_ian5(self):
+        """Barcode IAN5"""
+        self.barcode_test('Ean5')
+
+    def test_render_barcode_ian8(self):
+        """Barcode IAN5"""
+        self.barcode_test('Ean8')
+
+    def test_render_barcode_ian13(self):
+        """Barcode IAN5"""
+        self.barcode_test('Ean13')
+
+    def test_render_barcode_upca(self):
+        """Barcode IAN5"""
+        self.barcode_test('Upca')
+
+    def test_render_barcode_upce(self):
+        """Barcode UPCE"""
+        self.barcode_test('Upce')
+
+    def test_render_barcode_code128(self):
+        """Barcode Code128"""
+        self.barcode_test('Code128')
+
+    def test_render_barcode_code25i(self):
+        """Barcode Code25i"""
+        self.barcode_test('Code25i')
+
+    def test_render_barcode_code39(self):
+        """Barcode Code39"""
+        self.barcode_test('Code39')
+
+    def test_render_barcode_code39ext(self):
+        """Barcode Code39Ext"""
+        self.barcode_test('Code39Ext')
+
+    def test_render_barcode_ean2(self):
+        """Barcode Ean2"""
+        self.barcode_test('Ean2')
+
+    def test_render_barcode_royal_mail(self):
+        """Barcode RM4CC/RM4SCC"""
+        self.barcode_test('Rm4scc')
+
+    def barcode_test(self, name):
+        """Base module for all barcode testing"""
+
+        assert self.data[name.lower()], "No test data available for {}".format(name)
+        for datum in self.data[name.lower()]:
+            (text, code) = datum
+            coder = get_barcode(name, text=text)
+            code2 = coder.encode(text)
+            assert code == code2

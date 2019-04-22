@@ -62,7 +62,13 @@ class InputExtension(SvgOutputMixin, InkscapeExtension):
 
     Used in functions for `Open`
     """
-    pass
+    def effect(self):
+        """Effect isn't needed for a lot of Input extensions"""
+        pass
+
+    def load(self, stream):
+        """But load certainly is, we give a more exact message here"""
+        raise NotImplementedError("Input extensions require a load(stream) method!")
 
 class GenerateExtension(EffectExtension):
     """

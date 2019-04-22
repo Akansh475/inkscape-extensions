@@ -187,7 +187,23 @@ class SvgInputMixin(object):  # pylint: disable=too-few-public-methods
 class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
     """
     Expects the output document to be an svg document and will write an etree xml.
+
+    A template can be specified to kick off the svg document building process.
     """
+    template = """<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}"
+        xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+    </svg>"""
+
+    def get_template(self, **kwargs):
+        """
+        Opens a template svg document for building, the kwargs
+        MUST include all the replacement values in the template, the
+        default template has 'width' and 'height' of the document.
+        """
+        svg = self.template.format(**kwargs)
+        return etree.fromstring(svg, parser=SVG_PARSER)
 
     def save(self, stream):
         """Save the svg document to the given stream"""

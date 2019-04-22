@@ -170,10 +170,20 @@ class ComparisonMixin(object):
 
     def test_all_comparisons(self):
         """Testing all comparisons"""
+        if not isinstance(self.compare_file, (list, tuple)):
+            self._test_comparisons(self.compare_file)
+        else:
+            for compare_file in self.compare_file:
+                self._test_comparisons(
+                    compare_file,
+                    addout=os.path.basename(compare_file)
+                )
+
+    def _test_comparisons(self, compare_file, addout=None):
         for args in self.comparisons:
             self.assertCompare(
-                self.compare_file,
-                self.get_compare_outfile(args),
+                compare_file,
+                self.get_compare_outfile(args, addout),
                 args,
             )
 
@@ -226,9 +236,11 @@ class ComparisonMixin(object):
             data = cfilter(data)
         return data
 
-    def get_compare_outfile(self, args):
+    def get_compare_outfile(self, args, addout=None):
         """Generate an output file for the arguments given"""
         effect_name = self.effect_class.__module__
+        if addout is not None:
+            args = list(args) + [str(addout)]
         opstr = re.sub(r'[^\w-]', '__', '__'.join(args).replace(self.temp_dir, 'TMP_DIR'))
         if opstr:
             if len(opstr) > 127:

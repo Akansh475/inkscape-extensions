@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Hershey Text</_name>
+  <_name>Render Hershey</_name>
   <id>org.evilmad.render.hershe</id>
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">hersheydata.py</dependency>
@@ -74,7 +74,7 @@ For additional information, please visit:
   <effect needs-live-preview="true" needs-document="true">
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="Render"/>
+      <submenu _name="Text"/>
     </effects-menu>
   </effect>
     <script>

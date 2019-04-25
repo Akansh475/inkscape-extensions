@@ -253,6 +253,14 @@ class FlowPara(ShapeElement):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
+class FlowSpan(ShapeElement):
+    """SVG Flow Span (SVG 2.0)"""
+    tag_name = 'flowSpan'
+
+    def get_path(self):
+        # XXX: These empty paths mean the bbox for text elements will be nothing.
+        return Path()
+
 class FilterPrimitive(BaseElement):
     """A bunch of different filter primitives"""
     tag_names = [

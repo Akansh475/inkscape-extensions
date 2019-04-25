@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-Provide extra utility to each svg element type specific to it's type.
+Provide extra utility to each svg element type specific to its type.
 
 This is useful for having a common interface for each element which can
 give path, transform, and property access easily.
@@ -69,7 +69,7 @@ class BaseElement(etree.ElementBase):
                 yield subsubcls
 
     def __getattr__(self, name):
-        """Get the attribute, but load it if it's not available yet"""
+        """Get the attribute, but load it if it is not available yet"""
         if name in self.wrapped_attrs:
             cls = self.wrapped_attrs[name]
             # The reason we do this here and not in _init is because lxml
@@ -89,7 +89,7 @@ class BaseElement(etree.ElementBase):
                              .format(type(self).__name__, name))
 
     def __setattr__(self, name, value):
-        """Set the attribute, update the attrib if needed"""
+        """Set the attribute, update it if needed"""
         if name in self.wrapped_attrs:
             # Don't call self.set or self.get (infinate loop)
             if value:
@@ -121,7 +121,7 @@ class BaseElement(etree.ElementBase):
 
     def add(self, *children):
         """
-        Like append, but will do multiple children and well return
+        Like append, but will do multiple children and will return
         children or only child
         """
         for child in children:
@@ -129,7 +129,7 @@ class BaseElement(etree.ElementBase):
         return children if len(children) > 1 else children[0]
 
     def set_random_id(self, suffix=None, size=4):
-        """Sets the id attribute if it's not already set"""
+        """Sets the id attribute if it is not already set"""
         root = self.getroottree().getroot()
         self.set('id', root.get_unique_id(suffix, size=size))
 
@@ -164,10 +164,10 @@ class BaseElement(etree.ElementBase):
 
 
 class ShapeElement(BaseElement):
-    """Elements which have a visible reprisentation on the canvas"""
+    """Elements which have a visible representation on the canvas"""
     @property
     def path(self):
-        """Gets the outline or path of the element, this can be a simple bounding box for most"""
+        """Gets the outline or path of the element, this may be a simple bounding box"""
         return Path(self.get_path())
 
     @path.setter
@@ -323,7 +323,7 @@ class PathElement(ShapeElement):
             self.path = path
 
 class Polyline(ShapeElement):
-    """Like a path, but made up of strait lines only"""
+    """Like a path, but made up of straight lines only"""
     tag_name = 'polyline'
 
     def get_path(self):
@@ -334,7 +334,7 @@ class Polyline(ShapeElement):
         self.set('points', ' '.join(points))
 
 class Pattern(BaseElement):
-    """Patern element which is used in the def to control repeating fills"""
+    """Pattern element which is used in the def to control repeating fills"""
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
@@ -393,7 +393,7 @@ class Use(ShapeElement):
     get_path = lambda self: self.ref().get_path()
 
     def ref(self):
-        """Returns the referred to element if available"""
+        """Returns the referred-to element if available"""
         return self.root.getElementById(self.get('xlink:href').strip('#'))
 
 class ClipPath(Group):
@@ -434,7 +434,7 @@ class Guide(BaseElement):
         """
         Move this guide to the given x,y position,
 
-        Angle can either be a float or integer, which will change the orientation.
+        Angle may either be a float or integer, which will change the orientation.
         Or a pair of numbers (tuple) which will be set as the orientation directly.
         """
         self.set('position', "{:g},{:g}".format(float(pos_x), float(pos_y)))

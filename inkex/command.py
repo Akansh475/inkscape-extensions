@@ -97,6 +97,8 @@ def to_arg(arg):
             arg = '-' + arg
         if val is True:
             return arg
+        if val is False:
+            return None
         return '{}={}'.format(arg, str(val))
     return str(arg)
 
@@ -137,7 +139,8 @@ def to_args(prog, *positionals, **arguments):
             args.append(to_arg((arg, val)))
 
     args += [to_arg(pos) for pos in positionals]
-    return args
+    # Filter out empty non-arguments
+    return [arg for arg in args if arg is not None]
 
 def _call(program, *args, **kwargs):
     stdin = kwargs.pop('stdin', None)

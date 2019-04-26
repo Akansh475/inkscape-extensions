@@ -247,3 +247,33 @@ class DepricatedDict(dict):
     @deprecate
     def __iter__(self):
         return super(DepricatedDict, self).__iter__()
+
+# legacy inkex members
+
+class lazyproxy(object):
+    """Proxy, use as decorator on a function with provides the wrapped object.
+    The decorated function is called when a member is accessed on the proxy.
+    """
+    def __init__(self, getwrapped):
+        '''
+        :param getwrapped: Callable which returns the wrapped object
+        '''
+        self._getwrapped = getwrapped
+
+    def __getattr__(self, name):
+        return getattr(self._getwrapped(), name)
+
+    def __call__(self, *args, **kwargs):
+        return self._getwrapped()(*args, **kwargs)
+
+@lazyproxy
+def optparse():
+    _deprecated('inkex.optparse was removed, use "import optparse"', stack=3)
+    import optparse as wrapped
+    return wrapped
+
+@lazyproxy
+def etree():
+    _deprecated('inkex.etree was removed, use "from lxml import etree"', stack=3)
+    from lxml import etree as wrapped
+    return wrapped

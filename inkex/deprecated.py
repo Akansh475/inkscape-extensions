@@ -160,7 +160,13 @@ class DeprecatedEffect(object):
     def affect(self, args=sys.argv[1:], output=True):  # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility
         self._deprecated('affect', _('{} is now `Effect.run()`. The `output` argument has changed.'))
+        self._args = args[-1:]
         return self.run(args=args)
+
+    @property
+    def args(self):
+        self._deprecated('args', _('self.args[-1] is now self.options.input_file'))
+        return self._args
 
     def save_raw(self, ret):
         # Derived class may implement "output()"

@@ -193,7 +193,7 @@ class NiceChart(inkex.Effect):
             csv_file.close()
 
         elif input_type == "\"direct_input\"":
-            what = re.findall("([A-Z|a-z|0-9]+:[0-9]+\.?[0-9]*)", what)
+            what = re.findall(r"([A-Z|a-z|0-9]+:[0-9]+\.?[0-9]*)", what)
             for value in what:
                 value = value.split(":")
                 keys.append(value[0])

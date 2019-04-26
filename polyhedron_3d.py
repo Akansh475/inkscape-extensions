@@ -91,12 +91,12 @@ def get_obj_data(obj, name):
     infile = open(objfile(name))
 
     # regular expressions
-    getname = '(.[nN]ame:\\s*)(.*)'
-    floating = '([\-\+\\d*\.e]*)'  # a possibly non-integer number, with +/- and exponent.
-    getvertex = '(v\\s+)' + floating + '\\s+' + floating + '\\s+' + floating
-    getedgeline = '(l\\s+)(.*)'
-    getfaceline = '(f\\s+)(.*)'
-    getnextint = '(\\d+)([/\\d]*)(.*)'  # we need to deal with 123\343\123 or 123\\456 as equivalent to 123 (we are ignoring the other options in the obj file)
+    getname = r'(.[nN]ame:\\s*)(.*)'
+    floating = r'([\-\+\\d*\.e]*)'  # a possibly non-integer number, with +/- and exponent.
+    getvertex = r'(v\\s+)' + floating + '\\s+' + floating + '\\s+' + floating
+    getedgeline = r'(l\\s+)(.*)'
+    getfaceline = r'(f\\s+)(.*)'
+    getnextint = r'(\\d+)([/\\d]*)(.*)'  # we need to deal with 123\343\123 or 123\\456 as equivalent to 123 (we are ignoring the other options in the obj file)
 
     for line in infile:
         if line[0] == '#':  # we have a comment line

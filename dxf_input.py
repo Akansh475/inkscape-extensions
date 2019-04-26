@@ -78,12 +78,12 @@ def export_MTEXT():
                 text += vals[groups['3']][i]
         if vals[groups['1']]:
             text += vals[groups['1']][0]
-        found = text.find('\P')  # new line
+        found = text.find(r'\P')  # new line
         while found > -1:
             tspan = etree.SubElement(node, 'tspan', {inkex.addNS('role', 'sodipodi'): 'line'})
             tspan.text = text[:found]
             text = text[(found + 2):]
-            found = text.find('\P')
+            found = text.find(r'\P')
         tspan = etree.SubElement(node, 'tspan', {inkex.addNS('role', 'sodipodi'): 'line'})
         tspan.text = text
 

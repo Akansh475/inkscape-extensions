@@ -51,8 +51,8 @@ try:
 except ValueError:
     DEPRECATION_LEVEL = 1
 
-def _depricated(msg, stack=2):
-    """Internal method for raising a deprication warning"""
+def _deprecated(msg, stack=2):
+    """Internal method for raising a deprecation warning"""
     if DEPRECATION_LEVEL > 1:
         msg += ' ; ' + traceback.format_stack()
     if DEPRECATION_LEVEL:
@@ -76,7 +76,7 @@ class DeprecatedEffect(object):
     @classmethod
     def _deprecated(cls, name, msg=_('{} is deprecated and should be removed'), stack=3):
         """Give the user a warning about their extension using a deprecated API"""
-        _depricated(
+        _deprecated(
             msg.format('Effect.' + name, cls=cls.__module__ + '.' + cls.__name__),
             stack=stack)
 
@@ -229,7 +229,7 @@ def deprecate(func):
     """
 
     def _inner(*args, **kwargs):
-        _depricated('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), stack=2)
+        _deprecated('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), stack=2)
         return func(*args, **kwargs)
     return _inner
 

@@ -23,13 +23,22 @@ This provides the basic generic types of extensions which most writers should
 use in their code. See below for the different types.
 """
 
+import os
+import sys
 import types
 
+from lxml.etree import fromstring
+
 from .utils import errormsg
+from .svg import SVG_PARSER
 from .elements import BaseElement, Group
-from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin
+from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import TranslateTransform
 from .deprecated import DeprecatedEffect
+
+stdout = sys.stdout
+if sys.version_info[0] == 3:  #PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
     """An Inkscape effect, takes SVG in and outputs SVG"""
@@ -69,6 +78,42 @@ class InputExtension(SvgOutputMixin, InkscapeExtension):
     def load(self, stream):
         """But load certainly is, we give a more exact message here"""
         raise NotImplementedError("Input extensions require a load(stream) method!")
+
+class CallExtension(TempDirMixin, InputExtension):
+    """Call an external program to get the output"""
+    input_ext = 'svg'
+    output_ext = 'svg'
+
+    def load(self, stream):
+        pass # Not called (load_raw instead)
+
+    def load_raw(self):
+        # Don't call InputExtension.load_raw
+        TempDirMixin.load_raw(self)
+        input_file = self.options.input_file
+
+        if not isinstance(input_file, (unicode, str)):
+            data = input_file.read()
+            input_file = os.path.join(self.tempdir, 'input.' + self.input_ext)
+            with open(input_file, 'wb') as fhl:
+                fhl.write(data)
+
+        output_file = os.path.join(self.tempdir, 'output.' + self.output_ext)
+        document = self.call(input_file, output_file) or output_file
+        if isinstance(document, (str, unicode)):
+            if not os.path.isfile(document):
+                raise IOError("Can't find generated document: {}".format(document))
+
+            with open(document, 'r') as fhl:
+                document = fhl.read()
+
+            if '<' in document:
+                document = fromstring(document, parser=SVG_PARSER)
+        self.document = document
+
+    def call(self, input_file, output_file):
+        """Call whatever programs are needed to get the desired result."""
+        raise NotImplementedError("Call extensions require a call(in, out) method!")
 
 class GenerateExtension(EffectExtension):
     """

@@ -278,3 +278,12 @@ def etree():
     _deprecated('inkex.etree was removed, use "from lxml import etree"', stack=3)
     from lxml import etree as wrapped
     return wrapped
+
+@lazyproxy
+def InkOption():
+    import optparse
+    class wrapped(optparse.Option):
+        TYPES = optparse.Option.TYPES + ("inkbool", )
+        TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
+        TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
+    return wrapped

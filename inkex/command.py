@@ -32,9 +32,12 @@ your extension does.
 """
 
 import os
+import sys
 from subprocess import Popen, PIPE
 
 from .utils import TemporaryDirectory
+
+PY3 = sys.version_info[0] == 3
 
 class CommandNotFound(IOError):
     """Command is not found"""
@@ -144,7 +147,7 @@ def to_args(prog, *positionals, **arguments):
 
 def _call(program, *args, **kwargs):
     stdin = kwargs.pop('stdin', None)
-    if isinstance(stdin, str):
+    if PY3 and isinstance(stdin, str):
         stdin = stdin.encode('utf-8')
     inpipe = PIPE if stdin else None
 

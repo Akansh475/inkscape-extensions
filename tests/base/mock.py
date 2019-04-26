@@ -158,6 +158,12 @@ class MockCommandMixin(MockMixin):
                 ret.add(os.path.join(fdir, fname))
         return ret
 
+    def ignore_command_mock(self, program, arglst):
+        """Return true if the mock is ignored"""
+        if self and program and arglst:
+            return os.environ.get('NO_MOCK_COMMANDS')
+        return False
+
     def mock_call(self, program, *args, **kwargs):
         """
         Replacement for the inkex.command.call() function, instead of calling
@@ -194,7 +200,7 @@ class MockCommandMixin(MockMixin):
         # Generate a unique key for this call based on _all_ it's inputs
         key = hashlib.md5(keystr.encode('utf-8')).hexdigest()
 
-        if os.environ.get('NO_MOCK_COMMANDS'):
+        if self.ignore_command_mock(program, arglst):
             # Call original code. This is so programmers can run the test suite
             # against the external programs too, to see how their fair.
             if stdin is not None:

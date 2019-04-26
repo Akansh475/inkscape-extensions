@@ -101,6 +101,7 @@ class DeprecatedEffect(object):
         if kw.get('action', None) == 'store':
             # Default store action not required, removed.
             kw.pop('action')
+        args = [arg for arg in args if arg != ""]
         self.arg_parser.add_argument(*args, **kw)
 
     def effect(self):

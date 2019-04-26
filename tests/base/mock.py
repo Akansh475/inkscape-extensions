@@ -140,10 +140,13 @@ class MockCommandMixin(MockMixin):
 
     def clean_paths(self, data, files):
         """Clean a string of any files or tempdirs"""
-        for fname in files:
-            data = data.replace(fname, os.path.basename(fname))
-        for fdir in self.recorded_tempdirs:
-            data = data.replace(fdir, '.')
+        try:
+            for fname in files:
+                data = data.replace(fname, os.path.basename(fname))
+            for fdir in self.recorded_tempdirs:
+                data = data.replace(fdir, '.')
+        except UnicodeDecodeError:
+            pass
         return data
 
     def get_all_tempfiles(self):

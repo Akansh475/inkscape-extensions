@@ -95,9 +95,10 @@ class InkscapeExtension(object):
         """Load the input stream or filename, save everything to self"""
         if isinstance(self.options.input_file, (str, unicode)):
             self.file_io = open(self.options.input_file, 'rb')
-            self.document = self.load(self.file_io)
+            document = self.load(self.file_io)
         else:
-            self.document = self.load(self.options.input_file)
+            document = self.load(self.options.input_file)
+        self.document = document
 
     def save_raw(self, ret):
         """Save to the output steam, use everything from self"""

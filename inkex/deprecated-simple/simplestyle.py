@@ -28,13 +28,13 @@ def parseColor(c):
 
 @deprecate
 def formatColoria(a):
-    """str(inkex.Color(*a))"""
-    return str(inkex.Color(*a))
+    """str(inkex.Color(a))"""
+    return str(inkex.Color(a))
 
 @deprecate
 def formatColorfa(a):
-    """str(inkex.Color(*a))"""
-    return str(inkex.Color(*a))
+    """str(inkex.Color(a))"""
+    return str(inkex.Color(a))
 
 @deprecate
 def formatColor3i(r,g,b):

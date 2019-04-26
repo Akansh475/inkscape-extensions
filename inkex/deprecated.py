@@ -29,6 +29,7 @@ import os
 import sys
 import traceback
 import warnings
+import argparse
 from argparse import ArgumentParser
 
 import inkex
@@ -51,8 +52,8 @@ try:
 except ValueError:
     DEPRECATION_LEVEL = 1
 
-def _depricated(msg, stack=2):
-    """Internal method for raising a deprication warning"""
+def _deprecated(msg, stack=2):
+    """Internal method for raising a deprecation warning"""
     if DEPRECATION_LEVEL > 1:
         msg += ' ; ' + traceback.format_stack()
     if DEPRECATION_LEVEL:
@@ -76,7 +77,7 @@ class DeprecatedEffect(object):
     @classmethod
     def _deprecated(cls, name, msg=_('{} is deprecated and should be removed'), stack=3):
         """Give the user a warning about their extension using a deprecated API"""
-        _depricated(
+        _deprecated(
             msg.format('Effect.' + name, cls=cls.__module__ + '.' + cls.__name__),
             stack=stack)
 
@@ -101,6 +102,7 @@ class DeprecatedEffect(object):
         if kw.get('action', None) == 'store':
             # Default store action not required, removed.
             kw.pop('action')
+        args = [arg for arg in args if arg != ""]
         self.arg_parser.add_argument(*args, **kw)
 
     def effect(self):
@@ -157,10 +159,16 @@ class DeprecatedEffect(object):
               'Use `self.svg.namedview.add(Guide(x, y, a))` instead'))
         return self.svg.namedview.add(Guide(posX, posY, angle))
 
-    def affect(self, args=sys.argv[1:]):  # pylint: disable=dangerous-default-value
+    def affect(self, args=sys.argv[1:], output=True):  # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility
-        self._deprecated('affect', _('{} is now `Effect.run()` with the same args'))
+        self._deprecated('affect', _('{} is now `Effect.run()`. The `output` argument has changed.'))
+        self._args = args[-1:]
         return self.run(args=args)
+
+    @property
+    def args(self):
+        self._deprecated('args', _('self.args[-1] is now self.options.input_file'))
+        return self._args
 
     def save_raw(self, ret):
         # Derived class may implement "output()"
@@ -229,7 +237,7 @@ def deprecate(func):
     """
 
     def _inner(*args, **kwargs):
-        _depricated('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), stack=2)
+        _deprecated('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), stack=2)
         return func(*args, **kwargs)
     return _inner
 
@@ -241,3 +249,52 @@ class DepricatedDict(dict):
     @deprecate
     def __iter__(self):
         return super(DepricatedDict, self).__iter__()
+
+# legacy inkex members
+
+class lazyproxy(object):
+    """Proxy, use as decorator on a function with provides the wrapped object.
+    The decorated function is called when a member is accessed on the proxy.
+    """
+    def __init__(self, getwrapped):
+        '''
+        :param getwrapped: Callable which returns the wrapped object
+        '''
+        self._getwrapped = getwrapped
+
+    def __getattr__(self, name):
+        return getattr(self._getwrapped(), name)
+
+    def __call__(self, *args, **kwargs):
+        return self._getwrapped()(*args, **kwargs)
+
+@lazyproxy
+def optparse():
+    _deprecated('inkex.optparse was removed, use "import optparse"', stack=3)
+    import optparse as wrapped
+    return wrapped
+
+@lazyproxy
+def etree():
+    _deprecated('inkex.etree was removed, use "from lxml import etree"', stack=3)
+    from lxml import etree as wrapped
+    return wrapped
+
+@lazyproxy
+def InkOption():
+    import optparse
+    class wrapped(optparse.Option):
+        TYPES = optparse.Option.TYPES + ("inkbool", )
+        TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
+        TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
+    return wrapped
+
+# optparse.Values.ensure_value
+
+def ensure_value(self, attr, value):
+    _deprecated('Effect().options.ensure_value was removed', stack=2)
+    if getattr(self, attr, None) is None:
+        setattr(self, attr, value)
+    return getattr(self, attr)
+
+argparse.Namespace.ensure_value = ensure_value

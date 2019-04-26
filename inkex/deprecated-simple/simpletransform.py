@@ -6,6 +6,8 @@
 Depreicated simpletransform replacements with documentation
 """
 
+import warnings
+
 from inkex.deprecated import deprecate
 from inkex.transforms import Transform, BoundingBox, cubic_extrema
 from inkex.paths import Path
@@ -22,6 +24,9 @@ def parseTransform(transf, mat=None):
 @deprecate
 def formatTransform(mat):
     """str(Transform(mat))"""
+    if len(mat) == 3:
+        warnings.warn("3x3 matrices not suported")
+        mat = mat[:2]
     return str(Transform(mat))
 
 @deprecate

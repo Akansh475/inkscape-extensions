@@ -29,6 +29,7 @@ import os
 import sys
 import traceback
 import warnings
+import argparse
 from argparse import ArgumentParser
 
 import inkex
@@ -287,3 +288,13 @@ def InkOption():
         TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
         TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
     return wrapped
+
+# optparse.Values.ensure_value
+
+def ensure_value(self, attr, value):
+    _deprecated('Effect().options.ensure_value was removed', stack=2)
+    if getattr(self, attr, None) is None:
+        setattr(self, attr, value)
+    return getattr(self, attr)
+
+argparse.Namespace.ensure_value = ensure_value

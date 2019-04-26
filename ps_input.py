@@ -18,19 +18,22 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #
 """
-Python script for running ps2pdf in Inkscape extensions
+Simple wrapper around ps2pdf
 """
 
-import sys
-from run_command import run
+from inkex.generic import CallExtension
+from inkex.command import call
+from inkex.utils import inkbool
+
+class PostscriptInput(CallExtension):
+    """Load Postscript/EPS Files by calling ps2pdf program"""
+    input_ext = 'ps'
+
+    def add_arguments(self, pars):
+        pars.add_argument('--crop', type=inkbool, default=False)
+
+    def call(self, input_file, output_file):
+        call('ps2pdf', input_file, output_file, dEPSCrop=self.options.crop)
 
 if __name__ == '__main__':
-    cmd = 'ps2pdf'
-    if sys.argv[1] == "--dEPSCrop=true":
-        cmd += ' -dEPSCrop '
-
-    msg = run((cmd+' "%s" "%%s"') % sys.argv[-1].replace("%", "%%"), "ps2pdf")
-    if msg:
-        sys.stderr.write(msg + "\n")
-        sys.exit(1)
-
+    PostscriptInput().run()

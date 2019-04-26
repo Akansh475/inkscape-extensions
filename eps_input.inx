@@ -4,7 +4,7 @@
     <id>org.inkscape.input.eps</id>
     <dependency type="extension">org.inkscape.input.pdf</dependency>    
     <dependency type="executable" location="path">ps2pdf</dependency>
-    <dependency type="executable" location="extensions">ps2pdf_ext.py</dependency>
+    <dependency type="executable" location="extensions">ps_input.py</dependency>
     <param name="dEPSCrop" type="boolean" gui-hidden="true">true</param>
     <input>
         <extension>.eps</extension>
@@ -14,7 +14,7 @@
         <output_extension>org.inkscape.output.eps</output_extension>
     </input>
     <script>
-        <command reldir="extensions" interpreter="python">ps2pdf_ext.py</command>
+        <command reldir="extensions" interpreter="python">ps_input.py</command>
         <helper_extension>org.inkscape.input.pdf</helper_extension>
     </script>
 </inkscape-extension>

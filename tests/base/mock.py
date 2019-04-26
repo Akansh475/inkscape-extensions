@@ -145,7 +145,7 @@ class MockCommandMixin(MockMixin):
                 data = data.replace(fname, os.path.basename(fname))
             for fdir in self.recorded_tempdirs:
                 data = data.replace(fdir, '.')
-        except UnicodeDecodeError:
+        except UnicodeDecodeError, TypeError:
             pass
         return data
 

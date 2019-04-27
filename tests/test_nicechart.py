@@ -1,6 +1,6 @@
 # coding=utf-8
 from nicechart import NiceChart
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestNiceChartBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = NiceChart

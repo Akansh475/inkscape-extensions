@@ -2,7 +2,7 @@
 
 from fig_input import FigInput
 
-from tests.base import ComparisonMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 
 class TestFigInput(ComparisonMixin, TestCase):
     effect_class = FigInput

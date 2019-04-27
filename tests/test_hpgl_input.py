@@ -1,6 +1,6 @@
 # coding=utf-8
 from hpgl_input import HpglFile
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestHpglFileBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = HpglFile

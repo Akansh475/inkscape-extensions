@@ -2,8 +2,8 @@
 
 from dhw_input import DhwInput
 
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy
 
 
 class TestDxfInput(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

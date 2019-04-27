@@ -1,6 +1,6 @@
 # coding=utf-8
 from layout_nup import Nup
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 
 class TestNupBasic(InkscapeExtensionTestMixin, TestCase):

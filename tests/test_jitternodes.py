@@ -1,6 +1,6 @@
 # coding=utf-8
 from jitternodes import JitterNodes
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 
 class JitterNodesBasicTest(InkscapeExtensionTestMixin, TestCase):

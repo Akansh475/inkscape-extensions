@@ -1,7 +1,7 @@
 # coding=utf-8
 """Test units inkex module functionality"""
 from inkex.units import are_near_relative, convert_unit, discover_unit, parse_unit, render_unit
-from tests.base import TestCase
+from inkex.tester import TestCase
 
 
 class UnitsTest(TestCase):

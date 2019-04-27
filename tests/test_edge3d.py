@@ -2,8 +2,8 @@
 # coding=utf-8
 import inkex
 from edge3d import Edge3d
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 
 class Edge3dBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

@@ -6,8 +6,8 @@ Test string uppercase extension
 import string
 
 from text_uppercase import Uppercase
-from .base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from .base.word import word_generator
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.word import word_generator
 
 class UpperCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Uppercase

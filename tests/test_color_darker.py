@@ -1,6 +1,6 @@
 # coding=utf-8
 from color_darker import C
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class ColorDarkerBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = C

@@ -1,8 +1,8 @@
 # coding=utf-8
 
 from gcodetools import Gcodetools
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentBytes
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareOrderIndependentBytes
 
 class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Gcodetools

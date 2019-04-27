@@ -1,6 +1,6 @@
 # coding=utf-8
 from coloreffect import ColorEffect
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 
 class ColorEffectBasicTest(InkscapeExtensionTestMixin, TestCase):

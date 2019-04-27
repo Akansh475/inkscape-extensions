@@ -7,7 +7,7 @@ import re
 
 from inkex.paths import InvalidPath, Path, PathCommand
 from inkex.transforms import BoundingBox, Transform
-from tests.base import TestCase
+from inkex.tester import TestCase
 
 
 class PathTest(TestCase):

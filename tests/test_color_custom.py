@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from color_custom import C
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class ColorCustomBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

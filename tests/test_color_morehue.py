@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from color_morehue import C
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class ColorMoreHueBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

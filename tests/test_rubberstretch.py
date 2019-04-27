@@ -1,6 +1,6 @@
 # coding=utf-8
 from rubberstretch import RubberStretch
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestRubberStretchBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = RubberStretch

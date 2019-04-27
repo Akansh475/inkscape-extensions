@@ -1,7 +1,7 @@
 # coding=utf-8
 from render_gear_rack import RackGear
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareOrderIndependentStyle
 
 class TestRackGearBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = RackGear

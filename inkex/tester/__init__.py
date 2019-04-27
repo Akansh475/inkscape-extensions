@@ -45,7 +45,6 @@ if False: # pylint: disable=using-constant-test
     from typing import Type, List
     from .filters import Compare
 
-TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
     """Test case must specify 'self.effect_class' to assertEffect."""
@@ -84,8 +83,28 @@ class TestCase(MockCommandMixin, BaseCase):
         if self._temp_dir and os.path.isdir(self._temp_dir):
             shutil.rmtree(self._temp_dir)
 
+    @classmethod
+    def __file__(cls):
+        """Create a __file__ property which acts much like the module version"""
+        return os.path.abspath(sys.modules[cls.__module__].__file__)
+
+    @classmethod
+    def testdir(cls):
+        """Get's the folder where the test exists (so data can be found)"""
+        return os.path.dirname(cls.__file__())
+
+    @classmethod
+    def rootdir(cls):
+        """Return the full path to the extensions directory"""
+        return os.path.dirname(cls.testdir())
+
+    @classmethod
+    def datadir(cls):
+        """Get the data directory (can be over-ridden if needed)"""
+        return os.path.join(cls.testdir(), 'data')
+
     @property
-    def temp_dir(self):
+    def tempdir(self):
         """Generate a temporary location to store files"""
         if self._temp_dir is None:
             self._temp_dir = tempfile.mkdtemp(prefix='inkex-tests-')
@@ -96,20 +115,15 @@ class TestCase(MockCommandMixin, BaseCase):
     def temp_file(self, prefix='file-', template='{prefix}{name}{suffix}', suffix='.tmp'):
         """Generate the filename of a temporary file"""
         filename = template.format(prefix=prefix, suffix=suffix, name=uuid.uuid4().hex)
-        return os.path.join(self.temp_dir, filename)
+        return os.path.join(self.tempdir, filename)
 
-    @staticmethod
-    def data_file(filename, *parts):
+    @classmethod
+    def data_file(cls, filename, *parts):
         """Provide a data file from a filename, can accept directories as arguments."""
-        full_path = os.path.join(TEST_ROOT, 'data', filename, *parts)
+        full_path = os.path.join(cls.datadir(), filename, *parts)
         if not os.path.isfile(full_path):
             raise IOError("Can't find test data file: {}".format(full_path))
         return full_path
-
-    @property
-    def root_dir(self):
-        """Return the full path to the extensions directory"""
-        return os.path.abspath(os.path.join(TEST_ROOT, '..'))
 
     @property
     def empty_svg(self):
@@ -241,7 +255,7 @@ class ComparisonMixin(object):
         effect_name = self.effect_class.__module__
         if addout is not None:
             args = list(args) + [str(addout)]
-        opstr = re.sub(r'[^\w-]', '__', '__'.join(args).replace(self.temp_dir, 'TMP_DIR'))
+        opstr = re.sub(r'[^\w-]', '__', '__'.join(args).replace(self.tempdir, 'TMP_DIR'))
         if opstr:
             if len(opstr) > 127:
                 # avoid filename-too-long error

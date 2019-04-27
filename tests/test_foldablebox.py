@@ -1,7 +1,7 @@
 # coding=utf-8
 from foldablebox import FoldableBox
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareOrderIndependentStyle
 
 class FoldableBoxArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = FoldableBox

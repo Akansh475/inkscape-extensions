@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from inkex.colors import Color, ColorError, is_color
-from tests.base import TestCase
+from inkex.tester import TestCase
 
 
 class ColorTest(TestCase):

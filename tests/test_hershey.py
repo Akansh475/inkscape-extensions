@@ -1,7 +1,7 @@
 # coding=utf-8
 from hershey import Hershey
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy, CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy, CompareOrderIndependentStyle
 
 class TestHersheyBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Hershey

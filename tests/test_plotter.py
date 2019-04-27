@@ -1,6 +1,6 @@
 # coding=utf-8
 from plotter import Plot
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 class TestPlotBasic(InkscapeExtensionTestMixin, TestCase):
     effect_class = Plot

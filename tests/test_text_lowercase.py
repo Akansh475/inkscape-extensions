@@ -5,8 +5,8 @@ Test the lowercase effect
 
 import string
 
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.word import word_generator
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.word import word_generator
 from text_lowercase import Lowercase
 
 class LowerCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

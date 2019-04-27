@@ -24,7 +24,7 @@ from collections import defaultdict
 from barcode import get_barcode
 from render_barcode import InsertBarcode
 
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class InsertBarcodeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

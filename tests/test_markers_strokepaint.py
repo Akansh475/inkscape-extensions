@@ -6,7 +6,7 @@
 #
 import inkex
 from markers_strokepaint import MarkerStrokePaintEffect
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 
 class MarkerStrokePaintBasicTest(InkscapeExtensionTestMixin, TestCase):

@@ -1,6 +1,6 @@
 # coding=utf-8
 from color_removegreen import C
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class ColorRemoveGreenBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

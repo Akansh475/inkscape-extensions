@@ -1,7 +1,7 @@
 # coding=utf-8
 from pathalongpath import PathAlongPath
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 class TestPathAlongPathBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]

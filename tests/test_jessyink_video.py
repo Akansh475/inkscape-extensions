@@ -3,8 +3,8 @@
 import re
 
 from jessyInk_video import JessyInk_Effects
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import Compare, CompareOrderIndependentBytes
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import Compare, CompareOrderIndependentBytes
 
 class FilterOutJessyInkId(Compare):
     """Filter out jessyink ids specifically"""

@@ -1,6 +1,6 @@
 # coding=utf-8
 from dxf12_outlines import DxfTwelve
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 
 class TestDXF12OutlinesBasic(InkscapeExtensionTestMixin, TestCase):

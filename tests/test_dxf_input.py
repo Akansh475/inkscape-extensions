@@ -4,8 +4,8 @@ import os
 
 from dxf_input import DxfInput
 
-from tests.base import TEST_ROOT, ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy
 
 
 class TestDxfInputBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
@@ -17,4 +17,4 @@ class TestDxfInputBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     def _apply_compare_filters(self, data):
         """Remove the full pathnames"""
         data = super(TestDxfInputBasic, self)._apply_compare_filters(data)
-        return data.replace((os.path.join(TEST_ROOT, 'data') + '/').encode('utf-8'), b'')
+        return data.replace((self.datadir() + '/').encode('utf-8'), b'')

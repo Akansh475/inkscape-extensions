@@ -13,8 +13,8 @@ from inkex.elements import (
 )
 from inkex.transforms import Transform, ScaleTransform
 from inkex.styles import Style
-from tests.base import TestCase
-from tests.base.svg import svg_file
+from inkex.tester import TestCase
+from inkex.tester.svg import svg_file
 
 class ElementTestCase(TestCase):
     """Base element test case"""

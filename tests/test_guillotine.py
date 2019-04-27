@@ -1,6 +1,6 @@
 # coding=utf-8
 from guillotine import Guillotine
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestGuillotineBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Guillotine

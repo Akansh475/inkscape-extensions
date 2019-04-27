@@ -6,7 +6,7 @@ import os
 import sys
 
 from inkex.base import InkscapeExtension, SvgThroughMixin
-from tests.base import TestCase
+from inkex.tester import TestCase
 
 
 class ModExtension(InkscapeExtension):

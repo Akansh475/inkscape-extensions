@@ -5,8 +5,8 @@ Test titlecase extension
 
 import string
 
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.word import sentencecase, word_generator
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.word import sentencecase, word_generator
 from text_titlecase import TitleCase
 
 class TitleCaseTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

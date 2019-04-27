@@ -6,8 +6,8 @@ import calendar
 from datetime import datetime
 
 from svgcalendar import SVGCalendar
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentStyle, CompareNumericFuzzy
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareOrderIndependentStyle, CompareNumericFuzzy
 
 class CalendarArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     """Test arguments to calendar extensions"""

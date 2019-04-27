@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
 from extrude import Extrude
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentStyleAndPath, CompareWithPathSpace
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareOrderIndependentStyleAndPath, CompareWithPathSpace
 
 class ExtrudeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Extrude

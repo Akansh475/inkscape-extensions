@@ -1,6 +1,6 @@
 # coding=utf-8
 from jessyInk_transitions import JessyInk_Transitions
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class JessyInkTransitionsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

@@ -1,6 +1,6 @@
 # coding=utf-8
 from web_set_att import InkWebTransmitAtt
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestWebSetAttBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = InkWebTransmitAtt

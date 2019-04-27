@@ -1,7 +1,7 @@
 # coding=utf-8
 from grid_polar import GridPolar
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareOrderIndependentStyle
 
 class GridPolarBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareOrderIndependentStyle()]

@@ -4,8 +4,8 @@ import re
 
 from ps_input import PostscriptInput
 
-from tests.base.filters import CompareSize
-from tests.base import ComparisonMixin, TestCase
+from inkex.tester.filters import CompareSize
+from inkex.tester import ComparisonMixin, TestCase
 
 class TestPostscriptInput(ComparisonMixin, TestCase):
     effect_class = PostscriptInput

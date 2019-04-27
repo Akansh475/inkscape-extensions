@@ -1,7 +1,7 @@
 # coding=utf-8
 from convert2dashes import Dashit
 from inkex import NSS
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class DashitBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

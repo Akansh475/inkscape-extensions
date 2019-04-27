@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from triangle import Triangle
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy, CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy, CompareOrderIndependentStyle
 
 class TriangleBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Triangle

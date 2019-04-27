@@ -1,6 +1,6 @@
 # coding=utf-8
 from color_HSL_adjust import C
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class ColorHSLAdjustBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

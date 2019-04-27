@@ -22,7 +22,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import inkex
 from frame import Frame
-from tests.base import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 
 
 class FrameTest(InkscapeExtensionTestMixin, TestCase):

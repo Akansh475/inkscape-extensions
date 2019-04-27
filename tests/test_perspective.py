@@ -7,7 +7,7 @@
 #    with the default parameters).
 #
 from perspective import Project
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class PerspectiveBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Project

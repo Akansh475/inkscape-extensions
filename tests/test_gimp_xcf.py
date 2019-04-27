@@ -6,7 +6,7 @@ Revision history:
 """
 
 from gimp_xcf import GimpOutput
-from tests.base import ComparisonMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 
 class GimpXcfBasicTest(ComparisonMixin, TestCase):
     """Test the Gimp XCF file saving functionality"""

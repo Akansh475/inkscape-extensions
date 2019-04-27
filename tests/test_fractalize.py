@@ -1,6 +1,6 @@
 # coding=utf-8
 from fractalize import PathFractalize
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 
 class PathFractalizeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

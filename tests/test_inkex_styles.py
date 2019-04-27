@@ -3,7 +3,7 @@
 Test Inkex style parsing functionality.
 """
 from inkex.styles import Style
-from tests.base import TestCase
+from inkex.tester import TestCase
 
 
 class StyleTest(TestCase):

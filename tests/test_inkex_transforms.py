@@ -5,7 +5,7 @@ Test Inkex transformational logic.
 from inkex.transforms import (
     BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform
 )
-from tests.base import TestCase
+from inkex.tester import TestCase
 
 class TransformTest(TestCase):
     """Test transformation API and calculations"""

@@ -3,7 +3,7 @@
 Test Inkex command launching functionality.
 """
 
-from tests.base import BaseCase
+from inkex.tester import BaseCase
 from inkex.command import which, write_svg, to_arg, to_args, call, inkscape, inkscape_command, take_snapshot
 
 class CommandTest(BaseCase):

@@ -1,6 +1,6 @@
 # coding=utf-8
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 from whirl import Whirl
 

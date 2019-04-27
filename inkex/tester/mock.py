@@ -39,7 +39,6 @@ import inkex.command
 if False: # pylint: disable=using-constant-test
     from typing import List, Tuple, Callable, Any # pylint: disable=unused-import
 
-TEST_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 FIXED_BOUNDARY = '--CALLDATA--//--CALLDATA--'
 
 class ManualVerbosity(object):
@@ -131,6 +130,20 @@ class MockCommandMixin(MockMixin):
         (tempfile, 'mkdtemp', 'record_tempdir'),
     ]
     recorded_tempdirs = [] # type:List[str]
+
+    def setUp(self): # pylint: disable=invalid-name
+        super(MockCommandMixin, self).setUp()
+        # This is a the daftest thing I've ever seen, when in the middle
+        # of a mock, the 'self' variable magically turns from a FooTest
+        # into a TestCase, this makes it impossible to find the datadir.
+        from . import TestCase
+        TestCase._mockdatadir = self.datadir()
+
+    @classmethod
+    def cmddir(cls):
+        """Returns the location of all the mocked command results"""
+        from . import TestCase
+        return os.path.join(TestCase._mockdatadir, 'cmd')
 
     def record_tempdir(self, *args, **kwargs):
         """Record any attempts to make tempdirs"""
@@ -283,10 +296,9 @@ class MockCommandMixin(MockMixin):
             raise IOError("Attempted to find call test data {}".format(key))
         return fname
 
-    @staticmethod
-    def get_call_path(program, create=True):
+    def get_call_path(self, program, create=True):
         """Get where this program would store it's test data"""
-        command_dir = os.path.join(TEST_ROOT, 'data', 'cmd', program)
+        command_dir = os.path.join(self.cmddir(), program)
         if not os.path.isdir(command_dir):
             if create:
                 os.makedirs(command_dir)

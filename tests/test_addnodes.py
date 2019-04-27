@@ -1,8 +1,8 @@
 # coding=utf-8
 from addnodes import SplitIt
 from inkex import NSS
-from tests.base import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from tests.base.filters import CompareNumericFuzzy, CompareWithPathSpace
+from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 class SplitItBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = SplitIt

@@ -104,11 +104,15 @@ class CallExtension(TempDirMixin, InputExtension):
             if not os.path.isfile(document):
                 raise IOError("Can't find generated document: {}".format(document))
 
-            with open(document, 'r') as fhl:
-                document = fhl.read()
+            if self.output_ext == 'svg':
+                with open(document, 'r') as fhl:
+                    document = fhl.read()
+                if '<' in document:
+                    document = fromstring(document, parser=SVG_PARSER)
+            else:
+                with open(document, 'rb') as fhl:
+                    document = fhl.read()
 
-            if '<' in document:
-                document = fromstring(document, parser=SVG_PARSER)
         self.document = document
 
     def call(self, input_file, output_file):

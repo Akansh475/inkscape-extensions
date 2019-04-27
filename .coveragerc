@@ -3,6 +3,7 @@ omit = tests/*
        inkex/deprecated-simple/*
        inkex/deprecated.py
        .tox/*
+       index.py
        setup.py
 
 [report]

@@ -208,12 +208,10 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
 
     def save(self, stream):
         """Save the svg document to the given stream"""
-        if isinstance(self.document, etree.ElementBase):
+        try:
             document = etree.tostring(self.document)
-        elif isinstance(self.document, (bytes, str)):
+        except TypeError:
             document = self.document
-        else:
-            raise TypeError("Unknown document type!")
         try:
             stream.write(document)
         except TypeError:

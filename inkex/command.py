@@ -91,12 +91,12 @@ def write_svg(svg, *filename):
     return filename
 
 
-def to_arg(arg):
+def to_arg(arg, oldie=False):
     """Convert a python argument to a command line argument"""
     if isinstance(arg, (tuple, list)):
         (arg, val) = arg
         arg = '-' + arg
-        if len(arg) > 2:
+        if len(arg) > 2 and not oldie:
             arg = '-' + arg
         if val is True:
             return arg
@@ -130,6 +130,7 @@ def to_args(prog, *positionals, **arguments):
     use the ordered list tuple and don't use kwargs.
     """
     args = [prog]
+    oldie = arguments.pop('oldie', False)
     for arg, value in arguments.items():
         arg = arg.replace('_', '-').strip()
 
@@ -139,9 +140,9 @@ def to_args(prog, *positionals, **arguments):
             value = [value]
 
         for val in value:
-            args.append(to_arg((arg, val)))
+            args.append(to_arg((arg, val), oldie))
 
-    args += [to_arg(pos) for pos in positionals]
+    args += [to_arg(pos, oldie) for pos in positionals]
     # Filter out empty non-arguments
     return [arg for arg in args if arg is not None]
 
@@ -173,11 +174,11 @@ def call(program, *args, **kwargs):
     """
     return _call(program, *args, **kwargs)
 
-def inkscape(svg_file, **kwargs):
+def inkscape(svg_file, *args, **kwargs):
     """
     Call inkscape with the given svg_file and the given arguments
     """
-    return call('inkscape', svg_file, without_gui=True, **kwargs)
+    return call('inkscape', svg_file, without_gui=True, *args, **kwargs)
 
 def inkscape_command(svg, *verbs):
     """

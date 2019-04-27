@@ -28,6 +28,7 @@ from inkex.utils import inkbool
 class PostscriptInput(CallExtension):
     """Load Postscript/EPS Files by calling ps2pdf program"""
     input_ext = 'ps'
+    output_ext = 'pdf'
 
     def add_arguments(self, pars):
         pars.add_argument('--crop', type=inkbool, default=False)

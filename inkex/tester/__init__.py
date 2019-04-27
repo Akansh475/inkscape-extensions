@@ -18,7 +18,41 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
 #
 """
-Provide tests with the tools to test extensions.
+All extensions should come with tests, this package provides you will all the
+tools you need in order to create tests and make sure your extension continues
+to work with new versions of Inkscape, the Inkex python modules and other
+python and non-python tools you may use.
+
+Make sure your extension is a python extension and is using the `inkex.generic`
+base classes. As these provide the greatest amount of functionality for testing.
+
+You should start by creating a folder in your repository called `tests` with
+an empty file inside called `__init__.py` to turn it into a module folder.
+
+For each of your extensions, you should create a file called
+`test_{myextension}.py` where the name reflects the name of your extension.
+
+There are two types of tests:
+
+    1. Full-process Comparison tests - These are tests which envoke your
+           extension will various arguments and attempt to compare the
+           output to a known good state. These are useful for testing
+           that your extension would work, if it was used in Inkscape.
+
+           Good example of writing comparison tests can be found in the
+           inkscape core repository, each test which inherits from
+           the ComparisonMixin class are running comparison tests.
+
+    2. Unit tests - These are individual test functions which call out to
+           specific functions within your extension. These are typical
+           python unit testing and many good python documents exist
+           to describe how to write them well. For examples here you
+           can find the tests that test the inkex modules themsleves
+           to be the most instructive.
+
+Your tests will hit a cetain amount of code, this is called it's **coverage**
+and the higher the coverage, the better your tests are at stretching all
+the options and varients your code has.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals

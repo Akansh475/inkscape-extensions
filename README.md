@@ -17,13 +17,8 @@ These extensions are designed to have good test coverage as well as python 2.7
 and python 3.6 support.  
 Testing can be run using the setup.py command:
 
-    python3 setup.py test
+    python3 -m pytest
 
-To create a test coverage report just run the same command through coverage:
-
-    python3-coverage run setup.py test
-    python3-coverage report
-    
 The latest coverage report for master branch can be found at
 https://inkscape.gitlab.io/extensions/coverage/.
 

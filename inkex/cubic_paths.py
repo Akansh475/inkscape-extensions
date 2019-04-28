@@ -132,6 +132,25 @@ def CubicSuperPath(simplepath):
     lastctrl = []
     for s in simplepath:
         cmd, params = s
+
+        # expand shorthand notations
+        if cmd == 'H':
+            params = params + [last[1]]
+            cmd = 'L'
+        elif cmd == 'V':
+            params = [last[0]] + params
+            cmd = 'L'
+        elif cmd == 'S':
+            x1 = last[0] - lastctrl[0] + last[0]
+            y1 = last[1] - lastctrl[1] + last[1]
+            params = [x1, y1] + params
+            cmd = 'C'
+        elif cmd == 'T':
+            x1 = (last[0] - lastctrl[0]) * 3. / 2 + last[0]
+            y1 = (last[1] - lastctrl[1]) * 3. / 2 + last[1]
+            params = [x1, y1] + params
+            cmd = 'Q'
+
         if cmd == 'M':
             if last:
                 csp[subpath].append([lastctrl[:], last[:], last[:]])
@@ -173,6 +192,8 @@ def CubicSuperPath(simplepath):
             csp[subpath].append([lastctrl[:], last[:], last[:]])
             last = subpathstart[:]
             lastctrl = subpathstart[:]
+        else:
+            raise ValueError(cmd)
     # append final superpoint
     csp[subpath].append([lastctrl[:], last[:], last[:]])
     return csp

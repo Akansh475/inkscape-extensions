@@ -289,6 +289,14 @@ def InkOption():
         TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
     return wrapped
 
+# legacy inkex members <= 0.48.x
+
+def unittouu(string):
+    _deprecated('inkex.unittouu is now a method in the svg '
+            'document. Use `self.svg.unittouu(str)` instead.', stack=2)
+    import inkex.units
+    return inkex.units.convert_unit(string, 'px')
+
 # optparse.Values.ensure_value
 
 def ensure_value(self, attr, value):

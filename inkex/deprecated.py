@@ -64,6 +64,9 @@ class DeprecatedEffect(object):
 
     def __init__(self):
         super(DeprecatedEffect, self).__init__()
+
+        self._doc_ids = None
+
         # These are things we reference in the deprecated code, they are provided
         # by the new effects code, but we want to keep this as a Mixin so these
         # items will keep pylint happy and let use check our code as we write.
@@ -130,7 +133,12 @@ class DeprecatedEffect(object):
     def doc_ids(self):
         self._deprecated('doc_ids', _('{} is now a method in the svg '
                                       'document. Use `self.svg.get_ids()` instead.'))
-        return self.svg.get_ids()
+        if self._doc_ids is None:
+            self._doc_ids = dict.fromkeys(self.svg.get_ids())
+        return self._doc_ids
+
+    def getselected(self):
+        self._deprecated('getselected', _('{} has been removed'))
 
     def getElementById(self, eid):
         self._deprecated('getElementById',\
@@ -170,9 +178,15 @@ class DeprecatedEffect(object):
         self._deprecated('args', _('self.args[-1] is now self.options.input_file'))
         return self._args
 
+    @property
+    def svg_file(self):
+        self._deprecated('svg_file', _('self.svg_file is now self.options.input_file'))
+        return self.options.input_file
+
     def save_raw(self, ret):
         # Derived class may implement "output()"
-        if hasattr(self, 'output'):
+        # Attention: 'cubify.py' implements __getattr__ -> hasattr(self, 'output') returns True
+        if hasattr(self.__class__, 'output'):
             self._deprecated('output', 'Use `save()` or `save_raw()` instead.', stack=5)
             return getattr(self, 'output')()
         return inkex.base.InkscapeExtension.save_raw(self, ret)
@@ -181,13 +195,6 @@ class DeprecatedEffect(object):
         self._deprecated('uniqueId', _('{} is now a method in the svg document. '
                                        ' Use `self.svg.get_unique_id(old_id)` instead.'))
         return self.svg.get_unique_id(old_id)
-
-    @property
-    def __uuconv(self):
-        self._deprecated('__uuconv', _('{} wasn\'t even a public property, '
-                                       'why is your effect extension even using it? Should be '
-                                       'inkex.units.CONVERSIONS'))
-        return inkex.units.CONVERSIONS
 
     def getDocumentWidth(self):
         self._deprecated('getDocumentWidth', _('{} is now a property of the svg '
@@ -239,6 +246,9 @@ def deprecate(func):
     def _inner(*args, **kwargs):
         _deprecated('{0.__module__}.{0.__name__} -> {0.__doc__}'.format(func), stack=2)
         return func(*args, **kwargs)
+    _inner.__name__ = func.__name__
+    if func.__doc__:
+        _inner.__doc__ = "Deprecated -> " + func.__doc__
     return _inner
 
 class DepricatedDict(dict):
@@ -288,6 +298,14 @@ def InkOption():
         TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
         TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
     return wrapped
+
+# legacy inkex members <= 0.48.x
+
+def unittouu(string):
+    _deprecated('inkex.unittouu is now a method in the svg '
+            'document. Use `self.svg.unittouu(str)` instead.', stack=2)
+    import inkex.units
+    return inkex.units.convert_unit(string, 'px')
 
 # optparse.Values.ensure_value
 

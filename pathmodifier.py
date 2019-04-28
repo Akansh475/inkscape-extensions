@@ -38,6 +38,22 @@ from inkex.localize import _
 from inkex.elements import PathElement, Group, Use
 from inkex.generic import EffectExtension
 from inkex.cubic_paths import parseCubicPath, formatCubicPath
+from inkex.deprecated import deprecate
+
+
+@deprecate
+def zSort(inNode, idList):
+    """self.svg.get_z_selected()"""
+    sortedList = []
+    theid = inNode.get("id")
+    if theid in idList:
+        sortedList.append(theid)
+    for child in inNode:
+        if len(sortedList) == len(idList):
+            break
+        sortedList += zSort(child, idList)
+    return sortedList
+
 
 class PathModifier(EffectExtension):
     """Select list manipulation"""

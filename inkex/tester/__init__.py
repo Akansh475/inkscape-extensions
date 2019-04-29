@@ -123,19 +123,19 @@ class TestCase(MockCommandMixin, BaseCase):
         return os.path.abspath(sys.modules[cls.__module__].__file__)
 
     @classmethod
-    def testdir(cls):
+    def _testdir(cls):
         """Get's the folder where the test exists (so data can be found)"""
         return os.path.dirname(cls.__file__())
 
     @classmethod
     def rootdir(cls):
         """Return the full path to the extensions directory"""
-        return os.path.dirname(cls.testdir())
+        return os.path.dirname(cls._testdir())
 
     @classmethod
     def datadir(cls):
         """Get the data directory (can be over-ridden if needed)"""
-        return os.path.join(cls.testdir(), 'data')
+        return os.path.join(cls._testdir(), 'data')
 
     @property
     def tempdir(self):

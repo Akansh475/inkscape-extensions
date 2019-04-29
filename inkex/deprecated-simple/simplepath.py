@@ -7,10 +7,10 @@
 Depreicated simplepath replacements with documentation
 """
 
-from inkex.deprecated import deprecate, DepricatedDict
+from inkex.deprecated import deprecate, DeprecatedDict
 from inkex.paths import Path
 
-pathdefs = DepricatedDict({
+pathdefs = DeprecatedDict({
     'M':['L', 2, [float, float], ['x', 'y']],
     'L':['L', 2, [float, float], ['x', 'y']],
     'H':['H', 1, [float], ['x']],

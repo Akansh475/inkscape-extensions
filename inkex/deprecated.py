@@ -251,14 +251,14 @@ def deprecate(func):
         _inner.__doc__ = "Deprecated -> " + func.__doc__
     return _inner
 
-class DepricatedDict(dict):
+class DeprecatedDict(dict):
     @deprecate
     def __getitem__(self, key):
-        return super(DepricatedDict, self).__getitem__(key)
+        return super(DeprecatedDict, self).__getitem__(key)
 
     @deprecate
     def __iter__(self):
-        return super(DepricatedDict, self).__iter__()
+        return super(DeprecatedDict, self).__iter__()
 
 # legacy inkex members
 

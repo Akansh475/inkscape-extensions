@@ -157,12 +157,13 @@ class CoreElementTestCase(ElementTestCase):
         self.assertFalse(FlowRoot().get_path())
         self.assertFalse(FlowPara().get_path())
 
-    def test_decendants(self):
-        """Elements can walk their decendants"""
-        ids = tuple(elem.get('id') for elem in self.svg.decendants())
+    def test_descendants(self):
+        """Elements can walk their descendants"""
+        ids = tuple(elem.get('id') for elem in self.svg.descendants())
         self.assertEqual(ids, (
             None, None, 'path1', None,
             'base', 'metadata7',
+             None, None, None, None, None,
             'A', 'B', 'C', 'D', 'E', 'F', 'G'
         ))
 

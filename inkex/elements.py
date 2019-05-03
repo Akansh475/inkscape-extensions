@@ -140,13 +140,13 @@ class BaseElement(etree.ElementBase):
             return self.getparent().root
         return self
 
-    def decendants(self):
+    def descendants(self):
         """Walks the element tree and yields all elements, parent first"""
         yield self
         for child in self:
-            if hasattr(child, 'decendants'):
-                for decendant in child.decendants():
-                    yield decendant
+            if hasattr(child, 'descendants'):
+                for descendant in child.descendants():
+                    yield descendant
 
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
@@ -226,6 +226,7 @@ class OtherElements(BaseElement):
         'type',
         'work',
         'style',
+        'title',
     ]
 
 

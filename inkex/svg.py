@@ -224,7 +224,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         for cls in self.get_lookups():
             nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
             tags = getattr(cls, 'tag_names', [])
-            if name in tags:
+            if name.lower() in tags:
                 return cls
             if name == (tag or '') and \
                     (not namespace or not nsp or nsp == namespace):

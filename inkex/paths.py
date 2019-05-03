@@ -529,6 +529,10 @@ class Path(list):
         """Duplicates the original output of parsePath, returning arrays of segment data"""
         return [[seg.cmd, list(seg.args)] for seg in self.to_absolute()]
 
+    def to_superpath(self):
+        """Convert this path into a cubic super path"""
+        return CubicSuperPath(self)
+
     def copy(self):
         """Make a copy"""
         return copy.copy(self)

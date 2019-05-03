@@ -23,7 +23,7 @@ import math
 from lxml import etree
 
 import inkex
-from inkex.paths import PathCommand
+from inkex.paths import Segment, Curve
 
 class Motion(inkex.Effect):
     def __init__(self):
@@ -41,7 +41,7 @@ class Motion(inkex.Effect):
         """translate path segment along vector"""
         a = []
         a.append(['M', last[:]])
-        a.append([segment.cmd, segment[:]])
+        a.append([segment.cmd, list(segment.args)])
 
         npt = segment.translate([self.vx, self.vy])
         #defs = simplepath.pathdefs[cmd]
@@ -50,13 +50,14 @@ class Motion(inkex.Effect):
         #    elif defs[3][i] == 'y':
         #        np[i] += self.vy
 
-        a.append(['L', [npt[-2], npt[-1]]])
+        a.append(['L', [npt.x, npt.y]])
 
         # reverse direction of path segment
-        npt = PathCommand(npt.cmd, *(npt[:-2] + (last[0] + self.vx, last[1] + self.vy)))
+        npt = list(npt.args)
+        npt[-2:] = last[0] + self.vx, last[1] + self.vy
         if segment.cmd == 'C':
-            npt = PathCommand('C', *[npt[2], npt[3], npt[0], npt[1], npt[4], npt[5]])
-        a.append([segment.cmd, npt[:]])
+            npt = list(Curve(npt[2], npt[3], npt[0], npt[1], npt[4], npt[5]).args)
+        a.append([segment.cmd, npt])
 
         a.append(['Z', []])
         etree.SubElement(self.facegroup, inkex.addNS('path', 'svg'), {'d': str(inkex.Path(a))})
@@ -80,6 +81,7 @@ class Motion(inkex.Effect):
                 self.facegroup.set('style', s)
 
                 for segment in node.path:
+                    cmdcls = Segment.get_class(segment.cmd)
                     tees = []
                     if segment.cmd == 'C':
                         bez = (last, segment[:2], segment[2:4], segment[-2:])
@@ -88,28 +90,28 @@ class Motion(inkex.Effect):
 
                     segments = []
                     if len(tees) == 0 and segment.cmd in ['L', 'C']:
-                        segments.append(segment) # PathCommand(segment.cmd, params[:]))
+                        segments.append(segment)
                     elif len(tees) == 1:
                         one, two = inkex.beziersplitatt(bez, tees[0])
-                        segments.append(PathCommand(segment.cmd, *list(one[1] + one[2] + one[3])))
-                        segments.append(PathCommand(segment.cmd, *list(two[1] + two[2] + two[3])))
+                        segments.append(cmdcls(one[1] + one[2] + one[3]))
+                        segments.append(cmdcls(two[1] + two[2] + two[3]))
                     elif len(tees) == 2:
                         one, two = inkex.beziersplitatt(bez, tees[0])
                         two, three = inkex.beziersplitatt(two, tees[1])
-                        segments.append(PathCommand(segment.cmd, *list(one[1] + one[2] + one[3])))
-                        segments.append(PathCommand(segment.cmd, *list(two[1] + two[2] + two[3])))
-                        segments.append(PathCommand(segment.cmd, *list(three[1] + three[2] + three[3])))
+                        segments.append(cmdcls(one[1] + one[2] + one[3]))
+                        segments.append(cmdcls(two[1] + two[2] + two[3]))
+                        segments.append(cmdcls(three[1] + three[2] + three[3]))
 
                     for seg in segments:
                         self.makeface(last, seg)
-                        last = seg[-2:]
+                        last = seg.x, seg.y
 
                     if segment.cmd == 'M':
-                        subPathStart = segment[-2:]
+                        subPathStart = (segment.x, segment.y)
                     if segment.cmd == 'Z':
                         last = subPathStart
                     else:
-                        last = segment[-2:]
+                        last = (segment.x, segment.y)
 
 
 if __name__ == '__main__':

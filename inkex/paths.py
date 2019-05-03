@@ -30,6 +30,10 @@ from .transforms import Transform, BoundingBox, Scale
 from .utils import X, Y, classproperty, strargs, pairwise
 from .cubic_paths import unCubicSuperPath, ArcToPath
 
+if False: # pylint: disable=using-constant-test
+    from typing import Type, Dict # pylint: disable=unused-import
+
+
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None
 
@@ -38,9 +42,16 @@ class InvalidPath(ValueError):
     """Raised when given an invalid path string"""
 
 
-class PathCommand(tuple):
-    """A list of arguments that make up a segment, may return a list of
-    command objects if the command string parsed was chained."""
+class Segment(object):
+    """
+    A segment in a Path. Shouldn't be created sep' from the Path() object
+    but if needed can be created using the syntax:
+
+    Line(x, y)
+    Line((x, y)) # Same as above
+    Line([xa, ya, xb, yb, xc, yc]) # where array is modified leaving b and c
+    Line(Move(x, y)) # Where Move segment is converted to Line segment
+    """
     # Number of arguments that follow this path commands letter
     num = -1
 
@@ -48,12 +59,15 @@ class PathCommand(tuple):
     name = classproperty(lambda cls: cls.__name__)
 
     # The single letter represtation of this command (i.e. L, A, etc)
-    # This is always upper case and wouldn't be confused with self.cmd
-    this_cmd = classproperty(lambda cls: cls.name[0])
+    cmd = classproperty(lambda cls: cls.name[0])
 
     # The next command, this is for automatic chains where the next command
     # isn't given, just a bunch on numbers which we automatically parse.
-    next_cmd = '' # Automatically this command if not set.
+    get_next = classmethod(lambda cls: getattr(cls, '_next', cls))
+
+    # The other command is relative to absolute, absolute to relative
+    # Conversion, giving the class back that would make sense.
+    get_other = classmethod(lambda cls: cls.get_class(cls.cmd.swapcase()))
 
     # Returns True/False if the command is relative/absolute
     # based on the case of the command
@@ -63,32 +77,52 @@ class PathCommand(tuple):
     # The precision of the numbers when converting to string
     number_template = "{:.6g}"
 
-    @classmethod
-    def __new__(cls, _, cmd, *args):
-        if cmd.upper().strip() == cls.this_cmd:
-            if len(args) < cls.num:
-                raise InvalidPath("Bad arguments {}({})".format(cmd, args))
-            obj = tuple.__new__(cls, args[:cls.num])
-            obj.cmd = cmd
-            if len(args) > cls.num:
-                # pylint: disable=no-value-for-parameter
-                nxtcmd = cls.next_cmd if cls.next_cmd else (cls.this_cmd, cls.this_cmd.lower())
-                nxt = PathCommand(nxtcmd[obj.cmd.islower()], *args[cls.num:])
-                return [obj] + nxt if isinstance(nxt, list) else [obj, nxt]
-            return obj
-        try:
-            return next(iter(filter(NONE, [c(cmd, *args) for c in cls.__subclasses__()])))
-        except StopIteration:
-            if cls is PathCommand:
-                raise InvalidPath("Path command {} not recognised.".format(cmd))
+    def __init__(self, *args):
+        if len(args) == 1:
+            if isinstance(args[0], (list, tuple)):
+                # Passed in variable is parsed numbers (array) or
+                # set of coords from some other process (tupple)
+                args = args[0]
+            elif isinstance(args[0], Segment):
+                # Passed in variable is some other segment which
+                # should be converted to this type.
+                args = self._from_segment(args[0])
 
-    _argt = classmethod(lambda cls, sep: (sep + cls.number_template) * cls.num)
+        if self.num == -1:
+            raise InvalidPath("Bad Segment type (None)")
+        if isinstance(args, list) and len(args) < self.num:
+            raise InvalidPath("Bad arguments {}({})".format(self.name, args))
+        elif isinstance(args, tuple) and len(args) != self.num:
+            raise InvalidPath("Bad arguments {}({})".format(self.name, args))
+
+        self.args = tuple([float(x) for x in args[:self.num]])
+        if isinstance(args, list):
+            del args[:self.num]
+
+    _cmds = {} # type: Dict[str, Segment]
+
+    @classmethod
+    def get_class(cls, cmd):
+        """Get the class for this command name"""
+        cmd = cmd.strip()
+        pool = cls.__subclasses__()
+        while len(cls._cmds) < len(pool):
+            segtype = pool[len(cls._cmds)]
+            pool.extend(segtype.__subclasses__())
+            cls._cmds[segtype.cmd] = segtype
+        if cmd in cls._cmds:
+            return cls._cmds[cmd]
+        raise KeyError("Unknown path command: {}".format(cmd))
+
+    @classmethod
+    def _argt(cls, sep):
+        return sep.join([cls.number_template] * cls.num)
 
     def __str__(self):
-        return self.cmd + self._argt(" ").format(*self)
+        return "{} {}".format(self.cmd, self._argt(" ").format(*self.args)).strip()
 
     def __repr__(self):
-        return "{{}}('{{}}'{})".format(self._argt(", ")).format(self.name, self.cmd, *self)
+        return "{{}}({})".format(self._argt(", ")).format(self.name, *self.args)
 
     def __add__(self, other):
         if self.isabsolute():
@@ -98,8 +132,10 @@ class PathCommand(tuple):
     def __mul__(self, other):
         return self.scale(other)
 
-    all_x = property(lambda self: self[::2])
-    all_y = property(lambda self: self[1::2])
+    x = property(lambda self: self.args[-2])
+    y = property(lambda self: self.args[-1])
+    all_x = property(lambda self: self.args[::2])
+    all_y = property(lambda self: self.args[1::2])
 
     @property
     def points(self):
@@ -112,8 +148,8 @@ class PathCommand(tuple):
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""
-        lst = (opr(val, coords[i % 2]) for i, val in enumerate(self))
-        return PathCommand(self.cmd, *lst)
+        lst = [opr(val, coords[i % 2]) for i, val in enumerate(self.args)]
+        return type(self)(lst)
 
     def scale(self, coords):
         """Scale this path command by the given coords X/Y"""
@@ -128,7 +164,7 @@ class PathCommand(tuple):
             theta = (atan2(offset_y, offset_x) + angle * pi / 180)
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
             ans.extend([rad * cos(theta) + center_x, rad * sin(theta) + center_y])
-        return PathCommand(self.cmd, *ans) # pylint: disable=no-value-for-parameter
+        return type(self)(ans) # pylint: disable=no-value-for-parameter
 
     def transform(self, transform, raw=False):
         """Apply a matrix transform to this path and return a new path"""
@@ -138,7 +174,7 @@ class PathCommand(tuple):
             points[index] = transform.apply_to_point([x, y])
         if raw:
             return points
-        return PathCommand(self.cmd, *[coord for point in points for coord in point])
+        return type(self)([coord for point in points for coord in point])
 
     def get_pen(self, previous=(0, 0)):
         """Where will the pen be after this command"""
@@ -148,29 +184,50 @@ class PathCommand(tuple):
             return self.points[-1]
         return previous
 
+    @classmethod
+    def _from_segment(cls, segment):
+        """
+        How is a segment (any segment) converted to this type? The default
+        is for Line and Move, which takes only the next x,y coord pair.
 
-class Line(PathCommand):
-    """Line instruction"""
+        Others must be over-ridden to make sense of their inputs.
+        """
+        if segment.num == cls.num:
+            return segment.args
+        if cls.num == 2:
+            return (segment.x, segment.y)
+        raise NotImplementedError("Can not convert from {} to {}".format(segment.name, cls.name))
+
+class Line(Segment):
+    """Line segment"""
     num = 2
 
+class line(Line): # pylint: disable=invalid-name
+    """Relative line segment"""
 
-class ZClose(PathCommand):
-    """Close instruction to finish a path"""
-    next_cmd = 'Ll'
+class Move(Segment):
+    """Move pen segment without a line"""
+    _next = Line
+    num = 2
+
+class move(Move): # pylint: disable=invalid-name
+    """Relative move segment"""
+    _next = line
+
+class ZoneClose(Segment):
+    """Close segment to finish a path"""
+    _next = Move
     num = 0
 
+class zoneClose(ZoneClose): # pylint: disable=invalid-name
+    """Same as above (svg says no difference)"""
 
-class Move(PathCommand):
-    """Move pen instruction without a line"""
-    next_cmd = 'Ll'
-    num = 2
-
-
-class Horz(PathCommand):
-    """Horizontal Line instruction"""
+class Horz(Segment):
+    """Horizontal Line segment"""
     num = 1
-    cmd_index = X
-    points = property(lambda self: ((self[0], None),))
+    x = property(lambda self: self.args[0])
+    y = property(lambda self: None)
+    points = property(lambda self: ((self.x, self.y),))
 
     def get_pen(self, previous=(0, 0)):
         """When getting the pen for Horz moves, we return the combined point"""
@@ -179,63 +236,68 @@ class Horz(PathCommand):
 
     def translate(self, coords, opr=add):
         """Translate this Horz path by the given coords X/Y"""
-        return PathCommand(self.cmd, opr(self[0], coords[self.cmd_index]))
+        return Horz(opr(self.args[0], coords[X]))
 
     def transform(self, transform, raw=False):
         raise ValueError("Hozontal lines can't be transformed directly.")
 
     def to_line(self, previous):
         """Return this path command as a line instead"""
-        return PathCommand('L', self[0], previous[1])
+        return Line(self.x, Move(previous).y)
 
+class horz(Horz): # pylint: disable=invalid-name
+    """Relative horz line segment"""
 
 class Vert(Horz):
-    """Vertical Line instruction"""
-    cmd_index = Y
-    points = property(lambda self: ((None, self[0]),))
-
+    """Vertical Line segment"""
+    x = property(lambda self: None)
+    y = property(lambda self: self.args[0])
     all_x = property(lambda self: [])
-    all_y = property(lambda self: self[:1])
+    all_y = property(lambda self: [self.y])
+
+    def translate(self, coords, opr=add):
+        """Translate this Horz path by the given coords X/Y"""
+        return Vert(opr(self.args[0], coords[Y]))
 
     def to_line(self, previous):
         """Return this path command as a line instead"""
-        return PathCommand('L', previous[0], self[0])
+        return Line(Move(previous).x, self.y)
 
+class vert(Vert): # pylint: disable=invalid-name
+    """Relative vertical line segment"""
 
-class Curve(PathCommand):
-    """Curved Line instruction"""
+class Curve(Segment):
+    """Absolute Curved Line segment"""
     num = 6
 
+class curve(Curve): # pylint: disable=invalid-name
+    """Relative curved line segment"""
 
-class SmoothCurve(PathCommand):
-    """Smoothed Curved Line instruction"""
+class Smooth(Segment):
+    """Absolute Smoothed Curved Line segment"""
     num = 4
 
-    def bounding_box(self, prev):
-        """Returns a bounding box for curved lines, similar to refinedBBox"""
-        raise NotImplementedError("This requires the previous coords too")
-        #return cubic_extrema(*self.all_x) + cubic_extrema(*self.all_y)
+class smooth(Smooth): # pylint: disable=invalid-name
+    """Relative smoothed curved line segment"""
 
-
-class Quadratic(PathCommand):
-    """Quadratic Curved Line instruction"""
+class Quadratic(Segment):
+    """Absolute Quadratic Curved Line segment"""
     num = 4
 
-    def bounding_box(self, prev):
-        """Returns a bounding box for curved lines, similar to refinedBBox"""
-        raise NotImplementedError("This requires the previous coords too")
-        #return cubic_extrema(*self.all_y) + cubic_extrema(*self.all_y)
+class quadratic(Quadratic): # pylint: disable=invalid-name
+    """Relative quadratic line segment"""
 
-
-class TepidQuadratic(PathCommand):
-    """Smoothed Quadratic Line instruction"""
+class TepidQuadratic(Segment):
+    """Continued Quadratic Line segment"""
     num = 2
 
+class tepidQuadratic(Segment): # pylint: disable=invalid-name
+    """Relative continued quadratic line segment"""
 
-class Arc(PathCommand):
-    """Special Arc instruction"""
+class Arc(Segment):
+    """Special Arc segment"""
     num = 7
-    points = property(lambda self: (self[-2:],))
+    points = property(lambda self: (self.args[-2:],))
 
     def bounding_box(self, prev):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
@@ -247,33 +309,35 @@ class Arc(PathCommand):
 
     def to_curves(self, previous=(0, 0)):
         """Convert this arc into bezier curves"""
-        cubic = ArcToPath(list(previous), list(self))
+        cubic = ArcToPath(list(previous), list(self.args))
         for seg in unCubicSuperPath([cubic]):
-            yield PathCommand(seg[0], *seg[1])
+            yield Segment.get_class(seg[0])(list(seg[1]))
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""
-        lst = self[:5] + (opr(self[5], coords[X]), opr(self[6], coords[Y]))
-        return PathCommand(self.cmd, *lst)
+        lst = self.args[:5] + (opr(self.args[5], coords[X]), opr(self.args[6], coords[Y]))
+        return type(self)(list(lst))
 
     def transform(self, transform, raw=True):
         """Transform this arc along with the given transformation"""
         points = super(Arc, self).transform(transform, raw=True)[0]
-        return PathCommand(self.cmd, *(self[:-2] + tuple(points)))
+        return Arc(self.args[:-2] + tuple(points))
 
     def scale(self, coords):
         """Scale the Arc by the given coords"""
         (x, y) = coords  # pylint: disable=invalid-name
-        return PathCommand(self.cmd,
-                           self[0] * x,  # Radius
-                           self[1] * x,  # Radius
-                           (self[2], 0)[y < 0],  # X-axis rotation angle
-                           self[3],  # Unknown param '0'
-                           (self[4], 1 - self[4])[x * y < 0],  # sweep-flag
-                           self[5] * x,  # X coord
-                           self[6] * y,  # Y coord
-                          )
+        return Arc([
+            self.args[0] * x,  # Radius
+            self.args[1] * x,  # Radius
+            (self.args[2], 0)[y < 0],  # X-axis rotation angle
+            self.args[3],  # Unknown param '0'
+            (self.args[4], 1 - self.args[4])[x * y < 0],  # sweep-flag
+            self.args[5] * x,  # X coord
+            self.args[6] * y,  # Y coord
+        ])
 
+class arc(Arc): # pylint: disable=invalid-name
+    """Relative Arc line segment"""
 
 class Path(list):
     """A list of segment commands which combine to draw a shape"""
@@ -281,17 +345,28 @@ class Path(list):
     def __init__(self, path_d=None):
         super(Path, self).__init__()
         if isinstance(path_d, str):
-            for cmd, nums in LEX_REX.findall(path_d):
-                self.append(PathCommand(cmd, *strargs(nums)))
-        elif isinstance(path_d, (list, tuple)):
-            for item in path_d:
-                if isinstance(item, PathCommand):
-                    self.append(item)
-                elif isinstance(item, (list, tuple)) and len(item) == 2:
-                    if isinstance(item[1], (list, tuple)):
-                        self.append(PathCommand(item[0], *item[1]))
-                    else:
-                        self.append(PathCommand('L', *item))
+            # Returns a generator returning Segment objects
+            path_d = self.parse_string(path_d)
+
+        for item in (path_d or ()):
+            if isinstance(item, Segment):
+                self.append(item)
+            elif isinstance(item, (list, tuple)) and len(item) == 2:
+                if isinstance(item[1], (list, tuple)):
+                    self.append(Segment.get_class(item[0])(*item[1]))
+                else:
+                    self.append(Line(*item))
+
+    @classmethod
+    def parse_string(cls, path_d):
+        """Parse a path string and generate segment objects"""
+        for cmd, numbers in LEX_REX.findall(path_d):
+            args = list(strargs(numbers))
+            cmd = Segment.get_class(cmd)
+            while args or cmd.num == 0:
+                seg = cmd(args)
+                cmd = seg.get_next()
+                yield seg
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
@@ -303,7 +378,7 @@ class Path(list):
         """Append a command to this path including any chained commands"""
         if isinstance(cmd, list):
             self.extend(cmd)
-        elif isinstance(cmd, PathCommand):
+        elif isinstance(cmd, Segment):
             super(Path, self).append(cmd)
 
     def translate(self, x, y):  # pylint: disable=invalid-name
@@ -354,9 +429,10 @@ class Path(list):
                 # Force arcs to curves here
                 segs = list(seg.to_curves(pen))
             elif seg.isrelative() != (factor == -1):
-                segs = [PathCommand(
-                    seg.cmd.swapcase(),
-                    *seg.translate((pen[0] * factor, pen[1] * factor)))]
+
+                segs = [seg.get_other()(
+                    list(seg.translate((pen[0] * factor, pen[1] * factor)).args)
+                )]
             else:
                 segs = [seg]
 
@@ -391,7 +467,7 @@ class Path(list):
 
     def to_arrays(self):
         """Duplicates the original output of parsePath, returning arrays of segment data"""
-        return [[seg.cmd, list(seg)] for seg in self.to_absolute()]
+        return [[seg.cmd, list(seg.args)] for seg in self.to_absolute()]
 
     def copy(self):
         """Make a copy"""

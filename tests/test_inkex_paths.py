@@ -5,7 +5,7 @@ Test Inkex path parsing functionality.
 
 import re
 
-from inkex.paths import InvalidPath, Path, PathCommand
+from inkex.paths import InvalidPath, Path, Segment, Horz, ZoneClose, Line
 from inkex.transforms import BoundingBox, Transform
 from inkex.tester import TestCase
 
@@ -24,8 +24,8 @@ class PathTest(TestCase):
     def test_invalid(self):
         """Load an invalid path"""
         self._assertPath(Path('& 10 10 M 20 20'), 'M 20 20')
-        self.assertRaises(InvalidPath, PathCommand, '&')
-        self.assertRaises(InvalidPath, PathCommand, 'Z', 40)
+        self.assertRaises(InvalidPath, Segment, [])
+        self.assertRaises(InvalidPath, Line, [40,])
 
     def test_copy(self):
         """Make a copy of a path"""
@@ -33,7 +33,7 @@ class PathTest(TestCase):
 
     def test_repr(self):
         """Path representation"""
-        self._assertPath(repr(Path('M 10 10 10 10')), "[Move('M', 10, 10), Line('L', 10, 10)]")
+        self._assertPath(repr(Path('M 10 10 10 10')), "[Move(10, 10), Line(10, 10)]")
 
     def test_list(self):
         """Path of previous commands"""
@@ -52,7 +52,7 @@ class PathTest(TestCase):
         """Paths always extrapolate chained commands"""
         for path, ret in (
                 ('M 100 100 20 20', 'M 100 100 L 20 20'),
-                ('M 100 100 Z 20 20', 'M 100 100 Z L 20 20'),
+                ('M 100 100 Z 20 20', 'M 100 100 Z M 20 20'),
                 ('M 100 100 L 20 20 40 40 30 10 Z', 'M 100 100 L 20 20 L 40 40 L 30 10 Z'),
                 ('m 50 50 l 20 20 40 40', 'm 50 50 l 20 20 l 40 40'),
                 ('m 50 50 20 20', 'm 50 50 l 20 20'),
@@ -214,4 +214,4 @@ class PathTest(TestCase):
         ret = Path("M 10 10 A 50,50 0 0 1 85.355333,85.355341 L 100 0")
         ret.transform(Transform(scale=10))
         self.assertEqual(str(ret), 'M 100 100 A 50 50 0 0 1 853.553 853.553 L 1000 0')
-        self.assertRaises(ValueError, PathCommand('H', 10).transform, Transform())
+        self.assertRaises(ValueError, Horz([10]).transform, Transform())

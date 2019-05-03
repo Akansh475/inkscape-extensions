@@ -5,10 +5,32 @@ Test Inkex path parsing functionality.
 
 import re
 
-from inkex.paths import InvalidPath, Path, Segment, Horz, ZoneClose, Line
-from inkex.transforms import BoundingBox, Transform
+from inkex.paths import (
+    InvalidPath, Path, Segment,
+    Line, line, Move, Horz, Vert, Curve,
+)
+from inkex.transforms import Transform
 from inkex.tester import TestCase
 
+class SegmentTest(TestCase):
+    """
+    Test specific segment functionality.
+    """
+    def test_equals(self):
+        """Segments should be equalitive"""
+        self.assertEqual(Move(10, 10), Move(10, 10))
+        self.assertEqual(Line(10, 10), Line(10, 10))
+        self.assertEqual(line(10, 10), line(10, 10))
+        self.assertNotEqual(line(10, 10), Line(10, 10))
+        self.assertEqual(Horz(10), Line(10, 0))
+        self.assertEqual(Vert(10), Line(0, 10))
+        self.assertNotEqual(Vert(10), Horz(10))
+
+    def test_to_curves(self):
+        """Segments can become curves"""
+        self.assertRaises(ValueError, Move(0, 0).to_curve, None)
+        self.assertEqual(Line(10, 10).to_curve([10, 5]), (10, 5, 10, 10, 10, 10))
+        self.assertEqual(Curve(5, 5, 10, 10, 4, 4).to_curve([0, 0]), (5, 5, 10, 10, 4, 4))
 
 class PathTest(TestCase):
     """Test path API and calculations"""

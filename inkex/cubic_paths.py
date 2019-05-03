@@ -22,7 +22,6 @@ Tools for cubic path interpolation
 
 from math import acos, cos, pi, sin, sqrt, tan
 
-
 def matprod(mlist):
     prod = mlist[0]
     for m in mlist[1:]:
@@ -200,14 +199,8 @@ def CubicSuperPath(simplepath):
 
 
 def unCubicSuperPath(csp):
-    a = []
-    for subpath in csp:
-        if subpath:
-            a.append(['M', subpath[0][1][:]])
-            for i in range(1, len(subpath)):
-                a.append(['C', subpath[i - 1][2][:] + subpath[i][0][:] + subpath[i][1][:]])
-    return a
-
+    from .paths import CubicSuperPath as CSP
+    return CSP(csp).to_path().to_arrays()
 
 def parseCubicPath(d):
     from .paths import Path

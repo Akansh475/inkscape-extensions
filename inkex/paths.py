@@ -124,6 +124,23 @@ class Segment(object):
     def __repr__(self):
         return "{{}}({})".format(self._argt(", ")).format(self.name, *self.args)
 
+    def __eq__(self, other):
+        if type(self) == type(other): # pylint: disable=unidiomatic-typecheck
+            return self.args == other.args
+        if isinstance(other, tuple):
+            return self.args == other
+        if not isinstance(other, Segment):
+            raise ValueError("Can't compare types")
+        print("Trying to compare {} == {} with {} == {}".format(
+            self, other, self.to_curve([0, 0]), other.to_curve([0, 0]),
+        ))
+        try:
+            if self.isrelative() == other.isrelative():
+                return self.to_curve([0, 0]) == other.to_curve([0, 0])
+        except ValueError as err:
+            pass
+        return False
+
     def __add__(self, other):
         if self.isabsolute():
             return self.translate(other)
@@ -184,6 +201,10 @@ class Segment(object):
             return self.points[-1]
         return previous
 
+    def to_curve(self, previous):
+        """Convert the segment into a curve segment"""
+        raise NotImplementedError("To curve not supported for {}".format(self.name))
+
     @classmethod
     def _from_segment(cls, segment):
         """
@@ -202,6 +223,10 @@ class Line(Segment):
     """Line segment"""
     num = 2
 
+    def to_curve(self, previous):
+        previous = Move(previous)
+        return Curve(previous.x, previous.y, self.x, self.y, self.x, self.y)
+
 class line(Line): # pylint: disable=invalid-name
     """Relative line segment"""
 
@@ -209,6 +234,9 @@ class Move(Segment):
     """Move pen segment without a line"""
     _next = Line
     num = 2
+
+    def to_curve(self, previous):
+        raise ValueError("Move segments can not be changed into curves.")
 
 class move(Move): # pylint: disable=invalid-name
     """Relative move segment"""
@@ -245,6 +273,11 @@ class Horz(Segment):
         """Return this path command as a line instead"""
         return Line(self.x, Move(previous).y)
 
+    def to_curve(self, previous):
+        """Convert a horzontal line into a curve"""
+        previous = Move(previous)
+        return self.to_line(previous).to_curve(previous)
+
 class horz(Horz): # pylint: disable=invalid-name
     """Relative horz line segment"""
 
@@ -270,12 +303,27 @@ class Curve(Segment):
     """Absolute Curved Line segment"""
     num = 6
 
+    def to_curve(self, previous):
+        """No conversion needed, pass-through, returns self"""
+        return self
+
 class curve(Curve): # pylint: disable=invalid-name
     """Relative curved line segment"""
 
 class Smooth(Segment):
     """Absolute Smoothed Curved Line segment"""
     num = 4
+
+    def to_curve(self, previous):
+        """
+        Convert this Smooth curve to a regular curve by creating a mirror
+        set of nodes based on the previous node. Previous should be a curve.
+        """
+        last = previous.to_curve()
+        x1 = (2 * last[0]) - lastctrl[0]
+        y1 = (2 * last[1]) - lastctrl[1]
+        return Curve((x1, y1) + self.args)
+
 
 class smooth(Smooth): # pylint: disable=invalid-name
     """Relative smoothed curved line segment"""
@@ -290,6 +338,18 @@ class quadratic(Quadratic): # pylint: disable=invalid-name
 class TepidQuadratic(Segment):
     """Continued Quadratic Line segment"""
     num = 2
+
+    def to_curve(self, previous):
+        return self.to_quadratic(previous).to_curve(previous)
+
+    def to_quadratic(self, previous):
+        """
+        Convert this continued quadratic into a full quadratic
+        """
+        x1 = (last[0] - lastctrl[0]) * 3. / 2 + last[0]
+        y1 = (last[1] - lastctrl[1]) * 3. / 2 + last[1]
+        return Quadratic(x1, y1, *self.args)
+
 
 class tepidQuadratic(Segment): # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
@@ -472,3 +532,53 @@ class Path(list):
     def copy(self):
         """Make a copy"""
         return copy.copy(self)
+
+
+class CubicSuperPath(list):
+    """
+    A conversion of a path into a predictable list of cubic curves which
+    can be operated on as a list of simplified instructions.
+
+    When converting back into a path, all lines, arcs etc will be coverted
+    to curve instructions.
+
+    Structure is held as [SubPath[(point_a, bezier, point_b), ...]], ...]
+    """
+    def __init__(self, items):
+        super(CubicSuperPath, self).__init__()
+
+        if isinstance(items, str):
+            items = Path(items)
+
+        for item in items:
+            self.append(item)
+
+        self._move = None
+
+    def __str__(self):
+        return str(self.to_path())
+
+    def append(self, item):
+        """Accept multiple different formats for the data"""
+        if isinstance(item, Segment):
+            if isinstance(item, Move):
+                self._move = item
+            else:
+                item = item.to_absolute().to_curve()
+
+        # TODO: Check format of item here
+        super(CubicSuperPath, self).append(item)
+
+    def to_path(self):
+        """Convert the super path back to an svg path"""
+        return Path(list(self._to_segments()))
+
+    def _to_segments(self):
+        for subpath in self:
+            previous = []
+            for segment in subpath:
+                if not previous:
+                    yield Move(segment[1][:])
+                else:
+                    yield Curve(previous[2][:] + segment[0][:] + segment[1][:])
+                previous = segment

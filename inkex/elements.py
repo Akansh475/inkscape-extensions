@@ -226,6 +226,7 @@ class OtherElements(BaseElement):
         'type',
         'work',
         'style',
+        'title',
     ]
 
 

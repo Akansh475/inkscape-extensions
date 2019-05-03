@@ -163,6 +163,7 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(ids, (
             None, None, 'path1', None,
             'base', 'metadata7',
+             None, None, None, None, None,
             'A', 'B', 'C', 'D', 'E', 'F', 'G'
         ))
 

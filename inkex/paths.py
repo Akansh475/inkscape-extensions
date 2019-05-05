@@ -303,6 +303,11 @@ class Curve(Segment):
     """Absolute Curved Line segment"""
     num = 6
 
+    x1 = property(lambda self: self.args[0])
+    y1 = property(lambda self: self.args[1])
+    x2 = property(lambda self: self.args[2])
+    y2 = property(lambda self: self.args[3])
+
     def to_curve(self, previous):
         """No conversion needed, pass-through, returns self"""
         return self
@@ -314,15 +319,18 @@ class Smooth(Segment):
     """Absolute Smoothed Curved Line segment"""
     num = 4
 
+    x2 = property(lambda self: self.args[0])
+    y2 = property(lambda self: self.args[1])
+
     def to_curve(self, previous):
         """
         Convert this Smooth curve to a regular curve by creating a mirror
         set of nodes based on the previous node. Previous should be a curve.
         """
-        last = previous.to_curve()
-        x1 = (2 * last[0]) - lastctrl[0]
-        y1 = (2 * last[1]) - lastctrl[1]
-        return Curve((x1, y1) + self.args)
+        last = previous.to_curve(Line([0, 0]))
+        x1 = (2 * last.x) - last.x1
+        y1 = (2 * last.y) - last.y1
+        return Curve(x1, y1, self.x2, self.y2, self.x, self.y)
 
 
 class smooth(Smooth): # pylint: disable=invalid-name
@@ -331,6 +339,19 @@ class smooth(Smooth): # pylint: disable=invalid-name
 class Quadratic(Segment):
     """Absolute Quadratic Curved Line segment"""
     num = 4
+
+    x1 = property(lambda self: self.args[0])
+    y1 = property(lambda self: self.args[1])
+
+    def to_curve(self, previous):
+        """Attempt to convert a quadratic to a curve"""
+        previous = Move(previous)
+        x1 = 1. / 3 * previous.x + 2. / 3 * self.x1
+        x2 = 2. / 3 * self.x1 + 1. / 3 * self.x
+        y1 = 1. / 3 * previous.y + 2. / 3 * self.y1
+        y2 = 2. / 3 * self.y1 + 1. / 3 * self.y
+        return Curve(x1, y1, x2, y2, self.x, self.y)
+
 
 class quadratic(Quadratic): # pylint: disable=invalid-name
     """Relative quadratic line segment"""
@@ -346,9 +367,10 @@ class TepidQuadratic(Segment):
         """
         Convert this continued quadratic into a full quadratic
         """
-        x1 = (last[0] - lastctrl[0]) * 3. / 2 + last[0]
-        y1 = (last[1] - lastctrl[1]) * 3. / 2 + last[1]
-        return Quadratic(x1, y1, *self.args)
+        last = previous.to_curve(Line([0, 0]))
+        x1 = (last.x - last.x1) * 3. / 2 + last.x
+        y1 = (last.y - last.y1) * 3. / 2 + last.y
+        return Quadratic(x1, y1, self.x, self.y)
 
 
 class tepidQuadratic(Segment): # pylint: disable=invalid-name

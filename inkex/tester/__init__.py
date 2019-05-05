@@ -164,6 +164,15 @@ class TestCase(MockCommandMixin, BaseCase):
         """Returns a common minimal svg file"""
         return self.data_file('svg', 'default-inkscape-SVG.svg')
 
+    def assertAlmostTuple(self, found, expected, precision=8): # pylint: disable=invalid-name
+        """
+        Floating point results may vary with computer architecture; use
+        assertAlmostEqual to allow a tolerance in the result.
+        """
+        self.assertEqual(len(found), len(expected))
+        for fon, exp in zip(found, expected):
+            self.assertAlmostEqual(fon, exp, precision)
+
     def assertEffectEmpty(self, effect, **kwargs):  # pylint: disable=invalid-name
         """Assert calling effect without any arguments"""
         self.assertEffect(effect=effect, **kwargs)

@@ -167,6 +167,7 @@ def CubicSuperPath(simplepath):
             last = params[-2:]
             lastctrl = params[2:4]
         elif cmd == 'Q':
+            # pylint: disable=invalid-name
             q0 = last[:]
             q1 = params[0:2]
             q2 = params[2:4]

@@ -51,11 +51,10 @@ class SegmentTest(TestCase):
         )
 
         curves = list(Arc(50, 50, 0, 0, 1, 85, 85).to_curves([0, 0]))
-        self.assertEqual(len(curves), 4)
-        self.assertAlmostTuple(curves[0].args, (7.144660940672626, 7.144660940672626))
-        self.assertAlmostTuple(curves[1].args, (19.77590700610636, -5.4865851247611115, 38.18634924829132, -10.4196482558544, 55.44095225512604, -5.796291314453416))
-        self.assertAlmostTuple(curves[2].args, (72.69555526196076, -1.172934373052433, 86.17293437305243, 12.30444473803924, 90.79629131445341, 29.559047744873958))
-        self.assertAlmostTuple(curves[3].args, (95.41964825585441, 46.81365075170867, 90.4865851247611, 65.22409299389365, 77.85533905932738, 77.85533905932738))
+        self.assertEqual(len(curves), 3)
+        self.assertAlmostTuple(curves[0].args, (19.77590700610636, -5.4865851247611115, 38.18634924829132, -10.4196482558544, 55.44095225512604, -5.796291314453416))
+        self.assertAlmostTuple(curves[1].args, (72.69555526196076, -1.172934373052433, 86.17293437305243, 12.30444473803924, 90.79629131445341, 29.559047744873958))
+        self.assertAlmostTuple(curves[2].args, (95.41964825585441, 46.81365075170867, 90.4865851247611, 65.22409299389365, 77.85533905932738, 77.85533905932738))
 
 class PathTest(TestCase):
     """Test path API and calculations"""
@@ -163,7 +162,7 @@ class PathTest(TestCase):
 
         self.assertAlmostTuple(
             list(path[1].bounding_box(path[0])),
-            (85.355333, 99.99999988134624, 14.644650999999998, 85.355341))
+            (85.355333, 99.99999988134624, 24.021470405410984, 85.355341))
 
         #self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
         #self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())

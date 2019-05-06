@@ -205,6 +205,10 @@ class Segment(object):
         """Convert the segment into a curve segment"""
         raise NotImplementedError("To curve not supported for {}".format(self.name))
 
+    def to_curves(self, previous):
+        """Convert to segment, but returns an array of segments"""
+        return [self.to_curve(previous)]
+
     @classmethod
     def _from_segment(cls, segment):
         """
@@ -393,7 +397,8 @@ class Arc(Segment):
         """Convert this arc into bezier curves"""
         cubic = ArcToPath(list(previous), list(self.args))
         for seg in unCubicSuperPath([cubic]):
-            yield Segment.get_class(seg[0])(list(seg[1]))
+            if seg[0] == 'C':
+                yield Segment.get_class(seg[0])(list(seg[1]))
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""

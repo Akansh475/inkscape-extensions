@@ -172,7 +172,7 @@ def filename_arg(name):
     return filename
 
 def pairwise(iterable):
-    "Iterate over a list with overlapping pairs (see itertools recipies)"
+    "Iterate over a list with overlapping pairs (see itertools recipes)"
     first, then = tee(iterable)
     start = next(then, None)
     return [(None, start)] + list(zip(first, then))

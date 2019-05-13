@@ -26,10 +26,14 @@ Provide transformation parsing to extensions
 """
 
 import re
+import sys
 from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 
 from .utils import X, Y, strargs
+
+if sys.version_info[0] == 3:  #PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 class Transform(object):
     """A transformation object which will always reduce to a matrix and can
@@ -58,7 +62,7 @@ class Transform(object):
         self.matrix = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
         if matrix is not None:
             # We parse a given string as an svg transformation instruction
-            if isinstance(matrix, str):
+            if isinstance(matrix, (str, unicode)):
                 for func, values in self.TRM.findall(matrix.strip()):
                     getattr(self, 'add_' + func.lower())(*strargs(values))
             elif isinstance(matrix, Transform):

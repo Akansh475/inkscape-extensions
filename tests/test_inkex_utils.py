@@ -5,7 +5,7 @@ Unit test file for ../inkex.py
 # Revision history:
 #   * 2012-01-27 (jazzynico): check errormsg function.
 #
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, print_function
 
 from argparse import ArgumentTypeError
 
@@ -85,5 +85,5 @@ class TestInkexBasic(object):
     def test_unicode_latin1(self, capsys):
         # Py2 has issues with unicode in docstrings.   *sigh*
         # """Parse Àûïàèé (unicode)"""
-        errormsg('Àûïàèé')
-        assert capsys.readouterr().err, 'Àûïàèé\n'
+        errormsg(u'Àûïàèé')
+        assert capsys.readouterr().err, u'Àûïàèé\n'

@@ -24,6 +24,7 @@
 #
 
 import copy
+import sys
 
 from lxml import etree
 
@@ -97,7 +98,7 @@ class Extract(inkex.Effect):
             for child in node:
                 if child.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role'):
                     child.tail = "\n"
-            inkex.errormsg(etree.tostring(node, method='text').strip())
+            inkex.errormsg(etree.tostring(node, encoding='unicode', method='text').strip())
         else:
             for child in node:
                 self.recurse(child)

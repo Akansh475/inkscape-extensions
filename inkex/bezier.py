@@ -360,7 +360,7 @@ def subdiv(sp, flat, i=1):
 
 def csparea(csp):
     """Get area in cubic sub-path"""
-    MAT_AREA = numpy.matrix([[0, 2, 1, -3],
+    MAT_AREA = numpy.array([[0, 2, 1, -3],
                              [-2, 0, 1, 1],
                              [-1, -1, 0, 2],
                              [3, -1, -2, 0]])
@@ -371,30 +371,30 @@ def csparea(csp):
         for x, coord in enumerate(sp):  # calculate polygon area
             area += 0.5 * sp[x - 1][1][0] * (coord[1][1] - sp[x - 2][1][1])
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
-            vec_x = numpy.matrix([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
-            vec_y = numpy.matrix([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
-            area += 0.15 * (vec_x * MAT_AREA * vec_y.T)[0, 0]
+            vec_x = numpy.array([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
+            vec_y = numpy.array([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
+            area += 0.15 * numpy.matmul(numpy.matmul(vec_x, MAT_AREA), vec_y.T)[0, 0]
     return -area
 
 
 def cspcofm(csp):
     """Get cubic sub-path coefficient"""
-    MAT_COFM_0 = numpy.matrix([[0, 35, 10, -45],
+    MAT_COFM_0 = numpy.array([[0, 35, 10, -45],
                                [-35, 0, 12, 23],
                                [-10, -12, 0, 22],
                                [45, -23, -22, 0]])
 
-    MAT_COFM_1 = numpy.matrix([[0, 15, 3, -18],
+    MAT_COFM_1 = numpy.array([[0, 15, 3, -18],
                                [-15, 0, 9, 6],
                                [-3, -9, 0, 12],
                                [18, -6, -12, 0]])
 
-    MAT_COFM_2 = numpy.matrix([[0, 12, 6, -18],
+    MAT_COFM_2 = numpy.array([[0, 12, 6, -18],
                                [-12, 0, 9, 3],
                                [-6, -9, 0, 15],
                                [18, -3, -15, 0]])
 
-    MAT_COFM_3 = numpy.matrix([[0, 22, 23, -45],
+    MAT_COFM_3 = numpy.array([[0, 22, 23, -45],
                                [-22, 0, 12, 10],
                                [-23, -12, 0, 35],
                                [45, -10, -35, 0]])
@@ -411,14 +411,16 @@ def cspcofm(csp):
             yc += sp[x - 1][1][0] * (coord[1][1] - sp[x - 2][1][1]) \
                 * (sp[x - 2][1][1] + sp[x - 1][1][1] + coord[1][1]) / 6
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
-            vec_x = numpy.matrix([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
-            vec_y = numpy.matrix([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
-            vec_t = numpy.matrix([
-                (vec_x * MAT_COFM_0 * vec_y.T)[0, 0],
-                (vec_x * MAT_COFM_1 * vec_y.T)[0, 0],
-                (vec_x * MAT_COFM_2 * vec_y.T)[0, 0],
-                (vec_x * MAT_COFM_3 * vec_y.T)[0, 0]
+            vec_x = numpy.array([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
+            vec_y = numpy.array([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
+            def _mul(MAT):
+                return numpy.matmul(numpy.matmul(vec_x, MAT), vec_y.T)[0, 0]
+            vec_t = numpy.array([
+                _mul(MAT_COFM_0),
+                _mul(MAT_COFM_1),
+                _mul(MAT_COFM_2),
+                _mul(MAT_COFM_3)
             ])
-            xc += (vec_x * vec_t.T)[0, 0] / 280
-            yc += (vec_y * vec_t.T)[0, 0] / 280
+            xc += numpy.matmul(vec_x, vec_t.T)[0, 0] / 280
+            yc += numpy.matmul(vec_y, vec_t.T)[0, 0] / 280
     return -xc / area, -yc / area

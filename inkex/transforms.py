@@ -68,7 +68,7 @@ class Transform(object):
             elif isinstance(matrix, Transform):
                 self.matrix = matrix.matrix
             elif not isinstance(matrix, (tuple, list)):
-                raise ValueError("Given transformation isn't a valid input")
+                raise ValueError("Invalid transform type: {}".format(type(matrix).__name__))
             elif len(matrix) == 2:
                 self.matrix = tuple(matrix[0]), tuple(matrix[1])
             elif len(matrix) == 6:

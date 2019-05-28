@@ -115,6 +115,20 @@ InkWeb.transmitAtt = function (conf) {
   }
 }
 
+InkWeb.goto = function (conf) {
+  if ( typeof(conf.from) == "string" )
+    conf.from = document.getElementById( conf.from );
+  if ( ! conf.to )
+    conf.to = conf.to ;
+  if ( typeof(toEl) == "string" )
+      toEl = document.getElementById( toEl );
+  toEl = document.getElementById( conf.to );
+  console.log(toEl);
+  console.log(toEl.getAttribute("height"));
+  document.getElementsByTagName("svg")[0].viewBox.baseVal.x = toEl.getAttribute("x");
+  document.getElementsByTagName("svg")[0].viewBox.baseVal.y = toEl.getAttribute("y");
+}
+
 InkWeb.setAtt = function (conf) {
   if ( ! conf.el.join )
     conf.to = [ conf.el ];

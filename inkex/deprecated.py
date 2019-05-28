@@ -55,7 +55,7 @@ except ValueError:
 def _deprecated(msg, stack=2):
     """Internal method for raising a deprecation warning"""
     if DEPRECATION_LEVEL > 1:
-        msg += ' ; ' + traceback.format_stack()
+        msg += ' ; '.join(traceback.format_stack())
     if DEPRECATION_LEVEL:
         warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 

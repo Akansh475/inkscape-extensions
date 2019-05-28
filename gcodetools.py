@@ -88,7 +88,7 @@ from inkex import cubic_paths
 from inkex.bezier import bezierlength, bezierparameterize, beziertatlength
 from inkex.transforms import Transform
 
-inkex.localize.localize()
+inkex.localization.localize()
 
 if sys.version_info[0] > 2:
     xrange = range

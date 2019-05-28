@@ -25,7 +25,7 @@ from inkex.paths import Path
 from inkex.elements import PathElement, Group
 from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 from inkex.generic import EffectExtension
-from inkex.localize import _
+from inkex.localization import _
 
 X, Y = range(2)
 

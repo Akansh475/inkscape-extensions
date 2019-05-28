@@ -24,7 +24,7 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
-from inkex.localize import _
+from inkex.localization import _
 from inkex.generic import OutputExtension
 from webslicer_effect import WebSlicerMixin, is_empty
 

@@ -57,7 +57,7 @@ from math import acos, cos, floor, pi, sin, sqrt
 import inkex
 from inkex import inkbool
 from inkex.elements import Group
-from inkex.localize import _
+from inkex.localization import _
 
 from lxml import etree
 

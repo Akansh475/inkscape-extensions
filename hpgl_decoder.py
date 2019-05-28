@@ -24,7 +24,7 @@ from lxml import etree
 
 # local library
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 
 
 class hpglDecoder(object):

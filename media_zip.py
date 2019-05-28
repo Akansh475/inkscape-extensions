@@ -56,7 +56,7 @@ except ImportError:  # PY3
     from urllib.parse import urlparse
     from urllib.request import url2pathname
 
-inkex.localize.localize()
+inkex.localization.localize()
 
 
 class CompressedMediaOutput(OutputExtension):

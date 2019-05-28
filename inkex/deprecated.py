@@ -34,7 +34,7 @@ from argparse import ArgumentParser
 
 import inkex
 import inkex.utils
-from inkex.localize import _
+from inkex.localization import _
 from inkex.elements import Guide
 
 warnings.simplefilter("default")
@@ -297,6 +297,12 @@ def InkOption():
         TYPES = optparse.Option.TYPES + ("inkbool", )
         TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
         TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
+    return wrapped
+
+@lazyproxy
+def localize():
+    _deprecated('inkex.localize was moved to inkex.localization.localize', stack=3)
+    from .localization import localize as wrapped
     return wrapped
 
 # legacy inkex members <= 0.48.x

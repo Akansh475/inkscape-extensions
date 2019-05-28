@@ -24,7 +24,7 @@
 import random
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 from inkex.elements import PathElement, Pattern
 from inkex.generic import EffectExtension
 

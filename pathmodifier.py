@@ -34,7 +34,7 @@ import copy
 import random
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 from inkex.elements import PathElement, Group, Use
 from inkex.generic import EffectExtension
 from inkex.cubic_paths import parseCubicPath, formatCubicPath

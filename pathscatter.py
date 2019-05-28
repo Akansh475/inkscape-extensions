@@ -35,7 +35,7 @@ import random
 
 import inkex
 import pathmodifier
-from inkex.localize import _
+from inkex.localization import _
 from inkex.utils import inkbool
 from inkex.transforms import Transform
 from inkex.cubic_paths import parseCubicPath

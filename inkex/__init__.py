@@ -17,6 +17,7 @@ from .cubic_paths import *
 from .deprecated import optparse
 from .deprecated import InkOption
 from .deprecated import etree
+from .deprecated import localize
 
 # legacy functions
 from .deprecated import unittouu

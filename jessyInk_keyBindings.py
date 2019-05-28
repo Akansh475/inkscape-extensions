@@ -21,7 +21,7 @@ import argparse
 from lxml import etree
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 
 
 class JessyInk_CustomKeyBindings(inkex.Effect):

@@ -30,7 +30,7 @@ import numpy
 
 from .transforms import Segment
 from .utils import errormsg
-from .localize import _
+from .localization import _
 
 # bez = ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3))
 

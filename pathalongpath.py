@@ -37,7 +37,7 @@ from inkex.bezier import pointdistance, beziersplitatt, tpoint
 from inkex.paths import Path
 
 import pathmodifier
-from inkex.localize import _
+from inkex.localization import _
 from inkex.utils import inkbool
 from inkex.cubic_paths import CubicSuperPath, unCubicSuperPath
 

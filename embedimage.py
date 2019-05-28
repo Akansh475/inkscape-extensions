@@ -27,7 +27,7 @@ import sys
 import inkex
 from inkex import inkbool
 from inkex.generic import EffectExtension
-from inkex.localize import _
+from inkex.localization import _
 
 if sys.version_info[0] == 2:
     import urllib

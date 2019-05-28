@@ -21,7 +21,7 @@
 
 from lxml import etree
 
-from inkex.localize import _
+from inkex.localization import _
 
 from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 from inkex.elements import PathElement, Group

@@ -17,7 +17,7 @@
 #
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 from inkex import inkbool
 
 

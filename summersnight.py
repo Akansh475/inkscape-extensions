@@ -18,7 +18,7 @@
 #
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 from inkex.paths import Path
 from inkex.transforms import Segment
 from inkex.generic import EffectExtension

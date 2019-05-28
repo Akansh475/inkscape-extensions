@@ -6,7 +6,7 @@ import threading
 from argparse import ArgumentParser
 # local library
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 
 class VisitWebSiteWithoutLockingInkscape(threading.Thread):
     def __init__(self):

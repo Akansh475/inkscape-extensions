@@ -36,7 +36,7 @@ extensions library, and marker data from markers.svg.
 import inkex
 from inkex.transforms import BoundingBox
 from inkex.elements import Group, Marker, PathElement
-from inkex.localize import _
+from inkex.localization import _
 
 import pathmodifier
 

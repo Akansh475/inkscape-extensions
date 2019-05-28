@@ -23,7 +23,7 @@ import sys
 import hpgl_encoder
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 from inkex.utils import inkbool
 
 class Plot(inkex.Effect):

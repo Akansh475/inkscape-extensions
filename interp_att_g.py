@@ -26,7 +26,7 @@ from inkex import inkbool
 from inkex.generic import EffectExtension
 from inkex.colors import Color
 from inkex.elements import Group
-from inkex.localize import _
+from inkex.localization import _
 
 class InterpAttG(EffectExtension):
     """

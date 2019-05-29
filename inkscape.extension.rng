@@ -74,6 +74,11 @@
               <data type="boolean"/>
             </attribute>
           </optional>
+          <optional>
+            <attribute name="implements-custom-gui">
+              <data type="boolean"/>
+            </attribute>
+          </optional>
           <element name="object-type">
             <choice>
               <value type="token">all</value>

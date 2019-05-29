@@ -20,8 +20,6 @@
 '''
 Hershey Text 3.0, 2019-05-29
 
--- This version for Inkscape 1.0 --
-
 Copyright 2019, Windell H. Oskay, www.evilmadscientist.com
 
 Major revisions in Hershey Text 3.0:
@@ -58,6 +56,8 @@ import math
 import inkex
 
 from inkex import Transform, Style, units
+
+from inkex.elements import Group, TextElement, PathElement
 
 from lxml import etree
 
@@ -629,7 +629,6 @@ Evil Mad Scientist Laboratories
             p = etree.XMLParser(huge_tree=True)
             font_svg = etree.parse(f, parser=p)
             f.close()
-    #             return self.parse_svg_font( font_svg.getroot() )
             self.font_dict[fontname] = self.parse_svg_font( font_svg.getroot() )
             
         except IOError as e:
@@ -646,8 +645,7 @@ Evil Mad Scientist Laboratories
         self.options.preserve_text = False
         
         # Embed text in group to make manipulation easier:
-        g = etree.SubElement(self.svg.get_current_layer(), 'g')  # type: lxml.etree.ElementTree
-
+        g = self.svg.get_current_layer().add(Group())
         for fontname in self.font_file_list:
             self.load_font(fontname)
 
@@ -664,17 +662,17 @@ Evil Mad Scientist Laboratories
         
         for fontname in sorted(self.font_dict):
             text_attribs = {'x':'0','y': str(y),'hershey-ignore':'true'}
-            textline = etree.SubElement(g,inkex.addNS('text','svg'),text_attribs )
+            textline = g.add(TextElement(**text_attribs))
             textline.text = fontname
-
             textline.set( 'style',labeltext_style)    
     
             text_attribs = {'x':str(x_offset) ,'y': str(y) }
 
-            sampletext_style = { 'stroke' : 'none', 'font-size':font_size_text, 'fill' : 'black', \
-                'font-family' : fontname, 'text-anchor': 'start'}
-
-            sampleline = etree.SubElement(g,inkex.addNS('text','svg'),text_attribs )
+            sampletext_style = { 'stroke' : 'none', \
+                'font-size':font_size_text, \
+                'fill' : 'black', 'font-family' : fontname,\
+                'text-anchor': 'start'}
+            sampleline = g.add(TextElement(**text_attribs))
 
             try: # python 2
                 sampleline.text = self.options.sample_text.decode('utf-8')
@@ -701,7 +699,7 @@ Evil Mad Scientist Laboratories
             return
         
         # Embed in group to make manipulation easier:
-        g = etree.SubElement(self.svg.get_current_layer(), 'g')  
+        g = self.svg.get_current_layer().add(Group())
 
         missing_glyph = self.font_dict[fontname]['missing_glyph']
 
@@ -716,8 +714,8 @@ Evil Mad Scientist Laboratories
         font_size_text = str( font_size / self.vb_scale_factor) + 'px' 
 
         glyph_style = str(Style({ 'stroke' : 'none', \
-        'font-size':font_size_text, 'fill' : 'black', \
-                'font-family' : fontname, 'text-anchor': 'start'}))
+            'font-size':font_size_text, 'fill' : 'black', \
+            'font-family' : fontname, 'text-anchor': 'start'}))
 
         x_offset = 1.5 * font_size / self.vb_scale_factor
         y_offset = x_offset
@@ -731,7 +729,7 @@ Evil Mad Scientist Laboratories
             x = x_offset * ( x_pos + 1) 
             y = y_offset * ( y_pos + 1) 
             text_attribs = {'x':str(x),'y': str(y)}
-            sampleline = etree.SubElement(g,inkex.addNS('text','svg'),text_attribs )
+            sampleline = g.add(TextElement(**text_attribs))
             sampleline.text = glyph
             sampleline.set( 'style',glyph_style)    
 
@@ -1369,7 +1367,9 @@ Evil Mad Scientist Laboratories
                 # easier to manipulate in Inkscape once generated:
                 g_attribs = {inkex.addNS('label','inkscape'):'Hershey Text' }
                 parent = node.getparent()    
-                g = etree.SubElement(parent, 'g', g_attribs)
+
+                g = parent.add(Group(**g_attribs))
+
                 style = { 'stroke' : '#000000', 'fill' : 'none', \
                     'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
                     
@@ -1550,9 +1550,9 @@ Evil Mad Scientist Laboratories
                                     render_line = True
     
                                 if render_line:                                
-                                    # Create group for rendering a strip of text:
-                                    lineGroup = etree.SubElement(g, 'g')
-                                    
+                                    # Create group for rendering a strip of text:  
+                                    lineGroup = g.add(Group())
+
                                     wTemp = 0
                                     w = 0
                                     
@@ -1683,7 +1683,8 @@ Evil Mad Scientist Laboratories
                     letter_vals = [q for q in self.text_string] 
                     strLen = len(letter_vals)
 
-                    lineGroup = etree.SubElement(g, 'g') # Use a group for each line. This starts the first.
+                    lineGroup = g.add(Group()) # Use a group for each line. This starts the first.
+
                     i = 0
                     while (i < strLen):    # Loop through the entire text of the string.
     
@@ -1742,7 +1743,8 @@ Evil Mad Scientist Laboratories
                                 t = 'translate('+format(xShift,'.7f')+','+format(yShift,'.7f')+')'
                                 lineGroup.set( 'transform',t)
 
-                                lineGroup = etree.SubElement(g, 'g')  #Create new group for this line
+                                lineGroup = g.add(Group()) # Create new group for this line
+
                                 self.newLine = True # Used for managing indent defects
                                 w = 0    
                                 i += 1

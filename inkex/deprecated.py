@@ -52,11 +52,11 @@ try:
 except ValueError:
     DEPRECATION_LEVEL = 1
 
-def _deprecated(msg, stack=2):
+def _deprecated(msg, stack=2, level=DEPRECATION_LEVEL):
     """Internal method for raising a deprecation warning"""
-    if DEPRECATION_LEVEL > 1:
+    if level > 1:
         msg += ' ; '.join(traceback.format_stack())
-    if DEPRECATION_LEVEL:
+    if level:
         warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 
 class DeprecatedEffect(object):

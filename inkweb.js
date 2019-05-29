@@ -189,4 +189,16 @@ InkWeb.moveElTo = function (startConf) {
   }
 }
 
+InkWeb.moveViewbox = function (conf) {
+  if ( typeof(conf.from) == "string" )
+    conf.from = document.getElementById( conf.from );
+  if ( ! conf.to )
+    conf.to = conf.to ;
+  if ( typeof(toEl) == "string" )
+      toEl = document.getElementById( toEl );
+  toEl = document.getElementById( conf.to );
+  document.getElementsByTagName("svg")[0].viewBox.baseVal.x = toEl.getAttribute("x");
+  document.getElementsByTagName("svg")[0].viewBox.baseVal.y = toEl.getAttribute("y");
+}
+
 InkWeb.log = function () { /* if you need that, use the inkweb-debug.js too */ }

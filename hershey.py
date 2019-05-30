@@ -930,11 +930,8 @@ Evil Mad Scientist Laboratories
             oy = 0.0
         
         # Initial transform of document is based on viewbox, if present:
-        transform_string = 'scale=({0:.6E},{1:.6E}), translate=({2:.6E},{3:.6E})'.format(
-            sx, sy, ox, oy)
-            
-        self.docTransform = Transform(transform_string).matrix
-        
+        self.docTransform = Transform(scale=(sx, sy), translate=(ox, oy))
+
         self.vb_scale_factor = (sx + sy) / 2.0
         # In case of non-square aspect ratio, use average value. 
 

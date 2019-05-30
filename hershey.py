@@ -1216,7 +1216,7 @@ Evil Mad Scientist Laboratories
             if isinstance(node, Group):
             
                 recurseGroup = True
-                ink_label = node.get( inkex.addNS( 'label', 'inkscape' ) )
+                ink_label = node.get('inkscape:label')
 
                 if not ink_label:
                     pass
@@ -1240,7 +1240,8 @@ Evil Mad Scientist Laboratories
                 #     for processing the referenced element.  The referenced element is
                 #     hidden only if its visibility is "inherit" or "hidden".
 
-                refid = node.get( inkex.addNS( 'href', 'xlink' ) )
+                refid = node.get('href:xlink')
+
                 if not refid:
                     pass
 

@@ -1396,10 +1396,10 @@ Evil Mad Scientist Laboratories
 
 
                     if isinstance(flowref, Rectangle):
-                        startX = flowref.get('x', '0')
-                        startY = flowref.get('y', '0')
-                        rect_height = flowref.get('height')
-                        rect_width = float(flowref.get('width'))
+                        startX = flowref.left
+                        startY = flowref.top
+                        rect_height = flowref.height
+                        rect_width = flowref.width
                         bounding_rect = True
 
                     elif isinstance(flowref, Use):

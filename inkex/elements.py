@@ -91,8 +91,11 @@ class BaseElement(etree.ElementBase):
     def __setattr__(self, name, value):
         """Set the attribute, update it if needed"""
         if name in self.wrapped_attrs:
+            cls = self.wrapped_attrs[name]
             # Don't call self.set or self.get (infinate loop)
             if value:
+                if not isinstance(value, cls):
+                    value = cls(value)
                 self.attrib[name] = str(value)
             else:
                 self.attrib.pop(name, None) # pylint: disable=no-member

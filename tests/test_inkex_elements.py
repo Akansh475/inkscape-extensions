@@ -128,6 +128,8 @@ class CoreElementTestCase(ElementTestCase):
         elem = self.svg.getElementById('D')
         elem.style['fill'] = 'purpleberry'
         self.assertEqual(elem.get('style'), 'fill:purpleberry')
+        elem.style = {'marker': 'flag'}
+        self.assertEqual(elem.get('style'), 'marker:flag')
         elem.style = Style(stroke='gammon')
         self.assertEqual(elem.get('style'), 'stroke:gammon')
         elem.style.update('grape:2;strawberry:nice;')

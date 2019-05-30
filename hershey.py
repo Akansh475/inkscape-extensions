@@ -57,7 +57,8 @@ import inkex
 
 from inkex import Transform, Style, units
 
-from inkex.elements import Group, TextElement, PathElement
+from inkex.elements import Group, TextElement, FlowPara, \
+    FlowSpan, Tspan, FlowRoot, Rectangle, Use
 
 from lxml import etree
 
@@ -653,8 +654,8 @@ Evil Mad Scientist Laboratories
         font_size_text = str( font_size / self.vb_scale_factor) + 'px' 
 
         labeltext_style = str(Style({ 'stroke' : 'none', \
-         'font-size':font_size_text, 'fill' : 'black', \
-                'font-family' : 'sans-serif', 'text-anchor': 'end'}))
+            'font-size':font_size_text, 'fill' : 'black', \
+            'font-family' : 'sans-serif', 'text-anchor': 'end'}))
 
         x_offset = font_size / self.vb_scale_factor
         y_offset = 1.5 * x_offset
@@ -931,8 +932,9 @@ Evil Mad Scientist Laboratories
             oy = 0.0
         
         # Initial transform of document is based on viewbox, if present:
-        transform_string = 'scale({0:.6E},{1:.6E}) translate({2:.6E},{3:.6E})'.format(
+        transform_string = 'scale=({0:.6E},{1:.6E}), translate=({2:.6E},{3:.6E})'.format(
             sx, sy, ox, oy)
+            
         self.docTransform = Transform(transform_string).matrix
         
         self.vb_scale_factor = (sx + sy) / 2.0
@@ -1072,10 +1074,8 @@ Evil Mad Scientist Laboratories
                     self.text_heights.append(font_height_local)
                     self.text_spacings.append(line_spacing_local)
                     self.text_aligns.append(text_align_local)
-                            
-            if ((node.tag == inkex.addNS("flowPara", "svg")) or (node.tag == inkex.addNS("flowSpan", "svg"))
-                or (node.tag == 'flowPara') or (node.tag == 'flowSpan')):
-                
+
+            if isinstance(node, (FlowPara, FlowSpan)):
                 the_style = dict()
                 the_style['font_height'] = font_height_local
                 the_style['font_family'] = font_family_local
@@ -1096,8 +1096,8 @@ Evil Mad Scientist Laboratories
                     self.text_heights.append(font_height_local)
                     self.text_spacings.append(line_spacing_local)
                     self.text_aligns.append(text_align_local)
-            
-            if node.tag == inkex.addNS("flowPara", "svg"):
+
+            if isinstance(node, FlowPara):
                 self.text_string += "\n"    # Conclude every flowpara with a return
                 self.text_families.append(font_family_local)
                 self.text_heights.append(font_height_local)
@@ -1180,10 +1180,9 @@ Evil Mad Scientist Laboratories
 
         for subNode in node:
             # If text is located within a subnode of this node, process that subnode, with this very routine.
-            
-            if ((subNode.tag == inkex.addNS( 'tspan', 'svg' )) or (subNode.tag == 'tspan')):
+
+            if isinstance(subNode, Tspan):
                 # Note: There may be additional types of text tags that we should recursively search as well.
-                
                 node_info = dict()
                 node_info['font_height'] = font_height_local
                 node_info['font_family'] = font_family_local
@@ -1214,8 +1213,8 @@ Evil Mad Scientist Laboratories
             _matrix = node.transform
             matNew = Transform( matCurrent) * Transform( _matrix )
 
-            if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
-
+            if isinstance(node, Group):
+            
                 recurseGroup = True
                 ink_label = node.get( inkex.addNS( 'label', 'inkscape' ) )
 
@@ -1227,8 +1226,7 @@ Evil Mad Scientist Laboratories
                 if recurseGroup:
                     self.recursively_traverse_svg( node, matNew, v )
 
-            elif node.tag == inkex.addNS( 'use', 'svg' ) or node.tag == 'use':
-
+            elif isinstance(node, Use):
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
                 # attribute.  We will handle the element by doing an XPath search through
                 # the document, looking for the element with the matching id="blah"
@@ -1264,7 +1262,8 @@ Evil Mad Scientist Laboratories
                     v = node.get( 'visibility', v )
                     self.recursively_traverse_svg( refnode, matNew2, v )
 
-            elif (node.tag == inkex.addNS('text','svg')) or (node.tag == 'text') or (node.tag == inkex.addNS("flowRoot", "svg")):
+
+            elif isinstance(node, (TextElement,FlowRoot)):
 
                 # Variables are initially zeroed for each text object.
                 self.baseline_offset = 0.0    # Baseline Shift
@@ -1387,7 +1386,7 @@ Evil Mad Scientist Laboratories
                 CASE A: Handle flowed text nodes
                 '''
                 
-                if node.tag == inkex.addNS("flowRoot", "svg"):
+                if isinstance(node, FlowRoot):
 
                     try:
                         text_align = node_style['text-align']        # Use text-align, not text-anchor, in flowroot
@@ -1396,15 +1395,16 @@ Evil Mad Scientist Laboratories
 
                     #selects the flowRegion's child (svg:rect) to get @X and @Y
                     flowref = self.svg.getElement('/svg:svg//*[@id="%s"]/svg:flowRegion[1]' % id)[0]
-                    
-                    if flowref.tag == inkex.addNS("rect", "svg"):
+
+
+                    if isinstance(flowref, Rectangle):
                         startX = flowref.get('x', '0')
                         startY = flowref.get('y', '0')
                         rect_height = flowref.get('height')
                         rect_width = float(flowref.get('width'))
                         bounding_rect = True
 
-                    elif flowref.tag == inkex.addNS( 'use', 'svg' ) or flowref.tag == 'use':
+                    elif isinstance(flowref, Use):
                         pass
                         
                         # A <use> element refers to another SVG element via an xlink:href="#blah"

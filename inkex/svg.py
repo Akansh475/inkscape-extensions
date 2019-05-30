@@ -37,7 +37,7 @@ from .units import discover_unit, convert_unit, render_unit
 from .utils import removeNS
 from .transforms import BoundingBox
 from .elements import ( # pylint: disable=unused-import
-    BaseElement, OtherElements, Group, PathElement, Points, Rectangle, Image,
+    BaseElement, OtherElements, Group, PathElement, Rectangle, Image,
     Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Tspan, Marker
 )
 

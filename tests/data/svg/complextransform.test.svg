@@ -55,6 +55,9 @@
              style="fill:#0000ff;stroke-width:1px;" id="E"/>
           <circle cx="100" cy="100" r="50" style="stroke:#f00;" id="F"/>
           <use xlink:href="#path1" id="G"/>
+          <line x1="0" y1="80" x2="100" y2="20" id="H" />
+          <polyline points="0,100 50,25 50,75 100,0" id="I" />
+          <polygon points="0,100 50,25 50,75 100,0" id="J" />
         </g>
       </g>
     </g>

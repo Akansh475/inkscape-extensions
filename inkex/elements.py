@@ -342,10 +342,16 @@ class Pattern(BaseElement):
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
-class Points(ShapeElement):
-    """Provide a useful extension for points elements"""
-    tag_name = 'points'
-    get_path = lambda self: 'M' + self.get('points')
+class Polygon(ShapeElement):
+    """A closed polyline"""
+    tag_name = 'polygon'
+    get_path = lambda self: 'M' + self.get('points') + ' Z'
+
+
+class Line(ShapeElement):
+    """A line connecting two points"""
+    tag_name = 'line'
+    get_path = lambda self: 'M{0[x1]},{0[y1]} L{0[x2]},{0[y2]}'.format(self.attrib)
 
 
 class Rectangle(ShapeElement):

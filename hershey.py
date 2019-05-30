@@ -1038,13 +1038,13 @@ Evil Mad Scientist Laboratories
         for node in NodeList:
             try:
                 node_style = node.style
-            except:
+            except ValueError:
                 pass 
         
             try:
                 font_height = node_style['font-size']
                 font_height_local = self.unitsToUserUnits(font_height)
-            except:
+            except KeyError:
                 pass 
                 
             try:
@@ -1058,12 +1058,12 @@ Evil Mad Scientist Laboratories
                     line_spacing_local = float(line_spacing.rstrip("%")) / 100.0
                 else:
                     line_spacing_local = float(line_spacing) # (e.g., line-height:1.25)
-            except:
+            except KeyError:
                 pass 
 
             try:
                 text_align_local = node_style['text-align'] # Use text-anchor in text nodes
-            except:
+            except KeyError:
                 pass 
         
             if node.text is not None:
@@ -1119,26 +1119,26 @@ Evil Mad Scientist Laboratories
             pass 
 
         try:
-            font_height = node_style["font-size"]
+            font_height = node_style['font-size']
             font_height_local = self.unitsToUserUnits(font_height)
-        except:
+        except KeyError:
             pass 
 
         try:
             font_family_local = self.strip_quotes(node_style['font-family'])
-        except:
+        except KeyError:
             pass 
 
         try:
             anchor_local = node_style['text-anchor'] # Use text-anchor in text nodes
-        except:
+        except KeyError:
             pass 
 
         try:
             xTemp = node.get('x')
             if xTemp is not None:
                 x_local = xTemp
-        except:
+        except ValueError:
             pass 
 
         try:
@@ -1149,7 +1149,7 @@ Evil Mad Scientist Laboratories
                 # Special case, to handle multi-line text given by tspan
                 # elements that do not have y values
                 y_local = float(y_local) + self.line_number * parent_line_spacing * font_height_local
-        except:
+        except ValueError:
             pass 
 
         if node.text is not None:
@@ -1293,25 +1293,24 @@ Evil Mad Scientist Laboratories
                     hershey_ignore = node.get('hershey-ignore')
                     if hershey_ignore is not None:
                         continue # If the attribute is present, skip this node.
-                except:
+                except ValueError:
                     pass 
 
                 try:
                     node_style = node.style
-
-                except:
+                except ValueError:
                     pass 
 
                 font_height = 0
                 try:
                     font_height_temp = node_style['font-size']
                     font_height = self.unitsToUserUnits(font_height_temp)
-                except:
+                except KeyError:
                     pass 
 
                 try:
                     font_family = self.strip_quotes(node_style['font-family'])
-                except:
+                except KeyError:
                     pass 
 
                 try:
@@ -1320,12 +1319,12 @@ Evil Mad Scientist Laboratories
                         line_spacing = float(line_spacing_temp.rstrip("%")) / 100.0
                     else:
                         line_spacing = float(line_spacing_temp) # (e.g., line-height:1.25)
-                except:
+                except KeyError:
                     pass 
 
                 try:
-                    transform = node.get('transform')
-                except:
+                    transform = node.transform
+                except ValueError:
                     pass 
 
                 if (transform is not None):
@@ -1391,7 +1390,7 @@ Evil Mad Scientist Laboratories
 
                     try:
                         text_align = node_style['text-align']        # Use text-align, not text-anchor, in flowroot
-                    except:
+                    except KeyError:
                         pass 
 
                     #selects the flowRegion's child (svg:rect) to get @X and @Y
@@ -1629,7 +1628,7 @@ Evil Mad Scientist Laboratories
                     try:
                         # Use text-anchor, not text-align, in text (not flowroot) elements
                         text_align = node_style["text-anchor"]     
-                    except:
+                    except KeyError:
                         pass 
 
                     '''
@@ -1848,5 +1847,4 @@ Evil Mad Scientist Laboratories
                 )
 
 if __name__ == '__main__':
-    e = Hershey()
-    e.run()
+    Hershey.run()

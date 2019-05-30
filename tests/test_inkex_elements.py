@@ -9,8 +9,8 @@ from lxml import etree
 import inkex
 
 from inkex.elements import (
-    BaseElement, ShapeElement, OtherElements,
-    Group, Pattern, Guide, Polyline,
+    ShapeElement,
+    Group, Pattern, Guide, Polyline, Defs,
     TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
 )
 from inkex.transforms import Transform, ScaleTransform
@@ -323,3 +323,14 @@ class UseTest(ElementTestCase):
     def test_path(self):
         """Use path follows ref"""
         self.assertEqual(str(self.elem.path), 'M 0 0 L 10 10 Z')
+
+class DefsTest(ElementTestCase):
+    """Test the definitions tag"""
+    tag = 'defs'
+
+    def test_defs(self):
+        """Make sure defs can be seen in the nodes of an svg"""
+        svg = svg_file(self.data_file('ref_test.svg'))
+        self.assertTrue(isinstance(svg.defs, Defs))
+        defs = svg.getElementById('defs33')
+        self.assertTrue(isinstance(defs, Defs))

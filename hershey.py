@@ -65,7 +65,7 @@ from lxml import etree
 
 class Hershey( inkex.Effect ):
     def __init__( self ):
-        inkex.Effect.__init__( self )
+        super(Hershey, self).__init__()
 
         self.arg_parser.add_argument( "--tab", \
             dest="mode", \
@@ -1847,4 +1847,4 @@ Evil Mad Scientist Laboratories
                 )
 
 if __name__ == '__main__':
-    Hershey.run()
+    Hershey().run()

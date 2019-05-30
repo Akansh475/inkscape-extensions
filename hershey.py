@@ -665,8 +665,7 @@ Evil Mad Scientist Laboratories
             text_attribs = {'x':'0','y': str(y),'hershey-ignore':'true'}
             textline = g.add(TextElement(**text_attribs))
             textline.text = fontname
-            textline.set( 'style',labeltext_style)    
-    
+            textline.style = labeltext_style
             text_attribs = {'x':str(x_offset) ,'y': str(y) }
 
             sampletext_style = { 'stroke' : 'none', \
@@ -680,8 +679,7 @@ Evil Mad Scientist Laboratories
             except AttributeError: # python 3
                 sampleline.text = self.options.sample_text
 
-            sampleline.set( 'style', str(Style(sampletext_style)))
-
+            sampleline.style = sampletext_style
             y += y_offset
         self.recursively_traverse_svg( g, self.docTransform )
 
@@ -732,7 +730,7 @@ Evil Mad Scientist Laboratories
             text_attribs = {'x':str(x),'y': str(y)}
             sampleline = g.add(TextElement(**text_attribs))
             sampleline.text = glyph
-            sampleline.set( 'style',glyph_style)    
+            sampleline.style = glyph_style
 
         self.recursively_traverse_svg( g, self.docTransform )
 
@@ -996,10 +994,11 @@ Evil Mad Scientist Laboratories
         trans += 'translate('+format(xOffset,'.6f')+','+format(yOffset,'.6f')+')'
         trans += scale_text
 
-        text_attribs = {'d':path_string, 'transform':trans, 'style': str(Style(p_style))}
+        text_attribs = {'d':path_string, 'transform':trans}
         
         if path_string is not None:
-            etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
+            path_element = etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
+            path_element.style = p_style
             self.OutputGenerated = True    
 
         return offset + float(adv_x) * scale  # new horizontal offset value        
@@ -1373,8 +1372,7 @@ Evil Mad Scientist Laboratories
                     'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
                     
                 # Apply rounding to ends to improve final engraved text appearance.
-                g.set( 'style',str(Style(style)))    
-
+                g.style = style
                 # Some common variables used in both cases A and B:
                 strPos = 0      # Position through the full string that we are rendering
                 i = 0           # Dummy (index) variable for looping over letters in string

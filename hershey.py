@@ -61,6 +61,7 @@ from inkex.elements import Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use
 
 from lxml import etree
+from copy import deepcopy
 
 
 class Hershey( inkex.Effect ):
@@ -1236,28 +1237,58 @@ Evil Mad Scientist Laboratories
                 #     for processing the referenced element.  The referenced element is
                 #     hidden only if its visibility is "inherit" or "hidden".
 
-                refid = node.get('href:xlink')
-
+                refid = node.get( inkex.addNS( 'href', 'xlink' ) )
                 if not refid:
-                    pass
+                    continue # missing reference
 
                 # [1:] to ignore leading '#' in reference
                 path = '//*[@id="%s"]' % refid[1:]
                 refnode = node.xpath( path )
+
+                if node.ref() is None:
+                    continue # missing reference
+
                 if refnode:
+                    local_transform = Transform( _matrix )
                     x = float( node.get( 'x', '0' ) )
                     y = float( node.get( 'y', '0' ) )
                     # Note: the transform has already been applied
                     if ( x != 0 ) or (y != 0 ):
                         _trans_string = 'translate({0:.6E},{1:.6E})'.format(x, y)
-                        _matrix = Transform(_trans_string).matrix
-
-                        matNew2 =  Transform( mat_new) * Transform( _matrix )
-                        
+                        ref_transform = Transform( _matrix ) * Transform(_trans_string)
                     else:
-                       matNew2 = matNew
-                    v = node.get( 'visibility', v )
-                    self.recursively_traverse_svg( refnode, matNew2, v )
+                       ref_transform = local_transform
+    
+                    try:
+                        ref_group = aNodeList.add(Group())# Add a subgroup
+                    except TypeError:
+                        inkex.errormsg('Unable to process selected nodes. Consider unlinking cloned text.') 
+                        continue
+
+                    try:
+                        id = ref_group.get( 'id' )
+                    except AttributeError:
+                        id = self.uniqueId(None,True)
+                        ref_group.set( 'id', id)
+                    
+                    ref_group.set( 'transform',ref_transform)
+
+                    id_list = []
+
+                    for subnode in refnode:
+                        try:
+                            id = subnode.get( 'id' )
+                        except AttributeError:
+                            id = self.uniqueId(None,True)
+                            subnode.set( 'id', id)
+    
+                        if id not in id_list:
+                            ref_group.append( deepcopy(subnode) ) 
+                            id_list.append(id)
+
+                    #Preserve original element?
+                    if not self.options.preserve_text:
+                        self.nodes_to_delete.append(node)
 
 
             elif isinstance(node, (TextElement,FlowRoot)):

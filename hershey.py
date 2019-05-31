@@ -1774,11 +1774,11 @@ Evil Mad Scientist Laboratories
                 
                 if not self.OutputGenerated:
                     parent.remove(g)    #remove empty group
-    
+
                 #Preserve original element?
                 if not self.options.preserve_text and self.OutputGenerated:
-                    parent = node.getparent()
-                    parent.remove(node)
+                    self.nodes_to_delete.append(node)
+
 
     def effect( self ):
 
@@ -1802,7 +1802,9 @@ Evil Mad Scientist Laboratories
         
         self.warnUnflow = False
         self.warnTextPath = False    # For future use: Give warning about text attached to path.
-        
+
+        self.nodes_to_delete = [] # List of font elements to remove
+
         self.handle_viewBox()
         
         # Calculate "ideal" effective width of rendered strokes:
@@ -1830,6 +1832,12 @@ Evil Mad Scientist Laboratories
                     self.recursively_traverse_svg( [self.svg.selected[id]], transform)
             else: # Traverse entire document
                 self.recursively_traverse_svg( self.document.getroot(), self.docTransform )
+
+        for element_to_remove in self.nodes_to_delete: 
+            if element_to_remove is not None:
+                parent = element_to_remove.getparent()
+                if parent is not None:
+                    parent.remove(element_to_remove)
 
         if self.font_load_fail:
             inkex.errormsg(  'Warning: unable to load SVG stroke fonts.')

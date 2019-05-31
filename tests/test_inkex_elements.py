@@ -10,7 +10,7 @@ import inkex
 
 from inkex.elements import (
     ShapeElement,
-    Group, Pattern, Guide, Polyline, Defs,
+    Group, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
 )
 from inkex.transforms import Transform, ScaleTransform
@@ -323,6 +323,18 @@ class UseTest(ElementTestCase):
     def test_path(self):
         """Use path follows ref"""
         self.assertEqual(str(self.elem.path), 'M 0 0 L 10 10 Z')
+
+    def test_empty_ref(self):
+        """An empty ref or None ref doesn't cause an error"""
+        self.assertRaises(KeyError, Use().ref)
+        elem = self.svg.add(Use())
+        self.assertEqual(elem.ref(), None)
+        elem.set('xlink:href', '')
+        self.assertEqual(elem.ref(), None)
+        elem.set('xlink:href', '#badref')
+        self.assertEqual(elem.ref(), None)
+        elem.set('xlink:href', self.elem.get('xlink:href'))
+        self.assertEqual(elem.ref().get('id'), 'path1')
 
 class DefsTest(ElementTestCase):
     """Test the definitions tag"""

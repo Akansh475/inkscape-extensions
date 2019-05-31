@@ -404,7 +404,13 @@ class Use(ShapeElement):
 
     def ref(self):
         """Returns the referred-to element if available"""
-        return self.root.getElementById(self.get('xlink:href').strip('#'))
+        from inkex.svg import SvgDocumentElement
+        if not isinstance(self.root, SvgDocumentElement):
+            raise KeyError("XML Fragment can not use xlinks")
+        ref = self.get('xlink:href')
+        if not ref:
+            return None
+        return self.root.getElementById(ref.strip('#'))
 
 class ClipPath(Group):
     """A path used to clip objects"""

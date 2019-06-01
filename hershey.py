@@ -943,7 +943,7 @@ Evil Mad Scientist Laboratories
         offset = chardata['offset']
         vertoffset = chardata['vertoffset']
         font_height = chardata['font_height']
-        scale = 1.0
+        font_scale = 1.0
         
         # Stroke scale factor, including external transformations:
         stroke_scale = chardata['stroke_scale'] * self.vb_scale_factor
@@ -958,18 +958,18 @@ Evil Mad Scientist Laboratories
         if self.font_load_fail:
             return 0
 
-        scale *= scale_factor * font_height
+        font_scale *= scale_factor * font_height
 
         hOffset = 0
         vOffset = 0
         trans=""
         
         # SVG fonts use inverted Y axis; mirror vertically
-        scale_text = 'scale('+format(scale,'.6f')+', -'+format(scale,'.6f')+')'
+        scale_text = 'scale('+format(font_scale,'.6f')+', -'+format(font_scale,'.6f')+')'
 
         # Combine scales of external transformations with the scaling
         # applied by this function:
-        _scale = scale * stroke_scale
+        _scale = font_scale * stroke_scale
         if _scale == 0:
             _scale = 1 # Todo: reconsider what this default should be.
         stroke_width = self.render_width / _scale
@@ -999,7 +999,7 @@ Evil Mad Scientist Laboratories
             path_element.style = p_style
             self.OutputGenerated = True    
 
-        return offset + float(adv_x) * scale  # new horizontal offset value        
+        return offset + float(adv_x) * font_scale  # new horizontal offset value        
 
 
     def recursivelyGetEnclosingTransform( self, node ):

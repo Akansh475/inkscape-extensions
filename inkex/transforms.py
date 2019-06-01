@@ -44,11 +44,11 @@ class Transform(object):
 
       tr = Transform("scale(45, 32)")
 
-    Use with triplet matrix input (internal repr):
+    Use with triad matrix input (internal representation):
 
       tr = Transform(((1.0, 0.0, 0.0), (0.0, 1.0, 0.0)))
 
-    Use with sixtlet matrix input (i.e. svg matrix(...)):
+    Use with hexad matrix input (i.e. svg matrix(...)):
 
       tr = Transform((1.0, 0.0, 0.0, 1.0, 0.0, 0.0))
 
@@ -104,7 +104,7 @@ class Transform(object):
     __nonzero__ = __bool__
 
     def add_matrix(self, *args):
-        """Add matrix in order they appear in the svg sixtlet"""
+        """Add matrix in order they appear in the svg hexad"""
         self.__imul__(Transform(args))
 
     def add_translate(self, tr_x, tr_y=0.0):
@@ -131,11 +131,11 @@ class Transform(object):
         self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
 
     def to_sixlet(self):
-        """Returns the transform as a sixtlet matrix (used in svg)"""
+        """Returns the transform as a triad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
     def __str__(self):
-        """Format the given matrix into a string repr for svg"""
+        """Format the given matrix into a string representation for svg"""
         sixlet = tuple(self.to_sixlet())
         if sixlet[:4] == (1, 0, 0, 1):
             if sixlet[4:] == (0, 0):
@@ -146,7 +146,7 @@ class Transform(object):
         return "matrix({})".format(" ".join(format(var, '.6g') for var in sixlet))
 
     def __repr__(self):
-        """String Representation of this object"""
+        """String representation of this object"""
         return "{}((({}), ({})))".format(
             type(self).__name__,
             ', '.join(format(var, '.6g') for var in self.matrix[0]),
@@ -170,7 +170,7 @@ class Transform(object):
             self.b * other.e + self.d * other.f + self.f))
 
     def __imul__(self, matrix):
-        """In place multiplication of transformat matricies"""
+        """In place multiplication of transform matrices"""
         self.matrix = (self * matrix).matrix
         if self.callback is not None:
             self.callback(self)
@@ -209,14 +209,14 @@ class ScaleTransform(Transform):
         self.add_scale(scale_x, scale_y)
 
 class RotateTransform(Transform):
-    """A quick and easy to use Rotate definiiton"""
+    """A quick and easy to use Rotate definition"""
     def __init__(self, deg, center_x=0.0, center_y=0.0):
         super(RotateTransform, self).__init__()
         self.add_rotate(deg, center_x, center_y)
 
 
 class Scale(object):  # pylint: disable=too-few-public-methods
-    """A pair of numbers that reprisent the minimum and maximum values."""
+    """A pair of numbers that represent the minimum and maximum values."""
 
     def __init__(self, value=None, *others):
         if isinstance(value, Scale):
@@ -291,7 +291,7 @@ class Scale(object):  # pylint: disable=too-few-public-methods
 
     @property
     def size(self):
-        """Return the size difference minimum and manximum"""
+        """Return the size difference minimum and maximum"""
         if self.minimum is None or self.maximum is None:
             return None
         return self.maximum - self.minimum
@@ -429,7 +429,7 @@ class Segment(BoundingBox):
         return fabs((self.width * (self.top - y)) - ((self.left - x) * self.height)) / self.length
 
     def dot(self, other):
-        """Get the dot of the segment (what is dot, we don't know)"""
+        """Get the dot product with the segment with another"""
         return self.width * other.width + self.height * other.height
 
     def point_at_ratio(self, ratio):
@@ -452,7 +452,7 @@ class Segment(BoundingBox):
         return Segment(((x + self.width, y + self.height), (x, y)))
 
     def intersect(self, other):
-        """Get the intersection betwene two segments"""
+        """Get the intersection between two segments"""
         other = Segment(other)
         denom = (other.height * self.width) - (other.width * self.height)
         num = (other.width * (self.top - other.top)) - (other.height * (self.left - other.left))
@@ -470,7 +470,7 @@ class Segment(BoundingBox):
 
 
 def cubic_extrema(py0, py1, py2, py3):
-    """Returns the extreme value, given a set of bezier coords"""
+    """Returns the extreme value, given a set of bezier coordinates"""
     cmin, cmax = min(py0, py3), max(py0, py3)
     pd1 = py1 - py0
     pd2 = py2 - py1

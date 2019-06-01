@@ -131,7 +131,7 @@ class Transform(object):
         self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
 
     def to_sixlet(self):
-        """Returns the transform as a triad matrix (used in svg)"""
+        """Returns the transform as a hexad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
     def __str__(self):

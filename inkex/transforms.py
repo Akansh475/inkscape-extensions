@@ -242,7 +242,7 @@ class Scale(object):  # pylint: disable=too-few-public-methods
     __nonzero__ = __bool__
 
     def __add__(self, other):
-        return Scale(other) + self
+        return self.__iadd__(other)
 
     def __iadd__(self, other):
         other = Scale(other)

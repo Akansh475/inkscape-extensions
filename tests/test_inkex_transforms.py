@@ -3,7 +3,7 @@
 Test Inkex transformational logic.
 """
 from inkex.transforms import (
-    BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform
+    BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform, Segment
 )
 from inkex.tester import TestCase
 
@@ -107,6 +107,7 @@ class ScaleTest(TestCase):
         self.assertEqual(Scale(10, 2, 100, 1, 4), (1, 100))
         self.assertEqual(Scale([2, 50]), (2, 50))
         self.assertEqual(Scale([5, 50], [4, 5]), (4, 50))
+        self.assertEqual(repr(Scale([5, 10])), 'scale:(5, 10)')
 
     def test_center(self):
         """Center of a scale"""
@@ -121,6 +122,15 @@ class ScaleTest(TestCase):
         self.assertEqual(Scale(-10, 10).size, 20)
         self.assertEqual(Scale(-30, -10).size, 20)
 
+    def test_combine(self):
+        """Combine scales together"""
+        self.assertEqual(Scale(9, 10) + Scale(4, 5), (4, 10))
+        self.assertEqual(sum([Scale(4), Scale(3), Scale(10)]), (3, 10))
+        self.assertEqual(Scale(2, 2) * 2, (4, 4))
+
+    def test_errors(self):
+        """Expected errors"""
+        self.assertRaises(ValueError, Scale, 'foo')
 
 class BoundingBoxTest(TestCase):
     """Test bounding box calculations"""
@@ -132,6 +142,7 @@ class BoundingBoxTest(TestCase):
         self.assertEqual(BoundingBox((1, 2), (3, 4)), (1, 2, 3, 4))
         self.assertEqual(BoundingBox(((1, 2), (3, 4))), (1, 3, 2, 4))
         self.assertEqual(BoundingBox((1, 2, 3, 4)), (1, 2, 3, 4))
+        self.assertEqual(repr(BoundingBox((1, 2, 3, 4))), 'BoundingBox((1, 2, 3, 4))')
 
     def test_bbox_sum(self):
         """Test adding bboxes together"""
@@ -142,3 +153,20 @@ class BoundingBoxTest(TestCase):
             BoundingBox([0, 0, -5, 0]),
             BoundingBox([0, 0, 0, 5])])
         self.assertEqual(ret, (-5, 5, -5, 5))
+        self.assertEqual((-10, 2) + ret, (-10, 5, -5, 5))
+        self.assertEqual(ret + (1, -10), (-5, 5, -10, 5))
+
+    def test_bbox_scale(self):
+        """Bounding Boxes can be scaled"""
+        self.assertEqual(BoundingBox(1, 3) * 2, (2, 2, 6, 6))
+
+class SegmentTest(TestCase):
+    """Test special Segments"""
+    def test_segment_creation(self):
+        """Test segments"""
+        self.assertEqual(Segment((1, 2, 3, 4)), (1, 2, 3, 4))
+        self.assertEqual(repr(Segment((1, 2, 3, 4))), 'Segment(((1, 3), (2, 4)))')
+
+    def test_segment_maths(self):
+        """Segments have calculations"""
+        self.assertEqual(Segment(((0, 0), (10, 0))).angle, 0)

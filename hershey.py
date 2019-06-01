@@ -962,10 +962,9 @@ Evil Mad Scientist Laboratories
 
         hOffset = 0
         vOffset = 0
-        trans=""
         
         # SVG fonts use inverted Y axis; mirror vertically
-        scale_text = 'scale('+format(font_scale,'.6f')+', -'+format(font_scale,'.6f')+')'
+        scale_transform = Transform(scale=(font_scale,-font_scale))
 
         # Combine scales of external transformations with the scaling
         # applied by this function:
@@ -986,17 +985,15 @@ Evil Mad Scientist Laboratories
         
         p_style = {'stroke-width': width_string}
 
-        xOffset = offset + hOffset
-        yOffset = vertoffset + vOffset 
-    
-        trans += 'translate('+format(xOffset,'.6f')+','+format(yOffset,'.6f')+')'
-        trans += scale_text
+        the_transform = Transform(translate=(offset + hOffset,vertoffset + vOffset))
+        the_transform *= scale_transform 
 
-        text_attribs = {'d':path_string, 'transform':trans}
-        
+        text_attribs = {'d':path_string}
+
         if path_string is not None:
             path_element = etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
             path_element.style = p_style
+            path_element.transform = the_transform
             self.OutputGenerated = True    
 
         return offset + float(adv_x) * font_scale  # new horizontal offset value        

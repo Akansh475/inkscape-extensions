@@ -130,20 +130,20 @@ class Transform(object):
         """Add skew y to this transformation"""
         self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
 
-    def to_sixlet(self):
+    def to_hexad(self):
         """Returns the transform as a hexad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
     def __str__(self):
         """Format the given matrix into a string representation for svg"""
-        sixlet = tuple(self.to_sixlet())
-        if sixlet[:4] == (1, 0, 0, 1):
-            if sixlet[4:] == (0, 0):
+        hexad = tuple(self.to_hexad())
+        if hexad[:4] == (1, 0, 0, 1):
+            if hexad[4:] == (0, 0):
                 return ""
-            return "translate({:.6g}, {:.6g})".format(*sixlet[4:])
-        elif sixlet[4:] == (0, 0) and sixlet[1:3] == (0, 0):
-            return "scale({:.6g}, {:.6g})".format(sixlet[0], sixlet[3])
-        return "matrix({})".format(" ".join(format(var, '.6g') for var in sixlet))
+            return "translate({:.6g}, {:.6g})".format(*hexad[4:])
+        elif hexad[4:] == (0, 0) and hexad[1:3] == (0, 0):
+            return "scale({:.6g}, {:.6g})".format(hexad[0], hexad[3])
+        return "matrix({})".format(" ".join(format(var, '.6g') for var in hexad))
 
     def __repr__(self):
         """String representation of this object"""

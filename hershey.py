@@ -1237,58 +1237,42 @@ Evil Mad Scientist Laboratories
                 #     for processing the referenced element.  The referenced element is
                 #     hidden only if its visibility is "inherit" or "hidden".
 
-                refid = node.get( inkex.addNS( 'href', 'xlink' ) )
-                if not refid:
-                    continue # missing reference
-
-                # [1:] to ignore leading '#' in reference
-                path = '//*[@id="%s"]' % refid[1:]
-                refnode = node.xpath( path )
-
                 if node.ref() is None:
                     continue # missing reference
 
-                if refnode:
-                    local_transform = Transform( _matrix )
-                    x = float( node.get( 'x', '0' ) )
-                    y = float( node.get( 'y', '0' ) )
-                    # Note: the transform has already been applied
-                    if ( x != 0 ) or (y != 0 ):
-                        _trans_string = 'translate({0:.6E},{1:.6E})'.format(x, y)
-                        ref_transform = Transform( _matrix ) * Transform(_trans_string)
-                    else:
-                       ref_transform = local_transform
-    
-                    try:
-                        ref_group = aNodeList.add(Group())# Add a subgroup
-                    except TypeError:
-                        inkex.errormsg('Unable to process selected nodes. Consider unlinking cloned text.') 
-                        continue
+                refnode = node.ref()
 
-                    try:
-                        id = ref_group.get( 'id' )
-                    except AttributeError:
-                        id = self.uniqueId(None,True)
-                        ref_group.set( 'id', id)
-                    
-                    ref_group.set( 'transform',ref_transform)
+                inkex.errormsg('OK!') 
 
-                    id_list = []
+                local_transform = Transform( _matrix )
+                x = float( node.get( 'x', '0' ) )
+                y = float( node.get( 'y', '0' ) )
+                # Note: the transform has already been applied
+                if ( x != 0 ) or (y != 0 ):
+                    _trans_string = 'translate({0:.6E},{1:.6E})'.format(x, y)
+                    ref_transform = Transform( _matrix ) * Transform(_trans_string)
+                else:
+                   ref_transform = local_transform
 
-                    for subnode in refnode:
-                        try:
-                            id = subnode.get( 'id' )
-                        except AttributeError:
-                            id = self.uniqueId(None,True)
-                            subnode.set( 'id', id)
-    
-                        if id not in id_list:
-                            ref_group.append( deepcopy(subnode) ) 
-                            id_list.append(id)
+                try:
+                    ref_group = aNodeList.add(Group())# Add a subgroup
+                except AttributeError:
+                    inkex.errormsg('Unable to process selected nodes. Consider unlinking cloned text.') 
+                    continue
 
-                    #Preserve original element?
-                    if not self.options.preserve_text:
-                        self.nodes_to_delete.append(node)
+                try:
+                    id = ref_group.get( 'id' )
+                except AttributeError:
+                    id = self.uniqueId(None,True)
+                    ref_group.set( 'id', id)
+                
+                ref_group.set( 'transform',ref_transform)
+
+                ref_group.append( deepcopy(refnode) ) 
+
+                #Preserve original element?
+                if not self.options.preserve_text:
+                    self.nodes_to_delete.append(node)
 
 
             elif isinstance(node, (TextElement,FlowRoot)):
@@ -1777,6 +1761,11 @@ Evil Mad Scientist Laboratories
                                 break
                             i += 1    # Only executed when setAlignment is false.
                     t = ""
+
+                if len(lineGroup) == 0:
+                    parent = lineGroup.getparent()
+                    parent.remove(lineGroup)
+
 
                 #End cases A & B. Apply transform to text/flowroot object:
 

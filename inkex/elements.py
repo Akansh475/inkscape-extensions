@@ -420,6 +420,9 @@ class Defs(BaseElement):
     """An header defs element, one per document"""
     tag_name = 'defs'
 
+class Symbol(BaseElement):
+    """A template object which can be instantiated by a <use> element"""
+    tag_name = 'symbol'
 
 class NamedView(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""

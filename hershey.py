@@ -1242,8 +1242,6 @@ Evil Mad Scientist Laboratories
 
                 refnode = node.ref()
 
-                inkex.errormsg('OK!') 
-
                 local_transform = Transform( _matrix )
                 x = float( node.get( 'x', '0' ) )
                 y = float( node.get( 'y', '0' ) )

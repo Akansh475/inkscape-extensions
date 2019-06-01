@@ -49,7 +49,12 @@ class InkscapeExtensionTest(TestCase):
         with self.assertRaises(NotImplementedError):
             self.e.run([])
         with self.assertRaises(NotImplementedError):
-            self.e.run()
+            prevarg = sys.argv
+            sys.argv = ['pytest']
+            try:
+                self.e.run()
+            finally:
+                sys.argv = prevarg
         with self.assertRaises(NotImplementedError):
             self.e.effect()
         with self.assertRaises(NotImplementedError):

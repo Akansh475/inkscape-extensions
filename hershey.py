@@ -1265,6 +1265,11 @@ Evil Mad Scientist Laboratories
 
                 ref_group.append( deepcopy(refnode) ) 
 
+                for subnode in ref_group:
+                    # The copied text elements should be removed at the end,
+                    # or they will persist if original elements are preserved.
+                    self.nodes_to_delete.append(subnode)
+
                 #Preserve original element?
                 if not self.options.preserve_text:
                     self.nodes_to_delete.append(node)

@@ -55,7 +55,7 @@ import math
 
 import inkex
 
-from inkex import Transform, Style, units
+from inkex import Transform, ScaleTransform, TranslateTransform, Style, units
 
 from inkex.elements import Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use
@@ -964,7 +964,7 @@ Evil Mad Scientist Laboratories
         vOffset = 0
         
         # SVG fonts use inverted Y axis; mirror vertically
-        scale_transform = Transform(scale=(font_scale,-font_scale))
+        scale_transform = ScaleTransform(font_scale,-font_scale)
 
         # Combine scales of external transformations with the scaling
         # applied by this function:
@@ -985,7 +985,7 @@ Evil Mad Scientist Laboratories
         
         p_style = {'stroke-width': width_string}
 
-        the_transform = Transform(translate=(offset + hOffset,vertoffset + vOffset))
+        the_transform = TranslateTransform(offset + hOffset,vertoffset + vOffset)
         the_transform *= scale_transform 
 
         text_attribs = {'d':path_string}
@@ -1614,9 +1614,9 @@ Evil Mad Scientist Laboratories
     
                                     the_transform = None
                                     if (text_align == "center"):    # when using text-align
-                                        the_transform = Transform(translate=((float(rect_width) - widthThisLine)/2))
+                                        the_transform = TranslateTransform((float(rect_width) - widthThisLine)/2)
                                     elif (text_align == "end"):
-                                        the_transform = Transform(translate=(float(rect_width) - widthThisLine))
+                                        the_transform = TranslateTransform(float(rect_width) - widthThisLine)
                                     if the_transform is not None:
                                         lineGroup.transform = the_transform
                                         
@@ -1627,7 +1627,7 @@ Evil Mad Scientist Laboratories
                         strPos_eol = strPos_eol + extd_line_length
                         strPos = strPos_eol
 
-                    the_transform = Transform(translate=(startX, float(startY) - y_offs_overall ))
+                    the_transform = TranslateTransform(startX, float(startY) - y_offs_overall)
 
                 else:    # If this is a text object, rather than a flowroot object:
                     '''
@@ -1749,7 +1749,7 @@ Evil Mad Scientist Laboratories
                                 
                                 yShift = float(yStartLine)
                                 
-                                the_transform = Transform(translate=(xShift,yShift))
+                                the_transform = TranslateTransform(xShift,yShift)
 
                                 lineGroup.transform = the_transform
 

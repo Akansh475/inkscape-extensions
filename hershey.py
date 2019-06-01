@@ -1612,13 +1612,13 @@ Evil Mad Scientist Laboratories
     
                                     # Alignment for the strip:
     
-                                    t = "" # Empty string for translation  
+                                    the_transform = None
                                     if (text_align == "center"):    # when using text-align
-                                        t = 'translate(' + str((float(rect_width) - widthThisLine)/2) +  ')'
+                                        the_transform = Transform(translate=((float(rect_width) - widthThisLine)/2))
                                     elif (text_align == "end"):
-                                        t = 'translate(' + str(float(rect_width) - widthThisLine) +  ')'
-                                    if (t != ""):
-                                        lineGroup.set( 'transform',t)
+                                        the_transform = Transform(translate=(float(rect_width) - widthThisLine))
+                                    if the_transform is not None:
+                                        lineGroup.transform = the_transform
                                         
                                     if first_line:  
                                         y_offs_overall = lineMaxVSpacing / 3  # Heuristic
@@ -1627,8 +1627,7 @@ Evil Mad Scientist Laboratories
                         strPos_eol = strPos_eol + extd_line_length
                         strPos = strPos_eol
 
-
-                    t = 'translate(' + str(startX) + ',' + str(float(startY) - y_offs_overall) + ')'
+                    the_transform = Transform(translate=(startX, float(startY) - y_offs_overall ))
 
                 else:    # If this is a text object, rather than a flowroot object:
                     '''
@@ -1750,8 +1749,9 @@ Evil Mad Scientist Laboratories
                                 
                                 yShift = float(yStartLine)
                                 
-                                t = 'translate('+format(xShift,'.7f')+','+format(yShift,'.7f')+')'
-                                lineGroup.set( 'transform',t)
+                                the_transform = Transform(translate=(xShift,yShift))
+
+                                lineGroup.transform = the_transform
 
                                 lineGroup = g.add(Group()) # Create new group for this line
 
@@ -1762,36 +1762,21 @@ Evil Mad Scientist Laboratories
                             i += 1    # Only executed when setAlignment is false.
                     t = ""
 
+                    the_transform = Transform()
+
                 if len(lineGroup) == 0:
                     parent = lineGroup.getparent()
                     parent.remove(lineGroup)
 
-
                 #End cases A & B. Apply transform to text/flowroot object:
 
-                '''
-                if transform is not None:
-                    t3 = transform + t
-                else:
-                    t3 = t
-                g.set( 'transform',str(t3))    
-
-                This above five lines are a simplistic approach to applying transformations :
-                simply concatenating the transforms. It can end up with applied tranformations of the form:
-                "translate(-32.477009,-204.40135)translate(58.688175,293.76318)scale(0.775862068966)"
-
-                A more "correct" approach is to instead compose the transformation, using the following
-                which results in a more compact file, at the cost of slightly more processing time:
-               '''
-               
                 if (transform is not None):
-                    t2 = Transform(t).matrix
-                    result = Transform( transform2) * Transform( t2 )
-                    t4 = str(Transform(result))
+                    result = Transform( transform) * the_transform
                 else:
-                    t4 = t
-                g.set( 'transform',str(t4))
-                
+                    result = the_transform
+
+                g.transform = result
+
                 if not self.OutputGenerated:
                     parent.remove(g)    #remove empty group
 

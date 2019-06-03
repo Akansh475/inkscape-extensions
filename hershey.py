@@ -55,10 +55,10 @@ import math
 
 import inkex
 
-from inkex import Transform, ScaleTransform, TranslateTransform, Style, units
+from inkex import Transform, ScaleTransform, TranslateTransform, Style, units, svg
 
 from inkex.elements import Group, TextElement, FlowPara, \
-    FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement
+    FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
 
 from lxml import etree
 from copy import deepcopy
@@ -446,7 +446,8 @@ Evil Mad Scientist Laboratories
             return None
 
         for node in node_list:
-            if node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
+            if isinstance(node, Defs):
+#             if node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
                 return self.parse_svg_font(node) # Recursive call
 
             if node.tag == inkex.addNS( 'font', 'svg' ) or node.tag == 'font':
@@ -629,7 +630,8 @@ Evil Mad Scientist Laboratories
     
             f = open(the_path)
             p = etree.XMLParser(huge_tree=True)
-            font_svg = etree.parse(f, parser=p)
+            font_svg = etree.parse(f, parser=svg.SVG_PARSER)
+
             f.close()
             self.font_dict[fontname] = self.parse_svg_font( font_svg.getroot() )
             
@@ -1776,6 +1778,7 @@ Evil Mad Scientist Laboratories
                 g.transform = result
 
                 if not self.OutputGenerated:
+                    parent = g.getparent()
                     parent.remove(g)    #remove empty group
 
                 #Preserve original element?
@@ -1814,10 +1817,13 @@ Evil Mad Scientist Laboratories
         #   Default: 1/800 of page width or height, whichever is smaller
         
         _rendered_stroke_scale = 1 / (self.PX_PER_INCH * 800.0)
-        if self.svg_width < self.svg_height:
-            self.render_width = self.svg_width * _rendered_stroke_scale
-        else:
-            self.render_width = self.svg_height * _rendered_stroke_scale
+        
+        self.render_width = 1
+        if self.svg_width is not None:
+            if self.svg_width < self.svg_height:
+                self.render_width = self.svg_width * _rendered_stroke_scale
+            else:
+                self.render_width = self.svg_height * _rendered_stroke_scale
 
         if self.options.mode == "help":
             inkex.errormsg(self.help_text)

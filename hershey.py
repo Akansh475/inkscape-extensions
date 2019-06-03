@@ -58,7 +58,7 @@ import inkex
 from inkex import Transform, ScaleTransform, TranslateTransform, Style, units
 
 from inkex.elements import Group, TextElement, FlowPara, \
-    FlowSpan, Tspan, FlowRoot, Rectangle, Use
+    FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement
 
 from lxml import etree
 from copy import deepcopy
@@ -988,10 +988,9 @@ Evil Mad Scientist Laboratories
         the_transform = TranslateTransform(offset + hOffset,vertoffset + vOffset)
         the_transform *= scale_transform 
 
-        text_attribs = {'d':path_string}
-
         if path_string is not None:
-            path_element = etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
+            path_element = parent.add(PathElement())
+            path_element.set_path(path_string)
             path_element.style = p_style
             path_element.transform = the_transform
             self.OutputGenerated = True    
@@ -1013,7 +1012,6 @@ Evil Mad Scientist Laboratories
                 return parent_transform
             else:
                 tr = Transform(node_transform).matrix
-                Transform(transf).matrix
                 
                 if parent_transform is None:
                     return tr

@@ -222,8 +222,6 @@ class OtherElements(BaseElement):
     tag_names = [
         'desc',
         'filter',
-        'font',
-        'font-face',
         'format',
         'rdf',
         'type',
@@ -416,6 +414,7 @@ class ClipPath(Group):
     """A path used to clip objects"""
     tag_name = 'clipPath'
 
+
 class Defs(BaseElement):
     """An header defs element, one per document"""
     tag_name = 'defs'
@@ -516,3 +515,24 @@ class Grid(BaseElement):
 class Script(BaseElement):
     """A javascript tag in SVG"""
     tag_name = 'script'
+    
+
+class SVGfont(BaseElement):
+    """An svg font element"""
+    tag_name = 'font'
+
+
+class FontFace(BaseElement):
+    """An svg font font-face element"""
+    tag_name = 'font-face'
+    
+    
+class Glyph(BaseElement):
+    """An svg font glyph element"""
+    tag_name = 'glyph'
+
+
+class MissingGlyph(BaseElement):
+    """An svg font missing-glyph element"""
+    tag_name = 'missing-glyph'
+

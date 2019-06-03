@@ -9,7 +9,7 @@
     <object-type>all</object-type>
       <effects-menu>
        <submenu _name="Render">
-          <submenu _name="Mathamatics" />
+          <submenu _name="Mathematics" />
         </submenu>
       </effects-menu>
     </effect>

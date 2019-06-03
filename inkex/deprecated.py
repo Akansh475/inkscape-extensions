@@ -152,8 +152,7 @@ class DeprecatedEffect(object):
 
     def getParentNode(self, node):
         self._deprecated('getParentNode',\
-            _('{} should never have existed. lxml always had a getparent() '
-              'method and that should be used instead of this custom Effect method.'))
+            _('{} is no longer in use. Use the lxml .getparent() method instead.'))
         return node.getparent()
 
     def getNamedView(self):

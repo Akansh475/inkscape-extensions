@@ -17,18 +17,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
 #
 """
-This API provides methods for calling Inkscape to execute a given
-Inkscape command. This may be needed for various compiling options
-(e.g., png), running other extensions or performing other options only
+When inkscape needs to be loaded in order to ask for various compiling
+options (png) running other extensions and performing options only
 available via the shell API.
 
-Best practice is to avoid using this API except when absolutely necessary,
-since it is resource-intensive to invoke a new Inkscape instance.
+The preference should ALWAYS be to avoid using this API as it's very
+ineffeciant to call up a new inkscape instance in order to modify
+things.
 
-However, in any circumstance when it is necessary to call Inkscape, it
-is strongly recommended that you do so through this API (rather than calling
-it yourself) to take advantage of the security settings and testing functions.
-
+The reason you SHOULD use this API instead of calling out to inkscape
+yourself is because the security settings and testing functions have
+been thought through and should allow you to get on with whatever
+your extension does.
 """
 
 import os
@@ -166,7 +166,7 @@ def _call(program, *args, **kwargs):
 
 def call(program, *args, **kwargs):
     """
-    Generic caller to open any program and return its stdout.
+    Generic caller to open any program and return it's stdout.
 
     stdout = call('executable', arg1, arg2, dash_dash_arg='foo', d=True, ...)
 
@@ -176,7 +176,7 @@ def call(program, *args, **kwargs):
 
 def inkscape(svg_file, *args, **kwargs):
     """
-    Call Inkscape with the given svg_file and the given arguments
+    Call inkscape with the given svg_file and the given arguments
     """
     return call('inkscape', svg_file, without_gui=True, *args, **kwargs)
 
@@ -197,7 +197,7 @@ def inkscape_command(svg, *verbs):
 
 def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
     """
-    Take a snapshot of the given svg file.
+    Takes a snapshot of the given svg file.
 
     Resulting filename is yielded back, after generator finishes, the
     file is deleted so you must deal with the file inside the for loop.

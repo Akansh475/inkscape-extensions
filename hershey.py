@@ -18,7 +18,7 @@
 #
 
 '''
-Hershey Text 3.0, 2019-05-29
+Hershey Text 3.0, 2019-06-03
 
 Copyright 2019, Windell H. Oskay, www.evilmadscientist.com
 
@@ -119,7 +119,24 @@ For a general introduction to stroke fonts, please visit:
   www.evilmadscientist.com/go/hershey
 
 
-   ==== How it works ====
+   ==== Basic operation ====
+
+To use Hershey Text, start with a document that contains text objects. Select
+the "Render" tab of Hershey Text, and choose a font face from the pop-up menu.
+
+When you click Apply, it will render all text elements on your page with the
+selected stroke-based typeface. If you would like to convert only certain text
+elements, click Apply with just those elements selected. 
+
+If the "Preserve original text" box is checked, then the original text elements
+on the page will be preserved even when you click Apply. If it is unchecked,
+then the original font elements will be removed once rendered.
+
+You can generate a list of available SVG fonts or a list of all glyphs available
+in a given font by using the tools available on the "Utilities" tab.
+
+
+   ==== How Hershey Text works ====
 
 Hershey Text works by performing font substitution, starting with the text in
 your document and replacing it with paths generated from the characters in the
@@ -135,7 +152,30 @@ convert other fonts into SVG format. Its sole function is to replace the text
 in your document with paths from the selected SVG font.
 
 
-   ==== Using SVG fonts ====
+   ==== Using an external SVG font ====
+
+To use an external SVG font -- one not included with the distribution -- select
+"Other" for the name of the font in the pop-up menu on the "Render" tab. Then,
+do one of the following:
+
+(1) Add your SVG font file (perhaps "example.svg") to the "svg_fonts" directory
+within your Inkscape extensions directory, and enter the name of the font
+("example") in the "Other SVG font name or path" box on the "Render" tab.
+
+or
+
+(2) Place your SVG font file anywhere on your computer, and enter the full path
+to the file  in the "Other SVG font name or path" box on the "Render" tab.
+A full path might, for example, look like:
+    /Users/Robin/Documents/AxiDraw/fonts/path_handwriting.svg
+
+
+   ==== Using SVG fonts: Advanced methods ====
+
+In addition to using a single SVG font for substitution, you can also use
+font name mapping to automatically use particular stroke fonts in place of
+specific font faces, to support various automated workflows and to support
+the rapid use of multiple stroke font faces within the same document.
 
 Several SVG fonts are included with this distribution, including both 
 single-stroke and multi-stroke fonts. These fonts are included within the 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hershey Text</_name>
-  <id>org.evilmad.render.hershe</id>
-  <!-- Version 3.0 April 23, 2019 -->
+  <id>org.evilmad.text.hershey</id>
+  <!-- Version 3.0 June 3, 2019 -->
 
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -16,7 +16,7 @@ Hershey Text
 
 <_param indent="2" name="splashTitle1b" type="description" xml:space="preserve">A tool to replace text with stroke fonts
 
-Version 3.0, 2019-05-29
+Version 3.0, 2019-06-03
 
 
 </_param>

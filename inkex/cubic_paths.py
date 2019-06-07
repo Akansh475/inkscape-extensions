@@ -124,6 +124,9 @@ def ArcToPath(p1, params):
 
 
 def CubicSuperPath(simplepath):
+    from .paths import Path
+    new_csp = Path(simplepath).to_superpath()
+
     csp = []
     subpath = -1
     subpathstart = []
@@ -196,8 +199,32 @@ def CubicSuperPath(simplepath):
             raise ValueError(cmd)
     # append final superpoint
     csp[subpath].append([lastctrl[:], last[:], last[:]])
+
+    was_ok = False
+    with open("/tmp/csp.cmp", 'a') as fhl:
+        a = format_csp(csp)
+        b = format_csp(new_csp)
+        if a != b:
+            if was_ok:
+                fhl.write("---\n")
+            fhl.write("NOK:{}\n".format(str(Path(simplepath))))
+            fhl.write(" -{}\n".format(a))
+            fhl.write(" +{}\n".format(b))
+            fhl.write("---\n")
+        else:
+            was_ok = True
+            fhl.write("OK:{}\n".format(str(Path(simplepath))))
+
     return csp
 
+def format_csp(csp):
+    """Format a super path into a string"""
+    ret = ""
+    for subpath in csp:
+        for a, b, c in subpath:
+            ret += "({0},{1})({2},{3})({4},{5})|".format(a[0], a[1], b[0], b[1], c[0], c[1])
+        ret = ret.strip('|') + ","
+    return ret.strip(',')
 
 def unCubicSuperPath(csp):
     from .paths import CubicSuperPath as CSP

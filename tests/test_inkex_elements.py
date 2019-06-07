@@ -6,9 +6,11 @@ Test elements extra logic from svg xml lxml custom classes.
 
 from lxml import etree
 
+import inkex
+
 from inkex.elements import (
-    BaseElement, ShapeElement, OtherElements,
-    Group, Pattern, Guide, Polyline,
+    ShapeElement,
+    Group, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
 )
 from inkex.transforms import Transform, ScaleTransform
@@ -128,6 +130,8 @@ class CoreElementTestCase(ElementTestCase):
         elem = self.svg.getElementById('D')
         elem.style['fill'] = 'purpleberry'
         self.assertEqual(elem.get('style'), 'fill:purpleberry')
+        elem.style = {'marker': 'flag'}
+        self.assertEqual(elem.get('style'), 'marker:flag')
         elem.style = Style(stroke='gammon')
         self.assertEqual(elem.get('style'), 'stroke:gammon')
         elem.style.update('grape:2;strawberry:nice;')
@@ -164,7 +168,8 @@ class CoreElementTestCase(ElementTestCase):
             None, None, 'path1', None,
             'base', 'metadata7',
              None, None, None, None, None,
-            'A', 'B', 'C', 'D', 'E', 'F', 'G'
+            'A', 'B', 'C', 'D', 'E', 'F', 'G',
+            'H', 'I', 'J',
         ))
 
 class PathElementTestCase(ElementTestCase):
@@ -199,6 +204,16 @@ class PolylineElementTestCase(TestCase):
         self.assertEqual(str(pol.path), 'M 10 10 L 50 50 L 10 15 L 15 10')
         pol.path = "M 10 10 L 30 9 L 1 2 C 10 45 3 4 45 60 M 35 35"
         self.assertEqual(pol.get('points'), '10,10 30,9 1,2 45,60 35,35')
+
+class PolygonElementTestCase(TestCase):
+    def test(self):
+        pol = inkex.elements.Polygon(points='10,10 50,50 10,15 15,10')
+        self.assertEqual(str(pol.path), 'M 10 10 L 50 50 L 10 15 L 15 10 Z')
+
+class LineElementTestCase(TestCase):
+    def test(self):
+        pol = inkex.elements.Line(x1='2', y1='3', x2='4', y2='5')
+        self.assertEqual(str(pol.path), 'M 2 3 L 4 5')
 
 class PatternTestCase(ElementTestCase):
     tag = 'pattern'
@@ -261,6 +276,21 @@ class PathTest(ElementTestCase):
         self.assertEqual(path.get('d'), 'M 30 130 L 60 130 L 60 120 L 70 140 L 60 160 L 60 150 L 30 150')
         self.assertFalse(path.transform)
 
+class LineTest(ElementTestCase):
+    tag = 'line'
+    def test_type(self):
+        self.assertTrue(isinstance(self.elem, inkex.elements.Line))
+
+class PolylineTest(ElementTestCase):
+    tag = 'polyline'
+    def test_type(self):
+        self.assertTrue(isinstance(self.elem, inkex.elements.Polyline))
+
+class PolygonTest(ElementTestCase):
+    tag = 'polygon'
+    def test_type(self):
+        self.assertTrue(isinstance(self.elem, inkex.elements.Polygon))
+
 class CirtcleTest(ElementTestCase):
     """Test extra functionality on a circle element"""
     tag = 'circle'
@@ -293,3 +323,26 @@ class UseTest(ElementTestCase):
     def test_path(self):
         """Use path follows ref"""
         self.assertEqual(str(self.elem.path), 'M 0 0 L 10 10 Z')
+
+    def test_empty_ref(self):
+        """An empty ref or None ref doesn't cause an error"""
+        self.assertRaises(KeyError, Use().ref)
+        elem = self.svg.add(Use())
+        self.assertEqual(elem.ref(), None)
+        elem.set('xlink:href', '')
+        self.assertEqual(elem.ref(), None)
+        elem.set('xlink:href', '#badref')
+        self.assertEqual(elem.ref(), None)
+        elem.set('xlink:href', self.elem.get('xlink:href'))
+        self.assertEqual(elem.ref().get('id'), 'path1')
+
+class DefsTest(ElementTestCase):
+    """Test the definitions tag"""
+    tag = 'defs'
+
+    def test_defs(self):
+        """Make sure defs can be seen in the nodes of an svg"""
+        svg = svg_file(self.data_file('ref_test.svg'))
+        self.assertTrue(isinstance(svg.defs, Defs))
+        defs = svg.getElementById('defs33')
+        self.assertTrue(isinstance(defs, Defs))

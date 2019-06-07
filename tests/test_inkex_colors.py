@@ -22,11 +22,15 @@ class ColorTest(TestCase):
         self.assertRaises(ValueError, Color, [0, 0, 0, 0])
         self.assertRaises(ColorError, Color(None, space='nop').to_rgb)
         self.assertRaises(ColorError, Color(None, space='nop').to_hsl)
+        self.assertRaises(ColorError, Color([1], space='nop').__str__)
 
     def test_namedcolor(self):
         """Named Color"""
         self.assertEqual(Color('red'), [255, 0, 0])
         self.assertEqual(str(Color('red')), 'red')
+        color = Color('red')
+        color[0] = 41
+        self.assertEqual(str(color), '#290000')
 
     def test_rgb_hex(self):
         """RGB Hex Color"""

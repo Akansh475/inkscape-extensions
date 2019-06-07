@@ -97,7 +97,7 @@ class AbstractShape(Element):
         data = self.node.get("transform")
         if not data:
             return
-        return Transform(data).to_sixlet()
+        return Transform(data).to_hexad()
 
     def has_gradient(self):
         style = self.get_style()

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Interactive Mockup</_name>
+  <id>org.inkscape.webdesign.interactive_mockup</id>
+  <dependency type="executable" location="extensions">web_interactive_mockup.py</dependency>
+    <param name="tab" type="notebook">
+        <page name="Options" _gui-text="Options">
+            <param name="when" type="enum" _gui-text="When to transmit:">
+                <_item value="onclick">on click</_item>
+                <_item value="onfocusin">on focus</_item>
+                <_item value="onfocusout">on blur</_item>
+                <_item value="onactivate">on activate</_item>
+                <_item value="onmousedown">on mouse down</_item>
+                <_item value="onmouseup">on mouse up</_item>
+                <_item value="onmouseover">on mouse over</_item>
+                <_item value="onmousemove">on mouse move</_item>
+                <_item value="onmouseout">on mouse out</_item>
+                <_item value="onload">on element loaded</_item>
+            </param>
+        </page>
+        <page name="Help" _gui-text="Help">
+            <_param name="intro" type="description">This effect adds interaction in a viewer like a web browser.</_param>
+            <_param name="desc1" type="description">It creates a link effect by changing to viewbox from one position to another.</_param>
+            <_param name="desc2" type="description">When selecting object the last one is the one we jump to.</_param>
+        </page>
+    </param>
+    <effect>
+        <object-type>all</object-type>
+        <effects-menu>
+            <submenu name="Web design">
+                
+            </submenu>
+        </effects-menu>
+    </effect>
+    <script>
+        <command reldir="extensions" interpreter="python">web_interactive_mockup.py</command>
+    </script>
+</inkscape-extension>
+

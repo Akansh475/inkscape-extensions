@@ -19,7 +19,7 @@
 from lxml import etree
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 from inkex.generic import EffectExtension
 from webslicer_effect import WebSlicerMixin, is_empty
 

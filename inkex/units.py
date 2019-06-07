@@ -30,12 +30,12 @@ import re
 # a dictionary of unit to user unit conversion factors
 CONVERSIONS = {
     'in': 96.0,
-    'pt': 1.33333333333,
+    'pt': 1.3333333333333333,
     'px': 1.0,
-    'mm': 3.77952755913,
-    'cm': 37.7952755913,
-    'm': 3779.52755913,
-    'km': 3779527.55913,
+    'mm': 3.779527559055118,
+    'cm': 37.79527559055118,
+    'm': 3779.527559055118,
+    'km': 3779527.559055118,
     'pc': 16.0,
     'yd': 3456.0,
     'ft': 1152.0,
@@ -84,7 +84,7 @@ def convert_unit(value, to_unit):
 
 
 def render_unit(value, unit):
-    """Checks a then renders a number with it's unit"""
+    """Checks and then renders a number with its unit"""
     try:
         if isinstance(value, str):
             (value, unit) = parse_unit(value, default_unit=unit)

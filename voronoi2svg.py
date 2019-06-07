@@ -33,7 +33,7 @@ from lxml import etree
 import inkex
 import voronoi
 from inkex import Transform, inkbool
-from inkex.localize import _
+from inkex.localization import _
 
 
 class Point(object):

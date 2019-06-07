@@ -57,7 +57,7 @@ from math import acos, cos, floor, pi, sin, sqrt
 import inkex
 from inkex import inkbool
 from inkex.elements import Group
-from inkex.localize import _
+from inkex.localization import _
 
 from lxml import etree
 
@@ -259,30 +259,30 @@ def rotate(matrix, angle, axis):
 
 
 def rot_z(matrix, a):  # rotate around the z-axis by a radians
-    trans_mat = numpy.mat(numpy.array([[cos(a), -sin(a), 0],
+    trans_mat = numpy.array([[cos(a), -sin(a), 0],
                                        [sin(a), cos(a), 0],
-                                       [0, 0, 1]]))
-    return trans_mat * matrix
+                                       [0, 0, 1]])
+    return numpy.matmul(trans_mat, matrix)
 
 
 def rot_y(matrix, a):  # rotate around the y-axis by a radians
-    trans_mat = numpy.mat(numpy.array([[cos(a), 0, sin(a)],
+    trans_mat = numpy.array([[cos(a), 0, sin(a)],
                                        [0, 1, 0],
-                                       [-sin(a), 0, cos(a)]]))
-    return trans_mat * matrix
+                                       [-sin(a), 0, cos(a)]])
+    return numpy.matmul(trans_mat, matrix)
 
 
 def rot_x(matrix, a):  # rotate around the x-axis by a radians
-    trans_mat = numpy.mat(numpy.array([[1, 0, 0],
+    trans_mat = numpy.array([[1, 0, 0],
                                        [0, cos(a), -sin(a)],
-                                       [0, sin(a), cos(a)]]))
-    return trans_mat * matrix
+                                       [0, sin(a), cos(a)]])
+    return numpy.matmul(trans_mat, matrix)
 
 
 def get_transformed_pts(vtx_list, trans_mat):  # translate the points according to the matrix
     transformed_pts = []
     for vtx in vtx_list:
-        transformed_pts.append((trans_mat * numpy.mat(vtx).T).T.tolist()[0])  # transform the points at add to the list
+        transformed_pts.append((numpy.matmul(trans_mat, vtx.T)).T.tolist()[0])  # transform the points at add to the list
     return transformed_pts
 
 
@@ -516,7 +516,7 @@ class Poly3D(inkex.GenerateExtension):
 
         # TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
 
-        trans_mat = numpy.mat(numpy.identity(3, float))  # init. trans matrix as identity matrix
+        trans_mat = numpy.identity(3, float)  # init. trans matrix as identity matrix
         for i in range(1, 7):  # for each rotation
             axis = eval('so.r' + str(i) + '_ax')
             angle = eval('so.r' + str(i) + '_ang') * pi / 180

@@ -28,9 +28,9 @@ class UnitsTest(TestCase):
 
     def test_convert_unit(self):
         """Convert units from one to another"""
-        self.assertEqual(convert_unit("10mm", 'px'), 37.7952755913)
-        self.assertEqual(convert_unit("1in", 'cm'), 2.5399999999496763)
-        self.assertEqual(convert_unit("37.7952755913px", 'mm'), 10.0)
+        self.assertEqual(convert_unit("10mm", 'px'), 37.79527559055118)
+        self.assertEqual(convert_unit("1in", 'cm'), 2.54)
+        self.assertEqual(convert_unit("37.79527559055118px", 'mm'), 10.0)
 
     def test_render_unit(self):
         """Convert unit and value pair into rendered unit string"""

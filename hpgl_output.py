@@ -25,7 +25,7 @@ import hpgl_encoder
 import inkex
 from inkex.generic import OutputExtension
 
-from inkex.localize import _
+from inkex.localization import _
 
 class HpglOutput(OutputExtension):
 

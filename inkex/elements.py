@@ -91,8 +91,11 @@ class BaseElement(etree.ElementBase):
     def __setattr__(self, name, value):
         """Set the attribute, update it if needed"""
         if name in self.wrapped_attrs:
+            cls = self.wrapped_attrs[name]
             # Don't call self.set or self.get (infinate loop)
             if value:
+                if not isinstance(value, cls):
+                    value = cls(value)
                 self.attrib[name] = str(value)
             else:
                 self.attrib.pop(name, None) # pylint: disable=no-member
@@ -219,8 +222,6 @@ class OtherElements(BaseElement):
     tag_names = [
         'desc',
         'filter',
-        'font',
-        'font-face',
         'format',
         'rdf',
         'type',
@@ -339,10 +340,16 @@ class Pattern(BaseElement):
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
-class Points(ShapeElement):
-    """Provide a useful extension for points elements"""
-    tag_name = 'points'
-    get_path = lambda self: 'M' + self.get('points')
+class Polygon(ShapeElement):
+    """A closed polyline"""
+    tag_name = 'polygon'
+    get_path = lambda self: 'M' + self.get('points') + ' Z'
+
+
+class Line(ShapeElement):
+    """A line connecting two points"""
+    tag_name = 'line'
+    get_path = lambda self: 'M{0[x1]},{0[y1]} L{0[x2]},{0[y2]}'.format(self.attrib)
 
 
 class Rectangle(ShapeElement):
@@ -395,11 +402,18 @@ class Use(ShapeElement):
 
     def ref(self):
         """Returns the referred-to element if available"""
-        return self.root.getElementById(self.get('xlink:href').strip('#'))
+        from inkex.svg import SvgDocumentElement
+        if not isinstance(self.root, SvgDocumentElement):
+            raise KeyError("XML Fragment can not use xlinks")
+        ref = self.get('xlink:href')
+        if not ref:
+            return None
+        return self.root.getElementById(ref.strip('#'))
 
 class ClipPath(Group):
     """A path used to clip objects"""
     tag_name = 'clipPath'
+
 
 class Defs(BaseElement):
     """An header defs element, one per document"""
@@ -501,3 +515,24 @@ class Grid(BaseElement):
 class Script(BaseElement):
     """A javascript tag in SVG"""
     tag_name = 'script'
+    
+
+class SVGfont(BaseElement):
+    """An svg font element"""
+    tag_name = 'font'
+
+
+class FontFace(BaseElement):
+    """An svg font font-face element"""
+    tag_name = 'font-face'
+    
+    
+class Glyph(BaseElement):
+    """An svg font glyph element"""
+    tag_name = 'glyph'
+
+
+class MissingGlyph(BaseElement):
+    """An svg font missing-glyph element"""
+    tag_name = 'missing-glyph'
+

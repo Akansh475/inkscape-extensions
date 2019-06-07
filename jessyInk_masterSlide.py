@@ -16,7 +16,7 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 
 class JessyInk_MasterSlide(inkex.Effect):
     def __init__(self):

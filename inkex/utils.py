@@ -34,10 +34,6 @@ from argparse import ArgumentTypeError
 
 (X, Y) = range(2)
 
-if sys.version_info[0] == 3:  #PY3
-    unicode = str  # pylint: disable=redefined-builtin,invalid-name
-    basestring = str  # pylint: disable=redefined-builtin,invalid-name
-
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc
 NSS = {
     'sodipodi': 'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
@@ -74,9 +70,10 @@ def inkbool(value):
         return False
     return None
 
+
 def debug(what):
     """Print debug message if debugging is switched on"""
-    sys.stderr.write(unicode(what) + "\n")
+    errormsg(what)
     return what
 
 
@@ -93,15 +90,34 @@ def errormsg(msg):
          ...
          inkex.errormsg(_("This extension requires two selected paths."))
     """
-    sys.stderr.write(unicode(msg) + "\n")
+    try:
+        sys.stderr.write(msg)
+    except UnicodeEncodeError:
+        # Python 2:
+        # Fallback for cases where sys.stderr.encoding is not Unicode.
+        # Python 3:
+        # This will not work as write() does not accept byte strings, but AFAIK
+        # we should never reach this point as the default error handler is
+        # 'backslashreplace'.
+
+        # This will be None by default if stderr is piped, so use ASCII as a
+        # last resort.
+        encoding = sys.stderr.encoding or 'ascii'
+        sys.stderr.write(msg.encode(encoding, 'backslashreplace'))
+
+    # Write '\n' separately to avoid dealing with different string types.
+    sys.stderr.write('\n')
 
 
 class AbortExtension(Exception):
     """Raised to print a message to the user without backtrace"""
 
+    def __init__(self, message=""):
+        self.message = message
+
     def write(self):
         """write the error message out to the user"""
-        errormsg(str(self))
+        errormsg(self.message)
 
 
 class DependencyError(NotImplementedError):
@@ -172,7 +188,7 @@ def filename_arg(name):
     return filename
 
 def pairwise(iterable):
-    "Iterate over a list with overlapping pairs (see itertools recipies)"
+    "Iterate over a list with overlapping pairs (see itertools recipes)"
     first, then = tee(iterable)
     start = next(then, None)
     return [(None, start)] + list(zip(first, then))

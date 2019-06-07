@@ -21,8 +21,11 @@ Two simple functions for working with inline css
 and some color handling on top.
 """
 
+import sys
 from collections import OrderedDict
 
+if sys.version_info[0] == 3:  #PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 class Style(OrderedDict):
     """A list of style directives"""
@@ -30,7 +33,7 @@ class Style(OrderedDict):
     def __init__(self, style=None, callback=None, **kw):
         self.callback = None
         style = style or kw
-        if isinstance(style, str):
+        if isinstance(style, (str, unicode)):
             style = self.parse_str(style)
         # Should accept dict, Style, parsed string, list etc.
         super(Style, self).__init__(style)

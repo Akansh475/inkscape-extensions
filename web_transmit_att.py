@@ -18,7 +18,7 @@
 #
 
 import inkwebeffect
-from inkex.localize import _
+from inkex.localization import _
 
 
 class InkWebTransmitAtt(inkwebeffect.InkWebEffect):

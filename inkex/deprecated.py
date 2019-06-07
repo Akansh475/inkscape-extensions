@@ -34,7 +34,7 @@ from argparse import ArgumentParser
 
 import inkex
 import inkex.utils
-from inkex.localize import _
+from inkex.localization import _
 from inkex.elements import Guide
 
 warnings.simplefilter("default")
@@ -52,11 +52,11 @@ try:
 except ValueError:
     DEPRECATION_LEVEL = 1
 
-def _deprecated(msg, stack=2):
+def _deprecated(msg, stack=2, level=DEPRECATION_LEVEL):
     """Internal method for raising a deprecation warning"""
-    if DEPRECATION_LEVEL > 1:
-        msg += ' ; ' + traceback.format_stack()
-    if DEPRECATION_LEVEL:
+    if level > 1:
+        msg += ' ; '.join(traceback.format_stack())
+    if level:
         warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 
 class DeprecatedEffect(object):
@@ -152,8 +152,7 @@ class DeprecatedEffect(object):
 
     def getParentNode(self, node):
         self._deprecated('getParentNode',\
-            _('{} should never have existed. lxml always had a getparent() '
-              'method and that should be used instead of this custom Effect method.'))
+            _('{} is no longer in use. Use the lxml .getparent() method instead.'))
         return node.getparent()
 
     def getNamedView(self):
@@ -297,6 +296,12 @@ def InkOption():
         TYPES = optparse.Option.TYPES + ("inkbool", )
         TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
         TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == 'True'
+    return wrapped
+
+@lazyproxy
+def localize():
+    _deprecated('inkex.localize was moved to inkex.localization.localize', stack=3)
+    from .localization import localize as wrapped
     return wrapped
 
 # legacy inkex members <= 0.48.x

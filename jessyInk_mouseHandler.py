@@ -21,7 +21,7 @@ import os
 from lxml import etree
 
 import inkex
-from inkex.localize import _
+from inkex.localization import _
 
 
 class JessyInk_CustomMouseHandler(inkex.Effect):

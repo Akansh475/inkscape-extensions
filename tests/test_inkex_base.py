@@ -5,9 +5,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import sys
 
+from io import BytesIO
+
 from inkex.base import InkscapeExtension, SvgThroughMixin
 from inkex.tester import TestCase
-
 
 class ModExtension(InkscapeExtension):
     """A non-svg extension that loads, saves and flipples"""
@@ -47,6 +48,13 @@ class InkscapeExtensionTest(TestCase):
         """What happens when we don't inherit"""
         with self.assertRaises(NotImplementedError):
             self.e.run([])
+        with self.assertRaises(NotImplementedError):
+            prevarg = sys.argv
+            sys.argv = ['pytest']
+            try:
+                self.e.run()
+            finally:
+                sys.argv = prevarg
         with self.assertRaises(NotImplementedError):
             self.e.effect()
         with self.assertRaises(NotImplementedError):
@@ -102,3 +110,13 @@ class SvgInputOutputTest(TestCase):
         self.assertTrue(os.path.isfile(filename))
         with open(filename, 'r') as fhl:
             self.assertIn('<svg', fhl.read())
+
+    def test_str_document(self):
+        """Document is saved even if it's not bytes"""
+        obj = ModSvgExtension()
+        obj.document = b'foo'
+        obj.save(BytesIO())
+        obj.document = 'foo'
+        ret = BytesIO()
+        obj.save(ret)
+        self.assertEqual(ret.getvalue(), b'foo')

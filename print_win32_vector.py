@@ -37,7 +37,7 @@ import inkex
 from inkex.cubic_paths import parseCubicPath
 from inkex.transforms import Transform
 from inkex.paths import Path
-from inkex.localize import _
+from inkex.localization import _
 
 if sys.platform.startswith('win'):
     myspool = ctypes.WinDLL("winspool.drv")

@@ -388,13 +388,15 @@ class Arc(Segment):
     def bounding_box(self, prev):
         """Returns a bounding box for curved lines, similar to refinedBBox"""
         bbox = BoundingBox(None)
-        for seg in self.to_curves(prev.get_pen()):
+        for seg in self.to_curves(prev):
             bbox += seg.bounding_box(prev)
             prev = seg
         return bbox
 
     def to_curves(self, previous=(0, 0)):
         """Convert this arc into bezier curves"""
+        if isinstance(previous, Segment):
+            previous = previous.get_pen()
         cubic = ArcToPath(list(previous), list(self.args))
         for seg in unCubicSuperPath([cubic]):
             if seg[0] == 'C':
@@ -577,28 +579,62 @@ class CubicSuperPath(list):
     """
     def __init__(self, items):
         super(CubicSuperPath, self).__init__()
+        self._closed = True
+        self._prev = None
 
         if isinstance(items, str):
             items = Path(items)
 
+        if isinstance(items, Path):
+            items = items.to_absolute()
+
         for item in items:
             self.append(item)
-
-        self._move = None
 
     def __str__(self):
         return str(self.to_path())
 
     def append(self, item):
         """Accept multiple different formats for the data"""
-        if isinstance(item, Segment):
-            if isinstance(item, Move):
-                self._move = item
-            else:
-                item = item.to_absolute().to_curve()
+        if not item:
+            return
 
-        # TODO: Check format of item here
-        super(CubicSuperPath, self).append(item)
+        if isinstance(item, Segment):
+            self._prev = item
+            if isinstance(item, Move):
+                item = [list(item.args), list(item.args), list(item.args)]
+            elif isinstance(item, ZoneClose) and self and self[-1]:
+                # This duplicates the first segment to 'close' the path.
+                self.append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
+                # Then adds a new subpath for the next shape (if any)
+                self.closed = True
+                return
+            elif isinstance(item, Arc):
+                # Arcs are made up of three curves (approximated)
+                for arc_curve in item.to_curves(self._prev):
+                    self.append(arc_curve)
+                return
+            else:
+                item = item.to_curve(self._prev)
+
+        if isinstance(item, Curve):
+            item = [list(item.args[:2]), list(item.args[2:4]), list(item.args[4:6])]
+
+        if not isinstance(item, list):
+            raise ValueError("Unknown super curve item type: {}".format(item))
+
+        if len(item) != 3 or not all([len(bit) == 2 for bit in item]):
+            # The item is already a subpath (usually from some other process)
+            if len(item[0]) == 3 and all([len(bit) == 2 for bit in item[0]]):
+                return super(CubicSuperPath, self).append(item)
+            raise ValueError("Unknown super curve list format: {}".format(item))
+
+        if self._closed:
+            self._closed = False
+            super(CubicSuperPath, self).append([])
+
+        print("Appending: {}".format(item))
+        self[-1].append(item)
 
     def to_path(self):
         """Convert the super path back to an svg path"""

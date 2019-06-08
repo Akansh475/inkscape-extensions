@@ -37,7 +37,7 @@ class SegmentTest(TestCase):
 
         self.assertEqual(
             Smooth(10, 10, 4, 4).to_curve(Curve(5, 5, 10, 10, 4, 4)),
-            (3, 3, 10, 10, 4, 4),
+            (-2, -2, 10, 10, 4, 4),
         )
 
         self.assertAlmostTuple(
@@ -47,7 +47,8 @@ class SegmentTest(TestCase):
 
         self.assertAlmostTuple(
             TepidQuadratic(4, 4).to_curve(Quadratic(11, 12, 14, 19)).args,
-            (20.666666666666664, 30, 17.333333333333332, 25, 4, 4),
+            #            (20.666666666666664, 30, 17.333333333333332, 25, 4, 4),
+            (15.999999999999998, 23.666666666666664, 12.666666666666666, 18.666666666666664, 4, 4),
         )
 
         curves = list(Arc(50, 50, 0, 0, 1, 85, 85).to_curves([0, 0]))

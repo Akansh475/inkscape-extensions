@@ -279,6 +279,7 @@ class Horz(Segment):
 
     def to_curve(self, previous):
         """Convert a horzontal line into a curve"""
+        print("What the absolute fuck is this: {}".format(previous))
         previous = Move(previous)
         return self.to_line(previous).to_curve(previous)
 
@@ -580,7 +581,7 @@ class CubicSuperPath(list):
     def __init__(self, items):
         super(CubicSuperPath, self).__init__()
         self._closed = True
-        self._prev = None
+        self._prev = Move([0, 0])
 
         if isinstance(items, str):
             items = Path(items)
@@ -596,18 +597,15 @@ class CubicSuperPath(list):
 
     def append(self, item):
         """Accept multiple different formats for the data"""
-        if not item:
-            return
-
         if isinstance(item, Segment):
-            self._prev = item
             if isinstance(item, Move):
-                item = [list(item.args), list(item.args), list(item.args)]
+                item, self._prev = [list(item.args), list(item.args), list(item.args)], item
             elif isinstance(item, ZoneClose) and self and self[-1]:
                 # This duplicates the first segment to 'close' the path.
                 self.append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
                 # Then adds a new subpath for the next shape (if any)
                 self.closed = True
+                self._prev = Move([0, 0])
                 return
             elif isinstance(item, Arc):
                 # Arcs are made up of three curves (approximated)
@@ -615,7 +613,9 @@ class CubicSuperPath(list):
                     self.append(arc_curve)
                 return
             else:
-                item = item.to_curve(self._prev)
+                if isinstance(item, (Horz, Vert)):
+                    item = item.to_line(self._prev)
+                item, self._prev = item.to_curve(self._prev), item
 
         if isinstance(item, Curve):
             item = [list(item.args[:2]), list(item.args[2:4]), list(item.args[4:6])]

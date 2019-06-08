@@ -200,21 +200,6 @@ def CubicSuperPath(simplepath):
     # append final superpoint
     csp[subpath].append([lastctrl[:], last[:], last[:]])
 
-    was_ok = False
-    with open("/tmp/csp.cmp", 'a') as fhl:
-        a = format_csp(csp)
-        b = format_csp(new_csp)
-        if a != b:
-            if was_ok:
-                fhl.write("---\n")
-            fhl.write("NOK:{}\n".format(str(Path(simplepath))))
-            fhl.write(" -{}\n".format(a))
-            fhl.write(" +{}\n".format(b))
-            fhl.write("---\n")
-        else:
-            was_ok = True
-            fhl.write("OK:{}\n".format(str(Path(simplepath))))
-
     return csp
 
 def format_csp(csp):

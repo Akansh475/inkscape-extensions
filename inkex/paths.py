@@ -131,9 +131,6 @@ class Segment(object):
             return self.args == other
         if not isinstance(other, Segment):
             raise ValueError("Can't compare types")
-        print("Trying to compare {} == {} with {} == {}".format(
-            self, other, self.to_curve([0, 0]), other.to_curve([0, 0]),
-        ))
         try:
             if self.isrelative() == other.isrelative():
                 return self.to_curve([0, 0]) == other.to_curve([0, 0])
@@ -279,7 +276,6 @@ class Horz(Segment):
 
     def to_curve(self, previous):
         """Convert a horzontal line into a curve"""
-        print("What the absolute fuck is this: {}".format(previous))
         previous = Move(previous)
         return self.to_line(previous).to_curve(previous)
 
@@ -333,8 +329,8 @@ class Smooth(Segment):
         set of nodes based on the previous node. Previous should be a curve.
         """
         last = previous.to_curve(Line([0, 0]))
-        x1 = (2 * last.x) - last.x1
-        y1 = (2 * last.y) - last.y1
+        x1 = (2 * last.x) - last.x2
+        y1 = (2 * last.y) - last.y2
         return Curve(x1, y1, self.x2, self.y2, self.x, self.y)
 
 
@@ -373,8 +369,8 @@ class TepidQuadratic(Segment):
         Convert this continued quadratic into a full quadratic
         """
         last = previous.to_curve(Line([0, 0]))
-        x1 = (last.x - last.x1) * 3. / 2 + last.x
-        y1 = (last.y - last.y1) * 3. / 2 + last.y
+        x1 = (last.x - last.x2) * 3. / 2 + last.x
+        y1 = (last.y - last.y2) * 3. / 2 + last.y
         return Quadratic(x1, y1, self.x, self.y)
 
 
@@ -601,8 +597,12 @@ class CubicSuperPath(list):
             if isinstance(item, Move):
                 item, self._prev = [list(item.args), list(item.args), list(item.args)], item
             elif isinstance(item, ZoneClose) and self and self[-1]:
-                # This duplicates the first segment to 'close' the path.
-                self.append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
+                # This duplicates the first segment to 'close' the path, it's appended directly
+                # because we don't want to last coord to change for the final segment.
+                # XXX Because they are lists, if we literally re-store the same list
+                # from the start, then we'd have a good indication the path should be closed
+                # when converting back into a path. id(first) == id(last)
+                self[-1].append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
                 # Then adds a new subpath for the next shape (if any)
                 self.closed = True
                 self._prev = Move([0, 0])
@@ -618,6 +618,7 @@ class CubicSuperPath(list):
                 item, self._prev = item.to_curve(self._prev), item
 
         if isinstance(item, Curve):
+            # Curves are cut into three tuples for the super path.
             item = [list(item.args[:2]), list(item.args[2:4]), list(item.args[4:6])]
 
         if not isinstance(item, list):
@@ -630,11 +631,16 @@ class CubicSuperPath(list):
             raise ValueError("Unknown super curve list format: {}".format(item))
 
         if self._closed:
+            # Closed means that the previous segment is closed so we need a new one
+            # We always append to the last open segment. CSP starts out closed.
             self._closed = False
             super(CubicSuperPath, self).append([])
 
-        print("Appending: {}".format(item))
-        self[-1].append(item)
+        if self[-1]:
+            # The last tuple is replaced, it's the coords of where the next segment will land.
+            self[-1][-1][-1] = item[0]
+        # The last coord is duplicated, but is expected to be replaced
+        self[-1].append(item[1:] + item[-1:])
 
     def to_path(self):
         """Convert the super path back to an svg path"""

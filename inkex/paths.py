@@ -23,12 +23,11 @@ functions for digesting paths into a simple list structure
 import re
 import copy
 
-from math import atan2, cos, pi, sin, sqrt
+from math import atan2, cos, pi, sin, sqrt, acos, tan
 from operator import add, mul
 
 from .transforms import Transform, BoundingBox, Scale
 from .utils import X, Y, classproperty, strargs, pairwise
-from .cubic_paths import unCubicSuperPath, ArcToPath
 
 if False: # pylint: disable=using-constant-test
     from typing import Type, Dict # pylint: disable=unused-import
@@ -374,7 +373,7 @@ class TepidQuadratic(Segment):
         return Quadratic(x1, y1, self.x, self.y)
 
 
-class tepidQuadratic(Segment): # pylint: disable=invalid-name
+class tepidQuadratic(TepidQuadratic): # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
 
 class Arc(Segment):
@@ -394,10 +393,10 @@ class Arc(Segment):
         """Convert this arc into bezier curves"""
         if isinstance(previous, Segment):
             previous = previous.get_pen()
-        cubic = ArcToPath(list(previous), list(self.args))
-        for seg in unCubicSuperPath([cubic]):
-            if seg[0] == 'C':
-                yield Segment.get_class(seg[0])(list(seg[1]))
+        cubic = arc_to_path(list(previous), list(self.args))
+        for seg in CubicSuperPath([cubic]).to_segments():
+            if isinstance(seg, Curve):
+                yield seg
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""
@@ -433,6 +432,8 @@ class Path(list):
         if isinstance(path_d, str):
             # Returns a generator returning Segment objects
             path_d = self.parse_string(path_d)
+        elif isinstance(path_d, CubicSuperPath):
+            path_d = path_d.to_path()
 
         for item in (path_d or ()):
             if isinstance(item, Segment):
@@ -599,9 +600,6 @@ class CubicSuperPath(list):
             elif isinstance(item, ZoneClose) and self and self[-1]:
                 # This duplicates the first segment to 'close' the path, it's appended directly
                 # because we don't want to last coord to change for the final segment.
-                # XXX Because they are lists, if we literally re-store the same list
-                # from the start, then we'd have a good indication the path should be closed
-                # when converting back into a path. id(first) == id(last)
                 self[-1].append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
                 # Then adds a new subpath for the next shape (if any)
                 self.closed = True
@@ -644,9 +642,10 @@ class CubicSuperPath(list):
 
     def to_path(self):
         """Convert the super path back to an svg path"""
-        return Path(list(self._to_segments()))
+        return Path(list(self.to_segments()))
 
-    def _to_segments(self):
+    def to_segments(self):
+        """Generate a set of segments for this cubic super path"""
         for subpath in self:
             previous = []
             for segment in subpath:
@@ -655,3 +654,107 @@ class CubicSuperPath(list):
                 else:
                     yield Curve(previous[2][:] + segment[0][:] + segment[1][:])
                 previous = segment
+
+    def transform(self, transform):
+        """Apply a transformation matrix to this super path"""
+        return self.to_path().transform(transform).to_superpath()
+
+def arc_to_path(point, params):
+    """Approximates an arc with cubic bezier segments.
+
+    Arguments:
+    point:  Starting point (absolute coords)
+    params: Arcs parameters as per
+              https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
+
+    Returns a list of triplets of points : [control_point_before, node, control_point_after]
+    (first and last returned triplets are [p1, p1, *] and [*, p2, p2])
+    """
+    A = point[:]
+    rx, ry, teta, longflag, sweepflag, x2, y2 = params[:]
+    teta = teta * pi / 180.0
+    B = [x2, y2]
+    # Degenerate ellipse
+    if rx == 0 or ry == 0 or A == B:
+        return [[A[:], A[:], A[:]], [B[:], B[:], B[:]]]
+
+    # turn coordinates so that the ellipse morph into a *unit circle* (not 0-centered)
+    mat = matprod((rotmat(teta), [[1 / rx, 0], [0, 1 / ry]], rotmat(-teta)))
+    applymat(mat, A)
+    applymat(mat, B)
+
+    k = [-(B[1] - A[1]), B[0] - A[0]]
+    d = k[0] * k[0] + k[1] * k[1]
+    k[0] /= sqrt(d)
+    k[1] /= sqrt(d)
+    d = sqrt(max(0, 1 - d / 4))
+    # k is the unit normal to AB vector, pointing to center O
+    # d is distance from center to AB segment (distance from O to the midpoint of AB)
+    # for the last line, remember this is a unit circle, and kd vector is ortogonal to AB (Pythagorean thm)
+
+    if longflag == sweepflag: #top-right ellipse in SVG example https://www.w3.org/TR/SVG/images/paths/arcs02.svg
+        d *= -1
+
+    O = [(B[0] + A[0]) / 2 + d * k[0], (B[1] + A[1]) / 2 + d * k[1]]
+    OA = [A[0] - O[0], A[1] - O[1]]
+    OB = [B[0] - O[0], B[1] - O[1]]
+    start = acos(OA[0] / norm(OA))
+    if OA[1] < 0:
+        start *= -1
+    end = acos(OB[0] / norm(OB))
+    if OB[1] < 0:
+        end *= -1
+    # start and end are the angles from center of the circle to A and to B respectively
+
+    if sweepflag and start > end:
+        end += 2 * pi
+    if (not sweepflag) and start < end:
+        end -= 2 * pi
+
+    NbSectors = int(abs(start - end) * 2 / pi) + 1
+    dTeta = (end - start) / NbSectors
+    v = 4 * tan(dTeta / 4) / 3
+    # I would use v = tan(dTeta/2)*4*(sqrt(2)-1)/3 ?
+    p = []
+    for i in range(0, NbSectors + 1, 1):
+        angle = start + i * dTeta
+        v1 = [O[0] + cos(angle) - (-v) * sin(angle), O[1] + sin(angle) + (-v) * cos(angle)]
+        pt = [O[0] + cos(angle), O[1] + sin(angle)]
+        v2 = [O[0] + cos(angle) - v * sin(angle), O[1] + sin(angle) + v * cos(angle)]
+        p.append([v1, pt, v2])
+    p[0][0] = p[0][1][:]
+    p[-1][2] = p[-1][1][:]
+
+    # go back to the original coordinate system
+    mat = matprod((rotmat(teta), [[rx, 0], [0, ry]], rotmat(-teta)))
+    for pts in p:
+        applymat(mat, pts[0])
+        applymat(mat, pts[1])
+        applymat(mat, pts[2])
+    return p
+
+def matprod(mlist):
+    """Get the product of the mat"""
+    prod = mlist[0]
+    for mat in mlist[1:]:
+        a00 = prod[0][0] * mat[0][0] + prod[0][1] * mat[1][0]
+        a01 = prod[0][0] * mat[0][1] + prod[0][1] * mat[1][1]
+        a10 = prod[1][0] * mat[0][0] + prod[1][1] * mat[1][0]
+        a11 = prod[1][0] * mat[0][1] + prod[1][1] * mat[1][1]
+        prod = [[a00, a01], [a10, a11]]
+    return prod
+
+def rotmat(teta):
+    """Rotate the mat"""
+    return [[cos(teta), -sin(teta)], [sin(teta), cos(teta)]]
+
+def applymat(mat, point):
+    """Apply the given mat"""
+    x = mat[0][0] * point[0] + mat[0][1] * point[1]
+    y = mat[1][0] * point[0] + mat[1][1] * point[1]
+    point[0] = x
+    point[1] = y
+
+def norm(point):
+    """Normalise"""
+    return sqrt(point[0] * point[0] + point[1] * point[1])

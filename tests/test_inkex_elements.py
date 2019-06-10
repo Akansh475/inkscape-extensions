@@ -260,8 +260,8 @@ class RectTest(ElementTestCase):
 
     def test_path(self):
         """Rectangle path"""
-        self.assertEqual(self.elem.get_path(), 'M 200.0,200.0 h100.0v100.0h-100.0')
-        self.assertEqual(str(self.elem.path), 'M 200 200 h 100 v 100 h -100')
+        self.assertEqual(self.elem.get_path(), 'M 200.0,200.0 h100.0v100.0h-100.0 z')
+        self.assertEqual(str(self.elem.path), 'M 200 200 h 100 v 100 h -100 z')
 
 class PathTest(ElementTestCase):
     """Test path extra functionality"""
@@ -297,8 +297,8 @@ class CirtcleTest(ElementTestCase):
 
     def test_path(self):
         """Circle path"""
-        self.assertEqual(self.elem.get_path(),
-                         'M 50.0 150.0 A 50.0,50.0 0 1 0 150.0, 100.0 A 50.0,50.0 0 1 0 50.0, 100.0')
+        self.assertEqual(self.elem.get_path(),\
+             'm 150.0,100.0 a 50.0,50.0 0 0 1 -100.0,0 a 50.0,50.0 0 0 1 100.0,0 z')
 
 class NamedViewTest(ElementTestCase):
     """Test the sodipodi namedview tag"""

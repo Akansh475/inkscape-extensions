@@ -18,15 +18,29 @@
 """Deprecated cubic super path API"""
 
 from inkex.deprecated import deprecate
-from inkex import cubic_paths
+from inkex import paths
 
-matprod = deprecate(cubic_paths.matprod)
-rotmat = deprecate(cubic_paths.rotmat)
-applymat = deprecate(cubic_paths.applymat)
-norm = deprecate(cubic_paths.norm)
-ArcToPath = deprecate(cubic_paths.ArcToPath)
-CubicSuperPath = deprecate(cubic_paths.CubicSuperPath)
-unCubicSuperPath = deprecate(cubic_paths.unCubicSuperPath)
-parsePath = deprecate(cubic_paths.parseCubicPath)
-formatPath = deprecate(cubic_paths.formatCubicPath)
+@deprecate
+def ArcToPath(p1, params):
+    return paths.arc_to_path(p1, params)
 
+@deprecate
+def CubicSuperPath(simplepath):
+    return paths.Path(simplepath).to_superpath()
+
+@deprecate
+def unCubicSuperPath(csp):
+    return paths.CubicSuperPath(csp).to_path().to_arrays()
+
+@deprecate
+def parseCubicPath(d):
+    return paths.CubicSuperPath(paths.Path(d))
+
+@deprecate
+def formatCubicPath(p):
+    return str(paths.Path(unCubicSuperPath(p)))
+
+matprod = deprecate(paths.matprod)
+rotmat = deprecate(paths.rotmat)
+applymat = deprecate(paths.applymat)
+norm = deprecate(paths.norm)

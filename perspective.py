@@ -23,7 +23,6 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 import inkex
 from inkex.paths import Path
 from inkex.elements import PathElement, Group
-from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
 from inkex.generic import EffectExtension
 from inkex.localization import _
 
@@ -65,8 +64,7 @@ class Project(EffectExtension):
 
         if isinstance(obj, (PathElement, Group)):
             if isinstance(envelope, PathElement):
-                path = envelope.path.transform(envelope.composed_transform())
-                path = parseCubicPath(str(path))
+                path = envelope.path.transform(envelope.composed_transform()).to_superpath()
 
                 if len(path) < 1 or len(path[0]) < 4:
                     return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
@@ -124,15 +122,13 @@ class Project(EffectExtension):
 
     def process_path(self, element, matrix):
         mat = element.composed_transform()
-        path = element.path.transform(mat)
-        point = parseCubicPath(str(path))
+        point = element.path.transform(mat).to_superpath()
         for subs in point:
             for csp in subs:
                 csp[0] = self.project_point(csp[0], matrix)
                 csp[1] = self.project_point(csp[1], matrix)
                 csp[2] = self.project_point(csp[2], matrix)
-        path = Path(unCubicSuperPath(point))
-        element.path = path.transform(-mat)
+        element.path = Path(point).transform(-mat)
 
     def project_point(self, point, matrix):
         return [(point[X] * matrix[0][0] + point[Y] * matrix[0][1] + matrix[0][2]) /

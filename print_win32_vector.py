@@ -34,8 +34,8 @@ import sys
 import ctypes
 
 import inkex
-from inkex.cubic_paths import parseCubicPath
 from inkex.transforms import Transform
+from inkex.elements import PathElement, Rectangle, Group, Use
 from inkex.paths import Path
 from inkex.localization import _
 
@@ -60,9 +60,8 @@ class MyEffect(inkex.Effect):
         fillcolor = None                # fill color
         stroke = 1                      # pen width in printer pixels
         # Very NB : If the pen width is greater than 1 then the output will Not be a vector output !
-        style = node.get('style')
+        style = node.style
         if style:
-            style = dict(inkex.Style.parse_str(style))
             if 'stroke' in style:
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
                     rgb = inkex.Color(style['stroke']).to_rgb()
@@ -74,12 +73,11 @@ class MyEffect(inkex.Effect):
                     fill = inkex.Color(style['fill']).to_rgb()
                     fillcolor = fill[0] + 256*fill[1] + 256*256*fill[2]
         color = rgb[0] + 256*rgb[1] + 256*256*rgb[2]
-        if node.tag == inkex.addNS('path','svg'):
-            d = node.get('d')
-            if not d:
+        if isinstance(node, PathElement):
+            p = node.path.to_superpath()
+            if not p:
                 return
-            p = parseCubicPath(d)
-        elif node.tag == inkex.addNS('rect','svg'):
+        elif isinstance(node, Rectangle):
             x = float(node.get('x'))
             y = float(node.get('y'))
             width = float(node.get('width'))
@@ -152,19 +150,17 @@ class MyEffect(inkex.Effect):
 
     def process_group(self, group):
         if group.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
-            style = group.get('style')
-            if style:
-                style = dict(inkex.Style.parse_str(style))
-                if 'display' in style:
-                    if style['display'] == 'none' and self.visibleLayers:
-                        return
+            style = group.style
+            if 'display' in style:
+                if style['display'] == 'none' and self.visibleLayers:
+                    return
         trans = group.get('transform')
         if trans:
             self.groupmat.append(Transform(self.groupmat[-1]) * Transform(trans))
         for node in group:
-            if node.tag == inkex.addNS('g','svg'):
+            if isinstance(node, Group):
                 self.process_group(node)
-            elif node.tag == inkex.addNS('use', 'svg'):
+            elif isinstance(node, Use):
                 self.process_clone(node)
             else:
                 self.process_shape(node, self.groupmat[-1])

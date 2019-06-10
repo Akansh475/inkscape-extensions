@@ -34,12 +34,12 @@ import copy
 import random
 
 import inkex
-import pathmodifier
 from inkex.localization import _
 from inkex.utils import inkbool
 from inkex.transforms import Transform
-from inkex.cubic_paths import parseCubicPath
 from inkex.elements import Group, Use
+
+import pathmodifier
 
 def flipxy(path):
     for pathcomp in path:
@@ -217,7 +217,7 @@ class PathScatter(pathmodifier.Diffeo):
 
         counter = 0
         for skelnode in self.skeletons.values():
-            self.curSekeleton = parseCubicPath(skelnode.get('d'))
+            self.curSekeleton = skelnode.path.to_superpath()
             for comp in self.curSekeleton:
                 self.skelcomp, self.lengths = linearize(comp)
                 # !!!!>----> TODO: really test if path is closed! end point==start point is not enough!

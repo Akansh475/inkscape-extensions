@@ -23,7 +23,6 @@ from inkex.paths import Path
 from inkex.transforms import Segment
 from inkex.generic import EffectExtension
 from inkex.elements import PathElement, Group
-from inkex.cubic_paths import CubicSuperPath, unCubicSuperPath
 
 class Project(EffectExtension):
     def effect(self):
@@ -52,7 +51,7 @@ class Project(EffectExtension):
             if isinstance(trafo, PathElement):
                 # distil trafo into four node points
                 trafo.apply_transform()
-                trafo = CubicSuperPath(trafo.path.to_arrays())
+                trafo = trafo.path.to_superpath()
                 if len(trafo[0]) < 4:
                     return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
                 trafo = [[(csp[1][0], csp[1][1]) for csp in subs] for subs in trafo][0][:4]
@@ -82,7 +81,7 @@ class Project(EffectExtension):
 
     def process_path(self, node):
         node.apply_transform()
-        points = CubicSuperPath(node.path.to_arrays())
+        points = node.path.to_superpath()
         #simpletransform.applyTransformToPath(mat, p)
         for subs in points:
             for csp in subs:
@@ -90,7 +89,7 @@ class Project(EffectExtension):
                 csp[1] = self.trafopoint(csp[1])
                 csp[2] = self.trafopoint(csp[2])
 
-        node.path = Path(unCubicSuperPath(points))
+        node.path = points.to_path()
 
     def trafopoint(self, xy):
         """Transform algorithm thanks to Jose Hevia (freon)"""

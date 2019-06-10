@@ -37,9 +37,7 @@ import inkex
 from inkex.localization import _
 from inkex.elements import PathElement, Group, Use
 from inkex.generic import EffectExtension
-from inkex.cubic_paths import parseCubicPath, formatCubicPath
 from inkex.deprecated import deprecate
-
 
 @deprecate
 def zSort(inNode, idList):
@@ -192,9 +190,9 @@ class PathModifier(EffectExtension):
                 childstyle.update(newstyle)
                 newstyle.update(childstyle)
                 childAsPath = self.objectToPath(child, False)
-                newp += inkex.parseCubicPath(childAsPath.get('d'))
-            newNode.set('d', inkex.formatCubicPath(newp))
-            newNode.set('style', str(inkex.Style(newstyle)))
+                newp += childAsPath.path.to_superpath()
+            newNode.path = newp
+            newNode.style = newstyle
 
             self.svg.get_current_layer().remove(newNode)
             if doReplace:
@@ -208,7 +206,6 @@ class PathModifier(EffectExtension):
 
     def objectToPath(self, node, doReplace=True):
         # --TODO: support other object types!!!!
-        # --TODO: make sure inkex.cubic_paths supports A and Q commands...
         if node.tag == inkex.addNS('rect', 'svg'):
             return self.rectToPath(node, doReplace)
         if node.tag == inkex.addNS('g', 'svg'):
@@ -244,14 +241,11 @@ class PathModifier(EffectExtension):
         # self.expandGroupsUnlinkClones(self.selected, True)
         self.objectsToPaths(self.svg.selected, True)
         self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path', 'svg'):
-                d = node.get('d')
-                p = inkex.parseCubicPath(d)
-
+        for node in self.svg.selected.values():
+            if isinstance(node, PathElement):
+                path = node.path.to_superpath()
                 # do what ever you want with p!
-
-                node.set('d', inkex.formatCubicPath(p))
+                node.path = path
 
 
 class Diffeo(PathModifier):
@@ -287,14 +281,13 @@ class Diffeo(PathModifier):
         self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
         for node in self.svg.selected.values():
             if isinstance(node, PathElement):
-                d = node.get('d')
-                p = parseCubicPath(d)
+                path = node.path.to_superpath()
 
-                for sub in p:
+                for sub in path:
                     for ctlpt in sub:
                         self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
 
-                node.set('d', formatCubicPath(p))
+                node.path = path
 
 
 if __name__ == '__main__':

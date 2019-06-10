@@ -368,7 +368,7 @@ class Rectangle(ShapeElement):
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
-        return 'M {0.left},{0.top} h{0.width}v{0.height}h-{0.width}'.format(self)
+        return 'M {0.left},{0.top} h{0.width}v{0.height}h{1} z'.format(self, -self.width)
 
 
 class Image(Rectangle):
@@ -388,17 +388,15 @@ class Circle(ShapeElement):
     right = property(lambda self: self.center_x + self.radius_x)
 
     def get_path(self):
-        """Calculte the arc path of this circle/elipse"""
-        return ('M {0.left} {0.right} '
-                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '
-                'A {0.radius_x},{0.radius_y} 0 1 0 {0.left}, {0.center_y}'
-               ).format(self)
-
+        """Calculte the arc path of this circle"""
+        return ('m {0.right},{0.center_y} '
+                'a {0.radius_x},{0.radius_y} 0 0 1 {1},0 '
+                'a {0.radius_x},{0.radius_y} 0 0 1 {2},0 z'
+           ).format(self, -2 * self.radius_x, 2 * self.radius_x)
 
 class Ellipse(Circle):
     """Provide a similar extension to the Circle interface"""
     tag_name = 'ellipse'
-
 
 class Use(ShapeElement):
     """A 'use' element that links to another in the document"""

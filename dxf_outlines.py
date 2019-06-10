@@ -40,7 +40,7 @@ import inkex
 from inkex.paths import Path
 from inkex.transforms import Transform
 from inkex.generic import OutputExtension
-from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
+from inkex.elements import PathElement, Rectangle, Line, Circle, Ellipse
 
 import numpy
 from numpy.linalg import solve
@@ -205,45 +205,13 @@ class DxfOutlines(OutputExtension):
         self.color = 7  # default is black
         if hsl[2]:
             self.color = 1 + (int(6 * hsl[0] + 0.5) % 6)  # use 6 hues
-        if node.tag == inkex.addNS('path', 'svg'):
-            d = node.get('d')
-            if not d:
-                return
-            p = parseCubicPath(d)
-        elif node.tag == inkex.addNS('rect', 'svg'):
-            x = float(node.get('x', 0))
-            y = float(node.get('y', 0))
-            width = float(node.get('width'))
-            height = float(node.get('height'))
-            d = "m %s,%s %s,%s %s,%s %s,%s z" % (x, y, width, 0, 0, height, -width, 0)
-            p = parseCubicPath(d)
-        elif node.tag == inkex.addNS('line', 'svg'):
-            x1 = float(node.get('x1', 0))
-            x2 = float(node.get('x2', 0))
-            y1 = float(node.get('y1', 0))
-            y2 = float(node.get('y2', 0))
-            d = "M %s,%s L %s,%s" % (x1, y1, x2, y2)
-            p = parseCubicPath(d)
-        elif node.tag == inkex.addNS('circle', 'svg'):
-            cx = float(node.get('cx', 0))
-            cy = float(node.get('cy', 0))
-            r = float(node.get('r'))
-            d = "m %s,%s a %s,%s 0 0 1 %s,%s %s,%s 0 0 1 %s,%s z" % (cx + r, cy, r, r, -2 * r, 0, r, r, 2 * r, 0)
-            p = parseCubicPath(d)
-        elif node.tag == inkex.addNS('ellipse', 'svg'):
-            cx = float(node.get('cx', 0))
-            cy = float(node.get('cy', 0))
-            rx = float(node.get('rx'))
-            ry = float(node.get('ry'))
-            d = "m %s,%s a %s,%s 0 0 1 %s,%s %s,%s 0 0 1 %s,%s z" % (cx + rx, cy, rx, ry, -2 * rx, 0, rx, ry, 2 * rx, 0)
-            p = parseCubicPath(d)
-        else:
+
+        if not isinstance(node, (PathElement, Rectangle, Line, Circle)):
             return
 
-        path = Path(unCubicSuperPath(p)).transform(Transform(mat) * node.transform)
-        p = parseCubicPath(str(path))
-
-        for sub in p:
+        # Transforming /after/ superpath is more reliable than before
+        # because of some issues with arcs in transformations
+        for sub in node.path.to_superpath().transform(Transform(mat) * node.transform):
             for i in range(len(sub) - 1):
                 s = sub[i]
                 e = sub[i + 1]

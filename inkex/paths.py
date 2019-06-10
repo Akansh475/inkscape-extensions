@@ -638,9 +638,9 @@ class CubicSuperPath(list):
 
         if self[-1]:
             # The last tuple is replaced, it's the coords of where the next segment will land.
-            self[-1][-1][-1] = item[0]
+            self[-1][-1][-1] = item[0][:]
         # The last coord is duplicated, but is expected to be replaced
-        self[-1].append(item[1:] + item[-1:])
+        self[-1].append(item[1:] + copy.deepcopy(item)[-1:])
 
     def to_path(self):
         """Convert the super path back to an svg path"""

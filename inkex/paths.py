@@ -594,6 +594,8 @@ class CubicSuperPath(list):
 
     def append(self, item):
         """Accept multiple different formats for the data"""
+        if isinstance(item, list) and len(item) == 2 and isinstance(item[0], str):
+            item = Segment.get_class(item[0])(*item[1])
         if isinstance(item, Segment):
             if isinstance(item, Move):
                 item, self._prev = [list(item.args), list(item.args), list(item.args)], item

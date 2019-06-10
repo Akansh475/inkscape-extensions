@@ -119,8 +119,14 @@ class BaseElement(etree.ElementBase):
             setattr(self, name, self.wrapped_attrs[name](value))
             value = str(getattr(self, name))
             if not value:
-                return
-        super(BaseElement, self).set(addNS(name), value)
+                return None
+        if value is None:
+            return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+        return super(BaseElement, self).set(addNS(name), value)
+
+    def pop(self, name):
+        """Delete/remove the element attribute named, with addNS support."""
+        return self.set(name, None)
 
     def add(self, *children):
         """

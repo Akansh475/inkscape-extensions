@@ -42,6 +42,7 @@ class BaseElement(etree.ElementBase):
         ('transform', Transform),
         ('style', Style),
     )
+    __elements = set()
 
     # We do this because python2 and python3 have different ways
     # of combining two dictionaries that are incompatible.
@@ -57,6 +58,17 @@ class BaseElement(etree.ElementBase):
             self.set(key, value)
         for key, value in kwargs.items():
             self.set(key, value)
+
+    def append(self, element):
+        # extra bookkeeping is required to avoid python reference counter go to zero
+        # see https://gitlab.com/inkscape/extensions/issues/81
+        self.__elements.add(element)
+        super(BaseElement, self).append(element)
+
+    def remove(self, element):
+        if element in self.__elements:
+            self.__elements.remove(element)
+        super(BaseElement, self).remove(element)
 
     @classmethod
     def get_subclasses(cls):

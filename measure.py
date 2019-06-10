@@ -141,10 +141,7 @@ class Length(inkex.Effect):
         # loop over all selected paths
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path', 'svg'):
-                mat = inkex.composeParents(node, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-                p = inkex.parseCubicPath(node.get('d'))
-                # XXX New API needed to apply transform to path
-                #simpletransform.applyTransformToPath(mat, p)
+                p = node.path.transform(node.composed_transform()).to_superpath()
                 if self.options.mtype == "length":
                     slengths, stotal = csplength(p)
                     self.group = etree.SubElement(node.getparent(), inkex.addNS('text', 'svg'))

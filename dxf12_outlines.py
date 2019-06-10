@@ -28,8 +28,9 @@ import re
 import inkex
 from inkex.generic import OutputExtension
 from inkex.transforms import Transform
-from inkex.cubic_paths import parseCubicPath
 from inkex.bezier import cspsubdiv
+
+from cubicsuperpath import parseCubicPath
 
 r12_header = ''' 0 
 SECTION

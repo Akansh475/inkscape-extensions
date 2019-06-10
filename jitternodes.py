@@ -90,9 +90,8 @@ class JitterNodes(EffectExtension):
     def effect(self):
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('path','svg'):
-                d = node.get('d')
-                p = inkex.parseCubicPath(d)
-                for subpath in p:
+                path = node.path.is_superpath()
+                for subpath in path:
                     for csp in subpath:
                         if self.options.end:
                             delta=randomize([0,0], self.options.radiusx, self.options.radiusy, self.options.dist)
@@ -105,10 +104,8 @@ class JitterNodes(EffectExtension):
                         if self.options.ctrl:
                             csp[0]=randomize(csp[0], self.options.radiusx, self.options.radiusy, self.options.dist)
                             csp[2]=randomize(csp[2], self.options.radiusx, self.options.radiusy, self.options.dist)
-                node.set('d',inkex.formatCubicPath(p))
+                node.path = path
 
 
 if __name__ == '__main__':
     JitterNodes().run()
-
-

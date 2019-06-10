@@ -20,6 +20,7 @@
 
 import math
 import inkex
+from inkex.elements import PathElement
 from inkex import inkbool
 
 class Whirl(inkex.Effect):
@@ -33,33 +34,31 @@ class Whirl(inkex.Effect):
                          type=inkbool,
                         dest="rotation", default=True,
                         help="direction of rotation")
+
     def effect(self):
         view_center = self.svg.get_center_position()
-        for id, node in self.svg.selected.items():
+        for node in self.svg.selected.values():
             rotation = -1
-            if self.options.rotation == True:
+            if self.options.rotation is True:
                 rotation = 1
             whirl = self.options.whirl / 1000
-            if node.tag == inkex.addNS('path','svg'):
-                d = node.get('d')
-                p = inkex.parseCubicPath(d)
-                for sub in p:
+            if isinstance(node, PathElement):
+                path = node.path.to_superpath()
+                for sub in path:
                     for csp in sub:
                         for point in csp:
                             point[0] -= view_center[0]
                             point[1] -= view_center[1]
                             dist = math.sqrt((point[0] ** 2) + (point[1] ** 2))
                             if dist != 0:
-                                a = rotation * dist * whirl
-                                theta = math.atan2(point[1], point[0]) + a
+                                art = rotation * dist * whirl
+                                theta = math.atan2(point[1], point[0]) + art
                                 point[0] = (dist * math.cos(theta))
                                 point[1] = (dist * math.sin(theta))
                             point[0] += view_center[0]
                             point[1] += view_center[1]
-                node.set('d', inkex.formatCubicPath(p))
+                node.path = path
 
 
 if __name__ == '__main__':
     Whirl().run()
-
-

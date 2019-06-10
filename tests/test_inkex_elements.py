@@ -346,3 +346,16 @@ class DefsTest(ElementTestCase):
         self.assertTrue(isinstance(svg.defs, Defs))
         defs = svg.getElementById('defs33')
         self.assertTrue(isinstance(defs, Defs))
+
+class ReferenceCountTest(TestCase):
+    """Test inkex.element type is preservation on adding to group"""
+
+    def test_add_rects(self):
+        from inkex.elements import Rectangle
+        g = Group()
+        for i in range(10):
+            rect = Rectangle()
+            g.add(rect)
+
+        for elem in g:
+            self.assertEqual(type(elem), Rectangle)

@@ -211,37 +211,4 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         """Add document unit when no unit is specified in the string """
         return render_unit(value, self.unit)
 
-
-class SvgClassLookup(etree.CustomElementClassLookup):
-    """
-    We choose what kind of Elements we should return for each element, providing useful
-    SVG based API to our extensions system.
-    """
-    _lookups = set({}) # type: typing.Set[str]
-
-    def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
-        """Choose what kind of functionality our element will have"""
-        for cls in self.get_lookups():
-            nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
-            tags = getattr(cls, 'tag_names', [])
-            if name.lower() in tags:
-                return cls
-            if name == (tag or '') and \
-                    (not namespace or not nsp or nsp == namespace):
-                return cls
-
-        import inkex
-        inkex.errormsg("Failed to look up element: {}:{} ({})".format(
-            node_type, name, namespace))
-        return None
-
-    def get_lookups(self):
-        """Scan for and cache a list of available classes"""
-        if not self._lookups:
-            self._lookups = set(BaseElement.get_subclasses())
-
-        return self._lookups
-
-
-SVG_PARSER = lxml.etree.XMLParser(huge_tree=True)
-SVG_PARSER.setElementClassLookup(SvgClassLookup())
+from .elements import SVG_PARSER

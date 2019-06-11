@@ -60,9 +60,11 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_creation(self):
         """Create elements with attributes"""
-        group = Group(attrib={'inkscape:label': 'Foo'})
+        group = Group()
+        group.set('inkscape:label', 'Foo')
         self.assertEqual(group.get('inkscape:label'), 'Foo')
-        group = Group(inkscape__label="Bar")
+        group = Group()
+        group.set('inkscape:label', 'Bar')
         self.assertEqual(group.label, 'Bar')
 
     def test_sort_selected(self):

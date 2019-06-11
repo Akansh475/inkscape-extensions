@@ -33,11 +33,11 @@ def unCubicSuperPath(csp):
     return paths.CubicSuperPath(csp).to_path().to_arrays()
 
 @deprecate
-def parseCubicPath(d):
+def parsePath(d):
     return paths.CubicSuperPath(paths.Path(d))
 
 @deprecate
-def formatCubicPath(p):
+def formatPath(p):
     return str(paths.Path(unCubicSuperPath(p)))
 
 matprod = deprecate(paths.matprod)

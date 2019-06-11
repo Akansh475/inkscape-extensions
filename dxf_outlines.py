@@ -37,13 +37,9 @@ from __future__ import print_function
 
 import dxf_templates
 import inkex
-from inkex.paths import Path
 from inkex.transforms import Transform
 from inkex.generic import OutputExtension
-from inkex.elements import PathElement, Rectangle, Line, Circle, Ellipse
-
-import numpy
-from numpy.linalg import solve
+from inkex.elements import Group, Use, PathElement, Rectangle, Line, Circle
 
 def get_matrix(u, i, j):
     if j == i + 2:
@@ -91,8 +87,7 @@ class DxfOutlines(OutputExtension):
         self.layer = '0'  # mandatory layer
         self.layernames = []
         self.csp_old = [[0.0, 0.0]] * 4  # previous spline
-        if numpy is not None:
-            self.d = numpy.array([0], float)  # knot vector
+        self.d = [0.0] # knot vector
         self.poly = [[0.0, 0.0]]  # LWPOLYLINE data
 
     def save(self, stream):
@@ -102,6 +97,7 @@ class DxfOutlines(OutputExtension):
         self.dxf.append(str.encode(self.options.char_encode))
 
     def dxf_line(self, csp):
+        """Draw a line in the DXF format"""
         self.handle += 1
         self.dxf_add("  0\nLINE\n  5\n%x\n100\nAcDbEntity\n  8\n%s\n 62\n%d\n100\nAcDbLine\n" % (self.handle, self.layer, self.color))
         self.dxf_add(" 10\n%f\n 20\n%f\n 30\n0.0\n 11\n%f\n 21\n%f\n 31\n0.0\n" % (csp[0][0], csp[0][1], csp[1][0], csp[1][1]))
@@ -140,19 +136,19 @@ class DxfOutlines(OutputExtension):
             self.dxf_add(" 10\n%f\n 20\n%f\n 30\n0.0\n" % (i[0], i[1]))
 
     def ROBO_spline(self, csp):
-        # this spline has zero curvature at the endpoints, as in ROBO-Master
+        """this spline has zero curvature at the endpoints, as in ROBO-Master"""
         if (abs(csp[0][0] - self.csp_old[3][0]) > .0001
                 or abs(csp[0][1] - self.csp_old[3][1]) > .0001
                 or abs((csp[1][1] - csp[0][1]) * (self.csp_old[3][0] - self.csp_old[2][0]) - (csp[1][0] - csp[0][0]) * (self.csp_old[3][1] - self.csp_old[2][1])) > .001):
             self.ROBO_output()  # terminate current spline
-            self.xfit = numpy.array([csp[0][0]], float)  # initiallize new spline
-            self.yfit = numpy.array([csp[0][1]], float)
-            self.d = numpy.array([0], float)
+            self.xfit = [csp[0][0]]  # initiallize new spline
+            self.yfit = [csp[0][1]]
+            self.d = [0.0]
             self.color_ROBO = self.color
             self.layer_ROBO = self.layer
-        self.xfit = numpy.concatenate((self.xfit, numpy.zeros(3)))  # append to current spline
-        self.yfit = numpy.concatenate((self.yfit, numpy.zeros(3)))
-        self.d = numpy.concatenate((self.d, numpy.zeros(3)))
+        self.xfit += 3 * [0.0]
+        self.yfit += 3 * [0.0]
+        self.d += 3 * [0.0]
         for i in range(1, 4):
             j = len(self.d) + i - 4
             self.xfit[j] = get_fit(i / 3.0, csp, 0)
@@ -161,15 +157,23 @@ class DxfOutlines(OutputExtension):
         self.csp_old = csp
 
     def ROBO_output(self):
+        try:
+            import numpy
+            from numpy.linalg import solve
+        except ImportError:
+            inkex.errormsg("Failed to import the numpy or numpy.linalg modules. These modules are required by the ROBO option. Please install them and try again.")
+            return
+
         if len(self.d) == 1:
             return
         fits = len(self.d)
         ctrls = fits + 2
         knots = ctrls + 4
-        self.xfit = numpy.concatenate((self.xfit, numpy.zeros(2)))  # pad with 2 endpoint constraints
-        self.yfit = numpy.concatenate((self.yfit, numpy.zeros(2)))  # pad with 2 endpoint constraints
-        self.d = numpy.concatenate((self.d, numpy.zeros(6)))  # pad with 3 duplicates at each end
+        self.xfit += 2 * [0.0] # pad with 2 endpoint constraints
+        self.yfit += 2 * [0.0]
+        self.d += 6 * [0.0] # pad with 3 duplicates at each end
         self.d[fits + 2] = self.d[fits + 1] = self.d[fits] = self.d[fits - 1]
+
         solmatrix = numpy.zeros((ctrls, ctrls), dtype=float)
         for i in range(fits):
             solmatrix[i, i] = get_matrix(self.d, i, i)
@@ -226,6 +230,7 @@ class DxfOutlines(OutputExtension):
                     self.dxf_spline([s[1], s[2], e[0], e[1]])
 
     def process_clone(self, node):
+        """Process a clone node, looking for internal paths"""
         trans = node.get('transform')
         x = node.get('x')
         y = node.get('y')
@@ -240,12 +245,12 @@ class DxfOutlines(OutputExtension):
         if trans or x or y:
             self.groupmat.append(Transform(self.groupmat[-1]) * mat)
         # get referenced node
-        refid = node.get(inkex.addNS('href', 'xlink'))
+        refid = node.get('xlink:href')
         refnode = self.svg.getElementById(refid[1:])
         if refnode is not None:
-            if refnode.tag == inkex.addNS('g', 'svg'):
+            if isinstance(refnode, Group):
                 self.process_group(refnode)
-            elif refnode.tag == inkex.addNS('use', 'svg'):
+            elif isinstance(refnode, Use):
                 self.process_clone(refnode)
             else:
                 self.process_shape(refnode, self.groupmat[-1])
@@ -254,16 +259,15 @@ class DxfOutlines(OutputExtension):
             self.groupmat.pop()
 
     def process_group(self, group):
-        if group.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
-            style = group.get('style')
-            if style:
-                style = dict(inkex.Style.parse_str(style))
-                if 'display' in style:
-                    if style['display'] == 'none' and self.options.layer_option and self.options.layer_option == 'visible':
-                        return
-            layer = group.get(inkex.addNS('label', 'inkscape'))
-            if self.options.layer_name and self.options.layer_option and self.options.layer_option == 'name' and not layer.lower() in self.options.layer_name:
+        """Process group elements"""
+        if isinstance(group, Group) and group.is_layer():
+            style = group.style
+            if style.get('display', '') == 'none' and self.options.layer_option and self.options.layer_option == 'visible':
                 return
+            layer = group.label
+            if self.options.layer_name and self.options.layer_option == 'name':
+                if not layer.lower() in self.options.layer_name:
+                    return
 
             layer = layer.replace(' ', '_')
             if layer in self.layers:
@@ -272,9 +276,9 @@ class DxfOutlines(OutputExtension):
         if trans:
             self.groupmat.append(Transform(self.groupmat[-1]) * Transform(trans))
         for node in group:
-            if node.tag == inkex.addNS('g', 'svg'):
+            if isinstance(node, Group):
                 self.process_group(node)
-            elif node.tag == inkex.addNS('use', 'svg'):
+            elif isinstance(node, Use):
                 self.process_clone(node)
             else:
                 self.process_shape(node, self.groupmat[-1])
@@ -282,9 +286,6 @@ class DxfOutlines(OutputExtension):
             self.groupmat.pop()
 
     def effect(self):
-        if numpy is None:
-            inkex.errormsg("Failed to import the numpy or numpy.linalg modules. These modules are required by this extension. Please install them and try again.")
-            return
         # Warn user if name match field is empty
         if self.options.layer_option and self.options.layer_option == 'name' and not self.options.layer_name:
             return inkex.errormsg("Error: Field 'Layer match name' must be filled when using 'By name match' option")
@@ -299,8 +300,8 @@ class DxfOutlines(OutputExtension):
         # self.dxf_add("999\nDXF created by Inkscape\n")  # Some programs do not take comments in DXF files (KLayout 0.21.12 for example)
         self.dxf_add(dxf_templates.r14_header)
         for node in self.document.getroot().xpath('//svg:g', namespaces=inkex.NSS):
-            if node.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
-                layer = node.get(inkex.addNS('label', 'inkscape'))
+            if node.is_layer():
+                layer = node.label
                 self.layernames.append(layer.lower())
                 if self.options.layer_name and self.options.layer_option and self.options.layer_option == 'name' and not layer.lower() in self.options.layer_name:
                     continue

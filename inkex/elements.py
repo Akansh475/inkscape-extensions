@@ -157,6 +157,14 @@ class BaseElement(etree.ElementBase):
                 for descendant in child.descendants():
                     yield descendant
 
+    def ancestors(self):
+        """Walk the parents and yield all the ancestor elements, parent first"""
+        parent = self.getparent()
+        if parent is not None:
+            yield parent
+            for child in parent.ancestors():
+                yield child
+
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
         return super(BaseElement, self).xpath(pattern, namespaces=namespaces)

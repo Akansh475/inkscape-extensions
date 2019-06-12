@@ -548,3 +548,12 @@ class MissingGlyph(BaseElement):
     """An svg font missing-glyph element"""
     tag_name = 'missing-glyph'
 
+
+class Symbol(BaseElement):
+    """SVG symbol element"""
+    tag_name = 'symbol'
+
+
+class PathEffect(BaseElement):
+    """Inkscape LPE element"""
+    tag_name = 'inkscape:path-effect'

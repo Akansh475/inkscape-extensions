@@ -137,6 +137,11 @@ class DeprecatedEffect(object):
             self._doc_ids = dict.fromkeys(self.svg.get_ids())
         return self._doc_ids
 
+    def getdocids(self):
+        self._deprecated('getdocids', _('Use `self.svg.get_ids()` instead of {} and `doc_ids`.'))
+        self._doc_ids = None
+        self.svg.ids.clear()
+
     def getselected(self):
         self._deprecated('getselected', _('{} has been removed'))
 

@@ -413,7 +413,12 @@ class DefsTest(ElementTestCase):
         self.assertTrue(isinstance(defs, Defs))
 
 class ReferenceCountTest(TestCase):
-    """Test inkex.element type is preservation on adding to group"""
+    """
+    Test inkex.element.BaseElement-derived object type is preserved on adding to group
+
+    See https://gitlab.com/inkscape/extensions/issues/81 for details
+
+    """
 
     def test_add_rects(self):
         from inkex.elements import Rectangle

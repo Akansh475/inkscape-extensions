@@ -46,10 +46,10 @@ class SetupTypographyCanvas(inkex.Effect):
                                      help="Descender")
 
     def create_horizontal_guideline(self, name, position):
-        return self.svg.add(Guide(0, position, (0, 1), inkscape__label=name))
+        return self.svg.add(Guide().move_to(0, position, (0, 1)).set(inkscape__label=name))
 
     def create_vertical_guideline(self, name, position):
-        return self.svg.add(Guide(position, 0, (1, 0), inkscape__label=name))
+        return self.svg.add(Guide().move_to(position, 0, (1, 0)).set(inkscape__label=name))
 
     def effect(self):
         # Get all the options

@@ -33,11 +33,47 @@ from .transforms import BoundingBox
 from .transforms import Transform
 from .utils import NSS, addNS, removeNS
 
+
+class SvgClassLookup(etree.CustomElementClassLookup):
+    """
+    We choose what kind of Elements we should return for each element, providing useful
+    SVG based API to our extensions system.
+    """
+    _lookups = set({}) # type: typing.Set[str]
+
+    def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
+        """Choose what kind of functionality our element will have"""
+        for cls in self.get_lookups():
+            nsp, tag = removeNS(getattr(cls, 'tag_name', None), True)
+            tags = getattr(cls, 'tag_names', [])
+            if name.lower() in tags:
+                return cls
+            if name == (tag or '') and \
+                    (not namespace or not nsp or nsp == namespace):
+                return cls
+
+        import inkex
+        inkex.errormsg("Failed to look up element: {}:{} ({})".format(
+            node_type, name, namespace))
+        return None
+
+    def get_lookups(self):
+        """Scan for and cache a list of available classes"""
+        if not self._lookups:
+            self._lookups = set(BaseElement.get_subclasses())
+
+        return self._lookups
+
+SVG_PARSER = etree.XMLParser(huge_tree=True)
+SVG_PARSER.setElementClassLookup(SvgClassLookup())
+
+
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
     tag_name = 'none'
     TAG = property(lambda self: removeNS(self.tag_name)[-1])
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
+    PARSER = SVG_PARSER
     WRAPPED_ATTRS = (
         ('transform', Transform),
         ('style', Style),
@@ -47,16 +83,6 @@ class BaseElement(etree.ElementBase):
     # of combining two dictionaries that are incompatible.
     # This allows us to update these with inheritance.
     wrapped_attrs = property(lambda self: dict(self.WRAPPED_ATTRS))
-
-    def __init__(self, *children, **kwargs):
-        newkw = {'nsmap': kwargs.pop('nsmap', None)}
-        super(BaseElement, self).__init__(*children, **newkw)
-        # We covert the setting of all attributes so that we can
-        # better control them, both namespaces and value types.
-        for key, value in kwargs.pop('attrib', {}).items():
-            self.set(key, value)
-        for key, value in kwargs.items():
-            self.set(key, value)
 
     @classmethod
     def get_subclasses(cls):
@@ -112,21 +138,34 @@ class BaseElement(etree.ElementBase):
             return ret
         return super(BaseElement, self).get(addNS(name), default)
 
-    def set(self, name, value):
+    def set(self, name=None, value=None, **kwargs):
         """Set element attribute named, with addNS support."""
-        if name in self.wrapped_attrs:
-            # Always keep the local wrapped class up to date.
-            setattr(self, name, self.wrapped_attrs[name](value))
-            value = str(getattr(self, name))
-            if not value:
-                return None
-        if value is None:
-            return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
-        return super(BaseElement, self).set(addNS(name), value)
+        if name is not None:
+            kwargs[name] = value
+
+        for name, value in kwargs.items():
+            if name in self.wrapped_attrs:
+                # Always keep the local wrapped class up to date.
+                setattr(self, name, self.wrapped_attrs[name](value))
+                value = str(getattr(self, name))
+                if not value:
+                    continue
+            if value is None:
+                self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+            else:
+                super(BaseElement, self).set(addNS(name), value)
+
+        return self
 
     def pop(self, name):
         """Delete/remove the element attribute named, with addNS support."""
-        return self.set(name, None)
+        if name in self.wrapped_attrs:
+            # Always keep the local wrapped class up to date.
+            value = getattr(self, name)
+            setattr(self, name, self.wrapped_attrs[name](None))
+            return value
+        else:
+            return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
 
     def add(self, *children):
         """
@@ -448,11 +487,6 @@ class Guide(BaseElement):
     """An inkscape guide"""
     tag_name = 'sodipodi:guide'
 
-    def __init__(self, *args, **kwargs):
-        super(Guide, self).__init__(**kwargs)
-        if args:
-            self.move_to(*args)
-
     is_horizontal = property(lambda self: self.get('orientation') in ('0,1', '0,-1'))
     is_vertical = property(lambda self: self.get('orientation') == '1,0')
     point = property(lambda self: self.get('position').split(','))
@@ -477,6 +511,7 @@ class Guide(BaseElement):
             angle = "{:g},{:g}".format(*angle)
 
         self.set('orientation', angle)
+        return self
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""

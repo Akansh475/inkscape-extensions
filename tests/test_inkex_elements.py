@@ -60,10 +60,75 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_creation(self):
         """Create elements with attributes"""
-        group = Group(attrib={'inkscape:label': 'Foo'})
+        group = Group().set(inkscape__label='Foo')
         self.assertEqual(group.get('inkscape:label'), 'Foo')
-        group = Group(inkscape__label="Bar")
+        group = Group().set(inkscape__label='Bar')
         self.assertEqual(group.label, 'Bar')
+
+    def test_chained_set_multiple_attributes(self):
+        """Set multiple attributes at a time"""
+        group = Group().set(
+            attr1='A',
+            attr2='B'
+        ).set(
+            attr3='C',
+            attr4='D'
+        )
+        self.assertEqual(group.get('attr1'), 'A')
+        self.assertEqual(group.get('attr2'), 'B')
+        self.assertEqual(group.get('attr3'), 'C')
+        self.assertEqual(group.get('attr4'), 'D')
+
+        # remove attributes, setting them to None
+        group.set(
+            attr1=None,
+            attr4=None
+        )
+
+        self.assertEqual(group.get('attr1'), None)
+        self.assertEqual(group.get('attr2'), 'B')
+        self.assertEqual(group.get('attr3'), 'C')
+        self.assertEqual(group.get('attr4'), None)
+
+        self.assertEqual(group.pop('attr2'), 'B')
+        self.assertEqual(group.pop('attr3'), 'C')
+
+    def test_set_wrapped_attribute(self):
+        """Remove wrapped attribute using .set()"""
+        group = Group().set(
+            transform=ScaleTransform(2)
+        )
+        self.assertEqual(group.transform.matrix[0][0], 2)
+        self.assertEqual(group.transform.matrix[1][1], 2)
+
+        group.set(
+            transform=None
+        )
+        self.assertEqual(group.transform, Transform())
+
+    def test_pop_wrapped_attribute(self):
+        """Remove wrapped attribute using .pop()"""
+        group = Group()
+
+        self.assertEqual(group.pop('transform'), Transform())
+
+        group.set(
+            transform=ScaleTransform(2)
+        )
+        self.assertEqual(group.pop('transform'), ScaleTransform(2))
+        self.assertEqual(group.pop('transform'), Transform())
+
+    def test_pop_regular_attribute(self):
+        """Remove wrapped attribute using .pop()"""
+        group = Group()
+
+        self.assertEqual(group.get('attr1'), None)
+
+        group.set(
+            attr1="42"
+        )
+        self.assertEqual(group.pop('attr1'), "42")
+        self.assertEqual(group.pop('attr1'), None)
 
     def test_sort_selected(self):
         """Are the selected items sorted"""
@@ -304,8 +369,8 @@ class NamedViewTest(ElementTestCase):
     """Test the sodipodi namedview tag"""
     def test_guides(self):
         """Create a guide and see a list of them"""
-        self.svg.namedview.add(Guide(0, 0, 0))
-        self.svg.namedview.add(Guide(0, 0, 90))
+        self.svg.namedview.add(Guide().move_to(0, 0, 0))
+        self.svg.namedview.add(Guide().move_to(0, 0, 90))
         self.assertEqual(len(self.svg.namedview.get_guides()), 2)
 
 class TextTest(ElementTestCase):
@@ -346,3 +411,21 @@ class DefsTest(ElementTestCase):
         self.assertTrue(isinstance(svg.defs, Defs))
         defs = svg.getElementById('defs33')
         self.assertTrue(isinstance(defs, Defs))
+
+class ReferenceCountTest(TestCase):
+    """
+    Test inkex.element.BaseElement-derived object type is preserved on adding to group
+
+    See https://gitlab.com/inkscape/extensions/issues/81 for details
+
+    """
+
+    def test_add_rects(self):
+        from inkex.elements import Rectangle
+        g = Group()
+        for i in range(10):
+            rect = Rectangle()
+            g.add(rect)
+
+        for elem in g:
+            self.assertEqual(type(elem), Rectangle)

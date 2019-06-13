@@ -19,7 +19,6 @@
 #
 import inkex
 from inkex.elements import PathElement
-from inkex.paths import Path
 from inkex.generic import EffectExtension
 
 class Flatten(EffectExtension):
@@ -32,8 +31,7 @@ class Flatten(EffectExtension):
     def effect(self):
         for node in self.svg.selected.values():
             if isinstance(node, PathElement):
-                d = node.get('d')
-                p = inkex.parseCubicPath(d)
+                p = node.path.to_superpath()
                 inkex.cspsubdiv(p, self.options.flat)
                 np = []
                 for sp in p:
@@ -43,9 +41,8 @@ class Flatten(EffectExtension):
                         if first:
                             cmd = 'M'
                         first = False
-                        np.append([cmd,[csp[1][0],csp[1][1]]])
-                node.set('d', str(Path(np)))
+                        np.append([cmd, [csp[1][0], csp[1][1]]])
+                node.path = np
 
 if __name__ == '__main__':
     Flatten().run()
-

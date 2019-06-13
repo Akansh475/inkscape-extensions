@@ -22,9 +22,7 @@ Base class for HGPL Encoding
 """
 
 import re
-import os
 import math
-import string
 
 import inkex
 from inkex.transforms import Transform
@@ -225,12 +223,8 @@ class hpglEncoder(object):
 
     def processPath(self, node, mat, pen):
         # process path
-        path = node.get('d')
+        path = node.path.transform(mat).to_superpath()
         if path:
-            # parse and transform path
-            path = inkex.parseCubicPath(path)
-            # XXX New API needed for applying transforms to paths
-            # simpletransform.applyTransformToPath(mat, path)
             inkex.cspsubdiv(path, self.flat)
             # path to HPGL commands
             oldPosX = 0.0

@@ -19,16 +19,12 @@
 #
 """Join paths with lines or polygons"""
 
-from lxml import etree
 
-from inkex.localization import _
-
-from inkex.cubic_paths import parseCubicPath, unCubicSuperPath
-from inkex.elements import PathElement, Group
-from inkex.paths import Path
-from inkex.generic import EffectExtension
 import inkex
-
+from inkex.localization import _
+from inkex.elements import PathElement, Group
+from inkex.generic import EffectExtension
+from inkex.paths import Path
 
 class Extrude(EffectExtension):
     def __init__(self):
@@ -52,7 +48,7 @@ class Extrude(EffectExtension):
         for path in paths:
             path.apply_transform()
 
-        pts = [parseCubicPath(node.path) for node in paths]
+        pts = [node.path.to_superpath() for node in paths]
 
         for n1 in range(0, len(paths)):
             for n2 in range(n1 + 1, len(paths)):

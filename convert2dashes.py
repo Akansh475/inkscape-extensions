@@ -23,73 +23,80 @@ This extension converts a path into a dashed line using 'stroke-dasharray'
 It is a modification of the file addnodes.py
 """
 import inkex
+from inkex.paths import CubicSuperPath
+from inkex.elements import Group, PathElement
+from inkex.localization import _
 
 class Dashit(inkex.Effect):
+    """Extension to convert paths into dash-array line"""
     def __init__(self):
         super(Dashit, self).__init__()
         self.not_converted = []
 
     def effect(self):
-        for i, node in self.svg.selected.items():
+        for node in self.svg.selected.values():
             self.convert2dash(node)
-        if len(self.not_converted):
-            inkex.errormsg(_('Total number of objects not converted: {}\n').format(len(self.not_converted)))
+        if self.not_converted:
+            inkex.errormsg(_('Total number of objects not converted: {}\n').format(
+                len(self.not_converted)))
             # return list of IDs in case the user needs to find a specific object
             inkex.debug(self.not_converted)
 
     def convert2dash(self, node):
-        if node.tag == inkex.addNS('g', 'svg'):
+        """Convert each selected node's dash array"""
+        if isinstance(node, Group):
             for child in node:
                 self.convert2dash(child)
+        elif isinstance(node, PathElement):
+            self._convert(node)
         else:
-            if node.tag == inkex.addNS('path','svg'):
-                dashes = []
-                offset = 0
-                style = dict(inkex.Style.parse_str(node.get('style')))
-                if 'stroke-dasharray' in style:
-                    if style['stroke-dasharray'].find(',') > 0:
-                        dashes = [float (dash) for dash in style['stroke-dasharray'].split(',')]
-                if 'stroke-dashoffset' in style:
-                    offset = style['stroke-dashoffset']
-                if dashes:
-                    p = inkex.parseCubicPath(node.get('d'))
-                    new = []
-                    for sub in p:
-                        idash = 0
-                        dash = dashes[0]
-                        length = float (offset)
-                        while dash < length:
-                            length = length - dash
-                            idash = (idash + 1) % len(dashes)
-                            dash = dashes[idash]
-                        new.append([sub[0][:]])
-                        i = 1
-                        while i < len(sub):
-                            dash = dash - length
-                            length = inkex.cspseglength(new[-1][-1], sub[i])
-                            while dash < length:
-                                new[-1][-1], next, sub[i] = inkex.cspbezsplitatlength(new[-1][-1], sub[i], dash/length)
-                                if idash % 2:           # create a gap
-                                    new.append([next[:]])
-                                else:                   # splice the curve
-                                    new[-1].append(next[:])
-                                length = length - dash
-                                idash = (idash + 1) % len(dashes)
-                                dash = dashes[idash]
-                            if idash % 2:
-                                new.append([sub[i]])
-                            else:
-                                new[-1].append(sub[i])
-                            i += 1
-                    node.set('d', inkex.formatCubicPath(new))
-                    del style['stroke-dasharray']
-                    node.set('style', str(inkex.Style(style)))
-                    if node.get(inkex.addNS('type','sodipodi')):
-                        del node.attrib[inkex.addNS('type', 'sodipodi')]
-            else:
-                self.not_converted.append(node.get('id'))
+            self.not_converted.append(node.get('id'))
 
+    @staticmethod
+    def _convert(node):
+        dashes = []
+        offset = 0
+        style = node.style
+        if 'stroke-dasharray' in style:
+            if style['stroke-dasharray'].find(',') > 0:
+                dashes = [float(dash) for dash in style['stroke-dasharray'].split(',')]
+        if 'stroke-dashoffset' in style:
+            offset = style['stroke-dashoffset']
+        if not dashes:
+            return
+        new = []
+        for sub in node.path.to_superpath():
+            idash = 0
+            dash = dashes[0]
+            length = float(offset)
+            while dash < length:
+                length = length - dash
+                idash = (idash + 1) % len(dashes)
+                dash = dashes[idash]
+            new.append([sub[0][:]])
+            i = 1
+            while i < len(sub):
+                dash = dash - length
+                length = inkex.cspseglength(new[-1][-1], sub[i])
+                while dash < length:
+                    new[-1][-1], nxt, sub[i] = \
+                        inkex.cspbezsplitatlength(new[-1][-1], sub[i], dash/length)
+                    if idash % 2:           # create a gap
+                        new.append([nxt[:]])
+                    else:                   # splice the curve
+                        new[-1].append(nxt[:])
+                    length = length - dash
+                    idash = (idash + 1) % len(dashes)
+                    dash = dashes[idash]
+                if idash % 2:
+                    new.append([sub[i]])
+                else:
+                    new[-1].append(sub[i])
+                i += 1
+        style.pop('stroke-dasharray')
+        node.pop('sodipodi:type')
+        node.path = CubicSuperPath(new)
+        node.style = style
 
 if __name__ == '__main__':
     Dashit().run()
-

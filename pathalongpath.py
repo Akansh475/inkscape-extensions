@@ -34,12 +34,12 @@ import copy
 
 import inkex
 from inkex.bezier import pointdistance, beziersplitatt, tpoint
-from inkex.paths import Path
+from inkex.localization import _
+from inkex.paths import CubicSuperPath
+from inkex.utils import inkbool
+
 
 import pathmodifier
-from inkex.localization import _
-from inkex.utils import inkbool
-from inkex.cubic_paths import CubicSuperPath, unCubicSuperPath
 
 def flipxy(path):
     for pathcomp in path:
@@ -223,59 +223,64 @@ class PathAlongPath(pathmodifier.Diffeo):
 
         for id, node in self.patterns.items():
             if node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
-                d = node.get('d')
-                p0 = CubicSuperPath(node.path.to_arrays())
+                node.path = self._sekl_call(node.path.to_superpath(), dx, bbox)
+
+    def describe(self, obj, tab=0):
+        if isinstance(obj, list):
+            print(("  " * tab) + "{}:{}".format(type(obj).__name__, id(obj)))
+            for child in obj:
+                self.describe(child, tab=tab+1)
+        else:
+            print(("  " * tab) + "{}:{}".format(type(obj).__name__, obj))
+
+    def _sekl_call(self, p0, dx, bbox):
+        if self.options.vertical:
+            flipxy(p0)
+        newp = []
+        for skelnode in self.skeletons.values():
+            self.curSekeleton = skelnode.path.to_superpath()
+            if self.options.vertical:
+                flipxy(self.curSekeleton)
+            for comp in self.curSekeleton:
+                path = copy.deepcopy(p0)
+                self.skelcomp, self.lengths = linearize(comp)
+                # !!!!>----> TODO: really test if path is closed! end point==start point is not enough!
+                self.skelcompIsClosed = (self.skelcomp[0] == self.skelcomp[-1])
+
+                length = sum(self.lengths)
+                xoffset = self.skelcomp[0][0] - bbox[0] + self.options.toffset
+                yoffset = self.skelcomp[0][1] - (bbox[2] + bbox[3]) / 2 - self.options.noffset
+
+                if self.options.repeat:
+                    NbCopies = max(1, int(round((length + self.options.space) / dx)))
+                    width = dx * NbCopies
+                    if not self.skelcompIsClosed:
+                        width -= self.options.space
+                    bbox = bbox[0], bbox[0] + width, bbox[2], bbox[3]
+                    new = []
+                    for sub in path:
+                        for i in range(0, NbCopies, 1):
+                            new.append(copy.deepcopy(sub))
+                            offset(sub, dx, 0)
+                    path = new
+
+                for sub in path:
+                    offset(sub, xoffset, yoffset)
+
+                if self.options.stretch:
+                    if not width:
+                        exit(_("The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width."))
+                    for sub in path:
+                        stretch(sub, length / width, 1, self.skelcomp[0])
+
+                for sub in path:
+                    for ctlpt in sub:
+                        self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
+
                 if self.options.vertical:
-                    flipxy(p0)
-
-                newp = []
-                for skelnode in self.skeletons.values():
-                    self.curSekeleton = CubicSuperPath(skelnode.path.to_arrays())
-                    if self.options.vertical:
-                        flipxy(self.curSekeleton)
-                    for comp in self.curSekeleton:
-                        print(self.curSekeleton)
-                        p = copy.deepcopy(p0)
-                        self.skelcomp, self.lengths = linearize(comp)
-                        # !!!!>----> TODO: really test if path is closed! end point==start point is not enough!
-                        self.skelcompIsClosed = (self.skelcomp[0] == self.skelcomp[-1])
-
-                        length = sum(self.lengths)
-                        xoffset = self.skelcomp[0][0] - bbox[0] + self.options.toffset
-                        yoffset = self.skelcomp[0][1] - (bbox[2] + bbox[3]) / 2 - self.options.noffset
-
-                        if self.options.repeat:
-                            NbCopies = max(1, int(round((length + self.options.space) / dx)))
-                            width = dx * NbCopies
-                            if not self.skelcompIsClosed:
-                                width -= self.options.space
-                            bbox = bbox[0], bbox[0] + width, bbox[2], bbox[3]
-                            new = []
-                            for sub in p:
-                                for i in range(0, NbCopies, 1):
-                                    new.append(copy.deepcopy(sub))
-                                    offset(sub, dx, 0)
-                            p = new
-
-                        for sub in p:
-                            offset(sub, xoffset, yoffset)
-
-                        if self.options.stretch:
-                            if not width:
-                                exit(_("The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width."))
-                            for sub in p:
-                                stretch(sub, length / width, 1, self.skelcomp[0])
-
-                        for sub in p:
-                            for ctlpt in sub:
-                                self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
-
-                        if self.options.vertical:
-                            flipxy(p)
-                        newp += p
-
-                print("Setting path: {}".format(str(Path(unCubicSuperPath(newp)))))
-                node.set('d', str(Path(unCubicSuperPath(newp))))
+                    flipxy(path)
+                newp += path
+        return CubicSuperPath(newp)
 
 
 if __name__ == '__main__':

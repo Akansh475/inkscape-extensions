@@ -149,10 +149,20 @@ class BaseElement(etree.ElementBase):
                 setattr(self, name, self.wrapped_attrs[name](value))
                 value = str(getattr(self, name))
                 if not value:
-                    return
-            super(BaseElement, self).set(addNS(name), value)
+                    continue
+            if value is None:
+                self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+            else:
+                super(BaseElement, self).set(addNS(name), value)
 
         return self
+
+    def pop(self, name):
+        """Delete/remove the element attribute named, with addNS support."""
+        if name in self.wrapped_attrs:
+            # Always keep the local wrapped class up to date.
+            setattr(self, name, self.wrapped_attrs[name](None))
+        return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
 
     def add(self, *children):
         """
@@ -182,6 +192,14 @@ class BaseElement(etree.ElementBase):
             if hasattr(child, 'descendants'):
                 for descendant in child.descendants():
                     yield descendant
+
+    def ancestors(self):
+        """Walk the parents and yield all the ancestor elements, parent first"""
+        parent = self.getparent()
+        if parent is not None:
+            yield parent
+            for child in parent.ancestors():
+                yield child
 
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
@@ -394,7 +412,7 @@ class Rectangle(ShapeElement):
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
-        return 'M {0.left},{0.top} h{0.width}v{0.height}h-{0.width}'.format(self)
+        return 'M {0.left},{0.top} h{0.width}v{0.height}h{1} z'.format(self, -self.width)
 
 
 class Image(Rectangle):
@@ -414,17 +432,15 @@ class Circle(ShapeElement):
     right = property(lambda self: self.center_x + self.radius_x)
 
     def get_path(self):
-        """Calculte the arc path of this circle/elipse"""
-        return ('M {0.left} {0.right} '
-                'A {0.radius_x},{0.radius_y} 0 1 0 {0.right}, {0.center_y} '
-                'A {0.radius_x},{0.radius_y} 0 1 0 {0.left}, {0.center_y}'
-               ).format(self)
-
+        """Calculte the arc path of this circle"""
+        return ('m {0.right},{0.center_y} '
+                'a {0.radius_x},{0.radius_y} 0 0 1 {1},0 '
+                'a {0.radius_x},{0.radius_y} 0 0 1 {2},0 z'
+           ).format(self, -2 * self.radius_x, 2 * self.radius_x)
 
 class Ellipse(Circle):
     """Provide a similar extension to the Circle interface"""
     tag_name = 'ellipse'
-
 
 class Use(ShapeElement):
     """A 'use' element that links to another in the document"""
@@ -564,3 +580,12 @@ class MissingGlyph(BaseElement):
     """An svg font missing-glyph element"""
     tag_name = 'missing-glyph'
 
+
+class Symbol(BaseElement):
+    """SVG symbol element"""
+    tag_name = 'symbol'
+
+
+class PathEffect(BaseElement):
+    """Inkscape LPE element"""
+    tag_name = 'inkscape:path-effect'

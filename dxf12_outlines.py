@@ -28,7 +28,6 @@ import re
 import inkex
 from inkex.generic import OutputExtension
 from inkex.transforms import Transform
-from inkex.cubic_paths import parseCubicPath
 from inkex.bezier import cspsubdiv
 
 r12_header = ''' 0 
@@ -127,14 +126,13 @@ class DxfTwelve(OutputExtension):
 
             node.transform *= Transform([[scale, 0, 0], [0, -scale, h * scale]])
             node.apply_transform()
-            d = node.get('d')
-            p = parseCubicPath(d)
+            path = node.path.to_superpath()
 
             if re.search('drill$', layer, re.I) is None:
                 # if layer == 'Brackets Drill':
-                self.dxf_path_to_lines(layer, p)
+                self.dxf_path_to_lines(layer, path)
             else:
-                self.dxf_path_to_point(layer, p)
+                self.dxf_path_to_point(layer, path)
 
         self.dxf_add(r12_footer)
 

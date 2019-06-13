@@ -5,14 +5,60 @@ Test Inkex path parsing functionality.
 
 import re
 
-from inkex.paths import InvalidPath, Path, Segment, Horz, ZoneClose, Line
-from inkex.transforms import BoundingBox, Transform
+from inkex.paths import (
+    InvalidPath, Path, Segment,
+    line,
+    Line, Move, Horz, Vert, Curve, Smooth, Quadratic, TepidQuadratic, Arc,
+)
+from inkex.transforms import Transform
 from inkex.tester import TestCase
 
+class SegmentTest(TestCase):
+    """
+    Test specific segment functionality.
+    """
+    def test_equals(self):
+        """Segments should be equalitive"""
+        self.assertEqual(Move(10, 10), Move(10, 10))
+        self.assertEqual(Line(10, 10), Line(10, 10))
+        self.assertEqual(line(10, 10), line(10, 10))
+        self.assertNotEqual(line(10, 10), Line(10, 10))
+        self.assertEqual(Horz(10), Line(10, 0))
+        self.assertEqual(Vert(10), Line(0, 10))
+        self.assertNotEqual(Vert(10), Horz(10))
+
+    def test_to_curves(self):
+        """Segments can become curves"""
+        self.assertRaises(ValueError, Move(0, 0).to_curve, None)
+        self.assertEqual(Line(10, 10).to_curve([10, 5]), (10, 5, 10, 10, 10, 10))
+        self.assertEqual(Horz(10).to_curve([10, 5]), (10, 5, 10, 5, 10, 5))
+        self.assertEqual(Vert(10).to_curve([5, 10]), (5, 10, 5, 10, 5, 10))
+        self.assertEqual(Curve(5, 5, 10, 10, 4, 4).to_curve([0, 0]), (5, 5, 10, 10, 4, 4))
+
+        self.assertEqual(
+            Smooth(10, 10, 4, 4).to_curve(Curve(5, 5, 10, 10, 4, 4)),
+            (-2, -2, 10, 10, 4, 4),
+        )
+
+        self.assertAlmostTuple(
+            Quadratic(10, 10, 4, 4).to_curve([0, 0]).args,
+            (6.666666666666666, 6.666666666666666, 8, 8, 4, 4),
+        )
+
+        self.assertAlmostTuple(
+            TepidQuadratic(4, 4).to_curve(Quadratic(11, 12, 14, 19)).args,
+            #            (20.666666666666664, 30, 17.333333333333332, 25, 4, 4),
+            (15.999999999999998, 23.666666666666664, 12.666666666666666, 18.666666666666664, 4, 4),
+        )
+
+        curves = list(Arc(50, 50, 0, 0, 1, 85, 85).to_curves([0, 0]))
+        self.assertEqual(len(curves), 3)
+        self.assertAlmostTuple(curves[0].args, (19.77590700610636, -5.4865851247611115, 38.18634924829132, -10.4196482558544, 55.44095225512604, -5.796291314453416))
+        self.assertAlmostTuple(curves[1].args, (72.69555526196076, -1.172934373052433, 86.17293437305243, 12.30444473803924, 90.79629131445341, 29.559047744873958))
+        self.assertAlmostTuple(curves[2].args, (95.41964825585441, 46.81365075170867, 90.4865851247611, 65.22409299389365, 77.85533905932738, 77.85533905932738))
 
 class PathTest(TestCase):
     """Test path API and calculations"""
-
     def _assertPath(self, path, want_string):
         """Test a normalized path string against a good value"""
         return self.assertEqual(re.sub('\\s+', ' ', str(path)), want_string)
@@ -114,18 +160,14 @@ class PathTest(TestCase):
                     ' 50,50 0 0 1 14.644657,85.355341'
                     ' 50,50 0 0 1 14.644676,14.644651'
                     ' 50,50 0 0 1 85.355333,14.644651 Z')
-        # Floating point results may vary with computer architecture;
-        # use assertAlmostEqual to allow a tolerance in the result.
 
-        bb_tuple = path[1].bounding_box(path[0])
-        expected = (85.355333, 99.99999988134624, 14.644650999999998, 85.355341)
-        precision = 8
-        
-        for i in range(4):
-            self.assertAlmostEqual(bb_tuple[i], expected[i], precision)
+        self.assertAlmostTuple(
+            list(path[1].bounding_box(path[0])),
+            (85.355333, 99.99999988134624, 24.021470405410984, 85.355341))
 
         #self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
         #self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())
+
 
     def test_adding_to_path(self):
         """Paths can be translated using addition"""

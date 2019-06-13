@@ -38,7 +38,8 @@ from .utils import removeNS
 from .transforms import BoundingBox
 from .elements import ( # pylint: disable=unused-import
     BaseElement, OtherElements, Group, PathElement, Rectangle, Image,
-    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Tspan, Marker
+    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Tspan, Marker,
+    SVG_PARSER
 )
 
 if False: # pylint: disable=using-constant-test
@@ -210,5 +211,3 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     def add_unit(self, value):
         """Add document unit when no unit is specified in the string """
         return render_unit(value, self.unit)
-
-from .elements import SVG_PARSER

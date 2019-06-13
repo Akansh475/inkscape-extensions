@@ -34,7 +34,6 @@ from .transforms import Transform
 from .utils import NSS, addNS, removeNS
 
 
-import lxml
 class SvgClassLookup(etree.CustomElementClassLookup):
     """
     We choose what kind of Elements we should return for each element, providing useful
@@ -65,8 +64,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
 
         return self._lookups
 
-
-SVG_PARSER = lxml.etree.XMLParser(huge_tree=True)
+SVG_PARSER = etree.XMLParser(huge_tree=True)
 SVG_PARSER.setElementClassLookup(SvgClassLookup())
 
 

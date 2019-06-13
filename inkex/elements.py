@@ -161,8 +161,11 @@ class BaseElement(etree.ElementBase):
         """Delete/remove the element attribute named, with addNS support."""
         if name in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
+            value = getattr(self, name)
             setattr(self, name, self.wrapped_attrs[name](None))
-        return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+            return value
+        else:
+            return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
 
     def add(self, *children):
         """

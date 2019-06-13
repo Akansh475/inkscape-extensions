@@ -65,6 +65,71 @@ class CoreElementTestCase(ElementTestCase):
         group = Group().set(inkscape__label='Bar')
         self.assertEqual(group.label, 'Bar')
 
+    def test_chained_set_multiple_attributes(self):
+        """Set multiple attributes at a time"""
+        group = Group().set(
+            attr1='A',
+            attr2='B'
+        ).set(
+            attr3='C',
+            attr4='D'
+        )
+        self.assertEqual(group.get('attr1'), 'A')
+        self.assertEqual(group.get('attr2'), 'B')
+        self.assertEqual(group.get('attr3'), 'C')
+        self.assertEqual(group.get('attr4'), 'D')
+
+        # remove attributes, setting them to None
+        group.set(
+            attr1=None,
+            attr4=None
+        )
+
+        self.assertEqual(group.get('attr1'), None)
+        self.assertEqual(group.get('attr2'), 'B')
+        self.assertEqual(group.get('attr3'), 'C')
+        self.assertEqual(group.get('attr4'), None)
+
+        self.assertEqual(group.pop('attr2'), 'B')
+        self.assertEqual(group.pop('attr3'), 'C')
+
+    def test_set_wrapped_attribute(self):
+        """Remove wrapped attribute using .set()"""
+        group = Group().set(
+            transform=ScaleTransform(2)
+        )
+        self.assertEqual(group.transform.matrix[0][0], 2)
+        self.assertEqual(group.transform.matrix[1][1], 2)
+
+        group.set(
+            transform=None
+        )
+        self.assertEqual(group.transform, Transform())
+
+    def test_pop_wrapped_attribute(self):
+        """Remove wrapped attribute using .pop()"""
+        group = Group()
+
+        self.assertEqual(group.pop('transform'), Transform())
+
+        group.set(
+            transform=ScaleTransform(2)
+        )
+        self.assertEqual(group.pop('transform'), ScaleTransform(2))
+        self.assertEqual(group.pop('transform'), Transform())
+
+    def test_pop_regular_attribute(self):
+        """Remove wrapped attribute using .pop()"""
+        group = Group()
+
+        self.assertEqual(group.get('attr1'), None)
+
+        group.set(
+            attr1="42"
+        )
+        self.assertEqual(group.pop('attr1'), "42")
+        self.assertEqual(group.pop('attr1'), None)
+
     def test_sort_selected(self):
         """Are the selected items sorted"""
         self.svg.set_selected('G', 'B', 'D', 'F')

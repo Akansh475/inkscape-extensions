@@ -306,8 +306,8 @@ class NamedViewTest(ElementTestCase):
     """Test the sodipodi namedview tag"""
     def test_guides(self):
         """Create a guide and see a list of them"""
-        self.svg.namedview.add(Guide(0, 0, 0))
-        self.svg.namedview.add(Guide(0, 0, 90))
+        self.svg.namedview.add(Guide().move_to(0, 0, 0))
+        self.svg.namedview.add(Guide().move_to(0, 0, 90))
         self.assertEqual(len(self.svg.namedview.get_guides()), 2)
 
 class TextTest(ElementTestCase):

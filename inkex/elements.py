@@ -138,15 +138,21 @@ class BaseElement(etree.ElementBase):
             return ret
         return super(BaseElement, self).get(addNS(name), default)
 
-    def set(self, name, value):
+    def set(self, name=None, value=None, **kwargs):
         """Set element attribute named, with addNS support."""
-        if name in self.wrapped_attrs:
-            # Always keep the local wrapped class up to date.
-            setattr(self, name, self.wrapped_attrs[name](value))
-            value = str(getattr(self, name))
-            if not value:
-                return
-        super(BaseElement, self).set(addNS(name), value)
+        if name is not None:
+            kwargs[name] = value
+
+        for name, value in kwargs.items():
+            if name in self.wrapped_attrs:
+                # Always keep the local wrapped class up to date.
+                setattr(self, name, self.wrapped_attrs[name](value))
+                value = str(getattr(self, name))
+                if not value:
+                    return
+            super(BaseElement, self).set(addNS(name), value)
+
+        return self
 
     def add(self, *children):
         """
@@ -462,11 +468,6 @@ class Guide(BaseElement):
     """An inkscape guide"""
     tag_name = 'sodipodi:guide'
 
-    def __init__(self, *args, **kwargs):
-        super(Guide, self).__init__(**kwargs)
-        if args:
-            self.move_to(*args)
-
     is_horizontal = property(lambda self: self.get('orientation') in ('0,1', '0,-1'))
     is_vertical = property(lambda self: self.get('orientation') == '1,0')
     point = property(lambda self: self.get('position').split(','))
@@ -491,6 +492,7 @@ class Guide(BaseElement):
             angle = "{:g},{:g}".format(*angle)
 
         self.set('orientation', angle)
+        return self
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""

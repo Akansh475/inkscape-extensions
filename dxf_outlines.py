@@ -104,7 +104,8 @@ class DxfOutlines(OutputExtension):
 
     def LWPOLY_line(self, csp):
         if (abs(csp[0][0] - self.poly[-1][0]) > .0001
-                or abs(csp[0][1] - self.poly[-1][1]) > .0001):
+                or abs(csp[0][1] - self.poly[-1][1]) > .0001
+                or self.color_LWPOLY != self.color): # THIS LINE IS NEW
             self.LWPOLY_output()  # terminate current polyline
             self.poly = [csp[0]]  # initiallize new polyline
             self.color_LWPOLY = self.color

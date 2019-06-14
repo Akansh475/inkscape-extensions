@@ -138,23 +138,35 @@ class BaseElement(etree.ElementBase):
             return ret
         return super(BaseElement, self).get(addNS(name), default)
 
-    def set(self, name=None, value=None, **kwargs):
-        """Set element attribute named, with addNS support."""
-        if name is not None:
-            kwargs[name] = value
+    def set(self, name, value):
+        """Set element attribute named, with addNS support
 
+        Note: double underscore is used as namespace separator,
+        i.e. "namespace__attr" will be treated as "namespace:attr"
+        """
+        if name in self.wrapped_attrs:
+            # Always keep the local wrapped class up to date.
+            setattr(self, name, self.wrapped_attrs[name](value))
+            value = str(getattr(self, name))
+            if not value:
+                return
+        if value is None:
+            self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+        else:
+            super(BaseElement, self).set(addNS(name), value)
+
+    def update(self, **kwargs):
+        """
+        Update element attributes using keyword arguments
+
+        Note: double underscore is used as namespace separator,
+        i.e. "namespace__attr" argument name will be treated as "namespace:attr"
+
+        :param kwargs: dict with name=value pairs
+        :return:
+        """
         for name, value in kwargs.items():
-            if name in self.wrapped_attrs:
-                # Always keep the local wrapped class up to date.
-                setattr(self, name, self.wrapped_attrs[name](value))
-                value = str(getattr(self, name))
-                if not value:
-                    continue
-            if value is None:
-                self.attrib.pop(addNS(name), None) # pylint: disable=no-member
-            else:
-                super(BaseElement, self).set(addNS(name), value)
-
+            self.set(name,value)
         return self
 
     def pop(self, name):
@@ -562,7 +574,7 @@ class Grid(BaseElement):
 class Script(BaseElement):
     """A javascript tag in SVG"""
     tag_name = 'script'
-    
+
 
 class SVGfont(BaseElement):
     """An svg font element"""
@@ -572,8 +584,8 @@ class SVGfont(BaseElement):
 class FontFace(BaseElement):
     """An svg font font-face element"""
     tag_name = 'font-face'
-    
-    
+
+
 class Glyph(BaseElement):
     """An svg font glyph element"""
     tag_name = 'glyph'

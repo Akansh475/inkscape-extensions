@@ -22,7 +22,7 @@ SVG specific utilities for tests.
 
 from lxml import etree
 
-from inkex.svg import SVG_PARSER
+from inkex.elements import SVG_PARSER
 
 def svg(svg_attrs=''):
     """Returns xml etree based on a simple SVG element.

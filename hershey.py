@@ -55,9 +55,9 @@ import math
 
 import inkex
 
-from inkex import Transform, ScaleTransform, TranslateTransform, Style, units, svg
+from inkex import Transform, ScaleTransform, TranslateTransform, Style, units
 
-from inkex.elements import Group, TextElement, FlowPara, \
+from inkex.elements import SVG_PARSER, Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
 
 from lxml import etree
@@ -670,7 +670,7 @@ Evil Mad Scientist Laboratories
     
             f = open(the_path)
             p = etree.XMLParser(huge_tree=True)
-            font_svg = etree.parse(f, parser=svg.SVG_PARSER)
+            font_svg = etree.parse(f, parser=SVG_PARSER)
 
             f.close()
             self.font_dict[fontname] = self.parse_svg_font( font_svg.getroot() )

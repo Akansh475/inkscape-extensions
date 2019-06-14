@@ -34,13 +34,8 @@ import lxml
 from lxml import etree
 
 from .units import discover_unit, convert_unit, render_unit
-from .utils import removeNS
 from .transforms import BoundingBox
-from .elements import ( # pylint: disable=unused-import
-    BaseElement, OtherElements, Group, PathElement, Rectangle, Image,
-    Circle, Ellipse, TextElement, TextPath, Use, Defs, NamedView, Metadata, Tspan, Marker,
-    SVG_PARSER
-)
+from .elements import BaseElement, NamedView
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import

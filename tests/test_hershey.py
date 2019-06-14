@@ -2,7 +2,6 @@
 # tests for the hershey-text extension (hershey.py and hershey.inx)
 from lxml import etree
 
-from inkex.svg import SVG_PARSER
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareOrderIndependentStyle
 from inkex.tester.svg import svg, svg_file, uu_svg

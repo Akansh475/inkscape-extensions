@@ -30,7 +30,7 @@ from argparse import ArgumentParser
 from lxml import etree
 
 from .utils import filename_arg, AbortExtension
-from .svg import SVG_PARSER
+from .elements import SVG_PARSER
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3

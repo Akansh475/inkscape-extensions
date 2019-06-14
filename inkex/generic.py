@@ -30,8 +30,7 @@ import types
 from lxml.etree import fromstring
 
 from .utils import errormsg
-from .svg import SVG_PARSER
-from .elements import BaseElement, Group
+from .elements import SVG_PARSER, BaseElement, Group
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import TranslateTransform
 from .deprecated import DeprecatedEffect

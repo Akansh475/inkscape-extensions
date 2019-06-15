@@ -58,17 +58,17 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_creation(self):
         """Create elements with attributes"""
-        group = Group().set(inkscape__label='Foo')
+        group = Group().update(inkscape__label='Foo')
         self.assertEqual(group.get('inkscape:label'), 'Foo')
-        group = Group().set(inkscape__label='Bar')
+        group = Group().update(inkscape__label='Bar')
         self.assertEqual(group.label, 'Bar')
 
-    def test_chained_set_multiple_attributes(self):
+    def test_chained_update_multiple_attributes(self):
         """Set multiple attributes at a time"""
-        group = Group().set(
+        group = Group().update(
             attr1='A',
             attr2='B'
-        ).set(
+        ).update(
             attr3='C',
             attr4='D'
         )
@@ -78,7 +78,7 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(group.get('attr4'), 'D')
 
         # remove attributes, setting them to None
-        group.set(
+        group.update(
             attr1=None,
             attr4=None
         )
@@ -93,13 +93,13 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_set_wrapped_attribute(self):
         """Remove wrapped attribute using .set()"""
-        group = Group().set(
+        group = Group().update(
             transform=ScaleTransform(2)
         )
         self.assertEqual(group.transform.matrix[0][0], 2)
         self.assertEqual(group.transform.matrix[1][1], 2)
 
-        group.set(
+        group.update(
             transform=None
         )
         self.assertEqual(group.transform, Transform())
@@ -110,7 +110,7 @@ class CoreElementTestCase(ElementTestCase):
 
         self.assertEqual(group.pop('transform'), Transform())
 
-        group.set(
+        group.update(
             transform=ScaleTransform(2)
         )
         self.assertEqual(group.pop('transform'), ScaleTransform(2))
@@ -122,7 +122,7 @@ class CoreElementTestCase(ElementTestCase):
 
         self.assertEqual(group.get('attr1'), None)
 
-        group.set(
+        group.update(
             attr1="42"
         )
         self.assertEqual(group.pop('attr1'), "42")

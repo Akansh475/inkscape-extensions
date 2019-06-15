@@ -139,11 +139,7 @@ class BaseElement(etree.ElementBase):
         return super(BaseElement, self).get(addNS(name), default)
 
     def set(self, name, value):
-        """Set element attribute named, with addNS support
-
-        Note: double underscore is used as namespace separator,
-        i.e. "namespace__attr" will be treated as "namespace:attr"
-        """
+        """Set element attribute named, with addNS support"""
         if name in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
             setattr(self, name, self.wrapped_attrs[name](value))
@@ -163,7 +159,7 @@ class BaseElement(etree.ElementBase):
         i.e. "namespace__attr" argument name will be treated as "namespace:attr"
 
         :param kwargs: dict with name=value pairs
-        :return:
+        :return: self
         """
         for name, value in kwargs.items():
             self.set(name,value)

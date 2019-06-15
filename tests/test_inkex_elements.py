@@ -36,12 +36,10 @@ class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
     tag = 'g'
 
-    def test_attr(self):
-        """Access attributes"""
-        elem = ShapeElement()
-        self.assertRaises(AttributeError, getattr, elem, 'foo')
-        self.assertRaises(NotImplementedError, elem.get_path)
-        self.assertRaises(AttributeError, elem.set_path, 1)
+    def test_abstract_raises(self):
+        """Abstract classes cannot be instantiated"""
+        with self.assertRaises(AssertionError):
+            elem = ShapeElement()
 
     def test_findall(self):
         """Findall elements in svg"""

@@ -169,7 +169,7 @@ class BaseElement(etree.ElementBase):
             self.set(name,value)
         return self
 
-    def pop(self, name):
+    def pop(self, name, default=None):
         """Delete/remove the element attribute named, with addNS support."""
         if name in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
@@ -177,7 +177,7 @@ class BaseElement(etree.ElementBase):
             setattr(self, name, self.wrapped_attrs[name](None))
             return value
         else:
-            return self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+            return self.attrib.pop(addNS(name), default) # pylint: disable=no-member
 
     def add(self, *children):
         """
@@ -223,6 +223,11 @@ class BaseElement(etree.ElementBase):
     def findall(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
+
+    def delete(self):
+        """Delete this node from it's parent node"""
+        if self.getparent():
+            self.getparent().remove(self)
 
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to

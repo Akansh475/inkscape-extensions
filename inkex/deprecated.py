@@ -36,6 +36,7 @@ import inkex
 import inkex.utils
 from inkex.localization import _
 from inkex.elements import Guide
+from inkex.svg import SvgDocumentElement
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -71,7 +72,7 @@ class DeprecatedEffect(object):
         # by the new effects code, but we want to keep this as a Mixin so these
         # items will keep pylint happy and let use check our code as we write.
         if not hasattr(self, 'svg'):
-            self.svg = inkex.svg.SvgDocumentElement()
+            self.svg = SvgDocumentElement()
         if not hasattr(self, 'arg_parser'):
             self.arg_parser = ArgumentParser()
         if not hasattr(self, 'run'):

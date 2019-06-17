@@ -5,6 +5,7 @@ omit = tests/*
        .tox/*
        index.py
        setup.py
+       inkex.py
 
 [report]
 exclude_lines =

@@ -14,11 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 
-import sys
 
-# We will use the inkex module with the predefined Effect base class.
 import inkex
 from inkex.localization import _
+from inkex.utils import NSS
 
 class JessyInk_Effects(inkex.Effect):
     def __init__(self):
@@ -33,11 +32,11 @@ class JessyInk_Effects(inkex.Effect):
         self.arg_parser.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
         self.arg_parser.add_argument('--effectOut',  type=str, dest = 'effectOut', default = 'none')
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
@@ -47,22 +46,22 @@ class JessyInk_Effects(inkex.Effect):
 
         for id, node in self.svg.selected.items():
             if (self.options.effectIn == "appear") or (self.options.effectIn == "fade") or (self.options.effectIn == "pop"):
-                node.set("{" + inkex.NSS["jessyink"] + "}effectIn","name:" + self.options.effectIn  + ";order:" + self.options.effectInOrder + ";length:" + str(int(self.options.effectInDuration * 1000)))
+                node.set("{" + NSS["jessyink"] + "}effectIn","name:" + self.options.effectIn  + ";order:" + self.options.effectInOrder + ";length:" + str(int(self.options.effectInDuration * 1000)))
                 # Remove possible view argument.
-                if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
-                    del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+                if "{" + NSS["jessyink"] + "}view" in node.attrib:
+                    del node.attrib["{" + NSS["jessyink"] + "}view"]
             else:
-                if "{" + inkex.NSS["jessyink"] + "}effectIn" in node.attrib:
-                    del node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
+                if "{" + NSS["jessyink"] + "}effectIn" in node.attrib:
+                    del node.attrib["{" + NSS["jessyink"] + "}effectIn"]
 
             if (self.options.effectOut == "appear") or (self.options.effectOut == "fade") or (self.options.effectOut == "pop"):
-                node.set("{" + inkex.NSS["jessyink"] + "}effectOut","name:" + self.options.effectOut  + ";order:" + self.options.effectOutOrder + ";length:" + str(int(self.options.effectOutDuration * 1000)))
+                node.set("{" + NSS["jessyink"] + "}effectOut","name:" + self.options.effectOut  + ";order:" + self.options.effectOutOrder + ";length:" + str(int(self.options.effectOutDuration * 1000)))
                 # Remove possible view argument.
-                if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
-                    del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+                if "{" + NSS["jessyink"] + "}view" in node.attrib:
+                    del node.attrib["{" + NSS["jessyink"] + "}view"]
             else:
-                if "{" + inkex.NSS["jessyink"] + "}effectOut" in node.attrib:
-                    del node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
+                if "{" + NSS["jessyink"] + "}effectOut" in node.attrib:
+                    del node.attrib["{" + NSS["jessyink"] + "}effectOut"]
 
 # Create effect instance
 if __name__ == '__main__':

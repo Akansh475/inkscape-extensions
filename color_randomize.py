@@ -5,8 +5,7 @@ from __future__ import absolute_import, division
 import random
 
 import coloreffect
-import inkex
-
+from inkex import colors
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
@@ -40,14 +39,14 @@ class C(coloreffect.ColorEffect):
         return random.randrange(min_, max_) / 255
 
     def colmod(self, r, g, b):
-        hsl = inkex.rgb_to_hsl(r / 255, g / 255, b / 255)
+        hsl = colors.rgb_to_hsl(r / 255, g / 255, b / 255)
         if self.options.hue_range > 0:
             hsl[0] = self.randomize_hsl(self.options.hue_range, hsl[0])
         if self.options.saturation_range > 0:
             hsl[1] = self.randomize_hsl(self.options.saturation_range, hsl[1])
         if self.options.lightness_range > 0:
             hsl[2] = self.randomize_hsl(self.options.lightness_range, hsl[2])
-        rgb = inkex.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
+        rgb = colors.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
         return '{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
     def opacmod(self, opacity):

@@ -25,6 +25,7 @@ import inkex
 import inkex.utils
 from inkex.paths import Path
 from inkex.generic import EffectExtension
+from inkex.elements import Group
 
 from lxml import etree
 
@@ -135,9 +136,8 @@ class Edge3d(EffectExtension):
                         g.append(nn)
 
     def getGroup(self, node):
-        defs = self.document.getroot().xpath('//svg:defs', namespaces=inkex.NSS)
-        if defs:
-            defs = defs[0]
+        defs = self.svg.defs
+        if defs is not None:
             # make a clipped group, clip with clone of original, clipped group
             # include original and group of paths
             clip = etree.SubElement(defs, inkex.addNS('clipPath', 'svg'))
@@ -146,8 +146,8 @@ class Edge3d(EffectExtension):
             clip.append(nn)
             clipId = self.svg.get_unique_id('clipPath')
             clip.set('id', clipId)
-            clipG = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
-            g = etree.SubElement(clipG, inkex.addNS('g', 'svg'))
+            clipG = node.getparent().add(Group())
+            g = clipG.add(Group())
             clipG.set('clip-path', 'url(#' + clipId + ')')
             # make a blur filter reference by the style of each path
             filt = etree.SubElement(defs, inkex.addNS('filter', 'svg'))
@@ -161,7 +161,7 @@ class Edge3d(EffectExtension):
             fe.set('stdDeviation', str(self.options.stddev))
         else:
             # can't find defs, just group paths
-            g = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
+            g = node.getparent().add(Group())
             g.append(node)
 
         return g

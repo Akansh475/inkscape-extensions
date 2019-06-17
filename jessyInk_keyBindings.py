@@ -22,6 +22,7 @@ from lxml import etree
 
 import inkex
 from inkex.localization import _
+from inkex.utils import NSS
 
 
 class JessyInk_CustomKeyBindings(inkex.Effect):
@@ -105,7 +106,7 @@ class JessyInk_CustomKeyBindings(inkex.Effect):
         self.arg_parser.add_argument('--index_increaseNumberOfColumns', action=IndexAction, default='')
         self.arg_parser.add_argument('--index_setNumberOfColumnsToDefault', action=IndexAction, default='')
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
         self.slideActions["backWithEffects"] = "dispatchEffects(-1);"
         self.slideActions["nextWithEffects"] = "dispatchEffects(1);"
@@ -193,13 +194,13 @@ class JessyInk_CustomKeyBindings(inkex.Effect):
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
         # Remove old master slide property
-        for node in self.document.xpath("//svg:g[@jessyink:customKeyBindings='customKeyBindings']", namespaces=inkex.NSS):
+        for node in self.document.xpath("//svg:g[@jessyink:customKeyBindings='customKeyBindings']", namespaces=NSS):
             node.getparent().remove(node)
 
         # Set custom key bindings.
@@ -246,7 +247,7 @@ class JessyInk_CustomKeyBindings(inkex.Effect):
         scriptElm = etree.Element(inkex.addNS("script", "svg"))
         scriptElm.text = nodeText
         groupElm = etree.Element(inkex.addNS("g", "svg"))
-        groupElm.set("{" + inkex.NSS["jessyink"] + "}customKeyBindings", "customKeyBindings")
+        groupElm.set("{" + NSS["jessyink"] + "}customKeyBindings", "customKeyBindings")
         groupElm.set("onload", "this.getCustomCharBindings = function() { return getCustomCharBindingsSub(); }; this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };")
         groupElm.append(scriptElm)
         self.document.getroot().append(groupElm)

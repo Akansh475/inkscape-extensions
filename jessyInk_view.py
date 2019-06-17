@@ -17,9 +17,9 @@
 #
 
 import inkex
-from inkex.localization import _
 from inkex import inkbool
-
+from inkex.localization import _
+from inkex.utils import NSS
 
 def propStrToList(str):
     list = []
@@ -50,11 +50,11 @@ class JessyInk_Effects(inkex.Effect):
         self.arg_parser.add_argument('--viewDuration',  type=float, dest = 'viewDuration', default = 0.8)
         self.arg_parser.add_argument('--removeView',  type=inkbool, dest = 'removeView', default = False)
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
@@ -74,24 +74,24 @@ class JessyInk_Effects(inkex.Effect):
 
         if not self.options.removeView:
             # Remove the view that currently has the requested order number.
-            for node in rect.xpath("ancestor::svg:g[@inkscape:groupmode='layer']/descendant::*[@jessyink:view]", namespaces=inkex.NSS):
-                propDict = propListToDict(propStrToList(node.attrib["{" + inkex.NSS["jessyink"] + "}view"]))
+            for node in rect.xpath("ancestor::svg:g[@inkscape:groupmode='layer']/descendant::*[@jessyink:view]", namespaces=NSS):
+                propDict = propListToDict(propStrToList(node.attrib["{" + NSS["jessyink"] + "}view"]))
 
                 if propDict["order"] == self.options.viewOrder:
-                    del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+                    del node.attrib["{" + NSS["jessyink"] + "}view"]
 
             # Set the new view.
-            rect.set("{" + inkex.NSS["jessyink"] + "}view","name:view;order:" + self.options.viewOrder + ";length:" + str(int(self.options.viewDuration * 1000)))
+            rect.set("{" + NSS["jessyink"] + "}view","name:view;order:" + self.options.viewOrder + ";length:" + str(int(self.options.viewDuration * 1000)))
 
             # Remove possible effect arguments.
-            if "{" + inkex.NSS["jessyink"] + "}effectIn" in rect.attrib:
-                del rect.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
+            if "{" + NSS["jessyink"] + "}effectIn" in rect.attrib:
+                del rect.attrib["{" + NSS["jessyink"] + "}effectIn"]
 
-            if "{" + inkex.NSS["jessyink"] + "}effectOut" in rect.attrib:
-                del rect.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
+            if "{" + NSS["jessyink"] + "}effectOut" in rect.attrib:
+                del rect.attrib["{" + NSS["jessyink"] + "}effectOut"]
         else:
-            if "{" + inkex.NSS["jessyink"] + "}view" in node.attrib:
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+            if "{" + NSS["jessyink"] + "}view" in node.attrib:
+                del node.attrib["{" + NSS["jessyink"] + "}view"]
 
 
 # Create effect instance

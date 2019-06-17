@@ -19,10 +19,8 @@
 
 from lxml import etree
 
-import inkex
 from inkex.generic import EffectExtension
 from webslicer_effect import WebSlicerMixin, is_empty
-
 
 class WebSlicer_CreateRect(WebSlicerMixin, EffectExtension):
 
@@ -45,7 +43,7 @@ class WebSlicer_CreateRect(WebSlicerMixin, EffectExtension):
 
     def unique_slice_name(self):
         name = self.options.name
-        el = self.document.xpath('//*[@id="' + name + '"]', namespaces=inkex.NSS)
+        el = self.svg.xpath('//*[@id="' + name + '"]')
         if len(el) > 0:
             if name[-3:] == '-00':
                 name = name[:-3]
@@ -56,8 +54,7 @@ class WebSlicer_CreateRect(WebSlicerMixin, EffectExtension):
                 num_s = str(num)
                 if len(num_s) == 1:
                     num_s = '0' + num_s
-                el = self.document.xpath('//*[@id="' + name + '-' + num_s + '"]',
-                                         namespaces=inkex.NSS)
+                el = self.svg.xpath('//*[@id="' + name + '-' + num_s + '"]')
             self.options.name = name + '-' + num_s
 
     def validate_options(self):

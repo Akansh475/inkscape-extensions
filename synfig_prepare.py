@@ -1,38 +1,36 @@
 #!/usr/bin/env python
 # coding=utf-8
+#
+# Copyright (C) 2011 Nikita Kitaev
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
 """
-synfig_prepare.py
 Simplifies SVG files in preparation for sif export.
-
-Copyright (C) 2011 Nikita Kitaev
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
 import os
 import tempfile
 from subprocess import PIPE, Popen
 
-import simplepath
-import simpletransform
-from inkex.transforms import Transform, BoundingBox, cubic_extrema
+import inkex
+from inkex.transforms import Transform
+from inkex.elements import SVG_PARSER, Group, PathElement, ShapeElement, Anchor, Switch
+from inkex.svg import SvgDocumentElement
 
 from lxml import etree
-
-import inkex
-from inkex import NSS, addNS
 
 
 ###### Utility Classes ####################################
@@ -60,11 +58,12 @@ class InkscapeActionGroup(object):
         self.init_args = ""
         self.has_selection = False
         self.has_action = False
-        self.svg_document = svg_document
+        self.set_svg_document(svg_document)
 
     def set_svg_document(self, svg_document):
         """Set the SVG document that Inkscape will operate on"""
         self.svg_document = svg_document
+        self.svg = svg_document.getroot()
 
     def set_init_args(self, cmd):
         """Set the initial arguments to Inkscape subprocess
@@ -115,14 +114,12 @@ class InkscapeActionGroup(object):
         for node in nodes:
             self.select_node(node)
 
-    def select_xpath(self, xpath, namespaces=NSS):
+    def select_xpath(self, xpath):
         """Select objects matching a given XPath expression
 
         Selection will fail if any matching node has no id attribute
         """
-        nodes = self.svg_document.xpath(xpath, namespaces=namespaces)
-
-        self.select_nodes(nodes)
+        self.select_nodes(self.svg.xpath(xpath))
 
     def deselect(self):
         """Deselect all objects"""
@@ -157,9 +154,8 @@ class InkscapeActionGroup(object):
         self.run_file(svgfile)
 
         # Open the resulting file
-        stream = open(svgfile, 'r')
-        new_svg_doc = etree.parse(stream)
-        stream.close()
+        with open(svgfile, 'r') as stream:
+            self.svg_document = etree.parse(stream, parser=SVG_PARSER)
 
         # Clean up.
         try:
@@ -167,11 +163,8 @@ class InkscapeActionGroup(object):
         except Exception:
             pass
 
-        # Set the current SVG document
-        self.svg_document = new_svg_doc
-
         # Return the new document
-        return new_svg_doc
+        return self.svg_document
 
 
 class SynfigExportActionGroup(InkscapeActionGroup):
@@ -187,7 +180,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
         """Convert unsupported objects to paths"""
         # Flow roots contain rectangles inside them, so they need to be
         # converted to paths separately from other shapes
-        self.select_xpath("//svg:flowRoot", namespaces=NSS)
+        self.select_xpath("//svg:flowRoot")
         self.verb("ObjectToPath")
         self.deselect()
 
@@ -206,7 +199,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
 
         # Select all of these elements
         # Note: already selected elements are not deselected
-        self.select_xpath(xpath_cmd, namespaces=NSS)
+        self.select_xpath(xpath_cmd)
 
         # Convert them to paths
         self.verb("ObjectToPath")
@@ -214,7 +207,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
 
     def unlink_clones(self):
         """Unlink clones (remove <svg:use> elements)"""
-        self.select_xpath("//svg:use", namespaces=NSS)
+        self.select_xpath("//svg:use")
         self.verb("EditUnlinkClone")
         self.deselect()
 
@@ -225,8 +218,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
 
 def fuse_subpaths(path_node):
     """Fuse subpaths of a path. Should only be used on unstroked paths"""
-    path_d = path_node.get("d", None)
-    path = simplepath.parsePath(path_d)
+    path = path_node.path.to_arrays()
 
     if len(path) == 0:
         return
@@ -282,50 +274,31 @@ def split_fill_and_stroke(path_node):
     style = dict(inkex.Style.parse_str(path_node.get("style", "")))
 
     # If there is only stroke or only fill, don't split anything
-    if "fill" in style.keys() and style["fill"] == "none":
-        if "stroke" not in style.keys() or style["stroke"] == "none":
+    if "fill" in style and style["fill"] == "none":
+        if "stroke" not in style or style["stroke"] == "none":
             return [None, None]  # Path has neither stroke nor fill
         else:
             return [None, path_node]
     if "stroke" not in style.keys() or style["stroke"] == "none":
         return [path_node, None]
 
-    group = path_node.makeelement(addNS("g", "svg"))
-    fill = etree.SubElement(group, addNS("path", "svg"))
-    stroke = etree.SubElement(group, addNS("path", "svg"))
 
-    attribs = path_node.attrib
+    group = Group()
+    fill = group.add(PathElement())
+    stroke = group.add(PathElement())
 
-    if "d" in attribs.keys():
-        d = attribs["d"]
-        del attribs["d"]
-    else:
+    d = path_node.pop('d')
+    if d is None:
         raise AssertionError("Cannot split stroke and fill of non-path element")
 
-    if addNS("nodetypes", "sodipodi") in attribs.keys():
-        nodetypes = attribs[addNS("nodetypes", "sodipodi")]
-        del attribs[addNS("nodetypes", "sodipodi")]
-    else:
-        nodetypes = None
-
-    if "id" in attribs.keys():
-        path_id = attribs["id"]
-        del attribs["id"]
-    else:
-        path_id = str(id(path_node))
-
-    if "style" in attribs.keys():
-        del attribs["style"]
-
-    if "transform" in attribs.keys():
-        transform = attribs["transform"]
-        del attribs["transform"]
-    else:
-        transform = None
+    nodetypes = path_node.pop('sodipodi:nodetypes', None)
+    path_id = path_node.pop('id', str(id(path_node)))
+    transform = path_node.pop('transform', None)
+    path_node.pop('style')
 
     # Pass along all remaining attributes to the group
-    for attrib_name in attribs.keys():
-        group.set(attrib_name, attribs[attrib_name])
+    for attrib_name, attrib_value in path_node.attribs.items():
+        group.set(attrib_name, attrib_value)
 
     group.set("id", path_id)
 
@@ -357,8 +330,8 @@ def split_fill_and_stroke(path_node):
     fill.set("d", d)
     stroke.set("d", d)
     if nodetypes is not None:
-        fill.set(addNS("nodetypes", "sodipodi"), nodetypes)
-        stroke.set(addNS("nodetypes", "sodipodi"), nodetypes)
+        fill.set('sodipodi:nodetypes', nodetypes)
+        stroke.set('sodipodi:nodetypes', nodetypes)
     fill.set("id", path_id + "-fill")
     stroke.set("id", path_id + "-stroke")
     if transform is not None:
@@ -377,23 +350,20 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
     """Propagate style and transform to remove inheritance"""
 
     # Don't enter non-graphical portions of the document
-    if (node.tag == addNS("namedview", "sodipodi")
-            or node.tag == addNS("defs", "svg")
-            or node.tag == addNS("metadata", "svg")
-            or node.tag == addNS("foreignObject", "svg")):
+    if not isinstance(node, (ShapeElement, SvgDocumentElement)):
         return
 
     # Compose the transformations
-    if node.tag == addNS("svg", "svg") and node.get("viewBox"):
-        vx, vy, vw, vh = [get_dimension(x) for x in node.get("viewBox").split()]
+    if isinstance(node, SvgDocumentElement) and node.get("viewBox"):
+        vx, vy, vw, vh = [get_dimension(x) for x in node.get_viewbox()]
         dw = get_dimension(node.get("width", vw))
         dh = get_dimension(node.get("height", vh))
-        t = "translate(%f, %f) scale(%f, %f)" % (-vx, -vy, dw / vw, dh / vh)
-        this_transform = simpletransform.parseTransform(t, parent_transform)
-        this_transform = simpletransform.parseTransform(node.get("transform"), this_transform)
+        this_transform = Transform(translate=(-vx, -vy), scale=(dw / vw, dh / vh))
         del node.attrib["viewBox"]
     else:
-        this_transform = Transform(parent_transform) * node.transform
+        this_transform = Transform(parent_transform)
+
+    this_transform *= node.transform
 
     # Compose the style attribs
     this_style = dict(inkex.Style.parse_str(node.get("style", "")))
@@ -417,10 +387,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
             this_style[attrib] = node.get(attrib)
             del node.attrib[attrib]
 
-    if (node.tag == addNS("svg", "svg")
-            or node.tag == addNS("g", "svg")
-            or node.tag == addNS("a", "svg")
-            or node.tag == addNS("switch", "svg")):
+    if isinstance(node, (SvgDocumentElement, Group, Anchor, Switch)):
         # Leave only non-propagating style attributes
         if len(remaining_style) == 0:
             if "style" in node.keys():
@@ -442,8 +409,8 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
         this_style.update(remaining_style)
 
         # Set the element's style and transform attribs
-        node.set("style", str(inkex.Style(this_style)))
-        node.set("transform", simpletransform.formatTransform(this_transform))
+        node.style = this_style
+        node.transform = this_transform
 
 
 ### Style related
@@ -491,7 +458,7 @@ class SynfigPrep(inkex.Effect):
         propagate_attribs(self.document.getroot())
 
         # Fuse multiple subpaths in fills
-        for node in self.document.xpath('//svg:path', namespaces=NSS):
+        for node in self.document.getroot().xpath('//svg:path'):
             if node.get("d", "").lower().count("m") > 1:
                 # There are multiple subpaths
                 fill = split_fill_and_stroke(node)[0]

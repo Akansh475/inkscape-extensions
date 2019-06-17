@@ -41,7 +41,6 @@ creates a zip archive containing all images and the document
 
 import os
 import shutil
-import sys
 import tempfile
 import zipfile
 
@@ -93,10 +92,10 @@ class CompressedMediaOutput(OutputExtension):
         """
         dir = self.options.image_dir
 
-        for node in self.document.xpath('//svg:image', namespaces=inkex.NSS):
-            xlink = node.get(inkex.addNS('href', u'xlink'))
+        for node in self.svg.xpath('//svg:image'):
+            xlink = node.get('xlink:href')
             if xlink[:4] != 'data':
-                absref = node.get(inkex.addNS('absref', u'sodipodi'))
+                absref = node.get('sodipodi:absref')
                 url = urlparse(xlink)
                 href = url2pathname(url.path)
 
@@ -115,7 +114,7 @@ class CompressedMediaOutput(OutputExtension):
                 else:
                     inkex.errormsg('Could not locate file: %s' % absref)
 
-                node.set(inkex.addNS('href', u'xlink'), image_path)
+                node.set('xlink:href', image_path)
 
     def collect_SVG(self, docstripped, z):
         """
@@ -184,8 +183,7 @@ class CompressedMediaOutput(OutputExtension):
         z.write(dst_file, filename)
 
     def save(self, stream):
-        docroot = self.document.getroot()
-        docname = docroot.get(inkex.addNS('docname', u'sodipodi'))
+        docname = self.svg.get('sodipodi:docname')
 
         if docname is None:
             docname = self.options.input_file

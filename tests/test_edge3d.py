@@ -15,12 +15,12 @@ class Edge3dBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
         args = ['--id=edgeme',
                 self.data_file('svg', 'edge3d.svg')]
         self.effect.run(args)
-        old_paths = self.effect.original_document\
-            .xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)
-        new_paths = self.effect.document.xpath('//svg:path[@id="edgeme"]', namespaces=inkex.NSS)
-        self.assertTrue(len(old_paths) == 1)
-        self.assertTrue(len(new_paths) == 1)
-        old_paths = self.effect.original_document.xpath('//svg:path', namespaces=inkex.NSS)
-        new_paths = self.effect.document.xpath('//svg:path', namespaces=inkex.NSS)
-        self.assertTrue(len(old_paths) == 1)
-        self.assertTrue(len(new_paths) == 4)
+        old_paths = self.effect.original_document.getroot()\
+            .xpath('//svg:path[@id="edgeme"]')
+        new_paths = self.effect.svg.xpath('//svg:path[@id="edgeme"]')
+        self.assertEqual(len(old_paths), 1)
+        self.assertEqual(len(new_paths), 1)
+        old_paths = self.effect.original_document.getroot().xpath('//svg:path')
+        new_paths = self.effect.svg.xpath('//svg:path')
+        self.assertEqual(len(old_paths), 1)
+        self.assertEqual(len(new_paths), 4)

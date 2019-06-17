@@ -28,8 +28,8 @@ from inkex.tester import InkscapeExtensionTestMixin, TestCase
 class FrameTest(InkscapeExtensionTestMixin, TestCase):
     effect_class = Frame
 
-    def get_frame(self, document):
-        return document.xpath('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]', namespaces=inkex.NSS)[0]
+    def get_frame(self, svg):
+        return svg.getElement('//svg:g[@id="layer1"]//svg:path[@inkscape:label="Frame"]')
 
     def test_single_frame(self):
         args = ['--corner_radius=20',
@@ -42,7 +42,7 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
                 self.data_file('svg', 'single_box.svg')]
         uut = Frame()
         uut.run(args)
-        new_frame = self.get_frame(uut.document)
+        new_frame = self.get_frame(uut.svg)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
         new_frame_style = new_frame.attrib['style'].lower()
@@ -69,14 +69,14 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
                 self.data_file('svg', 'single_box.svg')]
         uut = Frame()
         uut.run(args)
-        new_frame = self.get_frame(uut.document)
+        new_frame = self.get_frame(uut.svg)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
         group = new_frame.getparent()
         self.assertEqual('{http://www.w3.org/2000/svg}g', group.tag)
         self.assertEqual('{http://www.w3.org/2000/svg}rect', group[0].tag)
         self.assertEqual('{http://www.w3.org/2000/svg}path', group[1].tag)
-        self.assertEqual("Frame", group[1].xpath('@inkscape:label', namespaces=inkex.NSS)[0])
+        self.assertEqual("Frame", group[1].label)
 
     def test_single_frame_clipped(self):
         uut = self.assertEffect(
@@ -89,10 +89,10 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
             stroke_color=255,
             tab="stroke",
             width=10)
-        new_frame = self.get_frame(uut.document)
+        new_frame = self.get_frame(uut.svg)
         self.assertIsNotNone(new_frame)
         self.assertEqual('{http://www.w3.org/2000/svg}path', new_frame.tag)
         orig = list(uut.svg.selected.values())[0]
         self.assertEqual('url(#clipPath5815)', orig.get('clip-path'))
-        clip_path = uut.document.xpath('//svg:defs/svg:clipPath', namespaces=inkex.NSS)[0]
+        clip_path = uut.svg.getElement('//svg:defs/svg:clipPath')
         self.assertEqual('{http://www.w3.org/2000/svg}clipPath', clip_path.tag)

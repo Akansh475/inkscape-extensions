@@ -49,7 +49,7 @@ class Extract(inkex.Effect):
 
     def effect(self):
         if not self.svg.selected:
-            for node in self.document.xpath('//svg:text | //svg:flowRoot', namespaces=inkex.NSS):
+            for node in self.svg.xpath('//svg:text | //svg:flowRoot'):
                 self.svg.selected[node.get('id')] = node
 
         if self.svg.selected:

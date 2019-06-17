@@ -67,12 +67,6 @@ class PathModifier(EffectExtension):
             clones[clone.get("id")] = clone
         return clones
 
-    def uniqueId(self, prefix):
-        id = "%s%04i" % (prefix, random.randint(0, 9999))
-        while len(self.document.getroot().xpath('//*[@id="%s"]' % id, namespaces=inkex.NSS)):
-            id = "%s%04i" % (prefix, random.randint(0, 9999))
-        return id
-
     def expandGroups(self, aList, transferTransform=True):
         for id, node in aList.items():
             if node.tag == inkex.addNS('g', 'svg') or node.tag == 'g':
@@ -94,7 +88,7 @@ class PathModifier(EffectExtension):
                 # Hum... not very efficient if there are many clones of groups...
 
             elif isinstance(node, Use):
-                refnode = self.refNode(node)
+                refnode = node.href
                 newnode = self.unlinkClone(node, doReplace)
                 del aList[elem_id]
 
@@ -113,18 +107,9 @@ class PathModifier(EffectExtension):
         for child in node:
             self.recursNewIds(child)
 
-    def refNode(self, node):
-        if node.get(inkex.addNS('href', 'xlink')):
-            refid = node.get(inkex.addNS('href', 'xlink'))
-            path = '//*[@id="%s"]' % refid[1:]
-            newNode = self.document.getroot().xpath(path, namespaces=inkex.NSS)[0]
-            return newNode
-        else:
-            raise AssertionError("Trying to follow empty xlink.href attribute.")
-
     def unlinkClone(self, node, doReplace):
         if node.tag == inkex.addNS('use', 'svg') or node.tag == 'use':
-            newNode = copy.deepcopy(self.refNode(node))
+            newNode = copy.deepcopy(node.href)
             self.recursNewIds(newNode)
             newNode.transform *= node.transform
 

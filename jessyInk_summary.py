@@ -18,7 +18,7 @@
 
 import inkex
 from inkex.localization import _
-
+from inkex.utils import NSS
 
 def propStrToList(str):
     list = []
@@ -46,27 +46,27 @@ class JessyInk_Summary(inkex.Effect):
 
         self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
         # Find the script node, if present
-        for node in self.document.xpath("//svg:script[@id='JessyInk']", namespaces=inkex.NSS):
-            if node.get("{" + inkex.NSS["jessyink"] + "}version"):
-                inkex.errormsg(_("JessyInk script version {0} installed.").format(node.get("{" + inkex.NSS["jessyink"] + "}version")))
+        for node in self.document.xpath("//svg:script[@id='JessyInk']", namespaces=NSS):
+            if node.get("{" + NSS["jessyink"] + "}version"):
+                inkex.errormsg(_("JessyInk script version {0} installed.").format(node.get("{" + NSS["jessyink"] + "}version")))
             else:
                 inkex.errormsg(_("JessyInk script installed."))
 
         slides = []
         masterSlide = None
 
-        for node in self.document.xpath("//svg:g[@inkscape:groupmode='layer']", namespaces=inkex.NSS):
-            if node.get("{" + inkex.NSS["jessyink"] + "}masterSlide"):
+        for node in self.document.xpath("//svg:g[@inkscape:groupmode='layer']", namespaces=NSS):
+            if node.get("{" + NSS["jessyink"] + "}masterSlide"):
                 masterSlide = node
             else:
                 slides.append(node)
@@ -79,14 +79,14 @@ class JessyInk_Summary(inkex.Effect):
 
         for slide in slides:
             inkex.errormsg(_("\nSlide {0!s}:").format(slideCounter))
-            self.describeNode(slide, "\t", str(slideCounter), str(len(slides)), slide.get("{" + inkex.NSS["inkscape"] + "}label"))
+            self.describeNode(slide, "\t", str(slideCounter), str(len(slides)), slide.get("{" + NSS["inkscape"] + "}label"))
             slideCounter += 1
 
     def describeNode(self, node, prefix, slideNumber, numberOfSlides, slideTitle):
-        inkex.errormsg(_(u"{0}Layer name: {1}").format(prefix, node.get("{" + inkex.NSS["inkscape"] + "}label")))
+        inkex.errormsg(_(u"{0}Layer name: {1}").format(prefix, node.get("{" + NSS["inkscape"] + "}label")))
 
         # Display information about transitions.
-        transitionInAttribute = node.get("{" + inkex.NSS["jessyink"] + "}transitionIn")
+        transitionInAttribute = node.get("{" + NSS["jessyink"] + "}transitionIn")
         if transitionInAttribute:
             transInDict = propListToDict(propStrToList(transitionInAttribute))
 
@@ -95,7 +95,7 @@ class JessyInk_Summary(inkex.Effect):
             else:
                 inkex.errormsg(_("{0}Transition in: {1}").format(prefix, transInDict["name"]))
 
-        transitionOutAttribute = node.get("{" + inkex.NSS["jessyink"] + "}transitionOut")
+        transitionOutAttribute = node.get("{" + NSS["jessyink"] + "}transitionOut")
         if transitionOutAttribute:
             transOutDict = propListToDict(propStrToList(transitionOutAttribute))
 
@@ -106,19 +106,19 @@ class JessyInk_Summary(inkex.Effect):
 
         # Display information about auto-texts.
         autoTexts = {"slideNumber" : slideNumber, "numberOfSlides" : numberOfSlides, "slideTitle" : slideTitle}
-        autoTextNodes = node.xpath(".//*[@jessyink:autoText]", namespaces=inkex.NSS)
+        autoTextNodes = node.xpath(".//*[@jessyink:autoText]", namespaces=NSS)
 
         if len(autoTextNodes) > 0:
             inkex.errormsg(_("\n{0}Auto-texts:").format(prefix))
 
             for atNode in autoTextNodes:
-                inkex.errormsg(_("{0}\t\"{1}\" (object id \"{2}\") will be replaced by \"{3}\".").format(prefix, atNode.text, atNode.getparent().get("id"), autoTexts[atNode.get("{" + inkex.NSS["jessyink"] + "}autoText")]))
+                inkex.errormsg(_("{0}\t\"{1}\" (object id \"{2}\") will be replaced by \"{3}\".").format(prefix, atNode.text, atNode.getparent().get("id"), autoTexts[atNode.get("{" + NSS["jessyink"] + "}autoText")]))
 
         # Collect information about effects.
         effects = {}
 
-        for effectNode in node.xpath(".//*[@jessyink:effectIn]", namespaces=inkex.NSS):
-            dictio = propListToDict(propStrToList(effectNode.get("{" + inkex.NSS["jessyink"] + "}effectIn")))
+        for effectNode in node.xpath(".//*[@jessyink:effectIn]", namespaces=NSS):
+            dictio = propListToDict(propStrToList(effectNode.get("{" + NSS["jessyink"] + "}effectIn")))
             dictio["direction"] = "in"
             dictio["id"] = effectNode.get("id")
             dictio["type"] = "effect"
@@ -128,8 +128,8 @@ class JessyInk_Summary(inkex.Effect):
 
             effects[dictio["order"]].append(dictio)
 
-        for effectNode in node.xpath(".//*[@jessyink:effectOut]", namespaces=inkex.NSS):
-            dictio = propListToDict(propStrToList(effectNode.get("{" + inkex.NSS["jessyink"] + "}effectOut")))
+        for effectNode in node.xpath(".//*[@jessyink:effectOut]", namespaces=NSS):
+            dictio = propListToDict(propStrToList(effectNode.get("{" + NSS["jessyink"] + "}effectOut")))
             dictio["direction"] = "out"
             dictio["id"] = effectNode.get("id")
             dictio["type"] = "effect"
@@ -139,8 +139,8 @@ class JessyInk_Summary(inkex.Effect):
 
             effects[dictio["order"]].append(dictio)
 
-        for viewNode in node.xpath(".//*[@jessyink:view]", namespaces=inkex.NSS):
-            dictio = propListToDict(propStrToList(viewNode.get("{" + inkex.NSS["jessyink"] + "}view")))
+        for viewNode in node.xpath(".//*[@jessyink:view]", namespaces=NSS):
+            dictio = propListToDict(propStrToList(viewNode.get("{" + NSS["jessyink"] + "}view")))
             dictio["id"] = viewNode.get("id")
             dictio["type"] = "view"
 

@@ -1,6 +1,5 @@
 # coding=utf-8
 from addnodes import SplitIt
-from inkex import NSS
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
@@ -15,6 +14,6 @@ class SplitItBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
         args = ['--id=dashme',
                 self.data_file('svg', 'dash.svg')]
         self.effect.run(args)
-        old_path = self.effect.original_document.xpath('//svg:path', namespaces=NSS)[0].path
-        new_path = self.effect.document.xpath('//svg:path', namespaces=NSS)[0].path
+        old_path = self.effect.original_document.getroot().getElement('//svg:path').path
+        new_path = self.effect.svg.getElement('//svg:path').path
         assert len(new_path) > len(old_path)

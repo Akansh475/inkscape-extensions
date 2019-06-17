@@ -138,7 +138,7 @@ class MarkerStrokePaintEffect(inkex.Effect):
                     if not self.options.modify:
                         defs.append(mnode)
 
-                    children = mnode.xpath('.//*[@style]', namespaces=inkex.NSS)
+                    children = mnode.xpath('.//*[@style]')
                     for child in children:
                         cstyle = dict(inkex.Style.parse_str(child.get('style')))
                         if not ('stroke' in cstyle and self.options.tab == '"object"' and cstyle['stroke'] == 'none' and self.options.fill_type == "filled"):

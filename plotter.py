@@ -245,10 +245,10 @@ class Plot(inkex.Effect):
         inkex.errormsg('  Auto align: ' + str(self.options.autoAlign))
         inkex.errormsg('  Show debug information: ' + str(self.options.debug))
         inkex.errormsg("\nDocument properties:\n")
-        version = self.document.getroot().xpath('//@inkscape:version', namespaces=inkex.NSS)
+        version = self.svg.xpath('//@inkscape:version')
         if version:
             inkex.errormsg('  Inkscape version: ' + version[0])
-        fileName = self.document.getroot().xpath('//@sodipodi:docname', namespaces=inkex.NSS)
+        fileName = self.svg.xpath('//@sodipodi:docname')
         if fileName:
             inkex.errormsg('  Filename: ' + fileName[0])
         inkex.errormsg('  Document unit: ' + self.getDocumentUnit())

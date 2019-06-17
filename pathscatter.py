@@ -34,6 +34,7 @@ import copy
 import random
 
 import inkex
+from inkex import bezier
 from inkex.localization import _
 from inkex.utils import inkbool
 from inkex.transforms import Transform
@@ -77,12 +78,12 @@ def linearize(p, tolerance=0.001):
     d = 0
     lengths = []
     while i < len(p) - 1:
-        box = inkex.pointdistance(p[i][1], p[i][2])
-        box += inkex.pointdistance(p[i][2], p[i + 1][0])
-        box += inkex.pointdistance(p[i + 1][0], p[i + 1][1])
-        chord = inkex.pointdistance(p[i][1], p[i + 1][1])
+        box = bezier.pointdistance(p[i][1], p[i][2])
+        box += bezier.pointdistance(p[i][2], p[i + 1][0])
+        box += bezier.pointdistance(p[i + 1][0], p[i + 1][1])
+        chord = bezier.pointdistance(p[i][1], p[i + 1][1])
         if (box - chord) > tolerance:
-            b1, b2 = inkex.beziersplitatt([p[i][1], p[i][2], p[i + 1][0], p[i + 1][1]], 0.5)
+            b1, b2 = bezier.beziersplitatt([p[i][1], p[i][2], p[i + 1][0], p[i + 1][1]], 0.5)
             p[i][2][0], p[i][2][1] = b1[1]
             p[i + 1][0][0], p[i + 1][0][1] = b2[2]
             p.insert(i + 1, [[b1[2][0], b1[2][1]], [b1[3][0], b1[3][1]], [b2[1][0], b2[1][1]]])
@@ -172,11 +173,11 @@ class PathScatter(pathmodifier.Diffeo):
         """
         i, t = self.lengthtotime(s)
         if i == len(self.skelcomp) - 1:
-            x, y = inkex.between_point(self.skelcomp[i - 1], self.skelcomp[i], 1 + t)
+            x, y = bezier.between_point(self.skelcomp[i - 1], self.skelcomp[i], 1 + t)
             dx = (self.skelcomp[i][0] - self.skelcomp[i - 1][0]) / self.lengths[-1]
             dy = (self.skelcomp[i][1] - self.skelcomp[i - 1][1]) / self.lengths[-1]
         else:
-            x, y = inkex.between_point(self.skelcomp[i], self.skelcomp[i + 1], t)
+            x, y = bezier.between_point(self.skelcomp[i], self.skelcomp[i + 1], t)
             dx = (self.skelcomp[i + 1][0] - self.skelcomp[i][0]) / self.lengths[i]
             dy = (self.skelcomp[i + 1][1] - self.skelcomp[i][1]) / self.lengths[i]
         if follow:

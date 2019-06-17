@@ -19,7 +19,6 @@
 
 import inkex
 from inkex.localization import _
-from inkex.paths import Path
 from inkex.transforms import Segment
 from inkex.generic import EffectExtension
 from inkex.elements import PathElement, Group
@@ -32,8 +31,8 @@ class Project(EffectExtension):
 
         #obj is selected second
         scale = self.svg.unittouu('1px')    # convert to document units
-        doc = self.document.getroot()
-        h = self.svg.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
+        doc = self.svg
+        h = self.svg.unittouu(doc.xpath('@height')[0])
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')
         if viewBox:

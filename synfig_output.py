@@ -1,37 +1,38 @@
 #!/usr/bin/env python
 # coding=utf-8
+#
+# Copyright (C) 2011 Nikita Kitaev
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
 """
-synfig_output.py
 An Inkscape extension for exporting Synfig files (.sif)
-
-Copyright (C) 2011 Nikita Kitaev
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 import math
 import uuid
 from copy import deepcopy
 
-import cubicsuperpath
-import simplepath
-import simpletransform
 from lxml import etree
 
 import inkex
+from inkex import Transform
+from inkex.paths import Path
+from inkex.elements import Group, Anchor, Switch, PathElement, Metadata, NamedView, Gradient
+from inkex.svg import SvgDocumentElement
+
 import synfig_fileformat as sif
-from inkex import NSS, Transform, addNS
 from synfig_prepare import MalformedSVGError, SynfigPrep, get_dimension
 
 
@@ -880,7 +881,7 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
         return []
 
     # Parse the path
-    path = simplepath.parsePath(path_d)
+    path = Path(path_d).to_arrays()
 
     # Append (more than) enough c's to the nodetypes
     if nodetypes is None:
@@ -952,7 +953,8 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
             lastsplit = False if nt[0] == "z" else True
             nt = nt[1:]
         elif cmd == 'A':
-            arcp = cubicsuperpath.ArcToPath(last[:], params[:])
+            from inkex.paths import arc_to_path
+            arcp = arc_to_path(last[:], params[:])
             arcp[0][0] = lastctrl[:]
             last = arcp[-1][1]
             lastctrl = arcp[-1][0]
@@ -990,26 +992,15 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
     if mtx != [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]:
         for bline in bline_list:
             for vertex in bline["points"]:
-                for pt in vertex:
-                    if type(pt) != bool:
-                        simpletransform.applyTransformToPoint(mtx, pt)
+                for point in vertex:
+                    if not isinstance(point, bool):
+                        pnt = Transform(mtx).apply_to_point(point)
+                        point[0], point[1] = pnt[0], pnt[1]
 
     return bline_list
 
 
 # ## Style related
-
-def extract_style(node, style_attrib="style"):
-    # return dict(inkex.Style.parse_str(node.get("style")))
-
-    # Work around a simplestyle bug in older versions of Inkscape
-    # that leaves spaces at the beginning and end of values
-    s = node.get(style_attrib)
-    if s is None:
-        return {}
-    else:
-        return dict([[x.strip() for x in i.split(":")] for i in s.split(";") if len(i)])
-
 
 def extract_color(style, color_attrib, *opacity_attribs):
     if color_attrib in style.keys():
@@ -1060,23 +1051,23 @@ class SynfigExport(SynfigPrep):
         width = get_dimension(svg.get("width", 1024))
         height = get_dimension(svg.get("height", 768))
 
-        title = svg.xpath("svg:title", namespaces=NSS)
-        if len(title) == 1:
-            name = title[0].text
+        title = svg.getElement('svg:title')
+        if title:
+            name = title.text
         else:
-            name = svg.get(addNS("docname", "sodipodi"), "Synfig Animation 1")
+            name = svg.get('sodipodi:docname', "Synfig Animation 1")
 
-        d = SynfigDocument(width, height, name)
+        doc = SynfigDocument(width, height, name)
 
         layers = []
         for node in svg.iterchildren():
-            layers += self.convert_node(node, d)
+            layers += self.convert_node(node, doc)
 
-        root_canvas = d.get_root_canvas()
+        root_canvas = doc.get_root_canvas()
         for layer in layers:
             root_canvas.append(layer)
 
-        self.synfig_document = d.get_root_tree()
+        self.synfig_document = doc.get_root_tree()
 
     def save(self, stream):
         self.synfig_document.write(stream)
@@ -1084,37 +1075,29 @@ class SynfigExport(SynfigPrep):
     def convert_node(self, node, d):
         """Convert an SVG node to a list of Synfig layers"""
         # Parse tags that don't draw any layers
-        if node.tag == addNS("namedview", "sodipodi"):
-            return []
-        elif node.tag == addNS("defs", "svg"):
+        if isinstance(node, SvgDocumentElement):
             self.parse_defs(node, d)
             return []
-        elif node.tag == addNS("metadata", "svg"):
-            return []
-        elif node.tag not in [addNS("g", "svg"),
-                              addNS("a", "svg"),
-                              addNS("switch", "svg"),
-                              addNS("path", "svg")]:
+        elif not isinstance(node, (Group, Anchor, Switch, PathElement, Metadata, NamedView)):
             # An unsupported element
             return []
 
         layers = []
-        if node.tag == addNS("g", "svg"):
+        if isinstance(node, Group):
             for subnode in node:
                 layers += self.convert_node(subnode, d)
-            if node.get(addNS("groupmode", "inkscape")) == "layer":
-                name = node.get(addNS("label", "inkscape"), "Inline Canvas")
+            if node.is_layer():
+                name = node.label or "Inline Canvas"
                 layers = d.op_encapsulate(layers, name=name)
 
-        elif (node.tag == addNS("a", "svg")
-              or node.tag == addNS("switch", "svg")):
+        elif isinstance(node, (Anchor, Switch)):
             # Treat anchor and switch as a group
             for subnode in node:
                 layers += self.convert_node(subnode, d)
-        elif node.tag == addNS("path", "svg"):
+        elif isinstance(node, PathElement):
             layers = self.convert_path(node, d)
 
-        style = extract_style(node)
+        style = node.style
         if "filter" in style.keys() and style["filter"].startswith("url"):
             filter_id = style["filter"][5:].split(")")[0]
             layers = d.op_filter(layers, filter_id)
@@ -1127,31 +1110,29 @@ class SynfigExport(SynfigPrep):
 
     def parse_defs(self, node, d):
         for child in node.iterchildren():
-            if child.tag == addNS("linearGradient", "svg"):
+            if isinstance(child, Gradient):
                 self.parse_gradient(child, d)
-            elif child.tag == addNS("radialGradient", "svg"):
-                self.parse_gradient(child, d)
-            elif child.tag == addNS("filter", "svg"):
+            elif child.TAG == "filter":
                 self.parse_filter(child, d)
 
     def parse_gradient(self, node, d):
-        if node.tag == addNS("linearGradient", "svg"):
+        if node.TAG == "linearGradient":
             gradient_id = node.get("id", str(id(node)))
             x1 = float(node.get("x1", "0.0"))
             x2 = float(node.get("x2", "0.0"))
             y1 = float(node.get("y1", "0.0"))
             y2 = float(node.get("y2", "0.0"))
 
-            mtx = simpletransform.parseTransform(node.get("gradientTransform"))
+            mtx = node.gradientTransform.matrix
 
-            link = node.get(addNS("href", "xlink"), "#")[1:]
+            link = node.get('xlink:href', "#")[1:]
             spread_method = node.get("spreadMethod", "pad")
             if link == "":
                 stops = self.parse_stops(node, d)
                 d.add_linear_gradient(gradient_id, [x1, y1], [x2, y2], mtx, stops=stops, spread_method=spread_method)
             else:
                 d.add_linear_gradient(gradient_id, [x1, y1], [x2, y2], mtx, link=link, spread_method=spread_method)
-        elif node.tag == addNS("radialGradient", "svg"):
+        elif node.TAG == "radialGradient":
             gradient_id = node.get("id", str(id(node)))
             cx = float(node.get("cx", "0.0"))
             cy = float(node.get("cy", "0.0"))
@@ -1159,9 +1140,9 @@ class SynfigExport(SynfigPrep):
             fx = float(node.get("fx", "0.0"))
             fy = float(node.get("fy", "0.0"))
 
-            mtx = simpletransform.parseTransform(node.get("gradientTransform"))
+            mtx = node.gradientTransform.matrix
 
-            link = node.get(addNS("href", "xlink"), "#")[1:]
+            link = node.get('xlink:href', "#")[1:]
             spread_method = node.get("spreadMethod", "pad")
             if link == "":
                 stops = self.parse_stops(node, d)
@@ -1172,9 +1153,9 @@ class SynfigExport(SynfigPrep):
     def parse_stops(self, node, d):
         stops = {}
         for stop in node.iterchildren():
-            if stop.tag == addNS("stop", "svg"):
+            if stop.TAG == "stop":
                 offset = float(stop.get("offset"))
-                style = extract_style(stop)
+                style = stop.style
                 stops[offset] = extract_color(style, "stop-color", "stop-opacity")
             else:
                 raise MalformedSVGError("Child of gradient is not a stop")
@@ -1199,7 +1180,7 @@ class SynfigExport(SynfigPrep):
                     raise UnsupportedException
                 l_in = refs[child.get("in")]
                 l_out = []
-                if child.tag == addNS("feGaussianBlur", "svg"):
+                if child.TAG == "feGaussianBlur":
                     std_dev = child.get("stdDeviation", "0")
                     std_dev = std_dev.replace(",", " ").split()
                     x = float(std_dev[0])
@@ -1214,7 +1195,7 @@ class SynfigExport(SynfigPrep):
                         x = d.distance_svg2sif(x)
                         y = d.distance_svg2sif(y)
                         l_out = d.op_blur(l_in, x, y, is_end=True)
-                elif child.tag == addNS("feBlend", "svg"):
+                elif child.TAG == "feBlend":
                     # Note: Blend methods are not an exact match
                     # because SVG uses alpha channel in places where
                     # Synfig does not
@@ -1265,10 +1246,10 @@ class SynfigExport(SynfigPrep):
         layers = []
 
         node_id = node.get("id", str(id(node)))
-        style = extract_style(node)
-        mtx = simpletransform.parseTransform(node.get("transform"))
+        style = node.style
 
-        blines = path_to_bline_list(node.get("d"), node.get(addNS("nodetypes", "sodipodi")), mtx)
+        mtx = node.transform.matrix
+        blines = path_to_bline_list(node.get("d"), node.get('sodipodi:nodetypes'), mtx)
         for bline in blines:
             d.bline_coor_svg2sif(bline)
             bline_guid = d.new_guid()
@@ -1341,7 +1322,8 @@ class SynfigExport(SynfigPrep):
                                    d.gradient_to_params(gradient),
                                    guids={"gradient": gradient["stops_guid"]})
 
-        return d.op_transform([layer], simpletransform.composeTransform(mtx, gradient["mtx"]))
+        trm = Transform(mtx) * Transform(gradient["mtx"])
+        return d.op_transform([layer], trm.matrix)
 
 
 if __name__ == '__main__':

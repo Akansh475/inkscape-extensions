@@ -245,9 +245,7 @@ class PrintingMarks(inkex.Effect):
         middle_horizontal = bbox.left + (bbox.width / 2)
 
         # Test if printing-marks layer existis
-        layer = self.document.xpath(
-                '//*[@id="printing-marks" and @inkscape:groupmode="layer"]',
-                namespaces=inkex.NSS)
+        layer = self.svg.xpath('//*[@id="printing-marks" and @inkscape:groupmode="layer"]')
         if layer:
             svg.remove(layer[0])  # remove if it existis
         # Create a new layer

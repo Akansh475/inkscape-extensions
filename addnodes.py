@@ -26,7 +26,7 @@ This extension either adds nodes to a path so that
 
 import math
 
-import inkex
+from inkex import bezier
 from inkex.elements import PathElement
 from inkex.paths import CubicSuperPath
 from inkex.base import InkscapeExtension, SvgThroughMixin
@@ -56,7 +56,7 @@ class SplitIt(SvgThroughMixin, InkscapeExtension):
                     new.append([sub[0][:]])
                     i = 1
                     while i <= len(sub) - 1:
-                        length = inkex.cspseglength(new[-1][-1], sub[i])
+                        length = bezier.cspseglength(new[-1][-1], sub[i])
 
                         if self.options.method == 'bynum':
                             splits = self.options.segments
@@ -64,7 +64,7 @@ class SplitIt(SvgThroughMixin, InkscapeExtension):
                             splits = math.ceil(length / self.options.max)
 
                         for sel in range(int(splits), 1, -1):
-                            result = inkex.cspbezsplitatlength(new[-1][-1], sub[i], 1.0 / sel)
+                            result = bezier.cspbezsplitatlength(new[-1][-1], sub[i], 1.0 / sel)
                             better_result = [[list(el) for el in elements] for elements in result]
                             new[-1][-1], nxt, sub[i] = better_result
                             new[-1].append(nxt[:])

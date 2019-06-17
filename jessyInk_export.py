@@ -27,7 +27,7 @@ from inkex.localization import _
 from inkex.base import TempDirMixin
 from inkex.generic import OutputExtension
 from inkex.command import take_snapshot
-
+from inkex.utils import NSS
 
 class JessyInkExport(TempDirMixin, OutputExtension):
     """
@@ -43,7 +43,7 @@ class JessyInkExport(TempDirMixin, OutputExtension):
         self.arg_parser.add_argument('--resolution', type=str, dest='resolution', default='1.0')
 
         # Register jessyink namespace.
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def save(self, stream):
         # Check whether the JessyInk-script is present (indicating

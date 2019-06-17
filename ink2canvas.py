@@ -24,9 +24,6 @@ from inkex.generic import OutputExtension
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
 
-log = inkex.debug  # alias to debug method
-
-
 class Ink2Canvas(OutputExtension):
     def save(self, stream):
         svg_root = self.document.getroot()

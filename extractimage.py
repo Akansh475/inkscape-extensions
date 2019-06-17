@@ -59,7 +59,7 @@ class ExtractImage(EffectExtension):
     def extractAll(self, document):
         self.document=document #not that nice... oh well
         path = '//svg:image'
-        for node in self.document.getroot().xpath(path, namespaces=inkex.NSS):
+        for node in self.svg.xpath(path):
             self.extract_image(node)
 
     def mime_to_ext(self, mime):

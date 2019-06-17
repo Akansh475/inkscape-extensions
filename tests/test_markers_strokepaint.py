@@ -15,14 +15,14 @@ class MarkerStrokePaintBasicTest(InkscapeExtensionTestMixin, TestCase):
     def test_empty_defs(self):
         e = MarkerStrokePaintEffect()
         e.run([self.data_file('svg', 'minimal-blank.svg')])
-        self.assertTrue(0 < len(e.document.xpath('//svg:defs', namespaces=inkex.NSS)))
+        self.assertTrue(0 < len(e.svg.xpath('//svg:defs')))
 
     def test_basic(self):
         args = ['--id=dimension',
                 self.data_file('svg', 'markers.svg')]
         e = MarkerStrokePaintEffect()
         e.run(args)
-        old_markers = e.original_document.xpath('//svg:defs//svg:marker', namespaces=inkex.NSS)
-        new_markers = e.document.xpath('//svg:defs//svg:marker', namespaces=inkex.NSS)
-        self.assertTrue(len(old_markers) == 2)
-        self.assertTrue(len(new_markers) == 4)
+        old_markers = e.original_document.getroot().xpath('//svg:defs//svg:marker')
+        new_markers = e.svg.xpath('//svg:defs//svg:marker')
+        self.assertEqual(len(old_markers), 2)
+        self.assertEqual(len(new_markers), 4)

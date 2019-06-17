@@ -52,7 +52,7 @@ class InkWebEffect(inkex.Effect):
     def ensureInkWebSupport(self):
         # Search for the script tag with the inkweb.js code:
         scriptEl = None
-        scripts = self.document.xpath('//svg:script', namespaces=inkex.NSS)
+        scripts = self.svg.xpath('//svg:script')
         for s in scripts:
             if re.search(self.reUpdateJS, s.text):
                 scriptEl = s

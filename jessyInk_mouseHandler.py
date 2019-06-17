@@ -22,7 +22,7 @@ from lxml import etree
 
 import inkex
 from inkex.localization import _
-
+from inkex.utils import NSS
 
 class JessyInk_CustomMouseHandler(inkex.Effect):
     def __init__(self):
@@ -32,17 +32,17 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
         self.arg_parser.add_argument('--tab', type=str, dest='what')
         self.arg_parser.add_argument('--mouseSettings', type=str, dest='mouseSettings', default='default')
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
         # Remove old mouse handler
-        for node in self.document.xpath("//jessyink:mousehandler", namespaces=inkex.NSS):
+        for node in self.document.xpath("//jessyink:mousehandler", namespaces=NSS):
             node.getparent().remove(node)
 
         if self.options.mouseSettings == "noclick":
@@ -50,7 +50,7 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
             scriptElm = etree.Element(inkex.addNS("script", "svg"))
             scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_noclick.js")).read()
             groupElm = etree.Element(inkex.addNS("mousehandler", "jessyink"))
-            groupElm.set("{" + inkex.NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_noclick")
+            groupElm.set("{" + NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_noclick")
             groupElm.append(scriptElm)
             self.document.getroot().append(groupElm)
         elif self.options.mouseSettings == "draggingZoom":
@@ -58,7 +58,7 @@ class JessyInk_CustomMouseHandler(inkex.Effect):
             scriptElm = etree.Element(inkex.addNS("script", "svg"))
             scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_zoomControl.js")).read()
             groupElm = etree.Element(inkex.addNS("mousehandler", "jessyink"))
-            groupElm.set("{" + inkex.NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_zoomControl")
+            groupElm.set("{" + NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_zoomControl")
             groupElm.append(scriptElm)
             self.document.getroot().append(groupElm)
 

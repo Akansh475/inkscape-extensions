@@ -30,10 +30,9 @@ def is_empty(val):
 class WebSlicerMixin(object):
     def get_slicer_layer(self, force_creation=False):
         # Test if webslicer-layer layer existis
-        layer = self.document.xpath(
-                '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]',
-                namespaces=inkex.NSS)
-        if not layer:
+        layer = self.svg.getElement(
+            '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]')
+        if layer is None:
             if force_creation:
                 # Create a new layer
                 layer = Group(id='webslicer-layer')
@@ -42,8 +41,6 @@ class WebSlicerMixin(object):
                 self.document.getroot().append(layer)
             else:
                 layer = None
-        else:
-            layer = layer[0]
         return layer
 
     def get_conf_text_from_list(self, conf_atts):

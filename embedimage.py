@@ -64,7 +64,7 @@ class Embedder(EffectExtension):
     def embedAll(self, document):
         self.document = document  # not that nice... oh well
         path = '//svg:image'
-        for node in self.document.getroot().xpath(path, namespaces=inkex.NSS):
+        for node in self.svg.xpath(path):
             self.embedImage(node)
 
     def embedImage(self, node):

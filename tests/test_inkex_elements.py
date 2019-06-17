@@ -389,15 +389,15 @@ class UseTest(ElementTestCase):
 
     def test_empty_ref(self):
         """An empty ref or None ref doesn't cause an error"""
-        self.assertRaises(KeyError, Use().ref)
+        self.assertRaises(KeyError, getattr, Use(), 'href')
         elem = self.svg.add(Use())
-        self.assertEqual(elem.ref(), None)
+        self.assertEqual(elem.href, None)
         elem.set('xlink:href', '')
-        self.assertEqual(elem.ref(), None)
+        self.assertEqual(elem.href, None)
         elem.set('xlink:href', '#badref')
-        self.assertEqual(elem.ref(), None)
+        self.assertEqual(elem.href, None)
         elem.set('xlink:href', self.elem.get('xlink:href'))
-        self.assertEqual(elem.ref().get('id'), 'path1')
+        self.assertEqual(elem.href.get('id'), 'path1')
 
 class DefsTest(ElementTestCase):
     """Test the definitions tag"""

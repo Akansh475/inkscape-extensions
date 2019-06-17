@@ -111,7 +111,7 @@ class ColorEffect(SvgThroughMixin, InkscapeExtension):
             id_ = col[len('url(#'):col.find(')')]
             new_id = '{}-{:d}'.format(id_, int(random.random() * 1000))
             path = '//*[@id="{}"]'.format(id_)
-            for node in self.document.xpath(path, namespaces=inkex.NSS):
+            for node in self.svg.xpath(path):
                 self.process_gradient(node, new_id)
             col = 'url(#{})'.format(new_id)
         else:
@@ -134,8 +134,8 @@ class ColorEffect(SvgThroughMixin, InkscapeExtension):
                 new_href = '{}-{:d}'.format(id_, int(random.random() * 1000))
                 new_node.set(xlink, '#{}'.format(new_href))
                 path = '//*[@id="{}"]'.format(id_)
-                for node in self.document.xpath(path, namespaces=inkex.NSS):
-                    self.process_gradient(node, new_href)
+                for child in self.svg.xpath(path):
+                    self.process_gradient(child, new_href)
 
     def colmod(self, r, g, b):
         raise NotImplementedError

@@ -199,7 +199,7 @@ class hpglEncoder(object):
                 self.processPath(node[1], node[2], node[3])
 
     def getPenNumber(self, doc):
-        penNum = doc.get('{' + inkex.NSS['inkscape'] + '}label')
+        penNum = doc.label
         if penNum == None:
             return self.options.pen
         penNum = penNum.lower().strip(' \t\n\r')

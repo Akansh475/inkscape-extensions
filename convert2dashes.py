@@ -23,6 +23,7 @@ This extension converts a path into a dashed line using 'stroke-dasharray'
 It is a modification of the file addnodes.py
 """
 import inkex
+from inkex import bezier
 from inkex.paths import CubicSuperPath
 from inkex.elements import Group, PathElement
 from inkex.localization import _
@@ -77,10 +78,10 @@ class Dashit(inkex.Effect):
             i = 1
             while i < len(sub):
                 dash = dash - length
-                length = inkex.cspseglength(new[-1][-1], sub[i])
+                length = bezier.cspseglength(new[-1][-1], sub[i])
                 while dash < length:
                     new[-1][-1], nxt, sub[i] = \
-                        inkex.cspbezsplitatlength(new[-1][-1], sub[i], dash/length)
+                        bezier.cspbezsplitatlength(new[-1][-1], sub[i], dash/length)
                     if idash % 2:           # create a gap
                         new.append([nxt[:]])
                     else:                   # splice the curve

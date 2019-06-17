@@ -90,7 +90,7 @@ class SetAttrImage(inkex.Effect):
 
     def change_all_images(self, node, attribute):
         path = 'descendant-or-self::svg:image'
-        for img in node.xpath(path, namespaces=inkex.NSS):
+        for img in node.xpath(path):
             self.change_attribute(img, attribute)
 
     # methods called via dispatcher

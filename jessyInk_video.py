@@ -24,6 +24,7 @@ from lxml import etree
 
 import inkex
 from inkex.localization import _
+from inkex.utils import NSS
 
 class JessyInk_Effects(inkex.Effect):
     def __init__(self):
@@ -32,21 +33,21 @@ class JessyInk_Effects(inkex.Effect):
 
         self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
-        baseView = self.document.xpath("//sodipodi:namedview[@id='base']", namespaces=inkex.NSS)
+        baseView = self.document.xpath("//sodipodi:namedview[@id='base']", namespaces=NSS)
 
         if len(baseView) != 1:
             inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
 
-        layer = self.document.xpath("//svg:g[@id='" + baseView[0].attrib["{" + inkex.NSS["inkscape"] + "}current-layer"] + "']", namespaces=inkex.NSS)
+        layer = self.document.xpath("//svg:g[@id='" + baseView[0].attrib["{" + NSS["inkscape"] + "}current-layer"] + "']", namespaces=NSS)
 
         if len(layer) != 1:
             inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
@@ -56,7 +57,7 @@ class JessyInk_Effects(inkex.Effect):
         tmplRoot = etree.fromstring(tmplFile.read())
         tmplFile.close()
 
-        elem = deepcopy(tmplRoot.xpath("//svg:g[@jessyink:element='core.video']", namespaces=inkex.NSS)[0])
+        elem = deepcopy(tmplRoot.xpath("//svg:g[@jessyink:element='core.video']", namespaces=NSS)[0])
         nodeDict = findInternalLinks(elem, tmplRoot)
 
         deleteIds(elem)
@@ -83,15 +84,15 @@ def findInternalLinks(node, docRoot, nodeDict = {}):
         linkId = entry[5:len(entry) - 1]
 
         if linkId not in nodeDict:
-            nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=inkex.NSS)[0])
+            nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=NSS)[0])
             nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
 
     for entry in node.iter():
-        if '{' + inkex.NSS['xlink'] + '}href' in entry.attrib:
-            linkId = entry.attrib['{' + inkex.NSS['xlink'] + '}href'][1:len(entry.attrib['{' + inkex.NSS['xlink'] + '}href'])]
+        if '{' + NSS['xlink'] + '}href' in entry.attrib:
+            linkId = entry.attrib['{' + NSS['xlink'] + '}href'][1:len(entry.attrib['{' + NSS['xlink'] + '}href'])]
 
             if linkId not in nodeDict:
-                nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=inkex.NSS)[0])
+                nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=NSS)[0])
                 nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
 
     return nodeDict
@@ -101,7 +102,7 @@ def getNewId(prefix, docRoot):
 
     number = datetime.datetime.now().microsecond
 
-    while len(docRoot.xpath("//*[@id='" + prefix + str(number) + "']", namespaces=inkex.NSS)) > 0:
+    while len(docRoot.xpath("//*[@id='" + prefix + str(number) + "']", namespaces=NSS)) > 0:
         number += 1
 
     return prefix + str(number)

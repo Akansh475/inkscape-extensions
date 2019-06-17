@@ -115,24 +115,10 @@ def is_sibling(element1, element2):
 def is_in_defs(doc, element):
     """Check whether element is in defs."""
     if element is not None:
-        defs = doc.find('defs', namespaces=inkex.NSS)
+        defs = doc.find('defs')
         if defs is not None:
-            return linked_node in defs.iterdescendants()
+            return element in defs.iterdescendants()
     return False
-
-
-def get_linked(doc, element):
-    """Return linked element or None."""
-    if element is not None:
-        href = element.get(inkex.addNS('href', 'xlink'), None)
-    if href is not None:
-        linked_id = href[href.find('#') + 1:]
-        path = '//*[@id="%s"]' % linked_id
-        el_list = doc.xpath(path, namespaces=inkex.NSS)
-        if isinstance(el_list, list) and len(el_list):
-            return el_list[0]
-        else:
-            return None
 
 
 def check_3dbox(svg, element, scale_x, scale_y):
@@ -148,7 +134,7 @@ def check_3dbox(svg, element, scale_x, scale_y):
 def check_text_on_path(svg, element, scale_x, scale_y):
     """Check whether to skip scaling a text put on a path."""
     skip = False
-    path = get_linked(svg, element.find(inkex.addNS('textPath', 'svg')))
+    path = element.find('textPath').href
     if not is_in_defs(svg, path):
         if is_sibling(element, path):
             # skip common element scaling if both text and path are siblings
@@ -179,7 +165,7 @@ def check_text_on_path(svg, element, scale_x, scale_y):
 def check_use(svg, element, scale_x, scale_y):
     """Check whether to skip scaling an instantiated element (<use>)."""
     skip = False
-    path = get_linked(svg, element)
+    path = element.href
     if not is_in_defs(svg, path):
         if is_sibling(element, path):
             skip = True
@@ -336,14 +322,14 @@ class DPISwitcher(EffectExtension):
 
     def scaleGuides(self, svg):
         xpathStr = '//sodipodi:guide'
-        guides = svg.xpath(xpathStr, namespaces=inkex.NSS)
+        guides = svg.xpath(xpathStr)
         for guide in guides:
             point = guide.get("position").split(",")
             guide.set("position", str(float(point[0].strip()) * self.factor_a) + "," + str(float(point[1].strip()) * self.factor_a))
 
     def scaleGrid(self, svg):
         xpathStr = '//inkscape:grid'
-        grids = svg.xpath(xpathStr, namespaces=inkex.NSS)
+        grids = svg.xpath(xpathStr)
         for grid in grids:
             grid.set("units", "px")
             if grid.get("spacingx"):
@@ -383,12 +369,12 @@ class DPISwitcher(EffectExtension):
             if units:
                 print("units: " + units)
             xpathStr = '//sodipodi:guide'
-            guides = svg.xpath(xpathStr, namespaces=inkex.NSS)
+            guides = svg.xpath(xpathStr)
             xpathStr = '//inkscape:grid'
             if guides:
                 numberGuides = len(guides)
                 print("Document has " + str(numberGuides) + " guides")
-            grids = svg.xpath(xpathStr, namespaces=inkex.NSS)
+            grids = svg.xpath(xpathStr)
             i = 1
             for grid in grids:
                 print("Grid number " + str(i) + ": Units: " + grid.get("units"))

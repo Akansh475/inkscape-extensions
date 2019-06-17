@@ -37,6 +37,7 @@ from __future__ import print_function
 
 import dxf_templates
 import inkex
+from inkex import colors, bezier
 from inkex.transforms import Transform
 from inkex.generic import OutputExtension
 from inkex.elements import Group, Use, PathElement, Rectangle, Line, Circle
@@ -154,7 +155,7 @@ class DxfOutlines(OutputExtension):
             j = len(self.d) + i - 4
             self.xfit[j] = get_fit(i / 3.0, csp, 0)
             self.yfit[j] = get_fit(i / 3.0, csp, 1)
-            self.d[j] = self.d[j - 1] + inkex.pointdistance((self.xfit[j - 1], self.yfit[j - 1]), (self.xfit[j], self.yfit[j]))
+            self.d[j] = self.d[j - 1] + bezier.pointdistance((self.xfit[j - 1], self.yfit[j - 1]), (self.xfit[j], self.yfit[j]))
         self.csp_old = csp
 
     def ROBO_output(self):
@@ -206,7 +207,7 @@ class DxfOutlines(OutputExtension):
             if 'stroke' in style:
                 if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
                     rgb = inkex.Color(style['stroke']).to_rgb()
-        hsl = inkex.rgb_to_hsl(rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0)
+        hsl = colors.rgb_to_hsl(rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0)
         self.color = 7  # default is black
         if hsl[2]:
             self.color = 1 + (int(6 * hsl[0] + 0.5) % 6)  # use 6 hues
@@ -300,7 +301,7 @@ class DxfOutlines(OutputExtension):
         #              The NURBS Book By Les Piegl and Wayne Tiller (Springer, 1995)
         # self.dxf_add("999\nDXF created by Inkscape\n")  # Some programs do not take comments in DXF files (KLayout 0.21.12 for example)
         self.dxf_add(dxf_templates.r14_header)
-        for node in self.document.getroot().xpath('//svg:g', namespaces=inkex.NSS):
+        for node in self.svg.xpath('//svg:g'):
             if node.is_layer():
                 layer = node.label
                 self.layernames.append(layer.lower())

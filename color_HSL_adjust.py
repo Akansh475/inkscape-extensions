@@ -6,7 +6,7 @@ import random
 
 import coloreffect
 import inkex
-
+from inkex import colors
 
 class C(coloreffect.ColorEffect):
     def __init__(self):
@@ -39,7 +39,7 @@ class C(coloreffect.ColorEffect):
         return max(minimum, min(x, maximum))
 
     def colmod(self, r, g, b):
-        hsl = inkex.rgb_to_hsl(r / 255, g / 255, b / 255)
+        hsl = colors.rgb_to_hsl(r / 255, g / 255, b / 255)
 
         if self.options.random_hue:
             hsl[0] = random.random()
@@ -60,7 +60,7 @@ class C(coloreffect.ColorEffect):
             light_val = hsl[2] + (self.options.lightness / 100)
             hsl[2] = self.clamp(0, light_val, 1)
 
-        rgb = inkex.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
+        rgb = colors.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
         return '{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
 

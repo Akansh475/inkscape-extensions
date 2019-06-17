@@ -50,18 +50,16 @@ Major revisions in Hershey Text 3.0:
 '''
 
 import os
-import sys
 import math
 
-import inkex
+from copy import deepcopy
+from lxml import etree
 
-from inkex import Transform, ScaleTransform, TranslateTransform, Style, units
+import inkex
+from inkex import Transform, Style, units
 
 from inkex.elements import SVG_PARSER, Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
-
-from lxml import etree
-from copy import deepcopy
 
 
 class Hershey( inkex.Effect ):
@@ -1006,7 +1004,7 @@ Evil Mad Scientist Laboratories
         vOffset = 0
         
         # SVG fonts use inverted Y axis; mirror vertically
-        scale_transform = ScaleTransform(font_scale,-font_scale)
+        scale_transform = Transform(scale=(font_scale, -font_scale))
 
         # Combine scales of external transformations with the scaling
         # applied by this function:
@@ -1027,7 +1025,7 @@ Evil Mad Scientist Laboratories
         
         p_style = {'stroke-width': width_string}
 
-        the_transform = TranslateTransform(offset + hOffset,vertoffset + vOffset)
+        the_transform = Transform(translate=(offset + hOffset, vertoffset + vOffset))
         the_transform *= scale_transform 
 
         if path_string is not None:
@@ -1274,10 +1272,9 @@ Evil Mad Scientist Laboratories
                 #     for processing the referenced element.  The referenced element is
                 #     hidden only if its visibility is "inherit" or "hidden".
 
-                if node.ref() is None:
+                refnode = node.href
+                if refnode is None:
                     continue # missing reference
-
-                refnode = node.ref()
 
                 local_transform = Transform( _matrix )
                 x = float( node.get( 'x', '0' ) )
@@ -1295,11 +1292,9 @@ Evil Mad Scientist Laboratories
                     inkex.errormsg('Unable to process selected nodes. Consider unlinking cloned text.') 
                     continue
 
-                try:
-                    id = ref_group.get( 'id' )
-                except AttributeError:
-                    id = self.uniqueId(None,True)
-                    ref_group.set( 'id', id)
+                # Tests are not using the preset seed for this atm
+                #if 'id' not in ref_group.attrib:
+                #    ref_group.set_random_id('')
                 
                 ref_group.set( 'transform',ref_transform)
 
@@ -1654,9 +1649,9 @@ Evil Mad Scientist Laboratories
     
                                     the_transform = None
                                     if (text_align == "center"):    # when using text-align
-                                        the_transform = TranslateTransform((float(rect_width) - widthThisLine)/2)
+                                        the_transform = Transform(translate=((float(rect_width) - widthThisLine)/2))
                                     elif (text_align == "end"):
-                                        the_transform = TranslateTransform(float(rect_width) - widthThisLine)
+                                        the_transform = Transform(translate=(float(rect_width) - widthThisLine))
                                     if the_transform is not None:
                                         lineGroup.transform = the_transform
                                         
@@ -1667,7 +1662,7 @@ Evil Mad Scientist Laboratories
                         strPos_eol = strPos_eol + extd_line_length
                         strPos = strPos_eol
 
-                    the_transform = TranslateTransform(startX, float(startY) - y_offs_overall)
+                    the_transform = Transform(translate=(startX, float(startY) - y_offs_overall))
 
                 else:    # If this is a text object, rather than a flowroot object:
                     '''
@@ -1789,7 +1784,7 @@ Evil Mad Scientist Laboratories
                                 
                                 yShift = float(yStartLine)
                                 
-                                the_transform = TranslateTransform(xShift,yShift)
+                                the_transform = Transform(translate=(xShift, yShift))
 
                                 lineGroup.transform = the_transform
 

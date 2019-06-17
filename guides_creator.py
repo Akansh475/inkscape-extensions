@@ -100,16 +100,8 @@ def getHorizontalDivisionsFromPreset(preset):
 
 
 def deleteAllGuides(document):
-    # getting the parent's tag of the guides
-    nv = document.xpath('/svg:svg/sodipodi:namedview', namespaces=inkex.NSS)[0]
-
-    # getting all the guides
-    children = document.xpath('/svg:svg/sodipodi:namedview/sodipodi:guide', namespaces=inkex.NSS)
-
-    # removing each guides
-    for element in children:
-        nv.remove(element)
-
+    for guide in document.getroot().get_guides():
+        guide.delete()
 
 class GuidesCreator(EffectExtension):
     def __init__(self):

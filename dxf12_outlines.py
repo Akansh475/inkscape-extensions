@@ -118,9 +118,9 @@ class DxfTwelve(OutputExtension):
         h = self.svg.unittouu(self.svg.height)
 
         path = '//svg:path'
-        for node in self.document.getroot().xpath(path, namespaces=inkex.NSS):
+        for node in self.svg.xpath(path):
 
-            layer = node.getparent().get(inkex.addNS('label', 'inkscape'))
+            layer = node.getparent().label
             if layer is None:
                 layer = 'Layer 1'
 

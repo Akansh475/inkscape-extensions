@@ -24,6 +24,7 @@ from lxml import etree
 
 # local library
 import inkex
+from inkex.utils import NSS
 from inkex.localization import _
 
 
@@ -50,7 +51,7 @@ class hpglDecoder(object):
     def getSvg(self):
         actualLayer = 0
         # prepare document
-        self.doc = etree.parse(StringIO('<svg xmlns:sodipodi="' + inkex.NSS['sodipodi'] + '" xmlns:inkscape="' + inkex.NSS['inkscape'] + '" width="%smm" height="%smm" viewBox="0 0 %s %s"></svg>' %
+        self.doc = etree.parse(StringIO('<svg xmlns:sodipodi="' + NSS['sodipodi'] + '" xmlns:inkscape="' + NSS['inkscape'] + '" width="%smm" height="%smm" viewBox="0 0 %s %s"></svg>' %
                                         (self.options.docWidth, self.options.docHeight, self.options.docWidth, self.options.docHeight)))
         etree.SubElement(self.doc.getroot(), inkex.addNS('namedview', 'sodipodi'), {inkex.addNS('document-units', 'inkscape'): 'mm'})
         if self.options.showMovements:

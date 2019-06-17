@@ -17,6 +17,7 @@
 
 import inkex
 from inkex.localization import _
+from inkex.utils import NSS
 
 class JessyInk_MasterSlide(inkex.Effect):
     def __init__(self):
@@ -26,28 +27,28 @@ class JessyInk_MasterSlide(inkex.Effect):
         self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
         self.arg_parser.add_argument('--layerName',  type=str, dest = 'layerName', default = '')
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=inkex.NSS)
+        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
             inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
         # Remove old master slide property
-        for node in self.document.xpath("//*[@jessyink:masterSlide='masterSlide']", namespaces=inkex.NSS):
-            del node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"]
+        for node in self.document.xpath("//*[@jessyink:masterSlide='masterSlide']", namespaces=NSS):
+            del node.attrib["{" + NSS["jessyink"] + "}masterSlide"]
 
         # Set new master slide.
         if self.options.layerName != "":
-            nodes = self.document.xpath("//*[@inkscape:groupmode='layer' and @inkscape:label='" + self.options.layerName + "']", namespaces=inkex.NSS)
+            nodes = self.document.xpath("//*[@inkscape:groupmode='layer' and @inkscape:label='" + self.options.layerName + "']", namespaces=NSS)
             if len(nodes) == 0:
                 inkex.errormsg(_("Layer not found. Removed current master slide selection.\n"))
             elif len(nodes) > 1:
                 inkex.errormsg(_("More than one layer with this name found. Removed current master slide selection.\n"))
             else:
-                nodes[0].set("{" + inkex.NSS["jessyink"] + "}masterSlide","masterSlide")
+                nodes[0].set("{" + NSS["jessyink"] + "}masterSlide","masterSlide")
 
 
 # Create effect instance

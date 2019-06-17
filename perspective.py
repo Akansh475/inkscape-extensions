@@ -48,8 +48,8 @@ class Project(EffectExtension):
 
         # obj is selected second
         scale = self.svg.unittouu('1px')  # convert to document units
-        doc = self.document.getroot()
-        h = self.svg.unittouu(doc.xpath('@height', namespaces=inkex.NSS)[0])
+        doc = self.svg
+        h = self.svg.unittouu(doc.xpath('@height')[0])
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')
         if viewBox:

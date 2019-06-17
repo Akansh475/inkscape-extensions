@@ -18,6 +18,7 @@
 
 import inkex
 from inkex import inkbool
+from inkex.utils import NSS
 
 def propStrToList(str):
     list = []
@@ -46,13 +47,13 @@ class JessyInk_Uninstall(inkex.Effect):
         self.arg_parser.add_argument('--remove_autoTexts',  type=inkbool, dest = 'remove_autoTexts', default = True)
         self.arg_parser.add_argument('--remove_views',  type=inkbool, dest = 'remove_views', default = True)
 
-        inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Remove script, if so desired.
         if self.options.remove_script:
             # Find and delete script node.
-            for node in self.document.xpath("//svg:script[@id='JessyInk']", namespaces=inkex.NSS):
+            for node in self.document.xpath("//svg:script[@id='JessyInk']", namespaces=NSS):
                 node.getparent().remove(node)
 
             # Remove "jessyInkInit()" in the "onload" attribute, if present.
@@ -73,56 +74,56 @@ class JessyInk_Uninstall(inkex.Effect):
 
         # Remove effect attributes, if so desired.
         if self.options.remove_effects:
-            for node in self.document.xpath("//*[@jessyink:effectIn]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}effectIn"]
+            for node in self.document.xpath("//*[@jessyink:effectIn]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}effectIn"]
 
-            for node in self.document.xpath("//*[@jessyink:effectOut]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}effectOut"]
+            for node in self.document.xpath("//*[@jessyink:effectOut]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}effectOut"]
 
             # Remove old style attributes as well.
-            for node in self.document.xpath("//*[@jessyInk_effectIn]", namespaces=inkex.NSS):
+            for node in self.document.xpath("//*[@jessyInk_effectIn]", namespaces=NSS):
                 del node.attrib["jessyInk_effectIn"]
 
-            for node in self.document.xpath("//*[@jessyInk_effectOut]", namespaces=inkex.NSS):
+            for node in self.document.xpath("//*[@jessyInk_effectOut]", namespaces=NSS):
                 del node.attrib["jessyInk_effectOut"]
 
         # Remove master slide assignment, if so desired.
         if self.options.remove_masterSlide:
-            for node in self.document.xpath("//*[@jessyink:masterSlide]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}masterSlide"]
+            for node in self.document.xpath("//*[@jessyink:masterSlide]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}masterSlide"]
 
             # Remove old style attributes as well.
-            for node in self.document.xpath("//*[@jessyInk_masterSlide]", namespaces=inkex.NSS):
+            for node in self.document.xpath("//*[@jessyInk_masterSlide]", namespaces=NSS):
                 del node.attrib["jessyInk_masterSlide"]
 
         # Remove transitions, if so desired.
         if self.options.remove_transitions:
-            for node in self.document.xpath("//*[@jessyink:transitionIn]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}transitionIn"]
+            for node in self.document.xpath("//*[@jessyink:transitionIn]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}transitionIn"]
 
-            for node in self.document.xpath("//*[@jessyink:transitionOut]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}transitionOut"]
+            for node in self.document.xpath("//*[@jessyink:transitionOut]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}transitionOut"]
 
             # Remove old style attributes as well.
-            for node in self.document.xpath("//*[@jessyInk_transitionIn]", namespaces=inkex.NSS):
+            for node in self.document.xpath("//*[@jessyInk_transitionIn]", namespaces=NSS):
                 del node.attrib["jessyInk_transitionIn"]
 
-            for node in self.document.xpath("//*[@jessyInk_transitionOut]", namespaces=inkex.NSS):
+            for node in self.document.xpath("//*[@jessyInk_transitionOut]", namespaces=NSS):
                 del node.attrib["jessyInk_transitionOut"]
 
         # Remove auto texts, if so desired.
         if self.options.remove_autoTexts:
-            for node in self.document.xpath("//*[@jessyink:autoText]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}autoText"]
+            for node in self.document.xpath("//*[@jessyink:autoText]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}autoText"]
 
             # Remove old style attributes as well.
-            for node in self.document.xpath("//*[@jessyInk_autoText]", namespaces=inkex.NSS):
+            for node in self.document.xpath("//*[@jessyInk_autoText]", namespaces=NSS):
                 del node.attrib["jessyInk_autoText"]
 
         # Remove views, if so desired.
         if self.options.remove_views:
-            for node in self.document.xpath("//*[@jessyink:view]", namespaces=inkex.NSS):
-                del node.attrib["{" + inkex.NSS["jessyink"] + "}view"]
+            for node in self.document.xpath("//*[@jessyink:view]", namespaces=NSS):
+                del node.attrib["{" + NSS["jessyink"] + "}view"]
 
 
 # Create effect instance.

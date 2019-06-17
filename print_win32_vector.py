@@ -187,7 +187,7 @@ class MyEffect(inkex.Effect):
 
         # initiallize print document
 
-        docname = self.document.getroot().xpath('@sodipodi:docname', namespaces=inkex.NSS)
+        docname = self.svg.xpath('@sodipodi:docname')
         if not docname:
             docname = ['New document 1']
         lpszDocName = ctypes.create_string_buffer('Inkscape ' + docname[0].split('\\')[-1])
@@ -199,7 +199,7 @@ class MyEffect(inkex.Effect):
 
         self.scale = (ord(pDevMode[58]) + 256.0*ord(pDevMode[59]))/96    # use PrintQuality from DEVMODE
         self.scale /= self.svg.unittouu('1px')
-        h = self.svg.unittouu(self.document.getroot().xpath('@height', namespaces=inkex.NSS)[0])
+        h = self.svg.unittouu(self.svg.xpath('@height')[0])
         doc = self.document.getroot()
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')

@@ -64,9 +64,7 @@ class Guillotine(EffectExtension):
         """
         root = self.document.getroot()
         guides = []
-        xpath = self.document.xpath("//sodipodi:guide",
-                                    namespaces=inkex.NSS)
-        for g in xpath:
+        for g in self.svg.namedview.get_guides():
             guide = {}
             (x, y) = g.attrib['position'].split(',')
             if g.attrib['orientation'][:2] == '0,':

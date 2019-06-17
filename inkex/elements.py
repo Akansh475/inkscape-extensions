@@ -286,6 +286,17 @@ class ShapeElement(BaseElement):
         """Returns the inkscape label"""
         return self.get('inkscape:label', None)
 
+    @property
+    def href(self):
+        """Returns the referred-to element if available"""
+        from inkex.svg import SvgDocumentElement
+        if not isinstance(self.root, SvgDocumentElement):
+            raise KeyError("XML Fragment can not use xlinks")
+        ref = self.get('xlink:href')
+        if not ref:
+            return None
+        return self.root.getElementById(ref.strip('#'))
+
 
 class FlowRegion(ShapeElement):
     """SVG Flow Region (SVG 2.0)"""
@@ -452,17 +463,7 @@ class Use(ShapeElement):
     """A 'use' element that links to another in the document"""
     tag_name = 'use'
 
-    get_path = lambda self: self.ref().get_path()
-
-    def ref(self):
-        """Returns the referred-to element if available"""
-        from inkex.svg import SvgDocumentElement
-        if not isinstance(self.root, SvgDocumentElement):
-            raise KeyError("XML Fragment can not use xlinks")
-        ref = self.get('xlink:href')
-        if not ref:
-            return None
-        return self.root.getElementById(ref.strip('#'))
+    get_path = lambda self: self.href.get_path()
 
 class ClipPath(Group):
     """A path used to clip objects"""

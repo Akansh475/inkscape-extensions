@@ -32,6 +32,8 @@ from .utils import X, Y, classproperty, strargs, pairwise
 if False: # pylint: disable=using-constant-test
     from typing import Type, Dict # pylint: disable=unused-import
 
+# All the names that get added to the inkex API itself.
+__all__ = ('Path', 'CubicSuperPath')
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None

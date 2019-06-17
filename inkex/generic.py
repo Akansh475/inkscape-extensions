@@ -33,15 +33,13 @@ from .utils import errormsg
 from .elements import SVG_PARSER, BaseElement, Group
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import TranslateTransform
-from .deprecated import DeprecatedEffect
+
+# All the names that get added to the inkex API itself.
+__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension')
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
-
-class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
-    """An Inkscape effect, takes SVG in and outputs SVG"""
-    pass
 
 class EffectExtension(SvgThroughMixin, InkscapeExtension):
     """

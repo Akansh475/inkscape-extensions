@@ -22,6 +22,9 @@
 Basic color controls
 """
 
+# All the names that get added to the inkex API itself.
+__all__ = ('Color',)
+
 SVG_COLOR = {
     'aliceblue': '#f0f8ff',
     'antiquewhite': '#faebd7',

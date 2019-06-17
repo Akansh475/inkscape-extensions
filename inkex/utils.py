@@ -32,6 +32,9 @@ from argparse import ArgumentTypeError
 # When python2 support is gone, enable tempfile's version
 # from tempfile import TemporaryDirectory
 
+# All the names that get added to the inkex API itself.
+__all__ = ('AbortExtension', 'inkbool', 'errormsg', 'addNS')
+
 (X, Y) = range(2)
 
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc

@@ -37,6 +37,7 @@ import inkex.utils
 from inkex.localization import _
 from inkex.elements import Guide
 from inkex.svg import SvgDocumentElement
+from inkex.base import SvgThroughMixin, InkscapeExtension
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -231,6 +232,9 @@ class DeprecatedEffect(object):
                                               'document. Use `self.svg.add_unit(value)` instead.'))
         return self.svg.add_unit(value)
 
+class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
+    """An Inkscape effect, takes SVG in and outputs SVG"""
+    pass
 
 def deprecate(func):
     """Function decorator for deprecation functions which have a one-liner

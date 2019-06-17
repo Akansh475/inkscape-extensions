@@ -32,6 +32,10 @@ from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 
 from .utils import X, Y, strargs
 
+# All the names that get added to the inkex API itself.
+__all__ = ('Transform', 'BoundingBox', 'Scale', 'Segment')
+
+
 if sys.version_info[0] == 3:  #PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 

@@ -69,6 +69,11 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     def set_selected(self, *ids):
         """Sets the currently selected elements to these ids"""
         self.selected = OrderedDict()
+
+        # Allow selecting of xpath elements directly
+        if len(ids) == 1 and isinstance(ids[0], str) and ids[0].startswith('//'):
+            ids = self.xpath(ids[0])
+
         for elem_id in ids:
             if isinstance(elem_id, BaseElement):
                 # Selection is a list of nodes to select

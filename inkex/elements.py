@@ -407,6 +407,11 @@ class Pattern(BaseElement):
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
+class Gradient(BaseElement):
+    """A gradient instruction usually in the defs"""
+    tag_names = ('linearGradient', 'radialGradient')
+    WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('gradientTransform', Transform),)
+
 class Polygon(ShapeElement):
     """A closed polyline"""
     tag_name = 'polygon'

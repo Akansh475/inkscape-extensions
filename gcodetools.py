@@ -1616,15 +1616,17 @@ class P(object):
     def __div__(self, other):
         return P(self.x / other, self.y / other)
 
+    def __truediv__(self, other):
+        return self.__div__(other)
+
     def mag(self):
         return math.hypot(self.x, self.y)
 
     def unit(self):
-        h = self.mag()
-        if h:
-            return self / h
-        else:
-            return P(0, 0)
+        h_mag = self.mag()
+        if h_mag:
+            return self / h_mag
+        return P(0, 0)
 
     def dot(self, other):
         return self.x * other.x + self.y * other.y
@@ -3948,7 +3950,9 @@ class Gcodetools(inkex.Effect):
         self.check_dir()
         gcode = ""
 
-        biarc_group = etree.SubElement(self.selected_paths.keys()[0] if len(self.selected_paths.keys()) > 0 else self.layers[0], inkex.addNS('g', 'svg'))
+        parent = list(self.selected_paths)[0] if self.selected_paths else self.layers[0]
+        from inkex.elements import Group
+        biarc_group = parent.add(Group())
         print_(("self.layers=", self.layers))
         print_(("paths=", paths))
         colors = {}
@@ -4822,7 +4826,7 @@ class Gcodetools(inkex.Effect):
         bitlen = 20 / self.options.engraving_newton_iterations
 
         for layer in self.layers:
-            if layer in self.selected_paths:
+            if layer in self.selected_paths and layer in self.orientation_points:
                 # Calculate scale in pixels per user unit (mm or inch)
                 p1 = self.orientation_points[layer][0][0]
                 p2 = self.orientation_points[layer][0][1]
@@ -5499,7 +5503,7 @@ G01 Z1 (going to cutting z)\n""",
                         top_start = [fine_cut[0][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
                         top_end = [fine_cut[-1][1][0], self.options.lathe_width + self.options.Zsafe + self.options.lathe_fine_cut_width]
                         gcode += "\n(Fine cutting start)\n(Calculating fine cut using {})\n".format(self.options.lathe_create_fine_cut_using)
-                        for i in range(self.options.lathe_fine_cut_count):
+                        for i in range(int(self.options.lathe_fine_cut_count)):
                             width = self.options.lathe_fine_cut_width * (1 - float(i + 1) / self.options.lathe_fine_cut_count)
                             if width == 0:
                                 current_pass = fine_cut
@@ -6023,6 +6027,8 @@ G01 Z1 (going to cutting z)\n""",
 
             elif self.options.active_tab == '"plasma-prepare-path"':
                 self.plasma_prepare_path()
+            else:
+                raise ValueError("Unknown function: '{}'".format(self.options.active_tab))
 
         print_("------------------------------------------")
         print_("Done in {:f} seconds".format(time.time() - start_time))

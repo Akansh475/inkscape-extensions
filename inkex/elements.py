@@ -61,7 +61,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         return self._lookups
 
 SVG_PARSER = etree.XMLParser(huge_tree=True)
-SVG_PARSER.setElementClassLookup(SvgClassLookup())
+SVG_PARSER.set_element_class_lookup(SvgClassLookup())
 
 
 class BaseElement(etree.ElementBase):

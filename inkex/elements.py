@@ -53,6 +53,8 @@ class SvgClassLookup(etree.CustomElementClassLookup):
 
     def get_lookups(self):
         """Scan for and cache a list of available classes"""
+        # This import is needed prior to generating the lookup table
+        from .svg import SvgDocumentElement # pylint: disable=unused-variable
         if not self._lookups:
             for cls in BaseElement.get_subclasses():
                 for name in (cls.tag_name,) if cls.tag_name else cls.tag_names:

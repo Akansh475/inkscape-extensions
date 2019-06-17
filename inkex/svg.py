@@ -30,12 +30,9 @@ Provide a way to load lxml attributes with an svg API on top.
 import random
 from collections import OrderedDict
 
-import lxml
-from lxml import etree
-
 from .units import discover_unit, convert_unit, render_unit
 from .transforms import BoundingBox
-from .elements import BaseElement, NamedView
+from .elements import BaseElement, NamedView, Defs
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import

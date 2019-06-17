@@ -59,6 +59,11 @@ class BasicSvgTest(TestCase):
         doc = svg('id="bananas"')
         doc.set_selected('bananas')
         self.assertEqual(doc.selected['bananas'], doc)
+        self.assertEqual(doc.get_first_selected(), doc)
+        doc = svg('id="apples"')
+        doc.set_selected(doc.getElementById('apples'))
+        self.assertEqual(doc.selected['apples'], doc)
+        self.assertEqual(doc.get_first_selected(), doc)
 
     def test_selected_bbox(self):
         """Can we get a bounding box from the selected items"""
@@ -81,6 +86,8 @@ class BasicSvgTest(TestCase):
         """Selected layer is selected"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
         self.assertEqual(doc.get_current_layer().get('id'), 'layer3')
+        doc = svg('id="empty"')
+        self.assertEqual(doc.get_current_layer(), doc)
 
     def test_svg_center_position(self):
         """SVG with namedview has a center position"""
@@ -88,6 +95,21 @@ class BasicSvgTest(TestCase):
         self.assertEqual(doc.get_center_position(), (30.714286, 520.0))
         self.assertEqual(svg().get_center_position(), (0, 0))
 
+    def test_defs(self):
+        """Can get the defs from an svg file"""
+        doc = svg_file(self.data_file('svg', 'markers.svg'))
+        self.assertEqual(len(doc.defs), 2)
+        doc = svg('id="empty"')
+        self.assertEqual(len(doc.defs), 0)
+
+    def test_scale(self):
+        """Scale of a document"""
+        doc = svg('id="empty" viewBox="0 0 100 100" width="200" height="200"')
+        self.assertEqual(float(doc.width), 200.0)
+        self.assertEqual(float(doc.get_viewbox()[2]), 100.0)
+        self.assertEqual(doc.scale, 2.0)
+        doc = svg('id="empty" viewBox="0 0 0 0" width="200" height="200"')
+        self.assertEqual(doc.scale, 1.0)
 
 class NamedViewTest(TestCase):
     """Tests for the named view functionality"""

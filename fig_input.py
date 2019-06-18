@@ -21,10 +21,10 @@
 Simple wrapper around fig2dev
 """
 
-from inkex.generic import CallExtension
+import inkex
 from inkex.command import call
 
-class FigInput(CallExtension):
+class FigInput(inkex.CallExtension):
     """Load FIG Files by calling fig2dev program"""
     input_ext = 'fig'
 

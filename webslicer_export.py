@@ -25,11 +25,9 @@ from lxml import etree
 import inkex
 from inkex import inkbool
 from inkex.localization import _
-from inkex.generic import OutputExtension
 from webslicer_effect import WebSlicerMixin, is_empty
 
-
-class WebSlicer_Export(WebSlicerMixin, OutputExtension):
+class WebSlicer_Export(WebSlicerMixin, inkex.OutputExtension):
 
     def __init__(self):
         super(WebSlicer_Export, self).__init__()

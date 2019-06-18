@@ -23,9 +23,6 @@ Generate a gear rack as SVG.
 from math import acos, cos, radians, sin, sqrt, tan
 
 import inkex
-from inkex.elements import PathElement
-from inkex.generic import GenerateExtension
-
 
 def involute_intersect_angle(Rb, R):
     Rb, R = float(Rb), float(R)
@@ -50,7 +47,7 @@ def points_to_svgd(p):
     return svgd
 
 
-class RackGear(GenerateExtension):
+class RackGear(inkex.GenerateExtension):
     def __init__(self):
         super(RackGear, self).__init__()
         self.arg_parser.add_argument(
@@ -87,7 +84,7 @@ class RackGear(GenerateExtension):
 
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
-        yield PathElement(style=str(inkex.Style(style)), d=str(path))
+        yield inkex.PathElement(style=str(inkex.Style(style)), d=str(path))
 
 if __name__ == '__main__':
     RackGear().run()

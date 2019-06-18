@@ -33,7 +33,6 @@ from lxml import etree
 import inkex
 from inkex import inkbool
 from inkex.paths import Path
-from inkex.generic import EffectExtension
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
                  fx="sin(x)", fpx="cos(x)", fponum=True, times2pi=False, polar=False, isoscale=True, drawaxis=True, endpts=False):
@@ -174,7 +173,7 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
     return a
 
 
-class FuncPlot(EffectExtension):
+class FuncPlot(inkex.EffectExtension):
     def __init__(self):
         super(FuncPlot, self).__init__()
         self.arg_parser.add_argument("--xstart",

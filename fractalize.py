@@ -19,9 +19,7 @@
 #
 import math
 import random
-
 import inkex
-from inkex.generic import EffectExtension
 
 def calculate_subdivision(smoothness, x1, y1, x2, y2):
     #Calculate the vector from (x1,y1) to (x2,y2)
@@ -48,7 +46,7 @@ def calculate_subdivision(smoothness, x1, y1, x2, y2):
     return (x, y)
 
 
-class PathFractalize(EffectExtension):
+class PathFractalize(inkex.EffectExtension):
     def __init__(self):
         super(PathFractalize, self).__init__()
         self.arg_parser.add_argument("-s", "--subdivs",

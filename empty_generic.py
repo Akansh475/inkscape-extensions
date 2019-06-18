@@ -4,22 +4,17 @@
 # Written by Tavmjong Bah
 from __future__ import absolute_import, print_function, unicode_literals
 
-from lxml import etree
-
 import inkex
-from inkex.utils import inkbool
-from inkex.generic import EffectExtension
 
-
-class GenericTemplate(EffectExtension):
+class GenericTemplate(inkex.EffectExtension):
     def __init__(self):
         super(GenericTemplate, self).__init__()
         self.arg_parser.add_argument("-w", "--width", type=int, dest="generic_width", default="1920", help="Custom width")
         self.arg_parser.add_argument("-z", "--height", type=int, dest="generic_height", default="1080", help="Custom height")
         self.arg_parser.add_argument("-u", "--unit", type=str, dest="generic_unit", default="px", help="SVG Unit")
         self.arg_parser.add_argument("-b", "--background", type=str, dest="generic_background", default="normal", help="Canvas background")
-        self.arg_parser.add_argument("-n", "--noborder", type=inkbool, dest="generic_noborder", default=False)
-        # self.arg_parser.add_argument("-l", "--layer", type=inkbool, dest="generic_layer", default=True)
+        self.arg_parser.add_argument("-n", "--noborder", type=inkex.inkbool, dest="generic_noborder", default=False)
+        # self.arg_parser.add_argument("-l", "--layer", type=inkex.inkbool, dest="generic_layer", default=True)
 
     def effect(self):
 
@@ -27,16 +22,13 @@ class GenericTemplate(EffectExtension):
         height = self.options.generic_height
         unit = self.options.generic_unit
 
-        root = self.document.getroot()
+        root = self.svg
         root.set("id", "SVGRoot")
         root.set("width", str(width) + unit)
         root.set("height", str(height) + unit)
         root.set("viewBox", "0 0 " + str(width) + " " + str(height))
 
-        namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
-        if namedview is None:
-            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
-
+        namedview = root.namedview
         namedview.set(inkex.addNS('document-units', 'inkscape'), unit)
 
         # Until units are supported in 'cx', etc.

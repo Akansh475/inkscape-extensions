@@ -19,12 +19,11 @@
 from lxml import etree
 
 import inkex
-from inkex.generic import OutputExtension
 
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
 
-class Ink2Canvas(OutputExtension):
+class Ink2Canvas(inkex.OutputExtension):
     def save(self, stream):
         svg_root = self.document.getroot()
         width = self.svg.unittouu(svg_root.get("width"))

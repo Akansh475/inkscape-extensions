@@ -23,13 +23,12 @@ Export a gimp pallet file (.gpl)
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from inkex.generic import OutputExtension
-from inkex.colors import Color
+import inkex
 
 DOCNAME = 'sodipodi:docname'
 TAGS = ('fill', 'stroke', 'stop-color', 'flood-color', 'lighting-color')
 
-class ExportGpl(OutputExtension):
+class ExportGpl(inkex.OutputExtension):
     def save(self, stream):
         name = self.svg.name.replace('.svg', '')
         stream.write('GIMP Palette\nName: {}\n#\n'.format(name).encode('utf-8'))
@@ -42,7 +41,7 @@ class ExportGpl(OutputExtension):
         styles = getattr(node, 'style', None) #dict(inkex.Style.parse_str(node.get('style', '')))
         for tag in TAGS:
             if styles and tag in styles:
-                col = Color(styles.get(tag, None))
+                col = inkex.Color(styles.get(tag, None))
                 if col:
                     yield ("{:3d} {:3d} {:3d}".format(*col.to_rgb()), str(str(col)).upper())
 

@@ -26,11 +26,8 @@ import random
 import inkex
 from inkex.localization import _
 from inkex.elements import PathElement, Pattern
-from inkex.generic import EffectExtension
 
 import voronoi
-
-
 
 def clip_line(x1, y1, x2, y2, w, h):
     if x1 < 0 and x2 < 0:
@@ -70,7 +67,7 @@ def clip_line(x1, y1, x2, y2, w, h):
     return [x1, y1, x2, y2]
 
 
-class PatternEffect(EffectExtension):
+class PatternEffect(inkex.EffectExtension):
     def __init__(self):
         super(PatternEffect, self).__init__()
         self.arg_parser.add_argument("--size", type=int, dest="size", default=10,

@@ -31,12 +31,10 @@ interest and that should be shipped out in separate files...
 """
 
 import copy
-import random
 
 import inkex
 from inkex.localization import _
 from inkex.elements import PathElement, Group, Use
-from inkex.generic import EffectExtension
 from inkex.deprecated import deprecate
 
 @deprecate
@@ -53,7 +51,7 @@ def zSort(inNode, idList):
     return sortedList
 
 
-class PathModifier(EffectExtension):
+class PathModifier(inkex.EffectExtension):
     """Select list manipulation"""
     def duplicateNodes(self, aList):
         clones = {}

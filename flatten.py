@@ -17,20 +17,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import inkex
 from inkex import bezier
-from inkex.elements import PathElement
-from inkex.generic import EffectExtension
 
-class Flatten(EffectExtension):
+class Flatten(inkex.EffectExtension):
     def __init__(self):
         super(Flatten, self).__init__()
-        self.arg_parser.add_argument("-f", "--flatness",
-                         type=float,
-                        dest="flat", default=10.0,
-                        help="Minimum flatness of the subdivided curves")
+        self.arg_parser.add_argument(
+            "-f", "--flatness", type=float,
+            dest="flat", default=10.0,
+            help="Minimum flatness of the subdivided curves")
+
     def effect(self):
         for node in self.svg.selected.values():
-            if isinstance(node, PathElement):
+            if isinstance(node, inkex.PathElement):
                 p = node.path.to_superpath()
                 bezier.cspsubdiv(p, self.options.flat)
                 np = []

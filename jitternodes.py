@@ -22,8 +22,6 @@
 import math
 import random
 import inkex
-import inkex.utils
-from inkex.generic import EffectExtension
 
 def randomize(pos, rx, ry, dist):
     (x, y) = pos
@@ -58,7 +56,7 @@ def randomize(pos, rx, ry, dist):
 
     return [x, y]
 
-class JitterNodes(EffectExtension):
+class JitterNodes(inkex.EffectExtension):
     def __init__(self):
         super(JitterNodes, self).__init__()
         self.arg_parser.add_argument("--title")
@@ -71,11 +69,11 @@ class JitterNodes(EffectExtension):
                         dest="radiusy", default=10.0,
                         help="Randomly move nodes and handles within this radius, Y")
         self.arg_parser.add_argument("-c", "--ctrl",
-                         type=inkex.utils.inkbool,
+                         type=inkex.inkbool,
                         dest="ctrl", default=True,
                         help="Randomize control points")
         self.arg_parser.add_argument("-e", "--end",
-                         type=inkex.utils.inkbool,
+                         type=inkex.inkbool,
                         dest="end", default=True,
                         help="Randomize nodes")
         self.arg_parser.add_argument("-d", "--dist",

@@ -26,11 +26,9 @@ import random
 
 import inkex
 from inkex.svg import SvgDocumentElement
-from inkex.generic import EffectExtension
 from inkex.localization import _
 
-
-class Restack(EffectExtension):
+class Restack(inkex.EffectExtension):
     def __init__(self):
         super(Restack, self).__init__()
         self.arg_parser.add_argument("-d", "--direction",

@@ -26,8 +26,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 import inkex
-from inkex.generic import OutputExtension
-from inkex.transforms import Transform
 from inkex.bezier import cspsubdiv
 
 r12_header = ''' 0 
@@ -64,7 +62,7 @@ ENDSEC
 EOF'''
 
 
-class DxfTwelve(OutputExtension):
+class DxfTwelve(inkex.OutputExtension):
     """Create dxf12 output from the svg"""
     def __init__(self):
         super(DxfTwelve, self).__init__()
@@ -124,7 +122,7 @@ class DxfTwelve(OutputExtension):
             if layer is None:
                 layer = 'Layer 1'
 
-            node.transform *= Transform([[scale, 0, 0], [0, -scale, h * scale]])
+            node.transform *= inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]])
             node.apply_transform()
             path = node.path.to_superpath()
 

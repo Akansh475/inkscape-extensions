@@ -19,15 +19,11 @@
 #
 from __future__ import absolute_import, unicode_literals
 
-import sys
-
 from lxml import etree
 
 import inkex
-from inkex.generic import OutputExtension
 
-
-class Nup(OutputExtension):
+class Nup(inkex.OutputExtension):
     def __init__(self):
         super(Nup, self).__init__()
         opts = [('--unit', str, 'unit', 'px', ''),

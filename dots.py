@@ -20,11 +20,10 @@
 import math
 
 import inkex
-from inkex.generic import EffectExtension
 from inkex.elements import Group, TextElement, Circle
 
 
-class Dots(EffectExtension):
+class Dots(inkex.EffectExtension):
 
     def __init__(self):
         super(Dots, self).__init__()

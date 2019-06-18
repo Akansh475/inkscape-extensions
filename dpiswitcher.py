@@ -46,13 +46,11 @@ from __future__ import absolute_import, print_function
 
 import math
 import re
-import sys
 
 from lxml import etree
 
 import inkex
-from inkex.generic import EffectExtension
-from inkex.transforms import Transform
+from inkex.elements import Use, TextElement
 
 # globals
 SKIP_CONTAINERS = [
@@ -85,23 +83,13 @@ GRAPHICS_ELEMENTS = [
 
 def is_3dbox(element):
     """Check whether element is an Inkscape 3dbox type."""
-    return element.get(inkex.addNS('type', 'sodipodi')) == 'inkscape:box3d'
-
-
-def is_use(element):
-    """Check whether element is of type <text>."""
-    return element.tag == inkex.addNS('use', 'svg')
-
-
-def is_text(element):
-    """Check whether element is of type <text>."""
-    return element.tag == inkex.addNS('text', 'svg')
+    return element.get('sodipodi:type') == 'inkscape:box3d'
 
 
 def is_text_on_path(element):
     """Check whether text element is put on a path."""
-    if is_text(element):
-        text_path = element.find(inkex.addNS('textPath', 'svg'))
+    if isinstance(element, TextElement):
+        text_path = element.find('svg:textPath')
         if text_path is not None and len(text_path):
             return True
     return False
@@ -143,7 +131,7 @@ def check_text_on_path(svg, element, scale_x, scale_y):
             if 'transform' in element.attrib:
                 element.transform.add_scale(scale_x, scale_y)
             # scale font size
-            mat = Transform('scale({},{})'.format(scale_x, scale_y)).matrix
+            mat = inkex.Transform('scale({},{})'.format(scale_x, scale_y)).matrix
             det = abs(mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0])
             descrim = math.sqrt(abs(det))
             prop = 'font-size'
@@ -175,12 +163,12 @@ def check_use(svg, element, scale_x, scale_y):
     return skip
 
 
-class DPISwitcher(EffectExtension):
+class DPISwitcher(inkex.EffectExtension):
     def __init__(self):
         super(DPISwitcher, self).__init__()
         self.arg_parser.add_argument(
-                "--switcher", type=str, dest="switcher", default="0",
-                help="Select the DPI switch you want")
+            "--switcher", type=str, dest="switcher", default="0",
+            help="Select the DPI switch you want")
         self.arg_parser.add_argument("--action", type=str, dest="action", default=None)
         self.factor_a = 90.0 / 96.0
         self.factor_b = 96.0 / 90.0
@@ -303,7 +291,7 @@ class DPISwitcher(EffectExtension):
                 if is_text_on_path(element):
                     if check_text_on_path(svg, element, width_scale, height_scale):
                         continue
-                if is_use(element):
+                if isinstance(element, Use):
                     if check_use(svg, element, width_scale, height_scale):
                         continue
 

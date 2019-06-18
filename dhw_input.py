@@ -26,13 +26,13 @@ Import a DHW file from ACECAD DigiMemo, a hardware based digitiser
 
 import struct
 
+import inkex
 from inkex.utils import AbortExtension, errormsg, addNS
-from inkex.generic import InputExtension
 from inkex.elements import Group, Polyline
 
 NSDM = 'http://github.com/nikitakit/DM2SVG'
 
-class DhwInput(InputExtension):
+class DhwInput(inkex.InputExtension):
     """Open DHW files and convert to svg on the fly"""
     template = """<svg viewBox="0 0 {w} {h}"
   fill="none" stroke="black" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"

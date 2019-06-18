@@ -30,18 +30,15 @@ This extension will pre-process a vector image by applying the operations:
 'EditSelectAllInAllLayers' and 'ObjectToPath'
 before calling the dialog File->Save As....
 """
-from subprocess import Popen, PIPE
 
-import os
-import shutil
 import inkex
 from inkex.base import TempDirMixin
-from inkex.generic import EffectExtension
 from inkex.command import inkscape_command
 
-class PrepareFileSave(TempDirMixin, EffectExtension):
+class PrepareFileSave(TempDirMixin, inkex.EffectExtension):
     def effect(self):
-        inkscape_command(self.svg, 'EditSelectAllInAllLayers', 'EditUnlinkClone', 'ObjectToPath', 'FileSaveACopy')
+        inkscape_command(self.svg, 'EditSelectAllInAllLayers',\
+            'EditUnlinkClone', 'ObjectToPath', 'FileSaveACopy')
 
 if __name__ == '__main__':
     PrepareFileSave().run()

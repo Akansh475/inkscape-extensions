@@ -22,10 +22,10 @@ Inkscape's general barcode extension. Run from within inkscape or use the
 Barcode module provided for outside or scripting.
 """
 
+import inkex
 from barcode import get_barcode
-from inkex.generic import GenerateExtension
 
-class InsertBarcode(GenerateExtension):
+class InsertBarcode(inkex.GenerateExtension):
     """
     Raw barcode Effect class, see Barcode base class.
     """

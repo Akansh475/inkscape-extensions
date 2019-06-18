@@ -27,19 +27,15 @@ All elements are grouped with similar elements (eg all x-subdivs)
 
 from math import log
 
-from lxml import etree
-
 import inkex
-from inkex.generic import GenerateExtension
-from inkex.elements import Group
-
+from inkex.elements import Group, PathElement, Rectangle
 
 def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
     style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
     line_attribs = {'style': str(inkex.Style(style)),
                     inkex.addNS('label', 'inkscape'): name,
                     'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-    etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
+    parent.append(PathElement(**line_attribs))
 
 
 def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
@@ -47,10 +43,10 @@ def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
     rect_attribs = {'style': str(inkex.Style(style)),
                     inkex.addNS('label', 'inkscape'): name,
                     'x': str(x), 'y': str(y), 'width': str(w), 'height': str(h)}
-    etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
+    parent.append(Rectangle(**rect_attribs))
 
 
-class GridCartesian(GenerateExtension):
+class GridCartesian(inkex.GenerateExtension):
     def __init__(self):
         super(GridCartesian, self).__init__()
         self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3)
@@ -107,31 +103,31 @@ class GridCartesian(GenerateExtension):
 
         # Group for major x gridlines
         g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorXGridlines'}
-        majglx = etree.SubElement(grid, 'g', g_attribs)
+        majglx = grid.add(Group(**g_attribs))
 
         # Group for major y gridlines
         g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorYGridlines'}
-        majgly = etree.SubElement(grid, 'g', g_attribs)
+        majgly = grid.add(Group(**g_attribs))
 
         # Group for minor x gridlines
         if self.options.x_subdivs > 1:  # if there are any minor x gridlines
             g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorXGridlines'}
-            minglx = etree.SubElement(grid, 'g', g_attribs)
+            minglx = grid.add(Group(**g_attribs))
 
         # Group for subminor x gridlines
         if self.options.x_subsubdivs > 1:  # if there are any minor minor x gridlines
             g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorXGridlines'}
-            mminglx = etree.SubElement(grid, 'g', g_attribs)
+            mminglx = grid.add(Group(**g_attribs))
 
         # Group for minor y gridlines
         if self.options.y_subdivs > 1:  # if there are any minor y gridlines
             g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorYGridlines'}
-            mingly = etree.SubElement(grid, 'g', g_attribs)
+            mingly = grid.add(Group(**g_attribs))
 
         # Group for subminor y gridlines
         if self.options.y_subsubdivs > 1:  # if there are any minor minor x gridlines
             g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorYGridlines'}
-            mmingly = etree.SubElement(grid, 'g', g_attribs)
+            mmingly = grid.add(Group(**g_attribs))
 
         draw_SVG_rect(0, 0, xmax, ymax, self.options.border_th,
                       'none', 'Border', grid)  # border rectangle

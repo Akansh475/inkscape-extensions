@@ -19,19 +19,10 @@
 #
 
 import random
-
 import inkex
-from inkex.generic import GenerateExtension
-from inkex.elements import PathElement
-from inkex.styles import Style
 from inkex import turtle as pturtle
 
-
-def stripme(s):
-    return s.strip()
-
-
-class LSystem(GenerateExtension):
+class LSystem(inkex.GenerateExtension):
     def __init__(self):
         super(LSystem, self).__init__()
         self.arg_parser.add_argument("-o", "--order",
@@ -73,7 +64,7 @@ class LSystem(GenerateExtension):
         self.turtle = pturtle.pTurtle()
 
     def iterate(self):
-        self.rules = dict([map(stripme, i.split("=")) for i in self.options.rules.upper().split(";") if i.count("=") == 1])
+        self.rules = dict([map((lambda s: s.strip()), i.split("=")) for i in self.options.rules.upper().split(";") if i.count("=") == 1])
         string = self.__recurse(self.options.axiom.upper(), 0)
         self.__compose_path(string)
         return self.turtle.getPath()
@@ -122,7 +113,7 @@ class LSystem(GenerateExtension):
              'stroke-opacity': '1.0', 'fill-opacity': '1.0',
              'stroke': '#000000', 'stroke-linecap': 'butt',
              'fill': 'none'}
-        return PathElement(style=str(Style(sty)), d=self.iterate())
+        return inkex.PathElement(style=str(inkex.Style(sty)), d=self.iterate())
 
 
 if __name__ == '__main__':

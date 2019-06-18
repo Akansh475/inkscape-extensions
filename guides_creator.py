@@ -40,14 +40,10 @@ This basic extension allows you to automatically draw guides in inkscape.
 # TODO:  See http://code.google.com/p/inkscape-guides-creator/wiki/Roadmap
 # # # # # # # #
 
-
 from math import cos, sin, sqrt
 
-from lxml import etree
-
 import inkex
-from inkex import inkbool
-from inkex.generic import EffectExtension
+from inkex.elements import Guide
 
 def drawVerticalGuides(division, w, h, edges, parent, vertical_shift=0):
     if division > 0:
@@ -76,13 +72,8 @@ def drawHorizontalGuides(division, w, h, edges, parent, horizontal_shift=0):
             orientation = "0," + str(round(w, 4))
             createGuide(position, orientation, parent)
 
-
 def createGuide(position, orientation, parent):
-    # Create a sodipodi:guide node
-    # (look into inkex's namespaces to find 'sodipodi' value in order to make a "sodipodi:guide" tag)
-    # see NSS array in file inkex.py for the other namespaces
-    etree.SubElement(parent, '{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}guide', {'position': position, 'orientation': orientation})
-
+    return parent.add(Guide(position=position, orientation=orientation))
 
 def getVerticalDivisionsFromPreset(preset):
     # take a "string1;string2" preset
@@ -103,7 +94,7 @@ def deleteAllGuides(document):
     for guide in document.getroot().get_guides():
         guide.delete()
 
-class GuidesCreator(EffectExtension):
+class GuidesCreator(inkex.EffectExtension):
     def __init__(self):
         """Defines options of the script."""
         super(GuidesCreator, self).__init__()
@@ -134,43 +125,43 @@ class GuidesCreator(EffectExtension):
 
         # Define boolean option "--start_from_edges" with default value False.
         self.arg_parser.add_argument('--start_from_edges',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='start_from_edges', default=False,
                                      help='Start from edges')
 
         # Define boolean option "--delete_existing_guides" with default value False.
         self.arg_parser.add_argument('--delete_existing_guides',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='delete_existing_guides', default=False,
                                      help='Delete existing guides')
 
         # Define boolean option "--upper_left_corner" with default value False.
         self.arg_parser.add_argument('--ul',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='ul', default=False,
                                      help='Upper left corner')
 
         # Define boolean option "--upper_right_corner" with default value False.
         self.arg_parser.add_argument('--ur',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='ur', default=False,
                                      help='Upper right corner')
 
         # Define boolean option "--lower_left_corner" with default value False.
         self.arg_parser.add_argument('--ll',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='ll', default=False,
                                      help='Lower left corner')
 
         # Define boolean option "--upper_left_corner" with default value False.
         self.arg_parser.add_argument('--lr',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='lr', default=False,
                                      help='Lower right corner')
 
         # Define boolean option "--delete_existing_guides2" with default value False.
         self.arg_parser.add_argument('--delete_existing_guides2',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='delete_existing_guides2', default=False,
                                      help='Delete existing guides')
 
@@ -182,7 +173,7 @@ class GuidesCreator(EffectExtension):
 
         # Define boolean option "--delete_existing_guides3" with default value False.
         self.arg_parser.add_argument('--delete_existing_guides3',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='delete_existing_guides3', default=False,
                                      help='Delete existing guides')
 
@@ -224,7 +215,7 @@ class GuidesCreator(EffectExtension):
 
         # Define boolean option "--start_from_edges2" with default value False.
         self.arg_parser.add_argument('--start_from_edges2',
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest='start_from_edges2', default=False,
                                      help='Start from edges')
 

@@ -45,8 +45,6 @@ import tempfile
 import zipfile
 
 import inkex
-from inkex import inkbool
-from inkex.generic import OutputExtension
 
 try:  # PY2
     from urllib import url2pathname
@@ -58,7 +56,7 @@ except ImportError:  # PY3
 inkex.localization.localize()
 
 
-class CompressedMediaOutput(OutputExtension):
+class CompressedMediaOutput(inkex.OutputExtension):
     def __init__(self):
         super(CompressedMediaOutput, self).__init__()
         if os.name == 'nt':
@@ -76,7 +74,7 @@ class CompressedMediaOutput(OutputExtension):
                                      default="",
                                      help="Image directory")
         self.arg_parser.add_argument("--font_list",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="font_list",
                                      default=False,
                                      help="Add font list")

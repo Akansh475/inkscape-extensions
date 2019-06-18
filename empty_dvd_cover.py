@@ -6,10 +6,9 @@
 from lxml import etree
 
 import inkex
-from inkex.generic import EffectExtension
 from inkex.elements import Guide
 
-class DvdCover(EffectExtension):
+class DvdCover(inkex.EffectExtension):
     """Create an empty DVD Cover"""
 
     def __init__(self):

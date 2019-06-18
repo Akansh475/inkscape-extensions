@@ -20,12 +20,10 @@
 """
 An Inkscape extension that creates a frame around a selected object.
 """
-import copy
 
 import inkex
 from inkex.utils import inkbool
 from inkex.elements import Group, PathElement, ClipPath
-from inkex.generic import GenerateExtension
 
 def color_in(value):
     """ Returns color data in style string format.
@@ -47,8 +45,9 @@ def size_box(box, delta):
 
 
 # Frame maker Inkscape effect extension
-class Frame(GenerateExtension):
-    """ An Inkscape extension that creates a frame around a selected object.
+class Frame(inkex.GenerateExtension):
+    """
+    An Inkscape extension that creates a frame around a selected object.
     """
 
     def __init__(self):

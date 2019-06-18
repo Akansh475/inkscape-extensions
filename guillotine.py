@@ -36,27 +36,22 @@ etc.
 
 """
 
-# standard library
-import locale
 import os
+import locale
 
-# local library
 import inkex
-from inkex.utils import inkbool
-from inkex.generic import EffectExtension
 from inkex.command import inkscape
 
 locale.setlocale(locale.LC_ALL, '')
 
-
-class Guillotine(EffectExtension):
+class Guillotine(inkex.EffectExtension):
     """Exports slices made using guides"""
 
     def __init__(self):
         super(Guillotine, self).__init__()
         self.arg_parser.add_argument("--directory", type=str, dest="directory")
         self.arg_parser.add_argument("--image", type=str, dest="image")
-        self.arg_parser.add_argument("--ignore", type=inkbool, dest="ignore")
+        self.arg_parser.add_argument("--ignore", type=inkex.inkbool, dest="ignore")
 
     def get_guides(self):
         """

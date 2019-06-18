@@ -20,10 +20,9 @@
 import inkex
 from inkex.localization import _
 from inkex.transforms import Segment
-from inkex.generic import EffectExtension
 from inkex.elements import PathElement, Group
 
-class Project(EffectExtension):
+class Project(inkex.EffectExtension):
     def effect(self):
         if len(self.options.ids) < 2:
             inkex.errormsg(_("This extension requires two selected paths. \nThe second path must be exactly four nodes long."))

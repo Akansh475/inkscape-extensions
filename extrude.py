@@ -22,11 +22,8 @@
 
 import inkex
 from inkex.localization import _
-from inkex.elements import PathElement, Group
-from inkex.generic import EffectExtension
-from inkex.paths import Path
 
-class Extrude(EffectExtension):
+class Extrude(inkex.EffectExtension):
     def __init__(self):
         super(Extrude, self).__init__()
         opts = [('-m', '--mode', str, 'mode', 'Lines',
@@ -39,7 +36,7 @@ class Extrude(EffectExtension):
     def effect(self):
         paths = []
         for node in self.svg.selected.values():
-            if isinstance(node, PathElement):
+            if isinstance(node, inkex.PathElement):
                 paths.append(node)
         if len(paths) < 2:
             inkex.errormsg(_('Need at least 2 paths selected'))
@@ -65,9 +62,9 @@ class Extrude(EffectExtension):
                         for n, v in enumerate(comp):
                             line += [('M', v[0])]
                             line += [('L', v[1])]
-                    ele = PathElement()
+                    ele = inkex.PathElement()
                     paths[0].xpath('..')[0].append(ele)
-                    ele.set('d', str(Path(line)))
+                    ele.set('d', str(inkex.Path(line)))
                     style = {
                         'fill': 'none',
                         'stroke': '#000000',
@@ -76,7 +73,7 @@ class Extrude(EffectExtension):
                     }
                     ele.set('style', str(inkex.Style(style)))
                 elif self.options.mode.lower() == 'polygons':
-                    g = Group()
+                    g = inkex.Group()
                     style = {
                         'fill': '#000000',
                         'fill-opacity': 0.3,
@@ -97,9 +94,9 @@ class Extrude(EffectExtension):
                             line += [('L', comp[nn][1])]
                             line += [('L', comp[nn][0])]
                             line += [('L', comp[n][0])]
-                            ele = PathElement()
+                            ele = inkex.PathElement()
                             g.append(ele)
-                            ele.set('d', str(Path(line)))
+                            ele.set('d', str(inkex.Path(line)))
 
 
 if __name__ == '__main__':

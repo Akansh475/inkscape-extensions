@@ -28,10 +28,7 @@ from __future__ import print_function
 import sys
 from itertools import product
 
-from lxml import etree
-
 import inkex
-from inkex.generic import GenerateExtension
 from inkex.elements import Group, Rectangle, Use, PathElement
 
 
@@ -1057,7 +1054,7 @@ class GridDrawer(object):
         grp.append(qrg)
 
 
-class QRCodeInkscape(GenerateExtension):
+class QRCodeInkscape(inkex.GenerateExtension):
     def __init__(self):
         super(QRCodeInkscape, self).__init__()
 

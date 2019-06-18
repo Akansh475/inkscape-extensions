@@ -18,17 +18,12 @@
 
 from __future__ import print_function
 
-# standard library
-import sys
-# local libraries
-import hpgl_encoder
 import inkex
-from inkex.generic import OutputExtension
-
 from inkex.localization import _
 
-class HpglOutput(OutputExtension):
+import hpgl_encoder
 
+class HpglOutput(inkex.OutputExtension):
     def __init__(self):
         super(HpglOutput, self).__init__()
         self.arg_parser.add_argument('--tab')

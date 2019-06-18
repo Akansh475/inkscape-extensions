@@ -20,11 +20,10 @@ from lxml import etree
 
 import inkex
 from inkex.localization import _
-from inkex.generic import EffectExtension
 from webslicer_effect import WebSlicerMixin, is_empty
 
 
-class WebSlicer_CreateGroup(WebSlicerMixin, EffectExtension):
+class WebSlicer_CreateGroup(WebSlicerMixin, inkex.EffectExtension):
 
     def __init__(self):
         super(WebSlicer_CreateGroup, self).__init__()

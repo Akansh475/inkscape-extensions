@@ -39,7 +39,6 @@ import dxf_templates
 import inkex
 from inkex import colors, bezier
 from inkex.transforms import Transform
-from inkex.generic import OutputExtension
 from inkex.elements import Group, Use, PathElement, Rectangle, Line, Circle
 
 def get_matrix(u, i, j):
@@ -57,7 +56,7 @@ def get_fit(u, csp, col):
     return (1-u)**3*csp[0][col] + 3*(1-u)**2*u*csp[1][col] \
         + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
 
-class DxfOutlines(OutputExtension):
+class DxfOutlines(inkex.OutputExtension):
     def __init__(self):
         super(DxfOutlines, self).__init__()
         self.arg_parser.add_argument("-R", "--ROBO",

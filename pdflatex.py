@@ -23,13 +23,13 @@ Generate Latex via a PDF using pdflatex
 
 import os
 from lxml import etree
-from inkex.svg import SVG_PARSER
 
-from inkex.generic import GenerateExtension, TempDirMixin
+import inkex
+from inkex.base import TempDirMixin
 from inkex.command import call, inkscape
-from inkex.elements import ShapeElement
+from inkex.elements import SVG_PARSER, ShapeElement
 
-class LatexGenerate(TempDirMixin, GenerateExtension):
+class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
     """
     Use pdflatex to generate LaTeX, this whole hack is required because
     we don't want to open a LaTeX document as a document, but as a

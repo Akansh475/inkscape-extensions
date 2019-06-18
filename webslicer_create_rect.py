@@ -19,10 +19,10 @@
 
 from lxml import etree
 
-from inkex.generic import EffectExtension
+import inkex
 from webslicer_effect import WebSlicerMixin, is_empty
 
-class WebSlicer_CreateRect(WebSlicerMixin, EffectExtension):
+class WebSlicer_CreateRect(WebSlicerMixin, inkex.EffectExtension):
 
     def __init__(self):
         super(WebSlicer_CreateRect, self).__init__()

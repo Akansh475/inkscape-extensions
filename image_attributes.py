@@ -26,19 +26,15 @@ or embedded bitmap images created with older versions of Inkscape
 or third-party applications.
 """
 
-# local library
 import inkex
-from inkex.utils import inkbool
-from inkex.generic import EffectExtension
 
-
-class SetAttrImage(inkex.Effect):
+class SetAttrImage(inkex.EffectExtension):
     def __init__(self):
         super(SetAttrImage, self).__init__()
         # main options
-        self.arg_parser.add_argument("--fix_scaling", type=inkbool,
+        self.arg_parser.add_argument("--fix_scaling", type=inkex.inkbool,
                                      dest="fix_scaling", default=True)
-        self.arg_parser.add_argument("--fix_rendering", type=inkbool,
+        self.arg_parser.add_argument("--fix_rendering", type=inkex.inkbool,
                                      dest="fix_rendering", default=False)
         self.arg_parser.add_argument("--aspect_ratio", type=str,
                                      dest="aspect_ratio", default="none",

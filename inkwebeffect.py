@@ -25,10 +25,8 @@ import sys
 from lxml import etree
 
 import inkex
-from inkex.generic import EffectExtension
 
-
-class InkWebEffect(inkex.Effect):
+class InkWebEffect(inkex.EffectExtension):
     def __init__(self):
         super(InkWebEffect, self).__init__()
         self.reUpdateJS = '/\\*\\s* inkweb.js [^*]* InkWebEffect:AutoUpdate \\s*\\*/'

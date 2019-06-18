@@ -20,16 +20,12 @@
 
 import copy
 from math import atan2, degrees
+from lxml import etree
 
 import inkex
 import inkex.utils
-from inkex.paths import Path
-from inkex.generic import EffectExtension
-from inkex.elements import Group
 
-from lxml import etree
-
-class Edge3d(EffectExtension):
+class Edge3d(inkex.EffectExtension):
     def __init__(self):
         super(Edge3d, self).__init__()
         self.arg_parser.add_argument('-a', '--angle',
@@ -129,7 +125,7 @@ class Edge3d(EffectExtension):
                             g = self.getGroup(node)
                         nn = copy.deepcopy(node)
                         del nn.attrib["id"]
-                        nn.set('d', str(Path(result)))
+                        nn.set('d', str(inkex.Path(result)))
                         col = 255 - int(255. * level)
                         a = 'fill:none;stroke:#%02x%02x%02x;stroke-opacity:1;stroke-width:10;%s' % ((col,) * 3 + (self.filtId,))
                         nn.set('style', a)
@@ -146,8 +142,8 @@ class Edge3d(EffectExtension):
             clip.append(nn)
             clipId = self.svg.get_unique_id('clipPath')
             clip.set('id', clipId)
-            clipG = node.getparent().add(Group())
-            g = clipG.add(Group())
+            clipG = node.getparent().add(inkex.Group())
+            g = clipG.add(inkex.Group())
             clipG.set('clip-path', 'url(#' + clipId + ')')
             # make a blur filter reference by the style of each path
             filt = etree.SubElement(defs, inkex.addNS('filter', 'svg'))
@@ -161,7 +157,7 @@ class Edge3d(EffectExtension):
             fe.set('stdDeviation', str(self.options.stddev))
         else:
             # can't find defs, just group paths
-            g = node.getparent().add(Group())
+            g = node.getparent().add(inkex.Group())
             g.append(node)
 
         return g

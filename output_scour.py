@@ -9,8 +9,6 @@ from distutils.version import StrictVersion
 from lxml import etree
 
 import inkex
-from inkex import inkbool
-from inkex.generic import OutputExtension
 
 if sys.version_info[0] == 3:  #PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
@@ -33,40 +31,40 @@ Please make sure it is installed (e.g. using 'pip install scour'
 """)
 
 
-class ScourInkscape(OutputExtension):
+class ScourInkscape(inkex.OutputExtension):
 
     def __init__(self):
         super(ScourInkscape, self).__init__()
 
         # Scour options
         self.arg_parser.add_argument("--tab",                      type=str,      dest="tab")
-        self.arg_parser.add_argument("--simplify-colors",          type=inkbool,  dest="simple_colors")
-        self.arg_parser.add_argument("--style-to-xml",             type=inkbool,  dest="style_to_xml")
-        self.arg_parser.add_argument("--group-collapsing",         type=inkbool,  dest="group_collapse")
-        self.arg_parser.add_argument("--create-groups",            type=inkbool,  dest="group_create")
-        self.arg_parser.add_argument("--enable-id-stripping",      type=inkbool,  dest="strip_ids")
-        self.arg_parser.add_argument("--shorten-ids",              type=inkbool,  dest="shorten_ids")
+        self.arg_parser.add_argument("--simplify-colors",          type=inkex.inkbool,  dest="simple_colors")
+        self.arg_parser.add_argument("--style-to-xml",             type=inkex.inkbool,  dest="style_to_xml")
+        self.arg_parser.add_argument("--group-collapsing",         type=inkex.inkbool,  dest="group_collapse")
+        self.arg_parser.add_argument("--create-groups",            type=inkex.inkbool,  dest="group_create")
+        self.arg_parser.add_argument("--enable-id-stripping",      type=inkex.inkbool,  dest="strip_ids")
+        self.arg_parser.add_argument("--shorten-ids",              type=inkex.inkbool,  dest="shorten_ids")
         self.arg_parser.add_argument("--shorten-ids-prefix",       type=str,      dest="shorten_ids_prefix", default="")
-        self.arg_parser.add_argument("--embed-rasters",            type=inkbool,  dest="embed_rasters")
-        self.arg_parser.add_argument("--keep-unreferenced-defs",   type=inkbool,  dest="keep_defs")
-        self.arg_parser.add_argument("--keep-editor-data",         type=inkbool,  dest="keep_editor_data")
-        self.arg_parser.add_argument("--remove-metadata",          type=inkbool,  dest="remove_metadata")
-        self.arg_parser.add_argument("--strip-xml-prolog",         type=inkbool,  dest="strip_xml_prolog")
+        self.arg_parser.add_argument("--embed-rasters",            type=inkex.inkbool,  dest="embed_rasters")
+        self.arg_parser.add_argument("--keep-unreferenced-defs",   type=inkex.inkbool,  dest="keep_defs")
+        self.arg_parser.add_argument("--keep-editor-data",         type=inkex.inkbool,  dest="keep_editor_data")
+        self.arg_parser.add_argument("--remove-metadata",          type=inkex.inkbool,  dest="remove_metadata")
+        self.arg_parser.add_argument("--strip-xml-prolog",         type=inkex.inkbool,  dest="strip_xml_prolog")
         self.arg_parser.add_argument("--set-precision",            type=int,      dest="digits")
         self.arg_parser.add_argument("--indent",                   type=str,      dest="indent_type")
         self.arg_parser.add_argument("--nindent",                  type=int,      dest="indent_depth")
-        self.arg_parser.add_argument("--line-breaks",              type=inkbool,  dest="newlines")
-        self.arg_parser.add_argument("--strip-xml-space",          type=inkbool,  dest="strip_xml_space_attribute")
-        self.arg_parser.add_argument("--protect-ids-noninkscape",  type=inkbool,  dest="protect_ids_noninkscape")
+        self.arg_parser.add_argument("--line-breaks",              type=inkex.inkbool,  dest="newlines")
+        self.arg_parser.add_argument("--strip-xml-space",          type=inkex.inkbool,  dest="strip_xml_space_attribute")
+        self.arg_parser.add_argument("--protect-ids-noninkscape",  type=inkex.inkbool,  dest="protect_ids_noninkscape")
         self.arg_parser.add_argument("--protect-ids-list",         type=str,      dest="protect_ids_list")
         self.arg_parser.add_argument("--protect-ids-prefix",       type=str,      dest="protect_ids_prefix")
-        self.arg_parser.add_argument("--enable-viewboxing",        type=inkbool,  dest="enable_viewboxing")
-        self.arg_parser.add_argument("--enable-comment-stripping", type=inkbool,  dest="strip_comments")
-        self.arg_parser.add_argument("--renderer-workaround",      type=inkbool,  dest="renderer_workaround")
+        self.arg_parser.add_argument("--enable-viewboxing",        type=inkex.inkbool,  dest="enable_viewboxing")
+        self.arg_parser.add_argument("--enable-comment-stripping", type=inkex.inkbool,  dest="strip_comments")
+        self.arg_parser.add_argument("--renderer-workaround",      type=inkex.inkbool,  dest="renderer_workaround")
 
         # options for internal use of the extension
         self.arg_parser.add_argument("--scour-version",            type=str,      dest="scour_version")
-        self.arg_parser.add_argument("--scour-version-warn-old",   type=inkbool,  dest="scour_version_warn_old")
+        self.arg_parser.add_argument("--scour-version-warn-old",   type=inkex.inkbool,  dest="scour_version_warn_old")
 
     def save(self, stream):
         # version check if enabled in options

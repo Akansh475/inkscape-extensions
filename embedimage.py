@@ -26,7 +26,6 @@ import sys
 
 import inkex
 from inkex import inkbool
-from inkex.generic import EffectExtension
 from inkex.localization import _
 
 if sys.version_info[0] == 2:
@@ -37,7 +36,7 @@ else:
     import urllib.parse as urlparse
 
 
-class Embedder(EffectExtension):
+class Embedder(inkex.EffectExtension):
     def __init__(self):
         super(Embedder, self).__init__()
         self.arg_parser.add_argument("-s", "--selectedonly",

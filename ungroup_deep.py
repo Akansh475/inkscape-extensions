@@ -9,18 +9,12 @@ for an example how to do the transform of parent to children.
 from lxml import etree
 
 import inkex
-from inkex.styles import Style
 from inkex.svg import SvgDocumentElement
-from inkex.generic import EffectExtension
 from inkex.elements import (
     Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject
 )
 
-SVG_NS = "http://www.w3.org/2000/svg"
-INKSCAPE_NS = "http://www.inkscape.org/namespaces/inkscape"
-
-
-class Ungroup(EffectExtension):
+class Ungroup(inkex.EffectExtension):
     def __init__(self):
         super(Ungroup, self).__init__()
         self.arg_parser.add_argument("-s", "--startdepth",
@@ -73,7 +67,7 @@ class Ungroup(EffectExtension):
                 if "style" in node.keys():
                     del node.attrib["style"]
             else:
-                node.set("style", str(Style(remaining_style)))
+                node.style = remaining_style
 
         else:
             # This element is not a container
@@ -82,7 +76,7 @@ class Ungroup(EffectExtension):
             this_style.update(remaining_style)
 
             # Set the element's style attribs
-            node.set("style", str(Style(this_style)))
+            node.style = this_style
 
     def _merge_clippath(self, node, clippathurl):
 

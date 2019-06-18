@@ -31,11 +31,9 @@ import tarfile
 import io
 import calendar
 import time
+import inkex
 
-from inkex.generic import OutputExtension
-from inkex.elements import Group
-
-class LayersOutput(OutputExtension):
+class LayersOutput(inkex.OutputExtension):
     """Entry point to our layers export"""
     def make_template(self):
         """Returns the current document as a new empty document with the same defs"""
@@ -46,7 +44,7 @@ class LayersOutput(OutputExtension):
 
     def layers(self, document):
         for node in document.getroot().iterchildren():
-            if isinstance(node, Group) and node.is_layer() and node.label:
+            if isinstance(node, inkex.Group) and node.is_layer() and node.label:
                 yield (node.label, node)
 
     def io_document(self, name, doc):
@@ -83,4 +81,3 @@ class LayersOutput(OutputExtension):
 
 if __name__ == '__main__':   #pragma: no cover
     LayersOutput().run()
-

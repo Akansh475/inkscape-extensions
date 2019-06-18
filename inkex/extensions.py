@@ -35,7 +35,7 @@ from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMi
 from .transforms import TranslateTransform
 
 # All the names that get added to the inkex API itself.
-__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension')
+__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension', 'CallExtension')
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3

@@ -33,6 +33,7 @@ from .transforms import BoundingBox
 from .transforms import Transform
 from .utils import NSS, addNS, removeNS
 
+__all__ = ('Group', 'PathElement', 'ShapeElement')
 
 class SvgClassLookup(etree.CustomElementClassLookup):
     """

@@ -22,13 +22,9 @@ Interpolation of attributes in selected objects or group's children.
 """
 
 import inkex
-from inkex import inkbool
-from inkex.generic import EffectExtension
-from inkex.colors import Color
-from inkex.elements import Group
 from inkex.localization import _
 
-class InterpAttG(EffectExtension):
+class InterpAttG(inkex.EffectExtension):
     """
     This effect applies a value for any interpolatable attribute for all
     elements inside the selected group or for all elements in a multiple selection.
@@ -57,7 +53,7 @@ class InterpAttG(EffectExtension):
             "-u", "--unit", type=str, dest="unit", default="color",
             help="Values unit.")
         self.arg_parser.add_argument(
-            "--zsort", type=inkbool, dest="zsort", default=True,
+            "--zsort", type=inkex.inkbool, dest="zsort", default=True,
             help="use z-order instead of selection order")
         self.arg_parser.add_argument(
             "--tab", type=str, dest="tab",
@@ -65,8 +61,8 @@ class InterpAttG(EffectExtension):
 
     def get_color_steps(self, total):
         """Get the color value, returning the start color and a single increment step"""
-        start_value = Color(self.options.start_val)
-        end_value = Color(self.options.end_val)
+        start_value = inkex.Color(self.options.start_val)
+        end_value = inkex.Color(self.options.end_val)
 
         color_inc = [
             (end_value[v] - start_value[v]) / float(total - 1)
@@ -108,7 +104,7 @@ class InterpAttG(EffectExtension):
 
         # must be a group
         node = self.svg.get_first_selected()
-        if isinstance(node, Group):
+        if isinstance(node, inkex.Group):
             return list(node)
         return []
 
@@ -171,7 +167,7 @@ class InterpAttG(EffectExtension):
                 raise KeyError("Unknown update {}".format(where))
 
             if inte_att_type == 'color':
-                cur = Color([cur[i] + inc[i] for i in range(3)])
+                cur = inkex.Color([cur[i] + inc[i] for i in range(3)])
             else:
                 cur += inc
 

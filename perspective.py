@@ -21,9 +21,6 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
 
 import inkex
-from inkex.paths import Path
-from inkex.elements import PathElement, Group
-from inkex.generic import EffectExtension
 from inkex.localization import _
 
 X, Y = range(2)
@@ -35,7 +32,7 @@ except:
     np = None
 
 
-class Project(EffectExtension):
+class Project(inkex.EffectExtension):
     def effect(self):
         if np is None:
             return inkex.errormsg(
@@ -62,8 +59,8 @@ class Project(EffectExtension):
         if obj.get(inkex.addNS('type', 'sodipodi')):
             return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type', 'sodipodi'))))
 
-        if isinstance(obj, (PathElement, Group)):
-            if isinstance(envelope, PathElement):
+        if isinstance(obj, (inkex.PathElement, inkex.Group)):
+            if isinstance(envelope, inkex.PathElement):
                 path = envelope.path.transform(envelope.composed_transform()).to_superpath()
 
                 if len(path) < 1 or len(path[0]) < 4:
@@ -83,7 +80,7 @@ class Project(EffectExtension):
                     [bbox.right, bbox.top],
                     [bbox.right, bbox.bottom]], dtype=np.float64)
             else:
-                if isinstance(envelope, Group):
+                if isinstance(envelope, inkex.Group):
                     return inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
                 else:
                     return inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
@@ -128,7 +125,7 @@ class Project(EffectExtension):
                 csp[0] = self.project_point(csp[0], matrix)
                 csp[1] = self.project_point(csp[1], matrix)
                 csp[2] = self.project_point(csp[2], matrix)
-        element.path = Path(point).transform(-mat)
+        element.path = inkex.Path(point).transform(-mat)
 
     def project_point(self, point, matrix):
         return [(point[X] * matrix[0][0] + point[Y] * matrix[0][1] + matrix[0][2]) /

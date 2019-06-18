@@ -25,15 +25,13 @@ import os
 import base64
 
 import inkex
-from inkex import inkbool
-from inkex.generic import EffectExtension
 
-class ExtractImage(EffectExtension):
+class ExtractImage(inkex.EffectExtension):
     def __init__(self):
         super(ExtractImage, self).__init__()
         self.arg_parser.add_argument("--desc")
-        self.arg_parser.add_argument("-s", "--selectedonly",
-             type=inkbool,
+        self.arg_parser.add_argument(
+            "-s", "--selectedonly", type=inkex.inkbool,
             dest="selectedonly", default=True,
             help="extract only selected images")
         self.arg_parser.add_argument("--filepath",
@@ -129,5 +127,3 @@ class ExtractImage(EffectExtension):
 
 if __name__ == '__main__':
     ExtractImage().run()
-
-

@@ -38,7 +38,6 @@ from lxml import etree
 
 import inkex
 from inkex import inkbool
-from inkex.generic import EffectExtension
 
 (X, Y) = range(2)
 
@@ -238,7 +237,7 @@ class Style(object):  # container for style information
         self.c_col = '#000000'
 
 
-class DrawFromTriangle(EffectExtension):
+class DrawFromTriangle(inkex.EffectExtension):
     def __init__(self):
         super(DrawFromTriangle, self).__init__()
         self.arg_parser.add_argument("--tab",

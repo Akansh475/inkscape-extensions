@@ -25,11 +25,10 @@ import zipfile
 import inkex
 from inkex.localization import _
 from inkex.base import TempDirMixin
-from inkex.generic import OutputExtension
 from inkex.command import take_snapshot
 from inkex.utils import NSS
 
-class JessyInkExport(TempDirMixin, OutputExtension):
+class JessyInkExport(TempDirMixin, inkex.OutputExtension):
     """
     JessyInkExport Output Extension saves to a zipfile each of the layers.
     """

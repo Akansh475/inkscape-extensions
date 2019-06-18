@@ -21,17 +21,16 @@
 Simple wrapper around ps2pdf
 """
 
-from inkex.generic import CallExtension
+import inkex
 from inkex.command import call
-from inkex.utils import inkbool
 
-class PostscriptInput(CallExtension):
+class PostscriptInput(inkex.CallExtension):
     """Load Postscript/EPS Files by calling ps2pdf program"""
     input_ext = 'ps'
     output_ext = 'pdf'
 
     def add_arguments(self, pars):
-        pars.add_argument('--crop', type=inkbool, default=False)
+        pars.add_argument('--crop', type=inkex.inkbool, default=False)
 
     def call(self, input_file, output_file):
         call('ps2pdf', input_file, output_file, dEPSCrop=self.options.crop)

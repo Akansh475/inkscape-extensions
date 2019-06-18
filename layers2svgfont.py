@@ -21,14 +21,12 @@
 from lxml import etree
 
 import inkex
-from inkex.generic import EffectExtension
 
-class Layers2SVGFont(EffectExtension):
+class Layers2SVGFont(inkex.EffectExtension):
     def guideline_value(self, label, index):
-        namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))
-        guides = namedview.findall(inkex.addNS('guide', 'sodipodi'))
-        for guide in guides:
-            l = guide.get(inkex.addNS('label', 'inkscape'))
+        namedview = self.svg.namedview
+        for guide in namedview.get_guides():
+            l = guide.label
             if l == label:
                 return int(guide.get("position").split(",")[index])
         return 0
@@ -40,7 +38,7 @@ class Layers2SVGFont(EffectExtension):
         return node
 
     def get_or_create_glyph(self, font, unicode_char):
-        glyphs = font.findall(inkex.addNS('glyph', 'svg'))
+        glyphs = font.findall('svg:glyph')
         for glyph in glyphs:
             if unicode_char == glyph.get("unicode"):
                 return glyph

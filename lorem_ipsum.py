@@ -23,8 +23,8 @@ Example filltext sentences generated over at http://lipsum.com/
 
 import random
 
+import inkex
 from inkex.elements import Group, FlowRoot, FlowRegion, FlowPara, Rectangle
-from inkex.generic import EffectExtension
 
 foo = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ',
@@ -177,7 +177,7 @@ foo = [
 ]
 
 
-class LorumImpsum(EffectExtension):
+class LorumImpsum(inkex.EffectExtension):
     def __init__(self):
         super(LorumImpsum, self).__init__()
         self.arg_parser.add_argument("--title")

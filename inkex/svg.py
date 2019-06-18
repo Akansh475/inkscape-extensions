@@ -67,7 +67,17 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         return new_id
 
     def set_selected(self, *ids):
-        """Sets the currently selected elements to these ids"""
+        """
+        Sets the currently selected elements to these ids.
+
+        Arguments are zero or more ids, element objects or a single xpath expression starting with "//".
+
+        All element objects must have an id to be correctly set.
+
+        >>> svg.set_selected("rect123", "path456", "text789")
+        >>> svg.set_selected(elem1, elem2, elem3)
+        >>> svg.set_selected("//rect")
+        """
         self.selected = OrderedDict()
 
         # Allow selecting of xpath elements directly

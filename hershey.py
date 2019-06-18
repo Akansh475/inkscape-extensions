@@ -18,7 +18,7 @@
 #
 
 '''
-Hershey Text 3.0, 2019-06-03
+Hershey Text 3.0, 2019-06-16
 
 Copyright 2019, Windell H. Oskay, www.evilmadscientist.com
 
@@ -113,8 +113,8 @@ Stroke fonts are most often used for creating text-like paths that computer
 controlled drawing and cutting machines (from pen plotters to CNC routers) can
 efficiently follow. 
 
-For a general introduction to stroke fonts, please visit:
-  www.evilmadscientist.com/go/hershey
+A full user guide for Hershey Text is available to download from
+    http://wiki.evilmadscientist.com/hershey
 
 
    ==== Basic operation ====
@@ -762,16 +762,19 @@ Evil Mad Scientist Laboratories
         x = x_offset
         y = y_offset
 
-        for glyph_num, glyph in enumerate(sorted(self.font_dict[fontname]['glyphs'])):
+        draw_position = 0
+
+        for glyph in sorted(self.font_dict[fontname]['glyphs']):
             if self.font_dict[fontname]['glyphs'][glyph]['d'] is None:
                 continue
-            y_pos,x_pos =  divmod(glyph_num,columns)
+            y_pos,x_pos =  divmod(draw_position,columns)
             x = x_offset * ( x_pos + 1) 
             y = y_offset * ( y_pos + 1) 
             text_attribs = {'x':str(x),'y': str(y)}
             sampleline = g.add(TextElement(**text_attribs))
             sampleline.text = glyph
             sampleline.style = glyph_style
+            draw_position = draw_position + 1
 
         self.recursively_traverse_svg( g, self.docTransform )
 

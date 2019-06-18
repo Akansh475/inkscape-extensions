@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hershey Text</_name>
   <id>org.evilmad.text.hershey</id>
-  <!-- Version 3.0 June 3, 2019 -->
 
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -16,7 +15,7 @@ Hershey Text
 
 <_param indent="2" name="splashTitle1b" type="description" xml:space="preserve">A tool to replace text with stroke fonts
 
-Version 3.0, 2019-06-03
+Version 3.0, 2019-06-16
 
 
 </_param>
@@ -57,7 +56,7 @@ Version 3.0, 2019-06-03
 <_param name="otherFontDesc" type="description" xml:space="preserve">
 Other SVG font name or path (if "Other" selected above):
 </_param>
-<param indent="0" name="otherfont" type="string" indent="2" _gui-text="Name/Path:">HersheySans1</param>
+<param name="otherfont" type="string" indent="2" _gui-text="Name/Path:">HersheySans1</param>
 
 <param name="preserve" indent="4" type="boolean" _gui-text="Preserve original text" >false</param>
 
@@ -97,8 +96,8 @@ Engraving fonts are used for creating text paths that
 computer controlled drawing and cutting machines (from
 pen plotters to CNC routers) can efficiently follow. 
 
-For a general introduction to stroke fonts, please visit:
-  www.evilmadscientist.com/go/hershey
+A complete user guide is available to download at:
+  http://wiki.evilmadscientist.com/hershey
   
 For extended help, click "Apply" with this tab selected.
 

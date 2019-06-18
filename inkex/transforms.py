@@ -33,7 +33,7 @@ from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 from .utils import X, Y, strargs
 
 try:
-    from typing import *
+    from typing import overload, Tuple
 except ImportError:
     overload = lambda x: x
 
@@ -403,6 +403,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         """Returns the middle of the bounding box"""
         return self.x.center, self.y.center
 
+
 class DirectedLineSegment(object):
     """
     A directed line segment
@@ -415,7 +416,7 @@ class DirectedLineSegment(object):
         pass
 
     @overload
-    def __init__(self, start, end):  # type: (Tuple(float, float), Tuple(float, float)) -> None
+    def __init__(self, start, end):  # type: (Tuple[float, float], Tuple[float, float]) -> None
         pass
 
     def __init__(self, *args):
@@ -427,8 +428,8 @@ class DirectedLineSegment(object):
         else:
             raise ValueError("DirectedLineSegment() can't be constructed from {}".format(args))
 
-        self.start = start  # type: Tuple(float, float)
-        self.end = end  # type: Tuple(float, float)
+        self.start = start  # type: Tuple[float, float]
+        self.end = end  # type: Tuple[float, float]
 
     def __eq__(self, other):
         if isinstance(other, (tuple, DirectedLineSegment)):
@@ -443,12 +444,11 @@ class DirectedLineSegment(object):
 
     @property
     def dx(self):
-        return self.end[0]-self.start[0]
+        return self.end[0] - self.start[0]
 
     @property
     def dy(self):
         return self.end[1] - self.start[1]
-
 
     @property
     def x0(self):
@@ -492,7 +492,7 @@ class DirectedLineSegment(object):
             return None
         return fabs((self.dx * (self.y0 - y)) - ((self.x0 - x) * self.dy)) / self.length
 
-    def dot(self, other): # type: (DirectedLineSegment) -> float
+    def dot(self, other):  # type: (DirectedLineSegment) -> float
         """Get the dot product with the segment with another"""
         return self.dx * other.dx + self.dy * other.dy
 
@@ -502,7 +502,7 @@ class DirectedLineSegment(object):
 
     def point_at_length(self, length):
         """Get the point as the length along the line"""
-        return self.point_at_ratio(length/self.length)
+        return self.point_at_ratio(length / self.length)
 
     def parallel(self, x, y):
         """Create parallel Segment"""
@@ -513,7 +513,7 @@ class DirectedLineSegment(object):
         other = DirectedLineSegment(other)
         denom = (other.dy * self.dx) - (other.dx * self.dy)
         num = (other.dx * (self.y0 - other.y0)) - (other.dy * (self.x0 - other.x0))
-        #num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
+        # num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
 
         if denom != 0:
             return (
@@ -563,6 +563,5 @@ def quadratic_extrema(py0, py1, py2):
         return cmin, cmax
     cmin, cmax = min(py0, py2), max(py0, py2)
     if py0+py2-2*py1:
-       cmin, cmax = _is_bigger((py0-py1)/(py0+py2-2*py1))
+        cmin, cmax = _is_bigger((py0-py1)/(py0+py2-2*py1))
     return cmin, cmax
-

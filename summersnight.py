@@ -19,7 +19,7 @@
 
 import inkex
 from inkex.localization import _
-from inkex.transforms import Segment
+from inkex.transforms import DirectedLineSegment
 from inkex.elements import PathElement, Group
 
 class Project(inkex.EffectExtension):
@@ -55,10 +55,10 @@ class Project(inkex.EffectExtension):
                 trafo = [[(csp[1][0], csp[1][1]) for csp in subs] for subs in trafo][0][:4]
 
                 #vectors pointing away from the trafo origin
-                self.t1 = Segment((trafo[0], trafo[1]))
-                self.t2 = Segment((trafo[1], trafo[2]))
-                self.t3 = Segment((trafo[3], trafo[2]))
-                self.t4 = Segment((trafo[0], trafo[3]))
+                self.t1 = DirectedLineSegment(trafo[0], trafo[1])
+                self.t2 = DirectedLineSegment(trafo[1], trafo[2])
+                self.t3 = DirectedLineSegment(trafo[3], trafo[2])
+                self.t4 = DirectedLineSegment(trafo[0], trafo[3])
                 self.bbox = obj.bounding_box()
 
                 self.process_group([obj])
@@ -92,11 +92,11 @@ class Project(inkex.EffectExtension):
     def trafopoint(self, xy):
         """Transform algorithm thanks to Jose Hevia (freon)"""
         (x, y) = xy
-        vector = Segment(((self.bbox.left, self.bbox.top), (x, y)))
-        xratio = vector.width / self.bbox.width
-        yratio = vector.height / self.bbox.height
-        horz = Segment((self.t1.point_at_ratio(xratio), self.t3.point_at_ratio(xratio)))
-        vert = Segment((self.t4.point_at_ratio(yratio), self.t2.point_at_ratio(yratio)))
+        vector = DirectedLineSegment((self.bbox.left, self.bbox.top), (x, y))
+        xratio = vector.dx / self.bbox.width
+        yratio = vector.dy / self.bbox.height
+        horz = DirectedLineSegment(self.t1.point_at_ratio(xratio), self.t3.point_at_ratio(xratio))
+        vert = DirectedLineSegment(self.t4.point_at_ratio(yratio), self.t2.point_at_ratio(yratio))
         return vert.intersect(horz)
 
 

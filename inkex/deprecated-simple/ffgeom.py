@@ -20,7 +20,7 @@
 from collections import namedtuple
 
 from inkex.deprecated import deprecate
-from inkex.transforms import Segment as NewSeg
+from inkex.transforms import DirectedLineSegment as NewSeg
 
 try:
     NaN = float('NaN')

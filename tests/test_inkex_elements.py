@@ -313,7 +313,7 @@ class RectTest(ElementTestCase):
         """Composed transformation"""
         self.assertEqual(self.elem.transform, Transform('rotate(16.097889)'))
         self.assertEqual(str(self.elem.composed_transform()),
-                         'matrix(0.754465 -0.863362 1.13818 1.31905 -461.592 215.193)')
+                         'matrix(0.754465 -0.863362 1.13818 1.31905 -461.593 215.192)')
 
     def test_compose_stylesheet(self):
         """Test finding the composed stylesheet for the shape"""

@@ -144,15 +144,33 @@ class Transform(object):
         """Returns the transform as a hexad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
+    def is_translate(self):
+        """Returns True if this transformation is ONLY translate"""
+        return abs(self.a) == abs(self.d) == 1 and self.b == self.c == 0
+
+    def is_scale(self):
+        """Returns True if this transformation is ONLY scale"""
+        return self.e == self.f == self.b == self.c == 0
+
+    def is_rotate(self):
+        """Returns True if this transformation is ONLY rotate"""
+        return self.a == self.d and self.c == -self.b and self.e == self.f == 0
+
+    def rotation_degrees(self):
+        """Return the amount of rotation in this transform"""
+        return atan2(self.b, self.a) * 180 / pi
+
     def __str__(self):
         """Format the given matrix into a string representation for svg"""
         hexad = tuple(self.to_hexad())
-        if hexad[:4] == (1, 0, 0, 1):
-            if hexad[4:] == (0, 0):
+        if self.is_translate():
+            if not self:
                 return ""
-            return "translate({:.6g}, {:.6g})".format(*hexad[4:])
-        elif hexad[4:] == (0, 0) and hexad[1:3] == (0, 0):
-            return "scale({:.6g}, {:.6g})".format(hexad[0], hexad[3])
+            return "translate({:.6g}, {:.6g})".format(self.e, self.f)
+        elif self.is_scale():
+            return "scale({:.6g}, {:.6g})".format(self.a, self.d)
+        elif self.is_rotate():
+            return "rotate({:.6g})".format(self.rotation_degrees())
         return "matrix({})".format(" ".join(format(var, '.6g') for var in hexad))
 
     def __repr__(self):

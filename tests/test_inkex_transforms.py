@@ -38,8 +38,7 @@ class TransformTest(TestCase):
 
     def test_new_from_rotate(self):
         """Create a rotational transformation"""
-        self.assertEqual(str(Transform('rotate(90)')),
-                         'matrix(6.12323e-17 1 -1 6.12323e-17 0 0)')
+        self.assertEqual(str(Transform('rotate(90)')), 'rotate(90)')
         self.assertEqual(str(Transform('rotate(90 10 12)')),
                          'matrix(6.12323e-17 1 -1 6.12323e-17 22 2)')
 
@@ -84,6 +83,7 @@ class TransformTest(TestCase):
 
     def test_rotate(self):
         """Test making rotate specific items"""
+        self.assertEqual(str(RotateTransform(45)), "rotate(45)")
         self.assertEqual(str(RotateTransform(45, 10, 10)), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
     def test_add_transform(self):

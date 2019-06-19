@@ -154,7 +154,7 @@ class Transform(object):
 
     def is_rotate(self):
         """Returns True if this transformation is ONLY rotate"""
-        return self.a == self.d and self.c == -self.b and self.e == self.f == 0
+        return self.a == self.d == 1 and self.c == -self.b and self.e == self.f == 0
 
     def rotation_degrees(self):
         """Return the amount of rotation in this transform"""

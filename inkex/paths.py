@@ -29,8 +29,8 @@ from operator import add, mul
 from .transforms import Transform, BoundingBox, Scale
 from .utils import X, Y, classproperty, strargs, pairwise
 
-if False: # pylint: disable=using-constant-test
-    from typing import Type, Dict # pylint: disable=unused-import
+if False:  # pylint: disable=using-constant-test
+    from typing import Type, Dict  # pylint: disable=unused-import
 
 # All the names that get added to the inkex API itself.
 __all__ = ('Path', 'CubicSuperPath')
@@ -100,7 +100,7 @@ class Segment(object):
         if isinstance(args, list):
             del args[:self.num]
 
-    _cmds = {} # type: Dict[str, Segment]
+    _cmds = {}  # type: Dict[str, Segment]
 
     @classmethod
     def get_class(cls, cmd):
@@ -126,7 +126,7 @@ class Segment(object):
         return "{{}}({})".format(self._argt(", ")).format(self.name, *self.args)
 
     def __eq__(self, other):
-        if type(self) == type(other): # pylint: disable=unidiomatic-typecheck
+        if type(self) == type(other):  # pylint: disable=unidiomatic-typecheck
             return self.args == other.args
         if isinstance(other, tuple):
             return self.args == other
@@ -157,9 +157,19 @@ class Segment(object):
         """Returns a list of points in this path command, x and y only"""
         return tuple(zip(self.all_x, self.all_y))
 
-    def bounding_box(self, prev): # pylint: disable=unused-argument
-        """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)"""
-        return BoundingBox(Scale(*self.all_x), Scale(*self.all_y))
+    def update_bounding_box(self, first_point, last_two_points, bbox):  # pylint: disable=unused-argument
+        """Returns a rough bounding box, similar to roughBBox returns: (x1, x2, y1, y2)
+
+        :param (tuple of float) first_point: first point of path. Required to calculate Z segment
+        :param (list of tuple) last_two_points: array with last two path points.
+        It might be curve point or bezier points depending on segment type
+        :param (BoundingBox) bbox: current bounding box to update
+        """
+        if self.isrelative:
+            raise ValueError("Can't calculate bounding box for relative path segment directly."
+                             "Convert to absolute segment first")
+        else:
+            raise NotImplementedError("Bounding box calculation is not implemented for {}".format(self.name))
 
     def translate(self, coords, opr=add):
         """Translate or scale this path command by the given coords X/Y"""
@@ -179,7 +189,7 @@ class Segment(object):
             theta = (atan2(offset_y, offset_x) + angle * pi / 180)
             rad = sqrt((offset_x ** 2) + (offset_y ** 2))
             ans.extend([rad * cos(theta) + center_x, rad * sin(theta) + center_y])
-        return type(self)(ans) # pylint: disable=no-value-for-parameter
+        return type(self)(ans)  # pylint: disable=no-value-for-parameter
 
     def transform(self, transform, raw=False):
         """Apply a matrix transform to this path and return a new path"""
@@ -221,36 +231,64 @@ class Segment(object):
             return (segment.x, segment.y)
         raise NotImplementedError("Can not convert from {} to {}".format(segment.name, cls.name))
 
+
 class Line(Segment):
     """Line segment"""
     num = 2
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        bbox += BoundingBox((last_two_points[-1][0], self.x),
+                            (last_two_points[-1][1], self.y))
+        last_two_points[-1] = (self.x, self.y)
 
     def to_curve(self, previous):
         previous = Move(previous)
         return Curve(previous.x, previous.y, self.x, self.y, self.x, self.y)
 
-class line(Line): # pylint: disable=invalid-name
+
+class line(Line):  # pylint: disable=invalid-name
     """Relative line segment"""
+
+    def update_bounding_box(self, *args):
+        super(Line, self).update_bounding_box(*args)
+
 
 class Move(Segment):
     """Move pen segment without a line"""
     _next = Line
     num = 2
 
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        bbox += BoundingBox(self.x, self.y)
+        last_two_points[-1] = (self.x, self.y)
+
     def to_curve(self, previous):
         raise ValueError("Move segments can not be changed into curves.")
 
-class move(Move): # pylint: disable=invalid-name
+
+class move(Move):  # pylint: disable=invalid-name
     """Relative move segment"""
     _next = line
+
+    def update_bounding_box(self, *args):
+        super(Move, self).update_bounding_box(*args)
+
 
 class ZoneClose(Segment):
     """Close segment to finish a path"""
     _next = Move
     num = 0
 
-class zoneClose(ZoneClose): # pylint: disable=invalid-name
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        last_two_points[-1] = first_point
+
+
+class zoneClose(ZoneClose):  # pylint: disable=invalid-name
     """Same as above (svg says no difference)"""
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        super(ZoneClose, self).update_bounding_box(first_point, last_two_points, bbox)
+
 
 class Horz(Segment):
     """Horizontal Line segment"""
@@ -258,6 +296,11 @@ class Horz(Segment):
     x = property(lambda self: self.args[0])
     y = property(lambda self: None)
     points = property(lambda self: ((self.x, self.y),))
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        bbox += BoundingBox((last_two_points[-1][0], self.x),
+                            last_two_points[-1][1])
+        last_two_points[-1] = (self.x, last_two_points[-1][1])
 
     def get_pen(self, previous=(0, 0)):
         """When getting the pen for Horz moves, we return the combined point"""
@@ -269,7 +312,7 @@ class Horz(Segment):
         return Horz(opr(self.args[0], coords[X]))
 
     def transform(self, transform, raw=False):
-        raise ValueError("Hozontal lines can't be transformed directly.")
+        raise ValueError("Horizontal lines can't be transformed directly.")
 
     def to_line(self, previous):
         """Return this path command as a line instead"""
@@ -280,15 +323,32 @@ class Horz(Segment):
         previous = Move(previous)
         return self.to_line(previous).to_curve(previous)
 
-class horz(Horz): # pylint: disable=invalid-name
+
+class horz(Horz):  # pylint: disable=invalid-name
     """Relative horz line segment"""
 
-class Vert(Horz):
+    def to_line(self, previous):
+        """Return this path command as a line instead"""
+        return Line(Move(previous).x + self.x, Move(previous).y)
+
+    def update_bounding_box(self, *args):
+        super(Horz, self).update_bounding_box(*args)
+
+
+class Vert(Segment):
     """Vertical Line segment"""
+    num = 1
     x = property(lambda self: None)
     y = property(lambda self: self.args[0])
     all_x = property(lambda self: [])
     all_y = property(lambda self: [self.y])
+
+    points = property(lambda self: ((self.x, self.y),))
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        bbox += BoundingBox(last_two_points[-1][0],
+                            (last_two_points[-1][1], self.y))
+        last_two_points[-1] = (last_two_points[-1][0], self.y)
 
     def translate(self, coords, opr=add):
         """Translate this Horz path by the given coords X/Y"""
@@ -298,8 +358,30 @@ class Vert(Horz):
         """Return this path command as a line instead"""
         return Line(Move(previous).x, self.y)
 
-class vert(Vert): # pylint: disable=invalid-name
+    def to_curve(self, previous):
+        """Convert a horzontal line into a curve"""
+        previous = Move(previous)
+        return self.to_line(previous).to_curve(previous)
+
+    def get_pen(self, previous=(0, 0)):
+        """When getting the pen for Vert moves, we return the combined point"""
+        pen = super(Vert, self).get_pen(previous)
+        return tuple(pen[i] is None and previous[i] or pen[i] for i in (0, 1))
+
+    def transform(self, transform, raw=False):
+        raise ValueError("Vertical lines can't be transformed directly.")
+
+
+class vert(Vert):  # pylint: disable=invalid-name
     """Relative vertical line segment"""
+
+    def to_line(self, previous):
+        """Return this path command as a line instead"""
+        return Line(Move(previous).x, Move(previous).y + self.y)
+
+    def update_bounding_box(self, *args):
+        super(Vert, self).update_bounding_box(*args)
+
 
 class Curve(Segment):
     """Absolute Curved Line segment"""
@@ -310,12 +392,37 @@ class Curve(Segment):
     x2 = property(lambda self: self.args[2])
     y2 = property(lambda self: self.args[3])
 
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        from .transforms import cubic_extrema
+
+        x1, x2, x3, x4 = last_two_points[-1][0], self.args[0], self.args[2], self.args[4]
+        y1, y2, y3, y4 = last_two_points[-1][1], self.args[1], self.args[3], self.args[5]
+
+        if not (x1 in bbox.x and
+                x2 in bbox.x and
+                x3 in bbox.x and
+                x4 in bbox.x):
+            bbox.x += cubic_extrema(x1, x2, x3, x4)
+
+        if not (y1 in bbox.y and
+                y2 in bbox.y and
+                y3 in bbox.y and
+                y4 in bbox.y):
+            bbox.y += cubic_extrema(y1, y2, y3, y4)
+
+        last_two_points[-2] = (x3, y3)
+        last_two_points[-1] = (x4, y4)
+
     def to_curve(self, previous):
         """No conversion needed, pass-through, returns self"""
         return self
 
-class curve(Curve): # pylint: disable=invalid-name
+class curve(Curve):  # pylint: disable=invalid-name
     """Relative curved line segment"""
+
+    def update_bounding_box(self, *args):
+        super(Curve, self).update_bounding_box(*args)
+
 
 class Smooth(Segment):
     """Absolute Smoothed Curved Line segment"""
@@ -323,6 +430,31 @@ class Smooth(Segment):
 
     x2 = property(lambda self: self.args[0])
     y2 = property(lambda self: self.args[1])
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        from .transforms import cubic_extrema
+
+        x1, x2, x3, x4 = last_two_points[-2][0], last_two_points[-1][0], self.args[0], self.args[2]
+        y1, y2, y3, y4 = last_two_points[-2][1], last_two_points[-1][1], self.args[1], self.args[3]
+
+        # infer reflected point
+        x1, x2 = x2, 2 * x2 - x1
+        y1, y2 = y2, 2 * y2 - y1
+
+        if not (x1 in bbox.x and
+                x2 in bbox.x and
+                x3 in bbox.x and
+                x4 in bbox.x):
+            bbox.x += cubic_extrema(x1, x2, x3, x4)
+
+        if not (y1 in bbox.y and
+                y2 in bbox.y and
+                y3 in bbox.y and
+                y4 in bbox.y):
+            bbox.y += cubic_extrema(y1, y2, y3, y4)
+
+        last_two_points[-2] = (x3, y3)
+        last_two_points[-1] = (x4, y4)
 
     def to_curve(self, previous):
         """
@@ -334,16 +466,37 @@ class Smooth(Segment):
         y1 = (2 * last.y) - last.y2
         return Curve(x1, y1, self.x2, self.y2, self.x, self.y)
 
-
-class smooth(Smooth): # pylint: disable=invalid-name
+class smooth(Smooth):  # pylint: disable=invalid-name
     """Relative smoothed curved line segment"""
+
+    def update_bounding_box(self, *args):
+        super(Smooth, self).update_bounding_box(*args)
+
 
 class Quadratic(Segment):
     """Absolute Quadratic Curved Line segment"""
     num = 4
-
     x1 = property(lambda self: self.args[0])
     y1 = property(lambda self: self.args[1])
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        from .transforms import quadratic_extrema
+
+        x1, x2, x3 = last_two_points[-1][0], self.args[0], self.args[2]
+        y1, y2, y3 = last_two_points[-1][1], self.args[1], self.args[3]
+
+        if not (x1 in bbox.x and
+                x2 in bbox.x and
+                x3 in bbox.x):
+            bbox.x += quadratic_extrema(x1, x2, x3)
+
+        if not (y1 in bbox.y and
+                y2 in bbox.y and
+                y3 in bbox.y):
+            bbox.y += quadratic_extrema(y1, y2, y3)
+
+        last_two_points[-2] = (x2, y2)
+        last_two_points[-1] = (x3, y3)
 
     def to_curve(self, previous):
         """Attempt to convert a quadratic to a curve"""
@@ -355,12 +508,39 @@ class Quadratic(Segment):
         return Curve(x1, y1, x2, y2, self.x, self.y)
 
 
-class quadratic(Quadratic): # pylint: disable=invalid-name
+class quadratic(Quadratic):  # pylint: disable=invalid-name
     """Relative quadratic line segment"""
+
+    def update_bounding_box(self, *args):
+        super(Quadratic, self).update_bounding_box(*args)
+
 
 class TepidQuadratic(Segment):
     """Continued Quadratic Line segment"""
     num = 2
+
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        from .transforms import quadratic_extrema
+
+        x1, x2, x3 = last_two_points[-2][0], last_two_points[-1][0], self.args[0]
+        y1, y2, y3 = last_two_points[-2][1], last_two_points[-1][1], self.args[1]
+
+        # infer reflected point
+        x1, x2 = x2, 2 * x2 - x1
+        y1, y2 = y2, 2 * y2 - y1
+
+        if not (x1 in bbox.x and
+                x2 in bbox.x and
+                x3 in bbox.x):
+            bbox.x += quadratic_extrema(x1, x2, x3)
+
+        if not (y1 in bbox.y and
+                y2 in bbox.y and
+                y3 in bbox.y):
+            bbox.y += quadratic_extrema(y1, y2, y3)
+
+        last_two_points[-2] = (x2, y2)
+        last_two_points[-1] = (x3, y3)
 
     def to_curve(self, previous):
         return self.to_quadratic(previous).to_curve(previous)
@@ -375,21 +555,21 @@ class TepidQuadratic(Segment):
         return Quadratic(x1, y1, self.x, self.y)
 
 
-class tepidQuadratic(TepidQuadratic): # pylint: disable=invalid-name
+class tepidQuadratic(TepidQuadratic):  # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
+
+    def update_bounding_box(self, *args):
+        super(TepidQuadratic, self).update_bounding_box(*args)
+
 
 class Arc(Segment):
     """Special Arc segment"""
     num = 7
     points = property(lambda self: (self.args[-2:],))
 
-    def bounding_box(self, prev):
-        """Returns a bounding box for curved lines, similar to refinedBBox"""
-        bbox = BoundingBox(None)
-        for seg in self.to_curves(prev):
-            bbox += seg.bounding_box(prev)
-            prev = seg
-        return bbox
+    def update_bounding_box(self, first_point, last_two_points, bbox):
+        for seg in self.to_curves(previous=last_two_points[-1]):
+            seg.update_bounding_box(first_point, last_two_points, bbox)
 
     def to_curves(self, previous=(0, 0)):
         """Convert this arc into bezier curves"""
@@ -423,8 +603,21 @@ class Arc(Segment):
             self.args[6] * y,  # Y coord
         ])
 
-class arc(Arc): # pylint: disable=invalid-name
+
+class arc(Arc):  # pylint: disable=invalid-name
     """Relative Arc line segment"""
+
+    def to_curves(self, previous=(0, 0)):
+        """Convert this arc into bezier curves"""
+        args = list(self.args)
+        args[-2:] = args[-2] + previous[0], args[-1] + previous[1]
+        cubic = ArcToPath(list(previous), args)
+        for seg in unCubicSuperPath([cubic]):
+            yield Segment.get_class(seg[0])(list(seg[1]))
+
+    def update_bounding_box(self, *args):
+        super(Arc, self).update_bounding_box(*args)
+
 
 class Path(list):
     """A list of segment commands which combine to draw a shape"""
@@ -459,9 +652,16 @@ class Path(list):
 
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
-        return sum([seg.bounding_box(prev) \
-            for prev, seg in pairwise(self.to_absolute(curves=True)) \
-                if seg])
+        bbox = BoundingBox()
+        abspath = self.to_absolute()
+        if len(abspath) > 0:
+            assert isinstance(abspath[0], Move)
+            first_point = abspath[0].x, abspath[0].y
+            prev_points = [(None, None), first_point]
+            bbox += BoundingBox(abspath[0].x, abspath[0].y)
+            for seg in abspath[1:]:
+                seg.update_bounding_box(first_point, prev_points, bbox)
+        return bbox
 
     def append(self, cmd):
         """Append a command to this path including any chained commands"""
@@ -500,8 +700,9 @@ class Path(list):
         """Convert to new path"""
         for i, seg in enumerate(self):
             if isinstance(seg, (Horz, Vert)):
-                previous = self[i-1] if i else (0, 0)
-                seg = seg.to_line(previous)
+                previous = self[i - 1] if i else (0, 0)
+                self[i] = seg.to_line(previous)
+        for i, seg in enumerate(self):
             self[i] = seg.transform(transform)
         return self
 
@@ -511,7 +712,7 @@ class Path(list):
 
     def to_absolute(self, factor=1, curves=False):
         """Convert this path to use only absolute coordinates"""
-        pen = (0.0, 0.0)
+        pen = [0.0, 0.0]
         new_path = Path()
         for seg in self:
             if curves and isinstance(seg, Arc):
@@ -526,7 +727,9 @@ class Path(list):
                 segs = [seg]
 
             new_path.extend(segs)
-            pen = new_path[-1].get_pen(pen)
+            new_pen = new_path[-1].get_pen(pen)
+            if new_pen[0] is not None: pen[0] = new_pen[0]
+            if new_pen[1] is not None: pen[1] = new_pen[1]
         return new_path
 
     def to_relative(self):
@@ -577,6 +780,7 @@ class CubicSuperPath(list):
 
     Structure is held as [SubPath[(point_a, bezier, point_b), ...]], ...]
     """
+
     def __init__(self, items):
         super(CubicSuperPath, self).__init__()
         self._closed = True
@@ -663,6 +867,7 @@ class CubicSuperPath(list):
         """Apply a transformation matrix to this super path"""
         return self.to_path().transform(transform).to_superpath()
 
+
 def arc_to_path(point, params):
     """Approximates an arc with cubic bezier segments.
 
@@ -696,7 +901,7 @@ def arc_to_path(point, params):
     # d is distance from center to AB segment (distance from O to the midpoint of AB)
     # for the last line, remember this is a unit circle, and kd vector is ortogonal to AB (Pythagorean thm)
 
-    if longflag == sweepflag: #top-right ellipse in SVG example https://www.w3.org/TR/SVG/images/paths/arcs02.svg
+    if longflag == sweepflag:  # top-right ellipse in SVG example https://www.w3.org/TR/SVG/images/paths/arcs02.svg
         d *= -1
 
     O = [(B[0] + A[0]) / 2 + d * k[0], (B[1] + A[1]) / 2 + d * k[1]]
@@ -737,6 +942,7 @@ def arc_to_path(point, params):
         applymat(mat, pts[2])
     return p
 
+
 def matprod(mlist):
     """Get the product of the mat"""
     prod = mlist[0]
@@ -748,9 +954,11 @@ def matprod(mlist):
         prod = [[a00, a01], [a10, a11]]
     return prod
 
+
 def rotmat(teta):
     """Rotate the mat"""
     return [[cos(teta), -sin(teta)], [sin(teta), cos(teta)]]
+
 
 def applymat(mat, point):
     """Apply the given mat"""
@@ -758,6 +966,7 @@ def applymat(mat, point):
     y = mat[1][0] * point[0] + mat[1][1] * point[1]
     point[0] = x
     point[1] = y
+
 
 def norm(point):
     """Normalise"""

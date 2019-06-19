@@ -141,12 +141,17 @@ class PathTest(TestCase):
         """
         Test the bounding box calculations of a curve
         """
-        self.assertEqual(
-            (-5.7198883, 104.71989, -5.6395306, 104.71989),
-            Path('M 85,14 C 104.63953,33.639531 104.71989,65.441157'
+
+        path=Path('M 85,14 C 104.63953,33.639531 104.71989,65.441157'
                  ' 85,85 65.441157,104.71989 33.558843,104.71989 14,85'
                  ' -5.7198883,65.441157 -5.6395306,33.639531 14,14'
-                 ' 33.639531,-5.6395306 65.360469,-5.6395306 85,14 Z').bounding_box())
+                 ' 33.639531,-5.6395306 65.360469,-5.6395306 85,14 Z')
+        bb_tuple = path.bounding_box()
+        expected = (-0.760, -0.760 + 100.520, -0.730, -0.730 + 100.520)
+        precision = 3
+
+        for i in range(4):
+            self.assertAlmostEqual(bb_tuple[i], expected[i], precision)
 
     def test_bounding_box_arcs(self):
         """
@@ -161,13 +166,15 @@ class PathTest(TestCase):
                     ' 50,50 0 0 1 14.644676,14.644651'
                     ' 50,50 0 0 1 85.355333,14.644651 Z')
 
-        self.assertAlmostTuple(
-            list(path[1].bounding_box(path[0])),
-            (85.355333, 99.99999988134624, 24.021470405410984, 85.355341))
+        bb_tuple = path.bounding_box()
+        expected = (0,100,0,100)
+        precision = 4
+
+        for i in range(4):
+            self.assertAlmostEqual(bb_tuple[i], expected[i], precision)
 
         #self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
         #self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())
-
 
     def test_adding_to_path(self):
         """Paths can be translated using addition"""
@@ -257,7 +264,10 @@ class PathTest(TestCase):
         self.assertEqual(str(ret), 'M 100 100 L 110 120 L 140 140 L 300 300')
         ret = Path('M 5 5 H 10 V 15')
         ret.transform(Transform(rotate=-10))
-        self.assertEqual(str(ret), 'M 5.79228 4.0558 L 10.5524 2.2577 L 12.9968 12.9397')
+        self.assertEqual('M 5.79228 4.0558 '
+                         'L 10.7163 3.18756 '
+                         'L 12.4528 13.0356',
+                         str(ret))
         ret = Path("M 10 10 A 50,50 0 0 1 85.355333,85.355341 L 100 0")
         ret.transform(Transform(scale=10))
         self.assertEqual(str(ret), 'M 100 100 A 50 50 0 0 1 853.553 853.553 L 1000 0')

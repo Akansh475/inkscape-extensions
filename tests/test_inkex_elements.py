@@ -211,8 +211,8 @@ class CoreElementTestCase(ElementTestCase):
     def test_bounding_box(self):
         """Elements can have bounding boxes"""
         elem = self.svg.getElementById('D')
-        self.assertEqual(elem.bounding_box(), (30.0, 70.0, 120.0, 160.0))
-        self.assertEqual(elem.get_center_position(), (50.0, 140.0))
+        self.assertEqual(elem.bounding_box(), (60.0, 100.0, 130.0, 170.0))
+        self.assertEqual(elem.get_center_position(), (80.0, 150.0))
         self.assertFalse(TextElement().bounding_box())
         group = Group(elem)
         self.assertEqual(elem.bounding_box(), group.bounding_box())
@@ -360,8 +360,8 @@ class CirtcleTest(ElementTestCase):
 
     def test_path(self):
         """Circle path"""
-        self.assertEqual(self.elem.get_path(),\
-             'm 150.0,100.0 a 50.0,50.0 0 0 1 -100.0,0 a 50.0,50.0 0 0 1 100.0,0 z')
+        self.assertEqual(self.elem.get_path(),
+                         'M 100.0,50.0 a 50.0,50.0 0 1 0 50.0, 50.0 a 50.0,50.0 0 0 0 -50.0, -50.0 z')
 
 class NamedViewTest(ElementTestCase):
     """Test the sodipodi namedview tag"""

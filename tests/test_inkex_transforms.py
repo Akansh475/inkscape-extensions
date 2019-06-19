@@ -86,6 +86,11 @@ class TransformTest(TestCase):
         self.assertEqual(str(RotateTransform(45)), "rotate(45)")
         self.assertEqual(str(RotateTransform(45, 10, 10)), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
+    def test_combine(self):
+        """Test combining transformations"""
+        self.assertEqual(str(Transform(scale=2.0, translate=(5, 6))), 'matrix(2 0 0 2 10 12)')
+        self.assertEqual(str(Transform(scale=2.0, rotate=45)), 'matrix(1.41421 1.41421 -1.41421 1.41421 0 0)')
+
     def test_add_transform(self):
         """Quickly add known transforms"""
         tr = Transform()

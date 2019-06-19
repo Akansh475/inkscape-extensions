@@ -1,22 +1,22 @@
 # coding=utf-8
 """Test inkex `.bounding_box()` method functionality"""
+from copy import deepcopy
+import os
+import xml.etree.ElementTree
+import subprocess
+
 import pytest
 from inkex.elements import (
     Circle,
     Rectangle,
     Group,
     PathElement,
-    ShapeElement
 )
-from inkex.transforms import TranslateTransform, ScaleTransform, RotateTransform, BoundingBox
-from inkex.paths import Path, Move
+from inkex.transforms import Transform, BoundingBox
+from inkex.paths import Path
 from inkex.styles import Style
 from inkex.svg import SvgDocumentElement
 from inkex.tester import TestCase
-from copy import deepcopy
-import os
-import xml.etree.ElementTree
-import subprocess
 from inkex.utils import TemporaryDirectory
 from inkex.command import is_inkscape_available
 from inkex.tester.decorators import requires_inkscape
@@ -25,10 +25,12 @@ DISABLE_STROKE_TESTS = True
 DISABLE_STROKE_CAP_TESTS = True
 DISABLE_INKSCAPE_QUERY_CHECK = not is_inkscape_available()
 
-skip_stroke_tests_decorator = pytest.mark.skipif(DISABLE_STROKE_TESTS,
-                                                 reason="Bounding box tests with stroke are disabled")
-skip_stroke_cap_tests_decorator = pytest.mark.skipif(DISABLE_STROKE_TESTS or DISABLE_STROKE_CAP_TESTS,
-                                                     reason="Bounding box tests with stroke-cap are disabled")
+skip_stroke_tests = pytest.mark.skipif( # pylint: disable=invalid-name
+    DISABLE_STROKE_TESTS, reason="Bounding box tests with stroke are disabled")
+
+skip_stroke_cap_tests = pytest.mark.skipif( # pylint: disable=invalid-name
+    DISABLE_STROKE_TESTS or DISABLE_STROKE_CAP_TESTS,
+    reason="Bounding box tests with stroke-cap are disabled")
 
 
 class BoundingBoxTest(TestCase):
@@ -129,7 +131,7 @@ class BoundingBoxTest(TestCase):
 
         self.assert_bounding_box_is_equal(circle, (cx - r, cx + r, cy - r, cy + r))
 
-    @skip_stroke_tests_decorator
+    @skip_stroke_tests
     def test_circle_with_stroke(self):
         r = 5
         cx = 10
@@ -144,7 +146,7 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(circle, (cx - (r + stroke_half_width), cx + (r + stroke_half_width),
                                                    cy - (r + stroke_half_width), cy + (r + stroke_half_width)))
 
-    @skip_stroke_tests_decorator
+    @skip_stroke_tests
     def test_circle_with_stroke_scaled(self):
         r = 5
         cx = 10
@@ -159,7 +161,7 @@ class BoundingBoxTest(TestCase):
 
         circle.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
 
-        circle.transform = ScaleTransform(scale_x, scale_y)
+        circle.transform = Transform(scale=(scale_x, scale_y))
 
         self.assert_bounding_box_is_equal(circle, (scale_x * (cx - (r + stroke_half_width)),
                                                    scale_x * (cx + (r + stroke_half_width)),
@@ -211,14 +213,14 @@ class BoundingBoxTest(TestCase):
 
         rect = Rectangle(width=str(w), height=str(h), x=str(x), y=str(y))
 
-        rect.transform = ScaleTransform(scale_x, scale_y)
+        rect.transform = Transform(scale=(scale_x, scale_y))
 
         self.assert_bounding_box_is_equal(rect, (scale_x * x,
                                                  scale_x * (x + w),
                                                  scale_y * y,
                                                  scale_y * (y + h)))
 
-    @skip_stroke_tests_decorator
+    @skip_stroke_tests
     def test_regular_rectangle_with_stroke(self):
 
         x, y = 10, 20
@@ -232,7 +234,7 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(rect, (x - stroke_half_width, x + w + stroke_half_width,
                                                  y - stroke_half_width, y + h + stroke_half_width))
 
-    @skip_stroke_tests_decorator
+    @skip_stroke_tests
     def test_regular_rectangle_with_stroke_scaled(self):
 
         x, y = 10, 20
@@ -245,7 +247,7 @@ class BoundingBoxTest(TestCase):
         rect = Rectangle(width=str(w), height=str(h), x=str(x), y=str(y))
 
         rect.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
-        rect.transform = ScaleTransform(scale_x, scale_y)
+        rect.transform = Transform(scale=(scale_x, scale_y))
 
         self.assert_bounding_box_is_equal(rect, (scale_x * (x - stroke_half_width),
                                                  scale_x * (x + w + stroke_half_width),
@@ -299,11 +301,11 @@ class BoundingBoxTest(TestCase):
         path.set_path("M 10 10 "
                       "L 20 20")
 
-        path.transform = ScaleTransform(scale_x, scale_y)
+        path.transform = Transform(scale=(scale_x, scale_y))
         self.assert_bounding_box_is_equal(path, (scale_x * 10, 20 * scale_x,
                                                  scale_y * 10, 20 * scale_y))
 
-    @skip_stroke_cap_tests_decorator
+    @skip_stroke_cap_tests
     def test_path_horizontal_line_stroke_butt_cap(self):
         path = PathElement()
 
@@ -317,7 +319,7 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(path, (0, 1,
                                                  -stroke_half_width, stroke_half_width))
 
-    @skip_stroke_cap_tests_decorator
+    @skip_stroke_cap_tests
     def test_path_horizontal_line_stroke_round_cap(self):
         path = PathElement()
 
@@ -331,7 +333,7 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(path, (-stroke_half_width, 1 + stroke_half_width,
                                                  -stroke_half_width, stroke_half_width))
 
-    @skip_stroke_cap_tests_decorator
+    @skip_stroke_cap_tests
     def test_path_horizontal_line_stroke_square_cap(self):
         path = PathElement()
 
@@ -351,7 +353,7 @@ class BoundingBoxTest(TestCase):
 
     def test_empty_group_with_translation(self):
         group = Group()
-        group.transform = TranslateTransform(10, 15)
+        group.transform = Transform(translate=(10, 15))
         self.assert_bounding_box_is_equal(group, (None, None, None, None))
 
     def test_group_with_regular_rect(self):
@@ -415,7 +417,7 @@ class BoundingBoxTest(TestCase):
 
             group.add(rect)
 
-        group.transform = ScaleTransform(scale_x, scale_y)
+        group.transform = Transform(scale=(scale_x, scale_y))
         self.assert_bounding_box_is_equal(group, (scale_x * xmin,
                                                   scale_x * xmax,
                                                   scale_y * ymin,
@@ -445,7 +447,7 @@ class BoundingBoxTest(TestCase):
 
             group.add(rect)
 
-        group.transform = TranslateTransform(dx, dy)
+        group.transform = Transform(translate=(dx, dy))
 
         self.assert_bounding_box_is_equal(group, (dx + xmin,
                                                   dx + xmax,
@@ -462,12 +464,13 @@ class BoundingBoxTest(TestCase):
 
         rect = Rectangle(width=str(w), height=str(h), x=str(x), y=str(y))
 
-        rect.transform = RotateTransform(45) * ScaleTransform(scale)
+        rect.transform = Transform(rotate=45, scale=scale)
 
         group.add(rect)
 
-        group.transform = RotateTransform(-45)  # rotation is compensated, but scale is not
+        group.transform = Transform(rotate=-45)  # rotation is compensated, but scale is not
 
+        a = rect.composed_transform()
         self.assert_bounding_box_is_equal(group, (scale * x,
                                                   scale * (x + w),
                                                   scale * y,

@@ -121,21 +121,36 @@ class GenerateExtension(EffectExtension):
     Does not need any SVG, but instead just outputs an SVG fragment which is
     inserted into Inkscape, centered on the selection.
     """
+    container_label = ''
+
     def generate(self):
-        """Return an SVG fragment to be inserted into Inkscape"""
+        """
+        Return an SVG fragment to be inserted into the selected layer of the document
+        OR yield multiple elements which will be grouped into a container Group
+        element which will be given an automatic label and transformation.
+        """
         raise NotImplementedError("Generate extensions must provide generate()")
 
-    def effect(self):
-
-        layer = self.svg.get_current_layer()
+    def container_transform(self):
+        """
+        Generate the transformation for the container group, the default is
+        to return the center position of the svg document or view port.
+        """
         (pos_x, pos_y) = self.svg.get_center_position()
         if pos_x is None:
             pos_x = 0
         if pos_y is None:
             pos_y = 0
+        return TranslateTransform(pos_x, pos_y)
+
+
+    def effect(self):
+        layer = self.svg.get_current_layer()
         fragment = self.generate()
         if isinstance(fragment, types.GeneratorType):
-            container = Group(transform=str(TranslateTransform(pos_x, pos_y)))
+            container = Group()
+            container.transform = self.container_transform()
+            container.set('inkscape:label', self.container_label)
             layer.append(container)
             for child in fragment:
                 container.append(child)

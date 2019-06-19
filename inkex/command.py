@@ -33,11 +33,13 @@ it yourself) to take advantage of the security settings and testing functions.
 
 import os
 import sys
+import subprocess
 from subprocess import Popen, PIPE
 
 from .utils import TemporaryDirectory
 
 PY3 = sys.version_info[0] == 3
+INKSCAPE_EXECUTABLE_NAME = 'inkscape'
 
 class CommandNotFound(IOError):
     """Command is not found"""
@@ -178,7 +180,7 @@ def inkscape(svg_file, *args, **kwargs):
     """
     Call Inkscape with the given svg_file and the given arguments
     """
-    return call('inkscape', svg_file, without_gui=True, *args, **kwargs)
+    return call(INKSCAPE_EXECUTABLE_NAME, svg_file, without_gui=True, *args, **kwargs)
 
 def inkscape_command(svg, *verbs):
     """
@@ -207,3 +209,11 @@ def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
     kwargs['export_' + ext] = ext_file
     inkscape(svg_file, export_dpi=dpi, **kwargs)
     return ext_file
+
+
+def is_inkscape_available():
+    try:
+        subprocess.check_call([INKSCAPE_EXECUTABLE_NAME, '--version'])
+        return True
+    except (OSError, subprocess.CalledProcessError) as ignored:
+        return False

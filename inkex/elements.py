@@ -273,9 +273,16 @@ class ShapeElement(BaseElement):
             return parent.composed_style() + self.style
         return self.style
 
-    def bounding_box(self):
-        """Returns the bounding box for the element as a BoundingBox object (x1, x2, y1, y2)"""
-        return self.path.bounding_box()
+    def bounding_box(self):  # type: () -> BoundingBox
+        """Returns the bounding box of the element"""
+        return self._bounding_box(transform=None)
+
+    def _bounding_box(self, transform):
+        """Implementation of bounding box calculation. SHOULD be called from ShapeElement-derived classes only"""
+        path = self.path.to_absolute().transform(self.transform)
+        if transform is not None:  # apply extra transformation
+            path = path.transform(transform)
+        return path.bounding_box()
 
     def get_center_position(self):
         """Returns object's center in terms of document units"""
@@ -348,11 +355,16 @@ class Group(ShapeElement):
     def get_path(self):
         return Path()
 
-    def bounding_box(self):
+    def _bounding_box(self, transform):
         bbox = BoundingBox(None)
+
+        transform = Transform(transform) * self.transform
+        if not transform:
+            transform = None
+
         for child in self:
             if isinstance(child, ShapeElement):
-                bbox += child.bounding_box()
+                bbox += child._bounding_box(transform=transform)
         return bbox
 
     @property
@@ -430,8 +442,8 @@ class Rectangle(ShapeElement):
     tag_name = 'rect'
     left = property(lambda self: float(self.get('x', '0')))
     top = property(lambda self: float(self.get('y', '0')))
-    width = property(lambda self: float(self.get('width')))
-    height = property(lambda self: float(self.get('height')))
+    width = property(lambda self: float(self.get('width', '0')))
+    height = property(lambda self: float(self.get('height', '0')))
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -446,20 +458,23 @@ class Image(Rectangle):
 class Circle(ShapeElement):
     """Provide a useful extension for circle elements"""
     tag_name = 'circle'
-    radius = property(lambda self: self.get('r'))
+    radius = property(lambda self: self.get('r', '0'))
     radius_x = property(lambda self: float(self.get('rx', self.radius)))
     radius_y = property(lambda self: float(self.get('ry', self.radius)))
     center_x = property(lambda self: float(self.get('cx', '0')))
     center_y = property(lambda self: float(self.get('cy', '0')))
+    top = property(lambda self: self.center_y - self.radius_y)
+    bottom = property(lambda self: self.center_y + self.radius_y)
     left = property(lambda self: self.center_x - self.radius_x)
     right = property(lambda self: self.center_x + self.radius_x)
 
     def get_path(self):
-        """Calculte the arc path of this circle"""
-        return ('m {0.right},{0.center_y} '
-                'a {0.radius_x},{0.radius_y} 0 0 1 {1},0 '
-                'a {0.radius_x},{0.radius_y} 0 0 1 {2},0 z'
-           ).format(self, -2 * self.radius_x, 2 * self.radius_x)
+        """Calculate the arc path of this circle"""
+        return ('M {0.center_x},{0.top} '
+                'a {0.radius_x},{0.radius_y} 0 1 0 {0.radius_x}, {0.radius_y} '
+                'a {0.radius_x},{0.radius_y} 0 0 0 -{0.radius_x}, -{0.radius_y} z'
+                ).format(self)
+
 
 class Ellipse(Circle):
     """Provide a similar extension to the Circle interface"""

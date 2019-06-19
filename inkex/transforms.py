@@ -242,6 +242,7 @@ class RotateTransform(Transform):
         super(RotateTransform, self).__init__()
         self.add_rotate(deg, center_x, center_y)
 
+
 class Scale(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
@@ -250,7 +251,10 @@ class Scale(object):  # pylint: disable=too-few-public-methods
             self.maximum = value.maximum
             self.minimum = value.minimum
         elif isinstance(value, (tuple, list)) and len(value) == 2:
-            (self.minimum, self.maximum) = value
+            if value[0] is not None:
+                self.minimum, self.maximum = min(value), max(value)
+            else:
+                self.minimum, self.maximum = value
         elif isinstance(value, (int, float, Decimal)):
             self.minimum = value
             self.maximum = value
@@ -305,6 +309,12 @@ class Scale(object):  # pylint: disable=too-few-public-methods
 
     def __eq__(self, other):
         return tuple(self) == tuple(Scale(other))
+
+    def __contains__(self, item):
+        if self.minimum is None or self.maximum is None:
+            return False
+        return self.minimum <= item <= self.maximum
+
 
     def __repr__(self):
         return "scale:" + str(tuple(self))
@@ -546,6 +556,8 @@ class DirectedLineSegment(object):
 
 def cubic_extrema(py0, py1, py2, py3):
     """Returns the extreme value, given a set of bezier coordinates"""
+
+    atol = 1e-9
     cmin, cmax = min(py0, py3), max(py0, py3)
     pd1 = py1 - py0
     pd2 = py2 - py1
@@ -560,18 +572,23 @@ def cubic_extrema(py0, py1, py2, py3):
             return min(cmin, pyx), max(cmax, pyx)
         return cmin, cmax
 
-    if pd1 - 2 * pd2 + pd3:
+    if fabs(pd1 - 2 * pd2 + pd3)>atol:
         if pd2 * pd2 > pd1 * pd3:
             pds = sqrt(pd2 * pd2 - pd1 * pd3)
             cmin, cmax = _is_bigger((pd1 - pd2 + pds) / (pd1 - 2 * pd2 + pd3))
             cmin, cmax = _is_bigger((pd1 - pd2 - pds) / (pd1 - 2 * pd2 + pd3))
 
-    elif pd2 - pd1:
+    elif fabs(pd2 - pd1)>atol:
         cmin, cmax = _is_bigger(-pd1 / (2 * (pd2 - pd1)))
 
     return cmin, cmax
 
+
 def quadratic_extrema(py0, py1, py2):
+
+    atol = 1e-9
+    cmin, cmax = min(py0, py2), max(py0, py2)
+
     def _is_bigger(point):
         if (point > 0) and (point < 1):
             pyx = py0 * (1 - point) * (1 - point) + \
@@ -579,7 +596,9 @@ def quadratic_extrema(py0, py1, py2):
                   py2 * point * point
             return min(cmin, pyx), max(cmax, pyx)
         return cmin, cmax
-    cmin, cmax = min(py0, py2), max(py0, py2)
-    if py0+py2-2*py1:
-        cmin, cmax = _is_bigger((py0-py1)/(py0+py2-2*py1))
+
+    if fabs(py0 + py2 - 2 * py1) > atol:
+        cmin, cmax = _is_bigger((py0 - py1) / (py0 + py2 - 2 * py1))
+
     return cmin, cmax
+

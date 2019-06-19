@@ -170,3 +170,28 @@ class SegmentTest(TestCase):
     def test_segment_maths(self):
         """Segments have calculations"""
         self.assertEqual(DirectedLineSegment((0, 0), (10, 0)).angle, 0)
+
+
+class ExtremaTest(TestCase):
+    """Test school formula implementation"""
+
+    def test_cubic_extrema_1(self):
+        from inkex.transforms import cubic_extrema
+        a, b, c, d = 14.644651000000003194,-4.881549508464541276,-4.8815495084645448287,14.644651000000003194
+        cmin, cmax = cubic_extrema(a, b, c, d)
+        self.assertAlmostEqual(cmin, 0, delta=1e-6)
+        self.assertAlmostEqual(cmax, a, delta=1e-6)
+
+    def test_quadratic_extrema_1(self):
+        from inkex.transforms import quadratic_extrema
+        a, b = 5.0, 12.0
+        cmin, cmax = quadratic_extrema(a, b, a)
+        self.assertAlmostEqual(cmin, 5, delta=1e-6)
+        self.assertAlmostEqual(cmax, 8.5, delta=1e-6)
+
+    def test_quadratic_extrema_2(self):
+        from inkex.transforms import quadratic_extrema
+        a = 5.0
+        cmin, cmax = quadratic_extrema(a,a,a)
+        self.assertAlmostEqual(cmin, a, delta=1e-6)
+        self.assertAlmostEqual(cmax, a, delta=1e-6)

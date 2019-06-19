@@ -69,7 +69,16 @@ class BasicSvgTest(TestCase):
         """Can we get a bounding box from the selected items"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
         doc.set_selected('path3904', 'path3902')
-        self.assertEqual(doc.get_selected_bbox(), (27.135259, 580.05892, 87.411314, 524.91176))
+        from inkex.transforms import BoundingBox
+        x, y, w, h = 199.544, 156.412, 377.489, 199.972  # from inkscape --query-all
+        expected_3904 = BoundingBox((x, x + w), (y, y + h))
+        x, y, w, h = 145.358, 478.373, 439.135, 419.142  # from inkscape --query-all
+        expected_3902 = BoundingBox((x, x + w), (y, y + h))
+        expected = list(expected_3902 + expected_3904)
+
+        for x, y in zip(expected, doc.get_selected_bbox()):
+            self.assertAlmostEqual(x, y, delta=1e-3)
+
 
     def test_svg_name(self):
         """Can get the sodipodi name attribute"""

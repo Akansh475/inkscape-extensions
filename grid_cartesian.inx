@@ -64,7 +64,7 @@
     <object-type>all</object-type>
     <effects-menu>
       <submenu _name="Render">
-          <submenu name="Grids"/>
+          <submenu _name="Grids"/>
       </submenu>
     </effects-menu>
   </effect>

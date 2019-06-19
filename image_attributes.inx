@@ -75,7 +75,5 @@ Available options:</_param>
         <command reldir="extensions" interpreter="python">image_attributes.py</command>
     </script>
 
-    <options silent="false"></options>
-
 </inkscape-extension>
 

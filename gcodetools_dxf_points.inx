@@ -69,10 +69,10 @@ Gcodetools ver. 1.7
 
     </param>
     <effect>
+        <object-type>path</object-type>
         <effects-menu>
             <submenu _name="Gcodetools"/>
         </effects-menu>
-        <object-type>path</object-type>
     </effect>
     <script>
         <command reldir="extensions" interpreter="python">gcodetools.py</command>

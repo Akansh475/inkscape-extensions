@@ -8,6 +8,7 @@
     <param name="maxdepth" type="int" min="0" max="65535" _gui-text="Stopping Depth (from top)">65535</param>
     <param name="keepdepth" type="int" min="0" max="65535" _gui-text="Depth to Keep (from bottom)">0</param>
     <effect needs-live-preview="false">
+        <object-type>all</object-type>
         <effects-menu >
             <submenu _name="Arrange" />
         </effects-menu>

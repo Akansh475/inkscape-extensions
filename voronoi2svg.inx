@@ -16,7 +16,7 @@
         <_item value="Page">Page</_item>
         <_item value="Automatic from seeds">Automatic from selected objects</_item>
       </param>
-      <param name="show-clip-box" type="boolean" _gui-text="Show the bounding box"></param>
+      <param name="show-clip-box" type="boolean" _gui-text="Show the bounding box">false</param>
       <_param name="Delaunay Options" type="description" appearance="header">Options for Delaunay Triangulation</_param>
       <param name="delaunay-fill-options"  _gui-text="Triangles color" type="optiongroup">
         <_option value="delaunay-no-fill">Default (Stroke black and no fill)</_option>

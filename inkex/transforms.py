@@ -32,8 +32,14 @@ from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 
 from .utils import X, Y, strargs
 
+try:
+    from typing import overload, Tuple
+except ImportError:
+    overload = lambda x: x
+
+
 # All the names that get added to the inkex API itself.
-__all__ = ('Transform', 'BoundingBox', 'Scale', 'Segment')
+__all__ = ('Transform', 'BoundingBox', 'Scale', 'DirectedLineSegment')
 
 
 if sys.version_info[0] == 3:  #PY3
@@ -218,7 +224,6 @@ class RotateTransform(Transform):
         super(RotateTransform, self).__init__()
         self.add_rotate(deg, center_x, center_y)
 
-
 class Scale(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
@@ -398,79 +403,127 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         """Returns the middle of the bounding box"""
         return self.x.center, self.y.center
 
-class Segment(BoundingBox):
-    """
-    A segment and a bounding box are functionally the same, except that
-    the coords mean something slightly different.
 
-    Segment(x1, x2, y1, y2)
-    Segment(((x1, y1), (x2, y2)))
+class DirectedLineSegment(object):
     """
+    A directed line segment
+
+    DirectedLineSegment(((x0, y0), (x1, y1)))
+    """
+
+    @overload
+    def __init__(self, other):  # type: (DirectedLineSegment) -> None
+        pass
+
+    @overload
+    def __init__(self, start, end):  # type: (Tuple[float, float], Tuple[float, float]) -> None
+        pass
+
+    def __init__(self, *args):
+        if len(args) == 1:  # overload 1
+            other, = args
+            start, end = other.start, other.end
+        elif len(args) == 2:  # overload 2
+            start, end = args
+        else:
+            raise ValueError("DirectedLineSegment() can't be constructed from {}".format(args))
+
+        self.start = start  # type: Tuple[float, float]
+        self.end = end  # type: Tuple[float, float]
+
+    def __eq__(self, other):
+        if isinstance(other, (tuple, DirectedLineSegment)):
+            return tuple(self) == tuple(other)
+        return False
+
+    def __iter__(self):
+        yield self.x0
+        yield self.x1
+        yield self.y0
+        yield self.y1
+
+    @property
+    def dx(self):
+        return self.end[0] - self.start[0]
+
+    @property
+    def dy(self):
+        return self.end[1] - self.start[1]
+
+    @property
+    def x0(self):
+        return self.start[0]
+
+    @property
+    def y0(self):
+        return self.start[1]
+
+    @property
+    def x1(self):
+        return self.end[0]
+
+    @property
+    def y1(self):
+        return self.end[1]
+
     @property
     def length(self):
         """Get the length from the top left to the bottom right of the line"""
-        return sqrt((self.width ** 2) + (self.height ** 2))
+        return sqrt((self.dx ** 2) + (self.dy ** 2))
 
     @property
     def angle(self):
         """Get the angle of the line created by this segment"""
-        return pi * (atan2(self.height, self.width)) / 180
+        return pi * (atan2(self.dy, self.dx)) / 180
 
     def distance_to_point(self, x, y):
         """Get the distance to the given point (x, y)"""
-        segment2 = Segment((self.minimum, (x, y)))
+        segment2 = DirectedLineSegment(self.start, (x, y))
         dot2 = segment2.dot(self)
         if dot2 <= 0:
-            return Segment(((x, y), self.minimum)).length
+            return DirectedLineSegment((x, y), self.start).length
         if self.dot(self) <= dot2:
-            return Segment(((x, y), self.maximum)).length
+            return DirectedLineSegment((x, y), self.end).length
         return self.perp_distance(x, y)
 
     def perp_distance(self, x, y):
         """Perpendicular distance to the given point"""
         if self.length == 0:
             return None
-        return fabs((self.width * (self.top - y)) - ((self.left - x) * self.height)) / self.length
+        return fabs((self.dx * (self.y0 - y)) - ((self.x0 - x) * self.dy)) / self.length
 
-    def dot(self, other):
+    def dot(self, other):  # type: (DirectedLineSegment) -> float
         """Get the dot product with the segment with another"""
-        return self.width * other.width + self.height * other.height
+        return self.dx * other.dx + self.dy * other.dy
 
     def point_at_ratio(self, ratio):
         """Get the point at the given ratio along the line"""
-        if self.length == 0:
-            return (None, None)
-        return (self.left + (ratio * self.width),
-                self.top + (ratio * self.height))
+        return self.x0 + ratio * self.dx, self.y0 + ratio * self.dy
 
     def point_at_length(self, length):
         """Get the point as the length along the line"""
-        if self.length == 0:
-            return (None, None)
-        ratio = length / self.length
-        return (self.left + (ratio * self.width),
-                self.top+ (ratio * self.height))
+        return self.point_at_ratio(length / self.length)
 
     def parallel(self, x, y):
         """Create parallel Segment"""
-        return Segment(((x + self.width, y + self.height), (x, y)))
+        return DirectedLineSegment((x + self.dx, y + self.dy), (x, y))
 
     def intersect(self, other):
         """Get the intersection between two segments"""
-        other = Segment(other)
-        denom = (other.height * self.width) - (other.width * self.height)
-        num = (other.width * (self.top - other.top)) - (other.height * (self.left - other.left))
-        #num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
+        other = DirectedLineSegment(other)
+        denom = (other.dy * self.dx) - (other.dx * self.dy)
+        num = (other.dx * (self.y0 - other.y0)) - (other.dy * (self.x0 - other.x0))
+        # num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
 
         if denom != 0:
             return (
-                self.left + ((num / denom) * (other.right - self.left)),
-                self.top + ((num / denom) * (other.top - self.top))
+                self.x0 + ((num / denom) * (other.x1 - self.x0)),
+                self.y0 + ((num / denom) * (other.y0 - self.y0))
             )
         return (None, None)
 
     def __repr__(self):
-        return "Segment(({0.minimum}, {0.maximum}))".format(self)
+        return "DirectedLineSegment(({0.start}, {0.end}))".format(self)
 
 
 def cubic_extrema(py0, py1, py2, py3):
@@ -510,6 +563,5 @@ def quadratic_extrema(py0, py1, py2):
         return cmin, cmax
     cmin, cmax = min(py0, py2), max(py0, py2)
     if py0+py2-2*py1:
-       cmin, cmax = _is_bigger((py0-py1)/(py0+py2-2*py1))
+        cmin, cmax = _is_bigger((py0-py1)/(py0+py2-2*py1))
     return cmin, cmax
-

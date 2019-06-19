@@ -3,7 +3,7 @@
 Test Inkex transformational logic.
 """
 from inkex.transforms import (
-    BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform, Segment
+    BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform, DirectedLineSegment
 )
 from inkex.tester import TestCase
 
@@ -164,9 +164,9 @@ class SegmentTest(TestCase):
     """Test special Segments"""
     def test_segment_creation(self):
         """Test segments"""
-        self.assertEqual(Segment((1, 2, 3, 4)), (1, 2, 3, 4))
-        self.assertEqual(repr(Segment((1, 2, 3, 4))), 'Segment(((1, 3), (2, 4)))')
+        self.assertEqual(DirectedLineSegment((1, 2), (3, 4)), (1, 3, 2, 4))
+        self.assertEqual(repr(DirectedLineSegment((1, 2), (3, 4))), 'DirectedLineSegment(((1, 2), (3, 4)))')
 
     def test_segment_maths(self):
         """Segments have calculations"""
-        self.assertEqual(Segment(((0, 0), (10, 0))).angle, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (10, 0)).angle, 0)

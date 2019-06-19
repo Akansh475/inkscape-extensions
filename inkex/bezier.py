@@ -28,7 +28,7 @@ import math
 
 import numpy
 
-from .transforms import Segment
+from .transforms import DirectedLineSegment
 from .utils import errormsg
 from .localization import _
 
@@ -329,7 +329,7 @@ def beziertatlength(bez, l=0.5, tolerance=0.001):
 
 def maxdist(bez):
     """Get maximum distance within bezier curve"""
-    seg = Segment((bez[0], bez[3]))
+    seg = DirectedLineSegment(bez[0], bez[3])
     return max(seg.distance_to_point(*bez[1]), seg.distance_to_point(*bez[2]))
 
 def cspsubdiv(csp, flat):

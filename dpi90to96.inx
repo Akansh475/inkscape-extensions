@@ -4,7 +4,7 @@
       <id>org.inkscape.dpi90to96</id>
       <dependency type="executable" location="extensions">dpiswitcher.py</dependency>
       <param name="action" type="notebook" gui-hidden="true">
-        <page name="dpi_swicher" >
+        <page name="dpi_swicher" _gui-text="Switch DPI">
             <param name="switcher" type="enum" gui-hidden="true">
                 <item value="0">DPI Switch from 90 to 96</item>
             </param>

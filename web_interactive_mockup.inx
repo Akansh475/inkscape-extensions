@@ -27,7 +27,7 @@
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu name="Web design">
+            <submenu _name="Web design">
                 
             </submenu>
         </effects-menu>

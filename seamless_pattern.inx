@@ -8,7 +8,7 @@
     <_param name="help-info" type="description">This extension overwrites the current document</_param>
 
     <effect needs-live-preview="false">
-        <object-type>All</object-type>
+        <object-type>all</object-type>
         <effects-menu>
             <submenu _name="Render"/>
         </effects-menu>

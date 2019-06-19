@@ -17,11 +17,11 @@
       <param name="colortab" type="notebook">
         <page name="fill_page" _gui-text="Fill">
           <param name="assign_fill" type="boolean" _gui-text="Assign fill color">true</param>
-          <param name="fill_color" gui-text="Fill color" type="color">-1</param>
+          <param name="fill_color" _gui-text="Fill color" type="color">-1</param>
         </page>
         <page name="stroke_page" _gui-text="Stroke">
           <param name="assign_stroke" type="boolean" _gui-text="Assign stroke color">true</param>
-          <param name="stroke_color" gui-text="Stroke color" type="color">255</param>
+          <param name="stroke_color" _gui-text="Stroke color" type="color">255</param>
         </page>
       </param>
     </page>

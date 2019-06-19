@@ -36,11 +36,11 @@
             <param name="unit" type="enum" _gui-text="Unit:">
                 <_item value="none">No Unit</_item>
                 <_item value="color">Color</_item>
-                <item>px</item>
-                <item>pt</item>
-                <item>in</item>
-                <item>cm</item>
-                <item>mm</item>
+                <item value="px">px</item>
+                <item value="pt">pt</item>
+                <item value="in">in</item>
+                <item value="cm">cm</item>
+                <item value="mm">mm</item>
             </param>
             <param name="zsort" type="boolean" _gui-text="Use Z-order" _gui-description="Workaround for reversed selection order in Live Preview cycles" gui-hidden="true">true</param>
         </page>

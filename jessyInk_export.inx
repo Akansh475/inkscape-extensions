@@ -21,7 +21,7 @@
         <mimetype>application/x-zip</mimetype>
         <_filetypename>JessyInk zipped pdf or png output (*.zip)</_filetypename>
         <_filetypetooltip>Creates a zip file containing pdfs or pngs of all slides of a JessyInk presentation.</_filetypetooltip>
-        <dataloss>TRUE</dataloss>
+        <dataloss>true</dataloss>
     </output>
     <script>
         <command reldir="extensions" interpreter="python">jessyInk_export.py</command>

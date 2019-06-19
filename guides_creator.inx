@@ -5,7 +5,7 @@
   <dependency type="executable" location="extensions">guides_creator.py</dependency>
   <param name="tab" type="notebook">
     <page name="regular_guides" _gui-text="Regular guides">
-      <param name="guides_preset" type="enum" appearance="minimal" _gui-text="Guides preset:">
+      <param name="guides_preset" type="enum" _gui-text="Guides preset:">
         <_item value="custom">Custom...</_item>
         <_item value="golden">Golden ratio</_item>
         <_item value="3;3">Rule-of-third</_item>
@@ -23,12 +23,12 @@
       <param name="delete_existing_guides2" type="boolean" _gui-text="Delete existing guides">false</param>
     </page>
     <page name="margins" _gui-text="Margins">
-      <param name="margins_preset" type="enum" appearance="minimal" _gui-text="Margins preset:">
+      <param name="margins_preset" type="enum" _gui-text="Margins preset:">
         <_item value="custom">Custom...</_item>
         <_item value="book_left">Left book page</_item>
         <_item value="book_right">Right book page</_item>
       </param>
-      <param name="header_margin" type="enum" appearance="minimal" _gui-text="Header margin:">
+      <param name="header_margin" type="enum" _gui-text="Header margin:">
         <item value="10">1/10</item>
         <item value="9">1/9</item>
         <item value="8">1/8</item>
@@ -40,7 +40,7 @@
         <item value="2">1/2</item>
         <_item msgctxt="Margin" value="0">None</_item>
       </param>
-      <param name="footer_margin" type="enum" appearance="minimal" _gui-text="Footer margin:">
+      <param name="footer_margin" type="enum" _gui-text="Footer margin:">
         <item value="10">1/10</item>
         <item value="9">1/9</item>
         <item value="8">1/8</item>
@@ -52,7 +52,7 @@
         <item value="2">1/2</item>
         <_item msgctxt="Margin" value="0">None</_item>
       </param>
-      <param name="left_margin" type="enum" appearance="minimal" _gui-text="Left margin:">
+      <param name="left_margin" type="enum" _gui-text="Left margin:">
         <item value="10">1/10</item>
         <item value="9">1/9</item>
         <item value="8">1/8</item>
@@ -64,7 +64,7 @@
         <item value="2">1/2</item>
         <_item msgctxt="Margin" value="0">None</_item>
       </param>
-      <param name="right_margin" type="enum" appearance="minimal" _gui-text="Right margin:">
+      <param name="right_margin" type="enum" _gui-text="Right margin:">
         <item value="10">1/10</item>
         <item value="9">1/9</item>
         <item value="8">1/8</item>

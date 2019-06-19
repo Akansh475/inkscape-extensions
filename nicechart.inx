@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <!--
    nicechart.inx
    
@@ -23,7 +25,7 @@
    MA 02110-1301, USA.
 -->
 
-<inkscape-extension>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>NiceCharts</_name>
   <id>org.inkscape.filter.nicechart</id>
   <dependency type="executable" location="extensions">nicechart.py</dependency>

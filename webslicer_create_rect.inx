@@ -13,16 +13,16 @@
   <param name="dpi" type="float" min="1" max="9999" _gui-text="DPI:">96</param>
   <param name="dimension" type="string" _gui-text="Force Dimension:"></param>
 <!-- i18n. Description duplicated in a fake value attribute in order to make it translatable -->
-  <param name="help-dimension1" type="description" _value="Force Dimension must be set as &lt;width&gt;x&lt;height&gt;">Force Dimension must be set as &lt;width&gt;x&lt;height&gt;</param>
+  <_param name="help-dimension1" type="description">Force Dimension must be set as &lt;width&gt;x&lt;height&gt;</_param>
   <_param name="help-dimension2" type="description">If set, this will replace DPI.</_param>
   <param name="bg-color" type="string" _gui-text="Background color:"></param>
   <param name="tab" type="notebook">
-    <page name="tabJPG" gui-text="JPG">
+    <page name="tabJPG" _gui-text="JPG">
       <_param name="help-jpg" type="description" appearance="header">JPG specific options</_param>
       <param name="quality" type="int" min="0" max="100" _gui-text="Quality:">85</param>
       <_param name="help-quality" type="description">0 is the lowest image quality and highest compression, and 100 is the best quality but least effective compression</_param>
     </page>
-    <page name="tabGIF" gui-text="GIF">
+    <page name="tabGIF" _gui-text="GIF">
       <_param name="help-gif" type="description" appearance="header">GIF specific options</_param>
       <param name="gif-type" type="enum" _gui-text="Type:">
         <_item value="grayscale">Grayscale</_item>
@@ -30,7 +30,7 @@
       </param>
       <param name="palette-size" type="int" min="2" max="256" _gui-text="Palette size:">256</param>
     </page>
-    <page name="tabHTML" gui-text="HTML">
+    <page name="tabHTML" _gui-text="HTML">
       <param name="html-id" type="string" _gui-text="HTML id attribute:"></param>
       <param name="html-class" type="string" _gui-text="HTML class attribute:"></param>
       <_param name="help-gif" type="description" appearance="header">Options for HTML export</_param>
@@ -62,7 +62,7 @@
     <object-type>all</object-type>
     <effects-menu>
       <submenu _name="Web">
-        <submenu name="Slicer"/>
+        <submenu _name="Slicer"/>
       </submenu>
     </effects-menu>
   </effect>

@@ -74,6 +74,12 @@ test:coverage:
       - htmlcov/
 
 
+test:validate-inx:
+  script:
+    - apt-get update && apt-get install libxml2-utils
+    - xmllint --noout --relaxng inkscape.extension.rng *.inx
+
+
 sphinx:
   stage: test
   when: always

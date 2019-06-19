@@ -5,27 +5,27 @@
     <dependency type="executable" location="extensions">draw_from_triangle.py</dependency>
     <param name="tab" type="notebook">
         <page name="common1" _gui-text="Common Objects">
-            <param name="circumcircle"    type="boolean" _gui-text="Circumcircle"></param>
-            <param name="circumcentre"    type="boolean" _gui-text="Circumcentre"></param>
-            <param name="incircle"        type="boolean" _gui-text="Incircle"></param>
-            <param name="incentre"        type="boolean" _gui-text="Incentre"></param>
-            <param name="contact_tri"     type="boolean" _gui-text="Contact Triangle"></param>
-            <param name="excircles"       type="boolean" _gui-text="Excircles"></param>
-            <param name="excentres"       type="boolean" _gui-text="Excentres"></param>
-            <param name="extouch_tri"     type="boolean" _gui-text="Extouch Triangle"></param>
-            <param name="excentral_tri"   type="boolean" _gui-text="Excentral Triangle"></param>
-            <param name="orthocentre"     type="boolean" _gui-text="Orthocentre"></param>
-            <param name="orthic_tri"      type="boolean" _gui-text="Orthic Triangle"></param>
-            <param name="altitudes"       type="boolean" _gui-text="Altitudes"></param>
-            <param name="anglebisectors"  type="boolean" _gui-text="Angle Bisectors"></param>
-            <param name="centroid"        type="boolean" _gui-text="Centroid"></param>
-            <param name="ninepointcentre" type="boolean" _gui-text="Nine-Point Centre"></param>
-            <param name="ninepointcircle" type="boolean" _gui-text="Nine-Point Circle"></param>
-            <param name="symmedians"      type="boolean" _gui-text="Symmedians"></param>
-            <param name="sym_point"       type="boolean" _gui-text="Symmedian Point"></param>
-            <param name="sym_tri"         type="boolean" _gui-text="Symmedial Triangle"></param>
-            <param name="gergonne_pt"     type="boolean" _gui-text="Gergonne Point"></param>
-            <param name="nagel_pt"        type="boolean" _gui-text="Nagel Point"></param>
+            <param name="circumcircle"    type="boolean" _gui-text="Circumcircle">false</param>
+            <param name="circumcentre"    type="boolean" _gui-text="Circumcentre">false</param>
+            <param name="incircle"        type="boolean" _gui-text="Incircle">false</param>
+            <param name="incentre"        type="boolean" _gui-text="Incentre">false</param>
+            <param name="contact_tri"     type="boolean" _gui-text="Contact Triangle">false</param>
+            <param name="excircles"       type="boolean" _gui-text="Excircles">false</param>
+            <param name="excentres"       type="boolean" _gui-text="Excentres">false</param>
+            <param name="extouch_tri"     type="boolean" _gui-text="Extouch Triangle">false</param>
+            <param name="excentral_tri"   type="boolean" _gui-text="Excentral Triangle">false</param>
+            <param name="orthocentre"     type="boolean" _gui-text="Orthocentre">false</param>
+            <param name="orthic_tri"      type="boolean" _gui-text="Orthic Triangle">false</param>
+            <param name="altitudes"       type="boolean" _gui-text="Altitudes">false</param>
+            <param name="anglebisectors"  type="boolean" _gui-text="Angle Bisectors">false</param>
+            <param name="centroid"        type="boolean" _gui-text="Centroid">false</param>
+            <param name="ninepointcentre" type="boolean" _gui-text="Nine-Point Centre">false</param>
+            <param name="ninepointcircle" type="boolean" _gui-text="Nine-Point Circle">false</param>
+            <param name="symmedians"      type="boolean" _gui-text="Symmedians">false</param>
+            <param name="sym_point"       type="boolean" _gui-text="Symmedian Point">false</param>
+            <param name="sym_tri"         type="boolean" _gui-text="Symmedial Triangle">false</param>
+            <param name="gergonne_pt"     type="boolean" _gui-text="Gergonne Point">false</param>
+            <param name="nagel_pt"        type="boolean" _gui-text="Nagel Point">false</param>
         </page>
         <page name="Custom" _gui-text="Custom Points and Options">
             <param name="mode" type="enum" _gui-text="Custom Point Specified By:">
@@ -33,12 +33,12 @@
                 <_item value="tcf">Triangle Function</_item>
             </param>
             <param name="cust_str"      type="string"  _gui-text="Point At:">cos(a_a):cos(a_b):cos(a_c)</param>
-            <param name="cust_pt"       type="boolean" _gui-text="Draw Marker At This Point"></param>
-            <param name="cust_radius"   type="boolean" _gui-text="Draw Circle Around This Point"></param>
+            <param name="cust_pt"       type="boolean" _gui-text="Draw Marker At This Point">false</param>
+            <param name="cust_radius"   type="boolean" _gui-text="Draw Circle Around This Point">false</param>
             <param name="radius"        type="string"  _gui-text="Radius (px):">s_a*s_b*s_c/(4*area)</param>
-            <param name="isogonal_conj" type="boolean" _gui-text="Draw Isogonal Conjugate"></param>
-            <param name="isotomic_conj" type="boolean" _gui-text="Draw Isotomic Conjugate"></param>
-            <param name="report" type="boolean" _gui-text="Report this triangle's properties"></param>
+            <param name="isogonal_conj" type="boolean" _gui-text="Draw Isogonal Conjugate">false</param>
+            <param name="isotomic_conj" type="boolean" _gui-text="Draw Isotomic Conjugate">false</param>
+            <param name="report"        type="boolean" _gui-text="Report this triangle's properties">false</param>
         </page>
         <page name="Help" _gui-text="Help">
             <_param name="instructions" type="description" xml:space="preserve">This extension draws constructions about a triangle defined by the first 3 nodes of a selected path. You may select one of preset objects or create your own ones.

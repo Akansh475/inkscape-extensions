@@ -48,6 +48,8 @@ def points_to_svgd(p):
 
 
 class RackGear(inkex.GenerateExtension):
+    container_label = 'Rendered Gear Rack'
+
     def __init__(self):
         super(RackGear, self).__init__()
         self.arg_parser.add_argument(

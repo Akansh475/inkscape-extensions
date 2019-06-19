@@ -49,6 +49,8 @@ def points_to_svgd(p):
 
 
 class Gears(inkex.GenerateExtension):
+    container_label = 'Rendered Gears'
+
     def __init__(self):
         super(Gears, self).__init__()
         self.arg_parser.add_argument("-t", "--teeth",
@@ -73,7 +75,6 @@ class Gears(inkex.GenerateExtension):
                                      help="unit of measure for circular pitch and center diameter")
 
     def generate(self):
-
         teeth = self.options.teeth
         pitch = self.svg.unittouu(str(self.options.pitch) + self.options.unit)
         angle = self.options.angle  # Angle of tangent to tooth at circular pitch wrt radial line.

@@ -212,8 +212,8 @@ def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
 
 
 def is_inkscape_available():
+    """Return true if the inkscape executable is available."""
     try:
-        subprocess.check_call([INKSCAPE_EXECUTABLE_NAME, '--version'])
-        return True
-    except (OSError, subprocess.CalledProcessError) as ignored:
+        return bool(which(INKSCAPE_EXECUTABLE_NAME))
+    except CommandNotFound:
         return False

@@ -86,8 +86,8 @@ class Transform(object):
             else:
                 raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
         elif extra:
-            for key in list(extra):
-                if hasattr(self, 'add_' + key):
+            for key in ('translate', 'scale', 'rotate', 'skewx', 'skewy'):
+                if key in extra:
                     value = extra.pop(key)
                     func = getattr(self, 'add_' + key)
                     if isinstance(value, tuple):

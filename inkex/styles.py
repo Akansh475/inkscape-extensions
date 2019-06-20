@@ -35,6 +35,9 @@ class Style(OrderedDict):
         style = style or kw
         if isinstance(style, (str, unicode)):
             style = self.parse_str(style)
+        # Order raw dictionaries so tests can be made reliable
+        if isinstance(style, dict) and not isinstance(style, OrderedDict):
+            style = [(name, style[name]) for name in sorted(style)]
         # Should accept dict, Style, parsed string, list etc.
         super(Style, self).__init__(style)
         self.callback = callback

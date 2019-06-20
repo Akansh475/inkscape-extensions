@@ -22,12 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-
-from lxml import etree
-
 import inkex
-from inkex import inkbool
-
+from inkex.elements import (
+    Rectangle, FlowRoot, FlowPara, FlowRegion, TextElement, Tspan
+)
 
 class Merge(inkex.Effect):
     def __init__(self):
@@ -45,11 +43,11 @@ class Merge(inkex.Effect):
                                      dest="yanchor", default="m",
                                      help="vertical point to compare")
         self.arg_parser.add_argument("-t", "--flowtext",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="flowtext", default=False,
                                      help="use a flow text structure instead of a normal text element")
         self.arg_parser.add_argument("-k", "--keepstyle",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="keepstyle", default=False,
                                      help="keep format")
 
@@ -97,44 +95,55 @@ class Merge(inkex.Effect):
             # move them to the top of the object stack in this order.
 
             if self.options.flowtext:
-                self.text_element = "flowRoot"
-                self.text_span = "flowPara"
+                text_element = FlowRoot
+                text_span = FlowPara
             else:
-                self.text_element = "text"
-                self.text_span = "tspan"
+                text_element = TextElement
+                text_span = Tspan
 
-            self.textRoot = etree.SubElement(parentnode, inkex.addNS(self.text_element, 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
-            self.textRoot.set(inkex.addNS('style', ''), 'font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;')
+            text_root = parentnode.add(text_element())
+            text_root.set('xml:space', 'preserve')
+            text_root.style = {
+                'font-size': '20px',
+                'font-style': 'normal',
+                'font-weight': 'normal',
+                'line-height': '125%',
+                'letter-spacing': '0px',
+                'word-spacing': '0px',
+                'fill': '#000000',
+                'fill-opacity': 1,
+                'stroke': 'none'
+            }
 
             for _, node in objlist:
-                self.recurse(node, self.textRoot)
+                self.recurse(text_span, node, text_root)
 
             if self.options.flowtext:
-                self.region = etree.SubElement(self.textRoot, inkex.addNS('flowRegion', 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
-                self.rect = etree.SubElement(self.region, inkex.addNS('rect', 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
-                self.rect.set(inkex.addNS('height', ''), '200')
-                self.rect.set(inkex.addNS('width', ''), '200')
+                region = text_root.add(FlowRegion())
+                region.set('xml:space', 'preserve')
+                rect = region.add(Rectangle())
+                rect.set('xml:space', 'preserve')
+                rect.set('height', 200)
+                rect.set('width', 200)
 
-    def recurse(self, node, span):
-        # istext = (node.tag == '{http://www.w3.org/2000/svg}flowPara' or node.tag == '{http://www.w3.org/2000/svg}flowDiv' or node.tag == '{http://www.w3.org/2000/svg}tspan')
-        if node.tag != '{http://www.w3.org/2000/svg}flowRegion':
+    def recurse(self, text_span, node, span):
+        if not isinstance(node, FlowRegion):
 
-            newspan = etree.SubElement(span, inkex.addNS(self.text_span, 'svg'), {inkex.addNS('space', 'xml'): 'preserve'})
+            newspan = span.add(text_span())
+            newspan.set('xml:space', 'preserve')
 
-            if node.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role'):
-                newspan.set(inkex.addNS('role', 'sodipodi'), node.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}role'))
-            if node.tag == '{http://www.w3.org/2000/svg}text' or node.tag == '{http://www.w3.org/2000/svg}flowPara':
-                newspan.set(inkex.addNS('role', 'sodipodi'), 'line')
+            newspan.set('sodipodi:role', node.get('sodipodi:role'))
+            if isinstance(node, (TextElement, FlowPara)):
+                newspan.set('sodipodi:role', 'line')
 
             if self.options.keepstyle:
-                if node.get('style'):
-                    newspan.set(inkex.addNS('style', ''), node.get('style'))
+                newspan.style = node.style
 
             if node.text is not None:
                 newspan.text = node.text
             for child in node:
-                self.recurse(child, newspan)
-            if node.tail and node.tag != '{http://www.w3.org/2000/svg}text':
+                self.recurse(text_span, child, newspan)
+            if node.tail and not isinstance(node, TextElement):
                 newspan.tail = node.tail
 
 

@@ -37,20 +37,20 @@ import sys
 from math import acos, asin, cos, pi, sin, sqrt
 
 import inkex
-from lxml import etree
 
 X, Y = range(2)
 
-
 def draw_SVG_tri(point1, point2, point3, offset, width, name, parent):
     style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
-    tri_attribs = {'style': str(inkex.Style(style)),
-                   inkex.addNS('label', 'inkscape'): name,
-                   'd': 'M ' + str(point1[X] + offset[X]) + ',' + str(point1[Y] + offset[Y]) +
-                        ' L ' + str(point2[X] + offset[X]) + ',' + str(point2[Y] + offset[Y]) +
-                        ' L ' + str(point3[X] + offset[X]) + ',' + str(point3[Y] + offset[Y]) +
-                        ' L ' + str(point1[X] + offset[X]) + ',' + str(point1[Y] + offset[Y]) + ' z'}
-    etree.SubElement(parent, inkex.addNS('path', 'svg'), tri_attribs)
+    elem = parent.add(inkex.PathElement())
+    elem.update(**{
+        'style': style,
+        'inkscape:label': name,
+         'd': 'M ' + str(point1[X] + offset[X]) + ',' + str(point1[Y] + offset[Y]) +
+              ' L ' + str(point2[X] + offset[X]) + ',' + str(point2[Y] + offset[Y]) +
+              ' L ' + str(point3[X] + offset[X]) + ',' + str(point3[Y] + offset[Y]) +
+              ' L ' + str(point1[X] + offset[X]) + ',' + str(point1[Y] + offset[Y]) + ' z'})
+    return elem
 
 
 def angle_from_3_sides(a, b, c):  # return the angle opposite side c

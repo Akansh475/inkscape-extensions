@@ -17,45 +17,52 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+Draws handles of selected paths.
+"""
 
-from lxml import etree
-
-from inkex.elements import PathElement
 import inkex
+from inkex.paths import Path, Curve, Move, Line, Quadratic, ZoneClose
 
-
-class Handles(inkex.Effect):
+class Handles(inkex.EffectExtension):
+    """
+    Renders the handle lines for the selected curves onto the canvas.
+    """
     def effect(self):
-        for id, node in self.svg.selected.items():
-            if isinstance(node, PathElement):
-                p = node.path.to_arrays()
-                a = []
-                pen = None
-                subPathStart = None
-                for cmd, params in p:
-                    if cmd == 'C':
-                        a.extend([['M', params[:2]], ['L', pen],
-                                  ['M', params[2:4]], ['L', params[-2:]]])
-                    if cmd == 'Q':
-                        a.extend([['M', params[:2]], ['L', pen],
-                                  ['M', params[:2]], ['L', params[-2:]]])
+        for node in self.svg.selected.values():
+            if isinstance(node, inkex.PathElement):
+                result = Path()
+                prev = None
+                start = None
+                for seg in node.path.to_absolute():
+                    if isinstance(seg, Curve):
+                        result += [
+                            Move((seg.x1, seg.y1)), Line((prev.x, prev.y)),
+                            Move((seg.x2, seg.y2)), Line((seg.x, seg.y)),
+                        ]
+                    elif isinstance(seg, Quadratic):
+                        result += [
+                            Move((seg.x1, seg.y1)), Line((prev.x, prev.y)),
+                            Move((seg.x1, seg.y1)), Line((seg.x, seg.y))
+                        ]
 
-                    if cmd == 'M':
-                        subPathStart = params
-
-                    if cmd == 'Z':
-                        pen = subPathStart
+                    if isinstance(seg, Move):
+                        start = seg
+                    if isinstance(seg, ZoneClose):
+                        prev = start
                     else:
-                        pen = params[-2:]
+                        prev = seg
 
-                if len(a) > 0:
-                    s = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px',
-                         'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-                         'stroke': '#000000', 'stroke-linecap': 'butt',
-                         'fill': 'none'}
-                    attribs = {'style': str(inkex.Style(s)), 'd': str(inkex.Path(a))}
-                    etree.SubElement(node.getparent(), inkex.addNS('path', 'svg'), attribs)
+                if not result:
+                    print("D!")
+                    continue
 
+                elem = node.getparent().add(inkex.PathElement())
+                elem.path = result
+                elem.style = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px',
+                              'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+                              'stroke': '#000000', 'stroke-linecap': 'butt',
+                              'fill': 'none'}
 
 if __name__ == '__main__':
     Handles().run()

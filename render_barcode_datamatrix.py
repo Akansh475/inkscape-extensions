@@ -51,9 +51,8 @@ The basis processing flow is;
 #    0.50    2009-10-25  Full functionality, up to 144x144.
 #                        ASCII and compressed digit encoding only.
 
-from lxml import etree
-
 import inkex
+from inkex.elements import Rectangle
 
 symbols = {
     'sq10': (10, 10),
@@ -620,77 +619,62 @@ def add_finder_pattern(array, data_nrow, data_ncol, reg_row, reg_col):
 #   squares. A binary 1 is a filled square
 # =====================================================================
 
-# SVG element generation routine
-def draw_SVG_square(wh, xy, parent):
-    (w, h) = wh
-    (x, y) = xy
+def draw_rect(size, x, y):
+    """SVG element generation routine"""
     style = {'stroke': 'none',
              'stroke-width': '1',
              'fill': '#000000'
-             }
-
+            }
     attribs = {
         'style': str(inkex.Style(style)),
-        'height': str(h),
-        'width': str(w),
+        'height': str(size),
+        'width': str(size),
         'x': str(x),
         'y': str(y)
     }
-    circ = etree.SubElement(parent, inkex.addNS('rect', 'svg'), attribs)
+    return Rectangle(**attribs)
 
 
-# turn a 2D array of 1's and 0's into a set of black squares
-def render_data_matrix(module_arrays, size, spacing, parent):
-    for i in range(len(module_arrays)):  # for each data matrix
-
-        height = len(module_arrays[i])
-        width = len(module_arrays[i][0])
+def render_data_matrix(module_arrays, size, spacing):
+    """turn a 2D array of 1's and 0's into a set of black squares"""
+    for i, line in enumerate(module_arrays):
+        height = len(line)
+        width = len(line[0])
 
         for y in range(height):  # loop over all the modules in the datamatrix
             for x in range(width):
-
-                if module_arrays[i][y][x] == 1:  # A binary 1 is a filled square
-                    draw_SVG_square((size, size), (x * size + i * spacing, y * size), parent)
-                elif module_arrays[i][y][x] != 0:  # we have an invalid bit value
+                if line[y][x] == 1:  # A binary 1 is a filled square
+                    yield draw_rect(size, x * size + i * spacing, y * size)
+                elif line[y][x] != 0:  # we have an invalid bit value
                     inkex.errormsg('Invalid bit value, this is a bug!')
 
 
-class DataMatrix(inkex.Effect):
-    def __init__(self):
-        super(DataMatrix, self).__init__()
-        self.arg_parser.add_argument("--text", type=str, dest="TEXT", default='Inkscape')
-        self.arg_parser.add_argument("--symbol", type=str, dest="SYMBOL", default='')
-        self.arg_parser.add_argument("--rows", type=int, dest="ROWS", default=10)
-        self.arg_parser.add_argument("--cols", type=int, dest="COLS", default=10)
-        self.arg_parser.add_argument("--size", type=int, dest="SIZE", default=4)
+class DataMatrix(inkex.GenerateExtension):
+    container_label = 'DataMatrix'
 
-    def effect(self):
+    def add_arguments(self, pars):
+        pars.add_argument("--text", type=str, dest="TEXT", default='Inkscape')
+        pars.add_argument("--symbol", type=str, dest="SYMBOL", default='')
+        pars.add_argument("--rows", type=int, dest="ROWS", default=10)
+        pars.add_argument("--cols", type=int, dest="COLS", default=10)
+        pars.add_argument("--size", type=int, dest="SIZE", default=4)
 
-        scale = self.svg.unittouu('1px')  # convert to document units
-        so = self.options
+    def generate(self):
+        opts = self.options
 
-        rows = so.ROWS
-        cols = so.COLS
-        if so.SYMBOL != '' and (so.SYMBOL in symbols):
-            rows = symbols[so.SYMBOL][0]
-            cols = symbols[so.SYMBOL][1]
+        rows = opts.ROWS
+        cols = opts.COLS
+        if opts.SYMBOL != '' and (opts.SYMBOL in symbols):
+            rows = symbols[opts.SYMBOL][0]
+            cols = symbols[opts.SYMBOL][1]
 
-        if so.TEXT == '':  # abort if converting blank text
+        if opts.TEXT == '':  # abort if converting blank text
             inkex.errormsg('Please enter an input string')
-        else:
+            return
 
-            # INKSCAPE GROUP TO CONTAIN EVERYTHING
-
-            centre = self.svg.get_center_position()
-            grp_transform = 'translate' + str(centre) + ' scale(%f)' % scale
-            grp_name = 'DataMatrix'
-            grp_attribs = {inkex.addNS('label', 'inkscape'): grp_name,
-                           'transform': grp_transform}
-            grp = etree.SubElement(self.svg.get_current_layer(), 'g', grp_attribs)  # the group to put everything in
-
-            # GENERATE THE DATAMATRIX
-            encoded = encode(so.TEXT, (rows, cols))  # get the pattern of squares
-            render_data_matrix(encoded, so.SIZE, cols * so.SIZE * 1.5, grp)  # generate the SVG elements
+        encoded = encode(opts.TEXT, (rows, cols))  # get the pattern of squares
+        for rect in render_data_matrix(encoded, opts.SIZE, cols * opts.SIZE * 1.5):
+            yield rect
 
 
 if __name__ == '__main__':

@@ -6,3 +6,4 @@ from inkex.tester.filters import CompareOrderIndependentStyle
 class TestDataMatrixBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = DataMatrix
     compare_filters = [CompareOrderIndependentStyle()]
+    comparisons = [()]

@@ -313,7 +313,6 @@ class FlowRegion(ShapeElement):
 
     def get_path(self):
         # This ignores flowRegionExcludes
-        print([child.path for child in self])
         return sum([child.path for child in self])
 
 class FlowRoot(ShapeElement):

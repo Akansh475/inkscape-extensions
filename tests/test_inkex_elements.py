@@ -213,7 +213,7 @@ class CoreElementTestCase(ElementTestCase):
         elem = self.svg.getElementById('D')
         self.assertEqual(elem.bounding_box(), (60.0, 100.0, 130.0, 170.0))
         self.assertEqual(elem.get_center_position(), (80.0, 150.0))
-        self.assertFalse(TextElement().bounding_box())
+        self.assertEqual(TextElement(x='10', y='5').bounding_box(), (10, 10, 5, 5))
         group = Group(elem)
         self.assertEqual(elem.bounding_box(), group.bounding_box())
 

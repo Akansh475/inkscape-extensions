@@ -10,14 +10,14 @@
         <_item value="tb">Top to bottom</_item>
     </param>
     <param name="xanchor" type="enum" _gui-text="Horizontal point:">
-        <_item value="l">Left</_item>
-        <_item value="m">Middle</_item>
-        <_item value="r">Right</_item>
+        <_item value="left">Left</_item>
+        <_item value="center_x">Middle</_item>
+        <_item value="right">Right</_item>
     </param>
     <param name="yanchor" type="enum" _gui-text="Vertical point:">
-        <_item value="t">Top</_item>
-        <_item value="m">Middle</_item>
-        <_item value="b">Bottom</_item>
+        <_item value="top">Top</_item>
+        <_item value="center_y">Middle</_item>
+        <_item value="bottom">Bottom</_item>
     </param>
     <effect>
     <object-type>all</object-type>

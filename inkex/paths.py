@@ -749,6 +749,11 @@ class Path(list):
             acopy.extend(other)
         return acopy
 
+    def __radd__(self, other):
+        if other != 0:  # ignore sum() initial value
+            return self + other
+        return self
+
     def __mul__(self, other):
         acopy = copy.copy(self)
         acopy.scale(other[X], other[Y])

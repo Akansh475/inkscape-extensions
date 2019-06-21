@@ -1,26 +1,28 @@
 #!/usr/bin/env python
 # coding=utf-8
+#
+# Copyright (C) 2007 John Bintz, jcoswell@cosellproductions.org
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
 """
-Copyright (C) 2007 John Bintz, jcoswell@cosellproductions.org
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Greate perfect bound cover
 """
-from lxml import etree
 
 import inkex
-from inkex import inkbool
+from inkex.elements import Guide
 
 
 def caliper_to_ppi(caliper):
@@ -71,7 +73,7 @@ class PerfectBoundCover(inkex.Effect):
                                      dest="bleed", default=0.25,
                                      help="cover bleed (in)")
         self.arg_parser.add_argument("--removeguides",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="removeguides", default=False,
                                      help="remove guides")
         self.arg_parser.add_argument("--book",
@@ -138,40 +140,12 @@ class PerfectBoundCover(inkex.Effect):
         namedview = self.svg.namedview
         if namedview is not None:
             if self.options.removeguides:
-                for node in self.svg.xpath('/svg:svg/sodipodi:namedview/sodipodi:guide'):
+                for node in namedview.get_guides():
                     node.delete()
             for guide in guides:
-                newguide = etree.Element(inkex.addNS('guide', 'sodipodi'))
+                newguide = namedview.add(Guide())
                 newguide.set("orientation", guide[0])
                 newguide.set("position", "%f" % (guide[1] * 96))
-                namedview.append(newguide)
-
-        '''
-        for id, node in self.selected.items():
-            if node.tag == inkex.addNS('path','svg'):
-                p = cubicsuperpath.parsePath(node.get('d'))
-                
-                #lens, total = csplength(p)
-                #avg = total/numlengths(lens)
-                #inkex.debug("average segment length: %s" % avg)
-
-                new = []
-                for sub in p:
-                    new.append([sub[0][:]])
-                    i = 1
-                    while i <= len(sub)-1:
-                        length = cspseglength(new[-1][-1], sub[i])
-                        if length > self.options.max:
-                            splits = math.ceil(length/self.options.max)
-                            for s in xrange(int(splits),1,-1):
-                                new[-1][-1], next, sub[i] = cspbezsplitatlength(new[-1][-1], sub[i], 1.0/s)
-                                new[-1].append(next[:])
-                        new[-1].append(sub[i])
-                        i+=1
-                    
-                node.set('d',cubicsuperpath.formatPath(new))
-            '''
-
 
 if __name__ == '__main__':
     PerfectBoundCover().run()

@@ -76,7 +76,7 @@ class CompareWithPathSpace(Compare):
         def func(match):
             """We've found a path command, process it"""
             new = re.sub(br'\s*([LZMHVCSQTAatqscvhmzl])\s*', br' \1 ', match.group(1))
-            return b' d="' + new + b'"'
+            return b' d="' + new.replace(b',', b' ') + b'"'
         return re.sub(br' d="([^"]*)"', func, contents)
 
 class CompareSize(Compare):

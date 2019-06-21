@@ -36,11 +36,11 @@ class Merge(inkex.Effect):
                                      help="direction to merge text")
         self.arg_parser.add_argument("-x", "--xanchor",
                                      type=str,
-                                     dest="xanchor", default="m",
+                                     dest="xanchor", default="center_x",
                                      help="horizontal point to compare")
         self.arg_parser.add_argument("-y", "--yanchor",
                                      type=str,
-                                     dest="yanchor", default="m",
+                                     dest="yanchor", default="center_y",
                                      help="vertical point to compare")
         self.arg_parser.add_argument("-t", "--flowtext",
                                      type=inkex.inkbool,
@@ -63,33 +63,19 @@ class Merge(inkex.Effect):
             for node in self.svg.selected.values():
                 # get the bounding box
                 bbox = node.bounding_box()
-                if not bbox:
-                    continue
 
-                # calc the comparison coords
-                if self.options.xanchor == "l":
-                    cx = bbox.left
-                elif self.options.xanchor == "r":
-                    cx = bbox.right
-                else:  # middle
-                    cx = bbox.center()[0]
-
-                if self.options.yanchor == "t":
-                    cy = bbox.top
-                elif self.options.yanchor == "b":
-                    cy = bbox.bottom
-                else:  # middle
-                    cy = bbox.center()[1]
+                x = getattr(bbox, self.options.xanchor)
+                y = getattr(bbox, self.options.yanchor)
 
                 # direction chosen
                 if self.options.direction == "tb":
-                    objlist.append([cy, node])
+                    objlist.append([y, node])
                 elif self.options.direction == "bt":
-                    objlist.append([-cy, node])
+                    objlist.append([-y, node])
                 elif self.options.direction == "lr":
-                    objlist.append([cx, node])
+                    objlist.append([x, node])
                 elif self.options.direction == "rl":
-                    objlist.append([-cx, node])
+                    objlist.append([-x, node])
 
             objlist.sort(key=lambda x: x[0])
             # move them to the top of the object stack in this order.

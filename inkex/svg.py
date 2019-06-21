@@ -133,8 +133,7 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
 
     def getElement(self, xpath):  # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
-        el_list = self.xpath(xpath)
-        return el_list[0] if el_list else None
+        return self.findone(xpath)
 
     def getElementById(self, eid, elm='*'):  # pylint: disable=invalid-name
         """Get an element in this svg document by it's ID attribute"""

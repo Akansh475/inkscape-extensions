@@ -18,46 +18,39 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-from lxml import etree
-
 import inkex
-from inkex import inkbool
 from inkex import turtle as pturtle
 
+class RTreeTurtle(inkex.GenerateExtension):
+    """Create RTree Turtle path"""
+    def add_arguments(self, pars):
+        pars.add_argument("-s", "--size", type=float,
+                          dest="size", default=100.0,
+                          help="initial branch size")
+        pars.add_argument("-m", "--minimum", type=float,
+                          dest="minimum", default=4.0,
+                          help="minimum branch size")
+        pars.add_argument("--pentoggle", type=inkex.inkbool,
+                          dest="pentoggle", default=False,
+                          help="Lift pen for backward steps")
 
-class RTreeTurtle(inkex.Effect):
-    def __init__(self):
-        super(RTreeTurtle, self).__init__()
-        self.arg_parser.add_argument("-s", "--size",
-                                     type=float,
-                                     dest="size", default=100.0,
-                                     help="initial branch size")
-        self.arg_parser.add_argument("-m", "--minimum",
-                                     type=float,
-                                     dest="minimum", default=4.0,
-                                     help="minimum branch size")
-        self.arg_parser.add_argument("--pentoggle",
-                                     type=inkbool,
-                                     dest="pentoggle", default=False,
-                                     help="Lift pen for backward steps")
-
-    def effect(self):
+    def generate(self):
         self.options.size = self.svg.unittouu(str(self.options.size) + 'px')
         self.options.minimum = self.svg.unittouu(str(self.options.minimum) + 'px')
-        s = {'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
-             'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-             'stroke': '#000000', 'stroke-linecap': 'butt',
-             'fill': 'none'}
-        t = pturtle.pTurtle()
-        t.pu()
         point = self.svg.get_center_position()
-        t.setpos(point)
-        t.pd()
-        t.rtree(self.options.size, self.options.minimum, self.options.pentoggle)
 
-        attribs = {'d': t.getPath(), 'style': str(inkex.Style(s))}
-        etree.SubElement(self.svg.get_current_layer(), inkex.addNS('path', 'svg'), attribs)
-
+        style = inkex.Style({
+            'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),
+            'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+            'stroke': '#000000', 'stroke-linecap': 'butt',
+            'fill': 'none'
+        })
+        tur = pturtle.pTurtle()
+        tur.pu()
+        tur.setpos(point)
+        tur.pd()
+        tur.rtree(self.options.size, self.options.minimum, self.options.pentoggle)
+        return inkex.PathElement(d=tur.getPath(), style=str(style))
 
 if __name__ == '__main__':
     RTreeTurtle().run()

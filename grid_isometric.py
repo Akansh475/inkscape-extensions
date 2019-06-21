@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
-
+#
 # Copyright (C) 2010 Jean-Luc JOULIN "JeanJouX" jean-luc.joulin@laposte.net
-
-# This extension allow you to draw a isometric grid with inkscape
-# There is some options including subdivision, subsubdivions and custom line width
-# All elements are grouped with similar elements
-# These grid are used for isometric view in mechanical drawing or piping schematic
-# !!! Y Divisions can't be smaller than half the X Divions
-
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -22,52 +16,59 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-
-from lxml import etree
+#
+"""
+This extension allow you to draw a isometric grid with inkscape
+There is some options including subdivision, subsubdivions and custom line width
+All elements are grouped with similar elements
+These grid are used for isometric view in mechanical drawing or piping schematic
+!!! Y Divisions can't be smaller than half the X Divions
+"""
 
 import inkex
+from inkex.elements import Rectangle
+from inkex.paths import Move, Line
+
+def draw_line(x1, y1, x2, y2, width, name, parent):
+    elem = parent.add(inkex.PathElement())
+    elem.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
+    elem.set('inkscape:label', name)
+    elem.path = [Move(x1, y1), Line(x2, y2)]
+
+def draw_rect(x, y, w, h, width, fill, name):
+    elem = Rectangle(x=str(x), y=str(y), width=str(w), height=str(h))
+    elem.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
+    elem.set('inkscape:label', name)
+    return elem
 
 
-def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
-    style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
-    line_attribs = {'style': str(inkex.Style(style)),
-                    inkex.addNS('label', 'inkscape'): name,
-                    'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-    etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
+class GridIsometric(inkex.GenerateExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--x_divs", type=int, dest="x_divs", default=5,
+                          help="Major X Divisions")
+        pars.add_argument("--y_divs", type=int, dest="y_divs", default=5,
+                          help="Major Y Divisions")
+        pars.add_argument("--dx", type=float, dest="dx", default=10.0,
+                          help="Major X division Spacing")
+        pars.add_argument("--subdivs", type=int, dest="subdivs", default=2,
+                          help="Subdivisions per Major X division")
+        pars.add_argument("--subsubdivs", type=int, dest="subsubdivs", default=5,
+                          help="Subsubdivisions per Minor X division")
+        pars.add_argument("--divs_th", type=float, dest="divs_th", default=2,
+                          help="Major X Division Line thickness")
+        pars.add_argument("--subdivs_th", type=float, dest="subdivs_th", default=1,
+                          help="Minor X Division Line thickness")
+        pars.add_argument("--subsubdivs_th", type=float, dest="subsubdivs_th",
+                          default=0.3, help="Subminor X Division Line thickness")
+        pars.add_argument("--border_th", type=float, dest="border_th", default=3,
+                          help="Border Line thickness")
 
+    @property
+    def container_label(self):
+        """Generate label from options"""
+        return 'Grid_Polar:X{0.x_divs}:Y{0.y_divs}'.format(self.options) # pylint: disable=missing-format-attribute
 
-def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
-    style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
-    rect_attribs = {'style': str(inkex.Style(style)),
-                    inkex.addNS('label', 'inkscape'): name,
-                    'x': str(x), 'y': str(y), 'width': str(w), 'height': str(h)}
-    etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
-
-
-class GridIsometric(inkex.Effect):
-    def __init__(self):
-        super(GridIsometric, self).__init__()
-        self.arg_parser.add_argument("--x_divs", type=int, dest="x_divs", default=5,
-                                     help="Major X Divisions")
-        self.arg_parser.add_argument("--y_divs", type=int, dest="y_divs", default=5,
-                                     help="Major X Divisions")
-        self.arg_parser.add_argument("--dx", type=float, dest="dx", default=10.0,
-                                     help="Major X division Spacing")
-        self.arg_parser.add_argument("--subdivs", type=int, dest="subdivs", default=2,
-                                     help="Subdivisions per Major X division")
-        self.arg_parser.add_argument("--subsubdivs", type=int, dest="subsubdivs", default=5,
-                                     help="Subsubdivisions per Minor X division")
-        self.arg_parser.add_argument("--divs_th", type=float, dest="divs_th", default=2,
-                                     help="Major X Division Line thickness")
-        self.arg_parser.add_argument("--subdivs_th", type=float, dest="subdivs_th", default=1,
-                                     help="Minor X Division Line thickness")
-        self.arg_parser.add_argument("--subsubdivs_th", type=float, dest="subsubdivs_th",
-                                     default=0.3, help="Subminor X Division Line thickness")
-        self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3,
-                                     help="Border Line thickness")
-
-    def effect(self):
+    def generate(self):
         self.options.dx = self.svg.unittouu(str(self.options.dx) + 'px')
         self.options.divs_th = self.svg.unittouu(str(self.options.divs_th) + 'px')
         self.options.subdivs_th = self.svg.unittouu(str(self.options.subdivs_th) + 'px')
@@ -83,53 +84,45 @@ class GridIsometric(inkex.Effect):
         xmax = self.options.dx * (2 * self.options.x_divs)
         ymax = self.options.dx * (2 * self.options.y_divs) / 0.866025
 
-        # Embed grid in group
-        # Put in in the centre of the current view
-
-        view_center = self.svg.get_center_position()
-        t = 'translate(' + str(view_center[0] - xmax / 2.0) + ',' + \
-            str(view_center[1] - ymax / 2.0) + ')'
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'Grid_Polar:X' +
-                                                       str(self.options.x_divs) + ':Y' + str(self.options.y_divs),
-                     'transform': t}
-        grid = etree.SubElement(self.svg.get_current_layer(), 'g', g_attribs)
-
         # Group for major x gridlines
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorXGridlines'}
-        majglx = etree.SubElement(grid, 'g', g_attribs)
+        majglx = inkex.Group.create('MajorXGridlines')
+        yield majglx
+
         # Group for major y gridlines
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorYGridlines'}
-        majgly = etree.SubElement(grid, 'g', g_attribs)
+        majgly = inkex.Group.create('MajorYGridlines')
+        yield majgly
+
         # Group for major z gridlines
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorZGridlines'}
-        majglz = etree.SubElement(grid, 'g', g_attribs)
+        majglz = inkex.Group.create('MajorZGridlines')
+        yield majglz
+
         # Group for minor x gridlines
         if self.options.subdivs > 1:  # if there are any minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorXGridlines'}
-            minglx = etree.SubElement(grid, 'g', g_attribs)
-        # Group for subminor x gridlines
-        if self.options.subsubdivs > 1:  # if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorXGridlines'}
-            mminglx = etree.SubElement(grid, 'g', g_attribs)
-        # Group for minor y gridlines
-        if self.options.subdivs > 1:  # if there are any minor y gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorYGridlines'}
-            mingly = etree.SubElement(grid, 'g', g_attribs)
-        # Group for subminor y gridlines
-        if self.options.subsubdivs > 1:  # if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorYGridlines'}
-            mmingly = etree.SubElement(grid, 'g', g_attribs)
-        # Group for minor z gridlines
-        if self.options.subdivs > 1:  # if there are any minor y gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorZGridlines'}
-            minglz = etree.SubElement(grid, 'g', g_attribs)
-        # Group for subminor z gridlines
-        if self.options.subsubdivs > 1:  # if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorZGridlines'}
-            mminglz = etree.SubElement(grid, 'g', g_attribs)
+            minglx = inkex.Group.create('MinorXGridlines')
+            yield minglx
+        # Group for subminor x gridlines, if there are any minor minor x gridlines
+        if self.options.subsubdivs > 1:
+            mminglx = inkex.Group.create('SubMinorXGridlines')
+            yield mminglx
+        # Group for minor y gridlines, if there are any minor y gridlines
+        if self.options.subdivs > 1:
+            mingly = inkex.Group.create('MinorYGridlines')
+            yield mingly
+        # Group for subminor y gridlines, if there are any minor minor x gridlines
+        if self.options.subsubdivs > 1:
+            mmingly = inkex.Group.create('SubMinorYGridlines')
+            yield mmingly
+        # Group for minor z gridlines, if there are any minor y gridlines
+        if self.options.subdivs > 1:
+            minglz = inkex.Group.create('MinorZGridlines')
+            yield minglz
+        # Group for subminor z gridlines, if there are any minor minor x gridlines
+        if self.options.subsubdivs > 1:
+            mminglz = inkex.Group.create('SubMinorZGridlines')
+            yield mminglz
 
-        draw_SVG_rect(0, 0, xmax, ymax, self.options.border_th,
-                      'none', 'Border', grid)  # Border of grid
+        # Border of grid
+        yield draw_rect(0, 0, xmax, ymax, self.options.border_th, 'none', 'Border')
 
         # X DIVISION
         # Shortcuts for divisions
@@ -161,19 +154,19 @@ class GridIsometric(inkex.Effect):
                 com_div = 1
 
             if com_subsubdiv == 1:
-                draw_SVG_line(self.options.dx * i / sd / ssd, 0,
+                draw_line(self.options.dx * i / sd / ssd, 0,
                               self.options.dx * i / sd / ssd, ymax,
                               self.options.subsubdivs_th,
                               'MajorXDiv' + str(i), mminglx)
             if com_subdiv == 1:
                 com_subdiv = 0
-                draw_SVG_line(self.options.dx * i / sd / ssd, 0,
+                draw_line(self.options.dx * i / sd / ssd, 0,
                               self.options.dx * i / sd / ssd, ymax,
                               self.options.subdivs_th,
                               'MajorXDiv' + str(i), minglx)
             if com_div == 1:
                 com_div = 0
-                draw_SVG_line(self.options.dx * i / sd / ssd, 0,
+                draw_line(self.options.dx * i / sd / ssd, 0,
                               self.options.dx * i / sd / ssd, ymax,
                               self.options.divs_th,
                               'MajorXDiv' + str(i), majglx)
@@ -219,31 +212,31 @@ class GridIsometric(inkex.Effect):
                 tyb = ymax - taille / (2 * 0.866025) - (taille * (l - 1) / 0.866025)
 
                 if com_subsubdiv == 1:
-                    draw_SVG_line(txa, tya,
+                    draw_line(txa, tya,
                                   txb, tyb,
                                   self.options.subsubdivs_th,
                                   'MajorYDiv' + str(i), mmingly)
-                    draw_SVG_line(xmax - txa, tya,
+                    draw_line(xmax - txa, tya,
                                   xmax - txb, tyb,
                                   self.options.subsubdivs_th,
                                   'MajorZDiv' + str(l), mminglz)
                 if com_subdiv == 1:
                     com_subdiv = 0
-                    draw_SVG_line(txa, tya,
+                    draw_line(txa, tya,
                                   txb, tyb,
                                   self.options.subdivs_th,
                                   'MajorYDiv' + str(i), mingly)
-                    draw_SVG_line(xmax - txa, tya,
+                    draw_line(xmax - txa, tya,
                                   xmax - txb, tyb,
                                   self.options.subdivs_th,
                                   'MajorZDiv' + str(l), minglz)
                 if com_div == 1:
                     com_div = 0
-                    draw_SVG_line(txa, tya,
+                    draw_line(txa, tya,
                                   txb, tyb,
                                   self.options.divs_th,
                                   'MajorYDiv' + str(i), majgly)
-                    draw_SVG_line(xmax - txa, tya,
+                    draw_line(xmax - txa, tya,
                                   xmax - txb, tyb,
                                   self.options.divs_th,
                                   'MajorZDiv' + str(l), majglz)
@@ -255,31 +248,31 @@ class GridIsometric(inkex.Effect):
                 tyb = ymax - taille / (2 * 0.866025) - (taille * (l - 1) / 0.866025)
 
                 if com_subsubdiv == 1:
-                    draw_SVG_line(txa, tya,
+                    draw_line(txa, tya,
                                   txb, tyb,
                                   self.options.subsubdivs_th,
                                   'MajorYDiv' + str(i), mmingly)
-                    draw_SVG_line(xmax - txa, tya,
+                    draw_line(xmax - txa, tya,
                                   xmax - txb, tyb,
                                   self.options.subsubdivs_th,
                                   'MajorZDiv' + str(l), mminglz)
                 if com_subdiv == 1:
                     com_subdiv = 0
-                    draw_SVG_line(txa, tya,
+                    draw_line(txa, tya,
                                   txb, tyb,
                                   self.options.subdivs_th,
                                   'MajorYDiv' + str(i), mingly)
-                    draw_SVG_line(xmax - txa, tya,
+                    draw_line(xmax - txa, tya,
                                   xmax - txb, tyb,
                                   self.options.subdivs_th,
                                   'MajorZDiv' + str(l), minglz)
                 if com_div == 1:
                     com_div = 0
-                    draw_SVG_line(txa, tya,
+                    draw_line(txa, tya,
                                   txb, tyb,
                                   self.options.divs_th,
                                   'MajorYDiv' + str(i), majgly)
-                    draw_SVG_line(xmax - txa, tya,
+                    draw_line(xmax - txa, tya,
                                   xmax - txb, tyb,
                                   self.options.divs_th,
                                   'MajorZDiv' + str(l), majglz)
@@ -298,31 +291,31 @@ class GridIsometric(inkex.Effect):
 
                     if txb < xmax:
                         if com_subsubdiv == 1:
-                            draw_SVG_line(txa, tya,
+                            draw_line(txa, tya,
                                           txb, tyb,
                                           self.options.subsubdivs_th,
                                           'MajorYDiv' + str(i), mmingly)
-                            draw_SVG_line(xmax - txa, tya,
+                            draw_line(xmax - txa, tya,
                                           xmax - txb, tyb,
                                           self.options.subsubdivs_th,
                                           'MajorZDiv' + str(l), mminglz)
                         if com_subdiv == 1:
                             com_subdiv = 0
-                            draw_SVG_line(txa, tya,
+                            draw_line(txa, tya,
                                           txb, tyb,
                                           self.options.subdivs_th,
                                           'MajorYDiv' + str(i), mingly)
-                            draw_SVG_line(xmax - txa, tya,
+                            draw_line(xmax - txa, tya,
                                           xmax - txb, tyb,
                                           self.options.subdivs_th,
                                           'MajorZDiv' + str(l), minglz)
                         if com_div == 1:
                             com_div = 0
-                            draw_SVG_line(txa, tya,
+                            draw_line(txa, tya,
                                           txb, tyb,
                                           self.options.divs_th,
                                           'MajorYDiv' + str(i), majgly)
-                            draw_SVG_line(xmax - txa, tya,
+                            draw_line(xmax - txa, tya,
                                           xmax - txb, tyb,
                                           self.options.divs_th,
                                           'MajorZDiv' + str(l), majglz)
@@ -330,31 +323,31 @@ class GridIsometric(inkex.Effect):
                 else:
                     if txb < xmax:
                         if com_subsubdiv == 1:
-                            draw_SVG_line(txa, tya,
+                            draw_line(txa, tya,
                                           txb, tyb,
                                           self.options.subsubdivs_th,
                                           'MajorYDiv' + str(i), mmingly)
-                            draw_SVG_line(xmax - txa, tya,
+                            draw_line(xmax - txa, tya,
                                           xmax - txb, tyb,
                                           self.options.subsubdivs_th,
                                           'MajorZDiv' + str(l), mminglz)
                         if com_subdiv == 1:
                             com_subdiv = 0
-                            draw_SVG_line(txa, tya,
+                            draw_line(txa, tya,
                                           txb, tyb,
                                           self.options.subdivs_th,
                                           'MajorYDiv' + str(i), mingly)
-                            draw_SVG_line(xmax - txa, tya,
+                            draw_line(xmax - txa, tya,
                                           xmax - txb, tyb,
                                           self.options.subdivs_th,
                                           'MajorZDiv' + str(l), minglz)
                         if com_div == 1:
                             com_div = 0
-                            draw_SVG_line(txa, tya,
+                            draw_line(txa, tya,
                                           txb, tyb,
                                           self.options.divs_th,
                                           'MajorYDiv' + str(i), majgly)
-                            draw_SVG_line(xmax - txa, tya,
+                            draw_line(xmax - txa, tya,
                                           xmax - txb, tyb,
                                           self.options.divs_th,
                                           'MajorZDiv' + str(l), majglz)

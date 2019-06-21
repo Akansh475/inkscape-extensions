@@ -29,9 +29,9 @@ from lxml import etree
 
 from .paths import Path
 from .styles import Style
-from .transforms import BoundingBox
-from .transforms import Transform
+from .transforms import BoundingBox, Transform
 from .utils import NSS, addNS, removeNS
+from .units import convert_unit
 
 __all__ = ('Group', 'PathElement', 'ShapeElement')
 
@@ -225,6 +225,11 @@ class BaseElement(etree.ElementBase):
         """Wrap findall call and add svg namespaces"""
         return super(BaseElement, self).findall(pattern, namespaces=namespaces)
 
+    def findone(self, xpath):
+        """Gets a single element from the given xpath or returns None"""
+        el_list = self.xpath(xpath)
+        return el_list[0] if el_list else None
+
     def delete(self):
         """Delete this node from it's parent node"""
         if self.getparent():
@@ -273,14 +278,10 @@ class ShapeElement(BaseElement):
             return parent.composed_style() + self.style
         return self.style
 
-    def bounding_box(self):  # type: () -> BoundingBox
-        """Returns the bounding box of the element"""
-        return self._bounding_box(transform=None)
-
-    def _bounding_box(self, transform):
-        """Implementation of bounding box calculation. SHOULD be called from ShapeElement-derived classes only"""
+    def bounding_box(self, transform=None):  # type: () -> BoundingBox
+        """BoundingBox calculation based on the ShapeElement rendered to a path."""
         path = self.path.to_absolute().transform(self.transform)
-        if transform is not None:  # apply extra transformation
+        if transform:  # apply extra transformation
             path = path.transform(transform)
         return path.bounding_box()
 
@@ -311,16 +312,22 @@ class FlowRegion(ShapeElement):
     tag_name = 'flowRegion'
 
     def get_path(self):
-        # XXX: These empty paths mean the bbox for text elements will be nothing.
-        return Path()
+        # This ignores flowRegionExcludes
+        print([child.path for child in self])
+        return sum([child.path for child in self])
 
 class FlowRoot(ShapeElement):
     """SVG Flow Root (SVG 2.0)"""
     tag_name = 'flowRoot'
 
+    @property
+    def region(self):
+        """Return the first flowRegion in this flowRoot"""
+        return self.findone('svg:flowRegion')
+
     def get_path(self):
-        # XXX: These empty paths mean the bbox for text elements will be nothing.
-        return Path()
+        region = self.region
+        return region.get_path() if region is not None else Path()
 
 class FlowPara(ShapeElement):
     """SVG Flow Paragraph (SVG 2.0)"""
@@ -364,7 +371,7 @@ class Group(ShapeElement):
     def get_path(self):
         return Path()
 
-    def _bounding_box(self, transform):
+    def bounding_box(self, transform=None):
         bbox = BoundingBox(None)
 
         transform = Transform(transform) * self.transform
@@ -373,7 +380,7 @@ class Group(ShapeElement):
 
         for child in self:
             if isinstance(child, ShapeElement):
-                bbox += child._bounding_box(transform=transform)
+                bbox += child.bounding_box(transform=transform)
         return bbox
 
     @property
@@ -558,9 +565,27 @@ class ForeignObject(BaseElement):
 class TextElement(ShapeElement):
     """A Text element"""
     tag_name = 'text'
+    x = property(lambda self: float(self.get('x', 0)))
+    y = property(lambda self: float(self.get('y', 0)))
 
     def get_path(self):
         return Path()
+
+    def tspans(self):
+        """Returns all children that are tspan elements"""
+        return self.findall('svg:tspan')
+
+    def bounding_box(self, transform=None):
+        """
+        Returns a horrible bounding box that just contains the coord points
+        of the text without width or height (which is impossible to calculate)
+        """
+        transform = self.transform * transform
+        x, y = transform.apply_to_point((self.x, self.y))
+        bbox = BoundingBox(x, y)
+        for tspan in self.tspans():
+            bbox += tspan.bounding_box(transform)
+        return bbox
 
 class TextPath(ShapeElement):
     """A textPath element"""
@@ -576,9 +601,23 @@ class TextPath(ShapeElement):
 class Tspan(ShapeElement):
     """A tspan text element"""
     tag_name = 'tspan'
+    x = property(lambda self: float(self.get('x', 0)))
+    y = property(lambda self: float(self.get('y', 0)))
 
     def get_path(self):
         return Path()
+
+    def bounding_box(self, transform=None):
+        """
+        Returns a horrible bounding box that just contains the coord points
+        of the text without width or height (which is impossible to calculate)
+        """
+        transform = self.transform * transform
+        x1, y1 = transform.apply_to_point((self.x, self.y))
+        fontsize = convert_unit(self.style.get('font-size', '1em'), 'px')
+        y2 = y1 + float(fontsize)
+        x2 = x1 + 0 # XXX This is impossible to calculate!
+        return BoundingBox((x1, x2), (y1, y2))
 
 class Marker(Group):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads

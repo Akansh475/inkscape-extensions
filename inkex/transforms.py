@@ -352,6 +352,8 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     left = property(lambda self: self.x.minimum)
     bottom = property(lambda self: self.y.maximum)
     right = property(lambda self: self.x.maximum)
+    center_x = property(lambda self: self.x.center)
+    center_y = property(lambda self: self.y.center)
 
     def __init__(self, x=None, y=None):
         if y is None:

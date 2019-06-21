@@ -11,3 +11,8 @@ class TestReplaceFontBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase
         '--fr_find=sans-serif',
         '--fr_replace=monospace',
     )]
+
+class TestFontList(ComparisonMixin, TestCase):
+    effect_class = ReplaceFont
+    comparisons = [('--action=list_only',),]
+    stderr_output = True

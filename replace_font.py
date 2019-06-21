@@ -25,8 +25,8 @@ font.
 It can also replace all fonts indiscriminately, and list all fonts
 currently being used.
 """
-import sys
 import inkex
+from inkex.localization import _
 
 text_tags = ['{http://www.w3.org/2000/svg}tspan',
                             '{http://www.w3.org/2000/svg}text',
@@ -128,9 +128,9 @@ def report_findings(findings):
         inkex.errormsg(_("Didn't find any fonts in this document/selection."))
     else:
         if len(findings) == 1:
-            inkex.errormsg(_("Found the following font only: %s") % findings[0])
+            inkex.errormsg(_(u"Found the following font only: %s") % findings[0])
         else:
-            inkex.errormsg(_("Found the following fonts:\n%s") % '\n'.join(findings))
+            inkex.errormsg(_(u"Found the following fonts:\n%s") % '\n'.join(findings))
 
 class ReplaceFont(inkex.Effect):
     """
@@ -235,7 +235,6 @@ class ReplaceFont(inkex.Effect):
             self.replace_all(relevant_items, replace)
         elif action == "list_only":
             self.list_all(relevant_items)
-            sys.exit(0)
 
 if __name__ == "__main__":
     ReplaceFont().run()

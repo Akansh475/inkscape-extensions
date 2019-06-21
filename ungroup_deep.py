@@ -6,12 +6,11 @@ https://github.com/nikitakit/svg2sif/blob/master/synfig_prepare.py#L370
 for an example how to do the transform of parent to children.
 """
 
-from lxml import etree
-
 import inkex
 from inkex.svg import SvgDocumentElement
 from inkex.elements import (
-    Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject
+    Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject,
+    ClipPath, Use,
 )
 
 class Ungroup(inkex.EffectExtension):
@@ -87,17 +86,14 @@ class Ungroup(inkex.EffectExtension):
                 # applied to the clipPath as well, which we don't want.  So, we
                 # create new clipPath element with references to all existing
                 # clippath subelements, but with the inverse transform applied
-                new_clippath = etree.SubElement(
-                    self.svg.getElement('//svg:defs'), 'clipPath',
-                    {'clipPathUnits': 'userSpaceOnUse',
-                     'id': self.svg.get_unique_id("clipPath")})
+                new_clippath = self.svg.defs.add(ClipPath(clipPathUnits='userSpaceOnUse'))
+                new_clippath.set_random_id('clipPath')
                 clippath = self.svg.getElementById(clippathurl[5:-1])
-                for c in clippath.iterchildren():
-                    etree.SubElement(
-                            new_clippath, 'use',
-                            {inkex.addNS('href', 'xlink'): '#' + c.get("id"),
-                             'transform': str(-node_transform),
-                             'id': self.svg.get_unique_id("use")})
+                for child in clippath.iterchildren():
+                    use = new_clippath.add(Use())
+                    use.add('xlink:href', '#' + child.get("id"))
+                    use.transform = -node_transform
+                    use.set_random_id('use')
 
                 # Set the clippathurl to be the one with the inverse transform
                 clippathurl = "url(#" + new_clippath.get("id") + ")"

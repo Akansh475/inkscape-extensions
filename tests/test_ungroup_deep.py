@@ -6,3 +6,7 @@ from inkex.tester.filters import CompareOrderIndependentStyle
 class TestUngroupBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Ungroup
     compare_filters = [CompareOrderIndependentStyle()]
+    comparisons = [
+        (),
+        ('--id=layer2',)
+    ]

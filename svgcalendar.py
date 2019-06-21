@@ -34,9 +34,8 @@ import re
 import sys
 from datetime import datetime
 
-from lxml import etree
-
 import inkex
+from inkex.elements import TextElement
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):
@@ -267,13 +266,13 @@ class SVGCalendar(inkex.Effect):
                     'x': str((self.month_w - self.day_w) / 2),
                     'y': str(self.day_h / 5)}
         try:
-            etree.SubElement(g, 'text', txt_atts).text = unicode(
-                    self.options.month_names[m - 1],
-                    self.options.input_encode)
+            g.add(TextElement(**txt_atts)).text = unicode(
+                self.options.month_names[m - 1],
+                self.options.input_encode)
         except:
             raise ValueError('You must select a correct system encoding.')
 
-        gw = etree.SubElement(g, 'g')
+        gw = g.add(inkex.Group())
         week_x = 0
         if self.options.start_day == 'sun':
             day_names = self.options.day_names[:]
@@ -289,9 +288,8 @@ class SVGCalendar(inkex.Effect):
                         'x': str(self.day_w * week_x),
                         'y': str(self.day_h)}
             try:
-                etree.SubElement(gw, 'text', txt_atts).text = unicode(
-                        wday,
-                        self.options.input_encode)
+                gw.add(TextElement(**txt_atts)).text = unicode(
+                    wday, self.options.input_encode)
             except:
                 raise ValueError('You must select a correct system encoding.')
 
@@ -311,9 +309,9 @@ class SVGCalendar(inkex.Effect):
                   str(m) +
                   '_' +
                   str(self.options.year)}
-        g = etree.SubElement(self.year_g, 'g', txt_atts)
+        g = self.year_g.add(inkex.Group(**txt_atts))
         self.write_month_header(g, m)
-        gdays = etree.SubElement(g, 'g')
+        gdays = g.add(inkex.Group())
         cal = calendar.monthcalendar(self.options.year, m)
         if m == 1:
             if self.options.year > 1:
@@ -356,7 +354,7 @@ class SVGCalendar(inkex.Effect):
                     txt_atts = {'style': str(inkex.Style(style)),
                                 'x': str(self.day_w * week_x),
                                 'y': str(self.day_h * (week_y + 2))}
-                    etree.SubElement(gdays, 'text', txt_atts).text = str(self.weeknr)
+                    gdays.add(TextElement(**txt_atts)).text = str(self.weeknr)
                     week_x += 1
                 else:
                     week_x += 1
@@ -369,18 +367,21 @@ class SVGCalendar(inkex.Effect):
                 txt_atts = {'style': str(inkex.Style(style)),
                             'x': str(self.day_w * week_x),
                             'y': str(self.day_h * (week_y + 2))}
+                text = None
                 if day == 0 and not self.options.fill_edb:
                     pass  # draw nothing
                 elif day == 0:
                     if before:
-                        etree.SubElement(gdays, 'text', txt_atts).text = str(before_month[-bmd])
+                        text = str(before_month[-bmd])
                         bmd -= 1
                     else:
-                        etree.SubElement(gdays, 'text', txt_atts).text = str(next_month[bmd])
+                        text = str(next_month[bmd])
                         bmd += 1
                 else:
-                    etree.SubElement(gdays, 'text', txt_atts).text = str(day)
+                    text = str(day)
                     before = False
+                if text:
+                    gdays.add(TextElement(**txt_atts)).text = text
                 week_x += 1
             week_y += 1
         self.month_x_pos += 1
@@ -393,11 +394,11 @@ class SVGCalendar(inkex.Effect):
         self.calculate_size_and_positions()
         parent = self.document.getroot()
         txt_atts = {'id': 'year_' + str(self.options.year)}
-        self.year_g = etree.SubElement(parent, 'g', txt_atts)
+        self.year_g = parent.add(inkex.Group(**txt_atts))
         txt_atts = {'style': str(inkex.Style(self.style_year)),
                     'x': str(self.doc_w / 2),
                     'y': str(self.day_w * 1.5)}
-        etree.SubElement(self.year_g, 'text', txt_atts).text = str(self.options.year)
+        self.year_g.add(TextElement(**txt_atts)).text = str(self.options.year)
         try:
             if self.options.month == 0:
                 for m in range(1, 13):

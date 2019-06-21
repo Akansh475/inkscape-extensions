@@ -13,6 +13,7 @@ class CalendarArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     """Test arguments to calendar extensions"""
     effect_class = SVGCalendar
     compare_filters = [CompareOrderIndependentStyle(), CompareNumericFuzzy()]
+    comparisons = [()]
 
     def test_default_names_list(self):
         """Test default names"""

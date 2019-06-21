@@ -352,6 +352,15 @@ class Group(ShapeElement):
     tag_name = 'g'
     is_layer = lambda self: self.groupmode == 'layer'
 
+    @classmethod
+    def create(cls, label, layer=False):
+        """Create a group, set the inkscape label and groupmode if needed"""
+        elem = cls()
+        elem.set('inkscape:label', label)
+        if layer is True:
+            elem.set('inkscape:groupmode', 'layer')
+        return elem
+
     def get_path(self):
         return Path()
 

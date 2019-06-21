@@ -279,9 +279,8 @@ class ComparisonMixin(object):
             xml_b = xml.parse(BytesIO(data_b))
             # Late importing
             ret = xmldiff(xml_a.getroot(), xml_b.getroot())
-            self.assertTrue(ret, "SVG Output Difference: {} <- {}".format(
-                outfile,
-                xml.tostring(xml_a.getroot()).decode('utf-8')))
+            diff = xml.tostring(xml_a.getroot()).decode('utf-8')
+            self.assertTrue(ret, "SVG Output Difference: {} <- {}".format(outfile, diff))
         else:
             # compare any content (non svg)
             self.assertEqual(data_a, data_b)

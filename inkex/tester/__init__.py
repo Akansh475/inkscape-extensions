@@ -66,7 +66,7 @@ import hashlib
 import random
 import uuid
 
-from io import BytesIO
+from io import BytesIO, StringIO
 import xml.etree.ElementTree as xml
 
 from unittest import TestCase as BaseCase
@@ -96,6 +96,10 @@ class TestCase(MockCommandMixin, BaseCase):
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
     effect_class = NoExtension # type: Type[InkscapeExtension]
+
+    # If set to true, the output is not expected to be the stdout SVG document, but rather
+    # text or a message sent to the stderr, this is highly weird. But sometimes happens.
+    stderr_output = False
 
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
@@ -189,9 +193,17 @@ class TestCase(MockCommandMixin, BaseCase):
         args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
 
         # Output is redirected to this string io buffer
-        output = BytesIO()
+        if self.stderr_output:
+            output = StringIO()
+            stderr, sys.stderr = sys.stderr, output
+            try:
+                effect.run(args, output=BytesIO())
+            finally:
+                sys.stderr = stderr
+        else:
+            output = BytesIO()
+            effect.run(args, output=output)
         effect.test_output = output
-        effect.run(args, output=output)
 
         if os.environ.get('FAIL_ON_DEPRICATION', False):
             warnings = getattr(effect, 'warned_about', set())

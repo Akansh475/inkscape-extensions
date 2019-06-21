@@ -3,20 +3,6 @@
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
 #
-# This extension allows you to draw various triangle constructions
-# It requires a path to be selected
-# It will use the first three nodes of this path
-#
-# Dimensions of a triangle__
-#
-#        /`__
-#       / a_c``--__
-#      /           ``--__ s_a
-# s_b /                  ``--__
-#    /a_a                    a_b`--__
-#   /--------------------------------``B
-#  A              s_b
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -31,13 +17,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+This extension allows you to draw various triangle constructions
+It requires a path to be selected
+It will use the first three nodes of this path
 
-from math import acos, cos, e, pi, sin, sqrt, tan
+Dimensions of a triangle__
 
-from lxml import etree
+       /`__
+      / a_c``--__
+     /           ``--__ s_a
+s_b /                  ``--__
+   /a_a                    a_b`--__
+  /--------------------------------``B
+ A              s_b
+"""
+
+from math import acos, cos, pi, sin, sqrt, tan
 
 import inkex
-from inkex import inkbool
+from inkex.elements import PathElement, Circle
 
 (X, Y) = range(2)
 
@@ -57,7 +56,7 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):  # draw an SVG ci
                     inkex.addNS('label', 'inkscape'): name,
                     'cx': str(cx), 'cy': str(cy),
                     'r': str(r)}
-    etree.SubElement(parent, inkex.addNS('circle', 'svg'), circ_attribs)
+    parent.add(Circle(**circ_attribs))
 
 
 # draw an SVG triangle given in trilinar coords
@@ -70,7 +69,7 @@ def draw_SVG_tri(vert_mat, params, style, name, parent):
                         ' L ' + str(p2[0]) + ',' + str(p2[1]) +
                         ' L ' + str(p3[0]) + ',' + str(p3[1]) +
                         ' L ' + str(p1[0]) + ',' + str(p1[1]) + ' z'}
-    etree.SubElement(parent, inkex.addNS('path', 'svg'), tri_attribs)
+    parent.add(PathElement(**tri_attribs))
 
 
 # draw an SVG line segment between the given (raw) points
@@ -81,7 +80,7 @@ def draw_SVG_line(a, b, style, name, parent):
     line_attribs = {'style': str(inkex.Style(line_style)),
                     inkex.addNS('label', 'inkscape'): name,
                     'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-    etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
+    parent.add(PathElement(**line_attribs))
 
 
 # lines from each vertex to a corresponding point in trilinears
@@ -203,21 +202,6 @@ def cot(x):  # cotangent(x)
         return 1 / tan(x)
 
 
-def report_properties(params):  # report to the Inkscape console using errormsg
-    # TODO: unit identifier needs solution for arbitrary document scale
-    unit = DrawFromTriangle.getDocumentUnit(e)
-
-    inkex.errormsg("Side Length 'a' ({0}): {1}".format(unit, str(params[0][0])))
-    inkex.errormsg("Side Length 'b' ({0}): {1}".format(unit, str(params[0][1])))
-    inkex.errormsg("Side Length 'c' ({0}): {1}".format(unit, str(params[0][2])))
-    inkex.errormsg("Angle 'A' (radians): {}".format(str(params[1][0])))
-    inkex.errormsg("Angle 'B' (radians): {}".format(str(params[1][1])))
-    inkex.errormsg("Angle 'C' (radians): {}".format(params[1][2]))
-    inkex.errormsg("Semiperimeter (px): {}".format(params[4][1]))
-    inkex.errormsg("Area ({0}^2): {1}".format(unit, str(params[4][0])))
-    return
-
-
 class Style(object):  # container for style information
     def __init__(self, svg, options):
         # dot markers
@@ -246,67 +230,67 @@ class DrawFromTriangle(inkex.EffectExtension):
                                      help="The selected UI-tab when OK was pressed")
         # PRESET POINT OPTIONS
         self.arg_parser.add_argument("--circumcircle",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_circumcircle", default=False)
         self.arg_parser.add_argument("--circumcentre",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_circumcentre", default=False)
         self.arg_parser.add_argument("--incircle",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_incircle", default=False)
         self.arg_parser.add_argument("--incentre",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_incentre", default=False)
         self.arg_parser.add_argument("--contact_tri",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_contact_tri", default=False)
         self.arg_parser.add_argument("--excircles",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_excircles", default=False)
         self.arg_parser.add_argument("--excentres",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_excentres", default=False)
         self.arg_parser.add_argument("--extouch_tri",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_extouch_tri", default=False)
         self.arg_parser.add_argument("--excentral_tri",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_excentral_tri", default=False)
         self.arg_parser.add_argument("--orthocentre",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_orthocentre", default=False)
         self.arg_parser.add_argument("--orthic_tri",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_orthic_tri", default=False)
         self.arg_parser.add_argument("--altitudes",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_altitudes", default=False)
         self.arg_parser.add_argument("--anglebisectors",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_anglebisectors", default=False)
         self.arg_parser.add_argument("--centroid",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_centroid", default=False)
         self.arg_parser.add_argument("--ninepointcentre",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_ninepointcentre", default=False)
         self.arg_parser.add_argument("--ninepointcircle",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_ninepointcircle", default=False)
         self.arg_parser.add_argument("--symmedians",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_symmedians", default=False)
         self.arg_parser.add_argument("--sym_point",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_sym_pt", default=False)
         self.arg_parser.add_argument("--sym_tri",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_sym_tri", default=False)
         self.arg_parser.add_argument("--gergonne_pt",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_gergonne_pt", default=False)
         self.arg_parser.add_argument("--nagel_pt",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_nagel_pt", default=False)
         # CUSTOM POINT OPTIONS
         self.arg_parser.add_argument("--mode",
@@ -316,30 +300,27 @@ class DrawFromTriangle(inkex.EffectExtension):
                                      type=str,
                                      dest="cust_str", default='s_a')
         self.arg_parser.add_argument("--cust_pt",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_cust_pt", default=False)
         self.arg_parser.add_argument("--cust_radius",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_cust_radius", default=False)
         self.arg_parser.add_argument("--radius",
                                      type=str,
                                      dest="radius", default='s_a')
         self.arg_parser.add_argument("--isogonal_conj",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_isogonal_conj", default=False)
         self.arg_parser.add_argument("--isotomic_conj",
-                                     type=inkbool,
+                                     type=inkex.inkbool,
                                      dest="do_isotomic_conj", default=False)
-        self.arg_parser.add_argument("--report",
-                                     type=inkbool,
-                                     dest="report", default=False)
 
     def effect(self):
 
         so = self.options  # shorthand
 
         pts = []  # initialise in case nothing is selected and following loop is not executed
-        for id, node in self.svg.selected.items():
+        for node in self.svg.selected.values():
             if node.tag == inkex.addNS('path', 'svg'):
                 # find the (x,y) coordinates of the first 3 points of the path
                 pts = get_n_points_from_path(node, 3)
@@ -352,7 +333,7 @@ class DrawFromTriangle(inkex.EffectExtension):
             group_translation = 'translate(' + str(pts[0][0]) + ',' + str(pts[0][1]) + ')'
             group_attribs = {inkex.addNS('label', 'inkscape'): 'TriangleElements',
                              'transform': group_translation}
-            layer = etree.SubElement(self.svg.get_current_layer(), 'g', group_attribs)
+            layer = self.svg.get_current_layer().add(inkex.Group(**group_attribs))
 
             # GET METRICS OF THE TRIANGLE
             # vertices in the local coordinates (set pt[0] to be the origin)
@@ -380,9 +361,6 @@ class DrawFromTriangle(inkex.EffectExtension):
             uvals = (area, semiperim)  # useful values
 
             params = (sides, angles, vecs, vtx, uvals)  # all useful triangle parameters in one object
-
-            if so.report:
-                report_properties(params)
 
             # BEGIN DRAWING
             if so.do_circumcentre or so.do_circumcircle:

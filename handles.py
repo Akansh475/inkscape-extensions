@@ -54,7 +54,6 @@ class Handles(inkex.EffectExtension):
                         prev = seg
 
                 if not result:
-                    print("D!")
                     continue
 
                 elem = node.getparent().add(inkex.PathElement())

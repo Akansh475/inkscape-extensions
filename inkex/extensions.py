@@ -122,6 +122,7 @@ class GenerateExtension(EffectExtension):
     inserted into Inkscape, centered on the selection.
     """
     container_label = ''
+    container_layer = False
 
     def generate(self):
         """
@@ -143,15 +144,16 @@ class GenerateExtension(EffectExtension):
             pos_y = 0
         return TranslateTransform(pos_x, pos_y)
 
-
     def effect(self):
         layer = self.svg.get_current_layer()
         fragment = self.generate()
         if isinstance(fragment, types.GeneratorType):
-            container = Group()
-            container.transform = self.container_transform()
-            container.set('inkscape:label', self.container_label)
-            layer.append(container)
+            container = Group.create(self.container_label, self.container_layer)
+            if self.container_layer:
+                self.svg.append(container)
+            else:
+                container.transform = self.container_transform()
+                layer.append(container)
             for child in fragment:
                 container.append(child)
         elif isinstance(fragment, BaseElement):

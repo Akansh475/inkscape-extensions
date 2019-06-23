@@ -194,6 +194,12 @@ class BaseElement(etree.ElementBase):
         root = self.getroottree().getroot()
         self.set('id', root.get_unique_id(suffix, size=size))
 
+    def get_id(self):
+        """Get the id for the element, will set a new unique id if not set"""
+        if 'id' not in self.attrib:
+            self.set_random_id(self.TAG)
+        return self.get('id')
+
     @property
     def root(self):
         """Get the root document element from any element descendent"""
@@ -352,6 +358,16 @@ class FilterPrimitive(BaseElement):
         'feGaussianBlur', 'feImage', 'feMerge', 'feMorphology', 'feOffset',
         'feSpecularLighting', 'feTile', 'feTurbulence'
     ]
+
+class Filter(BaseElement):
+    """A filter (usually in defs)"""
+    tag_name = 'filter'
+
+    def add_primitive(self, fe_type, **args):
+        """Create a filter primitive with the given arguments"""
+        elem = etree.SubElement(self, addNS(fe_type, 'svg'))
+        elem.update(**args)
+        return elem
 
 class Group(ShapeElement):
     """Any group element (layer or regular group)"""

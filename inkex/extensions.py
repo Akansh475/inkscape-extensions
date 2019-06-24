@@ -155,7 +155,8 @@ class GenerateExtension(EffectExtension):
                 container.transform = self.container_transform()
                 layer.append(container)
             for child in fragment:
-                container.append(child)
+                if isinstance(child, BaseElement):
+                    container.append(child)
         elif isinstance(fragment, BaseElement):
             layer.append(fragment)
         else:

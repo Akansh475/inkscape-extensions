@@ -309,7 +309,10 @@ class ComparisonMixin(object):
         effect_name = self.effect_class.__module__
         if addout is not None:
             args = list(args) + [str(addout)]
-        opstr = re.sub(r'[^\w-]', '__', '__'.join(args).replace(self.tempdir, 'TMP_DIR'))
+        opstr = '__'.join(args)\
+                    .replace(self.tempdir, 'TMP_DIR')\
+                    .replace(self.datadir(), 'DAT_DIR')
+        opstr = re.sub(r'[^\w-]', '__', opstr)
         if opstr:
             if len(opstr) > 127:
                 # avoid filename-too-long error

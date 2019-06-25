@@ -66,6 +66,7 @@ class Transform(object):
     any of the above inputs are also valid operators for composing.
     """
     TRM = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
+    absolute_tolerance = 1e-5
 
     def __init__(self, matrix=None, callback=None, **extra):
         self.callback = None
@@ -144,21 +145,27 @@ class Transform(object):
         """Returns the transform as a hexad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
-    def is_translate(self):
+    def is_translate(self, exactly=False):
         """Returns True if this transformation is ONLY translate"""
-        return abs(self.a) == abs(self.d) == 1 and self.b == self.c == 0
+        tol = self.absolute_tolerance if not exactly else 0.0
+        return fabs(self.a - 1) <= tol and abs(self.d-1)<= tol and fabs(self.b) <= tol and fabs(self.c) <= tol
 
-    def is_scale(self):
+    def is_scale(self, exactly=False):
         """Returns True if this transformation is ONLY scale"""
-        return self.e == self.f == self.b == self.c == 0
+        tol = self.absolute_tolerance if not exactly else 0.0
+        return (fabs(self.e) <= tol and fabs(self.f) <= tol and
+                fabs(self.b) <= tol and fabs(self.c) <= tol)
 
-    def is_rotate(self):
+    def is_rotate(self, exactly=False):
         """Returns True if this transformation is ONLY rotate"""
-        return self.a == self.d and self.b + self.c == 0 and \
-            self.e == self.f == 0 and self.a * self.a + self.b * self.b == 1
+        tol = self.absolute_tolerance if not exactly else 0.0
+        return self._is_URT(exactly=exactly) and \
+               fabs(self.e) <= tol and fabs(self.f) <= tol and fabs(self.a ** 2 + self.b ** 2 - 1) <= tol
 
     def rotation_degrees(self):
         """Return the amount of rotation in this transform"""
+        if not self._is_URT(exactly=False):
+            raise ValueError("Rotation angle is undefined for non-uniformly scaled or skewed matrices")
         return atan2(self.b, self.a) * 180 / pi
 
     def __str__(self):
@@ -183,7 +190,8 @@ class Transform(object):
 
     def __eq__(self, matrix):
         """Test if this transformation is equal to the given matrix"""
-        return self.matrix == Transform(matrix).matrix
+        return all(fabs(l - r) <= self.absolute_tolerance
+                   for l, r in zip(self.to_hexad(), Transform(matrix).to_hexad()))
 
     def __mul__(self, matrix):
         """Combine this transform's internal matrix with the given matrix"""
@@ -224,6 +232,16 @@ class Transform(object):
             raise ValueError("Will not transform string '{}'".format(point))
         return (self.a * point[X] + self.c * point[Y] + self.e,
                 self.b * point[X] + self.d * point[Y] + self.f)
+
+    def _is_URT(self, exactly=False):
+        """
+        Checks that transformation can be decomposed into product of
+        Uniform scale (U), Rotation around origin (R) and translation (T)
+
+        :return: decomposition as U*R*T is possible
+        """
+        tol = self.absolute_tolerance if not exactly else 0.0
+        return (fabs(self.a - self.d) <= tol) and (fabs(self.b + self.c) <= tol)
 
 class TranslateTransform(Transform):
     """A quick and easy to use Translate definition"""

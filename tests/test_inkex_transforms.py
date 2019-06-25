@@ -7,6 +7,7 @@ from inkex.transforms import (
 )
 from inkex.tester import TestCase
 
+
 class TransformTest(TestCase):
     """Test transformation API and calculations"""
 
@@ -98,6 +99,118 @@ class TransformTest(TestCase):
         self.assertEqual(str(tr), 'scale(5, 1)')
         tr.add_translate(10, 10)
         self.assertEqual(str(tr), 'matrix(5 0 0 1 50 10)')
+
+    def test_is_unity(self):
+        unity = Transform()
+        self.assertTrue(unity.is_rotate())
+        self.assertTrue(unity.is_scale())
+        self.assertTrue(unity.is_translate())
+
+    def test_is_rotation(self):
+        r1 = Transform(rotate=21)
+        r2 = Transform(rotate=35)
+        r3 = Transform(rotate=53)
+
+        self.assertFalse(Transform(translate=1e-9).is_rotate(exactly=True))
+        self.assertFalse(Transform(scale=1+1e-9).is_rotate(exactly=True))
+        self.assertFalse(Transform(skewx=1e-9).is_rotate(exactly=True))
+        self.assertFalse(Transform(skewy=1e-9).is_rotate(exactly=True))
+
+        self.assertTrue(Transform(translate=1e-9).is_rotate(exactly=False))
+        self.assertTrue(Transform(scale=1+1e-9).is_rotate(exactly=False))
+        self.assertTrue(Transform(skewx=1e-9).is_rotate(exactly=False))
+        self.assertTrue(Transform(skewy=1e-9).is_rotate(exactly=False))
+
+        self.assertTrue(r1.is_rotate())
+        self.assertTrue(r2.is_rotate())
+        self.assertTrue(r3.is_rotate())
+
+        self.assertFalse(r1.is_translate())
+        self.assertFalse(r2.is_translate())
+        self.assertFalse(r3.is_translate())
+
+        self.assertFalse(r1.is_scale())
+        self.assertFalse(r2.is_scale())
+        self.assertFalse(r3.is_scale())
+
+        self.assertTrue((r1 * r1).is_rotate())
+        self.assertTrue((r1 * r2).is_rotate())
+        self.assertTrue((r1 * r2 * r3 * r2 * r1).is_rotate())
+
+    def test_is_translate(self):
+        from math import sqrt, pi
+        t1 = Transform(translate=(1.1,))
+        t2 = Transform(translate=(1.3, 2.7))
+        t3 = Transform(translate=(sqrt(2) / 2, pi))
+
+        self.assertFalse(Transform(rotate=1e-9).is_translate(exactly=True))
+        self.assertFalse(Transform(scale=1+1e-9).is_translate(exactly=True))
+        self.assertFalse(Transform(skewx=1e-9).is_translate(exactly=True))
+        self.assertFalse(Transform(skewy=1e-9).is_translate(exactly=True))
+
+        self.assertTrue(Transform(rotate=1e-9).is_translate(exactly=False))
+        self.assertTrue(Transform(scale=1+1e-9).is_translate(exactly=False))
+        self.assertTrue(Transform(skewx=1e-9).is_translate(exactly=False))
+        self.assertTrue(Transform(skewy=1e-9).is_translate(exactly=False))
+
+        self.assertTrue(t1.is_translate())
+        self.assertTrue(t2.is_translate())
+        self.assertTrue(t3.is_translate())
+        self.assertFalse(t1.is_rotate())
+        self.assertFalse(t2.is_rotate())
+        self.assertFalse(t3.is_rotate())
+        self.assertFalse(t1.is_scale())
+        self.assertFalse(t2.is_scale())
+        self.assertFalse(t3.is_scale())
+
+        self.assertTrue((t1 * t1).is_translate())
+        self.assertTrue((t1 * t2).is_translate())
+        self.assertTrue((t1 * t2 * t3 * t2 * t1).is_translate())
+        self.assertFalse(t1 * t2 * t3 * -t1 * -t2 * -t3)  # is almost unity
+
+    def test_is_scale(self):
+        from math import sqrt, pi
+
+        s1 = Transform(scale=(1.1,))
+        s2 = Transform(scale=(1.3, 2.7))
+        s3 = Transform(scale=(sqrt(2) / 2, pi))
+
+        self.assertFalse(Transform(translate=1e-9).is_scale(exactly=True))
+        self.assertFalse(Transform(rotate=1e-9).is_scale(exactly=True))
+        self.assertFalse(Transform(skewx=1e-9).is_scale(exactly=True))
+        self.assertFalse(Transform(skewy=1e-9).is_scale(exactly=True))
+
+        self.assertTrue(Transform(translate=1e-9).is_scale(exactly=False))
+        self.assertTrue(Transform(rotate=1e-9).is_scale(exactly=False))
+        self.assertTrue(Transform(skewx=1e-9).is_scale(exactly=False))
+        self.assertTrue(Transform(skewy=1e-9).is_scale(exactly=False))
+
+        self.assertFalse(s1.is_translate())
+        self.assertFalse(s2.is_translate())
+        self.assertFalse(s3.is_translate())
+        self.assertFalse(s1.is_rotate())
+        self.assertFalse(s2.is_rotate())
+        self.assertFalse(s3.is_rotate())
+        self.assertTrue(s1.is_scale())
+        self.assertTrue(s2.is_scale())
+        self.assertTrue(s3.is_scale())
+
+    def test_rotation_degrees(self):
+        self.assertAlmostEqual(Transform(rotate=30).rotation_degrees(), 30)
+        self.assertAlmostEqual(Transform(translate=(10, 20)).rotation_degrees(), 0)
+        self.assertAlmostEqual(Transform(scale=(1, 1)).rotation_degrees(), 0)
+
+        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20)).rotation_degrees(), 35)
+        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20), scale=5).rotation_degrees(), 35)
+        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20), scale=(5, 5)).rotation_degrees(), 35)
+
+        def rotation_degrees(**kwargs):
+            return Transform(**kwargs).rotation_degrees()
+
+        self.assertRaises(ValueError, rotation_degrees, rotate=35, skewx=1)
+        self.assertRaises(ValueError, rotation_degrees, rotate=35, skewy=1)
+        self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
+        self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
 
 
 class ScaleTest(TestCase):

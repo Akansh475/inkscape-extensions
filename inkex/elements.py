@@ -148,13 +148,13 @@ class BaseElement(etree.ElementBase):
         if name in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
             setattr(self, name, self.wrapped_attrs[name](value))
-            value = str(getattr(self, name))
+            value = getattr(self, name)
             if not value:
                 return
         if value is None:
             self.attrib.pop(addNS(name), None) # pylint: disable=no-member
         else:
-            super(BaseElement, self).set(addNS(name), value)
+            super(BaseElement, self).set(addNS(name), str(value))
 
     def update(self, **kwargs):
         """

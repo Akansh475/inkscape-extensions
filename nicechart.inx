@@ -29,7 +29,7 @@
   <_name>NiceCharts</_name>
   <id>org.inkscape.filter.nicechart</id>
   <dependency type="executable" location="extensions">nicechart.py</dependency>
-  <param name="input_sections" type="notebook">
+  <param type="notebook">
     <page name="data_settings" _gui-text="Data">
       <param name="input_type" type="notebook">
         <page name="file" _gui-text="Data from file">

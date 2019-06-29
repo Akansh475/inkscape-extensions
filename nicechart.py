@@ -23,6 +23,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
+# pylint: disable=attribute-defined-outside-init
 
 # TODO / Ideas:
 # allow negative values for bar charts
@@ -32,22 +33,6 @@
 # adjust position of heading
 # use aliasing workaround for stacked bars (e.g. let the rectangles overlap)
 
-# Example CSV file contents:
-"""
-Month;1978;1979;1980;1981
-January;2;1,3;0.1;2.3
-February;6.5;2.4;1.2;6.1
-March;7.4;6.7;7.9;4.7
-April;7.7;6.4;8.2;8.9
-May;10.9;11.7;18.7;11.1
-June;12.6;14.2;14.7;14.7
-July;16.5;15.5;17.5;15.1
-August;15.9;15.4;14.6;16.6
-September;14;14.5;13.2;15.3
-October;11.9;13.9;11.5;9.2
-November;6.7;8.5;7;6.6
-December;6.4;2.2;6.3;3.5
-"""
 # The extension creates one chart for a single value column in one go,
 # e.g. chart all temperatures for all months of the year 1978 into one chart.
 # (for this, select column 0 for labels and column 1 for values).
@@ -57,14 +42,18 @@ December;6.4;2.2;6.3;3.5
 # Values can contain commas as decimal separator, as long as delimiter isn't comma
 # Negative values are not yet supported.
 
+# See tests/data/nicechart_01.csv for example data
 
-import math
 import re
+import csv
+import math
 
-from lxml import etree
+from argparse import ArgumentTypeError
 
 import inkex
-from inkex.utils import inkbool
+from inkex.utils import filename_arg
+from inkex.elements import Filter, TextElement, Circle, Rectangle
+from inkex.paths import Move, line
 
 # www.sapdesignguild.org/goodies/diagram_guidelines/color_palettes.html#mss
 COLOUR_TABLE = {
@@ -76,576 +65,462 @@ COLOUR_TABLE = {
             "#fff8a3", "#a9cc8f", "#b2c8d9", "#bea37a", "#f3aa79", "#b5b5a9", "#e6a5a5"]
 }
 
-
-def get_color_scheme(name="default"):
-    return COLOUR_TABLE.get(name.lower(), COLOUR_TABLE['red'])
-
-
-class NiceChart(inkex.Effect):
+class NiceChart(inkex.GenerateExtension):
     """
     Inkscape extension that can draw pie charts and bar charts
     (stacked, single, horizontally or vertically)
     with optional drop shadow, from a csv file or from pasted text
     """
+    container_layer = True
 
-    def __init__(self):
-        """
-        Constructor.
-        Defines the "--what" option of a script.
-        """
-        super(NiceChart, self).__init__()
+    @property
+    def container_label(self):
+        """Layer title/label"""
+        return 'Chart-Layer: {}'.format(self.options.what)
 
-        self.arg_parser.add_argument('-w', '--what', type=str, dest='what', default='22,11,67',
-                                     help='Chart Values')
-        self.arg_parser.add_argument("-t", "--type", type=str, dest="type", default='',
-                                     help="Chart Type")
-        self.arg_parser.add_argument("-b", "--blur", type=inkbool, dest="blur", default='True',
-                                     help="Blur Type")
-        self.arg_parser.add_argument("-f", "--filename", type=str, dest="filename", default='',
-                                     help="Name of File")
-        self.arg_parser.add_argument("-i", "--input_type", type=str, dest="input_type", default='file',
-                                     help="Chart Type")
-        self.arg_parser.add_argument("-d", "--delimiter", type=str, dest="csv_delimiter", default=';',
-                                     help="delimiter")
-        self.arg_parser.add_argument("-c", "--colors", type=str, dest="colors", default='default',
-                                     help="color-scheme")
-        self.arg_parser.add_argument("--colors_override", type=str, dest="colors_override", default='',
-                                     help="color-scheme-override")
-        self.arg_parser.add_argument("--reverse_colors", type=inkbool, dest="reverse_colors", default='False',
-                                     help="reverse color-scheme")
-        self.arg_parser.add_argument("-k", "--col_key", type=int, dest="col_key", default='0',
-                                     help="column that contains the keys")
-        self.arg_parser.add_argument("-v", "--col_val", type=int, dest="col_val", default='1',
-                                     help="column that contains the values")
-        self.arg_parser.add_argument("--encoding", type=str, dest="encoding", default='utf-8',
-                                     help="encoding of the CSV file, e.g. utf-8")
-        self.arg_parser.add_argument("--headings", type=inkbool, dest="headings", default='False',
-                                     help="the first line of the CSV file consists of headings for the columns")
-        self.arg_parser.add_argument("-r", "--rotate", type=inkbool, dest="rotate", default='False',
-                                     help="Draw barchart horizontally")
-        self.arg_parser.add_argument("-W", "--bar-width", type=int, dest="bar_width", default='10',
-                                     help="width of bars")
-        self.arg_parser.add_argument("-p", "--pie-radius", type=int, dest="pie_radius", default='100',
-                                     help="radius of pie-charts")
-        self.arg_parser.add_argument("-H", "--bar-height", type=int, dest="bar_height", default='100',
-                                     help="height of bars")
-        self.arg_parser.add_argument("-O", "--bar-offset", type=int, dest="bar_offset", default='5',
-                                     help="distance between bars")
-        self.arg_parser.add_argument("--stroke-width", type=float, dest="stroke_width", default='1')
-        self.arg_parser.add_argument("-o", "--text-offset", type=int, dest="text_offset", default='5',
-                                     help="distance between bar and descriptions")
-        self.arg_parser.add_argument("--heading-offset", type=int, dest="heading_offset", default='50',
-                                     help="distance between chart and chart title")
-        self.arg_parser.add_argument("--segment-overlap", type=inkbool, dest="segment_overlap", default='False',
-                                     help="work around aliasing effects by letting pie chart segments overlap")
-        self.arg_parser.add_argument("-F", "--font", type=str, dest="font", default='sans-serif',
-                                     help="font of description")
-        self.arg_parser.add_argument("-S", "--font-size", type=int, dest="font_size", default='10',
-                                     help="font size of description")
-        self.arg_parser.add_argument("-C", "--font-color", type=str, dest="font_color", default='black',
-                                     help="font color of description")
+    def get_type(self, value):
+        """Return the type function to draw the values into a chart"""
+        try:
+            return getattr(self, 'render_' + value)
+        except AttributeError:
+            raise ArgumentTypeError('Unknown type: {}'.format(value))
 
-        # Dummy:
-        self.arg_parser.add_argument("--input_sections")
+    def add_arguments(self, pars):
+        pars.add_argument('-w', '--what', default='22,11,67', help='Chart Values')
+        pars.add_argument("-t", "--type", type=self.get_type, default='bar', help="Chart Type")
+        pars.add_argument("-b", "--blur", type=inkex.inkbool, default=True, help="Blur Type")
+        pars.add_argument("-f", "--filename", type=filename_arg, help="Name of File")
+        pars.add_argument("-i", "--input_type", default='file', help="Chart Type")
+        pars.add_argument("-d", "--delimiter", default=';', help="delimiter")
+        pars.add_argument("-c", "--colors", default='default', help="color-scheme")
+        pars.add_argument("--colors_override", help="color-scheme-override")
+        pars.add_argument("--reverse_colors", type=inkex.inkbool, default=False,
+                          help="reverse color-scheme")
+        pars.add_argument("-k", "--col_key", type=int, default=0,
+                          help="column that contains the keys")
+        pars.add_argument("-v", "--col_val", type=int, default=1,
+                          help="column that contains the values")
+        pars.add_argument("--headings", type=inkex.inkbool, default=True,
+                          help="first line of the CSV file consists of headings for the columns")
+        pars.add_argument("-r", "--rotate", type=inkex.inkbool, default=False,
+                          help="Draw barchart horizontally")
+        pars.add_argument("-W", "--bar-width", type=int, default=10, help="width of bars")
+        pars.add_argument("-p", "--pie-radius", type=int, default=100, help="radius of pie-charts")
+        pars.add_argument("-H", "--bar-height", type=int, default=100, help="height of bars")
+        pars.add_argument("-O", "--bar-offset", type=int, default=5, help="distance between bars")
+        pars.add_argument("--stroke-width", type=float, default=1.0)
+        pars.add_argument("-o", "--text-offset", type=int, default=5,
+                          help="distance between bar and descriptions")
+        pars.add_argument("--heading-offset", type=int, default=50,
+                          help="distance between chart and chart title")
+        pars.add_argument("--segment-overlap", type=inkex.inkbool, default=False,
+                          help="Remove aliasing effects by letting pie chart segments overlap")
+        pars.add_argument("-F", "--font", default='sans-serif', help="font of description")
+        pars.add_argument("-S", "--font-size", type=int, default=10,
+                          help="font size of description")
+        pars.add_argument("-C", "--font-color", default='black', help="font color of description")
 
-        self.arg_parser.add_argument("-V", "--show_values", type=inkbool, dest="show_values", default='False',
-                                     help="Show values in chart")
+        pars.add_argument("-V", "--show_values", type=inkex.inkbool, default=False,
+                          help="Show values in chart")
 
-    def effect(self):
-        """
-        Effect behaviour.
-        Overrides base class' method and inserts a nice looking chart into SVG document.
-        """
-        # Get script's "--what" option value and process the data type --- i concess the if term is a little bit of magic
-        what = self.options.what
-        keys = []
-        values = []
-        orig_values = []
-        keys_present = True
-        pie_abs = False
-        cnt = 0
-        csv_file_name = self.options.filename
-        csv_delimiter = self.options.csv_delimiter
-        input_type = self.options.input_type
+    def get_data(self):
+        """Process the data"""
         col_key = self.options.col_key
         col_val = self.options.col_val
-        show_values = self.options.show_values
-        encoding = self.options.encoding.strip() or 'utf-8'
-        headings = self.options.headings
-        heading_offset = self.options.heading_offset
 
-        if input_type == "\"file\"":
-            csv_file = open(csv_file_name, "r")
+        def process_value(val):
+            """Confirm the values from files or direct"""
+            val = float(val)
+            if val < 0:
+                raise inkex.AbortExtension("Negative values are currently not supported!")
+            return val
 
-            for linenum, line in enumerate(csv_file):
-                value = line.decode(encoding).split(csv_delimiter)
-                # make sure that there is at least one value (someone may want to use it as description)
-                if len(value) >= 1:
-                    # allow to parse headings as strings
-                    if linenum == 0 and headings:
-                        heading = value[col_val]
-                    else:
-                        keys.append(value[col_key])
-                        # replace comma decimal separator from file by colon,
-                        # to avoid file editing for people whose programs output
-                        # values with comma
-                        values.append(float(value[col_val].replace(",", ".")))
-            csv_file.close()
+        if self.options.input_type == "file":
+            if self.options.filename is None:
+                raise inkex.AbortExtension("Filename not specified!")
 
-        elif input_type == "\"direct_input\"":
-            what = re.findall(r"([A-Z|a-z|0-9]+:[0-9]+\.?[0-9]*)", what)
-            for value in what:
-                value = value.split(":")
-                keys.append(value[0])
-                values.append(float(value[1]))
+            # Future: use encoding when opening the file here (if ever needed)
+            with open(self.options.filename, "r") as fhl:
+                reader = csv.reader(fhl, delimiter=self.options.delimiter)
+                title = col_val
 
-        # warn about negative values (not yet supported)
-        for value in values:
-            if value < 0:
-                inkex.errormsg("Negative values are currently not supported!")
-                return
+                if self.options.headings:
+                    header = next(reader)
+                    title = header[col_val]
 
-        # Get script's "--type" option value.
-        charttype = self.options.type
+                values = [(line[col_key], process_value(line[col_val])) for line in reader]
+                return (title,) + tuple(zip(*values))
 
-        if charttype == "pie_abs":
-            pie_abs = True
-            charttype = "pie"
+        elif self.options.input_type == "direct_input":
+            (keys, values) = zip(*[l.split(':', 1) for l in self.options.what.split(',')])
+            return ('Direct Input', keys, [process_value(val) for val in values])
 
-        # Get access to main SVG document element and get its dimensions.
-        svg = self.document.getroot()
+        raise inkex.AbortExtension("Unknown input type")
+
+    def get_blur(self):
+        """Add blur to the svg and return if needed"""
+        if self.options.blur:
+            defs = self.svg.defs
+            # Create new Filter
+            filt = defs.add(Filter(height='3', width='3', x='-0.5', y='-0.5'))
+            # Append Gaussian Blur to that Filter
+            filt.add_primitive('feGaussianBlur', stdDeviation='1.1')
+            return 'filter:url(#%s);' % filt.get_id()
+        return ''
+
+    def get_color(self):
+        """Get the next available color"""
+        if not hasattr(self, '_colors'):
+            # Generate list of available colours
+            if self.options.colors_override:
+                colors = self.options.colors_override.strip()
+            else:
+                colors = self.options.colors
+
+            if colors[0].isalpha():
+                colors = COLOUR_TABLE.get(colors.lower(), COLOUR_TABLE['red'])
+
+            else:
+                colors = re.findall("(#[0-9a-fA-F]{6})", colors)
+                # to be sure we create a fallback:
+                if not colors:
+                    colors = COLOUR_TABLE['red']
+
+            if self.options.reverse_colors:
+                colors.reverse()
+            # Cache the list of colours for later use
+            self._colors = colors
+            self._color_index = 0
+
+        color = self._colors[self._color_index]
+        # Increase index to the next available color
+        self._color_index = (self._color_index + 1) % len(self._colors)
+        return color
+
+    def generate(self):
+        """Generates a nice looking chart into SVG document."""
+
+        # Process the data from a file or text box
+        (self.title, keys, values) = self.get_data()
+        if not values:
+            raise inkex.AbortExtension("No data to render into a chart.")
 
         # Get the page attributes:
-        width = self.svg.unittouu(svg.get('width'))
-        height = self.svg.unittouu(svg.attrib['height'])
-
-        # Create a new layer.
-        layer = etree.SubElement(svg, 'g')
-        layer.set(inkex.addNS('label', 'inkscape'), 'Chart-Layer: %s' % what)
-        layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
+        self.width = self.svg.unittouu(self.svg.get('width'))
+        self.height = self.svg.unittouu(self.svg.attrib['height'])
+        self.fontoff = float(self.options.font_size) / 3
 
         # Check if a drop shadow should be drawn:
-        draw_blur = self.options.blur
+        self.blur = self.get_blur()
 
-        if draw_blur:
-            # Get defs of Document
-            defs = self.svg.getElement('/svg:svg//svg:defs')
-            if defs == None:
-                defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
+        # Draw the right type of chart
+        for elem in self.options.type(keys, values):
+            yield elem
 
-            # Create new Filter
-            filt = etree.SubElement(defs, inkex.addNS('filter', 'svg'))
-            filtId = self.svg.get_unique_id('filter')
-            self.filtId = 'filter:url(#%s);' % filtId
-            for k, v in [('id', filtId), ('height', "3"),
-                         ('width', "3"),
-                         ('x', '-0.5'), ('y', '-0.5')]:
-                filt.set(k, v)
+    def draw_header(self, heading_x):
+        """Draw an optional header text"""
+        if self.options.headings and self.title:
+            headingtext = self.draw_text(self.title, 4, anchor='end')
+            headingtext.set("y", str(self.height / 2 + self.options.heading_offset))
+            headingtext.set("x", str(heading_x))
+            return headingtext
+        return None
 
-            # Append Gaussian Blur to that Filter
-            fe = etree.SubElement(filt, inkex.addNS('feGaussianBlur', 'svg'))
-            fe.set('stdDeviation', "1.1")
-
-        # Set Default Colors
-        self.options.colors_override.strip()
-        if len(self.options.colors_override) > 0:
-            colors = self.options.colors_override
-        else:
-            colors = self.options.colors
-
-        if colors[0].isalpha():
-            colors = get_color_scheme(colors)
-        else:
-            colors = re.findall("(#[0-9a-fA-F]{6})", colors)
-            # to be sure we create a fallback:
-            if len(colors) == 0:
-                colors = get_color_scheme()
-
-        color_count = len(colors)
-
-        if self.options.reverse_colors:
-            colors.reverse()
-
-        # Those values should be self-explanatory:
+    def render_bar(self, keys, values):
+        """Draw bar chart"""
         bar_height = self.options.bar_height
         bar_width = self.options.bar_width
         bar_offset = self.options.bar_offset
-        # offset of the description in stacked-bar-charts:
-        # stacked_bar_text_offset=self.options.stacked_bar_text_offset
-        text_offset = self.options.text_offset
-        # prevents ugly aliasing effects between pie chart segments by overlapping
-        segment_overlap = self.options.segment_overlap
 
-        # get font
-        font = self.options.font
-        font_size = self.options.font_size
-        font_color = self.options.font_color
+        # Normalize the bars to the largest value
+        value_max = max(list(values) + [0.0])
 
-        # get rotation
-        rotate = self.options.rotate
+        # Draw Single bars with their shadows
+        for cnt, value in enumerate(values):
+            # Draw each bar a set amount offset
+            offset = cnt * (bar_width + bar_offset)
+            bar_value = (value / value_max) * bar_height
 
+            # Calculate the location of the bar
+            x = self.width / 2 + offset
+            y = self.height / 2 - int(bar_value)
+            width = bar_width
+            height = int(bar_value)
+
+            if self.options.rotate:
+                # Rotate the bar and align to the left
+                x, y, width, height = y, x, height, width
+                x += width
+
+            for elem in self.draw_rectangle(x, y, width, height):
+                yield elem
+
+            # If keys are given, create text elements
+            if keys:
+                text = self.draw_text(keys[cnt], anchor='end')
+                if not self.options.rotate:  # =vertical
+                    text.set("transform", "rotate(-90)")
+                    # y after rotation:
+                    text.set("x", "-" + str(self.height / 2 + self.options.text_offset))
+                    # x after rotation:
+                    text.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                else:  # =horizontal
+                    text.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                    text.set("x", str(self.height / 2 - self.options.text_offset))
+
+                yield text
+
+            if self.options.show_values:
+                vtext = self.draw_text(int(value))
+                if not self.options.rotate:  # =vertical
+                    vtext.set("transform", "rotate(-90)")
+                    # y after rotation:
+                    vtext.set("x", "-" + str(self.height / 2 + value - self.options.text_offset))
+                    # x after rotation:
+                    vtext.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                else:  # =horizontal
+                    vtext.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                    vtext.set("x", str(self.height / 2 + value + self.options.text_offset))
+                yield vtext
+
+        yield self.draw_header(self.width / 2)
+
+    def draw_rectangle(self, x, y, width, height):
+        """Draw a rectangle bar with optional shadow"""
+        if self.blur:
+            shadow = Rectangle(x=str(x+1), y=str(y+1), width=str(width), height=str(height))
+            shadow.set("style", self.blur)
+            yield shadow
+
+        rect = Rectangle(x=str(x), y=str(y), width=str(width), height=str(height))
+        rect.set("style", "fill:" + self.get_color())
+        yield rect
+
+    def draw_text(self, text, add_size=0, anchor='start', **kwargs):
+        """Draw a textual label"""
+        vtext = TextElement(**kwargs)
+        vtext.style = {
+            'fill': self.options.font_color,
+            'font-family': self.options.font,
+            'font-size': str(self.options.font_size + add_size) + 'px',
+            'font-style': 'normal',
+            'font-variant': 'normal',
+            'font-weight': 'normal',
+            'font-stretch': 'normal',
+            '-inkscape-font-specification': 'Bitstream Charter',
+            'text-align': anchor,
+            'text-anchor': anchor,
+        }
+        vtext.text = str(text)
+        return vtext
+
+    def render_pie_abs(self, keys, values):
+        """Draw a pie chart, with absolute values"""
+        # pie_abs = True
+        for elem in self.render_pie(keys, values, True):
+            yield elem
+
+    def render_pie(self, keys, values, pie_abs=False):
+        """Draw pie chart"""
         pie_radius = self.options.pie_radius
-        stroke_width = self.options.stroke_width
 
-        if charttype == "bar":
-            #########
-            ###BAR###
-            #########
+        # Iterate all values to draw the different slices
+        color = 0
+        x = float(self.width) / 2
+        y = float(self.height) / 2
 
-            # iterate all values, use offset to draw the bars in different places
-            offset = 0
-            color = 0
+        # Create the shadow first (if it should be created):
+        if self.blur:
+            shadow = Circle(cx=str(x), cy=str(y))
+            shadow.set('r', str(pie_radius))
+            shadow.set("style", self.blur + "fill:#000000")
+            yield shadow
 
-            # Normalize the bars to the largest value
-            try:
-                value_max = max(values)
-            except ValueError:
-                value_max = 0.0
+        # Add a grey background circle with a light stroke
+        background = Circle(cx=str(x), cy=str(y))
+        background.set("r", str(pie_radius))
+        background.set("style", "stroke:#ececec;fill:#f9f9f9")
+        yield background
 
-            for x in range(len(values)):
-                orig_values.append(values[x])
-                values[x] = (values[x] / value_max) * bar_height
+        # create value sum in order to divide the slices
+        try:
+            valuesum = sum(values)
+        except ValueError:
+            valuesum = 0
 
-            # Draw Single bars with their shadows
-            for value in values:
+        if pie_abs:
+            valuesum = 100
 
-                # draw drop shadow, if necessary
-                if draw_blur:
-                    # Create shadow element
-                    shadow = etree.Element(inkex.addNS("rect", "svg"))
-                    # Set chart position to center of document. Make it horizontal or vertical
-                    if not rotate:
-                        shadow.set('x', str(width / 2 + offset + 1))
-                        shadow.set('y', str(height / 2 - int(value) + 1))
-                        shadow.set("width", str(bar_width))
-                        shadow.set("height", str(int(value)))
-                    else:
-                        shadow.set('y', str(width / 2 + offset + 1))
-                        shadow.set('x', str(height / 2 + 1))
-                        shadow.set("height", str(bar_width))
-                        shadow.set("width", str(int(value)))
+        # Set an offsetangle
+        offset = 0
 
-                    # Set shadow blur (connect to filter object in xml path)
-                    shadow.set("style", "filter:url(#filter)")
+        # Draw single slices
+        for cnt, value in enumerate(values):
+            # Calculate the PI-angles for start and end
+            angle = (2 * 3.141592) / valuesum * float(value)
+            start = offset
+            end = offset + angle
 
-                # Create rectangle element
-                rect = etree.Element(inkex.addNS('rect', 'svg'))
+            # proper overlapping
+            if self.options.segment_overlap:
+                if cnt != len(values) - 1:
+                    end += 0.09  # add a 5° overlap
+                if cnt == 0:
+                    start -= 0.09  # let the first element overlap into the other direction
 
-                # Set chart position to center of document.
-                if not rotate:
-                    rect.set('x', str(width / 2 + offset))
-                    rect.set('y', str(height / 2 - int(value)))
-                    rect.set("width", str(bar_width))
-                    rect.set("height", str(int(value)))
-                else:
-                    rect.set('y', str(width / 2 + offset))
-                    rect.set('x', str(height / 2))
-                    rect.set("height", str(bar_width))
-                    rect.set("width", str(int(value)))
+            # then add the slice
+            pieslice = inkex.PathElement()
+            pieslice.set('sodipodi:type', 'arc')
+            pieslice.set('sodipodi:cx', x)
+            pieslice.set('sodipodi:cy', y)
+            pieslice.set('sodipodi:rx', pie_radius)
+            pieslice.set('sodipodi:ry', pie_radius)
+            pieslice.set('sodipodi:start', start)
+            pieslice.set('sodipodi:end', end)
+            pieslice.set("style", "fill:" + self.get_color() + ";stroke:none;fill-opacity:1")
+            ang = angle / 2 + offset
 
-                rect.set("style", "fill:" + colors[color % color_count])
+            # If text is given, draw short paths and add the text
+            if keys:
+                elem = inkex.PathElement()
+                elem.path = [
+                    Move(
+                        (self.width / 2) + pie_radius * math.cos(ang),
+                        (self.height / 2) + pie_radius * math.sin(ang),
+                    ), line(
+                        (self.options.text_offset - 2) * math.cos(ang),
+                        (self.options.text_offset - 2) * math.sin(ang),
+                    ),
+                ]
 
-                # If keys are given, create text elements
-                if keys_present:
-                    text = etree.Element(inkex.addNS('text', 'svg'))
-                    if not rotate:  # =vertical
-                        text.set("transform", "matrix(0,-1,1,0,0,0)")
-                        # y after rotation:
-                        text.set("x", "-" + str(height / 2 + text_offset))
-                        # x after rotation:
-                        text.set("y", str(width / 2 + offset + bar_width / 2 + font_size / 3))
-                    else:  # =horizontal
-                        text.set("y", str(width / 2 + offset + bar_width / 2 + font_size / 3))
-                        text.set("x", str(height / 2 - text_offset))
+                elem.style = {
+                    'fill': 'none',
+                    'stroke': self.options.font_color,
+                    'stroke-width': self.options.stroke_width,
+                    'stroke-linecap': 'butt',
+                }
+                yield elem
 
-                    text.set("style", "font-size:" + str(font_size) \
-                             + "px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:" \
-                             + font + ";-inkscape-font-specification:Bitstream Charter;text-align:end;text-anchor:end;fill:" \
-                             + font_color)
+                label = keys[cnt]
+                if self.options.show_values:
+                    label += ' ({}{})'.format(str(value), ('', '%')[pie_abs])
 
-                    text.text = keys[cnt]
+                # check if it is right or left of the Pie
+                anchor = 'start' if math.cos(ang) > 0 else 'end'
+                text = self.draw_text(label, anchor=anchor)
 
-                # Increase Offset and Color
-                # offset=offset+bar_width+bar_offset
-                color = (color + 1) % 8
-                # Connect elements together.
-                if draw_blur:
-                    layer.append(shadow)
-                layer.append(rect)
-                if keys_present:
-                    layer.append(text)
+                off = pie_radius + self.options.text_offset
+                text.set("x", (self.width / 2) + off * math.cos(ang))
+                text.set("y", (self.height / 2) + off * math.sin(ang) + self.fontoff)
+                yield text
 
-                if show_values:
-                    vtext = etree.Element(inkex.addNS('text', 'svg'))
-                    if not rotate:  # =vertical
-                        vtext.set("transform", "matrix(0,-1,1,0,0,0)")
-                        # y after rotation:
-                        vtext.set("x", "-" + str(height / 2 + text_offset - value - text_offset - text_offset))
-                        # x after rotation:
-                        vtext.set("y", str(width / 2 + offset + bar_width / 2 + font_size / 3))
-                    else:  # =horizontal
-                        vtext.set("y", str(width / 2 + offset + bar_width / 2 + font_size / 3))
-                        vtext.set("x", str(height / 2 - text_offset + value + text_offset + text_offset))
+            # increase the rotation-offset and the colorcycle-position
+            offset = offset + angle
+            color = (color + 1) % 8
 
-                    vtext.set("style", "font-size:" + str(font_size) \
-                              + "px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:" \
-                              + font + ";-inkscape-font-specification:Bitstream Charter;text-align:start;text-anchor:start;fill:" \
-                              + font_color)
+            # append the objects to the extension-layer
+            yield pieslice
 
-                    vtext.text = str(int(orig_values[cnt]))
-                    layer.append(vtext)
+        yield self.draw_header(self.width / 2 - pie_radius)
 
-                cnt = cnt + 1
-                offset = offset + bar_width + bar_offset
+    def render_stbar(self, keys, values):
+        """Draw stacked bar chart"""
 
-            # set x position for heading line
-            if not rotate:
-                heading_x = width / 2  # TODO: adjust
+        # Iterate over all values to draw the different slices
+        color = 0
+
+        # create value sum in order to divide the bars
+        try:
+            valuesum = sum(values)
+        except ValueError:
+            valuesum = 0.0
+
+        # Init offset
+        offset = 0
+        width = self.options.bar_width
+        height = self.options.bar_height
+        x = self.width / 2
+        y = self.height / 2
+
+        if self.blur:
+            if self.options.rotate:
+                width, height = height, width
+                shy = y
             else:
-                heading_x = width / 2  # TODO: adjust
+                shy = str(y - self.options.bar_height)
 
+            # Create rectangle element
+            shadow = Rectangle(
+                x=str(x), y=str(shy),
+                width=str(width), height=str(height),
+            )
 
-        elif charttype == "pie":
-            #########
-            ###PIE###
-            #########
-            # Iterate all values to draw the different slices
-            color = 0
+            # Set shadow blur (connect to filter object in xml path)
+            shadow.set("style", self.blur)
+            yield shadow
 
-            # Create the shadow first (if it should be created):
-            if draw_blur:
-                shadow = etree.Element(inkex.addNS("circle", "svg"))
-                shadow.set('cx', str(width / 2))
-                shadow.set('cy', str(height / 2))
-                shadow.set('r', str(pie_radius))
-                shadow.set("style", "filter:url(#filter);fill:#000000")
-                layer.append(shadow)
+        # Draw Single bars
+        for cnt, value in enumerate(values):
 
-            # Add a grey background circle with a light stroke
-            background = etree.Element(inkex.addNS("circle", "svg"))
-            background.set("cx", str(width / 2))
-            background.set("cy", str(height / 2))
-            background.set("r", str(pie_radius))
-            background.set("style", "stroke:#ececec;fill:#f9f9f9")
-            layer.append(background)
+            # Calculate the individual heights normalized on 100units
+            normedvalue = (self.options.bar_height / valuesum) * float(value)
 
-            # create value sum in order to divide the slices
-            try:
-                valuesum = sum(values)
+            # Create rectangle element
+            rect = Rectangle()
 
-            except ValueError:
-                valuesum = 0
-
-            if pie_abs:
-                valuesum = 100
-
-            num_values = len(values)
-
-            # Set an offsetangle
-            offset = 0
-
-            # Draw single slices
-            for i in range(num_values):
-                value = values[i]
-                # Calculate the PI-angles for start and end
-                angle = (2 * 3.141592) / valuesum * float(value)
-                start = offset
-                end = offset + angle
-
-                # proper overlapping
-                if segment_overlap:
-                    if i != num_values - 1:
-                        end += 0.09  # add a 5° overlap
-                    if i == 0:
-                        start -= 0.09  # let the first element overlap into the other direction
-
-                # then add the slice
-                pieslice = etree.Element(inkex.addNS("path", "svg"))
-                pieslice.set(inkex.addNS('type', 'sodipodi'), 'arc')
-                pieslice.set(inkex.addNS('cx', 'sodipodi'), str(width / 2))
-                pieslice.set(inkex.addNS('cy', 'sodipodi'), str(height / 2))
-                pieslice.set(inkex.addNS('rx', 'sodipodi'), str(pie_radius))
-                pieslice.set(inkex.addNS('ry', 'sodipodi'), str(pie_radius))
-                pieslice.set(inkex.addNS('start', 'sodipodi'), str(start))
-                pieslice.set(inkex.addNS('end', 'sodipodi'), str(end))
-                pieslice.set("style", "fill:" + colors[color % color_count] + ";stroke:none;fill-opacity:1")
-
-                # If text is given, draw short paths and add the text
-                if keys_present:
-                    path = etree.Element(inkex.addNS("path", "svg"))
-                    path.set("d", "m "
-                             + str((width / 2) + pie_radius * math.cos(angle / 2 + offset)) + ","
-                             + str((height / 2) + pie_radius * math.sin(angle / 2 + offset)) + " "
-                             + str((text_offset - 2) * math.cos(angle / 2 + offset)) + ","
-                             + str((text_offset - 2) * math.sin(angle / 2 + offset)))
-
-                    path.set("style", "fill:none;stroke:"
-                             + font_color + ";stroke-width:" + str(stroke_width)
-                             + "px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1")
-                    layer.append(path)
-                    text = etree.Element(inkex.addNS('text', 'svg'))
-                    text.set("x", str((width / 2) + (pie_radius + text_offset) * math.cos(angle / 2 + offset)))
-                    text.set("y", str((height / 2) + (pie_radius + text_offset) * math.sin(angle / 2 + offset) + font_size / 3))
-                    textstyle = "font-size:" + str(font_size) \
-                                + "px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:" \
-                                + font + ";-inkscape-font-specification:Bitstream Charter;fill:" + font_color
-                    # check if it is right or left of the Pie
-                    if math.cos(angle / 2 + offset) > 0:
-                        text.set("style", textstyle)
-                    else:
-                        text.set("style", textstyle + ";text-align:end;text-anchor:end")
-                    text.text = keys[cnt]
-                    if show_values:
-                        text.text = text.text + "(" + str(values[cnt])
-
-                        if pie_abs:
-                            text.text = text.text + " %"
-
-                        text.text = text.text + ")"
-
-                    cnt = cnt + 1
-                    layer.append(text)
-
-                # increase the rotation-offset and the colorcycle-position
-                offset = offset + angle
-                color = (color + 1) % 8
-
-                # append the objects to the extension-layer
-                layer.append(pieslice)
-
-            # set x position for heading line
-            heading_x = width / 2 - pie_radius  # TODO: adjust
-
-        elif charttype == "stbar":
-            #################
-            ###STACKED BAR###
-            #################
-            # Iterate over all values to draw the different slices
-            color = 0
-
-            # create value sum in order to divide the bars
-            try:
-                valuesum = sum(values)
-            except ValueError:
-                valuesum = 0.0
-
-            for value in values:
-                valuesum = valuesum + float(value)
-
-            # Init offset
-            offset = 0
-
-            if draw_blur:
-                # Create rectangle element
-                shadow = etree.Element(inkex.addNS("rect", "svg"))
-                # Set chart position to center of document.
-                if not rotate:
-                    shadow.set('x', str(width / 2))
-                    shadow.set('y', str(height / 2 - bar_height / 2))
-                else:
-                    shadow.set('x', str(width / 2))
-                    shadow.set('y', str(height / 2))
-                # Set rectangle properties
-                if not rotate:
-                    shadow.set("width", str(bar_width))
-                    shadow.set("height", str(bar_height / 2))
-                else:
-                    shadow.set("width", str(bar_height / 2))
-                    shadow.set("height", str(bar_width))
-                # Set shadow blur (connect to filter object in xml path)
-                shadow.set("style", "filter:url(#filter)")
-                layer.append(shadow)
-
-            i = 0
-            # Draw Single bars
-            for value in values:
-
-                # Calculate the individual heights normalized on 100units
-                normedvalue = (bar_height / valuesum) * float(value)
-
-                # Create rectangle element
-                rect = etree.Element(inkex.addNS('rect', 'svg'))
-
-                # Set chart position to center of document.
-                if not rotate:
-                    rect.set('x', str(width / 2))
-                    rect.set('y', str(height / 2 - offset - normedvalue))
-                else:
-                    rect.set('x', str(width / 2 + offset))
-                    rect.set('y', str(height / 2))
-                # Set rectangle properties
-                if not rotate:
-                    rect.set("width", str(bar_width))
-                    rect.set("height", str(normedvalue))
-                else:
-                    rect.set("height", str(bar_width))
-                    rect.set("width", str(normedvalue))
-                rect.set("style", "fill:" + colors[color % color_count])
-
-                # If text is given, draw short paths and add the text
-                # TODO: apply overlap workaround for visible gaps in between
-                if keys_present:
-                    if not rotate:
-                        path = etree.Element(inkex.addNS("path", "svg"))
-                        path.set("d", "m " + str((width + bar_width) / 2) + ","
-                                 + str(height / 2 - offset - (normedvalue / 2)) + " "
-                                 + str(bar_width / 2 + text_offset) + ",0")
-                        path.set("style", "fill:none;stroke:" + font_color
-                                 + ";stroke-width:" + str(stroke_width)
-                                 + "px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1")
-                        layer.append(path)
-                        text = etree.Element(inkex.addNS('text', 'svg'))
-                        text.set("x", str(width / 2 + bar_width + text_offset + 1))
-                        text.set("y", str(height / 2 - offset + font_size / 3 - (normedvalue / 2)))
-                        text.set("style", "font-size:" + str(font_size)
-                                 + "px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:"
-                                 + font + ";-inkscape-font-specification:Bitstream Charter;fill:" + font_color)
-                        text.text = keys[cnt]
-                        cnt = cnt + 1
-                        layer.append(text)
-                    else:
-                        path = etree.Element(inkex.addNS("path", "svg"))
-                        path.set("d", "m " + str(width / 2 + offset + normedvalue / 2) + ","
-                                 + str(height / 2 + bar_width / 2) + " 0,"
-                                 + str(bar_width / 2 + (font_size * i) + text_offset))  # line
-                        path.set("style", "fill:none;stroke:" + font_color
-                                 + ";stroke-width:" + str(stroke_width)
-                                 + "px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1")
-                        layer.append(path)
-                        text = etree.Element(inkex.addNS('text', 'svg'))
-                        text.set("x", str(width / 2 + offset + normedvalue / 2 - font_size / 3))
-                        text.set("y", str((height / 2) + bar_width + (font_size * (i + 1)) + text_offset))
-                        text.set("style", "font-size:" + str(font_size)
-                                 + "px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:"
-                                 + font + ";-inkscape-font-specification:Bitstream Charter;fill:" + font_color)
-                        text.text = keys[color]
-                        layer.append(text)
-
-                # Increase Offset and Color
-                offset = offset + normedvalue
-                color = (color + 1) % 8
-
-                # Draw rectangle
-                layer.append(rect)
-                i += 1
-
-            # set x position for heading line
-            if not rotate:
-                heading_x = width / 2 + offset + normedvalue  # TODO: adjust
+            # Set chart position to center of document.
+            if not self.options.rotate:
+                rect.set('x', str(self.width / 2))
+                rect.set('y', str(self.height / 2 - offset - normedvalue))
+                rect.set("width", str(self.options.bar_width))
+                rect.set("height", str(normedvalue))
             else:
-                heading_x = width / 2 + offset + normedvalue  # TODO: adjust
+                rect.set('x', str(self.width / 2 + offset))
+                rect.set('y', str(self.height / 2))
+                rect.set("height", str(self.options.bar_width))
+                rect.set("width", str(normedvalue))
 
-        if headings and input_type == "\"file\"":
-            headingtext = etree.Element(inkex.addNS('text', 'svg'))
-            headingtext.set("y", str(height / 2 + heading_offset))
-            headingtext.set("x", str(heading_x))
-            headingtext.set("style", "font-size:" + str(font_size + 4) \
-                            + "px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:" \
-                            + font + ";-inkscape-font-specification:Bitstream Charter;text-align:end;text-anchor:end;fill:" \
-                            + font_color)
+            rect.set("style", "fill:" + self.get_color())
 
-            headingtext.text = heading
-            layer.append(headingtext)
+            # If text is given, draw short paths and add the text
+            # TODO: apply overlap workaround for visible gaps in between
+            if keys:
+                if not self.options.rotate:
+                    x1 = (self.width + self.options.bar_width) / 2
+                    y1 = y - offset - (normedvalue / 2)
+                    x2 = self.options.bar_width / 2 + self.options.text_offset
+                    y2 = 0
+                    txt = self.width / 2 + self.options.bar_width + self.options.text_offset + 1
+                    tyt = y - offset + self.fontoff - (normedvalue / 2)
+                else:
+                    x1 = x + offset + normedvalue / 2
+                    y1 = y + self.options.bar_width / 2
+                    x2 = 0
+                    y2 = self.options.bar_width / 2 + (self.options.font_size \
+                            * cnt) + self.options.text_offset
+                    txt = x + offset + normedvalue / 2 - self.fontoff
+                    tyt = (y) + self.options.bar_width + (self.options.font_size \
+                            * (cnt + 1)) + self.options.text_offset
+
+                elem = inkex.PathElement()
+                elem.path = [Move(x1, y1), line(x2, y2)]
+                elem.style = {
+                    'fill': 'none',
+                    'stroke': self.options.font_color,
+                    'stroke-width': self.options.stroke_width,
+                    'stroke-linecap': 'butt',
+                }
+                yield elem
+                yield self.draw_text(keys[cnt], x=str(txt), y=str(tyt))
+
+            # Increase Offset and Color
+            offset = offset + normedvalue
+            color = (color + 1) % 8
+
+            # Draw rectangle
+            yield rect
+
+        yield self.draw_header(self.width / 2 + offset + normedvalue)
 
 
 if __name__ == '__main__':

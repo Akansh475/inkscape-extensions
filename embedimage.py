@@ -75,6 +75,9 @@ class Embedder(inkex.EffectExtension):
         # 2. realpath-ified href
         # 3. absref, only if the above does not point to a file
         if href is not None:
+            svg_path = self.options.input_file
+            if svg_path:
+                os.chdir(os.path.dirname(svg_path))
             path = os.path.realpath(href)
 
         if not os.path.isfile(path):

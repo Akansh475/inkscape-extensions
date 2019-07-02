@@ -170,8 +170,8 @@ class DeprecatedEffect(object):
     def createGuide(self, posX, posY, angle):
         self._deprecated('createGuide',\
             _('{} is now a method of the namedview element object. '
-              'Use `self.svg.namedview.add(Guide(x, y, a))` instead'))
-        return self.svg.namedview.add(Guide(posX, posY, angle))
+              'Use `self.svg.namedview.add(Guide().move_to(x, y, a))` instead'))
+        return self.svg.namedview.add(Guide().move_to(posX, posY, angle))
 
     def affect(self, args=sys.argv[1:], output=True):  # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility
@@ -313,6 +313,17 @@ def localize():
     _deprecated('inkex.localize was moved to inkex.localization.localize', stack=3)
     from .localization import localize as wrapped
     return wrapped
+
+def are_near_relative(a, b, eps):
+    _deprecated('inkex.are_near_relative was moved to '
+            'inkex.units.are_near_relative', stack=2)
+    import inkex.units
+    return inkex.units.are_near_relative(a, b, eps)
+
+def debug(what):
+    _deprecated('inkex.debug was moved to inkex.utils.debug', stack=2)
+    import inkex.utils
+    return inkex.utils.debug(what)
 
 # legacy inkex members <= 0.48.x
 

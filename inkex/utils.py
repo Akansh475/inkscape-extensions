@@ -33,7 +33,13 @@ from argparse import ArgumentTypeError
 # from tempfile import TemporaryDirectory
 
 # All the names that get added to the inkex API itself.
-__all__ = ('AbortExtension', 'inkbool', 'errormsg', 'addNS')
+__all__ = (
+    'AbortExtension',
+    'inkbool',
+    'errormsg',
+    'addNS',
+    'NSS',
+)
 
 (X, Y) = range(2)
 

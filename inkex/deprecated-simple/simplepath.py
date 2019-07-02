@@ -36,17 +36,18 @@ def formatPath(a):
 @deprecate
 def translatePath(p, x, y):
     """Path(array).translate(x, y)"""
-    return (Path(p) + (x, y)).to_arrays()
+    p[:] = (Path(p) + (x, y)).to_arrays()
 
 @deprecate
 def scalePath(p, x, y):
     """Path(array).scale(x, y)"""
-    return (Path(p) * (x, y)).to_arrays()
+    p[:] = (Path(p) * (x, y)).to_arrays()
 
 @deprecate
 def rotatePath(p, a, cx=0, cy=0):
     """Path(array).rotate(angle_degrees, center_x, center_y)"""
+    import math
     path = Path(p)
-    path.rotate(a, cx, cy)
-    return path.to_arrays()
+    path.rotate(math.degrees(a), cx, cy)
+    p[:] = path.to_arrays()
 

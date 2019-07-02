@@ -4,3 +4,4 @@ from text_randomcase import RandomCase
 
 class TestRandomCaseBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = RandomCase
+    comparisons = [()]

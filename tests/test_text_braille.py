@@ -4,3 +4,4 @@ from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestBrailleBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Braille
+    comparisons = [()]

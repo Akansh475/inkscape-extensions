@@ -11,6 +11,7 @@ from text_lowercase import Lowercase
 
 class LowerCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Lowercase
+    comparisons = [()]
 
     def test_uppercase(self):
         var = word_generator(15)

@@ -11,6 +11,7 @@ from text_titlecase import TitleCase
 
 class TitleCaseTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = TitleCase
+    comparisons = [()]
 
     def test_lowercase(self):
         var = word_generator(6)

@@ -17,105 +17,110 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""
+Embed images so they are base64 encoded data inside the svg.
+"""
 
 from __future__ import unicode_literals
 
-import base64
 import os
-import sys
+import base64
 
 import inkex
 from inkex import inkbool
 from inkex.localization import _
+from inkex.elements import Image
 
-if sys.version_info[0] == 2:
-    import urllib
-    import urlparse
-else:
+try:
     import urllib.request as urllib
     import urllib.parse as urlparse
-
+except ImportError:
+    import urllib
+    import urlparse
 
 class Embedder(inkex.EffectExtension):
-    def __init__(self):
-        super(Embedder, self).__init__()
-        self.arg_parser.add_argument("-s", "--selectedonly",
-                                     type=inkbool,
-                                     dest="selectedonly", default=False,
-                                     help="embed only selected images")
+    """Allow selected image tags to become embeded image tags"""
+    def add_arguments(self, pars):
+        pars.add_argument("-s", "--selectedonly",
+                          type=inkbool,
+                          dest="selectedonly", default=False,
+                          help="embed only selected images")
 
     def effect(self):
-        # if slectedonly is enabled and there is a selection only embed selected
-        # images. otherwise embed all images
+        # if slectedonly is enabled and there is a selection
+        # only embed selected images. otherwise embed all images
         if self.options.selectedonly:
-            self.embedSelected(self.document, self.selected)
+            images = self.svg.selected.values()
         else:
-            self.embedAll(self.document)
+            images = self.svg.xpath('//svg:image')
 
-    def embedSelected(self, document, selected):
-        self.document = document
-        self.selected = selected
-        if self.options.ids:
-            for id, node in selected.items():
-                if node.tag == inkex.addNS('image', 'svg'):
-                    self.embedImage(node)
+        for node in images:
+            if isinstance(node, Image):
+                self.embed_image(node)
 
-    def embedAll(self, document):
-        self.document = document  # not that nice... oh well
-        path = '//svg:image'
-        for node in self.svg.xpath(path):
-            self.embedImage(node)
-
-    def embedImage(self, node):
+    def embed_image(self, node):
+        """Embed the data of the selected Image Tag element"""
         xlink = node.get(inkex.addNS('href', 'xlink'))
-        if xlink is None or xlink[:5] != 'data:':
-            absref = node.get(inkex.addNS('absref', 'sodipodi'))
-            url = urlparse.urlparse(xlink)
-            href = urllib.url2pathname(url.path)
+        if xlink and xlink[:5] == 'data:':
+            # No need, data alread embedded
+            return
 
-            path = ''
-            # path selection strategy:
-            # 1. href if absolute
-            # 2. realpath-ified href
-            # 3. absref, only if the above does not point to a file
-            if href is not None:
-                path = os.path.realpath(href)
-            if not os.path.isfile(path):
-                if absref is not None:
-                    path = absref
+        absref = node.get(inkex.addNS('absref', 'sodipodi'))
+        url = urlparse.urlparse(xlink)
+        href = urllib.url2pathname(url.path)
 
-            if not os.path.isfile(path):
-                inkex.errormsg(_('No xlink:href or sodipodi:absref attributes found, or they do not point to an existing file! Unable to embed image.'))
-                if path:
-                    inkex.errormsg(_("Sorry we could not locate %s") % str(path))
+        path = ''
+        # path selection strategy:
+        # 1. href if absolute
+        # 2. realpath-ified href
+        # 3. absref, only if the above does not point to a file
+        if href is not None:
+            path = os.path.realpath(href)
 
-            if os.path.isfile(path):
-                with open(path, "rb").read() as f:
-                    embed = True
-                    if file[:4] == b'\x89PNG':
-                        file_type = 'image/png'
-                    elif file[:2] == b'\xff\xd8':
-                        file_type = 'image/jpeg'
-                    elif file[:2] == b'BM':
-                        file_type = 'image/bmp'
-                    elif file[:6] == b'GIF87a' or file[:6] == b'GIF89a':
-                        file_type = 'image/gif'
-                    elif file[:4] == b'MM\x00\x2a' or file[:4] == b'II\x2a\x00':
-                        file_type = 'image/tiff'
-                    # ico files lack any magic... therefore we check the filename instead
-                    elif path.endswith('.ico'):
-                        file_type = 'image/x-icon'  # official IANA registered MIME is 'image/vnd.microsoft.icon' tho
-                    elif path.endswith('.svg'):
-                        file_type = 'image/svg+xml'
-                    else:
-                        embed = False
-                    if embed:
-                        node.set(inkex.addNS('href', 'xlink'), 'data:{};base64,{}'.format(file_type, base64.encodestring(file).decode('ascii')))
-                        if absref is not None:
-                            del node.attrib[inkex.addNS('absref', u'sodipodi')]
-                    else:
-                        inkex.errormsg(_("%s is not of type image/png, image/jpeg, image/bmp, image/gif, image/tiff, or image/x-icon") % path)
+        if not os.path.isfile(path):
+            if absref is not None:
+                path = absref
 
+        if not os.path.isfile(path):
+            inkex.errormsg(_('No xlink:href or sodipodi:absref attributes found, or '\
+                'they do not point to an existing file! Unable to embed image.'))
+            if path:
+                inkex.errormsg(_("Sorry we could not locate %s") % str(path))
+            return
+
+        with open(path, "rb") as handle:
+            # Don't read the whole file to check the header
+            file_type = self.get_type(path, handle.read(10))
+            handle.seek(0)
+
+            if file_type:
+                # Future: Change encodestring to encodebytes when python3 only
+                node.set('xlink:href', 'data:{};base64,{}'.format(
+                    file_type, base64.encodestring(handle.read()).decode('ascii')))
+                node.pop('sodipodi:absref')
+            else:
+                inkex.errormsg(_("%s is not of type image/png, image/jpeg, "\
+                    "image/bmp, image/gif, image/tiff, or image/x-icon") % path)
+
+    def get_type(self, path, header):
+        """Basic magic header checker, returns mime type"""
+        if header[:4] == b'\x89PNG':
+            return 'image/png'
+        elif header[:2] == b'\xff\xd8':
+            return 'image/jpeg'
+        elif header[:2] == b'BM':
+            return 'image/bmp'
+        elif header[:6] == b'GIF87a' or header[:6] == b'GIF89a':
+            return 'image/gif'
+        elif header[:4] == b'MM\x00\x2a' or header[:4] == b'II\x2a\x00':
+            return 'image/tiff'
+        # ico files lack any magic... therefore we check the filename instead
+        elif path.endswith('.ico'):
+            # official IANA registered MIME is 'image/vnd.microsoft.icon' tho
+            return 'image/x-icon'
+        elif path.endswith('.svg'):
+            return 'image/svg+xml'
+        return None
 
 if __name__ == '__main__':
     Embedder().run()

@@ -177,8 +177,7 @@ class BaseElement(etree.ElementBase):
             value = getattr(self, name)
             setattr(self, name, self.wrapped_attrs[name](None))
             return value
-        else:
-            return self.attrib.pop(addNS(name), default) # pylint: disable=no-member
+        return self.attrib.pop(addNS(name), default) # pylint: disable=no-member
 
     def add(self, *children):
         """

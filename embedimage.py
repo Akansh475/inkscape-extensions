@@ -17,6 +17,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+# pylint: disable=ungrouped-imports
 """
 Embed images so they are base64 encoded data inside the svg.
 """
@@ -24,7 +25,6 @@ Embed images so they are base64 encoded data inside the svg.
 from __future__ import unicode_literals
 
 import os
-import base64
 
 import inkex
 from inkex import inkbool
@@ -34,9 +34,12 @@ from inkex.elements import Image
 try:
     import urllib.request as urllib
     import urllib.parse as urlparse
+    from base64 import encodebytes
 except ImportError:
+    # python2 compatibility, remove when python3 only.
     import urllib
     import urlparse
+    from base64 import encodestring as encodebytes
 
 class Embedder(inkex.EffectExtension):
     """Allow selected image tags to become embeded image tags"""
@@ -94,37 +97,42 @@ class Embedder(inkex.EffectExtension):
 
         with open(path, "rb") as handle:
             # Don't read the whole file to check the header
-            file_type = self.get_type(path, handle.read(10))
+            file_type = get_type(path, handle.read(10))
             handle.seek(0)
 
             if file_type:
                 # Future: Change encodestring to encodebytes when python3 only
                 node.set('xlink:href', 'data:{};base64,{}'.format(
-                    file_type, base64.encodestring(handle.read()).decode('ascii')))
+                    file_type, encodebytes(handle.read()).decode('ascii')))
                 node.pop('sodipodi:absref')
             else:
                 inkex.errormsg(_("%s is not of type image/png, image/jpeg, "\
                     "image/bmp, image/gif, image/tiff, or image/x-icon") % path)
 
-    def get_type(self, path, header):
-        """Basic magic header checker, returns mime type"""
-        if header[:4] == b'\x89PNG':
-            return 'image/png'
-        elif header[:2] == b'\xff\xd8':
-            return 'image/jpeg'
-        elif header[:2] == b'BM':
-            return 'image/bmp'
-        elif header[:6] == b'GIF87a' or header[:6] == b'GIF89a':
-            return 'image/gif'
-        elif header[:4] == b'MM\x00\x2a' or header[:4] == b'II\x2a\x00':
-            return 'image/tiff'
-        # ico files lack any magic... therefore we check the filename instead
-        elif path.endswith('.ico'):
+
+def get_type(path, header):
+    """Basic magic header checker, returns mime type"""
+    for head, mime in (
+            (b'\x89PNG', 'image/png'),
+            (b'\xff\xd8', 'image/jpeg'),
+            (b'BM', 'image/bmp'),
+            (b'GIF87a', 'image/gif'),
+            (b'GIF89a', 'image/gif'),
+            (b'MM\x00\x2a', 'image/tiff'),
+            (b'II\x2a\x00', 'image/tiff'),
+        ):
+        if header.startswith(head):
+            return mime
+
+    # ico files lack any magic... therefore we check the filename instead
+    for ext, mime in (
             # official IANA registered MIME is 'image/vnd.microsoft.icon' tho
-            return 'image/x-icon'
-        elif path.endswith('.svg'):
-            return 'image/svg+xml'
-        return None
+            ('.ico', 'image/x-icon'),
+            ('.svg', 'image/svg+xml'),
+        ):
+        if path.endswith(ext):
+            return mime
+    return None
 
 if __name__ == '__main__':
     Embedder().run()

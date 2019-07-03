@@ -38,15 +38,15 @@ class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
     ]
     compare_filters = [CompareOrderIndependentBytes()]
 
-    def test_gcode_fixed_dir(self):
+    def test_all_comparisons(self):
         """
         gcodetools tries to write to a folder and filename specified
         on the command line, this needs to be handled carefully.
         """
         for tab in (
                 ('--active-tab="path-to-gcode"',),
-                ('--active-tab="engraving"',),
-                ('--active-tab="graffiti"',),
+                #('--active-tab="engraving"',),
+                #('--active-tab="graffiti"',),
                 ('--active-tab="lathe"',),
             ):
             args = SETTINGS + tab + (
@@ -60,6 +60,8 @@ class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
 
             with open(outfile, 'rb') as fhl:
                 data_a = fhl.read()
+
+            self.assertTrue(data_a, "No data produced with {}".format(tab))
 
             outfile = self.get_compare_outfile(args)
             if os.environ.get('EXPORT_COMPARE', False):

@@ -4809,7 +4809,7 @@ class Gcodetools(inkex.Effect):
         wmax = 0
         cspe = []
         we = []
-        if len(self.selected_paths) <= 0:
+        if not self.selected_paths:
             self.error("Please select at least one path to engrave and run again.")
             return
         if not self.check_dir():

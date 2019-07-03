@@ -318,7 +318,7 @@ class FlowRegion(ShapeElement):
 
     def get_path(self):
         # This ignores flowRegionExcludes
-        return sum([child.path for child in self])
+        return sum([child.path for child in self], Path())
 
 class FlowRoot(ShapeElement):
     """SVG Flow Root (SVG 2.0)"""
@@ -442,7 +442,7 @@ class Polyline(ShapeElement):
         return Path('M' + self.get('points'))
 
     def set_path(self, path):
-        points = ['{:g},{:g}'.format(*seg.points[-1]) for seg in Path(path) if seg]
+        points = ['{:g},{:g}'.format(x, y) for x, y in Path(path).end_points]
         self.set('points', ' '.join(points))
 
 class Pattern(BaseElement):

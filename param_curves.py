@@ -96,13 +96,13 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
         # check for visibility of x-axis
         if ybottom <= 0 <= ytop:
             # xaxis
-            a.append(['M ', [left, coordy(0)]])
-            a.append([' l ', [width, 0]])
+            a.append(['M', [left, coordy(0)]])
+            a.append(['l', [width, 0]])
         # check for visibility of y-axis
         if xleft <= 0 <= xright:
             # xaxis
-            a.append([' M ', [coordx(0), bottom]])
-            a.append([' l ', [0, -height]])
+            a.append(['M', [coordx(0), bottom]])
+            a.append(['l', [0, -height]])
 
     # initialize functions and derivatives for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
@@ -118,7 +118,7 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
     dy0 = (y1 - y0) / ds
 
     # Start curve
-    a.append([' M ', [coordx(x0), coordy(y0)]])  # initial moveto
+    a.append(['M', [coordx(x0), coordy(y0)]])  # initial moveto
     for i in range(int(samples - 1)):
         t1 = (i + 1) * step + t_start
         t2 = t1 - ds  # Second point BEFORE first point (Good for last point)
@@ -132,7 +132,7 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
         dy1 = (y1 - y2) / ds
 
         # create curve
-        a.append([' C ',
+        a.append(['C',
                   [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)),
                    coordx(x1 - (dx1 * third)), coordy(y1 - (dy1 * third)),
                    coordx(x1), coordy(y1)]

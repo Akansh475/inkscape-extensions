@@ -512,11 +512,23 @@ class BoundingBoxTest(TestCase):
         pe.path = path
         self.assert_bounding_box_is_equal(pe, (10, 10, 20, 20))
 
+    def test_path_move(self):
+        path = Path("M 15 30 m 10 20")
+        pe = PathElement()
+        pe.path = path
+        self.assert_bounding_box_is_equal(pe, (15, 25, 30, 50))
+
     def test_path_Line(self):
         path = Path("M 15 30 L 10 20")
         pe = PathElement()
         pe.path = path
         self.assert_bounding_box_is_equal(pe, (10, 15, 20, 30))
+
+    def test_path_line(self):
+        path = Path("M 15 30 l 10 20")
+        pe = PathElement()
+        pe.path = path
+        self.assert_bounding_box_is_equal(pe, (15, 25, 30, 50))
 
     def test_path_Zone(self):
         path = Path("M 15 30 Z")
@@ -530,31 +542,29 @@ class BoundingBoxTest(TestCase):
         pe.path = path
         self.assert_bounding_box_is_equal(pe, (15, 20, 30, 30))
 
+    def test_path_horz(self):
+        path = Path("M 15 30 h 20")
+        pe = PathElement()
+        pe.path = path
+        self.assert_bounding_box_is_equal(pe, (15, 35, 30, 30))
+
     def test_path_Vert(self):
         path = Path("M 15 30 V 20")
         pe = PathElement()
         pe.path = path
         self.assert_bounding_box_is_equal(pe, (15, 15, 20, 30))
 
+    def test_path_vert(self):
+        path = Path("M 15 30 v 20")
+        pe = PathElement()
+        pe.path = path
+        self.assert_bounding_box_is_equal(pe, (15, 15, 30, 50))
+
     def test_path_Curve(self):
         path = Path("M10 10 C 20 20, 40 20, 50 10")
         pe = PathElement()
         pe.path = path
         self.assert_bounding_box_is_equal(pe, (10, 50, 10, 17.5))
-
-    def test_path_relative_segment_bbox_raises(self):
-        from inkex.paths import line, vert, horz, curve, move, arc, quadratic, tepidQuadratic, smooth, zoneClose
-
-        for Klass in (line, vert, horz, curve, move, arc, quadratic, tepidQuadratic, smooth, zoneClose):
-            def _costruct_and_call_bb():
-                bb = BoundingBox()
-                first_point = (0, 0)
-                last_two_points = [(0, 0), (0, 0)]
-                Klass().update_bounding_box(first_point, last_two_points, bb)
-
-            self.assertRaises(ValueError,
-                              _costruct_and_call_bb
-                              )
 
     @requires_inkscape
     def test_path_combined_1(self):
@@ -591,7 +601,7 @@ class BoundingBoxTest(TestCase):
         klasses = (Line, Vert, Horz, Curve, Move, Quadratic)  # , ZoneClose, Arc
 
         def random_segment(klass):
-            args = [random.randint(1, 100) for _ in range(klass.num)]
+            args = [random.randint(1, 100) for _ in range(klass.nargs)]
             if klass is Arc:
                 args[2] = 0  # random.randint(0, 1)
                 args[3] = 0  # random.randint(0, 1)

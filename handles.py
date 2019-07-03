@@ -23,6 +23,7 @@ Draws handles of selected paths.
 
 import inkex
 from inkex.paths import Path, Curve, Move, Line, Quadratic, ZoneClose
+from inkex.transforms import Vector2d
 
 class Handles(inkex.EffectExtension):
     """
@@ -32,26 +33,22 @@ class Handles(inkex.EffectExtension):
         for node in self.svg.selected.values():
             if isinstance(node, inkex.PathElement):
                 result = Path()
-                prev = None
+                prev = Vector2d()
                 start = None
                 for seg in node.path.to_absolute():
+                    if start is None:
+                        start = seg.end_point(start, prev)
                     if isinstance(seg, Curve):
                         result += [
-                            Move((seg.x1, seg.y1)), Line((prev.x, prev.y)),
-                            Move((seg.x2, seg.y2)), Line((seg.x, seg.y)),
+                            Move(seg.x2, seg.y2), Line(prev.x, prev.y),
+                            Move(seg.x3, seg.y3), Line(seg.x4, seg.y4),
                         ]
                     elif isinstance(seg, Quadratic):
                         result += [
-                            Move((seg.x1, seg.y1)), Line((prev.x, prev.y)),
-                            Move((seg.x1, seg.y1)), Line((seg.x, seg.y))
+                            Move(seg.x2, seg.y2), Line(prev.x, prev.y),
+                            Move(seg.x2, seg.y2), Line(seg.x3, seg.y3)
                         ]
-
-                    if isinstance(seg, Move):
-                        start = seg
-                    if isinstance(seg, ZoneClose):
-                        prev = start
-                    else:
-                        prev = seg
+                    prev = seg.end_point(start, prev)
 
                 if not result:
                     continue

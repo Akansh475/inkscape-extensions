@@ -3,9 +3,92 @@
 Test Inkex transformational logic.
 """
 from inkex.transforms import (
-    BoundingBox, Scale, Transform, TranslateTransform, ScaleTransform, RotateTransform, DirectedLineSegment
+    Vector2d, BoundingBox, Scale, Transform, TranslateTransform,
+    ScaleTransform, RotateTransform, DirectedLineSegment
 )
 from inkex.tester import TestCase
+
+class Vector2dTest(TestCase):
+    """Test the Vector2d object"""
+    def test_vector_creation(self):
+        """Test Vector2D creation"""
+        vec0 = Vector2d(15, 22)
+        self.assertEqual(vec0.x, 15)
+        self.assertEqual(vec0.y, 22)
+
+        vec1 = Vector2d()
+        self.assertEqual(vec1.x, 0)
+        self.assertEqual(vec1.y, 0)
+
+        vec2 = Vector2d((17, 32))
+        self.assertEqual(vec2.x, 17)
+        self.assertEqual(vec2.y, 32)
+
+        vec3 = Vector2d(vec0)
+        self.assertEqual(vec3.x, 15)
+        self.assertEqual(vec3.y, 22)
+
+        self.assertRaises(ValueError, Vector2d, (1))
+        self.assertRaises(ValueError, Vector2d, (1, 2, 3))
+
+    def test_binary_operators(self):
+        """Test binary operators for vector2d"""
+        vec1 = Vector2d(15, 22)
+        vec2 = Vector2d(5, 3)
+
+        self.assertTrue((vec1 - vec2).is_close((10, 19)))
+        self.assertTrue((vec1 - (5, 3)).is_close((10, 19)))
+        self.assertTrue(((15, 22) - vec2).is_close((10, 19)))
+        self.assertTrue((vec1 + vec2).is_close((20, 25)))
+        self.assertTrue((vec1 + (5, 3)).is_close((20, 25)))
+        self.assertTrue(((15, 22) + vec2).is_close((20, 25)))
+        self.assertTrue((vec1 * 2).is_close((30, 44)))
+        self.assertTrue((2 * vec1).is_close((30, 44)))
+        self.assertTrue((vec1 / 2).is_close((7.5, 11)))
+        self.assertTrue((vec1.__div__(2)).is_close((7.5, 11)))
+        self.assertTrue((vec1 // 2).is_close((7.5, 11)))
+
+    def test_ioperators(self):
+        """Test operators for vector2d"""
+        vec = Vector2d(15, 22)
+        vec += (1, 1)
+        self.assertTrue(vec.is_close((16, 23)))
+        vec -= (10, 20)
+        self.assertTrue(vec.is_close((6, 3)))
+        vec *= 5
+        self.assertTrue(vec.is_close((30, 15)))
+        vec /= 90
+        self.assertTrue(vec.is_close((1.0/3, 1.0/6)))
+        vec //= 1.0/3
+        self.assertTrue(vec.is_close((1, 0.5)))
+
+    def test_unary_operators(self):
+        """Test unary operators"""
+        vec = Vector2d(1, 2)
+        self.assertTrue((-vec).is_close((-1, -2)))
+        self.assertTrue((+vec).is_close(vec))
+        self.assertTrue(+vec is not vec)  # returned value is a copy
+
+    def test_representations(self):
+        """Test Vector2D Repr"""
+        self.assertEqual(str(Vector2d(1, 2)), "1, 2")
+        self.assertEqual(repr(Vector2d(1, 2)), "Vector2d(1, 2)")
+        self.assertEqual(Vector2d(1, 2).to_tuple(), (1, 2))
+
+    def test_assign(self):
+        """Test vector2d assignement"""
+        vec = Vector2d(10, 20)
+        vec.assign(5, 10)
+        self.assertAlmostTuple(vec, (5, 10))
+        vec.assign((7, 11))
+        self.assertAlmostTuple(vec, (7, 11))
+
+    def test_getitem(self):
+        """Test getitem for Vector2D"""
+        vec = Vector2d(10, 20)
+        self.assertEqual(len(vec), 2)
+        self.assertEqual(vec[0], 10)
+        self.assertEqual(vec[1], 20)
 
 
 class TransformTest(TestCase):
@@ -71,7 +154,7 @@ class TransformTest(TestCase):
     def test_apply_to_point(self):
         """Test applying the transformation to a point"""
         trans = Transform('translate(10, 10)')
-        self.assertEqual(trans.apply_to_point((10, 10)), (20, 20))
+        self.assertEqual(trans.apply_to_point((10, 10)).to_tuple(), (20, 20))
         self.assertRaises(ValueError, trans.apply_to_point, '')
 
     def test_translate(self):
@@ -212,7 +295,6 @@ class TransformTest(TestCase):
         self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
         self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
 
-
 class ScaleTest(TestCase):
     """Test scale class"""
 
@@ -250,8 +332,10 @@ class ScaleTest(TestCase):
         """Expected errors"""
         self.assertRaises(ValueError, Scale, 'foo')
 
+
 class BoundingBoxTest(TestCase):
     """Test bounding box calculations"""
+
     def test_bbox(self):
         """Creating bounding boxes"""
         self.assertEqual(BoundingBox((15)), (15, 15, None, None))
@@ -278,12 +362,14 @@ class BoundingBoxTest(TestCase):
         """Bounding Boxes can be scaled"""
         self.assertEqual(BoundingBox(1, 3) * 2, (2, 2, 6, 6))
 
+
 class SegmentTest(TestCase):
     """Test special Segments"""
+
     def test_segment_creation(self):
         """Test segments"""
         self.assertEqual(DirectedLineSegment((1, 2), (3, 4)), (1, 3, 2, 4))
-        self.assertEqual(repr(DirectedLineSegment((1, 2), (3, 4))), 'DirectedLineSegment(((1, 2), (3, 4)))')
+        self.assertEqual(repr(DirectedLineSegment((1, 2), (3, 4))), 'DirectedLineSegment((1, 2), (3, 4))')
 
     def test_segment_maths(self):
         """Segments have calculations"""

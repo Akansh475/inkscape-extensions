@@ -151,7 +151,7 @@ def pt_from_tcf(tcf, params):  # returns a trilinear triplet from a triangle cen
 
 def get_n_points_from_path(node, n):
     """returns a list of first n points (x,y) in an SVG path-representing node"""
-    points = [(seg.all_x[0], seg.all_y[0]) for seg in node.path]
+    points = list(node.path.control_points)
     if len(points) < 3:
         return []
     return points[:3]

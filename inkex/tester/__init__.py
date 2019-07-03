@@ -212,6 +212,14 @@ class TestCase(MockCommandMixin, BaseCase):
 
         return effect
 
+    def assertDeepAlmostEqual(self, first, second, places=7, msg=None, delta=None):
+        if isinstance(first, (list, tuple)):
+            assert len(first) == len(second)
+            for (f, s) in zip(first, second):
+                self.assertDeepAlmostEqual(f, s, places, msg, delta)
+        else:
+            self.assertAlmostEqual(first, second, places, msg, delta)
+
 
 class InkscapeExtensionTestMixin(object):
     """Automatically setup self.effect for each test and test with an empty svg"""

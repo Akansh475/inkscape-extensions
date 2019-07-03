@@ -33,17 +33,158 @@ from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 from .utils import X, Y, strargs
 
 try:
-    from typing import overload, Tuple
+    from typing import overload, Tuple, Union, Optional, TypeVar
+    VectorLike = Union["Vector2d", Tuple[float,float]]
 except ImportError:
     overload = lambda x: x
 
-
 # All the names that get added to the inkex API itself.
-__all__ = ('Transform', 'BoundingBox', 'Scale', 'DirectedLineSegment')
+__all__ = ('Vector2d', 'Transform', 'BoundingBox', 'Scale', 'DirectedLineSegment')
 
-
-if sys.version_info[0] == 3:  #PY3
+if sys.version_info[0] == 3:  # PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
+
+
+class Vector2d(object):
+    """
+    Represents an element of 2-dimensional Euclidean space
+    """
+
+    x = 0.0
+    y = 0.0
+
+    @overload
+    def __init__(self):  # type: () -> None
+        pass
+
+    @overload
+    def __init__(self, x, y):  # type: (float, float) -> None
+        pass
+
+    @overload
+    def __init__(self, v):  # type: (VectorLike) -> None
+        pass
+
+    def __init__(self, *args):
+        if len(args) == 0:
+            self.x, self.y = 0.0, 0.0
+            return
+        if len(args) == 1:
+            point = args[0]
+            if isinstance(point, Vector2d):
+                self.x, self.y = point.x, point.y
+                return
+            elif isinstance(point, (tuple, list)) and len(point) == 2:
+                self.x, self.y = point
+                return
+        elif len(args) == 2:
+            x, y = args
+            if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+                self.x, self.y = x, y
+                return
+        raise ValueError("Vector2d can't be constructed from {}".format(repr(args)))
+
+    def __add__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        return Vector2d(self.x + other.x, self.y + other.y)
+
+    def __iadd__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        self.x += other.x
+        self.y += other.y
+        return self
+
+    def __radd__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        return Vector2d(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        return Vector2d(self.x - other.x, self.y - other.y)
+
+    def __isub__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        self.x -= other.x
+        self.y -= other.y
+        return self
+
+    def __abs__(self):
+        return self.length
+
+    @overload
+    def assign(self, x, y):  # type: (float, float) -> None
+        pass
+
+    @overload
+    def assign(self, other):   # type: (VectorLike) -> None
+        pass
+
+    def assign(self, *args):
+        self.x, self.y = Vector2d(*args)
+
+    def __rsub__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        return Vector2d(-self.x + other.x, -self.y + other.y)
+
+    def __neg__(self):  # type: () -> VectorLike
+        return Vector2d(-self.x, -self.y)
+
+    def __pos__(self):  # type: () -> VectorLike
+        return Vector2d(self.x, self.y)
+
+    def __floordiv__(self, factor):  # type: (float) -> VectorLike
+        return Vector2d(self.x / float(factor), self.y / float(factor))
+
+    def __truediv__(self, factor):  # type: (float) -> VectorLike
+        return Vector2d(self.x / float(factor), self.y / float(factor))
+
+    def __div__(self, factor):  # type: (float) -> VectorLike
+        return Vector2d(self.x / float(factor), self.y / float(factor))
+
+    def __mul__(self, factor):  # type: (float) -> VectorLike
+        return Vector2d(self.x * factor, self.y * factor)
+
+    def __imul__(self, factor):  # type: (float) -> VectorLike
+        self.x *= factor
+        self.y *= factor
+        return self
+
+    def __rmul__(self, factor):  # type: (float) -> VectorLike
+        return Vector2d(self.x * factor, self.y * factor)
+
+    def __repr__(self):
+        return "Vector2d({:.6g}, {:.6g})".format(self.x, self.y)
+
+    def __str__(self):
+        return "{:.6g}, {:.6g}".format(self.x, self.y)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
+
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, item):
+        return (self.x, self.y)[item]
+
+    def to_tuple(self):
+        return self.x, self.y
+
+    def dot(self, other):  # type: (VectorLike) -> float
+        other = Vector2d(other)
+        return self.x * other.x + self.y * other.y
+
+    def is_close(self, other, rtol=1e-5, atol=1e-8
+                 ):  # type: (Union[VectorLike,Tuple[float,float]], Optional[float], Optional[float]) -> float
+        other = Vector2d(other)
+        delta = (self-other).length
+        return delta < (atol + rtol * other.length)
+
+    @property
+    def length(self):  # type: () -> float
+        return sqrt(fabs(self.dot(self)))
+
 
 class Transform(object):
     """A transformation object which will always reduce to a matrix and can
@@ -112,14 +253,26 @@ class Transform(object):
 
     def __bool__(self):
         return not self.__eq__(Transform())
+
     __nonzero__ = __bool__
 
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg hexad"""
         self.__imul__(Transform(args))
 
-    def add_translate(self, tr_x, tr_y=0.0):
-        """Add translation to this transformation"""
+    @overload
+    def add_translate(self, dr): # type: (VectorLike) -> None
+        pass
+
+    @overload
+    def add_translate(self, tr_x, tr_y=0.0): # type: (float, Optional[float]) -> None
+        pass
+
+    def add_translate(self, *args):
+        if len(args) == 1 and isinstance(args[0], (int, float)):
+            tr_x, tr_y = args[0], 0.0
+        else:
+            tr_x, tr_y = Vector2d(*args)
         self.__imul__(((1.0, 0.0, tr_x), (0.0, 1.0, tr_y)))
 
     def add_scale(self, sc_x, sc_y=None):
@@ -127,8 +280,17 @@ class Transform(object):
         sc_y = sc_x if sc_y is None else sc_y
         self.__imul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
 
-    def add_rotate(self, deg, center_x=0.0, center_y=0.0):
+    @overload
+    def add_rotate(self, deg, center): # type: (float, VectorLike) -> None
+        pass
+
+    @overload
+    def add_rotate(self, deg, center_x, center_y): # type: (float, float, float) -> None
+        pass
+
+    def add_rotate(self, deg, *args):
         """Add rotation to this transformation"""
+        center_x, center_y = Vector2d(*args)
         _cos, _sin = cos(radians(deg)), sin(radians(deg))
         self.__imul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
         self.__imul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
@@ -226,12 +388,15 @@ class Transform(object):
         new_f = -(new_b * self.e + new_d * self.f)
         return Transform((new_a, new_b, new_c, new_d, new_e, new_f))
 
-    def apply_to_point(self, point):
+    def apply_to_point(self, point): # type: (VectorLike) -> Vector2d
         """Transform a tuple (X, Y)"""
         if isinstance(point, str):
             raise ValueError("Will not transform string '{}'".format(point))
-        return (self.a * point[X] + self.c * point[Y] + self.e,
-                self.b * point[X] + self.d * point[Y] + self.f)
+        point = Vector2d(point)
+        return Vector2d(self.a * point.x + self.c * point.y + self.e,
+                        self.b * point.x + self.d * point.y + self.f)
+
+
 
     def _is_URT(self, exactly=False):
         """
@@ -245,18 +410,23 @@ class Transform(object):
 
 class TranslateTransform(Transform):
     """A quick and easy to use Translate definition"""
+
     def __init__(self, pos_x, pos_y=0.0):
         super(TranslateTransform, self).__init__()
         self.add_translate(pos_x, pos_y)
 
+
 class ScaleTransform(Transform):
     """A quick and easy to use Scale definition"""
+
     def __init__(self, scale_x, scale_y=None):
         super(ScaleTransform, self).__init__()
         self.add_scale(scale_x, scale_y)
 
+
 class RotateTransform(Transform):
     """A quick and easy to use Rotate definition"""
+
     def __init__(self, deg, center_x=0.0, center_y=0.0):
         super(RotateTransform, self).__init__()
         self.add_rotate(deg, center_x, center_y)
@@ -289,6 +459,7 @@ class Scale(object):  # pylint: disable=too-few-public-methods
 
     def __bool__(self):
         return self.minimum is not None and self.maximum is not None
+
     __nonzero__ = __bool__
 
     def __add__(self, other):
@@ -391,6 +562,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
 
     def __bool__(self):
         return bool(self.x) and bool(self.y)
+
     __nonzero__ = __bool__
 
     def __add__(self, other):
@@ -450,7 +622,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
 
     def center(self):
         """Returns the middle of the bounding box"""
-        return self.x.center, self.y.center
+        return Vector2d(self.x.center, self.y.center)
 
 
 class DirectedLineSegment(object):
@@ -460,15 +632,24 @@ class DirectedLineSegment(object):
     DirectedLineSegment(((x0, y0), (x1, y1)))
     """
 
+    start = Vector2d()  # start point of segment
+    end = Vector2d()  # end point of segment
+
+    @overload
+    def __init__(self):  # type: () -> None
+        pass
+
     @overload
     def __init__(self, other):  # type: (DirectedLineSegment) -> None
         pass
 
     @overload
-    def __init__(self, start, end):  # type: (Tuple[float, float], Tuple[float, float]) -> None
+    def __init__(self, start, end):  # type: (VectorLike, VectorLike) -> None
         pass
 
     def __init__(self, *args):
+        if len(args) == 0:  # overload 0
+            start, end = Vector2d(), Vector2d()
         if len(args) == 1:  # overload 1
             other, = args
             start, end = other.start, other.end
@@ -477,8 +658,8 @@ class DirectedLineSegment(object):
         else:
             raise ValueError("DirectedLineSegment() can't be constructed from {}".format(args))
 
-        self.start = start  # type: Tuple[float, float]
-        self.end = end  # type: Tuple[float, float]
+        self.start = Vector2d(start)
+        self.end = Vector2d(end)
 
     def __eq__(self, other):
         if isinstance(other, (tuple, DirectedLineSegment)):
@@ -493,27 +674,27 @@ class DirectedLineSegment(object):
 
     @property
     def dx(self):
-        return self.end[0] - self.start[0]
+        return self.end.x - self.start.x
 
     @property
     def dy(self):
-        return self.end[1] - self.start[1]
+        return self.end.y - self.start.y
 
     @property
     def x0(self):
-        return self.start[0]
+        return self.start.x
 
     @property
     def y0(self):
-        return self.start[1]
+        return self.start.y
 
     @property
     def x1(self):
-        return self.end[0]
+        return self.end.x
 
     @property
     def y1(self):
-        return self.end[1]
+        return self.end.y
 
     @property
     def length(self):
@@ -557,7 +738,7 @@ class DirectedLineSegment(object):
         """Create parallel Segment"""
         return DirectedLineSegment((x + self.dx, y + self.dy), (x, y))
 
-    def intersect(self, other):
+    def intersect(self, other): # type: (DirectedLineSegment) -> Optional[Vector2d]
         """Get the intersection between two segments"""
         other = DirectedLineSegment(other)
         denom = (other.dy * self.dx) - (other.dx * self.dy)
@@ -565,14 +746,13 @@ class DirectedLineSegment(object):
         # num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
 
         if denom != 0:
-            return (
+            return Vector2d(
                 self.x0 + ((num / denom) * (other.x1 - self.x0)),
                 self.y0 + ((num / denom) * (other.y0 - self.y0))
             )
-        return (None, None)
 
     def __repr__(self):
-        return "DirectedLineSegment(({0.start}, {0.end}))".format(self)
+        return "DirectedLineSegment(({0.start}), ({0.end}))".format(self)
 
 
 def cubic_extrema(py0, py1, py2, py3):

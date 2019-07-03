@@ -34,6 +34,7 @@ from lxml import etree
 import inkex
 import render_alphabetsoup_config
 from inkex import Transform, inkbool
+from inkex.transforms import Vector2d
 from inkex.paths import Path
 from inkex.elements import PathElement
 
@@ -115,7 +116,20 @@ def flip(sp, cb, param):
     p = Path(sp)
     cb(p, param)
     del sp[:]
-    sp.extend([pp.cmd, list(itertools.chain.from_iterable(list(x) for x in pp.points))] for pp in p)
+
+    prev = Vector2d()
+    prev_prev = Vector2d()
+    first = Vector2d()
+
+    for i, seg in enumerate(p):
+        if i == 0:
+            first = seg.end_point(first, prev)
+        cps = []
+        for cp in seg.control_points(first, prev, prev_prev):
+            prev_prev = prev
+            prev = cp
+            cps.extend(cp)
+        sp.append([seg.letter, cps])
     # print('flip after +' + str(sp))
 
 def flipLeftRight(sp, width):
@@ -335,7 +349,7 @@ def draw(stack):  # draw a character based on a tree stack
                 dx = rule[i][1] * units
                 dy = rule[i][2] * units
                 # newbox = ((box[0]+dx),(box[1]+dy),(box[2]+dx),(box[3]+dy))
-                currimg = (Path(currimg) + (dx, dy)).to_arrays()
+                currimg = (Path(currimg).translate(dx, dy)).to_arrays()
                 image = combinePaths(image, currimg)
 
         stack.pop(0)
@@ -345,8 +359,8 @@ def draw(stack):  # draw a character based on a tree stack
 def draw_crop_scale(stack, zoom):  # draw, crop and scale letter image
     image, width, height = draw(stack)
     bbox = getPathBoundingBox(image)
-    image = (Path(image) + (-bbox[0], 0)).to_arrays()
-    image = (Path(image) * (zoom / units, zoom / units)).to_arrays()
+    image = (Path(image).translate (-bbox[0], 0)).to_arrays()
+    image = (Path(image).scale (zoom / units, zoom / units)).to_arrays()
     return image, bbox[1] - bbox[0], bbox[3] - bbox[2]
 
 
@@ -501,7 +515,7 @@ def layoutstring(imagelist, zoom):  # layout string of letter-images using optic
 
         position = position - kern  # move position back by kern amount
         thisimage = copy.deepcopy(image)
-        thisimage = (Path(thisimage) + (position, 0)).to_arrays()
+        thisimage = (Path(thisimage).translate(position, 0)).to_arrays()
         workspace = combinePaths(workspace, thisimage)
         position = position + width + zoom  # advance position by letter width
 

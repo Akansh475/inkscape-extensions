@@ -7,12 +7,6 @@ from inkex.tester import TestCase
 from inkex.paths import CubicSuperPath
 
 class CubicPathTest(TestCase):
-    def assertDeepAlmostEqual(self, first, second, places=7, msg=None, delta=None):
-        if isinstance(first, (list, tuple)):
-            for (f, s) in zip(first, second):
-                self.assertDeepAlmostEqual(f, s, places, msg, delta)
-        else:
-            self.assertAlmostEqual(first, second, places, msg, delta)
 
     def test_LHV(self):
         p = [

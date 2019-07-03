@@ -6,17 +6,23 @@ Test Inkex path parsing functionality.
 import re
 
 from inkex.paths import (
-    InvalidPath, Path, Segment,
-    line,
-    Line, Move, Horz, Vert, Curve, Smooth, Quadratic, TepidQuadratic, Arc,
+    InvalidPath, Path, PathCommand,
+    line, move, curve, smooth, quadratic, tepidQuadratic, arc, vert, horz, zoneClose,
+    Line, Move, Horz, Vert, Curve, Smooth, Quadratic, TepidQuadratic, Arc, ZoneClose
 )
-from inkex.transforms import Transform
+from inkex.transforms import Transform, Vector2d
 from inkex.tester import TestCase
+
 
 class SegmentTest(TestCase):
     """
     Test specific segment functionality.
     """
+
+    def get_random_cmd(self, Cmd):
+        import random
+        return Cmd(*[random.randint(0, 10) for i in range(Cmd.nargs)])
+
     def test_equals(self):
         """Segments should be equalitive"""
         self.assertEqual(Move(10, 10), Move(10, 10))
@@ -30,35 +36,129 @@ class SegmentTest(TestCase):
     def test_to_curves(self):
         """Segments can become curves"""
         self.assertRaises(ValueError, Move(0, 0).to_curve, None)
-        self.assertEqual(Line(10, 10).to_curve([10, 5]), (10, 5, 10, 10, 10, 10))
-        self.assertEqual(Horz(10).to_curve([10, 5]), (10, 5, 10, 5, 10, 5))
-        self.assertEqual(Vert(10).to_curve([5, 10]), (5, 10, 5, 10, 5, 10))
-        self.assertEqual(Curve(5, 5, 10, 10, 4, 4).to_curve([0, 0]), (5, 5, 10, 10, 4, 4))
+        self.assertEqual(Line(10, 10).to_curve(Vector2d(10, 5)), (10, 5, 10, 10, 10, 10))
+        self.assertEqual(Horz(10).to_curve(Vector2d(10, 5)), (10, 5, 10, 5, 10, 5))
+        self.assertEqual(Vert(10).to_curve(Vector2d(5, 10)), (5, 10, 5, 10, 5, 10))
+        self.assertEqual(Curve(5, 5, 10, 10, 4, 4).to_curve(Vector2d(0, 0)), (5, 5, 10, 10, 4, 4))
 
         self.assertEqual(
-            Smooth(10, 10, 4, 4).to_curve(Curve(5, 5, 10, 10, 4, 4)),
+            Smooth(10, 10, 4, 4).to_curve(Vector2d(4, 4), Vector2d(10, 10)),
             (-2, -2, 10, 10, 4, 4),
         )
 
         self.assertAlmostTuple(
-            Quadratic(10, 10, 4, 4).to_curve([0, 0]).args,
+            Quadratic(10, 10, 4, 4).to_curve(Vector2d(0, 0)).args,
             (6.666666666666666, 6.666666666666666, 8, 8, 4, 4),
         )
 
         self.assertAlmostTuple(
-            TepidQuadratic(4, 4).to_curve(Quadratic(11, 12, 14, 19)).args,
+            TepidQuadratic(4, 4).to_curve(Vector2d(14, 19), Vector2d(11, 12)).args,
             #            (20.666666666666664, 30, 17.333333333333332, 25, 4, 4),
             (15.999999999999998, 23.666666666666664, 12.666666666666666, 18.666666666666664, 4, 4),
         )
 
-        curves = list(Arc(50, 50, 0, 0, 1, 85, 85).to_curves([0, 0]))
+        curves = list(Arc(50, 50, 0, 0, 1, 85, 85).to_curves(Vector2d(0, 0)))
         self.assertEqual(len(curves), 3)
-        self.assertAlmostTuple(curves[0].args, (19.77590700610636, -5.4865851247611115, 38.18634924829132, -10.4196482558544, 55.44095225512604, -5.796291314453416))
-        self.assertAlmostTuple(curves[1].args, (72.69555526196076, -1.172934373052433, 86.17293437305243, 12.30444473803924, 90.79629131445341, 29.559047744873958))
-        self.assertAlmostTuple(curves[2].args, (95.41964825585441, 46.81365075170867, 90.4865851247611, 65.22409299389365, 77.85533905932738, 77.85533905932738))
+        self.assertAlmostTuple(curves[0].args, (
+            19.77590700610636, -5.4865851247611115, 38.18634924829132, -10.4196482558544, 55.44095225512604,
+            -5.796291314453416))
+        self.assertAlmostTuple(curves[1].args, (
+            72.69555526196076, -1.172934373052433, 86.17293437305243, 12.30444473803924, 90.79629131445341,
+            29.559047744873958))
+        self.assertAlmostTuple(curves[2].args, (
+            95.41964825585441, 46.81365075170867, 90.4865851247611, 65.22409299389365, 77.85533905932738,
+            77.85533905932738))
+
+        def apply_to_curve(obj):
+            obj.to_curve(Vector2d())
+
+        def apply_to_curves(obj):
+            obj.to_curve(Vector2d())
+
+        self.assertRaises(ValueError, apply_to_curve, ZoneClose())
+        self.assertRaises(ValueError, apply_to_curves, zoneClose())
+
+        self.assertRaises(ValueError, apply_to_curve, Move(0, 0))
+        self.assertRaises(ValueError, apply_to_curves, move(0, 0))
+
+    def test_transformation(self):
+        t = Transform(matrix=((1, 2, 3), (4, 5, 6)))
+
+        first = Vector2d()
+        prev = Vector2d(31, 97)
+        prev_prev = Vector2d(5, 7)
+
+        for Cmd in (Line, Move, Curve, Smooth, Quadratic, TepidQuadratic, Arc):
+            random_seg = self.get_random_cmd(Cmd)
+            self.assertTrue(random_seg.transform(t) is not random_seg)  # transform returns copy
+            self.assertEqual(random_seg.transform(t).name, Cmd.name)  # transform does not change Command type
+
+            T = Transform()
+            T.add_translate(10, 20)
+            A = [ T.apply_to_point(p) for p in random_seg.control_points(first, prev, prev_prev) ]
+            first2, prev2, prev_prev2 = (T.apply_to_point(p) for p in (first, prev, prev_prev))
+            B = list(random_seg.translate(Vector2d(10, 20)).control_points(first2, prev2, prev_prev2))
+            self.assertAlmostTuple(A, B)
+
+            T = Transform()
+            T.add_scale(10, 20)
+            A = [ T.apply_to_point(p) for p in random_seg.control_points(first, prev, prev_prev) ]
+            first2, prev2, prev_prev2 = (T.apply_to_point(p) for p in (first, prev, prev_prev))
+            B = list(random_seg.scale((10, 20)).control_points(first2, prev2, prev_prev2))
+            self.assertAlmostTuple(A, B)
+
+
+            T = Transform()
+            T.add_rotate(35, 15, 28)
+            A = [ T.apply_to_point(p) for p in random_seg.control_points(first, prev, prev_prev) ]
+            first2, prev2, prev_prev2 = (T.apply_to_point(p) for p in (first, prev, prev_prev))
+            B = list(random_seg.rotate(35, Vector2d(15, 28)).control_points(first2, prev2, prev_prev2))
+            self.assertAlmostTuple(A, B)
+
+
+
+    def test_absolute_relative(self):
+        absolutes = Line, Move, Curve, Smooth, Quadratic, TepidQuadratic, Arc, Vert, Horz, ZoneClose
+        relatives = line, move, curve, smooth, quadratic, tepidQuadratic, arc, vert, horz, zoneClose
+
+        zero = Vector2d()
+        for R, A in zip(relatives, absolutes):
+            rel = self.get_random_cmd(R)
+            ab = self.get_random_cmd(A)
+
+            self.assertTrue(rel.is_relative)
+            self.assertTrue(ab.is_absolute)
+
+            self.assertFalse(rel.is_absolute)
+            self.assertFalse(ab.is_relative)
+
+            self.assertEqual(type(rel.to_absolute(zero)), A)
+            self.assertEqual(type(ab.to_relative(zero)), R)
+            self.assertTrue(rel.to_relative(zero) is not rel)
+            self.assertTrue(ab.to_absolute(zero) is not ab)
+
+    def test_to_line(self):
+        self.assertEqual(Vert(3).to_line(Vector2d(5, 11)), Line(5, 3))
+        self.assertEqual(Horz(3).to_line(Vector2d(5, 11)), Line(3, 11))
+
+        self.assertEqual(vert(3).to_line(Vector2d(5, 11)), Line(5, 14))
+        self.assertEqual(horz(3).to_line(Vector2d(5, 11)), Line(8, 11))
+
+    def test_args(self):
+
+        commands = Line, Move, Curve, Smooth, Quadratic, TepidQuadratic, Arc, Vert, Horz, ZoneClose, \
+              line, move, curve, smooth, quadratic, tepidQuadratic, arc, vert, horz, zoneClose
+
+        for Cmd in commands:
+            cmd = self.get_random_cmd(Cmd)
+            self.assertEqual(len(cmd.args), cmd.nargs)
+            self.assertEqual(Cmd(*cmd.args), cmd)
+
+
 
 class PathTest(TestCase):
     """Test path API and calculations"""
+
     def _assertPath(self, path, want_string):
         """Test a normalized path string against a good value"""
         return self.assertEqual(re.sub('\\s+', ' ', str(path)), want_string)
@@ -70,8 +170,7 @@ class PathTest(TestCase):
     def test_invalid(self):
         """Load an invalid path"""
         self._assertPath(Path('& 10 10 M 20 20'), 'M 20 20')
-        self.assertRaises(InvalidPath, Segment, [])
-        self.assertRaises(InvalidPath, Line, [40,])
+        self.assertRaises(TypeError, Line, [40, ])
 
     def test_copy(self):
         """Make a copy of a path"""
@@ -111,21 +210,23 @@ class PathTest(TestCase):
         arg = ((10, 10), (4, 5), (16, -9), (20, 20))
         self.assertEqual(str(Path(arg)), 'L 10 10 L 4 5 L 16 -9 L 20 20')
 
-    def test_points(self):
+    def test_control_points(self):
         """Test how x,y points are extracted"""
         for path, ret in (
                 ('M 100 100', ((100, 100),)),
                 ('L 100 100', ((100, 100),)),
-                ('H 133', ((133, None),)),
-                ('V 144', ((None, 144),)),
-                ('T 100 100', ((100, 100),)),
+                ('H 133', ((133, 0),)),
+                ('V 144', ((0, 144),)),
+                ('Q 40 20 12 99 T 100 100', ((40, 20), (12, 99), (-16, 178), (100, 100),)),
                 ('C 12 12 15 15 20 20', ((12, 12), (15, 15), (20, 20))),
-                ('S 50 90 30 10', ((50, 90), (30, 10),)),
+                ('S 50 90 30 10', ((0, 0), (50, 90), (30, 10),)),
                 ('Q 40 20 12 99', ((40, 20), (12, 99),)),
-                ('A 1,2,3,4,5,10,20', ((10, 20),)),
-                ('Z', ()),
+                ('A 1,2,3,0,0,10,20', ((10, 20),)),
+                ('Z', ((0, 0),)),
         ):
-            self.assertEqual(Path(path)[0].points, ret)
+            points = list(Path(path).control_points)
+            self.assertEqual(len(points), len(ret), msg=path)
+            self.assertTrue(all(p.is_close(r) for p, r in zip(points, ret)), msg=path)
 
     def test_bounding_box_lines(self):
         """
@@ -142,10 +243,10 @@ class PathTest(TestCase):
         Test the bounding box calculations of a curve
         """
 
-        path=Path('M 85,14 C 104.63953,33.639531 104.71989,65.441157'
-                 ' 85,85 65.441157,104.71989 33.558843,104.71989 14,85'
-                 ' -5.7198883,65.441157 -5.6395306,33.639531 14,14'
-                 ' 33.639531,-5.6395306 65.360469,-5.6395306 85,14 Z')
+        path = Path('M 85,14 C 104.63953,33.639531 104.71989,65.441157'
+                    ' 85,85 65.441157,104.71989 33.558843,104.71989 14,85'
+                    ' -5.7198883,65.441157 -5.6395306,33.639531 14,14'
+                    ' 33.639531,-5.6395306 65.360469,-5.6395306 85,14 Z')
         bb_tuple = path.bounding_box()
         expected = (-0.760, -0.760 + 100.520, -0.730, -0.730 + 100.520)
         precision = 3
@@ -161,24 +262,24 @@ class PathTest(TestCase):
         it should be from 0,0 -> 100, 100
         """
         path = Path('M 85.355333,14.644651 '
-                     'A 50,50 0 0 1 85.355333,85.355341'
+                    'A 50,50 0 0 1 85.355333,85.355341'
                     ' 50,50 0 0 1 14.644657,85.355341'
                     ' 50,50 0 0 1 14.644676,14.644651'
                     ' 50,50 0 0 1 85.355333,14.644651 Z')
 
         bb_tuple = path.bounding_box()
-        expected = (0,100,0,100)
+        expected = (0, 100, 0, 100)
         precision = 4
 
         for i in range(4):
             self.assertAlmostEqual(bb_tuple[i], expected[i], precision)
 
-        #self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
-        #self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())
+        # self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
+        # self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())
 
     def test_adding_to_path(self):
         """Paths can be translated using addition"""
-        ret = Path('M 20,20 L 90,90 l 10,10 Z') + (50, 50)
+        ret = Path('M 20,20 L 90,90 l 10,10 Z').translate(50, 50)
         self._assertPath(ret, 'M 70 70 L 140 140 l 10 10 Z')
 
     def test_extending(self):
@@ -193,21 +294,23 @@ class PathTest(TestCase):
 
     def test_subtracting_from_path(self):
         """Paths can be translated using addition"""
-        ret = Path('M 20,20 L 90,90 l 10,10 Z') - (10, 10)
+        ret = Path('M 20,20 L 90,90 l 10,10 Z').translate(-10, -10)
         self._assertPath(ret, 'M 10 10 L 80 80 l 10 10 Z')
 
     def test_scale(self):
         """Paths can be scaled using the times operator"""
-        ret = Path('M 10,10 L 30,30 C 20 20 10 10 10 10 l 10 10') * (2.5, 3)
+        ret = Path('M 10,10 L 30,30 C 20 20 10 10 10 10 l 10 10').scale(2.5, 3)
         self._assertPath(ret, 'M 25 30 L 75 90 C 50 60 25 30 25 30 l 25 30')
 
         ret = Path("M 29.867708,101.68274 A 14.867708,14.867708 0 0 1 15,116.55045 14.867708,"
                    "14.867708 0 0 1 0.13229179,101.68274 14.867708,14.867708 0 0 1 15,86.815031 "
                    "14.867708,14.867708 0 0 1 29.867708,101.68274 Z")
-        ret.scale(1.2, 0.8)
-        self._assertPath(ret, 'M 35.8412 81.3462 A 17.8412 17.8412 0 0 1 '
-                              '18 93.2404 A 17.8412 17.8412 0 0 1 0.15875 81.3462 A 17.8412 1'
-                              '7.8412 0 0 1 18 69.452 A 17.8412 17.8412 0 0 1 35.8412 81.3462 Z')
+        ret = ret.scale(1.2, 0.8)
+        self._assertPath(ret, 'M 35.8412 81.3462 '
+                              'A 17.8412 11.8942 0 0 1 18 93.2404 '
+                              'A 17.8412 11.8942 0 0 1 0.15875 81.3462 '
+                              'A 17.8412 11.8942 0 0 1 18 69.452 '
+                              'A 17.8412 11.8942 0 0 1 35.8412 81.3462 Z')
 
     def test_absolute(self):
         """Paths can be converted to absolute"""
@@ -231,19 +334,19 @@ class PathTest(TestCase):
     def test_rotate(self):
         """Paths can be rotated"""
         ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
-        ret.rotate(35, 0, 0)
+        ret = ret.rotate(35, (0, 0))
         self._assertPath(ret, "M 0.0613938 0.348181 L 10.4885 7.64933 L 3.18737 18.0765 L -7.23976 10.7753 Z")
 
         ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
-        ret.rotate(-35, 0, 0)
+        ret = ret.rotate(-35, (0, 0))
         self._assertPath(ret, "M 0.348181 0.0613938 L 10.7753 -7.23976 L 18.0765 3.18737 L 7.64933 10.4885 Z")
 
         ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
-        ret.rotate(90, 10, -10)
+        ret = ret.rotate(90, (10, -10))
         self._assertPath(ret, "M -0.249999 -19.75 L -0.249999 -7.02083 L -12.9792 -7.02083 L -12.9792 -19.75 Z")
 
         ret = Path("M 0.24999949,0.24999949 H 12.979167 V 12.979167 H 0.24999949 Z")
-        ret.rotate(90)
+        ret = ret.rotate(90)
         self._assertPath(ret, "M 12.9792 0.249999 L 12.9792 12.9792 L 0.249999 12.9792 L 0.249999 0.249999 Z")
 
     def test_to_arrays(self):
@@ -258,17 +361,90 @@ class PathTest(TestCase):
     def test_transform(self):
         """Transform by a whole matrix"""
         ret = Path("M 100 100 L 110 120 L 140 140 L 300 300")
-        ret.transform(Transform(translate=(10, 10)))
+        ret = ret.transform(Transform(translate=(10, 10)))
         self.assertEqual(str(ret), 'M 110 110 L 120 130 L 150 150 L 310 310')
-        ret.transform(Transform(translate=(-10, -10)))
+        ret = ret.transform(Transform(translate=(-10, -10)))
         self.assertEqual(str(ret), 'M 100 100 L 110 120 L 140 140 L 300 300')
         ret = Path('M 5 5 H 10 V 15')
-        ret.transform(Transform(rotate=-10))
+        ret = ret.transform(Transform(rotate=-10))
         self.assertEqual('M 5.79228 4.0558 '
                          'L 10.7163 3.18756 '
                          'L 12.4528 13.0356',
                          str(ret))
         ret = Path("M 10 10 A 50,50 0 0 1 85.355333,85.355341 L 100 0")
-        ret.transform(Transform(scale=10))
-        self.assertEqual(str(ret), 'M 100 100 A 50 50 0 0 1 853.553 853.553 L 1000 0')
+        ret = ret.transform(Transform(scale=10))
+        self.assertEqual(str(ret), 'M 100 100 A 500 500 0 0 1 853.553 853.553 L 1000 0')
         self.assertRaises(ValueError, Horz([10]).transform, Transform())
+
+    def test_inline_transformations(self):
+        path = Path()
+        self.assertTrue(path is not path.translate(10, 20))
+        self.assertTrue(path is not path.transform(Transform(scale=10)))
+        self.assertTrue(path is not path.rotate(10))
+        self.assertTrue(path is not path.scale(10, 20))
+
+        self.assertTrue(path is path.translate(10, 20, inplace=True))
+        self.assertTrue(path is path.transform(Transform(scale=10), inplace=True))
+        self.assertTrue(path is path.rotate(10, inplace=True))
+        self.assertTrue(path is path.scale(10, 20, inplace=True))
+
+    def test_transformation_preserve_type(self):
+        import re
+        paths = [
+            "M 10 10 A 100 100 0 1 0 100 100 C 10 15 20 20 5 5 Z",
+            "m 10 10 a 100 100 0 1 0 100 100 c 10 15 20 20 5 5 z",
+            "m 10 10 l 100 200 L 20 30 C 10 20 30 40 11 12",
+            "M 10 10 Q 12 13 14 15 T 11 32 T 32 11",
+            "m 10 10 q 12 13 14 15 t 11 32 t 32 11",
+        ]
+        t = Transform(matrix=((1, 2, 3), (4, 5, 6)))
+        for path_str in paths:
+            path = Path(path_str)
+            new_path = path.transform(t)
+            cmds = "".join([cmd.letter for cmd in new_path])
+            expected = re.sub(r"\d|\s|,", "", path_str)
+
+            self.assertEqual(expected, cmds)
+            self.assertAlmostTuple(
+                [t.apply_to_point(p) for p in path.control_points],
+                list(new_path.control_points)
+            )
+
+    def test_arc_transformation(self):
+        cases = [
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((1, 0, 1), (0, 1, 0)), "M 11 10 A 100 100 0 1 0 101 100 Z"),
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((1, 0, 0), (0, 1, 1)), "M 10 11 A 100 100 0 1 0 100 101 Z"),
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((1, 0, 1), (0, 1, 1)), "M 11 11 A 100 100 0 1 0 101 101 Z"),
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((2, 0, 0), (0, 1, 0)), "M 20 10 A 200 100 0 1 0 200 100 Z"),
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((1, 0, 0), (0, 2, 0)), "M 10 20 A 200 100 90 1 0 100 200 Z"),
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((1, 0, 0), (0, -1, 0)), "M 10 -10 A 100 100 0 1 1 100 -100 Z"),
+            ("M 10 10 A 100 100 0 1 0 100 100 Z", ((1, 2, 0), (0, 2, 0)), "M 30 20 "
+                                                                          "A 292.081 68.4742 41.4375 1 0 300 200 Z"),
+            ("M 10 10 "
+             "A 100 100 0 1 0 100 100 "
+             "A 300 200 0 1 0 50 20 Z", ((1, 2, 0), (5, 6, 0)), "M 30,110 "
+                                                                "A 810.90492,49.327608 74.368134 1 1 "
+                                                                "300,1100 1981.2436,121.13604 75.800007 1 1 90,370 Z"),
+        ]
+        for path, transform, expected in cases:
+            expected = Path(expected)
+            result = Path(path).transform(Transform(matrix=transform))
+            self.assertDeepAlmostEqual(expected.to_arrays(),
+                                       result.to_arrays(), places=4)
+
+    def test_single_point_transform(self):
+        from math import sqrt, sin, cos
+        self.assertAlmostTuple(list(Path("M 10 10 30 20").control_points), ((10, 10), (30, 20)))
+        self.assertAlmostTuple(list(Path("M 10 10 30 20").transform(Transform(translate=(10,7)))
+                                    .control_points), ((20, 17), (40, 27)))
+        self.assertAlmostTuple(list(Path("M 20 20 5 0 0 7 ").transform(Transform(scale=10))
+                                    .control_points), ((200, 200), (50, 0), (0, 70)))
+
+        self.assertAlmostTuple(list(Path("M 20 20 1 0").transform(Transform(rotate=90))
+                                    .control_points), ((-20, 20), (0, 1)))
+
+        self.assertAlmostTuple(list(Path("M 20 20 1 0").transform(Transform(rotate=45))
+                                    .control_points), ((0, sqrt(20 ** 2 + 20 ** 2)), (sqrt(2)/2, sqrt(2)/2)))
+
+        self.assertAlmostTuple(list(Path("M 1 0 0 1").transform(Transform(rotate=30))
+                                    .control_points), ((sqrt(3)/2, 0.5), (-0.5, sqrt(3)/2) ))

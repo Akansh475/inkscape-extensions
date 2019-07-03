@@ -46,8 +46,8 @@ class SVGFont2Layers(inkex.Effect):
 
     def flip_cordinate_system(self, d, emsize, baseline):
         path = Path(d)
-        path.scale(1, -1)
-        path.translate(0, int(emsize) - int(baseline))
+        path.scale(1, -1, inplace=True)
+        path.translate(0, int(emsize) - int(baseline), inplace=True)
         return str(path)
 
     def effect(self):

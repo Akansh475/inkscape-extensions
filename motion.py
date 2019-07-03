@@ -23,7 +23,7 @@ import math
 from lxml import etree
 
 import inkex
-from inkex.paths import Segment, Curve
+from inkex.paths import PathCommand, Curve
 
 class Motion(inkex.Effect):
     def __init__(self):
@@ -41,7 +41,7 @@ class Motion(inkex.Effect):
         """translate path segment along vector"""
         a = []
         a.append(['M', last[:]])
-        a.append([segment.cmd, list(segment.args)])
+        a.append([segment.letter, list(segment.args)])
 
         npt = segment.translate([self.vx, self.vy])
         #defs = simplepath.pathdefs[cmd]
@@ -55,9 +55,9 @@ class Motion(inkex.Effect):
         # reverse direction of path segment
         npt = list(npt.args)
         npt[-2:] = last[0] + self.vx, last[1] + self.vy
-        if segment.cmd == 'C':
+        if segment.letter == 'C':
             npt = list(Curve(npt[2], npt[3], npt[0], npt[1], npt[4], npt[5]).args)
-        a.append([segment.cmd, npt])
+        a.append([segment.letter, npt])
 
         a.append(['Z', []])
         etree.SubElement(self.facegroup, inkex.addNS('path', 'svg'), {'d': str(inkex.Path(a))})
@@ -81,15 +81,15 @@ class Motion(inkex.Effect):
                 self.facegroup.set('style', s)
 
                 for segment in node.path:
-                    cmdcls = Segment.get_class(segment.cmd)
+                    cmdcls = PathCommand.letter_to_class(segment.letter)
                     tees = []
-                    if segment.cmd == 'C':
+                    if segment.letter == 'C':
                         bez = (last, segment[:2], segment[2:4], segment[-2:])
                         tees = [t for t in inkex.beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
                         tees.sort()
 
                     segments = []
-                    if len(tees) == 0 and segment.cmd in ['L', 'C']:
+                    if len(tees) == 0 and segment.letter in ['L', 'C']:
                         segments.append(segment)
                     elif len(tees) == 1:
                         one, two = inkex.beziersplitatt(bez, tees[0])
@@ -106,9 +106,9 @@ class Motion(inkex.Effect):
                         self.makeface(last, seg)
                         last = seg.x, seg.y
 
-                    if segment.cmd == 'M':
+                    if segment.letter == 'M':
                         subPathStart = (segment.x, segment.y)
-                    if segment.cmd == 'Z':
+                    if segment.letter == 'Z':
                         last = subPathStart
                     else:
                         last = (segment.x, segment.y)

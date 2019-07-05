@@ -28,7 +28,7 @@ from inkex.paths import CubicSuperPath
 from inkex.elements import Group, PathElement
 from inkex.localization import _
 
-class Dashit(inkex.Effect):
+class Dashit(inkex.EffectExtension):
     """Extension to convert paths into dash-array line"""
     def __init__(self):
         super(Dashit, self).__init__()

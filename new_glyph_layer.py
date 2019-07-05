@@ -21,12 +21,9 @@
 import locale
 import sys
 
-from lxml import etree
-
 import inkex
 
-
-class NewGlyphLayer(inkex.Effect):
+class NewGlyphLayer(inkex.EffectExtension):
     def __init__(self):
         super(NewGlyphLayer, self).__init__()
         self.arg_parser.add_argument("-u", "--unicodechars", type=str, dest="unicodechars",
@@ -43,21 +40,15 @@ class NewGlyphLayer(inkex.Effect):
 
         # TODO: remove duplicate chars
 
-        # Get access to main SVG document element
-        svg = self.document.getroot()
-
         for char in unicode_chars:
             # Create a new layer.
-            layer = etree.SubElement(svg, 'g')
-            layer.set(inkex.addNS('label', 'inkscape'), u'GlyphLayer-' + char)
-            layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
+            layer = self.svg.add(inkex.Group.create(u'GlyphLayer-' + char, True))
             layer.set('style', 'display:none')  # initially not visible
 
             # TODO: make it optional ("Use current selection as template glyph")
             # Move selection to the newly created layer
-            for id, node in self.selected.items():
+            for node in self.svg.selected.values():
                 layer.append(node)
-
 
 if __name__ == '__main__':
     NewGlyphLayer().run()

@@ -20,6 +20,8 @@ import inkex
 from inkex.localization import _
 from inkex.utils import NSS
 
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+
 def propStrToList(str):
     list = []
     propList = str.split(";")
@@ -39,14 +41,9 @@ def propListToDict(list):
 
     return dictio
 
-class JessyInk_Summary(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
-
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+class JessyInk_Summary(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument('--tab',  type=str, dest = 'what')
 
     def effect(self):
         # Check version.

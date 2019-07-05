@@ -3,12 +3,9 @@
 
 # Written by Tavmjong Bah
 
-from lxml import etree
-
 import inkex
 
-
-class EmptyIcon(inkex.Effect):
+class EmptyIcon(inkex.EffectExtension):
     """Empty Icon Template"""
 
     def __init__(self):
@@ -26,10 +23,7 @@ class EmptyIcon(inkex.Effect):
         root.set("height", str(size) + 'px')
         root.set("viewBox", "0 0 " + str(size) + " " + str(size))
 
-        namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
-        if namedview is None:
-            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
-
+        namedview = self.svg.namedview
         namedview.set(inkex.addNS('document-units', 'inkscape'), 'px')
 
         namedview.set(inkex.addNS('zoom', 'inkscape'), str(256.0 / size))

@@ -26,7 +26,7 @@ import inkex
 from inkex.localization import _
 from inkex.utils import inkbool
 
-class Plot(inkex.Effect):
+class Plot(inkex.EffectExtension):
     def __init__(self):
         super(Plot, self).__init__()
         self.arg_parser.add_argument('--tab',               type=str,     dest='tab')

@@ -27,75 +27,29 @@ printing marks in Inkscape.
 """
 
 import math
-
-from lxml import etree
-
 import inkex
-from inkex import inkbool
+from inkex.elements import Circle, Rectangle, TextElement
 
-
-class PrintingMarks(inkex.Effect):
+class PrintingMarks(inkex.EffectExtension):
     # Default parameters
     stroke_width = 0.25
 
-    def __init__(self):
-        super(PrintingMarks, self).__init__()
-        self.arg_parser.add_argument("--where",
-                                     type=str,
-                                     dest="where_to_crop", default=True,
-                                     help="Apply crop marks to...")
-        self.arg_parser.add_argument("--crop_marks",
-                                     type=inkbool,
-                                     dest="crop_marks", default=True,
-                                     help="Draw crop Marks?")
-        self.arg_parser.add_argument("--bleed_marks",
-                                     type=inkbool,
-                                     dest="bleed_marks", default=False,
-                                     help="Draw Bleed Marks?")
-        self.arg_parser.add_argument("--registration_marks",
-                                     type=inkbool,
-                                     dest="reg_marks", default=False,
-                                     help="Draw Registration Marks?")
-        self.arg_parser.add_argument("--star_target",
-                                     type=inkbool,
-                                     dest="star_target", default=False,
-                                     help="Draw Star Target?")
-        self.arg_parser.add_argument("--colour_bars",
-                                     type=inkbool,
-                                     dest="colour_bars", default=False,
-                                     help="Draw Colour Bars?")
-        self.arg_parser.add_argument("--page_info",
-                                     type=inkbool,
-                                     dest="page_info", default=False,
-                                     help="Draw Page Information?")
-        self.arg_parser.add_argument("--unit",
-                                     type=str,
-                                     dest="unit", default="px",
-                                     help="Draw measurement")
-        self.arg_parser.add_argument("--crop_offset",
-                                     type=float,
-                                     dest="crop_offset", default=0,
-                                     help="Offset")
-        self.arg_parser.add_argument("--bleed_top",
-                                     type=float,
-                                     dest="bleed_top", default=0,
-                                     help="Bleed Top Size")
-        self.arg_parser.add_argument("--bleed_bottom",
-                                     type=float,
-                                     dest="bleed_bottom", default=0,
-                                     help="Bleed Bottom Size")
-        self.arg_parser.add_argument("--bleed_left",
-                                     type=float,
-                                     dest="bleed_left", default=0,
-                                     help="Bleed Left Size")
-        self.arg_parser.add_argument("--bleed_right",
-                                     type=float,
-                                     dest="bleed_right", default=0,
-                                     help="Bleed Right Size")
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+    def add_arguments(self, pars):
+        pars.add_argument("--where", help="Apply crop marks to...")
+        pars.add_argument("--crop_marks", type=inkex.inkbool, default=True, help="Draw crop Marks")
+        pars.add_argument("--bleed_marks", type=inkex.inkbool, help="Draw Bleed Marks")
+        pars.add_argument("--registration_marks", type=inkex.inkbool,\
+            dest="reg_marks", default=False, help="Draw Registration Marks?")
+        pars.add_argument("--star_target", type=inkex.inkbool, help="Draw Star Target?")
+        pars.add_argument("--colour_bars", type=inkex.inkbool, help="Draw Colour Bars?")
+        pars.add_argument("--page_info", type=inkex.inkbool, help="Draw Page Information?")
+        pars.add_argument("--unit", default="px", help="Draw measurement")
+        pars.add_argument("--crop_offset", type=float, default=0.0, help="Offset")
+        pars.add_argument("--bleed_top", type=float, default=0.0, help="Bleed Top Size")
+        pars.add_argument("--bleed_bottom", type=float, default=0.0, help="Bleed Bottom Size")
+        pars.add_argument("--bleed_left", type=float, default=0.0, help="Bleed Left Size")
+        pars.add_argument("--bleed_right", type=float, default=0.0, help="Bleed Right Size")
+        pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
 
     def draw_crop_line(self, x1, y1, x2, y2, name, parent):
         style = {'stroke': '#000000', 'stroke-width': str(self.stroke_width),
@@ -103,7 +57,7 @@ class PrintingMarks(inkex.Effect):
         line_attribs = {'style': str(inkex.Style(style)),
                         'id': name,
                         'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-        etree.SubElement(parent, 'path', line_attribs)
+        parent.add(inkex.PathElement(**line_attribs))
 
     def draw_bleed_line(self, x1, y1, x2, y2, name, parent):
         style = {'stroke': '#000000', 'stroke-width': str(self.stroke_width),
@@ -113,7 +67,7 @@ class PrintingMarks(inkex.Effect):
         line_attribs = {'style': str(inkex.Style(style)),
                         'id': name,
                         'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-        etree.SubElement(parent, 'path', line_attribs)
+        parent.add(inkex.PathElement(**line_attribs))
 
     def draw_reg_circles(self, cx, cy, r, name, colours, parent):
         for i in range(len(colours)):
@@ -123,12 +77,11 @@ class PrintingMarks(inkex.Effect):
                               inkex.addNS('label', 'inkscape'): name,
                               'cx': str(cx), 'cy': str(cy),
                               'r': str((r / len(colours)) * (i + 0.5))}
-            etree.SubElement(parent, inkex.addNS('circle', 'svg'),
-                             circle_attribs)
+            parent.add(Circle(**circle_attribs))
 
     def draw_reg_marks(self, cx, cy, rotate, name, parent):
         colours = ['#000000', '#00ffff', '#ff00ff', '#ffff00', '#000000']
-        g = etree.SubElement(parent, 'g', {'id': name})
+        g = parent.add(inkex.Group(id=name))
         for i in range(len(colours)):
             style = {'fill': colours[i], 'fill-opacity': '1', 'stroke': 'none'}
             r = (self.mark_size / 2)
@@ -147,7 +100,7 @@ class PrintingMarks(inkex.Effect):
                                     ' z',
                                'transform': 'translate(' + str(cx) + ',' + str(cy) +
                                             ') rotate(' + str(rotate) + ')'}
-            etree.SubElement(g, 'path', regmark_attribs)
+            g.add(inkex.PathElement(**regmark_attribs))
 
     def draw_star_target(self, cx, cy, name, parent):
         r = (self.mark_size / 2)
@@ -163,14 +116,12 @@ class PrintingMarks(inkex.Effect):
                            inkex.addNS('label', 'inkscape'): name,
                            'transform': 'translate(' + str(cx) + ',' + str(cy) + ')',
                            'd': d}
-        etree.SubElement(parent, inkex.addNS('path', 'svg'),
-                         regmark_attribs)
+        parent.add(inkex.PathElement(**regmark_attribs))
 
     def draw_coluor_bars(self, cx, cy, rotate, name, parent):
-        g = etree.SubElement(parent, 'g', {
-            'id': name,
-            'transform': 'translate(' + str(cx) + ',' + str(cy) +
-                         ') rotate(' + str(rotate) + ')'})
+        group = parent.add(inkex.Group(id=name))
+        group.transform = inkex.Transform(translate=(cx, cy), rotate=rotate)
+        bbox = parent.bounding_box()
         l = min(self.mark_size / 3, max(bbox.width, bbox.height) / 45)
         for bar in [{'c': '*', 'stroke': '#000', 'x': 0, 'y': -(l + 1)},
                     {'c': 'r', 'stroke': '#0FF', 'x': 0, 'y': 0},
@@ -193,14 +144,14 @@ class PrintingMarks(inkex.Effect):
                          'stroke-width': '0.5',
                          'x': str((l * i * 10) + bar['x']), 'y': str(bar['y']),
                          'width': str(l), 'height': str(l)}
-                r = etree.SubElement(g, 'rect', r_att)
+                group.add(Rectangle(*r_att))
                 i += 0.1
 
     def effect(self):
         self.mark_size = self.svg.unittouu('1cm')
         self.min_mark_margin = self.svg.unittouu('3mm')
 
-        if self.options.where_to_crop == 'selection':
+        if self.options.where == 'selection':
             bbox = self.svg.get_selected_bbox()
         else:
             bbox = self.svg.get_page_bbox()
@@ -249,18 +200,16 @@ class PrintingMarks(inkex.Effect):
         if layer:
             svg.remove(layer[0])  # remove if it existis
         # Create a new layer
-        layer = etree.SubElement(svg, 'g')
+        layer = svg.add(inkex.Group.create("Printing Marks", True))
         layer.set('id', 'printing-marks')
-        layer.set(inkex.addNS('label', 'inkscape'), 'Printing Marks')
-        layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
-        layer.set(inkex.addNS('insensitive', 'sodipodi'), 'true')
+        layer.set('sodipodi:insensitive', 'true')
 
         # Crop Mark
         if self.options.crop_marks:
             # Create a group for Crop Mark
             g_attribs = {inkex.addNS('label', 'inkscape'): 'CropMarks',
                          'id': 'CropMarks'}
-            g_crops = etree.SubElement(layer, 'g', g_attribs)
+            g_crops = layer.add(inkex.Group(**g_attribs))
 
             # Top left Mark
             self.draw_crop_line(bbox.left, offset_top,
@@ -299,7 +248,7 @@ class PrintingMarks(inkex.Effect):
             # Create a group for Bleed Mark
             g_attribs = {inkex.addNS('label', 'inkscape'): 'BleedMarks',
                          'id': 'BleedMarks'}
-            g_bleed = etree.SubElement(layer, 'g', g_attribs)
+            g_bleed = layer.add(inkex.Group(**g_attribs))
 
             # Top left Mark
             self.draw_bleed_line(bbox.left - bl, offset_top - bmt,
@@ -338,7 +287,7 @@ class PrintingMarks(inkex.Effect):
             # Create a group for Registration Mark
             g_attribs = {inkex.addNS('label', 'inkscape'): 'RegistrationMarks',
                          'id': 'RegistrationMarks'}
-            g_center = etree.SubElement(layer, 'g', g_attribs)
+            g_center = layer.add(inkex.Group(**g_attribs))
 
             # Left Mark
             cx = max(bml + offset, self.min_mark_margin)
@@ -369,7 +318,7 @@ class PrintingMarks(inkex.Effect):
             # Create a group for Star Target
             g_attribs = {inkex.addNS('label', 'inkscape'): 'StarTarget',
                          'id': 'StarTarget'}
-            g_center = etree.SubElement(layer, 'g', g_attribs)
+            g_center = layer.add(inkex.Group(**g_attribs))
 
             if bbox.height < bbox.width:
                 # Left Star
@@ -399,7 +348,7 @@ class PrintingMarks(inkex.Effect):
             # Create a group for Colour Bars
             g_attribs = {inkex.addNS('label', 'inkscape'): 'ColourBars',
                          'id': 'PrintingColourBars'}
-            g_center = etree.SubElement(layer, 'g', g_attribs)
+            g_center = layer.add(inkex.Group(**g_attribs))
 
             if bbox.height > bbox.width:
                 # Left Bars
@@ -433,18 +382,18 @@ class PrintingMarks(inkex.Effect):
             # Create a group for Page Information
             g_attribs = {inkex.addNS('label', 'inkscape'): 'PageInformation',
                          'id': 'PageInformation'}
-            g_pag_info = etree.SubElement(layer, 'g', g_attribs)
+            g_pag_info = layer.add(inkex.Group(**g_attribs))
             y_margin = max(bmb + offset, self.min_mark_margin)
             txt_attribs = {
                 'style': 'font-size:12px;font-style:normal;font-weight:normal;fill:#000000;font-family:Bitstream Vera Sans,sans-serif;text-anchor:middle;text-align:center',
                 'x': str(middle_horizontal),
                 'y': str(bbox.bottom + y_margin + self.mark_size + 20)
             }
-            txt = etree.SubElement(g_pag_info, 'text', txt_attribs)
+            txt = g_pag_info.add(TextElement(**txt_attribs))
             txt.text = 'Page size: ' + \
-                       str(round(self.uutounit(bbox.width, self.options.unit), 2)) + \
+                       str(round(self.svg.uutounit(bbox.width, self.options.unit), 2)) + \
                        'x' + \
-                       str(round(self.uutounit(bbox.height, self.options.unit), 2)) + \
+                       str(round(self.svg.uutounit(bbox.height, self.options.unit), 2)) + \
                        ' ' + self.options.unit
 
 

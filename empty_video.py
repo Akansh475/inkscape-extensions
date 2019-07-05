@@ -5,12 +5,9 @@
 
 import re
 
-from lxml import etree
-
 import inkex
 
-
-class EmptyVideo(inkex.Effect):
+class EmptyVideo(inkex.EffectExtension):
     """Empty video template"""
 
     def __init__(self):
@@ -41,10 +38,7 @@ class EmptyVideo(inkex.Effect):
         root.set("height", str(height) + 'px')
         root.set("viewBox", "0 0 " + str(width) + " " + str(height))
 
-        namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
-        if namedview is None:
-            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
-
+        namedview = self.svg.namedview
         namedview.set(inkex.addNS('document-units', 'inkscape'), 'px')
         namedview.set(inkex.addNS('cx', 'inkscape'), str(width / 2.0))
         namedview.set(inkex.addNS('cy', 'inkscape'), str(height / 2.0))

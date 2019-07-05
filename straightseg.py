@@ -21,29 +21,23 @@ import inkex
 
 from inkex.bezier import percent_point
 
-from inkex.elements import PathElement
-
-class SegmentStraightener(inkex.Effect):
-    def __init__(self):
-        super(SegmentStraightener, self).__init__()
-        self.arg_parser.add_argument("-p", "--percent",
-                         type=float,
-                        dest="percent", default=10.0,
-                        help="move curve handles PERCENT percent closer to a straight line")
-        self.arg_parser.add_argument("-b", "--behavior",
-                         type=int,
-                        dest="behave", default=1,
-                        help="straightening behavior for cubic segments")
+class SegmentStraightener(inkex.EffectExtension):
+    """Make segments straiter"""
+    def add_arguments(self, pars):
+        pars.add_argument("-p", "--percent", type=float, default=10.0,\
+            help="move curve handles PERCENT percent closer to a straight line")
+        pars.add_argument("-b", "--behavior", type=int, default=1,\
+            help="straightening behavior for cubic segments")
 
     def effect(self):
         for node in self.svg.selected.values():
-            if isinstance(node, PathElement):
+            if isinstance(node, inkex.PathElement):
                 p = node.path.to_arrays()
                 last = []
                 subPathStart = []
                 for cmd,params in p:
                     if cmd == 'C':
-                        if self.options.behave <= 1:
+                        if self.options.behavior <= 1:
                             #shorten handles towards end points
                             params[:2] = percent_point(params[:2],last[:],self.options.percent)
                             params[2:4] = percent_point(params[2:4],params[-2:],self.options.percent)
@@ -62,7 +56,7 @@ class SegmentStraightener(inkex.Effect):
                         last = subPathStart[:]
                     else:
                         last = params[-2:]
-                node.set('d', str(inkex.Path(p)))
+                node.path = p
 
 if __name__ == '__main__':
     SegmentStraightener().run()

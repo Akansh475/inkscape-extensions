@@ -21,29 +21,13 @@
 import inkex
 from inkex.elements import Guide
 
-class SetupTypographyCanvas(inkex.Effect):
-    def __init__(self):
-        super(SetupTypographyCanvas, self).__init__()
-        self.arg_parser.add_argument("-e", "--emsize",
-                                     type=int,
-                                     dest="emsize", default=1000,
-                                     help="Em-size")
-        self.arg_parser.add_argument("-a", "--ascender",
-                                     type=int,
-                                     dest="ascender", default='750',
-                                     help="Ascender")
-        self.arg_parser.add_argument("-c", "--caps",
-                                     type=int,
-                                     dest="caps", default='700',
-                                     help="Caps Height")
-        self.arg_parser.add_argument("-x", "--xheight",
-                                     type=int,
-                                     dest="xheight", default='500',
-                                     help="x-height")
-        self.arg_parser.add_argument("-d", "--descender",
-                                     type=int,
-                                     dest="descender", default='250',
-                                     help="Descender")
+class SetupTypographyCanvas(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("-e", "--emsize", type=int, default=1000)
+        pars.add_argument("-c", "--caps", type=int, default=700, help="Caps Height")
+        pars.add_argument("-x", "--xheight", type=int, default=500)
+        pars.add_argument("-a", "--ascender", type=int, default=750)
+        pars.add_argument("-d", "--descender", type=int, default=250)
 
     def create_horizontal_guideline(self, name, position):
         return self.svg.add(Guide().move_to(0, position, (0, 1)).update(inkscape__label=name))
@@ -60,7 +44,6 @@ class SetupTypographyCanvas(inkex.Effect):
         descender = self.options.descender
 
         # Get access to main SVG document element
-        self.svg = self.document.getroot()
         self.svg.set("width", str(emsize))
         self.svg.set("height", str(emsize))
         self.svg.set("viewBox", "0 0 " + str(emsize) + " " + str(emsize))

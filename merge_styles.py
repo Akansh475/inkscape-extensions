@@ -106,13 +106,11 @@ def get_styles(document):
     return ret
 
 
-class MergeStyles(inkex.Effect):
+class MergeStyles(inkex.EffectExtension):
     """Merge any styles which are the same for CSS"""
-
-    def __init__(self):
-        super(MergeStyles, self).__init__()
-        self.arg_parser.add_argument("-n", "--name", type=str, dest="name", default='',
-                                     help="Name of selected element's common class")
+    def add_arguments(self, pars):
+        self.arg_parser.add_argument("-n", "--name", type=str, dest="name", default='',\
+             help="Name of selected element's common class")
 
     def effect(self):
         """Apply the style effect"""

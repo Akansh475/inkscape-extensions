@@ -20,6 +20,7 @@ import inkex
 from inkex import inkbool
 from inkex.localization import _
 from inkex.utils import NSS
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
 def propStrToList(str):
     list = []
@@ -40,17 +41,12 @@ def propListToDict(list):
 
     return dictio
 
-class JessyInk_Effects(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
-
+class JessyInk_Effects(inkex.EffectExtension):
+    def add_arguments(self, pars):
         self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
         self.arg_parser.add_argument('--viewOrder',  type=str, dest = 'viewOrder', default = 1)
         self.arg_parser.add_argument('--viewDuration',  type=float, dest = 'viewDuration', default = 0.8)
         self.arg_parser.add_argument('--removeView',  type=inkbool, dest = 'removeView', default = False)
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.

@@ -25,15 +25,11 @@ from lxml import etree
 import inkex
 from inkex.localization import _
 from inkex.utils import NSS
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_Effects(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
-
+class JessyInk_Effects(inkex.EffectExtension):
+    def add_arguments(self, pars):
         self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Check version.

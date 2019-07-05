@@ -3,13 +3,9 @@
 
 # Rewritten by Tavmjong Bah to add correct viewBox, inkscape:cx, etc. attributes
 
-from lxml import etree
-
 import inkex
-from inkex.utils import inkbool
 
-
-class EmptyPage(inkex.Effect):
+class EmptyPage(inkex.EffectExtension):
     """An empty page extension"""
 
     def __init__(self):
@@ -20,7 +16,7 @@ class EmptyPage(inkex.Effect):
                                      default="vertical", help="Page orientation")
         self.arg_parser.add_argument("-b", "--background", type=str, dest="page_background",
                                      default="normal", help="Page background")
-        self.arg_parser.add_argument("-n", "--noborder", type=inkbool, dest="page_noborder",
+        self.arg_parser.add_argument("-n", "--noborder", type=inkex.inkbool, dest="page_noborder",
                                      default=False)
 
     def effect(self):
@@ -57,10 +53,7 @@ class EmptyPage(inkex.Effect):
         root.set("height", str(height) + units)
         root.set("viewBox", "0 0 " + str(width) + " " + str(height))
 
-        namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
-        if namedview is None:
-            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
-
+        namedview = self.svg.namedview
         namedview.set(inkex.addNS('document-units', 'inkscape'), units)
 
         # Until units are supported in 'cx', etc.

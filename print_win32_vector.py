@@ -50,9 +50,9 @@ LOGBRUSH = ctypes.c_long * 3
 DM_IN_PROMPT = 4                        # call printer property sheet
 DM_OUT_BUFFER = 2                       # write to DEVMODE structure
 
-class MyEffect(inkex.Effect):
+class PrintWin32Vector(inkex.EffectExtension):
     def __init__(self):
-        super(MyEffect, self).__init__()
+        super(PrintWin32Vector, self).__init__()
         self.visibleLayers = True       # print only visible layers
 
     def process_shape(self, node, mat):
@@ -213,4 +213,4 @@ class MyEffect(inkex.Effect):
         mygdi.EndDoc(self.hDC)
 
 if __name__ == '__main__':
-    MyEffect().run()
+    PrintWin32Vector().run()

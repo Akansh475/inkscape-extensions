@@ -22,12 +22,10 @@
 
 import copy
 
-from lxml import etree
-
 import inkex
+from inkex.localization import _
 
-
-class MarkerStrokePaintEffect(inkex.Effect):
+class MarkerStrokePaintEffect(inkex.EffectExtension):
     def __init__(self):
         super(MarkerStrokePaintEffect, self).__init__()
         self.arg_parser.add_argument(
@@ -62,9 +60,7 @@ class MarkerStrokePaintEffect(inkex.Effect):
                 help="The selected custom color tab when OK was pressed")
 
     def effect(self):
-        defs = self.svg.getElement('/svg:svg//svg:defs')
-        if defs == None:
-            defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
+        defs = self.svg.defs
 
         for id, node in self.svg.selected.items():
             mprops = ['marker', 'marker-start', 'marker-mid', 'marker-end']

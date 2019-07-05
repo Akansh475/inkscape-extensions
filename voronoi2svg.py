@@ -30,17 +30,12 @@ import random
 
 import inkex
 from inkex.elements import Group, Rectangle, PathElement
+from inkex.transforms import Vector2d as Point
 from inkex.localization import _
 
 import voronoi
 
-class Point(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
-class Voronoi2svg(inkex.Effect):
+class Voronoi2svg(inkex.EffectExtension):
     """Extension to create a Voronoi diagram."""
     def add_arguments(self, pars):
         pars.add_argument('--tab')

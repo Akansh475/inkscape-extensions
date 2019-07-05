@@ -33,11 +33,7 @@ Parametric Curves has no real description, even in the inx file, which is really
 
 from math import pi, cos, sin, tan
 
-from lxml import etree
-
 import inkex
-from inkex.paths import Path
-from inkex.utils import inkbool
 
 def maths_eval(user_function):
     """Try and make the eval safer"""
@@ -145,14 +141,14 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
     return a
 
 
-class ParamCurves(inkex.Effect):
+class ParamCurves(inkex.EffectExtension):
     def __init__(self):
         super(ParamCurves, self).__init__()
         self.arg_parser.add_argument("--t_start", type=float, dest="t_start", default=0.0,
                                      help="Start t-value")
         self.arg_parser.add_argument("--t_end", type=float, dest="t_end", default=1.0,
                                      help="End t-value")
-        self.arg_parser.add_argument("--times2pi", type=inkbool, dest="times2pi", default=True,
+        self.arg_parser.add_argument("--times2pi", type=inkex.inkbool, dest="times2pi", default=True,
                                      help="Multiply t-range by 2*pi")
         self.arg_parser.add_argument("--xleft", type=float, dest="xleft", default=-1.0,
                                      help="x-value of rectangle's left")
@@ -168,11 +164,11 @@ class ParamCurves(inkex.Effect):
                                      help="fx(t) for plotting")
         self.arg_parser.add_argument("--fofy", type=str, dest="fofy", default="sin(5*t)",
                                      help="fy(t) for plotting")
-        self.arg_parser.add_argument("--remove", type=inkbool, dest="remove", default=True,
+        self.arg_parser.add_argument("--remove", type=inkex.inkbool, dest="remove", default=True,
                                      help="If True, source rectangle is removed")
-        self.arg_parser.add_argument("--isoscale", type=inkbool, dest="isoscale", default=True,
+        self.arg_parser.add_argument("--isoscale", type=inkex.inkbool, dest="isoscale", default=True,
                                      help="If True, isotropic scaling is used")
-        self.arg_parser.add_argument("--drawaxis", type=inkbool, dest="drawaxis", default=True,
+        self.arg_parser.add_argument("--drawaxis", type=inkex.inkbool, dest="drawaxis", default=True,
                                      help="If True, axis are drawn")
         self.arg_parser.add_argument("--tab", type=str, dest="tab", default="sampling",
                                      help="The selected UI-tab when OK was pressed")
@@ -185,7 +181,7 @@ class ParamCurves(inkex.Effect):
         for id, node in self.svg.selected.items():
             if node.tag == inkex.addNS('rect', 'svg'):
                 # create new path with basic dimensions of selected rectangle
-                newpath = etree.Element(inkex.addNS('path', 'svg'))
+                newpath = inkex.PathElement()
                 x = float(node.get('x'))
                 y = float(node.get('y'))
                 w = float(node.get('width'))
@@ -201,7 +197,7 @@ class ParamCurves(inkex.Effect):
                     newpath.set('transform', t)
 
                 # top and bottom were exchanged
-                newpath.set('d', str(Path(
+                newpath.set('d', str(inkex.Path(
                         drawfunction(self.options.t_start,
                                      self.options.t_end,
                                      self.options.xleft,

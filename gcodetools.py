@@ -2835,7 +2835,7 @@ class Polygon(object):
 #
 ################################################################################
 
-class Gcodetools(inkex.Effect):
+class Gcodetools(inkex.EffectExtension):
 
     def export_gcode(self, gcode, no_headers=False):
         if self.options.postprocessor != "" or self.options.postprocessor_custom != "":

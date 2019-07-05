@@ -132,22 +132,16 @@ def report_findings(findings):
         else:
             inkex.errormsg(_(u"Found the following fonts:\n%s") % '\n'.join(findings))
 
-class ReplaceFont(inkex.Effect):
+class ReplaceFont(inkex.EffectExtension):
     """
     Replaces all instances of one font with another
     """
-    def __init__(self):
-        super(ReplaceFont, self).__init__()
-        self.arg_parser.add_argument("--fr_find", type=str, dest="fr_find",
-                                     default=None, help="")
-        self.arg_parser.add_argument("--fr_replace", type=str, dest="fr_replace",
-                                     default=None, help="")
-        self.arg_parser.add_argument("--r_replace", type=str, dest="r_replace",
-                                     default=None, help="")
-        self.arg_parser.add_argument("--action", type=str, dest="action",
-                                     default=None, help="")
-        self.arg_parser.add_argument("--scope", type=str, dest="scope",
-                                     default=None, help="")
+    def add_arguments(self, pars):
+        pars.add_argument("--fr_find")
+        pars.add_argument("--fr_replace")
+        pars.add_argument("--r_replace")
+        pars.add_argument("--action")
+        pars.add_argument("--scope")
 
     def find_child_text_items(self, node):
         """
@@ -155,9 +149,11 @@ class ReplaceFont(inkex.Effect):
         to self.selected_items
         """
         if is_text(node):
-            self.selected_items.append(node)
-            for child in node:
-                self.find_child_text_items(child)
+            yield node
+
+        for child in node:
+            for textchild in self.find_child_text_items(child):
+                yield textchild
 
     def relevant_items(self, scope):
         """
@@ -166,17 +162,18 @@ class ReplaceFont(inkex.Effect):
         """
         items = []
         to_return = []
+
+        selected = self.svg
         if scope == "selection_only":
-            self.selected_items = []
-            for item in self.selected.items():
-                self.find_child_text_items(item[1])
-            items = self.selected_items
-            if len(items) == 0:
-                return inkex.errormsg(_("There was nothing selected"))
-        else:
-            items = self.document.getroot().getiterator()
-        to_return.extend(filter(is_text, items))
-        return to_return
+            selected = self.svg.selected.values()
+
+        for item in selected:
+            items.extend(self.find_child_text_items(item))
+
+        if not items:
+            return inkex.errormsg(_("There was nothing selected"))
+
+        return items
 
     def find_replace(self, nodes, find, replace):
         """

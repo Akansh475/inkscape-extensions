@@ -20,19 +20,16 @@ import inkex
 from inkex.localization import _
 from inkex.utils import NSS
 
-class JessyInk_Transitions(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-        self.arg_parser.add_argument('--layerName',  type=str, dest = 'layerName', default = '')
-        self.arg_parser.add_argument('--effectIn',  type=str, dest = 'effectIn', default = 'default')
-        self.arg_parser.add_argument('--effectInDuration',  type=float, dest = 'effectInDuration', default = 0.8)
-        self.arg_parser.add_argument('--effectOut',  type=str, dest = 'effectOut', default = 'default')
-        self.arg_parser.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+class JessyInk_Transitions(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument('--tab',  type=str, dest = 'what')
+        pars.add_argument('--layerName',  type=str, dest = 'layerName', default = '')
+        pars.add_argument('--effectIn',  type=str, dest = 'effectIn', default = 'default')
+        pars.add_argument('--effectInDuration',  type=float, dest = 'effectInDuration', default = 0.8)
+        pars.add_argument('--effectOut',  type=str, dest = 'effectOut', default = 'default')
+        pars.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
 
     def effect(self):
         # Check version.

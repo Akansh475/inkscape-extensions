@@ -103,7 +103,7 @@ def transform_dimensions(transform, width=None, height=None, inverse=False):
         return height
 
 
-class PixelSnapEffect(inkex.Effect):
+class PixelSnapEffect(inkex.EffectExtension):
     def add_arguments(self, pars):
         """Add inx options"""
         pars.add_argument("-a", "--snap_ancestors", type=inkex.inkbool, default=True,\

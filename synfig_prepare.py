@@ -447,7 +447,7 @@ def get_dimension(s="1024"):
 
 
 ###### Main Class #########################################
-class SynfigPrep(inkex.Effect):
+class SynfigPrep(inkex.EffectExtension):
     def effect(self):
         """Transform document in preparation for exporting it into the Synfig format"""
 

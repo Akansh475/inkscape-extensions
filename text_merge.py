@@ -21,35 +21,25 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+#
+"""
+Merge text blocks together.
+"""
 
 import inkex
 from inkex.elements import (
     Rectangle, FlowRoot, FlowPara, FlowRegion, TextElement, Tspan
 )
 
-class Merge(inkex.Effect):
-    def __init__(self):
-        super(Merge, self).__init__()
-        self.arg_parser.add_argument("-d", "--direction",
-                                     type=str,
-                                     dest="direction", default="tb",
-                                     help="direction to merge text")
-        self.arg_parser.add_argument("-x", "--xanchor",
-                                     type=str,
-                                     dest="xanchor", default="center_x",
-                                     help="horizontal point to compare")
-        self.arg_parser.add_argument("-y", "--yanchor",
-                                     type=str,
-                                     dest="yanchor", default="center_y",
-                                     help="vertical point to compare")
-        self.arg_parser.add_argument("-t", "--flowtext",
-                                     type=inkex.inkbool,
-                                     dest="flowtext", default=False,
-                                     help="use a flow text structure instead of a normal text element")
-        self.arg_parser.add_argument("-k", "--keepstyle",
-                                     type=inkex.inkbool,
-                                     dest="keepstyle", default=False,
-                                     help="keep format")
+class Merge(inkex.EffectExtension):
+    """Merge text blocks together"""
+    def add_arguments(self, pars):
+        pars.add_argument("-d", "--direction", default="tb", help="direction to merge text")
+        pars.add_argument("-x", "--xanchor", default="center_x", help="horiz point to compare")
+        pars.add_argument("-y", "--yanchor", default="center_y", help="vertical point to compare")
+        pars.add_argument("-k", "--keepstyle", help="keep format")
+        pars.add_argument("-t", "--flowtext", type=inkex.inkbool,\
+            help="use a flow text structure instead of a normal text element")
 
     def effect(self):
         if not self.svg.selected:
@@ -113,6 +103,7 @@ class Merge(inkex.Effect):
                 rect.set('width', 200)
 
     def recurse(self, text_span, node, span):
+        """Recursively go through each node self calling on child nodes"""
         if not isinstance(node, FlowRegion):
 
             newspan = span.add(text_span())

@@ -22,30 +22,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+"""
+Extract text and print it to the error console.
+"""
 
-import copy
-import sys
-
-from lxml import etree
+from lxml.etree import tostring
 
 import inkex
 
-
-class Extract(inkex.Effect):
-    def __init__(self):
-        super(Extract, self).__init__()
-        self.arg_parser.add_argument("-d", "--direction",
-                                     type=str,
-                                     dest="direction", default="tb",
-                                     help="direction to extract text")
-        self.arg_parser.add_argument("-x", "--xanchor",
-                                     type=str,
-                                     dest="xanchor", default="center_x",
-                                     help="horizontal point to compare")
-        self.arg_parser.add_argument("-y", "--yanchor",
-                                     type=str,
-                                     dest="yanchor", default="center_y",
-                                     help="vertical point to compare")
+class Extract(inkex.EffectExtension):
+    """Extract text and print out"""
+    def add_arguments(self, pars):
+        pars.add_argument("-d", "--direction", default="tb", help="direction to extract text")
+        pars.add_argument("-x", "--xanchor", default="center_x", help="horiz point to compare")
+        pars.add_argument("-y", "--yanchor", default="center_y", help="vertical point to compare")
 
     def effect(self):
         if not self.svg.selected:
@@ -78,11 +68,12 @@ class Extract(inkex.Effect):
                 self.recurse(node)
 
     def recurse(self, node):
+        """Go through each node and recusively self call for all children"""
         if node.text is not None or node.tail is not None:
             for child in node:
                 if child.get('sodipodi:role'):
                     child.tail = "\n"
-            inkex.errormsg(etree.tostring(node, encoding='unicode', method='text').strip())
+            inkex.errormsg(tostring(node, encoding='unicode', method='text').strip())
         else:
             for child in node:
                 self.recurse(child)

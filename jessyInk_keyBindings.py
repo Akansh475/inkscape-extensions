@@ -25,7 +25,7 @@ from inkex.localization import _
 from inkex.utils import NSS
 
 
-class JessyInk_CustomKeyBindings(inkex.Effect):
+class JessyInk_CustomKeyBindings(inkex.EffectExtension):
     modes = ('slide', 'index', 'drawing')
     keyCodes = ('LEFT', 'RIGHT', 'DOWN', 'UP', 'HOME', 'END', 'ENTER', 'SPACE', 'PAGE_UP', 'PAGE_DOWN', 'ESCAPE')
     slideActions = {}
@@ -40,7 +40,7 @@ class JessyInk_CustomKeyBindings(inkex.Effect):
 
     def __init__(self):
         # Call the base class constructor.
-        inkex.Effect.__init__(self)
+        inkex.EffectExtension.__init__(self)
 
         effect = self
         class SlideAction(argparse.Action):

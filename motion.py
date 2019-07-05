@@ -24,18 +24,14 @@ from lxml import etree
 
 import inkex
 from inkex.paths import PathCommand, Curve
+from inkex.bezier import beziertatslope, beziersplitatt
 
-class Motion(inkex.Effect):
-    def __init__(self):
-        super(Motion, self).__init__()
-        self.arg_parser.add_argument("-a", "--angle",
-                                     type=float,
-                                     dest="angle", default=45.0,
-                                     help="direction of the motion vector")
-        self.arg_parser.add_argument("-m", "--magnitude",
-                                     type=float,
-                                     dest="magnitude", default=100.0,
-                                     help="magnitude of the motion vector")
+class Motion(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("-a", "--angle", type=float, default=45.0,\
+             help="direction of the motion vector")
+        pars.add_argument("-m", "--magnitude", type=float, default=100.0,\
+             help="magnitude of the motion vector")
 
     def makeface(self, last, segment):
         """translate path segment along vector"""
@@ -85,19 +81,19 @@ class Motion(inkex.Effect):
                     tees = []
                     if segment.letter == 'C':
                         bez = (last, segment[:2], segment[2:4], segment[-2:])
-                        tees = [t for t in inkex.beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
+                        tees = [t for t in beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
                         tees.sort()
 
                     segments = []
                     if len(tees) == 0 and segment.letter in ['L', 'C']:
                         segments.append(segment)
                     elif len(tees) == 1:
-                        one, two = inkex.beziersplitatt(bez, tees[0])
+                        one, two = beziersplitatt(bez, tees[0])
                         segments.append(cmdcls(one[1] + one[2] + one[3]))
                         segments.append(cmdcls(two[1] + two[2] + two[3]))
                     elif len(tees) == 2:
-                        one, two = inkex.beziersplitatt(bez, tees[0])
-                        two, three = inkex.beziersplitatt(two, tees[1])
+                        one, two = beziersplitatt(bez, tees[0])
+                        two, three = beziersplitatt(two, tees[1])
                         segments.append(cmdcls(one[1] + one[2] + one[3]))
                         segments.append(cmdcls(two[1] + two[2] + two[3]))
                         segments.append(cmdcls(three[1] + three[2] + three[3]))

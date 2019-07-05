@@ -37,7 +37,7 @@ def points_to_ppi(points):
     return caliper_to_ppi(points / 1000.0)
 
 
-class PerfectBoundCover(inkex.Effect):
+class PerfectBoundCover(inkex.EffectExtension):
     def __init__(self):
         super(PerfectBoundCover, self).__init__()
         self.arg_parser.add_argument("--width",

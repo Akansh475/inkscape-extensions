@@ -53,7 +53,7 @@ except locale.Error:
     locale.setlocale(locale.LC_ALL, 'C')
 
 
-class Length(inkex.Effect):
+class Length(inkex.EffectExtension):
     def __init__(self):
         super(Length, self).__init__()
         self.arg_parser.add_argument("--type",

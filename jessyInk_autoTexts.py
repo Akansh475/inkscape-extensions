@@ -19,15 +19,12 @@ import inkex
 from inkex.localization import _
 from inkex.utils import NSS
 
-class JessyInk_AutoTexts(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-        self.arg_parser.add_argument('--autoText',  type=str, dest = 'autoText', default = 'none')
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+class JessyInk_AutoTexts(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument('--tab',  dest='what')
+        pars.add_argument('--autoText', default='none')
 
     def effect(self):
         # Check version.
@@ -55,7 +52,5 @@ class JessyInk_AutoTexts(inkex.Effect):
                     if "{" + NSS["jessyink"] + "}autoText" in nodes[0].attrib:
                         del nodes[0].attrib["{" + NSS["jessyink"] + "}autoText"]
 
-
 if __name__ == '__main__':
     JessyInk_AutoTexts().run()
-

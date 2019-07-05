@@ -5,12 +5,9 @@
 
 import re
 
-from lxml import etree
-
 import inkex
 
-
-class BusinessCard(inkex.Effect):
+class BusinessCard(inkex.EffectExtension):
     def __init__(self):
         super(BusinessCard, self).__init__()
         self.arg_parser.add_argument("-s", "--size", type=str, dest="card_size",
@@ -32,10 +29,7 @@ class BusinessCard(inkex.Effect):
         root.set("height", height + height_unit)
         root.set("viewBox", "0 0 " + width + " " + height)
 
-        namedview = root.find(inkex.addNS('namedview', 'sodipodi'))
-        if namedview is None:
-            namedview = etree.SubElement(root, inkex.addNS('namedview', 'sodipodi'))
-
+        namedview = self.svg.namedview
         namedview.set(inkex.addNS('document-units', 'inkscape'), width_unit)
 
         width_int = int(self.svg.uutounit(float(width), 'px'))

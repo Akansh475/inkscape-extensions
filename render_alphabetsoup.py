@@ -22,7 +22,6 @@
 
 import cmath
 import copy
-import itertools
 import math
 import os
 import random
@@ -32,11 +31,10 @@ import sys
 from lxml import etree
 
 import inkex
-import render_alphabetsoup_config
-from inkex import Transform, inkbool
 from inkex.transforms import Vector2d
-from inkex.paths import Path
-from inkex.elements import PathElement
+from inkex.elements import SVG_PARSER
+
+import render_alphabetsoup_config
 
 syntax = render_alphabetsoup_config.syntax
 alphabet = render_alphabetsoup_config.alphabet
@@ -44,22 +42,22 @@ units = render_alphabetsoup_config.units
 font = render_alphabetsoup_config.font
 
 
-# Loads a super-path from a given SVG file
-def loadPath(svgPath):
-    extensionDir = os.path.normpath(
-            os.path.join(os.getcwd(), os.path.dirname(__file__))
+def load_path(filename):
+    """Loads a super-path from a given SVG file"""
+    base = os.path.normpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__))
     )
     # __file__ is better then sys.argv[0] because this file may be a module
     # for another one.
-    tree = etree.parse(extensionDir + "/" + svgPath)
+    fullpath = os.path.join(base, filename)
+    tree = etree.parse(fullpath, parser=SVG_PARSER)
     root = tree.getroot()
-    pathElement = root.find('{http://www.w3.org/2000/svg}path')
-    if pathElement is None:
+    elem = root.findone('svg:path')
+    if elem is None:
         return None, 0, 0
-    d = pathElement.get("d")
     width = float(root.get("width"))
     height = float(root.get("height"))
-    return Path(d).to_arrays(), width, height  # Currently we only support a single path
+    return elem.path.to_arrays(), width, height  # Currently we only support a single path
 
 
 def combinePaths(pathA, pathB):
@@ -113,7 +111,7 @@ def _tp_cb(p, height):
 
 def flip(sp, cb, param):
     # print('flip before +' + str(sp))
-    p = Path(sp)
+    p = inkex.Path(sp)
     cb(p, param)
     del sp[:]
 
@@ -181,82 +179,6 @@ def findRealRoots(a, b, c, d):
     return []
 
 
-def getPathBoundingBox(sp):
-    box = None
-    last = None
-    lostctrl = None
-
-    for cmd, params in sp:
-
-        segmentBox = None
-
-        if cmd == 'M':
-            # A move cannot contribute to the bounding box
-            last = params[:]
-            lastctrl = params[:]
-        elif cmd == 'L':
-            if last:
-                segmentBox = (min(params[0], last[0]), max(params[0], last[0]), min(params[1], last[1]), max(params[1], last[1]))
-            last = params[:]
-            lastctrl = params[:]
-        elif cmd == 'C':
-            if last:
-                segmentBox = (min(params[4], last[0]), max(params[4], last[0]), min(params[5], last[1]), max(params[5], last[1]))
-
-                bx0, by0 = last[:]
-                bx1, by1, bx2, by2, bx3, by3 = params[:]
-
-                # Compute the x limits
-                a = (-bx0 + 3 * bx1 - 3 * bx2 + bx3) * 3
-                b = (3 * bx0 - 6 * bx1 + 3 * bx2) * 2
-                c = (-3 * bx0 + 3 * bx1)
-                ts = findRealRoots(0, a, b, c)
-                for t in ts:
-                    if 0 <= t <= 1:
-                        x = (-bx0 + 3 * bx1 - 3 * bx2 + bx3) * (t ** 3) + \
-                            (3 * bx0 - 6 * bx1 + 3 * bx2) * (t ** 2) + \
-                            (-3 * bx0 + 3 * bx1) * t + \
-                            bx0
-                        segmentBox = (min(segmentBox[0], x), max(segmentBox[1], x), segmentBox[2], segmentBox[3])
-
-                # Compute the y limits
-                a = (-by0 + 3 * by1 - 3 * by2 + by3) * 3
-                b = (3 * by0 - 6 * by1 + 3 * by2) * 2
-                c = (-3 * by0 + 3 * by1)
-                ts = findRealRoots(0, a, b, c)
-                for t in ts:
-                    if 0 <= t <= 1:
-                        y = (-by0 + 3 * by1 - 3 * by2 + by3) * (t ** 3) + \
-                            (3 * by0 - 6 * by1 + 3 * by2) * (t ** 2) + \
-                            (-3 * by0 + 3 * by1) * t + \
-                            by0
-                        segmentBox = (segmentBox[0], segmentBox[1], min(segmentBox[2], y), max(segmentBox[3], y))
-
-            last = params[-2:]
-            lastctrl = params[2:4]
-
-        elif cmd == 'Q':
-            # Provisional
-            if last:
-                segmentBox = (min(params[0], last[0]), max(params[0], last[0]), min(params[1], last[1]), max(params[1], last[1]))
-            last = params[-2:]
-            lastctrl = params[2:4]
-
-        elif cmd == 'A':
-            # Provisional
-            if last:
-                segmentBox = (min(params[0], last[0]), max(params[0], last[0]), min(params[1], last[1]), max(params[1], last[1]))
-            last = params[-2:]
-            lastctrl = params[2:4]
-
-        if segmentBox:
-            if box:
-                box = (min(segmentBox[0], box[0]), max(segmentBox[1], box[1]), min(segmentBox[2], box[2]), max(segmentBox[3], box[3]))
-            else:
-                box = segmentBox
-    return box
-
-
 def mxfm(image, width, height, stack):  # returns possibly transformed image
     tbimage = image
     if stack[0] == "-":  # top-bottom flip
@@ -317,7 +239,7 @@ def draw(stack):  # draw a character based on a tree stack
     state = stack.pop(0)
     # print state,
 
-    image, width, height = loadPath(font + syntax[state][0])  # load the image
+    image, width, height = load_path(font + syntax[state][0])  # load the image
     if stack[0] != "[":  # terminal stack element
         if len(syntax[state]) == 1:  # this state is a terminal node
             return image, width, height
@@ -345,11 +267,11 @@ def draw(stack):  # draw a character based on a tree stack
             currimg, width, height = images[i]
 
             if currimg:
-                # box = getPathBoundingBox(currimg)
+                # box = inkex.Path(currimg).bounding_box()
                 dx = rule[i][1] * units
                 dy = rule[i][2] * units
                 # newbox = ((box[0]+dx),(box[1]+dy),(box[2]+dx),(box[3]+dy))
-                currimg = (Path(currimg).translate(dx, dy)).to_arrays()
+                currimg = (inkex.Path(currimg).translate(dx, dy)).to_arrays()
                 image = combinePaths(image, currimg)
 
         stack.pop(0)
@@ -358,9 +280,9 @@ def draw(stack):  # draw a character based on a tree stack
 
 def draw_crop_scale(stack, zoom):  # draw, crop and scale letter image
     image, width, height = draw(stack)
-    bbox = getPathBoundingBox(image)
-    image = (Path(image).translate (-bbox[0], 0)).to_arrays()
-    image = (Path(image).scale (zoom / units, zoom / units)).to_arrays()
+    bbox = inkex.Path(image).bounding_box()
+    image = (inkex.Path(image).translate (-bbox[0], 0)).to_arrays()
+    image = (inkex.Path(image).scale (zoom / units, zoom / units)).to_arrays()
     return image, bbox[1] - bbox[0], bbox[3] - bbox[2]
 
 
@@ -515,7 +437,7 @@ def layoutstring(imagelist, zoom):  # layout string of letter-images using optic
 
         position = position - kern  # move position back by kern amount
         thisimage = copy.deepcopy(image)
-        thisimage = (Path(thisimage).translate(position, 0)).to_arrays()
+        thisimage = (inkex.Path(thisimage).translate(position, 0)).to_arrays()
         workspace = combinePaths(workspace, thisimage)
         position = position + width + zoom  # advance position by letter width
 
@@ -546,21 +468,12 @@ def tokenize(text):
     return tokens
 
 
-class AlphabetSoup(inkex.Effect):
-    def __init__(self):
-        super(AlphabetSoup, self).__init__()
-        self.arg_parser.add_argument("-t", "--text",
-                                     type=str,
-                                     dest="text", default="Inkscape",
-                                     help="The text for alphabet soup")
-        self.arg_parser.add_argument("-z", "--zoom",
-                                     type=float,
-                                     dest="zoom", default="8.0",
-                                     help="The zoom on the output graphics")
-        self.arg_parser.add_argument("-r", "--randomize",
-                                     type=inkbool,
-                                     dest="randomize", default=False,
-                                     help="Generate random (unreadable) text")
+class AlphabetSoup(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("-t", "--text", default="Inkscape", help="The text for alphabet soup")
+        pars.add_argument("-z", "--zoom", type=float, default=8.0, help="The zoom on the output")
+        pars.add_argument("-r", "--randomize", type=inkex.inkbool, default=False,\
+            help="Generate random (unreadable) text")
 
     def effect(self):
         zoom = self.svg.unittouu(str(self.options.zoom) + 'px')
@@ -576,17 +489,17 @@ class AlphabetSoup(inkex.Effect):
         if image:
             s = {'stroke': 'none', 'fill': '#000000'}
 
-            new = PathElement(
+            new = inkex.PathElement(
                 style=str(inkex.Style(s)),
-                d=str(Path(image)))
+                d=str(inkex.Path(image)))
 
             layer = self.svg.get_current_layer()
             layer.append(new)
 
             # compensate preserved transforms of parent layer
             if layer.getparent() is not None:
-                mat = (self.svg.get_current_layer().transform * Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
-                new.transform *= -Transform(mat)
+                mat = (self.svg.get_current_layer().transform * inkex.Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
+                new.transform *= -inkex.Transform(mat)
 
 
 if __name__ == '__main__':

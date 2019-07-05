@@ -20,6 +20,8 @@ import inkex
 from inkex import inkbool
 from inkex.utils import NSS
 
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+
 def propStrToList(str):
     list = []
     propList = str.split(";")
@@ -34,20 +36,16 @@ def listToPropStr(list):
         str += " " + prop + ";"
     return str[1:]
 
-class JessyInk_Uninstall(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
+class JessyInk_Uninstall(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument('--tab',  type=str, dest = 'what')
+        pars.add_argument('--remove_script',  type=inkbool, dest = 'remove_script', default = True)
+        pars.add_argument('--remove_effects',  type=inkbool, dest = 'remove_effects', default = True)
+        pars.add_argument('--remove_masterSlide',  type=inkbool, dest = 'remove_masterSlide', default = True)
+        pars.add_argument('--remove_transitions',  type=inkbool, dest = 'remove_transitions', default = True)
+        pars.add_argument('--remove_autoTexts',  type=inkbool, dest = 'remove_autoTexts', default = True)
+        pars.add_argument('--remove_views',  type=inkbool, dest = 'remove_views', default = True)
 
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-        self.arg_parser.add_argument('--remove_script',  type=inkbool, dest = 'remove_script', default = True)
-        self.arg_parser.add_argument('--remove_effects',  type=inkbool, dest = 'remove_effects', default = True)
-        self.arg_parser.add_argument('--remove_masterSlide',  type=inkbool, dest = 'remove_masterSlide', default = True)
-        self.arg_parser.add_argument('--remove_transitions',  type=inkbool, dest = 'remove_transitions', default = True)
-        self.arg_parser.add_argument('--remove_autoTexts',  type=inkbool, dest = 'remove_autoTexts', default = True)
-        self.arg_parser.add_argument('--remove_views',  type=inkbool, dest = 'remove_views', default = True)
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def effect(self):
         # Remove script, if so desired.

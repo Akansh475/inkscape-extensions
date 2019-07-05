@@ -99,40 +99,17 @@ def draw_tri_from_3_sides(s_a, s_b, s_c, offset, width, parent):  # draw a trian
         inkex.errormsg('Invalid Triangle Specifications.')
 
 
-class Triangle(inkex.Effect):
-    def __init__(self):
-        super(Triangle, self).__init__()
-        self.arg_parser.add_argument("--s_a",
-                                     type=float,
-                                     dest="s_a", default=100.0,
-                                     help="Side Length a")
-        self.arg_parser.add_argument("--s_b",
-                                     type=float,
-                                     dest="s_b", default=100.0,
-                                     help="Side Length b")
-        self.arg_parser.add_argument("--s_c",
-                                     type=float,
-                                     dest="s_c", default=100.0,
-                                     help="Side Length c")
-        self.arg_parser.add_argument("--a_a",
-                                     type=float,
-                                     dest="a_a", default=60.0,
-                                     help="Angle a")
-        self.arg_parser.add_argument("--a_b",
-                                     type=float,
-                                     dest="a_b", default=30.0,
-                                     help="Angle b")
-        self.arg_parser.add_argument("--a_c",
-                                     type=float,
-                                     dest="a_c", default=90.0,
-                                     help="Angle c")
-        self.arg_parser.add_argument("--mode",
-                                     type=str,
-                                     dest="mode", default='3_sides',
-                                     help="Side Length c")
+class Triangle(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--s_a", type=float, default=100.0, help="Side Length a")
+        pars.add_argument("--s_b", type=float, default=100.0, help="Side Length b")
+        pars.add_argument("--s_c", type=float, default=100.0, help="Side Length c")
+        pars.add_argument("--a_a", type=float, default=60.0, help="Angle a")
+        pars.add_argument("--a_b", type=float, default=30.0, help="Angle b")
+        pars.add_argument("--a_c", type=float, default=90.0, help="Angle c")
+        pars.add_argument("--mode", default='3_sides', help="Side Length c")
 
     def effect(self):
-
         tri = self.svg.get_current_layer()
         offset = self.svg.get_center_position()
         self.options.s_a = self.svg.unittouu(str(self.options.s_a) + 'px')

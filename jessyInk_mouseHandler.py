@@ -23,16 +23,12 @@ from lxml import etree
 import inkex
 from inkex.localization import _
 from inkex.utils import NSS
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_CustomMouseHandler(inkex.Effect):
-    def __init__(self):
-        # Call the base class constructor.
-        inkex.Effect.__init__(self)
-
-        self.arg_parser.add_argument('--tab', type=str, dest='what')
-        self.arg_parser.add_argument('--mouseSettings', type=str, dest='mouseSettings', default='default')
-
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+class JessyInk_CustomMouseHandler(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument('--tab', type=str, dest='what')
+        pars.add_argument('--mouseSettings', type=str, dest='mouseSettings', default='default')
 
     def effect(self):
         # Check version.

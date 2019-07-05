@@ -661,7 +661,7 @@ class FontFace(BaseElement):
     tag_name = 'font-face'
 
 
-class Glyph(BaseElement):
+class Glyph(PathElement):
     """An svg font glyph element"""
     tag_name = 'glyph'
 

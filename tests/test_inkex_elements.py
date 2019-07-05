@@ -13,7 +13,7 @@ from inkex.elements import (
     Group, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
 )
-from inkex.transforms import Transform, ScaleTransform
+from inkex.transforms import Transform
 from inkex.styles import Style
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
@@ -94,7 +94,7 @@ class CoreElementTestCase(ElementTestCase):
     def test_set_wrapped_attribute(self):
         """Remove wrapped attribute using .set()"""
         group = Group().update(
-            transform=ScaleTransform(2)
+            transform=Transform(scale=2)
         )
         self.assertEqual(group.transform.matrix[0][0], 2)
         self.assertEqual(group.transform.matrix[1][1], 2)
@@ -111,9 +111,9 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(group.pop('transform'), Transform())
 
         group.update(
-            transform=ScaleTransform(2)
+            transform=Transform(scale=2)
         )
-        self.assertEqual(group.pop('transform'), ScaleTransform(2))
+        self.assertEqual(group.pop('transform'), Transform(scale=2))
         self.assertEqual(group.pop('transform'), Transform())
 
     def test_pop_regular_attribute(self):
@@ -157,7 +157,7 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.transform, Transform())
         self.assertEqual(elem.get('transform'), None)
         elem.transform.add_scale(1.0666666666666667, 1.0666666666666667)
-        self.assertEqual(elem.get('transform'), ScaleTransform(1.06667))
+        self.assertEqual(elem.get('transform'), Transform(scale=1.06667))
         self.assertIn(b'transform', etree.tostring(elem))
 
     def test_in_place_transforms(self):

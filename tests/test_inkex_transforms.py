@@ -3,8 +3,7 @@
 Test Inkex transformational logic.
 """
 from inkex.transforms import (
-    Vector2d, BoundingBox, Scale, Transform, TranslateTransform,
-    ScaleTransform, RotateTransform, DirectedLineSegment
+    Vector2d, BoundingBox, Scale, Transform, DirectedLineSegment
 )
 from inkex.tester import TestCase
 
@@ -159,16 +158,16 @@ class TransformTest(TestCase):
 
     def test_translate(self):
         """Test making translate specific items"""
-        self.assertEqual(str(TranslateTransform(10.6, 99.9)), "translate(10.6, 99.9)")
+        self.assertEqual(str(Transform(translate=(10.6, 99.9))), "translate(10.6, 99.9)")
 
     def test_scale(self):
         """Test making scale specific items"""
-        self.assertEqual(str(ScaleTransform(1.0, 2.2)), "scale(1, 2.2)")
+        self.assertEqual(str(Transform(scale=(1.0, 2.2))), "scale(1, 2.2)")
 
     def test_rotate(self):
         """Test making rotate specific items"""
-        self.assertEqual(str(RotateTransform(45)), "rotate(45)")
-        self.assertEqual(str(RotateTransform(45, 10, 10)), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
+        self.assertEqual(str(Transform(rotate=45)), "rotate(45)")
+        self.assertEqual(str(Transform(rotate=(45, 10, 10))), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
     def test_combine(self):
         """Test combining transformations"""

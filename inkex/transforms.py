@@ -408,30 +408,6 @@ class Transform(object):
         tol = self.absolute_tolerance if not exactly else 0.0
         return (fabs(self.a - self.d) <= tol) and (fabs(self.b + self.c) <= tol)
 
-class TranslateTransform(Transform):
-    """A quick and easy to use Translate definition"""
-
-    def __init__(self, pos_x, pos_y=0.0):
-        super(TranslateTransform, self).__init__()
-        self.add_translate(pos_x, pos_y)
-
-
-class ScaleTransform(Transform):
-    """A quick and easy to use Scale definition"""
-
-    def __init__(self, scale_x, scale_y=None):
-        super(ScaleTransform, self).__init__()
-        self.add_scale(scale_x, scale_y)
-
-
-class RotateTransform(Transform):
-    """A quick and easy to use Rotate definition"""
-
-    def __init__(self, deg, center_x=0.0, center_y=0.0):
-        super(RotateTransform, self).__init__()
-        self.add_rotate(deg, center_x, center_y)
-
-
 class Scale(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 

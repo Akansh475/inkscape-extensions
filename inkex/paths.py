@@ -24,10 +24,9 @@ import re
 import copy
 
 from math import atan2, cos, pi, sin, sqrt, acos, tan
-from operator import add, mul
 
-from .transforms import Transform, BoundingBox, Scale, Vector2d, TranslateTransform, RotateTransform, ScaleTransform
-from .utils import X, Y, classproperty, strargs, pairwise
+from .transforms import Transform, BoundingBox, Vector2d
+from .utils import classproperty, strargs
 
 if False:  # pylint: disable=using-constant-test
     from typing import Type, Dict, Optional, Union, Tuple, List  # pylint: disable=unused-import
@@ -219,28 +218,18 @@ class AbsolutePathCommand(PathCommand):
         :param degrees: rotation angle in degrees
         :param center: invariant point of rotation
         """
-        from .transforms import RotateTransform
-        x, y = center
-        t = Transform()
-        t.add_rotate(degrees, x, y)
-        return self.transform(t)
+        return self.transform(Transform(rotate=(degrees, center[0], center[1])))
 
     def translate(self, dr):  # type: (T, Vector2d) -> T
         """Translate or scale this path command by dr"""
-        t = Transform()
-        t.add_translate(*dr)
-        return self.transform(t)
+        return self.transform(Transform(translate=dr))
 
     def scale(self, factor):  # type: (T, Union[float, Tuple[float,float]]) -> T
         """Returns new transformed segment
 
         :param factor: scale or (scale_x, scale_y)
         """
-        if factor is float:
-            factor = (factor, factor)
-        t = Transform()
-        t.add_scale(*factor)
-        return self.transform(t)
+        return self.transform(Transform(scale=factor))
 
 
 class Line(AbsolutePathCommand):
@@ -861,13 +850,11 @@ class Arc(AbsolutePathCommand):
         return result
 
     def transform(self, transform):  # type: (T, Transform) -> T
-        from .transforms import RotateTransform
-
         x_, y_ = transform.apply_to_point((self.x, self.y))
 
         T = transform  # type: Transform
         if self.x_axis_rotation != 0:
-            T = T * RotateTransform(deg=self.x_axis_rotation)
+            T = T * Transform(rotate=self.x_axis_rotation)
         a, c, b, d, _, _ = list(T.to_hexad())
         # T = | a b |
         #     | c d |
@@ -1020,11 +1007,11 @@ class Path(list):
 
     def translate(self, x, y, inplace=False):  # pylint: disable=invalid-name
         """Move all coords in this path by the given amount"""
-        return self.transform(TranslateTransform(x, y), inplace=inplace)
+        return self.transform(Transform(translate=(x, y)), inplace=inplace)
 
     def scale(self, x, y, inplace=False):  # pylint: disable=invalid-name
         """Scale all coords in this path by the given amounts"""
-        return self.transform(ScaleTransform(x, y), inplace=inplace)
+        return self.transform(Transform(scale=(x, y)), inplace=inplace)
 
     def rotate(self, deg, center=None, inplace=False):
         """Rotate the path around the given point"""
@@ -1036,7 +1023,7 @@ class Path(list):
             else:
                 center = Vector2d()
         center = Vector2d(center)
-        return self.transform(RotateTransform(deg, center.x, center.y), inplace=inplace)
+        return self.transform(Transform(rotate=(deg, center.x, center.y)), inplace=inplace)
 
     @property
     def control_points(self):

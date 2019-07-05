@@ -32,7 +32,7 @@ from lxml.etree import fromstring
 from .utils import errormsg
 from .elements import SVG_PARSER, BaseElement, Group
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
-from .transforms import TranslateTransform
+from .transforms import Transform
 
 # All the names that get added to the inkex API itself.
 __all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension', 'CallExtension')
@@ -142,7 +142,7 @@ class GenerateExtension(EffectExtension):
             pos_x = 0
         if pos_y is None:
             pos_y = 0
-        return TranslateTransform(pos_x, pos_y)
+        return Transform(translate=(pos_x, pos_y))
 
     def effect(self):
         layer = self.svg.get_current_layer()

@@ -102,6 +102,7 @@ class PathCommand(object):
         """Returns list of path command control points"""
         raise NotImplementedError
 
+    @classmethod
     def _argt(cls, sep):
         return sep.join([cls.number_template] * cls.nargs)
 
@@ -122,7 +123,7 @@ class PathCommand(object):
         try:
             if self.is_relative == other.is_relative:
                 return self.to_curve(previous) == other.to_curve(previous)
-        except ValueError as ignored:
+        except ValueError:
             pass
         return False
 
@@ -137,11 +138,11 @@ class PathCommand(object):
         Enlarges given bbox to contain path element.
 
         :param (tuple of float) first: first point of path. Required to calculate Z segment
-        :param (list of tuple) last_two_points: list with last two control points in absolute coordinates.
+        :param (list of tuple) last_two_points: list with last two control points in abs coords.
          Updated at the end of call.
         :param (BoundingBox) bbox: bounding box to update
         """
-        raise NotImplementedError("Bounding box calculation is not implemented for {}".format(self.name))
+        raise NotImplementedError("Bounding box is not implemented for {}".format(self.name))
 
     def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
         """Convert command to :py:class:`Curve`
@@ -158,7 +159,8 @@ class RelativePathCommand(PathCommand):
     """
     Abstract base class for relative path commands.
 
-    Implements most of methods of :py:class:`PathCommand` through conversion to :py:class:`AbsolutePathCommand`
+    Implements most of methods of :py:class:`PathCommand` through
+    conversion to :py:class:`AbsolutePathCommand`
     """
 
     @property

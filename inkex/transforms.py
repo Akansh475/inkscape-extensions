@@ -30,16 +30,16 @@ import sys
 from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
 
-from .utils import X, Y, strargs
+from .utils import strargs
 
 try:
-    from typing import overload, Tuple, Union, Optional, TypeVar
-    VectorLike = Union["Vector2d", Tuple[float,float]]
+    from typing import overload, Tuple, Union, Optional # pylint: disable=unused-import
+    VectorLike = Union["Vector2d", Tuple[float, float]] # pylint: disable=invalid-name
 except ImportError:
     overload = lambda x: x
 
 # All the names that get added to the inkex API itself.
-__all__ = ('Vector2d', 'Transform', 'BoundingBox', 'Scale', 'DirectedLineSegment')
+__all__ = ('Transform', 'BoundingBox',)
 
 if sys.version_info[0] == 3:  # PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name

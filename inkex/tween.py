@@ -17,6 +17,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
+import math
+from .utils import X, Y
 
 def interpcoord(coord_a, coord_b, time):
     """Interpolate single coordinate by the amount of time"""
@@ -28,22 +30,22 @@ def interppoints(point1, point2, time):
     return [interpcoord(point1[X], point2[X], time), interpcoord(point1[Y], point2[Y], time)]
 
 
-def tweenstylefloat(property, start, end, time):
-    sp = float(start[property])
-    ep = float(end[property])
+def tweenstylefloat(prop, start, end, time):
+    sp = float(start[prop])
+    ep = float(end[prop])
     return str(sp + (time * (ep - sp)))
 
 
-def tweenstyleunit(property, start, end, time):  # moved here so we can call 'unittouu'
-    scale = self.unittouu('1px')
-    sp = self.unittouu(start.get(property, '1px')) / scale
-    ep = self.unittouu(end.get(property, '1px')) / scale
+def tweenstyleunit(svg, prop, start, end, time):  # moved here so we can call 'unittouu'
+    scale = svg.unittouu('1px')
+    sp = svg.unittouu(start.get(prop, '1px')) / scale
+    ep = svg.unittouu(end.get(prop, '1px')) / scale
     return str(sp + (time * (ep - sp)))
 
 
-def tweenstylecolor(property, start, end, time):
-    sr, sg, sb = parsecolor(start[property])
-    er, eg, eb = parsecolor(end[property])
+def tweenstylecolor(prop, start, end, time):
+    sr, sg, sb = parsecolor(start[prop])
+    er, eg, eb = parsecolor(end[prop])
     return '#%s%s%s' % (tweenhex(time, sr, er), tweenhex(time, sg, eg), tweenhex(time, sb, eb))
 
 

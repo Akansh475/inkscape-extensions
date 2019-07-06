@@ -190,8 +190,10 @@ def filename_arg(name):
         raise ArgumentTypeError("File not found: {}".format(name))
     return filename
 
-def pairwise(iterable):
+def pairwise(iterable, start=True):
     "Iterate over a list with overlapping pairs (see itertools recipes)"
     first, then = tee(iterable)
-    start = next(then, None)
-    return [(None, start)] + list(zip(first, then))
+    starter = [(None, next(then, None))]
+    if not start:
+        starter = []
+    return starter + list(zip(first, then))

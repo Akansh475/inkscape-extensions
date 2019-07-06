@@ -1212,11 +1212,9 @@ Evil Mad Scientist Laboratories
                 node_info['line_spacing'] = parent_line_spacing
 
                 adv_line = False
-                role_attr = inkex.addNS( 'role', 'sodipodi' )
-                role = subNode.get(role_attr) 
-                if role is not None:
-                    if role == "line":
-                        adv_line = True
+                role = subNode.get('sodipodi:role')
+                if role == "line":
+                    adv_line = True
 
                 self.recursivelyParseTextNode( subNode, node_info)
 

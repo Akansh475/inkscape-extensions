@@ -18,7 +18,7 @@
 #
 
 '''
-Hershey Text 3.0, 2019-06-16
+Hershey Text 3.0.1, 2019-07-05
 
 Copyright 2019, Windell H. Oskay, www.evilmadscientist.com
 
@@ -1197,6 +1197,31 @@ Evil Mad Scientist Laboratories
                 self.text_x.append(x_local)
                 self.text_y.append(y_local)
                 
+
+        for subNode in node:
+            # If text is located within a subnode of this node, process that subnode, with this very routine.
+
+            if isinstance(subNode, Tspan):
+                # Note: There may be additional types of text tags that we should recursively search as well.
+                node_info = dict()
+                node_info['font_height'] = font_height_local
+                node_info['font_family'] = font_family_local
+                node_info['anchor'] = anchor_local
+                node_info['x_pos'] = x_local
+                node_info['y_pos'] = y_local
+                node_info['line_spacing'] = parent_line_spacing
+
+                adv_line = False
+                role = subNode.get('sodipodi:role')
+                if role == "line":
+                    adv_line = True
+
+                self.recursivelyParseTextNode( subNode, node_info)
+
+                # Increment line after tspan if it is labeled as a line
+                if adv_line:
+                    self.line_number = self.line_number + 1 
+
         if node.tail is not None:
             _stripped_tail = node.tail.strip()
             if _stripped_tail is not None:    
@@ -1212,24 +1237,6 @@ Evil Mad Scientist Laboratories
                     self.text_aligns.append(text_align_local)
                     self.text_x.append(x_local)
                     self.text_y.append(y_local)
-
-        for subNode in node:
-            # If text is located within a subnode of this node, process that subnode, with this very routine.
-
-            if isinstance(subNode, Tspan):
-                # Note: There may be additional types of text tags that we should recursively search as well.
-                node_info = dict()
-                node_info['font_height'] = font_height_local
-                node_info['font_family'] = font_family_local
-                node_info['anchor'] = anchor_local
-                node_info['x_pos'] = x_local
-                node_info['y_pos'] = y_local
-                node_info['line_spacing'] = parent_line_spacing
-
-                self.recursivelyParseTextNode( subNode, node_info)
-
-                # Increment after each tspan:
-                self.line_number = self.line_number + 1 
 
     def recursively_traverse_svg( self, aNodeList,
         matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -1735,8 +1742,8 @@ Evil Mad Scientist Laboratories
                     i = 0
                     while (i < strLen):    # Loop through the entire text of the string.
     
-                        xStartLine = self.text_x[i]       # We are starting a new line here.
-                        yStartLine = self.text_y[i]   
+                        xStartLine = float(self.text_x[i])       # We are starting a new line here.
+                        yStartLine = float(self.text_y[i])   
                         
                         while (i < strLen): # Inner while loop, that we will break out of, back to the outer while loop.
                             
@@ -1763,7 +1770,7 @@ Evil Mad Scientist Laboratories
                             iNext = i + 1
                             if (iNext >= strLen):    # End of the string; this is the last character.
                                 setAlignment = True
-                            elif ((self.text_x[iNext] != xStartLine) or (self.text_y[iNext] != yStartLine) ):
+                            elif ((float(self.text_x[iNext]) != xStartLine) or (float(self.text_y[iNext]) != yStartLine) ):
                                 setAlignment = True
                                 
                             if setAlignment:
@@ -1779,13 +1786,13 @@ Evil Mad Scientist Laboratories
 
                                 xShift = 0
                                 if (text_align == "middle"): # when using text-anchor
-                                    xShift = float(xStartLine) - (widthThisLine / 2)
+                                    xShift = xStartLine - (widthThisLine / 2)
                                 elif (text_align == "end"):
-                                    xShift = float(xStartLine) - widthThisLine
+                                    xShift = xStartLine - widthThisLine
                                 else:
-                                    xShift = float(xStartLine)
+                                    xShift = xStartLine
                                 
-                                yShift = float(yStartLine)
+                                yShift = yStartLine
                                 
                                 the_transform = Transform(translate=(xShift, yShift))
 

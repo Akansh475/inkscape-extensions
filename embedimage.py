@@ -44,10 +44,8 @@ except ImportError:
 class Embedder(inkex.EffectExtension):
     """Allow selected image tags to become embeded image tags"""
     def add_arguments(self, pars):
-        pars.add_argument("-s", "--selectedonly",
-                          type=inkbool,
-                          dest="selectedonly", default=False,
-                          help="embed only selected images")
+        pars.add_argument("-s", "--selectedonly", type=inkbool,\
+            help="embed only selected images")
 
     def effect(self):
         # if slectedonly is enabled and there is a selection
@@ -63,36 +61,23 @@ class Embedder(inkex.EffectExtension):
 
     def embed_image(self, node):
         """Embed the data of the selected Image Tag element"""
-        xlink = node.get(inkex.addNS('href', 'xlink'))
+        xlink = node.get('xlink:href')
         if xlink and xlink[:5] == 'data:':
             # No need, data alread embedded
             return
 
-        absref = node.get(inkex.addNS('absref', 'sodipodi'))
         url = urlparse.urlparse(xlink)
         href = urllib.url2pathname(url.path)
 
-        path = ''
-        # path selection strategy:
-        # 1. href if absolute
-        # 2. realpath-ified href
-        # 3. absref, only if the above does not point to a file
-        if href is not None:
-            # Append the svg's own directory as the relative location for images.
-            svg_path = self.options.input_file
-            if svg_path and not os.path.isabs(href):
-                href = os.path.join(os.path.dirname(svg_path), href)
-            path = os.path.realpath(href)
+        # Primary location always the filename itself.
+        path = self.abssolute_href(href or '')
+
+        # Backup directory where we can find the image
+        if not os.path.isfile(path):
+            path = node.get('sodipodi:absref', path)
 
         if not os.path.isfile(path):
-            if absref is not None:
-                path = absref
-
-        if not os.path.isfile(path):
-            inkex.errormsg(_('No xlink:href or sodipodi:absref attributes found, or '\
-                'they do not point to an existing file! Unable to embed image.'))
-            if path:
-                inkex.errormsg(_("Sorry we could not locate %s") % str(path))
+            inkex.errormsg(_('File not found "{}". Unable to embed image.').format(path))
             return
 
         with open(path, "rb") as handle:

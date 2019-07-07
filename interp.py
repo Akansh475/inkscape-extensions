@@ -79,8 +79,9 @@ class Interp(inkex.EffectExtension):
             if self.options.style:
                 dostroke = True
                 dofill = True
-                styledefaults = {'opacity': '1.0', 'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-                                 'stroke-width': '1.0', 'stroke': 'none', 'fill': 'none'}
+                styledefaults = inkex.Style(
+                    'opacity:1.0;stroke-opacity:1.0;fill-opacity:1.0;'
+                    'stroke-width:1.0;stroke:none;fill:none')
                 for key in styledefaults:
                     sst.setdefault(key, styledefaults[key])
                     est.setdefault(key, styledefaults[key])

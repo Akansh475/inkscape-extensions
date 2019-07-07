@@ -14,7 +14,7 @@ class ModExtension(InkscapeExtension):
     """A non-svg extension that loads, saves and flipples"""
 
     def effect(self):
-        self.document += '>flipple'
+        self.document += b'>flipple'
 
     def load(self, stream):
         return stream.read()
@@ -81,6 +81,19 @@ class InkscapeExtensionTest(TestCase):
         options = self.e.arg_parser.parse_args(['--output', 'foo.txt', self.empty_svg])
         self.assertEqual(options.input_file, self.empty_svg)
         self.assertEqual(options.output, 'foo.txt')
+
+    def test_svg_path(self):
+        """Can get the svg file location"""
+        output = os.path.join(self.tempdir, 'output.tmp')
+        ext = ModExtension()
+        ext.run(['--output', output, self.empty_svg])
+        self.assertEqual(ext.svg_path(), os.path.join(self.datadir(), 'svg'))
+        self.assertEqual(ext.abssolute_href('/foo'), '/foo')
+        self.assertEqual(ext.abssolute_href('./foo'), os.path.join(self.datadir(), 'svg', 'foo'))
+        self.assertEqual(ext.abssolute_href('~/foo'), os.path.expanduser('~/foo'))
+        ext.options.input_file = None
+        self.assertEqual(ext.abssolute_href('./foo'), os.path.expanduser('~/foo'))
+        self.assertEqual(ext.abssolute_href('./foo', '/tmp/'), '/tmp/foo')
 
 
 class SvgInputOutputTest(TestCase):

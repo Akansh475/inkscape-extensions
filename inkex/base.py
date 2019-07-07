@@ -130,6 +130,30 @@ class InkscapeExtension(object):
         if self.file_io is not None:
             self.file_io.close()
 
+    def svg_path(self):
+        """
+        Return the folder the svg is contained in.
+        Returns None if there is no file.
+        """
+        if self.options.input_file:
+            return os.path.dirname(self.options.input_file)
+        return None
+
+    def abssolute_href(self, filename, default='~/'):
+        """
+        Process the filename such that it's turned into an absolute filename
+        with the working directory being the directory of the loaded svg.
+
+        User's home folder is also resolved. So '~/a.png` will be `/home/bob/a.png`
+
+        Default is a fallback directory to use if the svg's filename is not available.
+        """
+        filename = os.path.expanduser(filename)
+        if not os.path.isabs(filename):
+            path = self.svg_path() or default
+            filename = os.path.join(path, filename)
+        return os.path.realpath(os.path.expanduser(filename))
+
     @property
     def name(self):
         """Return a fixed name for this extension"""

@@ -176,7 +176,7 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     @property
     def width(self):  # getDocumentWidth(self):
         """Fault tolerance for lazily defined SVG"""
-        return self.get('width') or self.get_viewbox()[2] or '0'
+        return self.unittouu(self.get('width')) or self.get_viewbox()[2]
 
     @property
     def height(self):  # getDocumentHeight(self):
@@ -184,7 +184,7 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         defined in the SVG file. If it is not defined, returns the height
         as defined by the viewBox attribute. If viewBox is not defined,
         returns the string '0'."""
-        return self.get('height') or self.get_viewbox()[3] or '0'
+        return self.unittouu(self.get('height')) or self.get_viewbox()[3]
 
     @property
     def scale(self):
@@ -203,7 +203,7 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         Defaults to 'px' units."""
         viewbox = self.get_viewbox()
         if viewbox and set(viewbox) != {0}:
-            return discover_unit(self.width, viewbox[2], default='px')
+            return discover_unit(self.get('width'), viewbox[2], default='px')
         return 'px'  # Default is px
 
     def unittouu(self, value):

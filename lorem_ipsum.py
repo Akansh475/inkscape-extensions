@@ -237,8 +237,8 @@ class LorumImpsum(inkex.EffectExtension):
             region = root.add(FlowRegion())
 
             region.add(Rectangle(x='0', y='0',\
-                width=str(self.svg.width),\
-                height=str(self.svg.height)))
+                width=str(int(self.svg.width)),\
+                height=str(int(self.svg.height))))
 
             self.addText(root)
             self.svg.append(group)

@@ -103,7 +103,7 @@
                 <item value="latin5">latin5</item>
                 <item value="latin6">latin6</item>
                 <item value="latin8">latin8</item>
-                <item value="iso-8859-15">Latin - iso-8859-15 - Western Europe</item>
+                <_item value="iso-8859-15">Latin - iso-8859-15 - Western Europe</_item>
                 <item value="macgreek">macgreek</item>
                 <item value="maciceland">maciceland</item>
                 <item value="maccentraleurope">maccentraleurope</item>
@@ -117,18 +117,18 @@
                 <item value="sjisx0213">sjisx0213</item>
                 <item value="u-jis">u-jis</item>
                 <item value="us-ascii">us-ascii</item>
-                <item value="windows-1250">Windows - Central and Eastern Europe</item>
-                <item value="windows-1251">Windows - Russian and more</item>
-                <item value="windows-1252">Windows - Western Europe</item>
-                <item value="windows-1253">Windows - Greek</item>
-                <item value="windows-1254">Windows - Turkish</item>
-                <item value="windows-1255">Windows - Hebrew</item>
-                <item value="windows-1256">Windows - Arabic</item>
-                <item value="windows-1257">Windows - Baltic languages</item>
-                <item value="windows-1258">Windows - Vietnamese</item>
-                <item value="utf_32">UTF-32 - All languages</item>
-                <item value="utf_16">UTF-16 - All languages</item>
-                <item value="utf_8">UTF-8 - All languages</item>
+                <_item value="windows-1250">Windows - Central and Eastern Europe</_item>
+                <_item value="windows-1251">Windows - Russian and more</_item>
+                <_item value="windows-1252">Windows - Western Europe</_item>
+                <_item value="windows-1253">Windows - Greek</_item>
+                <_item value="windows-1254">Windows - Turkish</_item>
+                <_item value="windows-1255">Windows - Hebrew</_item>
+                <_item value="windows-1256">Windows - Arabic</_item>
+                <_item value="windows-1257">Windows - Baltic languages</_item>
+                <_item value="windows-1258">Windows - Vietnamese</_item>
+                <_item value="utf_32">UTF-32 - All languages</_item>
+                <_item value="utf_16">UTF-16 - All languages</_item>
+                <_item value="utf_8">UTF-8 - All languages</_item>
             </param>
             <_param name="encoding-help" type="description">Select your system encoding. More information at http://docs.python.org/library/codecs.html#standard-encodings.</_param>
         </page>

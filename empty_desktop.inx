@@ -3,9 +3,9 @@
     <_name>Desktop</_name>
     <id>org.inkscape.render.empty_desktop</id>
     <dependency type="executable" location="extensions">empty_desktop.py</dependency>
-    
+
     <param name="size" _gui-text="Desktop size:" type="enum">
-        <item value="Custom">Custom</item>
+        <_item value="Custom">Custom</_item>
         <item value="640x480">640x480 (VGA)</item>
         <item value="800x600">800x600 (SVGA)</item>
         <item value="1024x768">1024x768 (XGA)</item>
@@ -23,7 +23,7 @@
     <!-- Maximum size is '16k' -->
     <param name="width"  _gui-text="Custom Width:"  type="int" min="240" max="15360">1920</param>
     <param name="height" _gui-text="Custom Height:" type="int" min="160" max="8640">1080</param>
-        
+
     <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu hidden="true" />

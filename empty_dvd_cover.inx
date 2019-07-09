@@ -3,16 +3,16 @@
     <_name>DVD Cover</_name>
     <id>org.inkscape.render.empty_dvd_cover</id>
     <dependency type="executable" location="extensions">empty_dvd_cover.py</dependency>
-    
+
     <param name="spine" _gui-text="DVD spine width:" type="enum">
-        <item value="14">Normal (14mm)</item>
-        <item value="9">Slim (9mm)</item>
-        <item value="7">Super Slim (7mm)</item>
-        <item value="5">Ultra Slim (5mm)</item>
+        <_item value="14">Normal (14mm)</_item>
+        <_item value="9">Slim (9mm)</_item>
+        <_item value="7">Super Slim (7mm)</_item>
+        <_item value="5">Ultra Slim (5mm)</_item>
     </param>
-    
+
     <param name="bleed" _gui-text="DVD cover bleed (mm):" type="float" min="0" max="25">3</param>
-    
+
     <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu hidden="true" />

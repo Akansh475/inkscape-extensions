@@ -6,13 +6,13 @@
       <param name="action" type="notebook" gui-hidden="true">
         <page name="dpi_swicher" _gui-text="Switch DPI">
             <param name="switcher" type="enum" gui-hidden="true">
-                <item value="0">DPI Switch from 90 to 96</item>
+                <_item value="0">DPI Switch from 90 to 96</_item>
             </param>
         </page>
       </param>
       <effect needs-live-preview="false">
         <object-type>all</object-type>
-        <effects-menu>  
+        <effects-menu>
           <submenu _name="Document"/>
         </effects-menu>
       </effect>

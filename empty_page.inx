@@ -3,24 +3,24 @@
     <_name>Page</_name>
     <id>org.inkscape.render.empty_page</id>
     <dependency type="executable" location="extensions">empty_page.py</dependency>
-    
+
     <param name="size" _gui-text="Page size:" type="enum">
         <item value="a3">A3</item>
         <item value="a4">A4</item>
         <item value="a5">A5</item>
-        <item value="letter">letter</item>
+        <item value="letter">Letter</item>
     </param>
-    
+
     <param name="orientation" _gui-text="Page orientation:" type="enum">
-        <item value="horizontal">Horizontal</item>
-        <item value="vertical">Vertical</item>
+        <_item value="horizontal">Horizontal</_item>
+        <_item value="vertical">Vertical</_item>
     </param>
 
     <param name="background" _gui-text="Page background:" type="enum">
-        <item value="normal">Normal</item>
-    <item value="black">Black Opaque</item>
-    <item value="gray">Gray Opaque</item>
-    <item value="white">White Opaque</item>
+        <_item value="normal">Normal</_item>
+        <_item value="black">Black Opaque</_item>
+        <_item value="gray">Gray Opaque</_item>
+        <_item value="white">White Opaque</_item>
     </param>
 
     <param name="noborder" type="boolean" _gui-text="Hide border">false</param>

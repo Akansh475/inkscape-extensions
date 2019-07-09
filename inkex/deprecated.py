@@ -34,6 +34,7 @@ from argparse import ArgumentParser
 
 import inkex
 import inkex.utils
+import inkex.units
 from inkex.localization import _
 from inkex.elements import Guide
 from inkex.svg import SvgDocumentElement
@@ -316,13 +317,11 @@ def localize():
 
 def are_near_relative(a, b, eps):
     _deprecated('inkex.are_near_relative was moved to '
-            'inkex.units.are_near_relative', stack=2)
-    import inkex.units
+                'inkex.units.are_near_relative', stack=2)
     return inkex.units.are_near_relative(a, b, eps)
 
 def debug(what):
     _deprecated('inkex.debug was moved to inkex.utils.debug', stack=2)
-    import inkex.utils
     return inkex.utils.debug(what)
 
 # legacy inkex members <= 0.48.x
@@ -330,7 +329,6 @@ def debug(what):
 def unittouu(string):
     _deprecated('inkex.unittouu is now a method in the svg '
             'document. Use `self.svg.unittouu(str)` instead.', stack=2)
-    import inkex.units
     return inkex.units.convert_unit(string, 'px')
 
 # optparse.Values.ensure_value

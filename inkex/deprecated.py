@@ -206,12 +206,12 @@ class DeprecatedEffect(object):
     def getDocumentWidth(self):
         self._deprecated('getDocumentWidth', _('{} is now a property of the svg '
                                                'document. Use `self.svg.width` instead.'))
-        return self.svg.width
+        return self.svg.get('width')
 
     def getDocumentHeight(self):
         self._deprecated('getDocumentHeight', _('{} is now a property of the svg '
                                                 'document. Use `self.svg.height` instead.'))
-        return self.svg.height
+        return self.svg.get('height')
 
     def getDocumentUnit(self):
         self._deprecated('getDocumentUnit', _('{} is now a property of the svg '

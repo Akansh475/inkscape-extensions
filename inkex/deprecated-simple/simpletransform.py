@@ -14,12 +14,16 @@ from inkex.paths import Path
 
 import inkex, cubicsuperpath
 
+def _lists(mat):
+    return [list(row) for row in mat]
+
 @deprecate
 def parseTransform(transf, mat=None):
     """Transform(str).matrix"""
+    t = Transform(transf)
     if mat is not None:
-        return (Transform(mat) * Transform(transf)).matrix
-    return Transform(transf).matrix
+        t = Transform(mat) * t
+    return _lists(t.matrix)
 
 @deprecate
 def formatTransform(mat):
@@ -32,12 +36,12 @@ def formatTransform(mat):
 @deprecate
 def invertTransform(mat):
     """-Transform(mat)"""
-    return (-Transform(mat)).matrix
+    return _lists((-Transform(mat)).matrix)
 
 @deprecate
 def composeTransform(mat1, mat2):
     """Transform(M1) * Transform(M2)"""
-    return (Transform(mat1) * Transform(mat2)).matrix
+    return _lists((Transform(mat1) * Transform(mat2)).matrix)
 
 @deprecate
 def composeParents(node, mat):
@@ -57,7 +61,6 @@ def applyTransformToPoint(mat, pt):
     # but don't do this in your code! This is not good code design.
     pt[0] = pt2[0]
     pt[1] = pt2[1]
-    return pt2
 
 @deprecate
 def applyTransformToPath(mat, path):
@@ -72,7 +75,7 @@ def fuseTransform(node):
 @deprecate
 def boxunion(b1, b2):
     """list(BoundingBox(b1) + BoundingBox(b2))"""
-    return list(BoundingBox(b1) + BoundingBox(b2))
+    return tuple(BoundingBox(b1) + BoundingBox(b2))
 
 @deprecate
 def roughBBox(path):

@@ -6,7 +6,7 @@
       <param name="action" type="notebook" gui-hidden="true">
         <page name="dpi_swicher" _gui-text="Switch DPI">
             <param name="switcher" type="enum" gui-hidden="true">
-                <item value="1">DPI Switch from 96 to 90</item>
+                <_item value="1">DPI Switch from 96 to 90</_item>
             </param>
         </page>
       </param>

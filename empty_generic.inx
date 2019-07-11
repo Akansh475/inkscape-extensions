@@ -3,24 +3,24 @@
     <_name>Generic Canvas</_name>
     <id>org.inkscape.render.empty_generic_canvas</id>
     <dependency type="executable" location="extensions">empty_generic.py</dependency>
-    
+
     <param name="width"  _gui-text="Custom Width:"  type="float" min="1" max="15360">800</param>
     <param name="height" _gui-text="Custom Height:" type="float" min="1" max="8640">600</param>
 
     <param name="unit" _gui-text="SVG Unit:" type="enum">
-        <item value="px">'px'</item>
-        <item value="in">'in'</item>
-        <item value="mm">'mm'</item>
-        <item value="cm">'cm'</item>
-        <item value="pc">'pc'</item>
-        <item value="pt">'pt'</item>
+        <item value="px">px</item>
+        <item value="in">in</item>
+        <item value="mm">mm</item>
+        <item value="cm">cm</item>
+        <item value="pc">pc</item>
+        <item value="pt">pt</item>
     </param>
 
     <param name="background" _gui-text="Canvas background:" type="enum">
-        <item value="normal">Normal</item>
-    <item value="black">Black Opaque</item>
-    <item value="gray">Gray Opaque</item>
-    <item value="white">White Opaque</item>
+        <_item value="normal">Normal</_item>
+        <_item value="black">Black Opaque</_item>
+        <_item value="gray">Gray Opaque</_item>
+        <_item value="white">White Opaque</_item>
     </param>
 
     <param name="noborder" type="boolean" _gui-text="Hide border">false</param>

@@ -7,3 +7,4 @@ from whirl import Whirl
 class WhirlBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Whirl
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
+    comparisons = [('--id=p1', '--id=r3')]

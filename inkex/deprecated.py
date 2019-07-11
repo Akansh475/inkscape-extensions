@@ -34,6 +34,7 @@ from argparse import ArgumentParser
 
 import inkex
 import inkex.utils
+import inkex.units
 from inkex.localization import _
 from inkex.elements import Guide
 from inkex.svg import SvgDocumentElement
@@ -170,8 +171,8 @@ class DeprecatedEffect(object):
     def createGuide(self, posX, posY, angle):
         self._deprecated('createGuide',\
             _('{} is now a method of the namedview element object. '
-              'Use `self.svg.namedview.add(Guide(x, y, a))` instead'))
-        return self.svg.namedview.add(Guide(posX, posY, angle))
+              'Use `self.svg.namedview.add(Guide().move_to(x, y, a))` instead'))
+        return self.svg.namedview.add(Guide().move_to(posX, posY, angle))
 
     def affect(self, args=sys.argv[1:], output=True):  # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility
@@ -205,12 +206,12 @@ class DeprecatedEffect(object):
     def getDocumentWidth(self):
         self._deprecated('getDocumentWidth', _('{} is now a property of the svg '
                                                'document. Use `self.svg.width` instead.'))
-        return self.svg.width
+        return self.svg.get('width')
 
     def getDocumentHeight(self):
         self._deprecated('getDocumentHeight', _('{} is now a property of the svg '
                                                 'document. Use `self.svg.height` instead.'))
-        return self.svg.height
+        return self.svg.get('height')
 
     def getDocumentUnit(self):
         self._deprecated('getDocumentUnit', _('{} is now a property of the svg '
@@ -314,12 +315,20 @@ def localize():
     from .localization import localize as wrapped
     return wrapped
 
+def are_near_relative(a, b, eps):
+    _deprecated('inkex.are_near_relative was moved to '
+                'inkex.units.are_near_relative', stack=2)
+    return inkex.units.are_near_relative(a, b, eps)
+
+def debug(what):
+    _deprecated('inkex.debug was moved to inkex.utils.debug', stack=2)
+    return inkex.utils.debug(what)
+
 # legacy inkex members <= 0.48.x
 
 def unittouu(string):
     _deprecated('inkex.unittouu is now a method in the svg '
             'document. Use `self.svg.unittouu(str)` instead.', stack=2)
-    import inkex.units
     return inkex.units.convert_unit(string, 'px')
 
 # optparse.Values.ensure_value

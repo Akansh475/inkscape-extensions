@@ -841,15 +841,10 @@ class Arc(AbsolutePathCommand):
 
     def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Vector2d) -> List[Curve]
         """Convert this arc into bezier curves"""
-        cubic = arc_to_path(list(prev), self.args)
-        p3 = None
-        result = []
-        for (x1, y1), (x2, y2), (x3, y3) in cubic:
-            if p3 is not None:
-                result.append(Curve(p3[0], p3[1], x1, y1, x2, y2))
-            p3 = (x3, y3)
-        prev_prev.x, prev_prev.y = x1, y1
-        return result
+        path = CubicSuperPath([arc_to_path(list(prev), self.args)]).to_path()
+        prev_prev.x, prev_prev.y = path[-1].x3, path[-1].y3
+        # Ignore the first move command from to_path()
+        return list(path)[1:]
 
     def transform(self, transform):  # type: (T, Transform) -> T
         x_, y_ = transform.apply_to_point((self.x, self.y))

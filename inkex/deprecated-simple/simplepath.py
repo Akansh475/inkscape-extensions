@@ -7,7 +7,9 @@
 Depreicated simplepath replacements with documentation
 """
 
+import math
 from inkex.deprecated import deprecate, DeprecatedDict
+from inkex.transforms import Transform
 from inkex.paths import Path
 
 pathdefs = DeprecatedDict({
@@ -36,17 +38,14 @@ def formatPath(a):
 @deprecate
 def translatePath(p, x, y):
     """Path(array).translate(x, y)"""
-    return (Path(p) + (x, y)).to_arrays()
+    p[:] = Path(p).translate(x, y).to_arrays()
 
 @deprecate
 def scalePath(p, x, y):
     """Path(array).scale(x, y)"""
-    return (Path(p) * (x, y)).to_arrays()
+    p[:] = Path(p).scale(x, y).to_arrays()
 
 @deprecate
 def rotatePath(p, a, cx=0, cy=0):
-    """Path(array).rotate(angle_degrees, center_x, center_y)"""
-    path = Path(p)
-    path.rotate(a, cx, cy)
-    return path.to_arrays()
-
+    """Path(array).rotate(angle_degrees, (center_x, center_y))"""
+    p[:] = Path(p).rotate(math.degrees(a), (cx, cy)).to_arrays()

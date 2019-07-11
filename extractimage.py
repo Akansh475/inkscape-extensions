@@ -22,108 +22,80 @@ Extract emebeded images.
 """
 
 import os
-import base64
-
 import inkex
+from inkex.elements import Image
+
+try:
+    from base64 import decodebytes
+except ImportError:
+    from base64 import decodestring as decodebytes
 
 class ExtractImage(inkex.EffectExtension):
-    def __init__(self):
-        super(ExtractImage, self).__init__()
-        self.arg_parser.add_argument("--desc")
-        self.arg_parser.add_argument(
-            "-s", "--selectedonly", type=inkex.inkbool,
-            dest="selectedonly", default=True,
-            help="extract only selected images")
-        self.arg_parser.add_argument("--filepath",
-                         type=str,
-                        dest="filepath", default=None,
-                        help="")
+    """Extract images and save to filenames"""
+    def add_arguments(self, pars):
+        pars.add_argument("--desc")
+        pars.add_argument("-s", "--selectedonly", type=inkex.inkbool,\
+            help="Extract only selected images", default=True)
+        pars.add_argument("--filepath", default='.',\
+            help="Location to save the images.")
+
     def effect(self):
-        # if slectedonly is enabled and there is a selection only extractselected
-        # images. otherwise extract all images
-        if self.options.selectedonly:
-            self.extractSelected(self.document, self.svg.selected)
-        else:
-            self.extractAll(self.document)
+        elems = self.svg.selected.values() \
+            if self.options.selectedonly else self.svg.xpath('//svg:image')
 
-    def extractSelected(self, document, selected):
-        self.document=document
-        self.svg.selected=selected
-        if self.options.ids:
-            for id, node in selected.items():
-                if node.tag == inkex.addNS('image','svg'):
-                    self.extract_image(node)
+        for elem in elems:
+            if isinstance(elem, Image):
+                self.extract_image(elem)
 
-    def extractAll(self, document):
-        self.document=document #not that nice... oh well
-        path = '//svg:image'
-        for node in self.svg.xpath(path):
-            self.extract_image(node)
-
-    def mime_to_ext(self, mime):
+    @staticmethod
+    def mime_to_ext(mime):
+        """Return an extension based on the mime type"""
+        # Most extensions are automatic (i.e. extension is same as minor part of mime type)
         part = mime.split('/', 1)[1].split('+')[0]
-        return {
-            'png'     : '.png',
+        return '.' + {
+            # These are the non-matching ones.
             'svg+xml' : '.svg',
-            'bmp'     : '.bmp',
             'jpeg'    : '.jpg',
-            'jpg'     : '.jpg', #bogus mime
             'icon'    : '.ico',
-            'gif'     : '.gif',
-            'wmf'     : '.wmf',
-            'emf'     : '.emf',
         }.get(part, part)
 
-
     def extract_image(self, node):
-        """
-        Extract the node as if it were an image.
-        """
-
-        # exbed the first embedded image
-        path = self.options.filepath
-        if path == '':
-            return # No filepath provided (error?)
-
-        if node.tag != inkex.addNS('image', 'svg'):
-            inkex.errormsg("Not an image element")
-            return # Not an image tag
-
-        xlink = node.get(inkex.addNS('href', 'xlink'))
+        """Extract the node as if it were an image."""
+        xlink = node.get('xlink:href')
         if not xlink.startswith('data:'):
-            inkex.errormsg("Not an image element")
-            return # Not embedded data
+            return # Not embedded image data
 
-        data = xlink[5:]
-        if ',' not in data or ';' not in data:
+        save_to = self.abssolute_href(self.options.filepath)
+        # Make the target directory if it doesn't exist yet.
+        if not os.path.isdir(save_to):
+            os.makedirs(save_to)
+
+        try:
+            data = xlink[5:]
+            (mimetype, data) = data.split(';', 1)
+            (base, data) = data.split(',', 1)
+        except ValueError:
             inkex.errormsg("Invalid image format found")
             return
 
-        (mimetype, data) = data.split(';', 1)
-        (base, data) = data.split(',', 1)
-
         if base != 'base64':
             inkex.errormsg("Can't decode encoding: {}".format(base))
+            return
 
         file_ext = self.mime_to_ext(mimetype)
 
-        pathwext = path + file_ext
+        pathwext = os.path.join(save_to, node.get("id") + file_ext)
         if os.path.isfile(pathwext):
-            pathwext = path + "_" + node.get("id") + file_ext
+            inkex.errormsg("Can't extract image, filename already used: {}".format(pathwext))
+            return
 
-        if not os.path.isabs(pathwext):
-            if os.name == 'nt':
-                pathwext = os.path.join(os.environ['USERPROFILE'], pathwext)
-            else:
-                pathwext = os.path.join(os.path.expanduser("~"), pathwext)
-
-        inkex.errormsg('Image extracted to: %s' % pathwext)
+        print('Image extracted to: {}'.format(pathwext))
 
         with open(pathwext, 'wb') as fhl:
-            fhl.write(base64.decodestring(data))
+            fhl.write(decodebytes(data.encode('utf-8')))
 
         # absolute for making in-mem cycles work
-        node.set(inkex.addNS('href', 'xlink'), os.path.realpath(pathwext))
+        node.set('xlink:href', os.path.realpath(pathwext))
 
 if __name__ == '__main__':
     ExtractImage().run()

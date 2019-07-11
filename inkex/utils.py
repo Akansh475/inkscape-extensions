@@ -33,7 +33,7 @@ from argparse import ArgumentTypeError
 # from tempfile import TemporaryDirectory
 
 # All the names that get added to the inkex API itself.
-__all__ = ('AbortExtension', 'inkbool', 'errormsg', 'addNS')
+__all__ = ('AbortExtension', 'inkbool', 'errormsg', 'addNS', 'NSS')
 
 (X, Y) = range(2)
 
@@ -190,8 +190,10 @@ def filename_arg(name):
         raise ArgumentTypeError("File not found: {}".format(name))
     return filename
 
-def pairwise(iterable):
+def pairwise(iterable, start=True):
     "Iterate over a list with overlapping pairs (see itertools recipes)"
     first, then = tee(iterable)
-    start = next(then, None)
-    return [(None, start)] + list(zip(first, then))
+    starter = [(None, next(then, None))]
+    if not start:
+        starter = []
+    return starter + list(zip(first, then))

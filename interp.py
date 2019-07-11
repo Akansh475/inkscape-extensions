@@ -20,47 +20,26 @@
 
 import copy
 
-from lxml import etree
-
 import inkex
-from inkex import inkbool
-from inkex.base import InkscapeExtension, SvgThroughMixin
-from inkex.paths import Path
+from inkex.utils import pairwise
+from inkex.paths import CubicSuperPath
+from inkex.tween import tweenstyleunit, tweenstylefloat, tweenstylecolor, interppoints
+from inkex.bezier import csplength, cspbezsplitatlength, cspbezsplit, bezlenapprx
 
-
-class Interp(SvgThroughMixin, InkscapeExtension):
-    def __init__(self):
-        super(Interp, self).__init__()
-        self.arg_parser.add_argument("-e", "--exponent",
-                                     type=float,
-                                     dest="exponent",
-                                     default=0.0,
-                                     help="values other than zero give non linear interpolation")
-        self.arg_parser.add_argument("-s", "--steps",
-                                     type=int,
-                                     dest="steps",
-                                     default=5,
-                                     help="number of interpolation steps")
-        self.arg_parser.add_argument("-m", "--method",
-                                     type=int,
-                                     dest="method",
-                                     default=2,
-                                     help="method of interpolation")
-        self.arg_parser.add_argument("-d", "--dup",
-                                     type=inkbool,
-                                     dest="dup",
-                                     default=True,
-                                     help="duplicate endpaths")
-        self.arg_parser.add_argument("--style",
-                                     type=inkbool,
-                                     dest="style",
-                                     default=True,
-                                     help="try interpolation of some style properties")
-        self.arg_parser.add_argument("--zsort",
-                                     type=inkbool,
-                                     dest="zsort",
-                                     default=False,
-                                     help="use z-order instead of selection order")
+class Interp(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("-e", "--exponent", type=float, default=0.0,\
+            help="values other than zero give non linear interpolation")
+        pars.add_argument("-s", "--steps", type=int, default=5,\
+            help="number of interpolation steps")
+        pars.add_argument("-m", "--method", type=int, default=2,\
+            help="method of interpolation")
+        pars.add_argument("-d", "--dup", type=inkex.inkbool, default=True,\
+            help="duplicate endpaths")
+        pars.add_argument("--style", type=inkex.inkbool, default=True,\
+            help="try interpolation of some style properties")
+        pars.add_argument("--zsort", type=inkex.inkbool, default=False,\
+            help="use z-order instead of selection order")
 
     def effect(self):
         exponent = self.options.exponent
@@ -73,9 +52,6 @@ class Interp(SvgThroughMixin, InkscapeExtension):
             steps.append(steps[0] + steps[-1])
         steps = [step ** exponent for step in steps]
 
-        paths = {}
-        styles = {}
-
         if self.options.zsort:
             # work around selection order swapping with Live Preview
             objects = self.svg.get_z_selected()
@@ -84,32 +60,29 @@ class Interp(SvgThroughMixin, InkscapeExtension):
             objects = self.svg.selected
 
         for _id, node in objects.items():
-            if node.tag == inkex.addNS('path', 'svg'):
-                paths[_id] = inkex.Transform(node.get('d'))
-                styles[_id] = dict(inkex.Style.parse_str(node.get('style')))
-                trans = node.get('transform')
-                if trans:
-                    simpletransform.applyTransformToPath(inkex.Transform(trans).matrix, paths[_id])
+            if isinstance(node, inkex.PathElement):
+                node.apply_transform()
             else:
                 objects.pop(_id)
 
-        sorted_ids = list(objects)  # This should be fixed since it's an OrderedDict now
-        for i in range(1, len(sorted_ids)):
-            start = copy.deepcopy(paths[sorted_ids[i - 1]])
-            end = copy.deepcopy(paths[sorted_ids[i]])
-            sst = copy.deepcopy(styles[sorted_ids[i - 1]])
-            est = copy.deepcopy(styles[sorted_ids[i]])
+        for (elem1, elem2) in pairwise(objects.values(), start=False):
+            start = elem1.path.to_superpath()
+            end = elem2.path.to_superpath()
+            sst = copy.deepcopy(elem1.style)
+            est = copy.deepcopy(elem2.style)
             basestyle = copy.deepcopy(sst)
+
             if 'stroke-width' in basestyle:
-                basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width', sst, est, 0)
+                basestyle['stroke-width'] = tweenstyleunit(self.svg, 'stroke-width', sst, est, 0)
 
             # prepare for experimental style tweening
             if self.options.style:
                 dostroke = True
                 dofill = True
-                styledefaults = {'opacity': '1.0', 'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-                                 'stroke-width': '1.0', 'stroke': 'none', 'fill': 'none'}
-                for key in styledefaults.keys():
+                styledefaults = inkex.Style(
+                    'opacity:1.0;stroke-opacity:1.0;fill-opacity:1.0;'
+                    'stroke-width:1.0;stroke:none;fill:none')
+                for key in styledefaults:
                     sst.setdefault(key, styledefaults[key])
                     est.setdefault(key, styledefaults[key])
                 isnotplain = lambda x: not (x == 'none' or x[:1] == '#')
@@ -136,8 +109,8 @@ class Interp(SvgThroughMixin, InkscapeExtension):
 
             if self.options.method == 2:
                 # subdivide both paths into segments of relatively equal lengths
-                slengths, stotal = inkex.csplength(start)
-                elengths, etotal = inkex.csplength(end)
+                slengths, stotal = csplength(start)
+                elengths, etotal = csplength(end)
                 lengths = {}
                 t = 0
                 for sp in slengths:
@@ -168,7 +141,7 @@ class Interp(SvgThroughMixin, InkscapeExtension):
                         if sadd and t > sadd[0]:
                             while sadd and sadd[0] < t:
                                 nt = (sadd[0] - pt) / (t - pt)
-                                bezes = inkex.cspbezsplitatlength(s[-1][-1][:], start[0][0][:], nt)
+                                bezes = cspbezsplitatlength(s[-1][-1][:], start[0][0][:], nt)
                                 s[-1][-1:] = bezes[:2]
                                 start[0][0] = bezes[2]
                                 pt = sadd.pop(0)
@@ -185,7 +158,7 @@ class Interp(SvgThroughMixin, InkscapeExtension):
                         if eadd and t > eadd[0]:
                             while eadd and eadd[0] < t:
                                 nt = (eadd[0] - pt) / (t - pt)
-                                bezes = inkex.cspbezsplitatlength(e[-1][-1][:], end[0][0][:], nt)
+                                bezes = cspbezsplitatlength(e[-1][-1][:], end[0][0][:], nt)
                                 e[-1][-1:] = bezes[:2]
                                 end[0][0] = bezes[2]
                                 pt = eadd.pop(0)
@@ -194,7 +167,7 @@ class Interp(SvgThroughMixin, InkscapeExtension):
                 end = e[:]
             else:
                 # which path has fewer segments?
-                lengthdiff = inkex.numsegs(start) - inkex.numsegs(end)
+                lengthdiff = len(start.path) - len(end.path)
                 # swap shortest first
                 if lengthdiff > 0:
                     start, end = end, start
@@ -205,13 +178,13 @@ class Interp(SvgThroughMixin, InkscapeExtension):
                     segment = 0
                     for y in range(len(start)):
                         for z in range(1, len(start[y])):
-                            leng = inkex.bezlenapprx(start[y][z - 1], start[y][z])
+                            leng = bezlenapprx(start[y][z - 1], start[y][z])
                             if leng > maxlen:
                                 maxlen = leng
                                 subpath = y
                                 segment = z
                     sp1, sp2 = start[subpath][segment - 1:segment + 1]
-                    start[subpath][segment - 1:segment + 1] = inkex.cspbezsplit(sp1, sp2)
+                    start[subpath][segment - 1:segment + 1] = cspbezsplit(sp1, sp2)
                 # if swapped, swap them back
                 if lengthdiff > 0:
                     start, end = end, start
@@ -238,7 +211,7 @@ class Interp(SvgThroughMixin, InkscapeExtension):
             if self.options.dup:
                 steps = [0] + steps + [1]
             # create an interpolated path for each interval
-            group = etree.SubElement(self.svg.get_current_layer(), inkex.addNS('g', 'svg'))
+            group = self.svg.get_current_layer().add(inkex.Group())
             for time in steps:
                 interp = []
                 # process subpaths
@@ -255,7 +228,7 @@ class Interp(SvgThroughMixin, InkscapeExtension):
                         for p1, p2 in zip(sp, ep):
                             if not (sp or ep):
                                 break
-                            interp[-1][-1].append(inkex.interppoints(p1, p2, time))
+                            interp[-1][-1].append(interppoints(p1, p2, time))
 
                 # remove final subpath if empty.
                 if not interp[-1]:
@@ -263,16 +236,18 @@ class Interp(SvgThroughMixin, InkscapeExtension):
 
                 # basic style tweening
                 if self.options.style:
-                    basestyle['opacity'] = inkex.tweenstylefloat('opacity', sst, est, time)
+                    basestyle['opacity'] = tweenstylefloat('opacity', sst, est, time)
                     if dostroke:
-                        basestyle['stroke-opacity'] = inkex.tweenstylefloat('stroke-opacity', sst, est, time)
-                        basestyle['stroke-width'] = inkex.tweenstyleunit('stroke-width', sst, est, time)
-                        basestyle['stroke'] = inkex.tweenstylecolor('stroke', sst, est, time)
+                        basestyle['stroke-opacity'] = tweenstylefloat('stroke-opacity', sst, est, time)
+                        basestyle['stroke-width'] = tweenstyleunit(self.svg, 'stroke-width', sst, est, time)
+                        basestyle['stroke'] = tweenstylecolor('stroke', sst, est, time)
                     if dofill:
-                        basestyle['fill-opacity'] = inkex.tweenstylefloat('fill-opacity', sst, est, time)
-                        basestyle['fill'] = inkex.tweenstylecolor('fill', sst, est, time)
-                attribs = {'style': str(inkex.Style(basestyle)), 'd': str(Path(interp))}
-                new = etree.SubElement(group, inkex.addNS('path', 'svg'), attribs)
+                        basestyle['fill-opacity'] = tweenstylefloat('fill-opacity', sst, est, time)
+                        basestyle['fill'] = tweenstylecolor('fill', sst, est, time)
+
+                new = group.add(inkex.PathElement())
+                new.style = basestyle
+                new.path = CubicSuperPath(interp)
 
 
 if __name__ == '__main__':

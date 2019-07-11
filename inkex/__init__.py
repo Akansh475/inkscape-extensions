@@ -22,6 +22,8 @@ from .deprecated import optparse
 from .deprecated import InkOption
 from .deprecated import etree
 from .deprecated import localize
+from .deprecated import debug
 
 # legacy functions
+from .deprecated import are_near_relative
 from .deprecated import unittouu

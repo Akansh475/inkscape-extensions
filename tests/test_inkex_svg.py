@@ -114,8 +114,8 @@ class BasicSvgTest(TestCase):
     def test_scale(self):
         """Scale of a document"""
         doc = svg('id="empty" viewBox="0 0 100 100" width="200" height="200"')
-        self.assertEqual(float(doc.width), 200.0)
-        self.assertEqual(float(doc.get_viewbox()[2]), 100.0)
+        self.assertEqual(doc.width, 200.0)
+        self.assertEqual(doc.get_viewbox()[2], 100.0)
         self.assertEqual(doc.scale, 2.0)
         doc = svg('id="empty" viewBox="0 0 0 0" width="200" height="200"')
         self.assertEqual(doc.scale, 1.0)
@@ -141,27 +141,27 @@ class GetDocumentWidthTest(TestCase):
 
     def test_no_dimensions(self):
         """An empty width value should be default zero width"""
-        self.assertEqual(svg().width, '0')
+        self.assertEqual(svg().width, 0)
 
     def test_empty_width(self):
         """An empty width value should be the same as a missing width."""
-        self.assertEqual(svg('width=""').width, '0')
+        self.assertEqual(svg('width=""').width, 0)
 
     def test_empty_viewbox(self):
         """An empty viewBox value should be the same as a missing viewBox."""
-        self.assertEqual(svg('viewBox=""').width, '0')
+        self.assertEqual(svg('viewBox=""').width, 0)
 
     def test_empty_width_and_viewbox(self):
         """Empty values for both should be the same as both missing."""
-        self.assertEqual(svg('width="" viewBox=""').width, '0')
+        self.assertEqual(svg('width="" viewBox=""').width, 0)
 
     def test_width_only(self):
         """Test a fixed width"""
-        self.assertEqual(svg('width="120mm"').width, '120mm')
+        self.assertAlmostEqual(svg('width="120mm"').width, 453.5433071)
 
     def test_width_and_viewbox(self):
         """If both are present, width overrides viewBox."""
-        self.assertEqual(svg('width="120mm" viewBox="0 0 22 99"').width, '120mm')
+        self.assertAlmostEqual(svg('width="120mm" viewBox="0 0 22 99"').width, 453.5433071)
 
     def test_viewbox_only(self):
         """IF only the viewBox is present"""
@@ -181,27 +181,27 @@ class GetDocumentHeightTest(TestCase):
 
     def test_no_dimensions(self):
         """Test height from blank svg"""
-        self.assertEqual(svg().height, '0')
+        self.assertEqual(svg().height, 0)
 
     def test_empty_height(self):
         """An empty height value should be the same as a missing height."""
-        self.assertEqual(svg('height=""').height, '0')
+        self.assertEqual(svg('height=""').height, 0)
 
     def test_empty_viewbox(self):
         """An empty viewBox value should be the same as a missing viewBox."""
-        self.assertEqual(svg('viewBox=""').height, '0')
+        self.assertEqual(svg('viewBox=""').height, 0)
 
     def test_empty_height_viewbox(self):
         """Empty values for both should be the same as both missing."""
-        self.assertEqual(svg('height="" viewBox=""').height, '0')
+        self.assertEqual(svg('height="" viewBox=""').height, 0)
 
     def test_height_only(self):
         """A simple height only in px"""
-        self.assertEqual(svg('height="330px"').height, '330px')
+        self.assertEqual(svg('height="330px"').height, 330)
 
     def test_height_and_viewbox(self):
         """If both are present, height overrides viewBox."""
-        self.assertEqual(svg('height="330px" viewBox="0 0 22 99"').height, '330px')
+        self.assertEqual(svg('height="330px" viewBox="0 0 22 99"').height, 330)
 
     def test_viewbox_only(self):
         """Height from viewBox only"""

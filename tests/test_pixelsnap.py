@@ -6,3 +6,4 @@ from inkex.tester.filters import CompareOrderIndependentStyle
 class TestPixelSnapEffectBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = PixelSnapEffect
     compare_filters = [CompareOrderIndependentStyle()]
+    comparisons = [('--id=p1', '--id=r3')]

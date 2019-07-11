@@ -13,14 +13,12 @@
       <param name="vertical_guides"    type="int"   min="1" max="1000" _gui-text="Columns:">2</param>
       <param name="horizontal_guides"  type="int"   min="1" max="1000" _gui-text="Rows:">3</param>
       <param name="start_from_edges"       type="boolean" _gui-text="Start from edges">false</param>
-      <param name="delete_existing_guides" type="boolean" _gui-text="Delete existing guides">false</param>
     </page>
     <page name="diagonal_guides" _gui-text="Diagonal guides">
       <param name="ul" type="boolean" _gui-text="Upper left corner">false</param>
       <param name="ur" type="boolean" _gui-text="Upper right corner">false</param>
       <param name="ll" type="boolean" _gui-text="Lower left corner">false</param>
       <param name="lr" type="boolean" _gui-text="Lower right corner">false</param>
-      <param name="delete_existing_guides2" type="boolean" _gui-text="Delete existing guides">false</param>
     </page>
     <page name="margins" _gui-text="Margins">
       <param name="margins_preset" type="enum" _gui-text="Margins preset:">
@@ -76,12 +74,12 @@
         <item value="2">1/2</item>
         <_item msgctxt="Margin" value="0">None</_item>
       </param>
-      <param name="vertical_subdivisions"    type="int"   min="1" max="1000" _gui-text="Columns:">2</param>
-      <param name="horizontal_subdivisions"  type="int"   min="1" max="1000" _gui-text="Rows:">3</param>
+      <param name="vert"    type="int"   min="1" max="1000" _gui-text="Columns:">2</param>
+      <param name="horz"  type="int"   min="1" max="1000" _gui-text="Rows:">3</param>
       <param name="start_from_edges2"       type="boolean" _gui-text="Start from edges">false</param>
-      <param name="delete_existing_guides3" type="boolean" _gui-text="Delete existing guides">false</param>
     </page>
   </param>
+  <param name="delete" type="boolean" _gui-text="Delete existing guides">false</param>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

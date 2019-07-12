@@ -26,6 +26,7 @@ import math
 
 import inkex
 from inkex.transforms import Transform
+from inkex.bezier import cspsubdiv
 
 class hpglEncoder(object):
     PI = math.pi
@@ -225,7 +226,7 @@ class hpglEncoder(object):
         # process path
         path = node.path.transform(mat).to_superpath()
         if path:
-            inkex.cspsubdiv(path, self.flat)
+            cspsubdiv(path, self.flat)
             # path to HPGL commands
             oldPosX = 0.0
             oldPosY = 0.0

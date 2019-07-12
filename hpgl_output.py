@@ -24,46 +24,43 @@ from inkex.localization import _
 import hpgl_encoder
 
 class HpglOutput(inkex.OutputExtension):
-    def __init__(self):
-        super(HpglOutput, self).__init__()
-        self.arg_parser.add_argument('--tab')
-        self.arg_parser.add_argument('--resolutionX',   type=float,         default=1016.0, help='Resolution X (dpi)')
-        self.arg_parser.add_argument('--resolutionY',   type=float,         default=1016.0, help='Resolution Y (dpi)')
-        self.arg_parser.add_argument('--pen',           type=int,           default=1,      help='Pen number')
-        self.arg_parser.add_argument('--force',         type=int,           default=24,     help='Pen force (g)')
-        self.arg_parser.add_argument('--speed',         type=int,           default=20,     help='Pen speed (cm/s)')
-        self.arg_parser.add_argument('--orientation',                       default='90',   help='Rotation (Clockwise)')
-        self.arg_parser.add_argument('--mirrorX',       type=inkex.inkbool, default='False',help='Mirror X axis')
-        self.arg_parser.add_argument('--mirrorY',       type=inkex.inkbool, default='False',help='Mirror Y axis')
-        self.arg_parser.add_argument('--center',        type=inkex.inkbool, default='False',help='Center zero point')
-        self.arg_parser.add_argument('--overcut',       type=float,         default=1.0,    help='Overcut (mm)')
-        self.arg_parser.add_argument('--toolOffset',    type=float,         default=0.25,   help='Tool (Knife) offset correction (mm)')
-        self.arg_parser.add_argument('--precut',        type=inkex.inkbool, default=True,   help='Use precut')
-        self.arg_parser.add_argument('--flat',          type=float,         default=1.2,    help='Curve flatness')
-        self.arg_parser.add_argument('--autoAlign',     type=inkex.inkbool, default=True,   help='Auto align')
-        self.arg_parser.add_argument('--convertObjects',type=inkex.inkbool, default=True,   help='Convert objects to paths')
+    """Save as HPGL Output"""
+    def add_arguments(self, pars):
+        pars.add_argument('--tab')
+        pars.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
+        pars.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
+        pars.add_argument('--pen', type=int, default=1, help='Pen number')
+        pars.add_argument('--force', type=int, default=24, help='Pen force (g)')
+        pars.add_argument('--speed', type=int, default=20, help='Pen speed (cm/s)')
+        pars.add_argument('--orientation', default='90', help='Rotation (Clockwise)')
+        pars.add_argument('--mirrorX', type=inkex.inkbool, default=False, help='Mirror X axis')
+        pars.add_argument('--mirrorY', type=inkex.inkbool, default=False, help='Mirror Y axis')
+        pars.add_argument('--center', type=inkex.inkbool, default=False, help='Center zero point')
+        pars.add_argument('--overcut', type=float, default=1.0, help='Overcut (mm)')
+        pars.add_argument('--precut', type=inkex.inkbool, default=True, help='Use precut')
+        pars.add_argument('--flat', type=float, default=1.2, help='Curve flatness')
+        pars.add_argument('--autoAlign', type=inkex.inkbool, default=True, help='Auto align')
+        pars.add_argument('--convertObjects', type=inkex.inkbool, default=True,\
+            help='Convert objects to paths')
+        pars.add_argument('--toolOffset', type=float, default=0.25,\
+            help='Tool (Knife) offset correction (mm)')
 
     def save(self, stream):
         self.options.debug = False
         # get hpgl data
-        myHpglEncoder = hpgl_encoder.hpglEncoder(self)
+        encoder = hpgl_encoder.hpglEncoder(self)
         try:
-            hpgl, debugObject = myHpglEncoder.getHpgl()
-        except Exception as inst:
-            if inst.args[0] == 'NO_PATHS':
-                # issue error if no paths found
-                inkex.errormsg(_("No paths where found. Please convert all objects you want to save into paths."))
-                hpgl = ''
-                return
-            else:
-                raise
+            hpgl = encoder.getHpgl()
+        except hpgl_encoder.NoPathError:
+            inkex.errormsg(_("No paths where found. Please convert objects you want into paths."))
+            return
         # convert raw HPGL to HPGL
-        hpglInit = 'IN'
+        hpgl_init = 'IN'
         if self.options.force > 0:
-            hpglInit += ';FS%d' % self.options.force
+            hpgl_init += ';FS%d' % self.options.force
         if self.options.speed > 0:
-            hpglInit += ';VS%d' % self.options.speed
-        hpgl = hpglInit + hpgl + ';SP0;PU0,0;IN; '
+            hpgl_init += ';VS%d' % self.options.speed
+        hpgl = hpgl_init + hpgl + ';SP0;PU0,0;IN; '
         stream.write(hpgl.encode('utf-8'))
 
 

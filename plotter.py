@@ -18,57 +18,51 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-import sys
+import inkex
+from inkex.localization import _
 
 import hpgl_encoder
 
-import inkex
-from inkex.localization import _
-from inkex.utils import inkbool
-
 class Plot(inkex.EffectExtension):
-    def __init__(self):
-        super(Plot, self).__init__()
-        self.arg_parser.add_argument('--tab',               type=str,     dest='tab')
-        self.arg_parser.add_argument('--portType',          type=str,     dest='portType',          default='serial',       help='Port type')
-        self.arg_parser.add_argument('--parallelPort',      type=str,     dest='parallelPort',      default='/dev/usb/lp2', help='Parallel port')
-        self.arg_parser.add_argument('--serialPort',        type=str,     dest='serialPort',        default='COM1',         help='Serial port')
-        self.arg_parser.add_argument('--serialBaudRate',    type=str,     dest='serialBaudRate',    default='9600',         help='Serial Baud rate')
-        self.arg_parser.add_argument('--serialByteSize',    type=str,     dest='serialByteSize',    default='eight',        help='Serial byte size')
-        self.arg_parser.add_argument('--serialStopBits',    type=str,     dest='serialStopBits',    default='one',          help='Serial stop bits')
-        self.arg_parser.add_argument('--serialParity',      type=str,     dest='serialParity',      default='none',         help='Serial parity')
-        self.arg_parser.add_argument('--serialFlowControl', type=str,     dest='serialFlowControl', default='0',            help='Flow control')
-        self.arg_parser.add_argument('--commandLanguage',   type=str,     dest='commandLanguage',   default='hpgl',         help='Command Language')
-        self.arg_parser.add_argument('--resolutionX',       type=float,   dest='resolutionX',       default=1016.0,         help='Resolution X (dpi)')
-        self.arg_parser.add_argument('--resolutionY',       type=float,   dest='resolutionY',       default=1016.0,         help='Resolution Y (dpi)')
-        self.arg_parser.add_argument('--pen',               type=int,     dest='pen',               default=1,              help='Pen number')
-        self.arg_parser.add_argument('--force',             type=int,     dest='force',             default=24,             help='Pen force (g)')
-        self.arg_parser.add_argument('--speed',             type=int,     dest='speed',             default=20,             help='Pen speed (cm/s)')
-        self.arg_parser.add_argument('--orientation',       type=str,     dest='orientation',       default='90',           help='Rotation (Clockwise)')
-        self.arg_parser.add_argument('--mirrorX',           type=inkbool, dest='mirrorX',           default='FALSE',        help='Mirror X axis')
-        self.arg_parser.add_argument('--mirrorY',           type=inkbool, dest='mirrorY',           default='FALSE',        help='Mirror Y axis')
-        self.arg_parser.add_argument('--center',            type=inkbool, dest='center',            default='FALSE',        help='Center zero point')
-        self.arg_parser.add_argument('--overcut',           type=float,   dest='overcut',           default=1.0,            help='Overcut (mm)')
-        self.arg_parser.add_argument('--toolOffset',        type=float,   dest='toolOffset',        default=0.25,           help='Tool (Knife) offset correction (mm)')
-        self.arg_parser.add_argument('--precut',            type=inkbool, dest='precut',            default='TRUE',         help='Use precut')
-        self.arg_parser.add_argument('--flat',              type=float,   dest='flat',              default=1.2,            help='Curve flatness')
-        self.arg_parser.add_argument('--autoAlign',         type=inkbool, dest='autoAlign',         default='TRUE',         help='Auto align')
-        self.arg_parser.add_argument('--debug',             type=inkbool, dest='debug',             default='FALSE',        help='Show debug information')
-        self.arg_parser.add_argument('--convertObjects',    type=inkbool, dest='convertObjects',    default='TRUE',         help='Convert objects to paths')
+    """Generate a plot in HPGL output"""
+    def add_arguments(self, pars):
+        pars.add_argument('--tab')
+        pars.add_argument('--portType', default='serial', help='Port type')
+        pars.add_argument('--parallelPort', default='/dev/usb/lp2', help='Parallel port')
+        pars.add_argument('--serialPort', default='COM1', help='Serial port')
+        pars.add_argument('--serialBaudRate', default='9600', help='Serial Baud rate')
+        pars.add_argument('--serialByteSize', default='eight', help='Serial byte size')
+        pars.add_argument('--serialStopBits', default='one', help='Serial stop bits')
+        pars.add_argument('--serialParity', default='none', help='Serial parity')
+        pars.add_argument('--serialFlowControl', default='0', help='Flow control')
+        pars.add_argument('--commandLanguage', default='hpgl', help='Command Language')
+        pars.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
+        pars.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
+        pars.add_argument('--pen', type=int, default=1, help='Pen number')
+        pars.add_argument('--force', type=int, default=24, help='Pen force (g)')
+        pars.add_argument('--speed', type=int, default=20, help='Pen speed (cm/s)')
+        pars.add_argument('--orientation', default='90', help='Rotation (Clockwise)')
+        pars.add_argument('--mirrorX', type=inkex.inkbool, default=False, help='Mirror X axis')
+        pars.add_argument('--mirrorY', type=inkex.inkbool, default=False, help='Mirror Y axis')
+        pars.add_argument('--center', type=inkex.inkbool, default=False, help='Center zero point')
+        pars.add_argument('--overcut', type=float, default=1.0, help='Overcut (mm)')
+        pars.add_argument('--precut', type=inkex.inkbool, default=True, help='Use precut')
+        pars.add_argument('--flat', type=float, default=1.2, help='Curve flatness')
+        pars.add_argument('--autoAlign', type=inkex.inkbool, default=True, help='Auto align')
+        pars.add_argument('--toolOffset', type=float, default=0.25,\
+            help='Tool (Knife) offset correction (mm)')
+        pars.add_argument('--convertObjects', type=inkex.inkbool, default=True,\
+            help='Convert objects to paths')
 
     def effect(self):
         # get hpgl data
-        myHpglEncoder = hpgl_encoder.hpglEncoder(self)
+        encoder = hpgl_encoder.hpglEncoder(self)
         try:
-            self.hpgl, debugObject = myHpglEncoder.getHpgl()
-        except Exception as inst:
-            if inst.args[0] == 'NO_PATHS':
-                # issue error if no paths found
-                inkex.errormsg(_("No paths where found. Please convert all objects you want to plot into paths."))
-                return 1
-            else:
-                type, value, traceback = sys.exc_info()
-                raise ValueError(('', type, value), traceback)
+            self.hpgl = encoder.getHpgl()
+        except hpgl_encoder.NoPathError:
+            inkex.errormsg(_("No paths where found. Please convert objects into paths."))
+            return
+
         # TODO: Get preview to work. This requires some work on the C++ side to be able to determine if it is
         # a preview or a final run. (Remember to set <effect needs-live-preview='false'> to true)
         '''
@@ -91,21 +85,19 @@ class Plot(inkex.EffectExtension):
         if self.options.commandLanguage == 'KNK':
             self.convertToKNK()
         # output
-        if self.options.debug:
-            self.showDebugInfo(debugObject)
-        elif self.options.portType == 'parallel':
+        if self.options.portType == 'parallel':
             self.sendHpglToParallel()
         elif self.options.portType == 'serial':
             self.sendHpglToSerial()
 
     def convertToHpgl(self):
         # convert raw HPGL to HPGL
-        hpglInit = 'IN'
+        hpgl_init = 'IN'
         if self.options.force > 0:
-            hpglInit += ';FS%d' % self.options.force
+            hpgl_init += ';FS%d' % self.options.force
         if self.options.speed > 0:
-            hpglInit += ';VS%d' % self.options.speed
-        self.hpgl = hpglInit + self.hpgl + ';SP0;PU0,0;IN; '
+            hpgl_init += ';VS%d' % self.options.speed
+        self.hpgl = hpgl_init + self.hpgl + ';SP0;PU0,0;IN; '
 
     def convertToDmpl(self):
         # convert HPGL to DMPL
@@ -132,12 +124,12 @@ class Plot(inkex.EffectExtension):
 
     def convertToKNK(self):
         # convert HPGL to KNK Plotter Language
-        hpglInit = 'ZG'
+        hpgl_init = 'ZG'
         if self.options.force > 0:
-            hpglInit += ';FS%d' % self.options.force
+            hpgl_init += ';FS%d' % self.options.force
         if self.options.speed > 0:
-            hpglInit += ';VS%d' % self.options.speed
-        self.hpgl = hpglInit + self.hpgl + ';SP0;PU0,0;@ '
+            hpgl_init += ';VS%d' % self.options.speed
+        self.hpgl = hpgl_init + self.hpgl + ';SP0;PU0,0;@ '
 
     def sendHpglToParallel(self):
         port = open(self.options.parallelPort, "w")
@@ -157,123 +149,58 @@ class Plot(inkex.EffectExtension):
                 + "\n"   + _("3. Close and restart Inkscape."))
             return
         # init serial framework
-        mySerial = serial.Serial()
+        comx = serial.Serial()
         # set serial port
-        mySerial.port = self.options.serialPort
+        comx.port = self.options.serialPort
         # set baudrate
-        mySerial.baudrate = self.options.serialBaudRate
+        comx.baudrate = self.options.serialBaudRate
         # set bytesize
         if self.options.serialByteSize == 'five':
-            mySerial.bytesize = serial.FIVEBITS
+            comx.bytesize = serial.FIVEBITS
         if self.options.serialByteSize == 'six':
-            mySerial.bytesize = serial.SIXBITS
+            comx.bytesize = serial.SIXBITS
         if self.options.serialByteSize == 'seven':
-            mySerial.bytesize = serial.SEVENBITS
+            comx.bytesize = serial.SEVENBITS
         if self.options.serialByteSize == 'eight':
-            mySerial.bytesize = serial.EIGHTBITS
+            comx.bytesize = serial.EIGHTBITS
         # set stopbits
         if self.options.serialStopBits == 'one':
-            mySerial.stopbits = serial.STOPBITS_ONE
+            comx.stopbits = serial.STOPBITS_ONE
         if self.options.serialStopBits == 'onePointFive':
-            mySerial.stopbits = serial.STOPBITS_ONE_POINT_FIVE
+            comx.stopbits = serial.STOPBITS_ONE_POINT_FIVE
         if self.options.serialStopBits == 'two':
-            mySerial.stopbits = serial.STOPBITS_TWO
+            comx.stopbits = serial.STOPBITS_TWO
         # set parity
         if self.options.serialParity == 'none':
-            mySerial.parity = serial.PARITY_NONE
+            comx.parity = serial.PARITY_NONE
         if self.options.serialParity == 'even':
-            mySerial.parity = serial.PARITY_EVEN
+            comx.parity = serial.PARITY_EVEN
         if self.options.serialParity == 'odd':
-            mySerial.parity = serial.PARITY_ODD
+            comx.parity = serial.PARITY_ODD
         if self.options.serialParity == 'mark':
-            mySerial.parity = serial.PARITY_MARK
+            comx.parity = serial.PARITY_MARK
         if self.options.serialParity == 'space':
-            mySerial.parity = serial.PARITY_SPACE
+            comx.parity = serial.PARITY_SPACE
         # set short timeout to avoid locked up interface
-        mySerial.timeout = 0.1
+        comx.timeout = 0.1
         # set flow control
         if self.options.serialFlowControl == 'xonxoff':
-            mySerial.xonxoff = True
-        if self.options.serialFlowControl == 'rtscts' or self.options.serialFlowControl == 'dsrdtrrtscts':
-            mySerial.rtscts = True
+            comx.xonxoff = True
+        if self.options.serialFlowControl in ('rtscts', 'dsrdtrrtscts'):
+            comx.rtscts = True
         if self.options.serialFlowControl == 'dsrdtrrtscts':
-            mySerial.dsrdtr = True
+            comx.dsrdtr = True
         # try to establish connection
         try:
-            mySerial.open()
-        except Exception as inst:
-            if inst.strerror is not None and 'ould not open port' in inst.strerror:
-                inkex.errormsg(_("Could not open port. Please check that your plotter is running, connected and the settings are correct."))
-                return
-            else:
-                type, value, traceback = sys.exc_info()
-                raise ValueError('', type, value).with_traceback(traceback)
+            comx.open()
+        except serial.SerialException:
+            inkex.errormsg(_("Could not open port. Please check that your plotter is "
+                             "running, connected and the settings are correct."))
+            return
         # send data to plotter
-        mySerial.write(self.hpgl)
-        mySerial.read(2)
-        mySerial.close()
-
-    def showDebugInfo(self, debugObject):
-        # show debug information
-        inkex.errormsg("---------------------------------\nDebug information\n---------------------------------\n\nSettings:\n")
-        inkex.errormsg('  Port type: ' + self.options.portType)
-        if self.options.portType == 'parallel':
-            inkex.errormsg('  Parallel Port: ' + self.options.parallelPort)
-        elif self.options.portType == 'serial':
-            inkex.errormsg('  Serial Port: ' + self.options.serialPort)
-            inkex.errormsg('  Serial baud rate: ' + self.options.serialBaudRate)
-            inkex.errormsg('  Serial byte size: ' + self.options.serialByteSize + ' Bits')
-            inkex.errormsg('  Serial stop bits: ' + self.options.serialStopBits + ' Bits')
-            inkex.errormsg('  Serial parity: ' + self.options.serialParity)
-            inkex.errormsg('  Serial Flow control: ' + self.options.serialFlowControl)
-            inkex.errormsg('  Command language: ' + self.options.commandLanguage)
-        else:
-            inkex.errormsg('  Unknown port type!')
-        inkex.errormsg('  Resolution X (dpi): ' + str(self.options.resolutionX))
-        inkex.errormsg('  Resolution Y (dpi): ' + str(self.options.resolutionY))
-        inkex.errormsg('  Pen number: ' + str(self.options.pen))
-        inkex.errormsg('  Pen force (g): ' + str(self.options.force))
-        inkex.errormsg('  Pen speed (cm/s): ' + str(self.options.speed))
-        inkex.errormsg('  Rotation (Clockwise): ' + self.options.orientation)
-        inkex.errormsg('  Mirror X axis: ' + str(self.options.mirrorX))
-        inkex.errormsg('  Mirror Y axis: ' + str(self.options.mirrorY))
-        inkex.errormsg('  Center zero point: ' + str(self.options.center))
-        inkex.errormsg('  Overcut (mm): ' + str(self.options.overcut))
-        inkex.errormsg('  Tool offset (mm): ' + str(self.options.toolOffset))
-        inkex.errormsg('  Use precut: ' + str(self.options.precut))
-        inkex.errormsg('  Curve flatness: ' + str(self.options.flat))
-        inkex.errormsg('  Auto align: ' + str(self.options.autoAlign))
-        inkex.errormsg('  Show debug information: ' + str(self.options.debug))
-        inkex.errormsg("\nDocument properties:\n")
-        version = self.svg.xpath('//@inkscape:version')
-        if version:
-            inkex.errormsg('  Inkscape version: ' + version[0])
-        fileName = self.svg.xpath('//@sodipodi:docname')
-        if fileName:
-            inkex.errormsg('  Filename: ' + fileName[0])
-        inkex.errormsg('  Document unit: ' + self.getDocumentUnit())
-        inkex.errormsg('  Width: ' + str(debugObject.debugValues['docWidth']) + ' ' + self.getDocumentUnit())
-        inkex.errormsg('  Height: ' + str(debugObject.debugValues['docHeight']) + ' ' + self.getDocumentUnit())
-        if debugObject.debugValues['viewBoxWidth'] == "-":
-            inkex.errormsg('  Viewbox Width: -')
-            inkex.errormsg('  Viewbox Height: -')
-        else:
-            inkex.errormsg('  Viewbox Width: ' + str(self.svg.unittouu(self.addDocumentUnit(debugObject.debugValues['viewBoxWidth']))) + ' ' + self.getDocumentUnit())
-            inkex.errormsg('  Viewbox Height: ' + str(self.svg.unittouu(self.addDocumentUnit(debugObject.debugValues['viewBoxHeight']))) + ' ' + self.getDocumentUnit())
-        inkex.errormsg("\n" + self.options.commandLanguage + " properties:\n")
-        inkex.errormsg('  Drawing width: ' + str(self.svg.unittouu(self.addDocumentUnit(str(debugObject.debugValues['drawingWidthUU'])))) + ' ' + self.getDocumentUnit())
-        inkex.errormsg('  Drawing height: ' + str(self.svg.unittouu(self.addDocumentUnit(str(debugObject.debugValues['drawingHeightUU'])))) + ' ' + self.getDocumentUnit())
-        inkex.errormsg('  Drawing width: ' + str(debugObject.debugValues['drawingWidth']) + ' plotter steps')
-        inkex.errormsg('  Drawing height: ' + str(debugObject.debugValues['drawingHeight']) + ' plotter steps')
-        inkex.errormsg('  Offset X: ' + str(debugObject.offsetX) + ' plotter steps')
-        inkex.errormsg('  Offset Y: ' + str(debugObject.offsetX) + ' plotter steps')
-        inkex.errormsg('  Overcut: ' + str(debugObject.overcut) + ' plotter steps')
-        inkex.errormsg('  Tool offset: ' + str(debugObject.toolOffset) + ' plotter steps')
-        inkex.errormsg('  Flatness: ' + str(debugObject.flat) + ' plotter steps')
-        inkex.errormsg('  Tool offset flatness: ' + str(debugObject.toolOffsetFlat) + ' plotter steps')
-        inkex.errormsg("\n" + self.options.commandLanguage + " data:\n")
-        inkex.errormsg(self.hpgl)
-
+        comx.write(self.hpgl)
+        comx.read(2)
+        comx.close()
 
 if __name__ == '__main__':
     Plot().run()

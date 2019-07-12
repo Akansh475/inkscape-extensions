@@ -28,6 +28,9 @@ import inkex
 from inkex.transforms import Transform
 from inkex.bezier import cspsubdiv
 
+class NoPathError(ValueError):
+    """Raise that paths not selected"""
+
 class hpglEncoder(object):
     PI = math.pi
     TWO_PI = PI * 2
@@ -48,7 +51,6 @@ class hpglEncoder(object):
                 "toolOffset":float
                 "precut":bool
                 "autoAlign":bool
-                "debug":bool
         """
         self.options = effect.options
         self.doc = effect.svg
@@ -80,21 +82,11 @@ class hpglEncoder(object):
         self.mirrorY = -1.0
         if self.options.mirrorY:
             self.mirrorY = 1.0
-        if self.options.debug:
-            self.debugValues = {}
-            self.debugValues['docWidth'] = self.docWidth
-            self.debugValues['docHeight'] = self.docHeight
         # process viewBox attribute to correct page scaling
         self.viewBoxTransformX = 1
         self.viewBoxTransformY = 1
-        if self.options.debug:
-            self.debugValues['viewBoxWidth'] = "-"
-            self.debugValues['viewBoxHeight'] = "-"
         viewBox = effect.svg.get_viewbox()
         if viewBox and viewBox[2] and viewBox[3]:
-            if self.options.debug:
-                self.debugValues['viewBoxWidth'] = viewBox[2]
-                self.debugValues['viewBoxHeight'] = viewBox[3]
             print(viewBox)
             self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
             self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
@@ -106,14 +98,9 @@ class hpglEncoder(object):
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         self.processGroups(self.doc, groupmat)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
-            raise Exception('NO_PATHS')
+            raise NoPathError("No paths found")
         # live run
         self.dryRun = False
-        if self.options.debug:
-            self.debugValues['drawingWidth'] = self.sizeX - self.divergenceX
-            self.debugValues['drawingHeight'] = self.sizeY - self.divergenceY
-            self.debugValues['drawingWidthUU'] = self.debugValues['drawingWidth'] / self.scaleX
-            self.debugValues['drawingHeightUU'] = self.debugValues['drawingHeight'] / self.scaleY
         # move drawing according to various modifiers
         if self.options.autoAlign:
             if self.options.center:
@@ -173,10 +160,7 @@ class hpglEncoder(object):
         # shift an empty node in in order to process last node in cache
         if self.toolOffset > 0.0 and not self.dryRun:
             self.processOffset('PU', 0, 0, 0)
-        if self.options.debug:
-            return self.hpgl, self
-        else:
-            return self.hpgl, ""
+        return self.hpgl
 
     def processGroups(self, doc, groupmat):
         # flatten layers and groups to avoid recursion

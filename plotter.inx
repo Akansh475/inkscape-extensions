@@ -90,7 +90,6 @@
       <param name="flat" type="float" min="0.1" max="10.0" precision="1" _gui-text="Curve flatness:" _gui-description="Curves are divided into lines, this number controls how fine the curves will be reproduced, the smaller the finer (Default: '1.2')">1.2</param>
       <param name="autoAlign" type="boolean" _gui-text="Auto align" _gui-description="Check this to auto align the drawing to the zero point (Plus the tool offset if used). If unchecked you have to make sure that all parts of your drawing are within the document border! (Default: Checked)">true</param>
       <param name="space" type="description">&#xa0;</param>
-      <param name="debug" type="boolean" _gui-text="Show debug information" _gui-description="Check this to get verbose information about the plot without actually sending something to the plotter (A.k.a. data dump) (Default: Unchecked)">false</param>
       <param name="convertObjects" type="boolean" _gui-text="Convert objects to paths" _gui-description="Check this to automatically (nondestructively) convert all objects to paths before plotting (Default: Checked)">true</param>
     </page>
   </param>

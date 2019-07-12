@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
-    <_name>Page</_name>
+    <_name>Blank Page</_name>
     <id>org.inkscape.render.empty_page</id>
     <dependency type="executable" location="extensions">empty_page.py</dependency>
 
     <param name="size" _gui-text="Page size:" type="enum">
-        <item value="a3">A3</item>
-        <item value="a4">A4</item>
-        <item value="a5">A5</item>
-        <item value="letter">Letter</item>
+        <item value="a3">A3 — 297 × 420 mm</item>
+        <item value="a4">A4 — 210 × 297 mm</item>
+        <item value="a5">A5 — 148 x 210 mm</item>
+        <item value="letter">Letter — 8.5 × 11 in</item>
+        <item value="legal">Legal — 8.5 × 14 in</item>
+        <item value="ledger">Ledger/Tabloid — 11 × 17 in</item>
     </param>
 
     <param name="orientation" _gui-text="Page orientation:" type="enum">
-        <_item value="horizontal">Horizontal</_item>
         <_item value="vertical">Vertical</_item>
+        <_item value="horizontal">Horizontal</_item>
     </param>
 
     <param name="background" _gui-text="Page background:" type="enum">
@@ -30,11 +32,11 @@
         <effects-menu hidden="true" />
     </effect>
     <inkscape:_templateinfo>
-      <inkscape:_name>Page...</inkscape:_name>
+      <inkscape:_name>Blank Page...</inkscape:_name>
       <inkscape:author>Jan Darowski, updated by Tavmjong Bah</inkscape:author>
       <inkscape:_shortdesc>Empty page of chosen size.</inkscape:_shortdesc>
-      <inkscape:date>2014-10-06</inkscape:date>
-      <inkscape:_keywords>empty sheet a4 a3 a5 letter black white opaque</inkscape:_keywords>
+      <inkscape:date>2019-07-11</inkscape:date>
+      <inkscape:_keywords>empty page sheet tabloid ledger letter legal print paper a4 a3 a5 letter black white opaque</inkscape:_keywords>
     </inkscape:_templateinfo>
     <script>
         <command reldir="extensions" interpreter="python">empty_page.py</command>

@@ -44,6 +44,17 @@ class EmptyPage(inkex.EffectExtension):
             height = 11
             units = 'in'
 
+        if self.options.page_size == "legal":
+            width = 8.5
+            height = 14
+            units = 'in'
+
+        if self.options.page_size == "ledger":
+            width = 11
+            height = 17
+            units = 'in'
+
+
         if self.options.page_orientation == "horizontal":
             width, height = height, width
 

@@ -138,7 +138,7 @@ class SetAttrImage(inkex.EffectExtension):
         if cmd_scope is not None:
             try:
                 change_cmd = getattr(self, 'change_{0}'.format(cmd_scope))
-                change_cmd(self.selected, attr_dict)
+                change_cmd(self.svg.selected, attr_dict)
             except AttributeError:
                 inkex.errormsg('Scope "{0}" not supported'.format(cmd_scope))
 

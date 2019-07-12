@@ -61,7 +61,7 @@ class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
             idTo.append(self.options.ids[-1])
         else:
             # The first transmit to all
-            elFrom.append(self.selected[self.options.ids[0]])
+            elFrom.append(self.svg.selected[self.options.ids[0]])
             for selId in self.options.ids[1:]:
                 idTo.append(selId)
 

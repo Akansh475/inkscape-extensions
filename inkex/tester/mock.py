@@ -202,7 +202,7 @@ class MockCommandMixin(MockMixin):
         arglst.sort()
         argstr = ' '.join(arglst)
         argstr = self.clean_paths(argstr, inputs + outputs)
-        msg['Arguments'] = argstr
+        msg['Arguments'] = argstr.strip()
 
         if stdin is not None:
             # The stdin is counted as the msg body

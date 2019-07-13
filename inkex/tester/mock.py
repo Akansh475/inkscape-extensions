@@ -171,7 +171,11 @@ class MockCommandMixin(MockMixin):
             for fname in os.listdir(fdir):
                 if fname in ('.', '..'):
                     continue
-                ret.add(os.path.join(fdir, fname))
+                path = os.path.join(fdir, fname)
+                # We store the modified time so if a program modifies
+                # the input file in-place, it will look different.
+                ret.add(path + ';{}'.format(os.path.getmtime(path)))
+
         return ret
 
     def ignore_command_mock(self, program, arglst):
@@ -225,6 +229,8 @@ class MockCommandMixin(MockMixin):
             before = self.get_all_tempfiles()
             stdout = self.old_call('_call')(program, *args, **kwargs)
             outputs += list(self.get_all_tempfiles() - before)
+            # Remove the modified time from the call
+            outputs = [out.rsplit(';', 1)[0] for out in outputs]
 
             # After the program has run, we collect any file outputs and store
             # them, then store any stdout or stderr created during the run.
@@ -351,7 +357,7 @@ class MockCommandMixin(MockMixin):
 
         for fname in set(files):
             if os.path.isfile(fname):
-                print("SAVING FILE INTO MSG: {}".format(fname))
+                #print("SAVING FILE INTO MSG: {}".format(fname))
                 self.add_call_file(msg, fname)
             else:
                 part = MIMEText("Missing File", 'plain', 'utf-8')

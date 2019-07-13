@@ -34,11 +34,14 @@ before calling the dialog File->Save As....
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import inkscape_command
+from inkex.elements import load_svg
 
 class PrepareFileSave(TempDirMixin, inkex.EffectExtension):
     def effect(self):
-        inkscape_command(self.svg, 'EditSelectAllInAllLayers',\
-            'EditUnlinkClone', 'ObjectToPath', 'FileSaveACopy')
+        self.document = load_svg(inkscape_command(
+            self.svg,
+            verbs=['EditSelectAllInAllLayers', 'EditUnlinkClone', 'ObjectToPath'],
+        ))
 
 if __name__ == '__main__':
     PrepareFileSave().run()

@@ -217,6 +217,9 @@ class MockCommandMixin(MockMixin):
         # There is a difference between python2 and python3 output
         keystr = keystr.replace('\n\n', '\n')
         keystr = keystr.replace('\n ', ' ')
+        if 'verb' in keystr:
+            # Verbs seperated by colons cause diff in py2/3
+            keystr = keystr.replace('; ', ';')
         # Generate a unique key for this call based on _all_ it's inputs
         key = hashlib.md5(keystr.encode('utf-8')).hexdigest()
 

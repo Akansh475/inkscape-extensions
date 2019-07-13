@@ -33,10 +33,11 @@ it yourself) to take advantage of the security settings and testing functions.
 
 import os
 import sys
-import subprocess
 from subprocess import Popen, PIPE
+from lxml.etree import ElementTree
 
 from .utils import TemporaryDirectory
+from .svg import SvgDocumentElement
 
 PY3 = sys.version_info[0] == 3
 INKSCAPE_EXECUTABLE_NAME = 'inkscape'
@@ -83,6 +84,8 @@ def write_svg(svg, *filename):
     if os.path.isfile(filename):
         return filename
     with open(filename, 'wb') as fhl:
+        if isinstance(svg, SvgDocumentElement):
+            svg = ElementTree(svg)
         if hasattr(svg, 'write'):
             # XML document
             svg.write(fhl)
@@ -144,7 +147,7 @@ def to_args(prog, *positionals, **arguments):
         for val in value:
             args.append(to_arg((arg, val), oldie))
 
-    args += [to_arg(pos, oldie) for pos in positionals]
+    args += [to_arg(pos, oldie) for pos in positionals if pos is not None]
     # Filter out empty non-arguments
     return [arg for arg in args if arg is not None]
 
@@ -180,22 +183,23 @@ def inkscape(svg_file, *args, **kwargs):
     """
     Call Inkscape with the given svg_file and the given arguments
     """
-    return call(INKSCAPE_EXECUTABLE_NAME, svg_file, without_gui=True, *args, **kwargs)
+    # This actually harms a lot of Verb commands, so it's a real problem!
+    kwargs.setdefault('without_gui', True)
+    return call(INKSCAPE_EXECUTABLE_NAME, svg_file, *args, **kwargs)
 
-def inkscape_command(svg, *verbs):
+def inkscape_command(svg, select=None, verbs=()):
     """
-    Executes a list of verbs on the given svg (svg as a string, not a filename).
+    Executes a list of commands, a mixture of verbs, selects etc.
 
-    inkscape_command('<svg...>', 'UnlockAllInAllLayers', 'ObjectToPath')
-
-    Returns the resulting svg string (not the filename!)
+    inkscape_command('<svg...>', ('verb', 'VerbName'), ...)
     """
     with TemporaryDirectory(prefix='inkscape-command') as dirname:
         svg_file = write_svg(svg, dirname, 'input.svg')
-        inkscape(svg_file, verb=list(verbs) + ['FileSave', 'FileQuit'])
+        select = ('select', select) if select else None
+        verbs += ('FileSave', 'FileQuit')
+        inkscape(svg_file, select, verb=';'.join(verbs), without_gui=False)
         with open(svg_file, 'rb') as fhl:
             return fhl.read()
-
 
 def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
     """

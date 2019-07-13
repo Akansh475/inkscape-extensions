@@ -93,7 +93,8 @@ class InkscapeExtensionTest(TestCase):
         self.assertEqual(ext.abssolute_href('~/foo'), os.path.expanduser('~/foo'))
         ext.options.input_file = None
         self.assertEqual(ext.abssolute_href('./foo'), os.path.expanduser('~/foo'))
-        self.assertEqual(ext.abssolute_href('./foo', '/tmp/'), '/tmp/foo')
+        tmp_foo = os.path.realpath('/tmp/foo')
+        self.assertEqual(ext.abssolute_href('./foo', '/tmp/'), tmp_foo)
 
 
 class SvgInputOutputTest(TestCase):

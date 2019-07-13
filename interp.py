@@ -59,13 +59,12 @@ class Interp(inkex.EffectExtension):
             # use selection order (default)
             objects = self.svg.selected
 
-        for _id, node in objects.items():
-            if isinstance(node, inkex.PathElement):
-                node.apply_transform()
-            else:
-                objects.pop(_id)
+        objects = [node for node in objects.values() if isinstance(node, inkex.PathElement)]
 
-        for (elem1, elem2) in pairwise(objects.values(), start=False):
+        for node in objects:
+            node.apply_transform()
+
+        for (elem1, elem2) in pairwise(objects, start=False):
             start = elem1.path.to_superpath()
             end = elem2.path.to_superpath()
             sst = copy.deepcopy(elem1.style)
@@ -167,7 +166,7 @@ class Interp(inkex.EffectExtension):
                 end = e[:]
             else:
                 # which path has fewer segments?
-                lengthdiff = len(start.path) - len(end.path)
+                lengthdiff = len(start) - len(end)
                 # swap shortest first
                 if lengthdiff > 0:
                     start, end = end, start

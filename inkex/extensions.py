@@ -27,10 +27,8 @@ import os
 import sys
 import types
 
-from lxml.etree import fromstring
-
 from .utils import errormsg
-from .elements import SVG_PARSER, BaseElement, Group
+from .elements import load_svg, BaseElement, Group
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
 
@@ -105,7 +103,7 @@ class CallExtension(TempDirMixin, InputExtension):
                 with open(document, 'r') as fhl:
                     document = fhl.read()
                 if '<' in document:
-                    document = fromstring(document, parser=SVG_PARSER)
+                    document = load_svg(document)
             else:
                 with open(document, 'rb') as fhl:
                     document = fhl.read()

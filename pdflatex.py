@@ -22,12 +22,11 @@ Generate Latex via a PDF using pdflatex
 """
 
 import os
-from lxml import etree
 
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import call, inkscape
-from inkex.elements import SVG_PARSER, ShapeElement
+from inkex.elements import load_svg, ShapeElement
 
 class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
     """
@@ -54,7 +53,7 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
                  G=True, pdf_poppler=True, export_type="svg")
 
         with open(svg_file, 'r') as fhl:
-            for child in etree.parse(fhl, parser=SVG_PARSER):
+            for child in load_svg(fhl):
                 if isinstance(child, ShapeElement):
                     yield child
 

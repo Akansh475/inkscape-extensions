@@ -66,6 +66,12 @@ class SvgClassLookup(etree.CustomElementClassLookup):
 SVG_PARSER = etree.XMLParser(huge_tree=True)
 SVG_PARSER.set_element_class_lookup(SvgClassLookup())
 
+def load_svg(stream):
+    """Load SVG file using the SVG_PARSER"""
+    if (isinstance(stream, str) and stream.startswith('<'))\
+      or (isinstance(stream, bytes) and stream.startswith(b'<')):
+        return etree.ElementTree(etree.fromstring(stream, parser=SVG_PARSER))
+    return etree.parse(stream, parser=SVG_PARSER)
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""

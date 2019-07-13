@@ -53,12 +53,11 @@ import os
 import math
 
 from copy import deepcopy
-from lxml import etree
 
 import inkex
 from inkex import Transform, Style, units
 
-from inkex.elements import SVG_PARSER, Group, TextElement, FlowPara, \
+from inkex.elements import load_svg, Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
 
 
@@ -453,7 +452,7 @@ Evil Mad Scientist Laboratories
         
     def parse_svg_font( self, node_list ):
         '''
-        Parse an input svg etree, searching for an SVG font. If an
+        Parse an input svg, searching for an SVG font. If an
         SVG font is found, parse it and return a "digest" containing
         structured information from the font. See below for more
         about the digest format.
@@ -665,12 +664,7 @@ Evil Mad Scientist Laboratories
             Multiple weights and styles within a font family are not
             presently supported.
             '''
-    
-            f = open(the_path)
-            p = etree.XMLParser(huge_tree=True)
-            font_svg = etree.parse(f, parser=SVG_PARSER)
-
-            f.close()
+            font_svg = load_svg(the_path)
             self.font_dict[fontname] = self.parse_svg_font( font_svg.getroot() )
             
         except IOError as e:

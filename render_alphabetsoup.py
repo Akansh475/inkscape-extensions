@@ -28,11 +28,9 @@ import random
 import re
 import sys
 
-from lxml import etree
-
 import inkex
 from inkex.transforms import Vector2d
-from inkex.elements import SVG_PARSER
+from inkex.elements import load_svg
 
 import render_alphabetsoup_config
 
@@ -50,7 +48,7 @@ def load_path(filename):
     # __file__ is better then sys.argv[0] because this file may be a module
     # for another one.
     fullpath = os.path.join(base, filename)
-    tree = etree.parse(fullpath, parser=SVG_PARSER)
+    tree = load_svg(fullpath)
     root = tree.getroot()
     elem = root.findone('svg:path')
     if elem is None:

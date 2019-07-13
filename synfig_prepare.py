@@ -27,11 +27,8 @@ from subprocess import PIPE, Popen
 
 import inkex
 from inkex.transforms import Transform
-from inkex.elements import SVG_PARSER, Group, PathElement, ShapeElement, Anchor, Switch
+from inkex.elements import load_svg, Group, PathElement, ShapeElement, Anchor, Switch
 from inkex.svg import SvgDocumentElement
-
-from lxml import etree
-
 
 ###### Utility Classes ####################################
 
@@ -155,7 +152,7 @@ class InkscapeActionGroup(object):
 
         # Open the resulting file
         with open(svgfile, 'r') as stream:
-            self.svg_document = etree.parse(stream, parser=SVG_PARSER)
+            self.svg_document = load_svg(stream)
 
         # Clean up.
         try:

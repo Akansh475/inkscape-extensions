@@ -30,7 +30,7 @@ from argparse import ArgumentParser
 from lxml import etree
 
 from .utils import filename_arg, AbortExtension
-from .elements import SVG_PARSER
+from .elements import load_svg
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3
@@ -202,7 +202,7 @@ class SvgInputMixin(object):  # pylint: disable=too-few-public-methods
 
     def load(self, stream):
         """Load the stream as an svg xml etree and make a backup"""
-        document = etree.parse(stream, parser=SVG_PARSER)
+        document = load_svg(stream)
         self.original_document = copy.deepcopy(document)
         self.svg = document.getroot()
         self.svg.set_selected(*self.options.ids)
@@ -227,8 +227,7 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
         MUST include all the replacement values in the template, the
         default template has 'width' and 'height' of the document.
         """
-        svg = self.template.format(**kwargs)
-        return etree.fromstring(svg, parser=SVG_PARSER)
+        return load_svg(self.template.format(**kwargs)).getroot()
 
     def save(self, stream):
         """Save the svg document to the given stream"""

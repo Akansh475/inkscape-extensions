@@ -285,6 +285,8 @@ class ComparisonMixin(object):
         data_a = effect.test_output.getvalue()
         if os.environ.get('EXPORT_COMPARE', False):
             with open(outfile + '.export', 'wb') as fhl:
+                if sys.version_info[0] == 3 and isinstance(data_a, str):
+                    data_a = data_a.encode('utf-8')
                 fhl.write(data_a)
                 print("Written output: {}.export".format(outfile))
         data_a = self._apply_compare_filters(data_a)

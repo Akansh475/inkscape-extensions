@@ -42,8 +42,6 @@ TODO:
 
 """
 
-from __future__ import absolute_import, print_function
-
 import math
 import re
 
@@ -336,36 +334,35 @@ class DPISwitcher(inkex.EffectExtension):
     def effect(self):
         svg = self.svg
         if self.options.action == '"page_info"':
-            print(":::SVG document related info:::")
-            print("version: " + str(svg.get(inkex.addNS('version', 'inkscape'))))
+            output = inkex.errormsg
+            output(":::SVG document related info:::")
+            output("version: " + str(svg.get(inkex.addNS('version', 'inkscape'))))
             width = svg.get('width')
             if width:
-                print("width: " + width)
+                output("width: " + width)
             height = svg.get('height')
             if height:
-                print("height: " + height)
+                output("height: " + height)
             viewBox = svg.get('viewBox')
             if viewBox:
-                print("viewBox: " + viewBox)
-            namedview = svg.find(inkex.addNS('namedview', 'sodipodi'))
-            if not namedview:
-                return inkex.errormsg("No document named view available.")
+                output("viewBox: " + viewBox)
+            namedview = svg.namedview
             docunits = namedview.get(inkex.addNS('document-units', 'inkscape'))
             if docunits:
-                print("document-units: " + docunits)
+                output("document-units: " + docunits)
             units = namedview.get('units')
             if units:
-                print("units: " + units)
+                output("units: " + units)
             xpathStr = '//sodipodi:guide'
             guides = svg.xpath(xpathStr)
             xpathStr = '//inkscape:grid'
             if guides:
                 numberGuides = len(guides)
-                print("Document has " + str(numberGuides) + " guides")
+                output("Document has " + str(numberGuides) + " guides")
             grids = svg.xpath(xpathStr)
             i = 1
             for grid in grids:
-                print("Grid number " + str(i) + ": Units: " + grid.get("units"))
+                output("Grid number {}: Units: {}".format(i, grid.get("units")))
                 i += 1
         else:
             if self.options.switcher == "0":

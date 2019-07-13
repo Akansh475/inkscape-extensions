@@ -95,6 +95,8 @@ def errormsg(msg):
     """
     try:
         sys.stderr.write(msg)
+    except TypeError:
+        sys.stderr.write(unicode(msg))
     except UnicodeEncodeError:
         # Python 2:
         # Fallback for cases where sys.stderr.encoding is not Unicode.

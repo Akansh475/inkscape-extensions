@@ -4,4 +4,7 @@ from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestDimensionBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Dimension
-    comparisons = [('--id=p1', '--id=r3')]
+    comparisons = [
+        ('--id=p1', '--id=r3'),
+        ('--id=p1', '--id=r3', '--type=visual'),
+    ]

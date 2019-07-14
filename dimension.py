@@ -105,8 +105,7 @@ class Dimension(pathmodifier.PathModifier):
         if self.options.type == "geometric":
             self.bbox = self.svg.get_selected_bbox()
         else:
-            self.bbox = self.svg.selected.values()[0].bounding_box()
-            self.bbox *= scale
+            self.bbox = self.svg.get_first_selected().bounding_box()
 
         layer = self.svg.get_current_layer()
 

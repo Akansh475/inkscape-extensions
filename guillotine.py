@@ -186,7 +186,7 @@ class Guillotine(inkex.EffectExtension):
         given.
         """
         coords = ":".join([self.get_localised_string(dim) for dim in sli])
-        inkscape(self.options.input_file, a=coords, e=filename)
+        inkscape(self.options.input_file, export_area=coords, export_file=filename)
 
     def export_slices(self, slices):
         """

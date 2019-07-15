@@ -190,7 +190,9 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     def scale(self):
         """Return the ratio between the page width and the viewBox width"""
         try:
-            return float(self.width) / float(self.get_viewbox()[2])
+            scale_x = float(self.width) / float(self.get_viewbox()[2])
+            scale_y = float(self.height) / float(self.get_viewbox()[3])
+            return max([scale_x, scale_y])
         except (ValueError, ZeroDivisionError):
             return 1.0
 

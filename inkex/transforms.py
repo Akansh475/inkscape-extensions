@@ -611,6 +611,13 @@ class DirectedLineSegment(object):
     start = Vector2d()  # start point of segment
     end = Vector2d()  # end point of segment
 
+    x0 = property(lambda self: self.start.x) # pylint: disable=invalid-name
+    y0 = property(lambda self: self.start.y) # pylint: disable=invalid-name
+    x1 = property(lambda self: self.end.x)
+    y1 = property(lambda self: self.end.y)
+    dx = property(lambda self: self.x1 - self.x0) # pylint: disable=invalid-name
+    dy = property(lambda self: self.y1 - self.y0) # pylint: disable=invalid-name
+
     @overload
     def __init__(self):  # type: () -> None
         pass
@@ -624,7 +631,7 @@ class DirectedLineSegment(object):
         pass
 
     def __init__(self, *args):
-        if len(args) == 0:  # overload 0
+        if not args:  # overload 0
             start, end = Vector2d(), Vector2d()
         if len(args) == 1:  # overload 1
             other, = args
@@ -647,30 +654,6 @@ class DirectedLineSegment(object):
         yield self.x1
         yield self.y0
         yield self.y1
-
-    @property
-    def dx(self):
-        return self.end.x - self.start.x
-
-    @property
-    def dy(self):
-        return self.end.y - self.start.y
-
-    @property
-    def x0(self):
-        return self.start.x
-
-    @property
-    def y0(self):
-        return self.start.y
-
-    @property
-    def x1(self):
-        return self.end.x
-
-    @property
-    def y1(self):
-        return self.end.y
 
     @property
     def length(self):
@@ -726,6 +709,7 @@ class DirectedLineSegment(object):
                 self.x0 + ((num / denom) * (other.x1 - self.x0)),
                 self.y0 + ((num / denom) * (other.y0 - self.y0))
             )
+        return None
 
     def __repr__(self):
         return "DirectedLineSegment(({0.start}), ({0.end}))".format(self)

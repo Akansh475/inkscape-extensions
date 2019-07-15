@@ -27,34 +27,27 @@ or third-party applications.
 """
 
 import inkex
+from inkex.elements import Image
 
 class SetAttrImage(inkex.EffectExtension):
-    def __init__(self):
-        super(SetAttrImage, self).__init__()
-        # main options
-        self.arg_parser.add_argument("--fix_scaling", type=inkex.inkbool,
-                                     dest="fix_scaling", default=True)
-        self.arg_parser.add_argument("--fix_rendering", type=inkex.inkbool,
-                                     dest="fix_rendering", default=False)
-        self.arg_parser.add_argument("--aspect_ratio", type=str,
-                                     dest="aspect_ratio", default="none",
-                                     help="Value for attribute 'preserveAspectRatio'")
-        self.arg_parser.add_argument("--aspect_clip", type=str,
-                                     dest="aspect_clip", default="unset",
-                                     help="optional 'meetOrSlice' value")
-        self.arg_parser.add_argument("--aspect_ratio_scope", type=str,
-                                     dest="aspect_ratio_scope", default="selected_only",
-                                     help="scope within which to edit 'preserveAspectRatio' attr")
-        self.arg_parser.add_argument("--image_rendering", type=str,
-                                     dest="image_rendering", default="unset",
-                                     help="Value for attribute 'image-rendering'")
-        self.arg_parser.add_argument("--image_rendering_scope", type=str,
-                                     dest="image_rendering_scope", default="selected_only",
-                                     help="scope within which to edit 'image-rendering' attribute")
-        # tabs
-        self.arg_parser.add_argument("--tab_main", type=str, dest="tab_main")
+    """Set attributes in images"""
+    def effect(self):
+        self.options.tab_main()
 
-    # core method
+    def add_arguments(self, pars):
+        pars.add_argument("--tab_main", type=self.arg_method(), default=self.method_tab_basic)
+        pars.add_argument("--fix_scaling", type=inkex.inkbool, default=True)
+        pars.add_argument("--fix_rendering", type=inkex.inkbool, default=False)
+        pars.add_argument("--aspect_ratio", default="none",\
+            help="Value for attribute 'preserveAspectRatio'")
+        pars.add_argument("--aspect_clip", default="unset",\
+            help="optional 'meetOrSlice' value")
+        pars.add_argument("--aspect_ratio_scope", type=self.arg_method("change"),\
+            default="selected_only", help="When to edit 'preserveAspectRatio' attribute")
+        pars.add_argument("--image_rendering", default="unset",\
+            help="Value for attribute 'image-rendering'")
+        pars.add_argument("--image_rendering_scope", type=self.arg_method("change"),\
+            default="selected_only", help="When to edit 'image-rendering' attribute")
 
     def change_attribute(self, node, attribute):
         for key, value in attribute.items():
@@ -85,63 +78,47 @@ class SetAttrImage(inkex.EffectExtension):
                 pass
 
     def change_all_images(self, node, attribute):
-        path = 'descendant-or-self::svg:image'
-        for img in node.xpath(path):
+        for img in node.xpath('descendant-or-self::svg:image'):
             self.change_attribute(img, attribute)
 
-    # methods called via dispatcher
-
     def change_selected_only(self, selected, attribute):
-        if selected:
-            for node_id, node in selected.items():
-                if node.tag == inkex.addNS('image', 'svg'):
-                    self.change_attribute(node, attribute)
+        for node in selected.values():
+            if isinstance(node, Image):
+                self.change_attribute(node, attribute)
 
     def change_in_selection(self, selected, attribute):
-        if selected:
-            for node_id, node in selected.items():
-                self.change_all_images(node, attribute)
+        for node in selected.values():
+            self.change_all_images(node, attribute)
 
     def change_in_document(self, selected, attribute):
         self.change_all_images(self.document.getroot(), attribute)
 
     def change_on_parent_group(self, selected, attribute):
-        if selected:
-            for node_id, node in selected.items():
-                self.change_attribute(node.getparent(), attribute)
+        for node in selected.values():
+            self.change_attribute(node.getparent(), attribute)
 
     def change_on_root_only(self, selected, attribute):
         self.change_attribute(self.document.getroot(), attribute)
 
-    # main
+    def method_tab_basic(self):
+        """Render all bitmap images like in older Inskcape versions"""
+        self.change_in_document(self.svg.selected, {
+            'preserveAspectRatio': ("none" if self.options.fix_scaling else "unset"),
+            'image-rendering': ("optimizeSpeed" if self.options.fix_rendering else "unset"),
+        })
 
-    def effect(self):
-        attr_val = []
-        attr_dict = {}
-        cmd_scope = None
-        if self.options.tab_main == '"tab_basic"':
-            cmd_scope = "in_document"
-            attr_dict['preserveAspectRatio'] = ("none" if self.options.fix_scaling else "unset")
-            attr_dict['image-rendering'] = ("optimizeSpeed" if self.options.fix_rendering else "unset")
-        elif self.options.tab_main == '"tab_aspectRatio"':
-            attr_val = [self.options.aspect_ratio]
-            if self.options.aspect_clip != "unset":
-                attr_val.append(self.options.aspect_clip)
-            attr_dict['preserveAspectRatio'] = ' '.join(attr_val)
-            cmd_scope = self.options.aspect_ratio_scope
-        elif self.options.tab_main == '"tab_image_rendering"':
-            attr_dict['image-rendering'] = self.options.image_rendering
-            cmd_scope = self.options.image_rendering_scope
-        else:  # help tab
-            pass
-        # dispatcher
-        if cmd_scope is not None:
-            try:
-                change_cmd = getattr(self, 'change_{0}'.format(cmd_scope))
-                change_cmd(self.svg.selected, attr_dict)
-            except AttributeError:
-                inkex.errormsg('Scope "{0}" not supported'.format(cmd_scope))
+    def method_tab_aspect_ratio(self):
+        """Image Aspect Ratio"""
+        attr_val = [self.options.aspect_ratio]
+        if self.options.aspect_clip != "unset":
+            attr_val.append(self.options.aspect_clip)
+        self.options.aspect_ratio_scope(self.svg.selected,\
+            {'preserveAspectRatio': ' '.join(attr_val)})
 
+    def method_tab_image_rendering(self):
+        """Image Rendering Quality"""
+        self.options.image_rendering_scope(self.svg.selected,\
+            {'image-rendering': self.options.image_rendering})
 
 if __name__ == '__main__':
     SetAttrImage().run()

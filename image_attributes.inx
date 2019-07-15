@@ -18,7 +18,7 @@ Available options:</_param>
         </page>
 
         <!-- image aspect ratio -->
-        <page name="tab_aspectRatio" _gui-text="Image Aspect Ratio">
+        <page name="tab_aspect_ratio" _gui-text="Image Aspect Ratio">
             <param name="aspect_ratio" type="enum" _gui-text="preserveAspectRatio attribute:">
                 <item value="none">none</item>
                 <_item value="unset">Unset</_item>

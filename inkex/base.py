@@ -70,6 +70,24 @@ class InkscapeExtension(object):
         """
         pass  # No extra arguments by default so super is not required
 
+    def arg_method(self, prefix='method'):
+        """Used by add_argument to match a tab selection with an object method
+
+        pars.add_argument("--tab", type=self.arg_method(), default="foo")
+        ...
+        self.otpions.tab(arguments)
+        ...
+        def method_foo(self, arguments):
+            # do something
+        """
+        def _inner(value):
+            name = '{}_{}'.format(prefix, value.strip('"'))
+            try:
+                return getattr(self, name)
+            except AttributeError:
+                raise AbortExtension("Can not find method {}".format(name))
+        return _inner
+
     def run(self, args=None, output=None):
         """Main entrypoint for any Inkscape Extension"""
         try:

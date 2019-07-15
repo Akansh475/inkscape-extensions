@@ -35,7 +35,8 @@ from inkex.elements import Guide
 class GuidesCreator(inkex.EffectExtension):
     """Create a set of guides based on the given options"""
     def add_arguments(self, pars):
-        pars.add_argument("--tab", default="regular_guides", help="Type of guides to create.")
+        pars.add_argument("--tab", type=self.arg_method('generate'), default="regular_guides",\
+            help="Type of guides to create.")
         pars.add_argument('--guides_preset', default='custom', help='Preset')
         pars.add_argument('--vertical_guides', type=int, default=3, help='Vertical guides')
         pars.add_argument('--horizontal_guides', type=int, default=3, help='Horizontal guides')
@@ -55,11 +56,6 @@ class GuidesCreator(inkex.EffectExtension):
         pars.add_argument('--delete', type=inkex.inkbool, help='Delete existing guides')
 
     def effect(self):
-        try:
-            generate = getattr(self, 'generate_{0}'.format(self.options.tab.strip('"')))
-        except AttributeError:
-            raise inkex.AbortExtension("Unknown guide creators mode: {}".format(self.options.tab))
-
         # getting the width and height attributes of the canvas
         self.width = float(self.svg.width)
         self.height = float(self.svg.height)
@@ -72,7 +68,7 @@ class GuidesCreator(inkex.EffectExtension):
             for guide in self.svg.get_guides():
                 guide.delete()
 
-        return generate()
+        return self.options.tab()
 
     def generate_regular_guides(self):
         """Generate a regular set of guides"""

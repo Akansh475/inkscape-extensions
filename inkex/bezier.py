@@ -361,9 +361,9 @@ def subdiv(sp, flat, i=1):
 def csparea(csp):
     """Get area in cubic sub-path"""
     MAT_AREA = numpy.array([[0, 2, 1, -3],
-                             [-2, 0, 1, 1],
-                             [-1, -1, 0, 2],
-                             [3, -1, -2, 0]])
+                            [-2, 0, 1, 1],
+                            [-1, -1, 0, 2],
+                            [3, -1, -2, 0]])
     area = 0.0
     for sp in csp:
         if len(sp) < 2:
@@ -373,7 +373,8 @@ def csparea(csp):
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
             vec_x = numpy.array([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.array([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
-            area += 0.15 * numpy.matmul(numpy.matmul(vec_x, MAT_AREA), vec_y.T)[0, 0]
+            vex = numpy.matmul(vec_x, MAT_AREA)
+            area += 0.15 * numpy.matmul(vex, vec_y.T)
     return -area
 
 

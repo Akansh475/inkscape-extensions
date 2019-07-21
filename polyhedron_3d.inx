@@ -28,7 +28,7 @@
             <param name="type" type="enum" _gui-text="Object Type:">
                 <_item value="face">Face-Specified</_item>
                 <_item value="edge">Edge-Specified</_item></param>
-            <param name="cw_wound"  type="boolean" _gui-text="Clockwise wound object">0</param>
+            <param name="cw_wound"  type="boolean" _gui-text="Clockwise wound object">false</param>
          </page>
          <page name="view" _gui-text="View">
             <param name="r1_ax" type="optiongroup" appearance="minimal" _gui-text="Rotate around:">
@@ -70,7 +70,7 @@
             <param name="f_opac" type="int" min="0" max="100" _gui-text="Fill opacity (%):">100</param>
             <param name="s_opac" type="int" min="0" max="100" _gui-text="Stroke opacity (%):">100</param>
             <param name="th" type="float" min="0" max="100" _gui-text="Stroke width (px):">2</param>
-            <param name="shade" type="boolean" _gui-text="Shading">1</param>
+            <param name="shade" type="boolean" _gui-text="Shading">true</param>
             <param name="lv_x" type="float" min="-100" max="100" _gui-text="Light X:">1</param>
             <param name="lv_y" type="float" min="-100" max="100" _gui-text="Light Y:">1</param>
             <param name="lv_z" type="float" min="-100" max="100" _gui-text="Light Z:">-2</param>
@@ -79,7 +79,7 @@
                 <_item value="edg">Edges</_item>
                 <_item value="vtx">Vertices</_item>
             </param>
-            <param name="back"  type="boolean" _gui-text="Draw back-facing polygons">0</param>
+            <param name="back"  type="boolean" _gui-text="Draw back-facing polygons">false</param>
             <param name="z_sort" type="enum"  _gui-text="Z-sort faces by:">
                 <_item value="max">Maximum</_item>
                 <_item value="min">Minimum</_item>

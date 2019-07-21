@@ -44,24 +44,24 @@
           <ref name="inx.io.common"/>
           <optional>
             <element name="dataloss">
-              <data type="boolean"/>
+              <ref name="data_type_boolean_strict"/>
             </element>
           </optional>
         </element>
         <element name="effect">
           <optional>
             <attribute name="needs-document">
-              <data type="boolean"/>
+              <ref name="data_type_boolean_strict"/>
             </attribute>
           </optional>
           <optional>
             <attribute name="needs-live-preview">
-              <data type="boolean"/>
+              <ref name="data_type_boolean_strict"/>
             </attribute>
           </optional>
           <optional>
             <attribute name="implements-custom-gui">
-              <data type="boolean"/>
+              <ref name="data_type_boolean_strict"/>
             </attribute>
           </optional>
           <element name="object-type">
@@ -76,7 +76,7 @@
           <element name="effects-menu">
             <choice>
               <attribute name="hidden">
-                <value type="boolean">true</value>
+                <ref name="data_type_boolean_strict"/>
               </attribute>
               <ref name="inx.submenu"/>
             </choice>
@@ -183,7 +183,7 @@
     </attribute>
     <optional>
       <attribute name="gui-hidden">
-        <data type="boolean"/>
+        <ref name="data_type_boolean_strict"/>
       </attribute>
     </optional>
     <optional>
@@ -255,7 +255,7 @@
         <attribute name="type">
           <value>boolean</value>
         </attribute>
-        <data type="boolean"/>
+        <ref name="data_type_boolean_strict"/>
       </group>
       <group>
         <attribute name="type">
@@ -394,5 +394,15 @@
         <ref name="inx.submenu"/>
       </optional>
     </element>
+  </define>
+  
+  <!-- general defines -->
+  <define name="data_type_boolean_strict">
+    <data type="boolean">
+      <except>
+        <value>0</value>
+        <value>1</value>
+      </except>
+    </data>
   </define>
 </grammar>

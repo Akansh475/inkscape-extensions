@@ -43,7 +43,7 @@
       <param name="showInner" type="boolean" _gui-text="Padding guide">true</param>
       <param name="showOuter" type="boolean" _gui-text="Margin guide">false</param>
       <param name="showInnerBox" type="boolean" _gui-text="Padding box">false</param>
-      <param name="showOuterBox" type="boolean" _gui-text="Margin box">0</param>
+      <param name="showOuterBox" type="boolean" _gui-text="Margin box">false</param>
     </page>
     <page name="help" _gui-text="Help">
       <_param name="instructions" type="description" xml:space="preserve">

@@ -5,7 +5,7 @@
     <dependency type="executable" location="extensions">edge3d.py</dependency>
     <param name="angle" type="float" min="0.0" max="360.0" _gui-text="Illumination Angle:">45</param>
     <param name="shades" type="int" min="2" max="360" _gui-text="Shades:">2</param>
-    <param name="bw" type="boolean" _gui-text="Only black and white:">0</param>
+    <param name="bw" type="boolean" _gui-text="Only black and white:">false</param>
     <param name="thick" type="float" min="1.0" max="50.0" _gui-text="Stroke width:">10</param>
     <param name="stddev" type="float" min="1.0" max="100.0" _gui-text="Blur stdDeviation:">5</param>
     <param name="blurwidth" type="float" min="1.0" max="10.0" _gui-text="Blur width:">2</param>

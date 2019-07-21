@@ -29,7 +29,7 @@ import shutil
 from argparse import ArgumentParser
 from lxml import etree
 
-from .utils import filename_arg, AbortExtension
+from .utils import filename_arg, AbortExtension, errormsg
 from .elements import load_svg
 
 stdout = sys.stdout
@@ -87,6 +87,10 @@ class InkscapeExtension(object):
             except AttributeError:
                 raise AbortExtension("Can not find method {}".format(name))
         return _inner
+
+    def debug(self, msg):
+        """Write a debug message"""
+        errormsg("DEBUG<{}> {}\n".format(type(self).__name__, msg))
 
     def run(self, args=None, output=None):
         """Main entrypoint for any Inkscape Extension"""

@@ -611,10 +611,6 @@ class TextPath(ShapeElement):
     """A textPath element"""
     tag_name = 'textPath'
 
-    def append_superscript(self, text):
-        """Adds a superscript tspan element"""
-        self.append(Tspan(text, style="font-size:65%;baseline-shift:super"))
-
     def get_path(self):
         return Path()
 
@@ -623,6 +619,11 @@ class Tspan(ShapeElement):
     tag_name = 'tspan'
     x = property(lambda self: float(self.get('x', 0)))
     y = property(lambda self: float(self.get('y', 0)))
+
+    @classmethod
+    def superscript(cls, text):
+        """Adds a superscript tspan element"""
+        return cls(text, style="font-size:65%;baseline-shift:super")
 
     def get_path(self):
         return Path()

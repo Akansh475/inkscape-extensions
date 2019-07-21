@@ -11,7 +11,7 @@ import inkex
 from inkex.elements import (
     ShapeElement,
     Group, Pattern, Guide, Polyline, Use, Defs,
-    TextElement, TextPath, FlowPara, FlowRoot, FlowRegion,
+    TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion,
 )
 from inkex.transforms import Transform
 from inkex.styles import Style
@@ -375,9 +375,9 @@ class TextTest(ElementTestCase):
     """Test all text functions"""
     def test_append_superscript(self):
         """Test adding superscript"""
-        tp = TextPath()
-        tp.append_superscript('th')
-        self.assertEqual(len(tp), 1)
+        tap = TextPath()
+        tap.append(Tspan.superscript('th'))
+        self.assertEqual(len(tap), 1)
 
 class UseTest(ElementTestCase):
     """Test extra functionality on a use element"""

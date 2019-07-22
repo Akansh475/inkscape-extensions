@@ -122,28 +122,28 @@ class PrintingMarks(inkex.EffectExtension):
         group = parent.add(inkex.Group(id=name))
         group.transform = inkex.Transform(translate=(cx, cy), rotate=rotate)
         bbox = parent.bounding_box()
-        l = min(self.mark_size / 3, max(bbox.width, bbox.height) / 45)
-        for bar in [{'c': '*', 'stroke': '#000', 'x': 0, 'y': -(l + 1)},
+        loc = 0
+        if bbox:
+            loc = min(self.mark_size / 3, max(bbox.width, bbox.height) / 45)
+        for bar in [{'c': '*', 'stroke': '#000', 'x': 0, 'y': -(loc + 1)},
                     {'c': 'r', 'stroke': '#0FF', 'x': 0, 'y': 0},
-                    {'c': 'g', 'stroke': '#F0F', 'x': (l * 11) + 1, 'y': -(l + 1)},
-                    {'c': 'b', 'stroke': '#FF0', 'x': (l * 11) + 1, 'y': 0}
+                    {'c': 'g', 'stroke': '#F0F', 'x': (loc * 11) + 1, 'y': -(loc + 1)},
+                    {'c': 'b', 'stroke': '#FF0', 'x': (loc * 11) + 1, 'y': 0}
                     ]:
             i = 0
             while i <= 1:
-                cr = '255'
-                cg = '255'
-                cb = '255'
+                color = inkex.Color('white')
                 if bar['c'] == 'r' or bar['c'] == '*':
-                    cr = str(255 * i)
+                    color.red = 255 * i
                 if bar['c'] == 'g' or bar['c'] == '*':
-                    cg = str(255 * i)
+                    color.green = 255 * i
                 if bar['c'] == 'b' or bar['c'] == '*':
-                    cb = str(255 * i)
-                r_att = {'fill': 'rgb(' + cr + ',' + cg + ',' + cb + ')',
+                    color.blue = 255 * i
+                r_att = {'fill': str(color),
                          'stroke': bar['stroke'],
                          'stroke-width': '0.5',
-                         'x': str((l * i * 10) + bar['x']), 'y': str(bar['y']),
-                         'width': str(l), 'height': str(l)}
+                         'x': str((loc * i * 10) + bar['x']), 'y': str(bar['y']),
+                         'width': str(loc), 'height': str(loc)}
                 group.add(Rectangle(*r_att))
                 i += 0.1
 

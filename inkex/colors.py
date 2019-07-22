@@ -193,12 +193,19 @@ class ColorError(KeyError):
 class Color(list):
     """An RGB array for the color"""
     red = property(lambda self: self.to_rgb()[0])
+    red = red.setter(lambda self, value: self._set(0, value))
     green = property(lambda self: self.to_rgb()[1])
+    green = green.setter(lambda self, value: self._set(1, value))
     blue = property(lambda self: self.to_rgb()[2])
+    blue = blue.setter(lambda self, value: self._set(2, value))
     alpha = property(lambda self: self.to_rgba()[3])
+    alpha = alpha.setter(lambda self, value: self._set(3, value, ('rgba',)))
     hue = property(lambda self: self.to_hsl()[0])
+    hue = hue.setter(lambda self, value: self._set(0, value, ('hsl',)))
     saturation = property(lambda self: self.to_hsl()[1])
+    saturation = saturation.setter(lambda self, value: self._set(1, value, ('hsl',)))
     lightness = property(lambda self: self.to_hsl()[2])
+    lightness = lightness.setter(lambda self, value: self._set(2, value, ('hsl',)))
 
     def __init__(self, color=None, space='rgb'):
         super(Color, self).__init__()
@@ -215,6 +222,21 @@ class Color(list):
         self.space = space
         for val in color:
             self.append(val)
+
+    def _set(self, index, value, spaces=('rgb', 'rgba')):
+        """Set the color value in place, limits setter to specific color space"""
+        if not self.space in spaces:
+            if index == 3 and self.space == 'rgb':
+                # Special, add alpha, don't convert back
+                self.space = 'rgba'
+                self.append(value)
+                return
+            else:
+                # Set in other colour space and convert back and forth
+                target = getattr(self, 'to_' + spaces[0])()
+                target[index] = value
+                self[:] = getattr(target, 'to_' + self.space)()
+        self[index] = value
 
     def append(self, val):
         """Append a value to the local list"""

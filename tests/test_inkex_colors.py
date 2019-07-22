@@ -46,6 +46,39 @@ class ColorTest(TestCase):
         self.assertEqual(color.lightness, 128)
         self.assertEqual(color.alpha, 1.0)
 
+    def test_setter_rgb(self):
+        """Color RGB units can be set"""
+        color = Color('#ff0102')
+        color.red = 127
+        self.assertEqual(color.red, 127)
+        color.green = 5
+        self.assertEqual(color.green, 5)
+        color.blue = 15
+        self.assertEqual(color.blue, 15)
+
+    def test_setter_hsl(self):
+        """Color HSL units can be set on RGB color"""
+        color = Color('#ff0102')
+        color.hue = 100
+        self.assertEqual(color.space, 'rgb')
+        self.assertEqual(color.hue, 82)
+        color.saturation = 100
+        self.assertEqual(color.space, 'rgb')
+        self.assertEqual(color.saturation, 45)
+        color.lightness = 100
+        self.assertEqual(color.space, 'rgb')
+        self.assertEqual(color.lightness, 99) # No sure, bad conversion?
+
+    def test_setter_alpha(self):
+        """Color conversion from rgb to rgba"""
+        color = Color('#ff0102')
+        self.assertEqual(color.space, 'rgb')
+        self.assertEqual(color.alpha, 1.0)
+        color.alpha = 0.5
+        self.assertEqual(color.space, 'rgba')
+        self.assertEqual(color.alpha, 0.5)
+
+
     def test_rgb_to_hsl(self):
         """RGB to HSL Color"""
         self.assertEqual(Color('#ff7c7d').to_hsl(), [254, 255, 189])

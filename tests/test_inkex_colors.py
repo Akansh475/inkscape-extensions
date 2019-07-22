@@ -48,7 +48,7 @@ class ColorTest(TestCase):
 
     def test_setter_rgb(self):
         """Color RGB units can be set"""
-        color = Color('#ff0102')
+        color = Color('red')
         color.red = 127
         self.assertEqual(color.red, 127)
         color.green = 5

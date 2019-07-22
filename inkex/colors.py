@@ -225,9 +225,12 @@ class Color(list):
 
     def _set(self, index, value, spaces=('rgb', 'rgba')):
         """Set the color value in place, limits setter to specific color space"""
+        # Named colors are just rgb, so dump name memory
+        if self.space == 'named':
+            self.space = 'rgb'
         if not self.space in spaces:
             if index == 3 and self.space == 'rgb':
-                # Special, add alpha, don't convert back
+                # Special, add alpha, don't convert back to rgb
                 self.space = 'rgba'
                 self.append(value)
                 return

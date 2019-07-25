@@ -45,7 +45,7 @@ def size_box(box, delta):
 
 
 # Frame maker Inkscape effect extension
-class Frame(inkex.GenerateExtension):
+class Frame(inkex.EffectExtension):
     """
     An Inkscape extension that creates a frame around a selected object.
     """
@@ -108,7 +108,7 @@ class Frame(inkex.GenerateExtension):
         attributes = {'style': style, inkex.addNS('label', 'inkscape'): name, 'd': d}
         return PathElement(**attributes)
 
-    def generate(self):
+    def effect(self):
         """Performs the effect."""
         # Get the style values.
         corner_radius = self.options.corner_radius
@@ -123,6 +123,7 @@ class Frame(inkex.GenerateExtension):
                                  'stroke-width': str(width),
                                  'fill': (fill_data.color or 'none'),
                                  'fill-opacity': fill_data.opacity}))
+        layer = self.svg.get_current_layer()
 
         for node in self.svg.selected.values():
             box = node.bounding_box()
@@ -138,10 +139,10 @@ class Frame(inkex.GenerateExtension):
                 group = Group()
                 group.append(node)
                 group.append(frame)
-                yield group
+                layer.append(group)
             else:
-                yield frame
-
+                layer.append(frame)
+        return None
 
 if __name__ == '__main__':
     Frame().run()

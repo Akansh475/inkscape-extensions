@@ -23,6 +23,12 @@ from inkex.localization import _
 
 import hpgl_encoder
 
+try:
+    import serial
+except ImportError:
+    serial = None
+    inkex.errormsg("Python serial module is missing! Incomplete installation!")
+
 class Plot(inkex.EffectExtension):
     """Generate a plot in HPGL output"""
     def add_arguments(self, pars):
@@ -137,16 +143,7 @@ class Plot(inkex.EffectExtension):
         port.close()
 
     def sendHpglToSerial(self):
-        # gracefully exit script when pySerial is missing
-        try:
-            import serial
-        except ImportError as e:
-            inkex.errormsg(_("pySerial is not installed. Please follow these steps:")
-                + "\n\n" + _("1. Download and extract (unzip) this file to your local harddisk:")
-                + "\n"   +   "   https://pypi.python.org/packages/source/p/pyserial/pyserial-2.7.tar.gz"
-                + "\n"   + _("2. Copy the \"serial\" folder (Can be found inside the just extracted folder)")
-                + "\n"   + _("   into the following Inkscape folder: C:\\[Program files]\\inkscape\\python\\Lib\\")
-                + "\n"   + _("3. Close and restart Inkscape."))
+        if not serial:
             return
         # init serial framework
         comx = serial.Serial()

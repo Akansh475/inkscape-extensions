@@ -20,10 +20,8 @@
 
 import math
 
-from lxml import etree
-
 import inkex
-from inkex.paths import PathCommand, Curve
+from inkex.paths import PathCommand, Move, Line, Curve, ZoneClose
 from inkex.bezier import beziertatslope, beziersplitatt
 
 class Motion(inkex.EffectExtension):
@@ -35,57 +33,51 @@ class Motion(inkex.EffectExtension):
 
     def makeface(self, last, segment):
         """translate path segment along vector"""
-        a = []
-        a.append(['M', last[:]])
-        a.append([segment.letter, list(segment.args)])
+        elem = self.facegroup.add(inkex.PathElement())
 
         npt = segment.translate([self.vx, self.vy])
-        #defs = simplepath.pathdefs[cmd]
-        #for i in range(defs[1]):
-        #        np[i] += self.vx
-        #    elif defs[3][i] == 'y':
-        #        np[i] += self.vy
-
-        a.append(['L', [npt.x, npt.y]])
 
         # reverse direction of path segment
-        npt = list(npt.args)
-        npt[-2:] = last[0] + self.vx, last[1] + self.vy
-        if segment.letter == 'C':
-            npt = list(Curve(npt[2], npt[3], npt[0], npt[1], npt[4], npt[5]).args)
-        a.append([segment.letter, npt])
+        rev = list(npt.args)
+        rev[-2:] = last[0] + self.vx, last[1] + self.vy
+        if isinstance(segment, Curve):
+            rev = list(Curve(rev[2], rev[3], rev[0], rev[1], rev[4], rev[5]).args)
+        rev = type(segment)(*rev)
 
-        a.append(['Z', []])
-        etree.SubElement(self.facegroup, inkex.addNS('path', 'svg'), {'d': str(inkex.Path(a))})
+        elem.path = inkex.Path([
+            Move(*last),
+            segment,
+            npt.to_line(),
+            rev,
+            ZoneClose(),
+        ])
 
     def effect(self):
         self.vx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
         self.vy = math.sin(math.radians(self.options.angle)) * self.options.magnitude
         last = None
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path', 'svg'):
-                group = etree.SubElement(node.getparent(), inkex.addNS('g', 'svg'))
-                self.facegroup = etree.SubElement(group, inkex.addNS('g', 'svg'))
+        for node in self.svg.selected.values():
+            if isinstance(node, inkex.PathElement):
+                group = node.getparent().add(inkex.Group())
+                self.facegroup = group.add(inkex.Group())
                 group.append(node)
 
-                t = node.get('transform')
-                if t:
-                    group.set('transform', t)
-                    node.set('transform', '')
+                if node.transform:
+                    group.transform = node.transform
+                    node.transform = None
 
-                s = node.get('style')
-                self.facegroup.set('style', s)
+                self.facegroup.style = node.style
 
-                for segment in node.path:
+                for segment in node.path.to_absolute():
                     cmdcls = PathCommand.letter_to_class(segment.letter)
                     tees = []
-                    if segment.letter == 'C':
+                    if isinstance(segment, Curve):
                         bez = (last, segment[:2], segment[2:4], segment[-2:])
                         tees = [t for t in beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
                         tees.sort()
 
                     segments = []
-                    if len(tees) == 0 and segment.letter in ['L', 'C']:
+                    if not tees and isinstance(segment, (Line, Curve)):
                         segments.append(segment)
                     elif len(tees) == 1:
                         one, two = beziersplitatt(bez, tees[0])
@@ -102,10 +94,10 @@ class Motion(inkex.EffectExtension):
                         self.makeface(last, seg)
                         last = seg.x, seg.y
 
-                    if segment.letter == 'M':
-                        subPathStart = (segment.x, segment.y)
-                    if segment.letter == 'Z':
-                        last = subPathStart
+                    if isinstance(segment, Move):
+                        path_start = (segment.x, segment.y)
+                    if isinstance(segment, ZoneClose):
+                        last = path_start
                     else:
                         last = (segment.x, segment.y)
 

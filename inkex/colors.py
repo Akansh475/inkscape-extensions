@@ -185,6 +185,9 @@ def is_color(color):
     except ColorError:
         return False
 
+def contrain(minim, value, maxim):
+    """Returns the value so long as it's between min and max values"""
+    return min([maxim, max([minim, value])])
 
 class ColorError(KeyError):
     """Specific color parsing error"""
@@ -232,12 +235,12 @@ class Color(list):
             if index == 3 and self.space == 'rgb':
                 # Special, add alpha, don't convert back to rgb
                 self.space = 'rgba'
-                self.append(value)
+                self.append(contrain(0.0, float(value), 1.0))
                 return
             else:
                 # Set in other colour space and convert back and forth
                 target = getattr(self, 'to_' + spaces[0])()
-                target[index] = value
+                target[index] = contrain(0, int(value), 255)
                 self[:] = getattr(target, 'to_' + self.space)()
         self[index] = value
 

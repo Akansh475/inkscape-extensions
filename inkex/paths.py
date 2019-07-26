@@ -154,6 +154,10 @@ class PathCommand(object):
         """Convert command to list of :py:class:`Curve` commands """
         return [self.to_curve(prev, prev_prev)]
 
+    def to_line(self, prev=None):
+        """Converts this segment to a line (copies if already a line)"""
+        return Line(*self.end_point(Vector2d(), prev))
+
 
 class RelativePathCommand(PathCommand):
     """
@@ -265,6 +269,7 @@ class Line(AbsolutePathCommand):
 
     def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
         return Curve(prev.x, prev.y, self.x, self.y, self.x, self.y)
+
 
 
 class line(RelativePathCommand):  # pylint: disable=invalid-name

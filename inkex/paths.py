@@ -561,6 +561,9 @@ class Curve(AbsolutePathCommand):
         prev_prev.x, prev_prev.y = self.x3, self.y3
         return Curve(*self.args)
 
+    def to_bez(self):
+        """Returns the list of coords for SuperPath"""
+        return [list(self.args[:2]), list(self.args[2:4]), list(self.args[4:6])]
 
 class curve(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative curved line segment"""
@@ -1209,7 +1212,7 @@ class CubicSuperPath(list):
 
         if isinstance(item, Curve):
             # Curves are cut into three tuples for the super path.
-            item = [list(item.args[:2]), list(item.args[2:4]), list(item.args[4:6])]
+            item = item.to_bez()
 
         if not isinstance(item, list):
             raise ValueError("Unknown super curve item type: {}".format(item))

@@ -72,7 +72,7 @@ class Motion(inkex.EffectExtension):
                     cmdcls = PathCommand.letter_to_class(segment.letter)
                     tees = []
                     if isinstance(segment, Curve):
-                        bez = (last, segment[:2], segment[2:4], segment[-2:])
+                        bez = [last] + segment.to_bez()
                         tees = [t for t in beziertatslope(bez, (self.vy, self.vx)) if 0 < t < 1]
                         tees.sort()
 

@@ -36,8 +36,6 @@ import inkex
 from inkex.bezier import pointdistance, beziersplitatt, tpoint
 from inkex.localization import _
 from inkex.paths import CubicSuperPath
-from inkex.utils import inkbool
-
 
 import pathmodifier
 
@@ -110,9 +108,9 @@ class PathAlongPath(pathmodifier.Diffeo):
         self.arg_parser.add_argument("-c", "--copymode", type=str, dest="copymode", default=True,
                                      help="repeat the path to fit deformer's length")
         self.arg_parser.add_argument("-p", "--space", type=float, dest="space", default=0.0)
-        self.arg_parser.add_argument("-v", "--vertical", type=inkbool, dest="vertical", default=False,
+        self.arg_parser.add_argument("-v", "--vertical", type=inkex.Boolean, dest="vertical", default=False,
                                      help="reference path is vertical")
-        self.arg_parser.add_argument("-d", "--duplicate", type=inkbool, dest="duplicate", default=False,
+        self.arg_parser.add_argument("-d", "--duplicate", type=inkex.Boolean, dest="duplicate", default=False,
                                      help="duplicate pattern before deformation")
         self.arg_parser.add_argument("--tab", type=str, dest="tab",
                                      help="The selected UI-tab when OK was pressed")

@@ -23,7 +23,6 @@ import tempfile
 from lxml import etree
 
 import inkex
-from inkex import inkbool
 from inkex.localization import _
 from webslicer_effect import WebSlicerMixin, is_empty
 
@@ -37,12 +36,12 @@ class WebSlicer_Export(WebSlicerMixin, inkex.OutputExtension):
                                      dest="dir",
                                      help="")
         self.arg_parser.add_argument("--create-dir",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      default=False,
                                      dest="create_dir",
                                      help="")
         self.arg_parser.add_argument("--with-code",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      default=False,
                                      dest="with_code",
                                      help="")

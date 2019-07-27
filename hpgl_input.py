@@ -30,7 +30,7 @@ class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         super(HpglFile, self).__init__()
         self.arg_parser.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
         self.arg_parser.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
-        self.arg_parser.add_argument('--showMovements', type=inkex.inkbool, default=False, help='Show Movements between paths')
+        self.arg_parser.add_argument('--showMovements', type=inkex.Boolean, default=False, help='Show Movements between paths')
         self.arg_parser.add_argument('--docWidth', type=float, default=210.0, help='Width in mm')
         self.arg_parser.add_argument('--docHeight', type=float, default=297.0, help='Height in mm')
 

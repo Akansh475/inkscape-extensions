@@ -55,7 +55,6 @@ import sys
 from math import acos, cos, floor, pi, sin, sqrt
 
 import inkex
-from inkex import inkbool
 from inkex.elements import Group
 from inkex.localization import _
 
@@ -397,7 +396,7 @@ class Poly3D(inkex.GenerateExtension):
                                      type=str,
                                      dest="spec_file", default='great_rhombicuboct.obj')
         self.arg_parser.add_argument("--cw_wound",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="cw_wound", default='true')
         self.arg_parser.add_argument("--type",
                                      type=str,
@@ -447,7 +446,7 @@ class Poly3D(inkex.GenerateExtension):
                                      type=str,
                                      dest="show", default='faces')
         self.arg_parser.add_argument("--shade",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="shade", default='true')
         self.arg_parser.add_argument("--f_r",
                                      type=int,
@@ -477,10 +476,10 @@ class Poly3D(inkex.GenerateExtension):
                                      type=float,
                                      dest="lv_z", default=-2)
         self.arg_parser.add_argument("--back",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="back", default='false')
         self.arg_parser.add_argument("--norm",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="norm", default='true')
         self.arg_parser.add_argument("--z_sort",
                                      type=str,

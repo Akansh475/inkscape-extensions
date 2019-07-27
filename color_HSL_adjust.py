@@ -21,15 +21,15 @@ class C(coloreffect.ColorEffect):
                                      type=int, default=0,
                                      help="Adjust lightness")
         self.arg_parser.add_argument("--random_h",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="random_hue", default=False,
                                      help="Randomize hue")
         self.arg_parser.add_argument("--random_s",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="random_saturation", default=False,
                                      help="Randomize saturation")
         self.arg_parser.add_argument("--random_l",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="random_lightness", default=False,
                                      help="Randomize lightness")
         self.arg_parser.add_argument("--tab",

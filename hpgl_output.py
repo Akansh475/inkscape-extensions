@@ -33,14 +33,14 @@ class HpglOutput(inkex.OutputExtension):
         pars.add_argument('--force', type=int, default=24, help='Pen force (g)')
         pars.add_argument('--speed', type=int, default=20, help='Pen speed (cm/s)')
         pars.add_argument('--orientation', default='90', help='Rotation (Clockwise)')
-        pars.add_argument('--mirrorX', type=inkex.inkbool, default=False, help='Mirror X axis')
-        pars.add_argument('--mirrorY', type=inkex.inkbool, default=False, help='Mirror Y axis')
-        pars.add_argument('--center', type=inkex.inkbool, default=False, help='Center zero point')
+        pars.add_argument('--mirrorX', type=inkex.Boolean, default=False, help='Mirror X axis')
+        pars.add_argument('--mirrorY', type=inkex.Boolean, default=False, help='Mirror Y axis')
+        pars.add_argument('--center', type=inkex.Boolean, default=False, help='Center zero point')
         pars.add_argument('--overcut', type=float, default=1.0, help='Overcut (mm)')
-        pars.add_argument('--precut', type=inkex.inkbool, default=True, help='Use precut')
+        pars.add_argument('--precut', type=inkex.Boolean, default=True, help='Use precut')
         pars.add_argument('--flat', type=float, default=1.2, help='Curve flatness')
-        pars.add_argument('--autoAlign', type=inkex.inkbool, default=True, help='Auto align')
-        pars.add_argument('--convertObjects', type=inkex.inkbool, default=True,\
+        pars.add_argument('--autoAlign', type=inkex.Boolean, default=True, help='Auto align')
+        pars.add_argument('--convertObjects', type=inkex.Boolean, default=True,\
             help='Convert objects to paths')
         pars.add_argument('--toolOffset', type=float, default=0.25,\
             help='Tool (Knife) offset correction (mm)')

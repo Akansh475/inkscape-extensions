@@ -27,7 +27,7 @@ class Whirl(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("-t", "--whirl", type=float,\
             default=1.0, help="amount of whirl")
-        pars.add_argument("-r", "--rotation", type=inkex.inkbool,\
+        pars.add_argument("-r", "--rotation", type=inkex.Boolean,\
             default=True, help="direction of rotation")
 
     def effect(self):

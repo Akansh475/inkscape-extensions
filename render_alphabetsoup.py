@@ -470,7 +470,7 @@ class AlphabetSoup(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("-t", "--text", default="Inkscape", help="The text for alphabet soup")
         pars.add_argument("-z", "--zoom", type=float, default=8.0, help="The zoom on the output")
-        pars.add_argument("-r", "--randomize", type=inkex.inkbool, default=False,\
+        pars.add_argument("-r", "--randomize", type=inkex.Boolean, default=False,\
             help="Generate random (unreadable) text")
 
     def effect(self):

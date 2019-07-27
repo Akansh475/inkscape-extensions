@@ -36,7 +36,6 @@ import random
 import inkex
 from inkex import bezier
 from inkex.localization import _
-from inkex.utils import inkbool
 from inkex.transforms import Transform
 from inkex.elements import Group, Use
 
@@ -103,18 +102,18 @@ class PathScatter(pathmodifier.Diffeo):
         self.arg_parser.add_argument("--title")
         self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0, help="normal offset")
         self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0, help="tangential offset")
-        self.arg_parser.add_argument("-g", "--grouppick", type=inkbool, dest="grouppick", default=False,
+        self.arg_parser.add_argument("-g", "--grouppick", type=inkex.Boolean, dest="grouppick", default=False,
                                      help="if pattern is a group then randomly pick group members")
         self.arg_parser.add_argument("-m", "--pickmode", type=str, dest="pickmode", default="rand",
                                      help="group pick mode (rand=random seq=sequentially)")
-        self.arg_parser.add_argument("-f", "--follow", type=inkbool, dest="follow", default=True,
+        self.arg_parser.add_argument("-f", "--follow", type=inkex.Boolean, dest="follow", default=True,
                                      help="choose between wave or snake effect")
-        self.arg_parser.add_argument("-s", "--stretch", type=inkbool, dest="stretch", default=True,
+        self.arg_parser.add_argument("-s", "--stretch", type=inkex.Boolean, dest="stretch", default=True,
                                      help="repeat the path to fit deformer's length")
         self.arg_parser.add_argument("-p", "--space", type=float, dest="space", default=0.0)
-        self.arg_parser.add_argument("-v", "--vertical", type=inkbool, dest="vertical", default=False,
+        self.arg_parser.add_argument("-v", "--vertical", type=inkex.Boolean, dest="vertical", default=False,
                                      help="reference path is vertical")
-        self.arg_parser.add_argument("-d", "--duplicate", type=inkbool, dest="duplicate", default=False,
+        self.arg_parser.add_argument("-d", "--duplicate", type=inkex.Boolean, dest="duplicate", default=False,
                                      help="duplicate pattern before deformation")
         self.arg_parser.add_argument("-c", "--copymode", type=str, dest="copymode", default="clone",
                                      help="duplicate pattern before deformation")

@@ -23,7 +23,6 @@ from math import atan2, degrees
 from lxml import etree
 
 import inkex
-import inkex.utils
 
 class Edge3d(inkex.EffectExtension):
     def __init__(self):
@@ -54,7 +53,7 @@ class Edge3d(inkex.EffectExtension):
                                      default=2,
                                      help='shades, 2 = black and white, 3 = black, grey, white, etc.'),
         self.arg_parser.add_argument('-b', '--bw',
-                                     type=inkex.utils.inkbool,
+                                     type=inkex.Boolean,
                                      dest='bw',
                                      default=False,
                                      help='black and white, create only the fully black and white wedges'),

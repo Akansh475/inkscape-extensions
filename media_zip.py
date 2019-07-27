@@ -74,7 +74,7 @@ class CompressedMediaOutput(inkex.OutputExtension):
                                      default="",
                                      help="Image directory")
         self.arg_parser.add_argument("--font_list",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="font_list",
                                      default=False,
                                      help="Add font list")

@@ -16,7 +16,7 @@ class EmptyPage(inkex.EffectExtension):
                                      default="vertical", help="Page orientation")
         self.arg_parser.add_argument("-b", "--background", type=str, dest="page_background",
                                      default="normal", help="Page background")
-        self.arg_parser.add_argument("-n", "--noborder", type=inkex.inkbool, dest="page_noborder",
+        self.arg_parser.add_argument("-n", "--noborder", type=inkex.Boolean, dest="page_noborder",
                                      default=False)
 
     def effect(self):

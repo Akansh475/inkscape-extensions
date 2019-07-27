@@ -33,7 +33,7 @@ from argparse import ArgumentTypeError
 # from tempfile import TemporaryDirectory
 
 # All the names that get added to the inkex API itself.
-__all__ = ('AbortExtension', 'inkbool', 'errormsg', 'addNS', 'NSS')
+__all__ = ('AbortExtension', 'Boolean', 'errormsg', 'addNS', 'NSS')
 
 (X, Y) = range(2)
 
@@ -65,14 +65,13 @@ class TemporaryDirectory(object): # pylint: disable=too-few-public-methods
         if os.path.isdir(self.path):
             shutil.rmtree(self.path)
 
-def inkbool(value):
-    """Turn a boolean string into a python boolean"""
+def Boolean(value):
+    """ArgParser function to turn a boolean string into a python boolean"""
     if value.upper() == 'TRUE':
         return True
     elif value.upper() == 'FALSE':
         return False
     return None
-
 
 def debug(what):
     """Print debug message if debugging is switched on"""

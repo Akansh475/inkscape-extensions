@@ -52,15 +52,15 @@ class SVGCalendar(inkex.EffectExtension):
             help="Month to be generated. If 0, then the entry year will be generated.")
         pars.add_argument("--year", type=int, default=0,\
             help="Year to be generated. If 0, then the current year will be generated.")
-        pars.add_argument("--fill-empty-day-boxes", type=inkex.inkbool,\
+        pars.add_argument("--fill-empty-day-boxes", type=inkex.Boolean,\
             dest="fill_edb", default=True, help="Fill empty day boxes with next month days.")
-        pars.add_argument("--show-week-number", type=inkex.inkbool,\
+        pars.add_argument("--show-week-number", type=inkex.Boolean,\
             dest="show_weeknr", default=False, help="Include a week number column.")
         pars.add_argument("--start-day", default="sun", help='Week start day. ("sun" or "mon")')
         pars.add_argument("--weekend", default="sat+sun",\
             help='Define the weekend days. ("sat+sun" or "sat" or "sun")')
         pars.add_argument(
-            "--auto-organize", type=inkex.inkbool, dest="auto_organize", default=True,
+            "--auto-organize", type=inkex.Boolean, dest="auto_organize", default=True,
             help='Automatically set the size and positions.')
         pars.add_argument(
             "--months-per-line", type=int, dest="months_per_line", default=3,

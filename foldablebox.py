@@ -57,7 +57,7 @@ class FoldableBox(inkex.EffectExtension):
                                      default=0.6,
                                      help="Inner tab proportion for upper tab")
         self.arg_parser.add_argument("-g", "--guide-line",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="guideLine",
                                      default=True,
                                      help="Add guide lines to help the drawing limits")

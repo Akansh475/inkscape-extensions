@@ -27,7 +27,6 @@ from __future__ import unicode_literals
 import os
 
 import inkex
-from inkex import inkbool
 from inkex.localization import _
 from inkex.elements import Image
 
@@ -44,7 +43,7 @@ except ImportError:
 class Embedder(inkex.EffectExtension):
     """Allow selected image tags to become embeded image tags"""
     def add_arguments(self, pars):
-        pars.add_argument("-s", "--selectedonly", type=inkbool,\
+        pars.add_argument("-s", "--selectedonly", type=inkex.Boolean,\
             help="embed only selected images")
 
     def effect(self):

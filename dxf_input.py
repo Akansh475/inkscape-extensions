@@ -413,7 +413,7 @@ class DxfInput(inkex.InputExtension):
         p.add_argument("--scale", dest="scale", default="1.0")
         p.add_argument("--xmin", dest="xmin", default="0.0")
         p.add_argument("--ymin", dest="ymin", default="0.0")
-        p.add_argument("--gcodetoolspoints", dest="gcodetoolspoints", default=True, type=inkex.inkbool)
+        p.add_argument("--gcodetoolspoints", dest="gcodetoolspoints", default=True, type=inkex.Boolean)
         p.add_argument("--encoding", dest="input_encode", default="latin_1")
         p.add_argument("--font", dest="font", default="Arial")
         p.add_argument("--tab", dest="tab", default="Options")

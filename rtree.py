@@ -30,7 +30,7 @@ class RTreeTurtle(inkex.GenerateExtension):
         pars.add_argument("-m", "--minimum", type=float,
                           dest="minimum", default=4.0,
                           help="minimum branch size")
-        pars.add_argument("--pentoggle", type=inkex.inkbool,
+        pars.add_argument("--pentoggle", type=inkex.Boolean,
                           dest="pentoggle", default=False,
                           help="Lift pen for backward steps")
 

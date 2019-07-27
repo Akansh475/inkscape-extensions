@@ -17,7 +17,6 @@
 #
 
 import inkex
-from inkex import inkbool
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
@@ -39,12 +38,12 @@ def listToPropStr(list):
 class JessyInk_Uninstall(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab',  type=str, dest = 'what')
-        pars.add_argument('--remove_script',  type=inkbool, dest = 'remove_script', default = True)
-        pars.add_argument('--remove_effects',  type=inkbool, dest = 'remove_effects', default = True)
-        pars.add_argument('--remove_masterSlide',  type=inkbool, dest = 'remove_masterSlide', default = True)
-        pars.add_argument('--remove_transitions',  type=inkbool, dest = 'remove_transitions', default = True)
-        pars.add_argument('--remove_autoTexts',  type=inkbool, dest = 'remove_autoTexts', default = True)
-        pars.add_argument('--remove_views',  type=inkbool, dest = 'remove_views', default = True)
+        pars.add_argument('--remove_script',  type=inkex.Boolean, dest = 'remove_script', default = True)
+        pars.add_argument('--remove_effects',  type=inkex.Boolean, dest = 'remove_effects', default = True)
+        pars.add_argument('--remove_masterSlide',  type=inkex.Boolean, dest = 'remove_masterSlide', default = True)
+        pars.add_argument('--remove_transitions',  type=inkex.Boolean, dest = 'remove_transitions', default = True)
+        pars.add_argument('--remove_autoTexts',  type=inkex.Boolean, dest = 'remove_autoTexts', default = True)
+        pars.add_argument('--remove_views',  type=inkex.Boolean, dest = 'remove_views', default = True)
 
 
     def effect(self):

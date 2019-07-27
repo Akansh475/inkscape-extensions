@@ -73,7 +73,7 @@ class Length(inkex.EffectExtension):
             help="Number of significant digits after decimal point")
         pars.add_argument("-s", "--scale", type=float, default=1.1,\
             help="Scale Factor (Drawing:Real Length)")
-        pars.add_argument("-r", "--orient", type=inkex.inkbool, default=True,\
+        pars.add_argument("-r", "--orient", type=inkex.Boolean, default=True,\
             help="Keep orientation of text upright")
 
     def effect(self):

@@ -103,7 +103,7 @@ class DeprecatedEffect(object):
                 'string': str,
                 'int': int,
                 'float': float,
-                'inkbool': inkex.utils.inkbool,
+                'inkbool': inkex.utils.Boolean,
             }.get(kw['type'])
         if kw.get('action', None) == 'store':
             # Default store action not required, removed.

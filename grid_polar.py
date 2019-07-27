@@ -27,7 +27,6 @@ from math import cos, log, pi, sin
 from lxml import etree
 
 import inkex
-from inkex import inkbool
 from inkex.elements import Group
 
 def draw_SVG_circle(r, cx, cy, width, fill, name, parent):
@@ -78,7 +77,7 @@ class GridPolar(inkex.GenerateExtension):
                                      dest="r_subdivs", default=3,
                                      help="Circular Subdivisions per Major division")
         self.arg_parser.add_argument("--r_log",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="r_log", default=False,
                                      help="Logarithmic subdivisions if true")
         self.arg_parser.add_argument("--r_divs_th",

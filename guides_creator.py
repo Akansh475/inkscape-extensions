@@ -40,11 +40,11 @@ class GuidesCreator(inkex.EffectExtension):
         pars.add_argument('--guides_preset', default='custom', help='Preset')
         pars.add_argument('--vertical_guides', type=int, default=3, help='Vertical guides')
         pars.add_argument('--horizontal_guides', type=int, default=3, help='Horizontal guides')
-        pars.add_argument('--start_from_edges', type=inkex.inkbool, help='Start from edges')
-        pars.add_argument('--ul', type=inkex.inkbool, default=True, help='Upper left corner')
-        pars.add_argument('--ur', type=inkex.inkbool, default=True, help='Upper right corner')
-        pars.add_argument('--ll', type=inkex.inkbool, default=True, help='Lower left corner')
-        pars.add_argument('--lr', type=inkex.inkbool, default=True, help='Lower right corner')
+        pars.add_argument('--start_from_edges', type=inkex.Boolean, help='Start from edges')
+        pars.add_argument('--ul', type=inkex.Boolean, default=True, help='Upper left corner')
+        pars.add_argument('--ur', type=inkex.Boolean, default=True, help='Upper right corner')
+        pars.add_argument('--ll', type=inkex.Boolean, default=True, help='Lower left corner')
+        pars.add_argument('--lr', type=inkex.Boolean, default=True, help='Lower right corner')
         pars.add_argument('--margins_preset', default='custom', help='Margins preset')
         pars.add_argument('--vert', type=int, default=0, help='Vert subdivisions')
         pars.add_argument('--horz', type=int, default=0, help='Horz subdivisions')
@@ -52,8 +52,8 @@ class GuidesCreator(inkex.EffectExtension):
         pars.add_argument('--footer_margin', default=6, help='Footer margin')
         pars.add_argument('--left_margin', default=6, help='Left margin')
         pars.add_argument('--right_margin', default=6, help='Right margin')
-        pars.add_argument('--start_from_edges2', type=inkex.inkbool, help='Start from edges')
-        pars.add_argument('--delete', type=inkex.inkbool, help='Delete existing guides')
+        pars.add_argument('--start_from_edges2', type=inkex.Boolean, help='Start from edges')
+        pars.add_argument('--delete', type=inkex.Boolean, help='Delete existing guides')
 
     def effect(self):
         # getting the width and height attributes of the canvas

@@ -28,7 +28,7 @@ class Split(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
         pars.add_argument("-s", "--splittype", default="word", help="type of split")
-        pars.add_argument("-p", "--preserve", type=inkex.inkbool, default=True,\
+        pars.add_argument("-p", "--preserve", type=inkex.Boolean, default=True,\
             help="Preserve original")
 
     def split_lines(self, node):

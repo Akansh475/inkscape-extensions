@@ -69,11 +69,11 @@ class JitterNodes(inkex.EffectExtension):
                         dest="radiusy", default=10.0,
                         help="Randomly move nodes and handles within this radius, Y")
         self.arg_parser.add_argument("-c", "--ctrl",
-                         type=inkex.inkbool,
+                         type=inkex.Boolean,
                         dest="ctrl", default=True,
                         help="Randomize control points")
         self.arg_parser.add_argument("-e", "--end",
-                         type=inkex.inkbool,
+                         type=inkex.Boolean,
                         dest="end", default=True,
                         help="Randomize nodes")
         self.arg_parser.add_argument("-d", "--dist",

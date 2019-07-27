@@ -53,7 +53,7 @@ class InterpAttG(inkex.EffectExtension):
             "-u", "--unit", type=str, dest="unit", default="color",
             help="Values unit.")
         self.arg_parser.add_argument(
-            "--zsort", type=inkex.inkbool, dest="zsort", default=True,
+            "--zsort", type=inkex.Boolean, dest="zsort", default=True,
             help="use z-order instead of selection order")
         self.arg_parser.add_argument(
             "--tab", type=str, dest="tab",

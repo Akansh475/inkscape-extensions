@@ -30,7 +30,7 @@ class PostscriptInput(inkex.CallExtension):
     output_ext = 'pdf'
 
     def add_arguments(self, pars):
-        pars.add_argument('--crop', type=inkex.inkbool, default=False)
+        pars.add_argument('--crop', type=inkex.Boolean, default=False)
 
     def call(self, input_file, output_file):
         crop = '-dEPSCrop' if self.options.crop else ''

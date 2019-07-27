@@ -27,7 +27,6 @@ import os
 from collections import OrderedDict
 
 import inkex
-from inkex import inkbool
 from inkex.localization import _
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot, call
@@ -46,15 +45,15 @@ class GimpOutput(TempDirMixin, inkex.OutputExtension):
                                      type=str,
                                      dest="tab")
         self.arg_parser.add_argument("-d", "--guides",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="saveGuides", default=False,
                                      help="Save the Guides with the .XCF")
         self.arg_parser.add_argument("-r", "--grid",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="saveGrid", default=False,
                                      help="Save the Grid with the .XCF")
         self.arg_parser.add_argument("-b", "--background",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="layerBackground", default=False,
                                      help="Add background color to each layer")
         self.arg_parser.add_argument("-i", "--dpi",

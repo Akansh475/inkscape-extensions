@@ -81,7 +81,7 @@ class Hershey( inkex.Effect ):
             help="Optional other font name or path to use" )
         
         self.arg_parser.add_argument( "--preserve", \
-            type=inkex.utils.inkbool, dest="preserve_text", \
+            type=inkex.Boolean, dest="preserve_text", \
             default=False, \
             help="Preserve original text")
 

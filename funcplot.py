@@ -31,7 +31,6 @@ from math import cos, pi, sin
 from lxml import etree
 
 import inkex
-from inkex import inkbool
 from inkex.paths import Path
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
@@ -185,11 +184,11 @@ class FuncPlot(inkex.EffectExtension):
                                      dest="xend", default=1.0,
                                      help="End x-value")
         self.arg_parser.add_argument("--times2pi",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="times2pi", default=True,
                                      help="Multiply x-range by 2*pi")
         self.arg_parser.add_argument("--polar",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="polar", default=False,
                                      help="Plot using polar coordinates")
         self.arg_parser.add_argument("--ybottom",
@@ -209,7 +208,7 @@ class FuncPlot(inkex.EffectExtension):
                                      dest="fofx", default="sin(x)",
                                      help="f(x) for plotting")
         self.arg_parser.add_argument("--fponum",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="fponum", default=True,
                                      help="Calculate the first derivative numerically")
         self.arg_parser.add_argument("--fpofx",
@@ -217,23 +216,23 @@ class FuncPlot(inkex.EffectExtension):
                                      dest="fpofx", default="cos(x)",
                                      help="f'(x) for plotting")
         self.arg_parser.add_argument("--clip",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="clip", default=False,
                                      help="If True, clip with copy of source rectangle")
         self.arg_parser.add_argument("--remove",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="remove", default=True,
                                      help="If True, source rectangle is removed")
         self.arg_parser.add_argument("--isoscale",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="isoscale", default=True,
                                      help="If True, isotropic scaling is used")
         self.arg_parser.add_argument("--drawaxis",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="drawaxis", default=True,
                                      help="If True, axis are drawn")
         self.arg_parser.add_argument("--endpts",
-                                     type=inkbool,
+                                     type=inkex.Boolean,
                                      dest="endpts", default=False,
                                      help="If True, end points are added")
         self.arg_parser.add_argument("--tab",

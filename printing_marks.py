@@ -36,13 +36,13 @@ class PrintingMarks(inkex.EffectExtension):
 
     def add_arguments(self, pars):
         pars.add_argument("--where", help="Apply crop marks to...")
-        pars.add_argument("--crop_marks", type=inkex.inkbool, default=True, help="Draw crop Marks")
-        pars.add_argument("--bleed_marks", type=inkex.inkbool, help="Draw Bleed Marks")
-        pars.add_argument("--registration_marks", type=inkex.inkbool,\
+        pars.add_argument("--crop_marks", type=inkex.Boolean, default=True, help="Draw crop Marks")
+        pars.add_argument("--bleed_marks", type=inkex.Boolean, help="Draw Bleed Marks")
+        pars.add_argument("--registration_marks", type=inkex.Boolean,\
             dest="reg_marks", default=False, help="Draw Registration Marks?")
-        pars.add_argument("--star_target", type=inkex.inkbool, help="Draw Star Target?")
-        pars.add_argument("--colour_bars", type=inkex.inkbool, help="Draw Colour Bars?")
-        pars.add_argument("--page_info", type=inkex.inkbool, help="Draw Page Information?")
+        pars.add_argument("--star_target", type=inkex.Boolean, help="Draw Star Target?")
+        pars.add_argument("--colour_bars", type=inkex.Boolean, help="Draw Colour Bars?")
+        pars.add_argument("--page_info", type=inkex.Boolean, help="Draw Page Information?")
         pars.add_argument("--unit", default="px", help="Draw measurement")
         pars.add_argument("--crop_offset", type=float, default=0.0, help="Offset")
         pars.add_argument("--bleed_top", type=float, default=0.0, help="Bleed Top Size")

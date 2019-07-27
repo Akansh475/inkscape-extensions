@@ -22,7 +22,6 @@ An Inkscape extension that creates a frame around a selected object.
 """
 
 import inkex
-from inkex.utils import inkbool
 from inkex.elements import Group, PathElement, ClipPath
 
 def size_box(box, delta):
@@ -44,10 +43,10 @@ class Frame(inkex.EffectExtension):
         self.defs = None
 
         # Parse the options.
-        self.arg_parser.add_argument('--clip', type=inkbool, dest='clip', default=False)
+        self.arg_parser.add_argument('--clip', type=inkex.Boolean, dest='clip', default=False)
         self.arg_parser.add_argument('--corner_radius', type=int, dest='corner_radius', default=0)
         self.arg_parser.add_argument('--fill_color', type=inkex.Color, default=inkex.Color(0))
-        self.arg_parser.add_argument('--group', type=inkbool, dest='group', default=False)
+        self.arg_parser.add_argument('--group', type=inkex.Boolean, dest='group', default=False)
         self.arg_parser.add_argument('--position', type=str, dest='position', default='outside')
         self.arg_parser.add_argument('--stroke_color', type=inkex.Color, default=inkex.Color(0))
         self.arg_parser.add_argument('--tab', type=str, dest='tab', default='object')

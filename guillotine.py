@@ -51,7 +51,7 @@ class Guillotine(inkex.EffectExtension):
         super(Guillotine, self).__init__()
         self.arg_parser.add_argument("--directory", type=str, dest="directory")
         self.arg_parser.add_argument("--image", type=str, dest="image")
-        self.arg_parser.add_argument("--ignore", type=inkex.inkbool, dest="ignore")
+        self.arg_parser.add_argument("--ignore", type=inkex.Boolean, dest="ignore")
 
     def get_guides(self):
         """

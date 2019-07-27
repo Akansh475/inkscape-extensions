@@ -34,11 +34,11 @@ class Interp(inkex.EffectExtension):
             help="number of interpolation steps")
         pars.add_argument("-m", "--method", type=int, default=2,\
             help="method of interpolation")
-        pars.add_argument("-d", "--dup", type=inkex.inkbool, default=True,\
+        pars.add_argument("-d", "--dup", type=inkex.Boolean, default=True,\
             help="duplicate endpaths")
-        pars.add_argument("--style", type=inkex.inkbool, default=True,\
+        pars.add_argument("--style", type=inkex.Boolean, default=True,\
             help="try interpolation of some style properties")
-        pars.add_argument("--zsort", type=inkex.inkbool, default=False,\
+        pars.add_argument("--zsort", type=inkex.Boolean, default=False,\
             help="use z-order instead of selection order")
 
     def effect(self):

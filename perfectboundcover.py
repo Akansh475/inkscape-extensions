@@ -73,7 +73,7 @@ class PerfectBoundCover(inkex.EffectExtension):
                                      dest="bleed", default=0.25,
                                      help="cover bleed (in)")
         self.arg_parser.add_argument("--removeguides",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="removeguides", default=False,
                                      help="remove guides")
         self.arg_parser.add_argument("--book",

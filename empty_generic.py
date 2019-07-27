@@ -13,8 +13,8 @@ class GenericTemplate(inkex.EffectExtension):
         self.arg_parser.add_argument("-z", "--height", type=int, dest="generic_height", default="1080", help="Custom height")
         self.arg_parser.add_argument("-u", "--unit", type=str, dest="generic_unit", default="px", help="SVG Unit")
         self.arg_parser.add_argument("-b", "--background", type=str, dest="generic_background", default="normal", help="Canvas background")
-        self.arg_parser.add_argument("-n", "--noborder", type=inkex.inkbool, dest="generic_noborder", default=False)
-        # self.arg_parser.add_argument("-l", "--layer", type=inkex.inkbool, dest="generic_layer", default=True)
+        self.arg_parser.add_argument("-n", "--noborder", type=inkex.Boolean, dest="generic_noborder", default=False)
+        # self.arg_parser.add_argument("-l", "--layer", type=inkex.Boolean, dest="generic_layer", default=True)
 
     def effect(self):
 

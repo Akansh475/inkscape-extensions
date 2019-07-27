@@ -3014,7 +3014,7 @@ class Gcodetools(inkex.EffectExtension):
         add_argument = self.arg_parser.add_argument
         add_argument("-d", "--directory", default="/home/", help="Directory for gcode file")
         add_argument("-f", "--filename", dest="file", default="-1.0", help="File name")
-        add_argument("--add-numeric-suffix-to-filename", type=inkex.inkbool, default=True, help="Add numeric suffix to filename")
+        add_argument("--add-numeric-suffix-to-filename", type=inkex.Boolean, default=True, help="Add numeric suffix to filename")
         add_argument("--Zscale", type=float, default="1.0", help="Scale factor Z")
         add_argument("--Zoffset", type=float, default="0.0", help="Offset along Z")
         add_argument("-s", "--Zsafe", type=float, default="0.5", help="Z above all obstacles")
@@ -3027,9 +3027,9 @@ class Gcodetools(inkex.EffectExtension):
         add_argument("--biarc-max-split-depth", type=int, default="4", help="Defines maximum depth of splitting while approximating using biarcs.")
         add_argument("--path-to-gcode-order", default="path by path", help="Defines cutting order path by path or layer by layer.")
         add_argument("--path-to-gcode-depth-function", default="zd", help="Path to gcode depth function.")
-        add_argument("--path-to-gcode-sort-paths", type=inkex.inkbool, default=True, help="Sort paths to reduce rapid distance.")
+        add_argument("--path-to-gcode-sort-paths", type=inkex.Boolean, default=True, help="Sort paths to reduce rapid distance.")
         add_argument("--comment-gcode", default="", help="Comment Gcode")
-        add_argument("--comment-gcode-from-properties", type=inkex.inkbool, default=False, help="Get additional comments from Object Properties")
+        add_argument("--comment-gcode-from-properties", type=inkex.Boolean, default=False, help="Get additional comments from Object Properties")
 
         add_argument("--tool-diameter", type=float, default="3", help="Tool diameter used for area cutting")
         add_argument("--max-area-curves", type=int, default="100", help="Maximum area curves for each area")
@@ -3045,7 +3045,7 @@ class Gcodetools(inkex.EffectExtension):
         add_argument("--area-find-artefacts-diameter", type=float, default="1", help="Artefacts seeking radius")
         add_argument("--area-find-artefacts-action", default="mark with an arrow", help="Artefacts action type")
 
-        add_argument("--auto_select_paths", type=inkex.inkbool, default=True, help="Select all paths if nothing is selected.")
+        add_argument("--auto_select_paths", type=inkex.Boolean, default=True, help="Select all paths if nothing is selected.")
 
         add_argument("--loft-distances", default="10", help="Distances between paths.")
         add_argument("--loft-direction", default="crosswise", help="Direction of loft's interpolation.")
@@ -3056,7 +3056,7 @@ class Gcodetools(inkex.EffectExtension):
         add_argument("--engraving-sharp-angle-tollerance", type=float, default="150", help="All angles thar are less than engraving-sharp-angle-tollerance will be thought sharp")
         add_argument("--engraving-max-dist", type=float, default="10", help="Distance from original path where engraving is not needed (usually it's cutting tool diameter)")
         add_argument("--engraving-newton-iterations", type=int, default="4", help="Number of sample points used to calculate distance")
-        add_argument("--engraving-draw-calculation-paths", type=inkex.inkbool, default=False, help="Draw additional graphics to debug engraving path")
+        add_argument("--engraving-draw-calculation-paths", type=inkex.Boolean, default=False, help="Draw additional graphics to debug engraving path")
         add_argument("--engraving-cutter-shape-function", default="w", help="Cutter shape function z(w). Ex. cone: w. ")
 
         add_argument("--lathe-width", type=float, default=10., help="Lathe width")
@@ -3068,7 +3068,7 @@ class Gcodetools(inkex.EffectExtension):
 
         add_argument("--lathe-rectangular-cutter-width", type=float, default="4", help="Rectangular cutter width")
 
-        add_argument("--create-log", type=inkex.inkbool, dest="log_create_log", default=False, help="Create log files")
+        add_argument("--create-log", type=inkex.Boolean, dest="log_create_log", default=False, help="Create log files")
         add_argument("--log-filename", default='', help="Create log files")
 
         add_argument("--orientation-points-count", default="2", help="Orientation points count")
@@ -3080,8 +3080,8 @@ class Gcodetools(inkex.EffectExtension):
 
         add_argument("--offset-radius", type=float, default=10., help="Offset radius")
         add_argument("--offset-step", type=float, default=10., help="Offset step")
-        add_argument("--offset-draw-clippend-path", type=inkex.inkbool, default=False, help="Draw clipped path")
-        add_argument("--offset-just-get-distance", type=inkex.inkbool, default=False, help="Don't do offset just get distance")
+        add_argument("--offset-draw-clippend-path", type=inkex.Boolean, default=False, help="Draw clipped path")
+        add_argument("--offset-just-get-distance", type=inkex.Boolean, default=False, help="Don't do offset just get distance")
 
         add_argument("--postprocessor", default='', help="Postprocessor command.")
         add_argument("--postprocessor-custom", default='', help="Postprocessor custom command.")
@@ -3089,20 +3089,20 @@ class Gcodetools(inkex.EffectExtension):
         add_argument("--graffiti-max-seg-length", type=float, default=1., help="Graffiti maximum segment length.")
         add_argument("--graffiti-min-radius", type=float, default=10., help="Graffiti minimal connector's radius.")
         add_argument("--graffiti-start-pos", default="(0;0)", help="Graffiti Start position (x;y).")
-        add_argument("--graffiti-create-linearization-preview", type=inkex.inkbool, default=True, help="Graffiti create linearization preview.")
-        add_argument("--graffiti-create-preview", type=inkex.inkbool, default=True, help="Graffiti create preview.")
+        add_argument("--graffiti-create-linearization-preview", type=inkex.Boolean, default=True, help="Graffiti create linearization preview.")
+        add_argument("--graffiti-create-preview", type=inkex.Boolean, default=True, help="Graffiti create preview.")
         add_argument("--graffiti-preview-size", type=int, default=800, help="Graffiti preview's size.")
         add_argument("--graffiti-preview-emmit", type=int, default=800, help="Preview's paint emmit (pts/s).")
 
-        add_argument("--in-out-path", type=inkex.inkbool, default=True, help="Create in-out paths")
-        add_argument("--in-out-path-do-not-add-reference-point", type=inkex.inkbool, default=False, help="Just add reference in-out point")
+        add_argument("--in-out-path", type=inkex.Boolean, default=True, help="Create in-out paths")
+        add_argument("--in-out-path-do-not-add-reference-point", type=inkex.Boolean, default=False, help="Just add reference in-out point")
         add_argument("--in-out-path-point-max-dist", type=float, default=10., help="In-out path max distance to reference point")
         add_argument("--in-out-path-type", default="Round", help="In-out path type")
         add_argument("--in-out-path-len", type=float, default=10., help="In-out path length")
-        add_argument("--in-out-path-replace-original-path", type=inkex.inkbool, default=False, help="Replace original path")
+        add_argument("--in-out-path-replace-original-path", type=inkex.Boolean, default=False, help="Replace original path")
         add_argument("--in-out-path-radius", type=float, default=10., help="In-out path radius for round path")
 
-        add_argument("--plasma-prepare-corners", type=inkex.inkbool, default=True, help="Prepare corners")
+        add_argument("--plasma-prepare-corners", type=inkex.Boolean, default=True, help="Prepare corners")
         add_argument("--plasma-prepare-corners-distance", type=float, default=10., help="Stepout distance for corners")
         add_argument("--plasma-prepare-corners-tolerance", type=float, default=10., help="Maximum angle for corner (0-180 deg)")
 

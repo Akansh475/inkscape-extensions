@@ -25,7 +25,7 @@ class SVGFont2Layers(inkex.EffectExtension):
     def __init__(self):
         super(SVGFont2Layers, self).__init__()
         self.count = 0
-        self.arg_parser.add_argument("--limitglyphs", type=inkex.inkbool, default=True,\
+        self.arg_parser.add_argument("--limitglyphs", type=inkex.Boolean, default=True,\
              help="Load only the first 30 glyphs from the SVGFont (otherwise the loading "
                   "process may take a very long time)")
 

@@ -36,8 +36,8 @@ class SetAttrImage(inkex.EffectExtension):
 
     def add_arguments(self, pars):
         pars.add_argument("--tab_main", type=self.arg_method(), default=self.method_tab_basic)
-        pars.add_argument("--fix_scaling", type=inkex.inkbool, default=True)
-        pars.add_argument("--fix_rendering", type=inkex.inkbool, default=False)
+        pars.add_argument("--fix_scaling", type=inkex.Boolean, default=True)
+        pars.add_argument("--fix_rendering", type=inkex.Boolean, default=False)
         pars.add_argument("--aspect_ratio", default="none",\
             help="Value for attribute 'preserveAspectRatio'")
         pars.add_argument("--aspect_clip", default="unset",\

@@ -1075,7 +1075,7 @@ class QRCodeInkscape(inkex.GenerateExtension):
                                      type=float,
                                      dest="MODULESIZE", default=10)
         self.arg_parser.add_argument("--invert",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="invert_code", default="false")
         self.arg_parser.add_argument("--drawtype",
                                      type=str,

@@ -74,7 +74,7 @@ class WireframeSphere(inkex.GenerateExtension):
         pars.add_argument("--radius", type=float, dest="RADIUS", default=100.0)
         pars.add_argument("--tilt", type=float, dest="TILT", default=35.0)
         pars.add_argument("--rotation", type=float, dest="ROT_OFFSET", default=4)
-        pars.add_argument("--hide_back", type=inkex.inkbool, dest="HIDE_BACK", default=False)
+        pars.add_argument("--hide_back", type=inkex.Boolean, dest="HIDE_BACK", default=False)
 
     def generate(self):
         opt = self.options

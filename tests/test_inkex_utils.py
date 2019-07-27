@@ -11,21 +11,21 @@ from argparse import ArgumentTypeError
 
 import pytest
 
-from inkex.utils import addNS, debug, errormsg, filename_arg, inkbool, to
+from inkex.utils import addNS, debug, errormsg, filename_arg, Boolean, to
 
 
 class TestInkexBasic(object):
     """Test basic utiltiies of inkex"""
 
-    def test_inkbool(self):
+    def test_boolean(self):
         """Inkscape boolean input"""
-        assert inkbool('TRUE') is True
-        assert inkbool('true') is True
-        assert inkbool('True') is True
-        assert inkbool('FALSE') is False
-        assert inkbool('false') is False
-        assert inkbool('False') is False
-        assert inkbool('Banana') is None
+        assert Boolean('TRUE') is True
+        assert Boolean('true') is True
+        assert Boolean('True') is True
+        assert Boolean('FALSE') is False
+        assert Boolean('false') is False
+        assert Boolean('False') is False
+        assert Boolean('Banana') is None
 
     def test_debug(self, capsys):
         """Debug messages go to stderr"""

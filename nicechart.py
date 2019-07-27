@@ -88,21 +88,21 @@ class NiceChart(inkex.GenerateExtension):
     def add_arguments(self, pars):
         pars.add_argument('-w', '--what', default='22,11,67', help='Chart Values')
         pars.add_argument("-t", "--type", type=self.get_type, default='bar', help="Chart Type")
-        pars.add_argument("-b", "--blur", type=inkex.inkbool, default=True, help="Blur Type")
+        pars.add_argument("-b", "--blur", type=inkex.Boolean, default=True, help="Blur Type")
         pars.add_argument("-f", "--filename", type=filename_arg, help="Name of File")
         pars.add_argument("-i", "--input_type", default='file', help="Chart Type")
         pars.add_argument("-d", "--delimiter", default=';', help="delimiter")
         pars.add_argument("-c", "--colors", default='default', help="color-scheme")
         pars.add_argument("--colors_override", help="color-scheme-override")
-        pars.add_argument("--reverse_colors", type=inkex.inkbool, default=False,
+        pars.add_argument("--reverse_colors", type=inkex.Boolean, default=False,
                           help="reverse color-scheme")
         pars.add_argument("-k", "--col_key", type=int, default=0,
                           help="column that contains the keys")
         pars.add_argument("-v", "--col_val", type=int, default=1,
                           help="column that contains the values")
-        pars.add_argument("--headings", type=inkex.inkbool, default=True,
+        pars.add_argument("--headings", type=inkex.Boolean, default=True,
                           help="first line of the CSV file consists of headings for the columns")
-        pars.add_argument("-r", "--rotate", type=inkex.inkbool, default=False,
+        pars.add_argument("-r", "--rotate", type=inkex.Boolean, default=False,
                           help="Draw barchart horizontally")
         pars.add_argument("-W", "--bar-width", type=int, default=10, help="width of bars")
         pars.add_argument("-p", "--pie-radius", type=int, default=100, help="radius of pie-charts")
@@ -113,14 +113,14 @@ class NiceChart(inkex.GenerateExtension):
                           help="distance between bar and descriptions")
         pars.add_argument("--heading-offset", type=int, default=50,
                           help="distance between chart and chart title")
-        pars.add_argument("--segment-overlap", type=inkex.inkbool, default=False,
+        pars.add_argument("--segment-overlap", type=inkex.Boolean, default=False,
                           help="Remove aliasing effects by letting pie chart segments overlap")
         pars.add_argument("-F", "--font", default='sans-serif', help="font of description")
         pars.add_argument("-S", "--font-size", type=int, default=10,
                           help="font size of description")
         pars.add_argument("-C", "--font-color", default='black', help="font color of description")
 
-        pars.add_argument("-V", "--show_values", type=inkex.inkbool, default=False,
+        pars.add_argument("-V", "--show_values", type=inkex.Boolean, default=False,
                           help="Show values in chart")
 
     def get_data(self):

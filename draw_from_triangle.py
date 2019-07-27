@@ -230,67 +230,67 @@ class DrawFromTriangle(inkex.EffectExtension):
                                      help="The selected UI-tab when OK was pressed")
         # PRESET POINT OPTIONS
         self.arg_parser.add_argument("--circumcircle",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_circumcircle", default=False)
         self.arg_parser.add_argument("--circumcentre",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_circumcentre", default=False)
         self.arg_parser.add_argument("--incircle",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_incircle", default=False)
         self.arg_parser.add_argument("--incentre",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_incentre", default=False)
         self.arg_parser.add_argument("--contact_tri",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_contact_tri", default=False)
         self.arg_parser.add_argument("--excircles",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_excircles", default=False)
         self.arg_parser.add_argument("--excentres",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_excentres", default=False)
         self.arg_parser.add_argument("--extouch_tri",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_extouch_tri", default=False)
         self.arg_parser.add_argument("--excentral_tri",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_excentral_tri", default=False)
         self.arg_parser.add_argument("--orthocentre",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_orthocentre", default=False)
         self.arg_parser.add_argument("--orthic_tri",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_orthic_tri", default=False)
         self.arg_parser.add_argument("--altitudes",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_altitudes", default=False)
         self.arg_parser.add_argument("--anglebisectors",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_anglebisectors", default=False)
         self.arg_parser.add_argument("--centroid",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_centroid", default=False)
         self.arg_parser.add_argument("--ninepointcentre",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_ninepointcentre", default=False)
         self.arg_parser.add_argument("--ninepointcircle",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_ninepointcircle", default=False)
         self.arg_parser.add_argument("--symmedians",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_symmedians", default=False)
         self.arg_parser.add_argument("--sym_point",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_sym_pt", default=False)
         self.arg_parser.add_argument("--sym_tri",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_sym_tri", default=False)
         self.arg_parser.add_argument("--gergonne_pt",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_gergonne_pt", default=False)
         self.arg_parser.add_argument("--nagel_pt",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_nagel_pt", default=False)
         # CUSTOM POINT OPTIONS
         self.arg_parser.add_argument("--mode",
@@ -300,19 +300,19 @@ class DrawFromTriangle(inkex.EffectExtension):
                                      type=str,
                                      dest="cust_str", default='s_a')
         self.arg_parser.add_argument("--cust_pt",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_cust_pt", default=False)
         self.arg_parser.add_argument("--cust_radius",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_cust_radius", default=False)
         self.arg_parser.add_argument("--radius",
                                      type=str,
                                      dest="radius", default='s_a')
         self.arg_parser.add_argument("--isogonal_conj",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_isogonal_conj", default=False)
         self.arg_parser.add_argument("--isotomic_conj",
-                                     type=inkex.inkbool,
+                                     type=inkex.Boolean,
                                      dest="do_isotomic_conj", default=False)
 
     def effect(self):

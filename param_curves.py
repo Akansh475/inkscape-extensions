@@ -148,7 +148,7 @@ class ParamCurves(inkex.EffectExtension):
                                      help="Start t-value")
         self.arg_parser.add_argument("--t_end", type=float, dest="t_end", default=1.0,
                                      help="End t-value")
-        self.arg_parser.add_argument("--times2pi", type=inkex.inkbool, dest="times2pi", default=True,
+        self.arg_parser.add_argument("--times2pi", type=inkex.Boolean, dest="times2pi", default=True,
                                      help="Multiply t-range by 2*pi")
         self.arg_parser.add_argument("--xleft", type=float, dest="xleft", default=-1.0,
                                      help="x-value of rectangle's left")
@@ -164,11 +164,11 @@ class ParamCurves(inkex.EffectExtension):
                                      help="fx(t) for plotting")
         self.arg_parser.add_argument("--fofy", type=str, dest="fofy", default="sin(5*t)",
                                      help="fy(t) for plotting")
-        self.arg_parser.add_argument("--remove", type=inkex.inkbool, dest="remove", default=True,
+        self.arg_parser.add_argument("--remove", type=inkex.Boolean, dest="remove", default=True,
                                      help="If True, source rectangle is removed")
-        self.arg_parser.add_argument("--isoscale", type=inkex.inkbool, dest="isoscale", default=True,
+        self.arg_parser.add_argument("--isoscale", type=inkex.Boolean, dest="isoscale", default=True,
                                      help="If True, isotropic scaling is used")
-        self.arg_parser.add_argument("--drawaxis", type=inkex.inkbool, dest="drawaxis", default=True,
+        self.arg_parser.add_argument("--drawaxis", type=inkex.Boolean, dest="drawaxis", default=True,
                                      help="If True, axis are drawn")
         self.arg_parser.add_argument("--tab", type=str, dest="tab", default="sampling",
                                      help="The selected UI-tab when OK was pressed")

@@ -49,7 +49,7 @@ class Voronoi2svg(inkex.EffectExtension):
             default='Page', dest='clip_box',
             help='Defines the bounding box of the Voronoi diagram')
         pars.add_argument(
-            '--show-clip-box', type=inkex.inkbool,
+            '--show-clip-box', type=inkex.Boolean,
             default=False, dest='showClipBox',
             help='Set this to true to write the bounding box')
         pars.add_argument(

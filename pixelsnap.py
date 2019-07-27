@@ -106,10 +106,10 @@ def transform_dimensions(transform, width=None, height=None, inverse=False):
 class PixelSnapEffect(inkex.EffectExtension):
     def add_arguments(self, pars):
         """Add inx options"""
-        pars.add_argument("-a", "--snap_ancestors", type=inkex.inkbool, default=True,\
+        pars.add_argument("-a", "--snap_ancestors", type=inkex.Boolean, default=True,\
             help="Snap unselected ancestors' translations "\
                  "(groups, layers, document height) first")
-        pars.add_argument("-t", "--ancestor_offset", type=inkex.inkbool, default=True,\
+        pars.add_argument("-t", "--ancestor_offset", type=inkex.Boolean, default=True,\
             help="Calculate offset relative to unselected ancestors' "\
                  "transforms (includes document height offset)")
         pars.add_argument("-g", "--max_gradient", type=float, default=0.5,\

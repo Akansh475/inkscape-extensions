@@ -1,7 +1,7 @@
 Content-Type: multipart/mixed; boundary="--CALLDATA--//--CALLDATA--"
 MIME-Version: 1.0
 Program: fig2dev
-Arguments: -L ref_test.fig output.svg svg
+Arguments: -L io/test.fig output.svg svg
 
 ----CALLDATA--//--CALLDATA--
 Content-Type: application/octet-stream; Name="output.svg"

@@ -1,7 +1,7 @@
 Content-Type: multipart/mixed; boundary="--CALLDATA--//--CALLDATA--"
 MIME-Version: 1.0
 Program: ps2pdf
-Arguments: ref_test.ps output.pdf
+Arguments: io/test.ps output.pdf
 
 ----CALLDATA--//--CALLDATA--
 Content-Type: application/octet-stream; Name="output.pdf"

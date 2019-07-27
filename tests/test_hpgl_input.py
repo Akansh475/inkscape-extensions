@@ -4,5 +4,5 @@ from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class TestHpglFileBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = HpglFile
-    compare_file = 'ref_test.hpgl'
+    compare_file = 'io/test.hpgl'
     comparisons = [()]

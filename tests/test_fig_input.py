@@ -6,5 +6,5 @@ from inkex.tester import ComparisonMixin, TestCase
 
 class TestFigInput(ComparisonMixin, TestCase):
     effect_class = FigInput
-    compare_file = 'ref_test.fig'
+    compare_file = 'io/test.fig'
     comparisons = [()]

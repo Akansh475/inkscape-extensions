@@ -10,7 +10,7 @@ class TestNiceChartBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
 
     @property
     def comparisons(self):
-        filename = self.data_file('nicechart_01.csv')
+        filename = self.data_file('io/nicechart_01.csv')
         filearg = '--file={}'.format(filename)
         return (
             (filearg,),

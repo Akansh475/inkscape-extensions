@@ -41,7 +41,7 @@ class GetBarcodeTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        with open(cls.data_file('render_barcode.data'), 'r') as fhl:
+        with open(cls.data_file('batches/barcodes.dat'), 'r') as fhl:
             for line in fhl:
                 (btype, text, code) = line.strip().split(':', 2)
                 cls.data[btype].append((text, code))

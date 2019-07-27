@@ -157,7 +157,7 @@ class DeprecatedTest(TestCase):
 
         args = [
             '--id', 'curve',
-            os.path.join(os.path.dirname(__file__), 'data', 'ref_curves.svg'),
+            os.path.join(os.path.dirname(__file__), 'data', 'svg/curves.svg'),
         ]
 
         e = Effect()

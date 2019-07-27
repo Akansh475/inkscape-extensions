@@ -238,7 +238,7 @@ class ComparisonMixin(object):
     """
     Add comparison tests to any existing test suite.
     """
-    compare_file = 'ref_test.svg'
+    compare_file = 'svg/shapes.svg'
     compare_filters = [] # type: List[Compare]
     comparisons = [
         (),

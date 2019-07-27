@@ -16,5 +16,5 @@ class GimpXcfBasicTest(ComparisonMixin, TestCase):
 class GimpXcfGuidesTest(ComparisonMixin, TestCase):
     """Test that Gimp XCF output can include guides and grids"""
     effect_class = GimpOutput
-    compare_file = 'ref_guides.svg'
+    compare_file = 'svg/guides.svg'
     comparisons = [('-d=true', '-r=true'),]

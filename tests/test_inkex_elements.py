@@ -405,7 +405,7 @@ class DefsTest(ElementTestCase):
 
     def test_defs(self):
         """Make sure defs can be seen in the nodes of an svg"""
-        svg = svg_file(self.data_file('ref_test.svg'))
+        svg = svg_file(self.data_file('svg/shapes.svg'))
         self.assertTrue(isinstance(svg.defs, Defs))
         defs = svg.getElementById('defs33')
         self.assertTrue(isinstance(defs, Defs))

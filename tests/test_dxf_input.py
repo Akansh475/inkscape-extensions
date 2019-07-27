@@ -9,7 +9,7 @@ from inkex.tester.filters import CompareNumericFuzzy
 
 
 class TestDxfInputBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    compare_file = 'r12.dxf'
+    compare_file = 'io/test_r12.dxf'
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
     effect_class = DxfInput

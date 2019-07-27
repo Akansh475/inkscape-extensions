@@ -11,7 +11,7 @@ class TestPostscriptInput(ComparisonMixin, TestCase):
     effect_class = PostscriptInput
     compare_filters = [CompareSize()]
     compare_file = [
-        'ref_test.ps',
-        'ref_test.eps',
+        'io/test.ps',
+        'io/test.eps',
     ]
     comparisons = [()]

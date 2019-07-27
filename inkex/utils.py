@@ -37,6 +37,9 @@ __all__ = ('AbortExtension', 'Boolean', 'errormsg', 'addNS', 'NSS')
 
 (X, Y) = range(2)
 
+if sys.version_info[0] == 3:  # PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
+
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc
 NSS = {
     'sodipodi': 'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',

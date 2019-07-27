@@ -21,10 +21,13 @@
 """
 Basic color controls
 """
-from __future__ import unicode_literals
+import sys
 
 # All the names that get added to the inkex API itself.
 __all__ = ('Color',)
+
+if sys.version_info[0] == 3:  # PY3
+    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 SVG_COLOR = {
     'aliceblue': '#f0f8ff',

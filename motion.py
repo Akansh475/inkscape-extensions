@@ -69,7 +69,6 @@ class Motion(inkex.EffectExtension):
                 self.facegroup.style = node.style
 
                 for segment in node.path.to_absolute():
-                    cmdcls = PathCommand.letter_to_class(segment.letter)
                     tees = []
                     if isinstance(segment, Curve):
                         bez = [last] + segment.to_bez()
@@ -81,14 +80,14 @@ class Motion(inkex.EffectExtension):
                         segments.append(segment)
                     elif len(tees) == 1:
                         one, two = beziersplitatt(bez, tees[0])
-                        segments.append(cmdcls(one[1] + one[2] + one[3]))
-                        segments.append(cmdcls(two[1] + two[2] + two[3]))
+                        segments.append(Curve(*(one[1] + one[2] + one[3])))
+                        segments.append(Curve(*(two[1] + two[2] + two[3])))
                     elif len(tees) == 2:
                         one, two = beziersplitatt(bez, tees[0])
                         two, three = beziersplitatt(two, tees[1])
-                        segments.append(cmdcls(one[1] + one[2] + one[3]))
-                        segments.append(cmdcls(two[1] + two[2] + two[3]))
-                        segments.append(cmdcls(three[1] + three[2] + three[3]))
+                        segments.append(Curve(*(one[1] + one[2] + one[3])))
+                        segments.append(Curve(*(two[1] + two[2] + two[3])))
+                        segments.append(Curve(*(three[1] + three[2] + three[3])))
 
                     for seg in segments:
                         self.makeface(last, seg)

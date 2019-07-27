@@ -24,6 +24,8 @@ and some color handling on top.
 import sys
 from collections import OrderedDict
 
+from .colors import Color
+
 if sys.version_info[0] == 3:  #PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
@@ -78,3 +80,9 @@ class Style(OrderedDict):
         super(Style, self).__setitem__(key, value)
         if self.callback is not None:
             self.callback(self)
+
+    def set_color(self, color, name='fill'):
+        """Sets the given color AND opacity as rgba to the fill or stroke style properties."""
+        color = Color(color)
+        self[name + '-opacity'] = color.alpha
+        self[name] = str(color.to_rgb())

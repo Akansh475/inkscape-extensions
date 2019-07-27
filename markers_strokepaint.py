@@ -29,28 +29,28 @@ class MarkerStrokePaintEffect(inkex.EffectExtension):
     def __init__(self):
         super(MarkerStrokePaintEffect, self).__init__()
         self.arg_parser.add_argument(
-                "-m", "--modify", type=inkex.utils.inkbool, dest="modify", default=False,
+                "-m", "--modify", type=inkex.inkbool, dest="modify", default=False,
                 help="Do not create a copy, modify the markers")
         self.arg_parser.add_argument(
                 "-t", "--type", type=str, dest="fill_type", default="stroke",
                 help="Replace the markers' fill with the object stroke or fill color")
         self.arg_parser.add_argument(
-                "-a", "--alpha", type=inkex.utils.inkbool, dest="assign_alpha", default=True,
+                "-a", "--alpha", type=inkex.inkbool, dest="assign_alpha", default=True,
                 help="Assign the object fill and stroke alpha to the markers")
         self.arg_parser.add_argument(
-                "-i", "--invert", type=inkex.utils.inkbool, dest="invert", default=False,
+                "-i", "--invert", type=inkex.inkbool, default=False,
                 help="Invert fill and stroke colors")
         self.arg_parser.add_argument(
-                "--assign_fill", type=inkex.utils.inkbool, dest="assign_fill", default=True,
+                "--assign_fill", type=inkex.inkbool, default=True,
                 help="Assign a fill color to the markers")
         self.arg_parser.add_argument(
-                "-f", "--fill_color", type=int, dest="fill_color", default=1364325887,
+                "-f", "--fill_color", type=inkex.Color, default=inkex.Color(1364325887),
                 help="Choose a custom fill color")
         self.arg_parser.add_argument(
-                "--assign_stroke", type=inkex.utils.inkbool, dest="assign_stroke", default=True,
+                "--assign_stroke", type=inkex.inkbool, dest="assign_stroke", default=True,
                 help="Assign a stroke color to the markers")
         self.arg_parser.add_argument(
-                "-s", "--stroke_color", type=int, dest="stroke_color", default=1364325887,
+                "-s", "--stroke_color", type=inkex.Color, default=inkex.Color(1364325887),
                 help="Choose a custom fill color")
         self.arg_parser.add_argument(
                 "--tab", type=str, dest="tab", default='"custom"',
@@ -95,16 +95,10 @@ class MarkerStrokePaintEffect(inkex.EffectExtension):
                         fill_opacity = stroke_opacity
             # Choose custom colors
             elif self.options.tab == '"custom"':
-                fill_red = ((self.options.fill_color >> 24) & 255)
-                fill_green = ((self.options.fill_color >> 16) & 255)
-                fill_blue = ((self.options.fill_color >> 8) & 255)
-                fill = "rgb(%s,%s,%s)" % (fill_red, fill_green, fill_blue)
-                fill_opacity = ((self.options.fill_color & 255) / 255.)
-                stroke_red = ((self.options.stroke_color >> 24) & 255)
-                stroke_green = ((self.options.stroke_color >> 16) & 255)
-                stroke_blue = ((self.options.stroke_color >> 8) & 255)
-                stroke = "rgb(%s,%s,%s)" % (stroke_red, stroke_green, stroke_blue)
-                stroke_opacity = ((self.options.stroke_color & 255) / 255.)
+                fill = str(self.options.fill_color.to_rgb())
+                fill_opacity = self.options.fill_color.alpha
+                stroke = str(self.options.stroke_color.to_rgb())
+                stroke_opacity = self.options.stroke_color.alpha
                 if not self.options.assign_fill:
                     fill = "none"
                 if not self.options.assign_stroke:

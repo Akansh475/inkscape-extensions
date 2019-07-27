@@ -305,6 +305,7 @@ class ShapeElement(BaseElement):
     def label(self):
         """Returns the inkscape label"""
         return self.get('inkscape:label', None)
+    label = label.setter(lambda self, value: self.set('inkscape:label', str(value)))
 
     @property
     def href(self):

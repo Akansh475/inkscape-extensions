@@ -31,6 +31,7 @@ from lxml import etree
 
 from .utils import filename_arg, AbortExtension, errormsg
 from .elements import load_svg
+from .colors import Color
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3

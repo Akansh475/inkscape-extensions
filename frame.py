@@ -25,17 +25,6 @@ import inkex
 from inkex.utils import inkbool
 from inkex.elements import Group, PathElement, ClipPath
 
-def color_in(value):
-    """ Returns color data in style string format.
-    value -- The value returned from the color picker.
-    Returns an object with color and opacity properties.
-    """
-    val = '{:08X}'.format(int(value) & 0xFFFFFFFF)
-    color = '#' + val[0:-2].rjust(6, '0')
-    opacity = '{:1.2f}'.format(float(int(val[6:].rjust(2, '0'), 16)) / 255)
-    return type('', (object,), {'color': color, 'opacity': opacity})()
-
-
 def size_box(box, delta):
     """ Returns a box with an altered size.
     delta -- The amount the box should grow.
@@ -57,10 +46,10 @@ class Frame(inkex.EffectExtension):
         # Parse the options.
         self.arg_parser.add_argument('--clip', type=inkbool, dest='clip', default=False)
         self.arg_parser.add_argument('--corner_radius', type=int, dest='corner_radius', default=0)
-        self.arg_parser.add_argument('--fill_color', type=color_in, default=color_in(0))
+        self.arg_parser.add_argument('--fill_color', type=inkex.Color, default=inkex.Color(0))
         self.arg_parser.add_argument('--group', type=inkbool, dest='group', default=False)
         self.arg_parser.add_argument('--position', type=str, dest='position', default='outside')
-        self.arg_parser.add_argument('--stroke_color', type=color_in, default=color_in(0))
+        self.arg_parser.add_argument('--stroke_color', type=inkex.Color, default=inkex.Color(0))
         self.arg_parser.add_argument('--tab', type=str, dest='tab', default='object')
         self.arg_parser.add_argument('--width', type=float, dest='width', default=2.0)
 
@@ -105,41 +94,35 @@ class Frame(inkex.EffectExtension):
                           'L', box[0], box[3],
                           'Z'])
 
-        attributes = {'style': style, inkex.addNS('label', 'inkscape'): name, 'd': d}
-        return PathElement(**attributes)
+        elem = PathElement()
+        elem.style = style
+        elem.label = name
+        elem.path = d
+        return elem
 
     def effect(self):
         """Performs the effect."""
-        # Get the style values.
-        corner_radius = self.options.corner_radius
-        stroke_data = self.options.stroke_color
-        fill_data = self.options.fill_color
-
         # Determine common properties.
-        position = self.options.position
         width = self.options.width
-        style = str(inkex.Style({'stroke': stroke_data.color,
-                                 'stroke-opacity': stroke_data.opacity,
-                                 'stroke-width': str(width),
-                                 'fill': (fill_data.color or 'none'),
-                                 'fill-opacity': fill_data.opacity}))
+        style = inkex.Style({'stroke-width': width})
+        style.set_color(self.options.fill_color, 'fill')
+        style.set_color(self.options.stroke_color, 'stroke')
         layer = self.svg.get_current_layer()
 
         for node in self.svg.selected.values():
             box = node.bounding_box()
-            if position == 'outside':
+            if self.options.position == 'outside':
                 box = size_box(box, (width / 2))
             else:
                 box = size_box(box, -(width / 2))
 
-            frame = self.add_frame("Frame", box, style, corner_radius)
+            frame = self.add_frame("Frame", box, style, self.options.corner_radius)
             if self.options.clip:
                 self.add_clip(node, frame)
             if self.options.group:
-                group = Group()
+                group = layer.add(Group())
                 group.append(node)
                 group.append(frame)
-                layer.append(group)
             else:
                 layer.append(frame)
         return None

@@ -95,11 +95,11 @@ class ColorEffect(SvgThroughMixin, InkscapeExtension):
                     elif prop in opacity_props:
                         opacity_in_style = True
                         val = val.strip()
-                        new_val = self.process_prop(val)
+                        new_val = self.opacmod(val)
                         if new_val != val:
                             declarations[i] = "{}:{}".format(prop, new_val)
             if not opacity_in_style:
-                new_val = self.process_prop("1")
+                new_val = self.opacmod("1")
                 declarations.append('opacity:{}'.format(new_val))
             node.set('style', ';'.join(declarations))
 
@@ -114,9 +114,6 @@ class ColorEffect(SvgThroughMixin, InkscapeExtension):
             for node in self.svg.xpath(path):
                 self.process_gradient(node, new_id)
             col = 'url(#{})'.format(new_id)
-        else:
-            col = self.opacmod(col)
-
         return col
 
     def process_gradient(self, node, new_id):

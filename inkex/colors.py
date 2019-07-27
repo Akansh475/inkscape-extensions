@@ -213,7 +213,15 @@ class Color(list):
     def __init__(self, color=None, space='rgb'):
         super(Color, self).__init__()
         if isinstance(color, str):
+            # String from xml or css attributes
             space, color = self.parse_str(color)
+
+        if isinstance(color, int):
+            # Number from arg parser colour value
+            space, color = self.parse_int(color)
+
+        if isinstance(color, Color):
+            space, color = color.space, list(color)
 
         # Empty list means 'none', or no color
         if color is None:
@@ -292,7 +300,28 @@ class Color(list):
             space, values = color.lower().strip().strip(')').split('(')
             return space, values.split(',')
 
+        try:
+            return Color.parse_int(int(color))
+        except ValueError:
+            pass
+
         raise ColorError("Unknown color format: {}".format(color))
+
+    @staticmethod
+    def parse_int(color):
+        """Creates an rgb or rgba from a long int"""
+        space = 'rgb'
+        color = [
+            ((color >> 24) & 255), # red
+            ((color >> 16) & 255), # green
+            ((color >> 8) & 255), # blue
+            ((color & 255) / 255.), # opacity
+        ]
+        if color[-1] == 1.0:
+            color.pop()
+        else:
+            space = 'rgba'
+        return space, color
 
     def __str__(self):
         """int array to #rrggbb"""
@@ -312,6 +341,13 @@ class Color(list):
         elif self.space == 'hsl':
             return 'hsl({0:g}, {1:g}, {2:g})'.format(*self)
         raise ColorError("Can't print colour space '{}'".format(self.space))
+
+    def __int__(self):
+        """int array to large integer"""
+        if not self:
+            return -1
+        color = self.to_rgba()
+        return (color[0] << 24) + (color[1] << 16) + (color[2] << 8) + (int(color[3] * 255))
 
     def to_hsl(self):
         """Turn this color into a Hue/Saturation/Lightness colour space"""

@@ -52,7 +52,7 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
                         'Invalid stroke in "' + new_frame_style + '".')
         self.assertTrue('stroke-width:10.0' in new_frame_style,
                         'Invalid stroke-width in "' + new_frame_style + '".')
-        self.assertTrue('stroke-opacity:1.00' in new_frame_style,
+        self.assertTrue('stroke-opacity:1.0' in new_frame_style,
                         'Invalid stroke-opacity in "' + new_frame_style + '".')
         self.assertTrue('fill:#ff0000' in new_frame_style,
                         'Invalid fill in "' + new_frame_style + '".')

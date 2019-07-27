@@ -147,3 +147,17 @@ class ColorTest(TestCase):
         """Can detect colour format"""
         self.assertFalse(is_color("rgb[t, b, s]"))
         self.assertTrue(is_color('#fff'))
+        self.assertTrue(is_color(1364325887))
+
+    def test_int_color(self):
+        """Colours from arg parser"""
+        color = Color(1364325887)
+        self.assertEqual(str(color), '#5151f5')
+        color = Color('1364325887')
+        self.assertEqual(str(color), '#5151f5')
+        color = Color(0xffffffff)
+        self.assertEqual(str(color), '#ffffff')
+        color = Color(0xffffff00)
+        self.assertEqual(str(color), 'rgba(255, 255, 255, 0)')
+        self.assertEqual(int(Color('#808080')), 0x808080ff)
+        self.assertEqual(int(Color('rgba(128, 128, 128, 0.2)')), 2155905075)

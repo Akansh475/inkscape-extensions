@@ -21,6 +21,7 @@
 """
 Basic color controls
 """
+from __future__ import unicode_literals
 
 # All the names that get added to the inkex API itself.
 __all__ = ('Color',)
@@ -212,16 +213,16 @@ class Color(list):
 
     def __init__(self, color=None, space='rgb'):
         super(Color, self).__init__()
-        if isinstance(color, str):
+        if isinstance(color, Color):
+            space, color = color.space, list(color)
+
+        if isinstance(color, (str, unicode)):
             # String from xml or css attributes
             space, color = self.parse_str(color)
 
         if isinstance(color, int):
             # Number from arg parser colour value
             space, color = self.parse_int(color)
-
-        if isinstance(color, Color):
-            space, color = color.space, list(color)
 
         # Empty list means 'none', or no color
         if color is None:
@@ -257,7 +258,7 @@ class Color(list):
         if len(self) == len(self.space):
             raise ValueError("Can't add any more values to color.")
 
-        if isinstance(val, str):
+        if isinstance(val, (unicode, str)):
             val = val.strip()
             if val.endswith('%'):
                 val = float(val.strip('%')) / 100

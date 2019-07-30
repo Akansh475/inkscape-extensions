@@ -171,26 +171,21 @@ class Split(inkex.EffectExtension):
         preserve = self.options.preserve
 
         # checks if the selected elements are text nodes
-        for elem in self.svg.selected.values():
-            if not isinstance(elem, (TextElement, FlowRoot)):
-                inkex.errormsg("Please select only text elements.")
-                break
-            else:
-                if split_type == "line":
-                    nodes = self.split_lines(elem)
-                elif split_type == "word":
-                    nodes = self.split_words(elem)
-                elif split_type == "letter":
-                    nodes = self.split_letters(elem)
+        for elem in self.svg.get_selected(TextElement, FlowRoot):
+            if split_type == "line":
+                nodes = self.split_lines(elem)
+            elif split_type == "word":
+                nodes = self.split_words(elem)
+            elif split_type == "letter":
+                nodes = self.split_letters(elem)
 
-                for child in nodes:
-                    elem.getparent().append(child)
+            for child in nodes:
+                elem.getparent().append(child)
 
-                # preserve original element
-                if not preserve and nodes:
-                    parent = elem.getparent()
-                    parent.remove(elem)
-
+            # preserve original element
+            if not preserve and nodes:
+                parent = elem.getparent()
+                parent.remove(elem)
 
 if __name__ == '__main__':
     Split().run()

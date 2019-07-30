@@ -49,28 +49,27 @@ class SplitIt(SvgThroughMixin, InkscapeExtension):
                                      help="The kind of division to perform")
 
     def effect(self):
-        for node in self.svg.selected.values():
-            if isinstance(node, PathElement):
-                new = []
-                for sub in node.path.to_superpath():
-                    new.append([sub[0][:]])
-                    i = 1
-                    while i <= len(sub) - 1:
-                        length = bezier.cspseglength(new[-1][-1], sub[i])
+        for node in self.svg.get_selected(PathElement):
+            new = []
+            for sub in node.path.to_superpath():
+                new.append([sub[0][:]])
+                i = 1
+                while i <= len(sub) - 1:
+                    length = bezier.cspseglength(new[-1][-1], sub[i])
 
-                        if self.options.method == 'bynum':
-                            splits = self.options.segments
-                        else:
-                            splits = math.ceil(length / self.options.max)
+                    if self.options.method == 'bynum':
+                        splits = self.options.segments
+                    else:
+                        splits = math.ceil(length / self.options.max)
 
-                        for sel in range(int(splits), 1, -1):
-                            result = bezier.cspbezsplitatlength(new[-1][-1], sub[i], 1.0 / sel)
-                            better_result = [[list(el) for el in elements] for elements in result]
-                            new[-1][-1], nxt, sub[i] = better_result
-                            new[-1].append(nxt[:])
-                        new[-1].append(sub[i])
-                        i += 1
-                node.path = CubicSuperPath(new).to_path(curves_only=True)
+                    for sel in range(int(splits), 1, -1):
+                        result = bezier.cspbezsplitatlength(new[-1][-1], sub[i], 1.0 / sel)
+                        better_result = [[list(el) for el in elements] for elements in result]
+                        new[-1][-1], nxt, sub[i] = better_result
+                        new[-1].append(nxt[:])
+                    new[-1].append(sub[i])
+                    i += 1
+            node.path = CubicSuperPath(new).to_path(curves_only=True)
 
 if __name__ == '__main__':
     SplitIt().run()

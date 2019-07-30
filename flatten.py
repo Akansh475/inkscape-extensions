@@ -29,20 +29,19 @@ class Flatten(inkex.EffectExtension):
             help="Minimum flatness of the subdivided curves")
 
     def effect(self):
-        for node in self.svg.selected.values():
-            if isinstance(node, inkex.PathElement):
-                p = node.path.to_superpath()
-                bezier.cspsubdiv(p, self.options.flat)
-                np = []
-                for sp in p:
-                    first = True
-                    for csp in sp:
-                        cmd = 'L'
-                        if first:
-                            cmd = 'M'
-                        first = False
-                        np.append([cmd, [csp[1][0], csp[1][1]]])
-                node.path = np
+        for node in self.svg.get_selected(inkex.PathElement):
+            p = node.path.to_superpath()
+            bezier.cspsubdiv(p, self.options.flat)
+            np = []
+            for sp in p:
+                first = True
+                for csp in sp:
+                    cmd = 'L'
+                    if first:
+                        cmd = 'M'
+                    first = False
+                    np.append([cmd, [csp[1][0], csp[1][1]]])
+            node.path = np
 
 if __name__ == '__main__':
     Flatten().run()

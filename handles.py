@@ -22,7 +22,7 @@ Draws handles of selected paths.
 """
 
 import inkex
-from inkex.paths import Path, Curve, Move, Line, Quadratic, ZoneClose
+from inkex.paths import Path, Curve, Move, Line, Quadratic
 from inkex.transforms import Vector2d
 
 class Handles(inkex.EffectExtension):
@@ -30,35 +30,34 @@ class Handles(inkex.EffectExtension):
     Renders the handle lines for the selected curves onto the canvas.
     """
     def effect(self):
-        for node in self.svg.selected.values():
-            if isinstance(node, inkex.PathElement):
-                result = Path()
-                prev = Vector2d()
-                start = None
-                for seg in node.path.to_absolute():
-                    if start is None:
-                        start = seg.end_point(start, prev)
-                    if isinstance(seg, Curve):
-                        result += [
-                            Move(seg.x2, seg.y2), Line(prev.x, prev.y),
-                            Move(seg.x3, seg.y3), Line(seg.x4, seg.y4),
-                        ]
-                    elif isinstance(seg, Quadratic):
-                        result += [
-                            Move(seg.x2, seg.y2), Line(prev.x, prev.y),
-                            Move(seg.x2, seg.y2), Line(seg.x3, seg.y3)
-                        ]
-                    prev = seg.end_point(start, prev)
+        for node in self.svg.get_selected(inkex.PathElement):
+            result = Path()
+            prev = Vector2d()
+            start = None
+            for seg in node.path.to_absolute():
+                if start is None:
+                    start = seg.end_point(start, prev)
+                if isinstance(seg, Curve):
+                    result += [
+                        Move(seg.x2, seg.y2), Line(prev.x, prev.y),
+                        Move(seg.x3, seg.y3), Line(seg.x4, seg.y4),
+                    ]
+                elif isinstance(seg, Quadratic):
+                    result += [
+                        Move(seg.x2, seg.y2), Line(prev.x, prev.y),
+                        Move(seg.x2, seg.y2), Line(seg.x3, seg.y3)
+                    ]
+                prev = seg.end_point(start, prev)
 
-                if not result:
-                    continue
+            if not result:
+                continue
 
-                elem = node.getparent().add(inkex.PathElement())
-                elem.path = result
-                elem.style = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px',
-                              'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-                              'stroke': '#000000', 'stroke-linecap': 'butt',
-                              'fill': 'none'}
+            elem = node.getparent().add(inkex.PathElement())
+            elem.path = result
+            elem.style = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px',
+                          'stroke-opacity': '1.0', 'fill-opacity': '1.0',
+                          'stroke': '#000000', 'stroke-linecap': 'butt',
+                          'fill': 'none'}
 
 if __name__ == '__main__':
     Handles().run()

@@ -223,20 +223,17 @@ class PathModifier(inkex.EffectExtension):
         # self.duplicateNodes(self.selected)
         # self.expandGroupsUnlinkClones(self.selected, True)
         self.objectsToPaths(self.svg.selected, True)
-        self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
-        for node in self.svg.selected.values():
-            if isinstance(node, PathElement):
-                path = node.path.to_superpath()
-                # do what ever you want with p!
-                node.path = path
+        self.bbox = self.svg.get_selected_bbox()
+        for node in self.svg.get_selected(PathElement):
+            path = node.path.to_superpath()
+            # do what ever you want with "path"!
+            node.path = path
 
 
 class Diffeo(PathModifier):
     def applyDiffeo(self, bpt, vects=()):
-        """
-        bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.
-        Defaults to identity!
-        """
+        # bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.
+        # Defaults to identity!
         for v in vects:
             v[0] -= bpt[0]
             v[1] -= bpt[1]
@@ -257,21 +254,16 @@ class Diffeo(PathModifier):
             v[1] += bpt[1]
 
     def effect(self):
-        # self.duplicateNodes(self.svg.selected)
         self.expandGroupsUnlinkClones(self.svg.selected, True)
         self.expandGroups(self.svg.selected, True)
         self.objectsToPaths(self.svg.selected, True)
-        self.bbox = sum([node.bounding_box() for node in self.svg.selected.values()])
-        for node in self.svg.selected.values():
-            if isinstance(node, PathElement):
-                path = node.path.to_superpath()
-
-                for sub in path:
-                    for ctlpt in sub:
-                        self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
-
-                node.path = path
-
+        self.bbox = self.svg.get_selected_bbox()
+        for node in self.svg.get_selected(PathElement):
+            path = node.path.to_superpath()
+            for sub in path:
+                for ctlpt in sub:
+                    self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
+            node.path = path
 
 if __name__ == '__main__':
     Diffeo().run()

@@ -103,8 +103,8 @@ class InterpAttG(inkex.EffectExtension):
             return self.svg.selected.values()
 
         # must be a group
-        node = self.svg.get_first_selected()
-        if isinstance(node, inkex.Group):
+        node = self.svg.get_first_selected(inkex.Group)
+        if node:
             return list(node)
         return []
 

@@ -34,9 +34,8 @@ class Whirl(inkex.EffectExtension):
         view_center = self.svg.get_center_position()
         rotation = 1 if self.options.rotation else -1
         whirl = self.options.whirl / 1000
-        for node in self.svg.selected.values():
-            if isinstance(node, inkex.PathElement):
-                self.whirl_node(view_center, rotation, whirl, node)
+        for node in self.svg.get_selected(inkex.PathElement):
+            self.whirl_node(view_center, rotation, whirl, node)
 
     @staticmethod
     def whirl_node(center, direction, ammount, node):

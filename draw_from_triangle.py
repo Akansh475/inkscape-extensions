@@ -320,10 +320,9 @@ class DrawFromTriangle(inkex.EffectExtension):
         so = self.options  # shorthand
 
         pts = []  # initialise in case nothing is selected and following loop is not executed
-        for node in self.svg.selected.values():
-            if node.tag == inkex.addNS('path', 'svg'):
-                # find the (x,y) coordinates of the first 3 points of the path
-                pts = get_n_points_from_path(node, 3)
+        for node in self.svg.get_selected(inkex.PathElement):
+            # find the (x,y) coordinates of the first 3 points of the path
+            pts = get_n_points_from_path(node, 3)
 
         if len(pts) == 3:  # if we have right number of nodes, else skip and end program
             st = Style(self.svg, so)  # style for dots, lines and circles

@@ -50,13 +50,12 @@ class Embedder(inkex.EffectExtension):
         # if slectedonly is enabled and there is a selection
         # only embed selected images. otherwise embed all images
         if self.options.selectedonly:
-            images = self.svg.selected.values()
+            images = self.svg.get_selected(Image)
         else:
             images = self.svg.xpath('//svg:image')
 
         for node in images:
-            if isinstance(node, Image):
-                self.embed_image(node)
+            self.embed_image(node)
 
     def embed_image(self, node):
         """Embed the data of the selected Image Tag element"""

@@ -90,24 +90,23 @@ class Length(inkex.EffectExtension):
         factor *= scale / self.svg.unittouu('1' + self.options.unit)
 
         # loop over all selected paths
-        for node in self.svg.selected.values():
-            if isinstance(node, inkex.PathElement):
-                csp = node.path.transform(node.composed_transform()).to_superpath()
-                if self.options.mtype == "length":
-                    slengths, stotal = csplength(csp)
-                    self.group = node.getparent().add(TextElement())
-                elif self.options.mtype == "area":
-                    stotal = abs(csparea(csp) * factor * self.options.scale)
-                    self.group = node.getparent().add(TextElement())
-                else:
-                    xc, yc = cspcofm(csp)
-                    self.group = node.getparent().add(inkex.PathElement())
-                    self.group.set('id', 'MassCenter_' + node.get('id'))
-                    self.add_cross(self.group, xc, yc, scale)
-                    continue
-                # Format the length as string
-                lenstr = locale.format("%(len)25." + str(prec) + "f", {'len': round(stotal * factor * self.options.scale, prec)}).strip()
-                self.options.method(node, lenstr)
+        for node in self.svg.get_selected(inkex.PathElement):
+            csp = node.path.transform(node.composed_transform()).to_superpath()
+            if self.options.mtype == "length":
+                slengths, stotal = csplength(csp)
+                self.group = node.getparent().add(TextElement())
+            elif self.options.mtype == "area":
+                stotal = abs(csparea(csp) * factor * self.options.scale)
+                self.group = node.getparent().add(TextElement())
+            else:
+                xc, yc = cspcofm(csp)
+                self.group = node.getparent().add(inkex.PathElement())
+                self.group.set('id', 'MassCenter_' + node.get('id'))
+                self.add_cross(self.group, xc, yc, scale)
+                continue
+            # Format the length as string
+            lenstr = locale.format("%(len)25." + str(prec) + "f", {'len': round(stotal * factor * self.options.scale, prec)}).strip()
+            self.options.method(node, lenstr)
 
     def method_textonpath(self, node, lenstr):
         _id = node.get('id')

@@ -222,11 +222,10 @@ class LorumImpsum(inkex.EffectExtension):
 
     def effect(self):
         found = 0
-        for node in self.svg.selected.values():
-            if isinstance(node, FlowRoot):
-                found += 1
-                if found == 1:
-                    self.addText(node)
+        for node in self.svg.get_selected(FlowRoot):
+            found += 1
+            if found == 1:
+                self.addText(node)
 
         if found == 0:
             group = self.svg.add(Group())

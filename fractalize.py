@@ -47,41 +47,34 @@ def calculate_subdivision(smoothness, x1, y1, x2, y2):
 
 
 class PathFractalize(inkex.EffectExtension):
-    def __init__(self):
-        super(PathFractalize, self).__init__()
-        self.arg_parser.add_argument("-s", "--subdivs",
-                                     type=int,
-                                     dest="subdivs", default="6",
-                                     help="Number of subdivisons")
-        self.arg_parser.add_argument("-f", "--smooth",
-                                     type=float,
-                                     dest="smooth", default="4.0",
-                                     help="Smoothness of the subdivision")
+    def add_arguments(self, pars):
+        pars.add_argument("-s", "--subdivs", type=int, default="6",
+                          help="Number of subdivisons")
+        pars.add_argument("-f", "--smooth", type=float, default="4.0",
+                          help="Smoothness of the subdivision")
 
     def effect(self):
-        for node in self.svg.selected.values():
-            if node.tag == inkex.addNS('path', 'svg'):
-                path = node.path.to_arrays()
+        for node in self.svg.get_selected(inkex.PathElement):
+            path = node.path.to_arrays()
+            result = []
+            first = 1
+            for cmd, params in path:
+                if cmd != 'Z':
+                    if first == 1:
+                        x1 = params[-2]
+                        y1 = params[-1]
+                        result.append(['M', params[-2:]])
+                        first = 2
+                    else:
+                        x2 = params[-2]
+                        y2 = params[-1]
+                        for seg in self.fractalize((x1, y1, x2, y2), self.options.subdivs, self.options.smooth):
+                            result.append(['L', seg])
+                        x1 = x2
+                        y1 = y2
+                        result.append(['L', params[-2:]])
 
-                result = []
-                first = 1
-                for cmd, params in path:
-                    if cmd != 'Z':
-                        if first == 1:
-                            x1 = params[-2]
-                            y1 = params[-1]
-                            result.append(['M', params[-2:]])
-                            first = 2
-                        else:
-                            x2 = params[-2]
-                            y2 = params[-1]
-                            for seg in self.fractalize((x1, y1, x2, y2), self.options.subdivs, self.options.smooth):
-                                result.append(['L', seg])
-                            x1 = x2
-                            y1 = y2
-                            result.append(['L', params[-2:]])
-
-                node.set('d', str(inkex.Path(result)))
+            node.path = result
 
     def fractalize(self, coords, subdivs, smooth):
         """recursively subdivide the segments left and right of the subdivision"""

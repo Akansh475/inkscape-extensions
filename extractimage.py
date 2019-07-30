@@ -40,12 +40,11 @@ class ExtractImage(inkex.EffectExtension):
             help="Location to save the images.")
 
     def effect(self):
-        elems = self.svg.selected.values() \
+        elems = self.svg.get_selected(Image) \
             if self.options.selectedonly else self.svg.xpath('//svg:image')
 
         for elem in elems:
-            if isinstance(elem, Image):
-                self.extract_image(elem)
+            self.extract_image(elem)
 
     @staticmethod
     def mime_to_ext(mime):

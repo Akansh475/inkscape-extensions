@@ -58,27 +58,26 @@ class Motion(inkex.EffectExtension):
         delx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
         dely = math.sin(math.radians(self.options.angle)) * self.options.magnitude
         last = None
-        for node in self.svg.selected.values():
-            if isinstance(node, inkex.PathElement):
-                group = node.getparent().add(inkex.Group())
-                facegroup = group.add(inkex.Group())
-                group.append(node)
+        for node in self.svg.get_selected(inkex.PathElement):
+            group = node.getparent().add(inkex.Group())
+            facegroup = group.add(inkex.Group())
+            group.append(node)
 
-                if node.transform:
-                    group.transform = node.transform
-                    node.transform = None
+            if node.transform:
+                group.transform = node.transform
+                node.transform = None
 
-                facegroup.style = node.style
+            facegroup.style = node.style
 
-                for segment in node.path.to_absolute():
-                    self.process_segment(last, segment, facegroup, delx, dely)
+            for segment in node.path.to_absolute():
+                self.process_segment(last, segment, facegroup, delx, dely)
 
-                    if isinstance(segment, Move):
-                        path_start = (segment.x, segment.y)
-                    if isinstance(segment, ZoneClose):
-                        last = path_start
-                    else:
-                        last = segment.end_point(None, None)
+                if isinstance(segment, Move):
+                    path_start = (segment.x, segment.y)
+                if isinstance(segment, ZoneClose):
+                    last = path_start
+                else:
+                    last = segment.end_point(None, None)
 
     @staticmethod
     def process_segment(last, segment, facegroup, delx, dely):

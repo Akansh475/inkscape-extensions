@@ -98,6 +98,12 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         sel = self.selected
         return OrderedDict((_id, sel[_id]) for _id in self.xpath('//@id') if _id in sel)
 
+    def get_selected(self, *types):
+        """Generator: Gets selected nodes which are the given element types"""
+        for node in self.selected.values():
+            if not types or isinstance(node, types):
+                yield node
+
     def get_selected_bbox(self):
         """Gets the bounding box of the selected items"""
         ret = sum([node.bounding_box() for node in self.selected.values()])
@@ -107,10 +113,10 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         """Gets the page dimentions as a bbox"""
         return BoundingBox((0, float(self.width)), (0, float(self.height)))
 
-    def get_first_selected(self):
-        """Returns the first item in the selected list"""
+    def get_first_selected(self, *types):
+        """Returns the first item in the selected list, of the given types"""
         if self.selected:
-            return list(self.selected.values())[0]
+            return list(self.get_selected(*types))[0]
         return None
 
     def get_current_layer(self):

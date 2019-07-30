@@ -849,7 +849,7 @@ class Arc(AbsolutePathCommand):
 
     def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Vector2d) -> List[Curve]
         """Convert this arc into bezier curves"""
-        path = CubicSuperPath([arc_to_path(list(prev), self.args)]).to_path()
+        path = CubicSuperPath([arc_to_path(list(prev), self.args)]).to_path(curves_only=True)
         prev_prev.x, prev_prev.y = path[-1].x3, path[-1].y3
         # Ignore the first move command from to_path()
         return list(path)[1:]
@@ -1249,17 +1249,22 @@ class CubicSuperPath(list):
         except IndexError:
             return Vector2d()
 
-    def to_path(self):
+    def to_path(self, curves_only=False):
         """Convert the super path back to an svg path"""
-        return Path(list(self.to_segments()))
+        return Path(list(self.to_segments(curves_only)))
 
-    def to_segments(self):
+    def to_segments(self, curves_only=False):
         """Generate a set of segments for this cubic super path"""
         for subpath in self:
             previous = []
             for segment in subpath:
                 if not previous:
                     yield Move(*segment[1][:])
+                elif self.is_line(previous, segment) and not curves_only:
+                    if segment is subpath[-1] and Vector2d(segment[1]).is_close(subpath[0][1]):
+                        yield ZoneClose()
+                    else:
+                        yield Line(*segment[1][:])
                 else:
                     yield Curve(*(previous[2][:] + segment[0][:] + segment[1][:]))
                 previous = segment
@@ -1268,6 +1273,11 @@ class CubicSuperPath(list):
         """Apply a transformation matrix to this super path"""
         return self.to_path().transform(transform).to_superpath()
 
+    @staticmethod
+    def is_line(previous, segment):
+        """Check whether csp segment (two points) has retracted handles."""
+        return Vector2d(previous[1]).is_close(previous[2]) and \
+               Vector2d(segment[0]).is_close(segment[1])
 
 def arc_to_path(point, params):
     """Approximates an arc with cubic bezier segments.

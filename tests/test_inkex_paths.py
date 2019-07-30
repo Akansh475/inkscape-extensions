@@ -448,3 +448,18 @@ class PathTest(TestCase):
 
         self.assertAlmostTuple(list(Path("M 1 0 0 1").transform(Transform(rotate=30))
                                     .control_points), ((sqrt(3)/2, 0.5), (-0.5, sqrt(3)/2) ))
+
+class SuperPathTest(TestCase):
+    """Super path tests for testing the super path class"""
+    def test_is_line(self):
+        """Test is super path segments can detect lines"""
+        path = Path("m 49,88 70,-1 c 18,17 1,59 1.7,59 "\
+                    "0,0 -48.7,18 -70.5,-1 18,-15 25,-32.4 -1.5,-57.2 z")
+        csp = path.to_superpath()
+        self.assertTrue(csp.is_line(csp[0][0], csp[0][1]), "Should be a line")
+        self.assertFalse(csp.is_line(csp[0][3], csp[0][4]), "Both controls not detected")
+        self.assertFalse(csp.is_line(csp[0][1], csp[0][2]), "Start control not detected")
+        self.assertFalse(csp.is_line(csp[0][2], csp[0][3]), "End control not detected")
+        # Also tests if zone close is applied correctly.
+        self.assertEqual(str(csp.to_path()), "M 49 88 L 119 87 C 137 104 120 146 120.7 146 "\
+            "C 120.7 146 72 164 50.2 145 C 68.2 130 75.2 112.6 48.7 87.8 Z")

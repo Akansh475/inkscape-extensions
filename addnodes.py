@@ -70,7 +70,7 @@ class SplitIt(SvgThroughMixin, InkscapeExtension):
                             new[-1].append(nxt[:])
                         new[-1].append(sub[i])
                         i += 1
-                node.path = CubicSuperPath(new)
+                node.path = CubicSuperPath(new).to_path(curves_only=True)
 
 if __name__ == '__main__':
     SplitIt().run()

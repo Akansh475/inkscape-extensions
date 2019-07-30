@@ -66,22 +66,22 @@ class Vector2d(object):
         pass
 
     def __init__(self, *args):
-        if len(args) == 0:
-            self.x, self.y = 0.0, 0.0
-            return
+        self.x, self.y = self._parse(args)
+
+    @staticmethod
+    def _parse(args):
+        if not args:
+            return 0.0, 0.0
         if len(args) == 1:
             point = args[0]
             if isinstance(point, Vector2d):
-                self.x, self.y = point.x, point.y
-                return
+                return point.x, point.y
             elif isinstance(point, (tuple, list)) and len(point) == 2:
-                self.x, self.y = point
-                return
+                return point
         elif len(args) == 2:
             x, y = args
             if isinstance(x, (int, float)) and isinstance(y, (int, float)):
-                self.x, self.y = x, y
-                return
+                return x, y
         raise ValueError("Vector2d can't be constructed from {}".format(repr(args)))
 
     def __add__(self, other):  # type: (VectorLike) -> VectorLike

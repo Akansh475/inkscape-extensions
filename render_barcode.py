@@ -29,18 +29,10 @@ class InsertBarcode(inkex.GenerateExtension):
     """
     Raw barcode Effect class, see Barcode base class.
     """
-
-    def __init__(self):
-        super(InsertBarcode, self).__init__()
-        self.arg_parser.add_argument(
-            "-l", "--height", type=int,
-            dest="height", default=30, help="Barcode Height")
-        self.arg_parser.add_argument(
-            "-t", "--type", type=str,
-            dest="type", default='', help="Barcode Type")
-        self.arg_parser.add_argument(
-            "-d", "--text", type=str,
-            dest="text", default='', help="Text to print on barcode")
+    def add_arguments(self, pars):
+        pars.add_argument("-l", "--height", type=int, default=30, help="Barcode Height")
+        pars.add_argument("-t", "--type", default='', help="Barcode Type")
+        pars.add_argument("-d", "--text", default='', help="Text to print on barcode")
 
     def generate(self):
         (pos_x, pos_y) = self.svg.get_center_position()

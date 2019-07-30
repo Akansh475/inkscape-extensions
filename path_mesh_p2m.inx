@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Path to Mesh-Gradient</_name>
+  <id>su-v/org.inkscape.meshes.from_path</id>
+
+  <dependency type="executable" location="extensions">path_mesh_p2m.py</dependency>
+
+  <param name="tab" type="notebook">
+
+    <page name="path2mesh_tab" _gui-text="Options">
+      <_param name="path2mesh_desc" type="description" _gui-description="Only the first four nodes in the first sub-path of each selected path will be used to create a basic meshgradient definition.">Convert each selected path to 1x1 mesh</_param>
+    </page>
+
+    <page name="about_tab" _gui-text="About">
+      <_param name="about_path2mesh_head" type="description" appearance="header">Path to mesh</_param>
+      <_param name="about_path2mesh_desc0" type="description" _gui-description="">TODO</_param>
+    </page>
+
+  </param>
+
+  <effect>
+    <object-type>all</object-type>
+    <menu-tip>Convert geometry of selected path (4 corners) to a meshgradient</menu-tip>
+    <effects-menu>
+      <submenu _name="Modify Path">
+        <submenu _name="Mesh">
+        </submenu>
+      </submenu>
+    </effects-menu>
+  </effect>
+
+  <script>
+    <command reldir="extensions" interpreter="python">path_mesh_p2m.py</command>
+  </script>
+
+  <options silent="false"></options>
+
+</inkscape-extension>

@@ -104,9 +104,7 @@ class InterpAttG(inkex.EffectExtension):
 
         # must be a group
         node = self.svg.get_first_selected(inkex.Group)
-        if node:
-            return list(node)
-        return []
+        return list(node) or []
 
     def effect(self):
         if self.options.att == 'other':

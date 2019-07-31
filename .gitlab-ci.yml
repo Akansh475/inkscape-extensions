@@ -58,7 +58,6 @@ test:coverage:
       "\n\n"
   dependencies:
     - test:python27
-    - test:python35
     - test:python36
     - test:python37
   when: always

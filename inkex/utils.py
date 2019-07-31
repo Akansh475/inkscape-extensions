@@ -130,6 +130,14 @@ class AbortExtension(Exception):
 class DependencyError(NotImplementedError):
     """Raised when we need an external python module that isn't available"""
 
+# TODO: Remove when python2 support is dropped
+class InitSubClassPy3(type):
+    """Provide a poly-fill for python3 __init_subclass__()"""
+    def __init__(cls, name, bases, dct):
+        if '__metaclass__' not in cls.__dict__:
+            if hasattr(cls, '__init_subclass__'):
+                cls.__init_subclass__()
+        super(InitSubClassPy3, cls).__init__(name, bases, dct)
 
 def to(kind):  # pylint: disable=invalid-name
     """

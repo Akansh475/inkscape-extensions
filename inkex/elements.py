@@ -30,7 +30,7 @@ from lxml import etree
 from .paths import Path
 from .styles import Style
 from .transforms import BoundingBox, Transform
-from .utils import NSS, addNS, removeNS
+from .utils import NSS, addNS, removeNS, InitSubClassPy3
 from .units import convert_unit
 
 __all__ = ('Group', 'PathElement', 'ShapeElement')
@@ -40,7 +40,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
     We choose what kind of Elements we should return for each element, providing useful
     SVG based API to our extensions system.
     """
-    _lookups = {}
+    lookup_tags = {}
 
     def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
         """Choose what kind of functionality our element will have"""
@@ -50,18 +50,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         if namespace is None:
             namespace = NSS['svg']
 
-        return self.get_lookups().get((namespace, name), BaseElement)
-
-    def get_lookups(self):
-        """Scan for and cache a list of available classes"""
-        # This import is needed prior to generating the lookup table
-        from .svg import SvgDocumentElement # pylint: disable=unused-variable
-        if not self._lookups:
-            for cls in BaseElement.get_subclasses():
-                for name in (cls.tag_name,) if cls.tag_name else cls.tag_names:
-                    self._lookups[removeNS(name, url=True)] = cls
-
-        return self._lookups
+        return self.lookup_tags.get((namespace, name), BaseElement)
 
 SVG_PARSER = etree.XMLParser(huge_tree=True)
 SVG_PARSER.set_element_class_lookup(SvgClassLookup())
@@ -75,6 +64,13 @@ def load_svg(stream):
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
+    # TODO: The next two lines are only required for python2, remove when py3 only
+    __metaclass__ = InitSubClassPy3
+    @classmethod
+    def __init_subclass__(cls):
+        for name in (cls.tag_name,) if cls.tag_name else cls.tag_names:
+            SvgClassLookup.lookup_tags[removeNS(name, url=True)] = cls
+
     tag_name = ''
     tag_names = ()
 
@@ -94,16 +90,6 @@ class BaseElement(etree.ElementBase):
     # of combining two dictionaries that are incompatible.
     # This allows us to update these with inheritance.
     wrapped_attrs = property(lambda self: dict(self.WRAPPED_ATTRS))
-
-    @classmethod
-    def get_subclasses(cls):
-        """Get subclasses, recursively
-        @rtype generator
-        """
-        for subcls in cls.__subclasses__():
-            yield subcls
-            for subsubcls in subcls.get_subclasses():
-                yield subsubcls
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""

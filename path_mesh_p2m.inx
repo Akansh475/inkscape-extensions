@@ -13,14 +13,13 @@
 
     <page name="about_tab" _gui-text="About">
       <_param name="about_path2mesh_head" type="description" appearance="header">Path to mesh</_param>
-      <_param name="about_path2mesh_desc0" type="description" _gui-description="">TODO</_param>
+      <_param name="about_path2mesh_desc0" type="description" _gui-description="">Convert geometry of selected path (4 corners) to a meshgradient</_param>
     </page>
 
   </param>
 
   <effect>
     <object-type>all</object-type>
-    <menu-tip>Convert geometry of selected path (4 corners) to a meshgradient</menu-tip>
     <effects-menu>
       <submenu _name="Modify Path">
         <submenu _name="Mesh">
@@ -32,7 +31,4 @@
   <script>
     <command reldir="extensions" interpreter="python">path_mesh_p2m.py</command>
   </script>
-
-  <options silent="false"></options>
-
 </inkscape-extension>

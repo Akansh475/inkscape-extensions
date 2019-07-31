@@ -18,14 +18,13 @@
 
     <page name="about_tab" _gui-text="About">
       <_param name="about_mesh2path_head" type="description" appearance="header">Mesh to path</_param>
-      <_param name="about_mesh2path_desc0" type="description" _gui-description="">TODO</_param>
+      <_param name="about_mesh2path_desc0" type="description" _gui-description="">Convert geometry of selected meshgradient to path data</_param>
     </page>
 
   </param>
 
   <effect>
     <object-type>all</object-type>
-    <menu-tip>Convert geometry of selected meshgradient to path data</menu-tip>
     <effects-menu>
       <submenu _name="Modify Path">
         <submenu _name="Mesh">
@@ -37,7 +36,4 @@
   <script>
     <command reldir="extensions" interpreter="python">path_mesh_m2p.py</command>
   </script>
-
-  <options silent="false"></options>
-
 </inkscape-extension>

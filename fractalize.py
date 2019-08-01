@@ -21,14 +21,15 @@ import math
 import random
 import inkex
 
+
 def calculate_subdivision(smoothness, x1, y1, x2, y2):
-    #Calculate the vector from (x1,y1) to (x2,y2)
+    # Calculate the vector from (x1,y1) to (x2,y2)
     x3 = x2 - x1
     y3 = y2 - y1
-    #Calculate the point half-way between the two points
+    # Calculate the point half-way between the two points
     hx = x1 + x3 / 2
     hy = y1 + y3 / 2
-    #Calculate normalized vector perpendicular to the vector (x3,y3)
+    # Calculate normalized vector perpendicular to the vector (x3,y3)
     length = math.sqrt(x3 * x3 + y3 * y3)
     if length != 0:
         nx = -y3 / length
@@ -36,7 +37,7 @@ def calculate_subdivision(smoothness, x1, y1, x2, y2):
     else:
         nx = 1
         ny = 0
-    #Scale perpendicular vector by random factor """
+    # Scale perpendicular vector by random factor """
     r = random.uniform(-length / (1 + smoothness), length / (1 + smoothness))
     nx = nx * r
     ny = ny * r
@@ -55,24 +56,18 @@ class PathFractalize(inkex.EffectExtension):
 
     def effect(self):
         for node in self.svg.get_selected(inkex.PathElement):
-            path = node.path.to_arrays()
+            path = node.path.to_absolute()
             result = []
-            first = 1
-            for cmd, params in path:
-                if cmd != 'Z':
-                    if first == 1:
-                        x1 = params[-2]
-                        y1 = params[-1]
-                        result.append(['M', params[-2:]])
-                        first = 2
-                    else:
-                        x2 = params[-2]
-                        y2 = params[-1]
-                        for seg in self.fractalize((x1, y1, x2, y2), self.options.subdivs, self.options.smooth):
-                            result.append(['L', seg])
-                        x1 = x2
-                        y1 = y2
-                        result.append(['L', params[-2:]])
+            for cmd_proxy in path.proxy_iterator():  # type: inkex.Path.PathCommandProxy
+                prev = cmd_proxy.previous_end_point
+                end = cmd_proxy.end_point
+                if cmd_proxy.letter == 'M':
+                    result.append(['M', cmd_proxy.args])
+                else:
+                    for seg in self.fractalize((prev.x, prev.y, end.x, end.y), self.options.subdivs,
+                                               self.options.smooth):
+                        result.append(['L', seg])
+                    result.append(['L', end.x, end.y])
 
             node.path = result
 

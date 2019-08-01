@@ -1005,11 +1005,9 @@ class Path(list):
         def end_point(self):
             return self.command.end_point(self.first_point, self.previous_end_point)
 
-        @property
         def to_curve(self):
             return self.command.to_curve(self.previous_end_point, self.prev2_control_point)
 
-        @property
         def to_curves(self):
             return self.command.to_curves(self.previous_end_point, self.prev2_control_point)
 

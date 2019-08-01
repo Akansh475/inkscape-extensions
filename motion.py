@@ -21,16 +21,18 @@
 import math
 
 import inkex
-from inkex.paths import Move, Line, Curve, ZoneClose
+from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path
 from inkex.bezier import beziertatslope, beziersplitatt
+
 
 class Motion(inkex.EffectExtension):
     """Generate a motion path"""
+
     def add_arguments(self, pars):
-        pars.add_argument("-a", "--angle", type=float, default=45.0,\
-             help="direction of the motion vector")
-        pars.add_argument("-m", "--magnitude", type=float, default=100.0,\
-             help="magnitude of the motion vector")
+        pars.add_argument("-a", "--angle", type=float, default=45.0, \
+                          help="direction of the motion vector")
+        pars.add_argument("-m", "--magnitude", type=float, default=100.0, \
+                          help="magnitude of the motion vector")
 
     @staticmethod
     def makeface(last, segment, facegroup, delx, dely):
@@ -40,14 +42,17 @@ class Motion(inkex.EffectExtension):
         npt = segment.translate([delx, dely])
 
         # reverse direction of path segment
-        rev = list(npt.args)
-        rev[-2:] = last[0] + delx, last[1] + dely
         if isinstance(segment, Curve):
-            rev = list(Curve(rev[2], rev[3], rev[0], rev[1], rev[4], rev[5]).args)
-        rev = type(segment)(*rev)
+            rev = Curve(npt.x3, npt.y3, npt.x2, npt.y2,
+                        last[0] + delx, last[1] + dely
+                        )
+        elif isinstance(segment, Line):
+            rev = Line(last[0] + delx, last[1] + dely)
+        else:
+            raise RuntimeError("Unexpected segment type {}".format(type(segment)))
 
         elem.path = inkex.Path([
-            Move(*last),
+            Move(last[0], last[1]),
             segment,
             npt.to_line(),
             rev,
@@ -57,7 +62,6 @@ class Motion(inkex.EffectExtension):
     def effect(self):
         delx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
         dely = math.sin(math.radians(self.options.angle)) * self.options.magnitude
-        last = None
         for node in self.svg.get_selected(inkex.PathElement):
             group = node.getparent().add(inkex.Group())
             facegroup = group.add(inkex.Group())
@@ -69,18 +73,12 @@ class Motion(inkex.EffectExtension):
 
             facegroup.style = node.style
 
-            for segment in node.path.to_absolute():
-                self.process_segment(last, segment, facegroup, delx, dely)
-
-                if isinstance(segment, Move):
-                    path_start = (segment.x, segment.y)
-                if isinstance(segment, ZoneClose):
-                    last = path_start
-                else:
-                    last = segment.end_point(None, None)
+            for cmd_proxy in node.path.to_absolute().proxy_iterator():
+                self.process_segment(cmd_proxy.first_point, cmd_proxy.previous_end_point, cmd_proxy.command,
+                                     facegroup, delx, dely)
 
     @staticmethod
-    def process_segment(last, segment, facegroup, delx, dely):
+    def process_segment(first, last, segment, facegroup, delx, dely):
         """Process each segments"""
         tees = []
         if isinstance(segment, Curve):
@@ -91,6 +89,10 @@ class Motion(inkex.EffectExtension):
         segments = []
         if not tees and isinstance(segment, (Line, Curve)):
             segments.append(segment)
+        if not tees and isinstance(segment, ZoneClose):
+            segments.append(Line(first.x, first.y))
+        if not tees and isinstance(segment, Arc):
+            segments.extend(segment.to_curves(last))
         elif len(tees) == 1:
             one, two = beziersplitatt(bez, tees[0])
             segments.append(Curve(*(one[1] + one[2] + one[3])))
@@ -102,9 +104,9 @@ class Motion(inkex.EffectExtension):
             segments.append(Curve(*(two[1] + two[2] + two[3])))
             segments.append(Curve(*(three[1] + three[2] + three[3])))
 
-        for seg in segments:
-            Motion.makeface(last, seg, facegroup, delx, dely)
-            last = segment.end_point(None, None)
+        for seg in Path([Move(*last)] + segments).proxy_iterator():
+            if isinstance(seg.command, Move): continue
+            Motion.makeface(seg.previous_end_point, seg.command, facegroup, delx, dely)
 
 
 if __name__ == '__main__':

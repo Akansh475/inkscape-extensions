@@ -29,7 +29,7 @@ from .transforms import Transform, BoundingBox, Vector2d
 from .utils import classproperty, strargs
 
 if False:  # pylint: disable=using-constant-test
-    from typing import Type, Dict, Optional, Union, Tuple, List  # pylint: disable=unused-import
+    from typing import Type, Dict, Optional, Union, Tuple, List, Iterator  # pylint: disable=unused-import
     from typing import TypeVar
 
     T = TypeVar('T')
@@ -526,7 +526,7 @@ class Curve(AbsolutePathCommand):
                 x4 in bbox.x):
             bbox.x += cubic_extrema(x1, x2, x3, x4)
 
-        if not (y1 in bbox.y and 
+        if not (y1 in bbox.y and
                 y2 in bbox.y and
                 y3 in bbox.y and
                 y4 in bbox.y):
@@ -960,6 +960,65 @@ PathCommand._letter_to_class = {
 class Path(list):
     """A list of segment commands which combine to draw a shape"""
 
+    class PathCommandProxy(object):
+        """
+        A handy class for Path traverse and coordinate access
+
+        Reduces number of arguments in user code compared to bare :py:class:`PathCommand` methods
+        """
+
+        def __init__(self, command, first_point, previous_end_point, prev2_control_point):
+            self.command = command  # type: PathCommand
+            self.first_point = first_point  # type: Vector2d
+            self.previous_end_point = previous_end_point  # type: Vector2d
+            self.prev2_control_point = prev2_control_point  # type: Vector2d
+
+        @property
+        def name(self):
+            return self.command.name
+
+        @property
+        def letter(self):
+            return self.command.letter
+
+        @property
+        def next_command(self):
+            return self.command.next_command
+
+        @property
+        def is_relative(self):
+            return self.command.is_relative
+
+        @property
+        def is_absolute(self):
+            return self.command.is_absolute
+
+        @property
+        def args(self):
+            return self.command.args
+
+        @property
+        def control_points(self):
+            return self.command.control_points(self.first_point, self.previous_end_point, self.prev2_control_point)
+
+        @property
+        def end_point(self):
+            return self.command.end_point(self.first_point, self.previous_end_point)
+
+        @property
+        def to_curve(self):
+            return self.command.to_curve(self.previous_end_point, self.prev2_control_point)
+
+        @property
+        def to_curves(self):
+            return self.command.to_curves(self.previous_end_point, self.prev2_control_point)
+
+        def __str__(self):
+            return str(self.command)
+
+        def __repr__(self):
+            return "<" + self.__class__.__name__ + ">" + repr(self.command)
+
     def __init__(self, path_d=None):
         super(Path, self).__init__()
         if isinstance(path_d, str):
@@ -1090,6 +1149,25 @@ class Path(list):
     def reverse(self):
         """Returns a reversed path"""
         pass
+
+    def proxy_iterator(self):
+        """
+        Yields :py:class:`AugmentedPathIterator`
+
+        :rtype: Iterator[ Path.PathCommandProxy ]
+        """
+
+        previous = Vector2d()
+        prev_prev = Vector2d()
+        first = Vector2d()
+
+        for i, seg in enumerate(self):  # type: PathCommand
+            if i == 0:
+                first = seg.end_point(first, previous)
+            yield Path.PathCommandProxy(seg, first, previous, prev_prev)
+            previous = seg.end_point(first, previous)
+            if isinstance(seg, (Curve, TepidQuadratic, Quadratic, Smooth)):
+                prev_prev = list(seg.control_points(first, previous, prev_prev))[-2]
 
     def to_absolute(self):
         """Convert this path to use only absolute coordinates"""

@@ -21,7 +21,7 @@
 import math
 
 import inkex
-from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path
+from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path, Vert, Horz, TepidQuadratic, Quadratic, Smooth
 from inkex.bezier import beziertatslope, beziersplitatt
 
 
@@ -74,37 +74,40 @@ class Motion(inkex.EffectExtension):
             facegroup.style = node.style
 
             for cmd_proxy in node.path.to_absolute().proxy_iterator():
-                self.process_segment(cmd_proxy.first_point, cmd_proxy.previous_end_point, cmd_proxy.command,
-                                     facegroup, delx, dely)
+                self.process_segment(cmd_proxy, facegroup, delx, dely)
 
     @staticmethod
-    def process_segment(first, last, segment, facegroup, delx, dely):
+    def process_segment(cmd_proxy, facegroup, delx, dely):
         """Process each segments"""
-        tees = []
-        if isinstance(segment, Curve):
-            bez = [last] + segment.to_bez()
-            tees = [t for t in beziertatslope(bez, (dely, delx)) if 0 < t < 1]
-            tees.sort()
 
         segments = []
-        if not tees and isinstance(segment, (Line, Curve)):
-            segments.append(segment)
-        if not tees and isinstance(segment, ZoneClose):
-            segments.append(Line(first.x, first.y))
-        if not tees and isinstance(segment, Arc):
-            segments.extend(segment.to_curves(last))
-        elif len(tees) == 1:
-            one, two = beziersplitatt(bez, tees[0])
-            segments.append(Curve(*(one[1] + one[2] + one[3])))
-            segments.append(Curve(*(two[1] + two[2] + two[3])))
-        elif len(tees) == 2:
-            one, two = beziersplitatt(bez, tees[0])
-            two, three = beziersplitatt(two, tees[1])
-            segments.append(Curve(*(one[1] + one[2] + one[3])))
-            segments.append(Curve(*(two[1] + two[2] + two[3])))
-            segments.append(Curve(*(three[1] + three[2] + three[3])))
+        if isinstance(cmd_proxy.command, (Curve, Smooth, TepidQuadratic, Quadratic, Arc)):
+            prev = cmd_proxy.previous_end_point
+            for curve in cmd_proxy.to_curves():
+                bez = [prev] + curve.to_bez()
+                prev = curve.end_point(cmd_proxy.first_point, prev)
+                tees = [t for t in beziertatslope(bez, (dely, delx)) if 0 < t < 1]
+                tees.sort()
+                if len(tees) == 1:
+                    one, two = beziersplitatt(bez, tees[0])
+                    segments.append(Curve(*(one[1] + one[2] + one[3])))
+                    segments.append(Curve(*(two[1] + two[2] + two[3])))
+                elif len(tees) == 2:
+                    one, two = beziersplitatt(bez, tees[0])
+                    two, three = beziersplitatt(two, tees[1])
+                    segments.append(Curve(*(one[1] + one[2] + one[3])))
+                    segments.append(Curve(*(two[1] + two[2] + two[3])))
+                    segments.append(Curve(*(three[1] + three[2] + three[3])))
+                else:
+                    segments.append(curve)
+        elif isinstance(cmd_proxy.command, (Line, Curve)):
+            segments.append(cmd_proxy.command)
+        elif isinstance(cmd_proxy.command, ZoneClose):
+            segments.append(Line(cmd_proxy.first_point.x, cmd_proxy.first_point.y))
+        elif isinstance(cmd_proxy.command, (Vert, Horz)):
+            segments.append(cmd_proxy.command.to_line(cmd_proxy.end_point))
 
-        for seg in Path([Move(*last)] + segments).proxy_iterator():
+        for seg in Path([Move(*cmd_proxy.previous_end_point)] + segments).proxy_iterator():
             if isinstance(seg.command, Move): continue
             Motion.makeface(seg.previous_end_point, seg.command, facegroup, delx, dely)
 

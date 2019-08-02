@@ -139,7 +139,6 @@ class PathCommand(object):
 
         :param (tuple of float) first: first point of path. Required to calculate Z segment
         :param (list of tuple) last_two_points: list with last two control points in abs coords.
-         Updated at the end of call.
         :param (BoundingBox) bbox: bounding box to update
         """
         raise NotImplementedError("Bounding box is not implemented for {}".format(self.name))
@@ -188,7 +187,7 @@ class RelativePathCommand(PathCommand):
         return self.to_absolute(prev).end_point(first, prev)
 
     def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> "Curve"
-        return self.to_absolute(prev).to_curve(prev)
+        return self.to_absolute(prev).to_curve(prev, prev_prev)
 
     def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> List["Curve"]
         return self.to_absolute(prev).to_curves(prev, prev_prev)
@@ -253,7 +252,6 @@ class Line(AbsolutePathCommand):
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox((last_two_points[-1].x, self.x), (last_two_points[-1].y, self.y))
-        last_two_points[-1] = Vector2d(self.x, self.y)
 
     def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
         yield Vector2d(self.x, self.y)
@@ -305,7 +303,6 @@ class Move(AbsolutePathCommand):
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(self.x, self.y)
-        last_two_points[-1] = Vector2d(self.x, self.y)
 
     def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
         yield Vector2d(self.x, self.y)
@@ -351,7 +348,7 @@ class ZoneClose(AbsolutePathCommand):
         return ()
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        last_two_points[-1] = first
+        pass
 
     def transform(self, transform):  # type: (T, Transform) -> T
         return ZoneClose()
@@ -396,7 +393,6 @@ class Horz(AbsolutePathCommand):
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox((last_two_points[-1].x, self.x), last_two_points[-1].y)
-        last_two_points[-1] = Vector2d(self.x, last_two_points[-1].y)
 
     def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
         yield Vector2d(self.x, prev.y)
@@ -453,7 +449,6 @@ class Vert(AbsolutePathCommand):
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(last_two_points[-1].x, (last_two_points[-1].y, self.y))
-        last_two_points[-1] = Vector2d(last_two_points[-1].x, self.y)
 
     def transform(self, transform):  # type: (T, Transform) -> T
         raise ValueError("Vertical lines can't be transformed directly.")
@@ -532,9 +527,6 @@ class Curve(AbsolutePathCommand):
                 y4 in bbox.y):
             bbox.y += cubic_extrema(y1, y2, y3, y4)
 
-        last_two_points[-2] = Vector2d(x3, y3)
-        last_two_points[-1] = Vector2d(x4, y4)
-
     def transform(self, transform):  # type: (T, Transform) -> T
         x2, y2 = transform.apply_to_point((self.x2, self.y2))
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
@@ -558,7 +550,6 @@ class Curve(AbsolutePathCommand):
 
     def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
         """No conversion needed, pass-through, returns self"""
-        prev_prev.x, prev_prev.y = self.x3, self.y3
         return Curve(*self.args)
 
     def to_bez(self):
@@ -643,7 +634,6 @@ class Smooth(AbsolutePathCommand):
         set of nodes based on the previous node. Previous should be a curve.
         """
         (x2, y2), (x3, y3), (x4, y4) = self.control_points(prev, prev, prev_prev)
-        prev_prev.x, prev_prev.y = self.x3, self.y3
         return Curve(x2, y2, x3, y3, x4, y4)
 
 
@@ -701,9 +691,6 @@ class Quadratic(AbsolutePathCommand):
                 y3 in bbox.y):
             bbox.y += quadratic_extrema(y1, y2, y3)
 
-        last_two_points[-2] = Vector2d(x2, y2)
-        last_two_points[-1] = Vector2d(x3, y3)
-
     def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
         yield Vector2d(self.x2, self.y2)
         yield Vector2d(self.x3, self.y3)
@@ -729,7 +716,6 @@ class Quadratic(AbsolutePathCommand):
         x2 = 2. / 3 * self.x2 + 1. / 3 * self.x3
         y1 = 1. / 3 * prev.y + 2. / 3 * self.y2
         y2 = 2. / 3 * self.y2 + 1. / 3 * self.y3
-        prev_prev.x, prev_prev.y = self.x2, self.y2
         return Curve(x1, y1, x2, y2, self.x3, self.y3)
 
 
@@ -801,7 +787,6 @@ class TepidQuadratic(AbsolutePathCommand):
         Convert this continued quadratic into a full quadratic
         """
         (x2, y2), (x3, y3) = self.control_points(prev, prev, prev_prev)
-        prev_prev.x, prev_prev.y = x2, y2
         return Quadratic(x2, y2, x3, y3)
 
 
@@ -841,8 +826,10 @@ class Arc(AbsolutePathCommand):
         self.y = y
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        for seg in self.to_curves(prev=last_two_points[-1]):
-            seg.update_bounding_box(first, last_two_points, bbox)
+        prev = last_two_points[-1]
+        for seg in self.to_curves(prev=prev):
+            seg.update_bounding_box(first, [None, prev], bbox)
+            prev = seg.end_point(first, prev)
 
     def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
         yield Vector2d(self.x, self.y)
@@ -850,7 +837,6 @@ class Arc(AbsolutePathCommand):
     def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Vector2d) -> List[Curve]
         """Convert this arc into bezier curves"""
         path = CubicSuperPath([arc_to_path(list(prev), self.args)]).to_path(curves_only=True)
-        prev_prev.x, prev_prev.y = path[-1].x3, path[-1].y3
         # Ignore the first move command from to_path()
         return list(path)[1:]
 
@@ -1050,14 +1036,11 @@ class Path(list):
     def bounding_box(self):
         """Return the top,left and bottom,right coords"""
         bbox = BoundingBox()
-        abspath = self.to_absolute()
-        if len(abspath) > 0:
-            assert isinstance(abspath[0], Move)
-            first = Vector2d(abspath[0].x, abspath[0].y)
-            prev_points = [Vector2d(0, 0), first]
-            bbox += BoundingBox(abspath[0].x, abspath[0].y)
-            for seg in abspath[1:]:
-                seg.update_bounding_box(first, prev_points, bbox)
+        for proxy in self.proxy_iterator():
+            proxy.command.update_bounding_box(proxy.first_point, [
+                proxy.prev2_control_point,
+                proxy.previous_end_point,
+            ], bbox)
         return bbox
 
     def append(self, cmd):
@@ -1161,11 +1144,11 @@ class Path(list):
 
         for i, seg in enumerate(self):  # type: PathCommand
             if i == 0:
-                first = seg.end_point(first, previous)
+                prev_prev = previous = first = seg.end_point(first, previous)
             yield Path.PathCommandProxy(seg, first, previous, prev_prev)
-            previous = seg.end_point(first, previous)
-            if isinstance(seg, (Curve, TepidQuadratic, Quadratic, Smooth)):
+            if isinstance(seg, (curve, tepidQuadratic, quadratic, smooth, Curve, TepidQuadratic, Quadratic, Smooth)):
                 prev_prev = list(seg.control_points(first, previous, prev_prev))[-2]
+            previous = seg.end_point(first, previous)
 
     def to_absolute(self):
         """Convert this path to use only absolute coordinates"""
@@ -1279,12 +1262,16 @@ class CubicSuperPath(list):
                 for arc_curve in item.to_curves(self._prev, self._prev_prev):
                     x2, y2, x3, y3, x4, y4 = arc_curve.args
                     self.append([[x2, y2], [x3, y3], [x4, y4]])
+                    self._prev_prev.assign(x3, y3)
                 return
             else:
                 is_quadratic = isinstance(item, (Quadratic, TepidQuadratic, quadratic, tepidQuadratic))
                 if isinstance(item, (Horz, Vert)):
                     item = item.to_line(self._prev)
-                item = item.to_curve(self._prev, self._prev_prev)
+                pp = self._prev_prev
+                if is_quadratic:
+                    self._prev_prev = list(item.control_points(self._first, self._prev, pp))[-2:-1][0]
+                item = item.to_curve(self._prev, pp)
 
         if isinstance(item, Curve):
             # Curves are cut into three tuples for the super path.

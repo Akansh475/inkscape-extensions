@@ -75,7 +75,6 @@ def linearize(p, tolerance=0.001):
     d = 0
     lengths = []
     while i < len(p) - 1:
-        print("C", i, p[i])
         box = pointdistance(p[i][1], p[i][2])
         box += pointdistance(p[i][2], p[i + 1][0])
         box += pointdistance(p[i + 1][0], p[i + 1][1])
@@ -222,14 +221,6 @@ class PathAlongPath(pathmodifier.Diffeo):
         for id, node in self.patterns.items():
             if node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
                 node.path = self._sekl_call(node.path.to_superpath(), dx, bbox)
-
-    def describe(self, obj, tab=0):
-        if isinstance(obj, list):
-            print(("  " * tab) + "{}:{}".format(type(obj).__name__, id(obj)))
-            for child in obj:
-                self.describe(child, tab=tab+1)
-        else:
-            print(("  " * tab) + "{}:{}".format(type(obj).__name__, obj))
 
     def _sekl_call(self, p0, dx, bbox):
         if self.options.vertical:

@@ -157,8 +157,9 @@ def _call(program, *args, **kwargs):
         stdin = stdin.encode('utf-8')
     inpipe = PIPE if stdin else None
 
+    args = to_args(which(program), *args, **kwargs)
     process = Popen(
-        to_args(which(program), *args, **kwargs),
+        args,
         shell=False, # Never have shell=True
         stdin=inpipe, # StdIn not used (yet)
         stdout=PIPE, # Grab any output (return it)
@@ -167,7 +168,8 @@ def _call(program, *args, **kwargs):
     (stdout, stderr) = process.communicate(input=stdin)
     if process.returncode == 0:
         return stdout
-    raise ProgramRunError("Return Code: {}: {}\n{}".format(process.returncode, stderr, stdout))
+    raise ProgramRunError("Return Code: {}: {}\n{}\nargs: {}".format(
+        process.returncode, stderr, stdout, args))
 
 def call(program, *args, **kwargs):
     """

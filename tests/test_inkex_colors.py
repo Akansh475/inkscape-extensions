@@ -64,10 +64,10 @@ class ColorTest(TestCase):
         color = Color('#ff0102')
         color.hue = 100
         self.assertEqual(color.space, 'rgb')
-        self.assertEqual(color.hue, 82)
+        self.assertEqual(color.hue, 100)
         color.saturation = 100
         self.assertEqual(color.space, 'rgb')
-        self.assertEqual(color.saturation, 45)
+        self.assertEqual(color.saturation, 99)
         color.lightness = 100
         self.assertEqual(color.space, 'rgb')
         self.assertEqual(color.lightness, 99) # No sure, bad conversion?

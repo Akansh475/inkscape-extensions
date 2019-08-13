@@ -249,11 +249,11 @@ class Color(list):
                 self.space = 'rgba'
                 self.append(contrain(0.0, float(value), 1.0))
                 return
-            else:
-                # Set in other colour space and convert back and forth
-                target = getattr(self, 'to_' + spaces[0])()
-                target[index] = contrain(0, int(value), 255)
-                self[:] = getattr(target, 'to_' + self.space)()
+            # Set in other colour space and convert back and forth
+            target = getattr(self, 'to_' + spaces[0])()
+            target[index] = contrain(0, int(value), 255)
+            self[:] = getattr(target, 'to_' + self.space)()
+            return
         self[index] = contrain(0, int(value), 255)
 
     def append(self, val):

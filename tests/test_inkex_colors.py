@@ -55,6 +55,9 @@ class ColorTest(TestCase):
         self.assertEqual(color.green, 5)
         color.blue = 15
         self.assertEqual(color.blue, 15)
+        color.blue = 5.1
+        self.assertEqual(color.blue, 5)
+        self.assertEqual(str(color), '#7f0505')
 
     def test_setter_hsl(self):
         """Color HSL units can be set on RGB color"""

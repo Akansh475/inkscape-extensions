@@ -254,7 +254,7 @@ class Color(list):
                 target = getattr(self, 'to_' + spaces[0])()
                 target[index] = contrain(0, int(value), 255)
                 self[:] = getattr(target, 'to_' + self.space)()
-        self[index] = value
+        self[index] = contrain(0, int(value), 255)
 
     def append(self, val):
         """Append a value to the local list"""

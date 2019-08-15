@@ -1,29 +1,26 @@
 #!/usr/bin/env python
+#
+# Copyright (C) 2016 su_v, <suv-sf@users.sf.net>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 """
-mesh_to_path - Convert meshgradient to path
-
-Copyright (C) 2016 su_v, <suv-sf@users.sf.net>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+Convert mesh gradient to path
 """
-# local library
+
 import inkex
-import simplestyle
-import simpletransform
-from cubicsuperpath import parsePath, formatPath
-
 
 # globals
 EPSILON = 1e-3
@@ -31,7 +28,6 @@ MG_PROPS = [
     'fill',
     'stroke'
 ]
-
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     """Test approximate equality.
@@ -117,7 +113,7 @@ def mesh_corners(meshgradient):
             path = 'M {},{}'.format(*first_corner)
             for edge in meshgradient[meshrow][meshpatch]:
                 path = ' '.join([path, edge.get('path')])
-            csp = parsePath(path)
+            csp = inkex.Path(path).to_superpath()
             # update corner list with current meshpatch
             if meshrow == 0:
                 corners[meshrow][meshpatch+1] = csp[0][1][1]
@@ -180,7 +176,7 @@ def mesh_to_outline(corners, hlines, vlines):
         path = ' '.join([path, edge_path])
     for edge_path in reversed(vlines[0]):
         path = ' '.join([path, edge_path])
-    outline_csps.append(parsePath(path))
+    outline_csps.append(inkex.Path(path).to_superpath())
     return outline_csps
 
 
@@ -193,22 +189,22 @@ def mesh_to_grid(corners, hlines, vlines):
     path = 'M {},{}'.format(*corners[0][0])
     for edge_path in hlines[0]:
         path = ' '.join([path, edge_path])
-    gridline_csps.append(parsePath(path))
+    gridline_csps.append(inkex.Path(path).to_superpath())
     for i in range(1, rows+1):
         path = 'M {},{}'.format(*corners[i][-1])
         for edge_path in reversed(hlines[i]):
             path = ' '.join([path, edge_path])
-        gridline_csps.append(parsePath(path))
+        gridline_csps.append(inkex.Path(path).to_superpath())
     # vertical
     path = 'M {},{}'.format(*corners[-1][0])
     for edge_path in reversed(vlines[0]):
         path = ' '.join([path, edge_path])
-    gridline_csps.append(parsePath(path))
+    gridline_csps.append(inkex.Path(path).to_superpath())
     for j in range(1, cols+1):
         path = 'M {},{}'.format(*corners[0][j])
         for edge_path in vlines[j]:
             path = ' '.join([path, edge_path])
-        gridline_csps.append(parsePath(path))
+        gridline_csps.append(inkex.Path(path).to_superpath())
     return gridline_csps
 
 
@@ -230,67 +226,44 @@ def mesh_to_faces(corners, hlines, vlines):
             if row == 0:
                 path = 'M {},{}'.format(*corners[row][col])
                 path = ' '.join([path, edge_t])
-                face.append(parsePath(path)[0])
+                face.append(inkex.Path(path).to_superpath()[0])
             else:
                 path = 'M {},{}'.format(*corners[row][col+1])
                 path = ' '.join([path, edge_t])
-                face.append(reverse_path(parsePath(path))[0])
+                face.append(reverse_path(inkex.Path(path).to_superpath())[0])
             # right edge
             path = 'M {},{}'.format(*corners[row][col+1])
             path = ' '.join([path, edge_r])
-            join_path(face, -1, parsePath(path), 0)
+            join_path(face, -1, inkex.Path(path).to_superpath(), 0)
             # bottom edge
             path = 'M {},{}'.format(*corners[row+1][col+1])
             path = ' '.join([path, edge_b])
-            join_path(face, -1, parsePath(path), 0)
+            join_path(face, -1, inkex.Path(path).to_superpath(), 0)
             # left edge
             if col == 0:
                 path = 'M {},{}'.format(*corners[row+1][col])
                 path = ' '.join([path, edge_l])
-                join_path(face, -1, parsePath(path), 0)
+                join_path(face, -1, inkex.Path(path).to_superpath(), 0)
             else:
                 path = 'M {},{}'.format(*corners[row][col])
                 path = ' '.join([path, edge_l])
-                join_path(face, -1, reverse_path(parsePath(path)), 0)
+                join_path(face, -1, reverse_path(inkex.Path(path).to_superpath()), 0)
             # append face to output list
             face_csps.append(face)
     return face_csps
 
 
-def is_path(node):
-    """Check whether element type of *node* is <path>."""
-    return (node.tag == inkex.addNS('path', 'svg') or
-            node.tag == 'path')
-
-
-def close_path(node):
-    """Append closing 'Z' to path data 'd' in *node*."""
-    if is_path(node):
-        data = node.get('d', '')
-        if len(data) and not data[-1] in ('z', 'Z'):
-            data += ' Z'
-            node.set('d', data)
-
-
-class MeshGradients(inkex.Effect):
-    """Effect-based class to process mesh gradients."""
-
-    def __init__(self):
-        """Init base clase and MeshGradients()."""
-        inkex.Effect.__init__(self)
-
-        self.OptionParser.add_option("--tab",
-                                     action="store", type="string",
-                                     dest="tab",
-                                     help="The selected UI-tab")
-
-    # ----- Retrieve meshgradient definitions
+class MeshToPath(inkex.EffectExtension):
+    """Effect extension to convert mesh geometry to path data."""
+    def add_arguments(self, pars):
+        pars.add_argument("--tab", help="The selected UI-tab")
+        pars.add_argument("--mode", default="outline", help="Edge mode")
 
     def process_url(self, val):
         """Process url in property value *val*."""
         linked_id = val[len('url(#'):val.find(')')]
         if linked_id:
-            return self.getElementById(linked_id)
+            return self.svg.getElementById(linked_id)
 
     def process_href(self, node):
         """Process href attribute in *node*."""
@@ -301,7 +274,7 @@ class MeshGradients(inkex.Effect):
             href = node.get('href', '')
         if href.startswith('#'):
             linked_id = href[1:]
-            linked_node = self.getElementById(linked_id)
+            linked_node = self.svg.getElementById(linked_id)
             return linked_node
 
     def recurse_href(self, node):
@@ -340,29 +313,11 @@ class MeshGradients(inkex.Effect):
         result = []
         # Presentation attributes
         adict = dict(node.attrib)
-        style = adict.pop('style', None)
         result.extend(self.process_props(adict, res_type))
         # Inline CSS style properties
-        if style is not None:
-            sdict = simplestyle.parseStyle(style)
-            result.extend(self.process_props(sdict, res_type))
+        result.extend(self.process_props(node.style, res_type))
         # TODO: check for child paint servers
         return result
-
-
-class MeshToPath(MeshGradients):
-    """MeshGradients-based class to convert mesh geometry to path data."""
-
-    def __init__(self):
-        """Init base clase and MeshToPath()."""
-        MeshGradients.__init__(self)
-
-        self.OptionParser.add_option("--mode",
-                                     action="store", type="string",
-                                     dest="mode", default="outline",
-                                     help="Edge mode")
-
-    # ----- Retrieve meshgradient definitions
 
     def find_meshgradients(self, node):
         """Parse node style, return list with linked meshgradients."""
@@ -375,7 +330,6 @@ class MeshToPath(MeshGradients):
 
         # init variables
         transform = None
-        mat = None
         mode = self.options.mode
 
         # gradient units
@@ -389,54 +343,48 @@ class MeshToPath(MeshGradients):
             transform = meshgradient.get('gradientTransform')
         elif 'transform' in meshgradient.attrib:        # SVG2 draft
             transform = meshgradient.get('transform')
-        if transform is not None:
-            mat = simpletransform.parseTransform(transform)
 
         # parse meshpatches, calculate absolute corner coords
         corners, meshpatch_csps = mesh_corners(meshgradient)
 
         if mode == 'meshpatches':
-            return meshpatch_csps, mat
+            return meshpatch_csps, transform
         else:
             hlines, vlines = mesh_hvlines(meshgradient)
             if mode == 'outline':
-                return mesh_to_outline(corners, hlines, vlines), mat
+                return mesh_to_outline(corners, hlines, vlines), transform
             elif mode == 'gridlines':
-                return mesh_to_grid(corners, hlines, vlines), mat
+                return mesh_to_grid(corners, hlines, vlines), transform
             elif mode == 'faces':
-                return mesh_to_faces(corners, hlines, vlines), mat
+                return mesh_to_faces(corners, hlines, vlines), transform
 
     # ----- Convert meshgradient definitions
 
-    def csp_to_path(self, node, csp_list, mat=None):
+    def csp_to_path(self, node, csp_list, transform=None):
         """Create new paths based on csp data, return group with paths."""
         # set up stroke width, group
-        stroke_width = self.unittouu('1px')
+        stroke_width = self.svg.unittouu('1px')
         stroke_color = '#000000'
         style = {
             'fill': 'none',
             'stroke': stroke_color,
             'stroke-width': str(stroke_width),
         }
-        group = inkex.etree.Element(inkex.addNS('g', 'svg'))
-        # apply gradientTransform to group
-        if mat is not None:
-            simpletransform.applyTransformToNode(mat, group)
-        # apply node's preserved transform to group
-        if 'transform' in node.attrib:
-            mat = simpletransform.parseTransform(node.get('transform'))
-            simpletransform.applyTransformToNode(mat, group)
+
+        group = inkex.Group()
+        # apply gradientTransform and node's preserved transform to group
+        group.transform = transform * node.transform
+
         # convert each csp to path, append to group
         for csp in csp_list:
-            path = inkex.etree.Element(inkex.addNS('path', 'svg'))
-            path.set('d', formatPath(csp))
+            elem = group.add(inkex.PathElement())
+            elem.style = style
+            elem.path = csp
             if self.options.mode == 'outline':
-                close_path(path)
+                elem.path.close()
             elif self.options.mode == 'faces':
                 if len(csp) == 1 and len(csp[0]) == 5:
-                    close_path(path)
-            path.set('style', simplestyle.formatStyle(style))
-            group.append(path)
+                    elem.path.close()
         return group
 
     # ----- main
@@ -444,7 +392,7 @@ class MeshToPath(MeshGradients):
     def effect(self):
         """Main routine to convert mesh geometry to path data."""
         # loop through selection
-        for node in self.selected.values():
+        for node in self.svg.selected.values():
             meshgradients = self.find_meshgradients(node)
             # if style references meshgradient
             if meshgradients and len(meshgradients):
@@ -464,7 +412,4 @@ class MeshToPath(MeshGradients):
 
 
 if __name__ == '__main__':
-    ME = MeshToPath()
-    ME.affect()
-
-# vim: et shiftwidth=4 tabstop=8 softtabstop=4 fileencoding=utf-8 textwidth=79
+    MeshToPath().run()

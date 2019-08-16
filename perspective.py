@@ -22,102 +22,100 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 
 import inkex
 from inkex.localization import _
+from inkex.svg import SvgDocumentElement
 
 X, Y = range(2)
 
 try:
     import numpy as np
     import numpy.linalg as lin
-except:
+    FLOAT = np.float64
+except ImportError:
     np = None
 
 
-class Project(inkex.EffectExtension):
+class PathPerspective(inkex.EffectExtension):
+    """Apply a perspective to a path"""
     def effect(self):
         if np is None:
-            return inkex.errormsg(
-                    _("Failed to import the numpy or numpy.linalg modules."
-                      " These modules are required by this extension. Please install them."
-                      "  On a Debian-like system this can be done with the command, "
-                      "sudo apt-get install python-numpy."))
+            raise inkex.AbortExtension(
+                _("Failed to import the numpy or numpy.linalg modules."
+                  " These modules are required by this extension. Please install them."
+                  "  On a Debian-like system this can be done with the command, "
+                  "sudo apt-get install python-numpy."))
         if len(self.options.ids) < 2:
-            return inkex.errormsg(_("This extension requires two selected paths."))
+            raise inkex.AbortExtension(_("This extension requires two selected paths."))
 
-        # obj is selected second
-        scale = self.svg.unittouu('1px')  # convert to document units
-        doc = self.svg
-        h = self.svg.unittouu(doc.xpath('@height')[0])
-        # process viewBox height attribute to correct page scaling
-        viewBox = doc.get('viewBox')
-        if viewBox:
-            viewBox2 = viewBox.split(',')
-            if len(viewBox2) < 4:
-                viewBox2 = viewBox.split(' ')
-            scale *= self.svg.unittouu(self.svg.add_unit(viewBox2[3])) / h
         obj = self.svg.selected[self.options.ids[0]]
         envelope = self.svg.selected[self.options.ids[1]]
-        if obj.get(inkex.addNS('type', 'sodipodi')):
-            return inkex.errormsg(_("The first selected object is of type '%s'.\nTry using the procedure Path->Object to Path." % obj.get(inkex.addNS('type', 'sodipodi'))))
 
         if isinstance(obj, (inkex.PathElement, inkex.Group)):
             if isinstance(envelope, inkex.PathElement):
                 path = envelope.path.transform(envelope.composed_transform()).to_superpath()
 
                 if len(path) < 1 or len(path[0]) < 4:
-                    return inkex.errormsg(_("This extension requires that the second selected path be four nodes long."))
+                    raise inkex.AbortExtension(
+                        _("This extension requires that the second path be four nodes long."))
 
-                dp = np.zeros((4, 2), dtype=np.float64)
+                dip = np.zeros((4, 2), dtype=FLOAT)
                 for i in range(4):
-                    dp[i][0] = path[0][i][1][0]
-                    dp[i][1] = path[0][i][1][1]
+                    dip[i][0] = path[0][i][1][0]
+                    dip[i][1] = path[0][i][1][1]
 
                 # query inkscape about the bounding box of obj
                 bbox = obj.bounding_box()
 
-                sp = np.array([
+                sip = np.array([
                     [bbox.left, bbox.bottom],
                     [bbox.left, bbox.top],
                     [bbox.right, bbox.top],
-                    [bbox.right, bbox.bottom]], dtype=np.float64)
+                    [bbox.right, bbox.bottom]], dtype=FLOAT)
             else:
                 if isinstance(envelope, inkex.Group):
-                    return inkex.errormsg(_("The second selected object is a group, not a path.\nTry using the procedure Object->Ungroup."))
-                else:
-                    return inkex.errormsg(_("The second selected object is not a path.\nTry using the procedure Path->Object to Path."))
+                    raise inkex.AbortExtension(_("The second selected object is a group, not a"
+                                                 " path.\nTry using Object->Ungroup."))
+                raise inkex.AbortExtension(_("The second selected object is not a path.\nTry using"
+                                             " the procedure Path->Object to Path."))
         else:
-            return inkex.errormsg(_("The first selected object is not a path.\nTry using the procedure Path->Object to Path."))
+            raise inkex.AbortExtension(_("The first selected object is not a path.\nTry using"
+                                         " the procedure Path->Object to Path."))
 
-        solmatrix = np.zeros((8, 8), dtype=np.float64)
-        free_term = np.zeros(8, dtype=np.float64)
+        solmatrix = np.zeros((8, 8), dtype=FLOAT)
+        free_term = np.zeros(8, dtype=FLOAT)
         for i in (0, 1, 2, 3):
-            solmatrix[i][0] = sp[i][0]
-            solmatrix[i][1] = sp[i][1]
+            solmatrix[i][0] = sip[i][0]
+            solmatrix[i][1] = sip[i][1]
             solmatrix[i][2] = 1
-            solmatrix[i][6] = -dp[i][0] * sp[i][0]
-            solmatrix[i][7] = -dp[i][0] * sp[i][1]
-            solmatrix[i + 4][3] = sp[i][0]
-            solmatrix[i + 4][4] = sp[i][1]
+            solmatrix[i][6] = -dip[i][0] * sip[i][0]
+            solmatrix[i][7] = -dip[i][0] * sip[i][1]
+            solmatrix[i + 4][3] = sip[i][0]
+            solmatrix[i + 4][4] = sip[i][1]
             solmatrix[i + 4][5] = 1
-            solmatrix[i + 4][6] = -dp[i][1] * sp[i][0]
-            solmatrix[i + 4][7] = -dp[i][1] * sp[i][1]
-            free_term[i] = dp[i][0]
-            free_term[i + 4] = dp[i][1]
+            solmatrix[i + 4][6] = -dip[i][1] * sip[i][0]
+            solmatrix[i + 4][7] = -dip[i][1] * sip[i][1]
+            free_term[i] = dip[i][0]
+            free_term[i + 4] = dip[i][1]
 
         res = lin.solve(solmatrix, free_term)
-        projmatrix = np.array([[res[0], res[1], res[2]], [res[3], res[4], res[5]], [res[6], res[7], 1.0]], dtype=np.float64)
-        if obj.tag == inkex.addNS("path", 'svg'):
+        projmatrix = np.array([
+            [res[0], res[1], res[2]],
+            [res[3], res[4], res[5]],
+            [res[6], res[7], 1.0]], dtype=FLOAT)
+        if isinstance(obj, inkex.PathElement):
             self.process_path(obj, projmatrix)
-        if obj.tag == inkex.addNS("g", 'svg'):
+        if isinstance(obj, inkex.Group):
             self.process_group(obj, projmatrix)
 
     def process_group(self, group, matrix):
+        """Go through all groups to process all paths inside them"""
         for node in group:
-            if node.tag == inkex.addNS('path', 'svg'):
+            if isinstance(node, inkex.PathElement):
                 self.process_path(node, matrix)
-            if node.tag == inkex.addNS('g', 'svg'):
+            if isinstance(node, SvgDocumentElement):
                 self.process_group(node, matrix)
 
     def process_path(self, element, matrix):
+        """Apply the transformation to the selected path"""
         mat = element.composed_transform()
         point = element.path.transform(mat).to_superpath()
         for subs in point:
@@ -127,7 +125,9 @@ class Project(inkex.EffectExtension):
                 csp[2] = self.project_point(csp[2], matrix)
         element.path = inkex.Path(point).transform(-mat)
 
-    def project_point(self, point, matrix):
+    @staticmethod
+    def project_point(point, matrix):
+        """Apply the matrix to the given point"""
         return [(point[X] * matrix[0][0] + point[Y] * matrix[0][1] + matrix[0][2]) /
                 (point[X] * matrix[2][0] + point[Y] * matrix[2][1] + matrix[2][2]),
                 (point[X] * matrix[1][0] + point[Y] * matrix[1][1] + matrix[1][2]) /
@@ -135,4 +135,4 @@ class Project(inkex.EffectExtension):
 
 
 if __name__ == '__main__':
-    Project().run()
+    PathPerspective().run()

@@ -26,14 +26,15 @@ import random
 import inkex
 from inkex.elements import Group, FlowRoot, FlowRegion, FlowPara, Rectangle
 
-foo = [
+CORPA = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ',
     'Duis sem velit, ultrices et, fermentum auctor, rhoncus ut, ligula. ',
     'Phasellus at purus sed purus cursus iaculis. ',
     'Suspendisse fermentum. ',
     'Pellentesque et arcu. ',
     'Maecenas viverra. ',
-    'In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros, sit amet sagittis nunc mi ac neque. ',
+    'In consectetuer, lorem eu lobortis egestas, velit odio imperdiet'
+    ' eros, sit amet sagittis nunc mi ac neque. ',
     'Sed non ipsum. ',
     'Nullam venenatis gravida orci. ',
     'Curabitur nunc ante, ullamcorper vel, auctor a, aliquam at, tortor. ',
@@ -45,13 +46,18 @@ foo = [
     'Morbi volutpat. ',
     'Phasellus hendrerit. ',
     'Quisque dictum quam vel neque. ',
-    'Quisque aliquam, nulla ac scelerisque convallis, nisi ligula sagittis risus, at nonummy arcu urna pulvinar nibh. ',
+    'Quisque aliquam, nulla ac scelerisque convallis, nisi ligula sagittis'
+    ' risus, at nonummy arcu urna pulvinar nibh. ',
     'Nam pharetra. ',
-    'Nam rhoncus, lectus vel hendrerit congue, nisl lorem feugiat ante, in fermentum erat nulla tristique arcu. ',
+    'Nam rhoncus, lectus vel hendrerit congue, nisl lorem feugiat ante, in'
+    ' fermentum erat nulla tristique arcu. ',
     'Mauris et dolor. ',
-    'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec gravida, ante vel ornare lacinia, orci enim porta est, eget sollicitudin lectus lectus eget lacus. ',
+    'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere'
+    ' cubilia Curae; Donec gravida, ante vel ornare lacinia, orci enim porta'
+    ' est, eget sollicitudin lectus lectus eget lacus. ',
     'Praesent a lacus vitae turpis consequat semper. ',
-    'In commodo, dolor quis fermentum ullamcorper, urna massa volutpat massa, vitae mattis purus arcu nec nulla. ',
+    'In commodo, dolor quis fermentum ullamcorper, urna massa volutpat'
+    ' massa, vitae mattis purus arcu nec nulla. ',
     'In hac habitasse platea dictumst. ',
     'Praesent scelerisque. ',
     'Nullam sapien mauris, venenatis at, fermentum at, tempus eu, urna. ',
@@ -63,13 +69,15 @@ foo = [
     'Maecenas rhoncus rhoncus ipsum. ',
     'Donec nonummy lacinia leo. ',
     'Aenean turpis ipsum, rhoncus vitae, posuere vitae, euismod sed, ligula. ',
-    'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. ',
+    'Pellentesque habitant morbi tristique senectus et netus et malesuada'
+    ' fames ac turpis egestas. ',
     'Mauris tempus diam. ',
     'Maecenas justo. ',
     'Sed a lorem ut est tincidunt consectetuer. ',
     'Ut eu metus id lectus vestibulum ultrices. ',
     'Suspendisse lectus. ',
-    'Vivamus posuere, ante eu tempor dictum, felis nibh facilisis sem, eu auctor metus nulla non lorem. ',
+    'Vivamus posuere, ante eu tempor dictum, felis nibh facilisis sem, eu'
+    ' auctor metus nulla non lorem. ',
     'Suspendisse potenti. ',
     'Integer fringilla. ',
     'Morbi urna. ',
@@ -78,15 +86,18 @@ foo = [
     'Morbi a mauris. ',
     'Pellentesque suscipit accumsan massa. ',
     'Quisque arcu ante, cursus in, ornare quis, viverra ut, justo. ',
-    'Quisque facilisis, urna sit amet pulvinar mollis, purus arcu adipiscing velit, non condimentum diam purus eu massa. ',
+    'Quisque facilisis, urna sit amet pulvinar mollis, purus arcu adipiscing'
+    ' velit, non condimentum diam purus eu massa. ',
     'Suspendisse potenti. ',
     'Phasellus nisi metus, tempus sit amet, ultrices ac, porta nec, felis. ',
     'Aliquam metus. ',
     'Nam a nunc. ',
     'Vivamus feugiat. ',
     'Nunc metus. ',
-    'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Vivamus eu orci. ',
-    'Sed elementum, felis quis porttitor sollicitudin, augue nulla sodales sapien, sit amet posuere quam purus at lacus. ',
+    'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere'
+    ' cubilia Curae; Vivamus eu orci. ',
+    'Sed elementum, felis quis porttitor sollicitudin, augue nulla sodales'
+    ' sapien, sit amet posuere quam purus at lacus. ',
     'Curabitur tincidunt tellus nec purus. ',
     'Nam consectetuer mollis dolor. ',
     'Sed quis elit. ',
@@ -108,10 +119,12 @@ foo = [
     'Mauris ac massa vestibulum nisl facilisis viverra. ',
     'Phasellus magna sem, vulputate eget, ornare sed, dignissim sit amet, pede. ',
     'Aenean justo ipsum, luctus ut, volutpat laoreet, vehicula in, libero. ',
-    'Praesent semper, neque vel condimentum hendrerit, lectus elit pretium ligula, nec consequat nisl velit at dui. ',
+    'Praesent semper, neque vel condimentum hendrerit, lectus elit pretium'
+    'ligula, nec consequat nisl velit at dui. ',
     'Proin dolor sapien, adipiscing id, sagittis eu, molestie viverra, mauris. ',
     'Aenean ligula. ',
-    'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. ',
+    'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere'
+    ' cubilia Curae; Suspendisse potenti. ',
     'Etiam pharetra lacus sed velit imperdiet bibendum. ',
     'Nunc in turpis ac lacus eleifend sagittis. ',
     'Nam massa turpis, nonummy et, consectetuer id, placerat ac, ante. ',
@@ -161,7 +174,8 @@ foo = [
     'Fusce consectetuer tellus ut nisl. ',
     'Curabitur risus urna, placerat et, luctus pulvinar, auctor vel, orci. ',
     'Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. ',
-    'Praesent aliquet, neque pretium congue mattis, ipsum augue dignissim ante, ac pretium nisl lectus at magna. ',
+    'Praesent aliquet, neque pretium congue mattis, ipsum augue dignissim ante, ac'
+    ' pretium nisl lectus at magna. ',
     'Vivamus quis mi. ',
     'Nam sed nisl nec elit suscipit ullamcorper. ',
     'Donec tempus quam quis neque. ',
@@ -178,69 +192,52 @@ foo = [
 
 
 class LorumImpsum(inkex.EffectExtension):
-    def __init__(self):
-        super(LorumImpsum, self).__init__()
-        self.arg_parser.add_argument("--title")
-        self.arg_parser.add_argument("-n", "--numberofparagraphs",
-                                     type=int,
-                                     dest="num", default=5,
-                                     help="Number of paragraphs to generate")
-        self.arg_parser.add_argument("-c", "--sentencecount",
-                                     type=int,
-                                     dest="sentencecount", default=16,
-                                     help="Number of Sentences")
-        self.arg_parser.add_argument("-f", "--fluctuation",
-                                     type=int,
-                                     dest="fluctuation", default=4,
-                                     help="+/-")
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+    """Generate text with psuedo latin content"""
+    def add_arguments(self, pars):
+        pars.add_argument("--title")
+        pars.add_argument("-n", "--numberofparagraphs", type=int, dest="num", default=5,
+                          help="Number of paragraphs to generate")
+        pars.add_argument("-c", "--sentencecount", type=int, default=16,
+                          help="Number of Sentences")
+        pars.add_argument("-f", "--fluctuation", type=int, default=4, help="+/-")
+        pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
 
-        self.first_sentence = 1
-
-    def makePara(self):
+    def make_paragraph(self, text_index=0):
+        """Make a paragraph"""
         _min = max(1, self.options.sentencecount - self.options.fluctuation)
         _max = max(2, self.options.sentencecount + self.options.fluctuation)
         scount = int(random.random() * _max + _min)
-        text = ''
-        for i in range(scount):
-            if self.first_sentence == 1:
-                text += foo[0]
-                self.first_sentence = 0
+        for sentence in range(scount):
+            if text_index + sentence == 0:
+                yield CORPA[0]
             else:
-                index = int(random.random() * (len(foo) - 1))
-                text += foo[index]
-        return text
+                index = int(random.random() * (len(CORPA) - 1))
+                yield CORPA[index]
 
-    def addText(self, node):
-        for i in range(self.options.num):
+    def add_text(self, node):
+        """Create many flowed text paragraph and append to node"""
+        for text_index in range(self.options.num):
             para = node.add(FlowPara())
-            para.text = self.makePara()
+            para.text = ''.join(self.make_paragraph(text_index))
             node.append(FlowPara())
 
     def effect(self):
-        found = 0
+        # Existing text flow to insert new text into
         for node in self.svg.get_selected(FlowRoot):
-            found += 1
-            if found == 1:
-                self.addText(node)
+            self.add_text(node)
+            return
 
-        if found == 0:
-            group = self.svg.add(Group())
-            group.set('inkscape:label', 'lorum ipsum')
-            group.set('inkscape:groupmode', 'layer')
-            root = group.add(FlowRoot())
-            root.set('xml:space', 'preserve')
-            region = root.add(FlowRegion())
+        # New text layer with lorum ipsum content
+        group = self.svg.add(Group.create('lorum ipsum', True))
+        root = group.add(FlowRoot())
+        root.set('xml:space', 'preserve')
+        region = root.add(FlowRegion())
 
-            region.add(Rectangle(x='0', y='0',\
-                width=str(int(self.svg.width)),\
-                height=str(int(self.svg.height))))
+        region.add(Rectangle(x='0', y='0',\
+            width=str(int(self.svg.width)),\
+            height=str(int(self.svg.height))))
 
-            self.addText(root)
-            self.svg.append(group)
+        self.add_text(root)
 
 
 if __name__ == '__main__':

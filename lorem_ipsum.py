@@ -228,15 +228,21 @@ class LorumImpsum(inkex.EffectExtension):
             return
 
         # New text layer with lorum ipsum content
-        group = self.svg.add(Group.create('lorum ipsum', True))
-        root = group.add(FlowRoot())
+        root = FlowRoot()
         root.set('xml:space', 'preserve')
         region = root.add(FlowRegion())
 
-        region.add(Rectangle(x='0', y='0',\
-            width=str(int(self.svg.width)),\
-            height=str(int(self.svg.height))))
+        shape = self.svg.get_first_selected()
+        if shape is not None:
+            parent = shape.getparent()
+            region.add(shape.copy())
+        else:
+            parent = self.svg.add(Group.create('lorum ipsum', True))
+            region.add(Rectangle(x='0', y='0',\
+                width=str(int(self.svg.width)),\
+                height=str(int(self.svg.height))))
 
+        parent.add(root)
         self.add_text(root)
 
 

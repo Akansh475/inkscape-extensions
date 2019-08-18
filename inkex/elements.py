@@ -26,6 +26,7 @@ give path, transform, and property access easily.
 import math
 
 from lxml import etree
+from copy import deepcopy
 
 from .paths import Path
 from .styles import Style
@@ -231,6 +232,10 @@ class BaseElement(etree.ElementBase):
         """Delete this node from it's parent node"""
         if self.getparent():
             self.getparent().remove(self)
+
+    def copy(self):
+        """Make a copy of the element and return it"""
+        return deepcopy(self)
 
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to

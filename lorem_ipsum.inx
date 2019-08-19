@@ -10,7 +10,7 @@
             <param name="fluctuation" type="int" min="1" max="100" _gui-text="Paragraph length fluctuation (sentences):">4</param>
         </page>
         <page name="Help" _gui-text="Help">
-            <_param name="title" type="description">This effect creates the standard "Lorem Ipsum" pseudolatin placeholder text. If a flowed text is selected, Lorem Ipsum is added to it; otherwise a new flowed text object, the size of the page, is created in a new layer.</_param>
+            <_param name="title" type="description">This effect creates the standard "Lorem Ipsum" pseudolatin placeholder text. If a flowed text is selected, Lorem Ipsum is added to it; otherwise a new flowed text object, the size of the page, is created in a new layer. If a shape (such as a path) is selected, the flowed text will flow into that shape instead of the page.</_param>
         </page>
     </param>
     <effect>

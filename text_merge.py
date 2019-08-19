@@ -27,9 +27,14 @@ Merge text blocks together.
 """
 
 import inkex
+from inkex.utils import KeyDict
 from inkex.elements import (
     Rectangle, FlowRoot, FlowPara, FlowRegion, TextElement, Tspan
 )
+
+# Old settings, supported because users click 'ok' without looking.
+XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})
+YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
 
 class Merge(inkex.EffectExtension):
     """Merge text blocks together"""
@@ -54,8 +59,8 @@ class Merge(inkex.EffectExtension):
                 # get the bounding box
                 bbox = node.bounding_box()
 
-                x = getattr(bbox, self.options.xanchor)
-                y = getattr(bbox, self.options.yanchor)
+                x = getattr(bbox, XAN[self.options.xanchor])
+                y = getattr(bbox, YAN[self.options.yanchor])
 
                 # direction chosen
                 if self.options.direction == "tb":

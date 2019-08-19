@@ -54,6 +54,17 @@ NSS = {
 }
 SSN = dict((b, a) for (a, b) in NSS.items())
 
+class KeyDict(dict):
+    """
+    A normal dictionary, except asking for anything not in the dictionary
+    always returns the key itself. This is used for translation dictionaries.
+    """
+    def __getitem__(self, key):
+        try:
+            return super(KeyDict, self).__getitem__(key)
+        except KeyError:
+            return key
+
 class TemporaryDirectory(object): # pylint: disable=too-few-public-methods
     """Tiny replacement for python3's version."""
     def __init__(self, suffix="", prefix="tmp"):

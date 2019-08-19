@@ -27,34 +27,25 @@ import sys
 
 _ = gettext.gettext
 
+# The default gettext domain is 'inkscape' this is because previously
+# we used the central translation dictionary for the translations
+# and now we want to support extensions that have their own.
+GETTEXT_DOMAIN = os.environ.get('INKEX_GETTEXT_DOMAIN', 'inkscape')
 
-def localize():
+# The package locale dir is primary, inkscape is secondary and finally
+# is None, which should default to the system settings.
+LOCALEDIR = os.environ.get('PACKAGE_LOCALE_DIR', \
+    os.environ.get('INKSCAPE_LOCALEDIR', None))
+
+def localize(domain=GETTEXT_DOMAIN, localdir=LOCALEDIR):
     """Turn on localisation for any platform"""
-    domain = 'inkscape'
+    languages = None
     if sys.platform.startswith('win'):
         import locale
         current_locale, _ = locale.getdefaultlocale()
         os.environ['LANG'] = current_locale
-        try:
-            localdir = os.environ['INKSCAPE_LOCALEDIR']
-            trans = gettext.translation(domain, localdir, [current_locale], fallback=True)
-        except KeyError:
-            trans = gettext.translation(domain, fallback=True)
-    elif sys.platform.startswith('darwin'):
-        try:
-            localdir = os.environ['INKSCAPE_LOCALEDIR']
-            trans = gettext.translation(domain, localdir, fallback=True)
-        except KeyError:
-            try:
-                localdir = os.environ['PACKAGE_LOCALE_DIR']
-                trans = gettext.translation(domain, localdir, fallback=True)
-            except KeyError:
-                trans = gettext.translation(domain, fallback=True)
-    else:
-        try:
-            localdir = os.environ['PACKAGE_LOCALE_DIR']
-            trans = gettext.translation(domain, localdir, fallback=True)
-        except KeyError:
-            trans = gettext.translation(domain, fallback=True)
+        languages = [current_locale]
+
     # sys.stderr.write(str(localdir) + "\n")
+    trans = gettext.translation(domain, localdir, languages, fallback=True)
     trans.install()

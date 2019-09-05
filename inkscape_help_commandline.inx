@@ -3,8 +3,8 @@
   <_name>Command Line Options</_name>
   <id>org.inkscape.help.commandline</id>
   <dependency type="executable" location="extensions">launch_webbrowser.py</dependency>
-  <!-- i18n. Please don't translate it unless a page exists in your language -->
-  <_param name="url" gui-hidden="true" type="string">http://inkscape.org/doc/inkscape-man.html</_param>
+  <!-- i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/doc/inkscape-man.[lang].html -->
+  <_param name="url" gui-hidden="true" type="string">https://inkscape.org/doc/inkscape-man.html</_param>
   <effect needs-document="false">
     <object-type>all</object-type>
     <effects-menu hidden="true" />

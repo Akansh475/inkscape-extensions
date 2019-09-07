@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
-    <_name>Desktop</_name>
+    <name>Desktop</name>
     <id>org.inkscape.render.empty_desktop</id>
     <dependency type="executable" location="extensions">empty_desktop.py</dependency>
 
-    <param name="size" _gui-text="Desktop size:" type="enum">
-        <_item value="Custom">Custom</_item>
-        <item value="640x480">640x480 (VGA)</item>
-        <item value="800x600">800x600 (SVGA)</item>
-        <item value="1024x768">1024x768 (XGA)</item>
-        <item value="1366x768">1366x768 (HD)</item>
-        <item value="1600x900">1600x900 (HD+)</item>
-        <item value="1600x1200">1600x1200 (UXGA)</item>
-        <item value="1920x1080">1920x1080 (FHD)</item>
-        <item value="1920x1200">1920x1200 (WUXGA)</item>
-        <item value="2560x1600">2560x1600 (WQXGA)</item>
-        <item value="3840x2160">3840x2160 (4K)</item>
-        <item value="5120x2880">5120x2880 (5K)</item>
-        <item value="7680x4320">7680x4320 (8K)</item>
+    <param name="size" gui-text="Desktop size:" type="optiongroup" appearance="combo">
+        <option value="Custom">Custom</option>
+        <option translatable="no" value="640x480">640x480 (VGA)</option>
+        <option translatable="no" value="800x600">800x600 (SVGA)</option>
+        <option translatable="no" value="1024x768">1024x768 (XGA)</option>
+        <option translatable="no" value="1366x768">1366x768 (HD)</option>
+        <option translatable="no" value="1600x900">1600x900 (HD+)</option>
+        <option translatable="no" value="1600x1200">1600x1200 (UXGA)</option>
+        <option translatable="no" value="1920x1080">1920x1080 (FHD)</option>
+        <option translatable="no" value="1920x1200">1920x1200 (WUXGA)</option>
+        <option translatable="no" value="2560x1600">2560x1600 (WQXGA)</option>
+        <option translatable="no" value="3840x2160">3840x2160 (4K)</option>
+        <option translatable="no" value="5120x2880">5120x2880 (5K)</option>
+        <option translatable="no" value="7680x4320">7680x4320 (8K)</option>
     </param>
 
     <!-- Maximum size is '16k' -->
-    <param name="width"  _gui-text="Custom Width:"  type="int" min="240" max="15360">1920</param>
-    <param name="height" _gui-text="Custom Height:" type="int" min="160" max="8640">1080</param>
+    <param name="width"  gui-text="Custom Width:"  type="int" min="240" max="15360">1920</param>
+    <param name="height" gui-text="Custom Height:" type="int" min="160" max="8640">1080</param>
 
     <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu hidden="true" />
     </effect>
-    <inkscape:_templateinfo>
-      <inkscape:_name>Desktop...</inkscape:_name>
+    <inkscape:templateinfo>
+      <inkscape:name>Desktop...</inkscape:name>
       <inkscape:author>Tavmjong Bah</inkscape:author>
-      <inkscape:_shortdesc>Empty desktop of chosen size.</inkscape:_shortdesc>
+      <inkscape:shortdesc>Empty desktop of chosen size.</inkscape:shortdesc>
       <inkscape:date>2014-10-09</inkscape:date>
-      <inkscape:_keywords>empty desktop</inkscape:_keywords>
-    </inkscape:_templateinfo>
+      <inkscape:keywords>empty desktop</inkscape:keywords>
+    </inkscape:templateinfo>
     <script>
         <command reldir="extensions" interpreter="python">empty_desktop.py</command>
     </script>

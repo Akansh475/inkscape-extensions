@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Whirl</_name>
+    <name>Whirl</name>
     <id>org.ekips.filter.whirl</id>
     <dependency type="executable" location="extensions">whirl.py</dependency>
-    <param name="whirl" type="float" min="0.00" max="1000.00" _gui-text="Amount of whirl:">5.0</param>
-    <param name="rotation" type="boolean" _gui-text="Rotation is clockwise">true</param>
+    <param name="whirl" type="float" min="0.00" max="1000.00" gui-text="Amount of whirl:">5.0</param>
+    <param name="rotation" type="bool" gui-text="Rotation is clockwise">true</param>
     <effect>
         <object-type>path</object-type>
         <effects-menu>
-            <submenu _name="Modify Path"/>
+            <submenu name="Modify Path"/>
         </effects-menu>
     </effect>
     <script>

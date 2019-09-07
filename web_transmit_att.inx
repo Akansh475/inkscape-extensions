@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Transmit Attributes</_name>
+  <name>Transmit Attributes</name>
   <id>org.inkscape.web.transmit-att</id>
   <dependency type="executable" location="extensions">web_transmit_att.py</dependency>
     <param name="tab" type="notebook">
-        <page name="Options" _gui-text="Options">
-            <param name="att" type="string" _gui-text="Attribute to transmit:">fill</param>
-            <param name="when" type="enum" _gui-text="When to transmit:">
-                <_item value="onclick">on click</_item>
-                <_item value="onfocusin">on focus</_item>
-                <_item value="onfocusout">on blur</_item>
-                <_item value="onactivate">on activate</_item>
-                <_item value="onmousedown">on mouse down</_item>
-                <_item value="onmouseup">on mouse up</_item>
-                <_item value="onmouseover">on mouse over</_item>
-                <_item value="onmousemove">on mouse move</_item>
-                <_item value="onmouseout">on mouse out</_item>
-                <_item value="onload">on element loaded</_item>
+        <page name="Options" gui-text="Options">
+            <param name="att" type="string" gui-text="Attribute to transmit:">fill</param>
+            <param name="when" type="optiongroup" appearance="combo" gui-text="When to transmit:">
+                <option value="onclick">on click</option>
+                <option value="onfocusin">on focus</option>
+                <option value="onfocusout">on blur</option>
+                <option value="onactivate">on activate</option>
+                <option value="onmousedown">on mouse down</option>
+                <option value="onmouseup">on mouse up</option>
+                <option value="onmouseover">on mouse over</option>
+                <option value="onmousemove">on mouse move</option>
+                <option value="onmouseout">on mouse out</option>
+                <option value="onload">on element loaded</option>
             </param>
-            <param name="compatibility" type="enum" _gui-text="Compatibility with previews code to this event:">
-                <_item value="append">Run it after</_item>
-                <_item value="prepend">Run it before</_item>
-                <_item value="replace">Replace</_item>
+            <param name="compatibility" type="optiongroup" appearance="combo" gui-text="Compatibility with previews code to this event:">
+                <option value="append">Run it after</option>
+                <option value="prepend">Run it before</option>
+                <option value="replace">Replace</option>
             </param>
-            <_param name="help" type="description">The next parameter is useful when you select more than two elements</_param>
-            <param name="from-and-to" type="enum" _gui-text="Source and destination of transmitting:">
-                <_item value="g-to-one">All selected ones transmit to the last one</_item>
-                <_item value="one-to-g">The first selected transmits to all others</_item>
+            <label>The next parameter is useful when you select more than two elements</label>
+            <param name="from-and-to" type="optiongroup" appearance="combo" gui-text="Source and destination of transmitting:">
+                <option value="g-to-one">All selected ones transmit to the last one</option>
+                <option value="one-to-g">The first selected transmits to all others</option>
             </param>
         </page>
-        <page name="Help" _gui-text="Help">
-            <_param name="intro" type="description">This effect adds a feature visible (or usable) only on a SVG enabled web browser (like Firefox).</_param>
-            <_param name="desc1" type="description">This effect transmits one or more attributes from the first selected element to the second when an event occurs.</_param>
-            <_param name="desc2" type="description">If you want to transmit more than one attribute, you should separate this with a space, and only with a space.</_param>
+        <page name="Help" gui-text="Help">
+            <label>This effect adds a feature visible (or usable) only on a SVG enabled web browser (like Firefox).</label>
+            <label>This effect transmits one or more attributes from the first selected element to the second when an event occurs.</label>
+            <label>If you want to transmit more than one attribute, you should separate this with a space, and only with a space.</label>
         </page>
     </param>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu _name="Web">
-                <submenu _name="JavaScript"/>
+            <submenu name="Web">
+                <submenu name="JavaScript"/>
             </submenu>
         </effects-menu>
     </effect>

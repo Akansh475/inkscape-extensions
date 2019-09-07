@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Create a slicer rectangle</_name>
+  <name>Create a slicer rectangle</name>
   <id>org.inkscape.web.slicer.create-rect</id>
   <dependency type="executable" location="extensions">webslicer_effect.py</dependency>
   <dependency type="executable" location="extensions">webslicer_create_rect.py</dependency>
-  <param name="name" type="string" _gui-text="Name:"></param>
-  <param name="format" type="enum" _gui-text="Format:">
-    <item value="png">PNG</item>
-    <item value="jpg">JPG</item>
-    <item value="gif">GIF</item>
+  <param name="name" type="string" gui-text="Name:"></param>
+  <param name="format" type="optiongroup" appearance="combo" gui-text="Format:">
+    <option translatable="no" value="png">PNG</option>
+    <option translatable="no" value="jpg">JPG</option>
+    <option translatable="no" value="gif">GIF</option>
   </param>
-  <param name="dpi" type="float" min="1" max="9999" _gui-text="DPI:">96</param>
-  <param name="dimension" type="string" _gui-text="Force Dimension:"></param>
+  <param name="dpi" type="float" min="1" max="9999" gui-text="DPI:">96</param>
+  <param name="dimension" type="string" gui-text="Force Dimension:"></param>
 <!-- i18n. Description duplicated in a fake value attribute in order to make it translatable -->
-  <_param name="help-dimension1" type="description">Force Dimension must be set as &lt;width&gt;x&lt;height&gt;</_param>
-  <_param name="help-dimension2" type="description">If set, this will replace DPI.</_param>
-  <param name="bg-color" type="string" _gui-text="Background color:"></param>
+  <label>Force Dimension must be set as &lt;width&gt;x&lt;height&gt;</label>
+  <label>If set, this will replace DPI.</label>
+  <param name="bg-color" type="string" gui-text="Background color:"></param>
   <param name="tab" type="notebook">
-    <page name="tabJPG" _gui-text="JPG">
-      <_param name="help-jpg" type="description" appearance="header">JPG specific options</_param>
-      <param name="quality" type="int" min="0" max="100" _gui-text="Quality:">85</param>
-      <_param name="help-quality" type="description">0 is the lowest image quality and highest compression, and 100 is the best quality but least effective compression</_param>
+    <page name="tabJPG" gui-text="JPG">
+      <label appearance="header">JPG specific options</label>
+      <param name="quality" type="int" min="0" max="100" gui-text="Quality:">85</param>
+      <label>0 is the lowest image quality and highest compression, and 100 is the best quality but least effective compression</label>
     </page>
-    <page name="tabGIF" _gui-text="GIF">
-      <_param name="help-gif" type="description" appearance="header">GIF specific options</_param>
-      <param name="gif-type" type="enum" _gui-text="Type:">
-        <_item value="grayscale">Grayscale</_item>
-        <_item value="palette">Palette</_item>
+    <page name="tabGIF" gui-text="GIF">
+      <label appearance="header">GIF specific options</label>
+      <param name="gif-type" type="optiongroup" appearance="combo" gui-text="Type:">
+        <option value="grayscale">Grayscale</option>
+        <option value="palette">Palette</option>
       </param>
-      <param name="palette-size" type="int" min="2" max="256" _gui-text="Palette size:">256</param>
+      <param name="palette-size" type="int" min="2" max="256" gui-text="Palette size:">256</param>
     </page>
-    <page name="tabHTML" _gui-text="HTML">
-      <param name="html-id" type="string" _gui-text="HTML id attribute:"></param>
-      <param name="html-class" type="string" _gui-text="HTML class attribute:"></param>
-      <_param name="help-gif" type="description" appearance="header">Options for HTML export</_param>
-      <param name="layout-disposition" type="enum" _gui-text="Layout disposition:">
-        <_item value="bg-el-norepeat">Positioned html block element with the image as Background</_item>
-        <_item value="bg-parent-repeat">Tiled Background (on parent group)</_item>
-        <_item value="bg-parent-repeat-x">Background — repeat horizontally (on parent group)</_item>
-        <_item value="bg-parent-repeat-y">Background — repeat vertically (on parent group)</_item>
-        <_item value="bg-parent-norepeat">Background — no repeat (on parent group)</_item>
-        <_item value="img-pos">Positioned Image</_item>
-        <_item value="img-nonpos">Non Positioned Image</_item>
-        <_item value="img-float-left">Left Floated Image</_item>
-        <_item value="img-float-right">Right Floated Image</_item>
+    <page name="tabHTML" gui-text="HTML">
+      <param name="html-id" type="string" gui-text="HTML id attribute:"></param>
+      <param name="html-class" type="string" gui-text="HTML class attribute:"></param>
+      <label appearance="header">Options for HTML export</label>
+      <param name="layout-disposition" type="optiongroup" appearance="combo" gui-text="Layout disposition:">
+        <option value="bg-el-norepeat">Positioned html block element with the image as Background</option>
+        <option value="bg-parent-repeat">Tiled Background (on parent group)</option>
+        <option value="bg-parent-repeat-x">Background — repeat horizontally (on parent group)</option>
+        <option value="bg-parent-repeat-y">Background — repeat vertically (on parent group)</option>
+        <option value="bg-parent-norepeat">Background — no repeat (on parent group)</option>
+        <option value="img-pos">Positioned Image</option>
+        <option value="img-nonpos">Non Positioned Image</option>
+        <option value="img-float-left">Left Floated Image</option>
+        <option value="img-float-right">Right Floated Image</option>
       </param>
-      <param name="layout-position-anchor" type="enum" _gui-text="Position anchor:">
-        <_item value="tl">Top and Left</_item>
-        <_item value="tc">Top and Center</_item>
-        <_item value="tr">Top and right</_item>
-        <_item value="ml">Middle and Left</_item>
-        <_item value="mc">Middle and Center</_item>
-        <_item value="mr">Middle and Right</_item>
-        <_item value="bl">Bottom and Left</_item>
-        <_item value="bc">Bottom and Center</_item>
-        <_item value="br">Bottom and Right</_item>
+      <param name="layout-position-anchor" type="optiongroup" appearance="combo" gui-text="Position anchor:">
+        <option value="tl">Top and Left</option>
+        <option value="tc">Top and Center</option>
+        <option value="tr">Top and right</option>
+        <option value="ml">Middle and Left</option>
+        <option value="mc">Middle and Center</option>
+        <option value="mr">Middle and Right</option>
+        <option value="bl">Bottom and Left</option>
+        <option value="bc">Bottom and Center</option>
+        <option value="br">Bottom and Right</option>
       </param>
     </page>
   </param>
   <effect needs-live-preview="false">
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="Web">
-        <submenu _name="Slicer"/>
+      <submenu name="Web">
+        <submenu name="Slicer"/>
       </submenu>
     </effects-menu>
   </effect>

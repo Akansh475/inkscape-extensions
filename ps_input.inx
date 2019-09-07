@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>PostScript Input</_name>
+    <name>PostScript Input</name>
     <id>org.inkscape.input.ps</id>
     <dependency type="extension">org.inkscape.input.pdf</dependency>
     <dependency type="executable" location="path">ps2pdf</dependency>
@@ -8,8 +8,8 @@
     <input>
         <extension>.ps</extension>
         <mimetype>image/x-postscript</mimetype>
-        <_filetypename>PostScript (*.ps)</_filetypename>
-        <_filetypetooltip>PostScript</_filetypetooltip>
+        <filetypename>PostScript (*.ps)</filetypename>
+        <filetypetooltip>PostScript</filetypetooltip>
         <output_extension>org.inkscape.output.ps</output_extension>
     </input>
     <script>

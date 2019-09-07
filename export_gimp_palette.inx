@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Export as GIMP Palette</_name>
+    <name>Export as GIMP Palette</name>
     <id>com.kaioa.export_gimp_palette</id>
     <dependency type="executable" location="extensions">export_gimp_palette.py</dependency>
     <output>
         <extension>.gpl</extension>
         <mimetype>text/plain</mimetype>
-        <_filetypename>GIMP Palette (*.gpl)</_filetypename>
-        <_filetypetooltip>Exports the colors of this document as GIMP Palette</_filetypetooltip>
+        <filetypename>GIMP Palette (*.gpl)</filetypename>
+        <filetypetooltip>Exports the colors of this document as GIMP Palette</filetypetooltip>
     </output>
     <script>
         <command reldir="extensions" interpreter="python">export_gimp_palette.py</command>

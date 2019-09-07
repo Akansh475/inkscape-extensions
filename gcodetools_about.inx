@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>About</_name>
+    <name>About</name>
     <id>ru.cnc-club.filter.gcodetools_about_no_options_no_preferences</id>
     <dependency type="executable" location="extensions">gcodetools.py</dependency>
     <param name='active-tab' type="notebook">
 
-        <page name='about' _gui-text='About'>
-            <_param name="help" type="description" xml:space="preserve">Gcodetools was developed to make simple Gcode from Inkscape's paths. Gcode is a special format which is used in most of CNC machines. So Gcodetools allows you to use Inkscape as CAM program.
+        <page name='about' gui-text='About'>
+            <label xml:space="preserve">Gcodetools was developed to make simple Gcode from Inkscape's paths. Gcode is a special format which is used in most of CNC machines. So Gcodetools allows you to use Inkscape as CAM program.
 
 It can be used with a lot of machine types:
     Mills
@@ -17,11 +17,11 @@ It can be used with a lot of machine types:
     Plotters
     etc.
 
-To get more info visit developers page at http://www.cnc-club.ru/gcodetools</_param>
+To get more info visit developers page at http://www.cnc-club.ru/gcodetools</label>
         </page>
 
-        <page name='help' _gui-text='Help'>
-            <_param name="fullhelp" type="description" xml:space="preserve">
+        <page name='help' gui-text='Help'>
+            <label xml:space="preserve">
 Gcodetools plug-in:
 Converts paths to Gcode (using circular interpolation), makes offset paths and engraves sharp corners using cone cutters.
 This plug-in calculates Gcode for paths using circular interpolation or linear motion when needed.
@@ -36,7 +36,7 @@ and Russian support forum:
 Credits: Nick Drobchenko, Vladimir Kalyaev, John Brooker, Henry Nicolas, Chris Lusby Taylor.
 
 Gcodetools ver. 1.7
-</_param>
+</label>
 
         </page>
 
@@ -44,7 +44,7 @@ Gcodetools ver. 1.7
     <effect>
         <object-type>path</object-type>
         <effects-menu>
-            <submenu _name="Gcodetools"/>
+            <submenu name="Gcodetools"/>
         </effects-menu>
     </effect>
     <script>

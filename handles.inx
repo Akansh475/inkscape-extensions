@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Draw Handles</_name>
+    <name>Draw Handles</name>
     <id>org.ekips.filter.handles</id>
     <dependency type="executable" location="extensions">handles.py</dependency>
     <effect>
         <object-type>path</object-type>
         <effects-menu>
-            <submenu _name="Visualize Path" />
+            <submenu name="Visualize Path" />
         </effects-menu>
     </effect>
     <script>

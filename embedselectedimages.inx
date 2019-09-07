@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Embed Selected Images</_name>
+  <name>Embed Selected Images</name>
   <id>org.ekips.filter.embedselectedimages</id>
   <dependency type="executable" location="extensions">embedimage.py</dependency>
-  <param name="selectedonly" type="boolean" gui-hidden="true" _gui-text="Embed only selected images">true</param>
+  <param name="selectedonly" type="bool" gui-hidden="true" gui-text="Embed only selected images">true</param>
   <effect needs-live-preview="false">
     <object-type>all</object-type>
     <effects-menu hidden="true" />

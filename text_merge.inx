@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Merge</_name>
+  <name>Merge</name>
   <id>org.inkscape.text.merge</id>
   <dependency type="executable" location="extensions">text_merge.py</dependency>
-  <param name="direction" type="enum" _gui-text="Text direction:">
-    <_item value="lr">Left to right</_item>
-    <_item value="bt">Bottom to top</_item>
-    <_item value="rl">Right to left</_item>
-    <_item value="tb">Top to bottom</_item>
+  <param name="direction" type="optiongroup" appearance="combo" gui-text="Text direction:">
+    <option value="lr">Left to right</option>
+    <option value="bt">Bottom to top</option>
+    <option value="rl">Right to left</option>
+    <option value="tb">Top to bottom</option>
   </param>
-  <param name="xanchor" type="enum" _gui-text="Horizontal point:">
-    <_item value="left">Left</_item>
-    <_item value="center_x">Middle</_item>
-    <_item value="right">Right</_item>
+  <param name="xanchor" type="optiongroup" appearance="combo" gui-text="Horizontal point:">
+    <option value="left">Left</option>
+    <option value="center_x">Middle</option>
+    <option value="right">Right</option>
   </param>
-  <param name="yanchor" type="enum" _gui-text="Vertical point:">
-    <_item value="top">Top</_item>
-    <_item value="center_y">Middle</_item>
-    <_item value="bottom">Bottom</_item>
+  <param name="yanchor" type="optiongroup" appearance="combo" gui-text="Vertical point:">
+    <option value="top">Top</option>
+    <option value="center_y">Middle</option>
+    <option value="bottom">Bottom</option>
   </param>
-<!--  <param name="flowtext" type="boolean" _gui-text="Flow text">false</param> -->
-  <param name="keepstyle" type="boolean" _gui-text="Keep style">true</param>
+<!--  <param name="flowtext" type="bool" gui-text="Flow text">false</param> -->
+  <param name="keepstyle" type="bool" gui-text="Keep style">true</param>
   <effect>
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="Text"/>
+      <submenu name="Text"/>
     </effects-menu>
   </effect>
   <script>

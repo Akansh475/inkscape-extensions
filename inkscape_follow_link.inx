@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Follow Link</_name>
+  <name>Follow Link</name>
   <id>org.inkscape.followlink</id>
   <dependency type="executable" location="extensions">inkscape_follow_link.py</dependency>
   <effect needs-live-preview="false">

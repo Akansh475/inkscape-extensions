@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>EPS Input</_name>
+    <name>EPS Input</name>
     <id>org.inkscape.input.eps</id>
     <dependency type="extension">org.inkscape.input.pdf</dependency>    
     <dependency type="executable" location="path">ps2pdf</dependency>
     <dependency type="executable" location="extensions">ps_input.py</dependency>
-    <param name="crop" type="boolean" gui-hidden="true">true</param>
+    <param name="crop" type="bool" gui-hidden="true">true</param>
     <input>
         <extension>.eps</extension>
         <mimetype>image/x-encapsulated-postscript</mimetype>
-        <_filetypename>Encapsulated PostScript (*.eps)</_filetypename>
-        <_filetypetooltip>Encapsulated PostScript</_filetypetooltip>
+        <filetypename>Encapsulated PostScript (*.eps)</filetypename>
+        <filetypetooltip>Encapsulated PostScript</filetypetooltip>
         <output_extension>org.inkscape.output.eps</output_extension>
     </input>
     <script>

@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Set a layout group</_name>
+    <name>Set a layout group</name>
     <id>org.inkscape.web.slicer.create-group</id>
     <dependency type="executable" location="extensions">webslicer_effect.py</dependency>
     <dependency type="executable" location="extensions">webslicer_create_group.py</dependency>
     <param name="tab" type="notebook">
-        <page name="Options" _gui-text="Options">
-            <param name="html-id" type="string" _gui-text="HTML id attribute:"></param>
-            <param name="html-class" type="string" _gui-text="HTML class attribute:"></param>
-            <param name="width-unity" type="enum" _gui-text="Width unit:">
-            <_item value="px">Pixel (fixed)</_item>
-            <_item value="percent">Percent (relative to parent size)</_item>
-            <_item value="undefined">Undefined (relative to non-floating content size)</_item>
+        <page name="Options" gui-text="Options">
+            <param name="html-id" type="string" gui-text="HTML id attribute:"></param>
+            <param name="html-class" type="string" gui-text="HTML class attribute:"></param>
+            <param name="width-unity" type="optiongroup" appearance="combo" gui-text="Width unit:">
+            <option value="px">Pixel (fixed)</option>
+            <option value="percent">Percent (relative to parent size)</option>
+            <option value="undefined">Undefined (relative to non-floating content size)</option>
             </param>
-            <param name="height-unity" type="enum" _gui-text="Height unit:">
-            <_item value="px">Pixel (fixed)</_item>
-            <_item value="percent">Percent (relative to parent size)</_item>
-            <_item value="undefined">Undefined (relative to non-floating content size)</_item>
+            <param name="height-unity" type="optiongroup" appearance="combo" gui-text="Height unit:">
+            <option value="px">Pixel (fixed)</option>
+            <option value="percent">Percent (relative to parent size)</option>
+            <option value="undefined">Undefined (relative to non-floating content size)</option>
             </param>
-            <param name="bg-color" type="string" _gui-text="Background color:"></param>
+            <param name="bg-color" type="string" gui-text="Background color:"></param>
         </page>
-        <page name="Help" _gui-text="Help">
-            <_param name="about" type="description">Layout Group is only about to help a better code generation (if you need it). To use this, you must to select some "Slicer rectangles" first.</_param>
+        <page name="Help" gui-text="Help">
+            <label>Layout Group is only about to help a better code generation (if you need it). To use this, you must to select some "Slicer rectangles" first.</label>
         </page>
     </param>
     <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>
-            <submenu _name="Web">
-                <submenu _name="Slicer"/>
+            <submenu name="Web">
+                <submenu name="Slicer"/>
             </submenu>
         </effects-menu>
     </effect>

@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Interpolate Attribute in a group</_name>
+    <name>Interpolate Attribute in a group</name>
     <id>org.inkscape.filter.interp-att-g</id>
     <dependency type="executable" location="extensions">interp_att_g.py</dependency>
     <param name="tab" type="notebook">
-        <page name="Options" _gui-text="Options">
-            <param name="att" type="enum" _gui-text="Attribute to Interpolate:">
-                <_item value="width">Width</_item>
-                <_item value="height">Height</_item>
-                <_item value="scale">Scale</_item>
-                <_item value="trans-x">Translate X</_item>
-                <_item value="trans-y">Translate Y</_item>
-                <_item value="fill">Fill</_item>
-                <_item value="opacity">Opacity</_item>
-                <_item value="other">Other</_item>
+        <page name="Options" gui-text="Options">
+            <param name="att" type="optiongroup" appearance="combo" gui-text="Attribute to Interpolate:">
+                <option value="width">Width</option>
+                <option value="height">Height</option>
+                <option value="scale">Scale</option>
+                <option value="trans-x">Translate X</option>
+                <option value="trans-y">Translate Y</option>
+                <option value="fill">Fill</option>
+                <option value="opacity">Opacity</option>
+                <option value="other">Other</option>
             </param>
             
-            <_param name="other-header" type="description" appearance="header">Other Attribute</_param>
-            <_param name="other-info" type="description">If you selected "Other" above, you must specify the details for this "other" here.</_param>
-            <param name="att-other" type="string" _gui-text="Other Attribute:" _gui-description="Examples: r, width, inkscape:rounded, sodipodi:sides"></param>
-            <param name="att-other-type" type="enum" _gui-text="Other Attribute type:">
-                <_item value="color">Color</_item>
-                <_item value="int">Integer Number</_item>
-                <_item value="float">Float Number</_item>
+            <label appearance="header">Other Attribute</label>
+            <label>If you selected "Other" above, you must specify the details for this "other" here.</label>
+            <param name="att-other" type="string" gui-text="Other Attribute:" gui-description="Examples: r, width, inkscape:rounded, sodipodi:sides"></param>
+            <param name="att-other-type" type="optiongroup" appearance="combo" gui-text="Other Attribute type:">
+                <option value="color">Color</option>
+                <option value="int">Integer Number</option>
+                <option value="float">Float Number</option>
             </param>
-            <param name="att-other-where" type="enum" _gui-text="Apply to:">
-                <_item value="tag">Tag</_item>
-                <_item value="style">Style</_item>
-                <_item value="transform">Transformation</_item>
+            <param name="att-other-where" type="optiongroup" appearance="combo" gui-text="Apply to:">
+                <option value="tag">Tag</option>
+                <option value="style">Style</option>
+                <option value="transform">Transformation</option>
             </param>
             
-            <_param name="numbers" type="description" appearance="header">Values</_param>
-            <param name="start-val" type="string" _gui-text="Start Value:" _gui-description="Examples: 0.5, 5, #rgb, #rrggbb or r, g, b"></param>
-            <param name="end-val" type="string" _gui-text="End Value:" _gui-description="Examples: 0.5, 5, #rgb, #rrggbb or r, g, b"></param>
-            <param name="unit" type="enum" _gui-text="Unit:">
-                <_item value="none">No Unit</_item>
-                <_item value="color">Color</_item>
-                <item value="px">px</item>
-                <item value="pt">pt</item>
-                <item value="in">in</item>
-                <item value="cm">cm</item>
-                <item value="mm">mm</item>
+            <label appearance="header">Values</label>
+            <param name="start-val" type="string" gui-text="Start Value:" gui-description="Examples: 0.5, 5, #rgb, #rrggbb or r, g, b"></param>
+            <param name="end-val" type="string" gui-text="End Value:" gui-description="Examples: 0.5, 5, #rgb, #rrggbb or r, g, b"></param>
+            <param name="unit" type="optiongroup" appearance="combo" gui-text="Unit:">
+                <option value="none">No Unit</option>
+                <option value="color">Color</option>
+                <option translatable="no" value="px">px</option>
+                <option translatable="no" value="pt">pt</option>
+                <option translatable="no" value="in">in</option>
+                <option translatable="no" value="cm">cm</option>
+                <option translatable="no" value="mm">mm</option>
             </param>
-            <param name="zsort" type="boolean" _gui-text="Use Z-order" _gui-description="Workaround for reversed selection order in Live Preview cycles" gui-hidden="true">true</param>
+            <param name="zsort" type="bool" gui-text="Use Z-order" gui-description="Workaround for reversed selection order in Live Preview cycles" gui-hidden="true">true</param>
         </page>
-        <page name="Help" _gui-text="Help">
-            <_param name="intro" type="description">This effect applies a value for any interpolatable attribute for all elements inside the selected group or for all elements in a multiple selection.</_param>
+        <page name="Help" gui-text="Help">
+            <label>This effect applies a value for any interpolatable attribute for all elements inside the selected group or for all elements in a multiple selection.</label>
         </page>
     </param>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu _name="Modify Path"/>
+            <submenu name="Modify Path"/>
         </effects-menu>
     </effect>
     <script>

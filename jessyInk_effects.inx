@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Effects</_name>
+  <name>Effects</name>
   <id>jessyink.effects</id>
   <dependency type="executable" location="extensions">jessyInk_effects.py</dependency>
   <param name="tab" type="notebook">
-    <page name="settings" _gui-text="Settings">
-            <_param name="effectInLabel" type="description">Built-in effect</_param>
-            <param name="effectInOrder" type="int" min="1" max="100" _gui-text="Order:">1</param>
-            <param name="effectInDuration" precision="1" type="float" min="0.1" max="10.0" _gui-text="Duration in seconds:">0.8</param>
-            <param name="effectIn" type="optiongroup" _gui-text="Type:">
-        <_option value="none">None (default)</_option>
-        <_option value="appear">Appear</_option>
-        <_option value="fade">Fade in</_option>
-        <_option value="pop">Pop</_option>
+    <page name="settings" gui-text="Settings">
+            <label>Built-in effect</label>
+            <param name="effectInOrder" type="int" min="1" max="100" gui-text="Order:">1</param>
+            <param name="effectInDuration" precision="1" type="float" min="0.1" max="10.0" gui-text="Duration in seconds:">0.8</param>
+            <param name="effectIn" type="optiongroup" appearance="radio" gui-text="Type:">
+        <option value="none">None (default)</option>
+        <option value="appear">Appear</option>
+        <option value="fade">Fade in</option>
+        <option value="pop">Pop</option>
             </param>
-            <_param name="effectOutLabel" type="description">Build-out effect</_param>
-            <param name="effectOutOrder" type="int" min="1" max="100" _gui-text="Order:">1</param>
-            <param name="effectOutDuration" precision="1" type="float" min="0.1" max="10.0" _gui-text="Duration in seconds:">0.8</param>
-            <param name="effectOut" type="optiongroup" _gui-text="Type:">
-        <_option value="none">None (default)</_option>
-        <_option value="appear">Appear</_option>
-        <_option value="fade">Fade out</_option>
-        <_option value="pop">Pop</_option>
+            <label>Build-out effect</label>
+            <param name="effectOutOrder" type="int" min="1" max="100" gui-text="Order:">1</param>
+            <param name="effectOutDuration" precision="1" type="float" min="0.1" max="10.0" gui-text="Duration in seconds:">0.8</param>
+            <param name="effectOut" type="optiongroup" appearance="radio" gui-text="Type:">
+        <option value="none">None (default)</option>
+        <option value="appear">Appear</option>
+        <option value="fade">Fade out</option>
+        <option value="pop">Pop</option>
             </param>
         </page>
-    <page name="help" _gui-text="Help">
-      <_param name="help_text" type="description">This extension allows you to install, update and remove object effects for a JessyInk presentation. Please see code.google.com/p/jessyink for more details.</_param>
+    <page name="help" gui-text="Help">
+      <label>This extension allows you to install, update and remove object effects for a JessyInk presentation. Please see code.google.com/p/jessyink for more details.</label>
     </page>
   </param>
   <effect>
     <object-type>all</object-type>
       <effects-menu>
-        <submenu _name="JessyInk"/>
+        <submenu name="JessyInk"/>
       </effects-menu>
   </effect>
   <script>

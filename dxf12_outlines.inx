@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Desktop Cutting Plotter R12</_name>
+    <name>Desktop Cutting Plotter R12</name>
     <id>org.ekips.output.dxf12_outlines</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     <output>
         <extension>.dxf</extension>
         <mimetype>image/dxf</mimetype>
-        <_filetypename>Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)</_filetypename>
-        <_filetypetooltip>DXF R12 Output</_filetypetooltip>
+        <filetypename>Desktop Cutting Plotter (AutoCAD DXF R12) (*.dxf)</filetypename>
+        <filetypetooltip>DXF R12 Output</filetypetooltip>
         <dataloss>true</dataloss>
     </output>
     <script>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Less Hue</_name>
+    <name>Less Hue</name>
     <id>org.inkscape.color.lesshue</id>
     <dependency type="executable" location="extensions">coloreffect.py</dependency>
     <dependency type="executable" location="extensions">color_lesshue.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu _name="Color"/>
+            <submenu name="Color"/>
         </effects-menu>
     </effect>
     <script>

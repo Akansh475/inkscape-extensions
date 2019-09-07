@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Extract Image</_name>
+    <name>Extract Image</name>
     <id>org.ekips.filter.extractimage</id>
     <dependency type="executable" location="extensions">extractimage.py</dependency>
-    <param name="selectedonly" type="boolean" _gui-text="Extract only selected images">true</param>
-    <param name="filepath" type="string" _gui-text="Path to save image:">./images/</param>
+    <param name="selectedonly" type="bool" gui-text="Extract only selected images">true</param>
+    <param name="filepath" type="string" gui-text="Path to save image:">./images/</param>
     <effect needs-live-preview="false">
         <object-type>all</object-type>
                 <effects-menu>
-                        <submenu _name="Images"/>
+                        <submenu name="Images"/>
                 </effects-menu>                    
     </effect>
     <script>

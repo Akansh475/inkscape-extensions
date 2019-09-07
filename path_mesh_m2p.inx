@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Mesh-Gradient to Path</_name>
+  <name>Mesh-Gradient to Path</name>
   <id>su-v/org.inkscape.meshes.to_path</id>
 
   <dependency type="executable" location="extensions">path_mesh_m2p.py</dependency>
 
   <param name="tab" type="notebook">
 
-    <page name="mesh2path_tab" _gui-text="Options">
-      <param name="mode" type="optiongroup" _gui-text="Mode:">
+    <page name="mesh2path_tab" gui-text="Options">
+      <param name="mode" type="optiongroup" appearance="radio" gui-text="Mode:">
         <option value="outline">Outline</option>
         <option value="gridlines">Grid</option>
         <option value="meshpatches">Patches</option>
@@ -16,9 +16,9 @@
       </param>
     </page>
 
-    <page name="about_tab" _gui-text="About">
-      <_param name="about_mesh2path_head" type="description" appearance="header">Mesh to path</_param>
-      <_param name="about_mesh2path_desc0" type="description" _gui-description="">Convert geometry of selected meshgradient to path data</_param>
+    <page name="about_tab" gui-text="About">
+      <label appearance="header">Mesh to path</label>
+      <label>Convert geometry of selected meshgradient to path data</label>
     </page>
 
   </param>
@@ -26,8 +26,8 @@
   <effect>
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="Modify Path">
-        <submenu _name="Mesh">
+      <submenu name="Modify Path">
+        <submenu name="Mesh">
         </submenu>
       </submenu>
     </effects-menu>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Negative</_name>
+    <name>Negative</name>
     <id>org.inkscape.color.negative</id>
     <dependency type="executable" location="extensions">color_negative.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu _name="Color"/>
+            <submenu name="Color"/>
         </effects-menu>
     </effect>
     <script>

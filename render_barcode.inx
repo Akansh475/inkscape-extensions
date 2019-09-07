@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Classic</_name>
+  <name>Classic</name>
   <id>org.inkscape.render.barcode</id>
   <dependency type="executable" location="extensions">render_barcode.py</dependency>
-  <param name="type" type="enum" _gui-text="Barcode Type:">
-    <item value="Ean2">EAN2 Extension</item>
-    <item value="Ean5">EAN5 Extension</item>
-    <item value="Ean13">EAN13 +Extensions</item>
-    <item value="Ean8">EAN8</item>
-    <item value="Upca">UPC-A</item>
-    <item value="Upce">UPC-E</item>
-    <item value="Code25i">Code25 Interleaved 2 of 5</item>
-    <item value="Code39">Code39</item>
-    <item value="Code39Ext">Code39 Extended</item>
-    <item value="Code93">Code93</item>
-    <item value="Code128">Code128</item>
-    <item value="Rm4scc">RM4CC / RM4SCC</item>
+  <param name="type" type="optiongroup" appearance="combo" gui-text="Barcode Type:">
+    <option translatable="no" value="Ean2">EAN2 Extension</option>
+    <option translatable="no" value="Ean5">EAN5 Extension</option>
+    <option translatable="no" value="Ean13">EAN13 +Extensions</option>
+    <option translatable="no" value="Ean8">EAN8</option>
+    <option translatable="no" value="Upca">UPC-A</option>
+    <option translatable="no" value="Upce">UPC-E</option>
+    <option translatable="no" value="Code25i">Code25 Interleaved 2 of 5</option>
+    <option translatable="no" value="Code39">Code39</option>
+    <option translatable="no" value="Code39Ext">Code39 Extended</option>
+    <option translatable="no" value="Code93">Code93</option>
+    <option translatable="no" value="Code128">Code128</option>
+    <option translatable="no" value="Rm4scc">RM4CC / RM4SCC</option>
   </param>
-  <param name="text" type="string" _gui-text="Barcode Data:"></param>
-  <param name="height" type="int" _gui-text="Bar Height:" min="20" max="80">30</param>
+  <param name="text" type="string" gui-text="Barcode Data:"></param>
+  <param name="height" type="int" gui-text="Bar Height:" min="20" max="80">30</param>
   <effect>
     <object-type>all</object-type>
     <effects-menu>
-     <submenu _name="Render">
-        <submenu _name="Barcode" />
+     <submenu name="Render">
+        <submenu name="Barcode" />
       </submenu>
     </effects-menu>
   </effect>

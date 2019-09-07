@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>View Previous Glyph</_name>
+  <name>View Previous Glyph</name>
   <id>org.inkscape.typography.previousglyphlayer</id>
   <effect>
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="Typography"/>
+      <submenu name="Typography"/>
     </effects-menu>
   </effect>
   <script>

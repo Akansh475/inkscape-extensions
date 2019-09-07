@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-      <_name>DPI 90 to 96</_name>
+      <name>DPI 90 to 96</name>
       <id>org.inkscape.dpi90to96</id>
       <dependency type="executable" location="extensions">dpiswitcher.py</dependency>
       <param name="action" type="notebook" gui-hidden="true">
-        <page name="dpi_swicher" _gui-text="Switch DPI">
-            <param name="switcher" type="enum" gui-hidden="true">
-                <_item value="0">DPI Switch from 90 to 96</_item>
+        <page name="dpi_swicher" gui-text="Switch DPI">
+            <param name="switcher" type="optiongroup" appearance="combo" gui-hidden="true">
+                <option value="0">DPI Switch from 90 to 96</option>
             </param>
         </page>
       </param>
       <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>
-          <submenu _name="Document"/>
+          <submenu name="Document"/>
         </effects-menu>
       </effect>
       <script>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Synfig Output</_name>
+    <name>Synfig Output</name>
     <id>org.inkscape.output.sif</id>
     <dependency type="executable" location="extensions">synfig_fileformat.py</dependency>
     <dependency type="executable" location="extensions">synfig_output.py</dependency>
@@ -8,8 +8,8 @@
     <output>
         <extension>.sif</extension>
         <mimetype>image/sif</mimetype>
-        <_filetypename>Synfig Animation (*.sif)</_filetypename>
-        <_filetypetooltip>Synfig Animation written using the sif-file exporter extension</_filetypetooltip>
+        <filetypename>Synfig Animation (*.sif)</filetypename>
+        <filetypetooltip>Synfig Animation written using the sif-file exporter extension</filetypetooltip>
         <dataloss>true</dataloss>
     </output>
     <script>

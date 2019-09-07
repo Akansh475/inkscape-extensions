@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>FAQ</_name>
+  <name>FAQ</name>
   <id>org.inkscape.help.faq</id>
   <dependency type="executable" location="extensions">launch_webbrowser.py</dependency>
   <param name="url" gui-hidden="true" type="string">https://inkscape.org/learn/faq/</param>

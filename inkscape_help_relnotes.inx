@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>New in This Version</_name>
+  <name>New in This Version</name>
   <id>org.inkscape.help.relnotes</id>
   <dependency type="executable" location="extensions">launch_webbrowser.py</dependency>
   <!-- i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: http://wiki.inkscape.org/wiki/index.php/Release_notes/1.0/[lang] -->
-  <_param name="url" gui-hidden="true" type="string">http://wiki.inkscape.org/wiki/index.php/Release_notes/1.0</_param>
+  <param name="url" gui-hidden="true" type="string" translatable="yes">http://wiki.inkscape.org/wiki/index.php/Release_notes/1.0</param>
   <effect needs-document="false">
     <object-type>all</object-type>
     <effects-menu hidden="true" />

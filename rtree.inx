@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Random Tree</_name>
+    <name>Random Tree</name>
     <id>org.ekips.filter.turtle.rtree</id>
     <dependency type="executable" location="extensions">rtree.py</dependency>
-    <param name="size" type="float" min="0.0" max="1000.0" _gui-text="Initial size:">100.0</param>
-    <param name="minimum" type="float" min="0.0" max="500.0" _gui-text="Minimum size:">40.0</param>
-    <param name="pentoggle" type="boolean" _gui-text="Omit redundant segments" _gui-description="Lift pen for backward steps">false</param>
+    <param name="size" type="float" min="0.0" max="1000.0" gui-text="Initial size:">100.0</param>
+    <param name="minimum" type="float" min="0.0" max="500.0" gui-text="Minimum size:">40.0</param>
+    <param name="pentoggle" type="bool" gui-text="Omit redundant segments" gui-description="Lift pen for backward steps">false</param>
     <effect>
         <object-type>all</object-type>
                 <effects-menu>
-                    <submenu _name="Render"/>
+                    <submenu name="Render"/>
                 </effects-menu>                     
     </effect>
     <script>

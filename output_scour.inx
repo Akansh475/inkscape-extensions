@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Optimized SVG Output</name>
     <id>org.inkscape.output.scour</id>
-    <dependency type="executable" location="extensions">output_scour.py</dependency>
+
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param gui-text="Number of significant digits for coordinates:"
@@ -93,28 +93,36 @@
                    name="protect-ids-prefix" type="string"></param>
         </page>
         <page name="About" gui-text="About">
-            <spacer/>
-            <label>Optimized SVG Output is provided by</label>
-            <label appearance="header" indent="1">Scour - An SVG Scrubber</label>
-            <spacer/>
-            <label>For details please refer to</label>
-            <label appearance="url" indent="1">https://github.com/scour-project/scour</label>
-            <spacer/>
-            <spacer/>
-            <spacer/>
-            <label>This version of the extension is designed for</label>
-            <label>Scour 0.31+</label>
+            <hbox>
+                <image>output_scour.svg</image>
+                <spacer/>
+                <vbox>
+                    <spacer/>
+                    <label>Optimized SVG Output is provided by</label>
+                    <label appearance="header" indent="1">Scour - An SVG Scrubber</label>
+                    <spacer/>
+                    <label>For details please refer to</label>
+                    <label appearance="url" indent="1">https://github.com/scour-project/scour</label>
+                </vbox>
+            </hbox>
+            <spacer size="expand"/>
+            <hbox>
+                <label>This version of the extension is designed for</label>
+                <label>Scour 0.31+</label>
+            </hbox>
             <param name="scour-version" type="string" gui-hidden="true">0.31</param> <!-- this parameter is checked programmatically in the extension to show a warning -->
             <param gui-text="Show warnings for older versions of Scour"
                    name="scour-version-warn-old" type="bool">true</param>
         </page>
     </param>
+
     <output>
         <extension>.svg</extension>
         <mimetype>image/svg+xml</mimetype>
         <filetypename>Optimized SVG (*.svg)</filetypename>
         <filetypetooltip>Scalable Vector Graphics</filetypetooltip>
     </output>
+
     <script>
         <command reldir="extensions" interpreter="python">output_scour.py</command>
     </script>

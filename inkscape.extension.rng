@@ -1,165 +1,178 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" ns="http://www.inkscape.org/namespace/inkscape/extension">
+
+<!-- START EXTENSION DESCRIPTION (uses defines below) -->
   <start>
     <element name="inkscape-extension">
-      <element name="_name">
+      <element name="name">
         <text/>
       </element>
       <element name="id">
         <text/>
       </element>
+
       <zeroOrMore>
-        <element name="dependency">
-          <attribute name="type">
-            <ref name="inx.dependency-type.values"/>
+        <ref name="inx.dependency"/>
+      </zeroOrMore>
+
+      <zeroOrMore>
+        <ref name="inx.widget"/>
+      </zeroOrMore>
+
+      <choice>
+        <ref name="inx.input_extension"/>
+        <ref name="inx.output_extension"/>
+        <ref name="inx.effect_extension"/>
+        <ref name="inx.path-effect_extension"/>
+        <ref name="inx.print_extension"/>
+      </choice>
+
+      <optional>
+        <ref name="inx.templateinfo"/>
+      </optional>
+
+      <choice>
+        <ref name="inx.script"/>
+        <ref name="inx.xslt"/>
+        <ref name="inx.plugin"/>
+      </choice>
+    </element>
+  </start>
+<!-- END EXTENSION DESCRIPTION (uses defines below) -->
+
+
+
+
+
+
+<!-- TEMPLATEINFO FOR PROCEDURAL TEMPLATES -->
+
+  <define name="inx.templateinfo">
+    <element name="templateinfo" ns="http://www.inkscape.org/namespaces/inkscape">
+      <element name="name"><text/></element>
+      <element name="author"><text/></element>
+      <element name="shortdesc"><text/></element>
+      <element name="date"><text/></element>
+      <element name="keywords"><text/></element>
+    </element>
+  </define>
+
+
+
+
+<!-- DEPENDENCIES (INCLDUING SCRIPTS, XSLT AND PLUGINS) -->
+
+  <define name="inx.dependency">
+    <element name="dependency">
+      <attribute name="type">
+        <choice>
+          <value>extension</value>
+          <value>executable</value>
+          <value>plugin</value>
+        </choice>
+      </attribute>
+      <optional>
+        <attribute name="location">
+          <ref name="inx.dependency.locations"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="description"/>
+      </optional>
+      <text/>
+    </element>
+  </define>
+
+  <define name="inx.script">
+    <element name="script">
+      <group>
+        <element name="command">
+          <attribute name="reldir">
+            <ref name="inx.dependency.locations"/>
           </attribute>
           <optional>
-            <attribute name="location">
-              <ref name="inx.location.values"/>
-            </attribute>
-          </optional>
-          <optional>
-            <attribute name="_description">
-              <text/>
+            <attribute name="interpreter">
+              <choice>
+                <value>python</value>
+                <value>perl</value>
+              </choice>
             </attribute>
           </optional>
           <text/>
         </element>
-      </zeroOrMore>
-      <zeroOrMore>
-        <choice>
-          <ref name="inx.parameters"/>
-        </choice>
-      </zeroOrMore>
-      <choice>
-        <element name="input">
-          <ref name="inx.io.common"/>
-          <optional>
-            <element name="output_extension">
-              <text/>
-            </element>
-          </optional>
-        </element>
-        <element name="output">
-          <ref name="inx.io.common"/>
-          <optional>
-            <element name="dataloss">
-              <ref name="data_type_boolean_strict"/>
-            </element>
-          </optional>
-        </element>
-        <element name="effect">
-          <optional>
-            <attribute name="needs-document">
-              <ref name="data_type_boolean_strict"/>
-            </attribute>
-          </optional>
-          <optional>
-            <attribute name="needs-live-preview">
-              <ref name="data_type_boolean_strict"/>
-            </attribute>
-          </optional>
-          <optional>
-            <attribute name="implements-custom-gui">
-              <ref name="data_type_boolean_strict"/>
-            </attribute>
-          </optional>
-          <element name="object-type">
-            <choice>
-              <value type="token">all</value>
-              <value type="token">g</value>
-              <value type="token">path</value>
-              <value type="token">rect</value>
-              <value type="token">text</value>
-            </choice>
+        <optional>
+          <element name="helper_extension">
+            <data type="NMTOKEN"/>
           </element>
-          <element name="effects-menu">
-            <choice>
-              <attribute name="hidden">
-                <ref name="data_type_boolean_strict"/>
-              </attribute>
-              <ref name="inx.submenu"/>
-            </choice>
-          </element>
-        </element>
-        <element name="path-effect">
-          <empty/>
-        </element>
-        <element name="print">
-          <empty/>
-        </element>
-      </choice>
-      <optional>
-        <element name="_templateinfo" ns="http://www.inkscape.org/namespaces/inkscape">
-          <element name="_name"><text/></element>
-          <element name="author"><text/></element>
-          <element name="_shortdesc"><text/></element>
-          <element name="date"><text/></element>
-          <element name="_keywords"><text/></element>
-        </element>
-      </optional>
-      <choice>
-        <element name="script">
-          <group>
-            <element name="command">
-              <ref name="inx.reldir.attr"/>
-              <optional>
-                <attribute name="interpreter">
-                  <choice>
-                    <value>python</value>
-                    <value>perl</value>
-                  </choice>
-                </attribute>
-              </optional>
-              <text/>
-            </element>
-            <optional>
-              <element name="helper_extension">
-                <data type="NMTOKEN"/>
-              </element>
-            </optional>
-            <zeroOrMore>
-              <element name="check">
-                <ref name="inx.reldir.attr"/>
-                <text/>
-              </element>
-            </zeroOrMore>
-          </group>
-        </element>
-        <element name="xslt">
-          <element name="file">
-            <ref name="inx.reldir.attr"/>
+        </optional>
+        <zeroOrMore>
+          <element name="check">
+            <attribute name="reldir">
+              <ref name="inx.dependency.locations"/>
+            </attribute>
             <text/>
           </element>
-        </element>
-        <element name="plugin">
-          <element name="name">
-            <text/>
-          </element>
-        </element>
-      </choice>
+        </zeroOrMore>
+      </group>
     </element>
-  </start>
-  <define name="inx.reldir.attr">
-    <attribute name="reldir">
-      <ref name="inx.location.values"/>
-    </attribute>
   </define>
-  <define name="inx.location.values">
+
+  <define name="inx.xslt">
+    <element name="xslt">
+      <element name="file">
+        <attribute name="reldir">
+          <ref name="inx.dependency.locations"/>
+        </attribute>
+        <text/>
+      </element>
+    </element>
+  </define>
+
+  <define name="inx.plugin">
+    <!-- TODO: What's this? How/where is it used? -->
+    <element name="plugin">
+      <element name="name">
+        <text/>
+      </element>
+    </element>
+  </define>
+
+  <define name="inx.dependency.locations">
     <choice>
       <value>extensions</value>
       <value>path</value>
       <value>plugins</value>
     </choice>
   </define>
-  <define name="inx.dependency-type.values">
-    <choice>
-      <value>extension</value>
-      <value>executable</value>
-      <value>plugin</value>
-    </choice>
+
+
+
+
+<!-- EXTENSION TYPES -->
+
+  <define name="inx.input_extension">
+    <element name="input">
+      <ref name="inx.input_output_extension.common"/>
+      <optional>
+        <element name="output_extension">
+          <text/>
+        </element>
+      </optional>
+    </element>
   </define>
-  <define name="inx.io.common">
+
+  <define name="inx.output_extension">
+    <element name="output">
+      <ref name="inx.input_output_extension.common"/>
+      <optional>
+        <element name="dataloss">
+          <ref name="data_type_boolean_strict"/>
+        </element>
+      </optional>
+    </element>
+  </define>
+
+  <define name="inx.input_output_extension.common">
     <element name="extension">
       <text/>
     </element>
@@ -167,39 +180,154 @@
       <text/>
     </element>
     <optional>
-      <element name="_filetypename">
+      <element name="filetypename">
         <text/>
       </element>
     </optional>
     <optional>
-      <element name="_filetypetooltip">
+      <element name="filetypetooltip">
         <text/>
       </element>
     </optional>
   </define>
+
+  <define name="inx.effect_extension">
+    <element name="effect">
+      <optional>
+        <attribute name="needs-document">
+          <ref name="data_type_boolean_strict"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="needs-live-preview">
+          <ref name="data_type_boolean_strict"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="implements-custom-gui">
+          <ref name="data_type_boolean_strict"/>
+        </attribute>
+      </optional>
+      <element name="object-type">
+        <choice>
+          <value type="token">all</value>
+          <value type="token">g</value>
+          <value type="token">path</value>
+          <value type="token">rect</value>
+          <value type="token">text</value>
+        </choice>
+      </element>
+      <element name="effects-menu">
+        <choice>
+          <attribute name="hidden">
+            <ref name="data_type_boolean_strict"/>
+          </attribute>
+          <ref name="inx.effect_extension.submenu"/>
+        </choice>
+      </element>
+    </element>
+  </define>
+
+  <define name="inx.effect_extension.submenu">
+    <element name="submenu">
+      <attribute name="name"/>
+      <optional>
+        <!-- TODO: This allows arbitrarily deep menu nesting - could/should we limit this? -->
+        <ref name="inx.effect_extension.submenu"/>
+      </optional>
+    </element>
+  </define>
+
+  <define name="inx.path-effect_extension">
+    <!-- TODO: Are we still suing these? -->
+    <element name="path-effect">
+      <empty/>
+    </element>
+  </define>
+
+  <define name="inx.print_extension">
+    <!-- TODO: Are we still suing these? -->
+    <element name="print">
+      <empty/>
+    </element>
+  </define>
+
+
+
+
+<!-- WIDGETS AND PARAMETERS -->
+
+  <define name="inx.widget">
+    <choice>
+      <element name="param">
+        <ref name="inx.widget.common_attributes"/>
+        <ref name="inx.parameter"/>
+      </element>
+      <element name="label">
+        <ref name="inx.widget.common_attributes"/>
+        <optional>
+          <attribute name="appearance">
+            <choice>
+              <value>header</value>
+              <value>url</value>
+            </choice>
+          </attribute>
+        </optional>
+        <optional>
+          <attribute name="xml:space">
+            <choice>
+              <value>default</value>
+              <value>preserve</value>
+            </choice>
+          </attribute>
+        </optional>
+        <text/>
+      </element>
+      <element name="hbox">
+        <ref name="inx.widget.common_attributes"/>
+        <oneOrMore>
+          <ref name="inx.widget"/>
+        </oneOrMore>
+      </element>
+      <element name="vbox">
+        <ref name="inx.widget.common_attributes"/>
+        <oneOrMore>
+          <ref name="inx.widget"/>
+        </oneOrMore>
+      </element>
+      <element name="separator">
+        <ref name="inx.widget.common_attributes"/>
+        <empty/>
+      </element>
+      <element name="spacer">
+        <ref name="inx.widget.common_attributes"/>
+        <optional>
+          <attribute name="size">
+            <choice>
+              <data type="integer"/>
+              <value>expand</value>
+            </choice>
+          </attribute>
+        </optional>
+        <empty/>
+      </element>
+      <element name="image">
+        <ref name="inx.widget.common_attributes"/>
+        <optional>
+          <attribute name="width">
+            <data type="integer"/>
+          </attribute>
+          <attribute name="height">
+            <data type="integer"/>
+          </attribute>
+        </optional>
+        <text/>
+      </element>
+    </choice>
+  </define>
+
   <define name="inx.parameter">
-    <attribute name="name">
-      <data type="token"/>
-    </attribute>
-    <optional>
-      <attribute name="gui-hidden">
-        <ref name="data_type_boolean_strict"/>
-      </attribute>
-    </optional>
-    <optional>
-      <attribute name="_gui-text"/>
-    </optional>
-    <optional>
-      <attribute name="_gui-description"/>
-    </optional>
-    <optional>
-      <attribute name="msgctxt"/>
-    </optional>
-    <optional>
-      <attribute name="indent">
-        <data type="integer"/>
-      </attribute>
-    </optional>
+    <ref name="inx.parameter.common_attributes"/>
     <choice>
       <group>
         <attribute name="type">
@@ -253,7 +381,7 @@
       </group>
       <group>
         <attribute name="type">
-          <value>boolean</value>
+          <value>bool</value>
         </attribute>
         <ref name="data_type_boolean_strict"/>
       </group>
@@ -261,9 +389,18 @@
         <attribute name="type">
           <value>color</value>
         </attribute>
+        <optional>
+          <attribute name="appearance">
+            <choice>
+              <value>colorbutton</value>
+            </choice>
+          </attribute>
+        </optional>
         <choice>
           <empty/>
           <data type="integer"/>
+          <data type="string"/> <!-- TODO: We want to support unsigned integers in hex notation (e.g. 0x12345678),
+                                           and possibly other representations valid for strtoul, not random strings -->
         </choice>
       </group>
       <group>
@@ -275,6 +412,13 @@
             <data type="integer"/>
           </attribute>
         </optional>
+        <optional>
+          <attribute name="appearance">
+            <choice>
+              <value>multiline</value>
+            </choice>
+          </attribute>
+        </optional>
         <choice>
           <empty/>
           <text/>
@@ -282,121 +426,114 @@
       </group>
       <group>
         <attribute name="type">
-          <value>description</value>
+          <value>path</value>
         </attribute>
-        <optional>
-          <attribute name="appearance">
-            <choice>
-              <value>header</value>
-              <value>url</value>
-            </choice>
-          </attribute>
-        </optional>
-        <optional>
-          <attribute name="xml:space">
-            <choice>
-              <value>default</value>
-              <value>preserve</value>
-            </choice>
-          </attribute>
-        </optional>
-        <text/>
-      </group>
-      <group>
-        <attribute name="type">
-          <value>enum</value>
-        </attribute>
-        <oneOrMore>
+        <attribute name="mode">
+          <!-- Note: "mode" is actually optional and defaults to "file".
+                     For semantic reasons it makes sense to always include, though. -->
           <choice>
-            <element name="_item">
-              <ref name="inx.parameter.enum.item"/>
-                <optional>
-                  <attribute name="msgctxt"/>
-                </optional>
-            </element>
-            <element name="item">
-              <ref name="inx.parameter.enum.item"/>
-            </element>
+            <value>file</value>
+            <value>files</value>
+            <value>folder</value>
+            <value>folders</value>
+            <value>file_new</value>
+            <value>folder_new</value>
           </choice>
-        </oneOrMore>
+        </attribute>
+        <optional>
+          <attribute name="filetypes"/>
+        </optional>
+        <choice>
+          <empty/>
+          <text/>
+        </choice>
       </group>
       <group>
         <attribute name="type">
           <value>optiongroup</value>
         </attribute>
-        <optional>
-          <attribute name="appearance">
-            <value>minimal</value>
-          </attribute>
-        </optional>
+        <attribute name="appearance">
+          <!-- Note: "appearance" is actually optional and defaults to "radio".
+                     For semantic reasons it makes sense to always include, though. -->
+          <choice>
+            <value>combo</value>
+            <value>radio</value>
+          </choice>
+        </attribute>
         <oneOrMore>
           <choice>
             <element name="option">
-              <ref name="inx.parameter.optiongroup.option"/>
-            </element>
-            <element name="_option">
-              <ref name="inx.parameter.optiongroup.option"/>
-                <optional>
-                  <attribute name="msgctxt"/>
-                </optional>
+              <optional>
+                <attribute name="value"/>
+              </optional>
+              <optional>
+                <attribute name="translatable">
+                  <ref name="data_type_boolean_yes_no"/>
+                </attribute>
+              </optional>
+              <optional>
+                <attribute name="context"/>
+              </optional>
+              <text/>
             </element>
           </choice>
         </oneOrMore>
       </group>
       <group>
-        <!-- TODO: Evaluate which of the standard parameter attributes apply, i.e.
-                      _gui-text, _gui-description, msgctxt, indent
-                   and whether we need to exclude them somehow for notebooks -->
         <attribute name="type">
           <value>notebook</value>
         </attribute>
         <oneOrMore>
           <element name="page">
             <attribute name="name"/>
-            <attribute name="_gui-text"/>
+            <attribute name="gui-text"/>
             <oneOrMore>
-              <ref name="inx.parameters"/>
+              <ref name="inx.widget"/>
             </oneOrMore>
           </element>
         </oneOrMore>
       </group>
     </choice>
   </define>
-  <define name="inx.parameters">
-    <choice>
-      <element name="param">
-        <ref name="inx.parameter"/>
-      </element>
-      <element name="_param">
-        <ref name="inx.parameter"/>
-      </element>
-    </choice>
-  </define>
-  <define name="inx.parameter.enum.item">
-    <attribute name="value"/>
-    <data type="token"/>
-  </define>
-  <define name="inx.parameter.optiongroup.option">
+
+  <define name="inx.widget.common_attributes">
     <optional>
-      <attribute name="value">
-        <text/>
+      <attribute name="gui-hidden">
+        <ref name="data_type_boolean_strict"/>
       </attribute>
     </optional>
-    <text/>
-  </define>
-  <define name="inx.submenu">
-    <element name="submenu">
-      <attribute name="_name">
-        <text/>
+    <optional>
+      <attribute name="indent">
+        <data type="integer"/>
       </attribute>
-      <optional>
-        <!-- TODO: This allows arbitrarily deep menu nesting - could/should we limit this? -->
-        <ref name="inx.submenu"/>
-      </optional>
-    </element>
+    </optional>
+    <optional>
+      <attribute name="translatable">
+        <ref name="data_type_boolean_yes_no"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="context"/>
+    </optional>
   </define>
-  
-  <!-- general defines -->
+
+  <define name="inx.parameter.common_attributes">
+    <attribute name="name">
+      <data type="token"/>
+    </attribute>
+    <optional>
+      <!-- TODO: gui-text is mandatory for visible parameters -->
+      <attribute name="gui-text"/>
+    </optional>
+    <optional>
+      <attribute name="gui-description"/>
+    </optional>
+  </define>
+
+
+
+<!-- GENERAL DEFINES -->
+
   <define name="data_type_boolean_strict">
     <data type="boolean">
       <except>
@@ -405,4 +542,12 @@
       </except>
     </data>
   </define>
+
+  <define name="data_type_boolean_yes_no">
+    <choice>
+      <value>yes</value>
+      <value>no</value>
+    </choice>
+  </define>
+
 </grammar>

@@ -18,7 +18,7 @@
 #
 
 '''
-Hershey Text 3.0.1, 2019-07-05
+Hershey Text 3.0.2, 2019-09-07
 
 Copyright 2019, Windell H. Oskay, www.evilmadscientist.com
 
@@ -697,6 +697,9 @@ Evil Mad Scientist Laboratories
         y = y_offset
         
         for fontname in sorted(self.font_dict):
+            if self.font_dict[fontname] == None:
+                continue # If the SVG file did NOT contain a font, skip it.
+        
             text_attribs = {'x':'0','y': str(y),'hershey-ignore':'true'}
             textline = g.add(TextElement(**text_attribs))
             textline.text = fontname

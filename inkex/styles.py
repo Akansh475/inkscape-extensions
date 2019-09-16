@@ -81,8 +81,14 @@ class Style(OrderedDict):
         if self.callback is not None:
             self.callback(self)
 
+    def get_color(self, name='fill'):
+        """Get the color AND opacity as one Color object"""
+        color = Color(self.get(name, 'none'))
+        return color.to_rgba(self.get(name + '-opacity', 1.0))
+
     def set_color(self, color, name='fill'):
         """Sets the given color AND opacity as rgba to the fill or stroke style properties."""
         color = Color(color)
-        self[name + '-opacity'] = color.alpha
+        if color.space == 'rgba':
+            self[name + '-opacity'] = color.alpha
         self[name] = str(color.to_rgb())

@@ -27,3 +27,11 @@ class StyleTest(TestCase):
         stl = Style()
         stl['border-pain'] = 'green'
         self.assertEqual(str(stl), 'border-pain:green')
+
+    def test_color_property(self):
+        """Color special handling"""
+        stl = Style("fill-opacity:0.7;fill:red;")
+        self.assertEqual(stl.get_color('fill').alpha, 0.7)
+        self.assertEqual(str(stl.get_color('fill')), 'rgba(255, 0, 0, 0.7)')
+        stl.set_color('rgba(0, 127, 0, 0.5)', 'stroke')
+        self.assertEqual(str(stl), 'fill-opacity:0.7;fill:red;stroke-opacity:0.5;stroke:#007f00')

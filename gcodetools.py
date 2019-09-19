@@ -2857,6 +2857,7 @@ class Gcodetools(inkex.EffectExtension):
     # TODO move it to the bottom
     ################################################################################
     def plasma_prepare_path(self):
+        self.get_info_plus()
 
         def add_arc(sp1, sp2, end=False, l=10., r=10.):
             if not end:
@@ -3009,9 +3010,8 @@ class Gcodetools(inkex.EffectExtension):
                         else:
                             draw_csp(res, width=1, style=styles["in_out_path_style"])
 
-    def __init__(self):
-        super(Gcodetools, self).__init__()
-        add_argument = self.arg_parser.add_argument
+    def add_arguments(self, pars):
+        add_argument = pars.add_argument
         add_argument("-d", "--directory", default="/home/", help="Directory for gcode file")
         add_argument("-f", "--filename", dest="file", default="-1.0", help="File name")
         add_argument("--add-numeric-suffix-to-filename", type=inkex.Boolean, default=True, help="Add numeric suffix to filename")
@@ -3036,7 +3036,7 @@ class Gcodetools(inkex.EffectExtension):
         add_argument("--area-inkscape-radius", type=float, default="0", help="Area curves overlapping (depends on tool diameter [0, 0.9])")
         add_argument("--area-tool-overlap", type=float, default="-10", help="Radius for preparing curves using inkscape")
         add_argument("--unit", default="G21 (All units in mm)", help="Units")
-        add_argument("--active-tab", default="", help="Defines which tab is active")
+        add_argument("--active-tab", type=self.arg_method('tab'), default=self.tab_help, help="Defines which tab is active")
 
         add_argument("--area-fill-angle", type=float, default="0", help="Fill area with lines heading this angle")
         add_argument("--area-fill-shift", type=float, default="0", help="Shift the lines by tool d * shift")
@@ -3106,6 +3106,8 @@ class Gcodetools(inkex.EffectExtension):
         add_argument("--plasma-prepare-corners-distance", type=float, default=10., help="Stepout distance for corners")
         add_argument("--plasma-prepare-corners-tolerance", type=float, default=10., help="Maximum angle for corner (0-180 deg)")
 
+    def __init__(self):
+        super(Gcodetools, self).__init__()
         self.default_tool = {
             "name": "Default tool",
             "id": "default tool",
@@ -3819,7 +3821,8 @@ class Gcodetools(inkex.EffectExtension):
     # Path to Gcode
     #
     ################################################################################
-    def path_to_gcode(self):
+    def tab_path_to_gcode(self):
+        self.get_info_plus()
         def get_boundaries(points):
             minx = None
             miny = None
@@ -4083,7 +4086,8 @@ class Gcodetools(inkex.EffectExtension):
     # dxfpoints
     #
     ################################################################################
-    def dxfpoints(self):
+    def tab_dxfpoints(self):
+        self.get_info_plus()
         if self.selected_paths == {}:
             self.error("Nothing is selected. Please select something to convert to drill point (dxfpoint) or clear point sign.")
         for layer in self.layers:
@@ -4109,7 +4113,8 @@ class Gcodetools(inkex.EffectExtension):
     # Artefacts
     #
     ################################################################################
-    def area_artefacts(self):
+    def tab_area_artefacts(self):
+        self.get_info_plus()
         if self.selected_paths == {} and self.options.auto_select_paths:
             paths = self.paths
             self.error("No paths are selected! Trying to work on all available paths.")
@@ -4153,12 +4158,9 @@ class Gcodetools(inkex.EffectExtension):
 
         return
 
-    ################################################################################
-    #
-    # Calculate area curves
-    #
-    ################################################################################
-    def area(self):
+    def tab_area(self):
+        """Calculate area curves"""
+        self.get_info_plus()
         if len(self.selected_paths) <= 0:
             self.error("This extension requires at least one selected path.")
             return
@@ -4259,7 +4261,8 @@ class Gcodetools(inkex.EffectExtension):
     # Fills area with lines
     ################################################################################
 
-    def area_fill(self):
+    def tab_area_fill(self):
+        self.get_info_plus()
         # convert degrees into rad
         self.options.area_fill_angle = self.options.area_fill_angle * math.pi / 180
         if len(self.selected_paths) <= 0:
@@ -4435,7 +4438,8 @@ class Gcodetools(inkex.EffectExtension):
     # where parent may be the layer or a parent group. To get the parent group, you can use
     # parent = self.selected_paths[layer][0].getparent()
     ################################################################################
-    def engraving(self):
+    def tab_engraving(self):
+        self.get_info_plus()
         global cspm
         global wl
         global nlLT
@@ -5109,7 +5113,8 @@ class Gcodetools(inkex.EffectExtension):
     # Orientation
     #
     ################################################################################
-    def orientation(self, layer=None):
+    def tab_orientation(self, layer=None):
+        self.get_info()
 
         if layer is None:
             layer = self.svg.get_current_layer() if self.svg.get_current_layer() is not None else self.document.getroot()
@@ -5180,7 +5185,12 @@ class Gcodetools(inkex.EffectExtension):
     # Tools library
     #
     ################################################################################
-    def tools_library(self, layer=None):
+    def tab_tools_library(self, layer=None):
+        self.get_info()
+
+        if self.options.tools_library_type == "check":
+            return self.check_tools_and_op()
+
         # Add a tool to the drawing
         if layer is None:
             layer = self.svg.get_current_layer() if self.svg.get_current_layer() is not None else self.document.getroot()
@@ -5358,13 +5368,16 @@ G01 Z1 (going to cutting z)\n""",
     ################################################################################
     # TODO Launch browser on help tab
     ################################################################################
-    def help(self):
+    def tab_help(self):
         self.error("Tutorials, manuals and support can be found at\n"
                    " English support forum:\n"
                    "    http://www.cnc-club.ru/gcodetools\n"
                    "and Russian support forum:\n"
                    "    http://www.cnc-club.ru/gcodetoolsru")
         return
+
+    def tab_about(self):
+        return self.tab_help()
 
     ################################################################################
     # Lathe
@@ -5403,7 +5416,8 @@ G01 Z1 (going to cutting z)\n""",
                         gcode += ("G02" if s[3] * flip_angle < 0 else "G03") + (" {} {:f} {} {:f}".format(x, s[4][0], z, s[4][1])) + " R{:f}".format(r) + feed + "\n"
         return gcode
 
-    def lathe(self):
+    def tab_lathe(self):
+        self.get_info_plus()
         if not self.check_dir():
             return
         x = self.options.lathe_x_axis_remap
@@ -5541,7 +5555,8 @@ G01 Z1 (going to cutting z)\n""",
     #
     ################################################################################
 
-    def lathe_modify_path(self):
+    def tab_lathe_modify_path(self):
+        self.get_info()
         if self.selected_paths == {} and self.options.auto_select_paths:
             paths = self.paths
             self.error("No paths are selected! Trying to work on all available paths.")
@@ -5601,7 +5616,8 @@ G01 Z1 (going to cutting z)\n""",
     ################################################################################
     # Graffiti function generates Gcode for graffiti drawer
     ################################################################################
-    def graffiti(self):
+    def tab_graffiti(self):
+        self.get_info_plus()
         # Get reference points.
 
         def get_gcode_coordinates(point, layer):
@@ -5909,6 +5925,19 @@ G01 Z1 (going to cutting z)\n""",
             except:
                 self.error("Png module have not been found!")
 
+    def get_info_plus(self):
+        """Like get_info(), but checks some of the values"""
+        self.get_info()
+        if self.orientation_points == {}:
+            self.error("Orientation points have not been defined! A default set of orientation points has been automatically added.")
+            self.tab_orientation(self.layers[min(1, len(self.layers) - 1)])
+            self.get_info()
+        if self.tools == {}:
+            self.error("Cutting tool has not been defined! A default tool has been automatically added.")
+            self.options.tools_library_type = "default"
+            self.tab_tools_library(self.layers[min(1, len(self.layers) - 1)])
+            self.get_info()
+
     ################################################################################
     #
     # Effect
@@ -5929,110 +5958,65 @@ G01 Z1 (going to cutting z)\n""",
             try:
                 if os.path.isfile(self.options.log_filename):
                     os.remove(self.options.log_filename)
-                with open(self.options.log_filename, "a") as f:
-                    f.write("Gcodetools log file.\nStarted at {}.\n{}\n".format(time.strftime("%d.%m.%Y %H:%M:%S"), options.log_filename))
-                    f.write("{} tab is active.\n".format(self.options.active_tab))
+                with open(self.options.log_filename, "a") as fhl:
+                    fhl.write("""Gcodetools log file.
+Started at {}.
+{}
+""".format(time.strftime("%d.%m.%Y %H:%M:%S"), options.log_filename))
             except:
                 print_ = lambda *x: None
         else:
             print_ = lambda *x: None
-        if self.options.active_tab == '"help"':
-            self.help()
-            return
 
-        elif self.options.active_tab == '"about"':
-            self.help()
-            return
-
-        elif self.options.active_tab not in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"orientation"', '"tools_library"', '"lathe"', '"offset"', '"graffiti"', '"lathe_modify_path"', '"plasma-prepare-path"']:
-            self.error("Select one of the action tabs - "
-                       "Path to Gcode, Area, Engraving, DXF points, Orientation, Offset, Lathe or Tools library.\n"
-                       " Current active tab id is {}".format(self.options.active_tab), "error")
-        else:
-            # Get all Gcodetools data from the scene.
-            self.get_info()
-            if self.options.active_tab in ['"dxfpoints"', '"path-to-gcode"', '"area_fill"', '"area"', '"area_artefacts"', '"engraving"', '"lathe"', '"graffiti"', '"plasma-prepare-path"']:
-                if self.orientation_points == {}:
-                    self.error("Orientation points have not been defined! A default set of orientation points has been automatically added.")
-                    self.orientation(self.layers[min(1, len(self.layers) - 1)])
-                    self.get_info()
-                if self.tools == {}:
-                    self.error("Cutting tool has not been defined! A default tool has been automatically added.")
-                    self.options.tools_library_type = "default"
-                    self.tools_library(self.layers[min(1, len(self.layers) - 1)])
-                    self.get_info()
-            if self.options.active_tab == '"path-to-gcode"':
-                self.path_to_gcode()
-            elif self.options.active_tab == '"area_fill"':
-                self.area_fill()
-            elif self.options.active_tab == '"area"':
-                self.area()
-            elif self.options.active_tab == '"area_artefacts"':
-                self.area_artefacts()
-            elif self.options.active_tab == '"dxfpoints"':
-                self.dxfpoints()
-            elif self.options.active_tab == '"engraving"':
-                self.engraving()
-            elif self.options.active_tab == '"orientation"':
-                self.orientation()
-            elif self.options.active_tab == '"graffiti"':
-                self.graffiti()
-            elif self.options.active_tab == '"tools_library"':
-                if self.options.tools_library_type != "check":
-                    self.tools_library()
-                else:
-                    self.check_tools_and_op()
-            elif self.options.active_tab == '"lathe"':
-                self.lathe()
-            elif self.options.active_tab == '"lathe_modify_path"':
-                self.lathe_modify_path()
-            elif self.options.active_tab == '"offset"':
-                if self.options.offset_just_get_distance:
-                    for layer in self.selected_paths:
-                        if len(self.selected_paths[layer]) == 2:
-                            csp1 = self.selected_paths[layer][0].path.to_superpath()
-                            csp2 = self.selected_paths[layer][1].path.to_superpath()
-                            dist = csp_to_csp_distance(csp1, csp2)
-                            print_(dist)
-                            draw_pointer(list(csp_at_t(csp1[dist[1]][dist[2] - 1], csp1[dist[1]][dist[2]], dist[3]))
-                                         + list(csp_at_t(csp2[dist[4]][dist[5] - 1], csp2[dist[4]][dist[5]], dist[6])), "red", "line", comment=math.sqrt(dist[0]))
-                    return
-                if self.options.offset_step == 0:
-                    self.options.offset_step = self.options.offset_radius
-                if self.options.offset_step * self.options.offset_radius < 0:
-                    self.options.offset_step *= -1
-                time_ = time.time()
-                offsets_count = 0
-                for layer in self.selected_paths:
-                    for path in self.selected_paths[layer]:
-
-                        offset = self.options.offset_step / 2
-                        while abs(offset) <= abs(self.options.offset_radius):
-                            offset_ = csp_offset(path.path.to_superpath(), offset)
-                            offsets_count += 1
-                            if offset_:
-                                for iii in offset_:
-                                    draw_csp([iii], width=1)
-                            else:
-                                print_("------------Reached empty offset at radius {}".format(offset))
-                                break
-                            offset += self.options.offset_step
-                print_()
-                print_("-----------------------------------------------------------------------------------")
-                print_("-----------------------------------------------------------------------------------")
-                print_("-----------------------------------------------------------------------------------")
-                print_()
-                print_("Done in {}".format(time.time() - time_))
-                print_("Total offsets count {}".format(offsets_count))
-
-            elif self.options.active_tab == '"plasma-prepare-path"':
-                self.plasma_prepare_path()
-            else:
-                raise ValueError("Unknown function: '{}'".format(self.options.active_tab))
+        # This automatically calls any `tab_{tab_name_in_inx}` which in this
+        # extension is A LOT of different functions. So see all method prefixed
+        # with tab_ to find out what's supported here.
+        self.options.active_tab()
 
         print_("------------------------------------------")
         print_("Done in {:f} seconds".format(time.time() - start_time))
         print_("End at {}.".format(time.strftime("%d.%m.%Y %H:%M:%S")))
+
+
+    def tab_offset(self):
+        self.get_info()
+        if self.options.offset_just_get_distance:
+            for layer in self.selected_paths:
+                if len(self.selected_paths[layer]) == 2:
+                    csp1 = self.selected_paths[layer][0].path.to_superpath()
+                    csp2 = self.selected_paths[layer][1].path.to_superpath()
+                    dist = csp_to_csp_distance(csp1, csp2)
+                    print_(dist)
+                    draw_pointer(list(csp_at_t(csp1[dist[1]][dist[2] - 1], csp1[dist[1]][dist[2]], dist[3]))
+                                 + list(csp_at_t(csp2[dist[4]][dist[5] - 1], csp2[dist[4]][dist[5]], dist[6])), "red", "line", comment=math.sqrt(dist[0]))
+            return
+        if self.options.offset_step == 0:
+            self.options.offset_step = self.options.offset_radius
+        if self.options.offset_step * self.options.offset_radius < 0:
+            self.options.offset_step *= -1
+        time_ = time.time()
+        offsets_count = 0
+        for layer in self.selected_paths:
+            for path in self.selected_paths[layer]:
+
+                offset = self.options.offset_step / 2
+                while abs(offset) <= abs(self.options.offset_radius):
+                    offset_ = csp_offset(path.path.to_superpath(), offset)
+                    offsets_count += 1
+                    if offset_:
+                        for iii in offset_:
+                            draw_csp([iii], width=1)
+                    else:
+                        print_("------------Reached empty offset at radius {}".format(offset))
+                        break
+                    offset += self.options.offset_step
+        print_()
+        print_("-----------------------------------------------------------------------------------")
+        print_("-----------------------------------------------------------------------------------")
+        print_("-----------------------------------------------------------------------------------")
+        print_()
+        print_("Done in {}".format(time.time() - time_))
+        print_("Total offsets count {}".format(offsets_count))
 
 
 if __name__ == '__main__':

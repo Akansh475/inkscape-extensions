@@ -60,8 +60,11 @@ class MarkerStrokePaintEffect(inkex.EffectExtension):
         """Use object colors"""
         fill = style.get_color('fill')
         stroke = style.get_color('stroke')
+
         if self.options.fill_type == "solid":
             fill = stroke
+        elif self.options.fill_type == "filled":
+            stroke = None
         elif self.options.invert:
             fill, stroke = stroke, fill
 
@@ -96,11 +99,10 @@ class MarkerStrokePaintEffect(inkex.EffectExtension):
                 marker_node.set('id', marker_id)
                 marker_node.set('inkscape:stockid', marker_id)
 
-                children = marker_node.xpath('.//*[@style]')
-                for child in children:
-                    if stroke is not None and self.options.fill_type != "filled":
+                for child in marker_node:
+                    if stroke is not None:
                         child.style.set_color(stroke, 'stroke')
-                    if fill is not None and self.options.fill_type != "solid":
+                    if fill is not None:
                         child.style.set_color(fill, 'fill')
 
 if __name__ == '__main__':

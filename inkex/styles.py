@@ -33,6 +33,7 @@ class Style(OrderedDict):
     """A list of style directives"""
 
     def __init__(self, style=None, callback=None, **kw):
+        # This callback is set twice because this is 'pre-initial' data (no callback)
         self.callback = None
         style = style or kw
         if isinstance(style, (str, unicode)):
@@ -42,6 +43,7 @@ class Style(OrderedDict):
             style = [(name, style[name]) for name in sorted(style)]
         # Should accept dict, Style, parsed string, list etc.
         super(Style, self).__init__(style)
+        # Now after the initial data, the callback makes sense.
         self.callback = callback
 
     @staticmethod

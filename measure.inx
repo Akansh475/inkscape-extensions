@@ -3,7 +3,7 @@
     <name>Measure Path</name>
     <id>com.njhurst.visualise.measure_length</id>
     <dependency type="executable" location="extensions">measure.py</dependency>
-            <param name="type" type="optiongroup" appearance="combo" gui-text="Measurement Type: ">
+            <param name="type" type="optiongroup" appearance="combo" gui-text="Measurement Type:">
                 <option value="length">Length</option>
                 <option context="measure extension" value="area">Area</option>
                 <option context="measure extension" value="cofm">Center of Mass</option>

@@ -7,7 +7,7 @@
   <dependency type="executable" location="extensions">hpgl_encoder.py</dependency>
   <label>Please make sure that all objects you want to plot are converted to paths.</label>
   <param name="tab" type="notebook">
-    <page name="misc" gui-text="Connection Settings ">
+    <page name="misc" gui-text="Connection Settings">
       <param name="portType" type="optiongroup" appearance="radio" gui-text="Port type:">
         <option value="serial">Serial</option>
         <option value="parallel">Parallel</option>
@@ -65,7 +65,7 @@
       <label>This can be a physical serial connection or a USB-to-Serial bridge. Ask your plotter manufacturer for drivers if needed.</label>
       <label>Parallel (LPT) connections are not supported.</label>
     </page>
-    <page name="plotter" gui-text="Plotter Settings ">
+    <page name="plotter" gui-text="Plotter Settings">
       <param name="resolutionX" type="float" min="1.0" max="4096.0" precision="1" gui-text="Resolution X (dpi):" gui-description="The amount of steps the plotter moves if it moves for 1 inch on the X axis (Default: 1016.0)">1016.0</param>
       <param name="resolutionY" type="float" min="1.0" max="4096.0" precision="1" gui-text="Resolution Y (dpi):" gui-description="The amount of steps the plotter moves if it moves for 1 inch on the Y axis (Default: 1016.0)">1016.0</param>
       <param name="pen" type="int" min="0" max="99" gui-text="Pen number:" gui-description="The number of the pen (tool) to use (Standard: '1')">1</param>
@@ -83,7 +83,7 @@
       <spacer/>
       <label>If you want to use multiple pens on your pen plotter create one layer for each pen, name the layers "Pen 1", "Pen 2", etc., and put your drawings in the corresponding layers. This overrules the pen number option above.</label>
     </page>
-    <page name="misc" gui-text="Plot Features ">
+    <page name="misc" gui-text="Plot Features">
       <param name="overcut" type="float" min="0.0" max="100.0" precision="2" gui-text="Overcut (mm):" gui-description="The distance in mm that will be cut over the starting point of the path to prevent open paths, set to 0.0 to omit command (Default: 1.00)">1.00</param>
       <param name="toolOffset" type="float" min="0.0" max="20.0" precision="2" gui-text="Tool (Knife) offset correction (mm):" gui-description="The offset from the tool tip to the tool axis in mm, set to 0.0 to omit command (Default: 0.25)">0.25</param>
       <param name="precut" type="bool" gui-text="Precut" gui-description="Check this to cut a small line before the real drawing starts to correctly align the tool orientation. (Default: Checked)">true</param>

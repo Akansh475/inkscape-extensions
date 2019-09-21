@@ -33,7 +33,7 @@
   </param>
   <param name="invert" type="bool" gui-text="Invert QR code:">false</param>
   <param name="modulesize" type="float" min="0" max="1000" gui-text="Square size (px):">4</param>
-  <param name="drawtype" type="optiongroup" appearance="combo" gui-text="Drawing type: ">
+  <param name="drawtype" type="optiongroup" appearance="combo" gui-text="Drawing type:">
     <option value="neutral">Smooth: neutral</option>
     <option value="greedy">Smooth: greedy</option>
     <option value="proud">Smooth: proud</option>

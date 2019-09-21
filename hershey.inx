@@ -20,7 +20,7 @@ Version 3.0.2, 2019-09-07
 
 </label>
 
-	<param indent="1" name="fontface" type="optiongroup" appearance="combo" gui-text="Font face: ">
+	<param indent="1" name="fontface" type="optiongroup" appearance="combo" gui-text="Font face:">
 		<option value="HersheySans1">Hershey Sans 1-stroke</option>
 		<option value="HersheySansMed">Hershey Sans medium</option>
 
@@ -67,7 +67,7 @@ Other SVG font name or path (if "Other" selected above):
 Hershey Text Utility Functions
   </label>
 
-  <param indent="2" name="action" type="optiongroup" appearance="combo" gui-text="Action: ">
+  <param indent="2" name="action" type="optiongroup" appearance="combo" gui-text="Action:">
     <option value="sample"   >Generate font table</option>
     <option value="table"    >Generate glyph table in selected font</option>
   </param>

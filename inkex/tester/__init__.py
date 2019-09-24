@@ -53,6 +53,16 @@ There are two types of tests:
 Your tests will hit a cetain amount of code, this is called it's **coverage**
 and the higher the coverage, the better your tests are at stretching all
 the options and varients your code has.
+
+Generating comparison output can be done using the EXPORT_COMPARE environment
+variable when calling pytest. For example:
+
+    EXPORT_COMPARE=1 pytest tests/test_my_specific_test.py
+
+This will create files in `tests/data/refs/*.out.export` and these files should
+be manually checked to make sure they are correct before being renamed, stripping
+off the `.export` suffix. pytest should then be re-run to confirm before
+committing to the repository.
 """
 
 from __future__ import absolute_import, print_function, unicode_literals

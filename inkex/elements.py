@@ -230,7 +230,7 @@ class BaseElement(etree.ElementBase):
 
     def delete(self):
         """Delete this node from it's parent node"""
-        if self.getparent():
+        if self.getparent() is not None:
             self.getparent().remove(self)
 
     def copy(self):

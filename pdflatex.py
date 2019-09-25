@@ -26,7 +26,7 @@ import os
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import call, inkscape
-from inkex.elements import load_svg, ShapeElement
+from inkex.elements import load_svg, ShapeElement, Defs
 
 class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
     """
@@ -39,23 +39,29 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
         pars.add_argument('--packages', type=str, default='')
 
     def generate(self):
-        tex_file = os.path.join(self.tempdir, 'input.tex')
-        pdf_file = os.path.join(self.tempdir, 'input.pdf') # Auto-generate by pdflatex
-        svg_file = os.path.join(self.tempdir, 'output.svg')
+        d = os.getcwd()
+        os.chdir(self.tempdir)
+        tex_file = 'input.tex'
+        pdf_file = 'input.pdf' # Auto-generate by pdflatex
+        svg_file = 'output.svg'
 
         with open(tex_file, 'w') as fhl:
             self.write_latex(fhl)
 
         call('pdflatex', tex_file,
-             output_directory=self.tempdir, halt_on_error=True, oldie=True)
+             halt_on_error=True, oldie=True)
 
         inkscape(pdf_file, export_file=svg_file, pdf_page=1,
-                 G=True, pdf_poppler=True, export_type="svg")
+                 pdf_poppler=True, export_type="svg")
 
         with open(svg_file, 'r') as fhl:
-            for child in load_svg(fhl):
+            for child in load_svg(fhl).getroot():
                 if isinstance(child, ShapeElement):
                     yield child
+                elif isinstance(child, Defs):
+                    for def_child in child:
+                        self.svg.defs.append(def_child)
+        os.chdir(d)
 
     def write_latex(self, stream):
         stream.write(r"""%% processed with pdflatex.py

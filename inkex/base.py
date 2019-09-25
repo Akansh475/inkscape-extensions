@@ -162,7 +162,7 @@ class InkscapeExtension(object):
             return os.path.dirname(self.options.input_file)
         return None
 
-    def abssolute_href(self, filename, default='~/'):
+    def absolute_href(self, filename, default='~/'):
         """
         Process the filename such that it's turned into an absolute filename
         with the working directory being the directory of the loaded svg.

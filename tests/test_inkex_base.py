@@ -88,13 +88,13 @@ class InkscapeExtensionTest(TestCase):
         ext = ModExtension()
         ext.run(['--output', output, self.empty_svg])
         self.assertEqual(ext.svg_path(), os.path.join(self.datadir(), 'svg'))
-        self.assertEqual(ext.abssolute_href('/foo'), '/foo')
-        self.assertEqual(ext.abssolute_href('./foo'), os.path.join(self.datadir(), 'svg', 'foo'))
-        self.assertEqual(ext.abssolute_href('~/foo'), os.path.expanduser('~/foo'))
+        self.assertEqual(ext.absolute_href('/foo'), '/foo')
+        self.assertEqual(ext.absolute_href('./foo'), os.path.join(self.datadir(), 'svg', 'foo'))
+        self.assertEqual(ext.absolute_href('~/foo'), os.path.expanduser('~/foo'))
         ext.options.input_file = None
-        self.assertEqual(ext.abssolute_href('./foo'), os.path.expanduser('~/foo'))
+        self.assertEqual(ext.absolute_href('./foo'), os.path.expanduser('~/foo'))
         tmp_foo = os.path.realpath('/tmp/foo')
-        self.assertEqual(ext.abssolute_href('./foo', '/tmp/'), tmp_foo)
+        self.assertEqual(ext.absolute_href('./foo', '/tmp/'), tmp_foo)
 
 
 class SvgInputOutputTest(TestCase):

@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-Extract emebeded images.
+Extract embedded images.
 """
 
 import os
@@ -64,7 +64,7 @@ class ExtractImage(inkex.EffectExtension):
         if not xlink.startswith('data:'):
             return # Not embedded image data
 
-        save_to = self.abssolute_href(self.options.filepath)
+        save_to = self.absolute_href(self.options.filepath)
         # Make the target directory if it doesn't exist yet.
         if not os.path.isdir(save_to):
             os.makedirs(save_to)

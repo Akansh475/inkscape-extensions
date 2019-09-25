@@ -68,7 +68,7 @@ class Embedder(inkex.EffectExtension):
         href = urllib.url2pathname(url.path)
 
         # Primary location always the filename itself.
-        path = self.abssolute_href(href or '')
+        path = self.absolute_href(href or '')
 
         # Backup directory where we can find the image
         if not os.path.isfile(path):

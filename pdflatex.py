@@ -39,17 +39,16 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
         pars.add_argument('--packages', type=str, default='')
 
     def generate(self):
-        d = os.getcwd()
-        os.chdir(self.tempdir)
-        tex_file = 'input.tex'
-        pdf_file = 'input.pdf' # Auto-generate by pdflatex
-        svg_file = 'output.svg'
+        tex_file = os.path.join(self.tempdir, 'input.tex')
+        pdf_file = os.path.join(self.tempdir, 'input.pdf') # Auto-generate by pdflatex
+        svg_file = os.path.join(self.tempdir, 'output.svg')
 
         with open(tex_file, 'w') as fhl:
             self.write_latex(fhl)
 
-        call('pdflatex', tex_file,
-             halt_on_error=True, oldie=True)
+        call('pdflatex', tex_file,\
+            output_directory=self.tempdir,\
+            halt_on_error=True, oldie=True)
 
         inkscape(pdf_file, export_file=svg_file, pdf_page=1,
                  pdf_poppler=True, export_type="svg")
@@ -61,9 +60,9 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
                 elif isinstance(child, Defs):
                     for def_child in child:
                         self.svg.defs.append(def_child)
-        os.chdir(d)
 
     def write_latex(self, stream):
+        """Takes a forumle and wraps it in latex"""
         stream.write(r"""%% processed with pdflatex.py
 \documentclass{minimal}
 \usepackage{amsmath}

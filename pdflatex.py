@@ -39,6 +39,7 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
         pars.add_argument('--packages', type=str, default='')
 
     def generate(self):
+        d = os.getcwd()
         os.chdir(self.tempdir)
         tex_file = 'input.tex'
         pdf_file = 'input.pdf' # Auto-generate by pdflatex
@@ -60,6 +61,7 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
                 elif isinstance(child, Defs):
                     for def_child in child:
                         self.svg.defs.append(def_child)
+        os.chdir(d)
 
     def write_latex(self, stream):
         stream.write(r"""%% processed with pdflatex.py

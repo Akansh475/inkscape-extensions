@@ -9,7 +9,7 @@
     <option translatable="no" value="px">px</option>
     <option translatable="no" value="mm">mm</option>
     <option translatable="no" value="cm">cm</option>
-    <option translatable="no" value="mm">in</option>
+    <option translatable="no" value="in">in</option>
   </param>
   <param name="tab" type="notebook">
     <page name="x_tab" gui-text="X Axis">

@@ -4,7 +4,7 @@
   <id>jessyink.keyBindings</id>
   <dependency type="executable" location="extensions">jessyInk_keyBindings.py</dependency>
   <param name="tab" type="notebook">
-    <page name="settings" gui-text="Slide mode">
+    <page name="slide" gui-text="Slide mode">
             <param name="slide_backWithEffects" type="string" gui-text="Back (with effects):">LEFT, PAGE_UP</param>
             <param name="slide_nextWithEffects" type="string" gui-text="Next (with effects):">RIGHT, PAGE_DOWN, SPACE</param>
             <param name="slide_backWithoutEffects" type="string" gui-text="Back (without effects):">UP</param>
@@ -19,7 +19,7 @@
             <param name="slide_resetTimer" type="string" gui-text="Reset timer:">t</param>
             <param name="slide_export" type="string" gui-text="Export presentation:">e</param>
         </page>
-    <page name="settings" gui-text="Drawing mode">
+    <page name="drawing" gui-text="Drawing mode">
             <param name="drawing_switchToSlideMode" type="string" gui-text="Switch to slide mode:">ESCAPE, d</param>
             <param name="drawing_pathWidthDefault" type="string" gui-text="Set path width to default:">0</param>
             <param name="drawing_pathWidth1" type="string" gui-text="Set path width to 1:">1</param>
@@ -38,7 +38,7 @@
             <param name="drawing_pathColourYellow" type="string" gui-text="Set path color to yellow:">y</param>
             <param name="drawing_undo" type="string" gui-text="Undo last path segment:">z</param>
         </page>
-    <page name="settings" gui-text="Index mode">
+    <page name="index" gui-text="Index mode">
             <param name="index_selectSlideToLeft" type="string" gui-text="Select the slide to the left:">LEFT</param>
             <param name="index_selectSlideToRight" type="string" gui-text="Select the slide to the right:">RIGHT</param>
             <param name="index_selectSlideAbove" type="string" gui-text="Select the slide above:">UP</param>

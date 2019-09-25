@@ -7,7 +7,7 @@
   <dependency type="executable" location="extensions">hpgl_encoder.py</dependency>
   <label>Please make sure that all objects you want to plot are converted to paths.</label>
   <param name="tab" type="notebook">
-    <page name="misc" gui-text="Connection Settings">
+    <page name="connection" gui-text="Connection Settings">
       <param name="portType" type="optiongroup" appearance="radio" gui-text="Port type:">
         <option value="serial">Serial</option>
         <option value="parallel">Parallel</option>
@@ -22,7 +22,7 @@
         <option translatable="no" value="1200">1200</option>
         <option translatable="no" value="2400">2400</option>
         <option translatable="no" value="4800">4800</option>
-        <option translatable="no" value="9600">9600</option>
+        <!-- <option translatable="no" value="9600">9600</option> -->
         <option translatable="no" value="14400">14400</option>
         <option translatable="no" value="19200">19200</option>
         <option translatable="no" value="28800">28800</option>
@@ -83,7 +83,7 @@
       <spacer/>
       <label>If you want to use multiple pens on your pen plotter create one layer for each pen, name the layers "Pen 1", "Pen 2", etc., and put your drawings in the corresponding layers. This overrules the pen number option above.</label>
     </page>
-    <page name="misc" gui-text="Plot Features">
+    <page name="plot_features" gui-text="Plot Features">
       <param name="overcut" type="float" min="0.0" max="100.0" precision="2" gui-text="Overcut (mm):" gui-description="The distance in mm that will be cut over the starting point of the path to prevent open paths, set to 0.0 to omit command (Default: 1.00)">1.00</param>
       <param name="toolOffset" type="float" min="0.0" max="20.0" precision="2" gui-text="Tool (Knife) offset correction (mm):" gui-description="The offset from the tool tip to the tool axis in mm, set to 0.0 to omit command (Default: 0.25)">0.25</param>
       <param name="precut" type="bool" gui-text="Precut" gui-description="Check this to cut a small line before the real drawing starts to correctly align the tool orientation. (Default: Checked)">true</param>

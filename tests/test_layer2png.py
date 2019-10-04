@@ -1,10 +1,11 @@
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+"""
+Test export slices of an image.
+"""
 
+from inkex.tester import InkscapeExtensionTestMixin, TestCase
 from layer2png import ExportSlices
 
-class Layer2PNGTest(#ComparisonMixin,
-                    InkscapeExtensionTestMixin, TestCase):
-    
+class Layer2PNGTest(InkscapeExtensionTestMixin, TestCase):
     effect_class = ExportSlices
     compare_file = 'svg/slicer.svg'
 
@@ -16,8 +17,8 @@ class Layer2PNGTest(#ComparisonMixin,
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()
         nodes = self.effect.get_layer_nodes('slices')
-        assert len(nodes) == 1
-        assert nodes[0].tag == '{http://www.w3.org/2000/svg}rect'
+        self.assertEqual(len(nodes), 1)
+        self.assertEqual(nodes[0].tag, '{http://www.w3.org/2000/svg}rect')
 
 
     def test_bad_slice_layer(self):
@@ -28,7 +29,7 @@ class Layer2PNGTest(#ComparisonMixin,
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()
         nodes = self.effect.get_layer_nodes('badslices')
-        assert nodes is None
+        self.assertEqual(nodes, None)
 
 
     def test_color(self):
@@ -40,6 +41,5 @@ class Layer2PNGTest(#ComparisonMixin,
         self.effect.load_raw()
         nodes = self.effect.get_layer_nodes('slices')
         color, kwargs = self.effect.get_color_and_command_kwargs(nodes[0])
-        assert color == self.effect.GREEN
-        assert kwargs['export-id'] == 'slice1'
-
+        self.assertEqual(color, self.effect.GREEN)
+        self.assertEqual(kwargs['export-id'], 'slice1')

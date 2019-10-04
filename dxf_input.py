@@ -28,7 +28,6 @@ from __future__ import absolute_import, unicode_literals
 import math
 import re
 import sys
-from io import StringIO
 
 from lxml import etree
 

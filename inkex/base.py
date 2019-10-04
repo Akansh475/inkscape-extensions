@@ -251,18 +251,18 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
         default template has 'width' and 'height' of the document.
         """
         kwargs.setdefault('unit', '')
-        return load_svg(self.template.format(**kwargs))
+        return load_svg(str(self.template.format(**kwargs)))
 
     def save(self, stream):
         """Save the svg document to the given stream"""
-        if isinstance(self.document, (bytes, str)):
+        if isinstance(self.document, (bytes, str, unicode)):
             document = self.document
         elif 'Element' in type(self.document).__name__:
             # isinstance can't be used here because etree is broken
             document = self.document.getroot().tostring()
         else:
             raise ValueError("Unknown type of document: {} can not save."\
-                .format(type(self.document.__name__)))
+                .format(type(self.document).__name__))
 
         try:
             stream.write(document)

@@ -25,8 +25,8 @@ give path, transform, and property access easily.
 
 import math
 
-from lxml import etree
 from copy import deepcopy
+from lxml import etree
 
 from .paths import Path
 from .styles import Style
@@ -160,7 +160,7 @@ class BaseElement(etree.ElementBase):
         :return: self
         """
         for name, value in kwargs.items():
-            self.set(name,value)
+            self.set(name, value)
         return self
 
     def pop(self, name, default=None):
@@ -180,6 +180,11 @@ class BaseElement(etree.ElementBase):
         for child in children:
             self.append(child)
         return children if len(children) > 1 else children[0]
+
+    def description(self, text):
+        """Set the desc element with text"""
+        desc = self.add(Desc())
+        desc.text = text
 
     def set_random_id(self, suffix=None, size=4):
         """Sets the id attribute if it is not already set"""
@@ -501,7 +506,7 @@ class Circle(ShapeElement):
         return ('M {0.center_x},{0.top} '
                 'a {0.radius_x},{0.radius_y} 0 1 0 {0.radius_x}, {0.radius_y} '
                 'a {0.radius_x},{0.radius_y} 0 0 0 -{0.radius_x}, -{0.radius_y} z'
-                ).format(self)
+               ).format(self)
 
 
 class Ellipse(Circle):
@@ -523,6 +528,9 @@ class Defs(BaseElement):
     """An header defs element, one per document"""
     tag_name = 'defs'
 
+class Desc(BaseElement):
+    """Description element"""
+    tag_name = 'desc'
 
 class NamedView(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""

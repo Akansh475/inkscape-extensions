@@ -28,6 +28,7 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import random
+from lxml import etree
 from collections import OrderedDict
 
 from .units import discover_unit, convert_unit, render_unit
@@ -47,6 +48,10 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         self.view_center = (0.0, 0.0)
         self.selected = OrderedDict()
         self.ids = {}
+
+    def tostring(self):
+        """Convert document to string"""
+        return etree.tostring(etree.ElementTree(self))
 
     def get_ids(self):
         """Returns a set of unique document ids"""

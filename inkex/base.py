@@ -238,7 +238,7 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
 
     A template can be specified to kick off the svg document building process.
     """
-    template = """<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}"
+    template = """<svg viewBox="0 0 {width} {height}" width="{width}{unit}" height="{height}{unit}"
         xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"
         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
@@ -250,14 +250,20 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
         MUST include all the replacement values in the template, the
         default template has 'width' and 'height' of the document.
         """
-        return load_svg(self.template.format(**kwargs)).getroot()
+        kwargs.setdefault('unit', '')
+        return load_svg(self.template.format(**kwargs))
 
     def save(self, stream):
         """Save the svg document to the given stream"""
-        try:
-            document = etree.tostring(self.document)
-        except TypeError:
+        if isinstance(self.document, (bytes, str)):
             document = self.document
+        elif 'Element' in type(self.document).__name__:
+            # isinstance can't be used here because etree is broken
+            document = self.document.getroot().tostring()
+        else:
+            raise ValueError("Unknown type of document: {} can not save."\
+                .format(type(self.document.__name__)))
+
         try:
             stream.write(document)
         except TypeError:

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <name>Export Layer Slices</name>
+  <id>org.inkscape.output.layer2png</id>
+  <dependency type="executable" location="extensions">layer2png.py</dependency>
+  <param name="iconmode" type="boolean" _gui-text="Icon mode">false</param>
+  <param name="sizes" type="string" gui-text="Sizes">128, 64, 48, 32, 24, 16</param>
+  <param name="layer" type="string" gui-text="Layer with Slices:">slices</param>
+  <param name="overwrite" type="boolean" gui-text="Overwrite existing exports">true</param>
+  <param name="directory" type="path" mode="folder" gui-text="Directory"></param>
+  <param name="dpi" type="string" gui-text="DPI">300</param>
+
+
+  <!-- Live preview doesn't make sense so we add this attribute to
+       remove it -->
+  <effect needs-live-preview="false">
+    <object-type>all</object-type>
+    <effects-menu>
+      <submenu name="Export"/>
+    </effects-menu>
+  </effect>
+
+  <script>
+    <command reldir="extensions" interpreter="python">layer2png.py</command>
+  </script>
+</inkscape-extension>

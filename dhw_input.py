@@ -61,7 +61,8 @@ class DhwInput(inkex.InputExtension):
             raise AbortExtension('Could not load file, not a ACECAD DHW file!')
 
         height = int(header[2])
-        svg = self.get_template(**dict(zip(('v', 'w', 'h', 'p'), header)))
+        doc = self.get_template(**dict(zip(('v', 'w', 'h', 'p'), header)))
+        svg = doc.getroot()
 
         timestamp = 0
         layer = svg.getElementById('layer1')
@@ -93,7 +94,7 @@ class DhwInput(inkex.InputExtension):
                 poly.path = coords
                 poly.set(addNS('timestamp', NSDM), str(timestamp))
 
-        return svg
+        return doc
 
 
 def read_point(stream, ymax):

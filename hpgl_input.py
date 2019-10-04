@@ -43,7 +43,7 @@ class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         self.document = None
 
         try:
-            doc, warnings = myHpglDecoder.getSvg()
+            doc, warnings = myHpglDecoder.get_svg()
         except Exception as inst:
             if inst.args[0] == 'NO_HPGL_DATA':
                 # issue error if no hpgl data found

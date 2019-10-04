@@ -1,8 +1,8 @@
 # coding=utf-8
-from seamless_pattern import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from seamless_pattern import SeamlessPattern
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
-class SeamlessPatternBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class SeamlessPatternBasicTest(ComparisonMixin, TestCase):
+    effect_class = SeamlessPattern
     compare_filters = [CompareNumericFuzzy()]

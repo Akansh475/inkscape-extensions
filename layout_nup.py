@@ -19,70 +19,61 @@
 #
 from __future__ import absolute_import, unicode_literals
 
-from lxml import etree
-
 import inkex
+from inkex.elements import Use, Rectangle
+from inkex.base import SvgOutputMixin
 
-class Nup(inkex.OutputExtension):
-    def __init__(self):
-        super(Nup, self).__init__()
-        opts = [('--unit', str, 'unit', 'px', ''),
-                ('--rows', int, 'rows', '2', ''),
-                ('--cols', int, 'cols', '2', ''),
-                ('--paddingTop', str, 'paddingTop', '', ''),
-                ('--paddingBottom', str, 'paddingBottom', '', ''),
-                ('--paddingLeft', str, 'paddingLeft', '', ''),
-                ('--paddingRight', str, 'paddingRight', '', ''),
-                ('--marginTop', str, 'marginTop', '', ''),
-                ('--marginBottom', str, 'marginBottom', '', ''),
-                ('--marginLeft', str, 'marginLeft', '', ''),
-                ('--marginRight', str, 'marginRight', '', ''),
-                ('--pgSizeX', str, 'pgSizeX', '', ''),
-                ('--pgSizeY', str, 'pgSizeY', '', ''),
-                ('--sizeX', str, 'sizeX', '', ''),
-                ('--sizeY', str, 'sizeY', '', ''),
-                ('--calculateSize', inkex.Boolean, 'calculateSize', True, ''),
-                ('--pgMarginTop', str, 'pgMarginTop', '', ''),
-                ('--pgMarginBottom', str, 'pgMarginBottom', '', ''),
-                ('--pgMarginLeft', str, 'pgMarginLeft', '', ''),
-                ('--pgMarginRight', str, 'pgMarginRight', '', ''),
-                ('--showHolder', inkex.Boolean, 'showHolder', True, ''),
-                ('--showCrosses', inkex.Boolean, 'showCrosses', True, ''),
-                ('--showInner', inkex.Boolean, 'showInner', True, ''),
-                ('--showOuter', inkex.Boolean, 'showOuter', False, ''),
-                ('--showInnerBox', inkex.Boolean, 'showInnerBox', False, ''),
-                ('--showOuterBox', inkex.Boolean, 'showOuterBox', False, ''),
-                ('--tab', str, 'tab', '', ''),
-                ]
-        for o in opts:
-            self.arg_parser.add_argument(o[0], type=o[1],
-                                         dest=o[2], default=o[3], help=o[4])
+class Nup(inkex.OutputExtension, SvgOutputMixin):
+    """N-up Layout generator"""
+    def add_arguments(self, pars):
+        pars.add_argument('--unit', default='px')
+        pars.add_argument('--rows', type=int, default=2)
+        pars.add_argument('--cols', type=int, default=2)
+        pars.add_argument('--paddingTop')
+        pars.add_argument('--paddingBottom')
+        pars.add_argument('--paddingLeft')
+        pars.add_argument('--paddingRight')
+        pars.add_argument('--marginTop')
+        pars.add_argument('--marginBottom')
+        pars.add_argument('--marginLeft')
+        pars.add_argument('--marginRight')
+        pars.add_argument('--pgMarginTop')
+        pars.add_argument('--pgMarginBottom')
+        pars.add_argument('--pgMarginLeft')
+        pars.add_argument('--pgMarginRight')
+        pars.add_argument('--pgSizeX')
+        pars.add_argument('--pgSizeY')
+        pars.add_argument('--sizeX')
+        pars.add_argument('--sizeY')
+        pars.add_argument('--calculateSize', type=inkex.Boolean, default=True)
+        pars.add_argument('--showHolder', type=inkex.Boolean, default=True)
+        pars.add_argument('--showCrosses', type=inkex.Boolean, default=True)
+        pars.add_argument('--showInner', type=inkex.Boolean, default=True)
+        pars.add_argument('--showOuter', type=inkex.Boolean, default=False)
+        pars.add_argument('--showInnerBox', type=inkex.Boolean, default=False)
+        pars.add_argument('--showOuterBox', type=inkex.Boolean, default=False)
+        pars.add_argument('--tab')
 
     def save(self, stream):
-        showList = []
+        show_list = []
         for i in ['showHolder', 'showCrosses', 'showInner', 'showOuter',
                   'showInnerBox', 'showOuterBox', ]:
             if getattr(self.options, i):
-                showList.append(i.lower().replace('show', ''))
-        o = self.options
-        ret = self.GenerateNup(
-                unit=o.unit,
-                pgSize=(o.pgSizeX, o.pgSizeY),
-                pgMargin=(o.pgMarginTop, o.pgMarginRight, o.pgMarginBottom, o.pgMarginLeft),
-                num=(o.rows, o.cols),
-                calculateSize=o.calculateSize,
-                size=(o.sizeX, o.sizeY),
-                margin=(o.marginTop, o.marginRight, o.marginBottom, o.marginLeft),
-                padding=(o.paddingTop, o.paddingRight, o.paddingBottom, o.paddingLeft),
-                show=showList,
+                show_list.append(i.lower().replace('show', ''))
+        opt = self.options
+        ret = self.generate_nup(
+            unit=opt.unit,
+            pgSize=(opt.pgSizeX, opt.pgSizeY),
+            pgMargin=(opt.pgMarginTop, opt.pgMarginRight, opt.pgMarginBottom, opt.pgMarginLeft),
+            num=(opt.rows, opt.cols),
+            calculateSize=opt.calculateSize,
+            size=(opt.sizeX, opt.sizeY),
+            margin=(opt.marginTop, opt.marginRight, opt.marginBottom, opt.marginLeft),
+            padding=(opt.paddingTop, opt.paddingRight, opt.paddingBottom, opt.paddingLeft),
+            show=show_list,
         )
         if ret:
             stream.write(ret)
-
-    def setAttr(self, node, name, value):
-        attr = node.ownerDocument.createAttribute(name)
-        attr.value = value
-        node.attributes.setNamedItem(attr)
 
     def expandTuple(self, unit, x, length=4):
         try:
@@ -99,19 +90,17 @@ class Nup(inkex.OutputExtension):
         except:
             return None
 
-    def GenerateNup(self,
-                    unit="px",
-                    pgSize=("8.5*96", "11*96"),
-                    pgMargin=(0, 0),
-                    pgPadding=(0, 0),
-                    num=(2, 2),
-                    calculateSize=True,
-                    size=None,
-                    margin=(0, 0),
-                    padding=(20, 20),
-                    show=['default'],
-                    container='svg',
-                    returnTree=False,
+    def generate_nup(self,
+                     unit="px",
+                     pgSize=("8.5*96", "11*96"),
+                     pgMargin=(0, 0),
+                     pgPadding=(0, 0),
+                     num=(2, 2),
+                     calculateSize=True,
+                     size=None,
+                     margin=(0, 0),
+                     padding=(20, 20),
+                     show=['default'],
                     ):
         """Generate the SVG.  Inputs are run through 'eval(str(x))' so you can use
     '8.5*72' instead of 612.  Margin / padding dimension tuples can be
@@ -129,8 +118,6 @@ class Nup(inkex.OutputExtension):
             - 'crosses' - cutting guides
             - 'inner' - inner boundary
             - 'outer' - outer boundary
-    container -- 'svg' or 'g'
-    returnTree -- whether to return the ElementTree or the string
     """
 
         if 'default' in show:
@@ -147,20 +134,20 @@ class Nup(inkex.OutputExtension):
         if not pgMargin or not pgPadding:
             return inkex.errormsg("No padding or margin available.")
 
-        pgEdge = list(map(sum, zip(pgMargin, pgPadding)))
+        page_edge = list(map(sum, zip(pgMargin, pgPadding)))
 
         top, right, bottom, left = 0, 1, 2, 3
         width, height = 0, 1
         rows, cols = 0, 1
         size = self.expandTuple(unit, size, length=2)
-        if size is None or calculateSize == True or len(size) < 2 or size[0] == 0 or size[1] == 0:
+        if size is None or calculateSize or len(size) < 2 or size[0] == 0 or size[1] == 0:
             size = ((pgSize[width]
-                     - pgEdge[left] - pgEdge[right]
+                     - page_edge[left] - page_edge[right]
                      - num[cols] * (margin[left] + margin[right])) / num[cols],
                     (pgSize[height]
-                     - pgEdge[top] - pgEdge[bottom]
+                     - page_edge[top] - page_edge[bottom]
                      - num[rows] * (margin[top] + margin[bottom])) / num[rows]
-                    )
+                   )
         else:
             size = self.expandTuple(unit, size, length=2)
 
@@ -170,109 +157,88 @@ class Nup(inkex.OutputExtension):
 
         style = 'stroke:#000000;stroke-opacity:1;fill:none;fill-opacity:1;'
 
-        padbox = 'rect', {
-            'x': str(pgEdge[left] + margin[left] + padding[left]),
-            'y': str(pgEdge[top] + margin[top] + padding[top]),
-            'width': str(size[width] - padding[left] - padding[right]),
-            'height': str(size[height] - padding[top] - padding[bottom]),
-            'style': style,
-        }
-        margbox = 'rect', {
-            'x': str(pgEdge[left] + margin[left]),
-            'y': str(pgEdge[top] + margin[top]),
-            'width': str(size[width]),
-            'height': str(size[height]),
-            'style': style,
-        }
+        padbox = Rectangle(
+            x=str(page_edge[left] + margin[left] + padding[left]),
+            y=str(page_edge[top] + margin[top] + padding[top]),
+            width=str(size[width] - padding[left] - padding[right]),
+            height=str(size[height] - padding[top] - padding[bottom]),
+            style=style,
+        )
+        margbox = Rectangle(
+            x=str(page_edge[left] + margin[left]),
+            y=str(page_edge[top] + margin[top]),
+            width=str(size[width]),
+            height=str(size[height]),
+            style=style,
+        )
 
-        doc = etree.ElementTree(etree.Element(container,
-                                              {'xmlns:inkscape': "http://www.inkscape.org/namespaces/inkscape",
-                                               'xmlns:xlink': "http://www.w3.org/1999/xlink",
-                                               'width': str(pgSize[width]),
-                                               'height': str(pgSize[height]),
-                                               }))
+        doc = self.get_template(width=pgSize[width], height=pgSize[height])
+        svg = doc.getroot()
 
-        sub = etree.SubElement
-
-        root = doc.getroot()
-
-        def makeClones(under, to):
-            for r in range(0, num[rows]):
-                for c in range(0, num[cols]):
-                    if r == 0 and c == 0:
+        def make_clones(under, to):
+            for row in range(0, num[rows]):
+                for col in range(0, num[cols]):
+                    if row == 0 and col == 0:
                         continue
-                    sub(under, 'use', {
-                        'xlink:href': '#' + to,
-                        'transform': 'translate(%f,%f)' %
-                                     (c * sep[width], r * sep[height])})
+                    use = under.add(Use())
+                    use.set('xlink:href', '#' + to)
+                    use.transform.add_translate(col * sep[width], row * sep[height])
 
         # guidelayer #####################################################
         if {'inner', 'outer'}.intersection(show):
-            layer = sub(root, 'g', {'id': 'guidelayer',
-                                    'inkscape:groupmode': 'layer'})
+            layer = svg.add(inkex.Group.create('Guide Layer', layer=True))
             if 'inner' in show:
-                padbox[1]['id'] = 'innerguide'
-                padbox[1]['style'] = padbox[1]['style'].replace('stroke:#000000',
-                                                                'stroke:#8080ff')
-                sub(layer, *padbox)
-                del padbox[1]['id']
-                padbox[1]['style'] = padbox[1]['style'].replace('stroke:#8080ff',
-                                                                'stroke:#000000')
-                makeClones(layer, 'innerguide')
+                ibox = layer.add(padbox.copy())
+                ibox.style['stroke'] = '#8080ff'
+                ibox.set('id', 'innerguide')
+                make_clones(layer, 'innerguide')
             if 'outer' in show:
-                margbox[1]['id'] = 'outerguide'
-                margbox[1]['style'] = padbox[1]['style'].replace('stroke:#000000',
-                                                                 'stroke:#8080ff')
-                sub(layer, *margbox)
-                del margbox[1]['id']
-                margbox[1]['style'] = padbox[1]['style'].replace('stroke:#8080ff',
-                                                                 'stroke:#000000')
-                makeClones(layer, 'outerguide')
+                obox = layer.add(margbox.copy())
+                obox.style['stroke'] = '#8080ff'
+                obox.set('id', 'outerguide')
+                make_clones(layer, 'outerguide')
 
         # crosslayer #####################################################
         if {'crosses'}.intersection(show):
-            layer = sub(root, 'g', {'id': 'cutlayer',
-                                    'inkscape:groupmode': 'layer'})
+            layer = svg.add(inkex.Group.create('Cut Layer', layer=True))
 
             if 'crosses' in show:
                 crosslen = 12
-                group = sub(layer, 'g', id='cross')
+                group = layer.add(inkex.Group(id='cross'))
                 x, y = 0, 0
-                path = 'M%f %f' % (x + pgEdge[left] + margin[left],
-                                   y + pgEdge[top] + margin[top] - crosslen)
-                path += ' L%f %f' % (x + pgEdge[left] + margin[left],
-                                     y + pgEdge[top] + margin[top] + crosslen)
-                path += ' M%f %f' % (x + pgEdge[left] + margin[left] - crosslen,
-                                     y + pgEdge[top] + margin[top])
-                path += ' L%f %f' % (x + pgEdge[left] + margin[left] + crosslen,
-                                     y + pgEdge[top] + margin[top])
-                sub(group, 'path', style=style + 'stroke-width:0.05',
-                    d=path, id='crossmarker')
-                for r in 0, 1:
-                    for c in 0, 1:
-                        if r or c:
-                            x, y = c * size[width], r * size[height]
-                            sub(group, 'use', {
-                                'xlink:href': '#crossmarker',
-                                'transform': 'translate(%f,%f)' %
-                                             (x, y)})
-                makeClones(layer, 'cross')
+                path = 'M%f %f' % (x + page_edge[left] + margin[left],
+                                   y + page_edge[top] + margin[top] - crosslen)
+                path += ' L%f %f' % (x + page_edge[left] + margin[left],
+                                     y + page_edge[top] + margin[top] + crosslen)
+                path += ' M%f %f' % (x + page_edge[left] + margin[left] - crosslen,
+                                     y + page_edge[top] + margin[top])
+                path += ' L%f %f' % (x + page_edge[left] + margin[left] + crosslen,
+                                     y + page_edge[top] + margin[top])
+                group.add(inkex.PathElement(style=style + 'stroke-width:0.05',
+                                            d=path, id='crossmarker'))
+                for row in 0, 1:
+                    for col in 0, 1:
+                        if row or col:
+                            cln = group.add(Use())
+                            cln.set('xlink:href', '#crossmarker')
+                            cln.transform.add_translate(col * size[width], row * size[height])
+                make_clones(layer, 'cross')
 
         # clonelayer #####################################################
-        layer = sub(root, 'g', {'id': 'clonelayer', 'inkscape:groupmode': 'layer'})
-        makeClones(layer, 'main')
+        layer = svg.add(inkex.Group.create('Clone Layer', layer=True))
+        make_clones(layer, 'main')
 
         # mainlayer ######################################################
-        layer = sub(root, 'g', {'id': 'mainlayer', 'inkscape:groupmode': 'layer'})
-        group = sub(layer, 'g', {'id': 'main'})
+        layer = svg.add(inkex.Group.create('Main Layer', layer=True))
+        group = layer.add(inkex.Group(id='main'))
 
         if 'innerbox' in show:
-            sub(group, *padbox)
+            group.add(padbox)
         if 'outerbox' in show:
-            sub(group, *margbox)
+            group.add(margbox)
         if 'holder' in show:
-            x, y = (pgEdge[left] + margin[left] + padding[left],
-                    pgEdge[top] + margin[top] + padding[top])
+            x, y = (page_edge[left] + margin[left] + padding[left],
+                    page_edge[top] + margin[top] + padding[top])
             w, h = (size[width] - padding[left] - padding[right],
                     size[height] - padding[top] - padding[bottom])
             path = 'M{:f} {:f}'.format(x + w / 2., y)
@@ -280,11 +246,9 @@ class Nup(inkex.OutputExtension):
             path += ' L{:f} {:f}'.format(x + w / 2., y + h)
             path += ' L{:f} {:f}'.format(x, y + h / 2.)
             path += ' Z'
-            sub(group, 'path', style=style, d=path)
+            group.add(inkex.PathElement(style=style, d=path))
 
-        if returnTree:
-            return doc
-        return etree.tostring(root)
+        return svg.tostring()
 
 
 if __name__ == '__main__':

@@ -18,18 +18,12 @@
 # standard libraries
 from __future__ import unicode_literals
 
-from io import StringIO
-
-from lxml import etree
-
 # local library
 import inkex
-from inkex.utils import NSS
+from inkex.base import SvgOutputMixin
 from inkex.localization import _
 
-
-class hpglDecoder(object):
-
+class hpglDecoder(SvgOutputMixin):
     def __init__(self, hpglString, options):
         """ options:
                 "resolutionX":float
@@ -48,42 +42,46 @@ class hpglDecoder(object):
         self.layers = {}
         self.oldCoordinates = (0.0, self.options.docHeight)
 
-    def getSvg(self):
-        actualLayer = 0
+    def get_svg(self):
+        """Generate an svg document from hgpl data"""
+        actual_layer = 0
         # prepare document
-        self.doc = etree.parse(StringIO('<svg xmlns:sodipodi="' + NSS['sodipodi'] + '" xmlns:inkscape="' + NSS['inkscape'] + '" width="%smm" height="%smm" viewBox="0 0 %s %s"></svg>' %
-                                        (self.options.docWidth, self.options.docHeight, self.options.docWidth, self.options.docHeight)))
-        etree.SubElement(self.doc.getroot(), inkex.addNS('namedview', 'sodipodi'), {inkex.addNS('document-units', 'inkscape'): 'mm'})
+        doc = self.get_template(width=self.options.docWidth,
+                                height=self.options.docHeight, unit='mm')
+        svg = doc.getroot()
+        svg.namedview.set('inkscape:document-units', 'mm')
+
         if self.options.showMovements:
-            self.layers[0] = etree.SubElement(self.doc.getroot(), 'g', {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): self.textMovements, 'id': self.textMovements})
+            self.layers[0] = svg.add(inkex.Group.create(self.textMovements, layer=True))
+
         # cut stream into commands
-        hpglData = self.hpglString.split(';')
+        hpgl_data = self.hpglString.split(';')
         # if number of commands is under needed minimum, no data was found
-        if len(hpglData) < 3:
+        if len(hpgl_data) < 3:
             raise Exception('NO_HPGL_DATA')
         # decode commands into svg data
-        for i, command in enumerate(hpglData):
+        for command in hpgl_data:
             if command.strip() != '':
                 if command[:2] == 'IN' or command[:2] == 'FS' or command[:2] == 'VS':
                     # if Initialize, force or speed command ignore it
                     pass
                 elif command[:2] == 'SP':
                     # if Select Pen command
-                    actualLayer = int(command[2:])
+                    actual_layer = int(command[2:])
                 elif command[:2] == 'PU':
                     # if Pen Up command
-                    self.parametersToPath(command[2:], 0, True)
+                    self.parameters_to_path(svg, command[2:], 0, True)
                 elif command[:2] == 'PD':
                     # if Pen Down command
-                    self.parametersToPath(command[2:], actualLayer + 1, False)
+                    self.parameters_to_path(svg, command[2:], actual_layer + 1, False)
                 else:
                     self.warning = 'UNKNOWN_COMMANDS'
-        return self.doc, self.warning
+        return doc, self.warning
 
-    def parametersToPath(self, parameters, layerNum, isPU):
-        # split params and sanity check them
+    def parameters_to_path(self, svg, parameters, layerNum, isPU):
+        """split params and sanity check them"""
         parameters = parameters.strip().split(',')
-        if len(parameters) > 0 and len(parameters) % 2 == 0:
+        if parameters and len(parameters) % 2 == 0:
             for i, param in enumerate(parameters):
                 # convert params to document units
                 if i % 2 == 0:
@@ -93,11 +91,11 @@ class hpglDecoder(object):
             # create path and add it to the corresponding layer
             if not isPU or (self.options.showMovements and isPU):
                 # create layer if it does not exist
-                try:
-                    self.layers[layerNum]
-                except KeyError:
-                    self.layers[layerNum] = etree.SubElement(self.doc.getroot(), 'g',
-                                                             {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): self.textPenNumber + str(layerNum - 1), 'id': self.textPenNumber + str(layerNum - 1)})
+                if layerNum not in self.layers:
+                    label = self.textPenNumber + str(layerNum - 1)
+                    self.layers[layerNum] = svg.add(inkex.Group.create(label, layer=True))
+
                 path = 'M %f,%f L %s' % (self.oldCoordinates[0], self.oldCoordinates[1], ','.join(parameters))
-                etree.SubElement(self.layers[layerNum], 'path', {'d': path, 'style': 'stroke:#' + ('ff0000' if isPU else '000000') + '; stroke-width:0.2; fill:none;'})
+                style = 'stroke:#' + ('ff0000' if isPU else '000000') + '; stroke-width:0.2; fill:none;'
+                self.layers[layerNum].add(inkex.PathElement(d=path, style=style))
             self.oldCoordinates = (float(parameters[-2]), float(parameters[-1]))

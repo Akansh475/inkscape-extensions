@@ -438,9 +438,8 @@ class DxfInput(inkex.InputExtension):
 
         options = self.options
 
-        doc = etree.parse(StringIO('<svg xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="%s" height="%s"></svg>' % (210 * 96 / 25.4, 297 * 96 / 25.4)))
-        desc = etree.SubElement(doc.getroot(), 'desc', {})
-        defs = etree.SubElement(doc.getroot(), 'defs', {})
+        doc = self.get_template(width=210 * 96 / 25.4, height=297 * 96 / 25.4)
+        defs = doc.getroot().defs
         marker = etree.SubElement(defs, 'marker', {'id': 'DistanceX', 'orient': 'auto', 'refX': '0.0', 'refY': '0.0', 'style': 'overflow:visible'})
         etree.SubElement(marker, 'path', {'d': 'M 3,-3 L -3,3 M 0,-5 L  0,5', 'style': 'stroke:#000000; stroke-width:0.5'})
         pattern = etree.SubElement(defs, 'pattern', {'id': 'Hatch', 'patternUnits': 'userSpaceOnUse', 'width': '8', 'height': '8', 'x': '0', 'y': '0'})
@@ -518,8 +517,8 @@ class DxfInput(inkex.InputExtension):
             scale = float(options.scale)  # manual scale factor
             xmin = float(options.xmin)
             ymin = float(options.ymin)
-        desc.text = '%s - scale = %f, origin = (%f, %f), method = %s' % (
-            options.input_file, scale, xmin, ymin, options.scalemethod)
+        doc.getroot().description('%s - scale = %f, origin = (%f, %f), method = %s' % (
+            options.input_file, scale, xmin, ymin, options.scalemethod))
         scale *= 96.0 / 25.4  # convert from mm to pixels
 
         if '0' not in layer_nodes:

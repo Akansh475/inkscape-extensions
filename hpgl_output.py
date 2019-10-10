@@ -52,7 +52,7 @@ class HpglOutput(inkex.OutputExtension):
         try:
             hpgl = encoder.getHpgl()
         except hpgl_encoder.NoPathError:
-            inkex.errormsg(_("No paths where found. Please convert objects you want into paths."))
+            inkex.errormsg(_("No paths were found. Please convert objects you want into paths."))
             return
         # convert raw HPGL to HPGL
         hpgl_init = 'IN'

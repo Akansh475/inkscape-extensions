@@ -71,11 +71,7 @@
           <value>plugin</value>
         </choice>
       </attribute>
-      <optional>
-        <attribute name="location">
-          <ref name="inx.dependency.locations"/>
-        </attribute>
-      </optional>
+      <ref name="inx.dependency.location_attribute"/>
       <optional>
         <attribute name="description"/>
       </optional>
@@ -87,9 +83,7 @@
     <element name="script">
       <group>
         <element name="command">
-          <attribute name="reldir">
-            <ref name="inx.dependency.locations"/>
-          </attribute>
+          <ref name="inx.dependency.location_attribute"/>
           <optional>
             <attribute name="interpreter">
               <choice>
@@ -105,14 +99,6 @@
             <data type="NMTOKEN"/>
           </element>
         </optional>
-        <zeroOrMore>
-          <element name="check">
-            <attribute name="reldir">
-              <ref name="inx.dependency.locations"/>
-            </attribute>
-            <text/>
-          </element>
-        </zeroOrMore>
       </group>
     </element>
   </define>
@@ -120,9 +106,7 @@
   <define name="inx.xslt">
     <element name="xslt">
       <element name="file">
-        <attribute name="reldir">
-          <ref name="inx.dependency.locations"/>
-        </attribute>
+        <ref name="inx.dependency.location_attribute"/>
         <text/>
       </element>
     </element>
@@ -137,12 +121,17 @@
     </element>
   </define>
 
-  <define name="inx.dependency.locations">
-    <choice>
-      <value>extensions</value>
-      <value>path</value>
-      <value>plugins</value>
-    </choice>
+  <define name="inx.dependency.location_attribute">
+    <optional>
+      <attribute name="location">
+        <choice>
+          <value>path</value> <!-- default if missing -->
+          <value>extensions</value>
+          <value>inx</value>
+          <value>absolute</value>
+        </choice>
+      </attribute>
+    </optional>
   </define>
 
 

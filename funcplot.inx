@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Function Plotter</name>
     <id>org.inkscape.effect.funcplot</id>
-    <dependency type="executable" location="extensions">funcplot.py</dependency>
+    <dependency type="executable" location="inx">funcplot.py</dependency>
     <param name="tab" type="notebook">
         <page name="sampling" gui-text="Range and sampling">
             <param name="xstart" type="float" min="-1000.0" max="1000.0" gui-text="Start X value:">0.0</param>
@@ -51,6 +51,6 @@ The constants pi and e are also available.</label>
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">funcplot.py</command>
+        <command location="inx" interpreter="python">funcplot.py</command>
     </script>
 </inkscape-extension>

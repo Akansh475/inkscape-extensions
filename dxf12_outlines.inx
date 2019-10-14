@@ -11,7 +11,7 @@
         <dataloss>true</dataloss>
     </output>
     <script>
-        <command reldir="extensions" interpreter="python">dxf12_outlines.py</command>
+        <command location="inx" interpreter="python">dxf12_outlines.py</command>
         <helper_extension>org.inkscape.output.svg.inkscape</helper_extension>
     </script>
 </inkscape-extension>

@@ -10,6 +10,6 @@
         <filetypetooltip>Microsoft's GUI definition format</filetypetooltip>
     </output>
     <xslt>
-        <file reldir="extensions">svg2xaml.xsl</file>
+        <file location="inx">svg2xaml.xsl</file>
     </xslt>
 </inkscape-extension>

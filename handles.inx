@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Draw Handles</name>
     <id>org.ekips.filter.handles</id>
-    <dependency type="executable" location="extensions">handles.py</dependency>
+    <dependency type="executable" location="inx">handles.py</dependency>
     <effect>
         <object-type>path</object-type>
         <effects-menu>
@@ -10,6 +10,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">handles.py</command>
+        <command location="inx" interpreter="python">handles.py</command>
     </script>
 </inkscape-extension>

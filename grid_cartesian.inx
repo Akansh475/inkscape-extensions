@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Cartesian Grid</name>
   <id>grid.cartesian</id>
-  <dependency type="executable" location="extensions">grid_cartesian.py</dependency>
+  <dependency type="executable" location="inx">grid_cartesian.py</dependency>
 
   <param name="border_th"       type="float"   min="0" max="1000" gui-text="Border Thickness:">1</param>
   <param name="border_th_unit" type="optiongroup" appearance="combo" gui-text="Border Thickness Unit:">
@@ -69,6 +69,6 @@
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">grid_cartesian.py</command>
+    <command location="inx" interpreter="python">grid_cartesian.py</command>
   </script>
 </inkscape-extension>

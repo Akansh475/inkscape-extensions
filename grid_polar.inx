@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Polar Grid</name>
   <id>grids.polar</id>
-  <dependency type="executable" location="extensions">grid_polar.py</dependency>
+  <dependency type="executable" location="inx">grid_polar.py</dependency>
 
   <param name="c_dot_dia"    type="float" min="1" max="1000" gui-text="Centre Dot Diameter (px):">5.0</param>
   <param name="a_labels"     type="optiongroup" appearance="combo"  gui-text="Circumferential Labels:">
@@ -39,6 +39,6 @@
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">grid_polar.py</command>
+    <command location="inx" interpreter="python">grid_polar.py</command>
   </script>
 </inkscape-extension>

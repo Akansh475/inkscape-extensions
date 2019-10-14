@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Icon</name>
     <id>org.inkscape.render.empty_icon</id>
-    <dependency type="executable" location="extensions">empty_icon.py</dependency>
+    <dependency type="executable" location="inx">empty_icon.py</dependency>
     
     <param name="size" gui-text="Icon size:" type="int" min="8" max="256">16</param>
     
@@ -18,6 +18,6 @@
       <inkscape:keywords>empty icon</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command reldir="extensions" interpreter="python">empty_icon.py</command>
+        <command location="inx" interpreter="python">empty_icon.py</command>
     </script>
 </inkscape-extension>

@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Master slide</name>
   <id>jessyink.masterSlide</id>
-  <dependency type="executable" location="extensions">jessyInk_masterSlide.py</dependency>
+  <dependency type="executable" location="inx">jessyInk_masterSlide.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" gui-text="Settings">
             <param name="layerName" type="string" gui-text="Name of layer:"></param>
@@ -19,7 +19,7 @@
       </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">jessyInk_masterSlide.py</command>
+    <command location="inx" interpreter="python">jessyInk_masterSlide.py</command>
   </script>
 </inkscape-extension>
 

@@ -4,7 +4,7 @@
     <name>Set Image Attributes</name>
     <id>org.inkscape.effect.image_attributes</id>
 
-    <dependency type="executable" location="extensions">image_attributes.py</dependency>
+    <dependency type="executable" location="inx">image_attributes.py</dependency>
 
     <param name="tab_main" type="notebook">
 
@@ -72,7 +72,7 @@ Available options:</label>
     </effect>
 
     <script>
-        <command reldir="extensions" interpreter="python">image_attributes.py</command>
+        <command location="inx" interpreter="python">image_attributes.py</command>
     </script>
 
 </inkscape-extension>

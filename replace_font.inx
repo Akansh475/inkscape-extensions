@@ -4,7 +4,7 @@
     <id>org.inkscape.replace_font</id>
 
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-    <dependency type="executable" location="extensions">replace_font.py</dependency>
+    <dependency type="executable" location="inx">replace_font.py</dependency>
 
      <param name="action" type="notebook">
         <page name="find_replace" gui-text="Find and Replace font">
@@ -32,6 +32,6 @@
     </effect>
 
     <script>
-        <command reldir="extensions" interpreter="python">replace_font.py</command>
+        <command location="inx" interpreter="python">replace_font.py</command>
     </script>
 </inkscape-extension>

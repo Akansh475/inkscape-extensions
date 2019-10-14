@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Extrude</name>
     <id>org.greygreen.inkscape.effects.extrude</id>
-    <dependency type="executable" location="extensions">extrude.py</dependency>
+    <dependency type="executable" location="inx">extrude.py</dependency>
     <param name="mode" type="optiongroup" appearance="combo" gui-text="Mode:">
         <option value="Lines">Lines</option>
         <option value="Polygons">Polygons</option>
@@ -14,6 +14,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">extrude.py</command>
+        <command location="inx" interpreter="python">extrude.py</command>
     </script>
 </inkscape-extension>

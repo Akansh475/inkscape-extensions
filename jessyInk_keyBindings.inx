@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Key bindings</name>
   <id>jessyink.keyBindings</id>
-  <dependency type="executable" location="extensions">jessyInk_keyBindings.py</dependency>
+  <dependency type="executable" location="inx">jessyInk_keyBindings.py</dependency>
   <param name="tab" type="notebook">
     <page name="slide" gui-text="Slide mode">
             <param name="slide_backWithEffects" type="string" gui-text="Back (with effects):">LEFT, PAGE_UP</param>
@@ -63,7 +63,7 @@
       </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">jessyInk_keyBindings.py</command>
+    <command location="inx" interpreter="python">jessyInk_keyBindings.py</command>
   </script>
 </inkscape-extension>
 

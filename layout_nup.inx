@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>N-up layout</name>
   <id>org.greygreen.inkscape.effects.nup</id>
-  <dependency type="executable" location="extensions">layout_nup.py</dependency>
+  <dependency type="executable" location="inx">layout_nup.py</dependency>
   <param name="tab" type="notebook">  
     <page name="pageDims" gui-text="Page dimensions">
       <param name="unit" gui-text="Unit:" type="optiongroup" appearance="combo">
@@ -69,7 +69,7 @@ Parameters:
   </effect>
   
   <script>
-    <command reldir="extensions" interpreter="python">layout_nup.py</command>
+    <command location="inx" interpreter="python">layout_nup.py</command>
   </script>
 </inkscape-extension>
 

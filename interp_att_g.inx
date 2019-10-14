@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Interpolate Attribute in a group</name>
     <id>org.inkscape.filter.interp-att-g</id>
-    <dependency type="executable" location="extensions">interp_att_g.py</dependency>
+    <dependency type="executable" location="inx">interp_att_g.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="att" type="optiongroup" appearance="combo" gui-text="Attribute to Interpolate:">
@@ -55,6 +55,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">interp_att_g.py</command>
+        <command location="inx" interpreter="python">interp_att_g.py</command>
     </script>
 </inkscape-extension>

@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Edge 3D</name>
     <id>org.greygreen.inkscape.effects.edge3d</id>
-    <dependency type="executable" location="extensions">edge3d.py</dependency>
+    <dependency type="executable" location="inx">edge3d.py</dependency>
     <param name="angle" type="float" min="0.0" max="360.0" gui-text="Illumination Angle:">45</param>
     <param name="shades" type="int" min="2" max="360" gui-text="Shades:">2</param>
     <param name="bw" type="bool" gui-text="Only black and white:">false</param>
@@ -17,6 +17,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">edge3d.py</command>
+        <command location="inx" interpreter="python">edge3d.py</command>
     </script>
 </inkscape-extension>

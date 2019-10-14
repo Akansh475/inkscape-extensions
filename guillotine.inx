@@ -5,7 +5,7 @@
     
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     
-    <dependency type="executable" location="extensions">guillotine.py</dependency>
+    <dependency type="executable" location="inx">guillotine.py</dependency>
     
     <param name="directory" type="string" gui-text="Directory to save images to:">~/</param>
     <param name="image" type="string" gui-text="Image name (without extension):">guillotined</param>
@@ -19,7 +19,7 @@
     </effect>
     
     <script>
-        <command reldir="extensions" interpreter="python">guillotine.py</command>
+        <command location="inx" interpreter="python">guillotine.py</command>
     </script>
     
 </inkscape-extension>

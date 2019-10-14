@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>3D Polyhedron</name>
     <id>math.polyhedron.3d</id>
-    <dependency type="executable" location="extensions">polyhedron_3d.py</dependency>
+    <dependency type="executable" location="inx">polyhedron_3d.py</dependency>
     <param name="tab" type="notebook">
         <page name="common" gui-text="Model file">
             <param name="obj" type="optiongroup" appearance="combo" gui-text="Object:">
@@ -93,6 +93,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">polyhedron_3d.py</command>
+        <command location="inx" interpreter="python">polyhedron_3d.py</command>
     </script>
 </inkscape-extension>

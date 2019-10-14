@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Voronoi Pattern</name>
     <id>com.vaxxine.generate.voronoi</id>
-    <dependency type="executable" location="extensions">generate_voronoi.py</dependency>
-    <dependency type="executable" location="extensions">voronoi.py</dependency>
+    <dependency type="executable" location="inx">generate_voronoi.py</dependency>
+    <dependency type="executable" location="inx">voronoi.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="size" type="int" min="2" max="200" gui-text="Average size of cell (px):">10</param>
@@ -22,6 +22,6 @@ If border is zero, the pattern will be discontinuous at the edges. Use a positiv
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">generate_voronoi.py</command>
+        <command location="inx" interpreter="python">generate_voronoi.py</command>
     </script>
 </inkscape-extension>

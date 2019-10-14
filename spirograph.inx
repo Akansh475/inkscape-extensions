@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Spirograph</name>
     <id>org.ekips.filter.spirograph</id>
-    <dependency type="executable" location="extensions">spirograph.py</dependency>
+    <dependency type="executable" location="inx">spirograph.py</dependency>
     <param name="primaryr" type="float" min="0.0" max="1000.0" gui-text="R - Ring Radius (px):">100.0</param>
     <param name="secondaryr" type="float" min="0.0" max="1000.0" gui-text="r - Gear Radius (px):">60.0</param>
     <param name="penr" type="float" min="0.0" max="1000.0" gui-text="d - Pen Radius (px):">50.0</param>
@@ -19,6 +19,6 @@
         </effects-menu>                                 
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">spirograph.py</command>
+        <command location="inx" interpreter="python">spirograph.py</command>
     </script>
 </inkscape-extension>

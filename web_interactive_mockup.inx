@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Interactive Mockup</name>
   <id>org.inkscape.webdesign.interactive_mockup</id>
-  <dependency type="executable" location="extensions">web_interactive_mockup.py</dependency>
+  <dependency type="executable" location="inx">web_interactive_mockup.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="when" type="optiongroup" appearance="combo" gui-text="When to transmit:">
@@ -33,7 +33,7 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">web_interactive_mockup.py</command>
+        <command location="inx" interpreter="python">web_interactive_mockup.py</command>
     </script>
 </inkscape-extension>
 

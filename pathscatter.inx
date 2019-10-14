@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Scatter</name>
     <id>math.univ-lille1.barraud.pathScatter</id>
-    <dependency type="executable" location="extensions">pathmodifier.py</dependency>
-    <dependency type="executable" location="extensions">pathscatter.py</dependency>
+    <dependency type="executable" location="inx">pathmodifier.py</dependency>
+    <dependency type="executable" location="inx">pathscatter.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="follow" type="bool" gui-text="Follow path orientation">false</param>
@@ -35,6 +35,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">pathscatter.py</command>
+        <command location="inx" interpreter="python">pathscatter.py</command>
     </script>
 </inkscape-extension>

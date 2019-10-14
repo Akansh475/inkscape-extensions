@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Draw From Triangle</name>
     <id>il.fromtriangle</id>
-    <dependency type="executable" location="extensions">draw_from_triangle.py</dependency>
+    <dependency type="executable" location="inx">draw_from_triangle.py</dependency>
     <param name="tab" type="notebook">
         <page name="common1" gui-text="Common Objects">
             <param name="circumcircle"    type="bool" gui-text="Circumcircle">false</param>
@@ -72,6 +72,6 @@ You can specify the radius of a circle around a custom point using a formula, wh
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">draw_from_triangle.py</command>
+        <command location="inx" interpreter="python">draw_from_triangle.py</command>
     </script>
 </inkscape-extension>

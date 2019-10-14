@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Jitter nodes</name>
     <id>org.ekips.filter.jitternodes</id>
-    <dependency type="executable" location="extensions">jitternodes.py</dependency>
+    <dependency type="executable" location="inx">jitternodes.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="radiusx" type="float" min="0.0" max="1000.0" gui-text="Maximum displacement in X (px):">10.0</param>
@@ -27,6 +27,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">jitternodes.py</command>
+        <command location="inx" interpreter="python">jitternodes.py</command>
     </script>
 </inkscape-extension>

@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Blank Page</name>
     <id>org.inkscape.render.empty_page</id>
-    <dependency type="executable" location="extensions">empty_page.py</dependency>
+    <dependency type="executable" location="inx">empty_page.py</dependency>
 
     <param name="size" gui-text="Page size:" type="optiongroup" appearance="combo">
         <option translatable="no" value="a3">A3 — 297 × 420 mm</option>
@@ -39,6 +39,6 @@
       <inkscape:keywords>empty page sheet tabloid ledger letter legal print paper a4 a3 a5 letter black white opaque</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command reldir="extensions" interpreter="python">empty_page.py</command>
+        <command location="inx" interpreter="python">empty_page.py</command>
     </script>
 </inkscape-extension>

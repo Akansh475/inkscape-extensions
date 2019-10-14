@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>HSL Adjust</name>
     <id>org.inkscape.color.HSL_adjust</id>
-    <dependency type="executable" location="extensions">coloreffect.py</dependency>
-    <dependency type="executable" location="extensions">color_HSL_adjust.py</dependency>
+    <dependency type="executable" location="inx">coloreffect.py</dependency>
+    <dependency type="executable" location="inx">color_HSL_adjust.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="hue" type="int" appearance="full" min="-360" max="360" indent="0" gui-text="Hue (°)">0</param>
@@ -31,6 +31,6 @@ Options:
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">color_HSL_adjust.py</command>
+        <command location="inx" interpreter="python">color_HSL_adjust.py</command>
     </script>
 </inkscape-extension>

@@ -3,7 +3,7 @@
     <name>Desktop Cutting Plotter R14</name>
     <id>org.ekips.output.dxf_outlines</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-    <dependency type="executable" location="extensions">dxf_outlines.py</dependency>
+    <dependency type="executable" location="inx">dxf_outlines.py</dependency>
     <param name="tab" type="notebook">
         <page name="options" gui-text="Options">
             <param name="ROBO" type="bool" gui-text="use ROBO-Master type of spline output">false</param>
@@ -51,7 +51,7 @@
         <dataloss>true</dataloss>
     </output>
     <script>
-        <command reldir="extensions" interpreter="python">dxf_outlines.py</command>
+        <command location="inx" interpreter="python">dxf_outlines.py</command>
         <helper_extension>org.inkscape.output.svg.inkscape</helper_extension>
     </script>
 </inkscape-extension>

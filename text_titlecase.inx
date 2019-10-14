@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Title Case</name>
   <id>org.inkscape.text.titlecase</id>
-  <dependency type="executable" location="extensions">chardataeffect.py</dependency>
-  <dependency type="executable" location="extensions">text_titlecase.py</dependency>
+  <dependency type="executable" location="inx">chardataeffect.py</dependency>
+  <dependency type="executable" location="inx">text_titlecase.py</dependency>
   <effect>
     <object-type>all</object-type>
     <effects-menu>
@@ -13,6 +13,6 @@
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">text_titlecase.py</command>
+    <command location="inx" interpreter="python">text_titlecase.py</command>
   </script>
 </inkscape-extension>

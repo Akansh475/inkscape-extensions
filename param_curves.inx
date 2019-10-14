@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Parametric Curves</name>
     <id>org.inkscape.effect.param_curves</id>
-    <dependency type="executable" location="extensions">param_curves.py</dependency>
+    <dependency type="executable" location="inx">param_curves.py</dependency>
     <param name="tab" type="notebook">
         <page name="sampling"  gui-text="Range and Sampling">
             <param name="t_start"  type="float" min="-1000.0" max="1000.0" gui-text="Start t-value:">0.0</param>
@@ -43,6 +43,6 @@ The constants pi and e are also available.</label>
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">param_curves.py</command>
+        <command location="inx" interpreter="python">param_curves.py</command>
     </script>
 </inkscape-extension>

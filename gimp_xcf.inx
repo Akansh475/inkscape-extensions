@@ -3,7 +3,7 @@
     <name>GIMP XCF</name>
     <id>org.ekips.output.gimp_xcf</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-    <dependency type="executable" location="extensions">gimp_xcf.py</dependency>
+    <dependency type="executable" location="inx">gimp_xcf.py</dependency>
     <dependency type="executable" location="path">gimp</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
@@ -30,7 +30,7 @@ Each first level layer is converted to a Gimp layer. Sublayers are concatenated 
                 <dataloss>true</dataloss>
     </output>
     <script>
-        <command reldir="extensions" interpreter="python">gimp_xcf.py</command>
+        <command location="inx" interpreter="python">gimp_xcf.py</command>
         <helper_extension>org.inkscape.output.svg.inkscape</helper_extension>
     </script>
 </inkscape-extension>

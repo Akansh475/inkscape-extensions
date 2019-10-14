@@ -10,6 +10,6 @@
         <output_extension>org.inkscape.output.xaml</output_extension>
     </input>
     <xslt>
-        <file reldir="extensions">xaml2svg.xsl</file>
+        <file location="inx">xaml2svg.xsl</file>
     </xslt>
 </inkscape-extension>

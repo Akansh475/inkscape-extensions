@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Effects</name>
   <id>jessyink.effects</id>
-  <dependency type="executable" location="extensions">jessyInk_effects.py</dependency>
+  <dependency type="executable" location="inx">jessyInk_effects.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" gui-text="Settings">
             <label>Built-in effect</label>
@@ -35,7 +35,7 @@
       </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">jessyInk_effects.py</command>
+    <command location="inx" interpreter="python">jessyInk_effects.py</command>
   </script>
 </inkscape-extension>
 

@@ -9,6 +9,6 @@
         <filetypetooltip>Cleans the cruft out of Adobe Illustrator SVGs before opening</filetypetooltip>
     </input>
     <xslt>
-        <file reldir="extensions">aisvg.xslt</file>
+        <file location="inx">aisvg.xslt</file>
     </xslt>
 </inkscape-extension>

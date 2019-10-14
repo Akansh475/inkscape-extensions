@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Keys and Mouse Reference</name>
   <id>org.inkscape.help.keys</id>
-  <dependency type="executable" location="extensions">launch_webbrowser.py</dependency>
+  <dependency type="executable" location="inx">launch_webbrowser.py</dependency>
   <!-- i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/doc/keys.[lang].html -->
   <param name="url" gui-hidden="true" type="string" translatable="yes">https://inkscape.org/doc/keys.html</param>
   <effect needs-document="false">
@@ -10,6 +10,6 @@
     <effects-menu hidden="true" />
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">launch_webbrowser.py</command>
+    <command location="inx" interpreter="python">launch_webbrowser.py</command>
   </script>
 </inkscape-extension>

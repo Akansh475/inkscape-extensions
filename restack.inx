@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Restack</name>
     <id>org.inkscape.filter.restack</id>
-    <dependency type="executable" location="extensions">restack.py</dependency>
+    <dependency type="executable" location="inx">restack.py</dependency>
     <param name="tab" type="notebook">
         <page name="positional" gui-text="Based on Position">
             <label appearance="header">Restack Direction</label>
@@ -54,6 +54,6 @@ The extension restacks either objects inside a single selected group, or a selec
     </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">restack.py</command>
+        <command location="inx" interpreter="python">restack.py</command>
     </script>
 </inkscape-extension>

@@ -9,6 +9,6 @@
         <filetypetooltip>Adobe's XML Graphics file format</filetypetooltip>
     </output>
     <xslt>
-        <file reldir="extensions">svg2fxg.xsl</file>
+        <file location="inx">svg2fxg.xsl</file>
     </xslt>
 </inkscape-extension>

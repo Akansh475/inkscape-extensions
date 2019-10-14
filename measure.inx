@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Measure Path</name>
     <id>com.njhurst.visualise.measure_length</id>
-    <dependency type="executable" location="extensions">measure.py</dependency>
+    <dependency type="executable" location="inx">measure.py</dependency>
             <param name="type" type="optiongroup" appearance="combo" gui-text="Measurement Type:">
                 <option value="length">Length</option>
                 <option context="measure extension" value="area">Area</option>
@@ -69,6 +69,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">measure.py</command>
+        <command location="inx" interpreter="python">measure.py</command>
     </script>
 </inkscape-extension>

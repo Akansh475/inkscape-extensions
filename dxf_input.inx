@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>DXF Input</name>
     <id>org.inkscape.input.dxf</id>
-    <dependency type="executable" location="extensions">dxf_input.py</dependency>
+    <dependency type="executable" location="inx">dxf_input.py</dependency>
     <param name="tab" type="notebook">
         <page name="options" gui-text="Options">
             <param name="scalemethod" type="optiongroup" appearance="radio" gui-text="Method of Scaling:">
@@ -41,6 +41,6 @@
         <filetypetooltip>Import AutoCAD's Document Exchange Format</filetypetooltip>
     </input>
     <script>
-        <command reldir="extensions" interpreter="python">dxf_input.py</command>
+        <command location="inx" interpreter="python">dxf_input.py</command>
     </script>
 </inkscape-extension>

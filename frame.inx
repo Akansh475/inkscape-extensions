@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Frame</name>
     <id>frame</id>
-    <dependency type="executable" location="extensions">frame.py</dependency>
+    <dependency type="executable" location="inx">frame.py</dependency>
     <param name="tab" type="notebook">
         <page name="stroke" gui-text="Stroke">
             <param name="stroke_color" type="color" gui-text="Stroke Color:">255</param>
@@ -26,6 +26,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">frame.py</command>
+        <command location="inx" interpreter="python">frame.py</command>
     </script>
 </inkscape-extension>

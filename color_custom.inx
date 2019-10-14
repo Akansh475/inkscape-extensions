@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Custom</name>
     <id>org.inkscape.color.custom</id>
-    <dependency type="executable" location="extensions">coloreffect.py</dependency>
-    <dependency type="executable" location="extensions">color_custom.py</dependency>
+    <dependency type="executable" location="inx">coloreffect.py</dependency>
+    <dependency type="executable" location="inx">color_custom.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="r" type="string" gui-text="Red Function:">r</param>
@@ -33,6 +33,6 @@ Example (half the red, swap green and blue):
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">color_custom.py</command>
+        <command location="inx" interpreter="python">color_custom.py</command>
     </script>
 </inkscape-extension>

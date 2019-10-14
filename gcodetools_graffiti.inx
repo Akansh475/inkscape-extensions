@@ -3,7 +3,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Graffiti</name>
     <id>ru.cnc-club.filter.gcodetools_graffiti_orientation</id>
-    <dependency type="executable" location="extensions">gcodetools.py</dependency>
+    <dependency type="executable" location="inx">gcodetools.py</dependency>
     <param name='active-tab' type="notebook">
 
         <page name='graffiti' gui-text='Graffiti'>
@@ -116,6 +116,6 @@ Gcodetools ver. 1.7
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">gcodetools.py</command>
+        <command location="inx" interpreter="python">gcodetools.py</command>
     </script>
 </inkscape-extension>

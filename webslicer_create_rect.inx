@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Create a slicer rectangle</name>
   <id>org.inkscape.web.slicer.create-rect</id>
-  <dependency type="executable" location="extensions">webslicer_effect.py</dependency>
-  <dependency type="executable" location="extensions">webslicer_create_rect.py</dependency>
+  <dependency type="executable" location="inx">webslicer_effect.py</dependency>
+  <dependency type="executable" location="inx">webslicer_create_rect.py</dependency>
   <param name="name" type="string" gui-text="Name:"></param>
   <param name="format" type="optiongroup" appearance="combo" gui-text="Format:">
     <option translatable="no" value="png">PNG</option>
@@ -67,6 +67,6 @@
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">webslicer_create_rect.py</command>
+    <command location="inx" interpreter="python">webslicer_create_rect.py</command>
   </script>
 </inkscape-extension>

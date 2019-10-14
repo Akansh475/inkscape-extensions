@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>L-system</name>
     <id>org.ekips.filter.turtle.lindenmayer</id>
-    <dependency type="executable" location="extensions">lindenmayer.py</dependency>
+    <dependency type="executable" location="inx">lindenmayer.py</dependency>
     <param name="tab" type="notebook">
         <page name="rules" gui-text="Axiom and rules">
             <param name="axiom" type="string" gui-text="Axiom:">++F</param>
@@ -44,6 +44,6 @@ Any of G,H,I,J,K,L: move forward
             </effects-menu>                                 
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">lindenmayer.py</command>
+        <command location="inx" interpreter="python">lindenmayer.py</command>
     </script>
 </inkscape-extension>

@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>More Saturation</name>
     <id>org.inkscape.color.moresaturation</id>
-    <dependency type="executable" location="extensions">coloreffect.py</dependency>
-    <dependency type="executable" location="extensions">color_moresaturation.py</dependency>
+    <dependency type="executable" location="inx">coloreffect.py</dependency>
+    <dependency type="executable" location="inx">color_moresaturation.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
@@ -11,6 +11,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">color_moresaturation.py</command>
+        <command location="inx" interpreter="python">color_moresaturation.py</command>
     </script>
 </inkscape-extension>

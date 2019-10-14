@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
       <name>DPI 90 to 96</name>
       <id>org.inkscape.dpi90to96</id>
-      <dependency type="executable" location="extensions">dpiswitcher.py</dependency>
+      <dependency type="executable" location="inx">dpiswitcher.py</dependency>
       <param name="action" type="notebook" gui-hidden="true">
         <page name="dpi_swicher" gui-text="Switch DPI">
             <param name="switcher" type="optiongroup" appearance="combo" gui-hidden="true">
@@ -17,6 +17,6 @@
         </effects-menu>
       </effect>
       <script>
-        <command reldir="extensions" interpreter="python">dpiswitcher.py</command>
+        <command location="inx" interpreter="python">dpiswitcher.py</command>
       </script>
 </inkscape-extension>

@@ -2,13 +2,13 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Embed Selected Images</name>
   <id>org.ekips.filter.embedselectedimages</id>
-  <dependency type="executable" location="extensions">embedimage.py</dependency>
+  <dependency type="executable" location="inx">embedimage.py</dependency>
   <param name="selectedonly" type="bool" gui-hidden="true" gui-text="Embed only selected images">true</param>
   <effect needs-live-preview="false">
     <object-type>all</object-type>
     <effects-menu hidden="true" />
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">embedimage.py</command>
+    <command location="inx" interpreter="python">embedimage.py</command>
   </script>
 </inkscape-extension>

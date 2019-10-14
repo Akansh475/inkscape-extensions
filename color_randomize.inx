@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Randomize</name>
     <id>org.inkscape.color.randomize</id>
-    <dependency type="executable" location="extensions">color_randomize.py</dependency>
+    <dependency type="executable" location="inx">color_randomize.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="hue_range" type="int" appearance="full" min="0" max="100" indent="0" gui-text="Hue range (%)">100</param>
@@ -21,6 +21,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">color_randomize.py</command>
+        <command location="inx" interpreter="python">color_randomize.py</command>
     </script>
 </inkscape-extension>

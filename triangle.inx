@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Triangle</name>
     <id>math.triangle</id>
-    <dependency type="executable" location="extensions">triangle.py</dependency>
+    <dependency type="executable" location="inx">triangle.py</dependency>
     <param name="s_a"       type="float"   min="0.01" max="10000" gui-text="Side Length a (px):">100.0</param>
     <param name="s_b"       type="float"   min="0.01" max="10000" gui-text="Side Length b (px):">100.0</param>
     <param name="s_c"       type="float"   min="0.01" max="10000" gui-text="Side Length c (px):">100.0</param>
@@ -23,6 +23,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">triangle.py</command>
+        <command location="inx" interpreter="python">triangle.py</command>
     </script>
 </inkscape-extension>

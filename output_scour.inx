@@ -124,6 +124,6 @@
     </output>
 
     <script>
-        <command reldir="extensions" interpreter="python">output_scour.py</command>
+        <command location="inx" interpreter="python">output_scour.py</command>
     </script>
 </inkscape-extension>

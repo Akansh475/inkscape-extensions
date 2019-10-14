@@ -2,8 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Convert to Braille</name>
     <id>org.inkscape.text.braille</id>
-    <dependency type="executable" location="extensions">chardataeffect.py</dependency>
-    <dependency type="executable" location="extensions">text_braille.py</dependency>
+    <dependency type="executable" location="inx">chardataeffect.py</dependency>
+    <dependency type="executable" location="inx">text_braille.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>
@@ -11,6 +11,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command reldir="extensions" interpreter="python">text_braille.py</command>
+        <command location="inx" interpreter="python">text_braille.py</command>
     </script>
 </inkscape-extension>

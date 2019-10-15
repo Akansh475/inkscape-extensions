@@ -64,13 +64,15 @@
 
   <define name="inx.dependency">
     <element name="dependency">
-      <attribute name="type">
-        <choice>
-          <value>extension</value>
-          <value>executable</value>
-          <value>plugin</value>
-        </choice>
-      </attribute>
+      <optional>
+        <attribute name="type">
+          <choice>
+            <value>file</value> <!-- default if missing -->
+            <value>executable</value>
+            <value>extension</value>
+          </choice>
+        </attribute>
+      </optional>
       <ref name="inx.dependency.location_attribute"/>
       <optional>
         <attribute name="description"/>

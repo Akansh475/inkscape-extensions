@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Export as GIMP Palette</name>
     <id>com.kaioa.export_gimp_palette</id>
-    <dependency type="executable" location="inx">export_gimp_palette.py</dependency>
     <output>
         <extension>.gpl</extension>
         <mimetype>text/plain</mimetype>

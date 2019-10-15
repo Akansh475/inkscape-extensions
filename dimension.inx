@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Dimensions</name>
     <id>se.lewerin.filter.dimension</id>
-    <dependency type="executable" location="inx">dimension.py</dependency>
     <param name="xoffset" type="float" min="0" max="1000" gui-text="X Offset:">50</param>
     <param name="yoffset" type="float" min="0" max="1000" gui-text="Y Offset:">50</param>
     <param name="type" type="optiongroup" appearance="combo" gui-text="Bounding box type:">

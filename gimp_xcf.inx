@@ -3,7 +3,6 @@
     <name>GIMP XCF</name>
     <id>org.ekips.output.gimp_xcf</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-    <dependency type="executable" location="inx">gimp_xcf.py</dependency>
     <dependency type="executable" location="path">gimp</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">

@@ -3,7 +3,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>About</name>
     <id>ru.cnc-club.filter.gcodetools_about_no_options_no_preferences</id>
-    <dependency type="executable" location="inx">gcodetools.py</dependency>
     <param name='active-tab' type="notebook">
 
         <page name='about' gui-text='About'>

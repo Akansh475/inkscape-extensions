@@ -3,9 +3,6 @@
   <name>Hershey Text</name>
   <id>org.evilmad.text.hershey</id>
 
-  <dependency type="executable" location="inx">hershey.py</dependency>
-  <dependency type="executable" location="inx">inkex.py</dependency>
-
   <param name="tab" type="notebook">
     <page name="render" gui-text="Render">
 

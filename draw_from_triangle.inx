@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Draw From Triangle</name>
     <id>il.fromtriangle</id>
-    <dependency type="executable" location="inx">draw_from_triangle.py</dependency>
     <param name="tab" type="notebook">
         <page name="common1" gui-text="Common Objects">
             <param name="circumcircle"    type="bool" gui-text="Circumcircle">false</param>

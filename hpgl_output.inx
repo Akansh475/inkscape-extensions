@@ -3,8 +3,7 @@
   <name>HPGL Output</name>
   <id>org.ekips.output.hpgl</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-  <dependency type="executable" location="inx">hpgl_output.py</dependency>
-  <dependency type="executable" location="inx">hpgl_encoder.py</dependency>
+  <dependency type="file" location="inx">hpgl_encoder.py</dependency>
   <label>Please make sure that all objects you want to save are converted to paths. Please use the plotter extension (Extensions menu) to plot directly over a serial connection.</label>
   <param name="tab" type="notebook">
     <page name="plotter" gui-text="Plotter Settings">

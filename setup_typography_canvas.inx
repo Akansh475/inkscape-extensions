@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>1 - Setup Typography Canvas</name>
   <id>org.inkscape.typography.setuptypographycanvas</id>
-  <dependency type="executable" location="inx">setup_typography_canvas.py</dependency>
   <param name="emsize" type="int" gui-text="Em-size:" min="10" max="2048">1000</param>
   <param name="ascender" type="int" gui-text="Ascender:" min="0" max="2048">750</param>
   <param name="caps" type="int" gui-text="Caps Height:" min="0" max="2048">700</param>

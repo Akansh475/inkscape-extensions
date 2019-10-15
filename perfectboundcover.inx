@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Perfect-Bound Cover Template</name>
     <id>org.coswellproductions.inkscape.effects.perfectboundcover</id>
-    <dependency type="executable" location="inx">perfectboundcover.py</dependency>
     <label appearance="header">Book Properties</label>
     <param name="width" precision="3" type="float" indent="1" min="0.0" max="100.000" gui-text="Book Width (inches):">6</param>
     <param name="height" precision="3" type="float" indent="1" min="0.0" max="100.000" gui-text="Book Height (inches):">9</param>

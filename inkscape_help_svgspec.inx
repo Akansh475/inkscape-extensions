@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>SVG 1.1 Specification</name>
     <id>org.inkscape.help.svgspec</id>
-    <dependency type="executable" location="inx">launch_webbrowser.py</dependency>
     <param name="url" gui-hidden="true" type="string">http://www.w3.org/TR/SVG11/</param>
     <effect needs-document="false">
         <object-type>all</object-type>

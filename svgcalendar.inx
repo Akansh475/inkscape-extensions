@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Calendar</name>
     <id>org.inkscape.render.calendar</id>
-    <dependency type="executable" location="inx">svgcalendar.py</dependency>
     <param name="tab" type="notebook">
         <page name="config" gui-text="Configuration">
             <param name="year" type="int" min="0" max="3000" gui-text="Year (4 digits):">2020</param>

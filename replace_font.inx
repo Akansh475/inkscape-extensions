@@ -4,7 +4,6 @@
     <id>org.inkscape.replace_font</id>
 
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-    <dependency type="executable" location="inx">replace_font.py</dependency>
 
      <param name="action" type="notebook">
         <page name="find_replace" gui-text="Find and Replace font">

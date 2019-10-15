@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Deep Ungroup</name>
     <id>mcepl.ungroup_deep</id>
-    <dependency type="executable" location="inx">ungroup_deep.py</dependency>
     <label>Ungroup all groups in the selected object.</label>
     <param name="startdepth" type="int" min="0" max="65535" gui-text="Starting Depth">0</param>
     <param name="maxdepth" type="int" min="0" max="65535" gui-text="Stopping Depth (from top)">65535</param>

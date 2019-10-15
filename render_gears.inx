@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Gear</name>
     <id>org.ekips.filter.gears</id>
-    <dependency type="executable" location="inx">render_gears.py</dependency>
     <param name="teeth"    type="int"   min="6"    max="360"    gui-text="Number of teeth:">24</param>
     <param name="pitch"    type="float" min="0.0"  max="1000.0" gui-text="Circular pitch (tooth size):">20.0</param>
     <param name="angle"    type="float" min="10.0" max="30.0"   gui-text="Pressure angle (degrees):">20.0</param>

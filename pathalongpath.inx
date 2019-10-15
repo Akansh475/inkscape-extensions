@@ -2,8 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Pattern along Path</name>
     <id>math.univ-lille1.barraud.pathdeform</id>
-    <dependency type="executable" location="inx">pathmodifier.py</dependency>
-    <dependency type="executable" location="inx">pathalongpath.py</dependency>
+    <dependency type="file" location="inx">pathmodifier.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
         <param name="copymode" type="optiongroup" appearance="combo" gui-text="Copies of the pattern:">

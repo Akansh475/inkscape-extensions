@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Convert to Dashes</name>
     <id>com.vaxxine.filter.dashes</id>
-    <dependency type="executable" location="inx">convert2dashes.py</dependency>
     <effect>
         <object-type>path</object-type>
         <effects-menu>

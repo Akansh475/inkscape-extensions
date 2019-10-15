@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>3 - Convert Glyph Layers to SVG Font</name>
   <id>org.inkscape.typography.layers2svgfont</id>
-  <dependency type="executable" location="inx">layers2svgfont.py</dependency>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

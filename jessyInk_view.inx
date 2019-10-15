@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>View</name>
   <id>jessyink.view</id>
-  <dependency type="executable" location="inx">jessyInk_view.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" gui-text="Settings">
             <param name="viewOrder" type="int" min="0" max="100" gui-text="Order:">1</param>

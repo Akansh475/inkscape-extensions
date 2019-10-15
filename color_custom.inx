@@ -2,8 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Custom</name>
     <id>org.inkscape.color.custom</id>
-    <dependency type="executable" location="inx">coloreffect.py</dependency>
-    <dependency type="executable" location="inx">color_custom.py</dependency>
+    <dependency type="file" location="inx">coloreffect.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="r" type="string" gui-text="Red Function:">r</param>

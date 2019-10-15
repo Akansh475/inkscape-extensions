@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Command Line Options</name>
   <id>org.inkscape.help.commandline</id>
-  <dependency type="executable" location="inx">launch_webbrowser.py</dependency>
   <!-- i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/doc/inkscape-man.[lang].html -->
   <param name="url" gui-hidden="true" type="string" translatable="yes">https://inkscape.org/doc/inkscape-man.html</param>
   <effect needs-document="false">

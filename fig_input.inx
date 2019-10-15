@@ -3,7 +3,6 @@
     <name>XFIG Input</name>
     <id>org.inkscape.input.fig</id>
     <dependency type="executable" location="path">fig2dev</dependency>
-    <dependency type="executable" location="inx">fig_input.py</dependency>
     <input>
         <extension>.fig</extension>
         <mimetype>image/x-xfig</mimetype>

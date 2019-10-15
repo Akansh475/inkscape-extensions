@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>PixelSnap</name>
     <id>bryhoyt.pixelsnap</id>
-    <dependency type="executable" location="inx">pixelsnap.py</dependency>
     <label>Snap selected paths, images, and rectangles to pixel boundaries. Strokes with a non-zero odd width are snapped to midpoints, so they align correctly</label>
 
     <param name="snap_ancestors" type="bool" gui-text="Snap unselected ancestors' translations (groups, layers, document height) first">true</param>

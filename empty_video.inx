@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Video Screen</name>
     <id>org.inkscape.render.empty_video</id>
-    <dependency type="executable" location="inx">empty_video.py</dependency>
 
     <param name="size" gui-text="Video size:" type="optiongroup" appearance="combo">
         <option value="Custom">Custom</option>

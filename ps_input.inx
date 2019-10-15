@@ -4,7 +4,6 @@
     <id>org.inkscape.input.ps</id>
     <dependency type="extension">org.inkscape.input.pdf</dependency>
     <dependency type="executable" location="path">ps2pdf</dependency>
-    <dependency type="executable" location="inx">ps_input.py</dependency>
     <input>
         <extension>.ps</extension>
         <mimetype>image/x-postscript</mimetype>

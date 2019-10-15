@@ -3,7 +3,6 @@
   <name>Collection of SVG files One per root layer</name>
   <id>org.inkscape.output.LAYERS</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-  <dependency type="executable" location="inx">tar_layers.py</dependency>
   <output>
     <extension>.tar</extension>
     <mimetype>application/tar</mimetype>

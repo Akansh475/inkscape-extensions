@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Blank Page</name>
     <id>org.inkscape.render.empty_page</id>
-    <dependency type="executable" location="inx">empty_page.py</dependency>
 
     <param name="size" gui-text="Page size:" type="optiongroup" appearance="combo">
         <option translatable="no" value="a3">A3 — 297 × 420 mm</option>

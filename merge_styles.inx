@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Merge Styles into CSS</name>
   <id>org.inkscape.stylesheet.merge</id>
-  <dependency type="executable" location="inx">merge_styles.py</dependency>
 
   <label>All selected nodes will be grouped together and their common style attributes will create a new class, this class will replace the existing inline style attributes. Please use a name which best describes the kinds of objects and their common context for best effect.</label>
 

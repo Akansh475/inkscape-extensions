@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Master slide</name>
   <id>jessyink.masterSlide</id>
-  <dependency type="executable" location="inx">jessyInk_masterSlide.py</dependency>
   <param name="tab" type="notebook">
     <page name="settings" gui-text="Settings">
             <param name="layerName" type="string" gui-text="Name of layer:"></param>

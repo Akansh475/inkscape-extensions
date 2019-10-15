@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Motion</name>
     <id>org.ekips.filter.motion</id>
-    <dependency type="executable" location="inx">motion.py</dependency>
     <param name="magnitude" type="float" min="0" max="1000" gui-text="Magnitude:">100</param>
     <param name="angle" type="float" min="0.0" max="360.0" gui-text="Angle:">45</param>
     <effect>

@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Lorem ipsum</name>
     <id>com.kaioa.lorem_ipsum</id>
-    <dependency type="executable" location="inx">lorem_ipsum.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="num" type="int" min="1" max="1000" gui-text="Number of paragraphs:">5</param>

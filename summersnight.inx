@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Envelope</name>
     <id>org.ekips.filter.summersnight</id>
-    <dependency type="executable" location="inx">summersnight.py</dependency>
     <effect>
     <object-type>path</object-type>
         <effects-menu>

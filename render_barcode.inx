@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Classic</name>
   <id>org.inkscape.render.barcode</id>
-  <dependency type="executable" location="inx">render_barcode.py</dependency>
   <param name="type" type="optiongroup" appearance="combo" gui-text="Barcode Type:">
     <option translatable="no" value="Ean2">EAN2 Extension</option>
     <option translatable="no" value="Ean5">EAN5 Extension</option>

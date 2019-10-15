@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>RGB Barrel</name>
     <id>org.inkscape.color.rgbbarrel</id>
-    <dependency type="executable" location="inx">color_rgbbarrel.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>

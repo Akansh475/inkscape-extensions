@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Desktop</name>
     <id>org.inkscape.render.empty_desktop</id>
-    <dependency type="executable" location="inx">empty_desktop.py</dependency>
 
     <param name="size" gui-text="Desktop size:" type="optiongroup" appearance="combo">
         <option value="Custom">Custom</option>

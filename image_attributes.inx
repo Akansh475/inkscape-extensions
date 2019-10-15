@@ -4,8 +4,6 @@
     <name>Set Image Attributes</name>
     <id>org.inkscape.effect.image_attributes</id>
 
-    <dependency type="executable" location="inx">image_attributes.py</dependency>
-
     <param name="tab_main" type="notebook">
 
         <!-- render images like in 0.48 -->

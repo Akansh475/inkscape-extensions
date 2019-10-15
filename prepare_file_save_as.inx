@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Pre-Process File Save As...</name>
     <id>com.vaxxine.file.saveas.preprocess</id>
-    <dependency type="executable" location="inx">prepare_file_save_as.py</dependency>
     <effect>
         <object-type>path</object-type>
         <effects-menu>

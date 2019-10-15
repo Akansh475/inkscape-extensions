@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Extract Image</name>
     <id>org.ekips.filter.extractimage</id>
-    <dependency type="executable" location="inx">extractimage.py</dependency>
     <param name="selectedonly" type="bool" gui-text="Extract only selected images">true</param>
     <param name="filepath" type="string" gui-text="Path to save image:">./images/</param>
     <effect needs-live-preview="false">

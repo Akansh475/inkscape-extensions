@@ -2,8 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Install/update</name>
   <id>jessyink.install</id>
-  <dependency type="executable" location="inx">jessyInk_install.py</dependency>
-  <dependency type="executable" location="inx">jessyInk.js</dependency>
+  <dependency type="file" location="inx">jessyInk.js</dependency>
   <param name="tab" type="notebook">
     <page name="help" gui-text="Help">
             <label>This extension allows you to install or update the JessyInk script in order to turn your SVG file into a presentation. Please see code.google.com/p/jessyink for more details.</label>

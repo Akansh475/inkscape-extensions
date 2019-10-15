@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Ask Us a Question</name>
   <id>org.inkscape.help.askaquestion</id>
-  <dependency type="executable" location="inx">launch_webbrowser.py</dependency>
   <!-- i18n. Please don't translate link unless the page exists in your language. Add your language code to the link this way: https://inkscape.org/[lang]/ask/ -->
   <param name="url" gui-hidden="true" type="string" translatable="yes">https://inkscape.org/en/ask/</param>
   <effect needs-document="false">

@@ -3,7 +3,6 @@
     <name>Win32 Vector Print</name>
     <id>com.vaxxine.print.win32</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-    <dependency type="executable" location="inx">print_win32_vector.py</dependency>
     <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>

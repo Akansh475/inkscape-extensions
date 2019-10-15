@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Wireframe Sphere</name>
     <id>il.wireframesphere</id>
-    <dependency type="executable" location="inx">wireframe_sphere.py</dependency>
     <param name="num_lat" type="int" min="0" max="1000" gui-text="Lines of latitude:">19</param>
     <param name="num_long" type="int" min="0" max="1000" gui-text="Lines of longitude:">24</param>
     <param name="tilt" type="float" min="-90" max="90" gui-text="Tilt (deg):">35</param>

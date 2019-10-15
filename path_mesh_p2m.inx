@@ -3,8 +3,6 @@
   <name>Path to Mesh-Gradient</name>
   <id>su-v/org.inkscape.meshes.from_path</id>
 
-  <dependency type="executable" location="inx">path_mesh_p2m.py</dependency>
-
   <param name="tab" type="notebook">
 
     <page name="path2mesh_tab" gui-text="Options">

@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Perspective</name>
     <id>org.ekips.filter.perspective</id>
-    <dependency type="executable" location="inx">perspective.py</dependency>
     <effect>
     <object-type>path</object-type>
         <effects-menu>

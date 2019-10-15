@@ -28,7 +28,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>NiceCharts</name>
   <id>org.inkscape.filter.nicechart</id>
-  <dependency type="executable" location="inx">nicechart.py</dependency>
   <param name="input_sections" type="notebook">
     <page name="data_settings" gui-text="Data">
       <param name="input_type" type="notebook">

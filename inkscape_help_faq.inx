@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>FAQ</name>
   <id>org.inkscape.help.faq</id>
-  <dependency type="executable" location="inx">launch_webbrowser.py</dependency>
   <param name="url" gui-hidden="true" type="string">https://inkscape.org/learn/faq/</param>
   <effect needs-document="false">
     <object-type>all</object-type>

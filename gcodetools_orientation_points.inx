@@ -3,7 +3,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Orientation points</name>
     <id>ru.cnc-club.filter.gcodetools_orientation_no_options_no_preferences</id>
-    <dependency type="executable" location="inx">gcodetools.py</dependency>
     <param name='active-tab' type="notebook">
 
         <page name='orientation' gui-text='Orientation'>

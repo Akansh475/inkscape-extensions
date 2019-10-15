@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Remove Red</name>
     <id>org.inkscape.color.removered</id>
-    <dependency type="executable" location="inx">color_removered.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>

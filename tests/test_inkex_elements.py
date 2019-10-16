@@ -207,6 +207,8 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.get('id'), 'Thing5815')
         elem.set_random_id('Thing', size=2)
         self.assertEqual(elem.get('id'), 'Thing85')
+        elem.set_random_id()
+        self.assertEqual(elem.get('id'), 'path5392')
 
     def test_bounding_box(self):
         """Elements can have bounding boxes"""

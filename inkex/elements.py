@@ -186,10 +186,11 @@ class BaseElement(etree.ElementBase):
         desc = self.add(Desc())
         desc.text = text
 
-    def set_random_id(self, suffix=None, size=4):
+    def set_random_id(self, prefix=None, size=4):
         """Sets the id attribute if it is not already set"""
         root = self.getroottree().getroot()
-        self.set('id', root.get_unique_id(suffix, size=size))
+        prefix = str(self) if prefix is None else prefix
+        self.set('id', root.get_unique_id(prefix, size=size))
 
     def get_id(self):
         """Get the id for the element, will set a new unique id if not set"""

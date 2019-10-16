@@ -476,11 +476,24 @@ class Rectangle(ShapeElement):
     tag_name = 'rect'
     left = property(lambda self: float(self.get('x', '0')))
     top = property(lambda self: float(self.get('y', '0')))
+    right = property(lambda self: self.left + self.width)
+    bottom = property(lambda self: self.top + self.height)
     width = property(lambda self: float(self.get('width', '0')))
     height = property(lambda self: float(self.get('height', '0')))
+    rx = property(lambda self: float(self.get('rx', self.get('ry', 0.0))))
+    ry = property(lambda self: float(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
+        if self.rx:
+            rx, ry = self.rx, self.ry # pylint: disable=invalid-name
+            return 'M {1},{0.top}'\
+                   'L {2},{0.top}    A {0.rx},{0.ry} 0 0 1 {0.right},{3}'\
+                   'L {0.right},{4}  A {0.rx},{0.ry} 0 0 1 {2},{0.bottom}'\
+                   'L {1},{0.bottom} A {0.rx},{0.ry} 0 0 1 {0.left},{4}'\
+                   'L {0.left},{3}   A {0.rx},{0.ry} 0 0 1 {1},{0.top} z'\
+                .format(self, self.left + rx, self.right - rx, self.top + ry, self.bottom - ry)
+
         return 'M {0.left},{0.top} h{0.width}v{0.height}h{1} z'.format(self, -self.width)
 
 

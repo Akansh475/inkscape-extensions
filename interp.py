@@ -61,6 +61,9 @@ class Interp(inkex.EffectExtension):
 
         objects = [node for node in objects.values() if isinstance(node, inkex.PathElement)]
 
+        # prevents modification of original objects
+        objects = copy.deepcopy(objects)
+
         for node in objects:
             node.apply_transform()
 

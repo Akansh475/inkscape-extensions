@@ -340,3 +340,16 @@ def ensure_value(self, attr, value):
     return getattr(self, attr)
 
 argparse.Namespace.ensure_value = ensure_value
+
+@deprecate
+def zSort(inNode, idList):
+    """self.svg.get_z_selected()"""
+    sortedList = []
+    theid = inNode.get("id")
+    if theid in idList:
+        sortedList.append(theid)
+    for child in inNode:
+        if len(sortedList) == len(idList):
+            break
+        sortedList += zSort(child, idList)
+    return sortedList

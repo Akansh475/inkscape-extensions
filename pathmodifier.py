@@ -35,21 +35,9 @@ import copy
 import inkex
 from inkex.localization import _
 from inkex.elements import PathElement, Group, Use
-from inkex.deprecated import deprecate
 
-@deprecate
-def zSort(inNode, idList):
-    """self.svg.get_z_selected()"""
-    sortedList = []
-    theid = inNode.get("id")
-    if theid in idList:
-        sortedList.append(theid)
-    for child in inNode:
-        if len(sortedList) == len(idList):
-            break
-        sortedList += zSort(child, idList)
-    return sortedList
-
+# This depricated API is used by some external extensions.
+from inkex.deprecated import zSort # pylint: disable=unused-import
 
 class PathModifier(inkex.EffectExtension):
     """Select list manipulation"""

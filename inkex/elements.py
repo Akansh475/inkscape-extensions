@@ -239,6 +239,11 @@ class BaseElement(etree.ElementBase):
         if self.getparent() is not None:
             self.getparent().remove(self)
 
+    def replace(self, elem):
+        """Replace this element with the given element"""
+        self.addnext(elem)
+        self.delete()
+
     def copy(self):
         """Make a copy of the element and return it"""
         return deepcopy(self)
@@ -271,6 +276,14 @@ class ShapeElement(BaseElement):
         raise AttributeError("Path can not be set on this type of element: {} <- {}."
                              .format(type(self).__name__, path))
 
+    def to_path_element(self):
+        """Replace this element with a path element"""
+        elem = PathElement()
+        elem.path = self.path
+        elem.style = self.effective_style()
+        elem.transform = self.transform
+        return elem
+
     def composed_transform(self):
         """Calculate every transform down to the root document node"""
         parent = self.getparent()
@@ -284,6 +297,10 @@ class ShapeElement(BaseElement):
         parent = self.getparent()
         if parent is not None and isinstance(parent, ShapeElement):
             return parent.composed_style() + self.style
+        return self.style
+
+    def effective_style(self):
+        """Without parent styles, what is the effective style is"""
         return self.style
 
     def bounding_box(self, transform=None):  # type: () -> BoundingBox
@@ -387,7 +404,12 @@ class Group(ShapeElement):
         return elem
 
     def get_path(self):
-        return Path()
+        ret = Path()
+        for child in self:
+            path = child.path
+            path.transform(child.transform)
+            ret += path
+        return ret
 
     def bounding_box(self, transform=None):
         bbox = BoundingBox(None)
@@ -400,6 +422,13 @@ class Group(ShapeElement):
             if isinstance(child, ShapeElement):
                 bbox += child.bounding_box(transform=transform)
         return bbox
+
+    def effective_style(self):
+        """A blend of each child's style mixed together (last child wins)"""
+        style = self.style
+        for child in self:
+            style.update(child.effective_style())
+        return style
 
     @property
     def groupmode(self):
@@ -531,7 +560,17 @@ class Use(ShapeElement):
     """A 'use' element that links to another in the document"""
     tag_name = 'use'
 
-    get_path = lambda self: self.href.get_path()
+    def get_path(self):
+        """Returns the path of the cloned href plus any transformation"""
+        path = self.href.path
+        path.transform(self.href.transform)
+        return path
+
+    def effective_style(self):
+        """Href's style plus this object's own styles"""
+        style = self.href.effective_style()
+        style.update(self.style)
+        return style
 
 class ClipPath(Group):
     """A path used to clip objects"""

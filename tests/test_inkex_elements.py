@@ -219,6 +219,13 @@ class CoreElementTestCase(ElementTestCase):
         group = Group(elem)
         self.assertEqual(elem.bounding_box(), group.bounding_box())
 
+    def test_replace(self):
+        """Replacing nodes in a tree"""
+        rect = self.svg.getElementById('E')
+        path = rect.to_path_element()
+        rect.replace(path)
+        self.assertEqual(rect.getparent(), None)
+        self.assertEqual(path.getparent(), self.svg.getElementById('C'))
 
     def test_path(self):
         """Test getting paths"""
@@ -316,6 +323,13 @@ class RectTest(ElementTestCase):
         self.assertEqual(self.elem.transform, Transform('rotate(16.097889)'))
         self.assertEqual(str(self.elem.composed_transform()),
                          'matrix(0.754465 -0.863362 1.13818 1.31905 -461.593 215.192)')
+
+    def test_effetive_stylesheet(self):
+        """Test the non-parent combination of styles"""
+        self.assertEqual(str(self.elem.effective_style()),\
+            'fill:#0000ff;stroke-width:1px')
+        self.assertEqual(str(self.elem.getparent().effective_style()),\
+            'fill:#0000ff;stroke-width:1px;stroke:#f00')
 
     def test_compose_stylesheet(self):
         """Test finding the composed stylesheet for the shape"""

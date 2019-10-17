@@ -310,9 +310,22 @@ class ComparisonMixin(object):
             xml_a = xml.parse(BytesIO(data_a))
             xml_b = xml.parse(BytesIO(data_b))
             # Late importing
-            ret = xmldiff(xml_a.getroot(), xml_b.getroot())
-            diff = xml.tostring(xml_a.getroot()).decode('utf-8')
-            self.assertTrue(ret, "SVG Output Difference: {} <- {}".format(outfile, diff))
+            delta = xmldiff(xml_a.getroot(), xml_b.getroot())
+            if not delta:
+                print('The XML is different, you can save the output using the EXPORT_COMPARE=1'\
+                      ' envionment variable. This will save the compared file as a ".output" file'\
+                      ' next to the reference file used in the text.\n')
+            diff = 'SVG Differences: {}\n\n'.format(outfile)
+            if os.environ.get('XML_DIFF', False):
+                diff = '<- ' + xml.tostring(xml_a.getroot()).decode('utf-8')
+            else:
+                for x, (value_a, value_b) in enumerate(delta):
+                    try:
+                        # Take advantage of better text diff in testcase's own asserts.
+                        self.assertEqual(value_a, value_b)
+                    except AssertionError as err:
+                        diff += " {}. {}\n".format(x, str(err))
+            self.assertTrue(delta, diff)
         else:
             # compare any content (non svg)
             self.assertEqual(data_a, data_b)

@@ -239,7 +239,7 @@ class BaseElement(etree.ElementBase):
         if self.getparent() is not None:
             self.getparent().remove(self)
 
-    def replace(self, elem):
+    def replace_with(self, elem):
         """Replace this element with the given element"""
         self.addnext(elem)
         self.delete()

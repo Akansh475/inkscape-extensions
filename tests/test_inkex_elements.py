@@ -219,11 +219,11 @@ class CoreElementTestCase(ElementTestCase):
         group = Group(elem)
         self.assertEqual(elem.bounding_box(), group.bounding_box())
 
-    def test_replace(self):
+    def test_replace_with(self):
         """Replacing nodes in a tree"""
         rect = self.svg.getElementById('E')
         path = rect.to_path_element()
-        rect.replace(path)
+        rect.replace_with(path)
         self.assertEqual(rect.getparent(), None)
         self.assertEqual(path.getparent(), self.svg.getElementById('C'))
 

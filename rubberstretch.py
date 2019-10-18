@@ -16,19 +16,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-# barraud@math.univ-lille1.fr
 #
+"""
+Distorts selected paths, stretching it vertically while squeezing horizontally.
+
+Amount is controlled by ratio parameter.
+
+Curve gives further effect by bunching the surface towards the ends.
+"""
 
 import inkex
-import cubicsuperpath, bezmisc, pathmodifier
 
-class RubberStretch(pathmodifier.Diffeo):
-    def __init__(self):
-        super(RubberStretch, self).__init__()
-        self.arg_parser.add_argument("-r", "--ratio", type=float,
-                                     dest="ratio", default=0.5)
-        self.arg_parser.add_argument("-c", "--curve", type=float,
-                                     dest="curve", default=0.5)
+from pathmodifier import Diffeo
+
+class RubberStretch(Diffeo):
+    def add_arguments(self, pars):
+        pars.add_argument("-r", "--ratio", type=float, default=0.5)
+        pars.add_argument("-c", "--curve", type=float, default=0.5)
 
     def applyDiffeo(self,bpt,vects=()):
         for v in vects:
@@ -73,4 +77,3 @@ class RubberStretch(pathmodifier.Diffeo):
 
 if __name__ == '__main__':
     RubberStretch().run()
-

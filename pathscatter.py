@@ -137,15 +137,15 @@ class PathScatter(pathmodifier.Diffeo):
             self.patternNode = list(duplist.values())[0]
 
         # TODO: allow 4th option: duplicate the first copy and clone the next ones.
-        if "%s" % self.options.copymode == "clone":
+        if self.options.copymode == "clone":
             self.patternNode = Use()
             self.patternNode.set('xlink:href', "#" + sid)
             self.gNode.append(self.patternNode)
 
         self.skeletons = dict(self.svg.selected)
         del self.skeletons[sid]
-        self.expandGroupsUnlinkClones(self.skeletons, True, False)
-        self.objectsToPaths(self.skeletons, False)
+        self.expand_clones(self.skeletons, True, False)
+        self.objects_to_paths(self.skeletons, False)
 
     def lengthtotime(self, l):
         """

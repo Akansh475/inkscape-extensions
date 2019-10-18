@@ -126,13 +126,13 @@ class PathAlongPath(pathmodifier.Diffeo):
 
         if self.options.duplicate:
             self.patterns = self.duplicateNodes(self.patterns)
-        self.expandGroupsUnlinkClones(self.patterns, True, True)
-        self.objectsToPaths(self.patterns)
+        self.expand_clones(self.patterns, True, True)
+        self.objects_to_paths(self.patterns)
         del self.svg.selected[_id]
 
         self.skeletons = self.svg.selected
-        self.expandGroupsUnlinkClones(self.skeletons, True, False)
-        self.objectsToPaths(self.skeletons)
+        self.expand_clones(self.skeletons, True, False)
+        self.objects_to_paths(self.skeletons)
 
     def lengthtotime(self, l):
         """

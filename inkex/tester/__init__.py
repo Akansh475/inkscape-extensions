@@ -311,7 +311,7 @@ class ComparisonMixin(object):
             xml_b = xml.parse(BytesIO(data_b))
             # Late importing
             delta = xmldiff(xml_a.getroot(), xml_b.getroot())
-            if not delta:
+            if not delta and not os.environ.get('EXPORT_COMPARE', False):
                 print('The XML is different, you can save the output using the EXPORT_COMPARE=1'\
                       ' envionment variable. This will save the compared file as a ".output" file'\
                       ' next to the reference file used in the text.\n')

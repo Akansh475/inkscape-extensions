@@ -192,6 +192,13 @@ class BaseElement(etree.ElementBase):
         prefix = str(self) if prefix is None else prefix
         self.set('id', root.get_unique_id(prefix, size=size))
 
+    def set_random_ids(self, prefix=None):
+        """Same as set_random_id, but will apply also to children"""
+        self.set_random_id(prefix=prefix)
+        for child in self:
+            if hasattr(child, 'set_random_id'):
+                self.set_random_id(prefix=prefix)
+
     def get_id(self):
         """Get the id for the element, will set a new unique id if not set"""
         if 'id' not in self.attrib:
@@ -571,6 +578,15 @@ class Use(ShapeElement):
         style = self.href.effective_style()
         style.update(self.style)
         return style
+
+    def unlink(self):
+        """Unlink this clone, replacing it with a copy of the original"""
+        copy = self.href.copy()
+        copy.set_random_ids()
+        copy.transform *= self.transform
+        copy.style = self.style + copy.style
+        self.replace_with(copy)
+        return copy
 
 class ClipPath(Group):
     """A path used to clip objects"""

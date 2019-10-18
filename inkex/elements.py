@@ -188,9 +188,8 @@ class BaseElement(etree.ElementBase):
 
     def set_random_id(self, prefix=None, size=4):
         """Sets the id attribute if it is not already set"""
-        root = self.getroottree().getroot()
         prefix = str(self) if prefix is None else prefix
-        self.set('id', root.get_unique_id(prefix, size=size))
+        self.set('id', self.root.get_unique_id(prefix, size=size))
 
     def set_random_ids(self, prefix=None):
         """Same as set_random_id, but will apply also to children"""
@@ -210,6 +209,9 @@ class BaseElement(etree.ElementBase):
         """Get the root document element from any element descendent"""
         if self.getparent() is not None:
             return self.getparent().root
+        from inkex.svg import SvgDocumentElement
+        if not isinstance(self, SvgDocumentElement):
+            raise ValueError("Element fragment does not have a document root!")
         return self
 
     def descendants(self):
@@ -331,9 +333,6 @@ class ShapeElement(BaseElement):
     @property
     def href(self):
         """Returns the referred-to element if available"""
-        from inkex.svg import SvgDocumentElement
-        if not isinstance(self.root, SvgDocumentElement):
-            raise KeyError("XML Fragment can not use xlinks")
         ref = self.get('xlink:href')
         if not ref:
             return None
@@ -582,10 +581,10 @@ class Use(ShapeElement):
     def unlink(self):
         """Unlink this clone, replacing it with a copy of the original"""
         copy = self.href.copy()
-        copy.set_random_ids()
         copy.transform *= self.transform
         copy.style = self.style + copy.style
         self.replace_with(copy)
+        copy.set_random_ids()
         return copy
 
 class ClipPath(Group):

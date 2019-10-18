@@ -25,27 +25,23 @@ import gettext
 import os
 import sys
 
-_ = gettext.gettext
+# Get gettext domain and matching locale directory (both environment variables are set by Inkscape)
+GETTEXT_DOMAIN = os.environ.get('INKEX_GETTEXT_DOMAIN')
+GETTEXT_DIRECTORY = os.environ.get('INKEX_GETTEXT_DIRECTORY')
 
-# The default gettext domain is 'inkscape' this is because previously
-# we used the central translation dictionary for the translations
-# and now we want to support extensions that have their own.
-GETTEXT_DOMAIN = os.environ.get('INKEX_GETTEXT_DOMAIN', 'inkscape')
+def localize(domain=GETTEXT_DOMAIN, localedir=GETTEXT_DIRECTORY):
+    """Configure gettext and install _() function into builtins namespace for easy access"""
 
-# The package locale dir is primary, inkscape is secondary and finally
-# is None, which should default to the system settings.
-LOCALEDIR = os.environ.get('PACKAGE_LOCALE_DIR', \
-    os.environ.get('INKSCAPE_LOCALEDIR', None))
+    # Do not enable translation if GETTEXT_DOMAIN is unset.
+    # This is the case when translationdomain="none", but also when no catalog was found.
+    # Install a NullTranslation just to be sure (so we do not get errors about undefined '_')
+    if (domain is None):
+        gettext.NullTranslations().install()
+        return
 
-def localize(domain=GETTEXT_DOMAIN, localdir=LOCALEDIR):
-    """Turn on localisation for any platform"""
+    # Use the default system locale by default,
+    # but prefer LANGUAGE environment variable (which is set by Inkscape according to UI language)
     languages = None
-    if sys.platform.startswith('win'):
-        import locale
-        current_locale, _ = locale.getdefaultlocale()
-        os.environ['LANG'] = current_locale
-        languages = [current_locale]
 
-    # sys.stderr.write(str(localdir) + "\n")
-    trans = gettext.translation(domain, localdir, languages, fallback=True)
+    trans = gettext.translation(domain, localedir, languages, fallback=True)
     trans.install()

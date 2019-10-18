@@ -32,6 +32,7 @@ from lxml import etree
 from .utils import filename_arg, AbortExtension, errormsg
 from .elements import load_svg
 from .colors import Color
+from .localization import localize
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3
@@ -61,6 +62,8 @@ class InkscapeExtension(object):
             help="Optional output filename for saving the result (default is stdout).")
 
         self.add_arguments(self.arg_parser)
+
+        localize()
 
     def add_arguments(self, pars):
         """Add any extra arguments to your extension handle, use:

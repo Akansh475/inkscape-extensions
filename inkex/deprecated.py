@@ -35,10 +35,13 @@ from argparse import ArgumentParser
 import inkex
 import inkex.utils
 import inkex.units
-from inkex.localization import _
 from inkex.elements import Guide
 from inkex.svg import SvgDocumentElement
 from inkex.base import SvgThroughMixin, InkscapeExtension
+
+# temporary placeholder for inkex-internal translations (that need constant gettext domain)
+import gettext
+_ = gettext.NullTranslations().gettext
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)

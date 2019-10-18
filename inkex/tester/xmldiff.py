@@ -32,11 +32,14 @@ class DeltaLogger(list):
 
     def append_attr(self, attr, value_a, value_b):
         """Record an attribute difference"""
-        if value_a:
-            value_a = "{}='{}'".format(attr, value_a)
-        if value_b:
-            value_b = "{}='{}'".format(attr, value_b)
-        self.append((value_a, value_b))
+        def _prep(val):
+            if val:
+                if attr == 'd':
+                    from inkex.paths import Path
+                    return [attr] + Path(val).to_arrays()
+                return (attr, val)
+            return val
+        self.append((_prep(value_a), _prep(value_b)))
 
     def append_text(self, text_a, text_b):
         """Record a text difference"""

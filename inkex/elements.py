@@ -31,7 +31,7 @@ from lxml import etree
 from .paths import Path
 from .styles import Style
 from .transforms import BoundingBox, Transform
-from .utils import NSS, addNS, removeNS, InitSubClassPy3
+from .utils import NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
 
 __all__ = ('Group', 'PathElement', 'ShapeElement')
@@ -211,7 +211,7 @@ class BaseElement(etree.ElementBase):
             return self.getparent().root
         from inkex.svg import SvgDocumentElement
         if not isinstance(self, SvgDocumentElement):
-            raise ValueError("Element fragment does not have a document root!")
+            raise FragmentError("Element fragment does not have a document root!")
         return self
 
     def descendants(self):

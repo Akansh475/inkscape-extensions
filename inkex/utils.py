@@ -141,6 +141,9 @@ class AbortExtension(Exception):
 class DependencyError(NotImplementedError):
     """Raised when we need an external python module that isn't available"""
 
+class FragmentError(Exception):
+    """Raised when trying to do rooty things on an xml fragment"""
+
 # TODO: Remove when python2 support is dropped
 class InitSubClassPy3(type):
     """Provide a poly-fill for python3 __init_subclass__()"""

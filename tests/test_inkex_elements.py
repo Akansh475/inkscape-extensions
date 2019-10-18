@@ -13,6 +13,7 @@ from inkex.elements import (
     Group, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion,
 )
+from inkex.utils import FragmentError
 from inkex.transforms import Transform
 from inkex.styles import Style
 from inkex.tester import TestCase
@@ -405,7 +406,9 @@ class UseTest(ElementTestCase):
 
     def test_empty_ref(self):
         """An empty ref or None ref doesn't cause an error"""
-        self.assertRaises(KeyError, getattr, Use(), 'href')
+        use = Use()
+        use.set('xlink:href', 'something')
+        self.assertRaises(FragmentError, getattr, use, 'href')
         elem = self.svg.add(Use())
         self.assertEqual(elem.href, None)
         elem.set('xlink:href', '')

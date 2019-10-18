@@ -34,7 +34,6 @@ import copy
 
 import inkex
 from inkex.bezier import pointdistance, beziersplitatt, tpoint
-from inkex.localization import _
 from inkex.paths import CubicSuperPath
 
 import pathmodifier

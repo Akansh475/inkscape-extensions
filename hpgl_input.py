@@ -23,7 +23,6 @@ import sys
 import hpgl_decoder
 import inkex
 import inkex.base
-from inkex.localization import _
 
 class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
     def __init__(self):

@@ -4,7 +4,6 @@
 import webbrowser
 import threading
 from argparse import ArgumentParser
-from inkex.localization import _
 
 class ThreadWebsite(threading.Thread):
     """Visit website without locking Inkscape"""

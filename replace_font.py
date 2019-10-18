@@ -26,7 +26,6 @@ It can also replace all fonts indiscriminately, and list all fonts
 currently being used.
 """
 import inkex
-from inkex.localization import _
 
 text_tags = ['{http://www.w3.org/2000/svg}tspan',
                             '{http://www.w3.org/2000/svg}text',

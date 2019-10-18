@@ -23,7 +23,6 @@ from copy import deepcopy
 from lxml import etree
 
 import inkex
-from inkex.localization import _
 from inkex.utils import NSS
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 

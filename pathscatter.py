@@ -35,7 +35,6 @@ import random
 
 import inkex
 from inkex import bezier
-from inkex.localization import _
 from inkex.transforms import Transform
 from inkex.elements import Group, Use
 

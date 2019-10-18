@@ -26,7 +26,6 @@ import inkex
 from inkex import bezier
 from inkex.paths import CubicSuperPath
 from inkex.elements import Group, PathElement
-from inkex.localization import _
 
 class Dashit(inkex.EffectExtension):
     """Extension to convert paths into dash-array line"""

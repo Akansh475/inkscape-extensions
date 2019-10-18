@@ -23,7 +23,6 @@
 import copy
 
 import inkex
-from inkex.localization import _
 
 MARKERS = ['marker', 'marker-start', 'marker-mid', 'marker-end']
 

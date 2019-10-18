@@ -21,7 +21,6 @@
 
 
 import inkex
-from inkex.localization import _
 
 class Extrude(inkex.EffectExtension):
     def __init__(self):

@@ -23,7 +23,6 @@ import tempfile
 from lxml import etree
 
 import inkex
-from inkex.localization import _
 from webslicer_effect import WebSlicerMixin, is_empty
 
 class WebSlicer_Export(WebSlicerMixin, inkex.OutputExtension):

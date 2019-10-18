@@ -31,7 +31,6 @@ import random
 import inkex
 from inkex.elements import Group, Rectangle, PathElement
 from inkex.transforms import Vector2d as Point
-from inkex.localization import _
 
 import voronoi
 

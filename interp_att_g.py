@@ -22,7 +22,6 @@ Interpolation of attributes in selected objects or group's children.
 """
 
 import inkex
-from inkex.localization import _
 
 class InterpAttG(inkex.EffectExtension):
     """

@@ -16,7 +16,6 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 
 import inkex
-from inkex.localization import _
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"

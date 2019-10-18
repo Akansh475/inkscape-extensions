@@ -86,8 +86,6 @@ from inkex.transforms import Transform
 from inkex.elements import PathElement
 from inkex.paths import CubicSuperPath
 
-inkex.localization.localize()
-
 if sys.version_info[0] > 2:
     xrange = range
     unicode = str

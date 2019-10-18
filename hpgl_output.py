@@ -19,7 +19,6 @@
 from __future__ import print_function
 
 import inkex
-from inkex.localization import _
 
 import hpgl_encoder
 

@@ -21,7 +21,6 @@ import argparse
 from lxml import etree
 
 import inkex
-from inkex.localization import _
 from inkex.utils import NSS
 
 

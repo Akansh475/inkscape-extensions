@@ -27,7 +27,6 @@ import os
 from collections import OrderedDict
 
 import inkex
-from inkex.localization import _
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot, call
 

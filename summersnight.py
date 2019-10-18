@@ -18,7 +18,6 @@
 #
 
 import inkex
-from inkex.localization import _
 from inkex.transforms import DirectedLineSegment
 from inkex.elements import PathElement, Group
 

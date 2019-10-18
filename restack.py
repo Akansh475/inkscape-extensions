@@ -26,7 +26,6 @@ import random
 
 import inkex
 from inkex.svg import SvgDocumentElement
-from inkex.localization import _
 
 class Restack(inkex.EffectExtension):
     def __init__(self):

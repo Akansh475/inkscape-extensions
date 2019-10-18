@@ -23,7 +23,6 @@ JessyInk Export to zipfile multiple layers.
 import zipfile
 
 import inkex
-from inkex.localization import _
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot
 from inkex.utils import NSS

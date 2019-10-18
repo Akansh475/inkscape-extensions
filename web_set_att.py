@@ -26,7 +26,6 @@ and only with aspace.
 
 # local library
 import inkwebeffect
-from inkex.localization import _
 
 class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
 

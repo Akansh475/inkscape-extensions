@@ -27,7 +27,6 @@ from __future__ import unicode_literals
 import os
 
 import inkex
-from inkex.localization import _
 from inkex.elements import Image
 
 try:

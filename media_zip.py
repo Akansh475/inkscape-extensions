@@ -53,8 +53,6 @@ except ImportError:  # PY3
     from urllib.parse import urlparse
     from urllib.request import url2pathname
 
-inkex.localization.localize()
-
 
 class CompressedMediaOutput(inkex.OutputExtension):
     def __init__(self):

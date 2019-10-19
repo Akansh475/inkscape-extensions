@@ -30,10 +30,7 @@ import numpy
 
 from .transforms import DirectedLineSegment
 from .utils import errormsg
-
-# temporary placeholder for inkex-internal translations (that need constant gettext domain)
-import gettext
-_ = gettext.NullTranslations().gettext
+from .localization import inkex_gettext as _
 
 # bez = ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3))
 

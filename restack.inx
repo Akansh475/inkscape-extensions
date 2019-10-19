@@ -7,7 +7,7 @@
             <label appearance="header">Restack Direction</label>
             <param name="nb_direction" type="notebook">
                 <page name="presets" gui-text="Presets">
-                    <param name="direction" type="optiongroup" appearance="combo" gui-text="">
+                    <param name="direction" type="optiongroup" appearance="combo" gui-text="Direction">
                         <option value="lr">Left to Right (0)</option>
                         <option value="bt">Bottom to Top (90)</option>
                         <option value="rl">Right to Left (180)</option>
@@ -33,8 +33,7 @@
             </param>
         </page>
         <page name="z_order" gui-text="Based on Z-Order">
-            <label appearance="header">Restack Mode</label>
-            <param name="zsort" type="optiongroup" appearance="combo" gui-text="">
+            <param name="zsort" type="optiongroup" appearance="combo" gui-text="Restack Mode">
                 <option value="rev">Reverse Z-Order</option>
                 <option value="rand">Shuffle Z-Order</option>
             </param>

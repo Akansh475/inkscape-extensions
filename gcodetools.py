@@ -949,14 +949,14 @@ def point_to_arc_distance(p, arc):
             else:
                 alpha = TAU + alpha
         if between(alpha, 0, a) or min(abs(alpha), abs(alpha - a)) < STRAIGHT_TOLERANCE:
-            return (p - i).mag(), [i.x, i.y]
+            return (p - i).mag(), (i.x, i.y)
         else:
             d1 = (p - P0).mag()
             d2 = (p - P2).mag()
             if d1 < d2:
-                return d1, [P0.x, P0.y]
+                return d1, (P0.x, P0.y)
             else:
-                return d2, [P2.x, P2.y]
+                return d2, (P2.x, P2.y)
 
 
 def csp_to_arc_distance(sp1, sp2, arc1, arc2, tolerance=0.01):  # arc = [start,end,center,alpha]
@@ -2200,7 +2200,7 @@ def biarc(sp1, sp2, z1, z2, depth=0):
         alpha = (p2a - p0a) % (2 * math.pi)
         if (p0a < p2a and (p1a < p0a or p2a < p1a)) or (p2a < p1a < p0a):
             alpha = -2 * math.pi + alpha
-        if abs(R.x) > 1000000 or abs(R.y) > 1000000 or (R - P0).mag < options.min_arc_radius ** 2:
+        if abs(R.x) > 1000000 or abs(R.y) > 1000000 or (R - P0).mag() < options.min_arc_radius ** 2:
             return None, None
         else:
             return R, alpha

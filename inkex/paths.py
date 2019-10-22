@@ -1124,8 +1124,7 @@ class Path(list):
             previous_new = new_seg.end_point(first, previous_new)
         if inplace:
             return self
-        else:
-            return result
+        return result
 
     def reverse(self):
         """Returns a reversed path"""
@@ -1146,7 +1145,8 @@ class Path(list):
             if i == 0:
                 prev_prev = previous = first = seg.end_point(first, previous)
             yield Path.PathCommandProxy(seg, first, previous, prev_prev)
-            if isinstance(seg, (curve, tepidQuadratic, quadratic, smooth, Curve, TepidQuadratic, Quadratic, Smooth)):
+            if isinstance(seg, (curve, tepidQuadratic, quadratic, smooth,
+                                Curve, TepidQuadratic, Quadratic, Smooth)):
                 prev_prev = list(seg.control_points(first, previous, prev_prev))[-2]
             previous = seg.end_point(first, previous)
 
@@ -1254,7 +1254,7 @@ class CubicSuperPath(list):
                 # because we don't want to last coord to change for the final segment.
                 self[-1].append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
                 # Then adds a new subpath for the next shape (if any)
-                self.closed = True
+                self._closed = True
                 self._prev.assign(self._first)
                 return
             elif isinstance(item, Arc):

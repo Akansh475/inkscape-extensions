@@ -451,6 +451,15 @@ class PathTest(TestCase):
 
 class SuperPathTest(TestCase):
     """Super path tests for testing the super path class"""
+    def test_closing(self):
+        """Closing paths create two arrays"""
+        path = Path("M 0,0 C 1.505,0 2.727,-0.823 2.727,-1.841 V -4.348 C 2.727,-5.363"\
+                    " 1.505,-6.189 0,-6.189 H -8.3 V 0 Z m -10.713,1.991 h -0.211 V -8.178"\
+                    " H 0 c 2.954,0 5.345,1.716 5.345,3.83 v 2.507 C 5.345,0.271 2.954,1.991"
+                    " 0,1.991 Z")
+        csp = path.to_superpath()
+        self.assertEqual(len(csp), 2)
+
     def test_is_line(self):
         """Test is super path segments can detect lines"""
         path = Path("m 49,88 70,-1 c 18,17 1,59 1.7,59 "\

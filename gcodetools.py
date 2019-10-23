@@ -962,8 +962,8 @@ def point_to_arc_distance(p, arc):
 def csp_to_arc_distance(sp1, sp2, arc1, arc2, tolerance=0.01):  # arc = [start,end,center,alpha]
     n = 10
     i = 0
-    d = (0, (0, 0))
-    d1 = (0, (0, 0))
+    d = (0, [0, 0])
+    d1 = (0, [0, 0])
     dl = 0
     while i < 1 or (abs(d1[0] - dl[0]) > tolerance and i < 4):
         i += 1
@@ -3449,7 +3449,7 @@ class Gcodetools(inkex.EffectExtension):
         return trans
 
     def reverse_transform(self, transform):
-        trans = numpy.array(transform + [[0, 0, 1]])
+        trans = numpy.array(transform + ([0, 0, 1],))
         if numpy.linalg.det(trans) != 0:
             trans = numpy.linalg.inv(trans).tolist()[:2]
             return trans

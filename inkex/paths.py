@@ -1248,6 +1248,8 @@ class CubicSuperPath(list):
         is_quadratic = False
         if isinstance(item, PathCommand):
             if isinstance(item, Move):
+                if self._closed is False:
+                    super(CubicSuperPath, self).append([])
                 item = [list(item.args), list(item.args), list(item.args)]
             elif isinstance(item, ZoneClose) and self and self[-1]:
                 # This duplicates the first segment to 'close' the path, it's appended directly

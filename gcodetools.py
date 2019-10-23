@@ -949,14 +949,14 @@ def point_to_arc_distance(p, arc):
             else:
                 alpha = TAU + alpha
         if between(alpha, 0, a) or min(abs(alpha), abs(alpha - a)) < STRAIGHT_TOLERANCE:
-            return (p - i).mag(), (i.x, i.y)
+            return (p - i).mag(), [i.x, i.y]
         else:
             d1 = (p - P0).mag()
             d2 = (p - P2).mag()
             if d1 < d2:
-                return d1, (P0.x, P0.y)
+                return d1, [P0.x, P0.y]
             else:
-                return d2, (P2.x, P2.y)
+                return d2, [P2.x, P2.y]
 
 
 def csp_to_arc_distance(sp1, sp2, arc1, arc2, tolerance=0.01):  # arc = [start,end,center,alpha]

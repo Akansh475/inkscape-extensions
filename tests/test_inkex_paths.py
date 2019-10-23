@@ -460,6 +460,15 @@ class SuperPathTest(TestCase):
         csp = path.to_superpath()
         self.assertEqual(len(csp), 2)
 
+    def test_closing_without_z(self):
+        """Closing paths without z create two arrays"""
+        path = Path("m 51.553104,253.58572 c -11.644086,-0.14509 -4.683516,-19.48876"\
+                    " 2.096523,-8.48973 1.722993,2.92995 0.781608,6.73867 -2.096523,8.48973"\
+                    " m -3.100522,-13.02176 c -18.971587,17.33811 15.454875,20.05577"\
+                    " 6.51412,3.75474 -1.362416,-2.30812 -3.856221,-3.74395 -6.51412,-3.75474")
+        csp = path.to_superpath()
+        self.assertEqual(len(csp), 2)
+
     def test_is_line(self):
         """Test is super path segments can detect lines"""
         path = Path("m 49,88 70,-1 c 18,17 1,59 1.7,59 "\

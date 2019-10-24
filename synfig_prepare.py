@@ -386,19 +386,19 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
 
     if isinstance(node, (SvgDocumentElement, Group, Anchor, Switch)):
         # Leave only non-propagating style attributes
-        if len(remaining_style) == 0:
+        if remaining_style:
+            node.style = remaining_style
+        else:
             if "style" in node.keys():
                 del node.attrib["style"]
-        else:
-            node.set("style", str(inkex.Style(remaining_style)))
 
         # Remove the transform attribute
         if "transform" in node.keys():
             del node.attrib["transform"]
 
         # Continue propagating on subelements
-        for c in node.iterchildren():
-            propagate_attribs(c, this_style, this_transform)
+        for child in node.iterchildren():
+            propagate_attribs(child, this_style, this_transform)
     else:
         # This element is not a container
 

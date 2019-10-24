@@ -463,6 +463,5 @@ class StyleTest(ElementTestCase):
 
     def test_style(self):
         """Make sure style tags can be loaded and saved"""
-        doc_css = self.svg.css
-        
-        # Test loading the style element.
+        css = self.svg.stylesheet
+        self.assertTrue(css)

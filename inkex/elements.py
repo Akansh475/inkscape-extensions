@@ -29,7 +29,7 @@ from copy import deepcopy
 from lxml import etree
 
 from .paths import Path
-from .styles import Style
+from .styles import Style, StyleSheet
 from .transforms import BoundingBox, Transform
 from .utils import NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
@@ -53,7 +53,7 @@ class SvgClassLookup(etree.CustomElementClassLookup):
 
         return self.lookup_tags.get((namespace, name), BaseElement)
 
-SVG_PARSER = etree.XMLParser(huge_tree=True)
+SVG_PARSER = etree.XMLParser(huge_tree=True, strip_cdata=False)
 SVG_PARSER.set_element_class_lookup(SvgClassLookup())
 
 def load_svg(stream):
@@ -301,11 +301,17 @@ class ShapeElement(BaseElement):
 
     def composed_style(self):
         """Calculate the final styles applied to this element"""
-        # FUTURE: We could compose styles from class/css too.
         parent = self.getparent()
         if parent is not None and isinstance(parent, ShapeElement):
             return parent.composed_style() + self.style
         return self.style
+
+    def cascaded_style(self):
+        """Add all cascaded styles, do not write to this Style object"""
+        ret = Style()
+        for style in self.root.stylesheets.lookup(self.get('id')):
+            ret += style
+        return ret + self.style
 
     def effective_style(self):
         """Without parent styles, what is the effective style is"""
@@ -594,6 +600,18 @@ class ClipPath(Group):
 class Defs(BaseElement):
     """An header defs element, one per document"""
     tag_name = 'defs'
+
+class StyleElement(BaseElement):
+    """A CSS style element containing multiple style definitions"""
+    tag_name = 'style'
+
+    def set_text(self, content):
+        """Sets the style content text as a CDATA section"""
+        self.text = etree.CDATA(str(content))
+
+    def stylesheet(self):
+        """Return the StyleSheet() object for the style tag"""
+        return StyleSheet(self.text, callback=self.set_text)
 
 class Desc(BaseElement):
     """Description element"""

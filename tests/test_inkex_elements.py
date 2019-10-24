@@ -21,11 +21,12 @@ from inkex.tester.svg import svg_file
 
 class ElementTestCase(TestCase):
     """Base element test case"""
+    source_file = 'complextransform.test.svg'
     tag = 'svg'
 
     def setUp(self):
         super(ElementTestCase, self).setUp()
-        self.svg = svg_file(self.data_file('svg', 'complextransform.test.svg'))
+        self.svg = svg_file(self.data_file('svg', self.source_file))
         self.elem = self.svg.getElement('//svg:{}'.format(self.tag))
 
     def test_print(self):
@@ -37,10 +38,25 @@ class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
     tag = 'g'
 
+    def test_reference_count(self):
+        """
+        Test inkex.element.BaseElement-derived object type is preserved on adding to group
+
+        See https://gitlab.com/inkscape/extensions/issues/81 for details
+        """
+        from inkex.elements import Rectangle
+        grp = Group()
+        for _ in range(10):
+            rect = Rectangle()
+            grp.add(rect)
+
+        for elem in grp:
+            self.assertEqual(type(elem), Rectangle)
+
     def test_abstract_raises(self):
         """Abstract classes cannot be instantiated"""
         with self.assertRaises(AssertionError):
-            elem = ShapeElement()
+            ShapeElement()
 
     def test_findall(self):
         """Findall elements in svg"""
@@ -64,7 +80,7 @@ class CoreElementTestCase(ElementTestCase):
         group = Group().update(inkscape__label='Bar')
         self.assertEqual(group.label, 'Bar')
 
-    def test_chained_update_multiple_attributes(self):
+    def test_chained_multiple_attrs(self):
         """Set multiple attributes at a time"""
         group = Group().update(
             attr1='A',
@@ -139,9 +155,9 @@ class CoreElementTestCase(ElementTestCase):
 
         self.svg.set_selected()
         self.assertEqual(tuple(self.svg.get_z_selected()), ())
-        A_to_G = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
-        self.svg.set_selected(*A_to_G)
-        self.assertEqual(tuple(self.svg.get_z_selected()), A_to_G)
+        a_to_g = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+        self.svg.set_selected(*a_to_g)
+        self.assertEqual(tuple(self.svg.get_z_selected()), a_to_g)
         self.svg.set_selected('X', 'Y', 'Z', 'A')
         self.assertEqual(tuple(self.svg.get_z_selected()), ('A',))
 
@@ -240,19 +256,20 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(ids, (
             None, None, 'path1', None,
             'base', 'metadata7',
-             None, None, None, None, None,
+            None, None, None, None, None,
             'A', 'B', 'C', 'D', 'E', 'F', 'G',
             'H', 'I', 'J',
         ))
 
 class PathElementTestCase(ElementTestCase):
+    """Test PathElements"""
+    source_file = 'with-lpe.svg'
     tag = 'path'
 
     def test_original_path(self):
         """LPE paths can return their original paths"""
-        svg = svg_file(self.data_file('svg', 'with-lpe.svg'))
-        lpe = svg.getElementById('lpe')
-        nolpe = svg.getElementById('nolpe')
+        lpe = self.svg.getElementById('lpe')
+        nolpe = self.svg.getElementById('nolpe')
         self.assertEqual(str(lpe.path), 'M 30 30 L -10 -10 Z')
         self.assertEqual(str(lpe.original_path), 'M 20 20 L 10 10 Z')
         self.assertEqual(str(nolpe.path), 'M 30 30 L -10 -10 Z')
@@ -269,8 +286,14 @@ class PathElementTestCase(ElementTestCase):
         self.assertEqual(nolpe.get('inkscape:original-d', None), None)
         self.assertEqual(nolpe.get('d'), 'M 60 60 L 5 5')
 
-class PolylineElementTestCase(TestCase):
+class PolylineElementTestCase(ElementTestCase):
     """Test the polyline elements support"""
+    tag = 'polyline'
+
+    def test_type(self):
+        """Polyline have their own types"""
+        self.assertTrue(isinstance(self.elem, inkex.elements.Polyline))
+
     def test_polyline_points(self):
         """Basic tests for points attribute as a path"""
         pol = Polyline(points='10,10 50,50 10,15 15,10')
@@ -278,17 +301,34 @@ class PolylineElementTestCase(TestCase):
         pol.path = "M 10 10 L 30 9 L 1 2 C 10 45 3 4 45 60 M 35 35"
         self.assertEqual(pol.get('points'), '10,10 30,9 1,2 45,60 35,35')
 
-class PolygonElementTestCase(TestCase):
-    def test(self):
+class PolygonElementTestCase(ElementTestCase):
+    """Test Polygon Elements"""
+    tag = 'polygon'
+
+    def test_type(self):
+        """Polygons have their own types"""
+        self.assertTrue(isinstance(self.elem, inkex.elements.Polygon))
+
+    def test_conversion(self):
+        """Polygones are converted to paths"""
         pol = inkex.elements.Polygon(points='10,10 50,50 10,15 15,10')
         self.assertEqual(str(pol.path), 'M 10 10 L 50 50 L 10 15 L 15 10 Z')
 
-class LineElementTestCase(TestCase):
-    def test(self):
+class LineElementTestCase(ElementTestCase):
+    """Test Line Elements"""
+    tag = 'line'
+
+    def test_type(self):
+        """Lines have their own types"""
+        self.assertTrue(isinstance(self.elem, inkex.elements.Line))
+
+    def test_conversion(self):
+        """Lines are converted to paths"""
         pol = inkex.elements.Line(x1='2', y1='3', x2='4', y2='5')
         self.assertEqual(str(pol.path), 'M 2 3 L 4 5')
 
 class PatternTestCase(ElementTestCase):
+    """Test Pattern elements"""
     tag = 'pattern'
 
     def test_pattern_transform(self):
@@ -353,32 +393,19 @@ class PathTest(ElementTestCase):
         path.transform = Transform(translate=(10, 10))
         self.assertEqual(path.get('d'), 'M30,130 L60,130 L60,120 L70,140 L60,160 L60,150 L30,150')
         path.apply_transform()
-        self.assertEqual(path.get('d'), 'M 30 130 L 60 130 L 60 120 L 70 140 L 60 160 L 60 150 L 30 150')
+        self.assertEqual(path.get('d'), 'M 30 130 L 60 130 L 60 120 '
+                                        'L 70 140 L 60 160 L 60 150 L 30 150')
         self.assertFalse(path.transform)
 
-class LineTest(ElementTestCase):
-    tag = 'line'
-    def test_type(self):
-        self.assertTrue(isinstance(self.elem, inkex.elements.Line))
-
-class PolylineTest(ElementTestCase):
-    tag = 'polyline'
-    def test_type(self):
-        self.assertTrue(isinstance(self.elem, inkex.elements.Polyline))
-
-class PolygonTest(ElementTestCase):
-    tag = 'polygon'
-    def test_type(self):
-        self.assertTrue(isinstance(self.elem, inkex.elements.Polygon))
-
-class CirtcleTest(ElementTestCase):
+class CircleTest(ElementTestCase):
     """Test extra functionality on a circle element"""
     tag = 'circle'
 
     def test_path(self):
         """Circle path"""
         self.assertEqual(self.elem.get_path(),
-                         'M 100.0,50.0 a 50.0,50.0 0 1 0 50.0, 50.0 a 50.0,50.0 0 0 0 -50.0, -50.0 z')
+                         'M 100.0,50.0 a 50.0,50.0 0 1 0 50.0, '
+                         '50.0 a 50.0,50.0 0 0 0 -50.0, -50.0 z')
 
 class NamedViewTest(ElementTestCase):
     """Test the sodipodi namedview tag"""
@@ -420,29 +447,22 @@ class UseTest(ElementTestCase):
 
 class DefsTest(ElementTestCase):
     """Test the definitions tag"""
+    source_file = 'shapes.svg'
     tag = 'defs'
 
     def test_defs(self):
         """Make sure defs can be seen in the nodes of an svg"""
-        svg = svg_file(self.data_file('svg/shapes.svg'))
-        self.assertTrue(isinstance(svg.defs, Defs))
-        defs = svg.getElementById('defs33')
+        self.assertTrue(isinstance(self.svg.defs, Defs))
+        defs = self.svg.getElementById('defs33')
         self.assertTrue(isinstance(defs, Defs))
 
-class ReferenceCountTest(TestCase):
-    """
-    Test inkex.element.BaseElement-derived object type is preserved on adding to group
+class StyleTest(ElementTestCase):
+    """Test a style tag"""
+    source_file = 'css.svg'
+    tag = 'style'
 
-    See https://gitlab.com/inkscape/extensions/issues/81 for details
-
-    """
-
-    def test_add_rects(self):
-        from inkex.elements import Rectangle
-        g = Group()
-        for i in range(10):
-            rect = Rectangle()
-            g.add(rect)
-
-        for elem in g:
-            self.assertEqual(type(elem), Rectangle)
+    def test_style(self):
+        """Make sure style tags can be loaded and saved"""
+        doc_css = self.svg.css
+        
+        # Test loading the style element.

@@ -19,8 +19,8 @@
 #layer1 {
    stroke: yellow;
 }
-#rect1 {
-   fill: blue;
+circle {
+   fill: red;
 }
 .two {
    fill: green;
@@ -31,8 +31,11 @@
 #layer1 .four {
    fill: grey;
 }
-circle {
-   fill: red;
+#rect1 {
+   fill: blue;
+}
+#circle1, #circle2, .two {
+   font: Homie;
 }
      </style>
      <style id="style2"></style>
@@ -80,5 +83,10 @@ circle {
        cy="70"
        cx="70"
        id="circle1"/>
+    <circle
+       r="10"
+       cy="20"
+       cx="20"
+       id="circle2"/>
   </g>
 </svg>

@@ -28,12 +28,13 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import random
-from lxml import etree
 from collections import OrderedDict
+from lxml import etree
 
 from .units import discover_unit, convert_unit, render_unit
 from .transforms import BoundingBox
-from .elements import BaseElement, NamedView, Defs
+from .elements import BaseElement, StyleElement, NamedView, Defs
+from .styles import StyleSheets
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import
@@ -75,7 +76,8 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         """
         Sets the currently selected elements to these ids.
 
-        Arguments are zero or more ids, element objects or a single xpath expression starting with "//".
+        Arguments a list of element ids, element objects or
+            a single xpath expression starting with "//".
 
         All element objects must have an id to be correctly set.
 
@@ -230,3 +232,21 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     def add_unit(self, value):
         """Add document unit when no unit is specified in the string """
         return render_unit(value, self.unit)
+
+    @property
+    def stylesheets(self):
+        """Get all the stylesheets, bound together to one, (for reading)"""
+        sheets = StyleSheets(self)
+        for node in self.xpath('//svg:style'):
+            sheets.append(node.stylesheet())
+        return sheets
+
+    @property
+    def stylesheet(self):
+        """Return the first stylesheet or create one if needed (for writing)"""
+        for sheet in self.stylesheets:
+            return sheet
+
+        style_node = StyleElement()
+        self.defs.append(style_node)
+        return style_node.stylesheet()

@@ -21,6 +21,7 @@ Two simple functions for working with inline css
 and some color handling on top.
 """
 
+import re
 import sys
 from collections import OrderedDict
 
@@ -59,7 +60,11 @@ class Style(OrderedDict):
 
     def __str__(self):
         """Format an inline style attribute from a dictionary"""
-        return ";".join(["{0}:{1}".format(*seg) for seg in self.items()])
+        return self.to_str()
+
+    def to_str(self, sep=";"):
+        """Convert to string using a custom delimiter"""
+        return sep.join(["{0}:{1}".format(*seg) for seg in self.items()])
 
     def __add__(self, other):
         """Add two styles together to get a third, composing them"""
@@ -71,6 +76,17 @@ class Style(OrderedDict):
         """Add style to this style, the same as style.update(dict)"""
         self.update(other)
         return self
+
+    def __sub__(self, other):
+        """Remove keys and return copy"""
+        ret = self.copy()
+        ret.__isub__(other)
+        return ret
+
+    def __isub__(self, other):
+        """Remove keys from this style, list of keys or other style dictionary"""
+        for key in other:
+            del self[key]
 
     def update(self, other):
         """Make sure callback is called when updating"""
@@ -94,3 +110,122 @@ class Style(OrderedDict):
         if color.space == 'rgba':
             self[name + '-opacity'] = color.alpha
         self[name] = str(color.to_rgb())
+
+class StyleSheets(list):
+    """
+    Special mechanism which contains all the stylesheets for an svg document
+    while also caching lookups for specific elements.
+
+    This caching is needed because data can't be attached to elements as they are
+    re-created on the fly by lxml so lookups have to be centralised.
+    """
+    def __init__(self, svg=None):
+        super(StyleSheets, self).__init__()
+        self.svg = svg
+
+    def lookup(self, element_id, svg=None):
+        """
+        Find all styles for this element.
+        """
+        # This is aweful, but required because we can't know for sure
+        # what might have changed in the xml tree.
+        if svg is None:
+            svg = self.svg
+        for sheet in self:
+            for style in sheet.lookup(element_id, svg=svg):
+                yield style
+
+class StyleSheet(list):
+    """
+    A style sheet, usually the CDATA contents of a style tag, but also
+    a css file used with a css. Will yield multiple Style() classes.
+    """
+    comment_strip = re.compile(r"//.*?\n")
+
+    def __init__(self, content=None, callback=None):
+        super(StyleSheet, self).__init__()
+        self.callback = None
+        # Remove comments
+        content = self.comment_strip.sub('', (content or ''))
+        # Parse rules
+        for block in content.split('}'):
+            if block:
+                self.append(block)
+        self.callback = callback
+
+    def __str__(self):
+        return '\n'.join([str(style) for style in self])
+
+    def _callback(self):
+        if self.callback is not None:
+            self.callback(self)
+
+    def append(self, other):
+        """Make sure callback is called when updating"""
+        if isinstance(other, str):
+            if '{' not in other:
+                return # Warning?
+            rules, style = other.strip('}').split('{', 1)
+            other = ConditionalStyle(rules=rules, style=style.strip(), callback=self._callback)
+        super(StyleSheet, self).append(other)
+        self._callback()
+
+    def lookup(self, element_id, svg):
+        """Lookup the element_id against all the styles in this sheet"""
+        for style in self:
+            for elem in svg.xpath(style.to_xpath()):
+                if elem.get('id', None) == element_id:
+                    yield style
+
+class ConditionalStyle(Style):
+    """
+    Just like a Style object, but includes one or more
+    conditional rules which places this style in a stylesheet
+    rather than being an attribute style.
+    """
+    def __init__(self, rules='*', style=None, callback=None, **kwargs):
+        super(ConditionalStyle, self).__init__(style=style, callback=callback, **kwargs)
+        self.rules = [ConditionalRule(rule) for rule in rules.split(',')]
+
+    def __str__(self):
+        """Return this style as a css entry with class"""
+        content = super(ConditionalStyle, self).__str__()
+        rules = ",\n".join(str(rule) for rule in self.rules)
+        return "{0} {{\n{1}\n}}".format(rules, content)
+
+    def to_xpath(self):
+        """Convert all rules to an xpath"""
+        # This can be converted to cssselect.CSSSelector (lxml.cssselect) later if we have
+        # coverage problems. The main reason we're not is that cssselect is doing exactly
+        # this xpath transform and provides no extra functionality for reverse lookups.
+        return '|'.join([rule.to_xpath() for rule in self.rules])
+
+class ConditionalRule(object):
+    """A single css rule"""
+    step_to_xpath = [
+        (re.compile(r'\[(\w+)\^=([^\]]+)\]'), r'[starts-with(@\1,\2)]'), # Starts With
+        (re.compile(r'\[(\w+)\$=([^\]]+)\]'), r'[ends-with(@\1,\2)]'), # Ends With
+        (re.compile(r'\[(\w+)\*=([^\]]+)\]'), r'[contains(@\1,\2)]'), # Contains
+        (re.compile(r'\[([^@\(\)\]]+)\]'), r'[@\1]'), # Attribute (start)
+        (re.compile(r'#(\w+)'), r"[@id='\1']"), # Id Match
+        (re.compile(r'\s*>\s*([^\s>~\+]+)'), r'/\1'), # Direct child match
+        #(re.compile(r'\s*~\s*([^\s>~\+]+)'), r'/following-sibling::\1'),
+        #(re.compile(r'\s*\+\s*([^\s>~\+]+)'), r'/following-sibling::\1[1]'),
+        (re.compile(r'\s*([^\s>~\+]+)'), r'//\1'), # Decendant match
+        (re.compile(r'\.(\w+)'), r"[contains(concat(' ', normalize-space(@class), ' '), ' \1 ')]"),
+        (re.compile(r'//\['), r'//*['), # Attribute only match
+        (re.compile(r'//(\w+)'), r'//svg:\1'), # SVG namespace addition
+    ]
+
+    def __init__(self, rule):
+        self.rule = rule.strip()
+
+    def __str__(self):
+        return self.rule
+
+    def to_xpath(self):
+        """Attempt to convert the rule into a simplified xpath"""
+        ret = self.rule
+        for matcher, replacer in self.step_to_xpath:
+            ret = matcher.sub(replacer, ret)
+        return ret

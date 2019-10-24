@@ -91,6 +91,7 @@ class BaseElement(etree.ElementBase):
     # of combining two dictionaries that are incompatible.
     # This allows us to update these with inheritance.
     wrapped_attrs = property(lambda self: dict(self.WRAPPED_ATTRS))
+    typename = property(lambda self: type(self).__name__)
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""
@@ -109,8 +110,7 @@ class BaseElement(etree.ElementBase):
             value = cls(self.attrib.get(name, None), callback=_set_attr)
             setattr(self, name, value)
             return value
-        raise AttributeError("Can't find attribute {}.{}"
-                             .format(type(self).__name__, name))
+        raise AttributeError("Can't find attribute {}.{}".format(self.typename, name))
 
     def __setattr__(self, name, value):
         """Set the attribute, update it if needed"""
@@ -277,13 +277,12 @@ class ShapeElement(BaseElement):
 
     def get_path(self):
         """Generate a path for this object which can inform the bounding box"""
-        raise NotImplementedError("Path should be provided by svg element {}."
-                                  .format(type(self).__name__))
+        raise NotImplementedError("Path should be provided by svg elem {}.".format(self.typename))
 
     def set_path(self, path):
         """Set the path for this object (if possible)"""
-        raise AttributeError("Path can not be set on this type of element: {} <- {}."
-                             .format(type(self).__name__, path))
+        raise AttributeError(
+            "Path can not be set on this element: {} <- {}.".format(self.typename, path))
 
     def to_path_element(self):
         """Replace this element with a path element"""

@@ -70,7 +70,7 @@ def discover_unit(value, viewbox, default='px'):
 
     # try to find the svgunitfactor in the list of units known. If we don't find something, ...
     for unit, unit_factor in CONVERSIONS.items():
-        if unit is not '':
+        if unit != '':
             # allow 1% error in factor
             if are_near_relative(this_factor, unit_factor, eps=0.01):
                 return unit

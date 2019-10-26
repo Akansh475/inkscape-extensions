@@ -29,7 +29,7 @@ from copy import deepcopy
 from lxml import etree
 
 from .paths import Path
-from .styles import Style, StyleSheet
+from .styles import Style, StyleSheet, Classes
 from .transforms import BoundingBox, Transform
 from .utils import NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
@@ -83,71 +83,84 @@ class BaseElement(etree.ElementBase):
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
     PARSER = SVG_PARSER
     WRAPPED_ATTRS = (
+        # (prop_name, [optional: attr_name], cls)
         ('transform', Transform),
         ('style', Style),
+        ('classes', 'class', Classes),
     )
 
     # We do this because python2 and python3 have different ways
     # of combining two dictionaries that are incompatible.
     # This allows us to update these with inheritance.
-    wrapped_attrs = property(lambda self: dict(self.WRAPPED_ATTRS))
+    @property
+    def wrapped_attrs(self):
+        """Map attributes to property name and wrapper class"""
+        return dict([(row[-2], (row[0], row[-1])) for row in self.WRAPPED_ATTRS])
+
+    @property
+    def wrapped_props(self):
+        """Map properties to attribute name and wrapper class"""
+        return dict([(row[0], (row[-2], row[-1])) for row in self.WRAPPED_ATTRS])
+
     typename = property(lambda self: type(self).__name__)
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""
-        if name in self.wrapped_attrs:
-            cls = self.wrapped_attrs[name]
+        if name in self.wrapped_props:
+            (attr, cls) = self.wrapped_props[name]
             # The reason we do this here and not in _init is because lxml
             # is inconsistant about when elements are initialised.
             # So we make this a lazy property.
             def _set_attr(new_item):
                 if new_item:
-                    self.set(name, str(new_item))
+                    self.set(attr, str(new_item))
                 else:
-                    self.attrib.pop(name, None) # pylint: disable=no-member
+                    self.attrib.pop(attr, None) # pylint: disable=no-member
 
             # pylint: disable=no-member
-            value = cls(self.attrib.get(name, None), callback=_set_attr)
+            value = cls(self.attrib.get(attr, None), callback=_set_attr)
             setattr(self, name, value)
             return value
         raise AttributeError("Can't find attribute {}.{}".format(self.typename, name))
 
     def __setattr__(self, name, value):
         """Set the attribute, update it if needed"""
-        if name in self.wrapped_attrs:
-            cls = self.wrapped_attrs[name]
+        if name in self.wrapped_props:
+            (attr, cls) = self.wrapped_props[name]
             # Don't call self.set or self.get (infinate loop)
             if value:
                 if not isinstance(value, cls):
                     value = cls(value)
-                self.attrib[name] = str(value)
+                self.attrib[attr] = str(value)
             else:
-                self.attrib.pop(name, None) # pylint: disable=no-member
+                self.attrib.pop(attr, None) # pylint: disable=no-member
         else:
             super(BaseElement, self).__setattr__(name, value)
 
-    def get(self, name, default=None):
+    def get(self, attr, default=None):
         """Get element attribute named, with addNS support."""
-        if name in self.wrapped_attrs:
-            value = getattr(self, name, None)
+        if attr in self.wrapped_attrs:
+            (prop, _) = self.wrapped_attrs[attr]
+            value = getattr(self, prop, None)
             # We check the boolean nature of the value, because empty
             # transformations and style attributes are equiv to not-existing
             ret = str(value) if value else (default or None)
             return ret
-        return super(BaseElement, self).get(addNS(name), default)
+        return super(BaseElement, self).get(addNS(attr), default)
 
-    def set(self, name, value):
+    def set(self, attr, value):
         """Set element attribute named, with addNS support"""
-        if name in self.wrapped_attrs:
+        if attr in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
-            setattr(self, name, self.wrapped_attrs[name](value))
-            value = getattr(self, name)
+            (prop, cls) = self.wrapped_attrs[attr]
+            setattr(self, prop, cls(value))
+            value = getattr(self, prop)
             if not value:
                 return
         if value is None:
-            self.attrib.pop(addNS(name), None) # pylint: disable=no-member
+            self.attrib.pop(addNS(attr), None) # pylint: disable=no-member
         else:
-            super(BaseElement, self).set(addNS(name), str(value))
+            super(BaseElement, self).set(addNS(attr), str(value))
 
     def update(self, **kwargs):
         """
@@ -163,14 +176,15 @@ class BaseElement(etree.ElementBase):
             self.set(name, value)
         return self
 
-    def pop(self, name, default=None):
+    def pop(self, attr, default=None):
         """Delete/remove the element attribute named, with addNS support."""
-        if name in self.wrapped_attrs:
+        if attr in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
-            value = getattr(self, name)
-            setattr(self, name, self.wrapped_attrs[name](None))
+            (prop, cls) = self.wrapped_attrs[attr]
+            value = getattr(self, prop)
+            setattr(self, prop, cls(None))
             return value
-        return self.attrib.pop(addNS(name), default) # pylint: disable=no-member
+        return self.attrib.pop(addNS(attr), default) # pylint: disable=no-member
 
     def add(self, *children):
         """

@@ -43,6 +43,23 @@ class StyleSheetTest(TestCase):
         self.svg = svg_file(self.data_file('svg', 'css.svg'))
         self.css = self.svg.stylesheet
 
+    def test_classes(self):
+        """Test element class manipulation"""
+        rect = self.svg.getElementById('rect2')
+        self.assertEqual(rect.get('class'), 'two')
+        self.assertEqual(rect.classes, ['two'])
+        rect.classes[0] = 'twa'
+        self.assertEqual(rect.get('class'), 'twa')
+        rect.classes.append('tri')
+        rect.classes.append('four')
+        self.assertEqual(rect.get('class'), 'twa tri four')
+        rect.classes.remove('twa')
+        self.assertEqual(rect.get('class'), 'tri four')
+        rect.classes.toggle('toggle')
+        self.assertEqual(rect.get('class'), 'tri four toggle')
+        rect.classes.toggle('toggle')
+        self.assertEqual(rect.get('class'), 'tri four')
+
     def test_creation(self):
         """Stylesheet is created when needed"""
         self.svg = svg_file(self.data_file('svg', 'empty-SVG.svg'))

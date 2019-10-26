@@ -30,6 +30,45 @@ from .colors import Color
 if sys.version_info[0] == 3:  #PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
+class Classes(list):
+    """A list of classes applied to an element (used in css and js)"""
+    def __init__(self, classes=None, callback=None):
+        self.callback = None
+        if isinstance(classes, (str, unicode)):
+            classes = classes.split()
+        super(Classes, self).__init__(classes or ())
+        self.callback = callback
+
+    def __str__(self):
+        return " ".join(self)
+
+    def _callback(self):
+        if self.callback is not None:
+            self.callback(self)
+
+    def __setitem__(self, index, value):
+        super(Classes, self).__setitem__(index, value)
+        self._callback()
+
+    def append(self, value):
+        value = str(value)
+        if value not in self:
+            super(Classes, self).append(value)
+            self._callback()
+
+    def remove(self, value):
+        value = str(value)
+        if value in self:
+            super(Classes, self).remove(value)
+            self._callback()
+
+    def toggle(self, value):
+        """If exists, remove it, if not, add it"""
+        value = str(value)
+        if value in self:
+            return self.remove(value)
+        return self.append(value)
+
 class Style(OrderedDict):
     """A list of style directives"""
 
@@ -159,6 +198,10 @@ class StyleSheet(list):
     def _callback(self):
         if self.callback is not None:
             self.callback(self)
+
+    def add(self, rule, style):
+        """Append a rule and style combo to this stylesheet"""
+        self.append(ConditionalStyle(rules=rule, style=str(style), callback=self._callback))
 
     def append(self, other):
         """Make sure callback is called when updating"""

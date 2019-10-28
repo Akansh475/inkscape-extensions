@@ -125,7 +125,16 @@ class Style(OrderedDict):
     def __isub__(self, other):
         """Remove keys from this style, list of keys or other style dictionary"""
         for key in other:
-            del self[key]
+            self.pop(key, None)
+
+    def __eq__(self, other):
+        """Not equals, prefer to overload 'in' but that doesn't seem possible"""
+        if not isinstance(other, Style):
+            other = Style(other)
+        for arg in set(self) | set(other):
+            if self.get(arg, None) != other.get(arg, None):
+                return False
+        return True
 
     def update(self, other):
         """Make sure callback is called when updating"""
@@ -193,7 +202,7 @@ class StyleSheet(list):
         self.callback = callback
 
     def __str__(self):
-        return '\n'.join([str(style) for style in self])
+        return '\n' + '\n'.join([str(style) for style in self]) + '\n'
 
     def _callback(self):
         if self.callback is not None:
@@ -232,9 +241,11 @@ class ConditionalStyle(Style):
 
     def __str__(self):
         """Return this style as a css entry with class"""
-        content = super(ConditionalStyle, self).__str__()
+        content = self.to_str(";\n  ")
         rules = ",\n".join(str(rule) for rule in self.rules)
-        return "{0} {{\n{1}\n}}".format(rules, content)
+        if content:
+            return "{0} {{\n  {1};\n}}".format(rules, content)
+        return "{0} {{}}".format(rules)
 
     def to_xpath(self):
         """Convert all rules to an xpath"""

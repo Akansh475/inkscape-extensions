@@ -67,7 +67,7 @@ class StyleSheetTest(TestCase):
         self.assertEqual(len(self.svg.stylesheet), 0)
         self.assertEqual(len(self.svg.stylesheets), 1)
         self.svg.stylesheet.append('.cls1 { fill: blue; }')
-        self.assertIn(b'style><![CDATA[.cls1 {\nfill:blue\n}]]><', self.svg.tostring())
+        self.assertIn(b'style><![CDATA[\n.cls1 {\n  fill:blue;\n}\n]]><', self.svg.tostring())
 
     def test_parsing(self):
         """SVG parsing provides access to stylesheets"""

@@ -118,24 +118,24 @@ class DeprecatedEffect(object):
     @property
     def current_layer(self):
         self._deprecated('current_layer',\
-            _('{} is now a method in the svg. Use `self.svg.get_current_layer()` instead.'))
+            _('{} is now a method in the SvgDocumentElement class. Use `self.svg.get_current_layer()` instead.'))
         return self.svg.get_current_layer()
 
     @property
     def view_center(self):
         self._deprecated('view_center',\
-            _('{} is now a method in the svg. Use `self.svg.get_center_position()` instead.'))
+            _('{} is now a method in the SvgDocumentElement class. Use `self.svg.get_center_position()` instead.'))
         return self.svg.get_center_position()
 
     @property
     def selected(self):
-        self._deprecated('selected', _('{} is now a dict in the svg. Use `self.svg.selected`.'))
+        self._deprecated('selected', _('{} is now a dict in the SvgDocumentElement class. Use `self.svg.selected`.'))
         return self.svg.selected
 
     @property
     def doc_ids(self):
-        self._deprecated('doc_ids', _('{} is now a method in the svg '
-                                      'document. Use `self.svg.get_ids()` instead.'))
+        self._deprecated('doc_ids', _('{} is now a method in the SvgDocumentElement class.'
+                                      'Use `self.svg.get_ids()` instead.'))
         if self._doc_ids is None:
             self._doc_ids = dict.fromkeys(self.svg.get_ids())
         return self._doc_ids
@@ -150,12 +150,12 @@ class DeprecatedEffect(object):
 
     def getElementById(self, eid):
         self._deprecated('getElementById',\
-            _('{} is now a method in the svg. Use `self.svg.getElementById(eid)` instead.'))
+            _('{} is now a method in the SvgDocumentElement class. Use `self.svg.getElementById(eid)` instead.'))
         return self.svg.getElementById(eid)
 
     def xpathSingle(self, xpath):
-        self._deprecated('xpathSingle', _('{} is now a new method in the svg '
-                                          'document. Use `self.svg.getElement(path)` instead.`'))
+        self._deprecated('xpathSingle', _('{} is now a new method in the SvgDocumentElement class. '
+                                          'Use `self.svg.getElement(path)` instead.`'))
         return self.svg.getElement(xpath)
 
     def getParentNode(self, node):
@@ -165,7 +165,8 @@ class DeprecatedEffect(object):
 
     def getNamedView(self):
         self._deprecated('getNamedView',\
-            _('{} is now a property of the svg. Use `self.svg.namedview` to access this element'))
+            _('{} is now a property of the SvgDocumentElement class. '
+              'Use `self.svg.namedview` to access this element'))
         return self.svg.namedview
 
     def createGuide(self, posX, posY, angle):
@@ -199,38 +200,38 @@ class DeprecatedEffect(object):
         return inkex.base.InkscapeExtension.save_raw(self, ret)
 
     def uniqueId(self, old_id, make_new_id=True):
-        self._deprecated('uniqueId', _('{} is now a method in the svg document. '
+        self._deprecated('uniqueId', _('{} is now a method in the SvgDocumentElement class. '
                                        ' Use `self.svg.get_unique_id(old_id)` instead.'))
         return self.svg.get_unique_id(old_id)
 
     def getDocumentWidth(self):
-        self._deprecated('getDocumentWidth', _('{} is now a property of the svg '
-                                               'document. Use `self.svg.width` instead.'))
+        self._deprecated('getDocumentWidth', _('{} is now a property of the SvgDocumentElement class. '
+                                               'Use `self.svg.width` instead.'))
         return self.svg.get('width')
 
     def getDocumentHeight(self):
-        self._deprecated('getDocumentHeight', _('{} is now a property of the svg '
-                                                'document. Use `self.svg.height` instead.'))
+        self._deprecated('getDocumentHeight', _('{} is now a property of the SvgDocumentElement class. '
+                                                'Use `self.svg.height` instead.'))
         return self.svg.get('height')
 
     def getDocumentUnit(self):
-        self._deprecated('getDocumentUnit', _('{} is now a property of the svg '
-                                              'document. Use `self.svg.unit` instead.'))
+        self._deprecated('getDocumentUnit', _('{} is now a property of the SvgDocumentElement class. '
+                                              'Use `self.svg.unit` instead.'))
         return self.svg.unit
 
     def unittouu(self, string):
-        self._deprecated('unittouu', _('{} is now a method in the svg '
-                                       'document. Use `self.svg.unittouu(str)` instead.'))
+        self._deprecated('unittouu', _('{} is now a method in the SvgDocumentElement class. '
+                                       'Use `self.svg.unittouu(str)` instead.'))
         return self.svg.unittouu(string)
 
     def uutounit(self, val, unit):
-        self._deprecated('uutounit', _('{} is now a method in the svg '
-                                       'document. Use `self.svg.uutounit(value, unit)` instead.'))
+        self._deprecated('uutounit', _('{} is now a method in the SvgDocumentElement class. '
+                                       'Use `self.svg.uutounit(value, unit)` instead.'))
         return self.svg.uutounit(val, unit)
 
     def addDocumentUnit(self, value):
-        self._deprecated('addDocumentUnit', _('{} is now a method in the svg '
-                                              'document. Use `self.svg.add_unit(value)` instead.'))
+        self._deprecated('addDocumentUnit', _('{} is now a method in the SvgDocumentElement class. '
+                                              'Use `self.svg.add_unit(value)` instead.'))
         return self.svg.add_unit(value)
 
 class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
@@ -327,8 +328,8 @@ def debug(what):
 # legacy inkex members <= 0.48.x
 
 def unittouu(string):
-    _deprecated('inkex.unittouu is now a method in the svg '
-            'document. Use `self.svg.unittouu(str)` instead.', stack=2)
+    _deprecated('inkex.unittouu is now a method in the SvgDocumentElement class. '
+            'Use `self.svg.unittouu(str)` instead.', stack=2)
     return inkex.units.convert_unit(string, 'px')
 
 # optparse.Values.ensure_value

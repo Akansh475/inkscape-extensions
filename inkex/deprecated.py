@@ -91,7 +91,7 @@ class DeprecatedEffect(object):
     def OptionParser(self):
         self._deprecated(
             'OptionParser',
-            _('{} or `optparse` has been deprecated and replaced with `argparser`.'
+            _('{} or `optparse` has been deprecated and replaced with `argparser`. '
               'You must change `self.OptionParser.add_option` to '
               '`self.arg_parser.add_argument`; the arguments are similar.'))
         return self
@@ -155,24 +155,24 @@ class DeprecatedEffect(object):
 
     def xpathSingle(self, xpath):
         self._deprecated('xpathSingle', _('{} is now a new method in the SvgDocumentElement class. '
-                                          'Use `self.svg.getElement(path)` instead.`'))
+                                          'Use `self.svg.getElement(path)` instead.'))
         return self.svg.getElement(xpath)
 
     def getParentNode(self, node):
         self._deprecated('getParentNode',\
-            _('{} is no longer in use. Use the lxml .getparent() method instead.'))
+            _('{} is no longer in use. Use the lxml `.getparent()` method instead.'))
         return node.getparent()
 
     def getNamedView(self):
         self._deprecated('getNamedView',\
             _('{} is now a property of the SvgDocumentElement class. '
-              'Use `self.svg.namedview` to access this element'))
+              'Use `self.svg.namedview` to access this element.'))
         return self.svg.namedview
 
     def createGuide(self, posX, posY, angle):
         self._deprecated('createGuide',\
             _('{} is now a method of the namedview element object. '
-              'Use `self.svg.namedview.add(Guide().move_to(x, y, a))` instead'))
+              'Use `self.svg.namedview.add(Guide().move_to(x, y, a))` instead.'))
         return self.svg.namedview.add(Guide().move_to(posX, posY, angle))
 
     def affect(self, args=sys.argv[1:], output=True):  # pylint: disable=dangerous-default-value
@@ -183,12 +183,12 @@ class DeprecatedEffect(object):
 
     @property
     def args(self):
-        self._deprecated('args', _('self.args[-1] is now self.options.input_file'))
+        self._deprecated('args', _('self.args[-1] is now self.options.input_file.'))
         return self._args
 
     @property
     def svg_file(self):
-        self._deprecated('svg_file', _('self.svg_file is now self.options.input_file'))
+        self._deprecated('svg_file', _('self.svg_file is now self.options.input_file.'))
         return self.options.input_file
 
     def save_raw(self, ret):
@@ -312,7 +312,7 @@ def InkOption():
 
 @lazyproxy
 def localize():
-    _deprecated('inkex.localize was moved to inkex.localization.localize', stack=3)
+    _deprecated('inkex.localize was moved to inkex.localization.localize.', stack=3)
     from .localization import localize as wrapped
     return wrapped
 
@@ -322,7 +322,7 @@ def are_near_relative(a, b, eps):
     return inkex.units.are_near_relative(a, b, eps)
 
 def debug(what):
-    _deprecated('inkex.debug was moved to inkex.utils.debug', stack=2)
+    _deprecated('inkex.debug was moved to inkex.utils.debug.', stack=2)
     return inkex.utils.debug(what)
 
 # legacy inkex members <= 0.48.x
@@ -335,7 +335,7 @@ def unittouu(string):
 # optparse.Values.ensure_value
 
 def ensure_value(self, attr, value):
-    _deprecated('Effect().options.ensure_value was removed', stack=2)
+    _deprecated('Effect().options.ensure_value was removed.', stack=2)
     if getattr(self, attr, None) is None:
         setattr(self, attr, value)
     return getattr(self, attr)

@@ -25,6 +25,8 @@
 #  * 22-Dec-2006: Wiora : Added axis and isotropic scaling
 #  * 21-Jun-2007: Tavmjong: Added polar coordinates
 #
+import math
+import random
 from copy import deepcopy
 from math import cos, pi, sin
 
@@ -32,6 +34,11 @@ from lxml import etree
 
 import inkex
 from inkex.paths import Path
+
+EVAL_GLOBALS = {}
+EVAL_GLOBALS.update(random.__dict__)
+EVAL_GLOBALS.update(math.__dict__)
+
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
                  fx="sin(x)", fpx="cos(x)", fponum=True, times2pi=False, polar=False, isoscale=True, drawaxis=True, endpts=False):
@@ -81,9 +88,9 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
     # functions specified by the user
     try:
         if fx != "":
-            f = eval('lambda x: ' + fx.strip('"'))
+            f = eval('lambda x: ' + fx, EVAL_GLOBALS, {})
         if fpx != "":
-            fp = eval('lambda x: ' + fpx.strip('"'))
+            fp = eval('lambda x: ' + fpx, EVAL_GLOBALS, {})
     # handle incomplete/invalid function gracefully
     except SyntaxError:
         return []

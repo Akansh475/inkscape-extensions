@@ -126,6 +126,7 @@ class Style(OrderedDict):
         """Remove keys from this style, list of keys or other style dictionary"""
         for key in other:
             self.pop(key, None)
+        return self
 
     def __eq__(self, other):
         """Not equals, prefer to overload 'in' but that doesn't seem possible"""
@@ -135,6 +136,7 @@ class Style(OrderedDict):
             if self.get(arg, None) != other.get(arg, None):
                 return False
         return True
+    __ne__ = lambda self, other: not self.__eq__(other)
 
     def update(self, other):
         """Make sure callback is called when updating"""

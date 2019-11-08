@@ -2,7 +2,7 @@
 """
 Test Inkex style parsing functionality.
 """
-from inkex.styles import Style, StyleSheet
+from inkex.styles import Style
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
 
@@ -21,6 +21,16 @@ class StyleTest(TestCase):
         self.assertEqual(str(stl), 'border-color:red;border-issues:true')
         st2 = stl + "border-issues: false;"
         self.assertEqual(str(st2), 'border-color:red;border-issues:false')
+
+    def test_inbuilts(self):
+        """Test inbuild style functions"""
+        stadd = Style("a: 1") + Style("b: 2")
+        self.assertTrue(stadd == Style("b: 2; a: 1"))
+        self.assertFalse(stadd == Style("b: 2"))
+        self.assertFalse(stadd != Style("b: 2; a: 1"))
+        self.assertEqual(stadd - "a: 4", "b: 2")
+        stadd -= "b: 3; c: 4"
+        self.assertEqual(stadd, Style("a: 1"))
 
     def test_set_property(self):
         """Set the style attribute directly"""
@@ -75,7 +85,13 @@ class StyleSheetTest(TestCase):
         self.assertEqual(len(sheets), 3)
         self.assertEqual(len(sheets[0]), 7)
         self.assertEqual(len(sheets[1]), 0)
-        self.assertEqual(len(sheets[2]), 1)
+        self.assertEqual(len(sheets[2]), 2)
+
+    def test_string(self):
+        """Rendered to a string"""
+        sheets = self.svg.stylesheets
+        self.assertEqual(str(sheets[0][0]), '#layer1 {\n  stroke:yellow;\n}')
+        self.assertEqual(str(sheets[2][1]), '.rule {}')
 
     def test_lookup_by_id(self):
         """ID CSS lookup"""

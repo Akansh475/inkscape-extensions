@@ -43,6 +43,8 @@ circle {
 #layer1 {
     stroke-width: 2px;
 }
+.rule {
+}
      ]]></style>
   </defs>
   <g

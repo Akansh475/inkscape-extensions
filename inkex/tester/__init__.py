@@ -306,18 +306,15 @@ class ComparisonMixin(object):
 
         if isinstance(data_a, bytes) and isinstance(data_b, bytes) \
             and data_a.startswith(b'<') and data_b.startswith(b'<'):
-            # Compare two svg files
-            xml_a = xml.parse(BytesIO(data_a))
-            xml_b = xml.parse(BytesIO(data_b))
             # Late importing
-            delta = xmldiff(xml_a.getroot(), xml_b.getroot())
+            diff_xml, delta = xmldiff(data_a, data_b)
             if not delta and not os.environ.get('EXPORT_COMPARE', False):
                 print('The XML is different, you can save the output using the EXPORT_COMPARE=1'\
                       ' envionment variable. This will save the compared file as a ".output" file'\
                       ' next to the reference file used in the text.\n')
             diff = 'SVG Differences: {}\n\n'.format(outfile)
             if os.environ.get('XML_DIFF', False):
-                diff = '<- ' + xml.tostring(xml_a.getroot()).decode('utf-8')
+                diff = '<- ' + diff_xml
             else:
                 for x, (value_a, value_b) in enumerate(delta):
                     try:

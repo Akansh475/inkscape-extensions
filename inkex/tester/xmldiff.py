@@ -8,6 +8,8 @@
 """
 Allow two xml files/lxml etrees to be compared, returning their differences.
 """
+import xml.etree.ElementTree as xml
+from io import BytesIO
 
 def text_compare(test1, test2):
     """
@@ -55,9 +57,22 @@ class DeltaLogger(list):
             return "No differences detected"
         return "{} xml differences".format(len(self))
 
-def xmldiff(xml1, xml2):
+def to_xml(data):
+    """Convert string or bytes to xml parsed root node"""
+    if isinstance(data, str):
+        data = data.encode('utf8')
+    if isinstance(data, bytes):
+        return xml.parse(BytesIO(data)).getroot()
+    return data
+
+def xmldiff(data1, data2):
     """Create an xml difference, will modify the first xml structure with a diff"""
+    xml1, xml2 = to_xml(data1), to_xml(data2)
     delta = DeltaLogger()
+    _xmldiff(xml1, xml2, delta)
+    return xml.tostring(xml1).decode('utf-8'), delta
+
+def _xmldiff(xml1, xml2, delta):
     if xml1.tag != xml2.tag:
         xml1.tag = '{}XXX{}'.format(xml1.tag, xml2.tag)
         delta.append_tag(xml1.tag, xml2.tag)
@@ -95,13 +110,4 @@ def xmldiff(xml1, xml2):
             delta.append_tag(None, child_a.tag)
             child_a.tag += 'XXX'
         else:
-            delta.extend(xmldiff(child_a, child_b))
-    return delta
-
-if __name__ == '__main__':
-    import sys
-    import xml.etree.ElementTree as xml
-    XMLA = xml.parse(sys.argv[1])
-    XMLB = xml.parse(sys.argv[2])
-    xmldiff(XMLA.getroot(), XMLB.getroot())
-    print(xml.tostring(XMLA.getroot()).decode('utf-8'))
+            _xmldiff(child_a, child_b, delta)

@@ -432,9 +432,7 @@ class Group(ShapeElement):
     def get_path(self):
         ret = Path()
         for child in self:
-            path = child.path
-            path.transform(child.transform)
-            ret += path
+            ret += child.path.transform(child.transform)
         return ret
 
     def bounding_box(self, transform=None):
@@ -601,11 +599,16 @@ class Use(ShapeElement):
     def unlink(self):
         """Unlink this clone, replacing it with a copy of the original"""
         copy = self.href.copy()
+        if isinstance(copy, Symbol):
+            group = Group(**copy.attrib)
+            group.extend(copy)
+            copy = group
         copy.transform *= self.transform
         copy.style = self.style + copy.style
         self.replace_with(copy)
         copy.set_random_ids()
         return copy
+
 
 class ClipPath(Group):
     """A path used to clip objects"""
@@ -631,6 +634,10 @@ class StyleElement(BaseElement):
 class Desc(BaseElement):
     """Description element"""
     tag_name = 'desc'
+
+class Title(BaseElement):
+    """Title element"""
+    tag_name = 'title'
 
 class NamedView(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""

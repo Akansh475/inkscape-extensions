@@ -9,15 +9,17 @@ from lxml import etree
 import inkex
 
 from inkex.elements import (
-    ShapeElement,
-    Group, Pattern, Guide, Polyline, Use, Defs,
-    TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion,
+    ShapeElement, Group, Pattern, Guide, Polyline, Use, Defs,
+    TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
 )
 from inkex.utils import FragmentError
 from inkex.transforms import Transform
 from inkex.styles import Style
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
+
+class FakeShape(ShapeElement):
+    tag_name = 'fake'
 
 class ElementTestCase(TestCase):
     """Base element test case"""
@@ -55,8 +57,9 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_abstract_raises(self):
         """Abstract classes cannot be instantiated"""
-        with self.assertRaises(AssertionError):
-            ShapeElement()
+        self.assertRaises(AssertionError, ShapeElement)
+        self.assertRaises(NotImplementedError, FakeShape().get_path)
+        self.assertRaises(AttributeError, FakeShape().set_path, None)
 
     def test_findall(self):
         """Findall elements in svg"""
@@ -258,6 +261,7 @@ class CoreElementTestCase(ElementTestCase):
         self.assertFalse(FlowRegion().get_path())
         self.assertFalse(FlowRoot().get_path())
         self.assertFalse(FlowPara().get_path())
+        self.assertFalse(FlowSpan().get_path())
 
     def test_descendants(self):
         """Elements can walk their descendants"""
@@ -363,6 +367,18 @@ class GroupTest(ElementTestCase):
         self.assertEqual(self.svg.getElementById('A').groupmode, 'layer')
         self.assertEqual(self.svg.getElementById('C').groupmode, 'group')
 
+    def test_get_path(self):
+        """Group path is combined children"""
+        self.assertEqual(
+            str(self.svg.getElementById('A').get_path()),
+            'M -108.539 517.61 L -87.6093 496.117 L -98.3066 492.768 L -69.9352 492.301 L -55.5172'
+            ' 506.163 L -66.2145 502.814 L -87.1445 524.307 M 60.0914 498.693 L 156.784 439.145 L'
+            ' 240.218 491.183 L 143.526 550.731 z M -176.909 458.816 a 64.2385 38.9175 -7.86455 1'
+            ' 0 88.3701 -19.0784 a 64.2385 38.9175 -7.86455 0 0 -88.3701 19.0784 z M -300.162'
+            ' 513.715 L -282.488 509.9 Z M -214.583 540.504 L -209.001 448.77 M -193.189 547.201 L'
+            ' -238.536 486.266 L -185.049 503.008 L -230.396 442.073 M -193.189 547.201 L -238.536'
+            ' 486.266 L -185.049 503.008 L -230.396 442.073 Z')
+
 
 class RectTest(ElementTestCase):
     """Test extra functionality on a rectangle element"""
@@ -453,6 +469,30 @@ class UseTest(ElementTestCase):
         self.assertEqual(elem.href, None)
         elem.set('xlink:href', self.elem.get('xlink:href'))
         self.assertEqual(elem.href.get('id'), 'path1')
+
+    def test_unlink(self):
+        """Test use tag unlinking"""
+        elem = self.elem.unlink()
+        self.assertEqual(str(elem.path), 'M 0 0 L 10 10 Z')
+        self.assertEqual(elem.tag_name, 'path')
+        self.assertEqual(elem.getparent().get('id'), 'C')
+
+class SymbolTest(ElementTestCase):
+    """Test Symbol elements"""
+    source_file = 'symbol.svg'
+    tag = 'symbol'
+
+    def test_unlink_symbol(self):
+        """Test unlink symbols"""
+        use = self.svg.getElementById('plane01')
+        self.assertEqual(use.tag_name, 'use')
+        self.assertEqual(use.href.tag_name, 'symbol')
+        # Unlinking should replace symbol with group
+        elem = use.unlink()
+        self.assertEqual(elem.tag_name, 'g')
+        self.assertEqual(str(elem.transform), 'translate(18, 16)')
+        self.assertEqual(elem[0].tag_name, 'title')
+        self.assertEqual(elem[1].tag_name, 'rect')
 
 class DefsTest(ElementTestCase):
     """Test the definitions tag"""

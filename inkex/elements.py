@@ -205,12 +205,13 @@ class BaseElement(etree.ElementBase):
         prefix = str(self) if prefix is None else prefix
         self.set('id', self.root.get_unique_id(prefix, size=size))
 
-    def set_random_ids(self, prefix=None):
+    def set_random_ids(self, prefix=None, levels=-1):
         """Same as set_random_id, but will apply also to children"""
         self.set_random_id(prefix=prefix)
-        for child in self:
-            if hasattr(child, 'set_random_id'):
-                self.set_random_id(prefix=prefix)
+        if levels != 0:
+            for child in self:
+                if hasattr(child, 'set_random_ids'):
+                    child.set_random_ids(prefix=prefix, levels=levels-1)
 
     def get_id(self):
         """Get the id for the element, will set a new unique id if not set"""

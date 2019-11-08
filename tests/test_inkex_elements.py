@@ -132,6 +132,7 @@ class CoreElementTestCase(ElementTestCase):
         )
         self.assertEqual(group.pop('transform'), Transform(scale=2))
         self.assertEqual(group.pop('transform'), Transform())
+        self.assertRaises(AttributeError, getattr, group, 'foo')
 
     def test_pop_regular_attribute(self):
         """Remove wrapped attribute using .pop()"""
@@ -226,6 +227,14 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.get('id'), 'Thing85')
         elem.set_random_id()
         self.assertEqual(elem.get('id'), 'path5392')
+
+    def test_random_ids(self):
+        """Test setting a tree of ids"""
+        elem = self.svg.getElementById('D')
+        self.svg.set_random_ids(prefix='TreeItem')
+        self.assertEqual(self.svg.get('id'), 'TreeItem5815')
+        self.assertEqual(self.svg[0].get('id'), 'TreeItem8555')
+        self.assertEqual(elem.get('id'), 'TreeItem2036')
 
     def test_bounding_box(self):
         """Elements can have bounding boxes"""

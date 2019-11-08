@@ -258,10 +258,13 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_path(self):
         """Test getting paths"""
+        self.assertFalse(TextPath().get_path())
+        self.assertFalse(TextElement().get_path())
         self.assertFalse(FlowRegion().get_path())
         self.assertFalse(FlowRoot().get_path())
         self.assertFalse(FlowPara().get_path())
         self.assertFalse(FlowSpan().get_path())
+        self.assertFalse(Tspan().get_path())
 
     def test_descendants(self):
         """Elements can walk their descendants"""
@@ -437,7 +440,7 @@ class NamedViewTest(ElementTestCase):
     def test_guides(self):
         """Create a guide and see a list of them"""
         self.svg.namedview.add(Guide().move_to(0, 0, 0))
-        self.svg.namedview.add(Guide().move_to(0, 0, 90))
+        self.svg.namedview.add(Guide().move_to(0, 0, '90'))
         self.assertEqual(len(self.svg.namedview.get_guides()), 2)
 
 class TextTest(ElementTestCase):

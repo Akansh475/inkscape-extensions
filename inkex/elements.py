@@ -45,9 +45,6 @@ class SvgClassLookup(etree.CustomElementClassLookup):
 
     def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
         """Choose what kind of functionality our element will have"""
-        if node_type != "element":
-            return None
-
         if namespace is None:
             namespace = NSS['svg']
 
@@ -76,7 +73,8 @@ class BaseElement(etree.ElementBase):
     tag_names = ()
 
     @property
-    def TAG(self):
+    def TAG(self): # pylint: disable=invalid-name
+        """Return the tag_name without NS"""
         assert self.tag_name
         return removeNS(self.tag_name)[-1]
 

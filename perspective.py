@@ -22,6 +22,7 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 
 import inkex
 from inkex.svg import SvgDocumentElement
+from inkex.localization import inkex_gettext as _
 
 X, Y = range(2)
 
@@ -50,6 +51,7 @@ class PathPerspective(inkex.EffectExtension):
 
         if isinstance(obj, (inkex.PathElement, inkex.Group)):
             if isinstance(envelope, inkex.PathElement):
+                obj.path = obj.path.to_absolute()
                 path = envelope.path.transform(envelope.composed_transform()).to_superpath()
 
                 if len(path) < 1 or len(path[0]) < 4:

@@ -323,6 +323,10 @@ class PathTest(TestCase):
         ret = Path("M 150,150 a 76,55 0 1 1 283,128")
         self._assertPath(ret.to_absolute(), "M 150 150 A 76 55 0 1 1 433 278")
 
+        ret = Path("m 5 5 h 5 v 5 h -5 z M 15 15 l 5 5 z m 10 10 h 5 v 5 h -5 z")
+        self._assertPath(ret.to_absolute(),
+                   "M 5 5 H 10 V 10 H 5 Z M 15 15 L 20 20 Z M 25 25 H 30 V 30 H 25 Z")
+
     def test_relative(self):
         """Paths can be converted to relative"""
         ret = Path("M 100 100 L 110 120 140 140 300 300")

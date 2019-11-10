@@ -34,20 +34,10 @@ Area and Center of Mass calculated using Green's Theorem:
 http://mathworld.wolfram.com/GreensTheorem.html
 """
 
-import locale
 import inkex
 
 from inkex.elements import TextElement, TextPath, Tspan
 from inkex.bezier import csparea, cspcofm, csplength
-
-# On darwin, fall back to C in cases of
-# - incorrect locale IDs (see comments in bug #406662)
-# - https://bugs.python.org/issue18378
-try:
-    locale.setlocale(locale.LC_ALL, '')
-except locale.Error:
-    locale.setlocale(locale.LC_ALL, 'C')
-
 
 class Length(inkex.EffectExtension):
     """Measure the length of selected paths"""
@@ -105,8 +95,8 @@ class Length(inkex.EffectExtension):
                 self.add_cross(self.group, xc, yc, scale)
                 continue
             # Format the length as string
-            lenstr = locale.format("%(len)25." + str(prec) + "f", {'len': round(stotal * factor * self.options.scale, prec)}).strip()
-            self.options.method(node, lenstr)
+            val = round(stotal * factor * self.options.scale, prec)
+            self.options.method(node, str(val))
 
     def method_textonpath(self, node, lenstr):
         _id = node.get('id')

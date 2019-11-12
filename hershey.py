@@ -18,7 +18,7 @@
 #
 
 '''
-Hershey Text 3.0.2, 2019-09-07
+Hershey Text 3.0.3, 2019-11-11
 
 Copyright 2019, Windell H. Oskay, www.evilmadscientist.com
 
@@ -1180,6 +1180,8 @@ Evil Mad Scientist Laboratories
             else:
                 # Special case, to handle multi-line text given by tspan
                 # elements that do not have y values
+                if y_local is None:
+                    y_local = 0
                 y_local = float(y_local) + self.line_number * parent_line_spacing * font_height_local
         except ValueError:
             pass 
@@ -1354,13 +1356,14 @@ Evil Mad Scientist Laboratories
                 except ValueError:
                     pass 
 
-                font_height = 0
+                font_height = 16
                 try:
                     font_height_temp = node_style['font-size']
                     font_height = self.unitsToUserUnits(font_height_temp)
                 except KeyError:
                     pass 
 
+                font_family = 'sans-serif'
                 try:
                     font_family = self.strip_quotes(node_style['font-family'])
                 except KeyError:

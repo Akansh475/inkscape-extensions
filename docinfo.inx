@@ -4,7 +4,7 @@
       <id>org.inkscape.docinfo</id>
       <param name="action" type="notebook" gui-hidden="true">
         <page name="page_info" gui-text="Show page info">
-            <label>Choose this tab if you would like to see page info previously to apply DPI Switcher.</label>
+            <label>Choose this tab if you would like to information about the document before switching the DPI value.</label>
         </page>
       </param>
       <effect needs-live-preview="false">

@@ -1285,7 +1285,7 @@ class CubicSuperPath(list):
         if len(item) != 3 or not all([len(bit) == 2 for bit in item]):
             # The item is already a subpath (usually from some other process)
             if len(item[0]) == 3 and all([len(bit) == 2 for bit in item[0]]):
-                super(CubicSuperPath, self).append(item)
+                super(CubicSuperPath, self).append(self._clean(item))
                 self._prev_prev = Vector2d(self[-1][-1][0])
                 self._prev = Vector2d(self[-1][-1][1])
                 return
@@ -1306,6 +1306,12 @@ class CubicSuperPath(list):
         self._prev = Vector2d(self[-1][-1][1])
         if not is_quadratic:
             self._prev_prev = Vector2d(self[-1][-1][0])
+
+    def _clean(self, lst):
+        """Recursively clean lists so they have the same type"""
+        if isinstance(lst, (tuple, list)):
+            return [self._clean(child) for child in lst]
+        return lst
 
     @property
     def _first(self):

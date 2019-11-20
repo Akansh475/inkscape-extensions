@@ -6,7 +6,7 @@ Test Inkex path parsing functionality.
 import re
 
 from inkex.paths import (
-    InvalidPath, Path, PathCommand,
+    InvalidPath, Path, PathCommand, CubicSuperPath,
     line, move, curve, smooth, quadratic, tepidQuadratic, arc, vert, horz, zoneClose,
     Line, Move, Horz, Vert, Curve, Smooth, Quadratic, TepidQuadratic, Arc, ZoneClose
 )
@@ -472,6 +472,20 @@ class SuperPathTest(TestCase):
                     " 6.51412,3.75474 -1.362416,-2.30812 -3.856221,-3.74395 -6.51412,-3.75474")
         csp = path.to_superpath()
         self.assertEqual(len(csp), 2)
+
+    def test_from_arrays(self):
+        """SuperPath from arrays"""
+        csp = CubicSuperPath([[
+            [[14, 173], [14, 173], (14, 173)],
+            [(15, 171), (17, 168), (18, 168)],
+        ], [
+            [(18, 167), (18, 167), [20, 165]],
+            ((21, 164), [22, 162], (23, 162)),
+        ]])
+        self.assertEqual(
+            str(csp.to_path()),
+            'M 14 173 C 14 173 15 171 17 168 M 18 167 C 20 165 21 164 22 162'
+        )
 
     def test_is_line(self):
         """Test is super path segments can detect lines"""

@@ -53,6 +53,8 @@ import os
 import sys
 import tempfile
 
+from lxml import etree
+
 import inkex
 from inkex.command import inkscape
 
@@ -111,6 +113,12 @@ class ExportSlices(inkex.EffectExtension):
             default="300",
             help="Dots per inch (300 default)",
         )
+        pars.add_argument(
+            "-t",
+            "--tab",
+            dest="tab",
+            help="The selected UI-tab when OK was pressed"
+        )
 
 
     def effect(self):
@@ -130,6 +138,13 @@ class ExportSlices(inkex.EffectExtension):
         for node in nodes:
             self.clear_color(node)
 
+        # save file once now
+        # if we have multiple slices we will make multiple calls
+        # to inkscape
+        (ref, self.tmp_svg) = tempfile.mkstemp('.svg')
+        with open(self.tmp_svg, 'wb') as fout:
+            fout.write(etree.tostring(self.document))
+
         # in case there are overlapping rects, clear them all out before
         # saving any
         for node in nodes:
@@ -145,7 +160,7 @@ class ExportSlices(inkex.EffectExtension):
         # change slice colors to grey/green/red and set opacity to 25% in real document
         for node in nodes:
             self.change_color(node)
-
+        return self.document
 
     def get_layer_nodes(self, layer_name):
         """
@@ -189,7 +204,7 @@ class ExportSlices(inkex.EffectExtension):
 
     def export_node(self, node, height=None, width=None):
         color, kwargs = self.get_color_and_command_kwargs(node, height, width)
-        node_id = kwargs['export-id']
+        node_id = node.attrib["id"]
         self.color_map[node_id] = color
         if color == ExportSlices.GREY:  # skipping
             return

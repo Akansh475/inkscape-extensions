@@ -28,13 +28,13 @@ class InkWebIMockup(inkwebeffect.InkWebEffect):
         self.arg_parser.add_argument("--when", type=str, dest="when", default="onclick",
                                      help="Event that will trigger the action")
         self.arg_parser.add_argument("--tab", type=str, dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+                                     help="The selected UI tab when OK was pressed")
 
     def effect(self):
       self.ensureInkWebSupport()
 
       if len(self.options.ids) < 2:
-        raise inkex.AbortExtension("You must select at least two elements. The last one is the object you want to go to")
+        raise inkex.AbortExtension("You must select at least two elements. The last one is the object you want to go to.")
 
 
       elFrom = []

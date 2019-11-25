@@ -310,7 +310,8 @@ class MockCommandMixin(MockMixin):
 
     def get_call_path(self, program, create=True):
         """Get where this program would store it's test data"""
-        command_dir = os.path.join(self.cmddir(), program)
+        progname = 'inkscape' if program == inkex.command.INKSCAPE_EXECUTABLE_NAME else program
+        command_dir = os.path.join(self.cmddir(), progname)
         if not os.path.isdir(command_dir):
             if create:
                 os.makedirs(command_dir)

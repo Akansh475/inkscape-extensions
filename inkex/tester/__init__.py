@@ -168,7 +168,13 @@ class TestCase(MockCommandMixin, BaseCase):
     @classmethod
     def data_file(cls, filename, *parts):
         """Provide a data file from a filename, can accept directories as arguments."""
-        full_path = os.path.join(cls.datadir(), filename, *parts)
+        if os.path.isabs(filename):
+            # Absolute root was passed in, so we trust that (it might be a tempdir)
+            full_path = os.path.join(filename, *parts)
+        else:
+            # Otherwise we assume it's relative to the test data dir.
+            full_path = os.path.join(cls.datadir(), filename, *parts)
+
         if not os.path.isfile(full_path):
             raise IOError("Can't find test data file: {}".format(full_path))
         return full_path

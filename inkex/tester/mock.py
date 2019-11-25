@@ -250,7 +250,9 @@ class MockCommandMixin(MockMixin):
             return self.load_call(program, key, outputs)
         except IOError:
             self.save_key(program, key, keystr, 'bad-key')
-            raise IOError("Problem loading call: {}/{}".format(program, key))
+            raise IOError("Problem loading call: {}/{} use the environment variable "\
+                "NO_MOCK_COMMANDS=1 to call out to the external program and generate "\
+                "the mock call file.".format(program, key))
 
     def add_call_files(self, msg, args, kwargs):
         """

@@ -2,11 +2,11 @@
 
 from dhw_input import DhwInput
 
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
 
-class TestDxfInput(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class TestDxfInput(ComparisonMixin, TestCase):
     effect_class = DhwInput
     compare_file = [
         'io/PAGE_001.DHW',

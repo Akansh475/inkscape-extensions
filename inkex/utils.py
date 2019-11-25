@@ -35,6 +35,8 @@ from argparse import ArgumentTypeError
 # All the names that get added to the inkex API itself.
 __all__ = ('AbortExtension', 'Boolean', 'errormsg', 'addNS', 'NSS')
 
+ABORT_STATUS = -5
+
 (X, Y) = range(2)
 
 if sys.version_info[0] == 3:  # PY3

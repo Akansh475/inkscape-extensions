@@ -29,9 +29,8 @@ import shutil
 from argparse import ArgumentParser
 from lxml import etree
 
-from .utils import filename_arg, AbortExtension, errormsg
+from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg
 from .elements import load_svg
-from .colors import Color
 from .localization import localize
 
 stdout = sys.stdout
@@ -114,6 +113,7 @@ class InkscapeExtension(object):
             self.save_raw(self.effect())
         except AbortExtension as err:
             err.write()
+            sys.exit(ABORT_STATUS)
         finally:
             self.clean_up()
 

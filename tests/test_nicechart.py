@@ -1,9 +1,9 @@
 # coding=utf-8
 from nicechart import NiceChart
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
-class TestNiceChartBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class TestNiceChartBasic(ComparisonMixin, TestCase):
     effect_class = NiceChart
     compare_file = 'svg/default-plain-SVG.svg'
     compare_filters = [CompareNumericFuzzy()]

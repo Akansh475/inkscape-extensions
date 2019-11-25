@@ -40,7 +40,7 @@ from .utils import TemporaryDirectory
 from .svg import SvgDocumentElement
 
 PY3 = sys.version_info[0] == 3
-INKSCAPE_EXECUTABLE_NAME = 'inkscape'
+INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND', 'inkscape')
 
 class CommandNotFound(IOError):
     """Command is not found"""
@@ -54,6 +54,8 @@ def which(program):
     """
     Attempt different methods of trying to find if the program exists.
     """
+    if os.path.isabs(program) and os.path.isfile(program):
+        return program
     try:
         # Python2 and python3, but must have distutils and may not always
         # work on windows versions (depending on the version)

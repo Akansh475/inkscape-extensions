@@ -31,6 +31,6 @@
   </effect>
 
   <script>
-    <command reldir="extensions" interpreter="python">layer2png.py</command>
+    <command location="inx" interpreter="python">layer2png.py</command>
   </script>
 </inkscape-extension>

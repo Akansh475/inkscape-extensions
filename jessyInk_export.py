@@ -25,6 +25,7 @@ import zipfile
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot
+from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 
 class JessyInkExport(TempDirMixin, inkex.OutputExtension):
@@ -35,25 +36,26 @@ class JessyInkExport(TempDirMixin, inkex.OutputExtension):
 
     def __init__(self):
         super(JessyInkExport, self).__init__()
-
-        self.arg_parser.add_argument('--tab', type=str, dest='what')
-        self.arg_parser.add_argument('--type', type=str, dest='type', default='png')
-        self.arg_parser.add_argument('--resolution', type=str, dest='resolution', default='1.0')
-
         # Register jessyink namespace.
         NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+
+    def add_arguments(self, pars):
+        pars.add_argument('--tab', type=str, dest='what')
+        pars.add_argument('--type', type=str, dest='type', default='png')
+        pars.add_argument('--resolution', type=str, default='96')
 
     def save(self, stream):
         # Check whether the JessyInk-script is present (indicating
         # that the presentation has not been properly exported).
-        script = self.svg.xpath("//svg:script[@jessyink:version]")
+        script = self.svg.xpath("//script[@jessyink:version]")
 
         if script:
-            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has"
-                             " a different version than the JessyInk extensions. Please"
-                             " select \"install/update...\" from the \"JessyInk\" sub-menu"
-                             " of the \"Extensions\" menu to install or update the JessyInk"
-                             " script.\n\n"))
+            raise inkex.AbortExtension(
+                _("The JessyInk script is not installed in this SVG file or has"
+                  " a different version than the JessyInk extensions. Please"
+                  " select \"install/update...\" from the \"JessyInk\" sub-menu"
+                  " of the \"Extensions\" menu to install or update the JessyInk"
+                  " script.\n\n"))
 
         with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as output:
 
@@ -76,7 +78,7 @@ class JessyInkExport(TempDirMixin, inkex.OutputExtension):
                 newname = "{}.{}".format(name, self.options.type)
                 filename = take_snapshot(self.document, dirname=self.tempdir,
                                          name=name, ext=self.options.type,
-                                         dpi=self.options.resolution)
+                                         dpi=int(self.options.resolution))
                 output.write(filename, newname)
 
                 node.style['display'] = "none"

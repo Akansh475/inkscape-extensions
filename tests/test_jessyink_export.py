@@ -6,4 +6,4 @@ from inkex.tester.filters import CompareSize
 class JessyInkExportBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareSize()]
     effect_class = JessyInkExport
-    comparisons = [()]
+    comparisons = [('--resolution=1',)]

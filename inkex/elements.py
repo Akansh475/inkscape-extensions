@@ -30,7 +30,7 @@ from lxml import etree
 
 from .paths import Path
 from .styles import Style, StyleSheet, Classes
-from .transforms import BoundingBox, Transform
+from .transforms import BoundingBox, Transform, Vector2d
 from .utils import NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
 
@@ -655,7 +655,7 @@ class Guide(BaseElement):
 
     is_horizontal = property(lambda self: self.get('orientation') in ('0,1', '0,-1'))
     is_vertical = property(lambda self: self.get('orientation') == '1,0')
-    point = property(lambda self: self.get('position').split(','))
+    point = property(lambda self: Vector2d(self.get('position')))
 
     def move_to(self, pos_x, pos_y, angle=None):
         """

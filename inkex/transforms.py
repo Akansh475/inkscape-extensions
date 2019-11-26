@@ -78,6 +78,9 @@ class Vector2d(object):
                 return point.x, point.y
             elif isinstance(point, (tuple, list)) and len(point) == 2:
                 return point
+            elif isinstance(point, str) and point.count(',') == 1:
+                x, y = point.split(',')
+                return float(x), float(y)
         elif len(args) == 2:
             x, y = args
             if isinstance(x, (int, float)) and isinstance(y, (int, float)):

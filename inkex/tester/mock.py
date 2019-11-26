@@ -197,7 +197,7 @@ class MockCommandMixin(MockMixin):
 
         # We use email
         msg = MIMEMultipart(boundary=FIXED_BOUNDARY)
-        msg['Program'] = program
+        msg['Program'] = self.get_program_name(program)
 
         # Gather any output files and add any input files to msg, args and kwargs
         # may be modified to strip out filename directories (which change)
@@ -240,7 +240,7 @@ class MockCommandMixin(MockMixin):
             # them, then store any stdout or stderr created during the run.
             # A developer can then use this to build new test cases.
             reply = MIMEMultipart(boundary=FIXED_BOUNDARY)
-            reply['Program'] = program
+            reply['Program'] = self.get_program_name(program)
             reply['Arguments'] = argstr
             self.save_call(program, key, stdout, outputs, reply)
             self.save_key(program, key, keystr, 'key')
@@ -287,12 +287,15 @@ class MockCommandMixin(MockMixin):
                 files[1].append(value)
         return files
 
-    @staticmethod
-    def add_call_file(msg, filename):
+    def add_call_file(self, msg, filename):
         """Add a single file to the given mime message"""
         fname = os.path.basename(filename)
-        with open(filename, "rb") as flh:
-            part = MIMEApplication(flh.read(), Name=fname)
+        with open(filename, "rb") as fhl:
+            if filename.endswith('.svg'):
+                value = self.clean_paths(fhl.read().decode('utf8'), [])
+            else:
+                value = fhl.read()
+            part = MIMEApplication(value, Name=fname)
         # After the file is closed
         part['Content-Disposition'] = 'attachment'
         part['Filename'] = fname
@@ -308,10 +311,15 @@ class MockCommandMixin(MockMixin):
             raise IOError("Attempted to find call test data {}".format(key))
         return fname
 
+    def get_program_name(self, program):
+        """Takes a program and returns a program name"""
+        if program == inkex.command.INKSCAPE_EXECUTABLE_NAME:
+            return 'inkscape'
+        return program
+
     def get_call_path(self, program, create=True):
         """Get where this program would store it's test data"""
-        progname = 'inkscape' if program == inkex.command.INKSCAPE_EXECUTABLE_NAME else program
-        command_dir = os.path.join(self.cmddir(), progname)
+        command_dir = os.path.join(self.cmddir(), self.get_program_name(program))
         if not os.path.isdir(command_dir):
             if create:
                 os.makedirs(command_dir)

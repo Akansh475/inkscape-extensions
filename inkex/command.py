@@ -214,8 +214,7 @@ def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
     """
     svg_file = write_svg(svg, dirname, name + '.svg')
     ext_file = os.path.join(dirname, name + '.' + str(ext).lower())
-    kwargs['export_' + ext] = ext_file
-    inkscape(svg_file, export_dpi=dpi, **kwargs)
+    inkscape(svg_file, export_dpi=dpi, export_file=ext_file, export_type=ext, **kwargs)
     return ext_file
 
 

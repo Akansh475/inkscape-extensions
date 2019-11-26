@@ -38,58 +38,34 @@ class GimpOutput(TempDirMixin, inkex.OutputExtension):
     """
     dir_prefix = 'gimp-out-'
 
-    def __init__(self):
-        super(GimpOutput, self).__init__()
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab")
-        self.arg_parser.add_argument("-d", "--guides",
-                                     type=inkex.Boolean,
-                                     dest="saveGuides", default=False,
-                                     help="Save the Guides with the .XCF")
-        self.arg_parser.add_argument("-r", "--grid",
-                                     type=inkex.Boolean,
-                                     dest="saveGrid", default=False,
-                                     help="Save the Grid with the .XCF")
-        self.arg_parser.add_argument("-b", "--background",
-                                     type=inkex.Boolean,
-                                     dest="layerBackground", default=False,
-                                     help="Add background color to each layer")
-        self.arg_parser.add_argument("-i", "--dpi",
-                                     type=float,
-                                     dest="resolution", default="96",
-                                     help="File resolution")
+    def add_arguments(self, pars):
+        pars.add_argument("--tab", dest="tab")
+        pars.add_argument("-d", "--guides", type=inkex.Boolean, help="Save the Guides in the XCF")
+        pars.add_argument("-r", "--grid", type=inkex.Boolean, help="Save the Grid with the .XCF")
+        pars.add_argument("-b", "--background", type=inkex.Boolean, help="Add background color")
+        pars.add_argument("-i", "--dpi", type=float, default="96", help="File resolution")
 
     def get_guides(self):
         """Generate a list of horzontal and vertical only guides"""
-        doc_scale = self.svg.scale
-        res_scale = self.options.resolution / 96.0
-        page_height = self.svg.uutounit(self.svg.unittouu(self.svg.height), "px")
-        page_width = self.svg.uutounit(self.svg.unittouu(self.svg.width), "px")
-
         horz_guides = []
         vert_guides = []
         # Grab all guide tags in the namedview tag
-        for guide in self.svg.xpath("sodipodi:namedview/sodipodi:guide"):
+        for guide in self.svg.namedview.get_guides():
             if guide.is_horizontal:
-                # This is a horizontal guide
-                pos = self.svg.uutounit(float(guide.point[1]), "px") * doc_scale
                 # GIMP doesn't like guides that are outside of the image
-                if 0 < pos < page_height:
+                if 0 < guide.point.y < self.svg.height:
                     # The origin is at the top in GIMP land
-                    horz_guides.append(str(int(round(pos * res_scale))))
+                    horz_guides.append(str(guide.point.y))
             elif guide.is_vertical:
-                # This is a vertical guide
-                pos = self.svg.uutounit(float(guide.point[0]), "px") * doc_scale
                 # GIMP doesn't like guides that are outside of the image
-                if 0 < pos < page_width:
-                    vert_guides.append(str(int(round(pos * res_scale))))
+                if 0 < guide.point.x < self.svg.width:
+                    vert_guides.append(str(guide.point.x))
 
         return ('h', ' '.join(horz_guides)), ('v', ' '.join(vert_guides))
 
     def get_grid(self):
         """Get the grid if asked for and return as gimpfu script"""
-        scale = (self.svg.scale) * (self.options.resolution / 96.0)
+        scale = (self.svg.scale) * (self.options.dpi / 96.0)
         # GIMP only allows one rectangular grid
         xpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
         if self.svg.xpath(xpath):
@@ -126,11 +102,11 @@ class GimpOutput(TempDirMixin, inkex.OutputExtension):
                 self.document,
                 dirname=self.tempdir,
                 name=name,
-                dpi=self.options.resolution,
+                dpi=int(self.options.dpi),
                 export_id=node_id,
                 export_id_only=True,
                 export_area_page=True,
-                export_background_opacity=int(bool(self.options.layerBackground))
+                export_background_opacity=int(bool(self.options.background))
             )
 
         if not valid:
@@ -167,12 +143,12 @@ class GimpOutput(TempDirMixin, inkex.OutputExtension):
 
   (gimp-image-resize-to-layers img)
 """.format(
-    dpi=self.options.resolution,
+    dpi=self.options.dpi,
     files='" "'.join(pngs.values()),
     names='" "'.join(list(pngs))
 )
 
-        if self.options.saveGuides:
+        if self.options.guides:
             for dim, guides in self.get_guides():
                 script_fu += """
   (for-each
@@ -183,7 +159,7 @@ class GimpOutput(TempDirMixin, inkex.OutputExtension):
   )""".format(d=dim, g=guides)
 
         # Grid
-        if self.options.saveGrid:
+        if self.options.grid:
             for fu_let in self.get_grid():
                 script_fu += "\n" + fu_let + "\n"
 

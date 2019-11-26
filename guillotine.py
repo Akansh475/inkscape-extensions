@@ -42,57 +42,30 @@ import locale
 import inkex
 from inkex.command import inkscape
 
-locale.setlocale(locale.LC_ALL, '')
-
 class Guillotine(inkex.EffectExtension):
     """Exports slices made using guides"""
-
-    def __init__(self):
-        super(Guillotine, self).__init__()
-        self.arg_parser.add_argument("--directory", type=str, dest="directory")
-        self.arg_parser.add_argument("--image", type=str, dest="image")
-        self.arg_parser.add_argument("--ignore", type=inkex.Boolean, dest="ignore")
-
-    def get_guides(self):
-        """
-        Returns all guide elements as an iterable collection
-        """
-        root = self.document.getroot()
-        guides = []
-        for g in self.svg.namedview.get_guides():
-            guide = {}
-            (x, y) = g.attrib['position'].split(',')
-            if g.attrib['orientation'][:2] == '0,':
-                guide['orientation'] = 'horizontal'
-                guide['position'] = y
-                guides.append(guide)
-            elif g.attrib['orientation'][-2:] == ',0':
-                guide['orientation'] = 'vertical'
-                guide['position'] = x
-                guides.append(guide)
-        return guides
+    def add_arguments(self, pars):
+        pars.add_argument("--directory", type=str, dest="directory")
+        pars.add_argument("--image", type=str, dest="image")
+        pars.add_argument("--ignore", type=inkex.Boolean, dest="ignore")
 
     def get_all_horizontal_guides(self):
         """
         Returns all horizontal guides as a list of floats stored as
         strings. Each value is the position from 0 in pixels.
         """
-        guides = []
-        for g in self.get_guides():
-            if g['orientation'] == 'horizontal':
-                guides.append(g['position'])
-        return guides
+        for guide in self.svg.namedview.get_guides():
+            if guide.is_horizontal:
+                yield guide.point.y
 
     def get_all_vertical_guides(self):
         """
         Returns all vertical guides as a list of floats stored as
         strings. Each value is the position from 0 in pixels.
         """
-        guides = []
-        for g in self.get_guides():
-            if g['orientation'] == 'vertical':
-                guides.append(g['position'])
-        return guides
+        for guide in self.svg.namedview.get_guides():
+            if guide.is_vertical:
+                yield guide.point.x
 
     def get_horizontal_slice_positions(self):
         """
@@ -100,15 +73,13 @@ class Guillotine(inkex.EffectExtension):
         including 0 and the document height, but not including
         those outside of the canvas
         """
-        root = self.document.getroot()
-        horizontals = ['0']
-        height = self.svg.unittouu(root.attrib['height'])
-        for h in self.get_all_horizontal_guides():
-            if h >= 0 and float(h) <= float(height):
-                horizontals.append(h)
+        horizontals = [0.0]
+        height = float(self.svg.height)
+        for y in self.get_all_horizontal_guides():
+            if 0.0 < y <= height:
+                horizontals.append(y)
         horizontals.append(height)
-        horizontals.sort(key=float)
-        return horizontals
+        return sorted(horizontals)
 
     def get_vertical_slice_positions(self):
         """
@@ -116,15 +87,13 @@ class Guillotine(inkex.EffectExtension):
         including 0 and the document width, but not including
         those outside of the canvas.
         """
-        root = self.document.getroot()
-        verticals = ['0']
-        width = self.svg.unittouu(root.attrib['width'])
-        for v in self.get_all_vertical_guides():
-            if v >= 0 and float(v) <= float(width):
-                verticals.append(v)
+        verticals = [0.0]
+        width = float(self.svg.width)
+        for x in self.get_all_vertical_guides():
+            if 0.0 < x <= width:
+                verticals.append(x)
         verticals.append(width)
-        verticals.sort(key=float)
-        return verticals
+        return sorted(verticals)
 
     def get_slices(self):
         """
@@ -172,12 +141,8 @@ class Guillotine(inkex.EffectExtension):
             filename = filename.rsplit(".", 1)[0]  # Without extension
             return dirname, filename
 
-    def check_dir_exists(self, dir):
-        if not os.path.isdir(dir):
-            os.makedirs(dir)
-
-    def get_localised_string(self, str):
-        return locale.format("%.f", float(str), 0)
+    def get_localised_string(self, name):
+        return locale.format("%.f", float(name), 0)
 
     def export_slice(self, sli, filename):
         """
@@ -194,27 +159,26 @@ class Guillotine(inkex.EffectExtension):
         filename/directory into export_slice.
         """
         dirname, filename = self.get_filename_parts()
-        output_files = list()
-        if dirname == '' or dirname is None:
-            dirname = './'
+        # Remove some crusty extensions from name template
+        if filename.endswith('.svg') or filename.endswith('.png'):
+            filename = filename.rsplit('.', 1)[0]
+        if '{' not in filename:
+            filename += '_{}'
 
-        dirname = os.path.expanduser(dirname)
-        dirname = os.path.expandvars(dirname)
-        dirname = os.path.abspath(dirname)
-        if dirname[-1] != os.path.sep:
-            dirname += os.path.sep
-        self.check_dir_exists(dirname)
-        i = 0
-        for s in slices:
-            f = dirname + filename + str(i) + ".png"
-            output_files.append(f)
-            self.export_slice(s, f)
-            i += 1
-        inkex.errormsg("The sliced bitmaps have been saved as:" + "\n\n" + "\n".join(output_files))
+        dirname = os.path.abspath(os.path.expanduser(os.path.expandvars(dirname or './')))
+        if not os.path.isdir(dirname):
+            os.makedirs(dirname)
+
+        output_files = []
+        for i, slico in enumerate(slices):
+            fname = os.path.join(dirname, filename.format(i) + '.png')
+            output_files.append(fname)
+            self.export_slice(slico, fname)
+
+        self.debug("The sliced bitmaps have been saved as:" + "\n\n" + "\n".join(output_files))
 
     def effect(self):
-        slices = self.get_slices()
-        self.export_slices(slices)
+        self.export_slices(self.get_slices())
 
 
 if __name__ == "__main__":

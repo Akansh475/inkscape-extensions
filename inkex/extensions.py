@@ -180,6 +180,10 @@ class TemplateExtension(EffectExtension):
         self.arg_parser.add_argument("--unit", default="px")
         self.arg_parser.add_argument("--grid", type=Boolean)
 
+    def get_template(self):
+        """Can be over-ridden with custom svg loading here"""
+        return self.document
+
     def arg_size(self, unit='px'):
         """Argument is a string of the form X[unit]xY[unit], default units apply when missing"""
         def _inner(value):
@@ -212,6 +216,8 @@ class TemplateExtension(EffectExtension):
         width_px = int(self.svg.uutounit(width, 'px'))
         height_px = int(self.svg.uutounit(height, 'px'))
 
+        self.document = self.get_template()
+        self.svg = self.document.getroot()
         self.svg.set("id", self.template_id)
         self.svg.set("width", str(width) + width_unit)
         self.svg.set("height", str(height) + height_unit)

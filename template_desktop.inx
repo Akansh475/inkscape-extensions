@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Desktop</name>
-    <id>org.inkscape.render.empty_desktop</id>
+    <id>org.inkscape.template.desktop</id>
 
     <param name="size" gui-text="Desktop size:" type="optiongroup" appearance="combo">
         <option value="Custom">Custom</option>
@@ -35,6 +35,6 @@
       <inkscape:keywords>empty desktop</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_desktop.py</command>
+        <command location="inx" interpreter="python">template.py</command>
     </script>
 </inkscape-extension>

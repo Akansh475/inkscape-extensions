@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Generic Canvas</name>
-    <id>org.inkscape.render.empty_generic_canvas</id>
+    <id>org.inkscape.template.generic_canvas</id>
 
     <param name="width"  gui-text="Custom Width:"  type="float" min="1" max="15360">800</param>
     <param name="height" gui-text="Custom Height:" type="float" min="1" max="8640">600</param>
@@ -24,10 +24,6 @@
 
     <param name="noborder" type="bool" gui-text="Hide border">false</param>
 
-    <!--
-    <param name="layer" type="bool" gui-text="Include default layer">true</param>
-    -->
-
     <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu hidden="true" />
@@ -40,6 +36,6 @@
       <inkscape:keywords>empty generic canvas</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_generic.py</command>
+        <command location="inx" interpreter="python">template.py</command>
     </script>
 </inkscape-extension>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Business Card</name>
-    <id>org.inkscape.render.empty_business_card</id>
+    <id>org.inkscape.template.business_card</id>
 
     <param name="size" gui-text="Business card size:" type="optiongroup" appearance="combo">
         <option value="74mmx52mm">74mm x 52mm (A8)</option>
@@ -25,6 +25,6 @@
       <inkscape:keywords>business card</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_business_card.py</command>
+        <command location="inx" interpreter="python">template.py</command>
     </script>
 </inkscape-extension>

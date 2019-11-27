@@ -24,16 +24,18 @@ use in their code. See below for the different types.
 """
 
 import os
+import re
 import sys
 import types
 
-from .utils import errormsg
-from .elements import load_svg, BaseElement, Group
+from .utils import errormsg, Boolean
+from .elements import load_svg, BaseElement, Group, Grid
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
 
 # All the names that get added to the inkex API itself.
-__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension', 'CallExtension')
+__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
+           'OutputExtension', 'CallExtension', 'TemplateExtension')
 
 stdout = sys.stdout
 if sys.version_info[0] == 3:  #PY3
@@ -159,3 +161,69 @@ class GenerateExtension(EffectExtension):
             layer.append(fragment)
         else:
             errormsg("Nothing was generated\n")
+
+
+class TemplateExtension(EffectExtension):
+    """
+    Provide a standard way of creating templates.
+    """
+    size_rex = re.compile(r'([\d.]*)(\w\w)?x([\d.]*)(\w\w)?')
+    template_id = "SVGRoot"
+
+    def __init__(self):
+        super(TemplateExtension, self).__init__()
+        # Arguments added on after add_arguments so it can be overloaded cleanly.
+        self.arg_parser.add_argument("--size", type=self.arg_size(), dest="size")
+        self.arg_parser.add_argument("--width", type=int, default=800)
+        self.arg_parser.add_argument("--height", type=int, default=600)
+        self.arg_parser.add_argument("--orientation", default=None)
+        self.arg_parser.add_argument("--unit", default="px")
+        self.arg_parser.add_argument("--grid", type=Boolean)
+
+    def arg_size(self, unit='px'):
+        """Argument is a string of the form X[unit]xY[unit], default units apply when missing"""
+        def _inner(value):
+            try:
+                value = float(value)
+                return (value, unit, value, unit)
+            except ValueError:
+                pass
+            match = self.size_rex.match(str(value))
+            if match is not None:
+                size = match.groups()
+                return (float(size[0]), size[1] or unit, float(size[2]), size[3] or unit)
+            return None
+        return _inner
+
+    def get_size(self):
+        """Get the size of the new template (defaults to size options)"""
+        size = self.options.size
+        if self.options.size is None:
+            size = (self.options.width, self.options.unit,
+                    self.options.height, self.options.unit)
+        if self.options.orientation == "horizontal" and size[0] < size[2] \
+                or self.options.orientation == "vertical" and size[0] > size[2]:
+            size = size[2:4] + size[0:2]
+        return size
+
+    def effect(self):
+        """Creates a template, do not over-ride"""
+        (width, width_unit, height, height_unit) = self.get_size()
+        width_px = int(self.svg.uutounit(width, 'px'))
+        height_px = int(self.svg.uutounit(height, 'px'))
+
+        self.svg.set("id", self.template_id)
+        self.svg.set("width", str(width) + width_unit)
+        self.svg.set("height", str(height) + height_unit)
+        self.svg.set("viewBox", "0 0 {} {}".format(width, height))
+        self.set_namedview(width_px, height_px, width_unit)
+
+    def set_namedview(self, width, height, unit):
+        """Setup the document namedview"""
+        self.svg.namedview.set('inkscape:document-units', unit)
+        self.svg.namedview.set('inkscape:zoom', '0.25')
+        self.svg.namedview.set('inkscape:cx', str(width / 2.0))
+        self.svg.namedview.set('inkscape:cy', str(height / 2.0))
+        if self.options.grid:
+            self.svg.namedview.set('showgrid', "true")
+            self.svg.namedview.add(Grid(type="xygrid"))

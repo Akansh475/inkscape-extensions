@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Blank Page</name>
-    <id>org.inkscape.render.empty_page</id>
+    <id>org.inkscape.template.page</id>
 
     <param name="size" gui-text="Page size:" type="optiongroup" appearance="combo">
-        <option translatable="no" value="a3">A3 — 297 × 420 mm</option>
-        <option translatable="no" value="a4">A4 — 210 × 297 mm</option>
-        <option translatable="no" value="a5">A5 — 148 x 210 mm</option>
-        <option translatable="no" value="letter">Letter — 8.5 × 11 in</option>
-        <option translatable="no" value="legal">Legal — 8.5 × 14 in</option>
-        <option translatable="no" value="ledger">Ledger/Tabloid — 11 × 17 in</option>
+        <option translatable="no" value="297mmx420mm">A3 — 297 × 420 mm</option>
+        <option translatable="no" value="210mmx297mm">A4 — 210 × 297 mm</option>
+        <option translatable="no" value="148mmx210mm">A5 — 148 x 210 mm</option>
+        <option translatable="no" value="9.5inx11in">Letter — 8.5 × 11 in</option>
+        <option translatable="no" value="8.5inx14in">Legal — 8.5 × 14 in</option>
+        <option translatable="no" value="11inx17in">Ledger/Tabloid — 11 × 17 in</option>
     </param>
 
     <param name="orientation" gui-text="Page orientation:" type="optiongroup" appearance="combo">
-        <option value="vertical">Vertical</option>
-        <option value="horizontal">Horizontal</option>
+        <option value="vertical">Vertical (Portrait)</option>
+        <option value="horizontal">Horizontal (Landscape)</option>
     </param>
 
     <param name="background" gui-text="Page background:" type="optiongroup" appearance="combo">
@@ -38,6 +38,6 @@
       <inkscape:keywords>empty page sheet tabloid ledger letter legal print paper a4 a3 a5 letter black white opaque</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_page.py</command>
+        <command location="inx" interpreter="python">template.py</command>
     </script>
 </inkscape-extension>

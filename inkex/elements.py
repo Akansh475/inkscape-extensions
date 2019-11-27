@@ -649,6 +649,17 @@ class NamedView(BaseElement):
         """Returns a list of guides"""
         return self.findall('sodipodi:guide')
 
+    def new_guide(self, position, orient=True, name=None):
+        """Creates a new guide in this namedview"""
+        if orient is True:
+            elem = Guide().move_to(0, position, (0, 1))
+        elif orient is False:
+            elem = Guide().move_to(position, 0, (1, 0))
+        if name:
+            elem.set('inkscape:label', str(name))
+        return self.add(elem)
+
+
 class Guide(BaseElement):
     """An inkscape guide"""
     tag_name = 'sodipodi:guide'

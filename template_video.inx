@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Video Screen</name>
-    <id>org.inkscape.render.empty_video</id>
+    <id>org.inkscape.template.video</id>
 
     <param name="size" gui-text="Video size:" type="optiongroup" appearance="combo">
         <option value="Custom">Custom</option>
@@ -28,6 +28,6 @@
       <inkscape:keywords>empty video</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_video.py</command>
+        <command location="inx" interpreter="python">template.py</command>
     </script>
 </inkscape-extension>

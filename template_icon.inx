@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>Icon</name>
-    <id>org.inkscape.render.empty_icon</id>
+    <id>org.inkscape.template.icon</id>
     
-    <param name="size" gui-text="Icon size:" type="int" min="8" max="256">16</param>
+    <param name="size" gui-text="Icon size:" type="int" min="8" max="1024">16</param>
+    <param name="grid" gui-hidden="true" type="bool">true</param>
     
     <effect needs-live-preview="false">
         <object-type>all</object-type>
@@ -17,6 +18,6 @@
       <inkscape:keywords>empty icon</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_icon.py</command>
+        <command location="inx" interpreter="python">template.py</command>
     </script>
 </inkscape-extension>

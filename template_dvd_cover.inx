@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     <name>DVD Cover</name>
-    <id>org.inkscape.render.empty_dvd_cover</id>
+    <id>org.inkscape.template.dvd_cover</id>
 
     <param name="spine" gui-text="DVD spine width:" type="optiongroup" appearance="combo">
         <option value="14">Normal (14mm)</option>
@@ -24,6 +24,6 @@
       <inkscape:keywords>dvd cover</inkscape:keywords>
     </inkscape:templateinfo>
     <script>
-        <command location="inx" interpreter="python">empty_dvd_cover.py</command>
+        <command location="inx" interpreter="python">template_dvd_cover.py</command>
     </script>
 </inkscape-extension>

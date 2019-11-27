@@ -31,7 +31,7 @@ from lxml import etree
 from .paths import Path
 from .styles import Style, StyleSheet, Classes
 from .transforms import BoundingBox, Transform, Vector2d
-from .utils import NSS, addNS, removeNS, InitSubClassPy3, FragmentError
+from .utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
 
 __all__ = ('Group', 'PathElement', 'ShapeElement')
@@ -158,7 +158,8 @@ class BaseElement(etree.ElementBase):
         if value is None:
             self.attrib.pop(addNS(attr), None) # pylint: disable=no-member
         else:
-            super(BaseElement, self).set(addNS(attr), str(value))
+            value = str(value) if PY3 else unicode(value)
+            super(BaseElement, self).set(addNS(attr), value)
 
     def update(self, **kwargs):
         """

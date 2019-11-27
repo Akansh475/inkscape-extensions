@@ -38,8 +38,9 @@ __all__ = ('AbortExtension', 'Boolean', 'errormsg', 'addNS', 'NSS')
 ABORT_STATUS = -5
 
 (X, Y) = range(2)
+PY3 = sys.version_info[0] == 3
 
-if sys.version_info[0] == 3:  # PY3
+if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc

@@ -117,14 +117,13 @@ class PathPerspective(inkex.EffectExtension):
 
     def process_path(self, element, matrix):
         """Apply the transformation to the selected path"""
-        mat = element.composed_transform()
-        point = element.path.transform(mat).to_superpath()
+        point = element.path.to_superpath()
         for subs in point:
             for csp in subs:
                 csp[0] = self.project_point(csp[0], matrix)
                 csp[1] = self.project_point(csp[1], matrix)
                 csp[2] = self.project_point(csp[2], matrix)
-        element.path = inkex.Path(point).transform(-mat)
+        element.path = inkex.Path(point).transform(-element.composed_transform())
 
     @staticmethod
     def project_point(point, matrix):

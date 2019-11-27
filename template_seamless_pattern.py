@@ -36,12 +36,12 @@ class SeamlessPattern(inkex.TemplateExtension):
 
         text_preview = self.svg.getElementById('textPreview')
         if text_preview is not None:
-            x = width / 100 / factor
-            y = height / 1000
+            x = width / 100.0 / factor
+            y = height / 1000.0
             if factor <= 1:
                 x *= factor
                 y *= factor
-            text_preview.transform = inkex.Transform(translate=(width * 2, 0), scale=(x, y))
+            text_preview.transform = inkex.Transform(translate=(int(width) * 2, 0), scale=(x, y))
 
         info_group = self.svg.getElementById('infoGroup')
         if info_group is not None:

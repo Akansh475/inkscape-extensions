@@ -6,5 +6,7 @@ class TestPlotBasic(ComparisonMixin, TestCase):
     stderr_output = True
     effect_class = Plot
     comparisons = [
-        ('--serialPort=[test]',),
+        ('--serialPort=[test]',), # HPGL
+        ('--serialPort=[test]', '--commandLanguage=DMPL'),
+        ('--serialPort=[test]', '--commandLanguage=KNK'),
     ]

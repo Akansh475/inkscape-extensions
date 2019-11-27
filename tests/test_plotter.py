@@ -1,6 +1,10 @@
 # coding=utf-8
 from plotter import Plot
-from inkex.tester import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestPlotBasic(InkscapeExtensionTestMixin, TestCase):
+class TestPlotBasic(ComparisonMixin, TestCase):
+    stderr_output = True
     effect_class = Plot
+    comparisons = [
+        ('--serialPort=[test]',),
+    ]

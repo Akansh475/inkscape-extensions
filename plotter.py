@@ -19,14 +19,10 @@
 #
 
 import inkex
+from inkex.ports import Serial
+from inkex.localization import inkex_gettext as _
 
 import hpgl_encoder
-
-try:
-    import serial
-except ImportError:
-    serial = None
-    inkex.errormsg("Python serial module is missing! Incomplete installation!")
 
 class Plot(inkex.EffectExtension):
     """Generate a plot in HPGL output"""
@@ -65,8 +61,7 @@ class Plot(inkex.EffectExtension):
         try:
             self.hpgl = encoder.getHpgl()
         except hpgl_encoder.NoPathError:
-            inkex.errormsg(_("No paths where found. Please convert objects into paths."))
-            return
+            raise inkex.AbortExtension(_("No paths where found. Please convert objects into paths."))
 
         # TODO: Get preview to work. This requires some work on the C++ side to be able to determine if it is
         # a preview or a final run. (Remember to set <effect needs-live-preview='false'> to true)
@@ -137,67 +132,19 @@ class Plot(inkex.EffectExtension):
         self.hpgl = hpgl_init + self.hpgl + ';SP0;PU0,0;@ '
 
     def sendHpglToParallel(self):
-        port = open(self.options.parallelPort, "w")
-        port.write(self.hpgl)
+        port = open(self.options.parallelPort, "wb")
+        port.write(self.hpgl.encode('utf8'))
         port.close()
 
     def sendHpglToSerial(self):
-        if not serial:
-            return
-        # init serial framework
-        comx = serial.Serial()
-        # set serial port
-        comx.port = self.options.serialPort
-        # set baudrate
-        comx.baudrate = self.options.serialBaudRate
-        # set bytesize
-        if self.options.serialByteSize == 'five':
-            comx.bytesize = serial.FIVEBITS
-        if self.options.serialByteSize == 'six':
-            comx.bytesize = serial.SIXBITS
-        if self.options.serialByteSize == 'seven':
-            comx.bytesize = serial.SEVENBITS
-        if self.options.serialByteSize == 'eight':
-            comx.bytesize = serial.EIGHTBITS
-        # set stopbits
-        if self.options.serialStopBits == 'one':
-            comx.stopbits = serial.STOPBITS_ONE
-        if self.options.serialStopBits == 'onePointFive':
-            comx.stopbits = serial.STOPBITS_ONE_POINT_FIVE
-        if self.options.serialStopBits == 'two':
-            comx.stopbits = serial.STOPBITS_TWO
-        # set parity
-        if self.options.serialParity == 'none':
-            comx.parity = serial.PARITY_NONE
-        if self.options.serialParity == 'even':
-            comx.parity = serial.PARITY_EVEN
-        if self.options.serialParity == 'odd':
-            comx.parity = serial.PARITY_ODD
-        if self.options.serialParity == 'mark':
-            comx.parity = serial.PARITY_MARK
-        if self.options.serialParity == 'space':
-            comx.parity = serial.PARITY_SPACE
-        # set short timeout to avoid locked up interface
-        comx.timeout = 0.1
-        # set flow control
-        if self.options.serialFlowControl == 'xonxoff':
-            comx.xonxoff = True
-        if self.options.serialFlowControl in ('rtscts', 'dsrdtrrtscts'):
-            comx.rtscts = True
-        if self.options.serialFlowControl == 'dsrdtrrtscts':
-            comx.dsrdtr = True
-        # try to establish connection
-        try:
-            comx.open()
-        except serial.SerialException:
-            inkex.errormsg(_("Could not open port. Please check that your plotter is "
-                             "running, connected and the settings are correct."))
-            return
-        # send data to plotter
-        comx.write(self.hpgl)
-        comx.read(2)
-        comx.close()
+        with Serial(self.options.serialPort,
+                    baud=self.options.serialBaudRate,
+                    stop=self.options.serialStopBits,
+                    size=self.options.serialByteSize,
+                    flow=self.options.serialFlowControl,
+                    parity=self.options.serialParity,
+                   ) as comx:
+            comx.write(self.hpgl.encode('utf8'))
 
 if __name__ == '__main__':
     Plot().run()
-

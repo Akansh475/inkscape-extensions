@@ -72,7 +72,7 @@ class StyleSheetTest(TestCase):
 
     def test_creation(self):
         """Stylesheet is created when needed"""
-        self.svg = svg_file(self.data_file('svg', 'empty-SVG.svg'))
+        self.svg = svg_file(self.data_file('svg', 'empty.svg'))
         self.assertEqual(len(self.svg.stylesheets), 0)
         self.assertEqual(len(self.svg.stylesheet), 0)
         self.assertEqual(len(self.svg.stylesheets), 1)

@@ -1,9 +1,13 @@
 # coding=utf-8
 from render_barcode_datamatrix import DataMatrix
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from inkex.tester.filters import CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestDataMatrixBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class TestDataMatrixBasic(ComparisonMixin, TestCase):
     effect_class = DataMatrix
-    compare_filters = [CompareOrderIndependentStyle()]
-    comparisons = [()]
+    compare_file = 'svg/empty.svg'
+    comparisons = [
+        ('--symbol=sq10',),
+        ('--symbol=sq96', '--text=Sunshine'),
+        ('--symbol=sq144', '--text=HelloTest'),
+        ('--symbol=rect8x32', '--text=1234Foo'),
+    ]

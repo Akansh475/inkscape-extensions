@@ -77,8 +77,10 @@ class Serial(object):
 
     def __exit__(self, exc, value, traceback):
         if not traceback and hasattr(self, 'master'):
-            output = os.read(self.master, 1024)
-            sys.stderr.write(output.decode('utf8'))
+            output = ' ' * 1024
+            while len(output) == 1024:
+                output = os.read(self.master, 1024)
+                sys.stderr.write(output.decode('utf8'))
         #self.com.read(2)
         self.com.close()
 

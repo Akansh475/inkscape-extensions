@@ -84,7 +84,7 @@ class InkscapeExtension(object):
             # do something
         """
         def _inner(value):
-            name = '{}_{}'.format(prefix, value.strip('"')).replace('-', '_')
+            name = '{}_{}'.format(prefix, value.strip('"').lower()).replace('-', '_')
             try:
                 return getattr(self, name)
             except AttributeError:

@@ -28,7 +28,6 @@ class Plot(inkex.EffectExtension):
     """Generate a plot in HPGL output"""
     def add_arguments(self, pars):
         pars.add_argument('--tab')
-        pars.add_argument('--portType', default='serial', help='Port type')
         pars.add_argument('--parallelPort', default='/dev/usb/lp2', help='Parallel port')
         pars.add_argument('--serialPort', default='COM1', help='Serial port')
         pars.add_argument('--serialBaudRate', default='9600', help='Serial Baud rate')
@@ -36,7 +35,6 @@ class Plot(inkex.EffectExtension):
         pars.add_argument('--serialStopBits', default='one', help='Serial stop bits')
         pars.add_argument('--serialParity', default='none', help='Serial parity')
         pars.add_argument('--serialFlowControl', default='0', help='Flow control')
-        pars.add_argument('--commandLanguage', default='hpgl', help='Command Language')
         pars.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
         pars.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
         pars.add_argument('--pen', type=int, default=1, help='Pen number')
@@ -54,53 +52,30 @@ class Plot(inkex.EffectExtension):
             help='Tool (Knife) offset correction (mm)')
         pars.add_argument('--convertObjects', type=inkex.Boolean, default=True,\
             help='Convert objects to paths')
+        pars.add_argument('--portType', type=self.arg_method('to'),\
+            default=self.to_serial, dest="to_port", help='Port type')
+        pars.add_argument('--commandLanguage', type=self.arg_method('convert'),\
+            default=self.convert_hpgl, dest="to_language", help='Command Language Filter')
 
     def effect(self):
         # get hpgl data
         encoder = hpgl_encoder.hpglEncoder(self)
         try:
-            self.hpgl = encoder.getHpgl()
+            self.options.to_port(self.options.to_language(encoder.getHpgl()))
         except hpgl_encoder.NoPathError:
-            raise inkex.AbortExtension(_("No paths where found. Please convert objects into paths."))
+            raise inkex.AbortExtension(_("No paths where found. Please convert objects to paths."))
 
-        # TODO: Get preview to work. This requires some work on the C++ side to be able to determine if it is
-        # a preview or a final run. (Remember to set <effect needs-live-preview='false'> to true)
-        '''
-        if MAGIC:
-            # reparse data for preview
-            self.options.showMovements = True
-            self.options.docWidth = self.svg.uutounit(self.unittouu(self.document.getroot().get('width')), "px")
-            self.options.docHeight = self.svg.uutounit(self.unittouu(self.document.getroot().get('height')), "px")
-            myHpglDecoder = hpgl_decoder.hpglDecoder(self.hpgl, self.options)
-            doc, warnings = myHpglDecoder.getSvg()
-            # deliver document to inkscape
-            self.document = doc
-        else:
-        '''
-        # convert to other formats
-        if self.options.commandLanguage == 'HPGL':
-            self.convertToHpgl()
-        if self.options.commandLanguage == 'DMPL':
-            self.convertToDmpl()
-        if self.options.commandLanguage == 'KNK':
-            self.convertToKNK()
-        # output
-        if self.options.portType == 'parallel':
-            self.sendHpglToParallel()
-        elif self.options.portType == 'serial':
-            self.sendHpglToSerial()
-
-    def convertToHpgl(self):
-        # convert raw HPGL to HPGL
-        hpgl_init = 'IN'
+    def convert_hpgl(self, hpgl):
+        """Convert raw HPGL to HPGL"""
+        init = 'IN'
         if self.options.force > 0:
-            hpgl_init += ';FS%d' % self.options.force
+            init += ';FS%d' % self.options.force
         if self.options.speed > 0:
-            hpgl_init += ';VS%d' % self.options.speed
-        self.hpgl = hpgl_init + self.hpgl + ';SP0;PU0,0;IN; '
+            init += ';VS%d' % self.options.speed
+        return init + hpgl + ';SP0;PU0,0;IN; '
 
-    def convertToDmpl(self):
-        # convert HPGL to DMPL
+    def convert_dmpl(self, hpgl):
+        """Convert HPGL to DMPL"""
         # ;: = Initialise plotter
         # H = Home position
         # A = Absolute pen positioning
@@ -112,31 +87,33 @@ class Plot(inkex.EffectExtension):
         # U = Pen up
         # Z = Reset plotter
         # n,n, = Coordinate pair
-        self.hpgl = self.hpgl.replace(';', ',')
-        self.hpgl = self.hpgl.replace('SP', 'P')
-        self.hpgl = self.hpgl.replace('PU', 'U')
-        self.hpgl = self.hpgl.replace('PD', 'D')
-        dmplInit = ';:HAL0'
+        hpgl = hpgl.replace(';', ',')
+        hpgl = hpgl.replace('SP', 'P')
+        hpgl = hpgl.replace('PU', 'U')
+        hpgl = hpgl.replace('PD', 'D')
+        init = ';:HAL0'
         if self.options.speed > 0:
-            dmplInit += 'V%d' % self.options.speed
-        dmplInit += 'EC1'
-        self.hpgl = dmplInit + self.hpgl[1:] + ',P0,U0,0,Z '
+            init += 'V%d' % self.options.speed
+        init += 'EC1'
+        return init + hpgl[1:] + ',P0,U0,0,Z '
 
-    def convertToKNK(self):
-        # convert HPGL to KNK Plotter Language
-        hpgl_init = 'ZG'
+    def convert_knk(self, hpgl):
+        """Convert HPGL to KNK Plotter Language"""
+        init = 'ZG'
         if self.options.force > 0:
-            hpgl_init += ';FS%d' % self.options.force
+            init += ';FS%d' % self.options.force
         if self.options.speed > 0:
-            hpgl_init += ';VS%d' % self.options.speed
-        self.hpgl = hpgl_init + self.hpgl + ';SP0;PU0,0;@ '
+            init += ';VS%d' % self.options.speed
+        return init + hpgl + ';SP0;PU0,0;@ '
 
-    def sendHpglToParallel(self):
+    def to_parallel(self, hpgl):
+        """Output to hgpl to a parallel port"""
         port = open(self.options.parallelPort, "wb")
-        port.write(self.hpgl.encode('utf8'))
+        port.write(hpgl.encode('utf8'))
         port.close()
 
-    def sendHpglToSerial(self):
+    def to_serial(self, hpgl):
+        """Output to hgpl to a serial port"""
         with Serial(self.options.serialPort,
                     baud=self.options.serialBaudRate,
                     stop=self.options.serialStopBits,
@@ -144,7 +121,7 @@ class Plot(inkex.EffectExtension):
                     flow=self.options.serialFlowControl,
                     parity=self.options.serialParity,
                    ) as comx:
-            comx.write(self.hpgl.encode('utf8'))
+            comx.write(hpgl.encode('utf8'))
 
 if __name__ == '__main__':
     Plot().run()

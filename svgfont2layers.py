@@ -17,20 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""Extension for converting svg fonts to layers"""
 
 import inkex
-from inkex.elements import Guide
 
 class SVGFont2Layers(inkex.EffectExtension):
-    def __init__(self):
-        super(SVGFont2Layers, self).__init__()
-        self.count = 0
-        self.arg_parser.add_argument("--limitglyphs", type=inkex.Boolean, default=True,\
-             help="Load only the first 30 glyphs from the SVGFont (otherwise the loading "
-                  "process may take a very long time)")
-
-    def create_horiz_guideline(self, label, y):
-        return Guide(0, y, (0,1), inkscape__label=label)
+    """Convert an svg font to layers"""
+    def add_arguments(self, pars):
+        pars.add_argument("--count", type=int, default=30,\
+            help="Stop making layers after this number of glyphs.")
 
     def flip_cordinate_system(self, elem, emsize, baseline):
         """Scale and translate the element's path, returns the path object"""
@@ -57,30 +52,29 @@ class SVGFont2Layers(inkex.EffectExtension):
         emsize = fontface.get("units-per-em")
 
         # TODO: should we guarantee that <svg:font horiz-adv-x> equals <svg:font-face units-per-em> ?
-        caps = fontface.get("cap-height")
-        xheight = fontface.get("x-height")
-        ascender = fontface.get("ascent")
-        descender = fontface.get("descent")
+        caps = int(fontface.get("cap-height", 0))
+        xheight = int(fontface.get("x-height", 0))
+        ascender = int(fontface.get("ascent", 0))
+        descender = int(fontface.get("descent", 0))
 
         self.svg.set("width", emsize)
-        self.create_horiz_guideline("baseline", int(baseline))
-        self.create_horiz_guideline("ascender", int(baseline) + int(ascender))
-        self.create_horiz_guideline("caps", int(baseline) + int(caps))
-        self.create_horiz_guideline("xheight", int(baseline) + int(xheight))
-        self.create_horiz_guideline("descender", int(baseline) - int(descender))
+        self.svg.namedview.new_guide(baseline, True, "baseline")
+        self.svg.namedview.new_guide(baseline + ascender, True, "ascender")
+        self.svg.namedview.new_guide(baseline + caps, True, "caps")
+        self.svg.namedview.new_guide(baseline + xheight, True, "xheight")
+        self.svg.namedview.new_guide(baseline - descender, True, "decender")
 
         # TODO: missing-glyph
-        for x, glyph in enumerate(font.findall('svg:glyph')):
+        count = 0
+        for glyph in font.findall('svg:glyph'):
             unicode_char = glyph.get("unicode")
             if unicode_char is None:
                 continue
 
             layer = self.svg.add(inkex.Group.create("GlyphLayer-" + unicode_char, True))
             # glyph layers (except the first one) are innitially hidden
-            if x == 0:
-                layer.set("style", "display:none")
-
-            # TODO: interpret option 1
+            if count != 0:
+                layer.style['display'] = 'none'
 
             ############################
             # Option 1:
@@ -103,8 +97,8 @@ class SVGFont2Layers(inkex.EffectExtension):
             path = layer.add(inkex.PathElement())
             path.path = self.flip_cordinate_system(glyph, emsize, baseline)
 
-            self.count += 1
-            if self.options.limitglyphs and self.count >= 30:
+            count += 1
+            if count >= self.options.count:
                 break
 
 

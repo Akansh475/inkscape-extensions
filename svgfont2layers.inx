@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Convert SVG Font to Glyph Layers</name>
   <id>org.inkscape.typography.svgfont2layers</id>
-  <param name="limitglyphs" type="bool" gui-text="Load only the first 30 glyphs (Recommended)">true</param>
+  <param name="count" type="int" min="1" max="65535" gui-text="Stop after (30 Recommended)">30</param>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

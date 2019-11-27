@@ -43,7 +43,7 @@ class SeamlessPattern(inkex.TemplateExtension):
                 y *= factor
             text_preview.transform = inkex.Transform(translate=(width * 2, 0), scale=(x, y))
 
-        info_group = self.svg.getElementById('info_group')
+        info_group = self.svg.getElementById('infoGroup')
         if info_group is not None:
             scale = 100 if factor <= 1 else 1000
             info_group.transform = inkex.Transform(scale=(width / scale, height / scale * factor))

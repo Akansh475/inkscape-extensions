@@ -6,4 +6,4 @@ pytest-cov
 lxml
 numpy
 scour
-serial
+pyserial

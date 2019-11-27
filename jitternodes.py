@@ -23,87 +23,70 @@ import math
 import random
 import inkex
 
-def randomize(pos, rx, ry, dist):
-    (x, y) = pos
-    if dist == "Gaussian":
-        r1 = random.gauss(0.0,rx)
-        r2 = random.gauss(0.0,ry)
-    elif dist == "Pareto":
-        '''
-        sign is used to fake a double sided pareto distribution.
-        for parameter value between 1 and 2 the distribution has infinite variance
-        I truncate the distribution to a high value and then normalize it.
-        The idea is to get spiky distributions, any distribution with long-tails is
-        good (ideal would be Levy distribution).
-        '''
-        sign = random.uniform(-1.0,1.0)
-
-        r1 = min(random.paretovariate(1.0), 20.0)/20.0
-        r2 = min(random.paretovariate(1.0), 20.0)/20.0
-
-        r1 = rx * math.copysign(r1, sign)
-        r2 = ry * math.copysign(r2, sign)
-    elif dist == "Lognorm":
-        sign = random.uniform(-1.0,1.0)
-        r1 = rx * math.copysign(random.lognormvariate(0.0,1.0)/3.5,sign)
-        r2 = ry * math.copysign(random.lognormvariate(0.0,1.0)/3.5,sign)
-    elif dist == "Uniform":
-        r1 = random.uniform(-rx,rx)
-        r2 = random.uniform(-ry,ry)
-
-    x += r1
-    y += r2
-
-    return [x, y]
 
 class JitterNodes(inkex.EffectExtension):
-    def __init__(self):
-        super(JitterNodes, self).__init__()
-        self.arg_parser.add_argument("--title")
-        self.arg_parser.add_argument("-x", "--radiusx",
-                         type=float,
-                        dest="radiusx", default=10.0,
-                        help="Randomly move nodes and handles within this radius, X")
-        self.arg_parser.add_argument("-y", "--radiusy",
-                         type=float,
-                        dest="radiusy", default=10.0,
-                        help="Randomly move nodes and handles within this radius, Y")
-        self.arg_parser.add_argument("-c", "--ctrl",
-                         type=inkex.Boolean,
-                        dest="ctrl", default=True,
-                        help="Randomize control points")
-        self.arg_parser.add_argument("-e", "--end",
-                         type=inkex.Boolean,
-                        dest="end", default=True,
-                        help="Randomize nodes")
-        self.arg_parser.add_argument("-d", "--dist",
-                         type=str,
-                        dest="dist", default="Uniform",
-                        help="Choose the distribution of the displacements")
-        self.arg_parser.add_argument("--tab",
-                         type=str,
-                        dest="tab",
-                        help="The selected UI-tab when OK was pressed")
+    """Jiggle nodes around"""
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("--title")
+        pars.add_argument("--radiusx", type=float, default=10.0, help="Randum radius X")
+        pars.add_argument("--radiusy", type=float, default=10.0, help="Randum radius Y")
+        pars.add_argument("--ctrl", type=inkex.Boolean, default=True, help="Randomize ctrl points")
+        pars.add_argument("--end", type=inkex.Boolean, default=True, help="Randomize nodes")
+        pars.add_argument("--dist", type=self.arg_method('dist'),
+                          default=self.dist_uniform, help="Distribution of displacement")
 
     def effect(self):
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path','svg'):
-                path = node.path.is_superpath()
-                for subpath in path:
-                    for csp in subpath:
-                        if self.options.end:
-                            delta=randomize([0,0], self.options.radiusx, self.options.radiusy, self.options.dist)
-                            csp[0][0]+=delta[0]
-                            csp[0][1]+=delta[1]
-                            csp[1][0]+=delta[0]
-                            csp[1][1]+=delta[1]
-                            csp[2][0]+=delta[0]
-                            csp[2][1]+=delta[1]
-                        if self.options.ctrl:
-                            csp[0]=randomize(csp[0], self.options.radiusx, self.options.radiusy, self.options.dist)
-                            csp[2]=randomize(csp[2], self.options.radiusx, self.options.radiusy, self.options.dist)
-                node.path = path
+        for node in self.svg.get_selected(inkex.PathElement):
+            path = node.path.to_superpath()
+            for subpath in path:
+                for csp in subpath:
+                    if self.options.end:
+                        delta = self.randomize([0, 0])
+                        csp[0][0] += delta[0]
+                        csp[0][1] += delta[1]
+                        csp[1][0] += delta[0]
+                        csp[1][1] += delta[1]
+                        csp[2][0] += delta[0]
+                        csp[2][1] += delta[1]
+                    if self.options.ctrl:
+                        csp[0] = self.randomize(csp[0])
+                        csp[2] = self.randomize(csp[2])
+            node.path = path
 
+    def randomize(self, pos):
+        """Randomise the given position [x, y] as set in the options"""
+        delta = self.options.dist(self.options.radiusx, self.options.radiusy)
+        return [pos[0] + delta[0], pos[1] + delta[1]]
+
+    @staticmethod
+    def dist_gaussian(x, y):
+        """Gaussian distribution"""
+        return random.gauss(0.0, x), random.gauss(0.0, y)
+
+    @staticmethod
+    def dist_pareto(x, y):
+        """Pareto distribution"""
+        # sign is used to fake a double sided pareto distribution.
+        # for parameter value between 1 and 2 the distribution has infinite variance
+        # I truncate the distribution to a high value and then normalize it.
+        # The idea is to get spiky distributions, any distribution with long-tails is
+        # good (ideal would be Levy distribution).
+        sign = random.uniform(-1.0, 1.0)
+        return x * math.copysign(min(random.paretovariate(1.0), 20.0) / 20.0, sign),\
+               y * math.copysign(min(random.paretovariate(1.0), 20.0) / 20.0, sign)
+
+    @staticmethod
+    def dist_lognorm(x, y):
+        """Log Norm distribution"""
+        sign = random.uniform(-1.0, 1.0)
+        return x * math.copysign(random.lognormvariate(0.0, 1.0) / 3.5, sign),\
+               y * math.copysign(random.lognormvariate(0.0, 1.0) / 3.5, sign)
+
+    @staticmethod
+    def dist_uniform(x, y):
+        """Uniform distribution"""
+        return random.uniform(-x, x), random.uniform(-y, y)
 
 if __name__ == '__main__':
     JitterNodes().run()

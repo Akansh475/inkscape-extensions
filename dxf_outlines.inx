@@ -18,10 +18,11 @@
                 <option value="1./1152">ft</option>
             </param>
             <param name="encoding" type="optiongroup" appearance="combo" gui-text="Character Encoding:">
-                <option value="latin_1">Latin 1</option>
-                <option value="cp1250">CP 1250</option>
-                <option value="cp1252">CP 1252</option>
-                <option value="utf_8">UTF 8</option>
+                <option translatable="no" value="latin_1">Latin 1</option>
+                <option translatable="no" value="cp1250">CP 1250</option>
+                <option translatable="no" value="cp1252">CP 1252</option>
+                <option translatable="no" value="cp932">Shift JIS</option>
+                <option translatable="no" value="utf_8">UTF 8</option>
             </param>
             <param name="layer_option" type="optiongroup" appearance="combo" gui-text="Layer export selection:">
                 <option value="all">All (default)</option>

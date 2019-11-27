@@ -18,6 +18,7 @@
                 <option translatable="no" value="latin_1">Latin 1</option>
                 <option translatable="no" value="cp1250">CP 1250</option>
                 <option translatable="no" value="cp1252">CP 1252</option>
+                <option translatable="no" value="cp932">Shift JIS</option>
                 <option translatable="no" value="utf_8">UTF-8</option>
             </param>
             <param name="font" type="string" gui-text="Text Font:">Arial</param>

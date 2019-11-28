@@ -709,8 +709,8 @@ class DirectedLineSegment(object):
 
         if denom != 0:
             return Vector2d(
-                self.x0 + ((num / denom) * (other.x1 - self.x0)),
-                self.y0 + ((num / denom) * (other.y0 - self.y0))
+                self.x0 + ((num / denom) * self.dx),
+                self.y0 + ((num / denom) * self.dy)
             )
         return None
 

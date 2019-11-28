@@ -25,9 +25,10 @@ Input a DXF file >= (AutoCAD Release 13 == AC1012)
 
 from __future__ import absolute_import, unicode_literals
 
-import math
+import os
 import re
 import sys
+import math
 
 from lxml import etree
 
@@ -517,7 +518,7 @@ class DxfInput(inkex.InputExtension):
             xmin = float(options.xmin)
             ymin = float(options.ymin)
         doc.getroot().description('%s - scale = %f, origin = (%f, %f), method = %s' % (
-            options.input_file, scale, xmin, ymin, options.scalemethod))
+            os.path.basename(options.input_file), scale, xmin, ymin, options.scalemethod))
         scale *= 96.0 / 25.4  # convert from mm to pixels
 
         if '0' not in layer_nodes:

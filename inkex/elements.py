@@ -333,9 +333,13 @@ class ShapeElement(BaseElement):
 
     def bounding_box(self, transform=None):  # type: () -> BoundingBox
         """BoundingBox calculation based on the ShapeElement rendered to a path."""
-        path = self.path.to_absolute().transform(self.transform)
-        if transform:  # apply extra transformation
-            path = path.transform(transform)
+        path = self.path.to_absolute()
+        if transform is True:
+            path = path.transform(self.composed_transform())
+        else:
+            path = path.transform(self.transform)
+            if transform:  # apply extra transformation
+                path = path.transform(transform)
         return path.bounding_box()
 
     def get_center_position(self):

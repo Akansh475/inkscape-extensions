@@ -96,7 +96,7 @@ def add_lint(fname):
     html = html.replace('coverage</th>', 'coverage</th><th>pylint</th>')
     html = html.replace('</tr></tfoot>', f'<td>{total:.2f}</td></tr></tfoot>')
 
-    with open(fname + '.mod.html', 'w') as fhl:
+    with open(fname, 'w') as fhl:
         fhl.write(html)
 
 if __name__ == '__main__':

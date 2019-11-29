@@ -1130,6 +1130,11 @@ class Path(list):
         """Returns a reversed path"""
         pass
 
+    def close(self):
+        """Attempt to close the last path segment"""
+        if self and not isinstance(self[-1], (zoneClose, ZoneClose)):
+            self.append(ZoneClose())
+
     def proxy_iterator(self):
         """
         Yields :py:class:`AugmentedPathIterator`

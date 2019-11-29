@@ -10,3 +10,14 @@ class PathToMeshTest(ComparisonMixin, TestCase):
     effect_class = PathToMesh
     comparisons = [('--id=path1', '--id=path9'),]
     compare_file = 'svg/mesh.svg'
+
+class MeshToPathTest(ComparisonMixin, TestCase):
+    """Test mesh to path with comparisons"""
+    effect_class = MeshToPath
+    comparisons = [
+        ('--id=mesh1', '--mode=outline'),
+        ('--id=mesh1', '--mode=gridlines'),
+        ('--id=mesh1', '--mode=meshpatches'),
+        ('--id=mesh1', '--mode=faces'),
+    ]
+    compare_file = 'svg/mesh.svg'

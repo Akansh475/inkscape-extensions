@@ -63,25 +63,9 @@ def join_path(csp1, sp1, csp2, sp2):
     return csp1
 
 
-def print_corners(corners):
-    """Debug print coordinates of meshpatch corners."""
-    inkex.debug('=== corners per row: ===')
-    for row in corners:
-        inkex.debug(row)
-
-
 def is_url(val):
     """Check whether attribute value is linked resource."""
     return val.startswith('url(#')
-
-
-def has_href(node):
-    """Check for href attribute in xlink or svg namespace."""
-    xlink_href = inkex.addNS('href', 'xlink')
-    svg_href = inkex.addNS('href', 'svg')
-    return (xlink_href in node.attrib or
-            svg_href in node.attrib or
-            'href' in node.attrib)
 
 
 def is_meshgradient(node):
@@ -265,33 +249,6 @@ class MeshToPath(inkex.EffectExtension):
         if linked_id:
             return self.svg.getElementById(linked_id)
 
-    def process_href(self, node):
-        """Process href attribute in *node*."""
-        xlink_attr = inkex.addNS('href', 'xlink')
-        if xlink_attr in node.attrib:
-            href = node.get(xlink_attr, '')
-        else:
-            href = node.get('href', '')
-        if href.startswith('#'):
-            linked_id = href[1:]
-            linked_node = self.svg.getElementById(linked_id)
-            return linked_node
-
-    def recurse_href(self, node):
-        """Recursively process chain of href links."""
-        linked_node = self.process_href(node)
-        if has_href(linked_node):
-            return self.recurse_href(linked_node)
-        else:
-            return linked_node
-
-    def process_link(self, val):
-        """Process linked resource in property value *val*."""
-        linked_resource = self.process_url(val)
-        if has_href(linked_resource):
-            linked_resource = self.recurse_href(linked_resource)
-        return linked_resource
-
     def process_props(self, mdict, res_type='meshgradient'):
         """Process style properties of style dict *mdict*."""
         result = []
@@ -299,13 +256,8 @@ class MeshToPath(inkex.EffectExtension):
             if key in MG_PROPS:
                 if is_url(val):
                     paint_server = self.process_url(val)
-                    if res_type == 'linearGradient':
-                        pass
-                    elif res_type == 'radialGradient':
-                        pass
-                    elif res_type == 'meshgradient':
-                        if is_meshgradient(paint_server):
-                            result.append(paint_server)
+                    if res_type == 'meshgradient' and is_meshgradient(paint_server):
+                        result.append(paint_server)
         return result
 
     def process_style(self, node, res_type='meshgradient'):
@@ -338,11 +290,8 @@ class MeshToPath(inkex.EffectExtension):
             # TODO: position and scale based on "objectBoundingBox" units
             return
 
-        # gradient transformation
-        if 'gradientTransform' in meshgradient.attrib:  # Inkscape 0.92.x
-            transform = meshgradient.get('gradientTransform')
-        elif 'transform' in meshgradient.attrib:        # SVG2 draft
-            transform = meshgradient.get('transform')
+        # Inkscape SVG 0.92 and SVG 2.0 draft mesh transformations
+        transform = meshgradient.gradientTransform * meshgradient.transform
 
         # parse meshpatches, calculate absolute corner coords
         corners, meshpatch_csps = mesh_corners(meshgradient)
@@ -380,6 +329,8 @@ class MeshToPath(inkex.EffectExtension):
             elem = group.add(inkex.PathElement())
             elem.style = style
             elem.path = csp
+            if not elem.path:
+                elem.path = inkex.CubicSuperPath(csp)
             if self.options.mode == 'outline':
                 elem.path.close()
             elif self.options.mode == 'faces':
@@ -387,15 +338,13 @@ class MeshToPath(inkex.EffectExtension):
                     elem.path.close()
         return group
 
-    # ----- main
-
     def effect(self):
         """Main routine to convert mesh geometry to path data."""
         # loop through selection
         for node in self.svg.selected.values():
             meshgradients = self.find_meshgradients(node)
             # if style references meshgradient
-            if meshgradients and len(meshgradients):
+            if meshgradients:
                 for meshgradient in meshgradients:
                     csp_list = None
                     result = None

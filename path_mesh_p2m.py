@@ -21,10 +21,10 @@ Convert path to mesh gradient
 """
 
 import inkex
-from inkex.elements import BaseElement
+from inkex.elements import BaseElement, Gradient
 from inkex.paths import Line, Curve
 
-class MeshGradient(BaseElement):
+class MeshGradient(Gradient):
     """Usable MeshGradient XML base class"""
     tag_name = 'meshgradient'
 

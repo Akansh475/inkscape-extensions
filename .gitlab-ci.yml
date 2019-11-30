@@ -15,7 +15,7 @@ variables:
 
 .tests:
   artifacts:
-    name: "$CI_JOB_NAME"
+    name: "coverage"
     when: always
     paths:
       - .coverage-*
@@ -64,7 +64,6 @@ test:coverage:
   when: always
   coverage: '/TOTAL.+?(\d+%)/'
   artifacts:
-    name: "coverage"
     paths:
       - htmlcov/
 

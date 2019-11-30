@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+Save an SVG file into an html canvas file.
+"""
 
 from lxml import etree
 
@@ -24,6 +28,7 @@ import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
 
 class Ink2Canvas(inkex.OutputExtension):
+    """Creates a canvas output"""
     def save(self, stream):
         svg_root = self.document.getroot()
         width = self.svg.unittouu(svg_root.get("width"))
@@ -32,11 +37,8 @@ class Ink2Canvas(inkex.OutputExtension):
         self.walk_tree(svg_root, canvas)
         stream.write(canvas.output().encode('utf-8'))
 
-    def get_tag_name(self, node):
-        # remove namespace part from "{http://www.w3.org/2000/svg}elem"
-        return node.tag.split("}")[1]
-
     def get_gradient_defs(self, elem):
+        """Return the gradient information"""
         url_id = elem.get_gradient_href()
         # get the gradient element
         gradient = self.svg.getElementById(url_id)
@@ -48,27 +50,18 @@ class Ink2Canvas(inkex.OutputExtension):
             colors.append(stop.get("style"))
         if gradient.get("r"):
             return svg.RadialGradientDef(gradient, colors)
-        else:
-            return svg.LinearGradientDef(gradient, colors)
-
-    def get_clip_defs(self, elem):
-        if elem.has_clip():
-            pass
-        return
+        return svg.LinearGradientDef(gradient, colors)
 
     def walk_tree(self, root, canvas):
+        """Walk throug the whole svg tree"""
         for node in root:
             if node.tag is etree.Comment:
                 continue
-            tag = self.get_tag_name(node)
-            class_name = tag.capitalize()
+            class_name = node.TAG.capitalize()
             if not hasattr(svg, class_name):
                 continue
             gradient = None
-            clip = None
-            # creates a instance of 'elem'
-            # similar to 'elem = Rect(tag, node, ctx)'
-            elem = getattr(svg, class_name)(tag, node, canvas)
+            elem = getattr(svg, class_name)(node.TAG, node, canvas)
             if elem.has_gradient():
                 gradient = self.get_gradient_defs(elem)
             elem.start(gradient)

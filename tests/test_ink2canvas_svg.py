@@ -7,3 +7,4 @@ from inkex.tester.filters import CompareOrderIndependentLines
 class Ink2CanvasBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Ink2Canvas
     compare_filters = [CompareOrderIndependentLines()]
+    comparisons = [()]

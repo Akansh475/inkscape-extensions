@@ -28,7 +28,12 @@ from inkex.styles import Style
 from inkex.transforms import Transform
 
 class Element(object):
+    """Base Element"""
+    def __init__(self, node):
+        self.node = node
+
     def attr(self, val, ns=""):
+        """Get attribute"""
         if ns:
             val = inkex.addNS(val, ns)
         try:

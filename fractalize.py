@@ -20,7 +20,7 @@
 import math
 import random
 import inkex
-
+from inkex.paths import Move, Line
 
 def calculate_subdivision(smoothness, x1, y1, x2, y2):
     # Calculate the vector from (x1,y1) to (x2,y2)
@@ -62,12 +62,12 @@ class PathFractalize(inkex.EffectExtension):
                 prev = cmd_proxy.previous_end_point
                 end = cmd_proxy.end_point
                 if cmd_proxy.letter == 'M':
-                    result.append(['M', cmd_proxy.args])
+                    result.append(Move(*cmd_proxy.args))
                 else:
                     for seg in self.fractalize((prev.x, prev.y, end.x, end.y), self.options.subdivs,
                                                self.options.smooth):
-                        result.append(['L', seg])
-                    result.append(['L', end.x, end.y])
+                        result.append(Line(*seg))
+                    result.append(Line(end.x, end.y))
 
             node.path = result
 

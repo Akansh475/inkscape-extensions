@@ -1020,8 +1020,8 @@ class Path(list):
                 else:
                     self.append(Line(*item))
             else:
-                raise TypeError("Bad path type: {}({}, ...)".format(
-                    type(path_d).__name__, type(item).__name__))
+                raise TypeError("Bad path type: {}({}, ...): {}".format(
+                    type(path_d).__name__, type(item).__name__, item))
 
     @classmethod
     def parse_string(cls, path_d):

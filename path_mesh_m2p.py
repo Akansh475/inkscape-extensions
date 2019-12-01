@@ -328,9 +328,7 @@ class MeshToPath(inkex.EffectExtension):
         for csp in csp_list:
             elem = group.add(inkex.PathElement())
             elem.style = style
-            elem.path = csp
-            if not elem.path:
-                elem.path = inkex.CubicSuperPath(csp)
+            elem.path = inkex.CubicSuperPath(csp)
             if self.options.mode == 'outline':
                 elem.path.close()
             elif self.options.mode == 'faces':

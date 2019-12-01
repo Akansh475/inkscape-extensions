@@ -75,7 +75,8 @@ class Style(OrderedDict):
     def __init__(self, style=None, callback=None, **kw):
         # This callback is set twice because this is 'pre-initial' data (no callback)
         self.callback = None
-        style = style or kw
+        # Either a string style or kwargs (with dashes as underscores).
+        style = style or [(k.replace('_', '-'), v) for k, v in kw.items()]
         if isinstance(style, (str, unicode)):
             style = self.parse_str(style)
         # Order raw dictionaries so tests can be made reliable

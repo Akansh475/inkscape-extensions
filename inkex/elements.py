@@ -228,9 +228,10 @@ class BaseElement(etree.ElementBase):
             raise FragmentError("Element fragment does not have a document root!")
         return self
 
-    def descendants(self):
+    def descendants(self, *types):
         """Walks the element tree and yields all elements, parent first"""
-        yield self
+        if not types or isinstance(self, types):
+            yield self
         for child in self:
             if hasattr(child, 'descendants'):
                 for descendant in child.descendants():
@@ -494,6 +495,22 @@ class PathElement(ShapeElement):
         else:
             self.path = path
 
+    @classmethod
+    def arc(cls, center, rx, ry=None, **kw):
+        """Generate a sodipodi arc (special type)"""
+        others = [(name, kw.pop(name, None)) for name in ('start', 'end', 'open')]
+        elem = cls(**kw)
+        elem.set('sodipodi:cx', center[0])
+        elem.set('sodipodi:cy', center[1])
+        elem.set('sodipodi:rx', rx)
+        elem.set('sodipodi:ry', ry or rx)
+        elem.set('sodipodi:type', 'arc')
+        for name, value in others:
+            if value is not None:
+                elem.set('sodipodi:'+name, str(value).lower())
+        return elem
+
+
 class Polyline(ShapeElement):
     """Like a path, but made up of straight lines only"""
     tag_name = 'polyline'
@@ -715,6 +732,11 @@ class TextElement(ShapeElement):
     def tspans(self):
         """Returns all children that are tspan elements"""
         return self.findall('svg:tspan')
+
+    def get_text(self, sep="\n"):
+        """Return the text content including tspans"""
+        nodes = [self] + list(self.tspans())
+        return sep.join([elem.text for elem in nodes if elem.text is not None])
 
     def bounding_box(self, transform=None):
         """

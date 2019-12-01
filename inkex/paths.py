@@ -1019,6 +1019,9 @@ class Path(list):
                     self.append(PathCommand.letter_to_class(item[0])(*item[1]))
                 else:
                     self.append(Line(*item))
+            else:
+                raise TypeError("Bad path type: {}({}, ...)".format(
+                    type(path_d).__name__, type(item).__name__))
 
     @classmethod
     def parse_string(cls, path_d):

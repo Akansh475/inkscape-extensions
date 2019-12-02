@@ -21,7 +21,7 @@
 
 import inkex
 
-class SVGFont2Layers(inkex.EffectExtension):
+class SvgFontToLayers(inkex.EffectExtension):
     """Convert an svg font to layers"""
     def add_arguments(self, pars):
         pars.add_argument("--count", type=int, default=30,\
@@ -101,6 +101,5 @@ class SVGFont2Layers(inkex.EffectExtension):
             if count >= self.options.count:
                 break
 
-
 if __name__ == '__main__':
-    SVGFont2Layers().run()
+    SvgFontToLayers().run()

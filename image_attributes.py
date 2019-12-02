@@ -29,7 +29,7 @@ or third-party applications.
 import inkex
 from inkex.elements import Image
 
-class SetAttrImage(inkex.EffectExtension):
+class ImageAttributes(inkex.EffectExtension):
     """Set attributes in images"""
     def effect(self):
         self.options.tab_main()
@@ -121,4 +121,4 @@ class SetAttrImage(inkex.EffectExtension):
             {'image-rendering': self.options.image_rendering})
 
 if __name__ == '__main__':
-    SetAttrImage().run()
+    ImageAttributes().run()

@@ -1,7 +1,7 @@
 # coding=utf-8
-from web_set_att import InkWebTransmitAtt
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from web_set_att import SetAttribute
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestWebSetAttBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = InkWebTransmitAtt
+class SetAttributeBasic(ComparisonMixin, TestCase):
+    effect_class = SetAttribute
     comparisons = [('--id=p1', '--id=r3')]

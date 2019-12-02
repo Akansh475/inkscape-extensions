@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Export Layer Slices</name>
-  <id>org.inkscape.output.layer2png</id>
+  <id>org.inkscape.output.export_slices</id>
   <param name="tab" type="notebook">
     <page name="slicer_tab" gui-text="Options">
       <param name="iconmode" type="bool" gui-text="Icon mode">false</param>

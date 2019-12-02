@@ -17,6 +17,7 @@
 #
 
 import inkex
+from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
@@ -39,12 +40,12 @@ def propListToDict(list):
 
     return dictio
 
-class JessyInk_Effects(inkex.EffectExtension):
+class View(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument('--tab', type=str, dest='what')
-        pars.add_argument('--viewOrder', type=str, default=1)
+        pars.add_argument('--tab', dest='what')
+        pars.add_argument('--viewOrder', default=1)
         pars.add_argument('--viewDuration', type=float, default=0.8)
-        pars.add_argument('--removeView', type=inkex.Boolean, default=False)
+        pars.add_argument('--removeView', type=inkex.Boolean)
 
     def effect(self):
         # Check version.
@@ -56,15 +57,12 @@ class JessyInk_Effects(inkex.EffectExtension):
         rect = None
 
         for id, node in self.svg.selected.items():
-            if rect == None:
-                rect = node
-            else:
-                inkex.errormsg(_("More than one object selected. Please select only one object.\n"))
-                return
+            if rect != None:
+                raise inkex.AbortExtension(_("More than one object selected. Please select only one object.\n"))
+            rect = node
 
         if rect == None:
-            inkex.errormsg(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
-            return
+            raise inkex.AbortExtension(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
 
         if not self.options.removeView:
             # Remove the view that currently has the requested order number.
@@ -87,8 +85,5 @@ class JessyInk_Effects(inkex.EffectExtension):
             if "{" + NSS["jessyink"] + "}view" in node.attrib:
                 del node.attrib["{" + NSS["jessyink"] + "}view"]
 
-
-# Create effect instance
 if __name__ == '__main__':
-    JessyInk_Effects().run()
-
+    View().run()

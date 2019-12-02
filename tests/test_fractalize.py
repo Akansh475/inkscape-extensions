@@ -1,8 +1,7 @@
 # coding=utf-8
-from fractalize import PathFractalize
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from fractalize import Fractalize
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class PathFractalizeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = PathFractalize
+class PathFractalizeBasicTest(ComparisonMixin, TestCase):
+    effect_class = Fractalize
     comparisons = [('--id=p1', '--id=p2')]

@@ -1,6 +1,6 @@
 # coding=utf-8
-from export_gimp_palette import ExportGpl
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from export_gimp_palette import ExportGimpPalette
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestExportGplBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = ExportGpl
+class TestExportGplBasic(ComparisonMixin, TestCase):
+    effect_class = ExportGimpPalette

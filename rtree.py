@@ -21,17 +21,14 @@
 import inkex
 from inkex import turtle as pturtle
 
-class RTreeTurtle(inkex.GenerateExtension):
+class TurtleRtree(inkex.GenerateExtension):
     """Create RTree Turtle path"""
     def add_arguments(self, pars):
-        pars.add_argument("-s", "--size", type=float,
-                          dest="size", default=100.0,
+        pars.add_argument("--size", type=float, default=100.0,
                           help="initial branch size")
-        pars.add_argument("-m", "--minimum", type=float,
-                          dest="minimum", default=4.0,
+        pars.add_argument("--minimum", type=float, default=4.0,
                           help="minimum branch size")
-        pars.add_argument("--pentoggle", type=inkex.Boolean,
-                          dest="pentoggle", default=False,
+        pars.add_argument("--pentoggle", type=inkex.Boolean, default=False,
                           help="Lift pen for backward steps")
 
     def generate(self):
@@ -53,4 +50,4 @@ class RTreeTurtle(inkex.GenerateExtension):
         return inkex.PathElement(d=tur.getPath(), style=str(style))
 
 if __name__ == '__main__':
-    RTreeTurtle().run()
+    TurtleRtree().run()

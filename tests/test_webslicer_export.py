@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from webslicer_export import WebSlicer_Export
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from webslicer_export import Export
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestWebSlicerExportBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = WebSlicer_Export
+class TestWebSlicerExportBasic(ComparisonMixin, TestCase):
+    effect_class = Export
 
     @property
     def comparisons(self):

@@ -28,6 +28,7 @@ class PostscriptInput(inkex.CallExtension):
     """Load Postscript/EPS Files by calling ps2pdf program"""
     input_ext = 'ps'
     output_ext = 'pdf'
+    multi_inx = True
 
     def add_arguments(self, pars):
         pars.add_argument('--crop', type=inkex.Boolean, default=False)

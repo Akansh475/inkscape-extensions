@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Foldable Box</name>
-    <id>org.inkscape.render.foldable-box</id>
+    <id>org.inkscape.render.foldable_box</id>
     <param name="width"  type="float" min="0.1" max="1000.0" gui-text="Width:">10.0</param>
     <param name="height" type="float" min="0.1" max="1000.0" gui-text="Height:">15.0</param>
     <param name="depth"  type="float" min="0.1" max="1000.0" gui-text="Depth:">3.0</param>

@@ -47,7 +47,7 @@ def calculate_subdivision(smoothness, x1, y1, x2, y2):
     return (x, y)
 
 
-class PathFractalize(inkex.EffectExtension):
+class Fractalize(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("-s", "--subdivs", type=int, default="6",
                           help="Number of subdivisons")
@@ -86,6 +86,5 @@ class PathFractalize(inkex.EffectExtension):
             for right_seg in self.fractalize(subdiv_point[-2:] + coords[-2:], subdivs - 1, smooth):
                 yield right_seg
 
-
 if __name__ == '__main__':
-    PathFractalize().run()
+    Fractalize().run()

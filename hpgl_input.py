@@ -19,19 +19,18 @@
 #
 
 import sys
-
 import hpgl_decoder
 import inkex
-import inkex.base
+from inkex.localization import inkex_gettext as _
 
-class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
-    def __init__(self):
-        super(HpglFile, self).__init__()
-        self.arg_parser.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
-        self.arg_parser.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
-        self.arg_parser.add_argument('--showMovements', type=inkex.Boolean, default=False, help='Show Movements between paths')
-        self.arg_parser.add_argument('--docWidth', type=float, default=210.0, help='Width in mm')
-        self.arg_parser.add_argument('--docHeight', type=float, default=297.0, help='Height in mm')
+class HpglInput(inkex.InputExtension):
+    def add_arguments(self, pars):
+        pars.add_argument('--resolutionX', type=float, default=1016.0, help='Resolution X (dpi)')
+        pars.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
+        pars.add_argument('--showMovements', type=inkex.Boolean, default=False,
+                          help='Show Movements between paths')
+        pars.add_argument('--docWidth', type=float, default=210.0, help='Width in mm')
+        pars.add_argument('--docHeight', type=float, default=297.0, help='Height in mm')
 
     def load(self, stream):
         return b';'.join(line.strip() for line in stream).decode()
@@ -60,5 +59,4 @@ class HpglFile(inkex.base.SvgOutputMixin, inkex.base.InkscapeExtension):
         self.document = doc
 
 if __name__ == '__main__':
-    HpglFile().run()
-
+    HpglInput().run()

@@ -36,7 +36,7 @@ from inkex.base import TempDirMixin
 from inkex.command import inkscape_command
 from inkex.elements import load_svg
 
-class PrepareFileSave(TempDirMixin, inkex.EffectExtension):
+class PreProcess(TempDirMixin, inkex.EffectExtension):
     def effect(self):
         self.document = load_svg(inkscape_command(
             self.svg,
@@ -44,4 +44,4 @@ class PrepareFileSave(TempDirMixin, inkex.EffectExtension):
         ))
 
 if __name__ == '__main__':
-    PrepareFileSave().run()
+    PreProcess().run()

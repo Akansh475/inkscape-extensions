@@ -21,7 +21,7 @@ import inkex
 from inkex.transforms import DirectedLineSegment
 from inkex.localization import inkex_gettext as _
 
-class PathEnvelope(inkex.EffectExtension):
+class Envelope(inkex.EffectExtension):
     """Distort a path to a second path"""
     def effect(self):
         paths = list(self.svg.get_selected(inkex.PathElement))
@@ -71,6 +71,5 @@ class PathEnvelope(inkex.EffectExtension):
         vert = DirectedLineSegment(tbox[3].point_at_ratio(yratio), tbox[1].point_at_ratio(yratio))
         return vert.intersect(horz)
 
-
 if __name__ == '__main__':
-    PathEnvelope().run()
+    Envelope().run()

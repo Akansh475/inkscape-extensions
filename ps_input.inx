@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>PostScript Input</name>
-    <id>org.inkscape.input.ps</id>
+    <id>org.inkscape.input.postscript_input</id>
     <dependency type="extension">org.inkscape.input.pdf</dependency>
     <dependency type="executable" location="path">ps2pdf</dependency>
     <input>

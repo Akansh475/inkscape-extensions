@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Datamatrix</name>
-  <id>il.datamatrix</id>
+  <id>org.inkscape.render.data_matrix</id>
   <param name="text" type="string" gui-text="Text:">Inkscape</param>
   <param name="symbol" gui-text="Size, in unit squares:" type="optiongroup" appearance="combo">
     <option translatable="no" value="sq10">10x10</option>

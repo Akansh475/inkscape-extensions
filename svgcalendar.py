@@ -44,7 +44,7 @@ if sys.version_info[0] > 2:
         return s
 
 
-class SVGCalendar(inkex.EffectExtension):
+class Calendar(inkex.EffectExtension):
     """Generate Calendar in SVG"""
     def add_arguments(self, pars):
         pars.add_argument("--tab", type=str, dest="tab")
@@ -401,6 +401,5 @@ class SVGCalendar(inkex.EffectExtension):
         except ValueError as err:
             return inkex.errormsg(str(err))
 
-
 if __name__ == '__main__':
-    SVGCalendar().run()
+    Calendar().run()

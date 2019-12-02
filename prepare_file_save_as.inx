@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Pre-Process File Save As...</name>
-    <id>com.vaxxine.file.saveas.preprocess</id>
+    <id>org.inkscape.file.pre_process</id>
     <effect>
         <object-type>path</object-type>
         <effects-menu>

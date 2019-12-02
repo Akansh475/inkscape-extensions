@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Replace color</name>
-    <id>org.inkscape.color.replacecolor</id>
+    <id>org.inkscape.color.replace_color</id>
     <param name="from_color" type="string" max_length="6" gui-text="Replace color (RRGGBB hex):" gui-description="Color to replace">000000</param>
     <param name="to_color" type="string" max_length="6" gui-text="By color (RRGGBB hex):" gui-description="New color">000000</param>
     <effect>

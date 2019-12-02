@@ -20,10 +20,10 @@ from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_MasterSlide(inkex.EffectExtension):
+class MasterSlide(inkex.EffectExtension):
     def add_arguments(self, pars):
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
-        self.arg_parser.add_argument('--layerName',  type=str, dest = 'layerName', default = '')
+        self.arg_parser.add_argument('--tab', dest='what')
+        self.arg_parser.add_argument('--layerName', default='')
 
     def effect(self):
         # Check version.
@@ -46,8 +46,5 @@ class JessyInk_MasterSlide(inkex.EffectExtension):
             else:
                 nodes[0].set("{" + NSS["jessyink"] + "}masterSlide","masterSlide")
 
-
-# Create effect instance
 if __name__ == '__main__':
-    JessyInk_MasterSlide().run()
-
+    MasterSlide().run()

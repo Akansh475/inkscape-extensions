@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Remove Blue</name>
-    <id>org.inkscape.color.removeblue</id>
+    <id>org.inkscape.color.remove_blue</id>
     <effect>
         <object-type>all</object-type>
         <effects-menu>

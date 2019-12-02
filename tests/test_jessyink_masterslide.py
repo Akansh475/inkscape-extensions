@@ -1,6 +1,6 @@
 # coding=utf-8
-from jessyInk_masterSlide import JessyInk_MasterSlide
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from jessyInk_masterSlide import MasterSlide
+from inkex.tester import ComparisonMixin, TestCase
 
-class JessyInkMasterSlideBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = JessyInk_MasterSlide
+class JessyInkMasterSlideBasicTest(ComparisonMixin, TestCase):
+    effect_class = MasterSlide

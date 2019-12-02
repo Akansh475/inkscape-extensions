@@ -17,6 +17,7 @@
 
 
 import inkex
+from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
@@ -40,7 +41,7 @@ def propListToDict(list):
 
     return dictio
 
-class JessyInk_Summary(inkex.EffectExtension):
+class Summary(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab',  type=str, dest = 'what')
 
@@ -178,8 +179,5 @@ class JessyInk_Summary(inkex.EffectExtension):
 
             orderNumber += 1
 
-
-# Create effect instance
 if __name__ == '__main__':
-    JessyInk_Summary().run()
-
+    Summary().run()

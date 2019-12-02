@@ -1,9 +1,9 @@
 # coding=utf-8
-from color_lesshue import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_lesshue import LessHue
+from inkex.tester import ComparisonMixin, TestCase
 
-class ColorLessHueBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorLessHueBasicTest(ComparisonMixin, TestCase):
+    effect_class = LessHue
 
     def test_default_values_black(self):
         args = [self.empty_svg]

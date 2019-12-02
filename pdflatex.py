@@ -28,7 +28,7 @@ from inkex.base import TempDirMixin
 from inkex.command import call, inkscape
 from inkex.elements import load_svg, ShapeElement, Defs
 
-class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
+class PdfLatex(TempDirMixin, inkex.GenerateExtension):
     """
     Use pdflatex to generate LaTeX, this whole hack is required because
     we don't want to open a LaTeX document as a document, but as a
@@ -77,4 +77,4 @@ class LatexGenerate(TempDirMixin, inkex.GenerateExtension):
         stream.write("\n\\end{document}\n")
 
 if __name__ == '__main__':
-    LatexGenerate().run()
+    PdfLatex().run()

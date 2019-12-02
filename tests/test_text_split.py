@@ -1,8 +1,8 @@
 # coding=utf-8
-from text_split import Split
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from text_split import TextSplit
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestSplitBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class TestSplitBasic(ComparisonMixin, TestCase):
     """Test split effect"""
-    effect_class = Split
+    effect_class = TextSplit
     comparisons = [('--id=t1', '--id=t3')]

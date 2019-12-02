@@ -1,10 +1,10 @@
 # coding=utf-8
-from color_lesssaturation import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_lesssaturation import LessSaturation
+from inkex.tester import ComparisonMixin, TestCase
 
 
-class ColorLessSaturationBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorLessSaturationBasicTest(ComparisonMixin, TestCase):
+    effect_class = LessSaturation
 
     def test_default_values_black(self):
         args = [self.empty_svg]

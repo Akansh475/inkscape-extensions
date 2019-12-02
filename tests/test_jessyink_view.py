@@ -1,7 +1,7 @@
 # coding=utf-8
-from jessyInk_view import JessyInk_Effects
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from jessyInk_view import View
+from inkex.tester import ComparisonMixin, TestCase
 
-class JessyInkEffectsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = JessyInk_Effects
+class JessyInkEffectsBasicTest(ComparisonMixin, TestCase):
+    effect_class = View
     comparisons = [('--id=r3', '--viewOrder=1')]

@@ -17,18 +17,19 @@
 #
 
 import inkex
+from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_Transitions(inkex.EffectExtension):
+class Transitions(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument('--tab',  type=str, dest = 'what')
-        pars.add_argument('--layerName',  type=str, dest = 'layerName', default = '')
-        pars.add_argument('--effectIn',  type=str, dest = 'effectIn', default = 'default')
-        pars.add_argument('--effectInDuration',  type=float, dest = 'effectInDuration', default = 0.8)
-        pars.add_argument('--effectOut',  type=str, dest = 'effectOut', default = 'default')
-        pars.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
+        pars.add_argument('--tab', dest='what')
+        pars.add_argument('--layerName', default='')
+        pars.add_argument('--effectIn', default='default')
+        pars.add_argument('--effectOut', default='default')
+        pars.add_argument('--effectInDuration', type=float, default=0.8)
+        pars.add_argument('--effectOutDuration', type=float, default=0.8)
 
     def effect(self):
         # Check version.
@@ -57,8 +58,5 @@ class JessyInk_Transitions(inkex.EffectExtension):
         else:
             inkex.errormsg(_("Please enter a layer name.\n"))
 
-
-# Create effect instance
 if __name__ == '__main__':
-    JessyInk_Transitions().run()
-
+    Transitions().run()

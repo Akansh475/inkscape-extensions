@@ -28,16 +28,13 @@ from inkex.command import take_snapshot
 from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 
-class JessyInkExport(TempDirMixin, inkex.OutputExtension):
+NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+
+class Export(TempDirMixin, inkex.OutputExtension):
     """
     JessyInkExport Output Extension saves to a zipfile each of the layers.
     """
     dir_prefix = 'jessyInk-'
-
-    def __init__(self):
-        super(JessyInkExport, self).__init__()
-        # Register jessyink namespace.
-        NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
     def add_arguments(self, pars):
         pars.add_argument('--tab', type=str, dest='what')
@@ -85,4 +82,4 @@ class JessyInkExport(TempDirMixin, inkex.OutputExtension):
 
 
 if __name__ == '__main__':
-    JessyInkExport().run()
+    Export().run()

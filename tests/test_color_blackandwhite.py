@@ -1,10 +1,9 @@
 # coding=utf-8
-from color_blackandwhite import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_blackandwhite import BlackAndWhite
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorBlackAndWhiteBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorBlackAndWhiteBasicTest(ComparisonMixin, TestCase):
+    effect_class = BlackAndWhite
 
     def test_default_values_black(self):
         """

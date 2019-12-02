@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Polar Grid</name>
-  <id>grids.polar</id>
+  <id>org.inkscape.generate.grid_polar</id>
 
   <param name="c_dot_dia"    type="float" min="1" max="1000" gui-text="Centre Dot Diameter (px):">5.0</param>
   <param name="a_labels"     type="optiongroup" appearance="combo"  gui-text="Circumferential Labels:">

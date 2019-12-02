@@ -22,13 +22,12 @@ Written to test the coding of generating barcodes.
 from collections import defaultdict
 
 from barcode import get_barcode
-from render_barcode import InsertBarcode
+from render_barcode import Barcode
 
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class InsertBarcodeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = InsertBarcode
+class BarcodeBasicTest(ComparisonMixin, TestCase):
+    effect_class = Barcode
     comparisons = [
         ('--type', 'Ean2', '--text', '55'),
         ('--type', 'Code93', '--text', '3332222'),

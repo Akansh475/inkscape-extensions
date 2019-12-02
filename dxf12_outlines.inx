@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Desktop Cutting Plotter R12</name>
-    <id>org.ekips.output.dxf12_outlines</id>
+    <id>org.inkscape.output.dxf_twelve</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     <output>
         <extension>.dxf</extension>

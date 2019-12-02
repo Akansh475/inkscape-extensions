@@ -22,44 +22,17 @@ import random
 import inkex
 from inkex import turtle as pturtle
 
-class LSystem(inkex.GenerateExtension):
-    def __init__(self):
-        super(LSystem, self).__init__()
-        self.arg_parser.add_argument("-o", "--order",
-                                     type=int,
-                                     dest="order", default=3,
-                                     help="number of iteration")
-        self.arg_parser.add_argument("-l", "--langle",
-                                     type=float,
-                                     dest="langle", default=16.0,
-                                     help="angle for turning left")
-        self.arg_parser.add_argument("-r", "--rangle",
-                                     type=float,
-                                     dest="rangle", default=16.0,
-                                     help="angle for turning right")
-        self.arg_parser.add_argument("-s", "--step",
-                                     type=float,
-                                     dest="step", default=25.0,
-                                     help="step size")
-        self.arg_parser.add_argument("-p", "--randomizestep",
-                                     type=float,
-                                     dest="randomizestep", default=0.0,
-                                     help="randomize step")
-        self.arg_parser.add_argument("-z", "--randomizeangle",
-                                     type=float,
-                                     dest="randomizeangle", default=0.0,
-                                     help="randomize angle")
-        self.arg_parser.add_argument("-x", "--axiom",
-                                     type=str,
-                                     dest="axiom", default="++F",
-                                     help="initial state of system")
-        self.arg_parser.add_argument("-u", "--rules",
-                                     type=str,
-                                     dest="rules", default="F=FF-[-F+F+F]+[+F-F-F]",
-                                     help="replacement rules")
-        self.arg_parser.add_argument("-t", "--tab",
-                                     type=str,
-                                     dest="tab")
+class Lindenmayer(inkex.GenerateExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("--order", type=int, default=3, help="number of iteration")
+        pars.add_argument("--langle", type=float, default=16.0, help="angle for turning left")
+        pars.add_argument("--rangle", type=float, default=16.0, help="angle for turning right")
+        pars.add_argument("--step", type=float, default=25.0, help="step size")
+        pars.add_argument("--randomizestep", type=float, default=0.0, help="randomize step")
+        pars.add_argument("--randomizeangle", type=float, default=0.0, help="randomize angle")
+        pars.add_argument("--axiom", default="++F", help="initial state of system")
+        pars.add_argument("--rules", default="F=FF-[-F+F+F]+[+F-F-F]", help="replacement rules")
         self.stack = []
         self.turtle = pturtle.pTurtle()
 
@@ -117,4 +90,4 @@ class LSystem(inkex.GenerateExtension):
 
 
 if __name__ == '__main__':
-    LSystem().run()
+    Lindenmayer().run()

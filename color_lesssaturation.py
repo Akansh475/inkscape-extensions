@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Remove saturation from colors"""
 from __future__ import absolute_import, division
 
 import coloreffect
 from inkex import colors
 
-class C(coloreffect.ColorEffect):
+class LessSaturation(coloreffect.ColorEffect):
+    """Make colours less saturated"""
     def colmod(self, r, g, b):
         hsl = colors.rgb_to_hsl(r / 255, g / 255, b / 255)
         hsl[1] -= 0.05
@@ -17,4 +19,4 @@ class C(coloreffect.ColorEffect):
 
 
 if __name__ == '__main__':
-    C().run()
+    LessSaturation().run()

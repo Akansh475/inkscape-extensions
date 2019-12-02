@@ -875,7 +875,7 @@ class GridDrawer(object):
                 if self.isDark(c, r):
                     x, y = self.getSVGPos(c, r)
                     symbol = Use()
-                    symbol.set(inkex.addNS('href', 'xlink'), self.symbolId)
+                    symbol.set('xlink:href', self.symbolId)
                     symbol.set('x', str(x))
                     symbol.set('y', str(y))
                     symbol.set('width', str(self.boxsize))
@@ -1054,57 +1054,36 @@ class GridDrawer(object):
         grp.append(qrg)
 
 
-class QRCodeInkscape(inkex.GenerateExtension):
-    def __init__(self):
-        super(QRCodeInkscape, self).__init__()
-
-        # PARSE OPTIONS
-        self.arg_parser.add_argument("--text",
-                                     type=str,
-                                     dest="TEXT", default='www.inkscape.org')
-        self.arg_parser.add_argument("--typenumber",
-                                     type=str,
-                                     dest="TYPENUMBER", default="0")
-        self.arg_parser.add_argument("--correctionlevel",
-                                     type=str,
-                                     dest="CORRECTIONLEVEL", default="0")
-        self.arg_parser.add_argument("--encoding",
-                                     type=str,
-                                     dest="input_encode", default="latin_1")
-        self.arg_parser.add_argument("--modulesize",
-                                     type=float,
-                                     dest="MODULESIZE", default=10)
-        self.arg_parser.add_argument("--invert",
-                                     type=inkex.Boolean,
-                                     dest="invert_code", default="false")
-        self.arg_parser.add_argument("--drawtype",
-                                     type=str,
-                                     dest="drawtype", default="greedy")
-        self.arg_parser.add_argument("--smoothval",
-                                     type=float,
-                                     dest="smooth_value", default=0.2)
-        self.arg_parser.add_argument("--symbolid",
-                                     type=str,
-                                     dest="symbol_id", default="")
+class QrCode(inkex.GenerateExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--text", default='www.inkscape.org')
+        pars.add_argument("--typenumber", type=int, default=0)
+        pars.add_argument("--correctionlevel", type=int, default=0)
+        pars.add_argument("--encoding", default="latin_1")
+        pars.add_argument("--modulesize", type=int, default=10)
+        pars.add_argument("--invert", type=inkex.Boolean, default="false")
+        pars.add_argument("--drawtype", default="greedy")
+        pars.add_argument("--smoothval", type=float, default=0.2)
+        pars.add_argument("--symbolid", default='')
 
     def generate(self):
 
         scale = self.svg.unittouu('1px')  # convert to document units
         so = self.options
 
-        if so.TEXT == '':  # abort if converting blank text
+        if so.text == '':  # abort if converting blank text
             inkex.errormsg('Please enter an input text')
-        elif so.drawtype == "symbol" and so.symbol_id == "":
+        elif so.drawtype == "symbol" and so.symbolid == "":
             inkex.errormsg('Please enter symbol id')
         else:
             # Python 2 and 3 compatibility.
             if sys.version_info >= (3, 0, 0):
                 # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
-                text_bytes = bytes(so.TEXT, so.input_encode).decode("latin_1")
-                text_str = str(so.TEXT)
+                text_bytes = bytes(so.text, so.encoding).decode("latin_1")
+                text_str = str(so.text)
             else:
-                text_bytes = so.TEXT
-                text_str = so.TEXT.decode('utf-8')
+                text_bytes = so.text
+                text_str = so.text.decode('utf-8')
 
             grp = Group()
             grp.set('inkscape:label', 'QR Code: ' + text_str)
@@ -1113,23 +1092,24 @@ class QRCodeInkscape(inkex.GenerateExtension):
             if scale:
                 grp.transform.add_scale(scale)
 
+            print([so.typenumber, so.modulesize, so.invert, so.smoothval, so.symbolid, 4])
             # GENERATE THE QRCODE
-            if int(so.TYPENUMBER) == 0:
+            if so.typenumber == 0:
                 # Automatic QR code size`
-                qr = QRCode.getMinimumQRCode(text_bytes, int(so.CORRECTIONLEVEL))
+                qr = QRCode.getMinimumQRCode(text_bytes, so.correctionlevel)
             else:
                 # Manual QR code size
                 qr = QRCode()
-                qr.setTypeNumber(int(so.TYPENUMBER))
-                qr.setErrorCorrectLevel(int(so.CORRECTIONLEVEL))
+                qr.setTypeNumber(int(so.typenumber))
+                qr.setErrorCorrectLevel(so.correctionlevel)
                 qr.addData(text_bytes)
                 qr.make()
 
-            qrDraw = GridDrawer(int(so.MODULESIZE), so.invert_code, so.smooth_value, so.symbol_id, 4)
+            qrDraw = GridDrawer(so.modulesize, so.invert, so.smoothval, so.symbolid, 4)
             qrDraw.setGrid(qr.modules)
             qrDraw.makeSVG(grp, so.drawtype)
             return grp
 
 
 if __name__ == '__main__':
-    QRCodeInkscape().run()
+    QrCode().run()

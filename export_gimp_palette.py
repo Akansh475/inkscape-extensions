@@ -28,7 +28,7 @@ import inkex
 DOCNAME = 'sodipodi:docname'
 TAGS = ('fill', 'stroke', 'stop-color', 'flood-color', 'lighting-color')
 
-class ExportGpl(inkex.OutputExtension):
+class ExportGimpPalette(inkex.OutputExtension):
     def save(self, stream):
         name = self.svg.name.replace('.svg', '')
         stream.write('GIMP Palette\nName: {}\n#\n'.format(name).encode('utf-8'))
@@ -50,4 +50,4 @@ class ExportGpl(inkex.OutputExtension):
                 yield color
 
 if __name__ == '__main__':
-    ExportGpl().run()
+    ExportGimpPalette().run()

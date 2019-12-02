@@ -19,40 +19,22 @@
 #
 
 import math
-
-from lxml import etree
-
 import inkex
-from inkex.base import SvgThroughMixin, InkscapeExtension
 
-
-class Spirograph(SvgThroughMixin, InkscapeExtension):
-    def __init__(self):
-        super(Spirograph, self).__init__()
-        self.arg_parser.add_argument("-R", "--primaryr",
-                                     type=float,
-                                     dest="primaryr", default=60.0,
-                                     help="The radius of the outer gear")
-        self.arg_parser.add_argument("-r", "--secondaryr",
-                                     type=float,
-                                     dest="secondaryr", default=100.0,
-                                     help="The radius of the inner gear")
-        self.arg_parser.add_argument("-d", "--penr",
-                                     type=float,
-                                     dest="penr", default=50.0,
-                                     help="The distance of the pen from the inner gear")
-        self.arg_parser.add_argument("-p", "--gearplacement",
-                                     type=str,
-                                     dest="gearplacement", default="inside",
-                                     help="Selects whether the gear is inside or outside the ring")
-        self.arg_parser.add_argument("-a", "--rotation",
-                                     type=float,
-                                     dest="rotation", default=0.0,
-                                     help="The number of degrees to rotate the image by")
-        self.arg_parser.add_argument("-q", "--quality",
-                                     type=int,
-                                     dest="quality", default=16,
-                                     help="The quality of the calculated output")
+class Spirograph(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--primaryr", type=float, default=60.0,
+                          help="The radius of the outer gear")
+        pars.add_argument("--secondaryr", type=float, default=100.0,
+                          help="The radius of the inner gear")
+        pars.add_argument("--penr", type=float, default=50.0,
+                          help="The distance of the pen from the inner gear")
+        pars.add_argument("--gearplacement", default="inside",
+                          help="Selects whether the gear is inside or outside the ring")
+        pars.add_argument("--rotation", type=float, default=0.0,
+                          help="The number of degrees to rotate the image by")
+        pars.add_argument("--quality", type=int, default=16,
+                          help="The quality of the calculated output")
 
     def effect(self):
         self.options.primaryr = self.svg.unittouu(str(self.options.primaryr) + 'px')
@@ -78,11 +60,10 @@ class Spirograph(SvgThroughMixin, InkscapeExtension):
 
         rotation = - math.pi * self.options.rotation / 180
 
-        new = etree.Element(inkex.addNS('path', 'svg'))
-        s = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
-        new.set('style', str(inkex.Style(s)))
+        new = inkex.PathElement()
+        new.style = inkex.Style(stroke='#000000', fill='none', stroke_width='1.0')
 
-        pathString = ''
+        path_string = ''
         maxPointCount = 1000
 
         for i in range(maxPointCount):
@@ -101,22 +82,21 @@ class Spirograph(SvgThroughMixin, InkscapeExtension):
             dy = (a * math.cos(theta + rotation) - ratio * self.options.penr * math.cos(ratio * theta + rotation)) * scale / 3
 
             if i <= 0:
-                pathString += 'M {},{} C {},{} '.format(str(x), str(y), str(x + dx), str(y + dy))
+                path_string += 'M {},{} C {},{} '.format(str(x), str(y), str(x + dx), str(y + dy))
             else:
-                pathString += '{},{} {},{}'.format(str(x - dx), str(y - dy), str(x), str(y))
+                path_string += '{},{} {},{}'.format(str(x - dx), str(y - dy), str(x), str(y))
 
                 if math.fmod(i / ratio, self.options.quality) == 0 and i % self.options.quality == 0:
-                    pathString += 'Z'
+                    path_string += 'Z'
                     break
                 else:
                     if i == maxPointCount - 1:
                         pass  # we reached the allowed maximum of points, stop here
                     else:
-                        pathString += ' C {},{} '.format(str(x + dx), str(y + dy))
+                        path_string += ' C {},{} '.format(str(x + dx), str(y + dy))
 
-        new.set('d', pathString)
+        new.path = path_string
         self.svg.get_current_layer().append(new)
-
 
 if __name__ == '__main__':
     Spirograph().run()

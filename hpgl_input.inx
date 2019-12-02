@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>HPGL Input</name>
-  <id>org.inkscape.input.hpgl</id>
+  <id>org.inkscape.input.hpgl_input</id>
   <dependency type="file" location="inx">hpgl_decoder.py</dependency>
   <label>Please note that you can only open HPGL files written by Inkscape, to open other HPGL files please change their file extension to .plt, make sure you have UniConverter installed and open them again.</label>
   <spacer/>

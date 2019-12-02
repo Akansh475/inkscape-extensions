@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Edge 3D</name>
-    <id>org.greygreen.inkscape.effects.edge3d</id>
+    <id>org.inkscape.effects.edge3d</id>
     <param name="angle" type="float" min="0.0" max="360.0" gui-text="Illumination Angle:">45</param>
     <param name="shades" type="int" min="2" max="360" gui-text="Shades:">2</param>
     <param name="bw" type="bool" gui-text="Only black and white:">false</param>

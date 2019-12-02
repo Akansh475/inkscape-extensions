@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>DXF Input</name>
-    <id>org.inkscape.input.dxf</id>
+    <id>org.inkscape.input.dxf_input</id>
     <param name="tab" type="notebook">
         <page name="options" gui-text="Options">
             <param name="scalemethod" type="optiongroup" appearance="radio" gui-text="Method of Scaling:">

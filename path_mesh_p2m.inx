@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Path to Mesh-Gradient</name>
-  <id>su-v/org.inkscape.meshes.from_path</id>
+  <id>org.inkscape.meshes.path_to_mesh</id>
 
   <param name="tab" type="notebook">
 

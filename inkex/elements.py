@@ -270,7 +270,9 @@ class BaseElement(etree.ElementBase):
 
     def copy(self):
         """Make a copy of the element and return it"""
-        return deepcopy(self)
+        elem = deepcopy(self)
+        elem.set('id', None)
+        return elem
 
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to

@@ -21,27 +21,12 @@ import os
 from lxml import etree
 
 import inkex
+from inkex.elements import Script
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-def propStrToList(str):
-    list = []
-    propList = str.split(";")
-    for prop in propList:
-        if not (len(prop) == 0):
-            list.append(prop.strip())
-    return list
-
-
-def listToPropStr(list):
-    str = ""
-    for prop in list:
-        str += " " + prop + ";"
-    return str[1:]
-
-
-class JessyInk_Install(inkex.EffectExtension):
+class Install(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab', type=str, dest='what')
 
@@ -51,27 +36,17 @@ class JessyInk_Install(inkex.EffectExtension):
             node.getparent().remove(node)
 
         # Create new script node
-        scriptElm = etree.Element(inkex.addNS("script", "svg"))
-        scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk.js")).read()
-        scriptElm.set("id", "JessyInk")
-        scriptElm.set("{" + NSS["jessyink"] + "}version", '1.5.5')
-        self.document.getroot().append(scriptElm)
+        script_elem = Script()
+        script_elem.text = open(os.path.join(os.path.dirname(__file__), "jessyInk.js")).read()
+        script_elem.set("id", "JessyInk")
+        script_elem.set("{" + NSS["jessyink"] + "}version", '1.5.5')
+        self.svg.append(script_elem)
 
         # Remove "jessyInkInit()" in the "onload" attribute, if present.
-        if self.document.getroot().get("onload"):
-            propList = propStrToList(self.document.getroot().get("onload"))
-        else:
-            propList = []
-
-        for prop in propList:
-            if prop == "jessyInkInit()":
-                propList.remove("jessyInkInit()")
-
-        if len(propList) > 0:
-            self.document.getroot().set("onload", listToPropStr(propList))
-        else:
-            if self.document.getroot().get("onload"):
-                del self.document.getroot().attrib["onload"]
+        prop_list = [prop.strip() for prop in self.svg.get("onload", '').split(';')]
+        if "jessyInkInit()" in prop_list:
+            prop_list.remove("jessyInkInit()")
+        self.svg.set("onload", "; ".join(prop_list) or None)
 
         # Update effect attributes.
         for node in self.document.xpath("//*[@jessyInk_effectIn]", namespaces=NSS):
@@ -122,4 +97,4 @@ class JessyInk_Install(inkex.EffectExtension):
 
 # Create effect instance
 if __name__ == '__main__':
-    JessyInk_Install().run()
+    Install().run()

@@ -42,23 +42,14 @@ def eval_(node, namespace):
         raise TypeError(node)
 
 
-class C(coloreffect.ColorEffect):
-    def __init__(self):
-        super(C, self).__init__()
-        self.arg_parser.add_argument("-r", "--r",
-                                     dest="rFunction", default="r",
-                                     help="red channel function")
-        self.arg_parser.add_argument("-g", "--g",
-                                     dest="gFunction", default="g",
-                                     help="green channel function")
-        self.arg_parser.add_argument("-b", "--b",
-                                     dest="bFunction", default="b",
-                                     help="blue channel function")
-        self.arg_parser.add_argument("-t", "--tab",
-                                     help="The selected UI-tab when OK was pressed")
-        self.arg_parser.add_argument("-s", "--scale",
-                                     type=float, default=1,
-                                     help="The input (r,g,b) range")
+class Custom(coloreffect.ColorEffect):
+    """Custom colour functions per channel"""
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("-r", "--r", dest="rFunction", default="r", help="red channel function")
+        pars.add_argument("-g", "--g", dest="gFunction", default="g", help="green channel function")
+        pars.add_argument("-b", "--b", dest="bFunction", default="b", help="blue channel function")
+        pars.add_argument("-s", "--scale", type=float, default=1, help="The input (r,g,b) range")
 
     def normalize(self, v):
         if v < 0:
@@ -84,6 +75,5 @@ class C(coloreffect.ColorEffect):
         b2 = self.normalize(eval_expr(self.options.bFunction.strip(), safe_namespace))
         return self._hexstr(r2 * factor, g2 * factor, b2 * factor)
 
-
 if __name__ == '__main__':
-    C().run()
+    Custom().run()

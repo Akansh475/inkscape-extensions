@@ -1,10 +1,10 @@
 # coding=utf-8
 
-from path_envelope import PathEnvelope
+from path_envelope import Envelope
 from inkex.tester import ComparisonMixin, TestCase
 
 class PathEnvelopeTest(ComparisonMixin, TestCase):
     """Test envelope similar to perspective"""
-    effect_class = PathEnvelope
+    effect_class = Envelope
     comparisons = [('--id=text', '--id=envelope')]
     compare_file = 'svg/perspective.svg'

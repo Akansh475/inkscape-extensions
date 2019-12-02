@@ -5,7 +5,7 @@ from __future__ import absolute_import, division
 import coloreffect
 from inkex import colors
 
-class C(coloreffect.ColorEffect):
+class MoreHue(coloreffect.ColorEffect):
     def colmod(self, r, g, b):
         hsl = colors.rgb_to_hsl(r / 255, g / 255, b / 255)
         hsl[0] += 0.05
@@ -14,8 +14,5 @@ class C(coloreffect.ColorEffect):
         rgb = colors.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
         return '{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
 
-
 if __name__ == '__main__':
-    C().run()
-
-
+    MoreHue().run()

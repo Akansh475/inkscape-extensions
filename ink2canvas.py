@@ -27,7 +27,7 @@ import inkex
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
 
-class Ink2Canvas(inkex.OutputExtension):
+class Html5Canvas(inkex.OutputExtension):
     """Creates a canvas output"""
     def save(self, stream):
         svg_root = self.document.getroot()
@@ -71,4 +71,4 @@ class Ink2Canvas(inkex.OutputExtension):
 
 
 if __name__ == "__main__":
-    Ink2Canvas().run()
+    Html5Canvas().run()

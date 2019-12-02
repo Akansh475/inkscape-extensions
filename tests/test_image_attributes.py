@@ -1,9 +1,9 @@
 # coding=utf-8
-from image_attributes import SetAttrImage
+from image_attributes import ImageAttributes
 from inkex.tester import ComparisonMixin, TestCase
 
 class TestSetAttrImageBasic(ComparisonMixin, TestCase):
-    effect_class = SetAttrImage
+    effect_class = ImageAttributes
     compare_file = 'svg/images.svg'
     comparisons = [
         (), # All images in the document (basic)

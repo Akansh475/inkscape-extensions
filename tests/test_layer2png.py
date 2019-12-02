@@ -2,17 +2,17 @@
 Test export slices of an image.
 """
 
-from inkex.tester import InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from layer2png import ExportSlices
 
-class Layer2PNGTest(InkscapeExtensionTestMixin, TestCase):
+class Layer2PNGTest(ComparisonMixin, TestCase):
     effect_class = ExportSlices
     compare_file = 'svg/slicer.svg'
+    comparisons = []
 
     def test_get_layers(self):
         basic_svg = self.data_file('svg', 'slicer.svg')
         args = [basic_svg, '-l' 'slices']
-        self.effect = Layer2PNGTest.effect_class()
         self.effect.options = self.effect.arg_parser.parse_args(args)
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()
@@ -24,7 +24,6 @@ class Layer2PNGTest(InkscapeExtensionTestMixin, TestCase):
     def test_bad_slice_layer(self):
         basic_svg = self.data_file('svg', 'slicer.svg')
         args = [basic_svg, '-l' 'slices']
-        self.effect = Layer2PNGTest.effect_class()
         self.effect.options = self.effect.arg_parser.parse_args(args)
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()
@@ -35,7 +34,6 @@ class Layer2PNGTest(InkscapeExtensionTestMixin, TestCase):
     def test_color(self):
         basic_svg = self.data_file('svg', 'slicer.svg')
         args = [basic_svg, '-l' 'slices']
-        self.effect = Layer2PNGTest.effect_class()
         self.effect.options = self.effect.arg_parser.parse_args(args)
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()

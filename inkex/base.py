@@ -45,6 +45,7 @@ class InkscapeExtension(object):
     The base class extension, provides argument parsing and basic
     variable handling features.
     """
+    multi_inx = False # Set to true if this class is used by multiple inx files.
 
     def __init__(self):
         self.file_io = None

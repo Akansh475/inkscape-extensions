@@ -1,7 +1,7 @@
 #!/usr/bin/en
 # coding=utf-8
-from jessyInk_effects import JessyInk_Effects
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from jessyInk_effects import JessyinkEffects
+from inkex.tester import ComparisonMixin, TestCase
 
-class JessyInkEffectsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = JessyInk_Effects
+class JessyInkEffectsBasicTest(ComparisonMixin, TestCase):
+    effect_class = JessyinkEffects

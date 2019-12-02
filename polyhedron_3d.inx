@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>3D Polyhedron</name>
-    <id>math.polyhedron.3d</id>
+    <id>org.inkscape.render.poly_3d</id>
     <param name="tab" type="notebook">
         <page name="common" gui-text="Model file">
             <param name="obj" type="optiongroup" appearance="combo" gui-text="Object:">

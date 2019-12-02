@@ -4,12 +4,11 @@
 # Revision history:
 #  * 2012-01-27 (jazzynico): checks defaulf parameters and file handling.
 #
-from markers_strokepaint import MarkerStrokePaintEffect
+from markers_strokepaint import MarkersStrokePaint
 from inkex.tester import ComparisonMixin, TestCase
 
-
 class MarkerStrokePaintBasicTest(ComparisonMixin, TestCase):
-    effect_class = MarkerStrokePaintEffect
+    effect_class = MarkersStrokePaint
     compare_file = 'svg/markers.svg'
     comparisons = [
         ('--tab="object"', '--id=dimension'),
@@ -19,7 +18,7 @@ class MarkerStrokePaintBasicTest(ComparisonMixin, TestCase):
     def test_basic(self):
         args = ['--id=dimension',
                 self.data_file('svg', 'markers.svg')]
-        eff = MarkerStrokePaintEffect()
+        eff = MarkersStrokePaint()
         eff.run(args)
         old_markers = eff.original_document.getroot().xpath('//svg:defs//svg:marker')
         new_markers = eff.svg.xpath('//svg:defs//svg:marker')

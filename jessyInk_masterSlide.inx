@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Master slide</name>
-  <id>jessyink.masterSlide</id>
+  <id>org.inkscape.jessyink.master_slide</id>
   <param name="tab" type="notebook">
     <page name="settings" gui-text="Settings">
             <param name="layerName" type="string" gui-text="Name of layer:"></param>

@@ -23,8 +23,7 @@ from lxml import etree
 import inkex
 from inkex.utils import NSS
 
-
-class JessyInk_CustomKeyBindings(inkex.EffectExtension):
+class KeyBindings(inkex.EffectExtension):
     modes = ('slide', 'index', 'drawing')
     keyCodes = ('LEFT', 'RIGHT', 'DOWN', 'UP', 'HOME', 'END', 'ENTER', 'SPACE', 'PAGE_UP', 'PAGE_DOWN', 'ESCAPE')
     slideActions = {}
@@ -259,7 +258,5 @@ class JessyInk_CustomKeyBindings(inkex.EffectExtension):
 
         return parts[1]
 
-
-# Create effect instance
 if __name__ == '__main__':
-    JessyInk_CustomKeyBindings().run()
+    KeyBindings().run()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Add Nodes</name>
-    <id>org.ekips.filter.addnodes</id>
+    <id>org.inkscape.filter.add_nodes</id>
     <param name="method" type="optiongroup" appearance="combo" gui-text="Division method:">
         <option value="bymax">By max. segment length</option>
         <option value="bynum">By number of segments</option>

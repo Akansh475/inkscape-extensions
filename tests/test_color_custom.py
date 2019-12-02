@@ -1,11 +1,10 @@
 # coding=utf-8
 
-from color_custom import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_custom import Custom
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorCustomBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorCustomBasicTest(ComparisonMixin, TestCase):
+    effect_class = Custom
     comparisons = [
         ('--scale=100', '--r=100', '--g=50', '--b=0'),
     ]

@@ -1,10 +1,9 @@
 # coding=utf-8
-from color_removeblue import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_removeblue import RemoveBlue
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorRemoveBlueBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorRemoveBlueBasicTest(ComparisonMixin, TestCase):
+    effect_class = RemoveBlue
 
     def test_default_values_black(self):
         args = [self.empty_svg]

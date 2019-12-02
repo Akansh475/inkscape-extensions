@@ -35,7 +35,7 @@ def listToPropStr(list):
         str += " " + prop + ";"
     return str[1:]
 
-class JessyInk_Uninstall(inkex.EffectExtension):
+class Uninstall(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab',  type=str, dest = 'what')
         pars.add_argument('--remove_script',  type=inkex.Boolean, dest = 'remove_script', default = True)
@@ -125,5 +125,4 @@ class JessyInk_Uninstall(inkex.EffectExtension):
 
 # Create effect instance.
 if __name__ == '__main__':
-    JessyInk_Uninstall().run()
-
+    Uninstall().run()

@@ -5,13 +5,13 @@ All tests for the svg calendar extension
 import calendar
 from datetime import datetime
 
-from svgcalendar import SVGCalendar
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from svgcalendar import Calendar
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareOrderIndependentStyle, CompareNumericFuzzy
 
-class CalendarArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class CalendarArguments(ComparisonMixin, TestCase):
     """Test arguments to calendar extensions"""
-    effect_class = SVGCalendar
+    effect_class = Calendar
     compare_filters = [CompareOrderIndependentStyle(), CompareNumericFuzzy()]
     comparisons = [()]
 
@@ -79,11 +79,6 @@ class CalendarArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
         """Week start is set to Monday"""
         self.assertEffect(args=['--start-day=mon'])
         self.assertEqual(calendar.firstweekday(), 0)
-
-
-class CalendarMethods(InkscapeExtensionTestMixin, TestCase):
-    """Test calendar methods"""
-    effect_class = SVGCalendar
 
     def test_recognize_a_weekend(self):
         """Recognise a weekend"""

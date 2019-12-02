@@ -49,21 +49,10 @@ def points_to_svgd(p):
 
 class RackGear(inkex.GenerateExtension):
     container_label = 'Rendered Gear Rack'
-
-    def __init__(self):
-        super(RackGear, self).__init__()
-        self.arg_parser.add_argument(
-            "-l", "--length", type=float,
-            dest="length", default=100.,
-            help="Rack Length")
-        self.arg_parser.add_argument(
-            "-s", "--spacing", type=float,
-            dest="spacing", default=10.,
-            help="Tooth Spacing")
-        self.arg_parser.add_argument(
-            "-a", "--angle", type=float,
-            dest="angle", default=20.,
-            help="Contact Angle")
+    def add_arguments(self, pars):
+        pars.add_argument("--length", type=float, default=100.0, help="Rack Length")
+        pars.add_argument("--spacing", type=float, default=10.0, help="Tooth Spacing")
+        pars.add_argument("--angle", type=float, default=20.0, help="Contact Angle")
 
     def generate(self):
         length = self.svg.unittouu(str(self.options.length) + 'px')

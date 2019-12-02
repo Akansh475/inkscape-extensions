@@ -1,6 +1,6 @@
 # coding=utf-8
-from layers2svgfont import Layers2SVGFont
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from layers2svgfont import LayersToSvgFont
+from inkex.tester import ComparisonMixin, TestCase
 
-class TestLayers2SVGFontBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = Layers2SVGFont
+class TestLayers2SVGFontBasic(ComparisonMixin, TestCase):
+    effect_class = LayersToSvgFont

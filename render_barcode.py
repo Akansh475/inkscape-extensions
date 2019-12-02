@@ -25,7 +25,7 @@ Barcode module provided for outside or scripting.
 import inkex
 from barcode import get_barcode
 
-class InsertBarcode(inkex.GenerateExtension):
+class Barcode(inkex.GenerateExtension):
     """
     Raw barcode Effect class, see Barcode base class.
     """
@@ -47,4 +47,4 @@ class InsertBarcode(inkex.GenerateExtension):
         ).generate()
 
 if __name__ == '__main__':
-    InsertBarcode().run()
+    Barcode().run()

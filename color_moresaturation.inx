@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>More Saturation</name>
-    <id>org.inkscape.color.moresaturation</id>
+    <id>org.inkscape.color.more_saturation</id>
     <dependency type="file" location="inx">coloreffect.py</dependency>
     <effect>
         <object-type>all</object-type>

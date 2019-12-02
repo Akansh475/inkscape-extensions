@@ -1,7 +1,6 @@
 # coding=utf-8
-from jessyInk_mouseHandler import JessyInk_CustomMouseHandler
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from jessyInk_mouseHandler import MouseHandler
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class JessyInkCustomMouseHandlerBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = JessyInk_CustomMouseHandler
+class JessyInkCustomMouseHandlerBasicTest(ComparisonMixin, TestCase):
+    effect_class = MouseHandler

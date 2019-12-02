@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
 import inkex
-from edge3d import Edge3d
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from edge3d import Edge3D
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
-
-class Edge3dBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = Edge3d
+class Edge3dBasicTest(ComparisonMixin, TestCase):
+    effect_class = Edge3D
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
     comparisons = [('--id=p1', '--id=r3'),]
 

@@ -1,9 +1,9 @@
 # coding=utf-8
-from jessyInk_export import JessyInkExport
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from jessyInk_export import Export
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareSize
 
-class JessyInkExportBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class JessyInkExportBasicTest(ComparisonMixin, TestCase):
     compare_filters = [CompareSize()]
-    effect_class = JessyInkExport
+    effect_class = Export
     comparisons = [('--resolution=1',)]

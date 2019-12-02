@@ -191,7 +191,7 @@ CORPA = [
 ]
 
 
-class LorumImpsum(inkex.EffectExtension):
+class LoremIpsum(inkex.EffectExtension):
     """Generate text with psuedo latin content"""
     def add_arguments(self, pars):
         pars.add_argument("--title")
@@ -247,4 +247,4 @@ class LorumImpsum(inkex.EffectExtension):
 
 
 if __name__ == '__main__':
-    LorumImpsum().run()
+    LoremIpsum().run()

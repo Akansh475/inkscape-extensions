@@ -1,9 +1,9 @@
 # coding=utf-8
-from color_desaturate import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_desaturate import Desaturate
+from inkex.tester import ComparisonMixin, TestCase
 
-class ColorDesaturateBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorDesaturateBasicTest(ComparisonMixin, TestCase):
+    effect_class = Desaturate
 
     def test_default_values_black(self):
         args = [self.empty_svg]

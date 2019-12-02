@@ -25,25 +25,12 @@ from lxml import etree
 import inkex
 from webslicer_effect import WebSlicerMixin, is_empty
 
-class WebSlicer_Export(WebSlicerMixin, inkex.OutputExtension):
-
-    def __init__(self):
-        super(WebSlicer_Export, self).__init__()
-        self.arg_parser.add_argument("--tab")
-        self.arg_parser.add_argument("--dir",
-                                     type=str,
-                                     dest="dir",
-                                     help="")
-        self.arg_parser.add_argument("--create-dir",
-                                     type=inkex.Boolean,
-                                     default=False,
-                                     dest="create_dir",
-                                     help="")
-        self.arg_parser.add_argument("--with-code",
-                                     type=inkex.Boolean,
-                                     default=False,
-                                     dest="with_code",
-                                     help="")
+class Export(WebSlicerMixin, inkex.OutputExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("--dir")
+        pars.add_argument("--create-dir", type=inkex.Boolean, dest="create_dir")
+        pars.add_argument("--with-code", type=inkex.Boolean, dest="with_code")
 
     svgNS = '{http://www.w3.org/2000/svg}'
 
@@ -428,4 +415,4 @@ class WebSlicer_Export(WebSlicerMixin, inkex.OutputExtension):
         return code
 
 if __name__ == '__main__':
-    WebSlicer_Export().run()
+    Export().run()

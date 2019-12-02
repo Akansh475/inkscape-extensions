@@ -23,12 +23,13 @@ from copy import deepcopy
 from lxml import etree
 
 import inkex
+from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_Effects(inkex.EffectExtension):
+class Video(inkex.EffectExtension):
     def add_arguments(self, pars):
-        self.arg_parser.add_argument('--tab',  type=str, dest = 'what')
+        self.arg_parser.add_argument('--tab', dest='what')
 
     def effect(self):
         # Check version.
@@ -107,8 +108,5 @@ def deleteIds(node):
         if 'id' in entry.attrib:
             del entry.attrib['id']
 
-
-# Create effect instance
 if __name__ == '__main__':
-    JessyInk_Effects().run()
-
+    Video().run()

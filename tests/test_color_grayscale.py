@@ -1,10 +1,9 @@
 # coding=utf-8
-from color_grayscale import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_grayscale import Grayscale
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorGrayscaleBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorGrayscaleBasicTest(ComparisonMixin, TestCase):
+    effect_class = Grayscale
 
     def test_default_values_black(self):
         args = [self.empty_svg]

@@ -66,15 +66,11 @@ def clip_line(x1, y1, x2, y2, w, h):
     return [x1, y1, x2, y2]
 
 
-class PatternEffect(inkex.EffectExtension):
-    def __init__(self):
-        super(PatternEffect, self).__init__()
-        self.arg_parser.add_argument("--size", type=int, dest="size", default=10,
-                                     help="Average size of cell (px)")
-        self.arg_parser.add_argument("--border", type=int, dest="border", default=0,
-                                     help="Size of Border (px)")
-        self.arg_parser.add_argument("--tab", type=str, dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+class GenerateVoronoi(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("--size", type=int, default=10, help="Average size of cell (px)")
+        pars.add_argument("--border", type=int, default=0, help="Size of Border (px)")
 
     def effect(self):
         if not self.options.ids:
@@ -180,6 +176,5 @@ class PatternEffect(inkex.EffectExtension):
                 style['fill'] = 'url(#%s)' % pattern.get('id')
                 node.attrib['style'] = str(inkex.Style(style))
 
-
 if __name__ == '__main__':
-    PatternEffect().run()
+    GenerateVoronoi().run()

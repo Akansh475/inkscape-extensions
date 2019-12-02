@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Draw From Triangle</name>
-    <id>il.fromtriangle</id>
+    <id>org.inkscape.render.draw_from_triangle</id>
     <param name="tab" type="notebook">
         <page name="common1" gui-text="Common Objects">
             <param name="circumcircle"    type="bool" gui-text="Circumcircle">false</param>

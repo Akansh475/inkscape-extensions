@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 # coding=utf-8
+"""Replace color extension"""
 from __future__ import absolute_import, division
 
 import coloreffect
 
-
-class C(coloreffect.ColorEffect):
-    """
-    Replace color in SVG with another
-    """
-
-    def __init__(self):
-        super(C, self).__init__()
-        self.arg_parser.add_argument("-f", "--from_color",
-                                     default="000000", help="Replace color")
-        self.arg_parser.add_argument("-t", "--to_color",
-                                     default="000000", help="By color")
+class ReplaceColor(coloreffect.ColorEffect):
+    """Replace color in SVG with another"""
+    def add_arguments(self, pars):
+        pars.add_argument("-f", "--from_color", default="000000", help="Replace color")
+        pars.add_argument("-t", "--to_color", default="000000", help="By color")
 
     def colmod(self, r, g, b):
         this_color = '{:02x}{:02x}{:02x}'.format(r, g, b)
@@ -25,9 +19,7 @@ class C(coloreffect.ColorEffect):
 
         if this_color == from_color:
             return to_color
-        else:
-            return this_color
-
+        return this_color
 
 if __name__ == '__main__':
-    C().run()
+    ReplaceColor().run()

@@ -8,32 +8,15 @@ import coloreffect
 import inkex
 from inkex import colors
 
-class C(coloreffect.ColorEffect):
-    def __init__(self):
-        super(C, self).__init__()
-        self.arg_parser.add_argument("-x", "--hue",
-                                     type=int, default=0,
-                                     help="Adjust hue")
-        self.arg_parser.add_argument("-s", "--saturation",
-                                     type=int, default=0,
-                                     help="Adjust saturation")
-        self.arg_parser.add_argument("-l", "--lightness",
-                                     type=int, default=0,
-                                     help="Adjust lightness")
-        self.arg_parser.add_argument("--random_h",
-                                     type=inkex.Boolean,
-                                     dest="random_hue", default=False,
-                                     help="Randomize hue")
-        self.arg_parser.add_argument("--random_s",
-                                     type=inkex.Boolean,
-                                     dest="random_saturation", default=False,
-                                     help="Randomize saturation")
-        self.arg_parser.add_argument("--random_l",
-                                     type=inkex.Boolean,
-                                     dest="random_lightness", default=False,
-                                     help="Randomize lightness")
-        self.arg_parser.add_argument("--tab",
-                                     help="The selected UI-tab when OK was pressed")
+class HslAdjust(coloreffect.ColorEffect):
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("-x", "--hue", type=int, default=0, help="Adjust hue")
+        pars.add_argument("-s", "--saturation", type=int, default=0, help="Adjust saturation")
+        pars.add_argument("-l", "--lightness", type=int, default=0, help="Adjust lightness")
+        pars.add_argument("--random_h", type=inkex.Boolean, dest="random_hue")
+        pars.add_argument("--random_s", type=inkex.Boolean, dest="random_saturation")
+        pars.add_argument("--random_l", type=inkex.Boolean, dest="random_lightness")
 
     def clamp(self, minimum, x, maximum):
         return max(minimum, min(x, maximum))
@@ -65,4 +48,4 @@ class C(coloreffect.ColorEffect):
 
 
 if __name__ == '__main__':
-    C().run()
+    HslAdjust().run()

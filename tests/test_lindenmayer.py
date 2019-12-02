@@ -1,8 +1,8 @@
 # coding=utf-8
-from lindenmayer import LSystem
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from lindenmayer import Lindenmayer
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareOrderIndependentStyle
 
-class LSystemBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = LSystem
+class LSystemBasicTest(ComparisonMixin, TestCase):
+    effect_class = Lindenmayer
     compare_filters = [CompareOrderIndependentStyle()]

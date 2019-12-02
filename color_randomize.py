@@ -7,23 +7,14 @@ import random
 import coloreffect
 from inkex import colors
 
-class C(coloreffect.ColorEffect):
-    def __init__(self):
-        super(C, self).__init__()
-        self.arg_parser.add_argument("-y", "--hue_range", type=int,
-                                     dest="hue_range", default=0,
-                                     help="Hue range")
-        self.arg_parser.add_argument("-t", "--saturation_range", type=int,
-                                     dest="saturation_range", default=0,
-                                     help="Saturation range")
-        self.arg_parser.add_argument("-m", "--lightness_range", type=int,
-                                     dest="lightness_range", default=0,
-                                     help="Lightness range")
-        self.arg_parser.add_argument("-o", "--opacity_range", type=int,
-                                     dest="opacity_range", default=0,
-                                     help="Opacity range")
-        self.arg_parser.add_argument("--tab",
-                                     help="The selected UI-tab when OK was pressed")
+class Randomize(coloreffect.ColorEffect):
+    """Randomize the colours of all objects"""
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("-y", "--hue_range", type=int, default=0, help="Hue range")
+        pars.add_argument("-t", "--saturation_range", type=int, default=0, help="Saturation range")
+        pars.add_argument("-m", "--lightness_range", type=int, default=0, help="Lightness range")
+        pars.add_argument("-o", "--opacity_range", type=int, default=0, help="Opacity range")
 
     def randomize_hsl(self, limit, current_value):
         limit = 255 * float(limit) / 100
@@ -71,6 +62,5 @@ class C(coloreffect.ColorEffect):
             return ret
         return opacity
 
-
 if __name__ == '__main__':
-    C().run()
+    Randomize().run()

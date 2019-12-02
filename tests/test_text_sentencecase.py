@@ -1,7 +1,7 @@
 # coding=utf-8
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from text_sentencecase import SentanceCase
+from inkex.tester import ComparisonMixin, TestCase
+from text_sentencecase import SentenceCase
 
-class TestSentenceCaseBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = SentanceCase
+class TestSentenceCaseBasic(ComparisonMixin, TestCase):
+    effect_class = SentenceCase
     comparisons = [()]

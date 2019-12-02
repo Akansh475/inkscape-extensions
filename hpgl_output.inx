@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>HPGL Output</name>
-  <id>org.ekips.output.hpgl</id>
+  <id>org.ekips.output.hpgl_output</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="file" location="inx">hpgl_encoder.py</dependency>
   <label>Please make sure that all objects you want to save are converted to paths. Please use the plotter extension (Extensions menu) to plot directly over a serial connection.</label>

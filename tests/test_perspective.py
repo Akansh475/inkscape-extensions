@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from perspective import PathPerspective
+from perspective import Perspective
 from inkex.tester import ComparisonMixin, TestCase
 
 class PerspectiveBasicTest(ComparisonMixin, TestCase):
-    effect_class = PathPerspective
+    effect_class = Perspective
     comparisons = [('--id=text', '--id=envelope')]
     compare_file = 'svg/perspective.svg'

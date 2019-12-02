@@ -1,11 +1,10 @@
 # coding=utf-8
 
-from color_morehue import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_morehue import MoreHue
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorMoreHueBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorMoreHueBasicTest(ComparisonMixin, TestCase):
+    effect_class = MoreHue
 
     def test_default_values_black(self):
         args = [self.empty_svg]

@@ -2810,6 +2810,7 @@ class Polygon(object):
 ################################################################################
 
 class Gcodetools(inkex.EffectExtension):
+    multi_inx = True # XXX Remove this after refactoring
 
     def export_gcode(self, gcode, no_headers=False):
         if self.options.postprocessor != "" or self.options.postprocessor_custom != "":

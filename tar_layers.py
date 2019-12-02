@@ -33,7 +33,7 @@ import calendar
 import time
 import inkex
 
-class LayersOutput(inkex.OutputExtension):
+class TarLayers(inkex.OutputExtension):
     """Entry point to our layers export"""
     def make_template(self):
         """Returns the current document as a new empty document with the same defs"""
@@ -80,4 +80,4 @@ class LayersOutput(inkex.OutputExtension):
 
 
 if __name__ == '__main__':   #pragma: no cover
-    LayersOutput().run()
+    TarLayers().run()

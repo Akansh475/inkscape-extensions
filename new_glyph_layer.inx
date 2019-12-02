@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>2 - Add Glyph Layer</name>
-  <id>org.inkscape.typography.newglyphlayer</id>
+  <id>org.inkscape.typography.new_glyph_layer</id>
   <param name="unicode" type="string" gui-text="Unicode character:"></param>
   <effect>
     <object-type>all</object-type>

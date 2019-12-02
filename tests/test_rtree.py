@@ -1,9 +1,9 @@
 # coding=utf-8
-from rtree import RTreeTurtle
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from rtree import TurtleRtree
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
-class RTreeTurtleBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = RTreeTurtle
+class RTreeTurtleBasicTest(ComparisonMixin, TestCase):
+    effect_class = TurtleRtree
     comparisons = [()]
     compare_filters = [CompareNumericFuzzy(),]

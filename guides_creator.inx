@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Guides creator</name>
-  <id>org.inkscape.effect.guidescreator</id>
+  <id>org.inkscape.effect.guides_creator</id>
   <param name="tab" type="notebook">
     <page name="regular_guides" gui-text="Regular guides">
       <param name="guides_preset" type="optiongroup" appearance="combo" gui-text="Guides preset:">

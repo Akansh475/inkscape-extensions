@@ -34,7 +34,7 @@ except ImportError:
     np = None
 
 
-class PathPerspective(inkex.EffectExtension):
+class Perspective(inkex.EffectExtension):
     """Apply a perspective to a path"""
     def effect(self):
         if np is None:
@@ -135,4 +135,4 @@ class PathPerspective(inkex.EffectExtension):
 
 
 if __name__ == '__main__':
-    PathPerspective().run()
+    Perspective().run()

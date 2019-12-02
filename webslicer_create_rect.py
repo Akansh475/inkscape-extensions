@@ -22,24 +22,22 @@ from lxml import etree
 import inkex
 from webslicer_effect import WebSlicerMixin, is_empty
 
-class WebSlicer_CreateRect(WebSlicerMixin, inkex.EffectExtension):
-
-    def __init__(self):
-        super(WebSlicer_CreateRect, self).__init__()
-        self.arg_parser.add_argument("--name")
-        self.arg_parser.add_argument("--format", default="png")
-        self.arg_parser.add_argument("--dpi", type=int)
-        self.arg_parser.add_argument("--dimension")
-        self.arg_parser.add_argument("--bg-color")
-        self.arg_parser.add_argument("--quality", type=int)
-        self.arg_parser.add_argument("--gif-type")
-        self.arg_parser.add_argument("--palette-size", type=int)
-        self.arg_parser.add_argument("--html-id")
-        self.arg_parser.add_argument("--html-class")
-        self.arg_parser.add_argument("--layout-disposition")
-        self.arg_parser.add_argument("--layout-position-anchor")
+class CreateRect(WebSlicerMixin, inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--name")
+        pars.add_argument("--format", default="png")
+        pars.add_argument("--dpi", type=int)
+        pars.add_argument("--dimension")
+        pars.add_argument("--bg-color")
+        pars.add_argument("--quality", type=int)
+        pars.add_argument("--gif-type")
+        pars.add_argument("--palette-size", type=int)
+        pars.add_argument("--html-id")
+        pars.add_argument("--html-class")
+        pars.add_argument("--layout-disposition")
+        pars.add_argument("--layout-position-anchor")
         # inkscape param workaround
-        self.arg_parser.add_argument("--tab")
+        pars.add_argument("--tab")
 
     def unique_slice_name(self):
         name = self.options.name
@@ -99,6 +97,5 @@ class WebSlicer_CreateRect(WebSlicerMixin, inkex.EffectExtension):
         ])
         return conf_list
 
-
 if __name__ == '__main__':
-    WebSlicer_CreateRect().run()
+    CreateRect().run()

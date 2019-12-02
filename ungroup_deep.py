@@ -13,22 +13,14 @@ from inkex.elements import (
     ClipPath, Use,
 )
 
-class Ungroup(inkex.EffectExtension):
-    def __init__(self):
-        super(Ungroup, self).__init__()
-        self.arg_parser.add_argument("-s", "--startdepth",
-                                     type=int,
-                                     dest="startdepth", default=0,
-                                     help="starting depth for ungrouping")
-        self.arg_parser.add_argument("-m", "--maxdepth",
-                                     type=int,
-                                     dest="maxdepth", default=65535,
-                                     help="maximum ungrouping depth")
-        self.arg_parser.add_argument("-k", "--keepdepth",
-                                     type=int,
-                                     dest="keepdepth", default=0,
-                                     help="levels of ungrouping to "\
-                                          "leave untouched")
+class UngroupDeep(inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--startdepth", type=int, default=0,
+                          help="starting depth for ungrouping")
+        pars.add_argument("--maxdepth", type=int, default=65535,
+                          help="maximum ungrouping depth")
+        pars.add_argument("--keepdepth", type=int, default=0,
+                          help="levels of ungrouping to leave untouched")
 
     @staticmethod
     def _merge_style(node, style):
@@ -193,4 +185,4 @@ class Ungroup(inkex.EffectExtension):
 
 
 if __name__ == '__main__':
-    Ungroup().run()
+    UngroupDeep().run()

@@ -22,7 +22,8 @@ from lxml import etree
 
 import inkex
 
-class Layers2SVGFont(inkex.EffectExtension):
+class LayersToSvgFont(inkex.EffectExtension):
+    """Convert layers to an svg font"""
     def guideline_value(self, label, index):
         namedview = self.svg.namedview
         for guide in namedview.get_guides():
@@ -112,6 +113,5 @@ class Layers2SVGFont(inkex.EffectExtension):
                     d += " " + self.flip_cordinate_system(p, emsize, baseline)
                 glyph.set("d", d)
 
-
 if __name__ == '__main__':
-    Layers2SVGFont().run()
+    LayersToSvgFont().run()

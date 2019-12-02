@@ -1,7 +1,7 @@
 # coding=utf-8
-from lorem_ipsum import LorumImpsum
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from lorem_ipsum import LoremIpsum
+from inkex.tester import ComparisonMixin, TestCase
 
-class LorumImpsumBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = LorumImpsum
+class LorumIpsumBasicTest(ComparisonMixin, TestCase):
+    effect_class = LoremIpsum
     comparisons = [()]

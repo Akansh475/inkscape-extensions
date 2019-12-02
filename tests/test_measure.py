@@ -1,9 +1,9 @@
 # coding=utf-8
-from measure import Length
+from measure import MeasureLength
 from inkex.tester import ComparisonMixin, TestCase
 
 class LengthBasicTest(ComparisonMixin, TestCase):
-    effect_class = Length
+    effect_class = MeasureLength
     comparisons = [
         ('--id=p1', '--id=p2'),
         ('--method=presets', '--presetFormat=TaP_start', '--id=p1'),

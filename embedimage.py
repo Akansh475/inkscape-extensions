@@ -39,11 +39,10 @@ except ImportError:
     import urlparse
     from base64 import encodestring as encodebytes
 
-class Embedder(inkex.EffectExtension):
+class EmbedImage(inkex.EffectExtension):
     """Allow selected image tags to become embeded image tags"""
     def add_arguments(self, pars):
-        pars.add_argument("-s", "--selectedonly", type=inkex.Boolean,\
-            help="embed only selected images")
+        pars.add_argument("--selectedonly", type=inkex.Boolean, help="embed only selected images")
 
     def effect(self):
         # if slectedonly is enabled and there is a selection
@@ -117,4 +116,4 @@ def get_type(path, header):
     return None
 
 if __name__ == '__main__':
-    Embedder().run()
+    EmbedImage().run()

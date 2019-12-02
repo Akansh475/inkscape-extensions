@@ -29,8 +29,9 @@ from collections import OrderedDict
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot, call
+from inkex.localization import inkex_gettext as _
 
-class GimpOutput(TempDirMixin, inkex.OutputExtension):
+class GimpXcf(TempDirMixin, inkex.OutputExtension):
     """
     Provide a quick and dirty way of using gimp to output an xcf from Inkscape.
 
@@ -174,6 +175,5 @@ class GimpOutput(TempDirMixin, inkex.OutputExtension):
         with open(xcf, 'rb') as fhl:
             stream.write(fhl.read())
 
-
 if __name__ == '__main__':
-    GimpOutput().run()
+    GimpXcf().run()

@@ -1,8 +1,8 @@
 # coding=utf-8
-from tar_layers import LayersOutput
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from tar_layers import TarLayers
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareSize
 
-class LayersOutputBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = LayersOutput
+class LayersOutputBasicTest(ComparisonMixin, TestCase):
+    effect_class = TarLayers
     compare_filters = [CompareSize()]

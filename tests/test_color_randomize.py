@@ -1,14 +1,14 @@
 # coding=utf-8
-from color_randomize import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_randomize import Randomize
+from inkex.tester import ComparisonMixin, TestCase
 
 def extract_hsl(hexcol):
     from inkex.colors import Color
     return Color('#' + hexcol).to_hsl().to_floats()
 
 
-class ColorRandomizeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorRandomizeBasicTest(ComparisonMixin, TestCase):
+    effect_class = Randomize
 
     def test_default_values(self):
         """ The default ranges are set to 0, and thus the color and opacity should not change. """
@@ -18,10 +18,6 @@ class ColorRandomizeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestC
         self.assertEqual("8080ff", col)
         opac = self.effect.opacmod(5)
         self.assertEqual(5, opac)
-
-
-class ColorRandomizeColorModificationTest(InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
 
     def test_no_change(self):
         """ The user selected 0% values, and thus the color should not change. """
@@ -62,10 +58,6 @@ class ColorRandomizeColorModificationTest(InkscapeExtensionTestMixin, TestCase):
         hsl = extract_hsl(self.effect.colmod(156, 156, 156))
         self.assertLessEqual([hsl[0], hsl[1], hsl[2]], [1, 1, 1])
         self.assertGreaterEqual([hsl[0], hsl[1], hsl[2]], [0, 0, 0])
-
-
-class ColorRandomizeOpacityModificationTest(InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
 
     def test_no_change(self):
         """ The user selected 0% opacity range, and thus the opacity should not change. """

@@ -34,7 +34,7 @@ from inkex.transforms import Vector2d as Point
 
 import voronoi
 
-class Voronoi2svg(inkex.EffectExtension):
+class Voronoi(inkex.EffectExtension):
     """Extension to create a Voronoi diagram."""
     def add_arguments(self, pars):
         pars.add_argument('--tab')
@@ -291,4 +291,4 @@ class Voronoi2svg(inkex.EffectExtension):
                 i += 1
 
 if __name__ == "__main__":
-    Voronoi2svg().run()
+    Voronoi().run()

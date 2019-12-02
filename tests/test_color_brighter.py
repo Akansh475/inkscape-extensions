@@ -1,9 +1,9 @@
 # coding=utf-8
-from color_brighter import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_brighter import Brighter
+from inkex.tester import ComparisonMixin, TestCase
 
-class ColorBrighterBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorBrighterBasicTest(ComparisonMixin, TestCase):
+    effect_class = Brighter
 
     def test_default_values_black(self):
         args = [self.empty_svg]

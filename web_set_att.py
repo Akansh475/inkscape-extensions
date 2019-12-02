@@ -25,71 +25,45 @@ and only with aspace.
 """
 
 # local library
+import inkex
+from inkex.localization import inkex_gettext as _
 import inkwebeffect
 
-class InkWebTransmitAtt(inkwebeffect.InkWebEffect):
-
-    def __init__(self):
-        super(InkWebTransmitAtt, self).__init__()
-        self.arg_parser.add_argument("-a", "--att",
-                                     type=str,
-                                     dest="att", default="fill",
-                                     help="Attribute to set.")
-        self.arg_parser.add_argument("-v", "--val",
-                                     type=str,
-                                     dest="val", default="red",
-                                     help="Values to set.")
-        self.arg_parser.add_argument("-w", "--when",
-                                     type=str,
-                                     dest="when", default="onclick",
-                                     help="When it must to set?")
-        self.arg_parser.add_argument("-c", "--compatibility",
-                                     type=str,
-                                     dest="compatibility", default="append",
-                                     help="Compatibility with previews code to this event.")
-        self.arg_parser.add_argument("-t", "--from-and-to",
-                                     type=str,
-                                     dest="from_and_to", default="g-to-one",
-                                     help='Who transmit to Who? "g-to-one" All set the last. "one-to-g" The first set all.')
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+class SetAttribute(inkwebeffect.InkWebEffect):
+    """Set a web attribute accross many objects"""
+    def add_arguments(self, pars):
+        pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
+        pars.add_argument("--att", default="fill", help="Attribute to set.")
+        pars.add_argument("--val", default="red", help="Values to set.")
+        pars.add_argument("--when", default="onclick", help="When it must to set?")
+        pars.add_argument("--from-and-to", dest="from_and_to", default="g-to-one")
+        pars.add_argument("--compatibility", default="append",
+                          help="Compatibility with previews code to this event.")
 
     def effect(self):
         self.ensureInkWebSupport()
 
         if len(self.options.ids) < 2:
-            return inkwebeffect.inkex.errormsg(_("You must select at least two elements."))
+            raise inkex.AbortExtension(_("You must select at least two elements."))
 
-        elFrom = []
-        idTo = []
-        if self.options.from_and_to == "g-to-one":
-            # All set the last
-            for selId in self.options.ids[:-1]:
-                elFrom.append(self.svg.selected[selId])
-            idTo.append(self.options.ids[-1])
-        else:
-            # The first set all
-            elFrom.append(self.svg.selected[self.options.ids[0]])
-            for selId in self.options.ids[1:]:
-                idTo.append(selId)
+        # All set the last else The first set all
+        split = -1 if self.options.from_and_to == "g-to-one" else 1
+        el_from = list(self.svg.selected.values())[:split]
+        id_to = list(self.svg.selected.keys())[split:]
 
-        evCode = "InkWeb.setAtt({{el:['{}'], att:'{}', val:'{}'}})".format("','".join(idTo),
-                                                                         self.options.att,
-                                                                         self.options.val)
-        for el in elFrom:
-            prevEvCode = el.get(self.options.when)
-            if prevEvCode is None:
-                prevEvCode = ""
+        ev_code = "InkWeb.setAtt({{el:['{}'], att:'{}', val:'{}'}})".format(
+            "','".join(id_to), self.options.att, self.options.val)
+        for elem in el_from:
+            prev_ev_code = elem.get(self.options.when)
+            if prev_ev_code is None:
+                prev_ev_code = ""
 
             if self.options.compatibility == 'append':
-                elEvCode = prevEvCode + ";\n" + evCode
+                el_ev_code = prev_ev_code + ";\n" + ev_code
             if self.options.compatibility == 'prepend':
-                elEvCode = evCode + ";\n" + prevEvCode
+                el_ev_code = ev_code + ";\n" + prev_ev_code
 
-            el.set(self.options.when, elEvCode)
-
+            elem.set(self.options.when, el_ev_code)
 
 if __name__ == '__main__':
-    InkWebTransmitAtt().run()
+    SetAttribute().run()

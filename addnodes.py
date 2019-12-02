@@ -26,27 +26,19 @@ This extension either adds nodes to a path so that
 
 import math
 
+import inkex
 from inkex import bezier
 from inkex.elements import PathElement
 from inkex.paths import CubicSuperPath
-from inkex.base import InkscapeExtension, SvgThroughMixin
 
-class SplitIt(SvgThroughMixin, InkscapeExtension):
+class AddNodes(inkex.EffectExtension):
     """Extension to split a path by adding nodes to it"""
-    def __init__(self):
-        super(SplitIt, self).__init__()
-        self.arg_parser.add_argument("--segments",
-                                     type=int,
-                                     dest="segments", default=2,
-                                     help="Number of segments to divide the path into")
-        self.arg_parser.add_argument("--max",
-                                     type=float,
-                                     dest="max", default=2,
-                                     help="Number of segments to divide the path into")
-        self.arg_parser.add_argument("--method",
-                                     type=str,
-                                     dest="method", default='',
-                                     help="The kind of division to perform")
+    def add_arguments(self, pars):
+        pars.add_argument("--segments", type=int, default=2,
+                          help="Number of segments to divide the path into")
+        pars.add_argument("--max", type=float, default=2.0,
+                          help="Number of segments to divide the path into")
+        pars.add_argument("--method", help="The kind of division to perform")
 
     def effect(self):
         for node in self.svg.get_selected(PathElement):
@@ -72,4 +64,4 @@ class SplitIt(SvgThroughMixin, InkscapeExtension):
             node.path = CubicSuperPath(new).to_path(curves_only=True)
 
 if __name__ == '__main__':
-    SplitIt().run()
+    AddNodes().run()

@@ -1,9 +1,9 @@
 # coding=utf-8
-from pixelsnap import PixelSnapEffect
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from pixelsnap import PixelSnap
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareOrderIndependentStyle
 
-class TestPixelSnapEffectBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = PixelSnapEffect
+class TestPixelSnapEffectBasic(ComparisonMixin, TestCase):
+    effect_class = PixelSnap
     compare_filters = [CompareOrderIndependentStyle()]
     comparisons = [('--id=p1', '--id=r3')]

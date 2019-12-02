@@ -21,35 +21,14 @@ from lxml import etree
 import inkex
 from webslicer_effect import WebSlicerMixin, is_empty
 
-
-class WebSlicer_CreateGroup(WebSlicerMixin, inkex.EffectExtension):
-
-    def __init__(self):
-        super(WebSlicer_CreateGroup, self).__init__()
-        self.arg_parser.add_argument("--html-id",
-                                     type=str,
-                                     dest="html_id",
-                                     help="")
-        self.arg_parser.add_argument("--html-class",
-                                     type=str,
-                                     dest="html_class",
-                                     help="")
-        self.arg_parser.add_argument("--width-unity",
-                                     type=str,
-                                     dest="width_unity",
-                                     help="")
-        self.arg_parser.add_argument("--height-unity",
-                                     type=str,
-                                     dest="height_unity",
-                                     help="")
-        self.arg_parser.add_argument("--bg-color",
-                                     type=str,
-                                     dest="bg_color",
-                                     help="")
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+class CreateGroup(WebSlicerMixin, inkex.EffectExtension):
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("--html-id", dest="html_id")
+        pars.add_argument("--html-class", dest="html_class")
+        pars.add_argument("--width-unity", dest="width_unity")
+        pars.add_argument("--height-unity", dest="height_unity")
+        pars.add_argument("--bg-color", dest="bg_color")
 
     def get_base_elements(self):
         self.layer = self.get_slicer_layer()

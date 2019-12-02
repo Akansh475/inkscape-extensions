@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>HSL Adjust</name>
-    <id>org.inkscape.color.HSL_adjust</id>
+    <id>org.inkscape.color.hsl_adjust</id>
     <dependency type="file" location="inx">coloreffect.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">

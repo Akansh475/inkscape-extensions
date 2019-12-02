@@ -16,19 +16,20 @@
 
 
 import inkex
+from inkex.localization import inkex_gettext as _
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_Effects(inkex.EffectExtension):
+class JessyinkEffects(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument('--tab',  type=str, dest = 'what')
-        pars.add_argument('--effectInOrder',  type=str, dest = 'effectInOrder', default = 1)
-        pars.add_argument('--effectInDuration',  type=float, dest = 'effectInDuration', default = 0.8)
-        pars.add_argument('--effectIn',  type=str, dest = 'effectIn', default = 'none')
-        pars.add_argument('--effectOutOrder',  type=str, dest = 'effectOutOrder', default = 2)
-        pars.add_argument('--effectOutDuration',  type=float, dest = 'effectOutDuration', default = 0.8)
-        pars.add_argument('--effectOut', dest = 'effectOut', default = 'none')
+        pars.add_argument('--tab')
+        pars.add_argument('--effectInOrder', default=1)
+        pars.add_argument('--effectInDuration', type=float, default=0.8)
+        pars.add_argument('--effectIn', default='none')
+        pars.add_argument('--effectOutOrder', default=2)
+        pars.add_argument('--effectOutDuration', type=float, default=0.8)
+        pars.add_argument('--effectOut', default='none')
 
     def effect(self):
         # Check version.
@@ -61,4 +62,4 @@ class JessyInk_Effects(inkex.EffectExtension):
 
 # Create effect instance
 if __name__ == '__main__':
-    JessyInk_Effects().run()
+    JessyinkEffects().run()

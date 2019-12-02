@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Interpolate Attribute in a group</name>
-    <id>org.inkscape.filter.interp-att-g</id>
+    <id>org.inkscape.filter.interp_att_g</id>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="att" type="optiongroup" appearance="combo" gui-text="Attribute to Interpolate:">

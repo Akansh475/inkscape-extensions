@@ -23,7 +23,7 @@ from inkex.elements import (
     TextElement, FlowRoot, FlowPara, Tspan, TextPath, Rectangle
 )
 
-class Split(inkex.EffectExtension):
+class TextSplit(inkex.EffectExtension):
     """Split text up."""
     def add_arguments(self, pars):
         pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
@@ -188,4 +188,4 @@ class Split(inkex.EffectExtension):
                 parent.remove(elem)
 
 if __name__ == '__main__':
-    Split().run()
+    TextSplit().run()

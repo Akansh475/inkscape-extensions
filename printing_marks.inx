@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Printing Marks</name>
-  <id>org.inkscape.printing.marks</id>
+  <id>org.inkscape.generate.printing_marks</id>
 
   <param name="tab" type="notebook">
     <page name="marks" gui-text="Marks">

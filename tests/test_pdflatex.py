@@ -23,12 +23,11 @@ Clean up any old `.msg` files with invalid or old keys.
 
 (use EXPORT_COMPARE to generate the output svgs, see inkex.tester docs)
 """
-from pdflatex import LatexGenerate
-
+from pdflatex import PdfLatex
 from inkex.tester import ComparisonMixin, TestCase
 
 class PdfLatexTest(ComparisonMixin, TestCase):
-    effect_class = LatexGenerate
+    effect_class = PdfLatex
     comparisons = [
         ('--formule=\\(\\displaystyle\\frac{\\pi^2}{6}=\\lim_{n \\to \\infty}\\sum_{k=1}^n \\frac{1}{k^2}\\)', '--packages='),
     ]

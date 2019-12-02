@@ -45,6 +45,7 @@ import tempfile
 import zipfile
 
 import inkex
+from inkex.elements import TextElement, Tspan, FlowRoot, FlowPara, FlowSpan
 
 try:  # PY2
     from urllib import url2pathname
@@ -53,40 +54,21 @@ except ImportError:  # PY3
     from urllib.parse import urlparse
     from urllib.request import url2pathname
 
+ENCODING = "cp437" if os.name == 'nt' else "latin-1"
 
-class CompressedMediaOutput(inkex.OutputExtension):
-    def __init__(self):
-        super(CompressedMediaOutput, self).__init__()
-        if os.name == 'nt':
-            self.encoding = "cp437"
-        else:
-            self.encoding = "latin-1"
-        self.text_tags = ['{http://www.w3.org/2000/svg}tspan',
-                          '{http://www.w3.org/2000/svg}text',
-                          '{http://www.w3.org/2000/svg}flowRoot',
-                          '{http://www.w3.org/2000/svg}flowPara',
-                          '{http://www.w3.org/2000/svg}flowSpan']
-        self.arg_parser.add_argument("--image_dir",
-                                     type=str,
-                                     dest="image_dir",
-                                     default="",
-                                     help="Image directory")
-        self.arg_parser.add_argument("--font_list",
-                                     type=inkex.Boolean,
-                                     dest="font_list",
-                                     default=False,
-                                     help="Add font list")
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+class CompressedMedia(inkex.OutputExtension):
+    """Output a compressed file"""
+    def add_arguments(self, pars):
+        pars.add_argument("--image_dir", help="Image directory")
+        pars.add_argument("--font_list", type=inkex.Boolean, help="Add font list")
+        pars.add_argument("--tab")
 
     def collect_images(self, docname, z):
         """
         Collects all images in the document
         and copy them to the temporary directory.
         """
-        dir = self.options.image_dir
+        imgdir = self.options.image_dir
 
         for node in self.svg.xpath('//svg:image'):
             xlink = node.get('xlink:href')
@@ -98,21 +80,21 @@ class CompressedMediaOutput(inkex.OutputExtension):
                 if href is not None and os.path.isfile(href):
                     absref = os.path.realpath(href)
 
-                image_path = os.path.join(dir, os.path.basename(absref))
+                image_path = os.path.join(imgdir, os.path.basename(absref))
 
                 if os.path.isfile(absref):
                     shutil.copy(absref, self.tmp_dir)
-                    z.write(absref, image_path.encode(self.encoding))
+                    z.write(absref, image_path.encode(ENCODING))
                 elif os.path.isfile(os.path.join(self.tmp_dir, absref)):
                     # TODO: please explain why this clause is necessary
                     shutil.copy(os.path.join(self.tmp_dir, absref), self.tmp_dir)
-                    z.write(os.path.join(self.tmp_dir, absref), image_path.encode(self.encoding))
+                    z.write(os.path.join(self.tmp_dir, absref), image_path.encode(ENCODING))
                 else:
                     inkex.errormsg('Could not locate file: %s' % absref)
 
                 node.set('xlink:href', image_path)
 
-    def collect_SVG(self, docstripped, z):
+    def collect_svg(self, docstripped, z):
         """
         Copy SVG document to the temporary directory
         and add it to the temporary compressed file
@@ -127,7 +109,7 @@ class CompressedMediaOutput(inkex.OutputExtension):
         Returns true if the tag in question is an element that
         can hold text.
         """
-        return node.tag in self.text_tags
+        return isinstance(node, (TextElement, Tspan, FlowRoot, FlowPara, FlowSpan))
 
     def get_fonts(self, node):
         """
@@ -195,10 +177,9 @@ class CompressedMediaOutput(inkex.OutputExtension):
         # Create destination zip in same directory as the document
         with zipfile.ZipFile(stream, 'w') as z:
             self.collect_images(docname, z)
-            self.collect_SVG(docstripped, z)
+            self.collect_svg(docstripped, z)
             if self.options.font_list:
                 self.list_fonts(z)
 
-
 if __name__ == '__main__':
-    CompressedMediaOutput().run()
+    CompressedMedia().run()

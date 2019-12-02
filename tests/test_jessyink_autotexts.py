@@ -1,8 +1,8 @@
 #!/usr/bin/en
 # coding=utf-8
-from jessyInk_autoTexts import JessyInk_AutoTexts
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from jessyInk_autoTexts import AutoTexts
+from inkex.tester import ComparisonMixin, TestCase
 
-class JessyInkAutoTextsBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = JessyInk_AutoTexts
+class JessyInkAutoTextsBasicTest(ComparisonMixin, TestCase):
+    effect_class = AutoTexts
     comparisons = [('--autoText', 'slideTitle', '--id', 't1')]

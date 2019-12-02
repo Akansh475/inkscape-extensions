@@ -24,10 +24,10 @@ import inkex
 from inkex.utils import NSS
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
-class JessyInk_CustomMouseHandler(inkex.EffectExtension):
+class MouseHandler(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument('--tab', type=str, dest='what')
-        pars.add_argument('--mouseSettings', type=str, dest='mouseSettings', default='default')
+        pars.add_argument('--tab', dest='what')
+        pars.add_argument('--mouseSettings', dest='mouseSettings', default='default')
 
     def effect(self):
         # Check version.
@@ -60,4 +60,4 @@ class JessyInk_CustomMouseHandler(inkex.EffectExtension):
 
 # Create effect instance
 if __name__ == '__main__':
-    JessyInk_CustomMouseHandler().run()
+    MouseHandler().run()

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Collection of SVG files One per root layer</name>
-  <id>org.inkscape.output.LAYERS</id>
+  <id>org.inkscape.output.tar_layers</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <output>
     <extension>.tar</extension>

@@ -162,16 +162,16 @@ def check_use(svg, element, scale_x, scale_y):
 
 
 class DPISwitcher(inkex.EffectExtension):
-    def __init__(self):
-        super(DPISwitcher, self).__init__()
-        self.arg_parser.add_argument(
-            "--switcher", type=str, dest="switcher", default="0",
-            help="Select the DPI switch you want")
-        self.arg_parser.add_argument("--action", type=str, dest="action", default=None)
-        self.factor_a = 90.0 / 96.0
-        self.factor_b = 96.0 / 90.0
-        self.units = "px"
-        self.unitExponent = 1.0
+    multi_inx = True
+    factor_a = 90.0 / 96.0
+    factor_b = 96.0 / 90.0
+    units = "px"
+    unitExponent = 1.0
+
+    def add_arguments(self, pars):
+        pars.add_argument("--switcher", type=str, default="0",
+                          help="Select the DPI switch you want")
+        pars.add_argument("--action")
 
     # dictionaries of unit to user unit conversion factors
     __uuconvLegacy = {

@@ -3,8 +3,8 @@
 
 from chardataeffect import CharEffectBase
 
-
-class SentanceCase(CharEffectBase):
+class SentenceCase(CharEffectBase):
+    """Convert text to sentence case"""
     sentence_start = True
     was_punctuation = False
 
@@ -31,6 +31,5 @@ class SentanceCase(CharEffectBase):
             return char.lower()
         return char
 
-
 if __name__ == '__main__':
-    SentanceCase().run()
+    SentenceCase().run()

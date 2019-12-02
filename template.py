@@ -25,6 +25,7 @@ import inkex
 
 class InxDefinedTemplate(inkex.TemplateExtension):
     """Most functionality is in TemplateExtension"""
+    multi_inx = True
     themes = {
         'white': ('#ffffff', '#666666'),
         'gray': ('#808080', '#444444'),

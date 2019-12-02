@@ -1,10 +1,9 @@
 # coding=utf-8
-from color_negative import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_negative import Negative
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorNegativeBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorNegativeBasicTest(ComparisonMixin, TestCase):
+    effect_class = Negative
 
     def test_default_values_black(self):
         args = [self.empty_svg]

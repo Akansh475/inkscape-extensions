@@ -114,9 +114,11 @@ class TestCase(MockCommandMixin, BaseCase):
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
         self._temp_dir = None
+        self._effect = None
 
     def setUp(self): # pylint: disable=invalid-name
         """Make sure every test is seeded the same way"""
+        self._effect = None
         super(TestCase, self).setUp()
         try:
             # python3, with version 1 to get the same numbers
@@ -236,6 +238,12 @@ class TestCase(MockCommandMixin, BaseCase):
         else:
             self.assertAlmostEqual(first, second, places, msg, delta)
 
+    @property
+    def effect(self):
+        """Generate an effect object"""
+        if self._effect is None:
+            self._effect = self.effect_class()
+        return self._effect
 
 class InkscapeExtensionTestMixin(object):
     """Automatically setup self.effect for each test and test with an empty svg"""
@@ -244,7 +252,6 @@ class InkscapeExtensionTestMixin(object):
         super(InkscapeExtensionTestMixin, self).setUp()
         if self.effect_class is None:
             self.skipTest('self.effect_class is not defined for this this test')
-        self.effect = self.effect_class()
 
     def test_default_settings(self):
         """Extension works with empty svg file"""

@@ -18,53 +18,24 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-import copy
 from math import atan2, degrees
-from lxml import etree
 
 import inkex
+from inkex.elements import ClipPath, Filter
 
-class Edge3d(inkex.EffectExtension):
-    def __init__(self):
-        super(Edge3d, self).__init__()
-        self.arg_parser.add_argument('-a', '--angle',
-                                     type=float,
-                                     dest='angle',
-                                     default=45.0,
-                                     help='angle of illumination, clockwise, 45 = upper right'),
-        self.arg_parser.add_argument('-d', '--stddev',
-                                     type=float,
-                                     dest='stddev',
-                                     default=5.0,
-                                     help='stdDeviation for Gaussian Blur'),
-        self.arg_parser.add_argument('-H', '--blurheight',
-                                     type=float,
-                                     dest='blurheight',
-                                     default=2.0,
-                                     help='height for Gaussian Blur'),
-        self.arg_parser.add_argument('-W', '--blurwidth',
-                                     type=float,
-                                     dest='blurwidth',
-                                     default=2.0,
-                                     help='width for Gaussian Blur'),
-        self.arg_parser.add_argument('-s', '--shades',
-                                     type=int,
-                                     dest='shades',
-                                     default=2,
-                                     help='shades, 2 = black and white, 3 = black, grey, white, etc.'),
-        self.arg_parser.add_argument('-b', '--bw',
-                                     type=inkex.Boolean,
-                                     dest='bw',
-                                     default=False,
-                                     help='black and white, create only the fully black and white wedges'),
-        self.arg_parser.add_argument('-p', '--thick',
-                                     type=float,
-                                     dest='thick',
-                                     default=10.,
-                                     help='stroke-width for path pieces'),
-        self.filtId = ''
+class Edge3D(inkex.EffectExtension):
+    """Generate a 3d edge"""
+    def add_arguments(self, pars):
+        pars.add_argument('--angle', type=float, default=45.0,
+                          help='angle of illumination, clockwise, 45 = upper right')
+        pars.add_argument('--stddev', type=float, default=5.0, help='Gaussian Blur stdDeviation')
+        pars.add_argument('--blurheight', type=float, default=2.0, help='Gaussian Blur height')
+        pars.add_argument('--blurwidth', type=float, default=2.0, help='Gaussian Blur width')
+        pars.add_argument('--shades', type=int, default=2, help="Number of shades")
+        pars.add_argument('--bw', type=inkex.Boolean, help="Black and white")
+        pars.add_argument('--thick', type=float, default=10.0, help='stroke-width for pieces')
 
-    def angleBetween(self, start, end, angle):
+    def angle_between(self, start, end, angle):
         """Return true if angle (degrees, clockwise, 0 = up/north) is between
            angles start and end"""
 
@@ -84,83 +55,67 @@ class Edge3d(inkex.EffectExtension):
            for the current shade.  shade is a floating point 0-1 white-black"""
         # size of a wedge for shade i, wedges come in pairs
         delta = 360. / self.options.shades / 2.
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('path', 'svg'):
-                d = node.path
-                p = d.to_arrays()
-                g = None
-                for shade in range(0, self.options.shades):
-                    if self.options.bw and 0 < shade < self.options.shades - 1:
+        for node in self.svg.get_selected(inkex.PathElement):
+            array = node.path.to_arrays()
+            group = None
+            filt = None
+            for shade in range(0, self.options.shades):
+                if self.options.bw and 0 < shade < self.options.shades - 1:
+                    continue
+                start = [self.options.angle - delta * (shade + 1)]
+                end = [self.options.angle - delta * shade]
+                start.append(self.options.angle + delta * shade)
+                end.append(self.options.angle + delta * (shade + 1))
+                level = float(shade) / float(self.options.shades - 1)
+                last = []
+                result = []
+                for cmd, params in array:
+                    if cmd == 'Z':
+                        last = []
                         continue
-                    self.start = [self.options.angle - delta * (shade + 1)]
-                    self.end = [self.options.angle - delta * shade]
-                    self.start.append(self.options.angle + delta * shade)
-                    self.end.append(self.options.angle + delta * (shade + 1))
-                    level = float(shade) / float(self.options.shades - 1)
-                    last = []
-                    result = []
-                    for cmd, params in p:
-                        if cmd == 'Z':
-                            last = []
-                            continue
-                        if last:
-                            if cmd == 'V':
-                                point = [last[0], params[-2:][0]]
-                            elif cmd == 'H':
-                                point = [params[-2:][0], last[1]]
-                            else:
-                                point = params[-2:]
-                            a = degrees(atan2(point[0] - last[0], point[1] - last[1]))
-                            if (self.angleBetween(self.start[0], self.end[0], a) or
-                                    self.angleBetween(self.start[1], self.end[1], a)):
-                                result.append(('M', last))
-                                result.append((cmd, params))
-                            ref = point
+                    if last:
+                        if cmd == 'V':
+                            point = [last[0], params[-2:][0]]
+                        elif cmd == 'H':
+                            point = [params[-2:][0], last[1]]
                         else:
-                            ref = params[-2:]
-                        last = ref
-                    if result:
-                        if g is None:
-                            g = self.getGroup(node)
-                        nn = copy.deepcopy(node)
-                        del nn.attrib["id"]
-                        nn.set('d', str(inkex.Path(result)))
-                        col = 255 - int(255. * level)
-                        a = 'fill:none;stroke:#%02x%02x%02x;stroke-opacity:1;stroke-width:10;%s' % ((col,) * 3 + (self.filtId,))
-                        nn.set('style', a)
-                        g.append(nn)
+                            point = params[-2:]
+                        ang = degrees(atan2(point[0] - last[0], point[1] - last[1]))
+                        if (self.angle_between(start[0], end[0], ang) or \
+                            self.angle_between(start[1], end[1], ang)):
+                            result.append(('M', last))
+                            result.append((cmd, params))
+                        ref = point
+                    else:
+                        ref = params[-2:]
+                    last = ref
+                if result:
+                    if group is None:
+                        group, filt = self.get_group(node)
+                    new_node = group.add(node.copy())
+                    new_node.path = result
+                    col = 255 - int(255. * level)
+                    new_node.style = 'fill:none;stroke:#%02x%02x%02x;stroke-opacity:1;stroke-width:10;%s' % ((col,) * 3 + (filt,))
 
-    def getGroup(self, node):
+    def get_group(self, node):
+        """
+        make a clipped group, clip with clone of original, clipped group
+        include original and group of paths.
+        """
         defs = self.svg.defs
-        if defs is not None:
-            # make a clipped group, clip with clone of original, clipped group
-            # include original and group of paths
-            clip = etree.SubElement(defs, inkex.addNS('clipPath', 'svg'))
-            nn = copy.deepcopy(node)
-            del nn.attrib["id"]
-            clip.append(nn)
-            clipId = self.svg.get_unique_id('clipPath')
-            clip.set('id', clipId)
-            clipG = node.getparent().add(inkex.Group())
-            g = clipG.add(inkex.Group())
-            clipG.set('clip-path', 'url(#' + clipId + ')')
-            # make a blur filter reference by the style of each path
-            filt = etree.SubElement(defs, inkex.addNS('filter', 'svg'))
-            filtId = self.svg.get_unique_id('filter')
-            self.filtId = 'filter:url(#%s);' % filtId
-            for k, v in [('id', filtId), ('height', str(self.options.blurheight)),
-                         ('width', str(self.options.blurwidth)),
-                         ('x', '-0.5'), ('y', '-0.5')]:
-                filt.set(k, v)
-            fe = etree.SubElement(filt, inkex.addNS('feGaussianBlur', 'svg'))
-            fe.set('stdDeviation', str(self.options.stddev))
-        else:
-            # can't find defs, just group paths
-            g = node.getparent().add(inkex.Group())
-            g.append(node)
+        clip = defs.add(ClipPath())
+        new_node = clip.add(node.copy())
+        clip_group = node.getparent().add(inkex.Group())
+        group = clip_group.add(inkex.Group())
+        clip_group.set('clip-path', 'url(#' + clip.get_id() + ')')
 
-        return g
+        # make a blur filter reference by the style of each path
+        filt = defs.add(Filter(x='-0.5', y='-0.5',\
+            height=str(self.options.blurheight),\
+            width=str(self.options.blurwidth)))
 
+        filt.add_primitive('feGaussianBlur', stdDeviation=self.options.stddev)
+        return group, 'filter:url(#%s);' % filt.get_id()
 
 if __name__ == '__main__':
-    Edge3d().run()
+    Edge3D().run()

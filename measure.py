@@ -39,7 +39,7 @@ import inkex
 from inkex.elements import TextElement, TextPath, Tspan
 from inkex.bezier import csparea, cspcofm, csplength
 
-class Length(inkex.EffectExtension):
+class MeasureLength(inkex.EffectExtension):
     """Measure the length of selected paths"""
     def add_arguments(self, pars):
         pars.add_argument("--type", dest="mtype", default="length",\
@@ -198,6 +198,5 @@ class Length(inkex.EffectExtension):
         node.set('y', str(y))
         node.set('transform', 'rotate(%s, %s, %s)' % (angle, x, y))
 
-
 if __name__ == '__main__':
-    Length().run()
+    MeasureLength().run()

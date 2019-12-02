@@ -1,9 +1,9 @@
 # coding=utf-8
-from embedimage import Embedder
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from embedimage import EmbedImage
+from inkex.tester import ComparisonMixin, TestCase
 
-class EmbedderBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = Embedder
+class EmbedderBasicTest(ComparisonMixin, TestCase):
+    effect_class = EmbedImage
     compare_file = 'svg/images.svg'
     comparisons = (
         (),

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Transmit Attributes</name>
-  <id>org.inkscape.web.transmit-att</id>
+  <id>org.inkscape.web.transmit_attribute</id>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
             <param name="att" type="string" gui-text="Attribute to transmit:">fill</param>

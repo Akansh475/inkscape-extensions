@@ -4,8 +4,8 @@ from __future__ import absolute_import, division
 
 import coloreffect
 
-
-class C(coloreffect.ColorEffect):
+class Brighter(coloreffect.ColorEffect):
+    """Make colours brighter"""
     def colmod(self, r, g, b):
         factor = 0.9
 
@@ -27,6 +27,5 @@ class C(coloreffect.ColorEffect):
 
         return '{:02x}{:02x}{:02x}'.format(r, g, b)
 
-
 if __name__ == '__main__':
-    C().run()
+    Brighter().run()

@@ -1,10 +1,9 @@
 # coding=utf-8
-from color_HSL_adjust import C
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from color_HSL_adjust import HslAdjust
+from inkex.tester import ComparisonMixin, TestCase
 
-
-class ColorHSLAdjustBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = C
+class ColorHSLAdjustBasicTest(ComparisonMixin, TestCase):
+    effect_class = HslAdjust
 
     def test_default_values(self):
         """ The default ranges are set to 0, and thus the color should not change. """

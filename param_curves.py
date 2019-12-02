@@ -142,40 +142,22 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
 
 
 class ParamCurves(inkex.EffectExtension):
-    def __init__(self):
-        super(ParamCurves, self).__init__()
-        self.arg_parser.add_argument("--t_start", type=float, dest="t_start", default=0.0,
-                                     help="Start t-value")
-        self.arg_parser.add_argument("--t_end", type=float, dest="t_end", default=1.0,
-                                     help="End t-value")
-        self.arg_parser.add_argument("--times2pi", type=inkex.Boolean, dest="times2pi", default=True,
-                                     help="Multiply t-range by 2*pi")
-        self.arg_parser.add_argument("--xleft", type=float, dest="xleft", default=-1.0,
-                                     help="x-value of rectangle's left")
-        self.arg_parser.add_argument("--xright", type=float, dest="xright", default=1.0,
-                                     help="x-value of rectangle's right")
-        self.arg_parser.add_argument("--ybottom", type=float, dest="ybottom", default=-1.0,
-                                     help="y-value of rectangle's bottom")
-        self.arg_parser.add_argument("--ytop", type=float, dest="ytop", default=1.0,
-                                     help="y-value of rectangle's top")
-        self.arg_parser.add_argument("-s", "--samples", type=int, dest="samples", default=8,
-                                     help="Samples")
-        self.arg_parser.add_argument("--fofx", type=str, dest="fofx", default="cos(3*t)",
-                                     help="fx(t) for plotting")
-        self.arg_parser.add_argument("--fofy", type=str, dest="fofy", default="sin(5*t)",
-                                     help="fy(t) for plotting")
-        self.arg_parser.add_argument("--remove", type=inkex.Boolean, dest="remove", default=True,
-                                     help="If True, source rectangle is removed")
-        self.arg_parser.add_argument("--isoscale", type=inkex.Boolean, dest="isoscale", default=True,
-                                     help="If True, isotropic scaling is used")
-        self.arg_parser.add_argument("--drawaxis", type=inkex.Boolean, dest="drawaxis", default=True,
-                                     help="If True, axis are drawn")
-        self.arg_parser.add_argument("--tab", type=str, dest="tab", default="sampling",
-                                     help="The selected UI-tab when OK was pressed")
-        self.arg_parser.add_argument("--paramcurvesuse", type=str, dest="paramcurvesuse", default="",
-                                     help="dummy")
-        self.arg_parser.add_argument("--pythonfunctions", type=str, dest="pythonfunctions", default="",
-                                     help="dummy")
+    def add_arguments(self, pars):
+        pars.add_argument("--t_start", type=float, default=0.0, help="Start t-value")
+        pars.add_argument("--t_end", type=float, default=1.0, help="End t-value")
+        pars.add_argument("--times2pi", type=inkex.Boolean, default=True,
+                          help="Multiply t-range by 2*pi")
+        pars.add_argument("--xleft", type=float, default=-1.0, help="x-value of left")
+        pars.add_argument("--xright", type=float, default=1.0, help="x-value of right")
+        pars.add_argument("--ybottom", type=float, default=-1.0, help="y-value of bottom")
+        pars.add_argument("--ytop", type=float, default=1.0, help="y-value of top")
+        pars.add_argument("-s", "--samples", type=int, default=8, help="Samples")
+        pars.add_argument("--fofx", default="cos(3*t)", help="fx(t) for plotting")
+        pars.add_argument("--fofy", default="sin(5*t)", help="fy(t) for plotting")
+        pars.add_argument("--remove", type=inkex.Boolean, default=True, help="Remove rectangle")
+        pars.add_argument("--isoscale", type=inkex.Boolean, default=True, help="Isotropic scaling")
+        pars.add_argument("--drawaxis", type=inkex.Boolean, default=True)
+        pars.add_argument("--tab", default="sampling")
 
     def effect(self):
         for id, node in self.svg.selected.items():

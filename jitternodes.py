@@ -28,7 +28,6 @@ class JitterNodes(inkex.EffectExtension):
     """Jiggle nodes around"""
     def add_arguments(self, pars):
         pars.add_argument("--tab")
-        pars.add_argument("--title")
         pars.add_argument("--radiusx", type=float, default=10.0, help="Randum radius X")
         pars.add_argument("--radiusy", type=float, default=10.0, help="Randum radius Y")
         pars.add_argument("--ctrl", type=inkex.Boolean, default=True, help="Randomize ctrl points")

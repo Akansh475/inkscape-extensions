@@ -21,12 +21,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# TODO:
-# * Implement option to keep text orientation upright
-#    1. Find text direction i.e. path tangent,
-#    2. check direction >90 or <-90 Degrees
-#    3. rotate by 180 degrees around text center
-#
 """
 This extension module can measure arbitrary path and object length
 It adds text to the selected path containing the length in a given unit.
@@ -63,8 +57,6 @@ class MeasureLength(inkex.EffectExtension):
             help="Number of significant digits after decimal point")
         pars.add_argument("-s", "--scale", type=float, default=1.1,\
             help="Scale Factor (Drawing:Real Length)")
-        pars.add_argument("-r", "--orient", type=inkex.Boolean, default=True,\
-            help="Keep orientation of text upright")
 
     def effect(self):
         # get number of digits

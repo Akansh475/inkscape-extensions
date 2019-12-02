@@ -417,7 +417,6 @@ class DxfInput(inkex.InputExtension):
         p.add_argument("--encoding", dest="input_encode", default="latin_1")
         p.add_argument("--font", dest="font", default="Arial")
         p.add_argument("--tab", dest="tab", default="Options")
-        p.add_argument("--inputhelp", dest="inputhelp", default="")
 
     def load(self, stream):
         return stream

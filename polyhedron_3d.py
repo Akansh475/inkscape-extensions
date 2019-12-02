@@ -381,108 +381,42 @@ class Obj(object):  # a 3d object defined by the vertices and the faces (eg a po
 
 
 class Poly3D(inkex.GenerateExtension):
-    def __init__(self):
-        super(Poly3D, self).__init__()
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab", default="object")
+    def add_arguments(self, pars):
+        pars.add_argument("--tab", default="object")
 
         # MODEL FILE SETTINGS
-        self.arg_parser.add_argument("--obj",
-                                     type=str,
-                                     dest="obj", default='cube')
-        self.arg_parser.add_argument("--spec_file",
-                                     type=str,
-                                     dest="spec_file", default='great_rhombicuboct.obj')
-        self.arg_parser.add_argument("--cw_wound",
-                                     type=inkex.Boolean,
-                                     dest="cw_wound", default='true')
-        self.arg_parser.add_argument("--type",
-                                     type=str,
-                                     dest="type", default='face')
+        pars.add_argument("--obj", default='cube')
+        pars.add_argument("--spec_file", default='great_rhombicuboct.obj')
+        pars.add_argument("--cw_wound", type=inkex.Boolean, default=True)
+        pars.add_argument("--type", default='face')
         # VEIW SETTINGS
-        self.arg_parser.add_argument("--r1_ax",
-                                     type=str,
-                                     dest="r1_ax", default="X-Axis")
-        self.arg_parser.add_argument("--r2_ax",
-                                     type=str,
-                                     dest="r2_ax", default="X-Axis")
-        self.arg_parser.add_argument("--r3_ax",
-                                     type=str,
-                                     dest="r3_ax", default="X-Axis")
-        self.arg_parser.add_argument("--r4_ax",
-                                     type=str,
-                                     dest="r4_ax", default="X-Axis")
-        self.arg_parser.add_argument("--r5_ax",
-                                     type=str,
-                                     dest="r5_ax", default="X-Axis")
-        self.arg_parser.add_argument("--r6_ax",
-                                     type=str,
-                                     dest="r6_ax", default="X-Axis")
-        self.arg_parser.add_argument("--r1_ang",
-                                     type=float,
-                                     dest="r1_ang", default=0)
-        self.arg_parser.add_argument("--r2_ang",
-                                     type=float,
-                                     dest="r2_ang", default=0)
-        self.arg_parser.add_argument("--r3_ang",
-                                     type=float,
-                                     dest="r3_ang", default=0)
-        self.arg_parser.add_argument("--r4_ang",
-                                     type=float,
-                                     dest="r4_ang", default=0)
-        self.arg_parser.add_argument("--r5_ang",
-                                     type=float,
-                                     dest="r5_ang", default=0)
-        self.arg_parser.add_argument("--r6_ang",
-                                     type=float,
-                                     dest="r6_ang", default=0)
-        self.arg_parser.add_argument("--scl",
-                                     type=float,
-                                     dest="scl", default=100.0)
+        pars.add_argument("--r1_ax", default="X-Axis")
+        pars.add_argument("--r2_ax", default="X-Axis")
+        pars.add_argument("--r3_ax", default="X-Axis")
+        pars.add_argument("--r4_ax", default="X-Axis")
+        pars.add_argument("--r5_ax", default="X-Axis")
+        pars.add_argument("--r6_ax", default="X-Axis")
+        pars.add_argument("--r1_ang", type=float, default=0.0)
+        pars.add_argument("--r2_ang", type=float, default=0.0)
+        pars.add_argument("--r3_ang", type=float, default=0.0)
+        pars.add_argument("--r4_ang", type=float, default=0.0)
+        pars.add_argument("--r5_ang", type=float, default=0.0)
+        pars.add_argument("--r6_ang", type=float, default=0.0)
+        pars.add_argument("--scl", type=float, default=100.0)
         # STYLE SETTINGS
-        self.arg_parser.add_argument("--show",
-                                     type=str,
-                                     dest="show", default='faces')
-        self.arg_parser.add_argument("--shade",
-                                     type=inkex.Boolean,
-                                     dest="shade", default='true')
-        self.arg_parser.add_argument("--f_r",
-                                     type=int,
-                                     dest="f_r", default=255)
-        self.arg_parser.add_argument("--f_g",
-                                     type=int,
-                                     dest="f_g", default=0)
-        self.arg_parser.add_argument("--f_b",
-                                     type=int,
-                                     dest="f_b", default=0)
-        self.arg_parser.add_argument("--f_opac",
-                                     type=int,
-                                     dest="f_opac", default=100)
-        self.arg_parser.add_argument("--s_opac",
-                                     type=int,
-                                     dest="s_opac", default=100)
-        self.arg_parser.add_argument("--th",
-                                     type=float,
-                                     dest="th", default=2)
-        self.arg_parser.add_argument("--lv_x",
-                                     type=float,
-                                     dest="lv_x", default=1)
-        self.arg_parser.add_argument("--lv_y",
-                                     type=float,
-                                     dest="lv_y", default=1)
-        self.arg_parser.add_argument("--lv_z",
-                                     type=float,
-                                     dest="lv_z", default=-2)
-        self.arg_parser.add_argument("--back",
-                                     type=inkex.Boolean,
-                                     dest="back", default='false')
-        self.arg_parser.add_argument("--norm",
-                                     type=inkex.Boolean,
-                                     dest="norm", default='true')
-        self.arg_parser.add_argument("--z_sort",
-                                     type=str,
-                                     dest="z_sort", default='min')
+        pars.add_argument("--show", default='faces')
+        pars.add_argument("--shade", type=inkex.Boolean, default=True)
+        pars.add_argument("--f_r", type=int, default=255)
+        pars.add_argument("--f_g", type=int, default=0)
+        pars.add_argument("--f_b", type=int, default=0)
+        pars.add_argument("--f_opac", type=int, default=100)
+        pars.add_argument("--s_opac", type=int, default=100)
+        pars.add_argument("--th", type=float, default=2)
+        pars.add_argument("--lv_x", type=float, default=1)
+        pars.add_argument("--lv_y", type=float, default=1)
+        pars.add_argument("--lv_z", type=float, default=-2)
+        pars.add_argument("--back", type=inkex.Boolean, default=False)
+        pars.add_argument("--z_sort", default='min')
 
     def generate(self):
         if numpy is None:

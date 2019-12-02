@@ -26,6 +26,7 @@ import inkex
 
 class DvdCover(inkex.TemplateExtension):
     """Create an empty DVD Cover (in mm)"""
+    multi_inx = True
     def add_arguments(self, pars):
         pars.add_argument("-s", "--spine", type=float, default=14.0,
                           help="Dvd spine width (mm)")

@@ -57,29 +57,14 @@ def get_fit(u, csp, col):
         + 3*(1-u)*u**2*csp[2][col] + u**3*csp[3][col]
 
 class DxfOutlines(inkex.OutputExtension):
-    def __init__(self):
-        super(DxfOutlines, self).__init__()
-        self.arg_parser.add_argument("-R", "--ROBO",
-                                     type=str, dest="ROBO",
-                                     default=False)
-        self.arg_parser.add_argument("-P", "--POLY",
-                                     type=str, dest="POLY",
-                                     default=True)
-        self.arg_parser.add_argument("--units",
-                                     type=str, dest="units",
-                                     default="72./96")  # Points
-        self.arg_parser.add_argument("--encoding",
-                                     type=str, dest="char_encode",
-                                     default="latin_1")
-        self.arg_parser.add_argument("--tab",
-                                     type=str, dest="tab")
-        self.arg_parser.add_argument("--inputhelp",
-                                     type=str, dest="inputhelp")
-        self.arg_parser.add_argument("--layer_option",
-                                     type=str, dest="layer_option",
-                                     default="all")
-        self.arg_parser.add_argument("--layer_name",
-                                     type=str, dest="layer_name")
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("-R", "--ROBO", default=False)
+        pars.add_argument("-P", "--POLY", default=True)
+        pars.add_argument("--units", default="72./96")  # Points
+        pars.add_argument("--encoding", dest="char_encode", default="latin_1")
+        pars.add_argument("--layer_option", default="all")
+        pars.add_argument("--layer_name")
 
         self.dxf = []
         self.handle = 255  # handle for DXF ENTITY

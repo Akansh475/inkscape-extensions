@@ -10,9 +10,8 @@ import inkex
 from inkex.elements import load_svg
 
 class SeamlessPattern(inkex.TemplateExtension):
-    """
-    Generate a seamless pattern template
-    """
+    """Generate a seamless pattern template"""
+    multi_inx = True
     def get_template(self):
         name = "seamless_pattern.svg"
         path = os.path.dirname(os.path.realpath(__file__))

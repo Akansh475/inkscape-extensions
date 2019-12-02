@@ -61,7 +61,6 @@ class CompressedMedia(inkex.OutputExtension):
     def add_arguments(self, pars):
         pars.add_argument("--image_dir", help="Image directory")
         pars.add_argument("--font_list", type=inkex.Boolean, help="Add font list")
-        pars.add_argument("--tab")
 
     def collect_images(self, docname, z):
         """

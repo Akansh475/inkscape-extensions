@@ -194,9 +194,7 @@ CORPA = [
 class LoremIpsum(inkex.EffectExtension):
     """Generate text with psuedo latin content"""
     def add_arguments(self, pars):
-        pars.add_argument("--title")
-        pars.add_argument("-n", "--numberofparagraphs", type=int, dest="num", default=5,
-                          help="Number of paragraphs to generate")
+        pars.add_argument("--num", type=int, default=5, help="Number of paragraphs to generate")
         pars.add_argument("-c", "--sentencecount", type=int, default=16,
                           help="Number of Sentences")
         pars.add_argument("-f", "--fluctuation", type=int, default=4, help="+/-")

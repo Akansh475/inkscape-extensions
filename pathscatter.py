@@ -98,7 +98,6 @@ def linearize(p, tolerance=0.001):
 class PathScatter(pathmodifier.Diffeo):
     def __init__(self):
         super(PathScatter, self).__init__()
-        self.arg_parser.add_argument("--title")
         self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0, help="normal offset")
         self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0, help="tangential offset")
         self.arg_parser.add_argument("-g", "--grouppick", type=inkex.Boolean, dest="grouppick", default=False,

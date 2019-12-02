@@ -246,14 +246,6 @@ class FuncPlot(inkex.EffectExtension):
                                      type=str,
                                      dest="tab", default="sampling",
                                      help="The selected UI-tab when OK was pressed")
-        self.arg_parser.add_argument("--funcplotuse",
-                                     type=str,
-                                     dest="funcplotuse", default="",
-                                     help="dummy")
-        self.arg_parser.add_argument("--pythonfunctions",
-                                     type=str,
-                                     dest="pythonfunctions", default="",
-                                     help="dummy")
 
     def effect(self):
         newpath = None

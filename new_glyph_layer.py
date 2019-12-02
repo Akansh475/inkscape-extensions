@@ -24,17 +24,16 @@ import sys
 import inkex
 
 class NewGlyphLayer(inkex.EffectExtension):
-    def __init__(self):
-        super(NewGlyphLayer, self).__init__()
-        self.arg_parser.add_argument("-u", "--unicodechars", type=str, dest="unicodechars",
-                                     default='', help="Unicode chars")
+    def add_arguments(self, pars):
+        self.arg_parser.add_argument("--text", default='', help="Unicode chars")
+
         self.encoding = sys.stdin.encoding
         if self.encoding == 'cp0' or self.encoding is None:
             self.encoding = locale.getpreferredencoding()
 
     def effect(self):
         # Get all the options
-        unicode_chars = self.options.unicodechars
+        unicode_chars = self.options.text
         if isinstance(unicode_chars, bytes):
             unicode_chars = unicode_chars.decode(self.encoding)
 

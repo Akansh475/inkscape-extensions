@@ -28,8 +28,6 @@ class hpglDecoder(SvgOutputMixin):
                 "resolutionX":float
                 "resolutionY":float
                 "showMovements":bool
-                "docWidth":float
-                "docHeight":float
         """
         self.hpglString = hpglString
         self.options = options
@@ -39,14 +37,13 @@ class hpglDecoder(SvgOutputMixin):
         self.textMovements = _("Movements")
         self.textPenNumber = _("Pen ")
         self.layers = {}
-        self.oldCoordinates = (0.0, self.options.docHeight)
+        self.oldCoordinates = (0.0, 297.0)
 
     def get_svg(self):
         """Generate an svg document from hgpl data"""
         actual_layer = 0
         # prepare document
-        doc = self.get_template(width=self.options.docWidth,
-                                height=self.options.docHeight, unit='mm')
+        doc = self.get_template(width=210.0, height=297.0, unit='mm')
         svg = doc.getroot()
         svg.namedview.set('inkscape:document-units', 'mm')
 
@@ -86,7 +83,7 @@ class hpglDecoder(SvgOutputMixin):
                 if i % 2 == 0:
                     parameters[i] = str(float(param) / self.scaleX)
                 else:
-                    parameters[i] = str(self.options.docHeight - (float(param) / self.scaleY))
+                    parameters[i] = str(297.0 - (float(param) / self.scaleY))
             # create path and add it to the corresponding layer
             if not isPU or (self.options.showMovements and isPU):
                 # create layer if it does not exist

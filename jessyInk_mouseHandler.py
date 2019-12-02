@@ -27,7 +27,7 @@ NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 class MouseHandler(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab', dest='what')
-        pars.add_argument('--mouseSettings', dest='mouseSettings', default='default')
+        pars.add_argument('--mouseSetting', default='default')
 
     def effect(self):
         # Check version.
@@ -40,7 +40,7 @@ class MouseHandler(inkex.EffectExtension):
         for node in self.document.xpath("//jessyink:mousehandler", namespaces=NSS):
             node.getparent().remove(node)
 
-        if self.options.mouseSettings == "noclick":
+        if self.options.mouseSetting == "noclick":
             # Create new script node.
             scriptElm = etree.Element(inkex.addNS("script", "svg"))
             scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_noclick.js")).read()
@@ -48,7 +48,7 @@ class MouseHandler(inkex.EffectExtension):
             groupElm.set("{" + NSS["jessyink"] + "}subtype", "jessyInk_core_mouseHandler_noclick")
             groupElm.append(scriptElm)
             self.document.getroot().append(groupElm)
-        elif self.options.mouseSettings == "draggingZoom":
+        elif self.options.mouseSetting == "draggingZoom":
             # Create new script node.
             scriptElm = etree.Element(inkex.addNS("script", "svg"))
             scriptElm.text = open(os.path.join(os.path.dirname(__file__), "jessyInk_core_mouseHandler_zoomControl.js")).read()

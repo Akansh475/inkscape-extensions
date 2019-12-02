@@ -25,6 +25,7 @@
       </param>
     </page>
   </param>
+  <param name="modify" type="bool" gui-text="Modify in Place">false</param>
     
   <effect>
   <object-type>all</object-type>

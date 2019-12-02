@@ -18,7 +18,7 @@
     <option value="center_y">Middle</option>
     <option value="bottom">Bottom</option>
   </param>
-<!--  <param name="flowtext" type="bool" gui-text="Flow text">false</param> -->
+  <param name="flowtext" type="bool" gui-text="Flow text">false</param>
   <param name="keepstyle" type="bool" gui-text="Keep style">true</param>
   <effect>
     <object-type>all</object-type>

@@ -37,7 +37,6 @@
             <param name="radius"        type="string"  gui-text="Radius (px):">s_a*s_b*s_c/(4*area)</param>
             <param name="isogonal_conj" type="bool" gui-text="Draw Isogonal Conjugate">false</param>
             <param name="isotomic_conj" type="bool" gui-text="Draw Isotomic Conjugate">false</param>
-            <param name="report"        type="bool" gui-text="Report this triangle's properties">false</param>
         </page>
         <page name="Help" gui-text="Help">
             <label xml:space="preserve">This extension draws constructions about a triangle defined by the first 3 nodes of a selected path. You may select one of preset objects or create your own ones.

@@ -94,24 +94,18 @@ def linearize(p, tolerance=0.001):
 
 
 class PathAlongPath(pathmodifier.Diffeo):
-    def __init__(self):
-        pathmodifier.Diffeo.__init__(self)
-        self.arg_parser.add_argument("--title")
-        self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0,
-                                     help="normal offset")
-        self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0,
-                                     help="tangential offset")
-        self.arg_parser.add_argument("-k", "--kind", type=str, dest="kind", default=True,
-                                     help="choose between wave or snake effect")
-        self.arg_parser.add_argument("-c", "--copymode", type=str, dest="copymode", default=True,
-                                     help="repeat the path to fit deformer's length")
-        self.arg_parser.add_argument("-p", "--space", type=float, dest="space", default=0.0)
-        self.arg_parser.add_argument("-v", "--vertical", type=inkex.Boolean, dest="vertical", default=False,
-                                     help="reference path is vertical")
-        self.arg_parser.add_argument("-d", "--duplicate", type=inkex.Boolean, dest="duplicate", default=False,
-                                     help="duplicate pattern before deformation")
-        self.arg_parser.add_argument("--tab", type=str, dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+    def add_arguments(self, pars):
+        pars.add_argument("-n", "--noffset", type=float, default=0.0, help="normal offset")
+        pars.add_argument("-t", "--toffset", type=float, default=0.0, help="tangential offset")
+        pars.add_argument("-k", "--kind", type=inkex.Boolean, default=True)
+        pars.add_argument("-c", "--copymode", default="Single",
+                          help="repeat the path to fit deformer's length")
+        pars.add_argument("-p", "--space", type=float, default=0.0)
+        pars.add_argument("-v", "--vertical", type=inkex.Boolean, default=False,
+                          help="reference path is vertical")
+        pars.add_argument("-d", "--duplicate", type=inkex.Boolean, default=False,
+                          help="duplicate pattern before deformation")
+        pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
 
     def prepareSelectionList(self):
 

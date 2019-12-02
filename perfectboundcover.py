@@ -38,67 +38,25 @@ def points_to_ppi(points):
 
 
 class PerfectBoundCover(inkex.EffectExtension):
-    def __init__(self):
-        super(PerfectBoundCover, self).__init__()
-        self.arg_parser.add_argument("--width",
-                                     type=float,
-                                     dest="width", default=6.0,
-                                     help="cover width (in)")
-        self.arg_parser.add_argument("--height",
-                                     type=float,
-                                     dest="height", default=9.0,
-                                     help="cover height (in)")
-        self.arg_parser.add_argument("--pages",
-                                     type=int,
-                                     dest="pages", default=64,
-                                     help="number of pages")
-        self.arg_parser.add_argument("--paperthicknessmeasurement",
-                                     type=str,
-                                     dest="paperthicknessmeasurement", default=100.0,
-                                     help="paper thickness measurement")
-        self.arg_parser.add_argument("--paperthickness",
-                                     type=float,
-                                     dest="paperthickness", default=0.0,
-                                     help="paper thickness")
-        self.arg_parser.add_argument("--coverthicknessmeasurement",
-                                     type=str,
-                                     dest="coverthicknessmeasurement", default=100.0,
-                                     help="cover thickness measurement")
-        self.arg_parser.add_argument("--coverthickness",
-                                     type=float,
-                                     dest="coverthickness", default=0.0,
-                                     help="cover thickness")
-        self.arg_parser.add_argument("--bleed",
-                                     type=float,
-                                     dest="bleed", default=0.25,
-                                     help="cover bleed (in)")
-        self.arg_parser.add_argument("--removeguides",
-                                     type=inkex.Boolean,
-                                     dest="removeguides", default=False,
-                                     help="remove guides")
-        self.arg_parser.add_argument("--book",
-                                     type=str,
-                                     dest="book", default=False,
-                                     help="dummy")
-        self.arg_parser.add_argument("--cover",
-                                     type=str,
-                                     dest="cover", default=False,
-                                     help="dummy")
-        self.arg_parser.add_argument("--paper",
-                                     type=str,
-                                     dest="paper", default=False,
-                                     help="dummy")
-        self.arg_parser.add_argument("--warning",
-                                     type=str,
-                                     dest="warning", default=False,
-                                     help="dummy")
+    def add_arguments(self, pars):
+        pars.add_argument("--width", type=float, default=6.0, help="cover width (in)")
+        pars.add_argument("--height", type=float, default=9.0, help="cover height (in)")
+        pars.add_argument("--pages", type=int, default=64, help="number of pages")
+        pars.add_argument("--paperthicknessmeasurement", default=100.0,
+                          help="paper thickness measurement")
+        pars.add_argument("--paperthickness", type=float, default=0.0, help="paper thickness")
+        pars.add_argument("--coverthicknessmeasurement", type=float, default=100.0,
+                          help="cover thickness measurement")
+        pars.add_argument("--coverthickness", type=float, default=0.0, help="cover thickness")
+        pars.add_argument("--bleed", type=float, default=0.25, help="cover bleed (in)")
+        pars.add_argument("--removeguides", type=inkex.Boolean, default=False, help="remove guide")
 
     def effect(self):
         switch = {
             "ppi": lambda x: x,
-            "caliper": lambda x: caliper_to_ppi(x),
-            "bond_weight": lambda x: bond_weight_to_ppi(x),
-            "points": lambda x: points_to_ppi(x),
+            "caliper": caliper_to_ppi,
+            "bond_weight": bond_weight_to_ppi,
+            "points": points_to_ppi,
             "width": lambda x: x
         }
 

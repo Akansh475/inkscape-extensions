@@ -86,6 +86,8 @@ class NiceChart(inkex.GenerateExtension):
             raise ArgumentTypeError('Unknown type: {}'.format(value))
 
     def add_arguments(self, pars):
+        pars.add_argument('--tab')
+        pars.add_argument('--encoding', default='utf-8')
         pars.add_argument('-w', '--what', default='22,11,67', help='Chart Values')
         pars.add_argument("-t", "--type", type=self.get_type, default='bar', help="Chart Type")
         pars.add_argument("-b", "--blur", type=inkex.Boolean, default=True, help="Blur Type")

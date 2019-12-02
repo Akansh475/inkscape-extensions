@@ -29,8 +29,6 @@ class HpglInput(inkex.InputExtension):
         pars.add_argument('--resolutionY', type=float, default=1016.0, help='Resolution Y (dpi)')
         pars.add_argument('--showMovements', type=inkex.Boolean, default=False,
                           help='Show Movements between paths')
-        pars.add_argument('--docWidth', type=float, default=210.0, help='Width in mm')
-        pars.add_argument('--docHeight', type=float, default=297.0, help='Height in mm')
 
     def load(self, stream):
         return b';'.join(line.strip() for line in stream).decode()

@@ -162,6 +162,12 @@ class Style(OrderedDict):
             self[name + '-opacity'] = color.alpha
         self[name] = str(color.to_rgb())
 
+    def update_urls(self, old_id, new_id):
+        """Find urls in this style and replace them with the new id"""
+        for (name, value) in self.items():
+            if value == 'url(#{})'.format(old_id):
+                self[name] = 'url(#{})'.format(new_id)
+
 class StyleSheets(list):
     """
     Special mechanism which contains all the stylesheets for an svg document

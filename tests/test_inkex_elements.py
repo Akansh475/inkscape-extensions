@@ -239,6 +239,14 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(self.svg[0].get('id'), 'TreeItem8555')
         self.assertEqual(elem.get('id'), 'TreeItem2036')
 
+    def test_set_id_backlinks(self):
+        """Changing an id can update backlinks"""
+        elem = self.svg.getElementById('path1')
+        elem.set_id('plant54', True)
+        self.assertEqual(self.svg.getElementById('G').get('xlink:href'), '#plant54')
+        self.assertEqual(self.svg.getElementById('G').href, elem)
+        self.assertEqual(str(self.svg.getElementById('B').style), 'fill:#eee;joker:url(#plant54)')
+
     def test_bounding_box(self):
         """Elements can have bounding boxes"""
         elem = self.svg.getElementById('D')
@@ -404,7 +412,7 @@ class RectTest(ElementTestCase):
         """Test finding the composed stylesheet for the shape"""
         self.assertEqual(str(self.elem.style), 'fill:#0000ff;stroke-width:1px')
         self.assertEqual(str(self.elem.composed_style()),
-                         'fill:#0000ff;stroke:#d88;stroke-width:1px')
+                         'fill:#0000ff;stroke:#d88;joker:url(#path1);stroke-width:1px')
 
     def test_path(self):
         """Rectangle path"""

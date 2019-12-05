@@ -152,6 +152,17 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         """Get an element in this svg document by it's ID attribute"""
         return self.getElement('//{}[@id="{}"]'.format(elm, eid))
 
+    def getElementsByHref(self, eid): # pylint: disable=invalid-name
+        """Get elements by their href xlink attribute"""
+        return self.xpath('//*[@xlink:href="#{}"]'.format(eid))
+
+    def getElementsByStyleUrl(self, eid, style=None): # pylint: disable=invalid-name
+        """Get elements by a style attribute url"""
+        url = "url(#{})".format(eid)
+        if style is not None:
+            url = style + ":" + url
+        return self.xpath('//*[contains(@style,"{}")]'.format(url))
+
     @property
     def name(self):
         """Returns the Document Name"""

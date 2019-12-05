@@ -65,6 +65,26 @@ class BasicSvgTest(TestCase):
         self.assertEqual(doc.selected['apples'], doc)
         self.assertEqual(doc.get_first_selected(), doc)
 
+    def test_svg_by_href(self):
+        """Select element by xlink href"""
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        elem = doc.getElementsByHref('path3900')[0]
+        self.assertEqual(elem.TAG, 'textPath')
+        self.assertEqual(elem.get_id(), 'textPath3923')
+        elem = doc.getElementsByHref('path3904')[0]
+        self.assertEqual(elem.TAG, 'textPath')
+        self.assertEqual(elem.get_id(), 'textPath3906')
+        self.assertEqual(doc.getElementsByHref('not-an-id'), [])
+
+    def test_svg_by_url_link(self):
+        """Select element by urls in styles"""
+        doc = svg_file(self.data_file('svg', 'markers.svg'))
+        elem = doc.getElementsByStyleUrl('Arrow1Lend')[0]
+        self.assertEqual(elem.get_id(), 'dimension')
+        elem = doc.getElementsByStyleUrl('Arrow1Lstart')[0]
+        self.assertEqual(elem.get_id(), 'dimension')
+        self.assertEqual(doc.getElementsByStyleUrl('not-an-id'), [])
+
     def test_selected_bbox(self):
         """Can we get a bounding box from the selected items"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))

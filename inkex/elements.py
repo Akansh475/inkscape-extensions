@@ -199,24 +199,34 @@ class BaseElement(etree.ElementBase):
         desc = self.add(Desc())
         desc.text = text
 
-    def set_random_id(self, prefix=None, size=4):
-        """Sets the id attribute if it is not already set"""
+    def set_random_id(self, prefix=None, size=4, backlinks=False):
+        """Sets the id attribute if it is not already set."""
         prefix = str(self) if prefix is None else prefix
-        self.set('id', self.root.get_unique_id(prefix, size=size))
+        self.set_id(self.root.get_unique_id(prefix, size=size), backlinks=backlinks)
 
-    def set_random_ids(self, prefix=None, levels=-1):
+    def set_random_ids(self, prefix=None, levels=-1, backlinks=False):
         """Same as set_random_id, but will apply also to children"""
-        self.set_random_id(prefix=prefix)
+        self.set_random_id(prefix=prefix, backlinks=backlinks)
         if levels != 0:
             for child in self:
                 if hasattr(child, 'set_random_ids'):
-                    child.set_random_ids(prefix=prefix, levels=levels-1)
+                    child.set_random_ids(prefix=prefix, levels=levels-1, backlinks=backlinks)
 
     def get_id(self):
         """Get the id for the element, will set a new unique id if not set"""
         if 'id' not in self.attrib:
             self.set_random_id(self.TAG)
         return self.get('id')
+
+    def set_id(self, new_id, backlinks=False):
+        """Set the id and update backlinks to xlink and style urls if needed"""
+        old_id = self.get('id', None)
+        self.set('id', new_id)
+        if backlinks and old_id:
+            for elem in self.root.getElementsByHref(old_id):
+                elem.set('xlink:href', '#' + new_id)
+            for elem in self.root.getElementsByStyleUrl(old_id):
+                elem.style.update_urls(old_id, new_id)
 
     @property
     def root(self):

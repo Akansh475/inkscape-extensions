@@ -54,11 +54,14 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
                  pdf_poppler=True, export_type="svg")
 
         with open(svg_file, 'r') as fhl:
-            for child in load_svg(fhl).getroot():
+            svg = load_svg(fhl).getroot()
+            svg.set_random_ids(backlinks=True)
+            for child in svg:
                 if isinstance(child, ShapeElement):
                     yield child
                 elif isinstance(child, Defs):
                     for def_child in child:
+                        #def_child.set_random_id()
                         self.svg.defs.append(def_child)
 
     def write_latex(self, stream):

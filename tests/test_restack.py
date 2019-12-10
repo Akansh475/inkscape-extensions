@@ -1,8 +1,8 @@
 # coding=utf-8
 from restack import Restack
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 
-class RestackBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class RestackBasicTest(ComparisonMixin, TestCase):
     effect_class = Restack
     comparisons = [
         ('--tab=positional', '--id=p1', '--id=r3'),

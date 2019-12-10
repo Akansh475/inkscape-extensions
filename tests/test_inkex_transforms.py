@@ -361,6 +361,47 @@ class BoundingBoxTest(TestCase):
         """Bounding Boxes can be scaled"""
         self.assertEqual(BoundingBox(1, 3) * 2, (2, 2, 6, 6))
 
+    def test_bbox_anchor_left_right(self):
+        """Bunding box anchoring (left to right)"""
+        bbox = BoundingBox([-1, 1, 10, 20])
+        self.assertEqual([
+            bbox.get_anchor('l', 't', 'lr'),
+            bbox.get_anchor('m', 't', 'lr'),
+            bbox.get_anchor('r', 't', 'lr'),
+            bbox.get_anchor('l', 't', 'rl'),
+            bbox.get_anchor('m', 't', 'rl'),
+            bbox.get_anchor('r', 't', 'rl'),
+        ], [-1, 0.0, 1, 1, -0.0, -1])
+
+    def test_bbox_anchor_top_bottom(self):
+        """Bunding box anchoring (top to bottom)"""
+        bbox = BoundingBox([10, 20, -1, 1])
+        self.assertEqual([
+            bbox.get_anchor('l', 't', 'tb'),
+            bbox.get_anchor('l', 'm', 'tb'),
+            bbox.get_anchor('l', 'b', 'tb'),
+            bbox.get_anchor('l', 't', 'bt'),
+            bbox.get_anchor('l', 'm', 'bt'),
+            bbox.get_anchor('l', 'b', 'bt'),
+        ], [-1, 0.0, 1, 1, -0.0, -1])
+
+    def test_bbox_anchor_custom(self):
+        """Bounding box anchoring custom angle"""
+        bbox = BoundingBox([10, 10, 5, 5])
+        self.assertEqual([
+            bbox.get_anchor('l', 't', 0),
+            bbox.get_anchor('l', 't', 90),
+            bbox.get_anchor('l', 't', 180),
+            bbox.get_anchor('l', 't', 270),
+            bbox.get_anchor('l', 't', 45),
+        ], [10, -5, -10, 5, 3.5355339059327378])
+
+    def test_bbox_anchor_radial(self):
+        """Bounding box anchoring radial in/out"""
+        bbox = BoundingBox([10, 10, 5, 5])
+        self.assertRaises(ValueError, bbox.get_anchor, 'm', 'm', 'ro')
+        selbox = BoundingBox([100, 100, 100, 100])
+        self.assertEqual(int(bbox.get_anchor('m', 'm', 'ro', selbox)), 130)
 
 class SegmentTest(TestCase):
     """Test special Segments"""

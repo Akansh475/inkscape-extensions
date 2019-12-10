@@ -51,61 +51,46 @@ class Merge(inkex.EffectExtension):
             for node in self.svg.xpath('//svg:text | //svg:flowRoot'):
                 self.svg.selected[node.get('id')] = node
 
-        if self.svg.selected:
-            parentnode = self.svg.get_current_layer()
-            objlist = []
-            # calculate distances for each selected object
-            for node in self.svg.selected.values():
-                # get the bounding box
-                bbox = node.bounding_box()
+        if not self.svg.selected:
+            return
 
-                x = getattr(bbox, XAN[self.options.xanchor])
-                y = getattr(bbox, YAN[self.options.yanchor])
+        parentnode = self.svg.get_current_layer()
 
-                # direction chosen
-                if self.options.direction == "tb":
-                    objlist.append([y, node])
-                elif self.options.direction == "bt":
-                    objlist.append([-y, node])
-                elif self.options.direction == "lr":
-                    objlist.append([x, node])
-                elif self.options.direction == "rl":
-                    objlist.append([-x, node])
+        if self.options.flowtext:
+            text_element = FlowRoot
+            text_span = FlowPara
+        else:
+            text_element = TextElement
+            text_span = Tspan
 
-            objlist.sort(key=lambda x: x[0])
-            # move them to the top of the object stack in this order.
+        text_root = parentnode.add(text_element())
+        text_root.set('xml:space', 'preserve')
+        text_root.style = {
+            'font-size': '20px',
+            'font-style': 'normal',
+            'font-weight': 'normal',
+            'line-height': '125%',
+            'letter-spacing': '0px',
+            'word-spacing': '0px',
+            'fill': '#000000',
+            'fill-opacity': 1,
+            'stroke': 'none'
+        }
 
-            if self.options.flowtext:
-                text_element = FlowRoot
-                text_span = FlowPara
-            else:
-                text_element = TextElement
-                text_span = Tspan
+        for node in sorted(self.svg.selected.values(), key=self._sort):
+            self.recurse(text_span, node, text_root)
 
-            text_root = parentnode.add(text_element())
-            text_root.set('xml:space', 'preserve')
-            text_root.style = {
-                'font-size': '20px',
-                'font-style': 'normal',
-                'font-weight': 'normal',
-                'line-height': '125%',
-                'letter-spacing': '0px',
-                'word-spacing': '0px',
-                'fill': '#000000',
-                'fill-opacity': 1,
-                'stroke': 'none'
-            }
+        if self.options.flowtext:
+            region = text_root.add(FlowRegion())
+            region.set('xml:space', 'preserve')
+            rect = region.add(Rectangle())
+            rect.set('xml:space', 'preserve')
+            rect.set('height', 200)
+            rect.set('width', 200)
 
-            for _, node in objlist:
-                self.recurse(text_span, node, text_root)
-
-            if self.options.flowtext:
-                region = text_root.add(FlowRegion())
-                region.set('xml:space', 'preserve')
-                rect = region.add(Rectangle())
-                rect.set('xml:space', 'preserve')
-                rect.set('height', 200)
-                rect.set('width', 200)
+    def _sort(self, node):
+        return node.bounding_box().get_anchor(
+            self.options.xanchor, self.options.yanchor, self.options.direction)
 
     def recurse(self, text_span, node, span):
         """Recursively go through each node self calling on child nodes"""

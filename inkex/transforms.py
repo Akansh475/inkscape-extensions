@@ -28,9 +28,9 @@ Provide transformation parsing to extensions
 import re
 import sys
 from decimal import Decimal
-from math import cos, radians, sin, sqrt, tan, fabs, atan2, pi
+from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi
 
-from .utils import strargs
+from .utils import strargs, KeyDict
 
 try:
     from typing import overload, Tuple, Union, Optional # pylint: disable=unused-import
@@ -44,6 +44,12 @@ __all__ = ('Transform', 'BoundingBox',)
 if sys.version_info[0] == 3:  # PY3
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
+# Old settings, supported because users click 'ok' without looking.
+XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})
+YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
+# Anchoring objects with given directions (see inx options)
+CUSTOM_DIRECTION = {270: 'tb', 90: 'bt', 0: 'lr', 360: 'lr', 180: 'rl'}
+DIRECTION = ['tb', 'bt', 'lr', 'rl', 'ro', 'ri']
 
 class Vector2d(object):
     """
@@ -602,6 +608,31 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     def center(self):
         """Returns the middle of the bounding box"""
         return Vector2d(self.x.center, self.y.center)
+
+    def get_anchor(self, xanchor, yanchor, direction=None, selbox=None):
+        """Calls get_distance with the given anchor options"""
+        return self.anchor_distance(getattr(self, XAN[xanchor]), getattr(self, YAN[yanchor]),
+                                    direction=direction, selbox=selbox)
+
+    @staticmethod
+    def anchor_distance(x, y, direction=0, selbox=None):
+        """Using the x,y returns a single sortable value based on direction and angle
+
+        direction - int (custom angle), tb/bt (top/bottom), lr/rl (left/right), ri/ro (radial)
+        selbox - The bounding box of the whole selection for radial anchors
+        """
+        rot = 0
+        if isinstance(direction, int): # Angle
+            if direction not in CUSTOM_DIRECTION:
+                return hypot(x, y) * (cos(radians(-direction) - atan2(y, x)))
+            direction = CUSTOM_DIRECTION[direction]
+
+        if direction in ('ro', 'ri'):
+            if selbox is None:
+                raise ValueError("Radial distance not available without selection bounding box")
+            rot = hypot(selbox.x.center - x, selbox.y.center - y)
+
+        return [y, -y, x, -x, rot, -rot][DIRECTION.index(direction)]
 
 
 class DirectedLineSegment(object):

@@ -47,30 +47,16 @@ class Extract(inkex.EffectExtension):
             for node in self.svg.xpath('//svg:text | //svg:flowRoot'):
                 self.svg.selected[node.get('id')] = node
 
-        if self.svg.selected:
-            objlist = []
+        if not self.svg.selected:
+            return
 
-            # calculate distances for each selected object
-            for node in self.svg.selected.values():
-                # get the bounding box
-                bbox = node.bounding_box()
-                x = getattr(bbox, XAN[self.options.xanchor])
-                y = getattr(bbox, YAN[self.options.yanchor])
+        # move them to the top of the object stack in this order.
+        for node in sorted(self.svg.selected.values(), key=self._sort):
+            self.recurse(node)
 
-                # direction chosen
-                if self.options.direction == "tb":
-                    objlist.append([y, node])
-                elif self.options.direction == "bt":
-                    objlist.append([-y, node])
-                elif self.options.direction == "lr":
-                    objlist.append([x, node])
-                elif self.options.direction == "rl":
-                    objlist.append([-x, node])
-
-            objlist.sort(key=lambda x: x[0])
-            # move them to the top of the object stack in this order.
-            for _, node in objlist:
-                self.recurse(node)
+    def _sort(self, node):
+        return node.bounding_box().get_anchor(
+            self.options.xanchor, self.options.yanchor, self.options.direction)
 
     def recurse(self, node):
         """Go through each node and recusively self call for all children"""

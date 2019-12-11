@@ -51,28 +51,12 @@ def points_to_svgd(p):
 class Gears(inkex.GenerateExtension):
     container_label = 'Rendered Gears'
 
-    def __init__(self):
-        super(Gears, self).__init__()
-        self.arg_parser.add_argument("-t", "--teeth",
-                                     type=int,
-                                     dest="teeth", default=24,
-                                     help="Number of teeth")
-        self.arg_parser.add_argument("-p", "--pitch",
-                                     type=float,
-                                     dest="pitch", default=20.0,
-                                     help="Circular Pitch (length of arc from one tooth to next)")
-        self.arg_parser.add_argument("-a", "--angle",
-                                     type=float,
-                                     dest="angle", default=20.0,
-                                     help="Pressure Angle (common values: 14.5, 20, 25 degrees)")
-        self.arg_parser.add_argument("-c", "--centerdiameter",
-                                     type=float,
-                                     dest="centerdiameter", default=10.0,
-                                     help="Diameter of central hole - 0.0 for no hole")
-        self.arg_parser.add_argument("-u", "--unit",
-                                     type=str,
-                                     dest="unit", default="px",
-                                     help="unit of measure for circular pitch and center diameter")
+    def add_arguments(self, pars):
+        pars.add_argument("--teeth", type=int, default=24, help="Number of teeth")
+        pars.add_argument("--pitch", type=float, default=20.0, help="Circular Pitch")
+        pars.add_argument("--angle", type=float, default=20.0, help="Pressure Angle")
+        pars.add_argument("--centerdiameter", type=float, default=10.0, help="Diameter of hole")
+        pars.add_argument("--unit", default="px", help="unit for pitch and center diameter")
 
     def generate(self):
         teeth = self.options.teeth
@@ -166,19 +150,15 @@ class Gears(inkex.GenerateExtension):
 
         # Create SVG Path for gear
         style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
-        gear_attribs = {'style': str(inkex.Style(style)), 'd': path}
-        gear = PathElement(**gear_attribs)
+        gear = PathElement()
+        gear.style = style
+        gear.path = path
         yield gear
 
         if centerdiameter > 0.0:
-            center_attribs = {'style': str(inkex.Style(style)),
-                              inkex.addNS('cx', 'sodipodi'): '0.0',
-                              inkex.addNS('cy', 'sodipodi'): '0.0',
-                              inkex.addNS('rx', 'sodipodi'): str(centerdiameter / 2),
-                              inkex.addNS('ry', 'sodipodi'): str(centerdiameter / 2),
-                              inkex.addNS('type', 'sodipodi'): 'arc'
-                              }
-            yield PathElement(**center_attribs)
+            arc = PathElement.arc((0, 0), centerdiameter / 2)
+            arc.style = style
+            yield arc
 
 
 if __name__ == '__main__':

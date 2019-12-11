@@ -36,10 +36,6 @@ color_props = color_props_fill + color_props_stroke
 
 
 class ColorEffect(SvgThroughMixin, InkscapeExtension):
-    def __init__(self):
-        super(ColorEffect, self).__init__()
-        self.visited = []
-
     def effect(self):
         if not self.svg.selected:
             self.get_attribs(self.document.getroot())

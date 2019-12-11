@@ -23,248 +23,223 @@ __version__ = "0.2"
 import inkex
 
 class FoldableBox(inkex.EffectExtension):
+    """Foldable Box generation."""
+    def add_arguments(self, pars):
+        pars.add_argument("--width", type=float, default=10.0, help="The Box Width")
+        pars.add_argument("--height", type=float, default=15.0, help="The Box Height")
+        pars.add_argument("--depth", type=float, default=3.0, help="The Box Depth (z dimention)")
+        pars.add_argument("--unit", default="cm", help="The unit of the box dimensions")
+        pars.add_argument("--proportion", type=float, default=0.6, help="Inner tab proportion")
+        pars.add_argument("--guide", type=inkex.Boolean, default=False, help="Add guide lines")
 
-    def __init__(self):
-        super(FoldableBox, self).__init__()
-        self.arg_parser.add_argument("-x", "--width",
-                                     type=float,
-                                     dest="width",
-                                     default=10.0,
-                                     help="The Box Width - in the X dimension")
-        self.arg_parser.add_argument("-y", "--height",
-                                     type=float,
-                                     dest="height",
-                                     default=15.0,
-                                     help="The Box Height - in the Y dimension")
-        self.arg_parser.add_argument("-z", "--depth",
-                                     type=float,
-                                     dest="depth",
-                                     default=3.0,
-                                     help="The Box Depth - in the Z dimension")
-        self.arg_parser.add_argument("-u", "--unit",
-                                     type=str,
-                                     dest="unit",
-                                     default="cm",
-                                     help="The unit of the box dimensions")
-        self.arg_parser.add_argument("-p", "--paper-thickness",
-                                     type=float,
-                                     dest="thickness",
-                                     default=0.01,
-                                     help="Paper Thickness - sometimes that is important")
-        self.arg_parser.add_argument("-t", "--tab-proportion",
-                                     type=float,
-                                     dest="tabProportion",
-                                     default=0.6,
-                                     help="Inner tab proportion for upper tab")
-        self.arg_parser.add_argument("-g", "--guide-line",
-                                     type=inkex.Boolean,
-                                     dest="guideLine",
-                                     default=True,
-                                     help="Add guide lines to help the drawing limits")
+    def guide(self, value, orient):
+        """Create a guideline conditionally"""
+        if self.options.guide:
+            self.svg.namedview.new_guide(value, orient)
 
     def effect(self):
+        doc_w = self.svg.unittouu(self.document.getroot().get('width'))
+        doc_h = self.svg.unittouu(self.document.getroot().get('height'))
 
-        docW = self.svg.unittouu(self.document.getroot().get('width'))
-        docH = self.svg.unittouu(self.document.getroot().get('height'))
-
-        boxW = self.svg.unittouu(str(self.options.width) + self.options.unit)
-        boxH = self.svg.unittouu(str(self.options.height) + self.options.unit)
-        boxD = self.svg.unittouu(str(self.options.depth) + self.options.unit)
-        tabProp = self.options.tabProportion
-        tabH = boxD * tabProp
+        box_w = self.svg.unittouu(str(self.options.width) + self.options.unit)
+        box_h = self.svg.unittouu(str(self.options.height) + self.options.unit)
+        box_d = self.svg.unittouu(str(self.options.depth) + self.options.unit)
+        tab_h = box_d * self.options.proportion
 
         box_id = self.svg.get_unique_id('box')
         group = self.svg.get_current_layer().add(inkex.Group(id=box_id))
 
-        line_style = str(inkex.Style({'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}))
+        line_style = {'stroke': '#000000', 'fill': 'none',
+                      'stroke-width': str(self.svg.unittouu('1px'))}
 
-        # self.createGuide( 0, docH, 0 );
+        self.guide(doc_h, True)
 
         # Inner Close Tab
-        line_path = [
-            ['M', [boxW - (tabH * 0.7), 0]],
-            ['C', [boxW - (tabH * 0.25), 0, boxW, tabH * 0.3, boxW, tabH * 0.9]],
-            ['L', [boxW, tabH]],
-            ['L', [0, tabH]],
-            ['L', [0, tabH * 0.9]],
-            ['C', [0, tabH * 0.3, tabH * 0.25, 0, tabH * 0.7, 0]],
+        line = group.add(inkex.PathElement(id=box_id + '-inner-close-tab'))
+        line.path = [
+            ['M', [box_w - (tab_h * 0.7), 0]],
+            ['C', [box_w - (tab_h * 0.25), 0, box_w, tab_h * 0.3, box_w, tab_h * 0.9]],
+            ['L', [box_w, tab_h]],
+            ['L', [0, tab_h]],
+            ['L', [0, tab_h * 0.9]],
+            ['C', [0, tab_h * 0.3, tab_h * 0.25, 0, tab_h * 0.7, 0]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-inner-close-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        lower_pos = boxD + tabH
+        lower_pos = box_d + tab_h
         left_pos = 0
 
-        # self.createGuide( 0, docH-tabH, 0 );
+        self.guide(doc_h - tab_h, True)
 
         # Upper Close Tab
-        line_path = [
-            ['M', [left_pos, tabH]],
-            ['L', [left_pos + boxW, tabH]],
-            ['L', [left_pos + boxW, lower_pos]],
+        line = group.add(inkex.PathElement(id=box_id + '-upper-close-tab'))
+        line.path = [
+            ['M', [left_pos, tab_h]],
+            ['L', [left_pos + box_w, tab_h]],
+            ['L', [left_pos + box_w, lower_pos]],
             ['L', [left_pos + 0, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-upper-close-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxW
+        left_pos += box_w
 
         # Upper Right Tab
-        sideTabH = lower_pos - (boxW / 2)
-        if sideTabH < tabH:
-            sideTabH = tabH
-        line_path = [
-            ['M', [left_pos, sideTabH]],
-            ['L', [left_pos + (boxD * 0.8), sideTabH]],
-            ['L', [left_pos + boxD, ((lower_pos * 3) - sideTabH) / 3]],
-            ['L', [left_pos + boxD, lower_pos]],
+        side_tab_h = lower_pos - (box_w / 2)
+        if side_tab_h < tab_h:
+            side_tab_h = tab_h
+
+        line = group.add(inkex.PathElement(id=box_id + '-upper-right-tab'))
+        line.path = [
+            ['M', [left_pos, side_tab_h]],
+            ['L', [left_pos + (box_d * 0.8), side_tab_h]],
+            ['L', [left_pos + box_d, ((lower_pos * 3) - side_tab_h) / 3]],
+            ['L', [left_pos + box_d, lower_pos]],
             ['L', [left_pos + 0, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-upper-right-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxW + boxD
+        left_pos += box_w + box_d
 
         # Upper Left Tab
-        line_path = [
-            ['M', [left_pos + boxD, sideTabH]],
-            ['L', [left_pos + (boxD * 0.2), sideTabH]],
-            ['L', [left_pos, ((lower_pos * 3) - sideTabH) / 3]],
+        line = group.add(inkex.PathElement(id=box_id + '-upper-left-tab'))
+        line.path = [
+            ['M', [left_pos + box_d, side_tab_h]],
+            ['L', [left_pos + (box_d * 0.2), side_tab_h]],
+            ['L', [left_pos, ((lower_pos * 3) - side_tab_h) / 3]],
             ['L', [left_pos, lower_pos]],
-            ['L', [left_pos + boxD, lower_pos]],
+            ['L', [left_pos + box_d, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-upper-left-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
         left_pos = 0
 
-        # self.createGuide( 0, docH-tabH-boxD, 0 );
+        self.guide(doc_h - tab_h - box_d, True)
 
         # Right Tab
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-left-tab'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos - (boxD / 2), lower_pos + (boxD / 4)]],
-            ['L', [left_pos - (boxD / 2), lower_pos + boxH - (boxD / 4)]],
-            ['L', [left_pos, lower_pos + boxH]],
+            ['L', [left_pos - (box_d / 2), lower_pos + (box_d / 4)]],
+            ['L', [left_pos - (box_d / 2), lower_pos + box_h - (box_d / 4)]],
+            ['L', [left_pos, lower_pos + box_h]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-left-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
         # Front
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-front'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos + boxW, lower_pos]],
-            ['L', [left_pos + boxW, lower_pos + boxH]],
-            ['L', [left_pos, lower_pos + boxH]],
+            ['L', [left_pos + box_w, lower_pos]],
+            ['L', [left_pos + box_w, lower_pos + box_h]],
+            ['L', [left_pos, lower_pos + box_h]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-front', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxW
+        left_pos += box_w
 
         # Right
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-right'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos + boxD, lower_pos]],
-            ['L', [left_pos + boxD, lower_pos + boxH]],
-            ['L', [left_pos, lower_pos + boxH]],
+            ['L', [left_pos + box_d, lower_pos]],
+            ['L', [left_pos + box_d, lower_pos + box_h]],
+            ['L', [left_pos, lower_pos + box_h]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-right', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxD
+        left_pos += box_d
 
         # Back
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-back'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos + boxW, lower_pos]],
-            ['L', [left_pos + boxW, lower_pos + boxH]],
-            ['L', [left_pos, lower_pos + boxH]],
+            ['L', [left_pos + box_w, lower_pos]],
+            ['L', [left_pos + box_w, lower_pos + box_h]],
+            ['L', [left_pos, lower_pos + box_h]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-back', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxW
+        left_pos += box_w
 
         # Left
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-line'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos + boxD, lower_pos]],
-            ['L', [left_pos + boxD, lower_pos + boxH]],
-            ['L', [left_pos, lower_pos + boxH]],
+            ['L', [left_pos + box_d, lower_pos]],
+            ['L', [left_pos + box_d, lower_pos + box_h]],
+            ['L', [left_pos, lower_pos + box_h]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-left', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        lower_pos += boxH
+        lower_pos += box_h
         left_pos = 0
-        bTab = lower_pos + boxD
-        if bTab > boxW / 2.5:
-            bTab = boxW / 2.5
+        b_tab = lower_pos + box_d
+        if b_tab > box_w / 2.5:
+            b_tab = box_w / 2.5
 
         # Bottom Front Tab
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-bottom-front-tab'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos, lower_pos + (boxD / 2)]],
-            ['L', [left_pos + boxW, lower_pos + (boxD / 2)]],
-            ['L', [left_pos + boxW, lower_pos]],
+            ['L', [left_pos, lower_pos + (box_d / 2)]],
+            ['L', [left_pos + box_w, lower_pos + (box_d / 2)]],
+            ['L', [left_pos + box_w, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-bottom-front-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxW
+        left_pos += box_w
 
         # Bottom Right Tab
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-bottom-right-tab'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos, lower_pos + bTab]],
-            ['L', [left_pos + boxD, lower_pos + bTab]],
-            ['L', [left_pos + boxD, lower_pos]],
+            ['L', [left_pos, lower_pos + b_tab]],
+            ['L', [left_pos + box_d, lower_pos + b_tab]],
+            ['L', [left_pos + box_d, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-bottom-right-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxD
+        left_pos += box_d
 
         # Bottom Back Tab
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-bottom-back-tab'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos, lower_pos + (boxD / 2)]],
-            ['L', [left_pos + boxW, lower_pos + (boxD / 2)]],
-            ['L', [left_pos + boxW, lower_pos]],
+            ['L', [left_pos, lower_pos + (box_d / 2)]],
+            ['L', [left_pos + box_w, lower_pos + (box_d / 2)]],
+            ['L', [left_pos + box_w, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-bottom-back-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxW
+        left_pos += box_w
 
         # Bottom Left Tab
-        line_path = [
+        line = group.add(inkex.PathElement(id=box_id + '-bottom-left-tab'))
+        line.path = [
             ['M', [left_pos, lower_pos]],
-            ['L', [left_pos, lower_pos + bTab]],
-            ['L', [left_pos + boxD, lower_pos + bTab]],
-            ['L', [left_pos + boxD, lower_pos]],
+            ['L', [left_pos, lower_pos + b_tab]],
+            ['L', [left_pos + box_d, lower_pos + b_tab]],
+            ['L', [left_pos + box_d, lower_pos]],
             ['Z', []]
         ]
-        line_atts = {'style': line_style, 'id': box_id + '-bottom-left-tab', 'd': str(inkex.Path(line_path))}
-        group.add(inkex.PathElement(**line_atts))
+        line.style = line_style
 
-        left_pos += boxD
-        lower_pos += bTab
+        left_pos += box_d
+        lower_pos += b_tab
 
-        group.transform = inkex.Transform(translate=((docW - left_pos) / 2, (docH - lower_pos) / 2))
+        group.transform = inkex.Transform(translate=((doc_w - left_pos) / 2, (doc_h - lower_pos) / 2))
 
 
 if __name__ == '__main__':  # pragma: no cover

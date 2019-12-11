@@ -20,7 +20,8 @@
 """
 This extension allows you to draw a Cartesian grid in Inkscape.
 
-There is a wide range of options including subdivision, subsubdivions and logarithmic scales. Custom line widths are also possible.
+There is a wide range of options including subdivision, subsubdivions and
+logarithmic scales. Custom line widths are also possible.
 
 All elements are grouped with similar elements (eg all x-subdivs)
 """
@@ -30,50 +31,48 @@ from math import log
 import inkex
 from inkex.elements import Group, PathElement, Rectangle
 
-def draw_SVG_line(x1, y1, x2, y2, width, name, parent):
-    style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
-    line_attribs = {'style': str(inkex.Style(style)),
-                    inkex.addNS('label', 'inkscape'): name,
-                    'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-    parent.append(PathElement(**line_attribs))
+def draw_line(x1, y1, x2, y2, width, name, parent):
+    """Draw an SVG line"""
+    line = parent.add(PathElement())
+    line.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
+    line.path = 'M {},{} L {},{}'.format(x1, y1, x2, y2)
+    line.label = name
 
 
-def draw_SVG_rect(x, y, w, h, width, fill, name, parent):
-    style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
-    rect_attribs = {'style': str(inkex.Style(style)),
-                    inkex.addNS('label', 'inkscape'): name,
-                    'x': str(x), 'y': str(y), 'width': str(w), 'height': str(h)}
-    parent.append(Rectangle(**rect_attribs))
+def draw_rect(x, y, w, h, width, fill, name, parent):
+    """Draw an SVG Rectangle"""
+    rect = parent.add(Rectangle(x=str(x), y=str(y), width=str(w), height=str(h)))
+    rect.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
+    rect.label = name
 
 
 class GridCartesian(inkex.GenerateExtension):
-    def __init__(self):
-        super(GridCartesian, self).__init__()
-        self.arg_parser.add_argument("--border_th", type=float, dest="border_th", default=3)
-        self.arg_parser.add_argument("--border_th_unit", dest="border_th_unit", default="cm")
-        self.arg_parser.add_argument("--tab", dest="tab", default="x_tab")
-        self.arg_parser.add_argument("--x_divs", type=int, dest="x_divs", default=6)
-        self.arg_parser.add_argument("--dx", type=float, dest="dx", default=100.0)
-        self.arg_parser.add_argument("--dx_unit", dest="dx_unit", default="cm")
-        self.arg_parser.add_argument("--x_subdivs", type=int, dest="x_subdivs", default=2)
-        self.arg_parser.add_argument("--x_log", type=inkex.Boolean, dest="x_log", default="false")
-        self.arg_parser.add_argument("--x_subsubdivs", type=int, dest="x_subsubdivs", default=5)
-        self.arg_parser.add_argument("--x_half_freq", type=int, dest="x_half_freq", default=4)
-        self.arg_parser.add_argument("--x_divs_th", type=float, dest="x_divs_th", default=2)
-        self.arg_parser.add_argument("--x_subdivs_th", type=float, dest="x_subdivs_th", default=1)
-        self.arg_parser.add_argument("--x_subsubdivs_th", type=float, dest="x_subsubdivs_th", default=0.3)
-        self.arg_parser.add_argument("--x_div_unit", dest="x_div_unit", default="cm")
-        self.arg_parser.add_argument("--y_divs", type=int, dest="y_divs", default=5)
-        self.arg_parser.add_argument("--dy", type=float, dest="dy", default=100.0)
-        self.arg_parser.add_argument("--dy_unit", dest="dy_unit", default="cm")
-        self.arg_parser.add_argument("--y_subdivs", type=int, dest="y_subdivs", default=1)
-        self.arg_parser.add_argument("--y_log", type=inkex.Boolean, dest="y_log", default="false")
-        self.arg_parser.add_argument("--y_subsubdivs", type=int, dest="y_subsubdivs", default=5)
-        self.arg_parser.add_argument("--y_half_freq", type=int, dest="y_half_freq", default=4)
-        self.arg_parser.add_argument("--y_divs_th", type=float, dest="y_divs_th", default=2)
-        self.arg_parser.add_argument("--y_subdivs_th", type=float, dest="y_subdivs_th", default=1)
-        self.arg_parser.add_argument("--y_subsubdivs_th", type=float, dest="y_subsubdivs_th", default=0.3)
-        self.arg_parser.add_argument("--y_div_unit", dest="y_div_unit", default="cm")
+    def add_arguments(self, pars):
+        pars.add_argument("--border_th", type=float, default=3)
+        pars.add_argument("--border_th_unit", default="cm")
+        pars.add_argument("--tab", default="x_tab")
+        pars.add_argument("--x_divs", type=int, default=6)
+        pars.add_argument("--dx", type=float, default=100.0)
+        pars.add_argument("--dx_unit", default="cm")
+        pars.add_argument("--x_subdivs", type=int, default=2)
+        pars.add_argument("--x_log", type=inkex.Boolean, default="false")
+        pars.add_argument("--x_subsubdivs", type=int, default=5)
+        pars.add_argument("--x_half_freq", type=int, default=4)
+        pars.add_argument("--x_divs_th", type=float, default=2)
+        pars.add_argument("--x_subdivs_th", type=float, default=1)
+        pars.add_argument("--x_subsubdivs_th", type=float, default=0.3)
+        pars.add_argument("--x_div_unit", default="cm")
+        pars.add_argument("--y_divs", type=int, default=5)
+        pars.add_argument("--dy", type=float, default=100.0)
+        pars.add_argument("--dy_unit", default="cm")
+        pars.add_argument("--y_subdivs", type=int, default=1)
+        pars.add_argument("--y_log", type=inkex.Boolean, default="false")
+        pars.add_argument("--y_subsubdivs", type=int, default=5)
+        pars.add_argument("--y_half_freq", type=int, default=4)
+        pars.add_argument("--y_divs_th", type=float, default=2)
+        pars.add_argument("--y_subdivs_th", type=float, default=1)
+        pars.add_argument("--y_subsubdivs_th", type=float, default=0.3)
+        pars.add_argument("--y_div_unit", default="cm")
 
     def generate(self):
         self.options.border_th = self.svg.unittouu(str(self.options.border_th) + self.options.border_th_unit)
@@ -95,41 +94,33 @@ class GridCartesian(inkex.GenerateExtension):
         # Embed grid in group
         # Put in in the centre of the current view
 
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'GridCartesian:X' + str(self.options.x_divs) + ':Y' + str(self.options.y_divs)}
-        grid = Group(**g_attribs)
+        grid = Group.create("GridCartesian:X{0.x_divs}:Y{0.y_divs}".format(self.options))
 
         (pos_x, pos_y) = self.svg.get_center_position()
         grid.transform.add_translate(pos_x - xmax / 2.0, pos_y - ymax / 2.0)
 
         # Group for major x gridlines
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorXGridlines'}
-        majglx = grid.add(Group(**g_attribs))
-
+        majglx = grid.add(Group.create("MajorXGridlines"))
         # Group for major y gridlines
-        g_attribs = {inkex.addNS('label', 'inkscape'): 'MajorYGridlines'}
-        majgly = grid.add(Group(**g_attribs))
+        majgly = grid.add(Group.create("MajorYGridlines"))
 
         # Group for minor x gridlines
         if self.options.x_subdivs > 1:  # if there are any minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorXGridlines'}
-            minglx = grid.add(Group(**g_attribs))
+            minglx = grid.add(Group.create("MinorXGridlines"))
 
         # Group for subminor x gridlines
         if self.options.x_subsubdivs > 1:  # if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorXGridlines'}
-            mminglx = grid.add(Group(**g_attribs))
+            mminglx = grid.add(Group.create("SubMinorXGridlines"))
 
         # Group for minor y gridlines
         if self.options.y_subdivs > 1:  # if there are any minor y gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'MinorYGridlines'}
-            mingly = grid.add(Group(**g_attribs))
+            mingly = grid.add(Group.create("MinorYGridlines"))
 
         # Group for subminor y gridlines
         if self.options.y_subsubdivs > 1:  # if there are any minor minor x gridlines
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'SubMinorYGridlines'}
-            mmingly = grid.add(Group(**g_attribs))
+            mmingly = grid.add(Group.create("SubMinorYGridlines"))
 
-        draw_SVG_rect(0, 0, xmax, ymax, self.options.border_th,
+        draw_rect(0, 0, xmax, ymax, self.options.border_th,
                       'none', 'Border', grid)  # border rectangle
 
         # DO THE X DIVISIONS======================================
@@ -138,7 +129,7 @@ class GridCartesian(inkex.GenerateExtension):
 
         for i in range(0, self.options.x_divs):  # Major x divisions
             if i > 0:  # don't draw first line (we made a proper border)
-                draw_SVG_line(self.options.dx * i, 0,
+                draw_line(self.options.dx * i, 0,
                               self.options.dx * i, ymax,
                               self.options.x_divs_th,
                               'MajorXDiv' + str(i), majglx)
@@ -146,7 +137,7 @@ class GridCartesian(inkex.GenerateExtension):
             if self.options.x_log:  # log x subdivs
                 for j in range(1, sd):
                     if j > 1:  # the first loop is only for subsubdivs
-                        draw_SVG_line(self.options.dx * (i + log(j, sd)), 0,
+                        draw_line(self.options.dx * (i + log(j, sd)), 0,
                                       self.options.dx * (i + log(j, sd)), ymax,
                                       self.options.x_subdivs_th,
                                       'MinorXDiv' + str(i) + ':' + str(j), minglx)
@@ -157,20 +148,20 @@ class GridCartesian(inkex.GenerateExtension):
                                 ssd2 = ssd + 1  # make even
                             else:
                                 ssd2 = ssd  # no change
-                            draw_SVG_line(self.options.dx * (i + log(j + k / float(ssd2), sd)), 0,
+                            draw_line(self.options.dx * (i + log(j + k / float(ssd2), sd)), 0,
                                           self.options.dx * (i + log(j + k / float(ssd2), sd)), ymax,
                                           self.options.x_subsubdivs_th, 'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mminglx)
 
             else:  # linear x subdivs
                 for j in range(0, sd):
                     if j > 0:  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
-                        draw_SVG_line(self.options.dx * (i + j / float(sd)), 0,
+                        draw_line(self.options.dx * (i + j / float(sd)), 0,
                                       self.options.dx * (i + j / float(sd)), ymax,
                                       self.options.x_subdivs_th,
                                       'MinorXDiv' + str(i) + ':' + str(j), minglx)
 
                     for k in range(1, ssd):  # subsub divs
-                        draw_SVG_line(self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), 0,
+                        draw_line(self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), 0,
                                       self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), ymax,
                                       self.options.x_subsubdivs_th,
                                       'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mminglx)
@@ -181,7 +172,7 @@ class GridCartesian(inkex.GenerateExtension):
 
         for i in range(0, self.options.y_divs):  # Major y divisions
             if i > 0:  # don't draw first line (we will make a border)
-                draw_SVG_line(0, self.options.dy * i,
+                draw_line(0, self.options.dy * i,
                               xmax, self.options.dy * i,
                               self.options.y_divs_th,
                               'MajorYDiv' + str(i), majgly)
@@ -189,7 +180,7 @@ class GridCartesian(inkex.GenerateExtension):
             if self.options.y_log:  # log y subdivs
                 for j in range(1, sd):
                     if j > 1:  # the first loop is only for subsubdivs
-                        draw_SVG_line(0, self.options.dy * (i + 1 - log(j, sd)),
+                        draw_line(0, self.options.dy * (i + 1 - log(j, sd)),
                                       xmax, self.options.dy * (i + 1 - log(j, sd)),
                                       self.options.y_subdivs_th,
                                       'MinorXDiv' + str(i) + ':' + str(j), mingly)
@@ -200,20 +191,20 @@ class GridCartesian(inkex.GenerateExtension):
                                 ssd2 = ssd + 1
                             else:
                                 ssd2 = ssd  # no change
-                            draw_SVG_line(0, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
+                            draw_line(0, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
                                           xmax, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
                                           self.options.y_subsubdivs_th,
                                           'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)
             else:  # linear y subdivs
                 for j in range(0, self.options.y_subdivs):
                     if j > 0:  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
-                        draw_SVG_line(0, self.options.dy * (i + j / float(sd)),
+                        draw_line(0, self.options.dy * (i + j / float(sd)),
                                       xmax, self.options.dy * (i + j / float(sd)),
                                       self.options.y_subdivs_th,
                                       'MinorXYiv' + str(i) + ':' + str(j), mingly)
 
                     for k in range(1, ssd):  # subsub divs
-                        draw_SVG_line(0, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
+                        draw_line(0, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
                                       xmax, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
                                       self.options.y_subsubdivs_th,
                                       'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)

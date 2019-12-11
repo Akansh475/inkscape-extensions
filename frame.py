@@ -37,20 +37,16 @@ class Frame(inkex.EffectExtension):
     """
     An Inkscape extension that creates a frame around a selected object.
     """
-
-    def __init__(self):
-        super(Frame, self).__init__()
-        self.defs = None
-
+    def add_arguments(self, pars):
         # Parse the options.
-        self.arg_parser.add_argument('--clip', type=inkex.Boolean, dest='clip', default=False)
-        self.arg_parser.add_argument('--corner_radius', type=int, dest='corner_radius', default=0)
-        self.arg_parser.add_argument('--fill_color', type=inkex.Color, default=inkex.Color(0))
-        self.arg_parser.add_argument('--group', type=inkex.Boolean, dest='group', default=False)
-        self.arg_parser.add_argument('--position', type=str, dest='position', default='outside')
-        self.arg_parser.add_argument('--stroke_color', type=inkex.Color, default=inkex.Color(0))
-        self.arg_parser.add_argument('--tab', type=str, dest='tab', default='object')
-        self.arg_parser.add_argument('--width', type=float, dest='width', default=2.0)
+        pars.add_argument('--tab', default='object')
+        pars.add_argument('--clip', type=inkex.Boolean, default=False)
+        pars.add_argument('--corner_radius', type=int, default=0)
+        pars.add_argument('--fill_color', type=inkex.Color, default=inkex.Color(0))
+        pars.add_argument('--group', type=inkex.Boolean, default=False)
+        pars.add_argument('--position', default='outside')
+        pars.add_argument('--stroke_color', type=inkex.Color, default=inkex.Color(0))
+        pars.add_argument('--width', type=float, default=2.0)
 
     def add_clip(self, node, clip_path):
         """ Adds a new clip path node to the defs and sets

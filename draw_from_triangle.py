@@ -156,30 +156,6 @@ def get_n_points_from_path(node, n):
         return []
     return points[:3]
 
-    #p = node.path
-
-    #xi = []  # temporary storage for x and y (will combine at end)
-    #yi = []
-
-    #for cmd, params in p:  # a parsed path is made up of (cmd, params) pairs
-    #    defs = simplepath.pathdefs[cmd]
-    #    for i in range(defs[1]):
-    #        if defs[3][i] == 'x' and len(xi) < n:  # only collect the first three
-    #            xi.append(params[i])
-    #        elif defs[3][i] == 'y' and len(yi) < n:  # only collect the first three
-    #            yi.append(params[i])
-
-    #if len(xi) == n and len(yi) == n:
-    #    points = []  # returned pairs of points
-    #    for i in range(n):
-    #        points.append([xi[i], yi[i]])
-    #else:
-        # inkex.errormsg(_('Error: Not enough nodes to gather coordinates.')) #fail silently and exit, rather than invoke an error console
-    #    return []  # return a blank
-
-    #return points
-
-
 # EXTRA MATHS FUNCTIONS
 def sec(x):  # secant(x)
     if x == pi / 2 or x == -pi / 2 or x == 3 * pi / 2 or x == -3 * pi / 2:  # sec(x) is undefined
@@ -203,7 +179,7 @@ def cot(x):  # cotangent(x)
 
 
 class Style(object):  # container for style information
-    def __init__(self, svg, options):
+    def __init__(self, svg):
         # dot markers
         self.d_rad = svg.unittouu('4px')  # dot marker radius
         self.d_th = svg.unittouu('2px')  # stroke width
@@ -222,101 +198,40 @@ class Style(object):  # container for style information
 
 
 class DrawFromTriangle(inkex.EffectExtension):
-    def __init__(self):
-        super(DrawFromTriangle, self).__init__()
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab", default="sampling",
-                                     help="The selected UI-tab when OK was pressed")
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
         # PRESET POINT OPTIONS
-        self.arg_parser.add_argument("--circumcircle",
-                                     type=inkex.Boolean,
-                                     dest="do_circumcircle", default=False)
-        self.arg_parser.add_argument("--circumcentre",
-                                     type=inkex.Boolean,
-                                     dest="do_circumcentre", default=False)
-        self.arg_parser.add_argument("--incircle",
-                                     type=inkex.Boolean,
-                                     dest="do_incircle", default=False)
-        self.arg_parser.add_argument("--incentre",
-                                     type=inkex.Boolean,
-                                     dest="do_incentre", default=False)
-        self.arg_parser.add_argument("--contact_tri",
-                                     type=inkex.Boolean,
-                                     dest="do_contact_tri", default=False)
-        self.arg_parser.add_argument("--excircles",
-                                     type=inkex.Boolean,
-                                     dest="do_excircles", default=False)
-        self.arg_parser.add_argument("--excentres",
-                                     type=inkex.Boolean,
-                                     dest="do_excentres", default=False)
-        self.arg_parser.add_argument("--extouch_tri",
-                                     type=inkex.Boolean,
-                                     dest="do_extouch_tri", default=False)
-        self.arg_parser.add_argument("--excentral_tri",
-                                     type=inkex.Boolean,
-                                     dest="do_excentral_tri", default=False)
-        self.arg_parser.add_argument("--orthocentre",
-                                     type=inkex.Boolean,
-                                     dest="do_orthocentre", default=False)
-        self.arg_parser.add_argument("--orthic_tri",
-                                     type=inkex.Boolean,
-                                     dest="do_orthic_tri", default=False)
-        self.arg_parser.add_argument("--altitudes",
-                                     type=inkex.Boolean,
-                                     dest="do_altitudes", default=False)
-        self.arg_parser.add_argument("--anglebisectors",
-                                     type=inkex.Boolean,
-                                     dest="do_anglebisectors", default=False)
-        self.arg_parser.add_argument("--centroid",
-                                     type=inkex.Boolean,
-                                     dest="do_centroid", default=False)
-        self.arg_parser.add_argument("--ninepointcentre",
-                                     type=inkex.Boolean,
-                                     dest="do_ninepointcentre", default=False)
-        self.arg_parser.add_argument("--ninepointcircle",
-                                     type=inkex.Boolean,
-                                     dest="do_ninepointcircle", default=False)
-        self.arg_parser.add_argument("--symmedians",
-                                     type=inkex.Boolean,
-                                     dest="do_symmedians", default=False)
-        self.arg_parser.add_argument("--sym_point",
-                                     type=inkex.Boolean,
-                                     dest="do_sym_pt", default=False)
-        self.arg_parser.add_argument("--sym_tri",
-                                     type=inkex.Boolean,
-                                     dest="do_sym_tri", default=False)
-        self.arg_parser.add_argument("--gergonne_pt",
-                                     type=inkex.Boolean,
-                                     dest="do_gergonne_pt", default=False)
-        self.arg_parser.add_argument("--nagel_pt",
-                                     type=inkex.Boolean,
-                                     dest="do_nagel_pt", default=False)
+        pars.add_argument("--circumcircle", type=inkex.Boolean, default=False)
+        pars.add_argument("--circumcentre", type=inkex.Boolean, default=False)
+        pars.add_argument("--incircle", type=inkex.Boolean, default=False)
+        pars.add_argument("--incentre", type=inkex.Boolean, default=False)
+        pars.add_argument("--contact_tri", type=inkex.Boolean, default=False)
+        pars.add_argument("--excircles", type=inkex.Boolean, default=False)
+        pars.add_argument("--excentres", type=inkex.Boolean, default=False)
+        pars.add_argument("--extouch_tri", type=inkex.Boolean, default=False)
+        pars.add_argument("--excentral_tri", type=inkex.Boolean, default=False)
+        pars.add_argument("--orthocentre", type=inkex.Boolean, default=False)
+        pars.add_argument("--orthic_tri", type=inkex.Boolean, default=False)
+        pars.add_argument("--altitudes", type=inkex.Boolean, default=False)
+        pars.add_argument("--anglebisectors", type=inkex.Boolean, default=False)
+        pars.add_argument("--centroid", type=inkex.Boolean, default=False)
+        pars.add_argument("--ninepointcentre", type=inkex.Boolean, default=False)
+        pars.add_argument("--ninepointcircle", type=inkex.Boolean, default=False)
+        pars.add_argument("--symmedians", type=inkex.Boolean, default=False)
+        pars.add_argument("--sym_point", type=inkex.Boolean, default=False)
+        pars.add_argument("--sym_tri", type=inkex.Boolean, default=False)
+        pars.add_argument("--gergonne_pt", type=inkex.Boolean, default=False)
+        pars.add_argument("--nagel_pt", type=inkex.Boolean, default=False)
         # CUSTOM POINT OPTIONS
-        self.arg_parser.add_argument("--mode",
-                                     type=str,
-                                     dest="mode", default='trilin')
-        self.arg_parser.add_argument("--cust_str",
-                                     type=str,
-                                     dest="cust_str", default='s_a')
-        self.arg_parser.add_argument("--cust_pt",
-                                     type=inkex.Boolean,
-                                     dest="do_cust_pt", default=False)
-        self.arg_parser.add_argument("--cust_radius",
-                                     type=inkex.Boolean,
-                                     dest="do_cust_radius", default=False)
-        self.arg_parser.add_argument("--radius",
-                                     type=str,
-                                     dest="radius", default='s_a')
-        self.arg_parser.add_argument("--isogonal_conj",
-                                     type=inkex.Boolean,
-                                     dest="do_isogonal_conj", default=False)
-        self.arg_parser.add_argument("--isotomic_conj",
-                                     type=inkex.Boolean,
-                                     dest="do_isotomic_conj", default=False)
+        pars.add_argument("--mode", default='trilin')
+        pars.add_argument("--cust_str", default='s_a')
+        pars.add_argument("--cust_pt", type=inkex.Boolean, default=False)
+        pars.add_argument("--cust_radius", type=inkex.Boolean, default=False)
+        pars.add_argument("--radius", default='s_a')
+        pars.add_argument("--isogonal_conj", type=inkex.Boolean, default=False)
+        pars.add_argument("--isotomic_conj", type=inkex.Boolean, default=False)
 
     def effect(self):
-
         so = self.options  # shorthand
 
         pts = []  # initialise in case nothing is selected and following loop is not executed
@@ -325,7 +240,7 @@ class DrawFromTriangle(inkex.EffectExtension):
             pts = get_n_points_from_path(node, 3)
 
         if len(pts) == 3:  # if we have right number of nodes, else skip and end program
-            st = Style(self.svg, so)  # style for dots, lines and circles
+            st = Style(self.svg)  # style for dots, lines and circles
 
             # CREATE A GROUP TO HOLD ALL GENERATED ELEMENTS IN
             # Hold relative to point A (pt[0])
@@ -362,95 +277,95 @@ class DrawFromTriangle(inkex.EffectExtension):
             params = (sides, angles, vecs, vtx, uvals)  # all useful triangle parameters in one object
 
             # BEGIN DRAWING
-            if so.do_circumcentre or so.do_circumcircle:
+            if so.circumcentre or so.circumcircle:
                 r = s_a * s_b * s_c / (4 * area)
                 pt = (cos(a_a), cos(a_b), cos(a_c))
-                if so.do_circumcentre:
+                if so.circumcentre:
                     draw_SVG_circle(0, pt, params, st, 'Circumcentre', layer)
-                if so.do_circumcircle:
+                if so.circumcircle:
                     draw_SVG_circle(r, pt, params, st, 'Circumcircle', layer)
 
-            if so.do_incentre or so.do_incircle:
+            if so.incentre or so.incircle:
                 pt = [1, 1, 1]
-                if so.do_incentre:
+                if so.incentre:
                     draw_SVG_circle(0, pt, params, st, 'Incentre', layer)
-                if so.do_incircle:
+                if so.incircle:
                     r = area / semiperim
                     draw_SVG_circle(r, pt, params, st, 'Incircle', layer)
 
-            if so.do_contact_tri:
+            if so.contact_tri:
                 t1 = s_b * s_c / (-s_a + s_b + s_c)
                 t2 = s_a * s_c / (s_a - s_b + s_c)
                 t3 = s_a * s_b / (s_a + s_b - s_c)
                 v_mat = ((0, t2, t3), (t1, 0, t3), (t1, t2, 0))
                 draw_SVG_tri(v_mat, params, st, 'ContactTriangle', layer)
 
-            if so.do_extouch_tri:
+            if so.extouch_tri:
                 t1 = (-s_a + s_b + s_c) / s_a
                 t2 = (s_a - s_b + s_c) / s_b
                 t3 = (s_a + s_b - s_c) / s_c
                 v_mat = ((0, t2, t3), (t1, 0, t3), (t1, t2, 0))
                 draw_SVG_tri(v_mat, params, st, 'ExtouchTriangle', layer)
 
-            if so.do_orthocentre:
+            if so.orthocentre:
                 pt = pt_from_tcf('cos(a_b)*cos(a_c)', params)
                 draw_SVG_circle(0, pt, params, st, 'Orthocentre', layer)
 
-            if so.do_orthic_tri:
+            if so.orthic_tri:
                 v_mat = [[0, sec(a_b), sec(a_c)], [sec(a_a), 0, sec(a_c)], [sec(a_a), sec(a_b), 0]]
                 draw_SVG_tri(v_mat, params, st, 'OrthicTriangle', layer)
 
-            if so.do_centroid:
+            if so.centroid:
                 pt = [1 / s_a, 1 / s_b, 1 / s_c]
                 draw_SVG_circle(0, pt, params, st, 'Centroid', layer)
 
-            if so.do_ninepointcentre or so.do_ninepointcircle:
+            if so.ninepointcentre or so.ninepointcircle:
                 pt = [cos(a_b - a_c), cos(a_c - a_a), cos(a_a - a_b)]
-                if so.do_ninepointcentre:
+                if so.ninepointcentre:
                     draw_SVG_circle(0, pt, params, st, 'NinePointCentre', layer)
-                if so.do_ninepointcircle:
+                if so.ninepointcircle:
                     r = s_a * s_b * s_c / (8 * area)
                     draw_SVG_circle(r, pt, params, st, 'NinePointCircle', layer)
 
-            if so.do_altitudes:
+            if so.altitudes:
                 v_mat = [[0, sec(a_b), sec(a_c)], [sec(a_a), 0, sec(a_c)], [sec(a_a), sec(a_b), 0]]
                 draw_vertex_lines(v_mat, params, st, 'Altitude', layer)
 
-            if so.do_anglebisectors:
+            if so.anglebisectors:
                 v_mat = ((0, 1, 1), (1, 0, 1), (1, 1, 0))
                 draw_vertex_lines(v_mat, params, st, 'AngleBisectors', layer)
 
-            if so.do_excircles or so.do_excentres or so.do_excentral_tri:
+            if so.excircles or so.excentres or so.excentral_tri:
                 v_mat = ((-1, 1, 1), (1, -1, 1), (1, 1, -1))
-                if so.do_excentral_tri:
+                if so.excentral_tri:
                     draw_SVG_tri(v_mat, params, st, 'ExcentralTriangle', layer)
                 for i in range(3):
-                    if so.do_excircles:
+                    if so.excircles:
                         r = area / (semiperim - sides[i])
                         draw_SVG_circle(r, v_mat[i], params, st, 'Excircle:' + str(i), layer)
-                    if so.do_excentres:
+                    if so.excentres:
                         draw_SVG_circle(0, v_mat[i], params, st, 'Excentre:' + str(i), layer)
 
-            if so.do_sym_tri or so.do_symmedians:
+            if so.sym_tri or so.symmedians:
                 v_mat = ((0, s_b, s_c), (s_a, 0, s_c), (s_a, s_b, 0))
-                if so.do_sym_tri:
+                if so.sym_tri:
                     draw_SVG_tri(v_mat, params, st, 'SymmedialTriangle', layer)
-                if so.do_symmedians:
+                if so.symmedians:
                     draw_vertex_lines(v_mat, params, st, 'Symmedian', layer)
 
-            if so.do_sym_pt:
+            if so.sym_point:
                 pt = (s_a, s_b, s_c)
                 draw_SVG_circle(0, pt, params, st, 'SymmmedianPoint', layer)
 
-            if so.do_gergonne_pt:
+            if so.gergonne_pt:
                 pt = pt_from_tcf('1/(s_a*(s_b+s_c-s_a))', params)
                 draw_SVG_circle(0, pt, params, st, 'GergonnePoint', layer)
 
-            if so.do_nagel_pt:
+            if so.nagel_pt:
                 pt = pt_from_tcf('(s_b+s_c-s_a)/s_a', params)
                 draw_SVG_circle(0, pt, params, st, 'NagelPoint', layer)
 
-            if so.do_cust_pt or so.do_cust_radius or so.do_isogonal_conj or so.do_isotomic_conj:
+            if so.cust_pt or so.cust_radius or so.isogonal_conj or so.isotomic_conj:
                 pt = []  # where we will store the point in trilinears
                 if so.mode == 'trilin':  # if we are receiving from trilinears
                     for i in range(3):
@@ -462,19 +377,19 @@ class DrawFromTriangle(inkex.EffectExtension):
                     string = so.cust_str  # don't need to translate, as the pt_from_tcf function does that for us
                     pt = pt_from_tcf(string, params)  # get the point from the tcf directly
 
-                if so.do_cust_pt:  # draw the point
+                if so.cust_pt:  # draw the point
                     draw_SVG_circle(0, pt, params, st, 'CustomTrilinearPoint', layer)
-                if so.do_cust_radius:  # draw the circle with given radius
+                if so.cust_radius:  # draw the circle with given radius
                     strings = translate_string(so.radius, 0)
                     func = eval('lambda params: ' + strings.strip('"'))  # the function leading to the radius
                     r = func(params)
                     draw_SVG_circle(r, pt, params, st, 'CustomTrilinearCircle', layer)
-                if so.do_isogonal_conj:
+                if so.isogonal_conj:
                     isogonal = [0, 0, 0]
                     for i in range(3):
                         isogonal[i] = 1 / pt[i]
                     draw_SVG_circle(0, isogonal, params, st, 'CustomIsogonalConjugate', layer)
-                if so.do_isotomic_conj:
+                if so.isotomic_conj:
                     isotomic = [0, 0, 0]
                     for i in range(3):
                         isotomic[i] = 1 / (params[0][i] * params[0][i] * pt[i])

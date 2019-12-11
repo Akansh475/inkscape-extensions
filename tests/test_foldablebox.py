@@ -1,8 +1,11 @@
 # coding=utf-8
 from foldablebox import FoldableBox
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from inkex.tester.filters import CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, TestCase
 
-class FoldableBoxArguments(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class FoldableBoxArguments(ComparisonMixin, TestCase):
     effect_class = FoldableBox
-    compare_filters = [CompareOrderIndependentStyle()]
+    compare_file = 'svg/empty.svg'
+    comparisons = [
+        ('--width=20', '--height=20', '--depth=2.2'),
+        ('--proportion=0.5', '--guide=true'),
+    ]

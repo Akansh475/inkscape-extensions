@@ -25,15 +25,12 @@
 #  * 22-Dec-2006: Wiora : Added axis and isotropic scaling
 #  * 21-Jun-2007: Tavmjong: Added polar coordinates
 #
-import math
 import random
-from copy import deepcopy
+import math
 from math import cos, pi, sin
 
-from lxml import etree
-
 import inkex
-from inkex.paths import Path
+from inkex.elements import ClipPath, Rectangle
 
 EVAL_GLOBALS = {}
 EVAL_GLOBALS.update(random.__dict__)
@@ -180,95 +177,41 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
 
 
 class FuncPlot(inkex.EffectExtension):
-    def __init__(self):
-        super(FuncPlot, self).__init__()
-        self.arg_parser.add_argument("--xstart",
-                                     type=float,
-                                     dest="xstart", default=0.0,
-                                     help="Start x-value")
-        self.arg_parser.add_argument("--xend",
-                                     type=float,
-                                     dest="xend", default=1.0,
-                                     help="End x-value")
-        self.arg_parser.add_argument("--times2pi",
-                                     type=inkex.Boolean,
-                                     dest="times2pi", default=True,
-                                     help="Multiply x-range by 2*pi")
-        self.arg_parser.add_argument("--polar",
-                                     type=inkex.Boolean,
-                                     dest="polar", default=False,
-                                     help="Plot using polar coordinates")
-        self.arg_parser.add_argument("--ybottom",
-                                     type=float,
-                                     dest="ybottom", default=-1.0,
-                                     help="y-value of rectangle's bottom")
-        self.arg_parser.add_argument("--ytop",
-                                     type=float,
-                                     dest="ytop", default=1.0,
-                                     help="y-value of rectangle's top")
-        self.arg_parser.add_argument("-s", "--samples",
-                                     type=int,
-                                     dest="samples", default=8,
-                                     help="Samples")
-        self.arg_parser.add_argument("--fofx",
-                                     type=str,
-                                     dest="fofx", default="sin(x)",
-                                     help="f(x) for plotting")
-        self.arg_parser.add_argument("--fponum",
-                                     type=inkex.Boolean,
-                                     dest="fponum", default=True,
-                                     help="Calculate the first derivative numerically")
-        self.arg_parser.add_argument("--fpofx",
-                                     type=str,
-                                     dest="fpofx", default="cos(x)",
-                                     help="f'(x) for plotting")
-        self.arg_parser.add_argument("--clip",
-                                     type=inkex.Boolean,
-                                     dest="clip", default=False,
-                                     help="If True, clip with copy of source rectangle")
-        self.arg_parser.add_argument("--remove",
-                                     type=inkex.Boolean,
-                                     dest="remove", default=True,
-                                     help="If True, source rectangle is removed")
-        self.arg_parser.add_argument("--isoscale",
-                                     type=inkex.Boolean,
-                                     dest="isoscale", default=True,
-                                     help="If True, isotropic scaling is used")
-        self.arg_parser.add_argument("--drawaxis",
-                                     type=inkex.Boolean,
-                                     dest="drawaxis", default=True,
-                                     help="If True, axis are drawn")
-        self.arg_parser.add_argument("--endpts",
-                                     type=inkex.Boolean,
-                                     dest="endpts", default=False,
-                                     help="If True, end points are added")
-        self.arg_parser.add_argument("--tab",
-                                     type=str,
-                                     dest="tab", default="sampling",
-                                     help="The selected UI-tab when OK was pressed")
+    def add_arguments(self, pars):
+        pars.add_argument("--tab")
+        pars.add_argument("--xstart", type=float, default=0.0, help="Start x-value")
+        pars.add_argument("--xend", type=float, default=1.0, help="End x-value")
+        pars.add_argument("--times2pi", type=inkex.Boolean, default=True, help="* x-range by 2*pi")
+        pars.add_argument("--polar", type=inkex.Boolean, default=False, help="Use polar coords")
+        pars.add_argument("--ybottom", type=float, default=-1.0, help="y-value of rect's bottom")
+        pars.add_argument("--ytop", type=float, default=1.0, help="y-value of rectangle's top")
+        pars.add_argument("--samples", type=int, default=8, help="Samples")
+        pars.add_argument("--fofx", default="sin(x)", help="f(x) for plotting")
+        pars.add_argument("--fponum", type=inkex.Boolean, default=True, help="Numerical 1st deriv")
+        pars.add_argument("--fpofx", default="cos(x)", help="f'(x) for plotting")
+        pars.add_argument("--clip", type=inkex.Boolean, default=False, help="Clip with source rect")
+        pars.add_argument("--remove", type=inkex.Boolean, default=True, help="Remove source rect")
+        pars.add_argument("--isoscale", type=inkex.Boolean, default=True, help="Isotropic scaling")
+        pars.add_argument("--drawaxis", type=inkex.Boolean, default=True, help="Draw axis")
+        pars.add_argument("--endpts", type=inkex.Boolean, default=False, help="Add end points")
 
     def effect(self):
         newpath = None
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('rect', 'svg'):
+        for node in self.svg.selected.values():
+            if isinstance(node, Rectangle):
                 # create new path with basic dimensions of selected rectangle
-                newpath = etree.Element(inkex.addNS('path', 'svg'))
+                newpath = inkex.PathElement()
                 x = float(node.get('x'))
                 y = float(node.get('y'))
                 w = float(node.get('width'))
                 h = float(node.get('height'))
 
                 # copy attributes of rect
-                s = node.get('style')
-                if s:
-                    newpath.set('style', s)
-
-                t = node.get('transform')
-                if t:
-                    newpath.set('transform', t)
+                newpath.style = node.style
+                newpath.transform = node.transform
 
                 # top and bottom were exchanged
-                newpath.set('d', str(Path(
+                newpath.path = \
                         drawfunction(self.options.xstart,
                                      self.options.xend,
                                      self.options.ybottom,
@@ -282,28 +225,17 @@ class FuncPlot(inkex.EffectExtension):
                                      self.options.polar,
                                      self.options.isoscale,
                                      self.options.drawaxis,
-                                     self.options.endpts))))
+                                     self.options.endpts)
                 newpath.set('title', self.options.fofx)
-
-                # newpath.setAttribute('desc', '!func;' + self.options.fofx + ';'
-                #                                      + self.options.fpofx + ';'
-                #                                      + `self.options.fponum` + ';'
-                #                                      + `self.options.xstart` + ';'
-                #                                      + `self.options.xend` + ';'
-                #                                      + `self.options.samples`)
 
                 # add path into SVG structure
                 node.getparent().append(newpath)
                 # option whether to clip the path with rect or not.
                 if self.options.clip:
-                    defs = self.xpathSingle('/svg:svg//svg:defs')
-                    if defs is None:
-                        defs = etree.SubElement(self.document.getroot(), inkex.addNS('defs', 'svg'))
-                    clip = etree.SubElement(defs, inkex.addNS('clipPath', 'svg'))
-                    clip.append(deepcopy(node))
-                    clipId = self.svg.get_unique_id('clipPath')
-                    clip.set('id', clipId)
-                    newpath.set('clip-path', 'url(#' + clipId + ')')
+                    clip = self.svg.defs.add(ClipPath())
+                    clip.set_random_id()
+                    clip.append(node.copy())
+                    newpath.set('clip-path', 'url(#' + clip.get_id() + ')')
                 # option whether to remove the rectangle or not.
                 if self.options.remove:
                     node.getparent().remove(node)

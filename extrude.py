@@ -23,22 +23,15 @@
 import inkex
 
 class Extrude(inkex.EffectExtension):
-    def __init__(self):
-        super(Extrude, self).__init__()
-        opts = [('-m', '--mode', str, 'mode', 'Lines',
-                 'Join paths with lines or polygons'),
-                ]
-        for o in opts:
-            self.arg_parser.add_argument(o[0], o[1], type=o[2],
-                                         dest=o[3], default=o[4], help=o[5])
+    def add_arguments(self, pars):
+        pars.add_argument("--mode", default="Lines", help="Join paths with lines or polygons")
 
     def effect(self):
         paths = []
         for node in self.svg.get_selected(inkex.PathElement):
             paths.append(node)
         if len(paths) < 2:
-            inkex.errormsg(_('Need at least 2 paths selected'))
-            return
+            raise inkex.AbortExtension("Need at least 2 paths selected")
 
         for path in paths:
             path.apply_transform()

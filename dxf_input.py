@@ -406,17 +406,15 @@ colors = {1: '#FF0000', 2: '#FFFF00', 3: '#00FF00', 4: '#00FFFF', 5: '#0000FF', 
 
 
 class DxfInput(inkex.InputExtension):
-    def __init__(self):
-        super(DxfInput, self).__init__()
-        p = self.arg_parser
-        p.add_argument("--scalemethod", dest="scalemethod", default="manual")
-        p.add_argument("--scale", dest="scale", default="1.0")
-        p.add_argument("--xmin", dest="xmin", default="0.0")
-        p.add_argument("--ymin", dest="ymin", default="0.0")
-        p.add_argument("--gcodetoolspoints", dest="gcodetoolspoints", default=True, type=inkex.Boolean)
-        p.add_argument("--encoding", dest="input_encode", default="latin_1")
-        p.add_argument("--font", dest="font", default="Arial")
-        p.add_argument("--tab", dest="tab", default="Options")
+    def add_arguments(self, pars):
+        pars.add_argument("--tab", default="Options")
+        pars.add_argument("--scalemethod", default="manual")
+        pars.add_argument("--scale", default="1.0")
+        pars.add_argument("--xmin", default="0.0")
+        pars.add_argument("--ymin", default="0.0")
+        pars.add_argument("--gcodetoolspoints", default=True, type=inkex.Boolean)
+        pars.add_argument("--encoding", dest="input_encode", default="latin_1")
+        pars.add_argument("--font", default="Arial")
 
     def load(self, stream):
         return stream

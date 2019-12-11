@@ -21,27 +21,24 @@ import inkex
 from inkex import bezier
 
 class Flatten(inkex.EffectExtension):
-    def __init__(self):
-        super(Flatten, self).__init__()
-        self.arg_parser.add_argument(
-            "-f", "--flatness", type=float,
-            dest="flat", default=10.0,
-            help="Minimum flatness of the subdivided curves")
+    """Flattern a path"""
+    def add_arguments(self, pars):
+        pars.add_argument("--flatness", type=float, default=10.0, help="Minimum flattness")
 
     def effect(self):
         for node in self.svg.get_selected(inkex.PathElement):
-            p = node.path.to_superpath()
-            bezier.cspsubdiv(p, self.options.flat)
-            np = []
-            for sp in p:
+            path = node.path.to_superpath()
+            bezier.cspsubdiv(path, self.options.flatness)
+            newpath = []
+            for subpath in path:
                 first = True
-                for csp in sp:
+                for csp in subpath:
                     cmd = 'L'
                     if first:
                         cmd = 'M'
                     first = False
-                    np.append([cmd, [csp[1][0], csp[1][1]]])
-            node.path = np
+                    newpath.append([cmd, [csp[1][0], csp[1][1]]])
+            node.path = newpath
 
 if __name__ == '__main__':
     Flatten().run()

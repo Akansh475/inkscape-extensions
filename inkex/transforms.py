@@ -264,9 +264,8 @@ class Transform(object):
 
     def add_kwargs(self, **kwargs):
         """Add translations, scales, rotations etc using key word arguments"""
-        for key in ('translate', 'scale', 'rotate', 'skewx', 'skewy'):
+        for key, value in reversed(list(kwargs.items())):
             func = getattr(self, 'add_' + key)
-            value = kwargs.pop(key, None)
             if isinstance(value, tuple):
                 func(*value)
             elif value is not None:

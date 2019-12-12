@@ -166,6 +166,11 @@ class InkscapeExtension(object):
             return os.path.dirname(self.options.input_file)
         return None
 
+    @classmethod
+    def ext_path(cls):
+        """Return the folder the extension script is in"""
+        return os.path.dirname(sys.modules[cls.__module__].__file__)
+
     def absolute_href(self, filename, default='~/'):
         """
         Process the filename such that it's turned into an absolute filename

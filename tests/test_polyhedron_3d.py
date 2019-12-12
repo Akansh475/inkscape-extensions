@@ -1,16 +1,14 @@
 # coding=utf-8
 from polyhedron_3d import Poly3D
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-from inkex.tester.filters import CompareOrderIndependentStyle
+from inkex.tester import ComparisonMixin, TestCase
 
-class Poly3DBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class Poly3DBasicTest(ComparisonMixin, TestCase):
     effect_class = Poly3D
-    comparisons = [('--id=r2', '--tab="common"', '--obj=cube',
-        '--spec_file=great_rhombicuboct.obj', '--type=face',
-        '--cw_wound=false', '--r1_ax=x', '--r1_ang=0', '--r2_ax=x',
-        '--r2_ang=0', '--r3_ax=x', '--r3_ang=0', '--r4_ax=x', '--r4_ang=0',
-        '--r5_ax=x', '--r5_ang=0', '--r6_ax=x', '--r6_ang=0', '--scl=100',
-        '--f_r=255', '--f_g=0', '--f_b=0', '--f_opac=100', '--s_opac=100',
-        '--th=2', '--shade=true', '--lv_x=1', '--lv_y=1', '--lv_z=-2',
-        '--show=fce', '--back=false', '--z_sort=max')]
-    compare_filters = [CompareOrderIndependentStyle()]
+    comparisons = [
+        ('--show=fce', '--obj=cube', '--r1_ax=x', '--r1_ang=45', '--r2_ax=y', '--r2_ang=45'),
+        ('--show=fce', '--obj=cube', '--r1_ax=y', '--r1_ang=45', '--z_sort=cent'),
+        ('--show=fce', '--obj=cube', '--r1_ax=z', '--r1_ang=45', '--z_sort=max'),
+        ('--show=edg', '--obj=oct', '--r1_ax=z', '--r1_ang=45', '--th=4'),
+        ('--show=vtx', '--obj=methane',),
+    ]
+    compare_file = 'svg/empty.svg'

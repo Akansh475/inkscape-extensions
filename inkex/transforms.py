@@ -236,15 +236,8 @@ class Transform(object):
                 self.matrix = tuple(matrix[::2]), tuple(matrix[1::2])
             else:
                 raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
-        elif extra:
-            for key in ('translate', 'scale', 'rotate', 'skewx', 'skewy'):
-                if key in extra:
-                    value = extra.pop(key)
-                    func = getattr(self, 'add_' + key)
-                    if isinstance(value, tuple):
-                        func(*value)
-                    else:
-                        func(value)
+
+        self.add_kwargs(**extra)
         # Set callback last, so it doesn't kick off just setting up the internal value
         self.callback = callback
 
@@ -268,6 +261,16 @@ class Transform(object):
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg hexad"""
         self.__imul__(Transform(args))
+
+    def add_kwargs(self, **kwargs):
+        """Add translations, scales, rotations etc using key word arguments"""
+        for key in ('translate', 'scale', 'rotate', 'skewx', 'skewy'):
+            func = getattr(self, 'add_' + key)
+            value = kwargs.pop(key, None)
+            if isinstance(value, tuple):
+                func(*value)
+            elif value is not None:
+                func(value)
 
     @overload
     def add_translate(self, dr): # type: (VectorLike) -> None

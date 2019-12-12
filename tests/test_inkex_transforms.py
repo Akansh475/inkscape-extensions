@@ -294,6 +294,26 @@ class TransformTest(TestCase):
         self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
         self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
 
+    def test_construction(self):
+        import numpy as np
+        dx = 5
+        dy = 7
+        angle = 31
+
+        rotation = Transform(rotate=angle)
+        translation = Transform(translate=(dx, dy))
+
+        rotation_then_translation = translation * rotation
+        translation_then_rotation = rotation * translation
+
+        t1 = Transform(rotate=angle, translate=(dx, dy))
+        t2 = Transform(translate=(dx, dy), rotate=angle)
+
+        self.assertFalse(np.allclose(t1.matrix, t2.matrix))
+        self.assertDeepAlmostEqual(t1.matrix, rotation_then_translation.matrix)
+        self.assertDeepAlmostEqual(t2.matrix, translation_then_rotation.matrix)
+
+
 class ScaleTest(TestCase):
     """Test scale class"""
 

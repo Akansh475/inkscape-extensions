@@ -2,9 +2,11 @@
 """
 Test Inkex transformational logic.
 """
+from math import sqrt, pi
 from inkex.transforms import (
     Vector2d, BoundingBox, Scale, Transform, DirectedLineSegment
 )
+from inkex.utils import PY3
 from inkex.tester import TestCase
 
 class Vector2dTest(TestCase):
@@ -169,18 +171,13 @@ class TransformTest(TestCase):
         self.assertEqual(str(Transform(rotate=45)), "rotate(45)")
         self.assertEqual(str(Transform(rotate=(45, 10, 10))), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
-    def test_combine(self):
-        """Test combining transformations"""
-        self.assertEqual(str(Transform(scale=2.0, translate=(5, 6))), 'matrix(2 0 0 2 5 6)')
-        self.assertEqual(str(Transform(scale=2.0, rotate=45)), 'matrix(1.41421 1.41421 -1.41421 1.41421 0 0)')
-
     def test_add_transform(self):
         """Quickly add known transforms"""
-        tr = Transform()
-        tr.add_scale(5.0, 1.0)
-        self.assertEqual(str(tr), 'scale(5, 1)')
-        tr.add_translate(10, 10)
-        self.assertEqual(str(tr), 'matrix(5 0 0 1 50 10)')
+        tr1 = Transform()
+        tr1.add_scale(5.0, 1.0)
+        self.assertEqual(str(tr1), 'scale(5, 1)')
+        tr1.add_translate(10, 10)
+        self.assertEqual(str(tr1), 'matrix(5 0 0 1 50 10)')
 
     def test_is_unity(self):
         unity = Transform()
@@ -189,9 +186,9 @@ class TransformTest(TestCase):
         self.assertTrue(unity.is_translate())
 
     def test_is_rotation(self):
-        r1 = Transform(rotate=21)
-        r2 = Transform(rotate=35)
-        r3 = Transform(rotate=53)
+        rot1 = Transform(rotate=21)
+        rot2 = Transform(rotate=35)
+        rot3 = Transform(rotate=53)
 
         self.assertFalse(Transform(translate=1e-9).is_rotate(exactly=True))
         self.assertFalse(Transform(scale=1+1e-9).is_rotate(exactly=True))
@@ -203,27 +200,26 @@ class TransformTest(TestCase):
         self.assertTrue(Transform(skewx=1e-9).is_rotate(exactly=False))
         self.assertTrue(Transform(skewy=1e-9).is_rotate(exactly=False))
 
-        self.assertTrue(r1.is_rotate())
-        self.assertTrue(r2.is_rotate())
-        self.assertTrue(r3.is_rotate())
+        self.assertTrue(rot1.is_rotate())
+        self.assertTrue(rot2.is_rotate())
+        self.assertTrue(rot3.is_rotate())
 
-        self.assertFalse(r1.is_translate())
-        self.assertFalse(r2.is_translate())
-        self.assertFalse(r3.is_translate())
+        self.assertFalse(rot1.is_translate())
+        self.assertFalse(rot2.is_translate())
+        self.assertFalse(rot3.is_translate())
 
-        self.assertFalse(r1.is_scale())
-        self.assertFalse(r2.is_scale())
-        self.assertFalse(r3.is_scale())
+        self.assertFalse(rot1.is_scale())
+        self.assertFalse(rot2.is_scale())
+        self.assertFalse(rot3.is_scale())
 
-        self.assertTrue((r1 * r1).is_rotate())
-        self.assertTrue((r1 * r2).is_rotate())
-        self.assertTrue((r1 * r2 * r3 * r2 * r1).is_rotate())
+        self.assertTrue((rot1 * rot1).is_rotate())
+        self.assertTrue((rot1 * rot2).is_rotate())
+        self.assertTrue((rot1 * rot2 * rot3 * rot2 * rot1).is_rotate())
 
     def test_is_translate(self):
-        from math import sqrt, pi
-        t1 = Transform(translate=(1.1,))
-        t2 = Transform(translate=(1.3, 2.7))
-        t3 = Transform(translate=(sqrt(2) / 2, pi))
+        tr1 = Transform(translate=(1.1,))
+        tr2 = Transform(translate=(1.3, 2.7))
+        tr3 = Transform(translate=(sqrt(2) / 2, pi))
 
         self.assertFalse(Transform(rotate=1e-9).is_translate(exactly=True))
         self.assertFalse(Transform(scale=1+1e-9).is_translate(exactly=True))
@@ -235,24 +231,22 @@ class TransformTest(TestCase):
         self.assertTrue(Transform(skewx=1e-9).is_translate(exactly=False))
         self.assertTrue(Transform(skewy=1e-9).is_translate(exactly=False))
 
-        self.assertTrue(t1.is_translate())
-        self.assertTrue(t2.is_translate())
-        self.assertTrue(t3.is_translate())
-        self.assertFalse(t1.is_rotate())
-        self.assertFalse(t2.is_rotate())
-        self.assertFalse(t3.is_rotate())
-        self.assertFalse(t1.is_scale())
-        self.assertFalse(t2.is_scale())
-        self.assertFalse(t3.is_scale())
+        self.assertTrue(tr1.is_translate())
+        self.assertTrue(tr2.is_translate())
+        self.assertTrue(tr3.is_translate())
+        self.assertFalse(tr1.is_rotate())
+        self.assertFalse(tr2.is_rotate())
+        self.assertFalse(tr3.is_rotate())
+        self.assertFalse(tr1.is_scale())
+        self.assertFalse(tr2.is_scale())
+        self.assertFalse(tr3.is_scale())
 
-        self.assertTrue((t1 * t1).is_translate())
-        self.assertTrue((t1 * t2).is_translate())
-        self.assertTrue((t1 * t2 * t3 * t2 * t1).is_translate())
-        self.assertFalse(t1 * t2 * t3 * -t1 * -t2 * -t3)  # is almost unity
+        self.assertTrue((tr1 * tr1).is_translate())
+        self.assertTrue((tr1 * tr2).is_translate())
+        self.assertTrue((tr1 * tr2 * tr3 * tr2 * tr1).is_translate())
+        self.assertFalse(tr1 * tr2 * tr3 * -tr1 * -tr2 * -tr3)  # is almost unity
 
     def test_is_scale(self):
-        from math import sqrt, pi
-
         s1 = Transform(scale=(1.1,))
         s2 = Transform(scale=(1.3, 2.7))
         s3 = Transform(scale=(sqrt(2) / 2, pi))
@@ -294,24 +288,30 @@ class TransformTest(TestCase):
         self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
         self.assertRaises(ValueError, rotation_degrees, rotate=35, scale=(10, 11))
 
-    def test_construction(self):
-        import numpy as np
-        dx = 5
-        dy = 7
-        angle = 31
+    def test_construction_order(self):
+        """Test transform kwargs construction order"""
+        if not PY3:
+            self.skipTest("Construction order is known to fail on python2 (by design).")
+            return
 
+        self.assertEqual(str(Transform(scale=2.0, translate=(5, 6))),
+                         'matrix(2 0 0 2 5 6)')
+        self.assertEqual(str(Transform(scale=2.0, rotate=45)),
+                         'matrix(1.41421 1.41421 -1.41421 1.41421 0 0)')
+
+        x, y, angle = 5, 7, 31
         rotation = Transform(rotate=angle)
-        translation = Transform(translate=(dx, dy))
+        translation = Transform(translate=(x, y))
 
         rotation_then_translation = translation * rotation
         translation_then_rotation = rotation * translation
 
-        t1 = Transform(rotate=angle, translate=(dx, dy))
-        t2 = Transform(translate=(dx, dy), rotate=angle)
+        tr1 = Transform(rotate=angle, translate=(x, y))
+        tr2 = Transform(translate=(x, y), rotate=angle)
 
-        self.assertFalse(np.allclose(t1.matrix, t2.matrix))
-        self.assertDeepAlmostEqual(t1.matrix, rotation_then_translation.matrix)
-        self.assertDeepAlmostEqual(t2.matrix, translation_then_rotation.matrix)
+        self.assertNotEqual(tr1, tr2)
+        self.assertDeepAlmostEqual(tr1.matrix, rotation_then_translation.matrix)
+        self.assertDeepAlmostEqual(tr2.matrix, translation_then_rotation.matrix)
 
 
 class ScaleTest(TestCase):

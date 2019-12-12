@@ -25,55 +25,59 @@ Amount is controlled by ratio parameter.
 Curve gives further effect by bunching the surface towards the ends.
 """
 
-import inkex
-
+from inkex.utils import X, Y
 from pathmodifier import Diffeo
 
+
 class RubberStretch(Diffeo):
+    """Distort selected paths"""
+    ratio = property(lambda self: -(self.options.ratio / 100))
+    curve = property(lambda self: min(self.options.curve / 100, 0.99))
+
     def add_arguments(self, pars):
         pars.add_argument("-r", "--ratio", type=float, default=0.5)
         pars.add_argument("-c", "--curve", type=float, default=0.5)
 
-    def applyDiffeo(self,bpt,vects=()):
-        for v in vects:
-            v[0]-=bpt[0]
-            v[1]-=bpt[1]
-            v[1]*=-1
-        bpt[1]*=-1
-        a=self.options.ratio/100
-        b=min(self.options.curve/100,0.99)
-        x0= (self.bbox[0]+self.bbox[1])/2
-        y0=-(self.bbox[2]+self.bbox[3])/2
-        w,h=(self.bbox[1]-self.bbox[0])/2,(self.bbox[3]-self.bbox[2])/2
+    def applyDiffeo(self, bpt, vects=()):
+        for vect in vects:
+            vect[0] -= bpt[0]
+            vect[1] -= bpt[1]
+            vect[1] *= -1
+        bpt[1] *= -1
+        bx0 = (self.bbox[0] + self.bbox[1]) / 2
+        by0 = -(self.bbox[2] + self.bbox[3]) / 2
 
-        x,y=(bpt[0]-x0),(bpt[1]-y0)
-        sx=(1+b*(x/w+1)*(x/w-1))*2**(-a)
-        sy=(1+b*(y/h+1)*(y/h-1))*2**(-a)
-        bpt[0]=x0+x*sy
-        bpt[1]=y0+y/sx
-        for v in vects:
-            dx,dy=v
-            dXdx=sy
-            dXdy= x*2*b*y/h/h*2**(-a)
-            dYdx=-y*2*b*x/w/w*2**(-a)/sx/sx
-            dYdy=1/sx
-            v[0]=dXdx*dx+dXdy*dy
-            v[1]=dYdx*dx+dYdy*dy
+        x, y = (bpt[0] - bx0), (bpt[1] - by0)
+        sx1 = (1 + self.curve * (x / self.bbox.width + 1) * \
+              (x / self.bbox.width - 1)) * 2 ** self.ratio
+        sy1 = (1 + self.curve * (y / self.bbox.height + 1) * \
+              (y / self.bbox.height - 1)) * 2 ** self.ratio
+        bpt[0] = bx0 + x * sy1
+        bpt[1] = by0 + y / sx1
+        for vect in vects:
+            dx_dx = sy1
+            dx_dy = x * 2 * self.curve * y / self.bbox.height / self.bbox.height * 2 ** self.ratio
+            dy_dx = -y * 2 * self.curve * x / self.bbox.width / \
+                        self.bbox.width * 2 ** self.ratio / sx1 / sx1
+            dy_dy = 1 / sx1
+            vect[0] = dx_dx * vect[X] + dx_dy * vect[Y]
+            vect[1] = dy_dx * vect[X] + dy_dy * vect[Y]
 
-        #--spherify
-        #s=((x*x+y*y)/(w*w+h*h))**(-a/2)
-        #bpt[0]=x0+s*x
-        #bpt[1]=y0+s*y
-        #for v in vects:
+        # --spherify
+        # s=((x*x+y*y)/(w*w+h*h))**(-a/2)
+        # bpt[0]=x0+s*x
+        # bpt[1]=y0+s*y
+        # for v in vects:
         #    dx,dy=v
         #    v[0]=(1-a/2/(x*x+y*y)*2*x*x)*s*dx+( -a/2/(x*x+y*y)*2*y*x)*s*dy
         #    v[1]=( -a/2/(x*x+y*y)*2*x*y)*s*dx+(1-a/2/(x*x+y*y)*2*y*y)*s*dy
 
-        for v in vects:
-            v[0]+=bpt[0]
-            v[1]+=bpt[1]
-            v[1]*=-1
-        bpt[1]*=-1
+        for vect in vects:
+            vect[0] += bpt[0]
+            vect[1] += bpt[1]
+            vect[1] *= -1
+        bpt[1] *= -1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     RubberStretch().run()

@@ -32,7 +32,7 @@ from collections import OrderedDict
 from lxml import etree
 
 from .units import discover_unit, convert_unit, render_unit
-from .transforms import BoundingBox
+from .transforms import BoundingBox, Vector2d
 from .elements import BaseElement, StyleElement, NamedView, Defs
 from .styles import StyleSheets
 
@@ -137,12 +137,12 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         """Returns view_center in terms of document units"""
         namedview = self.namedview
         if namedview.center_x and namedview.center_y:
-            return (self.unittouu(namedview.center_x),
-                    self.unittouu(namedview.center_y))
+            return Vector2d(self.unittouu(namedview.center_x),
+                            self.unittouu(namedview.center_y))
             # y-coordinate flip, eliminate it when it's gone in Inkscape
             # doc_height = self.unittouu(self.height)
             # return (float(x), doc_height - float(y))
-        return 0.0, 0.0
+        return Vector2d()
 
     def getElement(self, xpath):  # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""

@@ -358,7 +358,7 @@ class ShapeElement(BaseElement):
     def get_center_position(self):
         """Returns object's center in terms of document units"""
         x, y = self.bounding_box().center()
-        return x or 0, y or 0
+        return Vector2d(x or 0, y or 0)
 
     @property
     def label(self):

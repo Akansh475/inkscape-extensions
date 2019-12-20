@@ -20,6 +20,7 @@
 """
 Test the svg interface for inkscape extensions.
 """
+from inkex.transforms import Vector2d
 from inkex.utils import addNS
 from inkex.elements import Guide
 from inkex.tester import TestCase
@@ -121,8 +122,8 @@ class BasicSvgTest(TestCase):
     def test_svg_center_position(self):
         """SVG with namedview has a center position"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
-        self.assertEqual(doc.get_center_position(), (30.714286, 520.0))
-        self.assertEqual(svg().get_center_position(), (0, 0))
+        self.assertTrue(doc.get_center_position().is_close((30.714286, 520.0)))
+        self.assertTrue(svg().get_center_position().is_close(Vector2d()))
 
     def test_defs(self):
         """Can get the defs from an svg file"""

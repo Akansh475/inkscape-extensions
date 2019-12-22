@@ -49,9 +49,12 @@ test:python37:
 test:coverage:
   stage: coverage
   script:
-    - python3-coverage combine .coverage-*
-    - python3-coverage report -m
-    - python3-coverage html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
+    - source /root/pyenv-init
+    - pyenv shell 3.7.2
+    - pip install coverage pylint
+    - coverage3 combine .coverage-*
+    - coverage3 report -m
+    - coverage3 html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
     - echo -e "\n\n"
       "Coverage report successfully created; you can access the full HTML report at\n"
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"

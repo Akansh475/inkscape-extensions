@@ -34,7 +34,7 @@ class TurtleRtree(inkex.GenerateExtension):
     def generate(self):
         self.options.size = self.svg.unittouu(str(self.options.size) + 'px')
         self.options.minimum = self.svg.unittouu(str(self.options.minimum) + 'px')
-        point = self.svg.get_center_position()
+        point = self.svg.namedview.center
 
         style = inkex.Style({
             'stroke-linejoin': 'miter', 'stroke-width': str(self.svg.unittouu('1px')),

@@ -35,7 +35,7 @@ class Barcode(inkex.GenerateExtension):
         pars.add_argument("-d", "--text", default='', help="Text to print on barcode")
 
     def generate(self):
-        (pos_x, pos_y) = self.svg.get_center_position()
+        (pos_x, pos_y) = self.svg.namedview.center
 
         return get_barcode(
             self.options.type,

@@ -124,8 +124,8 @@ class DeprecatedEffect(object):
     @property
     def view_center(self):
         self._deprecated('view_center',\
-            _('{} is now a method in the svg. Use `self.svg.get_center_position()` instead.'))
-        return self.svg.get_center_position()
+            _('{} is now a method in the svg. Use `self.svg.namedview.center` instead.'))
+        return self.svg.namedview.center
 
     @property
     def selected(self):

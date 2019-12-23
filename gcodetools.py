@@ -5051,7 +5051,7 @@ class Gcodetools(inkex.EffectExtension):
             draw_text(axis, graffiti_reference_points_count * 100 + 10, -10, group=g, gcodetools_tag="Gcodetools graffiti reference point text")
 
         elif self.options.orientation_points_count == "in-out reference point":
-            draw_pointer(group=self.svg.get_current_layer(), x=self.svg.get_center_position(), figure="arrow", pointer_type="In-out reference point", text="In-out point")
+            draw_pointer(group=self.svg.get_current_layer(), x=self.svg.namedview.center, figure="arrow", pointer_type="In-out reference point", text="In-out point")
 
         else:
             print_("Inserting orientation points")
@@ -5209,7 +5209,7 @@ G01 Z1 (going to cutting z)\n""",
             y += 15 * len(v) if key != 'name' else 20 * len(v)
 
         bg.set('d', "m -20,-20 l 400,0 0,{:f} -400,0 z ".format(y + 50))
-        tools_group.transform.add_translate(*self.svg.get_center_position())
+        tools_group.transform.add_translate(*self.svg.namedview.center)
         tools_group.transform.add_translate(-150, 0)
 
     ################################################################################

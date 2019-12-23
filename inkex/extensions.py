@@ -137,7 +137,7 @@ class GenerateExtension(EffectExtension):
         Generate the transformation for the container group, the default is
         to return the center position of the svg document or view port.
         """
-        (pos_x, pos_y) = self.svg.get_center_position()
+        (pos_x, pos_y) = self.svg.namedview.center
         if pos_x is None:
             pos_x = 0
         if pos_y is None:

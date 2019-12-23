@@ -44,7 +44,7 @@ class Lindenmayer(inkex.GenerateExtension):
 
     def __compose_path(self, string):
         self.turtle.pu()
-        point = self.svg.get_center_position()
+        point = self.svg.namedview.center
         self.turtle.setpos(point)
         self.turtle.pd()
         for c in string:

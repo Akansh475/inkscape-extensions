@@ -607,6 +607,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     def __repr__(self):
         return "BoundingBox({})".format(str(tuple(self)))
 
+    @property
     def center(self):
         """Returns the middle of the bounding box"""
         return Vector2d(self.x.center, self.y.center)

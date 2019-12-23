@@ -133,17 +133,6 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
             return self
         return layer
 
-    def get_center_position(self):
-        """Returns view_center in terms of document units"""
-        namedview = self.namedview
-        if namedview.center_x and namedview.center_y:
-            return Vector2d(self.unittouu(namedview.center_x),
-                            self.unittouu(namedview.center_y))
-            # y-coordinate flip, eliminate it when it's gone in Inkscape
-            # doc_height = self.unittouu(self.height)
-            # return (float(x), doc_height - float(y))
-        return Vector2d()
-
     def getElement(self, xpath):  # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""
         return self.findone(xpath)

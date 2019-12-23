@@ -96,7 +96,7 @@ class GridCartesian(inkex.GenerateExtension):
 
         grid = Group.create("GridCartesian:X{0.x_divs}:Y{0.y_divs}".format(self.options))
 
-        (pos_x, pos_y) = self.svg.get_center_position()
+        (pos_x, pos_y) = self.svg.namedview.center
         grid.transform.add_translate(pos_x - xmax / 2.0, pos_y - ymax / 2.0)
 
         # Group for major x gridlines

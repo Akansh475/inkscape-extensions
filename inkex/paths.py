@@ -1067,7 +1067,7 @@ class Path(list):
             # Default center is center of bbox
             bbox = self.bounding_box()
             if bbox:
-                center = bbox.center()
+                center = bbox.center
             else:
                 center = Vector2d()
         center = Vector2d(center)

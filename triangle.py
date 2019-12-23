@@ -111,7 +111,7 @@ class Triangle(inkex.EffectExtension):
 
     def effect(self):
         tri = self.svg.get_current_layer()
-        offset = self.svg.get_center_position()
+        offset = self.svg.namedview.center
         self.options.s_a = self.svg.unittouu(str(self.options.s_a) + 'px')
         self.options.s_b = self.svg.unittouu(str(self.options.s_b) + 'px')
         self.options.s_c = self.svg.unittouu(str(self.options.s_c) + 'px')

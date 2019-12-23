@@ -355,11 +355,6 @@ class ShapeElement(BaseElement):
                 path = path.transform(transform)
         return path.bounding_box()
 
-    def get_center_position(self):
-        """Returns object's center in terms of document units"""
-        x, y = self.bounding_box().center()
-        return Vector2d(x or 0, y or 0)
-
     @property
     def label(self):
         """Returns the inkscape label"""
@@ -675,9 +670,13 @@ class NamedView(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""
     tag_name = 'sodipodi:namedview'
 
-    center_x = property(lambda self: self.get('inkscape:cx'))
-    center_y = property(lambda self: self.get('inkscape:cy'))
     current_layer = property(lambda self: self.get('inkscape:current-layer'))
+
+    @property
+    def center(self):
+        """Returns view_center in terms of document units"""
+        return Vector2d(self.root.unittouu(self.get('inkscape:cx') or 0),
+                        self.root.unittouu(self.get('inkscape:cy') or 0))
 
     def get_guides(self):
         """Returns a list of guides"""

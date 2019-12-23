@@ -70,7 +70,7 @@ class Spirograph(inkex.EffectExtension):
 
             theta = i * scale
 
-            view_center = self.svg.get_center_position()
+            view_center = self.svg.namedview.center
             x = a * math.cos(theta + rotation) + \
                 self.options.penr * math.cos(ratio * theta + rotation) * flip + \
                 view_center[0]

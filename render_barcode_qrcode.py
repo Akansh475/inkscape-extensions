@@ -1087,7 +1087,7 @@ class QrCode(inkex.GenerateExtension):
 
             grp = Group()
             grp.set('inkscape:label', 'QR Code: ' + text_str)
-            pos_x, pos_y = self.svg.get_center_position()
+            pos_x, pos_y = self.svg.namedview.center
             grp.transform.add_translate(pos_x, pos_y)
             if scale:
                 grp.transform.add_scale(scale)

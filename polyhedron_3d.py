@@ -307,7 +307,7 @@ class Poly3D(inkex.GenerateExtension):
 
         # we will put all the rotations in the object name, so it can be repeated in
         poly = Group.create(obj.name + ':' + make_rotation_log(so))
-        (pos_x, pos_y) = self.svg.get_center_position()
+        (pos_x, pos_y) = self.svg.namedview.center
         poly.transform.add_translate(pos_x, pos_y)
         poly.transform.add_scale(scale)
 

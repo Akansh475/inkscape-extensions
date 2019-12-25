@@ -22,7 +22,6 @@ Common access to serial and other computer ports.
 
 import os
 import sys
-import pty
 from .utils import DependencyError, AbortExtension
 
 try:
@@ -43,6 +42,7 @@ class Serial(object):
     """
     def __init__(self, port, baud=9600, timeout=0.1, **options):
         if port == '[test]':
+            import pty # This does not work on windows
             self.master, self.slave = pty.openpty()
             port = os.ttyname(self.slave)
 

@@ -199,14 +199,14 @@ class PathAlongPath(pathmodifier.Diffeo):
             self.options.repeat = True
             self.options.stretch = True
 
-        bbox = sum([node.bounding_box() for node in self.patterns.values()])
+        bbox = sum([node.bounding_box() for node in self.patterns.values()], None)
         #bbox = simpletransform.computeBBox(self.patterns.values())
 
         if self.options.vertical:
             # flipxy(bbox)...
-            bbox = (-bbox[3], -bbox[2], -bbox[1], -bbox[0])
+            bbox = inkex.BoundingBox(-bbox.y, -bbox.x)
 
-        width = bbox[1] - bbox[0]
+        width = bbox.width
         dx = width + self.options.space
         if dx < 0.01:
             exit(_("The total length of the pattern is too small :\nPlease choose a larger object or set 'Space between copies' > 0"))
@@ -230,15 +230,15 @@ class PathAlongPath(pathmodifier.Diffeo):
                 self.skelcompIsClosed = (self.skelcomp[0] == self.skelcomp[-1])
 
                 length = sum(self.lengths)
-                xoffset = self.skelcomp[0][0] - bbox[0] + self.options.toffset
-                yoffset = self.skelcomp[0][1] - (bbox[2] + bbox[3]) / 2 - self.options.noffset
+                xoffset = self.skelcomp[0][0] - bbox.x.minimum + self.options.toffset
+                yoffset = self.skelcomp[0][1] - bbox.y.center - self.options.noffset
 
                 if self.options.repeat:
                     NbCopies = max(1, int(round((length + self.options.space) / dx)))
                     width = dx * NbCopies
                     if not self.skelcompIsClosed:
                         width -= self.options.space
-                    bbox = bbox[0], bbox[0] + width, bbox[2], bbox[3]
+                    bbox.x.maximum = bbox.x.minimum + width
                     new = []
                     for sub in path:
                         for i in range(0, NbCopies, 1):

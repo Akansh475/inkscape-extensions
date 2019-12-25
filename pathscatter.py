@@ -35,7 +35,7 @@ import random
 
 import inkex
 from inkex import bezier
-from inkex.transforms import Transform
+from inkex.transforms import Transform, BoundingBox
 from inkex.elements import Group, Use
 
 import pathmodifier
@@ -192,14 +192,14 @@ class PathScatter(pathmodifier.Diffeo):
 
         # center at (0,0)
         bbox = self.patternNode.bounding_box()
-        mat = [[1, 0, -(bbox[0] + bbox[1]) / 2], [0, 1, -(bbox[2] + bbox[3]) / 2]]
+        mat = [[1, 0, -bbox.center.x], [0, 1, -bbox.center.y]]
         if self.options.vertical:
-            bbox = [-bbox[3], -bbox[2], bbox[0], bbox[1]]
+            bbox = BoundingBox(-bbox.y, bbox.x)
             mat = (Transform([[0, -1, 0], [1, 0, 0]]) * Transform(mat)).matrix
         mat[1][2] += self.options.noffset
         self.patternNode.transform *= mat
 
-        width = bbox[1] - bbox[0]
+        width = bbox.width
         dx = width + self.options.space
 
         # check if group and expand it
@@ -228,8 +228,8 @@ class PathScatter(pathmodifier.Diffeo):
                     if n > 0:
                         dx = (length - self.options.toffset) / n
 
-                xoffset = self.skelcomp[0][0] - bbox[0] + self.options.toffset
-                yoffset = self.skelcomp[0][1] - (bbox[2] + bbox[3]) / 2 - self.options.noffset
+                xoffset = self.skelcomp[0][0] - bbox.x.minimum + self.options.toffset
+                yoffset = self.skelcomp[0][1] - bbox.y.center - self.options.noffset
 
                 s = self.options.toffset
                 while s <= length:

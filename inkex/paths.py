@@ -1037,14 +1037,21 @@ class Path(list):
                 yield seg
 
     def bounding_box(self):
-        """Return the top,left and bottom,right coords"""
-        bbox = BoundingBox()
-        for proxy in self.proxy_iterator():
-            proxy.command.update_bounding_box(proxy.first_point, [
-                proxy.prev2_control_point,
-                proxy.previous_end_point,
-            ], bbox)
-        return bbox
+        """Return bounding box of the Path"""
+        if not self:
+            return None
+        iterator = self.proxy_iterator()
+        proxy = next(iterator)
+        bbox = BoundingBox(proxy.first_point.x, proxy.first_point.y)
+        try:
+            while True:
+                proxy = next(iterator)
+                proxy.command.update_bounding_box(proxy.first_point, [
+                    proxy.prev2_control_point,
+                    proxy.previous_end_point,
+                ], bbox)
+        except StopIteration:
+            return bbox
 
     def append(self, cmd):
         """Append a command to this path including any chained commands"""

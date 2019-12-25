@@ -235,8 +235,8 @@ class PathTest(TestCase):
         A diagonal line from 20,20 to 90,90 then to +10,+10  "\"
 
         """
-        self.assertEqual((20, 100, 20, 100), Path('M 20,20 L 90,90 l 10,10 Z').bounding_box())
-        self.assertEqual((10, 90, 10, 90), Path('M 20,20 L 90,90 L 10,10 Z').bounding_box())
+        self.assertEqual((20, 100), (20, 100), Path('M 20,20 L 90,90 l 10,10 Z').bounding_box())
+        self.assertEqual((10, 90), (10, 90), Path('M 20,20 L 90,90 L 10,10 Z').bounding_box())
 
     def test_bounding_box_curves(self):
         """
@@ -248,11 +248,11 @@ class PathTest(TestCase):
                     ' -5.7198883,65.441157 -5.6395306,33.639531 14,14'
                     ' 33.639531,-5.6395306 65.360469,-5.6395306 85,14 Z')
         bb_tuple = path.bounding_box()
-        expected = (-0.760, -0.760 + 100.520, -0.730, -0.730 + 100.520)
+        expected = (-0.760, -0.760 + 100.520), (-0.730, -0.730 + 100.520)
         precision = 3
 
-        for i in range(4):
-            self.assertAlmostEqual(bb_tuple[i], expected[i], precision)
+        self.assertDeepAlmostEqual(tuple(bb_tuple.x), expected[0], places=precision)
+        self.assertDeepAlmostEqual(tuple(bb_tuple.y), expected[1], places=precision)
 
     def test_bounding_box_arcs(self):
         """
@@ -268,11 +268,11 @@ class PathTest(TestCase):
                     ' 50,50 0 0 1 85.355333,14.644651 Z')
 
         bb_tuple = path.bounding_box()
-        expected = (0, 100, 0, 100)
+        expected = (0, 100), (0, 100)
         precision = 4
 
-        for i in range(4):
-            self.assertAlmostEqual(bb_tuple[i], expected[i], precision)
+        self.assertDeepAlmostEqual(tuple(bb_tuple.x), expected[0], places=precision)
+        self.assertDeepAlmostEqual(tuple(bb_tuple.y), expected[1], places=precision)
 
         # self.assertEqual(('ERROR'), Path('M 10 10 S 100 100 300 0').bounding_box())
         # self.assertEqual(('ERRPR'), Path('M 10 10 Q 100 100 300 0').bounding_box())

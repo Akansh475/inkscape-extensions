@@ -44,8 +44,8 @@ class RubberStretch(Diffeo):
             vect[1] -= bpt[1]
             vect[1] *= -1
         bpt[1] *= -1
-        bx0 = (self.bbox[0] + self.bbox[1]) / 2
-        by0 = -(self.bbox[2] + self.bbox[3]) / 2
+        bx0 = self.bbox.center.x
+        by0 = -self.bbox.center.y
 
         x, y = (bpt[0] - bx0), (bpt[1] - by0)
         sx1 = (1 + self.curve * (x / self.bbox.width + 1) * \

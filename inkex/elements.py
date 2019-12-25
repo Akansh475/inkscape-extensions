@@ -34,6 +34,11 @@ from .transforms import BoundingBox, Transform, Vector2d
 from .utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
 
+try:
+    from typing import Optional  # pylint: disable=unused-import
+except ImportError:
+    pass
+
 __all__ = ('Group', 'PathElement', 'ShapeElement')
 
 class SvgClassLookup(etree.CustomElementClassLookup):
@@ -446,8 +451,8 @@ class Group(ShapeElement):
             ret += child.path.transform(child.transform)
         return ret
 
-    def bounding_box(self, transform=None):
-        bbox = BoundingBox(None)
+    def bounding_box(self, transform=None):  # type: (Transform) -> Optional[BoundingBox]
+        bbox = None
 
         transform = Transform(transform) * self.transform
         if not transform:

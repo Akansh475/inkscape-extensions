@@ -75,17 +75,20 @@ def fuseTransform(node):
 @deprecate
 def boxunion(b1, b2):
     """list(BoundingBox(b1) + BoundingBox(b2))"""
-    return tuple(BoundingBox(b1) + BoundingBox(b2))
+    bbox = BoundingBox(b1[:2], b1[2:]) + BoundingBox(b2[:2], b2[2:])
+    return bbox.x.minimum, bbox.x.maximum, bbox.y.minimum, bbox.y.maximum
 
 @deprecate
 def roughBBox(path):
     """list(Path(path)).bounding_box())"""
-    return list(Path(path).bounding_box())
+    bbox = Path(path).bounding_box()
+    return bbox.x.minimum, bbox.x.maximum, bbox.y.minimum, bbox.y.maximum
 
 @deprecate
 def refinedBBox(path):
     """list(Path(path)).bounding_box())"""
-    return list(Path(path).bounding_box())
+    bbox = Path(path).bounding_box()
+    return bbox.x.minimum, bbox.x.maximum, bbox.y.minimum, bbox.y.maximum
 
 @deprecate
 def cubicExtrema(y0, y1, y2, y3):
@@ -95,7 +98,7 @@ def cubicExtrema(y0, y1, y2, y3):
 @deprecate
 def computeBBox(aList, mat=[[1,0,0],[0,1,0]]):
     """sum([node.bounding_box() for node in aList])"""
-    return sum([node.bounding_box() for node in aList])
+    return sum([node.bounding_box() for node in aList], None)
 
 @deprecate
 def computePointInNode(pt, node, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):

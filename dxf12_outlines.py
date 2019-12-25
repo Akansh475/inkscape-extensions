@@ -102,9 +102,8 @@ class DxfTwelve(inkex.OutputExtension):
                 self.dxf_line(layer, [s[1], e[1]])
 
     def dxf_path_to_point(self, layer, p):
-        bbox = list(inkex.Path(p).bounding_box())
-        x = (bbox[0] + bbox[1]) / 2
-        y = (bbox[2] + bbox[3]) / 2
+        bbox = inkex.Path(p).bounding_box() or inkex.BoundingBox(0, 0)
+        x, y = bbox.center
         self.dxf_point(layer, x, y)
 
     def save(self, stream):

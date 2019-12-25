@@ -230,7 +230,9 @@ class TestCase(MockCommandMixin, BaseCase):
 
         return effect
 
-    def assertDeepAlmostEqual(self, first, second, places=7, msg=None, delta=None):
+    def assertDeepAlmostEqual(self, first, second, places=None, msg=None, delta=None):
+        if delta is None and places is None:
+            places = 7
         if isinstance(first, (list, tuple)):
             assert len(first) == len(second)
             for (f, s) in zip(first, second):

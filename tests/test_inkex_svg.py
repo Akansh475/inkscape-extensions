@@ -98,7 +98,7 @@ class BasicSvgTest(TestCase):
         expected = list(expected_3902 + expected_3904)
 
         for x, y in zip(expected, doc.get_selected_bbox()):
-            self.assertAlmostEqual(x, y, delta=1e-3)
+            self.assertDeepAlmostEqual(tuple(x), tuple(y), delta=1e-3)
 
 
     def test_svg_name(self):

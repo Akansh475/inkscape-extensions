@@ -28,13 +28,15 @@ Provide transformation parsing to extensions
 import re
 import sys
 from decimal import Decimal
-from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi
+from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isnan
 
 from .utils import strargs, KeyDict
 
 try:
-    from typing import overload, Tuple, Union, Optional # pylint: disable=unused-import
-    VectorLike = Union["Vector2d", Tuple[float, float]] # pylint: disable=invalid-name
+    from typing import overload, List, Tuple, Union, Optional  # pylint: disable=unused-import
+
+    VectorLike = Union["Vector2d", Tuple[float, float]]  # pylint: disable=invalid-name
+    BoundingIntervalArgs = Union['BoundingInterval', Tuple[float, float], float]  # pylint: disable=invalid-name
 except ImportError:
     overload = lambda x: x
 
@@ -50,6 +52,7 @@ YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
 # Anchoring objects with given directions (see inx options)
 CUSTOM_DIRECTION = {270: 'tb', 90: 'bt', 0: 'lr', 360: 'lr', 180: 'rl'}
 DIRECTION = ['tb', 'bt', 'lr', 'rl', 'ro', 'ri']
+
 
 class Vector2d(object):
     """
@@ -125,7 +128,7 @@ class Vector2d(object):
         pass
 
     @overload
-    def assign(self, other):   # type: (VectorLike) -> None
+    def assign(self, other):  # type: (VectorLike) -> None
         pass
 
     def assign(self, *args):
@@ -187,7 +190,7 @@ class Vector2d(object):
     def is_close(self, other, rtol=1e-5, atol=1e-8
                  ):  # type: (Union[VectorLike,Tuple[float,float]], Optional[float], Optional[float]) -> float
         other = Vector2d(other)
-        delta = (self-other).length
+        delta = (self - other).length
         return delta < (atol + rtol * other.length)
 
     @property
@@ -272,11 +275,11 @@ class Transform(object):
                 func(value)
 
     @overload
-    def add_translate(self, dr): # type: (VectorLike) -> None
+    def add_translate(self, dr):  # type: (VectorLike) -> None
         pass
 
     @overload
-    def add_translate(self, tr_x, tr_y=0.0): # type: (float, Optional[float]) -> None
+    def add_translate(self, tr_x, tr_y=0.0):  # type: (float, Optional[float]) -> None
         pass
 
     def add_translate(self, *args):
@@ -292,11 +295,11 @@ class Transform(object):
         self.__imul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
 
     @overload
-    def add_rotate(self, deg, center): # type: (float, VectorLike) -> None
+    def add_rotate(self, deg, center):  # type: (float, VectorLike) -> None
         pass
 
     @overload
-    def add_rotate(self, deg, center_x, center_y): # type: (float, float, float) -> None
+    def add_rotate(self, deg, center_x, center_y):  # type: (float, float, float) -> None
         pass
 
     def add_rotate(self, deg, *args):
@@ -321,7 +324,7 @@ class Transform(object):
     def is_translate(self, exactly=False):
         """Returns True if this transformation is ONLY translate"""
         tol = self.absolute_tolerance if not exactly else 0.0
-        return fabs(self.a - 1) <= tol and abs(self.d-1)<= tol and fabs(self.b) <= tol and fabs(self.c) <= tol
+        return fabs(self.a - 1) <= tol and abs(self.d - 1) <= tol and fabs(self.b) <= tol and fabs(self.c) <= tol
 
     def is_scale(self, exactly=False):
         """Returns True if this transformation is ONLY scale"""
@@ -399,15 +402,13 @@ class Transform(object):
         new_f = -(new_b * self.e + new_d * self.f)
         return Transform((new_a, new_b, new_c, new_d, new_e, new_f))
 
-    def apply_to_point(self, point): # type: (VectorLike) -> Vector2d
+    def apply_to_point(self, point):  # type: (VectorLike) -> Vector2d
         """Transform a tuple (X, Y)"""
         if isinstance(point, str):
             raise ValueError("Will not transform string '{}'".format(point))
         point = Vector2d(point)
         return Vector2d(self.a * point.x + self.c * point.y + self.e,
                         self.b * point.x + self.d * point.y + self.f)
-
-
 
     def _is_URT(self, exactly=False):
         """
@@ -419,58 +420,77 @@ class Transform(object):
         tol = self.absolute_tolerance if not exactly else 0.0
         return (fabs(self.a - self.d) <= tol) and (fabs(self.b + self.c) <= tol)
 
-class Scale(object):  # pylint: disable=too-few-public-methods
+
+class BoundingInterval(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
-    def __init__(self, value=None, *others):
-        if isinstance(value, Scale):
-            self.maximum = value.maximum
-            self.minimum = value.minimum
-        elif isinstance(value, (tuple, list)) and len(value) == 2:
-            if value[0] is not None:
-                self.minimum, self.maximum = min(value), max(value)
-            else:
-                self.minimum, self.maximum = value
-        elif isinstance(value, (int, float, Decimal)):
-            self.minimum = value
-            self.maximum = value
-        elif value is None:
-            self.minimum = None
-            self.maximum = None
-        else:
-            raise ValueError("Not a number for scaling: {} ({})" \
-                             .format(str(value), type(value).__name__))
+    @overload
+    def __init__(self, other):  # type: (BoundingInterval) -> None
+        pass
 
-        for item in others:
-            self += item
+    @overload
+    def __init__(self, pair):  # type: (Tuple[float, float]) -> None
+        pass
+
+    @overload
+    def __init__(self, value):  # type: (float) -> None
+        pass
+
+    @overload
+    def __init__(self, x, y):  # type: (float, float) -> None
+        pass
+
+    def __init__(self, x, y=None):
+        if y is not None:
+            if isinstance(x, (int, float, Decimal)) and isinstance(y, (int, float, Decimal)):
+                self.minimum = x
+                self.maximum = y
+            else:
+                raise ValueError("Not a number for scaling: {} ({},{})"
+                                 .format(str((x, y)), type(x).__name__, type(y).__name__))
+
+        else:
+            value = x
+            if isinstance(value, BoundingInterval):
+                self.minimum = value.minimum
+                self.maximum = value.maximum
+            elif isinstance(value, (tuple, list)) and len(value) == 2:
+                self.minimum, self.maximum = min(value), max(value)
+            elif isinstance(value, (int, float, Decimal)):
+                self.minimum = self.maximum = value
+            else:
+                raise ValueError("Not a number for scaling: {} ({})"
+                                 .format(str(value), type(value).__name__))
 
     def __bool__(self):
-        return self.minimum is not None and self.maximum is not None
+        return not (isnan(self.minimum) or isnan(self.maximum))
 
     __nonzero__ = __bool__
 
+    def __neg__(self):
+        return BoundingInterval((-self.maximum, -self.minimum))
+
     def __add__(self, other):
-        return self.__iadd__(other)
+        new = BoundingInterval(self)
+        if other is not None:
+            new += other
+        return new
 
     def __iadd__(self, other):
-        other = Scale(other)
-        if self.minimum is None:
-            self.minimum = other.minimum
-        elif other.minimum is not None:
-            self.minimum = min((self.minimum, other.minimum))
-        if self.maximum is None:
-            self.maximum = other.maximum
-        elif other.maximum is not None:
-            self.maximum = max((self.maximum, other.maximum))
+        if other is None:
+            return
+        other = BoundingInterval(other)
+        self.minimum = min((self.minimum, other.minimum))
+        self.maximum = max((self.maximum, other.maximum))
         return self
 
     def __radd__(self, other):
-        if other != 0:  # ignore sum() initial value
-            return self + other
-        return self
+        if other is None:
+            return BoundingInterval(self)
+        return self + other
 
     def __mul__(self, other):
-        new = Scale(self)
+        new = BoundingInterval(self)
         if other is not None:
             new *= other
         return new
@@ -485,29 +505,22 @@ class Scale(object):  # pylint: disable=too-few-public-methods
         yield self.maximum
 
     def __eq__(self, other):
-        return tuple(self) == tuple(Scale(other))
+        return tuple(self) == tuple(BoundingInterval(other))
 
-    def __contains__(self, item):
-        if self.minimum is None or self.maximum is None:
-            return False
-        return self.minimum <= item <= self.maximum
-
+    def __contains__(self, value):
+        return self.minimum <= value <= self.maximum
 
     def __repr__(self):
-        return "scale:" + str(tuple(self))
+        return "BoundingInterval({}, {})".format(self.minimum, self.maximum)
 
     @property
     def center(self):
         """Pick the middle of the line"""
-        if self.minimum is None or self.maximum is None:
-            return None
         return self.minimum + ((self.maximum - self.minimum) / 2)
 
     @property
     def size(self):
         """Return the size difference minimum and maximum"""
-        if self.minimum is None or self.maximum is None:
-            return None
         return self.maximum - self.minimum
 
 
@@ -515,13 +528,11 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     """
     Some functions to compute a rough bbox of a given list of objects.
 
-    BoundingBox() - Empty bounding box, bool == False
-    BoundingBox(x)
+    BoundingBox(other)
     BoundingBox(x, y)
-    BoundingBox((x1, x2, y1, y2))
     BoundingBox((x1, x2), (y1, y2))
-    BoundingBox(((x1, y1), (x2, y2)))
     """
+
     width = property(lambda self: self.x.size)
     height = property(lambda self: self.y.size)
     top = property(lambda self: self.y.minimum)
@@ -531,81 +542,82 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     center_x = property(lambda self: self.x.center)
     center_y = property(lambda self: self.y.center)
 
-    def __init__(self, x=None, y=None):
+    @overload
+    def __init__(self, other):  # type: (BoundingBox) -> None
+        pass
+
+    @overload
+    def __init__(self, x, y):  # type: (BoundingIntervalArgs, BoundingIntervalArgs) -> None
+        pass
+
+    def __init__(self, x, y=None):
         if y is None:
             if isinstance(x, BoundingBox):
                 x, y = x.x, x.y
-            elif isinstance(x, (list, tuple)):
-                if len(x) == 2:
-                    if isinstance(x[0], (list, tuple)):
-                        y = x[0][1], x[1][1]
-                        x = x[0][0], x[1][0]
-                    else:
-                        x, y = x
-                elif len(x) == 4:
-                    x, y = x[:2], x[2:]
-        self.x = Scale(x)
-        self.y = Scale(y)
+            else:
+                raise ValueError("Not a number for scaling: {} ({})"
+                                 .format(str(x), type(x).__name__))
+        self.x = BoundingInterval(x)
+        self.y = BoundingInterval(y)
 
     def __bool__(self):
         return bool(self.x) and bool(self.y)
 
     __nonzero__ = __bool__
 
+    def __neg__(self):
+        return BoundingBox(-self.x, -self.y)
+
     def __add__(self, other):
-        new = BoundingBox(self.x, self.y)
+        new = BoundingBox(self)
         if other is not None:
             new += other
         return new
 
     def __iadd__(self, other):
+        if other is None:
+            return self
         other = BoundingBox(other)
         self.x += other.x
         self.y += other.y
         return self
 
     def __radd__(self, other):
-        if other != 0:
+        if other is not None:
             return self + other
         return self
 
-    def __mul__(self, other):
-        new = BoundingBox(self.x, self.y)
-        if other is not None:
-            new *= other
+    def __mul__(self, factor):
+        new = BoundingBox(self)
+        new *= factor
         return new
 
-    def __imul__(self, other):
-        self.x *= other
-        self.y *= other
+    def __imul__(self, factor):
+        self.x *= factor
+        self.y *= factor
         return self
 
     def __eq__(self, other):
-        if isinstance(other, (tuple, BoundingBox)):
+        if isinstance(other, BoundingBox):
             return tuple(self) == tuple(other)
         return False
 
     def __iter__(self):
-        yield self.x.minimum
-        yield self.x.maximum
-        yield self.y.minimum
-        yield self.y.maximum
+        yield self.x
+        yield self.y
 
     @property
     def minimum(self):
         """Return the minimum x,y coords"""
-        return (self.x.minimum, self.y.minimum)
+        return Vector2d(self.x.minimum, self.y.minimum)
 
     @property
     def maximum(self):
         """Return the maximum x,y coords"""
-        return (self.x.maximum, self.y.maximum)
-
-    def __getitem__(self, index):
-        return list(self)[index]
+        return Vector2d(self.x.maximum, self.y.maximum)
 
     def __repr__(self):
-        return "BoundingBox({})".format(str(tuple(self)))
+        return "BoundingBox({},{})".format(tuple(self.x), tuple(self.y))
 
     @property
     def center(self):
@@ -625,7 +637,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         selbox - The bounding box of the whole selection for radial anchors
         """
         rot = 0
-        if isinstance(direction, int): # Angle
+        if isinstance(direction, int):  # Angle
             if direction not in CUSTOM_DIRECTION:
                 return hypot(x, y) * (cos(radians(-direction) - atan2(y, x)))
             direction = CUSTOM_DIRECTION[direction]
@@ -648,12 +660,12 @@ class DirectedLineSegment(object):
     start = Vector2d()  # start point of segment
     end = Vector2d()  # end point of segment
 
-    x0 = property(lambda self: self.start.x) # pylint: disable=invalid-name
-    y0 = property(lambda self: self.start.y) # pylint: disable=invalid-name
+    x0 = property(lambda self: self.start.x)  # pylint: disable=invalid-name
+    y0 = property(lambda self: self.start.y)  # pylint: disable=invalid-name
     x1 = property(lambda self: self.end.x)
     y1 = property(lambda self: self.end.y)
-    dx = property(lambda self: self.x1 - self.x0) # pylint: disable=invalid-name
-    dy = property(lambda self: self.y1 - self.y0) # pylint: disable=invalid-name
+    dx = property(lambda self: self.x1 - self.x0)  # pylint: disable=invalid-name
+    dy = property(lambda self: self.y1 - self.y0)  # pylint: disable=invalid-name
 
     @overload
     def __init__(self):  # type: () -> None
@@ -670,7 +682,7 @@ class DirectedLineSegment(object):
     def __init__(self, *args):
         if not args:  # overload 0
             start, end = Vector2d(), Vector2d()
-        if len(args) == 1:  # overload 1
+        elif len(args) == 1:  # overload 1
             other, = args
             start, end = other.start, other.end
         elif len(args) == 2:  # overload 2
@@ -734,7 +746,7 @@ class DirectedLineSegment(object):
         """Create parallel Segment"""
         return DirectedLineSegment((x + self.dx, y + self.dy), (x, y))
 
-    def intersect(self, other): # type: (DirectedLineSegment) -> Optional[Vector2d]
+    def intersect(self, other):  # type: (DirectedLineSegment) -> Optional[Vector2d]
         """Get the intersection between two segments"""
         other = DirectedLineSegment(other)
         denom = (other.dy * self.dx) - (other.dx * self.dy)
@@ -770,20 +782,19 @@ def cubic_extrema(py0, py1, py2, py3):
             return min(cmin, pyx), max(cmax, pyx)
         return cmin, cmax
 
-    if fabs(pd1 - 2 * pd2 + pd3)>atol:
+    if fabs(pd1 - 2 * pd2 + pd3) > atol:
         if pd2 * pd2 > pd1 * pd3:
             pds = sqrt(pd2 * pd2 - pd1 * pd3)
             cmin, cmax = _is_bigger((pd1 - pd2 + pds) / (pd1 - 2 * pd2 + pd3))
             cmin, cmax = _is_bigger((pd1 - pd2 - pds) / (pd1 - 2 * pd2 + pd3))
 
-    elif fabs(pd2 - pd1)>atol:
+    elif fabs(pd2 - pd1) > atol:
         cmin, cmax = _is_bigger(-pd1 / (2 * (pd2 - pd1)))
 
     return cmin, cmax
 
 
 def quadratic_extrema(py0, py1, py2):
-
     atol = 1e-9
     cmin, cmax = min(py0, py2), max(py0, py2)
 
@@ -799,4 +810,3 @@ def quadratic_extrema(py0, py1, py2):
         cmin, cmax = _is_bigger((py0 - py1) / (py0 + py2 - 2 * py1))
 
     return cmin, cmax
-

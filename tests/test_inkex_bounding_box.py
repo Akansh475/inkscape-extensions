@@ -12,7 +12,7 @@ from inkex.elements import (
     Group,
     PathElement,
 )
-from inkex.transforms import Transform, BoundingBox
+from inkex.transforms import Transform
 from inkex.paths import Path
 from inkex.styles import Style
 from inkex.svg import SvgDocumentElement
@@ -20,15 +20,19 @@ from inkex.tester import TestCase
 from inkex.utils import TemporaryDirectory
 from inkex.command import is_inkscape_available
 from inkex.tester.decorators import requires_inkscape
+try:
+    from typing import Optional, Tuple
+except ImportError:
+    pass
 
 DISABLE_STROKE_TESTS = True
 DISABLE_STROKE_CAP_TESTS = True
 DISABLE_INKSCAPE_QUERY_CHECK = not is_inkscape_available()
 
-skip_stroke_tests = pytest.mark.skipif( # pylint: disable=invalid-name
+skip_stroke_tests = pytest.mark.skipif(  # pylint: disable=invalid-name
     DISABLE_STROKE_TESTS, reason="Bounding box tests with stroke are disabled")
 
-skip_stroke_cap_tests = pytest.mark.skipif( # pylint: disable=invalid-name
+skip_stroke_cap_tests = pytest.mark.skipif(  # pylint: disable=invalid-name
     DISABLE_STROKE_TESTS or DISABLE_STROKE_CAP_TESTS,
     reason="Bounding box tests with stroke-cap are disabled")
 
@@ -36,26 +40,28 @@ skip_stroke_cap_tests = pytest.mark.skipif( # pylint: disable=invalid-name
 class BoundingBoxTest(TestCase):
     atol = 3e-3
 
-    def assert_bounding_box_is_equal(self, obj, expected_box, disable_inkscape_check=DISABLE_INKSCAPE_QUERY_CHECK):
+    def assert_bounding_box_is_equal(self, obj, xscale, yscale, disable_inkscape_check=DISABLE_INKSCAPE_QUERY_CHECK):
         """
         Assert: bounding box of object is exactly expected_box or is close to it
 
         :param (ShapeElement) obj: object to calculate bounding box
-        :param (tuple of (float or None)) expected_box: expected values of (xmin, xmax, ymin, ymax)
+        :param (Optional[Tuple[float,float]]) xscale: expected values of (xmin, xmax)
+        :param (Optional[Tuple[float,float]]) yscale: expected values of (ymin, ymax)
 
         """
         bounding_box = obj.bounding_box()
 
+        if bounding_box is None:
+            self.assertEqual((None, None), (xscale, yscale))
+            return
+
         box_array = list(bounding_box)
-        expected_array = expected_box
+        expected_array = xscale, yscale
 
         def cmp(a, b, msg=None):
             self.assertEqual(len(a), len(b), msg=msg)
-            for x, y, label in zip(a, b, ("xmin", "xmax", "ymin", "ymax")):
-                if x is None or y is None:
-                    self.assertEqual(x, y, msg=msg)
-                else:
-                    self.assertAlmostEqual(x, y, delta=self.atol, msg=msg + " (%s)" % label)
+            for x, y, label in zip(a, b, ("x", "y")):
+                self.assertDeepAlmostEqual(tuple(x), tuple(y), delta=self.atol, msg=msg + " (%s)" % label)
 
         if not disable_inkscape_check:
             inkscape_array = self.get_inkscape_bounding_box(obj)
@@ -95,32 +101,32 @@ class BoundingBoxTest(TestCase):
             for line in out_lines:
                 if line.startswith(obj_id):
                     x, y, w, h = list(map(float, line.split(',')[1:]))
-                    return x, x + w, y, y + h
+                    return (x, x + w), (y, y + h)
         return None, None, None, None
 
     def test_circle_without_attributes(self):
         circle = Circle()
-        self.assert_bounding_box_is_equal(circle, (0, 0, 0, 0))
+        self.assert_bounding_box_is_equal(circle, (0, 0), (0, 0))
 
     def test_circle_with_radius(self):
         r = 10
         circle = Circle(r=str(r))
-        self.assert_bounding_box_is_equal(circle, (-r, r, -r, r))
+        self.assert_bounding_box_is_equal(circle, (-r, r), (-r, r))
 
     def test_circle_with_cx(self):
         cx = 10
         circle = Circle(cx=str(cx))
-        self.assert_bounding_box_is_equal(circle, (cx, cx, 0, 0))
+        self.assert_bounding_box_is_equal(circle, (cx, cx), (0, 0))
 
     def test_circle_with_cy(self):
         cy = 10
         circle = Circle(cy=str(cy))
-        self.assert_bounding_box_is_equal(circle, (0, 0, cy, cy))
+        self.assert_bounding_box_is_equal(circle, (0, 0), (cy, cy))
 
     def test_circle_without_center(self):
         r = 10
         circle = Circle(r=str(r))
-        self.assert_bounding_box_is_equal(circle, (-r, r, -r, r))
+        self.assert_bounding_box_is_equal(circle, (-r, r), (-r, r))
 
     def test_regular_circle(self):
         r = 5
@@ -129,7 +135,7 @@ class BoundingBoxTest(TestCase):
 
         circle = Circle(r=str(r), cx=str(cx), cy=str(cy))
 
-        self.assert_bounding_box_is_equal(circle, (cx - r, cx + r, cy - r, cy + r))
+        self.assert_bounding_box_is_equal(circle, (cx - r, cx + r), (cy - r, cy + r))
 
     @skip_stroke_tests
     def test_circle_with_stroke(self):
@@ -143,8 +149,9 @@ class BoundingBoxTest(TestCase):
 
         circle.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
 
-        self.assert_bounding_box_is_equal(circle, (cx - (r + stroke_half_width), cx + (r + stroke_half_width),
-                                                   cy - (r + stroke_half_width), cy + (r + stroke_half_width)))
+        self.assert_bounding_box_is_equal(circle,
+                                          (cx - (r + stroke_half_width), cx + (r + stroke_half_width)),
+                                          (cy - (r + stroke_half_width), cy + (r + stroke_half_width)))
 
     @skip_stroke_tests
     def test_circle_with_stroke_scaled(self):
@@ -163,15 +170,16 @@ class BoundingBoxTest(TestCase):
 
         circle.transform = Transform(scale=(scale_x, scale_y))
 
-        self.assert_bounding_box_is_equal(circle, (scale_x * (cx - (r + stroke_half_width)),
-                                                   scale_x * (cx + (r + stroke_half_width)),
-                                                   scale_y * (cy - (r + stroke_half_width)),
-                                                   scale_y * (cy + (r + stroke_half_width))))
+        self.assert_bounding_box_is_equal(circle,
+                                          (scale_x * (cx - (r + stroke_half_width)),
+                                           scale_x * (cx + (r + stroke_half_width))),
+                                          (scale_y * (cy - (r + stroke_half_width)),
+                                           scale_y * (cy + (r + stroke_half_width))))
 
     def test_rectangle_without_attributes(self):
         rect = Rectangle()
 
-        self.assert_bounding_box_is_equal(rect, (0, 0, 0, 0))
+        self.assert_bounding_box_is_equal(rect, (0, 0), (0, 0))
 
     def test_rectangle_without_dimensions(self):
 
@@ -180,8 +188,7 @@ class BoundingBoxTest(TestCase):
 
         rect = Rectangle(x=str(x), y=str(y))
 
-        self.assert_bounding_box_is_equal(rect, (x, x + w,
-                                                 y, y + h))
+        self.assert_bounding_box_is_equal(rect, (x, x + w), (y, y + h))
 
     def test_rectangle_without_coordinates(self):
 
@@ -190,8 +197,7 @@ class BoundingBoxTest(TestCase):
 
         rect = Rectangle(width=str(w), height=str(h))
 
-        self.assert_bounding_box_is_equal(rect, (x, x + w,
-                                                 y, y + h))
+        self.assert_bounding_box_is_equal(rect, (x, x + w), (y, y + h))
 
     def test_regular_rectangle(self):
 
@@ -200,8 +206,7 @@ class BoundingBoxTest(TestCase):
 
         rect = Rectangle(width=str(w), height=str(h), x=str(x), y=str(y))
 
-        self.assert_bounding_box_is_equal(rect, (x, x + w,
-                                                 y, y + h))
+        self.assert_bounding_box_is_equal(rect, (x, x + w), (y, y + h))
 
     def test_regular_rectangle_scaled(self):
 
@@ -215,10 +220,11 @@ class BoundingBoxTest(TestCase):
 
         rect.transform = Transform(scale=(scale_x, scale_y))
 
-        self.assert_bounding_box_is_equal(rect, (scale_x * x,
-                                                 scale_x * (x + w),
-                                                 scale_y * y,
-                                                 scale_y * (y + h)))
+        self.assert_bounding_box_is_equal(rect,
+                                          (scale_x * x,
+                                           scale_x * (x + w)),
+                                          (scale_y * y,
+                                           scale_y * (y + h)))
 
     @skip_stroke_tests
     def test_regular_rectangle_with_stroke(self):
@@ -231,8 +237,9 @@ class BoundingBoxTest(TestCase):
 
         rect.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
 
-        self.assert_bounding_box_is_equal(rect, (x - stroke_half_width, x + w + stroke_half_width,
-                                                 y - stroke_half_width, y + h + stroke_half_width))
+        self.assert_bounding_box_is_equal(rect,
+                                          (x - stroke_half_width, x + w + stroke_half_width),
+                                          (y - stroke_half_width, y + h + stroke_half_width))
 
     @skip_stroke_tests
     def test_regular_rectangle_with_stroke_scaled(self):
@@ -249,15 +256,16 @@ class BoundingBoxTest(TestCase):
         rect.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
         rect.transform = Transform(scale=(scale_x, scale_y))
 
-        self.assert_bounding_box_is_equal(rect, (scale_x * (x - stroke_half_width),
-                                                 scale_x * (x + w + stroke_half_width),
-                                                 scale_y * (y - stroke_half_width),
-                                                 scale_y * (y + h + stroke_half_width)))
+        self.assert_bounding_box_is_equal(rect,
+                                          (scale_x * (x - stroke_half_width),
+                                           scale_x * (x + w + stroke_half_width)),
+                                          (scale_y * (y - stroke_half_width),
+                                           scale_y * (y + h + stroke_half_width)))
 
     def test_empty_path(self):
         path = PathElement()
 
-        self.assert_bounding_box_is_equal(path, (None, None, None, None))
+        self.assert_bounding_box_is_equal(path, None, None)
 
     def test_path_with_move_commands_only(self):
         path = PathElement()
@@ -265,14 +273,14 @@ class BoundingBoxTest(TestCase):
         path.set_path("M 0 0 "
                       "m 100 100 "
                       "M 200 200")
-        self.assert_bounding_box_is_equal(path, (0, 200, 0, 200))
+        self.assert_bounding_box_is_equal(path, (0, 200), (0, 200))
 
     def test_path_straight_line(self):
         path = PathElement()
 
         path.set_path("M 0 0 "
                       "L 10 10")
-        self.assert_bounding_box_is_equal(path, (0, 10, 0, 10))
+        self.assert_bounding_box_is_equal(path, (0, 10), (0, 10))
 
     def test_path_two_straight_lines_abosolute(self):
         path = PathElement()
@@ -281,7 +289,7 @@ class BoundingBoxTest(TestCase):
                       "L 10 10 "
                       "M -1 1 "
                       "L 10 10")
-        self.assert_bounding_box_is_equal(path, (-1, 10, 0, 10))
+        self.assert_bounding_box_is_equal(path, (-1, 10), (0, 10))
 
     def test_path_two_straight_lines_relative(self):
         path = PathElement()
@@ -290,7 +298,7 @@ class BoundingBoxTest(TestCase):
                       "l 10 10 "
                       "m -11 -9 "
                       "l 12 12")
-        self.assert_bounding_box_is_equal(path, (-1, 11, 0, 13))
+        self.assert_bounding_box_is_equal(path, (-1, 11), (0, 13))
 
     def test_path_straight_line_scaled(self):
         path = PathElement()
@@ -302,8 +310,8 @@ class BoundingBoxTest(TestCase):
                       "L 20 20")
 
         path.transform = Transform(scale=(scale_x, scale_y))
-        self.assert_bounding_box_is_equal(path, (scale_x * 10, 20 * scale_x,
-                                                 scale_y * 10, 20 * scale_y))
+        self.assert_bounding_box_is_equal(path, (scale_x * 10, 20 * scale_x),
+                                          (scale_y * 10, 20 * scale_y))
 
     @skip_stroke_cap_tests
     def test_path_horizontal_line_stroke_butt_cap(self):
@@ -316,8 +324,8 @@ class BoundingBoxTest(TestCase):
         path.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
         path.set("stroke-linecap", "butt")
 
-        self.assert_bounding_box_is_equal(path, (0, 1,
-                                                 -stroke_half_width, stroke_half_width))
+        self.assert_bounding_box_is_equal(path, (0, 1),
+                                          (-stroke_half_width, stroke_half_width))
 
     @skip_stroke_cap_tests
     def test_path_horizontal_line_stroke_round_cap(self):
@@ -330,8 +338,8 @@ class BoundingBoxTest(TestCase):
         path.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
         path.set("stroke-linecap", "round")
 
-        self.assert_bounding_box_is_equal(path, (-stroke_half_width, 1 + stroke_half_width,
-                                                 -stroke_half_width, stroke_half_width))
+        self.assert_bounding_box_is_equal(path, (-stroke_half_width, 1 + stroke_half_width),
+                                          (-stroke_half_width, stroke_half_width))
 
     @skip_stroke_cap_tests
     def test_path_horizontal_line_stroke_square_cap(self):
@@ -344,17 +352,17 @@ class BoundingBoxTest(TestCase):
         path.style = Style("stroke-width:{};stroke:red".format(stroke_half_width * 2))
         path.set("stroke-linecap", "square")
 
-        self.assert_bounding_box_is_equal(path, (-stroke_half_width, 1 + stroke_half_width,
-                                                 -stroke_half_width, stroke_half_width))
+        self.assert_bounding_box_is_equal(path, (-stroke_half_width, 1 + stroke_half_width),
+                                          (-stroke_half_width, stroke_half_width))
 
     def test_empty_group(self):
         group = Group()
-        self.assert_bounding_box_is_equal(group, (None, None, None, None))
+        self.assert_bounding_box_is_equal(group, None, None)
 
     def test_empty_group_with_translation(self):
         group = Group()
         group.transform = Transform(translate=(10, 15))
-        self.assert_bounding_box_is_equal(group, (None, None, None, None))
+        self.assert_bounding_box_is_equal(group, None, None)
 
     def test_group_with_regular_rect(self):
         group = Group()
@@ -365,8 +373,8 @@ class BoundingBoxTest(TestCase):
 
         group.add(rect)
 
-        self.assert_bounding_box_is_equal(group, (x, x + w,
-                                                  y, y + h))
+        self.assert_bounding_box_is_equal(group, (x, x + w),
+                                          (y, y + h))
 
     def test_group_with_number_of_rects(self):
 
@@ -391,7 +399,7 @@ class BoundingBoxTest(TestCase):
 
             group.append(rect)
 
-        self.assert_bounding_box_is_equal(group, (xmin, xmax, ymin, ymax))
+        self.assert_bounding_box_is_equal(group, (xmin, xmax), (ymin, ymax))
 
     def test_group_with_number_of_rects_scaled(self):
 
@@ -419,9 +427,9 @@ class BoundingBoxTest(TestCase):
 
         group.transform = Transform(scale=(scale_x, scale_y))
         self.assert_bounding_box_is_equal(group, (scale_x * xmin,
-                                                  scale_x * xmax,
-                                                  scale_y * ymin,
-                                                  scale_y * ymax))
+                                                  scale_x * xmax),
+                                          (scale_y * ymin,
+                                           scale_y * ymax))
 
     def test_group_with_number_of_rects_translated(self):
 
@@ -450,9 +458,9 @@ class BoundingBoxTest(TestCase):
         group.transform = Transform(translate=(dx, dy))
 
         self.assert_bounding_box_is_equal(group, (dx + xmin,
-                                                  dx + xmax,
-                                                  dy + ymin,
-                                                  dy + ymax))
+                                                  dx + xmax),
+                                          (dy + ymin,
+                                           dy + ymax))
 
     def test_group_nested_transform(self):
         group = Group()
@@ -472,99 +480,99 @@ class BoundingBoxTest(TestCase):
 
         a = rect.composed_transform()
         self.assert_bounding_box_is_equal(group, (scale * x,
-                                                  scale * (x + w),
-                                                  scale * y,
-                                                  scale * (y + h)))
+                                                  scale * (x + w)),
+                                          (scale * y,
+                                           scale * (y + h)))
 
     def test_path_Arc_long_sweep_off(self):
         path = Path("M 10 20 A 10 20 0 1 0 20 15")
         path_element = PathElement()
         path_element.path = path
-        self.assert_bounding_box_is_equal(path_element, (7.078, 20 + 7.078, 15.0, 15.0 + 39.127))
+        self.assert_bounding_box_is_equal(path_element, (7.078, 20 + 7.078), (15.0, 15.0 + 39.127))
 
     def test_path_Arc_short_sweep_off(self):
         path = Path("M 10 20 A 10 20 0 0 0 20 15")
         path_element = PathElement()
         path_element.path = path
-        self.assert_bounding_box_is_equal(path_element, (10, 20, 15, 15.0 + 5.873))
+        self.assert_bounding_box_is_equal(path_element, (10, 20), (15, 15.0 + 5.873))
 
     def test_path_Arc_short_sweep_on(self):
         path = Path("M 10 20 A 10 20 0 0 1 20 15")
         path_element = PathElement()
         path_element.path = path
-        self.assert_bounding_box_is_equal(path_element, (10, 20, 14.127, 14.127 + 5.873))
+        self.assert_bounding_box_is_equal(path_element, (10, 20), (14.127, 14.127 + 5.873))
 
     def test_path_Arc_long_sweep_on(self):
         path = Path("M 10 20 A 10 20 0 1 1 20 15")
         path_element = PathElement()
         path_element.path = path
-        self.assert_bounding_box_is_equal(path_element, (2.922, 2.922 + 20, -19.127, -19.127 + 39.127))
+        self.assert_bounding_box_is_equal(path_element, (2.922, 2.922 + 20), (-19.127, -19.127 + 39.127))
 
     def test_path_Arc_long_sweep_on_axis_x_25(self):
         path = Path("M 10 20 A 10 20 25 1 1 20 15")
         path_element = PathElement()
         path_element.path = path
-        self.assert_bounding_box_is_equal(path_element, (4.723, 4.723 + 24.786, -17.149, -17.149 + 37.149))
+        self.assert_bounding_box_is_equal(path_element, (4.723, 4.723 + 24.786), (-17.149, -17.149 + 37.149))
 
     def test_path_Move(self):
         path = Path("M 10 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (10, 10, 20, 20))
+        self.assert_bounding_box_is_equal(pe, (10, 10),( 20, 20))
 
     def test_path_move(self):
         path = Path("M 15 30 m 10 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 25, 30, 50))
+        self.assert_bounding_box_is_equal(pe, (15, 25), (30, 50))
 
     def test_path_Line(self):
         path = Path("M 15 30 L 10 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (10, 15, 20, 30))
+        self.assert_bounding_box_is_equal(pe, (10, 15),( 20, 30))
 
     def test_path_line(self):
         path = Path("M 15 30 l 10 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 25, 30, 50))
+        self.assert_bounding_box_is_equal(pe, (15, 25), (30, 50))
 
     def test_path_Zone(self):
         path = Path("M 15 30 Z")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 15, 30, 30))
+        self.assert_bounding_box_is_equal(pe, (15, 15), (30, 30))
 
     def test_path_Horz(self):
         path = Path("M 15 30 H 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 20, 30, 30))
+        self.assert_bounding_box_is_equal(pe, (15, 20), (30, 30))
 
     def test_path_horz(self):
         path = Path("M 15 30 h 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 35, 30, 30))
+        self.assert_bounding_box_is_equal(pe, (15, 35), (30, 30))
 
     def test_path_Vert(self):
         path = Path("M 15 30 V 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 15, 20, 30))
+        self.assert_bounding_box_is_equal(pe, (15, 15), (20, 30))
 
     def test_path_vert(self):
         path = Path("M 15 30 v 20")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (15, 15, 30, 50))
+        self.assert_bounding_box_is_equal(pe, (15, 15), (30, 50))
 
     def test_path_Curve(self):
         path = Path("M10 10 C 20 20, 40 20, 50 10")
         pe = PathElement()
         pe.path = path
-        self.assert_bounding_box_is_equal(pe, (10, 50, 10, 17.5))
+        self.assert_bounding_box_is_equal(pe, (10, 50), (10, 17.5))
 
     @requires_inkscape
     def test_path_combined_1(self):
@@ -574,27 +582,26 @@ class BoundingBoxTest(TestCase):
         pe.path = path
         ibb = self.get_inkscape_bounding_box(pe)
 
-        self.assert_bounding_box_is_equal(pe, ibb, disable_inkscape_check=True)
+        self.assert_bounding_box_is_equal(pe, *ibb, disable_inkscape_check=True)
 
     def test_path_TepidQuadratic(self):
         path = Path("M 10 5 Q 15 30 25 15 T 50 40")
         pe = PathElement()
         pe.path = path
-        ibb = (10, 50, 5, 40)
+        ibb = (10, 50), (5, 40)
 
-        self.assert_bounding_box_is_equal(pe, ibb)
+        self.assert_bounding_box_is_equal(pe, *ibb)
 
     def test_path_TepidQuadratic_2(self):
         path = Path("M 10 5 Q 15 30 25 15 T 50 40 T 15 20")
         pe = PathElement()
         pe.path = path
-        ibb = (10, 10 + 43.462, 5, 56)
-        self.assert_bounding_box_is_equal(pe, ibb)
+        ibb = (10, 10 + 43.462), (5, 56)
+        self.assert_bounding_box_is_equal(pe, *ibb)
 
     @requires_inkscape
     def test_random_path_1(self):
         import random
-        from datetime import datetime
 
         from inkex.paths import Line, Vert, Horz, Curve, Move, Arc, Quadratic, TepidQuadratic, Smooth, ZoneClose
 
@@ -631,4 +638,4 @@ class BoundingBoxTest(TestCase):
             pe.path = path
             ibb = self.get_inkscape_bounding_box(pe)
 
-            self.assert_bounding_box_is_equal(pe, ibb, disable_inkscape_check=True)
+            self.assert_bounding_box_is_equal(pe, *ibb, disable_inkscape_check=True)

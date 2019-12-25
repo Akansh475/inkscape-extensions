@@ -29,7 +29,8 @@ def size_box(box, delta):
     delta -- The amount the box should grow.
     Returns a box with an altered size.
     """
-    return (box[0] - delta), (box[1] + delta), (box[2] - delta), (box[3] + delta)
+    return (box.x.minimum - delta, box.x.maximum + delta,
+            box.y.minimum - delta, box.y.maximum + delta)
 
 
 # Frame maker Inkscape effect extension

@@ -4,10 +4,11 @@ Test Inkex transformational logic.
 """
 from math import sqrt, pi
 from inkex.transforms import (
-    Vector2d, BoundingBox, Scale, Transform, DirectedLineSegment
+    Vector2d, BoundingBox, BoundingInterval, Transform, DirectedLineSegment
 )
 from inkex.utils import PY3
 from inkex.tester import TestCase
+
 
 class Vector2dTest(TestCase):
     """Test the Vector2d object"""
@@ -319,37 +320,42 @@ class ScaleTest(TestCase):
 
     def test_creation(self):
         """Creating scales"""
-        self.assertEqual(Scale(), (None, None))
-        self.assertEqual(Scale(1), (1, 1))
-        self.assertEqual(Scale(10), (10, 10))
-        self.assertEqual(Scale(10, 20), (10, 20))
-        self.assertEqual(Scale(10, 2, 100, 1, 4), (1, 100))
-        self.assertEqual(Scale([2, 50]), (2, 50))
-        self.assertEqual(Scale([5, 50], [4, 5]), (4, 50))
-        self.assertEqual(repr(Scale([5, 10])), 'scale:(5, 10)')
+        self.assertEqual(BoundingInterval(0, 0), (0, 0))
+        self.assertEqual(BoundingInterval(1), (1, 1))
+        self.assertEqual(BoundingInterval(10), (10, 10))
+        self.assertEqual(BoundingInterval(10, 20), (10, 20))
+        self.assertEqual(BoundingInterval((2, 50)), (2, 50))
+        self.assertEqual(repr(BoundingInterval((5, 10))), 'BoundingInterval(5, 10)')
 
     def test_center(self):
         """Center of a scale"""
-        self.assertEqual(Scale().center, None)
-        self.assertEqual(Scale(0, 10).center, 5)
-        self.assertEqual(Scale(-10, 10).center, 0)
+        self.assertEqual(BoundingInterval(0, 0).center, 0)
+        self.assertEqual(BoundingInterval(0, 10).center, 5)
+        self.assertEqual(BoundingInterval(-10, 10).center, 0)
+
+    def test_neg(self):
+        """-Span(...)"""
+        self.assertEqual(tuple(-BoundingInterval(-10, 10)), (-10, 10))
+        self.assertEqual(tuple(-BoundingInterval(-15, 2)), (-2, 15))
+        self.assertEqual(tuple(-BoundingInterval(100, 110)), (-110, -100))
+        self.assertEqual(tuple(-BoundingInterval(-110, -100)), (100, 110))
 
     def test_size(self):
         """Size of the scale"""
-        self.assertEqual(Scale().size, None)
-        self.assertEqual(Scale(10, 30).size, 20)
-        self.assertEqual(Scale(-10, 10).size, 20)
-        self.assertEqual(Scale(-30, -10).size, 20)
+        self.assertEqual(BoundingInterval(0, 0).size, 0)
+        self.assertEqual(BoundingInterval(10, 30).size, 20)
+        self.assertEqual(BoundingInterval(-10, 10).size, 20)
+        self.assertEqual(BoundingInterval(-30, -10).size, 20)
 
     def test_combine(self):
         """Combine scales together"""
-        self.assertEqual(Scale(9, 10) + Scale(4, 5), (4, 10))
-        self.assertEqual(sum([Scale(4), Scale(3), Scale(10)]), (3, 10))
-        self.assertEqual(Scale(2, 2) * 2, (4, 4))
+        self.assertEqual(BoundingInterval(9, 10) + BoundingInterval(4, 5), (4, 10))
+        self.assertEqual(sum([BoundingInterval(4), BoundingInterval(3), BoundingInterval(10)], None), (3, 10))
+        self.assertEqual(BoundingInterval(2, 2) * 2, (4, 4))
 
     def test_errors(self):
         """Expected errors"""
-        self.assertRaises(ValueError, Scale, 'foo')
+        self.assertRaises(ValueError, BoundingInterval, 'foo')
 
 
 class BoundingBoxTest(TestCase):
@@ -357,33 +363,35 @@ class BoundingBoxTest(TestCase):
 
     def test_bbox(self):
         """Creating bounding boxes"""
-        self.assertEqual(BoundingBox((15)), (15, 15, None, None))
-        self.assertEqual(BoundingBox(1, 3), (1, 1, 3, 3))
-        self.assertEqual(BoundingBox((1, 3)), (1, 1, 3, 3))
-        self.assertEqual(BoundingBox((1, 2), (3, 4)), (1, 2, 3, 4))
-        self.assertEqual(BoundingBox(((1, 2), (3, 4))), (1, 3, 2, 4))
-        self.assertEqual(BoundingBox((1, 2, 3, 4)), (1, 2, 3, 4))
-        self.assertEqual(repr(BoundingBox((1, 2, 3, 4))), 'BoundingBox((1, 2, 3, 4))')
+        self.assertEqual(tuple(BoundingBox(1, 3)), ((1, 1), (3, 3)))
+        self.assertEqual(tuple(BoundingBox((1, 2), 3)), ((1, 2), (3, 3)))
+        self.assertEqual(tuple(BoundingBox(1, (3, 4))), ((1, 1), (3, 4)))
+        self.assertEqual(tuple(BoundingBox((1, 2), (3, 4))), ((1, 2), (3, 4)))
+        self.assertEqual(repr(BoundingBox((1, 2), (3, 4))), 'BoundingBox((1, 2),(3, 4))')
 
     def test_bbox_sum(self):
         """Test adding bboxes together"""
-        self.assertEqual(BoundingBox([0, 10, 0, 10]) + (-10, 0, -10, 0), (-10, 10, -10, 10))
+        self.assertEqual(tuple(BoundingBox((0, 10), (0, 10)) + BoundingBox((-10, 0), (-10, 0))), ((-10, 10), (-10, 10)))
         ret = sum([
-            BoundingBox([-5, 0, 0, 0]),
-            BoundingBox([0, 5, 0, 0]),
-            BoundingBox([0, 0, -5, 0]),
-            BoundingBox([0, 0, 0, 5])])
-        self.assertEqual(ret, (-5, 5, -5, 5))
-        self.assertEqual((-10, 2) + ret, (-10, 5, -5, 5))
-        self.assertEqual(ret + (1, -10), (-5, 5, -10, 5))
+            BoundingBox((-5, 0), (0, 0)),
+            BoundingBox((0, 5), (0, 0)),
+            BoundingBox((0, 0), (-5, 0)),
+            BoundingBox((0, 0), (0, 5))], None)
+        self.assertEqual(tuple(ret), ((-5, 5), (-5, 5)))
+        self.assertEqual(tuple(BoundingBox(-10, 2) + ret), ((-10, 5), (-5, 5)))
+        self.assertEqual(tuple(ret + BoundingBox(1, -10)), ((-5, 5), (-10, 5)))
+
+    def test_bbox_neg(self):
+        self.assertEqual(tuple(-BoundingBox(-10, 2)), ((10, 10), (-2, -2)))
+        self.assertEqual(tuple(-BoundingBox((-10, 15), (2, 10))), ((-15, 10), (-10, -2)))
 
     def test_bbox_scale(self):
         """Bounding Boxes can be scaled"""
-        self.assertEqual(BoundingBox(1, 3) * 2, (2, 2, 6, 6))
+        self.assertEqual(tuple(BoundingBox(1, 3) * 2), ((2, 2), (6, 6)))
 
     def test_bbox_anchor_left_right(self):
         """Bunding box anchoring (left to right)"""
-        bbox = BoundingBox([-1, 1, 10, 20])
+        bbox = BoundingBox((-1, 1), (10, 20))
         self.assertEqual([
             bbox.get_anchor('l', 't', 'lr'),
             bbox.get_anchor('m', 't', 'lr'),
@@ -395,7 +403,7 @@ class BoundingBoxTest(TestCase):
 
     def test_bbox_anchor_top_bottom(self):
         """Bunding box anchoring (top to bottom)"""
-        bbox = BoundingBox([10, 20, -1, 1])
+        bbox = BoundingBox((10, 20), (-1, 1))
         self.assertEqual([
             bbox.get_anchor('l', 't', 'tb'),
             bbox.get_anchor('l', 'm', 'tb'),
@@ -407,7 +415,7 @@ class BoundingBoxTest(TestCase):
 
     def test_bbox_anchor_custom(self):
         """Bounding box anchoring custom angle"""
-        bbox = BoundingBox([10, 10, 5, 5])
+        bbox = BoundingBox((10, 10), (5, 5))
         self.assertEqual([
             bbox.get_anchor('l', 't', 0),
             bbox.get_anchor('l', 't', 90),
@@ -418,9 +426,9 @@ class BoundingBoxTest(TestCase):
 
     def test_bbox_anchor_radial(self):
         """Bounding box anchoring radial in/out"""
-        bbox = BoundingBox([10, 10, 5, 5])
+        bbox = BoundingBox((10, 10), (5, 5))
         self.assertRaises(ValueError, bbox.get_anchor, 'm', 'm', 'ro')
-        selbox = BoundingBox([100, 100, 100, 100])
+        selbox = BoundingBox((100, 100), (100, 100))
         self.assertEqual(int(bbox.get_anchor('m', 'm', 'ro', selbox)), 130)
 
 class SegmentTest(TestCase):

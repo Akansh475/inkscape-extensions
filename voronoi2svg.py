@@ -187,8 +187,7 @@ class Voronoi(inkex.EffectExtension):
             nodes.append(node)
             bbox = node.bounding_box()
             if bbox:
-                center_x = 0.5 * (bbox[0] + bbox[1])
-                center_y = 0.5 * (bbox[2] + bbox[3])
+                center_x, center_y = bbox.center
                 point = [center_x, center_y]
                 if trans:
                     point = trans.apply_to_point(point)
@@ -212,7 +211,7 @@ class Voronoi(inkex.EffectExtension):
         # Clipping box handling
         if self.options.diagramType != 'Delaunay':
             # Clipping bounding box creation
-            group_bbox = sum([node.bounding_box() for node in nodes])
+            group_bbox = sum([node.bounding_box() for node in nodes], None)
 
             # Clipbox is the box to which the Voronoi diagram is restricted
             if self.options.clip_box == 'Page':

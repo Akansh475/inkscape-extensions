@@ -113,8 +113,7 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
 
     def get_selected_bbox(self):
         """Gets the bounding box of the selected items"""
-        ret = sum([node.bounding_box() for node in self.selected.values()])
-        return BoundingBox(None) if ret == 0 else ret
+        return sum([node.bounding_box() for node in self.selected.values()], None)
 
     def get_page_bbox(self):
         """Gets the page dimentions as a bbox"""

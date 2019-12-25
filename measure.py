@@ -108,8 +108,7 @@ class MeasureLength(inkex.EffectExtension):
             anchor = 'middle'
         elif self.options.position == "center":
             bbox = node.bounding_box()
-            tx = bbox[0] + (bbox[1] - bbox[0]) / 2.0
-            ty = bbox[2] + (bbox[3] - bbox[2]) / 2.0
+            tx, ty = bbox.center
             anchor = 'middle'
         else:  # default
             tx = csp[0][0][1][0]

@@ -250,9 +250,9 @@ class CoreElementTestCase(ElementTestCase):
     def test_bounding_box(self):
         """Elements can have bounding boxes"""
         elem = self.svg.getElementById('D')
-        self.assertEqual(elem.bounding_box(), (60.0, 100.0, 130.0, 170.0))
+        self.assertEqual(tuple(elem.bounding_box()), ((60.0, 100.0), (130.0, 170.00)))
         self.assertTrue(elem.bounding_box().center.is_close((80.0, 150.0)))
-        self.assertEqual(TextElement(x='10', y='5').bounding_box(), (10, 10, 5, 5))
+        self.assertEqual(tuple(TextElement(x='10', y='5').bounding_box()), ((10, 10), (5, 5)))
         group = Group(elem)
         self.assertEqual(elem.bounding_box(), group.bounding_box())
 

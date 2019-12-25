@@ -279,9 +279,9 @@ def draw(stack):  # draw a character based on a tree stack
 def draw_crop_scale(stack, zoom):  # draw, crop and scale letter image
     image, width, height = draw(stack)
     bbox = inkex.Path(image).bounding_box()
-    image = (inkex.Path(image).translate (-bbox[0], 0)).to_arrays()
+    image = (inkex.Path(image).translate(-bbox.x.minimum, 0)).to_arrays()
     image = (inkex.Path(image).scale (zoom / units, zoom / units)).to_arrays()
-    return image, bbox[1] - bbox[0], bbox[3] - bbox[2]
+    return image, bbox.width, bbox.height
 
 
 def randomize_input_string(tokens, zoom):  # generate a glyph starting from each token in the input string

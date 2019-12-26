@@ -52,7 +52,6 @@ class GuidesCreator(inkex.EffectExtension):
         pars.add_argument('--footer_margin', default=6, help='Footer margin')
         pars.add_argument('--left_margin', default=6, help='Left margin')
         pars.add_argument('--right_margin', default=6, help='Right margin')
-        pars.add_argument('--start_from_edges2', type=inkex.Boolean, help='Start from edges')
         pars.add_argument('--delete', type=inkex.Boolean, help='Delete existing guides')
 
     def effect(self):
@@ -156,7 +155,7 @@ class GuidesCreator(inkex.EffectExtension):
         h_subdiv = int(self.options.horz)
         v_subdiv = int(self.options.vert)
 
-        if self.options.start_from_edges2:
+        if self.options.start_from_edges:
             # horizontal borders
             self.draw_guide('0,' + str(self.height), self.h_orientation)
             self.draw_guide(str(self.height) + ',0', self.h_orientation)

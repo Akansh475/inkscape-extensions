@@ -18,7 +18,7 @@
     <sodipodi:guide id="guide886" orientation="0,-1" position="953.01659,49.024128"/>
     <sodipodi:guide id="guide888" orientation="0.70710678,-0.70710678" position="46.936577,49.024128"/>
     <sodipodi:guide id="guide890" orientation="-0.70710678,-0.70710678" position="953.01659,49.024128"/>
-  <sodipodi:guide position="1000,0" orientation="0.5253219888177297,0.5253219888177297"/><sodipodi:guide position="1000,1000" orientation="-0.8509035245341184,0.8509035245341184"/><sodipodi:guide position="0,0" orientation="-0.5253219888177297,0.5253219888177297"/><sodipodi:guide position="0,1000" orientation="-0.8509035245341184,-0.8509035245341184"/></sodipodi:namedview>
+  <sodipodi:guide position="0,1000" orientation="0,1000.0"/><sodipodi:guide position="1000,0" orientation="0,1000.0"/><sodipodi:guide position="0,1000" orientation="1000.0,0"/><sodipodi:guide position="1000,0" orientation="1000.0,0"/><sodipodi:guide position="0,833.333" orientation="0,1000.0"/><sodipodi:guide position="0,166.667" orientation="0,1000.0"/><sodipodi:guide position="166.667,0" orientation="1000.0,0"/><sodipodi:guide position="833.333,0" orientation="1000.0,0"/></sodipodi:namedview>
   <g style="display:inline" inkscape:label="Slide3" id="webslicer-layer" inkscape:groupmode="layer"/>
   <g style="display:inline" inkscape:label="Slide2" id="layer2" inkscape:groupmode="layer">
     <use transform="matrix(1.8978616,0,0,1.8909129,-450.29818,-444.94362)" inkscape:label="#use3808" height="100%" width="100%" id="u1" inkscape:transform-center-y="-0.31067244" inkscape:transform-center-x="12.274064" xlink:href="#s1" y="0" x="0" style="display:inline;stroke-width:0.527876"/>

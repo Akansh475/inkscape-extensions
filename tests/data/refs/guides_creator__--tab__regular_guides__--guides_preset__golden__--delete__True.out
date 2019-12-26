@@ -12,13 +12,7 @@
   <defs id="defs33"/>
   <sodipodi:namedview inkscape:bbox-nodes="true" inkscape:bbox-paths="true" inkscape:snap-page="true" inkscape:snap-nodes="true" inkscape:snap-bbox="true" inkscape:snap-global="true" inkscape:guide-bbox="true" showguides="true" inkscape:document-rotation="0" inkscape:current-layer="layer2" inkscape:window-maximized="1" inkscape:window-y="0" inkscape:window-x="0" inkscape:cy="465.64169" inkscape:cx="544.90051" inkscape:zoom="0.77183614" inkscape:snap-text-baseline="true" showgrid="true" id="base" inkscape:window-height="1017" inkscape:window-width="1920" inkscape:pageshadow="2" inkscape:pageopacity="0" guidetolerance="10" gridtolerance="10" objecttolerance="10" borderopacity="1" bordercolor="#666666" pagecolor="#ffffff">
     <inkscape:grid originy="0" originx="0" empopacity="0.25098039" empcolor="#ff0000" opacity="0.25098039" color="#8080ff" empspacing="2" spacingy="100" spacingx="100" id="grid27" type="xygrid"/>
-    <sodipodi:guide id="guide880" orientation="1,0" position="46.936577,700"/>
-    <sodipodi:guide id="guide882" orientation="0,-1" position="46.936577,951.0227"/>
-    <sodipodi:guide id="guide884" orientation="1,0" position="953.01659,951.0227"/>
-    <sodipodi:guide id="guide886" orientation="0,-1" position="953.01659,49.024128"/>
-    <sodipodi:guide id="guide888" orientation="0.70710678,-0.70710678" position="46.936577,49.024128"/>
-    <sodipodi:guide id="guide890" orientation="-0.70710678,-0.70710678" position="953.01659,49.024128"/>
-  <sodipodi:guide position="1000,0" orientation="0.5253219888177297,0.5253219888177297"/><sodipodi:guide position="1000,1000" orientation="-0.8509035245341184,0.8509035245341184"/><sodipodi:guide position="0,0" orientation="-0.5253219888177297,0.5253219888177297"/><sodipodi:guide position="0,1000" orientation="-0.8509035245341184,-0.8509035245341184"/></sodipodi:namedview>
+    <sodipodi:guide position="0,618.034" orientation="0,1000.0"/><sodipodi:guide position="0,381.966" orientation="0,1000.0"/><sodipodi:guide position="618.034,0" orientation="1000.0,0"/><sodipodi:guide position="381.966,0" orientation="1000.0,0"/></sodipodi:namedview>
   <g style="display:inline" inkscape:label="Slide3" id="webslicer-layer" inkscape:groupmode="layer"/>
   <g style="display:inline" inkscape:label="Slide2" id="layer2" inkscape:groupmode="layer">
     <use transform="matrix(1.8978616,0,0,1.8909129,-450.29818,-444.94362)" inkscape:label="#use3808" height="100%" width="100%" id="u1" inkscape:transform-center-y="-0.31067244" inkscape:transform-center-x="12.274064" xlink:href="#s1" y="0" x="0" style="display:inline;stroke-width:0.527876"/>

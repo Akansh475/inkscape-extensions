@@ -65,7 +65,7 @@ class GuidesCreator(inkex.EffectExtension):
         self.v_orientation = str(round(self.height, 4)) + ',0'
 
         if self.options.delete:
-            for guide in self.svg.get_guides():
+            for guide in self.svg.namedview.get_guides():
                 guide.delete()
 
         return self.options.tab()

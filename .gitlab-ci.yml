@@ -51,7 +51,7 @@ test:coverage:
   script:
     - source /root/pyenv-init
     - pyenv shell 3.7.2
-    - pip install coverage pylint
+    - pip install coverage
     - coverage3 combine .coverage-*
     - coverage3 report -m
     - coverage3 html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
@@ -60,6 +60,7 @@ test:coverage:
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
       "\n\n"
     - pyenv shell 3.6.8
+    - pip install pylint
     - python3.6 tests/add_pylint.py htmlcov/index.html
   dependencies:
     - test:python27

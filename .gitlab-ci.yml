@@ -59,7 +59,8 @@ test:coverage:
       "Coverage report successfully created; you can access the full HTML report at\n"
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
       "\n\n"
-    - python3 tests/add_pylint.py htmlcov/index.html
+    - pyenv shell 3.6.8
+    - python3.6 tests/add_pylint.py htmlcov/index.html
   dependencies:
     - test:python27
     - test:python36

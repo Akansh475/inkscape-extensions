@@ -5,6 +5,7 @@ from extractimage import ExtractImage
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class ExtractImageBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    stderr_protect = False
     effect_class = ExtractImage
     compare_file = 'svg/images.svg'
     comparisons = [

@@ -23,10 +23,12 @@ Basic color controls
 """
 import sys
 
+from .utils import PY3
+
 # All the names that get added to the inkex API itself.
 __all__ = ('Color',)
 
-if sys.version_info[0] == 3:  # PY3
+if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 SVG_COLOR = {

@@ -102,7 +102,7 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
 
     # initialize functions and derivatives for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
-    print("RET: {}".format(f1(1)))
+    #print("RET: {}".format(f1(1)))
     x0 = f1(t_start)
     y0 = f2(t_start)
 

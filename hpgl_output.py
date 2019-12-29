@@ -19,6 +19,7 @@
 from __future__ import print_function
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 import hpgl_encoder
 
@@ -51,8 +52,8 @@ class HpglOutput(inkex.OutputExtension):
         try:
             hpgl = encoder.getHpgl()
         except hpgl_encoder.NoPathError:
-            inkex.errormsg(_("No paths were found. Please convert objects you want into paths."))
-            return
+            raise inkex.AbortExtension(
+                _("No paths were found. Please convert objects you want into paths."))
         # convert raw HPGL to HPGL
         hpgl_init = 'IN'
         if self.options.force > 0:

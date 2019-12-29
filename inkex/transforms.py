@@ -30,7 +30,7 @@ import sys
 from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isnan
 
-from .utils import strargs, KeyDict
+from .utils import strargs, KeyDict, PY3
 
 try:
     from typing import overload, List, Tuple, Union, Optional  # pylint: disable=unused-import
@@ -43,7 +43,7 @@ except ImportError:
 # All the names that get added to the inkex API itself.
 __all__ = ('Transform', 'BoundingBox',)
 
-if sys.version_info[0] == 3:  # PY3
+if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 # Old settings, supported because users click 'ok' without looking.

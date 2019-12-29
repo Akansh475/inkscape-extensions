@@ -36,10 +36,9 @@ import sys
 from subprocess import Popen, PIPE
 from lxml.etree import ElementTree
 
-from .utils import TemporaryDirectory
+from .utils import TemporaryDirectory, PY3
 from .svg import SvgDocumentElement
 
-PY3 = sys.version_info[0] == 3
 INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND', 'inkscape')
 
 class CommandNotFound(IOError):

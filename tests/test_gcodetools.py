@@ -25,6 +25,7 @@ SETTINGS = (
 FILESET = SETTINGS + ('--directory=/home', '--filename=output.ngc',)
 
 class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    stderr_protect = False
     effect_class = Gcodetools
     comparisons = [
         FILESET + ('--active-tab="area_fill"',),

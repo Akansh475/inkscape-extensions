@@ -29,12 +29,12 @@ import shutil
 from argparse import ArgumentParser
 from lxml import etree
 
-from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg
+from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg
 from .elements import load_svg
 from .localization import localize
 
 stdout = sys.stdout
-if sys.version_info[0] == 3:  #PY3
+if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
     basestring = str  # pylint: disable=redefined-builtin,invalid-name
     stdout = sys.stdout.buffer
@@ -95,6 +95,11 @@ class InkscapeExtension(object):
     def debug(self, msg):
         """Write a debug message"""
         errormsg("DEBUG<{}> {}\n".format(type(self).__name__, msg))
+
+    @staticmethod
+    def msg(msg):
+        """Write a non-error message"""
+        errormsg(msg)
 
     def run(self, args=None, output=None):
         """Main entrypoint for any Inkscape Extension"""

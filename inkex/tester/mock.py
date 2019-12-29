@@ -24,7 +24,9 @@ outside of the target code that either takes too long to run, isn't available
 during the test running process or simply shouldn't be running at all.
 """
 
+import io
 import os
+import sys
 import logging
 import hashlib
 import tempfile
@@ -40,6 +42,27 @@ if False: # pylint: disable=using-constant-test
     from typing import List, Tuple, Callable, Any # pylint: disable=unused-import
 
 FIXED_BOUNDARY = '--CALLDATA--//--CALLDATA--'
+
+class Capture(object):
+    """Capture stdout or stderr. Used as `with Capture('stdout') as stream:`"""
+    def __init__(self, io_name='stdout', swap=True):
+        self.io_name = io_name
+        self.original = getattr(sys, io_name)
+        self.stream = io.StringIO()
+        self.swap = swap
+
+    def __enter__(self):
+        # We can't control python2 correctly (unicode vs. bytes-like) but
+        # we don't need it, so we're ignore python2 as if it doesn't exist.
+        if self.swap:
+            setattr(sys, self.io_name, self.stream)
+        return self.stream
+
+    def __exit__(self, exc, value, traceback):
+        if exc is not None and self.swap:
+            # Dump content back to original if there was an error.
+            self.original.write(self.stream.getvalue())
+        setattr(sys, self.io_name, self.original)
 
 class ManualVerbosity(object):
     """Change the verbosity of the test suite manually"""

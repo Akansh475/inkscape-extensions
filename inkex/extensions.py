@@ -28,7 +28,7 @@ import re
 import sys
 import types
 
-from .utils import errormsg, Boolean
+from .utils import errormsg, Boolean, PY3
 from .elements import load_svg, BaseElement, Group, Grid
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
@@ -38,7 +38,7 @@ __all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
            'OutputExtension', 'CallExtension', 'TemplateExtension')
 
 stdout = sys.stdout
-if sys.version_info[0] == 3:  #PY3
+if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 class EffectExtension(SvgThroughMixin, InkscapeExtension):

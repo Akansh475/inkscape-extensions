@@ -83,7 +83,7 @@ from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
 
 from .xmldiff import xmldiff
-from .mock import MockCommandMixin
+from .mock import MockCommandMixin, Capture
 
 if False: # pylint: disable=using-constant-test
     from typing import Type, List
@@ -110,6 +110,8 @@ class TestCase(MockCommandMixin, BaseCase):
     # If set to true, the output is not expected to be the stdout SVG document, but rather
     # text or a message sent to the stderr, this is highly weird. But sometimes happens.
     stderr_output = False
+    stdout_protect = True
+    stderr_protect = True
 
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
@@ -212,16 +214,17 @@ class TestCase(MockCommandMixin, BaseCase):
 
         # Output is redirected to this string io buffer
         if self.stderr_output:
-            output = StringIO()
-            stderr, sys.stderr = sys.stderr, output
-            try:
+            with Capture('stderr') as stderr:
                 effect.run(args, output=BytesIO())
-            finally:
-                sys.stderr = stderr
+                effect.test_output = stderr
         else:
             output = BytesIO()
-            effect.run(args, output=output)
-        effect.test_output = output
+            with Capture('stdout', kwargs.get('stdout_protect', self.stdout_protect)) as stdout:
+                with Capture('stderr', kwargs.get('stderr_protect', self.stderr_protect)) as stderr:
+                    effect.run(args, output=output)
+                    self.assertEqual('', stdout.getvalue(), "Extra print statements detected")
+                    self.assertEqual('', stderr.getvalue(), "Extra error or warnings detected")
+            effect.test_output = output
 
         if os.environ.get('FAIL_ON_DEPRICATION', False):
             warnings = getattr(effect, 'warned_about', set())

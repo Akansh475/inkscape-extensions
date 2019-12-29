@@ -36,10 +36,12 @@ class JessyinkEffects(inkex.EffectExtension):
         scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
 
         if len(scriptNodes) != 1:
-            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+            raise inkex.AbortExtension(
+                _("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
 
         if len(self.svg.selected) == 0:
-            inkex.errormsg(_("No object selected. Please select the object you want to assign an effect to and then press apply.\n"))
+            raise inkex.AbortExtension(
+                _("No object selected. Please select the object you want to assign an effect to and then press apply.\n"))
 
         for id, node in self.svg.selected.items():
             if (self.options.effectIn == "appear") or (self.options.effectIn == "fade") or (self.options.effectIn == "pop"):

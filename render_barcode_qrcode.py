@@ -1092,7 +1092,6 @@ class QrCode(inkex.GenerateExtension):
             if scale:
                 grp.transform.add_scale(scale)
 
-            print([so.typenumber, so.modulesize, so.invert, so.smoothval, so.symbolid, 4])
             # GENERATE THE QRCODE
             if so.typenumber == 0:
                 # Automatic QR code size`

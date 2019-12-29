@@ -22,12 +22,12 @@ and some color handling on top.
 """
 
 import re
-import sys
 from collections import OrderedDict
 
+from .utils import PY3
 from .colors import Color
 
-if sys.version_info[0] == 3:  #PY3
+if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 class Classes(list):

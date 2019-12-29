@@ -2,5 +2,6 @@
 from jessyInk_summary import Summary
 from inkex.tester import ComparisonMixin, TestCase
 
-class JessyInkSummaryBasicTest(ComparisonMixin, TestCase):
+class JessyInkSummaryTest(ComparisonMixin, TestCase):
+    stderr_protect = False
     effect_class = Summary

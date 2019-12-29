@@ -87,7 +87,6 @@ class hpglEncoder(object):
         self.viewBoxTransformY = 1
         viewBox = effect.svg.get_viewbox()
         if viewBox and viewBox[2] and viewBox[3]:
-            print(viewBox)
             self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
             self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
 

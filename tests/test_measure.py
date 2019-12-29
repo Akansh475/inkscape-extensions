@@ -1,9 +1,11 @@
 # coding=utf-8
 from measure import MeasureLength
 from inkex.tester import ComparisonMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy
 
 class LengthBasicTest(ComparisonMixin, TestCase):
     effect_class = MeasureLength
+    compare_filters = [CompareNumericFuzzy()]
     comparisons = [
         ('--id=p1', '--id=p2'),
         ('--method=presets', '--presetFormat=TaP_start', '--id=p1'),

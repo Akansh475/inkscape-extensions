@@ -87,7 +87,7 @@ class ExtractImage(inkex.EffectExtension):
             inkex.errormsg("Can't extract image, filename already used: {}".format(pathwext))
             return
 
-        print('Image extracted to: {}'.format(pathwext))
+        self.msg('Image extracted to: {}'.format(pathwext))
 
         with open(pathwext, 'wb') as fhl:
             fhl.write(decodebytes(data.encode('utf-8')))

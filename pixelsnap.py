@@ -144,7 +144,7 @@ class PixelSnap(inkex.EffectExtension):
         transform = (elem.transform * Transform(parent_transform))
 
         if abs(abs(transform.a) - abs(transform.d)) > (10 ** -Precision):
-            raise TransformError("Selection contains non-symetric scaling")  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 2 functions, or maybe returning a tuple
+            raise TransformError("Selection contains non-symetric scaling")  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 1 functions, or maybe returning a tuple
 
         stroke_width = transform_dimensions(transform, width=stroke_width)
 
@@ -272,7 +272,7 @@ class PixelSnap(inkex.EffectExtension):
         transform = elem.transform
         # if we've got any skew/rotation, get outta here
         if transform.c or transform.b:
-            raise TransformError("Selection contains transformations with skew/rotation")
+            raise TransformError("TR: Selection contains transformations with skew/rotation")
 
         trm = list(transform.to_hexad())
         trm[4] = round(transform.e)
@@ -300,7 +300,7 @@ class PixelSnap(inkex.EffectExtension):
         transform = (elem.transform * Transform(parent_transform))
 
         if transform.c or transform.b:  # if we've got any skew/rotation, get outta here
-            raise TransformError("Selection contains transformations with skew/rotation")
+            raise TransformError("Path: Selection contains transformations with skew/rotation")
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1
 
@@ -357,17 +357,13 @@ class PixelSnap(inkex.EffectExtension):
                 transform, fractional_offset[0], fractional_offset[1], inverse=True)
             self.transform_path_node(-Transform(translate=fractional_offset), path, i)
 
-        path = str(inkex.Path(path))
-        if elem.get('inkscape:original-d'):
-            elem.set('inkscape:original-d', path)
-        else:
-            elem.set('d', path)
+        elem.original_path = path
 
     def snap_rect(self, elem, parent_transform=None):
         transform = (elem.transform * Transform(parent_transform))
 
-        if transform.d or transform.b:  # if we've got any skew/rotation, get outta here
-            raise TransformError("Selection contains transformations with skew/rotation")
+        if transform.c or transform.b:  # if we've got any skew/rotation, get outta here
+            raise TransformError("Rect: Selection contains transformations with skew/rotation")
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1
 
@@ -406,11 +402,11 @@ class PixelSnap(inkex.EffectExtension):
         if isinstance(elem, Group):
             self.snap_transform(elem)
             transform = elem.transform * Transform(parent_transform)
-            for e in elem:
+            for child in elem:
                 try:
-                    self.pixel_snap(e, transform)
+                    self.pixel_snap(child, transform)
                 except TransformError as err:
-                    print(err, file=sys.stderr)
+                    raise inkex.AbortExtension(str(err))
             return
 
         # If we've been given a parent_transform, we can assume that the
@@ -428,8 +424,8 @@ class PixelSnap(inkex.EffectExtension):
         self.snap_transform(elem)
         try:
             self.snap_stroke(elem, parent_transform)
-        except TransformError as e:
-            print(e, file=sys.stderr)
+        except TransformError as err:
+            raise inkex.AbortExtension(str(err))
 
         if isinstance(elem, PathElement):
             self.snap_path_scale(elem, parent_transform)
@@ -448,8 +444,8 @@ class PixelSnap(inkex.EffectExtension):
         for id, elem in self.svg.selected.items():
             try:
                 self.pixel_snap(elem)
-            except TransformError as e:
-                print(e, file=sys.stderr)
+            except TransformError as err:
+                raise inkex.AbortExtension(str(err))
 
 
 if __name__ == '__main__':

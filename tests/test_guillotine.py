@@ -6,6 +6,7 @@ from inkex.tester import ComparisonMixin, TestCase
 
 class TestGuillotineBasic(ComparisonMixin, TestCase):
     """Test the Guillotine extension"""
+    stderr_protect = False
     effect_class = Guillotine
     compare_file = 'svg/guides.svg'
     comparisons = [

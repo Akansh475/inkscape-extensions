@@ -12,5 +12,5 @@ class LengthBasicTest(ComparisonMixin, TestCase):
         ('--method=presets', '--presetFormat=FT_bbox', '--id=p2'),
         ('--method=presets', '--presetFormat=FT_bbox', '--id=p2'),
         ('--type=area', '--id=p1'),
-        ('--type=cofm', '--id=p2'),
+        ('--type=cofm', '--id=c3'),
     ]

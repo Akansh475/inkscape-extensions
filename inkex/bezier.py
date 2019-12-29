@@ -29,7 +29,6 @@ import math
 import numpy
 
 from .transforms import DirectedLineSegment
-from .utils import errormsg
 from .localization import inkex_gettext as _
 
 # bez = ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3))
@@ -403,8 +402,7 @@ def cspcofm(csp):
     xc = 0.0
     yc = 0.0
     if abs(area) < 1.e-8:
-        errormsg(_("Area is zero, cannot calculate Center of Mass"))
-        return 0, 0
+        raise ValueError(_("Area is zero, cannot calculate Center of Mass"))
     for sp in csp:
         for x, coord in enumerate(sp):  # calculate polygon moment
             xc += sp[x - 1][1][1] * (sp[x - 2][1][0] - coord[1][0]) \
@@ -415,13 +413,13 @@ def cspcofm(csp):
             vec_x = numpy.array([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
             vec_y = numpy.array([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
             def _mul(MAT):
-                return numpy.matmul(numpy.matmul(vec_x, MAT), vec_y.T)[0, 0]
+                return numpy.matmul(numpy.matmul(vec_x, MAT), vec_y.T)
             vec_t = numpy.array([
                 _mul(MAT_COFM_0),
                 _mul(MAT_COFM_1),
                 _mul(MAT_COFM_2),
                 _mul(MAT_COFM_3)
             ])
-            xc += numpy.matmul(vec_x, vec_t.T)[0, 0] / 280
-            yc += numpy.matmul(vec_y, vec_t.T)[0, 0] / 280
+            xc += numpy.matmul(vec_x, vec_t.T) / 280
+            yc += numpy.matmul(vec_y, vec_t.T) / 280
     return -xc / area, -yc / area

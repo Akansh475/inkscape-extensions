@@ -81,7 +81,10 @@ class MeasureLength(inkex.EffectExtension):
                 stotal = abs(csparea(csp) * factor * self.options.scale)
                 self.group = node.getparent().add(TextElement())
             else:
-                xc, yc = cspcofm(csp)
+                try:
+                    xc, yc = cspcofm(csp)
+                except ValueError as err:
+                    raise inkex.AbortExtension(str(err))
                 self.group = node.getparent().add(inkex.PathElement())
                 self.group.set('id', 'MassCenter_' + node.get('id'))
                 self.add_cross(self.group, xc, yc, scale)

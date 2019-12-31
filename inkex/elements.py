@@ -702,8 +702,9 @@ class Guide(BaseElement):
     """An inkscape guide"""
     tag_name = 'sodipodi:guide'
 
-    is_horizontal = property(lambda self: self.get('orientation') in ('0,1', '0,-1'))
-    is_vertical = property(lambda self: self.get('orientation') == '1,0')
+    is_horizontal = property(lambda self: self.get('orientation').startswith('0,') and not
+                                          self.get('orientation') == '0,0')
+    is_vertical = property(lambda self: self.get('orientation').endswith(',0'))
     point = property(lambda self: Vector2d(self.get('position')))
 
     def move_to(self, pos_x, pos_y, angle=None):

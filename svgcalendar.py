@@ -29,10 +29,10 @@ http://en.wikipedia.org/wiki/ISO_week_date
 
 __version__ = "0.3"
 
+import datetime
 import calendar
 import re
 import sys
-from datetime import datetime
 
 import inkex
 from inkex.elements import TextElement
@@ -145,7 +145,7 @@ class Calendar(inkex.EffectExtension):
                                       'Fri', 'Sat']
         # Convert year 0 to current year
         if self.options.year == 0:
-            self.options.year = datetime.today().year
+            self.options.year = datetime.datetime.today().year
         # Year 1 starts it's week at monday, obligatorily
         if self.options.year == 1:
             self.options.start_day = 'mon'

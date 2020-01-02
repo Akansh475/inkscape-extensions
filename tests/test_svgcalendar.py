@@ -3,17 +3,26 @@
 All tests for the svg calendar extension
 """
 import calendar
-from datetime import datetime
+import datetime
 
 from svgcalendar import Calendar
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareOrderIndependentStyle, CompareNumericFuzzy
+from inkex.tester.mock import MockMixin
+
+class FrozenDateTime(datetime.datetime):
+    @classmethod
+    def today(cls):
+        return cls(2019, 11, 5)
 
 class CalendarArguments(ComparisonMixin, TestCase):
     """Test arguments to calendar extensions"""
     effect_class = Calendar
     compare_filters = [CompareOrderIndependentStyle(), CompareNumericFuzzy()]
     comparisons = [()]
+    mocks = [
+        (datetime, 'datetime', FrozenDateTime)
+    ]
 
     def test_default_names_list(self):
         """Test default names"""
@@ -22,7 +31,7 @@ class CalendarArguments(ComparisonMixin, TestCase):
         self.assertEqual(effect.options.month_names[11], 'December')
         self.assertEqual(effect.options.day_names[0], 'Sun')
         self.assertEqual(effect.options.day_names[6], 'Sat')
-        self.assertEqual(effect.options.year, datetime.today().year)
+        self.assertEqual(effect.options.year, datetime.datetime.today().year)
         self.assertEqual(calendar.firstweekday(), 6)
 
     def test_modifyed_names_list(self):
@@ -63,7 +72,7 @@ class CalendarArguments(ComparisonMixin, TestCase):
     def test_converted_year_zero(self):
         """Year equal to 0 is converted to correct year"""
         effect = self.assertEffect(args=['--year=0'])
-        self.assertEqual(effect.options.year, datetime.today().year)
+        self.assertEqual(effect.options.year, datetime.datetime.today().year)
 
     def test_converted_year_thousand(self):
         """Year equal to 2000 configuration"""

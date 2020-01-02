@@ -6,10 +6,3 @@ from inkex.tester.filters import CompareNumericFuzzy
 class TestDPISwitcherBasic(ComparisonMixin, TestCase):
     effect_class = DPISwitcher
     compare_filters = [CompareNumericFuzzy()]
-
-class TestDocInfo(ComparisonMixin, TestCase):
-    effect_class = DPISwitcher
-    stderr_output = True
-    comparisons = [
-        ('--action="page_info"',),
-    ]

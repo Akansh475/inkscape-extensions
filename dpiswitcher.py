@@ -166,12 +166,10 @@ class DPISwitcher(inkex.EffectExtension):
     factor_a = 90.0 / 96.0
     factor_b = 96.0 / 90.0
     units = "px"
-    unitExponent = 1.0
 
     def add_arguments(self, pars):
         pars.add_argument("--switcher", type=str, default="0",
                           help="Select the DPI switch you want")
-        pars.add_argument("--action")
 
     # dictionaries of unit to user unit conversion factors
     __uuconvLegacy = {
@@ -247,19 +245,20 @@ class DPISwitcher(inkex.EffectExtension):
             if unit in unit_list:
                 element.set(attr, '{}{}'.format(val * factor, unit))
 
-    def scaleRoot(self, svg):
+    def scale_root(self, unit_exponent=1.0):
         """Scale all top-level elements in SVG root."""
 
         # update viewport
-        widthNumber = self.parse_length(svg.get('width'))[0]
-        heightNumber = self.convert_length(*self.parse_length(svg.get('height')))[0]
-        widthDoc = widthNumber * self.factor_a * self.unitExponent
-        heightDoc = heightNumber * self.factor_a * self.unitExponent
+        width_num = self.parse_length(self.svg.get('width'))[0]
+        height_num = self.convert_length(*self.parse_length(self.svg.get('height')))[0]
+        width_doc = width_num * self.factor_a * unit_exponent
+        height_doc = height_num * self.factor_a * unit_exponent
 
+        svg = self.svg
         if svg.get('height'):
-            svg.set('height', str(heightDoc))
+            svg.set('height', str(height_doc))
         if svg.get('width'):
-            svg.set('width', str(widthDoc))
+            svg.set('width', str(width_doc))
 
         # update viewBox
         if svg.get('viewBox'):
@@ -270,8 +269,8 @@ class DPISwitcher(inkex.EffectExtension):
         # update guides, grids
         if self.options.switcher == "1":
             # FIXME: dpi96to90 only?
-            self.scaleGuides(svg)
-            self.scaleGrid(svg)
+            self.scale_guides()
+            self.scale_grid()
 
         for element in svg:  # iterate all top-level elements of SVGRoot
 
@@ -303,19 +302,18 @@ class DPISwitcher(inkex.EffectExtension):
                 if width_scale != 1.0 and height_scale != 1.0:
                     element.transform.add_scale(width_scale, height_scale)
 
-    def scaleElement(self, m):
+    def scale_element(self, elem):
         pass  # TODO: optionally scale graphics elements only?
 
-    def scaleGuides(self, svg):
-        xpathStr = '//sodipodi:guide'
-        guides = svg.xpath(xpathStr)
-        for guide in guides:
+    def scale_guides(self):
+        """Scale the guidelines"""
+        for guide in self.svg.namedview.get_guides():
             point = guide.get("position").split(",")
             guide.set("position", str(float(point[0].strip()) * self.factor_a) + "," + str(float(point[1].strip()) * self.factor_a))
 
-    def scaleGrid(self, svg):
-        xpathStr = '//inkscape:grid'
-        grids = svg.xpath(xpathStr)
+    def scale_grid(self):
+        """Scale the inkscape grid"""
+        grids = self.svg.xpath('//inkscape:grid')
         for grid in grids:
             grid.set("units", "px")
             if grid.get("spacingx"):
@@ -333,52 +331,18 @@ class DPISwitcher(inkex.EffectExtension):
 
     def effect(self):
         svg = self.svg
-        if self.options.action == '"page_info"':
-            output = inkex.errormsg
-            output(":::SVG document related info:::")
-            output("version: " + str(svg.get(inkex.addNS('version', 'inkscape'))))
-            width = svg.get('width')
-            if width:
-                output("width: " + width)
-            height = svg.get('height')
-            if height:
-                output("height: " + height)
-            viewBox = svg.get('viewBox')
-            if viewBox:
-                output("viewBox: " + viewBox)
-            namedview = svg.namedview
-            docunits = namedview.get(inkex.addNS('document-units', 'inkscape'))
-            if docunits:
-                output("document-units: " + docunits)
-            units = namedview.get('units')
-            if units:
-                output("units: " + units)
-            xpathStr = '//sodipodi:guide'
-            guides = svg.xpath(xpathStr)
-            xpathStr = '//inkscape:grid'
-            if guides:
-                numberGuides = len(guides)
-                output("Document has " + str(numberGuides) + " guides")
-            grids = svg.xpath(xpathStr)
-            i = 1
-            for grid in grids:
-                output("Grid number {}: Units: {}".format(i, grid.get("units")))
-                i += 1
-        else:
+        if self.options.switcher == "0":
+            self.factor_a = 96.0 / 90.0
+            self.factor_b = 90.0 / 96.0
+        svg.namedview.set('inkscape:document-units', "px")
+        self.units = self.parse_length(svg.get('width'))[1]
+        unit_exponent = 1.0
+        if self.units and self.units != "px" and self.units != "" and self.units != "%":
             if self.options.switcher == "0":
-                self.factor_a = 96.0 / 90.0
-                self.factor_b = 90.0 / 96.0
-            namedview = svg.namedview
-            if namedview is None:
-                return inkex.errormsg("No document named view available.")
-            namedview.set('inkscape:document-units', "px")
-            self.units = self.parse_length(svg.get('width'))[1]
-            if self.units and self.units != "px" and self.units != "" and self.units != "%":
-                if self.options.switcher == "0":
-                    self.unitExponent = 1.0 / (self.factor_a / self.__uuconv[self.units])
-                else:
-                    self.unitExponent = 1.0 / (self.factor_a / self.__uuconvLegacy[self.units])
-            self.scaleRoot(svg)
+                unit_exponent = 1.0 / (self.factor_a / self.__uuconv[self.units])
+            else:
+                unit_exponent = 1.0 / (self.factor_a / self.__uuconvLegacy[self.units])
+        self.scale_root(unit_exponent)
 
 
 if __name__ == '__main__':

@@ -2,11 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
       <name>DOC Info</name>
       <id>org.inkscape.docinfo</id>
-      <param name="action" type="notebook" gui-hidden="true">
-        <page name="page_info" gui-text="Show page info">
-            <label>Choose this tab if you would like to see page info previously to apply DPI Switcher.</label>
-        </page>
-      </param>
       <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>
@@ -14,6 +9,6 @@
         </effects-menu>
       </effect>
       <script>
-        <command location="inx" interpreter="python">dpiswitcher.py</command>
+        <command location="inx" interpreter="python">docinfo.py</command>
       </script>
 </inkscape-extension>

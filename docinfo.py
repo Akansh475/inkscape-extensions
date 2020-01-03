@@ -27,7 +27,7 @@ class DocInfo(inkex.EffectExtension):
     def effect(self):
         namedview = self.svg.namedview
         self.msg(":::SVG document related info:::")
-        self.msg("version: " + self.svg.get('inkscape:version'))
+        self.msg("version: " + self.svg.get('inkscape:version', 'New Document (unsaved)'))
         self.msg("width: {}".format(self.svg.width))
         self.msg("height: {}".format(self.svg.height))
         self.msg("viewbox: {}".format(str(self.svg.get_viewbox())))

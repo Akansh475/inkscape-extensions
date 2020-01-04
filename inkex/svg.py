@@ -112,11 +112,20 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
                 yield node
 
     def get_selected_bbox(self):
-        """Gets the bounding box of the selected items"""
+        """
+        Gets a :class:`inkex.transforms.BoundingBox` object for the selected items.
+        
+        Text objects have a bounding box without width or height that only 
+        reflects the coordinate of their anchor. If a text object is a part of 
+        the selection's boundary, the bounding box may be inaccurate.
+        
+        When no object is selected or when the object's location cannot be 
+        determined (e.g. empty group or layer), all coordinates will be None.
+        """
         return sum([node.bounding_box() for node in self.selected.values()], None)
 
     def get_page_bbox(self):
-        """Gets the page dimentions as a bbox"""
+        """Gets the page dimensions as a bbox"""
         return BoundingBox((0, float(self.width)), (0, float(self.height)))
 
     def get_first_selected(self, *types):

@@ -72,7 +72,7 @@ class Plot(inkex.EffectExtension):
             init += ';FS%d' % self.options.force
         if self.options.speed > 0:
             init += ';VS%d' % self.options.speed
-        return init + hpgl + ';SP0;PU0,0;IN; '
+        return init + hpgl + ';PU0,0;SP0;IN; '
 
     def convert_dmpl(self, hpgl):
         """Convert HPGL to DMPL"""

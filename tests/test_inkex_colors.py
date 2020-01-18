@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from inkex.colors import Color, ColorError, is_color
+from inkex.colors import Color, ColorError, ColorIdError, is_color
 from inkex.tester import TestCase
 
 
@@ -19,7 +19,10 @@ class ColorTest(TestCase):
     def test_errors(self):
         """Color parsing errors"""
         self.assertRaises(ColorError, Color, {})
-        self.assertRaises(ValueError, Color, [0, 0, 0, 0])
+        self.assertRaises(ColorError, Color, ["#id"])
+        self.assertRaises(ColorError, Color, "#badhex")
+        self.assertRaises(ColorIdError, Color, "url(#someid)")
+        self.assertRaises(ColorError, Color, [0, 0, 0, 0])
         self.assertRaises(ColorError, Color(None, space='nop').to_rgb)
         self.assertRaises(ColorError, Color(None, space='nop').to_hsl)
         self.assertRaises(ColorError, Color([1], space='nop').__str__)
@@ -40,6 +43,7 @@ class ColorTest(TestCase):
         self.assertEqual(color.red, 255)
         self.assertEqual(color.green, 1)
         self.assertEqual(color.blue, 2)
+        color = Color(' #ff0102')
         self.assertEqual(color.to_hsl(), [254, 255, 128])
         self.assertEqual(color.hue, 254)
         self.assertEqual(color.saturation, 255)

@@ -198,6 +198,8 @@ def contrain(minim, value, maxim):
 class ColorError(KeyError):
     """Specific color parsing error"""
 
+class ColorIdError(ColorError):
+    """Special color error for gradient and color stop ids"""
 
 class Color(list):
     """An RGB array for the color"""
@@ -223,7 +225,7 @@ class Color(list):
 
         if isinstance(color, (str, unicode)):
             # String from xml or css attributes
-            space, color = self.parse_str(color)
+            space, color = self.parse_str(color.strip())
 
         if isinstance(color, int):
             # Number from arg parser colour value
@@ -237,8 +239,11 @@ class Color(list):
             raise ColorError("Not a known a color value")
 
         self.space = space
-        for val in color:
-            self.append(val)
+        try:
+            for val in color:
+                self.append(val)
+        except ValueError:
+            raise ColorError("Bad color list")
 
     def _set(self, index, value, spaces=('rgb', 'rgba')):
         """Set the color value in place, limits setter to specific color space"""
@@ -290,6 +295,9 @@ class Color(list):
         if color is None:
             return 'rgb', None
 
+        if color.startswith('url('):
+            raise ColorIdError("Gradient other referenced element id.")
+
         # Next handle short colors (css: #abc -> #aabbcc)
         if color.startswith('#'):
             # Remove any icc or ilab directives
@@ -299,7 +307,10 @@ class Color(list):
                 col = '#{1}{1}{2}{2}{3}{3}'.format(*col)
 
             # Convert hex to integers
-            return 'rgb', (int(col[1:3], 16), int(col[3:5], 16), int(col[5:], 16))
+            try:
+                return 'rgb', (int(col[1:3], 16), int(col[3:5], 16), int(col[5:], 16))
+            except ValueError:
+                raise ColorError("Bad RGB hex color value {}".format(col))
 
         # Handle other css color values
         elif '(' in color and ')' in color:

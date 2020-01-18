@@ -106,6 +106,7 @@ class TestCase(MockCommandMixin, BaseCase):
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
     effect_class = NoExtension # type: Type[InkscapeExtension]
+    effect_name = property(lambda self: self.effect_class.__module__)
 
     # If set to true, the output is not expected to be the stdout SVG document, but rather
     # text or a message sent to the stderr, this is highly weird. But sometimes happens.
@@ -354,7 +355,6 @@ class ComparisonMixin(object):
 
     def get_compare_outfile(self, args, addout=None):
         """Generate an output file for the arguments given"""
-        effect_name = self.effect_class.__module__
         if addout is not None:
             args = list(args) + [str(addout)]
         opstr = '__'.join(args)\
@@ -366,4 +366,4 @@ class ComparisonMixin(object):
                 # avoid filename-too-long error
                 opstr = hashlib.md5(opstr.encode('latin1')).hexdigest()
             opstr = '__' + opstr
-        return self.data_file("refs", "{}{}.out".format(effect_name, opstr))
+        return self.data_file("refs", "{}{}.out".format(self.effect_name, opstr))

@@ -111,15 +111,26 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
             if not types or isinstance(node, types):
                 yield node
 
+    def get_selected_or_all(self, *types):
+        """Returns a generator of selected items: i.e. svg.get_selected(types)
+             or all of this type of element i.e. svg.descendants(types)
+        """
+        if self.svg.selected:
+            for node in self.get_selected(*types):
+                yield node # yield from when py3 only
+        else:
+            for node in self.descendants(*types):
+                yield node # yield from when py3 only
+
     def get_selected_bbox(self):
         """
         Gets a :class:`inkex.transforms.BoundingBox` object for the selected items.
-        
-        Text objects have a bounding box without width or height that only 
-        reflects the coordinate of their anchor. If a text object is a part of 
+
+        Text objects have a bounding box without width or height that only
+        reflects the coordinate of their anchor. If a text object is a part of
         the selection's boundary, the bounding box may be inaccurate.
-        
-        When no object is selected or when the object's location cannot be 
+
+        When no object is selected or when the object's location cannot be
         determined (e.g. empty group or layer), all coordinates will be None.
         """
         return sum([node.bounding_box() for node in self.selected.values()], None)

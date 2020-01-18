@@ -29,7 +29,7 @@ from copy import deepcopy
 from lxml import etree
 
 from .paths import Path
-from .styles import Style, StyleSheet, Classes
+from .styles import Style, AttrFallbackStyle, StyleSheet, Classes
 from .transforms import BoundingBox, Transform, Vector2d
 from .utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
@@ -350,6 +350,10 @@ class ShapeElement(BaseElement):
     def effective_style(self):
         """Without parent styles, what is the effective style is"""
         return self.style
+
+    def fallback_style(self, move=False):
+        """Get styles falling back to element attributes"""
+        return AttrFallbackStyle(self, move=move)
 
     def bounding_box(self, transform=None):  # type: () -> BoundingBox
         """BoundingBox calculation based on the ShapeElement rendered to a path."""

@@ -46,6 +46,49 @@ class StyleTest(TestCase):
         stl.set_color('rgba(0, 127, 0, 0.5)', 'stroke')
         self.assertEqual(str(stl), 'fill-opacity:0.7;fill:red;stroke-opacity:0.5;stroke:#007f00')
 
+class AttribFallbackTest(TestCase):
+    """Test the fallback style for handling attribute based styles"""
+    def setUp(self):
+        self.svg = svg_file(self.data_file('svg', 'css.svg'))
+        self.elem = self.svg.getElementById('rect2')
+
+    def atest_fallback_read_style(self):
+        """Style comes from style property"""
+        self.elem.style['fill'] = 'green'
+        self.elem.set('fill', 'red')
+        self.assertEqual(self.elem.fallback_style()['fill'], 'green')
+
+    def atest_fallback_read_attrib(self):
+        """Style comes from attribute"""
+        self.elem.style.pop('stroke', None)
+        self.assertEqual(self.elem.fallback_style()['stroke'], None)
+        self.elem.set('stroke', 'green')
+        self.assertEqual(self.elem.fallback_style()['stroke'], 'green')
+
+    def test_fallback_write_style(self):
+        """Styles are set back correctly"""
+        self.elem.style['fill'] = 'green'
+        self.elem.set('fill', 'red')
+        self.elem.fallback_style()['fill'] = 'blue'
+        self.assertEqual(self.elem.style['fill'], 'blue')
+        self.assertEqual(self.elem.get('fill'), None) # Removed
+
+    def atest_fallback_write_attrib(self):
+        """Attrib is written back when needed"""
+        self.elem.style.pop('stroke', None)
+        self.elem.set('stroke', 'green')
+        self.elem.fallback_style()['stroke'] = 'blue'
+        self.assertEqual(self.elem.style.get('fill', None), None) # Still empty
+        self.assertEqual(self.elem.get('fill'), 'blue')
+
+    def atest_fallback_write_move(self):
+        """Style is moved when required"""
+        self.elem.style.pop('stroke', None)
+        self.elem.set('stroke', 'green')
+        self.elem.fallback_style(move=True)['stroke'] = 'blue'
+        self.assertEqual(self.elem.style['fill'], 'blue')
+        self.assertEqual(self.elem.get('fill'), None) # Moved
+
 class StyleSheetTest(TestCase):
     """Test parsing style sheets"""
     def setUp(self):

@@ -71,6 +71,7 @@ class Classes(list):
 
 class Style(OrderedDict):
     """A list of style directives"""
+    color_props = ('stroke', 'fill', 'stop-color', 'flood-color', 'lighting-color')
 
     def __init__(self, style=None, callback=None, **kw):
         # This callback is set twice because this is 'pre-initial' data (no callback)
@@ -167,6 +168,35 @@ class Style(OrderedDict):
         for (name, value) in self.items():
             if value == 'url(#{})'.format(old_id):
                 self[name] = 'url(#{})'.format(new_id)
+
+class AttrFallbackStyle(object): # pylint: disable=too-few-public-methods
+    """
+    A container for a style and an element that may have competing styles
+
+    If move is set to true, any new values are set to the style attribute
+    and removed from the element attributes list.
+    """
+    # TODO: This doesn't cover iterating over styles, because we don't
+    # have a list of known styles to check attribs for.
+    def __init__(self, elem, move=False):
+        self.elem = elem
+        self.style = elem.style
+        self.move = move
+
+    def __getitem__(self, name):
+        # Style is more improtant, followed by the element
+        return self.style.get(name, self.elem.attrib.get(name, None))
+
+    def __setitem__(self, name, value):
+        # Set the item back into the attribs, or move it if requested.
+        if name in self.elem.attrib:
+            # The other reason to unset the attrib is if it's already in
+            # the style dictionary so isn't needed here anyway.
+            if not self.move and name not in self.style:
+                self.elem.set(name, value)
+                return
+            self.elem.set(name, None)
+        self.style[name] = value
 
 class StyleSheets(list):
     """

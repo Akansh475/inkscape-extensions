@@ -53,7 +53,9 @@ class SvgClassLookup(etree.CustomElementClassLookup):
         if namespace is None:
             namespace = NSS['svg']
 
-        return self.lookup_tags.get((namespace, name), BaseElement)
+        if node_type == 'element':
+            return self.lookup_tags.get((namespace, name), BaseElement)
+        return None
 
 SVG_PARSER = etree.XMLParser(huge_tree=True, strip_cdata=False)
 SVG_PARSER.set_element_class_lookup(SvgClassLookup())

@@ -115,7 +115,7 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         """Returns a generator of selected items: i.e. svg.get_selected(types)
              or all of this type of element i.e. svg.descendants(types)
         """
-        if self.svg.selected:
+        if self.selected:
             for node in self.get_selected(*types):
                 yield node # yield from when py3 only
         else:

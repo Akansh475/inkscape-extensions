@@ -52,13 +52,13 @@ class AttribFallbackTest(TestCase):
         self.svg = svg_file(self.data_file('svg', 'css.svg'))
         self.elem = self.svg.getElementById('rect2')
 
-    def atest_fallback_read_style(self):
+    def test_fallback_read_style(self):
         """Style comes from style property"""
         self.elem.style['fill'] = 'green'
         self.elem.set('fill', 'red')
         self.assertEqual(self.elem.fallback_style()['fill'], 'green')
 
-    def atest_fallback_read_attrib(self):
+    def test_fallback_read_attrib(self):
         """Style comes from attribute"""
         self.elem.style.pop('stroke', None)
         self.assertEqual(self.elem.fallback_style()['stroke'], None)
@@ -73,21 +73,28 @@ class AttribFallbackTest(TestCase):
         self.assertEqual(self.elem.style['fill'], 'blue')
         self.assertEqual(self.elem.get('fill'), None) # Removed
 
-    def atest_fallback_write_attrib(self):
+    def test_fallback_write_attrib(self):
         """Attrib is written back when needed"""
         self.elem.style.pop('stroke', None)
         self.elem.set('stroke', 'green')
         self.elem.fallback_style()['stroke'] = 'blue'
-        self.assertEqual(self.elem.style.get('fill', None), None) # Still empty
-        self.assertEqual(self.elem.get('fill'), 'blue')
+        self.assertEqual(self.elem.style.get('stroke', None), None) # Still empty
+        self.assertEqual(self.elem.get('stroke'), 'blue')
 
-    def atest_fallback_write_move(self):
+    def test_fallback_write_move(self):
         """Style is moved when required"""
         self.elem.style.pop('stroke', None)
         self.elem.set('stroke', 'green')
         self.elem.fallback_style(move=True)['stroke'] = 'blue'
-        self.assertEqual(self.elem.style['fill'], 'blue')
-        self.assertEqual(self.elem.get('fill'), None) # Moved
+        self.assertEqual(self.elem.style['stroke'], 'blue')
+        self.assertEqual(self.elem.get('stroke'), None) # Moved
+
+    def test_no_attr(self):
+        """Given name doesn't exist anywhere"""
+        self.elem.style = 'fill:red'
+        style = self.elem.fallback_style()
+        self.assertEqual(style.get('fill'), 'red')
+        self.assertEqual(style.get('jump'), None)
 
 class StyleSheetTest(TestCase):
     """Test parsing style sheets"""

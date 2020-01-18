@@ -169,7 +169,7 @@ class Style(OrderedDict):
             if value == 'url(#{})'.format(old_id):
                 self[name] = 'url(#{})'.format(new_id)
 
-class AttrFallbackStyle(object): # pylint: disable=too-few-public-methods
+class AttrFallbackStyle(object):
     """
     A container for a style and an element that may have competing styles
 
@@ -197,6 +197,17 @@ class AttrFallbackStyle(object): # pylint: disable=too-few-public-methods
                 return
             self.elem.set(name, None)
         self.style[name] = value
+
+    def get(self, name, default=None):
+        """Get with default"""
+        try:
+            return self[name]
+        except KeyError:
+            return default
+
+    def set(self, name, value):
+        """Set, nothing fancy"""
+        self[name] = value
 
 class StyleSheets(list):
     """

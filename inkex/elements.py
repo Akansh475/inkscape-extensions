@@ -251,7 +251,7 @@ class BaseElement(etree.ElementBase):
             yield self
         for child in self:
             if hasattr(child, 'descendants'):
-                for descendant in child.descendants():
+                for descendant in child.descendants(*types):
                     yield descendant
 
     def ancestors(self):
@@ -296,6 +296,18 @@ class BaseElement(etree.ElementBase):
         # namespaces, basically over printing details and providing no
         # supression mechanisms to turn off xml's over engineering.
         return str(self.tag).split('}')[-1]
+
+    @property
+    def href(self):
+        """Returns the referred-to element if available"""
+        ref = self.get('xlink:href')
+        if not ref:
+            return None
+        return self.root.getElementById(ref.strip('#'))
+
+    def fallback_style(self, move=False):
+        """Get styles falling back to element attributes"""
+        return AttrFallbackStyle(self, move=move)
 
 
 class ShapeElement(BaseElement):
@@ -351,10 +363,6 @@ class ShapeElement(BaseElement):
         """Without parent styles, what is the effective style is"""
         return self.style
 
-    def fallback_style(self, move=False):
-        """Get styles falling back to element attributes"""
-        return AttrFallbackStyle(self, move=move)
-
     def bounding_box(self, transform=None):  # type: () -> BoundingBox
         """BoundingBox calculation based on the ShapeElement rendered to a path."""
         path = self.path.to_absolute()
@@ -371,14 +379,6 @@ class ShapeElement(BaseElement):
         """Returns the inkscape label"""
         return self.get('inkscape:label', None)
     label = label.setter(lambda self, value: self.set('inkscape:label', str(value)))
-
-    @property
-    def href(self):
-        """Returns the referred-to element if available"""
-        ref = self.get('xlink:href')
-        if not ref:
-            return None
-        return self.root.getElementById(ref.strip('#'))
 
 
 class FlowRegion(ShapeElement):

@@ -190,8 +190,10 @@ def is_color(color):
     except ColorError:
         return False
 
-def contrain(minim, value, maxim):
+def constrain(minim, value, maxim, channel):
     """Returns the value so long as it's between min and max values"""
+    if channel == 'h': # Hue
+        return value % maxim # Wrap around hue value
     return min([maxim, max([minim, value])])
 
 class ColorError(KeyError):
@@ -253,14 +255,14 @@ class Color(list):
             if index == 3 and self.space == 'rgb':
                 # Special, add alpha, don't convert back to rgb
                 self.space = 'rgba'
-                self.append(contrain(0.0, float(value), 1.0))
+                self.append(constrain(0.0, float(value), 1.0, 'a'))
                 return
             # Set in other colour space and convert back and forth
-            target = getattr(self, 'to_' + spaces[0])()
-            target[index] = contrain(0, int(value), 255)
-            self[:] = getattr(target, 'to_' + self.space)()
+            target = self.to(spaces[0])
+            target[index] = constrain(0, int(value), 255, spaces[0][index])
+            self[:] = target.to(self.space)
             return
-        self[index] = contrain(0, int(value), 255)
+        self[index] = constrain(0, int(value), 255, spaces[0][index])
 
     def append(self, val):
         """Append a value to the local list"""
@@ -364,6 +366,10 @@ class Color(list):
             return -1
         color = self.to_rgba()
         return (color[0] << 24) + (color[1] << 16) + (color[2] << 8) + (int(color[3] * 255))
+
+    def to(self, space):
+        """Dynamic caller for to_hsl, to_rgb, etc"""
+        return getattr(self, 'to_' + space)()
 
     def to_hsl(self):
         """Turn this color into a Hue/Saturation/Lightness colour space"""

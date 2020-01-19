@@ -72,6 +72,7 @@ class Classes(list):
 class Style(OrderedDict):
     """A list of style directives"""
     color_props = ('stroke', 'fill', 'stop-color', 'flood-color', 'lighting-color')
+    opacity_props = ('stroke-opacity', 'fill-opacity', 'opacity')
 
     def __init__(self, style=None, callback=None, **kw):
         # This callback is set twice because this is 'pre-initial' data (no callback)
@@ -180,23 +181,32 @@ class AttrFallbackStyle(object):
     # have a list of known styles to check attribs for.
     def __init__(self, elem, move=False):
         self.elem = elem
-        self.style = elem.style
+        self.styles = [elem.style]
+        self.styles.extend(elem.root.stylesheets.lookup(elem.get('id')))
         self.move = move
 
     def __getitem__(self, name):
         # Style is more improtant, followed by the element
-        return self.style.get(name, self.elem.attrib.get(name, None))
+        for style in self.styles:
+            if name in style:
+                return style[name]
+        return self.elem.attrib.get(name, None)
 
     def __setitem__(self, name, value):
         # Set the item back into the attribs, or move it if requested.
         if name in self.elem.attrib:
             # The other reason to unset the attrib is if it's already in
             # the style dictionary so isn't needed here anyway.
-            if not self.move and name not in self.style:
+            if not self.move and name not in self.styles[0]:
                 self.elem.set(name, value)
                 return
             self.elem.set(name, None)
-        self.style[name] = value
+        for style in self.styles:
+            if name in style:
+                style[name] = value
+                return
+        # Not set before (anywhere), so set to element style
+        self.styles[0][name] = value
 
     def get(self, name, default=None):
         """Get with default"""
@@ -254,7 +264,7 @@ class StyleSheet(list):
     def __str__(self):
         return '\n' + '\n'.join([str(style) for style in self]) + '\n'
 
-    def _callback(self):
+    def _callback(self, style=None): # pylint: disable=unused-argument
         if self.callback is not None:
             self.callback(self)
 

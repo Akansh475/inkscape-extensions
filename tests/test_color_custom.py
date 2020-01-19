@@ -4,7 +4,7 @@ import inkex
 from color_custom import Custom
 from .test_inkex_extensions import ColorBaseCase
 
-class ColorCustomBasicTest(ColorBaseCase):
+class ColorCustomTest(ColorBaseCase):
     effect_class = Custom
     color_tests = [
         # The default ranges are set to 0, and thus the color should not change.

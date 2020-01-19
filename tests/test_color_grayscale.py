@@ -2,7 +2,7 @@
 from color_grayscale import Grayscale
 from .test_inkex_extensions import ColorBaseCase
 
-class ColorGrayscaleBasicTest(ColorBaseCase):
+class ColorGrayscaleTest(ColorBaseCase):
     effect_class = Grayscale
     color_tests = [
         ((0, 0, 0), "#000000"),

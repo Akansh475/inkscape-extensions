@@ -2,7 +2,7 @@
 from color_brighter import Brighter
 from .test_inkex_extensions import ColorBaseCase
 
-class ColorBrighterBasicTest(ColorBaseCase):
+class ColorBrighterTest(ColorBaseCase):
     effect_class = Brighter
     color_tests = [
         ((0, 0, 0), "#0a0a0a"),

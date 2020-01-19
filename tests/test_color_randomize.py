@@ -4,6 +4,7 @@ from .test_inkex_extensions import ColorBaseCase
 
 class ColorRandomizeTest(ColorBaseCase):
     effect_class = Randomize
+    python3_only = True
     color_tests = [
         # The default ranges are set to 0, and thus the color and opacity should not change.
         ((150, 100, 200), "#9564c7"),

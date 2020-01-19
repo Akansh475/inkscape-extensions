@@ -82,6 +82,7 @@ import xml.etree.ElementTree as xml
 from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
 
+from ..utils import PY3
 from .xmldiff import xmldiff
 from .mock import MockCommandMixin, Capture
 
@@ -113,6 +114,7 @@ class TestCase(MockCommandMixin, BaseCase):
     stderr_output = False
     stdout_protect = True
     stderr_protect = True
+    python3_only = False
 
     def __init__(self, *args, **kw):
         super(TestCase, self).__init__(*args, **kw)
@@ -123,6 +125,8 @@ class TestCase(MockCommandMixin, BaseCase):
         """Make sure every test is seeded the same way"""
         self._effect = None
         super(TestCase, self).setUp()
+        if self.python3_only and not PY3:
+            self.skipTest("No available in python2")
         try:
             # python3, with version 1 to get the same numbers
             # as in python2 during tests.

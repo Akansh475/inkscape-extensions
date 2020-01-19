@@ -158,8 +158,9 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
 
     def getElementById(self, eid, elm='*'):  # pylint: disable=invalid-name
         """Get an element in this svg document by it's ID attribute"""
-        eid = eid.strip()[4:-1] if eid.startswith('url(') else eid
-        eid = eid.lstrip('#')
+        if eid is not None:
+            eid = eid.strip()[4:-1] if eid.startswith('url(') else eid
+            eid = eid.lstrip('#')
         return self.getElement('//{}[@id="{}"]'.format(elm, eid))
 
     def getElementsByHref(self, eid): # pylint: disable=invalid-name

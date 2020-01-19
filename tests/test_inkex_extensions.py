@@ -20,6 +20,7 @@ class ColorEffectTest(ComparisonMixin, TestCase):
     effect_class = TurnGreenEffect
     effect_name = 'inkex_extensions_color'
     compare_file = 'svg/colors.svg'
+    python3_only = True
 
     comparisons = [
         ('--id=r1',), # One shape only

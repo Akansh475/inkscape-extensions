@@ -1,17 +1,19 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Darken colours of selected objects"""
 
-import coloreffect
+import inkex
 
-class Darker(coloreffect.ColorEffect):
+class Darker(inkex.ColorExtension):
     """Make the colours darker"""
-    def colmod(self, r, g, b):
+    def modify_color(self, name, color):
         factor = 0.9
-        r = int(round(max(r * factor, 0)))
-        g = int(round(max(g * factor, 0)))
-        b = int(round(max(b * factor, 0)))
-        return '{:02x}{:02x}{:02x}'.format(r, g, b)
+        if color.space == 'hsl':
+            color.lightness = int(round(max(color.lightness * factor, 0)))
+        else:
+            color.red = int(round(max(color.red * factor, 0)))
+            color.green = int(round(max(color.green * factor, 0)))
+            color.blue = int(round(max(color.blue * factor, 0)))
+        return color
 
 if __name__ == '__main__':
     Darker().run()

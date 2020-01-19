@@ -1,16 +1,14 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Remove colors"""
 
-import coloreffect
+import inkex
 
-class Desaturate(coloreffect.ColorEffect):
-    """Remove colour but maintain intesity"""
-    def colmod(self, r, g, b):
-        lum = (max(r, g, b) + min(r, g, b)) // 2
-        grey = int(round(lum))
-        return '{:02x}{:02x}{:02x}'.format(grey, grey, grey)
-
+class Desaturate(inkex.ColorExtension):
+    """Remove color but maintain intesity"""
+    def modify_color(self, name, color):
+        lum = (max(color.red, color.green, color.blue) \
+             + min(color.red, color.green, color.blue)) // 2
+        return inkex.Color((int(round(lum)), int(round(lum)), int(round(lum))))
 
 if __name__ == '__main__':
     Desaturate().run()

@@ -65,6 +65,11 @@ class AttribFallbackTest(TestCase):
         self.elem.set('stroke', 'green')
         self.assertEqual(self.elem.fallback_style()['stroke'], 'green')
 
+    def test_fallback_read_css(self):
+        """Style from basic css will work"""
+        elem = self.svg.getElementById('rect1')
+        self.assertEqual(elem.fallback_style()['fill'], 'blue')
+
     def test_fallback_write_style(self):
         """Styles are set back correctly"""
         self.elem.style['fill'] = 'green'
@@ -88,6 +93,14 @@ class AttribFallbackTest(TestCase):
         self.elem.fallback_style(move=True)['stroke'] = 'blue'
         self.assertEqual(self.elem.style['stroke'], 'blue')
         self.assertEqual(self.elem.get('stroke'), None) # Moved
+
+    def test_fallback_write_css(self):
+        """Style can be set into the stylesheet style"""
+        elem = self.svg.getElementById('rect1')
+        elem.fallback_style()['fill'] = 'green'
+        self.assertIn('#rect1 {\n  fill:green;\n}', self.svg.getElementById('style1').text)
+        elem.fallback_style()['fill'] = 'red'
+        self.assertIn('#rect1 {\n  fill:red;\n}', self.svg.getElementById('style1').text)
 
     def test_no_attr(self):
         """Given name doesn't exist anywhere"""

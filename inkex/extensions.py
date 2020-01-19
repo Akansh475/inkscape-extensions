@@ -28,14 +28,15 @@ import re
 import sys
 import types
 
-from .utils import errormsg, Boolean, PY3
-from .elements import load_svg, BaseElement, Group, Grid
+from .utils import errormsg, Boolean, CloningVat, PY3
+from .colors import Color, ColorIdError, ColorError
+from .elements import load_svg, BaseElement, ShapeElement, Group, Grid
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
 
 # All the names that get added to the inkex API itself.
 __all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
-           'OutputExtension', 'CallExtension', 'TemplateExtension')
+           'OutputExtension', 'CallExtension', 'TemplateExtension', 'ColorExtension')
 
 stdout = sys.stdout
 if PY3:
@@ -233,3 +234,61 @@ class TemplateExtension(EffectExtension):
         if self.options.grid:
             self.svg.namedview.set('showgrid', "true")
             self.svg.namedview.add(Grid(type="xygrid"))
+
+
+class ColorExtension(EffectExtension):
+    """
+    A standard way to modify colours in an svg document.
+    """
+    def effect(self):
+        # Limiting to shapes ignores Gradients (and other things) from the select_all
+        # this prevents defs from being processed twice.
+        self._renamed = {}
+        gradients = CloningVat(self.svg)
+        for elem in self.svg.get_selected_or_all(ShapeElement):
+            self.process_element(elem, gradients)
+        gradients.process(self.process_elements, types=(ShapeElement,))
+
+    def process_elements(self, elem):
+        """Process multiple elements (gradients)"""
+        for child in elem.descendants():
+            self.process_element(child)
+
+    def process_element(self, elem, gradients=None):
+        """Process one of the selected elements"""
+        style = elem.fallback_style(move=False)
+        # Colours first
+        for name in elem.style.color_props:
+            value = style.get(name)
+            if value is not None:
+                try:
+                    style[name] = self.modify_color(name, Color(value))
+                except ColorIdError:
+                    gradient = self.svg.getElementById(value)
+                    gradients.track(gradient, elem, self._ref_cloned, style=style, name=name)
+                    if gradient.href is not None:
+                        gradients.track(gradient.href, elem, self._xlink_cloned, linker=gradient)
+                except ColorError:
+                    pass # bad color value, don't touch.
+        # Then opacities (usually does nothing)
+        for name in elem.style.opacity_props:
+            value = style.get(name)
+            if value is not None:
+                style[name] = self.modify_opacity(name, value)
+
+    def _ref_cloned(self, old_id, new_id, style, name):
+        self._renamed[old_id] = new_id
+        style[name] = "url(#{})".format(new_id)
+
+    def _xlink_cloned(self, old_id, new_id, linker):
+        lid = linker.get('id')
+        linker = self.svg.getElementById(self._renamed.get(lid, lid))
+        linker.set('xlink:href', '#' + new_id)
+
+    def modify_color(self, name, color):
+        """Replace this method with your colour modifier method"""
+        raise NotImplementedError("Provide a modify_color method.")
+
+    def modify_opacity(self, name, opacity):
+        """Optional opacity modification"""
+        return opacity

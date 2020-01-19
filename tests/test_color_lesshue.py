@@ -1,130 +1,26 @@
 # coding=utf-8
 from color_lesshue import LessHue
-from inkex.tester import ComparisonMixin, TestCase
+from .test_inkex_extensions import ColorBaseCase
 
-class ColorLessHueBasicTest(ComparisonMixin, TestCase):
+class ColorLessHueTest(ColorBaseCase):
     effect_class = LessHue
-
-    def test_default_values_black(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(0, 0, 0)
-        self.assertEqual("000000", col)
-
-    def test_default_values_white(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(255, 255, 255)
-        self.assertEqual("ffffff", col)
-
-    def test_default_values_silver(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Silver
-        col = self.effect.colmod(192, 192, 192)
-        self.assertEqual("c0c0c0", col)
-
-    def test_default_values_grey(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Grey
-        col = self.effect.colmod(128, 128, 128)
-        self.assertEqual("808080", col)
-
-    def test_default_values_maroon(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Maroon
-        col = self.effect.colmod(128, 0, 0)
-        self.assertEqual("800026", col)
-
-    def test_default_values_red(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Red
-        col = self.effect.colmod(255, 0, 0)
-        self.assertEqual("ff004c", col)
-
-    def test_default_values_olive(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Olive
-        col = self.effect.colmod(128, 128, 0)
-        self.assertEqual("805900", col)
-
-    def test_default_values_yellow(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Yellow
-        col = self.effect.colmod(255, 255, 0)
-        self.assertEqual("ffb200", col)
-
-    def test_default_values_green(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Green
-        col = self.effect.colmod(0, 128, 0)
-        self.assertEqual("268000", col)
-
-    def test_default_values_lime(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Lime
-        col = self.effect.colmod(0, 255, 0)
-        self.assertEqual("4cff00", col)
-
-    def test_default_values_teal(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Teal
-        col = self.effect.colmod(0, 128, 128)
-        self.assertEqual("008059", col)
-
-    def test_default_values_aqua(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Aqua
-        col = self.effect.colmod(0, 255, 255)
-        self.assertEqual("00ffb2", col)
-
-    def test_default_values_navy(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Navy
-        col = self.effect.colmod(0, 0, 128)
-        self.assertEqual("002680", col)
-
-    def test_default_values_blue(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Blue
-        col = self.effect.colmod(0, 0, 255)
-        self.assertEqual("004cff", col)
-
-    def test_default_values_purple(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Purple
-        col = self.effect.colmod(128, 0, 128)
-        self.assertEqual("590080", col)
-
-    def test_default_values_fuschia(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-
-        # Fuschia
-        col = self.effect.colmod(255, 0, 255)
-        self.assertEqual("b200ff", col)
+    color_tests = [
+        ('hsl(0, 0, 0)', 'hsl(243, 0, 0)'),
+        ('hsl(255, 255, 255)', 'hsl(243, 255, 255)'),
+        ((0, 0, 0), "#000000"),
+        ((255, 255, 255), "#ffffff"),
+        ((192, 192, 192), "#c0c0c0"),
+        ((128, 128, 128), "#808080"),
+        ((128, 0, 0), "#800024"),
+        ((255, 0, 0), "#fe0047"),
+        ((128, 128, 0), "#805a00"),
+        ((255, 255, 0), "#feb300"),
+        ((0, 128, 0), "#248000"),
+        ((0, 255, 0), "#47fe00"),
+        ((0, 128, 128), "#00805a"),
+        ((0, 255, 255), "#00feb3"),
+        ((0, 0, 128), "#002480"),
+        ((0, 0, 255), "#0047fe"),
+        ((128, 0, 128), "#5a0080"),
+        ((255, 0, 255), "#b300fe"),
+    ]

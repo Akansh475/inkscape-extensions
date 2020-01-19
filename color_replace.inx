@@ -2,8 +2,14 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Replace color</name>
     <id>org.inkscape.color.replace_color</id>
-    <param name="from_color" type="string" max_length="6" gui-text="Replace color (RRGGBB hex):" gui-description="Color to replace">000000</param>
-    <param name="to_color" type="string" max_length="6" gui-text="By color (RRGGBB hex):" gui-description="New color">000000</param>
+    <param name="tab" type="notebook">
+      <page name="from" gui-text="Color to replace">
+        <param name="from_color" type="color" gui-text="From color"></param>
+      </page>
+      <page name="to" gui-text="New color">
+        <param name="to_color" type="color" gui-text="To color"></param>
+      </page>
+    </param>
     <effect>
         <object-type>all</object-type>
         <effects-menu>

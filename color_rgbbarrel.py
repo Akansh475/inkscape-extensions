@@ -1,17 +1,16 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Rotate the colors in the selected elements"""
 
-import coloreffect
+import inkex
 
-class RgbBarrel(coloreffect.ColorEffect):
+class RgbBarrel(inkex.ColorExtension):
     """
     Cycle colors RGB -> BRG
 
     aka  Do a Barrel Roll!
     """
-    def colmod(self, r, g, b):
-        return '{:02x}{:02x}{:02x}'.format(b, r, g)
+    def modify_color(self, name, color):
+        return inkex.Color((color.blue, color.red, color.green))
 
 if __name__ == '__main__':
     RgbBarrel().run()

@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Reverse the colors"""
 
-import coloreffect
+import inkex
 
-class Negative(coloreffect.ColorEffect):
+class Negative(inkex.ColorExtension):
     """Make the colour oposite"""
-    def colmod(self, r, g, b):
-        return "{:02x}{:02x}{:02x}".format(255 - r, 255 - g, 255 - b)
+    def modify_color(self, name, color):
+        # Support any colour space
+        for i in range(3):
+            color[i] = 255 - color[i]
+        return color
 
 if __name__ == '__main__':
     Negative().run()

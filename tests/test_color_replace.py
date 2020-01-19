@@ -1,46 +1,14 @@
 # coding=utf-8
 from color_replace import ReplaceColor
-from inkex.tester import ComparisonMixin, TestCase
+from .test_inkex_extensions import ColorBaseCase
 
-class ColorRemoveBlueBasicTest(ComparisonMixin, TestCase):
+class ColorReplaceTest(ColorBaseCase):
     effect_class = ReplaceColor
-
-    comparisons = [
-        ('-f', 'FFFF00', '-t', '0000FF'),
+    color_tests = [
+        ((0, 0, 0), "#ff0000", []),
+        ((128, 0, 0), "#800000", []),
+        ((0, 0, 0), "#696969", ['-t1768516095']),
+        ((0, 0, 0), "#000000", ["-f1", "-t1768516095"]),
+        ((18, 52, 86), "#696969", ["-f305420031", "-t1768516095"]),
+        ((18, 52, 86), "#ff0000", ["-f305420031"]),
     ]
-
-    def test_default_values_match(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(0, 0, 0)
-        self.assertEqual("000000", col)
-
-    def test_default_values_no_match(self):
-        args = [self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(128, 0, 0)
-        self.assertEqual("800000", col)
-
-    def test_default_from_different_to(self):
-        args = ["-t696969", self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(0, 0, 0)
-        self.assertEqual("696969", col)
-
-    def test_from_color_doesnt_match(self):
-        args = ["-f123456", "-t696969", self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(0, 0, 0)
-        self.assertEqual("000000", col)
-
-    def test_from_color_does_match(self):
-        args = ["-f123456", "-t696969", self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(18, 52, 86)
-        self.assertEqual("696969", col)
-
-    def test_from_color_no_to_color(self):
-        args = ["-f123456", self.empty_svg]
-        self.effect.run(args)
-        col = self.effect.colmod(18, 52, 86)
-        self.assertEqual("000000", col)

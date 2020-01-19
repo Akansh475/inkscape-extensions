@@ -1,14 +1,11 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Adjust all the HSL values"""
 
 import random
-
-import coloreffect
 import inkex
-from inkex import colors
 
-class HslAdjust(coloreffect.ColorEffect):
+class HslAdjust(inkex.ColorExtension):
+    """Modify the HSL levels of each color"""
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         pars.add_argument("-x", "--hue", type=int, default=0, help="Adjust hue")
@@ -18,34 +15,23 @@ class HslAdjust(coloreffect.ColorEffect):
         pars.add_argument("--random_s", type=inkex.Boolean, dest="random_saturation")
         pars.add_argument("--random_l", type=inkex.Boolean, dest="random_lightness")
 
-    def clamp(self, minimum, x, maximum):
-        return max(minimum, min(x, maximum))
-
-    def colmod(self, r, g, b):
-        hsl = colors.rgb_to_hsl(r / 255, g / 255, b / 255)
-
+    def modify_color(self, name, color):
         if self.options.random_hue:
-            hsl[0] = random.random()
+            color.hue = int(random.random() * 255.0)
         elif self.options.hue:
-            hue_val = hsl[0] + (self.options.hue / 360)
-            # Only return the fractional amount (i.e. 3.25 -> 0.25)
-            hsl[0] = hue_val % 1
+            color.hue += (self.options.hue * 2.55)
 
         if self.options.random_saturation:
-            hsl[1] = random.random()
+            color.saturation = int(random.random() * 255.0)
         elif self.options.saturation:
-            sat_val = hsl[1] + (self.options.saturation / 100)
-            hsl[1] = self.clamp(0, sat_val, 1)
+            color.saturation += (self.options.saturation * 2.55)
 
         if self.options.random_lightness:
-            hsl[2] = random.random()
+            color.lightness = int(random.random() * 255.0)
         elif self.options.lightness:
-            light_val = hsl[2] + (self.options.lightness / 100)
-            hsl[2] = self.clamp(0, light_val, 1)
+            color.lightness += (self.options.lightness * 2.55)
 
-        rgb = colors.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
-        return '{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
-
+        return color
 
 if __name__ == '__main__':
     HslAdjust().run()

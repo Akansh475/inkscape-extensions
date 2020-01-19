@@ -1,19 +1,15 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Convert to grey"""
 
-import coloreffect
+import inkex
 
-class Grayscale(coloreffect.ColorEffect):
+class Grayscale(inkex.ColorExtension):
     """Make all colours grayscale"""
-    def colmod(self, r, g, b):
-        # ITU-R Recommendation BT.709
+    def modify_color(self, name, color):
+        # ITU-R Recommendation BT.709 (NTSC and PAL)
         # l = 0.2125 * r + 0.7154 * g + 0.0721 * b
-
-        # NTSC and PAL
-        lum = 0.299 * r + 0.587 * g + 0.114 * b
-        gray = int(round(lum))
-        return '{:02x}{:02x}{:02x}'.format(gray, gray, gray)
+        lum = 0.299 * color.red + 0.587 * color.green + 0.114 * color.blue
+        return inkex.Color((int(round(lum)), int(round(lum)), int(round(lum))))
 
 if __name__ == '__main__':
     Grayscale().run()

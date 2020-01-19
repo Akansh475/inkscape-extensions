@@ -1,25 +1,19 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Replace color extension"""
-from __future__ import absolute_import, division
 
-import coloreffect
+import inkex
 
-class ReplaceColor(coloreffect.ColorEffect):
+class ReplaceColor(inkex.ColorExtension):
     """Replace color in SVG with another"""
     def add_arguments(self, pars):
-        pars.add_argument("-f", "--from_color", default="000000", help="Replace color")
-        pars.add_argument("-t", "--to_color", default="000000", help="By color")
+        pars.add_argument("--tab")
+        pars.add_argument('-f', "--from_color",\
+            default=inkex.Color("black"), type=inkex.Color, help="Replace color")
+        pars.add_argument('-t', "--to_color",\
+            default=inkex.Color("red"), type=inkex.Color, help="By color")
 
-    def colmod(self, r, g, b):
-        this_color = '{:02x}{:02x}{:02x}'.format(r, g, b)
-
-        from_color = self.options.from_color.strip('"').replace('#', '').lower().strip()
-        to_color = self.options.to_color.strip('"').replace('#', '').lower().strip()
-
-        if this_color == from_color:
-            return to_color
-        return this_color
+    def modify_color(self, name, color):
+        return self.options.to_color if color == self.options.from_color else color
 
 if __name__ == '__main__':
     ReplaceColor().run()

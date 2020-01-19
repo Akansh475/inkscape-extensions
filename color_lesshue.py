@@ -1,20 +1,13 @@
 #!/usr/bin/env python
-# coding=utf-8
-from __future__ import absolute_import, division
+"""Reduce hue"""
 
-import coloreffect
-from inkex import colors
+import inkex
 
-class LessHue(coloreffect.ColorEffect):
+class LessHue(inkex.ColorExtension):
     """Remove Hue from the color"""
-    def colmod(self, r, g, b):
-        hsl = colors.rgb_to_hsl(r / 255, g / 255, b / 255)
-        hsl[0] -= 0.05
-        if hsl[0] < 0:
-            hsl[0] += 1
-        rgb = colors.hsl_to_rgb(hsl[0], hsl[1], hsl[2])
-        return '{:02x}{:02x}{:02x}'.format(int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255))
-
+    def modify_color(self, name, color):
+        color.hue -= int(0.05 * 255)
+        return color
 
 if __name__ == '__main__':
     LessHue().run()

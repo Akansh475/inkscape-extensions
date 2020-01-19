@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-# coding=utf-8
 """Extension for removing the colour red from selected objects"""
-from __future__ import absolute_import, division
 
-import coloreffect
+import inkex
 
-class RemoveRed(coloreffect.ColorEffect):
+class RemoveRed(inkex.ColorExtension):
     """Remove red color from selected objects"""
-    def colmod(self, r, g, b):
-        return '{:02x}{:02x}{:02x}'.format(0, g, b)
+    def modify_color(self, name, color):
+        return inkex.Color([0, color.green, color.blue])
 
 if __name__ == '__main__':
     RemoveRed().run()

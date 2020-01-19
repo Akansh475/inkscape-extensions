@@ -74,6 +74,10 @@ class InkscapeExtension(object):
         """
         pass  # No extra arguments by default so super is not required
 
+    def parse_arguments(self, args):
+        """Parse the given arguments and set 'self.options'"""
+        self.options = self.arg_parser.parse_args(args)
+
     def arg_method(self, prefix='method'):
         """Used by add_argument to match a tab selection with an object method
 
@@ -107,7 +111,7 @@ class InkscapeExtension(object):
             if args is None:
                 args = sys.argv[1:]
 
-            self.options = self.arg_parser.parse_args(args)
+            self.parse_arguments(args)
             if self.options.input_file is None:
                 self.options.input_file = sys.stdin
 

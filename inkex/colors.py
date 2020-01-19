@@ -21,7 +21,6 @@
 """
 Basic color controls
 """
-import sys
 
 from .utils import PY3
 

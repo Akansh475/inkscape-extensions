@@ -262,6 +262,19 @@ class BaseElement(etree.ElementBase):
             for child in parent.ancestors():
                 yield child
 
+    def backlinks(self, *types):
+        """Get elements which link back to this element, like ancestors but via xlinks"""
+        if not types or isinstance(self, types):
+            yield self
+        my_id = self.get('id')
+        if my_id is not None:
+            elems = list(self.root.getElementsByHref(my_id)) \
+                  + list(self.root.getElementsByStyleUrl(my_id))
+            for elem in elems:
+                if hasattr(elem, 'backlinks'):
+                    for child in elem.backlinks(*types):
+                        yield child
+
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
         return super(BaseElement, self).xpath(pattern, namespaces=namespaces)

@@ -27,6 +27,7 @@ import sys
 import shutil
 
 from itertools import tee
+from collections import defaultdict
 from argparse import ArgumentTypeError
 
 # When python2 support is gone, enable tempfile's version
@@ -226,3 +227,43 @@ def pairwise(iterable, start=True):
     if not start:
         starter = []
     return starter + list(zip(first, then))
+
+class CloningVat(object):
+    """
+    When modifying defs, sometimes we want to know if every backlink would have
+    needed changing, of it was just some of them.
+
+    This tracks the def elements, their promises and creates clones if needed.
+    """
+    def __init__(self, svg):
+        self.svg = svg
+        self.tracks = defaultdict(set)
+        self.set_ids = defaultdict(list)
+
+    def track(self, elem, parent, set_id=None, **kwargs):
+        """Track the element and connected parent"""
+        elem_id = elem.get('id')
+        parent_id = parent.get('id')
+        self.tracks[elem_id].add(parent_id)
+        self.set_ids[elem_id].append((set_id, kwargs))
+
+    def process(self, process, types=(), make_clones=True, **kwargs):
+        """
+        Process each tracked item if the backlinks match the parents
+
+        Optionally make clones, process the clone and set the new id.
+        """
+        for elem_id in list(self.tracks):
+            parents = self.tracks[elem_id]
+            elem = self.svg.getElementById(elem_id)
+            backlinks = set([blk.get('id') for blk in elem.backlinks(*types)])
+            if backlinks == parents:
+                # No need to clone, we're processing on-behalf of all parents
+                process(elem, **kwargs)
+            elif make_clones:
+                clone = elem.copy()
+                elem.getparent().append(clone)
+                clone.set_random_id()
+                for update, upkw in self.set_ids.get(elem_id, ()):
+                    update(elem.get('id'), clone.get('id'), **upkw)
+                process(clone, **kwargs)

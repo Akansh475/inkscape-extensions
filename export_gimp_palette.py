@@ -21,32 +21,42 @@
 Export a gimp pallet file (.gpl)
 """
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 import inkex
-
-DOCNAME = 'sodipodi:docname'
-TAGS = ('fill', 'stroke', 'stop-color', 'flood-color', 'lighting-color')
+from inkex.elements import ShapeElement
+from inkex.colors import ColorIdError, ColorError
 
 class ExportGimpPalette(inkex.OutputExtension):
+    """Export all colors in a document to a gimp pallet"""
     def save(self, stream):
         name = self.svg.name.replace('.svg', '')
         stream.write('GIMP Palette\nName: {}\n#\n'.format(name).encode('utf-8'))
-        colors = dict(self.walk(self.svg))
-        for key, value in sorted(colors.items()):
+
+        for key, value in sorted(list(set(self.get_colors()))):
             stream.write("{} {}\n".format(key, value).encode('utf-8'))
 
-    def walk(self, node):
-        """Walks over all svg dom nodes"""
-        styles = getattr(node, 'style', None) #dict(inkex.Style.parse_str(node.get('style', '')))
-        for tag in TAGS:
-            if styles and tag in styles:
-                col = inkex.Color(styles.get(tag, None))
-                if col:
-                    yield ("{:3d} {:3d} {:3d}".format(*col.to_rgb()), str(str(col)).upper())
+    def get_colors(self):
+        """Get all the colors from the selected elements"""
+        for elem in self.svg.get_selected_or_all(ShapeElement):
+            for color in self.process_element(elem):
+                if str(color).upper() == 'NONE':
+                    continue
+                yield ("{:3d} {:3d} {:3d}".format(*color.to_rgb()), str(color).upper())
 
-        for child in node:
-            for color in self.walk(child):
+    def process_element(self, elem):
+        """Recursively process elements for colors"""
+        style = elem.fallback_style(move=False)
+        for name in inkex.Style.color_props:
+            try:
+                yield inkex.Color(style.get(name))
+            except ColorIdError:
+                gradient = self.svg.getElementById(style.get(name))
+                for color in self.process_element(gradient):
+                    yield color
+            except ColorError:
+                pass # Bad color
+
+        if elem.href is not None: # Capture second level gradient colors
+            for color in self.process_element(elem.href):
                 yield color
 
 if __name__ == '__main__':

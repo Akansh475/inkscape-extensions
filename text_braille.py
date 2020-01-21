@@ -1,18 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+"""Convert the text to braille text"""
 
-import sys
-from chardataeffect import CharEffectBase
-
-if sys.version_info[0] == 2:
-    chr = unichr
-
+import inkex
 
 # https://en.wikipedia.org/wiki/Braille_ASCII#Braille_ASCII_values
 U2801_MAP = "A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)="
 
-
-class Braille(CharEffectBase):
+class Braille(inkex.TextExtension):
     """Convert to ASCII Braille"""
     @staticmethod
     def map_char(char):

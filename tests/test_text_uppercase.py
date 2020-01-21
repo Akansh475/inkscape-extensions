@@ -1,15 +1,12 @@
 # coding=utf-8
-"""
-Test string uppercase extension
-"""
-
+"""Test string uppercase extension"""
 import string
 
 from text_uppercase import Uppercase
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.word import word_generator
 
-class UpperCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class UpperCase(ComparisonMixin, TestCase):
     effect_class = Uppercase
     comparisons = [()]
 

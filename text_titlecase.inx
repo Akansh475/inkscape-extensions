@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Title Case</name>
   <id>org.inkscape.text.title_case</id>
-  <dependency type="file" location="inx">chardataeffect.py</dependency>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

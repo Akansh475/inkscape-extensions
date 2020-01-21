@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# coding=utf-8
+"""Convert to sentence case"""
 
-from chardataeffect import CharEffectBase
+import inkex
 
-class SentenceCase(CharEffectBase):
+class SentenceCase(inkex.TextExtension):
     """Convert text to sentence case"""
     sentence_start = True
     was_punctuation = False

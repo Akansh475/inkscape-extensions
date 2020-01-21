@@ -5,11 +5,11 @@ Test titlecase extension
 
 import string
 
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.word import sentencecase, word_generator
 from text_titlecase import TitleCase
 
-class TitleCaseTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class TitleCaseTest(ComparisonMixin, TestCase):
     effect_class = TitleCase
     comparisons = [()]
 

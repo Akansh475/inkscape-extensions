@@ -30,13 +30,14 @@ import types
 
 from .utils import errormsg, Boolean, CloningVat, PY3
 from .colors import Color, ColorIdError, ColorError
-from .elements import load_svg, BaseElement, ShapeElement, Group, Grid
+from .elements import load_svg, BaseElement, ShapeElement, Group, Grid, \
+                      TextElement, FlowPara, FlowDiv
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
 
 # All the names that get added to the inkex API itself.
-__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
-           'OutputExtension', 'CallExtension', 'TemplateExtension', 'ColorExtension')
+__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension',
+           'CallExtension', 'TemplateExtension', 'ColorExtension', 'TextExtension')
 
 stdout = sys.stdout
 if PY3:
@@ -292,3 +293,43 @@ class ColorExtension(EffectExtension):
     def modify_opacity(self, name, opacity):
         """Optional opacity modification"""
         return opacity
+
+class TextExtension(EffectExtension):
+    """
+    A base effect for changing text in a document.
+    """
+    newline = True
+    newpar = True
+
+    def effect(self):
+        nodes = self.svg.selected or {None: self.document.getroot()}
+        for elem in nodes.values():
+            self.process_element(elem)
+
+    def process_element(self, node):
+        """Reverse the node text"""
+        if node.get('sodipodi:role') == 'line':
+            self.newline = True
+        elif isinstance(node, (TextElement, FlowPara, FlowDiv)):
+            self.newline = True
+            self.newpar = True
+
+        if node.text is not None:
+            node.text = self.process_chardata(node.text)
+            self.newline = False
+            self.newpar = False
+
+        for child in node:
+            self.process_element(child)
+
+        if node.tail is not None:
+            node.tail = self.process_chardata(node.tail)
+
+    def process_chardata(self, text):
+        """Replaceable chardata method for processing the text"""
+        return ''.join(map(self.map_char, text))
+
+    @staticmethod
+    def map_char(char):
+        """Replaceable map_char method for processing each letter"""
+        raise NotImplementedError("Please provide a process_chardata or map_char static method.")

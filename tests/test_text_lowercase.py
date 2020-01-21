@@ -1,15 +1,12 @@
 # coding=utf-8
-"""
-Test the lowercase effect
-"""
-
+"""Test the lowercase effect"""
 import string
 
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.word import word_generator
 from text_lowercase import Lowercase
 
-class LowerCase(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class LowerCase(ComparisonMixin, TestCase):
     effect_class = Lowercase
     comparisons = [()]
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
+"""Convert text to upper case"""
 
-from chardataeffect import CharEffectBase
+import inkex
 
-class Uppercase(CharEffectBase):
+class Uppercase(inkex.TextExtension):
+    """To upper case"""
     def process_chardata(self, text):
         return text.upper()
 

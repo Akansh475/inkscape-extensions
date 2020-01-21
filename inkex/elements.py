@@ -423,6 +423,14 @@ class FlowPara(ShapeElement):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
+class FlowDiv(ShapeElement):
+    """SVG Flow Div (SVG 2.0)"""
+    tag_name = 'flowDiv'
+
+    def get_path(self):
+        # XXX: These empty paths mean the bbox for text elements will be nothing.
+        return Path()
+
 class FlowSpan(ShapeElement):
     """SVG Flow Span (SVG 2.0)"""
     tag_name = 'flowSpan'

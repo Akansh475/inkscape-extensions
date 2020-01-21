@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
+"""Make text lower case"""
 
-from chardataeffect import CharEffectBase
+import inkex
 
-class Lowercase(CharEffectBase):
+class Lowercase(inkex.TextExtension):
+    """Convert to lowercase"""
     def process_chardata(self, text):
         return text.lower()
 

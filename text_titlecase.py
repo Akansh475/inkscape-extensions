@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
+"""Convert to title case"""
 
-from chardataeffect import CharEffectBase
+import inkex
 
-class TitleCase(CharEffectBase):
+class TitleCase(inkex.TextExtension):
+    """To titlecase"""
     word_ended = True
 
     def process_chardata(self, text):

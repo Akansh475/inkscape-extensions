@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# coding=utf-8
+"""Flip upper to lower and lower to upper cases"""
 
-from chardataeffect import CharEffectBase
+import inkex
 
-
-class FlipCase(CharEffectBase):
+class FlipCase(inkex.TextExtension):
     """Change the case, cHANGE THE CASE"""
     @staticmethod
     def map_char(char):

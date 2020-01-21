@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-# coding=utf-8
+"""Randomise the case of the letters."""
 
 import random
+import inkex
 
-from chardataeffect import CharEffectBase
-
-class RandomCase(CharEffectBase):
+class RandomCase(inkex.TextExtension):
     """Randomise the case of the text (with bias)"""
     previous_case = 1
 

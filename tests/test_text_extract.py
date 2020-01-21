@@ -1,8 +1,8 @@
 # coding=utf-8
-from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
+from inkex.tester import ComparisonMixin, TestCase
 from text_extract import Extract
 
-class TestExtractBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+class TestExtractBasic(ComparisonMixin, TestCase):
     effect_class = Extract
     stderr_output = True
     comparisons = [

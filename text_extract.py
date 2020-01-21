@@ -29,6 +29,7 @@ Extract text and print it to the error console.
 from lxml.etree import tostring
 
 import inkex
+from inkex.elements import TextElement, FlowRoot
 from inkex.utils import KeyDict
 
 # Old settings, supported because users click 'ok' without looking.
@@ -43,15 +44,8 @@ class Extract(inkex.EffectExtension):
         pars.add_argument("-y", "--yanchor", default="center_y", help="vertical point to compare")
 
     def effect(self):
-        if not self.svg.selected:
-            for node in self.svg.xpath('//svg:text | //svg:flowRoot'):
-                self.svg.selected[node.get('id')] = node
-
-        if not self.svg.selected:
-            return
-
         # move them to the top of the object stack in this order.
-        for node in sorted(self.svg.selected.values(), key=self._sort):
+        for node in sorted(self.svg.get_selected_or_all(TextElement, FlowRoot), key=self._sort):
             self.recurse(node)
 
     def _sort(self, node):

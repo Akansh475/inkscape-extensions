@@ -22,45 +22,35 @@ import os
 import re
 import sys
 
-from lxml import etree
-
 import inkex
+from inkex.elements import Script
 
 class InkWebEffect(inkex.EffectExtension):
-    def __init__(self):
-        super(InkWebEffect, self).__init__()
-        self.reUpdateJS = '/\\*\\s* inkweb.js [^*]* InkWebEffect:AutoUpdate \\s*\\*/'
-
+    reUpdateJS = '/\\*\\s* inkweb.js [^*]* InkWebEffect:AutoUpdate \\s*\\*/'
     def effect(self):
         pass
 
-    def mustAddInkWebJSCode(self, scriptEl):
-        if not scriptEl.text:
+    def mustAddInkWebJSCode(self, script):
+        if not script.text:
             return True
-        if len(scriptEl.text) == 0:
-            return True
-        if re.search(self.reUpdateJS, scriptEl.text):
+        if re.search(self.reUpdateJS, script.text):
             return True
         return False
 
-    def addInkWebJSCode(self, scriptEl):
+    def addInkWebJSCode(self, script):
         with open(os.path.join(sys.path[0], "inkweb.js")) as js:
-            scriptEl.text = etree.CDATA("\n/* inkweb.js - InkWebEffect:AutoUpdate */\n" + js.read())
+            script.set_text("\n/* inkweb.js - InkWebEffect:AutoUpdate */\n" + js.read())
 
     def ensureInkWebSupport(self):
         # Search for the script tag with the inkweb.js code:
-        scriptEl = None
-        scripts = self.svg.xpath('//svg:script')
-        for s in scripts:
-            if re.search(self.reUpdateJS, s.text):
-                scriptEl = s
+        script = None
+        for child in self.svg.xpath('//svg:script'):
+            if re.search(self.reUpdateJS, child.text):
+                script = child
 
-        if scriptEl is None:
-            root = self.document.getroot()
-            scriptEl = etree.Element("script")
-            scriptEl.set("id", "inkwebjs")
-            scriptEl.set("type", "text/javascript")
-            root.insert(0, scriptEl)
+        if script is None:
+            script = Script(id="inkwebjs", type="text/javascript")
+            self.svg.insert(0, script)
 
-        if self.mustAddInkWebJSCode(scriptEl):
-            self.addInkWebJSCode(scriptEl)
+        if self.mustAddInkWebJSCode(script):
+            self.addInkWebJSCode(script)

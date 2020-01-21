@@ -78,18 +78,12 @@ class NiceChart(inkex.GenerateExtension):
         """Layer title/label"""
         return 'Chart-Layer: {}'.format(self.options.what)
 
-    def get_type(self, value):
-        """Return the type function to draw the values into a chart"""
-        try:
-            return getattr(self, 'render_' + value)
-        except AttributeError:
-            raise ArgumentTypeError('Unknown type: {}'.format(value))
-
     def add_arguments(self, pars):
         pars.add_argument('--tab')
         pars.add_argument('--encoding', default='utf-8')
         pars.add_argument('-w', '--what', default='22,11,67', help='Chart Values')
-        pars.add_argument("-t", "--type", type=self.get_type, default='bar', help="Chart Type")
+        pars.add_argument("-t", "--type", type=self.arg_method('render'),
+                          default=self.render_bar, help="Chart Type")
         pars.add_argument("-b", "--blur", type=inkex.Boolean, default=True, help="Blur Type")
         pars.add_argument("-f", "--filename", type=filename_arg, help="Name of File")
         pars.add_argument("-i", "--input_type", default='file', help="Chart Type")

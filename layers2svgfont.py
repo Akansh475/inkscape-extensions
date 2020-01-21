@@ -17,46 +17,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-
-from lxml import etree
+"""Convert known layer structures to svg font glyphs"""
 
 import inkex
+from inkex.elements import SVGfont, FontFace, Glyph
 
 class LayersToSvgFont(inkex.EffectExtension):
     """Convert layers to an svg font"""
     def guideline_value(self, label, index):
-        namedview = self.svg.namedview
-        for guide in namedview.get_guides():
-            l = guide.label
-            if l == label:
-                return int(guide.get("position").split(",")[index])
+        for guide in self.svg.namedview.get_guides():
+            if guide.label == label:
+                return guide.point[index]
         return 0
-
-    def get_or_create(self, parentnode, nodetype):
-        node = parentnode.find(nodetype)
-        if node is None:
-            node = etree.SubElement(parentnode, nodetype)
-        return node
-
-    def get_or_create_glyph(self, font, unicode_char):
-        glyphs = font.findall('svg:glyph')
-        for glyph in glyphs:
-            if unicode_char == glyph.get("unicode"):
-                return glyph
-        return etree.SubElement(font, inkex.addNS('glyph', 'svg'))
 
     def flip_cordinate_system(self, path, emsize, baseline):
         path = path.copy()
         path.transform.add_scale(1, -1)
         path.transform.add_translate(0, int(emsize) - int(baseline))
-        path.apply_tranform()
+        path.apply_transform()
         return str(path.path)
 
     def effect(self):
-        # Get access to main SVG document element
-        self.svg = self.document.getroot()
-        self.defs = self.get_or_create(self.svg, inkex.addNS('defs', 'svg'))
-
         emsize = int(float(self.svg.get("width")))
         baseline = self.guideline_value("baseline", 1)
         ascender = self.guideline_value("ascender", 1) - baseline
@@ -64,11 +45,11 @@ class LayersToSvgFont(inkex.EffectExtension):
         xheight = self.guideline_value("xheight", 1) - baseline
         descender = baseline - self.guideline_value("descender", 1)
 
-        font = self.get_or_create(self.defs, inkex.addNS('font', 'svg'))
+        font = self.svg.defs.get_or_create('svg:font', SVGfont)
         font.set("horiz-adv-x", str(emsize))
         font.set("horiz-origin-y", str(baseline))
 
-        fontface = self.get_or_create(font, inkex.addNS('font-face', 'svg'))
+        fontface = font.get_or_create('font-face', FontFace)
         fontface.set("font-family", "SVGFont")
         fontface.set("units-per-em", str(emsize))
         fontface.set("cap-height", str(caps))
@@ -76,42 +57,39 @@ class LayersToSvgFont(inkex.EffectExtension):
         fontface.set("ascent", str(ascender))
         fontface.set("descent", str(descender))
 
-        groups = self.svg.findall(inkex.addNS('g', 'svg'))
-        for group in groups:
-            label = group.get(inkex.addNS('label', 'inkscape'))
+        for group in self.svg.findall('svg:g'):
+            label = group.label
             if "GlyphLayer-" in label:
                 unicode_char = label.split("GlyphLayer-")[1]
-                glyph = self.get_or_create_glyph(font, unicode_char)
+                glyph = font.get_or_create("svg:glyph[@unicode='{}']".format(unicode_char), Glyph)
                 glyph.set("unicode", unicode_char)
 
                 ############################
                 # Option 1:
                 # Using clone (svg:use) as childnode of svg:glyph
 
-                # use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
-                # use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
+                # use = glyph.get_or_create('svg:use', UseElement)
+                # use.set('xlink:href', "#"+group.get("id"))
                 # TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
 
                 ############################
                 # Option 2:
                 # Using svg:paths as childnodes of svg:glyph
 
-                # paths = group.findall(inkex.addNS('path', 'svg'))
-                # for p in paths:
+                # for p in group.findall('svg:path'):
                 #    d = p.get("d")
                 #    d = self.flip_cordinate_system(d, emsize, baseline)
-                #    path = etree.SubElement(glyph, inkex.addNS('path', 'svg'))
+                #    path = glyph.add(PathElement())
                 #    path.set("d", d)
 
                 ############################
                 # Option 3:
                 # Using curve description in d attribute of svg:glyph
 
-                paths = group.findall(inkex.addNS('path', 'svg'))
-                d = ""
-                for p in paths:
-                    d += " " + self.flip_cordinate_system(p, emsize, baseline)
-                glyph.set("d", d)
+                path_d = ""
+                for path in group.findall('svg:path'):
+                    path_d += " " + self.flip_cordinate_system(path, emsize, baseline)
+                glyph.set("d", path_d)
 
 if __name__ == '__main__':
     LayersToSvgFont().run()

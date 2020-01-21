@@ -42,11 +42,8 @@ TODO:
 
 """
 
-import math
 import re
-
-from lxml import etree
-
+import math
 import inkex
 from inkex.elements import Use, TextElement
 
@@ -275,7 +272,7 @@ class DPISwitcher(inkex.EffectExtension):
         for element in svg:  # iterate all top-level elements of SVGRoot
 
             # init variables
-            tag = etree.QName(element).localname
+            tag = element.TAG
             width_scale = self.factor_a
             height_scale = self.factor_a
 

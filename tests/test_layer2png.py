@@ -12,7 +12,7 @@ class Layer2PNGTest(ComparisonMixin, TestCase):
 
     def test_get_layers(self):
         basic_svg = self.data_file('svg', 'slicer.svg')
-        args = [basic_svg, '-l' 'slices']
+        args = [basic_svg, '--layer=slices']
         self.effect.options = self.effect.arg_parser.parse_args(args)
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()
@@ -23,7 +23,7 @@ class Layer2PNGTest(ComparisonMixin, TestCase):
 
     def test_bad_slice_layer(self):
         basic_svg = self.data_file('svg', 'slicer.svg')
-        args = [basic_svg, '-l' 'slices']
+        args = [basic_svg, '--layer=slices']
         self.effect.options = self.effect.arg_parser.parse_args(args)
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()
@@ -33,7 +33,7 @@ class Layer2PNGTest(ComparisonMixin, TestCase):
 
     def test_color(self):
         basic_svg = self.data_file('svg', 'slicer.svg')
-        args = [basic_svg, '-l' 'slices']
+        args = [basic_svg, '--layer=slices']
         self.effect.options = self.effect.arg_parser.parse_args(args)
         self.effect.options.input_file = basic_svg
         self.effect.load_raw()

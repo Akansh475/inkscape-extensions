@@ -245,6 +245,17 @@ class BaseElement(etree.ElementBase):
             raise FragmentError("Element fragment does not have a document root!")
         return self
 
+    def get_or_create(self, xpath, nodeclass, prepend=False):
+        """Get or create the given xpath, pre/append new node if not found."""
+        node = self.findone(xpath)
+        if node is None:
+            node = nodeclass()
+            if prepend:
+                self.insert(0, node)
+            else:
+                self.append(node)
+        return node
+
     def descendants(self, *types):
         """Walks the element tree and yields all elements, parent first"""
         if not types or isinstance(self, types):
@@ -690,6 +701,14 @@ class StyleElement(BaseElement):
         """Return the StyleSheet() object for the style tag"""
         return StyleSheet(self.text, callback=self.set_text)
 
+class Script(BaseElement):
+    """A javascript tag in SVG"""
+    tag_name = 'script'
+
+    def set_text(self, content):
+        """Sets the style content text as a CDATA section"""
+        self.text = etree.CDATA(str(content))
+
 class Desc(BaseElement):
     """Description element"""
     tag_name = 'desc'
@@ -839,10 +858,6 @@ class Switch(BaseElement):
 class Grid(BaseElement):
     """A namedview grid child"""
     tag_name = 'inkscape:grid'
-
-class Script(BaseElement):
-    """A javascript tag in SVG"""
-    tag_name = 'script'
 
 
 class SVGfont(BaseElement):

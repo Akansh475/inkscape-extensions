@@ -46,18 +46,13 @@ slices. Draw rectangles over the areas you want to slice (set
 x,y,width,height to whole pixel values). Name these rectangles using
 the Object Properties found in the right click contextual menu (the
 saved images name will be based on that value, so name them something
-like "header" instead of the default/non-useful "rect4312"). 
-
+like "header" instead of the default/non-useful "rect4312").
 """
 import os
-import sys
 import tempfile
-
-from lxml import etree
 
 import inkex
 from inkex.command import inkscape
-
 
 class ExportSlices(inkex.EffectExtension):
     """Exports all rectangles in the current layer"""
@@ -72,67 +67,23 @@ class ExportSlices(inkex.EffectExtension):
 
 
     def add_arguments(self, pars):
-        pars.add_argument(
-            "-d",
-            "--directory",
-            dest="directory",
-            default=os.path.expanduser("~"),
-            help="Existing destination directory",
-        )
-        pars.add_argument(
-            "-l",
-            "--layer",
-            dest="layer_name",
-            default="slices",
-            help="Layer with slices (rects) in it",
-        )
-        pars.add_argument(
-            "-i",
-            "--iconmode",
-            type=inkex.Boolean,
-            default=False,
-            help="Icon export mode",
-        )
-        pars.add_argument(
-            "-s",
-            "--sizes",
-            dest="sizes",
-            default="128, 64, 48, 32, 24, 16",
-            help="sizes to export comma separated",
-        )
-        pars.add_argument(
-            "-o",
-            "--overwrite",
-            type=inkex.Boolean,
-            default=False,
-            help="Overwrite existing exports?",
-        )
-        pars.add_argument(
-            "--dpi",
-            dest="dpi",
-            default="300",
-            help="Dots per inch (300 default)",
-        )
-        pars.add_argument(
-            "-t",
-            "--tab",
-            dest="tab",
-            help="The selected UI-tab when OK was pressed"
-        )
-
+        pars.add_argument("--tab")
+        pars.add_argument("--directory", default=os.path.expanduser("~"),\
+            help="Existing destination directory")
+        pars.add_argument("--layer", default="slices", help="Layer with slices (rects) in it")
+        pars.add_argument("--iconmode", type=inkex.Boolean, help="Icon export mode")
+        pars.add_argument("--sizes", default="128, 64, 48, 32, 24, 16",\
+            help="sizes to export comma separated")
+        pars.add_argument("--overwrite", type=inkex.Boolean, help="Overwrite existing exports?")
+        pars.add_argument("--dpi", default="300", help="Dots per inch (300 default)")
 
     def effect(self):
         if not os.path.isdir(self.options.directory):
             os.makedirs(self.options.directory)
 
-        nodes = self.get_layer_nodes(self.options.layer_name)
+        nodes = self.get_layer_nodes(self.options.layer)
         if nodes is None:
-            inkex.errormsg(
-                "Slice layer: '{}' does not exist.".format(
-                    self.options.layer_name
-                )
-            )
-            return
+            raise inkex.AbortExtension("Slice: '{}' does not exist.".format(self.options.layer))
 
         # set opacity to zero in slices
         for node in nodes:
@@ -141,18 +92,18 @@ class ExportSlices(inkex.EffectExtension):
         # save file once now
         # if we have multiple slices we will make multiple calls
         # to inkscape
-        (ref, self.tmp_svg) = tempfile.mkstemp('.svg')
-        with open(self.tmp_svg, 'wb') as fout:
-            fout.write(etree.tostring(self.document))
+        (_, tmp_svg) = tempfile.mkstemp('.svg')
+        with open(tmp_svg, 'wb') as fout:
+            fout.write(self.svg.tostring())
 
         # in case there are overlapping rects, clear them all out before
         # saving any
         for node in nodes:
             if self.options.iconmode:
-                for s in self.options.sizes.split(","):
-                    s = s.strip()
-                    if s.isdigit():
-                        png_size = int(s)
+                for size in self.options.sizes.split(","):
+                    size = size.strip()
+                    if size.isdigit():
+                        png_size = int(size)
                         self.export_node(node, png_size, png_size)
             else:
                 self.export_node(node)
@@ -191,7 +142,6 @@ class ExportSlices(inkex.EffectExtension):
         """
         node.style.update({"stroke": "none", "opacity": "0"})
 
-
     def change_color(self, node):
         """
         set color from color_map and set opacity to 25%
@@ -201,7 +151,6 @@ class ExportSlices(inkex.EffectExtension):
         color = self.color_map[node_id]
         node.style.update({"fill": color, "opacity": ".25"})
 
-
     def export_node(self, node, height=None, width=None):
         color, kwargs = self.get_color_and_command_kwargs(node, height, width)
         node_id = node.attrib["id"]
@@ -210,7 +159,6 @@ class ExportSlices(inkex.EffectExtension):
             return
         svg_file = self.options.input_file 
         inkscape(svg_file, **kwargs)
-        
 
     def get_color_and_command_kwargs(self, node, height=None, width=None):
         directory = self.options.directory

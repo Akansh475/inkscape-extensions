@@ -182,21 +182,12 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     @property
     def namedview(self):
         """Return the sp namedview meta information element"""
-        nvs = self.xpath('//sodipodi:namedview')
-        if not nvs:
-            # We auto create a namedview element when needed
-            nvs = [NamedView()]
-            self.insert(0, nvs[0])
-        return nvs[0]
+        return self.get_or_create('//sodipodi:namedview', NamedView, True)
 
     @property
     def defs(self):
         """Return the svg defs meta element container"""
-        defs = self.xpath('//svg:defs')
-        if not defs:
-            defs = [Defs()]
-            self.insert(0, defs[0])
-        return defs[0]
+        return self.get_or_create('//svg:defs', Defs, True)
 
     def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""

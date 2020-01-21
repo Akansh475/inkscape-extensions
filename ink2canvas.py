@@ -20,9 +20,8 @@
 Save an SVG file into an html canvas file.
 """
 
-from lxml import etree
-
 import inkex
+from inkex.elements import BaseElement
 
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
@@ -43,8 +42,7 @@ class Html5Canvas(inkex.OutputExtension):
         # get the gradient element
         gradient = self.svg.getElementById(url_id)
         # get the color stops
-        url_stops = gradient.get(inkex.addNS("href", "xlink"))
-        gstops = self.svg.getElement("//svg:linearGradient[@id='%s']" % url_stops[1:])
+        gstops = gradient.href
         colors = []
         for stop in gstops:
             colors.append(stop.get("style"))
@@ -55,7 +53,7 @@ class Html5Canvas(inkex.OutputExtension):
     def walk_tree(self, root, canvas):
         """Walk throug the whole svg tree"""
         for node in root:
-            if node.tag is etree.Comment:
+            if not isinstance(node, BaseElement):
                 continue
             class_name = node.TAG.capitalize()
             if not hasattr(svg, class_name):

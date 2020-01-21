@@ -18,9 +18,8 @@
 
 import argparse
 
-from lxml import etree
-
 import inkex
+from inkex.elements import Group, Script
 from inkex.utils import NSS
 
 class KeyBindings(inkex.EffectExtension):
@@ -238,20 +237,16 @@ class KeyBindings(inkex.EffectExtension):
         nodeText += "}" + "\n"
 
         # Create new script node
-        scriptElm = etree.Element(inkex.addNS("script", "svg"))
-        scriptElm.text = nodeText
-        groupElm = etree.Element(inkex.addNS("g", "svg"))
-        groupElm.set("{" + NSS["jessyink"] + "}customKeyBindings", "customKeyBindings")
-        groupElm.set("onload", "this.getCustomCharBindings = function() { return getCustomCharBindingsSub(); }; this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };")
-        groupElm.append(scriptElm)
-        self.document.getroot().append(groupElm)
+        group = self.svg.add(Group())
+        script = group.add(Script())
+        script.text = nodeText
+        group.set("jessyink:customKeyBindings", "customKeyBindings")
+        group.set("onload", "this.getCustomCharBindings = function() { return getCustomCharBindingsSub(); }; this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };")
 
     def getAction(self, varName):
         parts = varName.split('_')
-
         if len(parts) != 2:
             raise Exception("Error parsing variable name.")
-
         return parts[1]
 
 if __name__ == '__main__':

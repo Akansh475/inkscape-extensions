@@ -23,7 +23,6 @@ Element parsing and context for ink2canvas extensions
 from __future__ import unicode_literals
 
 import inkex
-from inkex.transforms import Transform
 
 class Element(object):
     """Base Element"""

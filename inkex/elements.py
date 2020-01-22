@@ -201,6 +201,15 @@ class BaseElement(etree.ElementBase):
             self.append(child)
         return children if len(children) > 1 else children[0]
 
+    def tostring(self):
+        """Return this element as it would appear in an svg document"""
+        # This kind of hack is pure maddness, but etree provides very little
+        # in the way of fragment printing, prefering to always output valid xml
+        from .base import SvgOutputMixin
+        svg = SvgOutputMixin.get_template(width=0, height=0).getroot()
+        svg.append(self.copy())
+        return svg.tostring().split(b'>\n    ', 1)[-1][:-6]
+
     def description(self, text):
         """Set the desc element with text"""
         desc = self.add(Desc())

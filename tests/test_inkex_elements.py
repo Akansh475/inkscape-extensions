@@ -13,7 +13,7 @@ from inkex.elements import (
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
 )
 from inkex.utils import FragmentError
-from inkex.transforms import Transform, Vector2d
+from inkex.transforms import Transform
 from inkex.styles import Style
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
@@ -110,6 +110,16 @@ class CoreElementTestCase(ElementTestCase):
 
         self.assertEqual(group.pop('attr2'), 'B')
         self.assertEqual(group.pop('attr3'), 'C')
+
+    def test_tostring(self):
+        """Elements can be printed as strings"""
+        self.assertEqual(Group().tostring(), b'<g/>')
+        elem = Group(id='bar')
+        path = elem.add(Tspan(id='foo'))
+        elem.transform.add_translate(50, 50)
+        path.style['fill'] = 'red'
+        self.assertEqual(elem.tostring(),
+            b'<g transform="translate(50, 50)"><tspan id="foo" style="fill:red"/></g>')
 
     def test_set_wrapped_attribute(self):
         """Remove wrapped attribute using .set()"""

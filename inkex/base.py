@@ -262,14 +262,15 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     </svg>"""
 
-    def get_template(self, **kwargs):
+    @classmethod
+    def get_template(cls, **kwargs):
         """
         Opens a template svg document for building, the kwargs
         MUST include all the replacement values in the template, the
         default template has 'width' and 'height' of the document.
         """
         kwargs.setdefault('unit', '')
-        return load_svg(str(self.template.format(**kwargs)))
+        return load_svg(str(cls.template.format(**kwargs)))
 
     def save(self, stream):
         """Save the svg document to the given stream"""

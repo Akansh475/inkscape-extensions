@@ -23,6 +23,7 @@ import tempfile
 from lxml import etree
 
 import inkex
+from inkex.localization import inkex_gettext as _
 from webslicer_effect import WebSlicerMixin, is_empty
 
 class Export(WebSlicerMixin, inkex.OutputExtension):
@@ -37,8 +38,7 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
     def validate_inputs(self):
         # The user must supply a directory to export:
         if is_empty(self.options.dir):
-            inkex.errormsg(_('You must give a directory to export the slices.'))
-            return {'error': 'You must give a directory to export the slices.'}
+            raise inkex.AbortExtension(_('You must give a directory to export the slices.'))
         # No directory separator at the path end:
         if self.options.dir[-1] == '/' or self.options.dir[-1] == '\\':
             self.options.dir = self.options.dir[0:-1]
@@ -49,17 +49,13 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
                 try:
                     os.makedirs(self.options.dir)
                 except Exception as e:
-                    inkex.errormsg('Can\'t create "{}".'.format(self.options.dir))
-                    inkex.errormsg('Error: {}'.format(e))
-                    return {'error': 'Can\'t create the directory to export.'}
+                    raise inkex.AbortExtension(_("Can't create '{}': {}.".format(self.options.dir, e)))
             else:
-                inkex.errormsg('The directory "{}" does not exists.'.format(self.options.dir))
-                return
+                raise inkex.AbortExtension(_("Dir doesn't exist '{}'.".format(self.options.dir)))
         # Check whether slicer layer exists (bug #1198826)
         slicer_layer = self.get_slicer_layer()
         if slicer_layer is None:
-            inkex.errormsg(_('No slicer layer found.'))
-            return {'error': 'No slicer layer found.'}
+            raise inkex.AbortExtension(_('No slicer layer found.'))
         else:
             self.unique_html_id(slicer_layer)
         return None
@@ -303,7 +299,7 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
         # relative to parent position.
         if not self.el_geo:
             self.register_all_els_geometry()
-        parent = self.getParentNode(el)
+        parent = el.getparent()
         geometry = self.el_geo[el.attrib['id']]
         geometry['x'] -= self.el_geo[parent.attrib['id']]['x']
         geometry['y'] -= self.el_geo[parent.attrib['id']]['y']
@@ -351,7 +347,7 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
     _html = {}
 
     def reg_html(self, el_tag, el):
-        parent = self.getParentNode(el)
+        parent = el.getparent()
         parent_id = self.get_el_conf(parent)['html-id']
         if parent == self.get_slicer_layer():
             parent_id = 'body'

@@ -152,7 +152,10 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
         layer.attrib['style'] = current_style
 
     def delete_the_temporary_svg(self):
-        os.remove(self.tmp_svg)
+        try:
+            os.remove(self.tmp_svg)
+        except (IOError, OSError, PermissionError):
+            pass
 
     noid_element_count = 0
 

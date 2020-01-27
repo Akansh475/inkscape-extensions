@@ -317,6 +317,7 @@ class BaseElement(etree.ElementBase):
         """Replace this element with the given element"""
         self.addnext(elem)
         self.delete()
+        return elem
 
     def copy(self):
         """Make a copy of the element and return it"""

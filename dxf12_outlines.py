@@ -112,7 +112,7 @@ class DxfTwelve(inkex.OutputExtension):
         self.dxf_add(r12_header)
 
         scale = 25.4 / 90.0
-        h = self.svg.unittouu(self.svg.height)
+        h = self.svg.height
 
         path = '//svg:path'
         for node in self.svg.xpath(path):

@@ -316,6 +316,10 @@ class BaseElement(etree.ElementBase):
     def replace_with(self, elem):
         """Replace this element with the given element"""
         self.addnext(elem)
+        if not elem.get('id') and self.get('id'):
+            elem.set('id', self.get('id'))
+        if not elem.label and self.label:
+            elem.label = self.label
         self.delete()
         return elem
 

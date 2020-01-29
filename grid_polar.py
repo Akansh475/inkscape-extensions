@@ -82,7 +82,7 @@ class GridPolar(inkex.GenerateExtension):
         self.options.a_label_outset = self.svg.unittouu(str(self.options.a_label_outset) + 'px')
 
         # Embed grid in group
-        grid = Group.create("GridPolar:R{0.r_divs}:A{0.a_divs}".format(self.options))
+        grid = Group.new("GridPolar:R{0.r_divs}:A{0.a_divs}".format(self.options))
 
         (pos_x, pos_y) = self.svg.namedview.center
         grid.transform.add_translate(pos_x, pos_y)

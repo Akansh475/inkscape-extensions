@@ -94,31 +94,31 @@ class GridCartesian(inkex.GenerateExtension):
         # Embed grid in group
         # Put in in the centre of the current view
 
-        grid = Group.create("GridCartesian:X{0.x_divs}:Y{0.y_divs}".format(self.options))
+        grid = Group.new("GridCartesian:X{0.x_divs}:Y{0.y_divs}".format(self.options))
 
         (pos_x, pos_y) = self.svg.namedview.center
         grid.transform.add_translate(pos_x - xmax / 2.0, pos_y - ymax / 2.0)
 
         # Group for major x gridlines
-        majglx = grid.add(Group.create("MajorXGridlines"))
+        majglx = grid.add(Group.new("MajorXGridlines"))
         # Group for major y gridlines
-        majgly = grid.add(Group.create("MajorYGridlines"))
+        majgly = grid.add(Group.new("MajorYGridlines"))
 
         # Group for minor x gridlines
         if self.options.x_subdivs > 1:  # if there are any minor x gridlines
-            minglx = grid.add(Group.create("MinorXGridlines"))
+            minglx = grid.add(Group.new("MinorXGridlines"))
 
         # Group for subminor x gridlines
         if self.options.x_subsubdivs > 1:  # if there are any minor minor x gridlines
-            mminglx = grid.add(Group.create("SubMinorXGridlines"))
+            mminglx = grid.add(Group.new("SubMinorXGridlines"))
 
         # Group for minor y gridlines
         if self.options.y_subdivs > 1:  # if there are any minor y gridlines
-            mingly = grid.add(Group.create("MinorYGridlines"))
+            mingly = grid.add(Group.new("MinorYGridlines"))
 
         # Group for subminor y gridlines
         if self.options.y_subsubdivs > 1:  # if there are any minor minor x gridlines
-            mmingly = grid.add(Group.create("SubMinorYGridlines"))
+            mmingly = grid.add(Group.new("SubMinorYGridlines"))
 
         draw_rect(0, 0, xmax, ymax, self.options.border_th,
                       'none', 'Border', grid)  # border rectangle

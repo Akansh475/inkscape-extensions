@@ -85,40 +85,40 @@ class GridIsometric(inkex.GenerateExtension):
         ymax = self.options.dx * (2 * self.options.y_divs) / 0.866025
 
         # Group for major x gridlines
-        majglx = inkex.Group.create('MajorXGridlines')
+        majglx = inkex.Group.new('MajorXGridlines')
         yield majglx
 
         # Group for major y gridlines
-        majgly = inkex.Group.create('MajorYGridlines')
+        majgly = inkex.Group.new('MajorYGridlines')
         yield majgly
 
         # Group for major z gridlines
-        majglz = inkex.Group.create('MajorZGridlines')
+        majglz = inkex.Group.new('MajorZGridlines')
         yield majglz
 
         # Group for minor x gridlines
         if self.options.subdivs > 1:  # if there are any minor x gridlines
-            minglx = inkex.Group.create('MinorXGridlines')
+            minglx = inkex.Group.new('MinorXGridlines')
             yield minglx
         # Group for subminor x gridlines, if there are any minor minor x gridlines
         if self.options.subsubdivs > 1:
-            mminglx = inkex.Group.create('SubMinorXGridlines')
+            mminglx = inkex.Group.new('SubMinorXGridlines')
             yield mminglx
         # Group for minor y gridlines, if there are any minor y gridlines
         if self.options.subdivs > 1:
-            mingly = inkex.Group.create('MinorYGridlines')
+            mingly = inkex.Group.new('MinorYGridlines')
             yield mingly
         # Group for subminor y gridlines, if there are any minor minor x gridlines
         if self.options.subsubdivs > 1:
-            mmingly = inkex.Group.create('SubMinorYGridlines')
+            mmingly = inkex.Group.new('SubMinorYGridlines')
             yield mmingly
         # Group for minor z gridlines, if there are any minor y gridlines
         if self.options.subdivs > 1:
-            minglz = inkex.Group.create('MinorZGridlines')
+            minglz = inkex.Group.new('MinorZGridlines')
             yield minglz
         # Group for subminor z gridlines, if there are any minor minor x gridlines
         if self.options.subsubdivs > 1:
-            mminglz = inkex.Group.create('SubMinorZGridlines')
+            mminglz = inkex.Group.new('SubMinorZGridlines')
             yield mminglz
 
         # Border of grid

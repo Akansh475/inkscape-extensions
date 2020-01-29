@@ -71,7 +71,7 @@ class SvgFontToLayers(inkex.EffectExtension):
             if unicode_char is None:
                 continue
 
-            layer = self.svg.add(inkex.Group.create("GlyphLayer-" + unicode_char, True))
+            layer = self.svg.add(inkex.Group.new("GlyphLayer-" + unicode_char, True))
             # glyph layers (except the first one) are innitially hidden
             if count != 0:
                 layer.style['display'] = 'none'

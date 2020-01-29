@@ -235,7 +235,7 @@ class LoremIpsum(inkex.EffectExtension):
             parent = shape.getparent()
             region.add(shape.copy())
         else:
-            parent = self.svg.add(Group.create('lorum ipsum', True))
+            parent = self.svg.add(Group.new('lorum ipsum', is_layer=True))
             region.add(Rectangle(x='0', y='0',\
                 width=str(int(self.svg.width)),\
                 height=str(int(self.svg.height))))

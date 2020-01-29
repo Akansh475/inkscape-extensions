@@ -150,7 +150,7 @@ class GenerateExtension(EffectExtension):
         layer = self.svg.get_current_layer()
         fragment = self.generate()
         if isinstance(fragment, types.GeneratorType):
-            container = Group.create(self.container_label, self.container_layer)
+            container = Group.new(self.container_label, self.container_layer)
             if self.container_layer:
                 self.svg.append(container)
             else:

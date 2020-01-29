@@ -11,8 +11,10 @@ import inkex
 from inkex.elements import (
     ShapeElement, Group, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
+    PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement
 )
-from inkex.utils import FragmentError
+from inkex.paths import Move, Line
+from inkex.utils import FragmentError, PY3
 from inkex.transforms import Transform
 from inkex.styles import Style
 from inkex.tester import TestCase
@@ -35,6 +37,10 @@ class ElementTestCase(TestCase):
         """Print element as string"""
         self.assertEqual(str(self.elem), self.tag)
 
+    def assertElement(self, elem, compare):
+        """Assert an element"""
+        if PY3:
+            self.assertEqual(elem.tostring(), compare)
 
 class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
@@ -46,7 +52,6 @@ class CoreElementTestCase(ElementTestCase):
 
         See https://gitlab.com/inkscape/extensions/issues/81 for details
         """
-        from inkex.elements import Rectangle
         grp = Group()
         for _ in range(10):
             rect = Rectangle()
@@ -295,10 +300,21 @@ class CoreElementTestCase(ElementTestCase):
             'H', 'I', 'J',
         ))
 
+class LineElementTestCase(ElementTestCase):
+    """Test LineElements"""
+    def test_new_line(self):
+        line = LineElement.new((10, 10), (20, 20))
+        self.assertElement(line, b'<line x1="10" y1="10" x2="20" y2="20"/>')
+
 class PathElementTestCase(ElementTestCase):
     """Test PathElements"""
     source_file = 'with-lpe.svg'
     tag = 'path'
+
+    def test_new_path(self):
+        """Test new path element"""
+        path = PathElement.new(path=[Move(10,10), Line(20, 20)])
+        self.assertEqual(path.get('d'), 'M 10 10 L 20 20')
 
     def test_original_path(self):
         """LPE paths can return their original paths"""
@@ -376,6 +392,13 @@ class GroupTest(ElementTestCase):
     """Test extra functionality on a group element"""
     tag = 'g'
 
+    def test_new_group(self):
+        """Test creating groups"""
+        svg = Group.new('layerA', True, Group.new('groupA', False, Rectangle()))
+        self.assertElement(svg,\
+            b'<g inkscape:label="layerA" inkscape:groupmode="layer">'\
+            b'<g inkscape:label="groupA"><rect/></g></g>')
+
     def test_transform_property(self):
         """Test getting and setting a transform"""
         self.assertEqual(str(self.elem.transform), 'matrix(1.44985 0 0 1.36417 -107.03 -167.362)')
@@ -447,11 +470,23 @@ class CircleTest(ElementTestCase):
     """Test extra functionality on a circle element"""
     tag = 'circle'
 
+    def test_new(self):
+        """Test new circles"""
+        elem = Circle.new(10, 10, 50)
+        self.assertElement(elem, b'<circle cx="10" cy="10" r="50"/>')
+        elem = Ellipse.new(10, 10, 15, 10)
+        self.assertElement(elem, b'<ellipse cx="10" cy="10" rx="15" ry="10"/>')
+
     def test_path(self):
         """Circle path"""
         self.assertEqual(self.elem.get_path(),
                          'M 100.0,50.0 a 50.0,50.0 0 1 0 50.0, '
                          '50.0 a 50.0,50.0 0 0 0 -50.0, -50.0 z')
+
+class AnchorTest(ElementTestCase):
+    def test_new(self):
+        link = Anchor.new('https://inkscape.org', Rectangle())
+        self.assertElement(link, b'<a xlink:href="https://inkscape.org"><rect/></a>')
 
 class NamedViewTest(ElementTestCase):
     """Test the sodipodi namedview tag"""

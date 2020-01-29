@@ -186,7 +186,7 @@ class Nup(inkex.OutputExtension, SvgOutputMixin):
 
         # guidelayer #####################################################
         if {'inner', 'outer'}.intersection(show):
-            layer = svg.add(inkex.Group.create('Guide Layer', layer=True))
+            layer = svg.add(inkex.Group.new('Guide Layer', is_layer=True))
             if 'inner' in show:
                 ibox = layer.add(padbox.copy())
                 ibox.style['stroke'] = '#8080ff'
@@ -200,7 +200,7 @@ class Nup(inkex.OutputExtension, SvgOutputMixin):
 
         # crosslayer #####################################################
         if {'crosses'}.intersection(show):
-            layer = svg.add(inkex.Group.create('Cut Layer', layer=True))
+            layer = svg.add(inkex.Group.new('Cut Layer', is_layer=True))
 
             if 'crosses' in show:
                 crosslen = 12
@@ -225,11 +225,11 @@ class Nup(inkex.OutputExtension, SvgOutputMixin):
                 make_clones(layer, 'cross')
 
         # clonelayer #####################################################
-        layer = svg.add(inkex.Group.create('Clone Layer', layer=True))
+        layer = svg.add(inkex.Group.new('Clone Layer', is_layer=True))
         make_clones(layer, 'main')
 
         # mainlayer ######################################################
-        layer = svg.add(inkex.Group.create('Main Layer', layer=True))
+        layer = svg.add(inkex.Group.new('Main Layer', is_layer=True))
         group = layer.add(inkex.Group(id='main'))
 
         if 'innerbox' in show:

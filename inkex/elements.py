@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+# pylint: disable=arguments-differ
 """
 Provide extra utility to each svg element type specific to its type.
 
@@ -84,6 +85,13 @@ class BaseElement(etree.ElementBase):
         """Return the tag_name without NS"""
         assert self.tag_name
         return removeNS(self.tag_name)[-1]
+
+    @classmethod
+    def new(cls, *children, **attrs):
+        """Create a new element, converting attrs values to strings."""
+        obj = cls(*children)
+        obj.update(**attrs)
+        return obj
 
     NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
     PARSER = SVG_PARSER
@@ -165,7 +173,7 @@ class BaseElement(etree.ElementBase):
         if value is None:
             self.attrib.pop(addNS(attr), None) # pylint: disable=no-member
         else:
-            value = str(value) if PY3 else unicode(value)
+            value = str(value) if PY3 else unicode(value) # pylint: disable=undefined-variable
             super(BaseElement, self).set(addNS(attr), value)
 
     def update(self, **kwargs):
@@ -489,13 +497,11 @@ class Group(ShapeElement):
     is_layer = lambda self: self.groupmode == 'layer'
 
     @classmethod
-    def create(cls, label, layer=False):
-        """Create a group, set the inkscape label and groupmode if needed"""
-        elem = cls()
-        elem.set('inkscape:label', label)
-        if layer is True:
-            elem.set('inkscape:groupmode', 'layer')
-        return elem
+    def new(cls, label, is_layer=False, *children, **attrs):
+        attrs['inkscape:label'] = label
+        if is_layer is True:
+            attrs['inkscape:groupmode'] = 'layer'
+        return super(Group, cls).new(*children, **attrs)
 
     def get_path(self):
         ret = Path()
@@ -531,10 +537,19 @@ class Anchor(Group):
     """An anchor or link tag"""
     tag_name = 'a'
 
+    @classmethod
+    def new(cls, href, *children, **attrs):
+        attrs['xlink:href'] = href
+        return super(Group, cls).new(*children, **attrs)
+
 class PathElement(ShapeElement):
     """Provide a useful extension for path elements"""
     tag_name = 'path'
     get_path = lambda self: self.get('d')
+
+    @classmethod
+    def new(cls, path, **attrs):
+        return super(PathElement, cls).new(d=Path(path), **attrs)
 
     def set_path(self, path):
         """Set the given data as a path as the 'd' attribute"""
@@ -607,6 +622,13 @@ class Line(ShapeElement):
     tag_name = 'line'
     get_path = lambda self: 'M{0[x1]},{0[y1]} L{0[x2]},{0[y2]}'.format(self.attrib)
 
+    @classmethod
+    def new(cls, start, end, **attrs):
+        start = Vector2d(start)
+        end = Vector2d(end)
+        return super(Line, cls).new(x1=start.x, y1=start.y,
+                                    x2=end.x, y2=end.y, **attrs)
+
 
 class Rectangle(ShapeElement):
     """Provide a useful extension for rectangle elements"""
@@ -619,6 +641,10 @@ class Rectangle(ShapeElement):
     height = property(lambda self: float(self.get('height', '0')))
     rx = property(lambda self: float(self.get('rx', self.get('ry', 0.0))))
     ry = property(lambda self: float(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
+
+    @classmethod
+    def new(cls, left, top, width, height, **attrs):
+        return super(Rectangle, cls).new(x=left, y=top, width=width, height=height, **attrs)
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -638,7 +664,6 @@ class Image(Rectangle):
     """Provide a useful extension for image elements"""
     tag_name = 'image'
 
-
 class Circle(ShapeElement):
     """Provide a useful extension for circle elements"""
     tag_name = 'circle'
@@ -652,6 +677,10 @@ class Circle(ShapeElement):
     left = property(lambda self: self.center_x - self.radius_x)
     right = property(lambda self: self.center_x + self.radius_x)
 
+    @classmethod
+    def new(cls, center_x, center_y, radius, **attrs):
+        return super(Circle, cls).new(cx=center_x, cy=center_y, r=radius, **attrs)
+
     def get_path(self):
         """Calculate the arc path of this circle"""
         return ('M {0.center_x},{0.top} '
@@ -663,6 +692,11 @@ class Circle(ShapeElement):
 class Ellipse(Circle):
     """Provide a similar extension to the Circle interface"""
     tag_name = 'ellipse'
+
+    @classmethod
+    def new(cls, center_x, center_y, radius_x, radius_y, **attrs):
+        return super(Circle, cls).new(cx=center_x, cy=center_y, rx=radius_x, ry=radius_y, **attrs)
+
 
 class Use(ShapeElement):
     """A 'use' element that links to another in the document"""
@@ -766,6 +800,12 @@ class Guide(BaseElement):
                                           self.get('orientation') == '0,0')
     is_vertical = property(lambda self: self.get('orientation').endswith(',0'))
     point = property(lambda self: Vector2d(self.get('position')))
+
+    @classmethod
+    def new(cls, pos_x, pos_y, angle, **attrs):
+        guide = super(Guide, cls).new(**attrs)
+        guide.move_to(pos_x, pos_y, angle=angle)
+        return guide
 
     def move_to(self, pos_x, pos_y, angle=None):
         """

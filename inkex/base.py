@@ -258,6 +258,7 @@ class SvgOutputMixin(object):  # pylint: disable=too-few-public-methods
     """
     template = """<svg viewBox="0 0 {width} {height}" width="{width}{unit}" height="{height}{unit}"
         xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
     </svg>"""

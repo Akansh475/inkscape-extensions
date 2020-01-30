@@ -597,6 +597,7 @@ class Group(GroupBase):
 
 
 class Layer(Group):
+    """Inkscape extension of svg:g"""
 
     @classmethod
     def new(cls, label, *children, **attrs):
@@ -605,7 +606,6 @@ class Layer(Group):
 
     @classmethod
     def _is_class_element(cls, el):  # type: (etree.Element) -> bool
-        """Hook to do more restrictive check in addition to (ns,tag) match"""
         return el.attrib.get(addNS('inkscape:groupmode'), None) == "layer"
 
 

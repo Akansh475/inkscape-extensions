@@ -599,10 +599,8 @@ class Group(GroupBase):
 class Layer(Group):
     """Inkscape extension of svg:g"""
 
-    @classmethod
-    def new(cls, label, *children, **attrs):
-        attrs['inkscape:groupmode'] = 'layer'
-        return super(Layer, cls).new(label, *children, **attrs)
+    def _init(self):
+        self.set('inkscape:groupmode', 'layer')
 
     @classmethod
     def _is_class_element(cls, el):  # type: (etree.Element) -> bool

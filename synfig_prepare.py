@@ -416,6 +416,8 @@ def get_dimension(s="1024"):
     """Convert an SVG length string from arbitrary units to pixels"""
     if s == "":
         return 0
+    if isinstance(s, float):
+        return s
     try:
         last = int(s[-1])
     except:

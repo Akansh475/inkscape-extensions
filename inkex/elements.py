@@ -552,14 +552,7 @@ class Filter(BaseElement):
         tag_name = 'feTurbulence'
 
 
-class Group(ShapeElement):
-    """Any group element (layer or regular group)"""
-    tag_name = 'g'
-
-    @classmethod
-    def new(cls, label, *children, **attrs):
-        attrs['inkscape:label'] = label
-        return super(Group, cls).new(*children, **attrs)
+class GroupBase(ShapeElement):
 
     def get_path(self):
         ret = Path()
@@ -578,6 +571,17 @@ class Group(ShapeElement):
             if isinstance(child, ShapeElement):
                 bbox += child.bounding_box(transform=transform)
         return bbox
+
+
+class Group(GroupBase):
+    """Any group element (layer or regular group)"""
+    tag_name = 'g'
+
+    @classmethod
+    def new(cls, label, *children, **attrs):
+        attrs['inkscape:label'] = label
+        return super(Group, cls).new(*children, **attrs)
+
 
     def effective_style(self):
         """A blend of each child's style mixed together (last child wins)"""
@@ -605,23 +609,22 @@ class Layer(Group):
         return el.attrib.get(addNS('inkscape:groupmode'), None) == "layer"
 
 
-class Anchor(Group):
+class Anchor(GroupBase):
     """An anchor or link tag"""
     tag_name = 'a'
 
     @classmethod
     def new(cls, href, *children, **attrs):
         attrs['xlink:href'] = href
-        return super(Group, cls).new(*children, **attrs)
+        return super(Anchor, cls).new(*children, **attrs)
 
-class PathElement(ShapeElement):
-    """Provide a useful extension for path elements"""
-    tag_name = 'path'
+
+class PathElementBase(ShapeElement):
     get_path = lambda self: self.get('d')
 
     @classmethod
     def new(cls, path, **attrs):
-        return super(PathElement, cls).new(d=Path(path), **attrs)
+        return super(PathElementBase, cls).new(d=Path(path), **attrs)
 
     def set_path(self, path):
         """Set the given data as a path as the 'd' attribute"""
@@ -645,6 +648,11 @@ class PathElement(ShapeElement):
             self.set('inkscape:original-d', str(Path(path)))
         else:
             self.path = path
+
+
+class PathElement(PathElementBase):
+    """Provide a useful extension for path elements"""
+    tag_name = 'path'
 
     @classmethod
     def arc(cls, center, rx, ry=None, **kw):
@@ -711,9 +719,8 @@ class Line(ShapeElement):
                                     x2=end.x, y2=end.y, **attrs)
 
 
-class Rectangle(ShapeElement):
+class RectangleBase(ShapeElement):
     """Provide a useful extension for rectangle elements"""
-    tag_name = 'rect'
     left = property(lambda self: float(self.get('x', '0')))
     top = property(lambda self: float(self.get('y', '0')))
     right = property(lambda self: self.left + self.width)
@@ -722,10 +729,6 @@ class Rectangle(ShapeElement):
     height = property(lambda self: float(self.get('height', '0')))
     rx = property(lambda self: float(self.get('rx', self.get('ry', 0.0))))
     ry = property(lambda self: float(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
-
-    @classmethod
-    def new(cls, left, top, width, height, **attrs):
-        return super(Rectangle, cls).new(x=left, y=top, width=width, height=height, **attrs)
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -741,7 +744,16 @@ class Rectangle(ShapeElement):
         return 'M {0.left},{0.top} h{0.width}v{0.height}h{1} z'.format(self, -self.width)
 
 
-class Image(Rectangle):
+class Rectangle(RectangleBase):
+    """Provide a useful extension for rectangle elements"""
+    tag_name = 'rect'
+
+    @classmethod
+    def new(cls, left, top, width, height, **attrs):
+        return super(Rectangle, cls).new(x=left, y=top, width=width, height=height, **attrs)
+
+
+class Image(RectangleBase):
     """Provide a useful extension for image elements"""
     tag_name = 'image'
 
@@ -809,7 +821,7 @@ class Use(ShapeElement):
         return copy
 
 
-class ClipPath(Group):
+class ClipPath(GroupBase):
     """A path used to clip objects"""
     tag_name = 'clipPath'
 
@@ -981,10 +993,12 @@ class Tspan(ShapeElement):
         x2 = x1 + 0 # XXX This is impossible to calculate!
         return BoundingBox((x1, x2), (y1, y2))
 
-class Marker(Group):
+
+class Marker(GroupBase):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads
      or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
     tag_name = 'marker'
+
 
 class Switch(BaseElement):
     """A switch element"""
@@ -1005,7 +1019,7 @@ class FontFace(BaseElement):
     tag_name = 'font-face'
 
 
-class Glyph(PathElement):
+class Glyph(PathElementBase):
     """An svg font glyph element"""
     tag_name = 'glyph'
 

@@ -30,7 +30,7 @@ import types
 
 from .utils import errormsg, Boolean, CloningVat, PY3
 from .colors import Color, ColorIdError, ColorError
-from .elements import load_svg, BaseElement, ShapeElement, Group, Grid, \
+from .elements import load_svg, BaseElement, ShapeElement, Group, Layer, Grid, \
                       TextElement, FlowPara, FlowDiv
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
@@ -150,7 +150,7 @@ class GenerateExtension(EffectExtension):
         layer = self.svg.get_current_layer()
         fragment = self.generate()
         if isinstance(fragment, types.GeneratorType):
-            container = Group.new(self.container_label, self.container_layer)
+            container = (Layer if self.container_layer else Group).new(self.container_label)
             if self.container_layer:
                 self.svg.append(container)
             else:

@@ -39,7 +39,7 @@ import dxf_templates
 import inkex
 from inkex import colors, bezier
 from inkex.transforms import Transform
-from inkex.elements import Group, Use, PathElement, Rectangle, Line, Circle
+from inkex.elements import Group, Layer, Use, PathElement, Rectangle, Line, Circle
 
 def get_matrix(u, i, j):
     if j == i + 2:
@@ -246,7 +246,7 @@ class DxfOutlines(inkex.OutputExtension):
 
     def process_group(self, group):
         """Process group elements"""
-        if isinstance(group, Group) and group.is_layer():
+        if isinstance(group, Layer):
             style = group.style
             if style.get('display', '') == 'none' and self.options.layer_option and self.options.layer_option == 'visible':
                 return
@@ -286,7 +286,7 @@ class DxfOutlines(inkex.OutputExtension):
         # self.dxf_add("999\nDXF created by Inkscape\n")  # Some programs do not take comments in DXF files (KLayout 0.21.12 for example)
         self.dxf_add(dxf_templates.r14_header)
         for node in self.svg.xpath('//svg:g'):
-            if node.is_layer():
+            if isinstance(node, Layer):
                 layer = node.label
                 self.layernames.append(layer.lower())
                 if self.options.layer_name and self.options.layer_option and self.options.layer_option == 'name' and not layer.lower() in self.options.layer_name:

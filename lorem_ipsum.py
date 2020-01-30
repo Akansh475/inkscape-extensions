@@ -24,7 +24,7 @@ Example filltext sentences generated over at http://lipsum.com/
 import random
 
 import inkex
-from inkex.elements import Group, FlowRoot, FlowRegion, FlowPara, Rectangle
+from inkex.elements import Layer, FlowRoot, FlowRegion, FlowPara, Rectangle
 
 CORPA = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ',
@@ -235,7 +235,7 @@ class LoremIpsum(inkex.EffectExtension):
             parent = shape.getparent()
             region.add(shape.copy())
         else:
-            parent = self.svg.add(Group.new('lorum ipsum', is_layer=True))
+            parent = self.svg.add(Layer.new('lorum ipsum'))
             region.add(Rectangle(x='0', y='0',\
                 width=str(int(self.svg.width)),\
                 height=str(int(self.svg.height))))

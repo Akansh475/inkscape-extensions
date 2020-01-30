@@ -41,7 +41,7 @@ try:
 except ImportError:
     pass
 
-__all__ = ('Group', 'PathElement', 'ShapeElement')
+__all__ = ('Group', 'Layer', 'PathElement', 'ShapeElement')
 
 
 class NodeBasedLookup(etree.PythonElementClassLookup):
@@ -555,13 +555,10 @@ class Filter(BaseElement):
 class Group(ShapeElement):
     """Any group element (layer or regular group)"""
     tag_name = 'g'
-    is_layer = lambda self: self.groupmode == 'layer'
 
     @classmethod
-    def new(cls, label, is_layer=False, *children, **attrs):
+    def new(cls, label, *children, **attrs):
         attrs['inkscape:label'] = label
-        if is_layer is True:
-            attrs['inkscape:groupmode'] = 'layer'
         return super(Group, cls).new(*children, **attrs)
 
     def get_path(self):
@@ -593,6 +590,20 @@ class Group(ShapeElement):
     def groupmode(self):
         """Return the type of group this is"""
         return self.get('inkscape:groupmode', 'group')
+
+
+class Layer(Group):
+
+    @classmethod
+    def new(cls, label, *children, **attrs):
+        attrs['inkscape:groupmode'] = 'layer'
+        return super(Layer, cls).new(label, *children, **attrs)
+
+    @classmethod
+    def _is_class_element(cls, el):  # type: (etree.Element) -> bool
+        """Hook to do more restrictive check in addition to (ns,tag) match"""
+        return el.attrib.get(addNS('inkscape:groupmode'), None) == "layer"
+
 
 class Anchor(Group):
     """An anchor or link tag"""

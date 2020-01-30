@@ -200,7 +200,7 @@ class PrintingMarks(inkex.EffectExtension):
         if layer:
             svg.remove(layer[0])  # remove if it existis
         # Create a new layer
-        layer = svg.add(inkex.Group.new("Printing Marks", True))
+        layer = svg.add(inkex.Layer.new("Printing Marks"))
         layer.set('id', 'printing-marks')
         layer.set('sodipodi:insensitive', 'true')
 

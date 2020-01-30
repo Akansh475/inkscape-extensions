@@ -76,7 +76,7 @@ import numpy
 import inkex
 from inkex.bezier import bezierlength, bezierparameterize, beziertatlength
 from inkex.transforms import Transform
-from inkex.elements import PathElement, TextElement, Tspan, Group, Marker
+from inkex.elements import PathElement, TextElement, Tspan, Group, Layer, Marker
 from inkex.paths import CubicSuperPath
 from inkex.styles import Style
 
@@ -4771,7 +4771,7 @@ class Gcodetools(inkex.EffectExtension):
 
                 engraving_group = self.selected_paths[layer][0].getparent().add(Group())
                 if self.options.engraving_draw_calculation_paths and (self.my3Dlayer is None):
-                    self.svg.add(Group.new("3D", is_layer=True))
+                    self.svg.add(Layer.new("3D"))
                 # Create groups for left and right eyes
                 if self.options.engraving_draw_calculation_paths:
                     gcode_3Dleft = self.my3Dlayer.add(Group(gcodetools="Gcode 3D L"))

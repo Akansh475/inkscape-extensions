@@ -29,7 +29,7 @@ from lxml import etree
 import inkex
 from inkex import Transform
 from inkex.paths import Path
-from inkex.elements import Group, Anchor, Switch, PathElement, Metadata, NamedView, Gradient
+from inkex.elements import Group, Layer, Anchor, Switch, PathElement, Metadata, NamedView, Gradient
 from inkex.svg import SvgDocumentElement
 
 import synfig_fileformat as sif
@@ -1086,7 +1086,7 @@ class SynfigExport(SynfigPrep):
         if isinstance(node, Group):
             for subnode in node:
                 layers += self.convert_node(subnode, d)
-            if node.is_layer():
+            if isinstance(node, Layer):
                 name = node.label or "Inline Canvas"
                 layers = d.op_encapsulate(layers, name=name)
 

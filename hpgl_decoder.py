@@ -48,7 +48,7 @@ class hpglDecoder(SvgOutputMixin):
         svg.namedview.set('inkscape:document-units', 'mm')
 
         if self.options.showMovements:
-            self.layers[0] = svg.add(inkex.Group.new(self.textMovements, is_layer=True))
+            self.layers[0] = svg.add(inkex.Layer(self.textMovements))
 
         # cut stream into commands
         hpgl_data = self.hpglString.split(';')
@@ -89,7 +89,7 @@ class hpglDecoder(SvgOutputMixin):
                 # create layer if it does not exist
                 if layerNum not in self.layers:
                     label = self.textPenNumber + str(layerNum - 1)
-                    self.layers[layerNum] = svg.add(inkex.Group.new(label, is_layer=True))
+                    self.layers[layerNum] = svg.add(inkex.Layer.new(label))
 
                 path = 'M %f,%f L %s' % (self.oldCoordinates[0], self.oldCoordinates[1], ','.join(parameters))
                 style = 'stroke:#' + ('ff0000' if isPU else '000000') + '; stroke-width:0.2; fill:none;'

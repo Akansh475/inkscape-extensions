@@ -9,7 +9,7 @@ from lxml import etree
 import inkex
 
 from inkex.elements import (
-    ShapeElement, Group, Pattern, Guide, Polyline, Use, Defs,
+    ShapeElement, Group, Layer, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement
 )
@@ -394,9 +394,9 @@ class GroupTest(ElementTestCase):
 
     def test_new_group(self):
         """Test creating groups"""
-        svg = Group.new('layerA', True, Group.new('groupA', False, Rectangle()))
+        svg = Layer.new('layerA', Group.new('groupA', Rectangle()))
         self.assertElement(svg,\
-            b'<g inkscape:label="layerA" inkscape:groupmode="layer">'\
+            b'<g inkscape:groupmode="layer" inkscape:label="layerA">'\
             b'<g inkscape:label="groupA"><rect/></g></g>')
 
     def test_transform_property(self):

@@ -26,6 +26,7 @@ give path, transform, and property access easily.
 
 import math
 
+from collections import defaultdict
 from copy import deepcopy
 from lxml import etree
 
@@ -42,24 +43,37 @@ except ImportError:
 
 __all__ = ('Group', 'PathElement', 'ShapeElement')
 
-class SvgClassLookup(etree.CustomElementClassLookup):
+
+class NodeBasedLookup(etree.PythonElementClassLookup):
     """
     We choose what kind of Elements we should return for each element, providing useful
     SVG based API to our extensions system.
     """
-    lookup_tags = {}
+    # (ns,tag) -> list(cls) ; ascending priority
+    lookup_table = defaultdict(list)
 
-    def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
-        """Choose what kind of functionality our element will have"""
-        if namespace is None:
-            namespace = NSS['svg']
+    @classmethod
+    def register_class(cls, klass):
+        cls.lookup_table[removeNS(klass.tag_name, url=True)].append(klass)
 
-        if node_type == 'element':
-            return self.lookup_tags.get((namespace, name), BaseElement)
-        return None
+    def lookup(self, doc, element):
+
+        try:
+            for cls in reversed(self.lookup_table[removeNS(element.tag, url=True)]):
+                if cls._is_class_element(element):
+                    return cls
+        except TypeError:
+            # Handle non-element proxies case
+            # The documentation implies that it's not possible
+            # Didn't found a reliable way to check whether proxy corresponds to element or not
+            # Look like lxml issue to me.
+            # The troubling element is "<!--Comment-->"
+            return
+        return BaseElement
+
 
 SVG_PARSER = etree.XMLParser(huge_tree=True, strip_cdata=False)
-SVG_PARSER.set_element_class_lookup(SvgClassLookup())
+SVG_PARSER.set_element_class_lookup(NodeBasedLookup())
 
 def load_svg(stream):
     """Load SVG file using the SVG_PARSER"""
@@ -74,11 +88,15 @@ class BaseElement(etree.ElementBase):
     __metaclass__ = InitSubClassPy3
     @classmethod
     def __init_subclass__(cls):
-        for name in (cls.tag_name,) if cls.tag_name else cls.tag_names:
-            SvgClassLookup.lookup_tags[removeNS(name, url=True)] = cls
+        if cls.tag_name:
+            NodeBasedLookup.register_class(cls)
+
+    @classmethod
+    def _is_class_element(cls, el):  # type: (etree.Element) -> bool
+        """Hook to do more restrictive check in addition to (ns,tag) match"""
+        return True
 
     tag_name = ''
-    tag_names = ()
 
     @property
     def TAG(self): # pylint: disable=invalid-name
@@ -472,15 +490,6 @@ class FlowSpan(ShapeElement):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
-class FilterPrimitive(BaseElement):
-    """A bunch of different filter primitives"""
-    tag_names = [
-        'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite',
-        'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feFlood',
-        'feGaussianBlur', 'feImage', 'feMerge', 'feMorphology', 'feOffset',
-        'feSpecularLighting', 'feTile', 'feTurbulence'
-    ]
-
 class Filter(BaseElement):
     """A filter (usually in defs)"""
     tag_name = 'filter'
@@ -490,6 +499,58 @@ class Filter(BaseElement):
         elem = etree.SubElement(self, addNS(fe_type, 'svg'))
         elem.update(**args)
         return elem
+
+    class Primitive(BaseElement):
+        pass
+
+    class Blend(Primitive):
+        tag_name = 'feBlend'
+
+    class ColorMatrix(Primitive):
+        tag_name = 'feColorMatrix'
+
+    class ComponentTransfer(Primitive):
+        tag_name = 'feComponentTransfer'
+
+    class Composite(Primitive):
+        tag_name = 'feComposite'
+
+    class ConvolveMatrix(Primitive):
+        tag_name = 'feConvolveMatrix'
+
+    class DiffuseLighting(Primitive):
+        tag_name = 'feDiffuseLighting'
+
+    class DisplacementMap(Primitive):
+        tag_name = 'feDisplacementMap'
+
+    class Flood(Primitive):
+        tag_name = 'feFlood'
+
+    class GaussianBlur(Primitive):
+        tag_name = 'feGaussianBlur'
+
+    class Image(Primitive):
+        tag_name = 'feImage'
+
+    class Merge(Primitive):
+        tag_name = 'feMerge'
+
+    class Morphology(Primitive):
+        tag_name = 'feMorphology'
+
+    class Offset(Primitive):
+        tag_name = 'feOffset'
+
+    class SpecularLighting(Primitive):
+        tag_name = 'feSpecularLighting'
+
+    class Tile(Primitive):
+        tag_name = 'feTile'
+
+    class Turbulence(Primitive):
+        tag_name = 'feTurbulence'
+
 
 class Group(ShapeElement):
     """Any group element (layer or regular group)"""
@@ -606,10 +667,19 @@ class Pattern(BaseElement):
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
+
 class Gradient(BaseElement):
     """A gradient instruction usually in the defs"""
-    tag_names = ('linearGradient', 'radialGradient')
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('gradientTransform', Transform),)
+
+
+class LinearGradient(Gradient):
+    tag_name = 'linearGradient'
+
+
+class RadialGradient(Gradient):
+    tag_name = 'radialGradient'
+
 
 class Polygon(ShapeElement):
     """A closed polyline"""

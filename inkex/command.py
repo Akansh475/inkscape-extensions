@@ -186,8 +186,6 @@ def inkscape(svg_file, *args, **kwargs):
     """
     Call Inkscape with the given svg_file and the given arguments
     """
-    # This actually harms a lot of Verb commands, so it's a real problem!
-    kwargs.setdefault('without_gui', True)
     return call(INKSCAPE_EXECUTABLE_NAME, svg_file, *args, **kwargs)
 
 def inkscape_command(svg, select=None, verbs=()):

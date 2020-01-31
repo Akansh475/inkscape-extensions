@@ -32,7 +32,6 @@ it yourself) to take advantage of the security settings and testing functions.
 """
 
 import os
-import sys
 from subprocess import Popen, PIPE
 from lxml.etree import ElementTree
 

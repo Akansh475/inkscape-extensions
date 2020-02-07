@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>More Hue</name>
     <id>org.inkscape.color.more_hue</id>
-    <dependency type="file" location="inx">coloreffect.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>

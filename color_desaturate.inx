@@ -2,7 +2,6 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Desaturate</name>
     <id>org.inkscape.color.desaturate</id>
-    <dependency type="file" location="inx">coloreffect.py</dependency>
     <effect>
         <object-type>all</object-type>
         <effects-menu>

@@ -34,7 +34,7 @@ from argparse import ArgumentTypeError
 # from tempfile import TemporaryDirectory
 
 # All the names that get added to the inkex API itself.
-__all__ = ('AbortExtension', 'Boolean', 'errormsg', 'addNS', 'NSS')
+__all__ = ('AbortExtension', 'DependencyError', 'Boolean', 'errormsg', 'addNS', 'NSS')
 
 ABORT_STATUS = -5
 

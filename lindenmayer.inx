@@ -33,6 +33,9 @@ Any of G,H,I,J,K,L: move forward
 [: remember point
 
 ]: return to remembered point
+
+Multiple rules can be provided by 
+separating them with a semicolon (;).
 </label>
         </page>
     </param>

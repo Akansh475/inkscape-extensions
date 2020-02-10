@@ -197,7 +197,7 @@ def inkscape_command(svg, select=None, verbs=()):
         svg_file = write_svg(svg, dirname, 'input.svg')
         select = ('select', select) if select else None
         verbs += ('FileSave', 'FileQuit')
-        inkscape(svg_file, select, verb=';'.join(verbs), without_gui=False)
+        inkscape(svg_file, select, batch_process=True, verb=';'.join(verbs))
         with open(svg_file, 'rb') as fhl:
             return fhl.read()
 

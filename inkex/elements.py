@@ -355,6 +355,12 @@ class BaseElement(etree.ElementBase):
         """Get styles falling back to element attributes"""
         return AttrFallbackStyle(self, move=move)
 
+    @property
+    def label(self):
+        """Returns the inkscape label"""
+        return self.get('inkscape:label', None)
+    label = label.setter(lambda self, value: self.set('inkscape:label', str(value)))
+
 
 class ShapeElement(BaseElement):
     """Elements which have a visible representation on the canvas"""
@@ -419,12 +425,6 @@ class ShapeElement(BaseElement):
             if transform:  # apply extra transformation
                 path = path.transform(transform)
         return path.bounding_box()
-
-    @property
-    def label(self):
-        """Returns the inkscape label"""
-        return self.get('inkscape:label', None)
-    label = label.setter(lambda self, value: self.set('inkscape:label', str(value)))
 
 
 class FlowRegion(ShapeElement):

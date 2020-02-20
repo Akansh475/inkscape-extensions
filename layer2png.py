@@ -171,7 +171,7 @@ class ExportSlices(inkex.EffectExtension):
             color = ExportSlices.RED  #  overwritten
             if not os.path.exists(filename):
                 color = ExportSlices.GREEN  # new export
-            kwargs = {'export-id': node_id, 'export-file': filename,
+            kwargs = {'export-id': node_id, 'export-filename': filename,
                       'export-dpi': self.options.dpi}
             if width:
                 kwargs['export-height'] = str(height)

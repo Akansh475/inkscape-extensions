@@ -141,7 +141,7 @@ class InterpAttG(inkex.EffectExtension):
 
         for node in collection:
             if inte_att_type == 'color':
-                val = str(cur)
+                val = inkex.Color([int(cur[i]) for i in range(3)])
             elif inte_att_type == 'float':
                 val = cur
             elif inte_att_type == 'int':
@@ -164,7 +164,7 @@ class InterpAttG(inkex.EffectExtension):
                 raise KeyError("Unknown update {}".format(where))
 
             if inte_att_type == 'color':
-                cur = inkex.Color([cur[i] + inc[i] for i in range(3)])
+                cur = [cur[i] + inc[i] for i in range(3)]
             else:
                 cur += inc
 

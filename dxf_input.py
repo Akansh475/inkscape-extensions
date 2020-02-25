@@ -428,6 +428,7 @@ class DxfInput(inkex.InputExtension):
         global style
         global layer
         global scale
+        global color
         global extrude
         global xmin
         global ymin

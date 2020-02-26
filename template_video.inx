@@ -12,9 +12,11 @@
         <option translatable="no" value="7680x4320">7680x4320 (8K)</option>
     </param>
 
+    <spacer />
+    <label indent="1" appearance="header">Custom</label>
     <!-- Maximum size is '16k' -->
-    <param name="width"  gui-text="Custom Width:"  type="int" min="240" max="15360">1920</param>
-    <param name="height" gui-text="Custom Height:" type="int" min="160" max="8640">1080</param>
+    <param indent="1" name="width"  gui-text="Width:"  type="int" min="240" max="15360">1920</param>
+    <param indent="1" name="height" gui-text="Height:" type="int" min="160" max="8640">1080</param>
 
     <effect needs-live-preview="false">
         <object-type>all</object-type>

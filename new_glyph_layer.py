@@ -41,7 +41,7 @@ class NewGlyphLayer(inkex.EffectExtension):
 
         for char in unicode_chars:
             # Create a new layer.
-            layer = self.svg.add(inkex.Group.new(u'GlyphLayer-' + char, is_layer=True))
+            layer = self.svg.add(inkex.Layer.new(u'GlyphLayer-' + char))
             layer.set('style', 'display:none')  # initially not visible
 
             # TODO: make it optional ("Use current selection as template glyph")

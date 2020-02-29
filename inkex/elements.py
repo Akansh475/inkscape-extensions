@@ -26,6 +26,7 @@ give path, transform, and property access easily.
 
 import math
 
+from collections import defaultdict
 from copy import deepcopy
 from lxml import etree
 
@@ -40,26 +41,39 @@ try:
 except ImportError:
     pass
 
-__all__ = ('Group', 'PathElement', 'ShapeElement')
+__all__ = ('Group', 'Layer', 'PathElement', 'ShapeElement')
 
-class SvgClassLookup(etree.CustomElementClassLookup):
+
+class NodeBasedLookup(etree.PythonElementClassLookup):
     """
     We choose what kind of Elements we should return for each element, providing useful
     SVG based API to our extensions system.
     """
-    lookup_tags = {}
+    # (ns,tag) -> list(cls) ; ascending priority
+    lookup_table = defaultdict(list)
 
-    def lookup(self, node_type, document, namespace, name):  # pylint: disable=unused-argument
-        """Choose what kind of functionality our element will have"""
-        if namespace is None:
-            namespace = NSS['svg']
+    @classmethod
+    def register_class(cls, klass):
+        cls.lookup_table[removeNS(klass.tag_name, url=True)].append(klass)
 
-        if node_type == 'element':
-            return self.lookup_tags.get((namespace, name), BaseElement)
-        return None
+    def lookup(self, doc, element):
+
+        try:
+            for cls in reversed(self.lookup_table[removeNS(element.tag, url=True)]):
+                if cls._is_class_element(element):
+                    return cls
+        except TypeError:
+            # Handle non-element proxies case
+            # The documentation implies that it's not possible
+            # Didn't found a reliable way to check whether proxy corresponds to element or not
+            # Look like lxml issue to me.
+            # The troubling element is "<!--Comment-->"
+            return
+        return BaseElement
+
 
 SVG_PARSER = etree.XMLParser(huge_tree=True, strip_cdata=False)
-SVG_PARSER.set_element_class_lookup(SvgClassLookup())
+SVG_PARSER.set_element_class_lookup(NodeBasedLookup())
 
 def load_svg(stream):
     """Load SVG file using the SVG_PARSER"""
@@ -74,11 +88,15 @@ class BaseElement(etree.ElementBase):
     __metaclass__ = InitSubClassPy3
     @classmethod
     def __init_subclass__(cls):
-        for name in (cls.tag_name,) if cls.tag_name else cls.tag_names:
-            SvgClassLookup.lookup_tags[removeNS(name, url=True)] = cls
+        if cls.tag_name:
+            NodeBasedLookup.register_class(cls)
+
+    @classmethod
+    def _is_class_element(cls, el):  # type: (etree.Element) -> bool
+        """Hook to do more restrictive check in addition to (ns,tag) match"""
+        return True
 
     tag_name = ''
-    tag_names = ()
 
     @property
     def TAG(self): # pylint: disable=invalid-name
@@ -472,15 +490,6 @@ class FlowSpan(ShapeElement):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
-class FilterPrimitive(BaseElement):
-    """A bunch of different filter primitives"""
-    tag_names = [
-        'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite',
-        'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feFlood',
-        'feGaussianBlur', 'feImage', 'feMerge', 'feMorphology', 'feOffset',
-        'feSpecularLighting', 'feTile', 'feTurbulence'
-    ]
-
 class Filter(BaseElement):
     """A filter (usually in defs)"""
     tag_name = 'filter'
@@ -491,17 +500,59 @@ class Filter(BaseElement):
         elem.update(**args)
         return elem
 
-class Group(ShapeElement):
-    """Any group element (layer or regular group)"""
-    tag_name = 'g'
-    is_layer = lambda self: self.groupmode == 'layer'
+    class Primitive(BaseElement):
+        pass
 
-    @classmethod
-    def new(cls, label, is_layer=False, *children, **attrs):
-        attrs['inkscape:label'] = label
-        if is_layer is True:
-            attrs['inkscape:groupmode'] = 'layer'
-        return super(Group, cls).new(*children, **attrs)
+    class Blend(Primitive):
+        tag_name = 'feBlend'
+
+    class ColorMatrix(Primitive):
+        tag_name = 'feColorMatrix'
+
+    class ComponentTransfer(Primitive):
+        tag_name = 'feComponentTransfer'
+
+    class Composite(Primitive):
+        tag_name = 'feComposite'
+
+    class ConvolveMatrix(Primitive):
+        tag_name = 'feConvolveMatrix'
+
+    class DiffuseLighting(Primitive):
+        tag_name = 'feDiffuseLighting'
+
+    class DisplacementMap(Primitive):
+        tag_name = 'feDisplacementMap'
+
+    class Flood(Primitive):
+        tag_name = 'feFlood'
+
+    class GaussianBlur(Primitive):
+        tag_name = 'feGaussianBlur'
+
+    class Image(Primitive):
+        tag_name = 'feImage'
+
+    class Merge(Primitive):
+        tag_name = 'feMerge'
+
+    class Morphology(Primitive):
+        tag_name = 'feMorphology'
+
+    class Offset(Primitive):
+        tag_name = 'feOffset'
+
+    class SpecularLighting(Primitive):
+        tag_name = 'feSpecularLighting'
+
+    class Tile(Primitive):
+        tag_name = 'feTile'
+
+    class Turbulence(Primitive):
+        tag_name = 'feTurbulence'
+
+
+class GroupBase(ShapeElement):
 
     def get_path(self):
         ret = Path()
@@ -521,6 +572,17 @@ class Group(ShapeElement):
                 bbox += child.bounding_box(transform=transform)
         return bbox
 
+
+class Group(GroupBase):
+    """Any group element (layer or regular group)"""
+    tag_name = 'g'
+
+    @classmethod
+    def new(cls, label, *children, **attrs):
+        attrs['inkscape:label'] = label
+        return super(Group, cls).new(*children, **attrs)
+
+
     def effective_style(self):
         """A blend of each child's style mixed together (last child wins)"""
         style = self.style
@@ -533,23 +595,34 @@ class Group(ShapeElement):
         """Return the type of group this is"""
         return self.get('inkscape:groupmode', 'group')
 
-class Anchor(Group):
+
+class Layer(Group):
+    """Inkscape extension of svg:g"""
+
+    def _init(self):
+        self.set('inkscape:groupmode', 'layer')
+
+    @classmethod
+    def _is_class_element(cls, el):  # type: (etree.Element) -> bool
+        return el.attrib.get(addNS('inkscape:groupmode'), None) == "layer"
+
+
+class Anchor(GroupBase):
     """An anchor or link tag"""
     tag_name = 'a'
 
     @classmethod
     def new(cls, href, *children, **attrs):
         attrs['xlink:href'] = href
-        return super(Group, cls).new(*children, **attrs)
+        return super(Anchor, cls).new(*children, **attrs)
 
-class PathElement(ShapeElement):
-    """Provide a useful extension for path elements"""
-    tag_name = 'path'
+
+class PathElementBase(ShapeElement):
     get_path = lambda self: self.get('d')
 
     @classmethod
     def new(cls, path, **attrs):
-        return super(PathElement, cls).new(d=Path(path), **attrs)
+        return super(PathElementBase, cls).new(d=Path(path), **attrs)
 
     def set_path(self, path):
         """Set the given data as a path as the 'd' attribute"""
@@ -573,6 +646,11 @@ class PathElement(ShapeElement):
             self.set('inkscape:original-d', str(Path(path)))
         else:
             self.path = path
+
+
+class PathElement(PathElementBase):
+    """Provide a useful extension for path elements"""
+    tag_name = 'path'
 
     @classmethod
     def arc(cls, center, rx, ry=None, **kw):
@@ -606,10 +684,19 @@ class Pattern(BaseElement):
     tag_name = 'pattern'
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('patternTransform', Transform),)
 
+
 class Gradient(BaseElement):
     """A gradient instruction usually in the defs"""
-    tag_names = ('linearGradient', 'radialGradient')
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('gradientTransform', Transform),)
+
+
+class LinearGradient(Gradient):
+    tag_name = 'linearGradient'
+
+
+class RadialGradient(Gradient):
+    tag_name = 'radialGradient'
+
 
 class Polygon(ShapeElement):
     """A closed polyline"""
@@ -630,9 +717,8 @@ class Line(ShapeElement):
                                     x2=end.x, y2=end.y, **attrs)
 
 
-class Rectangle(ShapeElement):
+class RectangleBase(ShapeElement):
     """Provide a useful extension for rectangle elements"""
-    tag_name = 'rect'
     left = property(lambda self: float(self.get('x', '0')))
     top = property(lambda self: float(self.get('y', '0')))
     right = property(lambda self: self.left + self.width)
@@ -641,10 +727,6 @@ class Rectangle(ShapeElement):
     height = property(lambda self: float(self.get('height', '0')))
     rx = property(lambda self: float(self.get('rx', self.get('ry', 0.0))))
     ry = property(lambda self: float(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
-
-    @classmethod
-    def new(cls, left, top, width, height, **attrs):
-        return super(Rectangle, cls).new(x=left, y=top, width=width, height=height, **attrs)
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -660,7 +742,16 @@ class Rectangle(ShapeElement):
         return 'M {0.left},{0.top} h{0.width}v{0.height}h{1} z'.format(self, -self.width)
 
 
-class Image(Rectangle):
+class Rectangle(RectangleBase):
+    """Provide a useful extension for rectangle elements"""
+    tag_name = 'rect'
+
+    @classmethod
+    def new(cls, left, top, width, height, **attrs):
+        return super(Rectangle, cls).new(x=left, y=top, width=width, height=height, **attrs)
+
+
+class Image(RectangleBase):
     """Provide a useful extension for image elements"""
     tag_name = 'image'
 
@@ -728,7 +819,7 @@ class Use(ShapeElement):
         return copy
 
 
-class ClipPath(Group):
+class ClipPath(GroupBase):
     """A path used to clip objects"""
     tag_name = 'clipPath'
 
@@ -900,10 +991,12 @@ class Tspan(ShapeElement):
         x2 = x1 + 0 # XXX This is impossible to calculate!
         return BoundingBox((x1, x2), (y1, y2))
 
-class Marker(Group):
+
+class Marker(GroupBase):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads
      or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
     tag_name = 'marker'
+
 
 class Switch(BaseElement):
     """A switch element"""
@@ -924,7 +1017,7 @@ class FontFace(BaseElement):
     tag_name = 'font-face'
 
 
-class Glyph(PathElement):
+class Glyph(PathElementBase):
     """An svg font glyph element"""
     tag_name = 'glyph'
 

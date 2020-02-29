@@ -44,7 +44,7 @@ class TarLayers(inkex.OutputExtension):
 
     def layers(self, document):
         for node in document.getroot().iterchildren():
-            if isinstance(node, inkex.Group) and node.is_layer() and node.label:
+            if isinstance(node, inkex.Layer) and node.label:
                 yield (node.label, node)
 
     def io_document(self, name, doc):

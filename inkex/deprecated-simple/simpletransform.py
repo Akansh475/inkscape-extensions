@@ -50,8 +50,8 @@ def composeParents(node, mat):
 
 @deprecate
 def applyTransformToNode(mat, node):
-    """elem.transform *= Transform(mat)"""
-    node.transform *= Transform(mat)
+    """elem.transform = Transform(mat) * elem.transform """
+    node.transform = Transform(mat) * node.transform
 
 @deprecate
 def applyTransformToPoint(mat, pt):

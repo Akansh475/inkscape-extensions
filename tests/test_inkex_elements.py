@@ -245,6 +245,23 @@ class CoreElementTestCase(ElementTestCase):
         self.assertEqual(elem.get('id'), 'Thing85')
         elem.set_random_id()
         self.assertEqual(elem.get('id'), 'path5392')
+        # No document root, no random id allowed
+        self.assertRaises(FragmentError, elem.copy().set_random_id)
+
+    def test_copy(self):
+        """Test copying elements"""
+        elem = self.svg.getElementById('D')
+        cpy = elem.copy()
+        self.assertFalse(cpy.getparent())
+        self.assertFalse(cpy.get('id'))
+
+    def test_duplicate(self):
+        """Test duplicating elements"""
+        elem = self.svg.getElementById('D')
+        dup = elem.duplicate()
+        self.assertTrue(dup.get('id'))
+        self.assertNotEqual(elem.get('id'), dup.get('id'))
+        self.assertEqual(elem.getparent(), dup.getparent())
 
     def test_random_ids(self):
         """Test setting a tree of ids"""

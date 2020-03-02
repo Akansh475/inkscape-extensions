@@ -355,6 +355,13 @@ class BaseElement(etree.ElementBase):
         elem.set('id', None)
         return elem
 
+    def duplicate(self):
+        """Like copy(), but the copy stays in the tree and sets a random id"""
+        elem = self.copy()
+        self.addnext(elem)
+        elem.set_random_id()
+        return elem
+
     def __str__(self):
         # We would do more here, but lxml is VERY unpleseant when it comes to
         # namespaces, basically over printing details and providing no

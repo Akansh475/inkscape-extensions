@@ -131,8 +131,7 @@ class PathScatter(pathmodifier.Diffeo):
         self.patternNode.getparent().append(self.gNode)
 
         if self.options.copymode == "copy":
-            duplist = self.duplicateNodes({sid: self.patternNode})
-            self.patternNode = list(duplist.values())[0]
+            self.patternNode = self.patternNode.duplicate()
 
         # TODO: allow 4th option: duplicate the first copy and clone the next ones.
         if self.options.copymode == "clone":

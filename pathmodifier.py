@@ -27,8 +27,6 @@ As an example, a second class (Diffeo) is derived from it,
 to implement deformations of the form X=f(x,y), Y=g(x,y)...
 """
 
-import copy
-
 import inkex
 from inkex.elements import PathElement, Group, Use
 
@@ -37,15 +35,6 @@ from inkex.deprecated import zSort # pylint: disable=unused-import
 
 class PathModifier(inkex.EffectExtension):
     """Select list manipulation"""
-    def duplicateNodes(self, nodes):
-        clones = {}
-        for node in nodes.values():
-            clone = copy.deepcopy(node)
-            clone.set_random_id()
-            node.getparent().append(clone)
-            clones[clone.get("id")] = clone
-        return clones
-
     def expand_groups(self, elements, transferTransform=True):
         for node_id, node in list(elements.items()):
             if isinstance(node, inkex.Group):
@@ -85,8 +74,6 @@ class PathModifier(inkex.EffectExtension):
 
     def effect(self):
         raise NotImplementedError("overwrite this method in subclasses")
-        # self.duplicateNodes(self.selected)
-        # self.expand_clones(self.selected, True)
         self.objects_to_paths(self.svg.selected, True)
         self.bbox = self.svg.get_selected_bbox()
         for node in self.svg.get_selected(PathElement):
@@ -129,6 +116,3 @@ class Diffeo(PathModifier):
                 for ctlpt in sub:
                     self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
             node.path = path
-
-if __name__ == '__main__':
-    Diffe().run()

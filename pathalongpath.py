@@ -93,7 +93,8 @@ def linearize(p, tolerance=0.001):
     return new, lengths
 
 
-class PathAlongPath(pathmodifier.Diffeo):
+class PathAlongPath(pathmodifier.PathModifier):
+    """Deform a path along a second path"""
     def add_arguments(self, pars):
         pars.add_argument("-n", "--noffset", type=float, default=0.0, help="normal offset")
         pars.add_argument("-t", "--toffset", type=float, default=0.0, help="tangential offset")
@@ -107,25 +108,21 @@ class PathAlongPath(pathmodifier.Diffeo):
                           help="duplicate pattern before deformation")
         pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
 
-    def prepareSelectionList(self):
+    def prepare_selection(self):
+        """
+        first selected->pattern, all but first selected-> skeletons
+        """
+        skeletons = self.svg.get_z_selected()
 
-        idList = self.svg.get_z_selected()
-        _id = list(idList)[-1]
-        self.patterns = {_id: self.svg.selected[_id]}
-
-        #        ##first selected->pattern, all but first selected-> skeletons
-        #        id = self.options.ids[-1]
-        #        self.patterns={id:self.selected[id]}
-
+        elem = skeletons.pop(list(skeletons)[-1])
         if self.options.duplicate:
-            self.patterns = self.duplicateNodes(self.patterns)
-        self.expand_clones(self.patterns, True, True)
-        self.objects_to_paths(self.patterns)
-        del self.svg.selected[_id]
+            elem = elem.duplicate()
+        pattern = elem.to_path_element()
+        elem.replace_with(pattern)
 
-        self.skeletons = self.svg.selected
-        self.expand_clones(self.skeletons, True, False)
-        self.objects_to_paths(self.skeletons)
+        self.expand_clones(skeletons, True, False)
+        self.objects_to_paths(skeletons)
+        return pattern, skeletons
 
     def lengthtotime(self, l):
         """
@@ -145,7 +142,7 @@ class PathAlongPath(pathmodifier.Diffeo):
         t = l / self.lengths[min(i, len(self.lengths) - 1)]
         return i, t
 
-    def applyDiffeo(self, bpt, vects=()):
+    def apply_diffeomorphism(self, bpt, vects=()):
         """
         The kernel of this stuff:
         bpt is a base point and for v in vectors, v'=v-p is a tangent vector at bpt.
@@ -182,9 +179,8 @@ class PathAlongPath(pathmodifier.Diffeo):
 
     def effect(self):
         if len(self.options.ids) < 2:
-            inkex.errormsg(_("This extension requires two selected paths."))
-            return
-        self.prepareSelectionList()
+            raise inkex.AbortExtension("This extension requires two selected paths.")
+
         self.options.wave = (self.options.kind == "Ribbon")
         if self.options.copymode == "Single":
             self.options.repeat = False
@@ -199,27 +195,27 @@ class PathAlongPath(pathmodifier.Diffeo):
             self.options.repeat = True
             self.options.stretch = True
 
-        bbox = sum([node.bounding_box() for node in self.patterns.values()], None)
-        #bbox = simpletransform.computeBBox(self.patterns.values())
+        pattern, skels = self.prepare_selection()
+        bbox = pattern.bounding_box()
 
         if self.options.vertical:
             # flipxy(bbox)...
             bbox = inkex.BoundingBox(-bbox.y, -bbox.x)
 
         width = bbox.width
-        dx = width + self.options.space
-        if dx < 0.01:
-            exit(_("The total length of the pattern is too small :\nPlease choose a larger object or set 'Space between copies' > 0"))
+        delta_x = width + self.options.space
+        if delta_x < 0.01:
+            raise inkex.AbortExtension("The total length of the pattern is too small\n"\
+                "Please choose a larger object or set 'Space between copies' > 0")
 
-        for id, node in self.patterns.items():
-            if node.tag == inkex.addNS('path', 'svg') or node.tag == 'path':
-                node.path = self._sekl_call(node.path.to_superpath(), dx, bbox)
+        if isinstance(pattern, inkex.PathElement):
+            pattern.path = self._sekl_call(skels, pattern.path.to_superpath(), delta_x, bbox)
 
-    def _sekl_call(self, p0, dx, bbox):
+    def _sekl_call(self, skeletons, p0, dx, bbox):
         if self.options.vertical:
             flipxy(p0)
         newp = []
-        for skelnode in self.skeletons.values():
+        for skelnode in skeletons.values():
             self.curSekeleton = skelnode.path.to_superpath()
             if self.options.vertical:
                 flipxy(self.curSekeleton)
@@ -241,7 +237,7 @@ class PathAlongPath(pathmodifier.Diffeo):
                     bbox.x.maximum = bbox.x.minimum + width
                     new = []
                     for sub in path:
-                        for i in range(0, NbCopies, 1):
+                        for _ in range(NbCopies):
                             new.append(copy.deepcopy(sub))
                             offset(sub, dx, 0)
                     path = new
@@ -251,13 +247,13 @@ class PathAlongPath(pathmodifier.Diffeo):
 
                 if self.options.stretch:
                     if not width:
-                        exit(_("The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width."))
+                        raise inkex.AbortExtension("The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width.")
                     for sub in path:
                         stretch(sub, length / width, 1, self.skelcomp[0])
 
                 for sub in path:
                     for ctlpt in sub:
-                        self.applyDiffeo(ctlpt[1], (ctlpt[0], ctlpt[2]))
+                        self.apply_diffeomorphism(ctlpt[1], (ctlpt[0], ctlpt[2]))
 
                 if self.options.vertical:
                     flipxy(path)

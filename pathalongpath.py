@@ -246,10 +246,10 @@ class PathAlongPath(pathmodifier.PathModifier):
                     offset(sub, xoffset, yoffset)
 
                 if self.options.stretch:
-                    if not width:
+                    if not bbox.width:
                         raise inkex.AbortExtension("The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width.")
                     for sub in path:
-                        stretch(sub, length / width, 1, self.skelcomp[0])
+                        stretch(sub, length / bbox.width, 1, self.skelcomp[0])
 
                 for sub in path:
                     for ctlpt in sub:

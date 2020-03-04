@@ -4,10 +4,98 @@ Test Inkex transformational logic.
 """
 from math import sqrt, pi
 from inkex.transforms import (
-    Vector2d, BoundingBox, BoundingInterval, Transform, DirectedLineSegment
+    Vector2d, ImmutableVector2d, BoundingBox, BoundingInterval, Transform, DirectedLineSegment
 )
 from inkex.utils import PY3
 from inkex.tester import TestCase
+import pytest
+
+class ImmutableVector2dTest(TestCase):
+    """Test the ImmutableVector2d object"""
+    def test_vector_creation(self):
+        """Test ImmutableVector2d creation"""
+        vec0 = ImmutableVector2d(15, 22)
+        self.assertEqual(vec0.x, 15)
+        self.assertEqual(vec0.y, 22)
+
+        vec1 = ImmutableVector2d()
+        self.assertEqual(vec1.x, 0)
+        self.assertEqual(vec1.y, 0)
+
+        vec2 = ImmutableVector2d((17, 32))
+        self.assertEqual(vec2.x, 17)
+        self.assertEqual(vec2.y, 32)
+
+        vec3 = ImmutableVector2d(vec0)
+        self.assertEqual(vec3.x, 15)
+        self.assertEqual(vec3.y, 22)
+
+        self.assertRaises(ValueError, ImmutableVector2d, (1))
+        self.assertRaises(ValueError, ImmutableVector2d, (1, 2, 3))
+
+    def test_binary_operators(self):
+        """Test binary operators for vector2d"""
+        vec1 = ImmutableVector2d(15, 22)
+        vec2 = ImmutableVector2d(5, 3)
+
+        self.assertTrue((vec1 - vec2).is_close((10, 19)))
+        self.assertTrue((vec1 - (5, 3)).is_close((10, 19)))
+        self.assertTrue(((15, 22) - vec2).is_close((10, 19)))
+        self.assertTrue((vec1 + vec2).is_close((20, 25)))
+        self.assertTrue((vec1 + (5, 3)).is_close((20, 25)))
+        self.assertTrue(((15, 22) + vec2).is_close((20, 25)))
+        self.assertTrue((vec1 * 2).is_close((30, 44)))
+        self.assertTrue((2 * vec1).is_close((30, 44)))
+        self.assertTrue((vec1 / 2).is_close((7.5, 11)))
+        self.assertTrue((vec1.__div__(2)).is_close((7.5, 11)))
+        self.assertTrue((vec1 // 2).is_close((7.5, 11)))
+
+    def test_ioperators(self):
+        """Test operators for vector2d"""
+        vec0 = vec = ImmutableVector2d(15, 22)
+        vec += (1, 1)
+        vec = ImmutableVector2d(vec)
+        self.assertTrue(vec.is_close((16, 23)))
+        vec -= (10, 20)
+        vec = ImmutableVector2d(vec)
+        self.assertTrue(vec.is_close((6, 3)))
+        vec *= 5
+        vec = ImmutableVector2d(vec)
+        self.assertTrue(vec.is_close((30, 15)))
+        vec /= 90
+        vec = ImmutableVector2d(vec)
+        self.assertTrue(vec.is_close((1.0/3, 1.0/6)))
+        vec //= 1.0/3
+        vec = ImmutableVector2d(vec)
+        self.assertTrue(vec.is_close((1, 0.5)))
+        self.assertTrue(vec0.is_close((15, 22)))
+        self.assertFalse(vec0.is_close(vec))
+
+    def test_unary_operators(self):
+        """Test unary operators"""
+        vec = ImmutableVector2d(1, 2)
+        self.assertTrue((-vec).is_close((-1, -2)))
+        self.assertTrue((+vec).is_close(vec))
+        self.assertTrue(+vec is not vec)  # returned value is a copy
+
+    def test_representations(self):
+        """Test ImmutableVector2d Repr"""
+        self.assertEqual(str(ImmutableVector2d(1, 2)), "1, 2")
+        self.assertEqual(repr(ImmutableVector2d(1, 2)), "Vector2d(1, 2)")
+        self.assertEqual(ImmutableVector2d(1, 2).to_tuple(), (1, 2))
+
+    def test_assign(self):
+        """Test ImmutableVector2d assignement"""
+        vec = ImmutableVector2d(10, 20)
+        with pytest.raises(AttributeError):
+            vec.assign(5, 10)
+
+    def test_getitem(self):
+        """Test getitem for ImmutableVector2d"""
+        vec = ImmutableVector2d(10, 20)
+        self.assertEqual(len(vec), 2)
+        self.assertEqual(vec[0], 10)
+        self.assertEqual(vec[1], 20)
 
 
 class Vector2dTest(TestCase):
@@ -52,7 +140,7 @@ class Vector2dTest(TestCase):
 
     def test_ioperators(self):
         """Test operators for vector2d"""
-        vec = Vector2d(15, 22)
+        vec0 = vec = Vector2d(15, 22)
         vec += (1, 1)
         self.assertTrue(vec.is_close((16, 23)))
         vec -= (10, 20)
@@ -63,6 +151,8 @@ class Vector2dTest(TestCase):
         self.assertTrue(vec.is_close((1.0/3, 1.0/6)))
         vec //= 1.0/3
         self.assertTrue(vec.is_close((1, 0.5)))
+        self.assertFalse(vec0.is_close((15, 22)))
+        self.assertTrue(vec0.is_close(vec))
 
     def test_unary_operators(self):
         """Test unary operators"""

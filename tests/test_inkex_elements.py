@@ -489,10 +489,10 @@ class CircleTest(ElementTestCase):
 
     def test_new(self):
         """Test new circles"""
-        elem = Circle.new(10, 10, 50)
-        self.assertElement(elem, b'<circle cx="10" cy="10" r="50"/>')
-        elem = Ellipse.new(10, 10, 15, 10)
-        self.assertElement(elem, b'<ellipse cx="10" cy="10" rx="15" ry="10"/>')
+        elem = Circle.new((10, 10), 50)
+        self.assertElement(elem, b'<circle cx="10.0" cy="10.0" r="50"/>')
+        elem = Ellipse.new((10, 10), (15, 10))
+        self.assertElement(elem, b'<ellipse cx="10.0" cy="10.0" rx="15.0" ry="10.0"/>')
 
     def test_path(self):
         """Circle path"""

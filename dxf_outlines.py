@@ -39,7 +39,7 @@ import dxf_templates
 import inkex
 from inkex import colors, bezier
 from inkex.transforms import Transform
-from inkex.elements import Group, Layer, Use, PathElement, Rectangle, Line, Circle
+from inkex.elements import Group, Layer, Use, PathElement, Rectangle, Line, Circle, Ellipse
 
 def get_matrix(u, i, j):
     if j == i + 2:
@@ -196,7 +196,7 @@ class DxfOutlines(inkex.OutputExtension):
         if hsl[2]:
             self.color = 1 + (int(6 * hsl[0] + 0.5) % 6)  # use 6 hues
 
-        if not isinstance(node, (PathElement, Rectangle, Line, Circle)):
+        if not isinstance(node, (PathElement, Rectangle, Line, Circle, Ellipse)):
             return
 
         # Transforming /after/ superpath is more reliable than before

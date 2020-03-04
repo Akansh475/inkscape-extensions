@@ -32,7 +32,7 @@ from lxml import etree
 
 from .paths import Path
 from .styles import Style, AttrFallbackStyle, StyleSheet, Classes
-from .transforms import BoundingBox, Transform, Vector2d
+from .transforms import BoundingBox, Transform, ImmutableVector2d, Vector2d
 from .utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 from .units import convert_unit
 
@@ -762,38 +762,74 @@ class Image(RectangleBase):
     """Provide a useful extension for image elements"""
     tag_name = 'image'
 
-class Circle(ShapeElement):
-    """Provide a useful extension for circle elements"""
-    tag_name = 'circle'
-    radius = property(lambda self: self.get('r', '0'))
-    radius_x = property(lambda self: float(self.get('rx', self.radius)))
-    radius_y = property(lambda self: float(self.get('ry', self.radius)))
-    center_x = property(lambda self: float(self.get('cx', '0')))
-    center_y = property(lambda self: float(self.get('cy', '0')))
-    top = property(lambda self: self.center_y - self.radius_y)
-    bottom = property(lambda self: self.center_y + self.radius_y)
-    left = property(lambda self: self.center_x - self.radius_x)
-    right = property(lambda self: self.center_x + self.radius_x)
 
-    @classmethod
-    def new(cls, center_x, center_y, radius, **attrs):
-        return super(Circle, cls).new(cx=center_x, cy=center_y, r=radius, **attrs)
+class EllipseBase(ShapeElement):
+    """Absorbs common part of Circle and Ellipse"""
 
     def get_path(self):
         """Calculate the arc path of this circle"""
-        return ('M {0.center_x},{0.top} '
-                'a {0.radius_x},{0.radius_y} 0 1 0 {0.radius_x}, {0.radius_y} '
-                'a {0.radius_x},{0.radius_y} 0 0 0 -{0.radius_x}, -{0.radius_y} z'
-               ).format(self)
+        rx, ry = self._rxry()
+        cx, y = self.center.x, self.center.y - ry
+        return ('M {cx},{y} '
+                'a {rx},{ry} 0 1 0 {rx}, {ry} '
+                'a {rx},{ry} 0 0 0 -{rx}, -{ry} z'
+                ).format(cx=cx, y=y, rx=rx, ry=ry)
+
+    @property
+    def center(self):
+        return ImmutableVector2d(float(self.get('cx', '0')), float(self.get('cy', '0')))
+
+    @center.setter
+    def center(self, value):
+        value = Vector2d(value)
+        self.set("cx", value.x)
+        self.set("cy", value.y)
+
+    def _rxry(self):  # type: () -> Vector2d()
+        """Helper function """
+        raise NotImplementedError()
+
+    @classmethod
+    def new(cls, center, radius, **attrs):
+        circle = super(EllipseBase, cls).new(**attrs)
+        circle.center = center
+        circle.radius = radius
+        return circle
 
 
-class Ellipse(Circle):
+class Circle(EllipseBase):
+    """Provide a useful extension for circle elements"""
+    tag_name = 'circle'
+
+    @property
+    def radius(self):
+        return float(self.get('r', '0'))
+
+    @radius.setter
+    def radius(self, value):
+        self.set("r", value)
+
+    def _rxry(self):
+        r = self.radius
+        return Vector2d(r, r)
+
+
+class Ellipse(EllipseBase):
     """Provide a similar extension to the Circle interface"""
     tag_name = 'ellipse'
 
-    @classmethod
-    def new(cls, center_x, center_y, radius_x, radius_y, **attrs):
-        return super(Circle, cls).new(cx=center_x, cy=center_y, rx=radius_x, ry=radius_y, **attrs)
+    @property
+    def radius(self):
+        return ImmutableVector2d(float(self.get('rx', '0')), float(self.get('ry', '0')))
+
+    @radius.setter
+    def radius(self, value):
+        value = Vector2d(value)
+        self.set("rx", str(value.x))
+        self.set("ry", str(value.y))
+
+    def _rxry(self):
+        return self.radius
 
 
 class Use(ShapeElement):

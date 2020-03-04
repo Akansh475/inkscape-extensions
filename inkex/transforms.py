@@ -35,7 +35,7 @@ from .utils import strargs, KeyDict, PY3
 try:
     from typing import overload, List, Tuple, Union, Optional  # pylint: disable=unused-import
 
-    VectorLike = Union["Vector2d", Tuple[float, float]]  # pylint: disable=invalid-name
+    VectorLike = Union["ImmutableVector2d", Tuple[float, float]]  # pylint: disable=invalid-name
     BoundingIntervalArgs = Union['BoundingInterval', Tuple[float, float], float]  # pylint: disable=invalid-name
 except ImportError:
     overload = lambda x: x
@@ -54,13 +54,12 @@ CUSTOM_DIRECTION = {270: 'tb', 90: 'bt', 0: 'lr', 360: 'lr', 180: 'rl'}
 DIRECTION = ['tb', 'bt', 'lr', 'rl', 'ro', 'ri']
 
 
-class Vector2d(object):
-    """
-    Represents an element of 2-dimensional Euclidean space
-    """
+class ImmutableVector2d(object):
+    _x = 0
+    _y = 0
 
-    x = 0.0
-    y = 0.0
+    x = property(lambda self: self._x)
+    y = property(lambda self: self._y)
 
     @overload
     def __init__(self):  # type: () -> None
@@ -75,7 +74,8 @@ class Vector2d(object):
         pass
 
     def __init__(self, *args):
-        self.x, self.y = self._parse(args)
+        x, y = self._parse(args)
+        self._x, self._y = float(x), float(y)
 
     @staticmethod
     def _parse(args):
@@ -83,83 +83,55 @@ class Vector2d(object):
             return 0.0, 0.0
         if len(args) == 1:
             point = args[0]
-            if isinstance(point, Vector2d):
+            if isinstance(point, ImmutableVector2d):
                 return point.x, point.y
             elif isinstance(point, (tuple, list)) and len(point) == 2:
                 return point
             elif isinstance(point, str) and point.count(',') == 1:
                 x, y = point.split(',')
-                return float(x), float(y)
+                return x, y
         elif len(args) == 2:
             x, y = args
             if isinstance(x, (int, float)) and isinstance(y, (int, float)):
                 return x, y
         raise ValueError("Vector2d can't be constructed from {}".format(repr(args)))
 
-    def __add__(self, other):  # type: (VectorLike) -> VectorLike
+    def __add__(self, other):  # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(self.x + other.x, self.y + other.y)
 
-    def __iadd__(self, other):  # type: (VectorLike) -> VectorLike
-        other = Vector2d(other)
-        self.x += other.x
-        self.y += other.y
-        return self
-
-    def __radd__(self, other):  # type: (VectorLike) -> VectorLike
+    def __radd__(self, other):  # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(self.x + other.x, self.y + other.y)
 
-    def __sub__(self, other):  # type: (VectorLike) -> VectorLike
+    def __sub__(self, other):  # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(self.x - other.x, self.y - other.y)
 
-    def __isub__(self, other):  # type: (VectorLike) -> VectorLike
-        other = Vector2d(other)
-        self.x -= other.x
-        self.y -= other.y
-        return self
-
-    def __abs__(self):
-        return self.length
-
-    @overload
-    def assign(self, x, y):  # type: (float, float) -> None
-        pass
-
-    @overload
-    def assign(self, other):  # type: (VectorLike) -> None
-        pass
-
-    def assign(self, *args):
-        self.x, self.y = Vector2d(*args)
-
-    def __rsub__(self, other):  # type: (VectorLike) -> VectorLike
+    def __rsub__(self, other):  # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(-self.x + other.x, -self.y + other.y)
 
-    def __neg__(self):  # type: () -> VectorLike
+    def __neg__(self):  # type: () -> Vector2d
         return Vector2d(-self.x, -self.y)
 
-    def __pos__(self):  # type: () -> VectorLike
+    def __pos__(self):  # type: () -> Vector2d
         return Vector2d(self.x, self.y)
 
-    def __floordiv__(self, factor):  # type: (float) -> VectorLike
+    def __floordiv__(self, factor):  # type: (float) -> Vector2d
         return Vector2d(self.x / float(factor), self.y / float(factor))
 
-    def __truediv__(self, factor):  # type: (float) -> VectorLike
+    def __truediv__(self, factor):  # type: (float) -> Vector2d
         return Vector2d(self.x / float(factor), self.y / float(factor))
 
-    def __div__(self, factor):  # type: (float) -> VectorLike
+    def __div__(self, factor):  # type: (float) -> Vector2d
         return Vector2d(self.x / float(factor), self.y / float(factor))
 
-    def __mul__(self, factor):  # type: (float) -> VectorLike
+    def __mul__(self, factor):  # type: (float) -> Vector2d
         return Vector2d(self.x * factor, self.y * factor)
 
-    def __imul__(self, factor):  # type: (float) -> VectorLike
-        self.x *= factor
-        self.y *= factor
-        return self
+    def __abs__(self):
+        return self.length
 
     def __rmul__(self, factor):  # type: (float) -> VectorLike
         return Vector2d(self.x * factor, self.y * factor)
@@ -196,6 +168,64 @@ class Vector2d(object):
     @property
     def length(self):  # type: () -> float
         return sqrt(fabs(self.dot(self)))
+
+
+class Vector2d(ImmutableVector2d):
+    """
+    Represents an element of 2-dimensional Euclidean space
+    """
+
+    @ImmutableVector2d.x.setter
+    def x(self, value):
+        self._x = float(value)
+
+    @ImmutableVector2d.y.setter
+    def y(self, value):
+        self._y = float(value)
+
+    def __iadd__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        self.x += other.x
+        self.y += other.y
+        return self
+
+    def __isub__(self, other):  # type: (VectorLike) -> VectorLike
+        other = Vector2d(other)
+        self.x -= other.x
+        self.y -= other.y
+        return self
+
+    def __imul__(self, factor):  # type: (float) -> VectorLike
+        self.x *= factor
+        self.y *= factor
+        return self
+
+    def __idiv__(self, factor):  # type: (float) -> VectorLike
+        self.x /= factor
+        self.y /= factor
+        return self
+
+    def __itruediv__(self, factor):  # type: (float) -> VectorLike
+        self.x /= factor
+        self.y /= factor
+        return self
+
+    def __ifloordiv__(self, factor):  # type: (float) -> VectorLike
+        self.x /= factor
+        self.y /= factor
+        return self
+
+    @overload
+    def assign(self, x, y):  # type: (float, float) -> None
+        pass
+
+    @overload
+    def assign(self, other):  # type: (VectorLike) -> None
+        pass
+
+    def assign(self, *args):
+        self.x, self.y = Vector2d(*args)
+
 
 
 class Transform(object):

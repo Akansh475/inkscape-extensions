@@ -49,7 +49,7 @@
             <param name="fontsize" type="int" min="1" max="1000" gui-text="Font size (px):">12</param>
             <param name="offset" type="float" min="-10000" max="10000" gui-text="Offset (px):">-6</param>
             <param name="precision" type="int" min="0" max="25" gui-text="Precision:">2</param>
-            <param name="scale" type="float" min="1e-8" max="1e10" gui-text="Scale Factor (Drawing:Real Length) = 1:">1</param>
+            <param name="scale" type="float" min="1e-8" max="1e10" precision="3" gui-text="Scale Factor (Real:Drawing Length):">1</param>
             <param name="unit" type="optiongroup" appearance="combo" gui-text="Length Unit:">
                 <option translatable="no" value="px">px</option>
                 <option translatable="no" value="pt">pt</option>

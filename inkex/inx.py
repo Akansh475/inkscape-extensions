@@ -158,7 +158,9 @@ class ParamElement(etree.ElementBase):
     @property
     def options(self):
         """Return a list of option values"""
-        return [option.get('value') for option in self.xpath('//inx:option', namespaces=NSS)]
+        if self.param_type == 'notebook':
+            return [option.get('name') for option in self.xpath('inx:page', namespaces=NSS)]
+        return [option.get('value') for option in self.xpath('inx:option', namespaces=NSS)]
 
     def __repr__(self):
         return "<param name='{0.name}' type='{0.param_type}'>".format(self)

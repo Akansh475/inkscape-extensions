@@ -1060,7 +1060,7 @@ class QrCode(inkex.GenerateExtension):
         pars.add_argument("--typenumber", type=int, default=0)
         pars.add_argument("--correctionlevel", type=int, default=0)
         pars.add_argument("--encoding", default="latin_1")
-        pars.add_argument("--modulesize", type=int, default=10)
+        pars.add_argument("--modulesize", type=float, default=10.0)
         pars.add_argument("--invert", type=inkex.Boolean, default="false")
         pars.add_argument("--drawtype", default="greedy")
         pars.add_argument("--smoothval", type=float, default=0.2)

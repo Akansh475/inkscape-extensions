@@ -39,7 +39,7 @@ class Export(TempDirMixin, inkex.OutputExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab', type=str, dest='what')
         pars.add_argument('--type', type=str, dest='type', default='png')
-        pars.add_argument('--resolution', type=str, default='96')
+        pars.add_argument('--resolution', type=int, default=96)
 
     def save(self, stream):
         # Check whether the JessyInk-script is present (indicating
@@ -75,7 +75,7 @@ class Export(TempDirMixin, inkex.OutputExtension):
                 newname = "{}.{}".format(name, self.options.type)
                 filename = take_snapshot(self.document, dirname=self.tempdir,
                                          name=name, ext=self.options.type,
-                                         dpi=int(self.options.resolution))
+                                         dpi=self.options.resolution)
                 output.write(filename, newname)
 
                 node.style['display'] = "none"

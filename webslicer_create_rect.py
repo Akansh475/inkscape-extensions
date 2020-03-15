@@ -26,7 +26,7 @@ class CreateRect(WebSlicerMixin, inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--name")
         pars.add_argument("--format", default="png")
-        pars.add_argument("--dpi", type=int)
+        pars.add_argument("--dpi", type=float)
         pars.add_argument("--dimension")
         pars.add_argument("--bg-color")
         pars.add_argument("--quality", type=int)

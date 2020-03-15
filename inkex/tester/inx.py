@@ -10,8 +10,10 @@ from ..inx import InxFile
 INTERNAL_ARGS = ('help', 'output', 'id', 'selected-nodes')
 ARG_TYPES = {
     'Boolean': 'bool',
+    'Color': 'color',
     'str': 'string',
-    'int': 'integer',
+    'int': 'int',
+    'float': 'float',
 }
 
 class InxMixin(object):
@@ -47,7 +49,13 @@ class InxMixin(object):
         mismatch_b = list(set(args) ^ set(params) & set(args))
         self.assertFalse(mismatch_a, "{}: Inx params missing from arg parser".format(inx.filename))
         self.assertFalse(mismatch_b, "{}: Script args missing from inx xml".format(inx.filename))
-        #print(f"{inx.ident} PARAMS {mismatch_a} {mismatch_b}")
+
+        for param in args:
+            if params[param]['type'] and args[param]['type']:
+                self.assertEqual(
+                    params[param]['type'],
+                    args[param]['type'],
+                    "Type is not the same for {}:param:{}".format(inx.filename, param))
 
     def introspect_arg_parser(self, arg_parser):
         """Pull apart the arg parser to find out what we have in it"""
@@ -70,14 +78,18 @@ class InxMixin(object):
     @staticmethod
     def parse_param(param):
         """Pull apart the param element in the inx file"""
-        if param.param_type == 'optiongroup':
+        if param.param_type in ('optiongroup', 'notebook'):
+            options = param.options
             return {
-                'type': 'string',
-                'choices': param.options,
-                'default': param.options[0],
+                'type': None,
+                'choices': options,
+                'default': options and options[0] or None,
             }
+        param_type = param.param_type
+        if param.param_type in ('path',):
+            param_type = 'string'
         return {
-            'type': param.param_type,
+            'type': param_type,
             'default': param.text,
             'choices': None,
         }

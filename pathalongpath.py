@@ -98,7 +98,7 @@ class PathAlongPath(pathmodifier.PathModifier):
     def add_arguments(self, pars):
         pars.add_argument("-n", "--noffset", type=float, default=0.0, help="normal offset")
         pars.add_argument("-t", "--toffset", type=float, default=0.0, help="tangential offset")
-        pars.add_argument("-k", "--kind", type=inkex.Boolean, default=True)
+        pars.add_argument("-k", "--kind", type=str, default='')
         pars.add_argument("-c", "--copymode", default="Single",
                           help="repeat the path to fit deformer's length")
         pars.add_argument("-p", "--space", type=float, default=0.0)

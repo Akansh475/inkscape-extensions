@@ -59,8 +59,8 @@ def get_fit(u, csp, col):
 class DxfOutlines(inkex.OutputExtension):
     def add_arguments(self, pars):
         pars.add_argument("--tab")
-        pars.add_argument("-R", "--ROBO", default=False)
-        pars.add_argument("-P", "--POLY", default=True)
+        pars.add_argument("-R", "--ROBO", type=inkex.Boolean, default=False)
+        pars.add_argument("-P", "--POLY", type=inkex.Boolean, default=False)
         pars.add_argument("--units", default="72./96")  # Points
         pars.add_argument("--encoding", dest="char_encode", default="latin_1")
         pars.add_argument("--layer_option", default="all")
@@ -206,11 +206,11 @@ class DxfOutlines(inkex.OutputExtension):
                 s = sub[i]
                 e = sub[i + 1]
                 if s[1] == s[2] and e[0] == e[1]:
-                    if self.options.POLY == 'true':
+                    if self.options.POLY:
                         self.LWPOLY_line([s[1], e[1]])
                     else:
                         self.dxf_line([s[1], e[1]])
-                elif self.options.ROBO == 'true':
+                elif self.options.ROBO:
                     self.ROBO_spline([s[1], s[2], e[0], e[1]])
                 else:
                     self.dxf_spline([s[1], s[2], e[0], e[1]])
@@ -314,9 +314,9 @@ class DxfOutlines(inkex.OutputExtension):
             scale *= h / self.svg.unittouu(self.svg.add_unit(viewBox2[3]))
         self.groupmat = [[[scale, 0.0, 0.0], [0.0, -scale, h * scale]]]
         self.process_group(doc)
-        if self.options.ROBO == 'true':
+        if self.options.ROBO:
             self.ROBO_output()
-        if self.options.POLY == 'true':
+        if self.options.POLY:
             self.LWPOLY_output()
         self.dxf_add(dxf_templates.r14_footer)
         # Warn user if layer data seems wrong

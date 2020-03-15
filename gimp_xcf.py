@@ -44,7 +44,7 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
         pars.add_argument("-d", "--guides", type=inkex.Boolean, help="Save the Guides in the XCF")
         pars.add_argument("-r", "--grid", type=inkex.Boolean, help="Save the Grid with the .XCF")
         pars.add_argument("-b", "--background", type=inkex.Boolean, help="Add background color")
-        pars.add_argument("-i", "--dpi", type=float, default="96", help="File resolution")
+        pars.add_argument("-i", "--dpi", type=float, default=96.0, help="File resolution")
 
     def get_guides(self):
         """Generate a list of horzontal and vertical only guides"""

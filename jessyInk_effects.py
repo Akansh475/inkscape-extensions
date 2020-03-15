@@ -24,10 +24,10 @@ NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 class JessyinkEffects(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab')
-        pars.add_argument('--effectInOrder', default=1)
+        pars.add_argument('--effectInOrder', type=int, default=1)
         pars.add_argument('--effectInDuration', type=float, default=0.8)
         pars.add_argument('--effectIn', default='none')
-        pars.add_argument('--effectOutOrder', default=2)
+        pars.add_argument('--effectOutOrder', type=int, default=2)
         pars.add_argument('--effectOutDuration', type=float, default=0.8)
         pars.add_argument('--effectOut', default='none')
 

@@ -42,7 +42,7 @@ class Merge(inkex.EffectExtension):
         pars.add_argument("-d", "--direction", default="tb", help="direction to merge text")
         pars.add_argument("-x", "--xanchor", default="center_x", help="horiz point to compare")
         pars.add_argument("-y", "--yanchor", default="center_y", help="vertical point to compare")
-        pars.add_argument("-k", "--keepstyle", help="keep format")
+        pars.add_argument("-k", "--keepstyle", type=inkex.Boolean, help="keep format")
         pars.add_argument("-t", "--flowtext", type=inkex.Boolean,\
             help="use a flow text structure instead of a normal text element")
 

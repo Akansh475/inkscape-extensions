@@ -43,7 +43,7 @@ def propListToDict(list):
 class View(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab', dest='what')
-        pars.add_argument('--viewOrder', default=1)
+        pars.add_argument('--viewOrder', type=int, default=1)
         pars.add_argument('--viewDuration', type=float, default=0.8)
         pars.add_argument('--removeView', type=inkex.Boolean)
 
@@ -65,15 +65,16 @@ class View(inkex.EffectExtension):
             raise inkex.AbortExtension(_("No object selected. Please select the object you want to assign a view to and then press apply.\n"))
 
         if not self.options.removeView:
+            viewOrder = str(self.options.viewOrder)
             # Remove the view that currently has the requested order number.
             for node in rect.xpath("ancestor::svg:g[@inkscape:groupmode='layer']/descendant::*[@jessyink:view]", namespaces=NSS):
                 propDict = propListToDict(propStrToList(node.attrib["{" + NSS["jessyink"] + "}view"]))
 
-                if propDict["order"] == self.options.viewOrder:
+                if propDict["order"] == viewOrder:
                     del node.attrib["{" + NSS["jessyink"] + "}view"]
 
             # Set the new view.
-            rect.set("{" + NSS["jessyink"] + "}view","name:view;order:" + self.options.viewOrder + ";length:" + str(int(self.options.viewDuration * 1000)))
+            rect.set("{" + NSS["jessyink"] + "}view","name:view;order:" + viewOrder + ";length:" + str(int(self.options.viewDuration * 1000)))
 
             # Remove possible effect arguments.
             if "{" + NSS["jessyink"] + "}effectIn" in rect.attrib:

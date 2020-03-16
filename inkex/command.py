@@ -36,7 +36,7 @@ from subprocess import Popen, PIPE
 from lxml.etree import ElementTree
 
 from .utils import TemporaryDirectory, PY3
-from .svg import SvgDocumentElement
+from .elements import SvgDocumentElement
 
 INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND', 'inkscape')
 

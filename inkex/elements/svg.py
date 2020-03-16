@@ -31,10 +31,12 @@ import random
 from collections import OrderedDict
 from lxml import etree
 
-from .units import discover_unit, convert_unit, render_unit
-from .transforms import BoundingBox, Vector2d
-from .elements import BaseElement, StyleElement, NamedView, Defs
-from .styles import StyleSheets
+from ..units import discover_unit, convert_unit, render_unit
+from ..transforms import BoundingBox
+from ..styles import StyleSheets
+
+from .base import BaseElement
+from .meta import NamedView, Defs, StyleElement
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import

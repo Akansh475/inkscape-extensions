@@ -7,10 +7,9 @@ for an example how to do the transform of parent to children.
 """
 
 import inkex
-from inkex.svg import SvgDocumentElement
 from inkex.elements import (
     Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject,
-    ClipPath, Use,
+    ClipPath, Use, SvgDocumentElement,
 )
 
 class UngroupDeep(inkex.EffectExtension):

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 - Martin Owens <doctormo@gmail.com>
+# Copyright (c) 2020 Martin Owens <doctormo@gmail.com>
+#                    Sergei Izmailov <sergei.a.izmailov@gmail.com>
+#                    Ryan Jarvis <ryan@shopboxretail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

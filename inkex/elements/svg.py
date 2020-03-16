@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) Aaron Spike <aaron@ekips.org>
-#               Aurélio A. Heckert <aurium(a)gmail.com>
-#               Bulia Byak <buliabyak@users.sf.net>
-#               Nicolas Dufour, nicoduf@yahoo.fr
-#               Peter J. R. Moulder <pjrm@users.sourceforge.net>
-#               Martin Owens <doctormo@gmail.com>
+# Copyright (c) 2020 Martin Owens <doctormo@gmail.com>
+#                    Thomas Holder <thomas.holder@schrodinger.com>
+#                    Sergei Izmailov <sergei.a.izmailov@gmail.com>
+#                    Windell Oskay <windell@oskay.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

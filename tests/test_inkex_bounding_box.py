@@ -7,6 +7,7 @@ import subprocess
 
 import pytest
 from inkex.elements import (
+    SvgDocumentElement,
     Circle,
     Rectangle,
     Group,
@@ -15,7 +16,6 @@ from inkex.elements import (
 from inkex.transforms import Transform
 from inkex.paths import Path
 from inkex.styles import Style
-from inkex.svg import SvgDocumentElement
 from inkex.tester import TestCase
 from inkex.utils import TemporaryDirectory
 from inkex.command import is_inkscape_available

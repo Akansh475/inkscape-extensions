@@ -21,7 +21,7 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
 
 import inkex
-from inkex.svg import SvgDocumentElement
+from inkex.elements import SvgDocumentElement
 from inkex.localization import inkex_gettext as _
 
 X, Y = range(2)

@@ -27,8 +27,8 @@ from subprocess import PIPE, Popen
 
 import inkex
 from inkex.transforms import Transform
-from inkex.elements import load_svg, Group, PathElement, ShapeElement, Anchor, Switch
-from inkex.svg import SvgDocumentElement
+from inkex.elements import load_svg, Group, PathElement, ShapeElement,\
+                           Anchor, Switch, SvgDocumentElement
 
 ###### Utility Classes ####################################
 

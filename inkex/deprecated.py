@@ -35,8 +35,7 @@ from argparse import ArgumentParser
 import inkex
 import inkex.utils
 import inkex.units
-from inkex.elements import Guide
-from inkex.svg import SvgDocumentElement
+from inkex.elements import Guide, SvgDocumentElement
 from inkex.base import SvgThroughMixin, InkscapeExtension
 from inkex.localization import inkex_gettext as _
 

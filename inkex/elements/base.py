@@ -217,7 +217,7 @@ class BaseElement(etree.ElementBase):
         """
         for child in children:
             self.append(child)
-        return children if len(children) > 1 else children[0]
+        return children if len(children) != 1 else children[0]
 
     def tostring(self):
         """Return this element as it would appear in an svg document"""

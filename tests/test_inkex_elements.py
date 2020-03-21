@@ -440,6 +440,12 @@ class GroupTest(ElementTestCase):
             ' -238.536 486.266 L -185.049 503.008 L -230.396 442.073 M -193.189 547.201 L -238.536'
             ' 486.266 L -185.049 503.008 L -230.396 442.073 Z')
 
+    def test_bounding_box(self):
+        """A group returns a bounding box"""
+        empty = self.svg.add(Group(Group()))
+        self.assertEqual(empty.bounding_box(), None)
+        self.assertEqual(int(self.svg.getElementById('A').bounding_box().width), 783)
+        self.assertEqual(int(self.svg.getElementById('B').bounding_box().height), 114)
 
 class RectTest(ElementTestCase):
     """Test extra functionality on a rectangle element"""

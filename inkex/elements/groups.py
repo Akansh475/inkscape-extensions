@@ -51,7 +51,9 @@ class GroupBase(ShapeElement):
 
         for child in self:
             if isinstance(child, ShapeElement):
-                bbox += child.bounding_box(transform=transform)
+                child_bbox = child.bounding_box(transform=transform)
+                if child_bbox is not None:
+                    bbox += child_bbox
         return bbox
 
 

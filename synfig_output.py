@@ -907,6 +907,7 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
     last = []
     lastctrl = []
     lastsplit = True
+
     for s in path:
         cmd, params = s
         if cmd != "M" and bline_list == []:
@@ -923,10 +924,17 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
             lastctrl = params[:]
             lastsplit = False if nt[0] == "z" else True
             nt = nt[1:]
-        elif cmd == 'L':
+        elif cmd in "LHV":
             bline_list[-1]["points"].append([lastctrl[:], last[:], last[:], lastsplit])
-            last = params[:]
-            lastctrl = params[:]
+            if cmd == 'H':
+                last = [params[0], last[1]]
+                lastctrl = [params[0], last[1]]
+            elif cmd == 'V':
+                last = [last[0], params[0]]
+                lastctrl = [last[0], params[0]]
+            else:
+                last = params[:]
+                lastctrl = params[:]
             lastsplit = False if nt[0] == "z" else True
             nt = nt[1:]
         elif cmd == 'C':
@@ -983,7 +991,6 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
 
             # Loop the subpath
             bline_list[-1]["loop"] = True
-
     # Append final superpoint, if needed
     if last:
         bline_list[-1]["points"].append([lastctrl[:], last[:], last[:], lastsplit])

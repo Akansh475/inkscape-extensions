@@ -142,7 +142,7 @@ class Guillotine(inkex.EffectExtension):
             return dirname, filename
 
     def get_localised_string(self, name):
-        return locale.format("%.f", float(name), 0)
+        return locale.format_string("%.f", float(name), 0)
 
     def export_slice(self, sli, filename):
         """

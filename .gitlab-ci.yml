@@ -46,6 +46,13 @@ test:python37:
     - tox -e py37-normal
 
 
+test:python38:
+  extends: .tests
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.8.0
+    - tox -e py38-normal
+
 test:coverage:
   stage: coverage
   script:
@@ -60,12 +67,13 @@ test:coverage:
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
       "\n\n"
     - pyenv shell 3.6.8
-    - pip install pylint
+    - pip install pylint==2.2.3
     - python3.6 tests/add_pylint.py htmlcov/index.html
   dependencies:
     - test:python27
     - test:python36
     - test:python37
+    - test:python38
   when: always
   coverage: '/TOTAL.+?(\d+%)/'
   artifacts:

@@ -222,6 +222,7 @@ def fuse_subpaths(path_node):
 
     i = 0
     initial_point = [path[i][1][-2], path[i][1][-1]]
+    prev_end = initial_point[:]
     return_stack = []
     while i < len(path):
         # Remove any terminators: they are redundant
@@ -229,8 +230,16 @@ def fuse_subpaths(path_node):
             path.remove(["Z", []])
             continue
 
-        # Skip all elements that do not begin a new path
-        if i == 0 or path[i][0] != "M":
+        if path[i][0] == 'V':
+            prev_end[0] = path[i][1][0]
+            i += 1
+            continue
+        elif path[i][0] == 'H':
+            prev_end[1] = path[i][1][0]
+            i += 1
+            continue
+        elif path[1][0] != 'M' or i == 0:
+            prev_end = path[i][1][-2:]
             i += 1
             continue
 
@@ -239,14 +248,13 @@ def fuse_subpaths(path_node):
 
         # Swap it for a lineto
         path[i][0] = 'L'
-
         # If the old subpath has not been closed yet, close it
-        if path[i - 1][1][-2] != initial_point[0] or path[i - 1][1][-2] != initial_point[1]:
+        if prev_end != initial_point:
             path.insert(i, ['L', initial_point])
             i += 1
 
         # Set the initial point of this subpath
-        initial_point = [path[i - 1][1][-2], path[i - 1][1][-1]]
+        initial_point = path[i][1][-2:]
 
         # Append this point to the return stack
         return_stack.append(initial_point)
@@ -294,7 +302,7 @@ def split_fill_and_stroke(path_node):
     path_node.pop('style')
 
     # Pass along all remaining attributes to the group
-    for attrib_name, attrib_value in path_node.attribs.items():
+    for attrib_name, attrib_value in path_node.attrib.items():
         group.set(attrib_name, attrib_value)
 
     group.set("id", path_id)

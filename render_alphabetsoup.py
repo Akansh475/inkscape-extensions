@@ -29,8 +29,7 @@ import re
 import sys
 
 import inkex
-from inkex.transforms import Vector2d
-from inkex.elements import load_svg
+from inkex import Vector2d, load_svg
 
 import render_alphabetsoup_config
 

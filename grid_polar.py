@@ -25,7 +25,7 @@ There is a wide range of options including subdivision and labels.
 from math import cos, log, pi, sin
 
 import inkex
-from inkex.elements import Group, Circle, TextElement
+from inkex import Group, Circle, TextElement
 
 def draw_circle(r, cx, cy, width, fill, name, parent):
     """Draw an SVG circle"""

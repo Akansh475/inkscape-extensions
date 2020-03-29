@@ -29,7 +29,7 @@ All elements are grouped with similar elements (eg all x-subdivs)
 from math import log
 
 import inkex
-from inkex.elements import Group, PathElement, Rectangle
+from inkex import Group, PathElement, Rectangle
 
 def draw_line(x1, y1, x2, y2, width, name, parent):
     """Draw an SVG line"""

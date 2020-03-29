@@ -20,7 +20,7 @@
 import math
 
 import inkex
-from inkex.elements import TextElement, Circle
+from inkex import TextElement, Circle
 
 class NumberNodes(inkex.EffectExtension):
     """Replace the selection's nodes with numbered dots according to the options"""

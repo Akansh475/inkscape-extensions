@@ -30,7 +30,7 @@ import math
 from math import cos, pi, sin
 
 import inkex
-from inkex.elements import ClipPath, Rectangle
+from inkex import ClipPath, Rectangle
 
 EVAL_GLOBALS = {}
 EVAL_GLOBALS.update(random.__dict__)

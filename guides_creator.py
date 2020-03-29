@@ -30,7 +30,8 @@ This basic extension allows you to automatically draw guides in inkscape.
 from math import cos, sin, sqrt
 
 import inkex
-from inkex.elements import Guide
+from inkex import Guide
+
 
 class GuidesCreator(inkex.EffectExtension):
     """Create a set of guides based on the given options"""

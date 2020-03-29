@@ -29,7 +29,7 @@ Extract text and print it to the error console.
 from lxml.etree import tostring
 
 import inkex
-from inkex.elements import TextElement, FlowRoot
+from inkex import TextElement, FlowRoot
 from inkex.utils import KeyDict
 
 # Old settings, supported because users click 'ok' without looking.

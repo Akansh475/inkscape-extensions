@@ -37,9 +37,9 @@ from __future__ import print_function
 
 import dxf_templates
 import inkex
-from inkex import colors, bezier
-from inkex.transforms import Transform
-from inkex.elements import Group, Layer, Use, PathElement, Rectangle, Line, Circle, Ellipse
+from inkex import colors, bezier, Transform, Group, Layer, Use, PathElement, \
+    Rectangle, Line, Circle, Ellipse
+
 
 def get_matrix(u, i, j):
     if j == i + 2:

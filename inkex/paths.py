@@ -35,7 +35,22 @@ if False:  # pylint: disable=using-constant-test
     T = TypeVar('T')
 
 # All the names that get added to the inkex API itself.
-__all__ = ('Path', 'CubicSuperPath')
+__all__ = (
+    'Path', 'CubicSuperPath',
+    # Path commands:
+    'Line', 'line',
+    'Move', 'move',
+    'ZoneClose', 'zoneClose',
+    'Horz', 'horz',
+    'Vert', 'vert',
+    'Curve', 'curve',
+    'Smooth', 'smooth',
+    'Quadratic', 'quadratic',
+    'TepidQuadratic', 'tepidQuadratic',
+    'Arc', 'arc',
+    # errors
+    'InvalidPath'
+)
 
 LEX_REX = re.compile(r'([MLHVCSQTAZmlhvcsqtaz])([^MLHVCSQTAZmlhvcsqtaz]*)')
 NONE = lambda obj: obj is not None

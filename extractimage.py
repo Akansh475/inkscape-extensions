@@ -23,7 +23,7 @@ Extract embedded images.
 
 import os
 import inkex
-from inkex.elements import Image
+from inkex import Image
 
 try:
     from base64 import decodebytes

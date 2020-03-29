@@ -24,7 +24,7 @@
 import random
 
 import inkex
-from inkex.elements import PathElement, Pattern
+from inkex import PathElement, Pattern
 
 import voronoi
 

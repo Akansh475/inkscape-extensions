@@ -22,7 +22,7 @@ Greate perfect bound cover
 """
 
 import inkex
-from inkex.elements import Guide
+from inkex import Guide
 
 
 def caliper_to_ppi(caliper):

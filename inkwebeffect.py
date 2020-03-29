@@ -23,7 +23,7 @@ import re
 import sys
 
 import inkex
-from inkex.elements import Script
+from inkex import Script
 
 class InkWebEffect(inkex.EffectExtension):
     reUpdateJS = '/\\*\\s* inkweb.js [^*]* InkWebEffect:AutoUpdate \\s*\\*/'

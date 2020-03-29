@@ -75,10 +75,7 @@ import numpy
 
 import inkex
 from inkex.bezier import bezierlength, bezierparameterize, beziertatlength
-from inkex.transforms import Transform
-from inkex.elements import PathElement, TextElement, Tspan, Group, Layer, Marker
-from inkex.paths import CubicSuperPath
-from inkex.styles import Style
+from inkex import Transform, PathElement, TextElement, Tspan, Group, Layer, Marker, CubicSuperPath, Style
 
 if sys.version_info[0] > 2:
     xrange = range

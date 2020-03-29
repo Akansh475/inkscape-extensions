@@ -19,7 +19,7 @@
 import argparse
 
 import inkex
-from inkex.elements import Group, Script
+from inkex import Group, Script
 from inkex.utils import NSS
 
 class KeyBindings(inkex.EffectExtension):

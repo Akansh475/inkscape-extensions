@@ -5,7 +5,7 @@ import threading
 import webbrowser
 
 import inkex
-from inkex.elements import Anchor
+from inkex import Anchor
 
 class ThreadWebsite(threading.Thread):
     """Visit the website without locking inkscape"""

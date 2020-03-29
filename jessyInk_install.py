@@ -21,7 +21,7 @@ import os
 from lxml import etree
 
 import inkex
-from inkex.elements import Script
+from inkex import Script
 from inkex.utils import NSS
 
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"

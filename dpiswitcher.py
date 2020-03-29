@@ -45,7 +45,7 @@ TODO:
 import re
 import math
 import inkex
-from inkex.elements import Use, TextElement
+from inkex import Use, TextElement
 
 # globals
 SKIP_CONTAINERS = [

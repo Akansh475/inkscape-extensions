@@ -34,7 +34,7 @@ extensions library, and marker data from markers.svg.
 """
 
 import inkex
-from inkex.elements import Group, Marker, PathElement
+from inkex import Group, Marker, PathElement
 
 import pathmodifier
 

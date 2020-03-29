@@ -21,7 +21,7 @@ Save an SVG file into an html canvas file.
 """
 
 import inkex
-from inkex.elements import BaseElement
+from inkex import BaseElement
 
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas

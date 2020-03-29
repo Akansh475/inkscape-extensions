@@ -20,7 +20,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import inkex
-from inkex.elements import Use, Rectangle
+from inkex import Use, Rectangle
 from inkex.base import SvgOutputMixin
 
 class Nup(inkex.OutputExtension, SvgOutputMixin):

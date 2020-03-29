@@ -20,7 +20,7 @@
 """Convert known layer structures to svg font glyphs"""
 
 import inkex
-from inkex.elements import SVGfont, FontFace, Glyph
+from inkex import SVGfont, FontFace, Glyph
 
 class LayersToSvgFont(inkex.EffectExtension):
     """Convert layers to an svg font"""

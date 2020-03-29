@@ -27,8 +27,7 @@ Import a DHW file from ACECAD DigiMemo, a hardware based digitiser
 import struct
 
 import inkex
-from inkex.utils import AbortExtension, errormsg, addNS
-from inkex.elements import Group, Polyline
+from inkex import AbortExtension, errormsg, addNS, Group, Polyline
 
 NSDM = 'http://github.com/nikitakit/DM2SVG'
 

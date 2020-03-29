@@ -69,8 +69,7 @@ from __future__ import print_function
 import sys
 
 import inkex
-from inkex.elements import PathElement, Group, Image, Rectangle, ShapeElement
-from inkex.transforms import Transform
+from inkex import PathElement, Group, Image, Rectangle, ShapeElement, Transform
 
 Precision = 5  # number of digits of precision for comparing float numbers
 

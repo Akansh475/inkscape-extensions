@@ -28,7 +28,8 @@ printing marks in Inkscape.
 
 import math
 import inkex
-from inkex.elements import Circle, Rectangle, TextElement
+from inkex import Circle, Rectangle, TextElement
+
 
 class PrintingMarks(inkex.EffectExtension):
     # Default parameters

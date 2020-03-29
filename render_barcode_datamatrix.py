@@ -45,7 +45,7 @@ The basis processing flow is;
 """
 
 import inkex
-from inkex.elements import Rectangle
+from inkex import Rectangle
 
 INVALID_BIT = 2
 

@@ -32,7 +32,7 @@ from lxml import etree
 from ..styles import StyleSheet
 from ..transforms import Vector2d
 
-from .base import BaseElement
+from ._base import BaseElement
 
 class Defs(BaseElement):
     """An header defs element, one per document"""

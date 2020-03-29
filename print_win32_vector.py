@@ -34,8 +34,7 @@ import sys
 import ctypes
 
 import inkex
-from inkex.transforms import Transform
-from inkex.elements import PathElement, Rectangle, Group, Use
+from inkex import PathElement, Rectangle, Group, Use, Transform
 from inkex.paths import Path
 
 if sys.platform.startswith('win'):

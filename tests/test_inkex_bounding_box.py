@@ -6,16 +6,16 @@ import xml.etree.ElementTree
 import subprocess
 
 import pytest
-from inkex.elements import (
+from inkex import (
     SvgDocumentElement,
     Circle,
     Rectangle,
     Group,
     PathElement,
+    Transform,
+    Path,
+    Style
 )
-from inkex.transforms import Transform
-from inkex.paths import Path
-from inkex.styles import Style
 from inkex.tester import TestCase
 from inkex.utils import TemporaryDirectory
 from inkex.command import is_inkscape_available

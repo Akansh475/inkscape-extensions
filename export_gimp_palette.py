@@ -22,8 +22,8 @@ Export a gimp pallet file (.gpl)
 """
 
 import inkex
-from inkex.elements import ShapeElement
-from inkex.colors import ColorIdError, ColorError
+from inkex import ShapeElement, ColorIdError, ColorError
+
 
 class ExportGimpPalette(inkex.OutputExtension):
     """Export all colors in a document to a gimp pallet"""

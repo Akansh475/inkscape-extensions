@@ -52,7 +52,7 @@ from argparse import ArgumentTypeError
 
 import inkex
 from inkex.utils import filename_arg
-from inkex.elements import Filter, TextElement, Circle, Rectangle
+from inkex import Filter, TextElement, Circle, Rectangle
 from inkex.paths import Move, line
 
 # www.sapdesignguild.org/goodies/diagram_guidelines/color_palettes.html#mss

@@ -29,7 +29,7 @@ import sys
 from itertools import product
 
 import inkex
-from inkex.elements import Group, Rectangle, Use, PathElement
+from inkex import Group, Rectangle, Use, PathElement
 
 
 class QRCode(object):

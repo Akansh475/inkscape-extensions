@@ -26,9 +26,8 @@ import tempfile
 from subprocess import PIPE, Popen
 
 import inkex
-from inkex.transforms import Transform
-from inkex.elements import load_svg, Group, PathElement, ShapeElement,\
-                           Anchor, Switch, SvgDocumentElement
+from inkex import load_svg, Group, PathElement, ShapeElement,\
+                           Anchor, Switch, SvgDocumentElement, Transform
 
 ###### Utility Classes ####################################
 

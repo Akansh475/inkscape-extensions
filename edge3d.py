@@ -21,7 +21,8 @@
 from math import atan2, degrees
 
 import inkex
-from inkex.elements import ClipPath, Filter
+from inkex import ClipPath, Filter
+
 
 class Edge3D(inkex.EffectExtension):
     """Generate a 3d edge"""

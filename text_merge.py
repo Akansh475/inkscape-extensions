@@ -28,7 +28,7 @@ Merge text blocks together.
 
 import inkex
 from inkex.utils import KeyDict
-from inkex.elements import (
+from inkex import (
     Rectangle, FlowRoot, FlowPara, FlowRegion, TextElement, Tspan
 )
 

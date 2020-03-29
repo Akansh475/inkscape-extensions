@@ -20,7 +20,7 @@
 Convas module for ink2canvas extension
 """
 
-from inkex.colors import Color
+from inkex import Color
 
 class Canvas(object):
     """Canvas API helper class"""

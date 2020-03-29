@@ -35,7 +35,7 @@ import re
 import sys
 
 import inkex
-from inkex.elements import TextElement
+from inkex import TextElement
 
 if sys.version_info[0] > 2:
     def unicode(s, encoding):

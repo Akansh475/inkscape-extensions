@@ -36,7 +36,7 @@ s_b /                  ``--__
 from math import acos, cos, pi, sin, sqrt, tan
 
 import inkex
-from inkex.elements import PathElement, Circle
+from inkex import PathElement, Circle
 
 (X, Y) = range(2)
 

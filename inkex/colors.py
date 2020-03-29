@@ -25,7 +25,7 @@ Basic color controls
 from .utils import PY3
 
 # All the names that get added to the inkex API itself.
-__all__ = ('Color',)
+__all__ = ('Color', 'ColorError', 'ColorIdError')
 
 if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name

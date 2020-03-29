@@ -22,7 +22,7 @@ An Inkscape extension that creates a frame around a selected object.
 """
 
 import inkex
-from inkex.elements import Group, PathElement, ClipPath
+from inkex import Group, PathElement, ClipPath
 
 def size_box(box, delta):
     """ Returns a box with an altered size.

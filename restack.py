@@ -25,7 +25,7 @@ import random
 
 import inkex
 from inkex.utils import KeyDict
-from inkex.elements import SvgDocumentElement
+from inkex import SvgDocumentElement
 
 # Old settings, supported because users click 'ok' without looking.
 XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})

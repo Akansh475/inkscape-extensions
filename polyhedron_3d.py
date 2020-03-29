@@ -55,7 +55,7 @@ from math import acos, cos, floor, pi, sin, sqrt
 
 import inkex
 from inkex.utils import pairwise
-from inkex.elements import Group, Circle
+from inkex import Group, Circle
 from inkex.paths import Move, Line
 
 try:

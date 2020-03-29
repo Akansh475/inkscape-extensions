@@ -8,15 +8,14 @@ from lxml import etree
 
 import inkex
 
-from inkex.elements import (
+from inkex import (
     ShapeElement, Group, Layer, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
-    PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement
+    PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
+    Transform, Style
 )
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError, PY3
-from inkex.transforms import Transform
-from inkex.styles import Style
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
 
@@ -359,7 +358,7 @@ class PolylineElementTestCase(ElementTestCase):
 
     def test_type(self):
         """Polyline have their own types"""
-        self.assertTrue(isinstance(self.elem, inkex.elements.Polyline))
+        self.assertTrue(isinstance(self.elem, inkex.Polyline))
 
     def test_polyline_points(self):
         """Basic tests for points attribute as a path"""
@@ -374,11 +373,11 @@ class PolygonElementTestCase(ElementTestCase):
 
     def test_type(self):
         """Polygons have their own types"""
-        self.assertTrue(isinstance(self.elem, inkex.elements.Polygon))
+        self.assertTrue(isinstance(self.elem, inkex.Polygon))
 
     def test_conversion(self):
         """Polygones are converted to paths"""
-        pol = inkex.elements.Polygon(points='10,10 50,50 10,15 15,10')
+        pol = inkex.Polygon(points='10,10 50,50 10,15 15,10')
         self.assertEqual(str(pol.path), 'M 10 10 L 50 50 L 10 15 L 15 10 Z')
 
 class LineElementTestCase(ElementTestCase):
@@ -387,7 +386,7 @@ class LineElementTestCase(ElementTestCase):
 
     def test_type(self):
         """Lines have their own types"""
-        self.assertTrue(isinstance(self.elem, inkex.elements.Line))
+        self.assertTrue(isinstance(self.elem, inkex.Line))
 
     def test_conversion(self):
         """Lines are converted to paths"""

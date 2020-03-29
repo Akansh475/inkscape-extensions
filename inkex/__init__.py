@@ -11,7 +11,7 @@ from __future__ import print_function
 from .extensions import *
 from .utils import *
 from .styles import *
-from .paths import *
+from .paths import Path, CubicSuperPath  # Path commands are not exported
 from .colors import *
 from .transforms import *
 from .elements import *

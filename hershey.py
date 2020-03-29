@@ -57,7 +57,7 @@ from copy import deepcopy
 import inkex
 from inkex import Transform, Style, units
 
-from inkex.elements import load_svg, Group, TextElement, FlowPara, \
+from inkex import load_svg, Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
 
 

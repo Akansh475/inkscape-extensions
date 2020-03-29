@@ -23,9 +23,8 @@ This extension converts a path into a dashed line using 'stroke-dasharray'
 It is a modification of the file addnodes.py
 """
 import inkex
-from inkex import bezier
-from inkex.paths import CubicSuperPath
-from inkex.elements import Group, PathElement
+from inkex import bezier, CubicSuperPath, Group, PathElement
+
 
 class Dashit(inkex.EffectExtension):
     """Extension to convert paths into dash-array line"""

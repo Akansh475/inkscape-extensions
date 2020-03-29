@@ -7,7 +7,7 @@
 import os
 
 import inkex
-from inkex.elements import load_svg
+from inkex import load_svg
 
 class SeamlessPattern(inkex.TemplateExtension):
     """Generate a seamless pattern template"""

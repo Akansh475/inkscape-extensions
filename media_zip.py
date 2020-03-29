@@ -45,7 +45,7 @@ import tempfile
 import zipfile
 
 import inkex
-from inkex.elements import TextElement, Tspan, FlowRoot, FlowPara, FlowSpan
+from inkex import TextElement, Tspan, FlowRoot, FlowPara, FlowSpan
 
 try:  # PY2
     from urllib import url2pathname

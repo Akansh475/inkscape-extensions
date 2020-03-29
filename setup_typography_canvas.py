@@ -19,7 +19,8 @@
 #
 
 import inkex
-from inkex.elements import Guide
+from inkex import Guide
+
 
 class SetupTypographyCanvas(inkex.EffectExtension):
     def add_arguments(self, pars):

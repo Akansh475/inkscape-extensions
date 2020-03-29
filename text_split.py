@@ -19,7 +19,7 @@
 #
 
 import inkex
-from inkex.elements import (
+from inkex import (
     TextElement, FlowRoot, FlowPara, Tspan, TextPath, Rectangle
 )
 

@@ -26,7 +26,7 @@ These grid are used for isometric view in mechanical drawing or piping schematic
 """
 
 import inkex
-from inkex.elements import Rectangle
+from inkex import Rectangle
 from inkex.paths import Move, Line
 
 def draw_line(x1, y1, x2, y2, width, name, parent):

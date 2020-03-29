@@ -7,7 +7,7 @@ for an example how to do the transform of parent to children.
 """
 
 import inkex
-from inkex.elements import (
+from inkex import (
     Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject,
     ClipPath, Use, SvgDocumentElement,
 )

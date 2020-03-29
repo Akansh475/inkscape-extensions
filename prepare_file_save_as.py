@@ -34,7 +34,7 @@ before calling the dialog File->Save As....
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import inkscape_command
-from inkex.elements import load_svg
+from inkex import load_svg
 
 class PreProcess(TempDirMixin, inkex.EffectExtension):
     def effect(self):

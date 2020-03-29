@@ -27,7 +27,7 @@ or third-party applications.
 """
 
 import inkex
-from inkex.elements import Image
+from inkex import Image
 
 class ImageAttributes(inkex.EffectExtension):
     """Set attributes in images"""

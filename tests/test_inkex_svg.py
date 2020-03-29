@@ -22,7 +22,7 @@ Test the svg interface for inkscape extensions.
 """
 from inkex.transforms import Vector2d
 from inkex.utils import addNS
-from inkex.elements import Guide
+from inkex import Guide
 from inkex.tester import TestCase
 from inkex.tester.svg import svg, svg_file, uu_svg
 

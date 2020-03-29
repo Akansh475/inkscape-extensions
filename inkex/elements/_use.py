@@ -21,8 +21,8 @@
 Interface for the Use and Symbol elements
 """
 
-from .groups import Group
-from .base import BaseElement, ShapeElement
+from ._groups import Group
+from ._base import BaseElement, ShapeElement
 
 class Symbol(BaseElement):
     """SVG symbol element"""

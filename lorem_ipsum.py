@@ -24,7 +24,7 @@ Example filltext sentences generated over at http://lipsum.com/
 import random
 
 import inkex
-from inkex.elements import Layer, FlowRoot, FlowRegion, FlowPara, Rectangle
+from inkex import Layer, FlowRoot, FlowRegion, FlowPara, Rectangle
 
 CORPA = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ',

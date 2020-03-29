@@ -27,7 +27,7 @@ from __future__ import unicode_literals
 import os
 
 import inkex
-from inkex.elements import Image
+from inkex import Image
 
 try:
     import urllib.request as urllib

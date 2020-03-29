@@ -29,8 +29,7 @@ Create Voronoi diagram from seeds (midpoints of selected objects)
 import random
 
 import inkex
-from inkex.elements import Group, Rectangle, PathElement
-from inkex.transforms import Vector2d as Point
+from inkex import Group, Rectangle, PathElement, Vector2d as Point
 
 import voronoi
 

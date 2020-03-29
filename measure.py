@@ -30,7 +30,7 @@ http://mathworld.wolfram.com/GreensTheorem.html
 
 import inkex
 
-from inkex.elements import TextElement, TextPath, Tspan
+from inkex import TextElement, TextPath, Tspan
 from inkex.bezier import csparea, cspcofm, csplength
 
 class MeasureLength(inkex.EffectExtension):

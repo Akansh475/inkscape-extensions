@@ -27,9 +27,8 @@ This extension either adds nodes to a path so that
 import math
 
 import inkex
-from inkex import bezier
-from inkex.elements import PathElement
-from inkex.paths import CubicSuperPath
+from inkex import bezier,  PathElement, CubicSuperPath
+
 
 class AddNodes(inkex.EffectExtension):
     """Extension to split a path by adding nodes to it"""

@@ -21,7 +21,7 @@ Convert path to mesh gradient
 """
 
 import inkex
-from inkex.elements import BaseElement, Gradient
+from inkex import BaseElement, Gradient
 from inkex.paths import Line, Curve
 
 class MeshGradient(Gradient):

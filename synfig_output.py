@@ -27,10 +27,9 @@ from copy import deepcopy
 from lxml import etree
 
 import inkex
-from inkex import Transform
-from inkex.paths import Path
-from inkex.elements import Group, Layer, Anchor, Switch, PathElement,\
-                           Metadata, NamedView, Gradient, SvgDocumentElement
+from inkex import Group, Layer, Anchor, Switch, PathElement, \
+                  Metadata, NamedView, Gradient, SvgDocumentElement, \
+                  Path, Transform
 
 import synfig_fileformat as sif
 from synfig_prepare import MalformedSVGError, SynfigPrep, get_dimension

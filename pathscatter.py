@@ -34,9 +34,7 @@ import copy
 import random
 
 import inkex
-from inkex import bezier
-from inkex.transforms import Transform, BoundingBox
-from inkex.elements import Group, Use
+from inkex import bezier, Transform, BoundingBox, Group, Use
 
 import pathmodifier
 

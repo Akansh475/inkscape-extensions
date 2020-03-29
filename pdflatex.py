@@ -26,7 +26,7 @@ import os
 import inkex
 from inkex.base import TempDirMixin
 from inkex.command import call, inkscape
-from inkex.elements import load_svg, ShapeElement, Defs
+from inkex import load_svg, ShapeElement, Defs
 
 class PdfLatex(TempDirMixin, inkex.GenerateExtension):
     """

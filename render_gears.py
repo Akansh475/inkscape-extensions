@@ -24,7 +24,7 @@ Generate gears in SVG
 from math import acos, cos, pi, radians, sin, sqrt
 
 import inkex
-from inkex.elements import PathElement
+from inkex import PathElement
 
 
 def involute_intersect_angle(Rb, R):

@@ -41,7 +41,13 @@ except ImportError:
     overload = lambda x: x
 
 # All the names that get added to the inkex API itself.
-__all__ = ('Transform', 'BoundingBox',)
+__all__ = (
+    'BoundingBox',
+    'DirectedLineSegment',
+    'ImmutableVector2d',
+    'Transform',
+    'Vector2d',
+)
 
 if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name

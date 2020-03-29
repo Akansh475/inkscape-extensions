@@ -21,7 +21,7 @@ Common elements between webslicer extensions
 """
 
 import inkex
-from inkex.elements import Group
+from inkex import Group
 
 def is_empty(val):
     return val in ('', None)

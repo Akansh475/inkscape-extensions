@@ -23,7 +23,7 @@ Base module for rendering barcodes for Inkscape.
 import itertools
 import sys
 
-from inkex.elements import Group, TextElement, Rectangle
+from inkex import Group, TextElement, Rectangle
 
 (TEXT_POS_BOTTOM, TEXT_POS_TOP) = range(2)
 (WHITE_BAR, BLACK_BAR, TALL_BAR) = range(3)

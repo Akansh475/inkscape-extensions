@@ -7,8 +7,8 @@ class Negative(inkex.ColorExtension):
     """Make the colour oposite"""
     def modify_color(self, name, color):
         # Support any colour space
-        for i in range(3):
-            color[i] = 255 - color[i]
+        for i, channel in enumerate(color):
+            color[i] = 255 - channel
         return color
 
 if __name__ == '__main__':

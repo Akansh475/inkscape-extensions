@@ -28,7 +28,7 @@ from lxml import etree
 from ..utils import addNS
 from ..transforms import Transform
 
-from ._base import BaseElement
+from .primitives import BaseElement
 
 class Filter(BaseElement):
     """A filter (usually in defs)"""

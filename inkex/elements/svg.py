@@ -33,8 +33,8 @@ from ..units import discover_unit, convert_unit, render_unit
 from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
-from ._base import BaseElement
-from ._meta import NamedView, Defs, StyleElement
+from .primitives import BaseElement
+from .meta import NamedView, Defs, StyleElement
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import

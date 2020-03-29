@@ -230,7 +230,7 @@ class BaseElement(etree.ElementBase):
 
     def description(self, text):
         """Set the desc element with text"""
-        from ._meta import Desc
+        from .meta import Desc
         desc = self.add(Desc())
         desc.text = text
 
@@ -268,7 +268,7 @@ class BaseElement(etree.ElementBase):
         """Get the root document element from any element descendent"""
         if self.getparent() is not None:
             return self.getparent().root
-        from ._svg import SvgDocumentElement
+        from .svg import SvgDocumentElement
         if not isinstance(self, SvgDocumentElement):
             raise FragmentError("Element fragment does not have a document root!")
         return self
@@ -402,7 +402,7 @@ class ShapeElement(BaseElement):
 
     def to_path_element(self):
         """Replace this element with a path element"""
-        from ._polygons import PathElement
+        from .polygons import PathElement
         elem = PathElement()
         elem.path = self.path
         elem.style = self.effective_style()

@@ -27,7 +27,7 @@ from ..paths import Path
 from ..transforms import Transform, ImmutableVector2d, Vector2d
 from ..utils import addNS
 
-from ._base import ShapeElement
+from .primitives import ShapeElement
 
 class PathElementBase(ShapeElement):
     """Base element for path based shapes"""

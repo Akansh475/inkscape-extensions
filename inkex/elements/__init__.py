@@ -5,14 +5,14 @@ interact directly with the SVG xml interface.
 See the documentation for each of the elements for details on how it works.
 """
 
-from ._base import SVG_PARSER, load_svg, ShapeElement, BaseElement
-from ._svg import SvgDocumentElement
-from ._groups import Group, Layer, Anchor, Marker, ClipPath
-from ._polygons import PathElement, Polyline, Polygon, Line, Rectangle, Circle, Ellipse
-from ._text import FlowRegion, FlowRoot, FlowPara, FlowDiv, FlowSpan, TextElement, \
+from .primitives import SVG_PARSER, load_svg, ShapeElement, BaseElement
+from .svg import SvgDocumentElement
+from .groups import Group, Layer, Anchor, Marker, ClipPath
+from .polygons import PathElement, Polyline, Polygon, Line, Rectangle, Circle, Ellipse
+from .text import FlowRegion, FlowRoot, FlowPara, FlowDiv, FlowSpan, TextElement, \
     TextPath, Tspan, SVGfont, FontFace, Glyph, MissingGlyph
-from ._use import Symbol, Use
-from ._meta import Defs, StyleElement, Script, Desc, Title, NamedView, Guide, \
+from .use import Symbol, Use
+from .meta import Defs, StyleElement, Script, Desc, Title, NamedView, Guide, \
     Metadata, ForeignObject, Switch, Grid
-from ._filters import Filter, Pattern, Gradient, LinearGradient, RadialGradient, PathEffect
-from ._image import Image
+from .filters import Filter, Pattern, Gradient, LinearGradient, RadialGradient, PathEffect
+from .image import Image

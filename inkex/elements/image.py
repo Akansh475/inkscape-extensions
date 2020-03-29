@@ -20,7 +20,7 @@
 Image element interface.
 """
 
-from ._polygons import RectangleBase
+from .polygons import RectangleBase
 
 class Image(RectangleBase):
     """Provide a useful extension for image elements"""

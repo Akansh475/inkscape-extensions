@@ -29,6 +29,7 @@ import shutil
 from itertools import tee
 from collections import defaultdict
 from argparse import ArgumentTypeError
+from lxml import etree
 
 # When python2 support is gone, enable tempfile's version
 # from tempfile import TemporaryDirectory
@@ -57,6 +58,16 @@ NSS = {
     'xml': 'http://www.w3.org/XML/1998/namespace'
 }
 SSN = dict((b, a) for (a, b) in NSS.items())
+
+def registerNS(nsmap):
+    """Call with dict of the extra namespaces to add"""
+    global NSS
+    global SSN
+
+    for key, NS in nsmap.items():
+        NSS[key] = NS
+        etree.register_namespace(key, NS)
+    SSN = dict((b, a) for (a, b) in NSS.items())
 
 class KeyDict(dict):
     """

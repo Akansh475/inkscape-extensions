@@ -29,7 +29,7 @@ import shutil
 from argparse import ArgumentParser
 from lxml import etree
 
-from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg
+from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg, registerNS
 from .elements import load_svg
 from .localization import localize
 
@@ -46,6 +46,17 @@ class InkscapeExtension(object):
     variable handling features.
     """
     multi_inx = False # Set to true if this class is used by multiple inx files.
+
+    def _addExtraNS(self):
+        """ If you need to add extra namaspaces, define a class attribute
+        "ExtraNS" in your subclass, to a dict of the namespaces to add. eg:
+
+        class AnExtension(inkex.EffectExtension):
+            Extra_NS={"someNamespace": "http://domain.com/someNamespce"}
+        """
+        if type(self).__dict__.has_key("Extra_NS"):
+            nsmap = type(self).__dict__["Extra_NS"]
+            registerNS(nsmap)
 
     def __init__(self):
         self.file_io = None
@@ -118,6 +129,8 @@ class InkscapeExtension(object):
             if self.options.output is None:
                 # assert output
                 self.options.output = (output or stdout)
+
+            self._addExtraNS()
 
             self.load_raw()
             self.save_raw(self.effect())

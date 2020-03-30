@@ -34,7 +34,7 @@ from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
 from .primitives import BaseElement
-from .meta import NamedView, Defs, StyleElement
+from .meta import NamedView, Defs, StyleElement, Metadata
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import
@@ -183,6 +183,11 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
     def namedview(self):
         """Return the sp namedview meta information element"""
         return self.get_or_create('//sodipodi:namedview', NamedView, True)
+
+    @property
+    def metadata(self):
+        """Return the svg metadata meta element container"""
+        return self.get_or_create('//svg:metadata', Metadata, True)
 
     @property
     def defs(self):

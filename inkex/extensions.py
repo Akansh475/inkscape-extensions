@@ -241,6 +241,8 @@ class ColorExtension(EffectExtension):
     """
     A standard way to modify colours in an svg document.
     """
+    process_none = False # should we call modify_color for the "none" color.
+
     def effect(self):
         # Limiting to shapes ignores Gradients (and other things) from the select_all
         # this prevents defs from being processed twice.
@@ -263,7 +265,7 @@ class ColorExtension(EffectExtension):
             value = style.get(name)
             if value is not None:
                 try:
-                    style[name] = self.modify_color(name, Color(value))
+                    style[name] = self._modify_color(name, Color(value))
                 except ColorIdError:
                     gradient = self.svg.getElementById(value)
                     gradients.track(gradient, elem, self._ref_cloned, style=style, name=name)
@@ -285,6 +287,12 @@ class ColorExtension(EffectExtension):
         lid = linker.get('id')
         linker = self.svg.getElementById(self._renamed.get(lid, lid))
         linker.set('xlink:href', '#' + new_id)
+
+    def _modify_color(self, name, color):
+        """Pre-process color value to filter out bad colors"""
+        if color or self.process_none:
+            return self.modify_color(name, color)
+        return color
 
     def modify_color(self, name, color):
         """Replace this method with your colour modifier method"""

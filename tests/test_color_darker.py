@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorDarkerTest(ColorBaseCase):
     effect_class = Darker
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#000000"),
         ((255, 255, 255), "#e6e6e6"),
         ((192, 192, 192), "#adadad"),

@@ -34,6 +34,8 @@ class ColorTest(TestCase):
         color = Color('red')
         color[0] = 41
         self.assertEqual(str(color), '#290000')
+        color = Color("#ff0000").to_named()
+        self.assertEqual(str(color), "red")
 
     def test_rgb_hex(self):
         """RGB Hex Color"""

@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorLessSaturationTest(ColorBaseCase):
     effect_class = LessSaturation
     color_tests = [
+        ("none", "none"),
         ('hsl(0, 0, 0)', 'hsl(0, 0, 0)'),
         ('hsl(255, 255, 255)', 'hsl(255, 243, 255)'),
         ((0, 0, 0), "#000000"),

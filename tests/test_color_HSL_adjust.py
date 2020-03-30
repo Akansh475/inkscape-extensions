@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorHSLAdjustTest(ColorBaseCase):
     effect_class = HslAdjust
     color_tests = [
+        ("none", "none"),
         ((255, 255, 255), "#ffffff"),
         ((0, 0, 0), "#000000"),
         ((0, 128, 0), "#008000"),

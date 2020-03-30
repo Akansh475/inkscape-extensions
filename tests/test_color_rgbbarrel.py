@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorBarrelTest(ColorBaseCase):
     effect_class = RgbBarrel
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#000000"),
         ((255, 255, 255), "#ffffff"),
         ((192, 192, 192), "#c0c0c0"),

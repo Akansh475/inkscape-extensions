@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorNegativeTest(ColorBaseCase):
     effect_class = Negative
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#ffffff"),
         ((255, 255, 255), "#000000"),
         ((192, 192, 192), "#3f3f3f"),

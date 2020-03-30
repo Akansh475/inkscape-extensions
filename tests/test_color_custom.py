@@ -8,6 +8,7 @@ class ColorCustomTest(ColorBaseCase):
     effect_class = Custom
     color_tests = [
         # The default ranges are set to 0, and thus the color should not change.
+        ("none", "none"),
         ((255, 255, 255), "#ffffff"),
         ((100, 0, 0), "#c80000", ['-r r*2']),
         ((12, 34, 56), "#0c3822", ['-g b', '-b g']),

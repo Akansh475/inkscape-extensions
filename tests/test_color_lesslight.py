@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorLessLightTest(ColorBaseCase):
     effect_class = LessLight
     color_tests = [
+        ("none", "none"),
         ('hsl(0, 0, 0)', 'hsl(0, 0, 0)'),
         ('hsl(255, 255, 255)', 'hsl(255, 255, 243)'),
         ((0, 0, 0), "#000000"),

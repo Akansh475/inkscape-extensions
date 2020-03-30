@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorReplaceTest(ColorBaseCase):
     effect_class = ReplaceColor
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#ff0000", []),
         ((128, 0, 0), "#800000", []),
         ((0, 0, 0), "#696969", ['-t1768516095']),

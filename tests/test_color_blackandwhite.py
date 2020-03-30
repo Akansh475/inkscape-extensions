@@ -6,6 +6,7 @@ class ColorBlackAndWhiteTest(ColorBaseCase):
     effect_class = BlackAndWhite
     color_tests = [
         # When converting to black and white the color white should be unchanged
+        ("none", "none"),
         ((0, 0, 0), "#000000"),
         ((255, 255, 255), "#ffffff"),
         ((192, 192, 192), "#ffffff"),

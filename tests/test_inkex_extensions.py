@@ -46,7 +46,7 @@ class ColorBaseCase(TestCase):
         """Run all color tests"""
         for x, (inp, outp) in enumerate(self._test_list(self.color_tests)):
             outp = inkex.Color(outp)
-            got = self.effect.modify_color('fill', inkex.Color(inp))
+            got = self.effect._modify_color('fill', inkex.Color(inp))
             self.assertTrue(isinstance(got, inkex.Color),\
                 "Bad output type: {}".format(type(got).__name__))
             outp, got = str(outp), str(got.to(outp.space))

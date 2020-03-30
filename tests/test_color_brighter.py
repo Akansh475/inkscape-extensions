@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorBrighterTest(ColorBaseCase):
     effect_class = Brighter
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#0a0a0a"),
         ((255, 255, 255), "#ffffff"),
         ((192, 192, 192), "#d5d5d5"),

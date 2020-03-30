@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorGrayscaleTest(ColorBaseCase):
     effect_class = Grayscale
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#000000"),
         ((255, 255, 255), "#ffffff"),
         ((192, 192, 192), "#c0c0c0"),

@@ -403,6 +403,12 @@ class Color(list):
         """Returns the colour values as percentage floats (0.0 - 1.0)"""
         return [val / 255.0 for val in self]
 
+    def to_named(self):
+        """Convert this color to a named color if possible"""
+        if not self:
+            return Color()
+        return Color(COLOR_SVG.get(str(self), str(self)))
+
 
 def rgb_to_hsl(red, green, blue):
     """RGB to HSL colour conversion"""

@@ -5,6 +5,7 @@ from .test_inkex_extensions import ColorBaseCase
 class ColorRemoveRedTest(ColorBaseCase):
     effect_class = RemoveRed
     color_tests = [
+        ("none", "none"),
         ((0, 0, 0), "#000000"),
         ((255, 255, 255), "#00ffff"),
         ((192, 192, 192), "#00c0c0"),

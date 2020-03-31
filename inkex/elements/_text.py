@@ -29,8 +29,8 @@ from ..paths import Path
 from ..transforms import BoundingBox
 from ..units import convert_unit
 
-from .primitives import BaseElement, ShapeElement
-from .polygons import PathElementBase
+from ._base import BaseElement, ShapeElement
+from ._polygons import PathElementBase
 
 class FlowRegion(ShapeElement):
     """SVG Flow Region (SVG 2.0)"""

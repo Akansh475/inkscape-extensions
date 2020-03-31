@@ -27,7 +27,7 @@ from ..paths import Path
 from ..utils import addNS
 from ..transforms import Transform
 
-from .primitives import ShapeElement
+from ._base import ShapeElement
 
 try:
     from typing import Optional  # pylint: disable=unused-import

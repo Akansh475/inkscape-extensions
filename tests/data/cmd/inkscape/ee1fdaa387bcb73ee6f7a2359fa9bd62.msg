@@ -4,6 +4,14 @@ Program: inkscape
 Arguments: --export-area=953:49:1000:951 --export-filename=f5oo.png compare_file.svg
 
 ----CALLDATA--//--CALLDATA--
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+Filename: img
+
+TWlzc2luZyBGaWxl
+
+----CALLDATA--//--CALLDATA--
 Content-Type: application/octet-stream; Name="f5oo.png"
 MIME-Version: 1.0
 Content-Transfer-Encoding: base64
@@ -16,13 +24,5 @@ BxQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMCDAZoM
 AAG1xnPlAAAAAElFTkSuQmCC
-
-----CALLDATA--//--CALLDATA--
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: base64
-Filename: img
-
-TWlzc2luZyBGaWxl
 
 ----CALLDATA--//--CALLDATA----

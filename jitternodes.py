@@ -39,7 +39,11 @@ class JitterNodes(inkex.EffectExtension):
         for node in self.svg.get_selected(inkex.PathElement):
             path = node.path.to_superpath()
             for subpath in path:
-                for csp in subpath:
+                closed = subpath[0] == subpath[-1]
+                for index, csp in enumerate(subpath):
+                    if closed and index == len(subpath) - 1:
+                            subpath[index] = subpath[0]
+                            break
                     if self.options.end:
                         delta = self.randomize([0, 0])
                         csp[0][0] += delta[0]

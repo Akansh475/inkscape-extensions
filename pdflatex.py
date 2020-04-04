@@ -50,7 +50,7 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
             output_directory=self.tempdir,\
             halt_on_error=True, oldie=True)
 
-        inkscape(pdf_file, export_file=svg_file, pdf_page=1,
+        inkscape(pdf_file, export_filename=svg_file, pdf_page=1,
                  pdf_poppler=True, export_type="svg")
 
         with open(svg_file, 'r') as fhl:

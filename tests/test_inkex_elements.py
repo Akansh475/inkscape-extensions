@@ -61,7 +61,6 @@ class CoreElementTestCase(ElementTestCase):
 
     def test_abstract_raises(self):
         """Abstract classes cannot be instantiated"""
-        self.assertRaises(AssertionError, ShapeElement)
         self.assertRaises(NotImplementedError, FakeShape().get_path)
         self.assertRaises(AttributeError, FakeShape().set_path, None)
 

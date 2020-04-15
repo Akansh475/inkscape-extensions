@@ -55,11 +55,7 @@ class Html5Canvas(inkex.OutputExtension):
         for node in root:
             if not isinstance(node, BaseElement):
                 continue
-            try:
-                class_name = node.TAG.capitalize()
-            except Exception as e:
-                # AssertionError with unknown tags, like <inkscape:clipboard>
-                continue
+            class_name = node.TAG.capitalize()
             if not hasattr(svg, class_name):
                 continue
             gradient = None

@@ -93,7 +93,8 @@ class BaseElement(etree.ElementBase):
     @property
     def TAG(self): # pylint: disable=invalid-name
         """Return the tag_name without NS"""
-        assert self.tag_name
+        if not self.tag_name:
+            return super(etree.ElementBase, self).TAG
         return removeNS(self.tag_name)[-1]
 
     @classmethod

@@ -6,5 +6,6 @@ from inkex.tester.filters import CompareOrderIndependentLines
 
 class Ink2CanvasBasicTest(ComparisonMixin, TestCase):
     effect_class = Html5Canvas
+    compare_file = 'svg/shapes-clipboard.svg'
     compare_filters = [CompareOrderIndependentLines()]
     comparisons = [()]

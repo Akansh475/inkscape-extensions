@@ -21,7 +21,6 @@ Save an SVG file into an html canvas file.
 """
 
 import inkex
-from inkex import BaseElement
 
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
@@ -50,16 +49,34 @@ class Html5Canvas(inkex.OutputExtension):
             return svg.RadialGradientDef(gradient, colors)
         return svg.LinearGradientDef(gradient, colors)
 
+    @staticmethod
+    def _shape_from_node(node, canvas):
+        """
+        Make a canvas shape object for the given node. Returns `None` if
+        the node is not an SVG shape element.
+        @rtype svg.AbstractShape or NoneType
+        """
+        prefix, _brace_, command = node.tag.partition('}')
+        if prefix != '{http://www.w3.org/2000/svg':
+            return None
+
+        # makes pylint happy
+        assert _brace_ == '}'
+
+        cls = getattr(svg, command.capitalize(), None)
+
+        if not (isinstance(cls, type) and issubclass(cls, svg.AbstractShape)):
+            return None
+
+        return cls(command, node, canvas)
+
     def walk_tree(self, root, canvas):
         """Walk throug the whole svg tree"""
         for node in root:
-            if not isinstance(node, BaseElement):
-                continue
-            class_name = node.TAG.capitalize()
-            if not hasattr(svg, class_name):
+            elem = self._shape_from_node(node, canvas)
+            if elem is None:
                 continue
             gradient = None
-            elem = getattr(svg, class_name)(node.TAG, node, canvas)
             if elem.has_gradient():
                 gradient = self.get_gradient_defs(elem)
             elem.start(gradient)

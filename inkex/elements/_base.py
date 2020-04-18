@@ -69,8 +69,8 @@ SVG_PARSER.set_element_class_lookup(NodeBasedLookup())
 
 def load_svg(stream):
     """Load SVG file using the SVG_PARSER"""
-    if (isinstance(stream, str) and stream.startswith('<'))\
-      or (isinstance(stream, bytes) and stream.startswith(b'<')):
+    if (isinstance(stream, str) and stream.lstrip().startswith('<'))\
+      or (isinstance(stream, bytes) and stream.lstrip().startswith(b'<')):
         return etree.ElementTree(etree.fromstring(stream, parser=SVG_PARSER))
     return etree.parse(stream, parser=SVG_PARSER)
 
@@ -94,7 +94,7 @@ class BaseElement(etree.ElementBase):
     def TAG(self): # pylint: disable=invalid-name
         """Return the tag_name without NS"""
         if not self.tag_name:
-            return super(etree.ElementBase, self).TAG
+            return removeNS(super(etree.ElementBase, self).tag)[-1]
         return removeNS(self.tag_name)[-1]
 
     @classmethod

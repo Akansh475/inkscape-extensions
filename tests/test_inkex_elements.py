@@ -12,7 +12,7 @@ from inkex import (
     ShapeElement, Group, Layer, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
-    Transform, Style
+    Transform, Style, load_svg
 )
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError, PY3
@@ -44,6 +44,25 @@ class ElementTestCase(TestCase):
 class CoreElementTestCase(ElementTestCase):
     """Test core element functionality"""
     tag = 'g'
+
+    def test_tag_names(self):
+        """
+        Test tag names for custom and unknown tags
+        """
+        doc = load_svg("""
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://x.com/x">
+    <g id="good"></g>
+    <badsvg id="bad">Unknown SVG tag</badsvg>
+    <x:othertag id="ugly"></x:othertag>
+</svg>""")
+        svg = doc.getroot()
+
+        good = svg.getElementById("good")
+        self.assertEqual(good.TAG, "g")
+        bad = svg.getElementById("bad")
+        self.assertEqual(bad.TAG, "badsvg")
+        ugly = svg.getElementById("ugly")
+        self.assertEqual(ugly.TAG, "othertag")
 
     def test_reference_count(self):
         """

@@ -445,3 +445,11 @@ class ShapeElement(BaseElement):
             if transform:  # apply extra transformation
                 path = path.transform(transform)
         return path.bounding_box()
+
+    def is_visible(self):
+        """Returns false if the css says this object is invisible"""
+        if self.style.get('display', '') == 'none':
+            return False
+        if not float(self.style.get('opacity', 1.0)):
+            return False
+        return True

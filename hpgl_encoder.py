@@ -31,10 +31,11 @@ from inkex.bezier import cspsubdiv
 class NoPathError(ValueError):
     """Raise that paths not selected"""
 
-class hpglEncoder(object):
-    PI = math.pi
-    TWO_PI = PI * 2
+# Find the pen number in the layer number
+FIND_PEN = re.compile(r'(\s|\A)pen\s*(\d+)(\s|\Z)')
 
+class hpglEncoder(object):
+    """HPGL Encoder, used by others"""
     def __init__(self, effect):
         """ options:
                 "resolutionX":float
@@ -76,12 +77,8 @@ class hpglEncoder(object):
             self.toolOffsetFlat = self.flat / self.toolOffset * 4.5 # scale flatness to offset
         else:
             self.toolOffsetFlat = 0.0
-        self.mirrorX = 1.0
-        if self.options.mirrorX:
-            self.mirrorX = -1.0
-        self.mirrorY = -1.0
-        if self.options.mirrorY:
-            self.mirrorY = 1.0
+        self.mirrorX = -1.0 if self.options.mirrorX else 1.0
+        self.mirrorY = 1.0 if self.options.mirrorY else -1.0
         # process viewBox attribute to correct page scaling
         self.viewBoxTransformX = 1
         self.viewBoxTransformY = 1
@@ -91,11 +88,16 @@ class hpglEncoder(object):
             self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
 
     def getHpgl(self):
+        """Return the HPGL instructions"""
         # dryRun to find edges
-        groupmat = Transform([[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0], [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]])
-        groupmat.add_rotate(int(self.options.orientation))
+        transform = Transform([
+            [self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0],
+            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
+        )
+        transform.add_rotate(int(self.options.orientation))
+
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
-        self.processGroups(self.doc, groupmat)
+        self.process_group(self.doc, transform)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
             raise NoPathError("No paths found")
         # live run
@@ -132,10 +134,17 @@ class hpglEncoder(object):
         if not self.options.center and self.toolOffset > 0.0:
             self.offsetX += self.toolOffset
             self.offsetY += self.toolOffset
+
         # initialize transformation matrix and cache
-        groupmat = Transform([[self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, -self.divergenceX + self.offsetX],
-            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, -self.divergenceY + self.offsetY]])
-        groupmat.add_rotate(int(self.options.orientation))
+        transform = Transform([
+            [self.mirrorX * self.scaleX * self.viewBoxTransformX,
+             0.0,
+             -float(self.divergenceX) + self.offsetX],
+            [0.0,
+             self.mirrorY * self.scaleY * self.viewBoxTransformY,
+             -float(self.divergenceY) + self.offsetY]
+        ])
+        transform.add_rotate(int(self.options.orientation))
         self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
@@ -155,59 +164,44 @@ class hpglEncoder(object):
                 self.processOffset('PU', 0, 0, self.options.pen)
                 self.processOffset('PD', 0, self.toolOffset * 8, self.options.pen)
         # start conversion
-        self.processGroups(self.doc, groupmat)
+        self.process_group(self.doc, transform)
         # shift an empty node in in order to process last node in cache
         if self.toolOffset > 0.0 and not self.dryRun:
             self.processOffset('PU', 0, 0, 0)
         return self.hpgl
 
-    def processGroups(self, doc, groupmat):
-        # flatten layers and groups to avoid recursion
-        paths = []
-        for node in doc:
-            if (node.tag == inkex.addNS('g', 'svg') and self.isGroupVisible(node)) or node.tag == inkex.addNS('path', 'svg'):
-                paths.append([node.tag, node, self.mergeTransform(node, groupmat), self.getPenNumber(node)])
-        doc = ''
-        hasGroups = True
-        while hasGroups:
-            hasGroups = False
-            for i, elm in enumerate(paths):
-                if paths[i][0] == inkex.addNS('g', 'svg') and self.isGroupVisible(paths[i][1]):
-                    hasGroups = True
-                    for path in paths[i][1]:
-                        if (path.tag == inkex.addNS('g', 'svg') and self.isGroupVisible(path)) or path.tag == inkex.addNS('path', 'svg'):
-                            paths.insert(i + 1, [path.tag, path, self.mergeTransform(path, paths[i][2]), paths[i][3]])
-                    paths[i][0] = ''
-        for node in paths:
-            if node[0] == inkex.addNS('path', 'svg'):
-                self.processPath(node[1], node[2], node[3])
+    def process_group(self, group, transform):
+        """flatten layers and groups to avoid recursion"""
+        for child in group:
+            if not isinstance(child, inkex.ShapeElement):
+                continue
+            if child.is_visible():
+                if isinstance(child, inkex.Group):
+                    self.process_group(child, transform)
+                elif isinstance(child, inkex.PathElement):
+                    self.process_path(child, transform)
+                elif self.options.convertObjects:
+                    # This only works for shape elements (not text yet!)
+                    new_elem = child.to_path_element()
+                    # Element is given composed transform b/c it's not added back to doc
+                    new_elem.transform = child.composed_transform()
+                    self.process_path(new_elem, transform)
 
-    def getPenNumber(self, doc):
-        penNum = doc.label
-        if penNum == None:
-            return self.options.pen
-        penNum = penNum.lower().strip(' \t\n\r')
-        if re.search(r'( |\A)pen *\d+( |\Z)', penNum):
-            penNum = re.sub(r'(.* |\A)pen *(\d+)( .*|\Z)', r'\2', penNum, 1)
-            return int(penNum)
-        else:
-            return self.options.pen
+    def get_pen_number(self, node):
+        """Get pen number for node label (usually group)"""
+        for parent in [node] + list(node.ancestors()):
+            match = FIND_PEN.fullmatch(parent.label or '', re.IGNORECASE)
+            if match:
+                return int(match.group(2))
+        return int(self.options.pen)
 
-    def mergeTransform(self, doc, matrix):
-        # get and merge two matrixes into one
-        return doc.transform * Transform(matrix)
-
-    def isGroupVisible(self, group):
-        style = group.get('style')
-        if style:
-            style = dict(inkex.Style.parse_str(style))
-            if 'display' in style and style['display'] == 'none':
-                return False
-        return True
-
-    def processPath(self, node, mat, pen):
-        # process path
-        path = node.path.transform(mat).to_superpath()
+    def process_path(self, node, transform):
+        """Process the given element into a plotter path"""
+        pen = self.get_pen_number(node)
+        path = node.path.to_absolute()\
+                   .transform(node.composed_transform())\
+                   .transform(transform)\
+                   .to_superpath()
         if path:
             cspsubdiv(path, self.flat)
             # path to HPGL commands
@@ -243,14 +237,14 @@ class hpglEncoder(object):
                                 oldPosY = posY
 
     def getLength(self, x1, y1, x2, y2, absolute=True):
-        # calc absolute or relative length between two points
+        """calc absolute or relative length between two points"""
         length = math.sqrt((x2 - x1) ** 2.0 + (y2 - y1) ** 2.0)
         if absolute:
             length = math.fabs(length)
         return length
 
     def changeLength(self, x1, y1, x2, y2, offset):
-        # change length of line
+        """change length of line"""
         if offset < 0:
             offset = max( - self.getLength(x1, y1, x2, y2), offset)
         x = x2 + (x2 - x1) / self.getLength(x1, y1, x2, y2, False) * offset
@@ -296,10 +290,10 @@ class hpglEncoder(object):
                         angleStart = math.atan2(pointThree[1] - self.vData[2][2], pointThree[0] - self.vData[2][1])
                         angleVector = math.atan2(pointFour[1] - self.vData[2][2], pointFour[0] - self.vData[2][1]) - angleStart
                         # switch direction when arc is bigger than 180°
-                        if angleVector > self.PI:
-                            angleVector -= self.TWO_PI
-                        elif angleVector < - self.PI:
-                            angleVector += self.TWO_PI
+                        if angleVector > math.pi:
+                            angleVector -= math.pi * 2
+                        elif angleVector < - math.pi:
+                            angleVector += math.pi * 2
                         # draw arc
                         if angleVector >= 0:
                             angle = angleStart + self.toolOffsetFlat

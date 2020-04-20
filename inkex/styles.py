@@ -25,7 +25,8 @@ import re
 from collections import OrderedDict
 
 from .utils import PY3
-from .colors import Color
+from .colors import Color, ColorIdError
+from .tween import interpcoord, interpunit
 
 if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
@@ -72,7 +73,8 @@ class Classes(list):
 class Style(OrderedDict):
     """A list of style directives"""
     color_props = ('stroke', 'fill', 'stop-color', 'flood-color', 'lighting-color')
-    opacity_props = ('stroke-opacity', 'fill-opacity', 'opacity')
+    opacity_props = ('stroke-opacity', 'fill-opacity', 'opacity', 'stop-opacity')
+    unit_props = ('stroke-width')
 
     def __init__(self, style=None, callback=None, **kw):
         # This callback is set twice because this is 'pre-initial' data (no callback)
@@ -169,6 +171,38 @@ class Style(OrderedDict):
         for (name, value) in self.items():
             if value == 'url(#{})'.format(old_id):
                 self[name] = 'url(#{})'.format(new_id)
+
+    def interpolate_prop(self, other, fraction, prop, svg=None):
+        """Interpolate specific property."""
+        a1 = self[prop]
+        a2 = other.get(prop, None)
+        if a2 is None:
+            val = a1
+        else:
+            if prop in self.color_props:
+                if isinstance(a1, Color):
+                    val = a1.interpolate(Color(a2), fraction)
+                elif a1.startswith('url(') or a2.startswith('url('):
+                    # gradient requires changes to the whole svg
+                    # and needs to be handled externally
+                    val = a1
+                else:
+                    val = Color(a1).interpolate(Color(a2), fraction)
+            elif prop in self.opacity_props:
+                val = interpcoord(float(a1), float(a2), fraction)
+            elif prop in self.unit_props:
+                val = interpunit(a1, a2, fraction)
+            else:
+                val = a1
+        return val
+
+    def interpolate(self, other, fraction):  # type: (Style, float, Optional[str], Optional[str]) -> Style
+        """Interpolate all properties."""
+        style = Style()
+        for prop, value in self.items():
+            style[prop] = self.interpolate_prop(other, fraction, prop)
+        return style
+
 
 class AttrFallbackStyle(object):
     """

@@ -5,6 +5,7 @@ Test elements extra logic from svg xml lxml custom classes.
 """
 
 from lxml import etree
+import pytest
 
 import inkex
 
@@ -12,8 +13,9 @@ from inkex import (
     ShapeElement, Group, Layer, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
-    Transform, Style, load_svg
+    Transform, Style, load_svg, LinearGradient, RadialGradient, Stop
 )
+from inkex.colors import Color
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError, PY3
 from inkex.tester import TestCase
@@ -572,6 +574,115 @@ class UseTest(ElementTestCase):
         self.assertEqual(str(elem.path), 'M 0 0 L 10 10 Z')
         self.assertEqual(elem.tag_name, 'path')
         self.assertEqual(elem.getparent().get('id'), 'C')
+
+class StopTests(ElementTestCase):
+    black = Color('#000000')
+    grey50 = Color('#080808')
+    white = Color('#111111')
+
+    def test_interpolate(self):
+        stl1 = Style({'stop-color': self.black, 'stop-opacity': 0.0})
+        stop1 = Stop(offset='0.0', style=str(stl1))
+        stl2 = Style({'stop-color': self.white, 'stop-opacity': 1.0})
+        stop2 = Stop(offset='1.0', style=str(stl2))
+        stop3 = stop1.interpolate(stop2, 0.5)
+        assert stop3.style['stop-color'] == str(self.grey50)
+        assert float(stop3.style['stop-opacity']) == pytest.approx(0.5, 1e-3)
+
+
+class GradientTests(ElementTestCase):
+    black = Color('#000000')
+    grey50 = Color('#080808')
+    white = Color('#111111')
+
+    whiteop1 = Style({'stop-color': white, 'stop-opacity': 1.0})
+    blackop1 = Style({'stop-color': black, 'stop-opacity': 1.0})
+    whiteop0 = Style({'stop-color': white, 'stop-opacity': 0.0})
+    blackop0 = Style({'stop-color': black, 'stop-opacity': 0.0})
+
+    translate11 = Transform('translate(1.0, 1.0)')
+    translate22 = Transform('translate(2.0, 2.0)')
+
+    def test_apply_transform(self):
+        values = [ 
+            (LinearGradient,
+             {'x1': 0.0, 'y1': 0.0, 'x2': 1.0, 'y2': 1.0},
+             {'x1': 1.0, 'y1': 1.0, 'x2': 2.0, 'y2': 2.0}),
+            (RadialGradient,
+             {'cx': 0.0, 'cy': 0.0, 'fx': 1.0, 'fy': 1.0, 'r': 1.0},
+             {'cx': 1.0, 'cy': 1.0, 'fx': 2.0, 'fy': 2.0, 'r': 1.0}
+             )]
+        for classname, orientation, expected in values:
+            grad = classname().update(**orientation)
+            grad.gradientTransform = self.translate11
+            grad.apply_transform()
+            val = grad.get('gradientTransform')
+            assert val is None
+            for key, value in expected.items():
+                assert float(grad.get(key)) == pytest.approx(value, 1e-3)
+
+    def test_stops(self):
+        for classname in [LinearGradient, RadialGradient]:
+            grad = classname()
+            stops = [
+                Stop().update(offset=0.0, style=self.whiteop0),
+                Stop().update(offset=1.0, style=self.blackop1)]
+            grad.add(*stops)
+            assert [s1.tostring() == s2.tostring() for s1, s2 in zip(grad.stops, stops)]
+
+    def test_stop_styles(self):
+        for classname in [LinearGradient, RadialGradient]:
+            grad = classname()
+            stops = [
+                Stop().update(offset=0.0, style=self.whiteop0),
+                Stop().update(offset=1.0, style=self.blackop1)]
+            grad.add(*stops)
+            assert [str(s1) == str(s2.style) for s1, s2 in zip(grad.stop_styles, stops)]
+
+    def test_get_stop_offsets(self):
+        for classname in [LinearGradient, RadialGradient]:
+            grad = classname()
+            stops = [
+                Stop().update(offset=0.0, style=self.whiteop0),
+                Stop().update(offset=1.0, style=self.blackop1)]
+            grad.add(*stops)
+            assert [float(s1) == pytest.approx(float(s2.offset), 1e-3) for s1, s2 in zip(grad.stop_offsets, stops)]
+
+    def test_interpolate(self):
+        values = [ 
+                (LinearGradient,
+                 {'x1': 0, 'y1': 0, 'x2': 1, 'y2': 1},
+                 {'x1': 2, 'y1': 2, 'x2': 1, 'y2': 1},
+                 {'x1': 1.0, 'y1': 1.0, 'x2': 1.0, 'y2': 1.0}),
+                (RadialGradient,
+                 {'cx': 0, 'cy': 0, 'fx': 1, 'fy': 1, 'r': 0},
+                 {'cx': 2, 'cy': 2, 'fx': 1, 'fy': 1, 'r': 1},
+                 {'cx': 1.0, 'cy': 1.0, 'fx': 1.0, 'fy': 1.0, 'r': 0.5})]
+        for classname, orientation1, orientation2, expected in values:
+            # gradient 1
+            grad1 = classname()
+            stops1 = [
+                Stop().update(offset=0.0, style=self.whiteop0),
+                Stop().update(offset=1.0, style=self.blackop1)]
+            grad1.add(*stops1)
+            grad1.update(gradientTransform=self.translate11)
+            grad1.update(**orientation1)
+
+            # gradient 2
+            grad2 = classname()
+            stops2 = [
+                Stop().update(offset=0.0, style=self.blackop1),
+                Stop().update(offset=1.0, style=self.whiteop0)]
+            grad2.add(*stops2)
+            grad2.update(gradientTransform=self.translate22)
+            grad2.update(**orientation2)
+            grad = grad1.interpolate(grad2, 0.5)
+            assert str(grad.stops[0].style) == str(Style({'stop-color': self.grey50, 'stop-opacity': 0.5}))
+            assert str(grad.stops[1].style) == str(Style({'stop-color': self.grey50, 'stop-opacity': 0.5}))
+            assert str(grad.gradientTransform) == 'translate(1.5, 1.5)'
+            for key, value in expected.items():
+                assert float(grad.get(key)) == pytest.approx(value, 1e-3) 
+
 
 class SymbolTest(ElementTestCase):
     """Test Symbol elements"""

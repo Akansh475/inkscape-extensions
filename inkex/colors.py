@@ -23,6 +23,7 @@ Basic color controls
 """
 
 from .utils import PY3
+from .tween import interpcoord
 
 # All the names that get added to the inkex API itself.
 __all__ = ('Color', 'ColorError', 'ColorIdError')
@@ -297,7 +298,7 @@ class Color(list):
             return 'rgb', None
 
         if color.startswith('url('):
-            raise ColorIdError("Gradient other referenced element id.")
+            raise ColorIdError("Color references other element id, e.g. a gradient")
 
         # Next handle short colors (css: #abc -> #aabbcc)
         if color.startswith('#'):
@@ -408,6 +409,13 @@ class Color(list):
         if not self:
             return Color()
         return Color(COLOR_SVG.get(str(self), str(self)))
+
+    def interpolate(self, other, fraction):
+        """Iterpolate two colours by the given fraction"""
+        return Color(
+            [interpcoord(c1, c2, fraction)
+             for (c1, c2) in zip(self.to_floats(), other.to_floats())]
+            )
 
 
 def rgb_to_hsl(red, green, blue):

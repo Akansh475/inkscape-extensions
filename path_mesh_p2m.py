@@ -23,6 +23,7 @@ Convert path to mesh gradient
 import inkex
 from inkex import BaseElement, Gradient
 from inkex.paths import Line, Curve
+from inkex.elements import Stop
 
 class MeshGradient(Gradient):
     """Usable MeshGradient XML base class"""
@@ -64,17 +65,12 @@ class MeshPatch(BaseElement):
             if i < len(self):
                 stop = self[i]
             else:
-                stop = self.add(MeshStop())
+                stop = self.add(Stop())
 
             # set edge path data
             stop.set('path', str(edge))
             # set stop color
             stop.style['stop-color'] = str(colors[i % 2])
-
-
-class MeshStop(BaseElement):
-    """Each stop color in a gradient"""
-    tag_name = 'stop'
 
 
 class PathToMesh(inkex.EffectExtension):

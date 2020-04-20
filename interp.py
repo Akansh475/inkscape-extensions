@@ -19,11 +19,14 @@
 #
 
 import copy
+from collections import namedtuple
+from itertools import combinations
 
 import inkex
+from inkex.styles import Style
 from inkex.utils import pairwise
 from inkex.paths import CubicSuperPath
-from inkex.tween import tweenstyleunit, tweenstylefloat, tweenstylecolor, interppoints
+from inkex.tween import interppoints
 from inkex.bezier import csplength, cspbezsplitatlength, cspbezsplit, bezlenapprx
 
 class Interp(inkex.EffectExtension):
@@ -67,7 +70,9 @@ class Interp(inkex.EffectExtension):
         for node in objects:
             node.apply_transform()
 
-        for (elem1, elem2) in pairwise(objects, start=False):
+        objectpairs = pairwise(objects, start=False) 
+
+        for (elem1, elem2) in objectpairs:
             start = elem1.path.to_superpath()
             end = elem2.path.to_superpath()
             sst = copy.deepcopy(elem1.style)
@@ -75,24 +80,39 @@ class Interp(inkex.EffectExtension):
             basestyle = copy.deepcopy(sst)
 
             if 'stroke-width' in basestyle:
-                basestyle['stroke-width'] = tweenstyleunit(self.svg, 'stroke-width', sst, est, 0)
+                basestyle['stroke-width'] = sst.interpolate_prop(est, 0, 'stroke-width')
 
             # prepare for experimental style tweening
             if self.options.style:
-                dostroke = True
-                dofill = True
-                styledefaults = inkex.Style(
-                    'opacity:1.0;stroke-opacity:1.0;fill-opacity:1.0;'
-                    'stroke-width:1.0;stroke:none;fill:none')
+                styledefaults = Style(
+                    {'opacity': 1.0,
+                     'stroke-opacity': 1.0,
+                     'fill-opacity': 1.0,
+                     'stroke-width': 1.0,
+                     'stroke': None,
+                     'fill': None})
                 for key in styledefaults:
                     sst.setdefault(key, styledefaults[key])
                     est.setdefault(key, styledefaults[key])
+
                 isnotplain = lambda x: not (x == 'none' or x[:1] == '#')
-                if isnotplain(sst['stroke']) or isnotplain(est['stroke']) or (sst['stroke'] == 'none' and est['stroke'] == 'none'):
-                    dostroke = False
-                if isnotplain(sst['fill']) or isnotplain(est['fill']) or (sst['fill'] == 'none' and est['fill'] == 'none'):
-                    dofill = False
-                if dostroke:
+                isgradient = lambda x: x.startswith('url(#')
+
+                if isgradient(sst['stroke']) and isgradient(est['stroke']):
+                    strokestyle = 'gradient' 
+                elif isnotplain(sst['stroke']) or isnotplain(est['stroke']) or (sst['stroke'] == 'none' and est['stroke'] == 'none'):
+                    strokestyle = 'notplain' 
+                else:
+                    strokestyle = 'color' 
+
+                if isgradient(sst['fill']) and isgradient(est['fill']):
+                    fillstyle = 'gradient' 
+                elif isnotplain(sst['fill']) or isnotplain(est['fill']) or (sst['fill'] == 'none' and est['fill'] == 'none'):
+                    fillstyle = 'notplain' 
+                else:
+                    fillstyle = 'color'
+
+                if strokestyle is 'color':
                     if sst['stroke'] == 'none':
                         sst['stroke-width'] = '0.0'
                         sst['stroke-opacity'] = '0.0'
@@ -101,7 +121,8 @@ class Interp(inkex.EffectExtension):
                         est['stroke-width'] = '0.0'
                         est['stroke-opacity'] = '0.0'
                         est['stroke'] = sst['stroke']
-                if dofill:
+
+                if fillstyle is 'color':
                     if sst['fill'] == 'none':
                         sst['fill-opacity'] = '0.0'
                         sst['fill'] = est['fill']
@@ -236,16 +257,22 @@ class Interp(inkex.EffectExtension):
                 if not interp[-1]:
                     del interp[-1]
 
-                # basic style tweening
+                # basic style interpolation
                 if self.options.style:
-                    basestyle['opacity'] = tweenstylefloat('opacity', sst, est, time)
-                    if dostroke:
-                        basestyle['stroke-opacity'] = tweenstylefloat('stroke-opacity', sst, est, time)
-                        basestyle['stroke-width'] = tweenstyleunit(self.svg, 'stroke-width', sst, est, time)
-                        basestyle['stroke'] = tweenstylecolor('stroke', sst, est, time)
-                    if dofill:
-                        basestyle['fill-opacity'] = tweenstylefloat('fill-opacity', sst, est, time)
-                        basestyle['fill'] = tweenstylecolor('fill', sst, est, time)
+                    basestyle.update(sst.interpolate(est, time))
+                    for prop in ['stroke', 'fill']:
+                        if isgradient(sst[prop]) and isgradient(est[prop]):
+                            gradid1 = sst[prop][4:-1]
+                            gradid2 = est[prop][4:-1]
+                            grad1 = self.svg.getElementById(gradid1)
+                            grad2 = self.svg.getElementById(gradid2)
+                            newgrad = grad1.interpolate(grad2, time)
+                            stops, orientation = newgrad.stops_and_orientation()
+                            self.svg.defs.add(orientation)
+                            basestyle[prop] = 'url(#{})'.format(orientation.get_id())
+                            if len(stops):
+                                self.svg.defs.add(stops, orientation)
+                                orientation.set('xlink:href', '#{}'.format(stops.get_id()))
 
                 new = group.add(inkex.PathElement())
                 new.style = basestyle

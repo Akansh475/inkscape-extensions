@@ -18,51 +18,54 @@
 #
 
 import math
-from .utils import X, Y
 
-def interpcoord(coord_a, coord_b, time):
+from bisect import bisect_left
+from .utils import X, Y
+from .units import convert_unit, parse_unit, render_unit
+
+try:
+    from typing import Tuple, List, TypeVar, Callable
+    V = TypeVar('V')
+except ImportError:
+    pass
+
+
+def interpcoord(coord_a, coord_b, time): # type: (float, float, float) -> float
     """Interpolate single coordinate by the amount of time"""
     return coord_a + ((coord_b - coord_a) * time)
 
 
-def interppoints(point1, point2, time):
+def interp(positions, values, newpositions, func=None): # type: (Callable[[V, V, float], V], List[float], List[V], List[float]) -> V
+    """Interpolate list with arbitrary interpolation function."""
+    newvalues = []
+    positions = list(map(float, positions))
+    newpositions = list(map(float, newpositions))
+    for pos in newpositions:
+        idxl = max(0, bisect_left(positions, pos) - 1)
+        idxr = min(len(positions)-1, idxl + 1)
+        fraction = (pos - positions[idxl]) / (positions[idxr] - positions[idxl])
+        vall = values[idxl]
+        valr = values[idxr]
+        if func is not None:
+            newval = func(vall, valr, fraction)
+        if isinstance(vall, (float, int)):
+            newval = interpcoord(vall, valr, fraction)
+        elif hasattr(vall, 'interpolate'):
+            newval = vall.interpolate(valr, fraction)
+        else:
+            raise Exception('Interpolated objects must be float/int or have an interpolate method if func is not passed as argument')
+        newvalues.append(newval)
+    return newvalues
+
+
+def interppoints(point1, point2, time): # type: (Tuple[float, float], Tuple[float, float], float) -> Tuple[float, float]
     """Interpolate coordinate points by amount of time"""
-    return [interpcoord(point1[X], point2[X], time), interpcoord(point1[Y], point2[Y], time)]
+    return (interpcoord(point1[X], point2[X], time), interpcoord(point1[Y], point2[Y], time))
 
 
-def tweenstylefloat(prop, start, end, time):
-    sp = float(start[prop])
-    ep = float(end[prop])
-    return str(sp + (time * (ep - sp)))
-
-
-def tweenstyleunit(svg, prop, start, end, time):  # moved here so we can call 'unittouu'
-    scale = svg.unittouu('1px')
-    sp = svg.unittouu(start.get(prop, '1px')) / scale
-    ep = svg.unittouu(end.get(prop, '1px')) / scale
-    return str(sp + (time * (ep - sp)))
-
-
-def tweenstylecolor(prop, start, end, time):
-    sr, sg, sb = parsecolor(start[prop])
-    er, eg, eb = parsecolor(end[prop])
-    return '#%s%s%s' % (tweenhex(time, sr, er), tweenhex(time, sg, eg), tweenhex(time, sb, eb))
-
-
-def tweenhex(time, s, e):
-    s = float(int(s, 16))
-    e = float(int(e, 16))
-    retval = hex(int(math.floor(s + (time * (e - s)))))[2:]
-    if len(retval) == 1:
-        retval = '0%s' % retval
-    return retval
-
-
-def parsecolor(c):
-    r, g, b = '0', '0', '0'
-    if c[:1] == '#':
-        if len(c) == 4:
-            r, g, b = c[1:2], c[2:3], c[3:4]
-        elif len(c) == 7:
-            r, g, b = c[1:3], c[3:5], c[5:7]
-    return r, g, b
+def interpunit(start, end, fraction): # type: (SvgDocumentElement, str, str, str, float) -> str
+    """Interpolate float attributes with unit."""
+    # moved here so we can call 'unittouu'
+    sp, unit = parse_unit(start)
+    ep = convert_unit(end, unit)
+    return render_unit(interpcoord(sp, ep, fraction), unit)

@@ -404,6 +404,14 @@ class TransformTest(TestCase):
         self.assertDeepAlmostEqual(tr1.matrix, rotation_then_translation.matrix)
         self.assertDeepAlmostEqual(tr2.matrix, translation_then_rotation.matrix)
 
+    def test_interpolate(self):
+        """Test interpolate with other transform"""
+        t1 = Transform((0,0,0,0,0,0))
+        t2 = Transform((1,1,1,1,1,1))
+        val = t1.interpolate(t2, 0.5)
+        assert all(getattr(val, a) == pytest.approx(0.5, 1e-3) for a in 'abcdef')
+
+
 
 class ScaleTest(TestCase):
     """Test scale class"""

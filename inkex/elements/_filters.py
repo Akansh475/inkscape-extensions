@@ -24,10 +24,13 @@ Element interface for patterns, filters, gradients and path effects.
 """
 
 from lxml import etree
+from copy import deepcopy
 
 from ..utils import addNS
 from ..transforms import Transform
+from ..tween import interpcoord, interp
 
+from ..styles import Style
 from ._base import BaseElement
 
 class Filter(BaseElement):
@@ -92,6 +95,24 @@ class Filter(BaseElement):
         tag_name = 'feTurbulence'
 
 
+class Stop(BaseElement):
+    tag_name = 'stop'
+
+    @property
+    def offset(self):
+        return self.get('offset')
+
+    @offset.setter
+    def offset(self, number):
+        self.set('offset', number)
+
+    def interpolate(self, other, fraction):
+        newstop = Stop()
+        newstop.style = self.style.interpolate(other.style, fraction)
+        newstop.offset = interpcoord(float(self.offset), float(other.offset), fraction)
+        return newstop
+
+
 class Pattern(BaseElement):
     """Pattern element which is used in the def to control repeating fills"""
     tag_name = 'pattern'
@@ -102,14 +123,93 @@ class Gradient(BaseElement):
     """A gradient instruction usually in the defs"""
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('gradientTransform', Transform),)
 
+    orientation_attributes = ()
+
+    @property
+    def stops(self): # type: () -> List[Stop]
+        """Return an ordered list of own or linked stop nodes"""
+        gradcolor = self.href if isinstance(self.href, LinearGradient) else self
+        return sorted(gradcolor, key=lambda x: float(x.offset))
+
+    @property
+    def stop_offsets(self): # type: () -> List[float]
+        """Return a list of own or linked stop offsets"""
+        return [child.offset for child in self.stops]
+
+    @property
+    def stop_styles(self): # type: () -> List[Style]
+        """Return a list of own or linked offset styles"""
+        return [child.style for child in self.stops]
+
+    def remove_orientation(self):
+        """Remove all orientation attributes from this element"""
+        for attr in self.orientation_attributes:
+            self.pop(attr)
+
+    def interpolate(self, other, fraction): # type: (LinearGradient, float) -> LinearGradient
+        """Interpolate with another gradient."""
+        if self.tag_name != other.tag_name:
+            return self
+        newgrad = self.copy()
+
+        # interpolate transforms
+        newtransform = self.gradientTransform.interpolate(other.gradientTransform, fraction)
+        newgrad.gradientTransform = newtransform
+
+        # interpolate orientation
+        for attr in self.orientation_attributes:
+            newattr = interpcoord(float(self.get(attr)), float(other.get(attr)), fraction)
+            newgrad.set(attr, newattr)
+
+        # interpolate stops
+        if self.href is not None and self.href is other.href:
+            # both gradients link to the same stops
+            pass
+        else:
+            # gradients might have different stops
+            newoffsets = sorted(self.stop_offsets + other.stop_offsets[1:-1])
+            sstops = interp(self.stop_offsets, self.stops, newoffsets)
+            ostops = interp(other.stop_offsets, other.stops, newoffsets)
+            newstops = [s1.interpolate(s2, fraction) for s1, s2 in zip(sstops, ostops)]
+            newgrad.remove_all(Stop)
+            newgrad.add(*newstops)
+        return newgrad
+
+    def stops_and_orientation(self):
+        """Return a copy of all the stops in this gradient"""
+        stops = self.copy()
+        stops.remove_orientation()
+        orientation = self.copy()
+        orientation.remove_all(Stop)
+        return stops, orientation
+
 
 class LinearGradient(Gradient):
     tag_name = 'linearGradient'
+    orientation_attributes = ('x1', 'y1', 'x2', 'y2')
+
+    def apply_transform(self): # type: () -> None
+       """Apply transform to orientation points and set it to identity."""
+       trans = self.pop('gradientTransform')
+       p1 = (float(self.get('x1')), float(self.get('y1')))
+       p2 = (float(self.get('x2')), float(self.get('y2')))
+       p1t = trans.apply_to_point(p1)
+       p2t = trans.apply_to_point(p2)
+       self.update(x1=p1t[0], y1=p1t[1], x2=p2t[0], y2=p2t[1])
 
 
 class RadialGradient(Gradient):
     tag_name = 'radialGradient'
+    orientation_attributes = ('cx', 'cy', 'fx', 'fy', 'r')
 
+    def apply_transform(self): # type: () -> None
+       """Apply transform to orientation points and set it to identity."""
+       trans = self.pop('gradientTransform')
+       p1 = (float(self.get('cx')), float(self.get('cy')))
+       p2 = (float(self.get('fx')), float(self.get('fy')))
+       p1t = trans.apply_to_point(p1)
+       p2t = trans.apply_to_point(p2)
+       self.update(cx=p1t[0], cy=p1t[1], fx=p2t[0], fy=p2t[1])
 
 class PathEffect(BaseElement):
     """Inkscape LPE element"""

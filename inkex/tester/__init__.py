@@ -35,9 +35,9 @@ For each of your extensions, you should create a file called
 There are two types of tests:
 
     1. Full-process Comparison tests - These are tests which envoke your
-           extension will various arguments and attempt to compare the
+           extension with various arguments and attempt to compare the
            output to a known good state. These are useful for testing
-           that your extension would work, if it was used in Inkscape.
+           that your extension would work if it was used in Inkscape.
 
            Good example of writing comparison tests can be found in the
            inkscape core repository, each test which inherits from
@@ -50,7 +50,7 @@ There are two types of tests:
            can find the tests that test the inkex modules themsleves
            to be the most instructive.
 
-Your tests will hit a cetain amount of code, this is called it's **coverage**
+Your tests will hit a certain amount of code, this is called it's **coverage**
 and the higher the coverage, the better your tests are at stretching all
 the options and varients your code has.
 

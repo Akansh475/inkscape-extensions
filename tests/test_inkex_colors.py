@@ -170,3 +170,11 @@ class ColorTest(TestCase):
         self.assertEqual(str(color), 'rgba(255, 255, 255, 0)')
         self.assertEqual(int(Color('#808080')), 0x808080ff)
         self.assertEqual(int(Color('rgba(128, 128, 128, 0.2)')), 2155905075)
+
+    def test_interpolate(self):
+        black = Color('#000000')
+        grey50 = Color('#080808')
+        white = Color('#111111')
+        val = black.interpolate(white, 0.5)
+        assert val == grey50
+

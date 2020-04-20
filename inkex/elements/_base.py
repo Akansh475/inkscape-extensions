@@ -333,6 +333,12 @@ class BaseElement(etree.ElementBase):
         if self.getparent() is not None:
             self.getparent().remove(self)
 
+    def remove_all(self, *types):
+        """Remove all children or child types"""
+        for child in self:
+            if not types or isinstance(child, types):
+                self.remove(child)
+
     def replace_with(self, elem):
         """Replace this element with the given element"""
         self.addnext(elem)

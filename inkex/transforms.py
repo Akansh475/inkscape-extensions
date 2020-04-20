@@ -30,6 +30,7 @@ import sys
 from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isnan
 
+from .tween import interpcoord
 from .utils import strargs, KeyDict, PY3
 
 try:
@@ -455,6 +456,16 @@ class Transform(object):
         """
         tol = self.absolute_tolerance if not exactly else 0.0
         return (fabs(self.a - self.d) <= tol) and (fabs(self.b + self.c) <= tol)
+
+    def interpolate(self, other, fraction):
+        """Interpolate with another Transform."""
+        return Transform((
+            interpcoord(self.a, other.a, fraction),
+            interpcoord(self.b, other.b, fraction),
+            interpcoord(self.c, other.c, fraction),
+            interpcoord(self.d, other.d, fraction),
+            interpcoord(self.e, other.e, fraction),
+            interpcoord(self.f, other.f, fraction)))
 
 
 class BoundingInterval(object):  # pylint: disable=too-few-public-methods

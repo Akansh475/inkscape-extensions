@@ -3,6 +3,7 @@ pytest
 pytest-cov
 
 # Code requirements
+typing
 lxml
 numpy
 scour

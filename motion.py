@@ -22,6 +22,7 @@ import math
 
 import inkex
 from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path, Vert, Horz, TepidQuadratic, Quadratic, Smooth
+from inkex.transforms import Vector2d
 from inkex.bezier import beziertatslope, beziersplitatt
 
 
@@ -54,7 +55,7 @@ class Motion(inkex.EffectExtension):
         elem.path = inkex.Path([
             Move(last[0], last[1]),
             segment,
-            npt.to_line(),
+            npt.to_line(Vector2d()),
             rev,
             ZoneClose(),
         ])

@@ -27,7 +27,7 @@ try:
     from inspect import isclass
     from importlib import util
 except ImportError:
-    util = None
+    util = None  # type: ignore
 
 from .base import InkscapeExtension
 from .utils import Boolean

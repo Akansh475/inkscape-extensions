@@ -168,7 +168,8 @@ class EllipseBase(ShapeElement):
         self.set("cx", value.x)
         self.set("cy", value.y)
 
-    def _rxry(self):  # type: () -> Vector2d()
+    def _rxry(self):
+        # type: () -> Vector2d
         """Helper function """
         raise NotImplementedError()
 

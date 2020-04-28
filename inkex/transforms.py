@@ -166,8 +166,8 @@ class ImmutableVector2d(object):
         other = Vector2d(other)
         return self.x * other.x + self.y * other.y
 
-    def is_close(self, other, rtol=1e-5, atol=1e-8
-                 ):  # type: (Union[VectorLike,Tuple[float,float]], Optional[float], Optional[float]) -> float
+    def is_close(self, other, rtol=1e-5, atol=1e-8):
+        # type: (Union[VectorLike,Tuple[float,float]], float, float) -> float
         other = Vector2d(other)
         delta = (self - other).length
         return delta < (atol + rtol * other.length)
@@ -190,34 +190,35 @@ class Vector2d(ImmutableVector2d):
     def y(self, value):
         self._y = float(value)
 
-    def __iadd__(self, other):  # type: (VectorLike) -> VectorLike
+    def __iadd__(self, other):
+        # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         self.x += other.x
         self.y += other.y
         return self
 
-    def __isub__(self, other):  # type: (VectorLike) -> VectorLike
+    def __isub__(self, other):  # type: (VectorLike) -> Vector2d 
         other = Vector2d(other)
         self.x -= other.x
         self.y -= other.y
         return self
 
-    def __imul__(self, factor):  # type: (float) -> VectorLike
+    def __imul__(self, factor):  # type: (float) -> Vector2d
         self.x *= factor
         self.y *= factor
         return self
 
-    def __idiv__(self, factor):  # type: (float) -> VectorLike
+    def __idiv__(self, factor):  # type: (float) -> Vector2d
         self.x /= factor
         self.y /= factor
         return self
 
-    def __itruediv__(self, factor):  # type: (float) -> VectorLike
+    def __itruediv__(self, factor):  # type: (float) -> Vector2d
         self.x /= factor
         self.y /= factor
         return self
 
-    def __ifloordiv__(self, factor):  # type: (float) -> VectorLike
+    def __ifloordiv__(self, factor):  # type: (float) -> Vector2d
         self.x /= factor
         self.y /= factor
         return self

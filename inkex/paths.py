@@ -28,11 +28,13 @@ from math import atan2, cos, pi, sin, sqrt, acos, tan
 from .transforms import Transform, BoundingBox, Vector2d
 from .utils import classproperty, strargs
 
-if False:  # pylint: disable=using-constant-test
-    from typing import Type, Dict, Optional, Union, Tuple, List, Iterator  # pylint: disable=unused-import
+try:  # pylint: disable=using-constant-test
+    from typing import overload, Any, Type, Dict, Optional, Union, Tuple, List, Iterator, Generator  # pylint: disable=unused-import
     from typing import TypeVar
-
-    T = TypeVar('T')
+    Pathlike = TypeVar('Pathlike', bound="PathCommand")
+    AbsolutePathlike = TypeVar('AbsolutePathlike', bound="AbsolutePathCommand")
+except ImportError:
+    overload = lambda x: x
 
 # All the names that get added to the inkex API itself.
 __all__ = (
@@ -101,7 +103,7 @@ class PathCommand(object):
 
     # Maps single letter path command to corresponding class
     # (filled at the bottom of file, when all classes already defined)
-    _letter_to_class = {}
+    _letter_to_class = {} # type: Dict[str, Type[Any]]
 
     @staticmethod
     def letter_to_class(letter):
@@ -113,7 +115,8 @@ class PathCommand(object):
         """Returns path command arguments as tuple of floats"""
         raise NotImplementedError()
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Union[List[Vector2d], Generator[Vector2d, None, None]]
         """Returns list of path command control points"""
         raise NotImplementedError
 
@@ -158,17 +161,20 @@ class PathCommand(object):
         """
         raise NotImplementedError("Bounding box is not implemented for {}".format(self.name))
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> Curve
         """Convert command to :py:class:`Curve`
         Curve().to_curve() returns a copy
         """
         raise NotImplementedError("To curve not supported for {}".format(self.name))
 
-    def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> List[Curve]
+    def to_curves(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> List[Curve]
         """Convert command to list of :py:class:`Curve` commands """
         return [self.to_curve(prev, prev_prev)]
 
-    def to_line(self, prev=None):
+    def to_line(self, prev):
+        # type: (Vector2d) -> Line
         """Converts this segment to a line (copies if already a line)"""
         return Line(*self.end_point(Vector2d(), prev))
 
@@ -189,22 +195,27 @@ class RelativePathCommand(PathCommand):
     def is_absolute(self):
         return False
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Union[List[Vector2d], Generator[Vector2d, None, None]]
         return self.to_absolute(prev).control_points(first, prev, prev_prev)
 
-    def to_relative(self, prev):  # type: (T, Vector2d) -> T
+    def to_relative(self, prev):
+        # type: (Pathlike, Vector2d) -> Pathlike
         return self.__class__(*self.args)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         self.to_absolute(last_two_points[-1]).update_bounding_box(first, last_two_points, bbox)
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return self.to_absolute(prev).end_point(first, prev)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> "Curve"
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> Curve
         return self.to_absolute(prev).to_curve(prev, prev_prev)
 
-    def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> List["Curve"]
+    def to_curves(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> List[Curve]
         return self.to_absolute(prev).to_curves(prev, prev_prev)
 
 
@@ -221,17 +232,17 @@ class AbsolutePathCommand(PathCommand):
     def is_absolute(self):
         return True
 
-    def to_absolute(self, previous):  # type: (T, Vector2d) -> T
+    def to_absolute(self, previous):  # type: (AbsolutePathlike, Vector2d) -> AbsolutePathlike
         return self.__class__(*self.args)
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):  # type: (AbsolutePathlike, Transform) -> AbsolutePathlike
         """Returns new transformed segment
 
         :param transform: a transformation to apply
         """
         raise NotImplementedError()
 
-    def rotate(self, degrees, center):  # type: (T, float, Vector2d) -> T
+    def rotate(self, degrees, center):  # type: (AbsolutePathlike, float, Vector2d) -> AbsolutePathlike
         """
         Returns new transformed segment
 
@@ -240,11 +251,11 @@ class AbsolutePathCommand(PathCommand):
         """
         return self.transform(Transform(rotate=(degrees, center[0], center[1])))
 
-    def translate(self, dr):  # type: (T, Vector2d) -> T
+    def translate(self, dr):  # type: (AbsolutePathlike, Vector2d) -> AbsolutePathlike
         """Translate or scale this path command by dr"""
         return self.transform(Transform(translate=dr))
 
-    def scale(self, factor):  # type: (T, Union[float, Tuple[float,float]]) -> T
+    def scale(self, factor):  # type: (AbsolutePathlike, Union[float, Tuple[float,float]]) -> AbsolutePathlike
         """Returns new transformed segment
 
         :param factor: scale or (scale_x, scale_y)
@@ -268,19 +279,24 @@ class Line(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox((last_two_points[-1].x, self.x), (last_two_points[-1].y, self.y))
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(self.x, self.y)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> line
+    def to_relative(self, prev):
+        # type: (Vector2d) -> line
         return line(self.x - prev.x, self.y - prev.y)
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Line, Transform) -> Line
         return Line(*transform.apply_to_point((self.x, self.y)))
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x, self.y)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Optional[Vector2d]) -> Curve
         return Curve(prev.x, prev.y, self.x, self.y, self.x, self.y)
 
 
@@ -319,19 +335,24 @@ class Move(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(self.x, self.y)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(self.x, self.y)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> move
+    def to_relative(self, prev):
+        # type: (Vector2d) -> move
         return move(self.x - prev.x, self.y - prev.y)
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> Move
         return Move(*transform.apply_to_point((self.x, self.y)))
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x, self.y)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Optional[Vector2d]) -> Curve
         raise ValueError("Move segments can not be changed into curves.")
 
 
@@ -365,19 +386,24 @@ class ZoneClose(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         pass
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> ZoneClose
         return ZoneClose()
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield first
 
-    def to_relative(self, prev):  # type: (Vector2d) -> zoneClose
+    def to_relative(self, prev):
+        # type: (Vector2d) -> zoneClose
         return zoneClose()
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return first
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Optional[Vector2d]) -> Curve
         raise ValueError("ZoneClose segments can not be changed into curves.")
 
 
@@ -409,23 +435,29 @@ class Horz(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox((last_two_points[-1].x, self.x), last_two_points[-1].y)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(self.x, prev.y)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> horz
+    def to_relative(self, prev):
+        # type: (Vector2d) -> horz
         return horz(self.x - prev.x)
 
-    def transform(self, transformation):  # type: (T, Transform) -> T
+    def transform(self, transformation):
+        # type: (Pathlike, Transform) -> Pathlike
         raise ValueError("Horizontal lines can't be transformed directly.")
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x, prev.y)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Optional[Vector2d]) -> Curve
         """Convert a horizontal line into a curve"""
         return self.to_line(prev).to_curve(prev)
 
-    def to_line(self, prev): # type: (Vector2d) -> Line
+    def to_line(self, prev):
+        # type: (Vector2d) -> Line
         """Return this path command as a Line instead"""
         return Line(self.x, prev.y)
 
@@ -465,19 +497,23 @@ class Vert(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(last_two_points[-1].x, (last_two_points[-1].y, self.y))
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):  # type: (Pathlike, Transform) -> Pathlike
         raise ValueError("Vertical lines can't be transformed directly.")
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(prev.x, self.y)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> vert
+    def to_relative(self, prev):
+        # type: (Vector2d) -> vert
         return vert(self.y - prev.y)
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(prev.x, self.y)
 
-    def to_line(self, prev): # type: (Vector2d) -> Line
+    def to_line(self, prev):
+        # type: (Vector2d) -> Line
         """Return this path command as a line instead"""
         return Line(prev.x, self.y)
 
@@ -542,13 +578,15 @@ class Curve(AbsolutePathCommand):
                 y4 in bbox.y):
             bbox.y += cubic_extrema(y1, y2, y3, y4)
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> Curve
         x2, y2 = transform.apply_to_point((self.x2, self.y2))
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         x4, y4 = transform.apply_to_point((self.x4, self.y4))
         return Curve(x2, y2, x3, y3, x4, y4)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(self.x2, self.y2)
         yield Vector2d(self.x3, self.y3)
         yield Vector2d(self.x4, self.y4)
@@ -616,7 +654,8 @@ class Smooth(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         self.to_curve(last_two_points[-1], last_two_points[-2]).update_bounding_box(first, last_two_points, bbox)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
 
         x1, x2, x3, x4 = prev_prev.x, prev.x, self.x3, self.x4
         y1, y2, y3, y4 = prev_prev.y, prev.y, self.y3, self.y4
@@ -635,7 +674,8 @@ class Smooth(AbsolutePathCommand):
             self.x4 - prev.x, self.y4 - prev.y
         )
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> Smooth
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         x4, y4 = transform.apply_to_point((self.x4, self.y4))
         return Smooth(x3, y3, x4, y4)
@@ -643,7 +683,8 @@ class Smooth(AbsolutePathCommand):
     def end_point(self, first, prev):
         return Vector2d(self.x4, self.y4)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> Curve
         """
         Convert this Smooth curve to a regular curve by creating a mirror
         set of nodes based on the previous node. Previous should be a curve.
@@ -706,25 +747,30 @@ class Quadratic(AbsolutePathCommand):
                 y3 in bbox.y):
             bbox.y += quadratic_extrema(y1, y2, y3)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(self.x2, self.y2)
         yield Vector2d(self.x3, self.y3)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> quadratic
+    def to_relative(self, prev):
+        # type: (Vector2d) -> quadratic
         return quadratic(
             self.x2 - prev.x, self.y2 - prev.y,
             self.x3 - prev.x, self.y3 - prev.y
         )
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> Quadratic
         x2, y2 = transform.apply_to_point((self.x2, self.y2))
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         return Quadratic(x2, y2, x3, y3)
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x3, self.y3)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> Curve
         """Attempt to convert a quadratic to a curve"""
         prev = Vector2d(prev)
         x1 = 1. / 3 * prev.x + 2. / 3 * self.x2
@@ -770,7 +816,8 @@ class TepidQuadratic(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         self.to_quadratic(last_two_points[-1], last_two_points[-2]).update_bounding_box(first, last_two_points, bbox)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
 
         x1, x2, x3 = prev_prev.x, prev.x, self.x3
         y1, y2, y3 = prev_prev.y, prev.y, self.y3
@@ -787,17 +834,21 @@ class TepidQuadratic(AbsolutePathCommand):
             self.x3 - prev.x, self.y3 - prev.y
         )
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> TepidQuadratic
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         return TepidQuadratic(x3, y3)
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x3, self.y3)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> Curve
         return self.to_quadratic(prev, prev_prev).to_curve(prev)
 
-    def to_quadratic(self, prev, prev_prev):  # type: (Vector2d, Vector2d) -> Quadratic
+    def to_quadratic(self, prev, prev_prev):
+        # type: (Vector2d, Vector2d) -> Quadratic
         """
         Convert this continued quadratic into a full quadratic
         """
@@ -817,7 +868,8 @@ class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
         self.dx3 = dx3
         self.dy3 = dy3
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> TepidQuadratic
+    def to_absolute(self, prev):
+        # type: (Vector2d) -> TepidQuadratic
         return TepidQuadratic(
             self.dx3 + prev.x, self.dy3 + prev.y
         )
@@ -846,16 +898,19 @@ class Arc(AbsolutePathCommand):
             seg.update_bounding_box(first, [None, prev], bbox)
             prev = seg.end_point(first, prev)
 
-    def control_points(self, first, prev, prev_prev):  # type: (Vector2d, Vector2d, Vector2d) -> List[Vector2d]
+    def control_points(self, first, prev, prev_prev):
+        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(self.x, self.y)
 
-    def to_curves(self, prev, prev_prev=Vector2d()):  # type: (Vector2d, Vector2d) -> List[Curve]
+    def to_curves(self, prev, prev_prev=Vector2d()):
+        # type: (Vector2d, Vector2d) -> List[Curve]
         """Convert this arc into bezier curves"""
         path = CubicSuperPath([arc_to_path(list(prev), self.args)]).to_path(curves_only=True)
         # Ignore the first move command from to_path()
         return list(path)[1:]
 
-    def transform(self, transform):  # type: (T, Transform) -> T
+    def transform(self, transform):
+        # type: (Transform) -> Arc
         x_, y_ = transform.apply_to_point((self.x, self.y))
 
         T = transform  # type: Transform
@@ -904,10 +959,12 @@ class Arc(AbsolutePathCommand):
 
         return Arc(rx_, ry_, theta_deg, self.large_arc, sweep, x_, y_)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> arc
+    def to_relative(self, prev):
+        # type: (Vector2d) -> arc
         return arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, self.sweep, self.x - prev.x, self.y - prev.y)
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
+    def end_point(self, first, prev):
+        # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x, self.y)
 
 
@@ -1052,6 +1109,7 @@ class Path(list):
                 yield seg
 
     def bounding_box(self):
+        # type: () -> Optional[BoundingBox]
         """Return bounding box of the Path"""
         if not self:
             return None

@@ -33,6 +33,13 @@ from ..tween import interpcoord, interp
 from ..styles import Style
 from ._base import BaseElement
 
+
+try:
+    from typing import overload, Iterable, List, Tuple, Union, Optional  # pylint: disable=unused-import
+except ImportError:
+    overload = lambda x: x
+
+
 class Filter(BaseElement):
     """A filter (usually in defs)"""
     tag_name = 'filter'
@@ -100,6 +107,7 @@ class Stop(BaseElement):
 
     @property
     def offset(self):
+        # type: () -> float
         return self.get('offset')
 
     @offset.setter
@@ -123,16 +131,18 @@ class Gradient(BaseElement):
     """A gradient instruction usually in the defs"""
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (('gradientTransform', Transform),)
 
-    orientation_attributes = ()
+    orientation_attributes = () # type: Tuple[str, ...]
 
     @property
-    def stops(self): # type: () -> List[Stop]
+    def stops(self):
         """Return an ordered list of own or linked stop nodes"""
         gradcolor = self.href if isinstance(self.href, LinearGradient) else self
-        return sorted(gradcolor, key=lambda x: float(x.offset))
+        return sorted([child for child in gradcolor if isinstance(child, Stop)]
+                      , key=lambda x: float(x.offset))
 
     @property
-    def stop_offsets(self): # type: () -> List[float]
+    def stop_offsets(self):
+        # type: () -> List[float]
         """Return a list of own or linked stop offsets"""
         return [child.offset for child in self.stops]
 
@@ -168,8 +178,9 @@ class Gradient(BaseElement):
         else:
             # gradients might have different stops
             newoffsets = sorted(self.stop_offsets + other.stop_offsets[1:-1])
-            sstops = interp(self.stop_offsets, self.stops, newoffsets)
-            ostops = interp(other.stop_offsets, other.stops, newoffsets)
+            func = lambda x,y,f: x.interpolate(y, f)
+            sstops = interp(self.stop_offsets, list(self.stops), newoffsets, func)
+            ostops = interp(other.stop_offsets, list(other.stops), newoffsets, func)
             newstops = [s1.interpolate(s2, fraction) for s1, s2 in zip(sstops, ostops)]
             newgrad.remove_all(Stop)
             newgrad.add(*newstops)

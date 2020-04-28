@@ -24,18 +24,31 @@ from .utils import X, Y
 from .units import convert_unit, parse_unit, render_unit
 
 try:
-    from typing import Tuple, List, TypeVar, Callable
-    V = TypeVar('V')
+    from typing import Union, Tuple, List, TypeVar, Callable, overload
+    hasTypes = True
+    Value = TypeVar('Value')
+    Number = TypeVar('Number', int, float)
 except ImportError:
     pass
 
 
-def interpcoord(coord_a, coord_b, time): # type: (float, float, float) -> float
+def interpcoord(
+    coord_a, # type: Number 
+    coord_b, # type: Number 
+    time # type: float
+):
+    # type: (...) -> float 
     """Interpolate single coordinate by the amount of time"""
     return coord_a + ((coord_b - coord_a) * time)
 
 
-def interp(positions, values, newpositions, func=None): # type: (Callable[[V, V, float], V], List[float], List[V], List[float]) -> V
+def interp(
+    positions, # type: List[float]
+    values, # type: List[Value]
+    newpositions, # type: List[float]
+    func # type: (Callable[[Value, Value, float], Value])
+):
+    # type: (...) -> List[Value]
     """Interpolate list with arbitrary interpolation function."""
     newvalues = []
     positions = list(map(float, positions))
@@ -46,24 +59,19 @@ def interp(positions, values, newpositions, func=None): # type: (Callable[[V, V,
         fraction = (pos - positions[idxl]) / (positions[idxr] - positions[idxl])
         vall = values[idxl]
         valr = values[idxr]
-        if func is not None:
-            newval = func(vall, valr, fraction)
-        if isinstance(vall, (float, int)):
-            newval = interpcoord(vall, valr, fraction)
-        elif hasattr(vall, 'interpolate'):
-            newval = vall.interpolate(valr, fraction)
-        else:
-            raise Exception('Interpolated objects must be float/int or have an interpolate method if func is not passed as argument')
+        newval = func(vall, valr, fraction)
         newvalues.append(newval)
     return newvalues
 
 
-def interppoints(point1, point2, time): # type: (Tuple[float, float], Tuple[float, float], float) -> Tuple[float, float]
+def interppoints(point1, point2, time):
+    # type: (Tuple[float, float], Tuple[float, float], float) -> Tuple[float, float]
     """Interpolate coordinate points by amount of time"""
     return (interpcoord(point1[X], point2[X], time), interpcoord(point1[Y], point2[Y], time))
 
 
-def interpunit(start, end, fraction): # type: (SvgDocumentElement, str, str, str, float) -> str
+def interpunit(start, end, fraction):
+    # type: (str, str, float) -> str
     """Interpolate float attributes with unit."""
     # moved here so we can call 'unittouu'
     sp, unit = parse_unit(start)

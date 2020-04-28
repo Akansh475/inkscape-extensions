@@ -37,7 +37,7 @@ stdout = sys.stdout
 if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
     basestring = str  # pylint: disable=redefined-builtin,invalid-name
-    stdout = sys.stdout.buffer
+    stdout = sys.stdout.buffer  # type: ignore
 
 
 class InkscapeExtension(object):

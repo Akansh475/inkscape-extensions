@@ -338,7 +338,7 @@ def ensure_value(self, attr, value):
         setattr(self, attr, value)
     return getattr(self, attr)
 
-argparse.Namespace.ensure_value = ensure_value
+argparse.Namespace.ensure_value = ensure_value # type: ignore
 
 @deprecate
 def zSort(inNode, idList):

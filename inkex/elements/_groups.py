@@ -23,7 +23,9 @@
 Interface for all group based elements such as Groups, Use, Markers etc.
 """
 
-from ..paths import Path
+from lxml import etree
+
+from ..paths import Path, BoundingBox
 from ..utils import addNS
 from ..transforms import Transform
 
@@ -42,7 +44,8 @@ class GroupBase(ShapeElement):
             ret += child.path.transform(child.transform)
         return ret
 
-    def bounding_box(self, transform=None):  # type: (Transform) -> Optional[BoundingBox]
+    def bounding_box(self, transform=None):
+        # type: (Transform) -> Optional[BoundingBox]
         bbox = None
 
         transform = Transform(transform) * self.transform
@@ -87,7 +90,8 @@ class Layer(Group):
         self.set('inkscape:groupmode', 'layer')
 
     @classmethod
-    def _is_class_element(cls, el):  # type: (etree.Element) -> bool
+    def _is_class_element(cls, el):
+        # type: (etree.Element) -> bool
         return el.attrib.get(addNS('inkscape:groupmode'), None) == "layer"
 
 

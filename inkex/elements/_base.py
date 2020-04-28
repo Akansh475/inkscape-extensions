@@ -30,10 +30,16 @@ from collections import defaultdict
 from copy import deepcopy
 from lxml import etree
 
-from ..paths import Path
+from ..paths import Path, BoundingBox
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform
 from ..utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
+
+try:
+    from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
+except ImportError:
+    overload = lambda x: x
+
 
 class NodeBasedLookup(etree.PythonElementClassLookup):
     """
@@ -41,7 +47,7 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
     SVG based API to our extensions system.
     """
     # (ns,tag) -> list(cls) ; ascending priority
-    lookup_table = defaultdict(list)
+    lookup_table = defaultdict(list) # type: DefaultDict[str, List[Any]]
 
     @classmethod
     def register_class(cls, klass):
@@ -111,7 +117,7 @@ class BaseElement(etree.ElementBase):
         ('transform', Transform),
         ('style', Style),
         ('classes', 'class', Classes),
-    )
+    ) # type: Tuple[Tuple[Any, ...], ...]
 
     # We do this because python2 and python3 have different ways
     # of combining two dictionaries that are incompatible.
@@ -384,7 +390,8 @@ class BaseElement(etree.ElementBase):
     def label(self):
         """Returns the inkscape label"""
         return self.get('inkscape:label', None)
-    label = label.setter(lambda self, value: self.set('inkscape:label', str(value)))
+
+    label = label.setter(lambda self, value: self.set('inkscape:label', str(value))) # type: ignore
 
 
 class ShapeElement(BaseElement):
@@ -441,7 +448,8 @@ class ShapeElement(BaseElement):
         """Without parent styles, what is the effective style is"""
         return self.style
 
-    def bounding_box(self, transform=None):  # type: () -> BoundingBox
+    def bounding_box(self, transform=None):
+        # type: (Optional[Transform]) -> Optional[BoundingBox]
         """BoundingBox calculation based on the ShapeElement rendered to a path."""
         path = self.path.to_absolute()
         if transform is True:

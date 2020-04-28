@@ -87,11 +87,25 @@ test:validate-inx:
     - xmllint --noout --relaxng inkscape.extension.rng *.inx
 
 
+mypy:
+  stage: test
+  when: always
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.7.2
+    - pip install mypy
+    - mypy inkex --ignore-missing-imports
+
 sphinx:
   stage: test
   when: always
   script:
+    - source /root/pyenv-init
+    - pyenv shell 3.7.2
+    - pip3 install sphinx-autodoc-typehints
+    - pip3 install typed-ast
     - sphinx-apidoc -F -o source inkex
+    - cp .gitlab-ci.sphinx-conf.py source/conf.py
     - python3 setup.py build_sphinx -s source
     - echo -e "\n\n"
       "Documentation for inkex module successfully created; you can access the HTML version at\n"

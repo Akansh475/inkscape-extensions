@@ -196,7 +196,8 @@ class Style(OrderedDict):
                 val = a1
         return val
 
-    def interpolate(self, other, fraction):  # type: (Style, float, Optional[str], Optional[str]) -> Style
+    def interpolate(self, other, fraction):
+        # type: (Style, float) -> Style
         """Interpolate all properties."""
         style = Style()
         for prop, value in self.items():

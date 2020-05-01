@@ -247,6 +247,10 @@ class Color(list):
         except ValueError:
             raise ColorError("Bad color list")
 
+    def __hash__(self):
+        """Allow colors to be hashable"""
+        return tuple(self.to_rgba()).__hash__()
+
     def _set(self, index, value, spaces=('rgb', 'rgba')):
         """Set the color value in place, limits setter to specific color space"""
         # Named colors are just rgb, so dump name memory

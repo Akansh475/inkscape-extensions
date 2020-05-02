@@ -4,12 +4,12 @@
 from collections import defaultdict
 import inkex
 
-class ColorList(inkex.ColorExtension):
+class ListColours(inkex.ColorExtension):
     """Make the colours darker"""
     _counts = defaultdict(int)
 
     def effect(self):
-        super(ColorList, self).effect()
+        super(ListColours, self).effect()
         items = sorted(self._counts.items(), key=lambda v: -v[1])
         for color, count in items:
             self.msg("{count}: {color}".format(color=color, count=count))
@@ -19,4 +19,4 @@ class ColorList(inkex.ColorExtension):
         return color
 
 if __name__ == '__main__':
-    ColorList().run()
+    ListColours().run()

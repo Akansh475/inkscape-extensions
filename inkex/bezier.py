@@ -34,7 +34,7 @@ from .localization import inkex_gettext as _
 # bez = ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3))
 
 def pointdistance(point_a, point_b):
-    """The size of the line between two points"""
+    """The straight line distance between two points"""
     return math.sqrt(((point_b[0] - point_a[0]) ** 2) + ((point_b[1] - point_a[1]) ** 2))
 
 

@@ -941,7 +941,7 @@ class Arc(AbsolutePathCommand):
         l2 = 4 * B ** 2 + DA ** 2
 
         if l2 == 0:
-            delta = 0
+            delta = 0.0
         else:
             delta = 0.5 * (-DA ** 2 - 4 * B ** 2) / sqrt(l2)
 

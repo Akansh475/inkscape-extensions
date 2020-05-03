@@ -34,12 +34,14 @@ from .tween import interpcoord
 from .utils import strargs, KeyDict, PY3
 
 try:
-    from typing import overload, List, Tuple, Union, Optional  # pylint: disable=unused-import
+    from typing import overload, cast, List, Any, Callable, Generator, Tuple, Union, Optional, Sequence  # pylint: disable=unused-import
 
     VectorLike = Union["ImmutableVector2d", Tuple[float, float]]  # pylint: disable=invalid-name
+    MatrixLike = Union[str, Tuple[Tuple[float,float,float], Tuple[float,float,float]], Tuple[float,float,float,float,float,float], "Transform"] 
     BoundingIntervalArgs = Union['BoundingInterval', Tuple[float, float], float]  # pylint: disable=invalid-name
 except ImportError:
     overload = lambda x: x
+    cast = lambda x, y: y
 
 # All the names that get added to the inkex API itself.
 __all__ = (
@@ -62,118 +64,142 @@ DIRECTION = ['tb', 'bt', 'lr', 'rl', 'ro', 'ri']
 
 
 class ImmutableVector2d(object):
-    _x = 0
-    _y = 0
+    _x = 0.0
+    _y = 0.0
 
-    x = property(lambda self: self._x)
-    y = property(lambda self: self._y)
+    x = property(lambda self: self._x) # type: property
+    y = property(lambda self: self._y) # type: property 
 
     @overload
-    def __init__(self):  # type: () -> None
+    def __init__(self):
+        # type: () -> None 
         pass
 
     @overload
-    def __init__(self, x, y):  # type: (float, float) -> None
+    def __init__(self, v):
+        # type: (Union[VectorLike, str]) -> None
         pass
 
     @overload
-    def __init__(self, v):  # type: (VectorLike) -> None
+    def __init__(self, x, y):
+        # type: (float, float) -> None
         pass
 
     def __init__(self, *args):
-        x, y = self._parse(args)
+        if len(args) == 0:
+            x, y = 0.0, 0.0
+        elif len(args) == 1:
+            x, y = self._parse(args[0])
+        elif len(args) == 2:
+            x, y = map(float, args)
+        else:
+            raise ValueError("too many arguments")
         self._x, self._y = float(x), float(y)
 
     @staticmethod
-    def _parse(args):
-        if not args:
-            return 0.0, 0.0
-        if len(args) == 1:
-            point = args[0]
-            if isinstance(point, ImmutableVector2d):
-                return point.x, point.y
-            elif isinstance(point, (tuple, list)) and len(point) == 2:
-                return point
-            elif isinstance(point, str) and point.count(',') == 1:
-                x, y = point.split(',')
-                return x, y
-        elif len(args) == 2:
-            x, y = args
-            if isinstance(x, (int, float)) and isinstance(y, (int, float)):
-                return x, y
-        raise ValueError("Vector2d can't be constructed from {}".format(repr(args)))
+    def _parse(point):
+        # type: (Union[VectorLike, str]) -> Tuple[float, float]
+        if isinstance(point, ImmutableVector2d):
+            x, y = point.x, point.y
+        elif isinstance(point, (tuple, list)) and len(point) == 2:
+            x, y = map(float, point)
+        elif isinstance(point, str) and point.count(',') == 1:
+            x, y = map(float, point.split(','))
+        else:
+            raise ValueError("Can't parse {}".format(repr(point)))
+        return x, y
 
-    def __add__(self, other):  # type: (VectorLike) -> Vector2d
+    def __add__(self, other):
+        # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(self.x + other.x, self.y + other.y)
 
-    def __radd__(self, other):  # type: (VectorLike) -> Vector2d
+    def __radd__(self, other):
+        # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(self.x + other.x, self.y + other.y)
 
-    def __sub__(self, other):  # type: (VectorLike) -> Vector2d
+    def __sub__(self, other):
+        # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(self.x - other.x, self.y - other.y)
 
-    def __rsub__(self, other):  # type: (VectorLike) -> Vector2d
+    def __rsub__(self, other):
+        # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
         return Vector2d(-self.x + other.x, -self.y + other.y)
 
-    def __neg__(self):  # type: () -> Vector2d
+    def __neg__(self):
+        # type: () -> Vector2d
         return Vector2d(-self.x, -self.y)
 
-    def __pos__(self):  # type: () -> Vector2d
+    def __pos__(self):
+        # type: () -> Vector2d
         return Vector2d(self.x, self.y)
 
-    def __floordiv__(self, factor):  # type: (float) -> Vector2d
+    def __floordiv__(self, factor): 
+        # type: (float) -> Vector2d
         return Vector2d(self.x / float(factor), self.y / float(factor))
 
-    def __truediv__(self, factor):  # type: (float) -> Vector2d
+    def __truediv__(self, factor):
+        # type: (float) -> Vector2d
         return Vector2d(self.x / float(factor), self.y / float(factor))
 
-    def __div__(self, factor):  # type: (float) -> Vector2d
+    def __div__(self, factor):
+        # type: (float) -> Vector2d
         return Vector2d(self.x / float(factor), self.y / float(factor))
 
-    def __mul__(self, factor):  # type: (float) -> Vector2d
+    def __mul__(self, factor):
+        # type: (float) -> Vector2d
         return Vector2d(self.x * factor, self.y * factor)
 
     def __abs__(self):
+        # type: () -> float
         return self.length
 
-    def __rmul__(self, factor):  # type: (float) -> VectorLike
+    def __rmul__(self, factor):
+        # type: (float) -> VectorLike
         return Vector2d(self.x * factor, self.y * factor)
 
     def __repr__(self):
+        # type: () -> str
         return "Vector2d({:.6g}, {:.6g})".format(self.x, self.y)
 
     def __str__(self):
+        # type: () -> str
         return "{:.6g}, {:.6g}".format(self.x, self.y)
 
     def __iter__(self):
+        # type: () -> Generator[float, None, None]
         yield self.x
         yield self.y
 
     def __len__(self):
+        # type: () -> int
         return 2
 
     def __getitem__(self, item):
+        # type: (int) -> float
         return (self.x, self.y)[item]
 
     def to_tuple(self):
+        # type : () -> Tuple[float, float]
         return self.x, self.y
 
-    def dot(self, other):  # type: (VectorLike) -> float
+    def dot(self, other):
+        # type: (VectorLike) -> float
         other = Vector2d(other)
         return self.x * other.x + self.y * other.y
 
     def is_close(self, other, rtol=1e-5, atol=1e-8):
-        # type: (Union[VectorLike,Tuple[float,float]], float, float) -> float
+        # type: (Union[VectorLike, str, Tuple[float,float]], float, float) -> float
         other = Vector2d(other)
         delta = (self - other).length
         return delta < (atol + rtol * other.length)
 
     @property
-    def length(self):  # type: () -> float
+    def length(self):
+        # type: () -> float
         return sqrt(fabs(self.dot(self)))
 
 
@@ -184,10 +210,12 @@ class Vector2d(ImmutableVector2d):
 
     @ImmutableVector2d.x.setter
     def x(self, value):
+        # type: (Union[float, int, str]) -> None
         self._x = float(value)
 
     @ImmutableVector2d.y.setter
     def y(self, value):
+        # type: (Union[float, int, str]) -> None
         self._y = float(value)
 
     def __iadd__(self, other):
@@ -197,38 +225,45 @@ class Vector2d(ImmutableVector2d):
         self.y += other.y
         return self
 
-    def __isub__(self, other):  # type: (VectorLike) -> Vector2d 
+    def __isub__(self, other):
+        # type: (VectorLike) -> Vector2d 
         other = Vector2d(other)
         self.x -= other.x
         self.y -= other.y
         return self
 
-    def __imul__(self, factor):  # type: (float) -> Vector2d
+    def __imul__(self, factor):
+        # type: (float) -> Vector2d
         self.x *= factor
         self.y *= factor
         return self
 
-    def __idiv__(self, factor):  # type: (float) -> Vector2d
+    def __idiv__(self, factor):
+        # type: (float) -> Vector2d
         self.x /= factor
         self.y /= factor
         return self
 
-    def __itruediv__(self, factor):  # type: (float) -> Vector2d
+    def __itruediv__(self, factor):
+        # type: (float) -> Vector2d
         self.x /= factor
         self.y /= factor
         return self
 
-    def __ifloordiv__(self, factor):  # type: (float) -> Vector2d
+    def __ifloordiv__(self, factor):
+        # type: (float) -> Vector2d
         self.x /= factor
         self.y /= factor
         return self
 
     @overload
-    def assign(self, x, y):  # type: (float, float) -> None
+    def assign(self, x, y):
+        # type: (float, float) -> None
         pass
 
     @overload
-    def assign(self, other):  # type: (VectorLike) -> None
+    def assign(self, other):
+        # type: (VectorLike, str) -> None
         pass
 
     def assign(self, *args):
@@ -257,30 +292,54 @@ class Transform(object):
     any of the above inputs are also valid operators for composing.
     """
     TRM = re.compile(r'(translate|scale|rotate|skewX|skewY|matrix)\s*\(([^)]*)\)\s*,?')
-    absolute_tolerance = 1e-5
+    absolute_tolerance = 1e-5 # type: float
 
-    def __init__(self, matrix=None, callback=None, **extra):
+
+    def __init__(
+            self,
+            matrix=None, # type: Optional[MatrixLike]
+            callback=None, # type: Optional[Callable[[Transform], Transform]]
+            **extra):
+        # type: (...) -> None
         self.callback = None
         self.matrix = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
         if matrix is not None:
-            # We parse a given string as an svg transformation instruction
-            if isinstance(matrix, (str, unicode)):
-                for func, values in self.TRM.findall(matrix.strip()):
-                    getattr(self, 'add_' + func.lower())(*strargs(values))
-            elif isinstance(matrix, Transform):
-                self.matrix = matrix.matrix
-            elif not isinstance(matrix, (tuple, list)):
-                raise ValueError("Invalid transform type: {}".format(type(matrix).__name__))
-            elif len(matrix) == 2:
-                self.matrix = tuple(matrix[0]), tuple(matrix[1])
-            elif len(matrix) == 6:
-                self.matrix = tuple(matrix[::2]), tuple(matrix[1::2])
-            else:
-                raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+            self._set_matrix(matrix)
 
         self.add_kwargs(**extra)
         # Set callback last, so it doesn't kick off just setting up the internal value
         self.callback = callback
+
+    def _set_matrix(self, matrix):
+        # type: (MatrixLike) -> None 
+        """Parse a given string as an svg transformation instruction."""
+        if isinstance(matrix, (str, unicode)):
+            for func, values in self.TRM.findall(matrix.strip()):
+                getattr(self, 'add_' + func.lower())(*strargs(values))
+        elif isinstance(matrix, Transform):
+            self.matrix = matrix.matrix
+        elif isinstance(matrix, (tuple, list)) and len(matrix) == 2:
+            row1 = matrix[0]
+            row2 = matrix[1]
+            if isinstance(row1, (tuple, list)) and isinstance(row2, (tuple, list)):
+                if len(row1) == 3 and len(row2) == 3:
+                    row1 = cast("Tuple[float, float, float]", tuple(map(float, row1)))
+                    row2 = cast("Tuple[float, float, float]", tuple(map(float, row2)))
+                    self.matrix = row1, row2
+                else:
+                    raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+            else:
+                raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+        elif isinstance(matrix, (list, tuple)) and len(matrix) == 6:
+            tmatrix = cast("Union[List[float], Tuple[float,float,float,float,float,float]]", matrix)
+            row1 = (float(tmatrix[0]), float(tmatrix[2]), float(tmatrix[4]))
+            row2 = (float(tmatrix[1]), float(tmatrix[3]), float(tmatrix[5]))
+            self.matrix = row1, row2
+        elif not isinstance(matrix, (list, tuple)):
+            raise ValueError("Invalid transform type: {}".format(type(matrix).__name__))
+        else:
+            raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+
 
     # These provide quick access to the svg matrix:
     #
@@ -295,13 +354,34 @@ class Transform(object):
     f = property(lambda self: self.matrix[1][2])  # pylint: disable=invalid-name
 
     def __bool__(self):
+        # type: () -> bool
         return not self.__eq__(Transform())
 
     __nonzero__ = __bool__
 
+    @overload
+    def add_matrix(self, a):
+        # type: (MatrixLike) -> None 
+        pass
+
+    @overload
+    def add_matrix(self, a, b, c, d, e, f):
+        # type: (float, float, float, float, float, float) -> None 
+        pass
+
+    @overload
+    def add_matrix(self, a, b):
+        # type: (Tuple[float, float, float], Tuple[float, float, float]) -> None 
+        pass
+
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg hexad"""
-        self.__imul__(Transform(args))
+        if len(args) == 1:
+            self.__imul__(Transform(args[0]))
+        elif len(args) == 2 or len(args) == 6:
+            self.__imul__(Transform(args))
+        else:
+            raise ValueError("Invalid number of arguments {}".format(args))
 
     def add_kwargs(self, **kwargs):
         """Add translations, scales, rotations etc using key word arguments"""
@@ -313,11 +393,13 @@ class Transform(object):
                 func(value)
 
     @overload
-    def add_translate(self, dr):  # type: (VectorLike) -> None
+    def add_translate(self, dr):
+        # type: (VectorLike) -> None
         pass
 
     @overload
-    def add_translate(self, tr_x, tr_y=0.0):  # type: (float, Optional[float]) -> None
+    def add_translate(self, tr_x, tr_y=0.0):
+        # type: (float, Optional[float]) -> None
         pass
 
     def add_translate(self, *args):
@@ -333,11 +415,28 @@ class Transform(object):
         self.__imul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
 
     @overload
-    def add_rotate(self, deg, center):  # type: (float, VectorLike) -> None
+    def add_rotate(self, deg, center):
+        # type: (float, VectorLike) -> None
         pass
 
     @overload
-    def add_rotate(self, deg, center_x, center_y):  # type: (float, float, float) -> None
+    def add_rotate(self, deg, center_x, center_y):
+        # type: (float, float, float) -> None
+        pass
+
+    @overload
+    def add_rotate(self, deg):
+        # type: (float) -> None
+        pass
+
+    @overload
+    def add_rotate(self, deg, a):
+        # type: (float, Union[VectorLike, str]) -> None
+        pass
+
+    @overload
+    def add_rotate(self, deg, a, b):
+        # type: (float, float, float) -> None
         pass
 
     def add_rotate(self, deg, *args):
@@ -348,41 +447,49 @@ class Transform(object):
         self.__imul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
 
     def add_skewx(self, deg):
+        # type: (float) -> None
         """Add skew x to this transformation"""
         self.__imul__(((1.0, tan(radians(deg)), 0.0), (0.0, 1.0, 0.0)))
 
     def add_skewy(self, deg):
+        # type: (float) -> None
         """Add skew y to this transformation"""
         self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
 
     def to_hexad(self):
+        # type: () -> Generator[float, None, None]
         """Returns the transform as a hexad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
     def is_translate(self, exactly=False):
+        # type: (bool) -> bool
         """Returns True if this transformation is ONLY translate"""
         tol = self.absolute_tolerance if not exactly else 0.0
         return fabs(self.a - 1) <= tol and abs(self.d - 1) <= tol and fabs(self.b) <= tol and fabs(self.c) <= tol
 
     def is_scale(self, exactly=False):
+        # type: (bool) -> bool
         """Returns True if this transformation is ONLY scale"""
         tol = self.absolute_tolerance if not exactly else 0.0
         return (fabs(self.e) <= tol and fabs(self.f) <= tol and
                 fabs(self.b) <= tol and fabs(self.c) <= tol)
 
     def is_rotate(self, exactly=False):
+        # type: (bool) -> bool
         """Returns True if this transformation is ONLY rotate"""
         tol = self.absolute_tolerance if not exactly else 0.0
         return self._is_URT(exactly=exactly) and \
                fabs(self.e) <= tol and fabs(self.f) <= tol and fabs(self.a ** 2 + self.b ** 2 - 1) <= tol
 
     def rotation_degrees(self):
+        # type: () -> float
         """Return the amount of rotation in this transform"""
         if not self._is_URT(exactly=False):
             raise ValueError("Rotation angle is undefined for non-uniformly scaled or skewed matrices")
         return atan2(self.b, self.a) * 180 / pi
 
     def __str__(self):
+        # type: () -> str
         """Format the given matrix into a string representation for svg"""
         hexad = tuple(self.to_hexad())
         if self.is_translate():
@@ -396,6 +503,7 @@ class Transform(object):
         return "matrix({})".format(" ".join(format(var, '.6g') for var in hexad))
 
     def __repr__(self):
+        # type: () -> str
         """String representation of this object"""
         return "{}((({}), ({})))".format(
             type(self).__name__,
@@ -403,11 +511,18 @@ class Transform(object):
             ', '.join(format(var, '.6g') for var in self.matrix[1]))
 
     def __eq__(self, matrix):
+        # typing this requires writing a proof for mypy that matrix is really
+        # MatrixLike
         """Test if this transformation is equal to the given matrix"""
-        return all(fabs(l - r) <= self.absolute_tolerance
-                   for l, r in zip(self.to_hexad(), Transform(matrix).to_hexad()))
+        if isinstance(matrix, (str, tuple, list, Transform)):
+            val = all(fabs(l - r) <= self.absolute_tolerance
+                      for l, r in zip(self.to_hexad(), Transform(matrix).to_hexad()))
+        else:
+            val = False
+        return val
 
     def __mul__(self, matrix):
+        # type: (MatrixLike) -> Transform
         """Combine this transform's internal matrix with the given matrix"""
         # Conform the input to a known quantity (and convert if needed)
         other = Transform(matrix)
@@ -421,6 +536,7 @@ class Transform(object):
             self.b * other.e + self.d * other.f + self.f))
 
     def __imul__(self, matrix):
+        # type: (MatrixLike) -> Transform
         """In place multiplication of transform matrices"""
         self.matrix = (self * matrix).matrix
         if self.callback is not None:
@@ -428,6 +544,7 @@ class Transform(object):
         return self
 
     def __neg__(self):
+        # type: () -> Transform
         """Returns an inverted transformation"""
         det = (self.a * self.d) - (self.c * self.b)
         # invert the rotation/scaling part
@@ -440,7 +557,8 @@ class Transform(object):
         new_f = -(new_b * self.e + new_d * self.f)
         return Transform((new_a, new_b, new_c, new_d, new_e, new_f))
 
-    def apply_to_point(self, point):  # type: (VectorLike) -> Vector2d
+    def apply_to_point(self, point):
+        # type: (VectorLike) -> Vector2d
         """Transform a tuple (X, Y)"""
         if isinstance(point, str):
             raise ValueError("Will not transform string '{}'".format(point))
@@ -449,6 +567,7 @@ class Transform(object):
                         self.b * point.x + self.d * point.y + self.f)
 
     def _is_URT(self, exactly=False):
+        # type: (bool) -> bool
         """
         Checks that transformation can be decomposed into product of
         Uniform scale (U), Rotation around origin (R) and translation (T)
@@ -459,6 +578,7 @@ class Transform(object):
         return (fabs(self.a - self.d) <= tol) and (fabs(self.b + self.c) <= tol)
 
     def interpolate(self, other, fraction):
+        # type: (Transform, float) -> Transform
         """Interpolate with another Transform."""
         return Transform((
             interpcoord(self.a, other.a, fraction),
@@ -473,19 +593,23 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
     @overload
-    def __init__(self, other):  # type: (BoundingInterval) -> None
+    def __init__(self, other):
+        # type: (BoundingInterval) -> None
         pass
 
     @overload
-    def __init__(self, pair):  # type: (Tuple[float, float]) -> None
+    def __init__(self, pair):
+        # type: (Tuple[float, float]) -> None
         pass
 
     @overload
-    def __init__(self, value):  # type: (float) -> None
+    def __init__(self, value):
+        # type: (float) -> None
         pass
 
     @overload
-    def __init__(self, x, y):  # type: (float, float) -> None
+    def __init__(self, x, y):
+        # type: (float, float) -> None
         pass
 
     def __init__(self, x, y=None):
@@ -511,20 +635,24 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
                                  .format(str(value), type(value).__name__))
 
     def __bool__(self):
+        # type: () -> bool
         return not (isnan(self.minimum) or isnan(self.maximum))
 
     __nonzero__ = __bool__
 
     def __neg__(self):
+        # type: () -> BoundingInterval
         return BoundingInterval((-self.maximum, -self.minimum))
 
     def __add__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
         new = BoundingInterval(self)
         if other is not None:
             new += other
         return new
 
     def __iadd__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
         if other is None:
             return
         other = BoundingInterval(other)
@@ -533,41 +661,50 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
         return self
 
     def __radd__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
         if other is None:
             return BoundingInterval(self)
         return self + other
 
     def __mul__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
         new = BoundingInterval(self)
         if other is not None:
             new *= other
         return new
 
     def __imul__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
         self.minimum *= other
         self.maximum *= other
         return self
 
     def __iter__(self):
+        # type: () -> Generator[BoundingInterval, None, None]
         yield self.minimum
         yield self.maximum
 
     def __eq__(self, other):
+        # type (object) -> bool
         return tuple(self) == tuple(BoundingInterval(other))
 
     def __contains__(self, value):
+        # type: (float) -> bool
         return self.minimum <= value <= self.maximum
 
     def __repr__(self):
+        # type: () -> str
         return "BoundingInterval({}, {})".format(self.minimum, self.maximum)
 
     @property
     def center(self):
+        # type: () -> float
         """Pick the middle of the line"""
         return self.minimum + ((self.maximum - self.minimum) / 2)
 
     @property
     def size(self):
+        # type: () -> float
         """Return the size difference minimum and maximum"""
         return self.maximum - self.minimum
 
@@ -591,11 +728,13 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     center_y = property(lambda self: self.y.center)
 
     @overload
-    def __init__(self, other):  # type: (BoundingBox) -> None
+    def __init__(self, other):
+        # type: (BoundingBox) -> None
         pass
 
     @overload
-    def __init__(self, x, y):  # type: (BoundingIntervalArgs, BoundingIntervalArgs) -> None
+    def __init__(self, x, y):
+        # type: (BoundingIntervalArgs, BoundingIntervalArgs) -> None
         pass
 
     def __init__(self, x, y=None):
@@ -609,20 +748,24 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         self.y = BoundingInterval(y)
 
     def __bool__(self):
+        # type: () -> bool
         return bool(self.x) and bool(self.y)
 
     __nonzero__ = __bool__
 
     def __neg__(self):
+        # type: () -> BoundingBox
         return BoundingBox(-self.x, -self.y)
 
     def __add__(self, other):
+        # type: (Optional[BoundingBox]) -> BoundingBox
         new = BoundingBox(self)
         if other is not None:
             new += other
         return new
 
     def __iadd__(self, other):
+        # type: (Optional[BoundingBox]) -> BoundingBox
         if other is None:
             return self
         other = BoundingBox(other)
@@ -631,60 +774,74 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         return self
 
     def __radd__(self, other):
+        # type: (Optional[BoundingBox]) -> BoundingBox
         if other is not None:
             return self + other
         return self
 
     def __mul__(self, factor):
+        # type: (float) -> BoundingBox
         new = BoundingBox(self)
         new *= factor
         return new
 
     def __imul__(self, factor):
+        # type: (float) -> BoundingBox
         self.x *= factor
         self.y *= factor
         return self
 
     def __eq__(self, other):
+        # type (object) -> bool
         if isinstance(other, BoundingBox):
             return tuple(self) == tuple(other)
         return False
 
     def __iter__(self):
+        # type: () -> Generator[BoundingBox, None, None]
         yield self.x
         yield self.y
 
     @property
     def minimum(self):
+        # type: () -> Vector2d
         """Return the minimum x,y coords"""
         return Vector2d(self.x.minimum, self.y.minimum)
 
     @property
     def maximum(self):
+        # type: () -> Vector2d
         """Return the maximum x,y coords"""
         return Vector2d(self.x.maximum, self.y.maximum)
 
     def __repr__(self):
+        # type: () -> str
         return "BoundingBox({},{})".format(tuple(self.x), tuple(self.y))
 
     @property
     def center(self):
+        # type: () -> Vector2d
         """Returns the middle of the bounding box"""
         return Vector2d(self.x.center, self.y.center)
 
-    def get_anchor(self, xanchor, yanchor, direction=None, selbox=None):
+    def get_anchor(self, xanchor, yanchor, direction=0, selbox=None):
+        # type: (str, str, Union[int, str], Optional[BoundingBox]) -> float
         """Calls get_distance with the given anchor options"""
-        return self.anchor_distance(getattr(self, XAN[xanchor]), getattr(self, YAN[yanchor]),
-                                    direction=direction, selbox=selbox)
+        return self.anchor_distance(
+                getattr(self, XAN[xanchor]),
+                getattr(self, YAN[yanchor]),
+                direction=direction,
+                selbox=selbox)
 
     @staticmethod
     def anchor_distance(x, y, direction=0, selbox=None):
+        # type: (float, float, Union[int, str], Optional[BoundingBox]) -> float 
         """Using the x,y returns a single sortable value based on direction and angle
 
         direction - int (custom angle), tb/bt (top/bottom), lr/rl (left/right), ri/ro (radial)
         selbox - The bounding box of the whole selection for radial anchors
         """
-        rot = 0
+        rot = 0.0
         if isinstance(direction, int):  # Angle
             if direction not in CUSTOM_DIRECTION:
                 return hypot(x, y) * (cos(radians(-direction) - atan2(y, x)))
@@ -716,15 +873,18 @@ class DirectedLineSegment(object):
     dy = property(lambda self: self.y1 - self.y0)  # pylint: disable=invalid-name
 
     @overload
-    def __init__(self):  # type: () -> None
+    def __init__(self):
+        # type: () -> None
         pass
 
     @overload
-    def __init__(self, other):  # type: (DirectedLineSegment) -> None
+    def __init__(self, other):
+        # type: (DirectedLineSegment) -> None
         pass
 
     @overload
-    def __init__(self, start, end):  # type: (VectorLike, VectorLike) -> None
+    def __init__(self, start, end):
+        # type: (VectorLike, VectorLike) -> None
         pass
 
     def __init__(self, *args):
@@ -742,11 +902,13 @@ class DirectedLineSegment(object):
         self.end = Vector2d(end)
 
     def __eq__(self, other):
+        # type: (object) -> bool
         if isinstance(other, (tuple, DirectedLineSegment)):
             return tuple(self) == tuple(other)
         return False
 
     def __iter__(self):
+        # type: () -> Generator[DirectedLineSegment, None, None]
         yield self.x0
         yield self.x1
         yield self.y0
@@ -754,15 +916,18 @@ class DirectedLineSegment(object):
 
     @property
     def length(self):
+        # type: () -> float
         """Get the length from the top left to the bottom right of the line"""
         return sqrt((self.dx ** 2) + (self.dy ** 2))
 
     @property
     def angle(self):
+        # type: () -> float
         """Get the angle of the line created by this segment"""
         return pi * (atan2(self.dy, self.dx)) / 180
 
     def distance_to_point(self, x, y):
+        # type: (float, float) -> Union[DirectedLineSegment, Optional[float]]
         """Get the distance to the given point (x, y)"""
         segment2 = DirectedLineSegment(self.start, (x, y))
         dot2 = segment2.dot(self)
@@ -773,28 +938,34 @@ class DirectedLineSegment(object):
         return self.perp_distance(x, y)
 
     def perp_distance(self, x, y):
+        # type: (float, float) -> Optional[float]
         """Perpendicular distance to the given point"""
         if self.length == 0:
             return None
         return fabs((self.dx * (self.y0 - y)) - ((self.x0 - x) * self.dy)) / self.length
 
-    def dot(self, other):  # type: (DirectedLineSegment) -> float
+    def dot(self, other):
+        # type: (DirectedLineSegment) -> float
         """Get the dot product with the segment with another"""
         return self.dx * other.dx + self.dy * other.dy
 
     def point_at_ratio(self, ratio):
+        # type: (float) -> Tuple[float, float]
         """Get the point at the given ratio along the line"""
         return self.x0 + ratio * self.dx, self.y0 + ratio * self.dy
 
     def point_at_length(self, length):
+        # type: (float) -> Tuple[float, float] 
         """Get the point as the length along the line"""
         return self.point_at_ratio(length / self.length)
 
     def parallel(self, x, y):
+        # type: (float, float) -> DirectedLineSegment
         """Create parallel Segment"""
         return DirectedLineSegment((x + self.dx, y + self.dy), (x, y))
 
-    def intersect(self, other):  # type: (DirectedLineSegment) -> Optional[Vector2d]
+    def intersect(self, other):
+        # type: (DirectedLineSegment) -> Optional[Vector2d]
         """Get the intersection between two segments"""
         other = DirectedLineSegment(other)
         denom = (other.dy * self.dx) - (other.dx * self.dy)
@@ -809,10 +980,12 @@ class DirectedLineSegment(object):
         return None
 
     def __repr__(self):
+        # type: () -> str
         return "DirectedLineSegment(({0.start}), ({0.end}))".format(self)
 
 
 def cubic_extrema(py0, py1, py2, py3):
+    # type: (float, float, float, float) -> Tuple[float, float]
     """Returns the extreme value, given a set of bezier coordinates"""
 
     atol = 1e-9
@@ -843,6 +1016,7 @@ def cubic_extrema(py0, py1, py2, py3):
 
 
 def quadratic_extrema(py0, py1, py2):
+    # type: (float, float, float) -> Tuple[float, float]
     atol = 1e-9
     cmin, cmax = min(py0, py2), max(py0, py2)
 

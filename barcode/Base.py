@@ -29,11 +29,16 @@ from inkex import Group, TextElement, Rectangle
 (WHITE_BAR, BLACK_BAR, TALL_BAR) = range(3)
 TEXT_TEMPLATE = 'font-size:%dpx;text-align:center;text-anchor:middle;'
 
+try:
+    from typing import Optional
+except ImportError:
+    pass
+
 class Barcode(object):
     """Provide a base class for all barcode renderers"""
     default_height = 30
     font_size = 9
-    name = None
+    name = None # type: Optional[str]
 
     def error(self, text, msg):
         """Cause an error to be reported"""

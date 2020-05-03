@@ -22,6 +22,11 @@ Some basic common code shared between EAN and UCP generators.
 
 from .Base import Barcode, TEXT_POS_TOP
 
+try:
+    from typing import Optional, List, Dict
+except ImportError:
+    pass
+
 MAPPING = [
     # Left side of barcode Family '0'
     ["0001101", "0011001", "0010011", "0111101", "0100011",
@@ -37,10 +42,10 @@ FAMILIES = ('000000', '001011', '001101', '001110', '010011',
 
 class EanBarcode(Barcode):
     """Simple base class for all EAN type barcodes"""
-    lengths = None
-    length = None
-    checks = []
-    extras = {}
+    lengths = None # type: Optional[List[int]]
+    length = None # type: Optional[int]
+    checks = [] # type: List[int]
+    extras = {} # type: Dict[int, str] 
     magic = 10
     guard_bar = '202'
     center_bar = '02020'

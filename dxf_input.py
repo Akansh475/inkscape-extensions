@@ -87,7 +87,7 @@ def export_MTEXT():
         tspan.text = text
 
 
-def export_POINT():
+def export_POINT(w):
     # mandatory group codes : (10, 20) (x, y)
     if vals[groups['10']] and vals[groups['20']]:
         if options.gcodetoolspoints:
@@ -610,7 +610,10 @@ class DxfInput(inkex.InputExtension):
                             vals[groups['51']][0] = 180.0 - vals[groups['50']][0]
                             vals[groups['50']][0] = 180.0 - temp
                     if entities[entity]:
-                        entities[entity]()
+                        if entity == 'POINT':
+                            entities[entity](w)
+                        else:
+                            entities[entity]()
                 entity = line[1]
                 vals = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
                 seqs = []

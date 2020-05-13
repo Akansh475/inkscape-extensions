@@ -237,7 +237,7 @@ class WavefrontObj(object):
         """translate vertex points according to the matrix"""
         transformed_pts = []
         for vtx in self.vtx:
-            transformed_pts.append((numpy.matmul(trans_mat, numpy.mat(vtx).T)).T.tolist()[0])
+            transformed_pts.append((numpy.matmul(trans_mat, numpy.array(vtx).T)).T.tolist())
         return transformed_pts
 
     def get_edge_list(self):
@@ -312,7 +312,7 @@ class Poly3D(inkex.GenerateExtension):
         poly.transform.add_scale(scale)
 
         # TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
-        trans_mat = numpy.mat(numpy.identity(3, float))  # init. trans matrix as identity matrix
+        trans_mat = numpy.identity(3, float)  # init. trans matrix as identity matrix
         for i in range(1, 7):  # for each rotation
             axis = getattr(so, 'r{}_ax'.format(i))
             angle = getattr(so, 'r{}_ang'.format(i)) * pi / 180

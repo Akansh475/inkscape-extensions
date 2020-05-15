@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
-# Copyright (C) 2013 Sebastian Wüst, sebi@timewaster.de
+#
+# Copyright (C) 2013 <Public Domain>
+#               2018 Martin Owens <doctormo@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

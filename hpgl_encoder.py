@@ -1,7 +1,6 @@
 # coding=utf-8
 #
 # Copyright (C) 2008 Aaron Spike, aaron@ekips.org
-# Copyright (C) 2013 Sebastian Wüst, sebi@timewaster.de
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

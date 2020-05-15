@@ -3,11 +3,11 @@
     <linearGradient id="linearGradient877" inkscape:collect="always">
       <stop id="stop873" offset="0" style="stop-color:#008000;stop-opacity:1"/>
       <stop style="stop-color:#7b0000;stop-opacity:1" offset="0.48378384" id="stop879"/>
-      <stop id="stop875" offset="1" style="stop-color:#0000ff;stop-opacity:1"/>
+      <stop id="stop875" offset="1" style="stop-color:rgb(0, 0, 255);stop-opacity:1"/>
     </linearGradient>
     <linearGradient inkscape:collect="always" id="linearGradient845">
       <stop style="stop-color:#008000;stop-opacity:1" offset="0" id="stop841"/>
-      <stop style="stop-color:#0000ff;stop-opacity:1" offset="1" id="stop843"/>
+      <stop style="stop-color:blue;stop-opacity:1" offset="1" id="stop843"/>
     </linearGradient>
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient845" id="linearGradient847" x1="13.096875" y1="138.45702" x2="13.096875" y2="104.24652" gradientUnits="userSpaceOnUse" gradientTransform="translate(4.47014, 54.8796)"/>
     <linearGradient inkscape:collect="always" xlink:href="#linearGradient845" id="linearGradient855" x1="184.80772" y1="102.37889" x2="184.80772" y2="136.77472" gradientUnits="userSpaceOnUse" gradientTransform="translate(151.224, 57.4921)"/>

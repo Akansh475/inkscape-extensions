@@ -17,6 +17,7 @@ class ColorCustomTest(ColorBaseCase):
         ((0, 0, 0), "#0f0000", ['-s 1', '-r 0.0625']),
         ((0, 0, 0), "#ff0000", ['-r 400']),
         ((0, 0, 0), "#000000", ['-r -400']),
+        ("red", "#fe0000", ['-s 400']),
     ]
 
     def test_evil_fails(self):

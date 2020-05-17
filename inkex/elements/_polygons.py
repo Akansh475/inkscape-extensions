@@ -44,8 +44,7 @@ class PathElementBase(ShapeElement):
     def apply_transform(self):
         """Apply the internal transformation to this node and delete"""
         if 'transform' in self.attrib:
-            self.path.transform(self.transform)
-            self.set('d', str(self.path))
+            self.path = self.path.transform(self.transform)
             self.set('transform', Transform())
 
     @property

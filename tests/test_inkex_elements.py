@@ -504,8 +504,8 @@ class PathTest(ElementTestCase):
         path.transform = Transform(translate=(10, 10))
         self.assertEqual(path.get('d'), 'M30,130 L60,130 L60,120 L70,140 L60,160 L60,150 L30,150')
         path.apply_transform()
-        self.assertEqual(path.get('d'), 'M 30 130 L 60 130 L 60 120 '
-                                        'L 70 140 L 60 160 L 60 150 L 30 150')
+        self.assertEqual(path.get('d'), 'M 40 140 L 70 140 L 70 130 L 80 150 '
+                                        'L 70 170 L 70 160 L 40 160')
         self.assertFalse(path.transform)
 
 class CircleTest(ElementTestCase):

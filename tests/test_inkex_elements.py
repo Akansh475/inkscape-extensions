@@ -70,7 +70,7 @@ class CoreElementTestCase(ElementTestCase):
         """
         Test inkex.element.BaseElement-derived object type is preserved on adding to group
 
-        See https://gitlab.com/inkscape/extensions/issues/81 for details
+        See https://gitlab.com/inkscape/extensions/-/issues/81 for details
         """
         grp = Group()
         for _ in range(10):

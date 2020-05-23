@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-# coding=utf-8
+#
 # Copyright 2008, 2009 Hannes Hochreiner
+#                 2020 Martin Owens
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -13,6 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
+#
+"""
+Jessyink effect extension.
+"""
 
 
 import inkex
@@ -22,6 +28,7 @@ from inkex.utils import NSS
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
 class JessyinkEffects(inkex.EffectExtension):
+    """Add ad effect to jessy ink selected items"""
     def add_arguments(self, pars):
         pars.add_argument('--tab')
         pars.add_argument('--effectInOrder', type=int, default=1)
@@ -33,35 +40,35 @@ class JessyinkEffects(inkex.EffectExtension):
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
+        scripts = self.svg.xpath("//svg:script[@jessyink:version='1.5.5']")
 
-        if len(scriptNodes) != 1:
+        if len(scripts) != 1:
             raise inkex.AbortExtension(
-                _("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+                _("The JessyInk script is not installed in this SVG file or has a different"
+                  " version than the JessyInk extensions. Please select \"install/update...\""
+                  " from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or"
+                  " update the JessyInk script.\n\n"))
 
-        if len(self.svg.selected) == 0:
+        if not self.svg.selected:
             raise inkex.AbortExtension(
-                _("No object selected. Please select the object you want to assign an effect to and then press apply.\n"))
+                _("No object selected. Please select the object you want to "
+                  "assign an effect to and then press apply.\n"))
 
-        for id, node in self.svg.selected.items():
-            if (self.options.effectIn == "appear") or (self.options.effectIn == "fade") or (self.options.effectIn == "pop"):
-                node.set("{" + NSS["jessyink"] + "}effectIn","name:" + self.options.effectIn  + ";order:" + self.options.effectInOrder + ";length:" + str(int(self.options.effectInDuration) * 1000))
-                # Remove possible view argument.
-                if "{" + NSS["jessyink"] + "}view" in node.attrib:
-                    del node.attrib["{" + NSS["jessyink"] + "}view"]
-            else:
-                if "{" + NSS["jessyink"] + "}effectIn" in node.attrib:
-                    del node.attrib["{" + NSS["jessyink"] + "}effectIn"]
+        for elem in self.svg.selected.values():
+            self._process(elem, 'effectIn')
+            self._process(elem, 'effectOut')
 
-            if (self.options.effectOut == "appear") or (self.options.effectOut == "fade") or (self.options.effectOut == "pop"):
-                node.set("{" + NSS["jessyink"] + "}effectOut","name:" + self.options.effectOut  + ";order:" + self.options.effectOutOrder + ";length:" + str(int(self.options.effectOutDuration) * 1000))
-                # Remove possible view argument.
-                if "{" + NSS["jessyink"] + "}view" in node.attrib:
-                    del node.attrib["{" + NSS["jessyink"] + "}view"]
-            else:
-                if "{" + NSS["jessyink"] + "}effectOut" in node.attrib:
-                    del node.attrib["{" + NSS["jessyink"] + "}effectOut"]
+    def _process(self, elem, name):
+        effect = getattr(self.options, name)
+        order = getattr(self.options, name + 'Order')
+        duration = int(getattr(self.options, name + 'Duration') * 1000)
 
-# Create effect instance
+        if effect in ("appear", "fade", "pop"):
+            elem.set("jessyink:" + name, inkex.Style(name=effect, order=order, length=duration))
+            # Remove possible view argument.
+            elem.pop('jessyink:view', None)
+        else:
+            elem.pop('jessyink:' + name, None)
+
 if __name__ == '__main__':
     JessyinkEffects().run()

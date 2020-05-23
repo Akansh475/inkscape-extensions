@@ -22,14 +22,6 @@ variables:
       - htmlcov
 
 
-test:python27:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 2.7.14
-    - tox -e py27-normal
-
-
 test:python36:
   extends: .tests
   script:
@@ -70,7 +62,6 @@ test:coverage:
     - pip install pylint==2.2.3
     - python3.6 tests/add_pylint.py htmlcov/index.html
   dependencies:
-    - test:python27
     - test:python36
     - test:python37
     - test:python38

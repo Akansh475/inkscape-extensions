@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 
 # local library
 import inkex
+from inkex.localization import inkex_gettext as _
 from inkex.base import SvgOutputMixin
 
 class hpglDecoder(SvgOutputMixin):

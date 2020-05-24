@@ -51,8 +51,6 @@ class Plot(inkex.EffectExtension):
         pars.add_argument('--autoAlign', type=inkex.Boolean, default=True, help='Auto align')
         pars.add_argument('--toolOffset', type=float, default=0.25,\
             help='Tool (Knife) offset correction (mm)')
-        #pars.add_argument('--convertObjects', type=inkex.Boolean, default=True,\
-        #    help='Convert objects to paths')
         pars.add_argument('--portType', type=self.arg_method('to'),\
             default=self.to_serial, dest="to_port", help='Port type')
         pars.add_argument('--commandLanguage', type=self.arg_method('convert'),\

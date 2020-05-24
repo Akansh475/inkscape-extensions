@@ -179,7 +179,7 @@ class hpglEncoder(object):
                     self.process_group(child, transform)
                 elif isinstance(child, inkex.PathElement):
                     self.process_path(child, transform)
-                elif self.options.convertObjects:
+                else:
                     # This only works for shape elements (not text yet!)
                     new_elem = child.to_path_element()
                     # Element is given composed transform b/c it's not added back to doc

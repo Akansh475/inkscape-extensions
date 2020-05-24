@@ -42,8 +42,6 @@ class HpglOutput(inkex.OutputExtension):
         pars.add_argument('--precut', type=inkex.Boolean, default=True, help='Use precut')
         pars.add_argument('--flat', type=float, default=1.2, help='Curve flatness')
         pars.add_argument('--autoAlign', type=inkex.Boolean, default=True, help='Auto align')
-        #pars.add_argument('--convertObjects', type=inkex.Boolean, default=True,\
-        #    help='Convert objects to paths')
         pars.add_argument('--toolOffset', type=float, default=0.25,\
             help='Tool (Knife) offset correction (mm)')
 

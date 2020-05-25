@@ -96,6 +96,9 @@ def debug(what):
     errormsg(what)
     return what
 
+def do_nothing(*args, **kwargs): # pylint: disable=unused-argument
+    """A blank function to do nothing"""
+    pass
 
 def errormsg(msg):
     """Intended for end-user-visible error messages.

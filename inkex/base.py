@@ -27,10 +27,9 @@ import copy
 import shutil
 
 from argparse import ArgumentParser, Namespace
-from io import IOBase
 from lxml import etree
 
-from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg
+from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
 from .elements import load_svg
 from .localization import localize
 
@@ -106,6 +105,8 @@ class InkscapeExtension(object):
             try:
                 return getattr(self, name)
             except AttributeError:
+                if name.startswith('_'):
+                    return do_nothing
                 raise AbortExtension("Can not find method {}".format(name))
         return _inner
 

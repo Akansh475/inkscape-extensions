@@ -36,15 +36,15 @@
                     </param>
                     <param name="angle" type="float" min="-360" max="360" gui-text="Angle (°):">0</param>
                 </page>
-        <page name="desc" gui-text="Help">
-            <label xml:space="preserve">This effect measures the length, area, or center-of-mass of the selected paths. Length and area are added as a text object with the selected units. Center-of-mass is shown as a cross symbol.
+                <page name="_help" gui-text="Help">
+                  <label xml:space="preserve">This effect measures the length, area, or center-of-mass of the selected paths. Length and area are added as a text object with the selected units. Center-of-mass is shown as a cross symbol.
 
   * Text display format can be either Text-On-Path, or stand-alone text at a specified angle.
   * The number of significant digits can be controlled by the Precision field.
   * The Offset field controls the distance from the text to the path.
   * The Scale factor can be used to make measurements in scaled drawings. For example, if 1 cm in the drawing equals 2.5 m in the real world, Scale must be set to 250.
   * When calculating area, the result should be precise for polygons and Bezier curves. If a circle is used, the area may be too high by as much as 0.03%.</label>
-        </page>
+                </page>
             </param>
             <param name="fontsize" type="int" min="1" max="1000" gui-text="Font size (px):">12</param>
             <param name="offset" type="float" min="-10000" max="10000" gui-text="Offset (px):">-6</param>

@@ -22,6 +22,7 @@ Common access to serial and other computer ports.
 
 import os
 import sys
+import time
 from .utils import DependencyError, AbortExtension
 
 try:
@@ -41,7 +42,8 @@ class Serial(object):
     able to accept the same input but allow for debugging.
     """
     def __init__(self, port, baud=9600, timeout=0.1, **options):
-        if port == '[test]':
+        self.test = port == '[test]'
+        if self.test:
             import pty # This does not work on windows
             self.master, self.slave = pty.openpty()
             port = os.ttyname(self.slave)
@@ -76,9 +78,10 @@ class Serial(object):
         return self.com
 
     def __exit__(self, exc, value, traceback):
-        if not traceback and hasattr(self, 'master'):
+        if not traceback and self.test:
             output = ' ' * 1024
             while len(output) == 1024:
+                time.sleep(0.01)
                 output = os.read(self.master, 1024)
                 sys.stderr.write(output.decode('utf8'))
         #self.com.read(2)

@@ -30,6 +30,7 @@ compare_filters = [
 """
 
 import re
+from ..utils import to_bytes
 
 class Compare(object):
     """
@@ -124,3 +125,15 @@ class CompareOrderIndependentTags(Compare):
     @staticmethod
     def filter(contents):
         return b"\n".join(sorted(re.split(br'>\s*<', contents)))
+
+class CompareReplacement(Compare):
+    """Replace pieces to make output more comparable"""
+    def __init__(self, *replacements):
+        self.deltas = replacements
+        super().__init__()
+
+    def filter(self, contents):
+        contents = to_bytes(contents)
+        for _from, _to in self.deltas:
+            contents = contents.replace(to_bytes(_from), to_bytes(_to))
+        return contents

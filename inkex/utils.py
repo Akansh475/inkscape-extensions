@@ -91,6 +91,12 @@ def Boolean(value):
         return False
     return None
 
+def to_bytes(content):
+    """Ensures the content is bytes"""
+    if isinstance(content, bytes):
+        return content
+    return str(content).encode("utf8")
+
 def debug(what):
     """Print debug message if debugging is switched on"""
     errormsg(what)

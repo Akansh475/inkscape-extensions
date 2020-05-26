@@ -82,7 +82,7 @@ import xml.etree.ElementTree as xml
 from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
 
-from ..utils import PY3
+from ..utils import PY3, to_bytes
 from .xmldiff import xmldiff
 from .mock import MockCommandMixin, Capture
 
@@ -271,8 +271,14 @@ class ComparisonMixin(object):
     """
     Add comparison tests to any existing test suite.
     """
+    # This input svg file sent to the extension (if any)
     compare_file = 'svg/shapes.svg'
+    # The ways in which the output is filtered for comparision (see filters.py)
     compare_filters = [] # type: List[Compare]
+    # If true, the filtered output will be saved and only applied to the
+    # extension output (and not to the reference file)
+    compare_filter_save = False
+    # A list of comparison runs, each entry will cause the extension to be run.
     comparisons = [
         (),
         ('--id=p1', '--id=r3'),
@@ -320,12 +326,13 @@ class ComparisonMixin(object):
             with open(outfile + '.export', 'wb') as fhl:
                 if sys.version_info[0] == 3 and isinstance(data_a, str):
                     data_a = data_a.encode('utf-8')
-                fhl.write(data_a)
+                fhl.write(self._apply_compare_filters(data_a, True))
                 print("Written output: {}.export".format(outfile))
+
         data_a = self._apply_compare_filters(data_a)
 
         with open(outfile, 'rb') as fhl:
-            data_b = self._apply_compare_filters(fhl.read())
+            data_b = self._apply_compare_filters(fhl.read(), False)
 
         if isinstance(data_a, bytes) and isinstance(data_b, bytes) \
             and data_a.startswith(b'<') and data_b.startswith(b'<'):
@@ -334,7 +341,7 @@ class ComparisonMixin(object):
             if not delta and not os.environ.get('EXPORT_COMPARE', False):
                 print('The XML is different, you can save the output using the EXPORT_COMPARE=1'\
                       ' envionment variable. This will save the compared file as a ".output" file'\
-                      ' next to the reference file used in the text.\n')
+                      ' next to the reference file used in the test.\n')
             diff = 'SVG Differences: {}\n\n'.format(outfile)
             if os.environ.get('XML_DIFF', False):
                 diff = '<- ' + diff_xml
@@ -350,11 +357,14 @@ class ComparisonMixin(object):
             # compare any content (non svg)
             self.assertEqual(data_a, data_b)
 
-    def _apply_compare_filters(self, data):
-        if sys.version_info[0] == 3 and isinstance(data, str):
-            data = data.encode('utf-8')
-        for cfilter in self.compare_filters:
-            data = cfilter(data)
+    def _apply_compare_filters(self, data, is_saving=None):
+        data = to_bytes(data)
+        # Applying filters flips depending if we are saving the filtered content
+        # to disk, or filtering during the test run. This is because some filters
+        # are destructive others are useful for diagnostics.
+        if is_saving is self.compare_filter_save or is_saving is None:
+            for cfilter in self.compare_filters:
+                data = cfilter(data)
         return data
 
     def get_compare_outfile(self, args, addout=None):

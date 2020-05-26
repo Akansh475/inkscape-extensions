@@ -34,7 +34,7 @@ from .tween import interpcoord
 from .utils import strargs, KeyDict, PY3
 
 try:
-    from typing import overload, cast, List, Any, Callable, Generator, Tuple, Union, Optional, Sequence  # pylint: disable=unused-import
+    from typing import overload, cast, List, Any, Callable, Generator, Iterator, Tuple, Union, Optional, Sequence  # pylint: disable=unused-import
 
     VectorLike = Union["ImmutableVector2d", Tuple[float, float]]  # pylint: disable=invalid-name
     MatrixLike = Union[str, Tuple[Tuple[float,float,float], Tuple[float,float,float]], Tuple[float,float,float,float,float,float], "Transform"] 
@@ -457,7 +457,7 @@ class Transform(object):
         self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
 
     def to_hexad(self):
-        # type: () -> Generator[float, None, None]
+        # type: () -> Iterator[float]
         """Returns the transform as a hexad matrix (used in svg)"""
         return (val for lst in zip(*self.matrix) for val in lst)
 
@@ -654,7 +654,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
     def __iadd__(self, other):
         # type: (BoundingInterval) -> BoundingInterval
         if other is None:
-            return
+            return None
         other = BoundingInterval(other)
         self.minimum = min((self.minimum, other.minimum))
         self.maximum = max((self.maximum, other.maximum))

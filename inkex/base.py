@@ -30,13 +30,13 @@ from argparse import ArgumentParser, Namespace
 from lxml import etree
 
 from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
-from .elements import load_svg
+from .elements._base import load_svg, BaseElement # pylint: disable=unused-import
 from .localization import localize
 
 stdout = sys.stdout
 
 try:
-    from typing import (List, Optional, Callable, Any, Union, IO,
+    from typing import (List, Tuple, Type, Optional, Callable, Any, Union, IO,
                         TYPE_CHECKING, cast)
 except ImportError:
     cast = lambda x, y: y
@@ -266,7 +266,7 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
     Expects the file input to be an svg document and will parse it.
     """
     # Select all objects if none are selected
-    select_all = None
+    select_all = () # type: Tuple[Type[BaseElement], ...]
 
     def __init__(self):
         super(SvgInputMixin, self).__init__()

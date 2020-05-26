@@ -242,13 +242,14 @@ class ColorExtension(EffectExtension):
     A standard way to modify colours in an svg document.
     """
     process_none = False # should we call modify_color for the "none" color.
+    select_all = (ShapeElement,)
 
     def effect(self):
         # Limiting to shapes ignores Gradients (and other things) from the select_all
         # this prevents defs from being processed twice.
         self._renamed = {}
         gradients = CloningVat(self.svg)
-        for elem in self.svg.get_selected_or_all(ShapeElement):
+        for elem in self.svg.selection.get(ShapeElement):
             self.process_element(elem, gradients)
         gradients.process(self.process_elements, types=(ShapeElement,))
 

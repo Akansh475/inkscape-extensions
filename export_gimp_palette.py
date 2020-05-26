@@ -27,6 +27,8 @@ from inkex import ShapeElement, ColorIdError, ColorError
 
 class ExportGimpPalette(inkex.OutputExtension):
     """Export all colors in a document to a gimp pallet"""
+    select_all = (ShapeElement,)
+
     def save(self, stream):
         name = self.svg.name.replace('.svg', '')
         stream.write('GIMP Palette\nName: {}\n#\n'.format(name).encode('utf-8'))
@@ -36,7 +38,7 @@ class ExportGimpPalette(inkex.OutputExtension):
 
     def get_colors(self):
         """Get all the colors from the selected elements"""
-        for elem in self.svg.get_selected_or_all(ShapeElement):
+        for elem in self.svg.selection.get(ShapeElement):
             for color in self.process_element(elem):
                 if str(color).upper() == 'NONE':
                     continue

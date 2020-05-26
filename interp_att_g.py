@@ -92,17 +92,17 @@ class InterpAttG(inkex.EffectExtension):
 
     def get_elements(self):
         """Returns a list of elements to work on"""
-        if not self.svg.selected:
+        if not self.svg.selection:
             return []
 
-        if len(self.svg.selected) > 1:
+        if len(self.svg.selection) > 1:
             # multiple selection
             if self.options.zsort:
-                return self.svg.get_z_selected().values()
-            return self.svg.selected.values()
+                return self.svg.selection.paint_order()
+            return self.svg.selected
 
         # must be a group
-        node = self.svg.get_first_selected(inkex.Group)
+        node = self.svg.selection.get(inkex.Group).first()
         return list(node) or []
 
     def effect(self):

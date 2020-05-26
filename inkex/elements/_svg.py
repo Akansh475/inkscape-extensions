@@ -26,10 +26,11 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import random
-from collections import OrderedDict
 from lxml import etree
 
+from ..deprecated import DepricatedSvgMixin
 from ..units import discover_unit, convert_unit, render_unit
+from ._selected import SelectedElements
 from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
@@ -40,14 +41,14 @@ if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import
 
 
-class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
+class SvgDocumentElement(DepricatedSvgMixin, BaseElement):
     """Provide access to the document level svg functionality"""
     tag_name = 'svg'
 
     def _init(self):
         self.current_layer = None
         self.view_center = (0.0, 0.0)
-        self.selected = OrderedDict()
+        self.selection = SelectedElements(self)
         self.ids = {}
 
     def tostring(self):
@@ -72,78 +73,9 @@ class SvgDocumentElement(BaseElement): # pylint: disable=too-many-public-methods
         self.ids.add(new_id)
         return new_id
 
-    def set_selected(self, *ids):
-        """
-        Sets the currently selected elements to these ids.
-
-        Arguments a list of element ids, element objects or
-            a single xpath expression starting with "//".
-
-        All element objects must have an id to be correctly set.
-
-        >>> svg.set_selected("rect123", "path456", "text789")
-        >>> svg.set_selected(elem1, elem2, elem3)
-        >>> svg.set_selected("//rect")
-        """
-        self.selected = OrderedDict()
-
-        # Allow selecting of xpath elements directly
-        if len(ids) == 1 and isinstance(ids[0], str) and ids[0].startswith('//'):
-            ids = self.xpath(ids[0])
-
-        for elem_id in ids:
-            if isinstance(elem_id, BaseElement):
-                # Selection is a list of nodes to select
-                self.selected[elem_id.get('id')] = elem_id
-                continue
-            # Selection is a text element id, find it (or them).
-            for node in self.xpath('//*[@id="{}"]'.format(elem_id)):
-                self.selected[elem_id] = node
-
-    def get_z_selected(self):
-        """Get the selected elements, but ordered by their apperence in the document"""
-        sel = self.selected
-        return OrderedDict((_id, sel[_id]) for _id in self.xpath('//@id') if _id in sel)
-
-    def get_selected(self, *types):
-        """Generator: Gets selected nodes which are the given element types"""
-        for node in self.selected.values():
-            if not types or isinstance(node, types):
-                yield node
-
-    def get_selected_or_all(self, *types):
-        """Returns a generator of selected items: i.e. svg.get_selected(types)
-             or all of this type of element i.e. svg.descendants(types)
-        """
-        if self.selected:
-            for node in self.get_selected(*types):
-                yield node # yield from when py3 only
-        else:
-            for node in self.descendants(*types):
-                yield node # yield from when py3 only
-
-    def get_selected_bbox(self):
-        """
-        Gets a :class:`inkex.transforms.BoundingBox` object for the selected items.
-
-        Text objects have a bounding box without width or height that only
-        reflects the coordinate of their anchor. If a text object is a part of
-        the selection's boundary, the bounding box may be inaccurate.
-
-        When no object is selected or when the object's location cannot be
-        determined (e.g. empty group or layer), all coordinates will be None.
-        """
-        return sum([node.bounding_box() for node in self.selected.values()], None)
-
     def get_page_bbox(self):
         """Gets the page dimensions as a bbox"""
         return BoundingBox((0, float(self.width)), (0, float(self.height)))
-
-    def get_first_selected(self, *types):
-        """Returns the first item in the selected list, of the given types"""
-        if self.selected:
-            return list(self.get_selected(*types))[0]
-        return None
 
     def get_current_layer(self):
         """Returns the currently selected layer"""

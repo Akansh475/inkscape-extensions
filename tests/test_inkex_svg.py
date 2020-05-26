@@ -58,13 +58,13 @@ class BasicSvgTest(TestCase):
     def test_svg_select_id(self):
         """Select an id from the document"""
         doc = svg('id="bananas"')
-        doc.set_selected('bananas')
-        self.assertEqual(doc.selected['bananas'], doc)
-        self.assertEqual(doc.get_first_selected(), doc)
+        doc.selection.set('bananas')
+        self.assertEqual(doc.selection['bananas'], doc)
+        self.assertEqual(doc.selection.first(), doc)
         doc = svg('id="apples"')
-        doc.set_selected(doc.getElementById('apples'))
-        self.assertEqual(doc.selected['apples'], doc)
-        self.assertEqual(doc.get_first_selected(), doc)
+        doc.selected.set(doc.getElementById('apples'))
+        self.assertEqual(doc.selection['apples'], doc)
+        self.assertEqual(doc.selection.first(), doc)
 
     def test_svg_by_href(self):
         """Select element by xlink href"""
@@ -89,7 +89,7 @@ class BasicSvgTest(TestCase):
     def test_selected_bbox(self):
         """Can we get a bounding box from the selected items"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
-        doc.set_selected('path3904', 'path3902')
+        doc.selected.set('path3904', 'path3902')
         from inkex.transforms import BoundingBox
         x, y, w, h = 199.544, 156.412, 377.489, 199.972  # from inkscape --query-all
         expected_3904 = BoundingBox((x, x + w), (y, y + h))
@@ -97,7 +97,7 @@ class BasicSvgTest(TestCase):
         expected_3902 = BoundingBox((x, x + w), (y, y + h))
         expected = list(expected_3902 + expected_3904)
 
-        for x, y in zip(expected, doc.get_selected_bbox()):
+        for x, y in zip(expected, doc.selection.bounding_box()):
             self.assertDeepAlmostEqual(tuple(x), tuple(y), delta=1e-3)
 
 

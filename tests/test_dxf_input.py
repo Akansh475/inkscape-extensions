@@ -11,8 +11,10 @@ class TestDxfInputBasic(ComparisonMixin, TestCase):
     comparisons = [()]
     effect_class = DxfInput
 
-    def _apply_compare_filters(self, data):
+    def _apply_compare_filters(self, data, is_saving=None):
         """Remove the full pathnames"""
-        data = super(TestDxfInputBasic, self)._apply_compare_filters(data)
+        if is_saving is True:
+            return data
+        data = super()._apply_compare_filters(data)
         return data.replace((self.datadir() + '/').encode('utf-8'), b'')
 

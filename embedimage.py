@@ -48,7 +48,7 @@ class EmbedImage(inkex.EffectExtension):
         # if slectedonly is enabled and there is a selection
         # only embed selected images. otherwise embed all images
         if self.options.selectedonly:
-            images = self.svg.get_selected(Image)
+            images = self.svg.selection.get(Image)
         else:
             images = self.svg.xpath('//svg:image')
 

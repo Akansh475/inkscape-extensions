@@ -171,7 +171,7 @@ class TextSplit(inkex.EffectExtension):
         preserve = self.options.preserve
 
         # checks if the selected elements are text nodes
-        for elem in self.svg.get_selected(TextElement, FlowRoot):
+        for elem in self.svg.selection.get(TextElement, FlowRoot):
             if split_type == "line":
                 nodes = self.split_lines(elem)
             elif split_type == "word":

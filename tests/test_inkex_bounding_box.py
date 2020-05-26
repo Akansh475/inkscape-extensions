@@ -2,7 +2,6 @@
 """Test inkex `.bounding_box()` method functionality"""
 from copy import deepcopy
 import os
-import xml.etree.ElementTree
 import subprocess
 
 import pytest
@@ -38,6 +37,7 @@ skip_stroke_cap_tests = pytest.mark.skipif(  # pylint: disable=invalid-name
 
 
 class BoundingBoxTest(TestCase):
+    """Test BoundingBox functionality"""
     atol = 3e-3
 
     def assert_bounding_box_is_equal(self, obj, xscale, yscale, disable_inkscape_check=DISABLE_INKSCAPE_QUERY_CHECK):
@@ -88,7 +88,7 @@ class BoundingBoxTest(TestCase):
             temp_svg = os.path.join(tmp, "tmp.svg")
 
             with open(temp_svg, "wb") as out:
-                out.write(xml.etree.ElementTree.tostring(svg))
+                out.write(svg.tostring())
 
             with open(os.devnull, 'w') as devnull:
                 output = subprocess.check_output([

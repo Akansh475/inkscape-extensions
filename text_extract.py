@@ -38,6 +38,8 @@ YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
 
 class Extract(inkex.EffectExtension):
     """Extract text and print out"""
+    select_all = (TextElement, FlowRoot)
+
     def add_arguments(self, pars):
         pars.add_argument("-d", "--direction", default="tb", help="direction to extract text")
         pars.add_argument("-x", "--xanchor", default="center_x", help="horiz point to compare")
@@ -45,7 +47,7 @@ class Extract(inkex.EffectExtension):
 
     def effect(self):
         # move them to the top of the object stack in this order.
-        for node in sorted(self.svg.get_selected_or_all(TextElement, FlowRoot), key=self._sort):
+        for node in sorted(self.svg.selection.get(TextElement, FlowRoot), key=self._sort):
             self.recurse(node)
 
     def _sort(self, node):

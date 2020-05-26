@@ -118,7 +118,7 @@ class PathScatter(pathmodifier.Diffeo):
 
     def prepareSelectionList(self):
 
-        id_list = list(self.svg.get_z_selected())
+        id_list = self.svg.selection.paint_order().ids()
 
         # first selected->pattern, all but first selected-> skeletons
         # id = self.options.ids[-1]

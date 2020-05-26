@@ -221,7 +221,7 @@ class LoremIpsum(inkex.EffectExtension):
 
     def effect(self):
         # Existing text flow to insert new text into
-        for node in self.svg.get_selected(FlowRoot):
+        for node in self.svg.selection.get(FlowRoot):
             self.add_text(node)
             return
 
@@ -230,7 +230,7 @@ class LoremIpsum(inkex.EffectExtension):
         root.set('xml:space', 'preserve')
         region = root.add(FlowRegion())
 
-        shape = self.svg.get_first_selected()
+        shape = self.svg.selection.first()
         if shape is not None:
             parent = shape.getparent()
             region.add(shape.copy())

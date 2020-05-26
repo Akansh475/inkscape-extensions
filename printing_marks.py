@@ -153,7 +153,7 @@ class PrintingMarks(inkex.EffectExtension):
         self.min_mark_margin = self.svg.unittouu('3mm')
 
         if self.options.where == 'selection':
-            bbox = self.svg.get_selected_bbox()
+            bbox = self.svg.selection.bounding_box()
         else:
             bbox = self.svg.get_page_bbox()
 

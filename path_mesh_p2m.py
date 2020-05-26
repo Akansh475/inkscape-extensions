@@ -87,7 +87,7 @@ class PathToMesh(inkex.EffectExtension):
     def effect(self):
         """Main routine to convert path data to mesh geometry."""
         # loop through selection
-        for node in self.svg.get_selected(inkex.PathElement):
+        for node in self.svg.selection.get(inkex.PathElement):
             csp = None
             meshgradient = None
             mesh_id = None

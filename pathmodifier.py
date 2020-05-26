@@ -75,8 +75,8 @@ class PathModifier(inkex.EffectExtension):
     def effect(self):
         raise NotImplementedError("overwrite this method in subclasses")
         self.objects_to_paths(self.svg.selected, True)
-        self.bbox = self.svg.get_selected_bbox()
-        for node in self.svg.get_selected(PathElement):
+        self.bbox = self.svg.selection.bounding_box()
+        for node in self.svg.selection.get(PathElement):
             path = node.path.to_superpath()
             # do what ever you want with "path"!
             node.path = path
@@ -109,8 +109,8 @@ class Diffeo(PathModifier):
         self.expand_clones(self.svg.selected, True)
         self.expand_groups(self.svg.selected, True)
         self.objects_to_paths(self.svg.selected, True)
-        self.bbox = self.svg.get_selected_bbox()
-        for node in self.svg.get_selected(PathElement):
+        self.bbox = self.svg.selection.bounding_box()
+        for node in self.svg.selection.get(PathElement):
             path = node.path.to_superpath()
             for sub in path:
                 for ctlpt in sub:

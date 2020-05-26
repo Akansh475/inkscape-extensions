@@ -35,7 +35,6 @@ from argparse import ArgumentParser
 import inkex
 import inkex.utils
 import inkex.units
-from inkex.elements import Guide, SvgDocumentElement
 from inkex.base import SvgThroughMixin, InkscapeExtension
 from inkex.localization import inkex_gettext as _
 
@@ -73,6 +72,7 @@ class DeprecatedEffect(object):
         # by the new effects code, but we want to keep this as a Mixin so these
         # items will keep pylint happy and let use check our code as we write.
         if not hasattr(self, 'svg'):
+            from .elements import SvgDocumentElement
             self.svg = SvgDocumentElement()
         if not hasattr(self, 'arg_parser'):
             self.arg_parser = ArgumentParser()
@@ -129,7 +129,7 @@ class DeprecatedEffect(object):
     @property
     def selected(self):
         self._deprecated('selected', _('{} is now a dict in the svg. Use `self.svg.selected`.'))
-        return self.svg.selected
+        return dict(self.svg.selected)
 
     @property
     def doc_ids(self):
@@ -168,6 +168,7 @@ class DeprecatedEffect(object):
         return self.svg.namedview
 
     def createGuide(self, posX, posY, angle):
+        from .elements import Guide
         self._deprecated('createGuide',\
             _('{} is now a method of the namedview element object. '
               'Use `self.svg.namedview.add(Guide().move_to(x, y, a))` instead'))
@@ -352,3 +353,42 @@ def zSort(inNode, idList):
             break
         sortedList += zSort(child, idList)
     return sortedList
+
+class DepricatedSvgMixin(object):
+    """Mixin which adds depricated API elements to the SvgDocumentElement"""
+    @property
+    def selected(self):
+        """svg.selection"""
+        return self.selection
+
+    @deprecate
+    def set_selected(self, *ids):
+        """svg.selection.set(*ids)"""
+        return self.selection.set(*ids)
+
+    @deprecate
+    def get_z_selected(self):
+        """svg.selection.paint_order()"""
+        return self.selection.paint_order()
+
+    @deprecate
+    def get_selected(self, *types):
+        """svg.selection.get(*types).values()"""
+        return self.selection.get(*types).values()
+
+    @deprecate
+    def get_selected_or_all(self, *types):
+        """Set select_all = True in extension class"""
+        if not self.selection:
+            self.selection.set_all()
+        return self.selection.get(*types)
+
+    @deprecate
+    def get_selected_bbox(self):
+        """selection.bounding_box()"""
+        return self.selection.bounding_box()
+
+    @deprecate
+    def get_first_selected(self, *types):
+        """selection.get(*types).first()"""
+        return self.selection.get(*types).first()

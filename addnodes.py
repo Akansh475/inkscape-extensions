@@ -23,11 +23,10 @@ This extension either adds nodes to a path so that
   into a given number of equal segments.
 
 """
-
 import math
-
 import inkex
-from inkex import bezier,  PathElement, CubicSuperPath
+
+from inkex import bezier, PathElement, CubicSuperPath
 
 
 class AddNodes(inkex.EffectExtension):
@@ -40,7 +39,7 @@ class AddNodes(inkex.EffectExtension):
         pars.add_argument("--method", help="The kind of division to perform")
 
     def effect(self):
-        for node in self.svg.get_selected(PathElement):
+        for node in self.svg.selection.get(PathElement):
             new = []
             for sub in node.path.to_superpath():
                 new.append([sub[0][:]])

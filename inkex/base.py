@@ -265,6 +265,8 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
     """
     Expects the file input to be an svg document and will parse it.
     """
+    # Select all objects if none are selected
+    select_all = None
 
     def __init__(self):
         super(SvgInputMixin, self).__init__()
@@ -283,7 +285,9 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
         document = load_svg(stream)
         self.original_document = copy.deepcopy(document)
         self.svg = document.getroot()
-        self.svg.set_selected(*self.options.ids)
+        self.svg.selection.set(*self.options.ids)
+        if not self.svg.selection and self.select_all:
+            self.svg.selection.set_all(*self.select_all)
         return document
 
 

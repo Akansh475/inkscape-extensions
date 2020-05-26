@@ -63,7 +63,7 @@ class Motion(inkex.EffectExtension):
     def effect(self):
         delx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
         dely = math.sin(math.radians(self.options.angle)) * self.options.magnitude
-        for node in self.svg.get_selected(inkex.PathElement):
+        for node in self.svg.selection.get(inkex.PathElement):
             group = node.getparent().add(inkex.Group())
             facegroup = group.add(inkex.Group())
             group.append(node)

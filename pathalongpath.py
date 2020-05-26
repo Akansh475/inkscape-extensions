@@ -112,9 +112,9 @@ class PathAlongPath(pathmodifier.PathModifier):
         """
         first selected->pattern, all but first selected-> skeletons
         """
-        skeletons = self.svg.get_z_selected()
+        skeletons = self.svg.selection.paint_order()
 
-        elem = skeletons.pop(list(skeletons)[-1])
+        elem = skeletons.pop()
         if self.options.duplicate:
             elem = elem.duplicate()
         pattern = elem.to_path_element()

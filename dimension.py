@@ -92,9 +92,9 @@ class Dimension(pathmodifier.PathModifier):
         if not self.svg.selected:
             raise inkex.AbortExtension("Please select an object")
         if self.options.type == "geometric":
-            bbox = self.svg.get_selected_bbox()
+            bbox = self.svg.selection.bounding_box()
         else:
-            bbox = self.svg.get_first_selected().bounding_box()
+            bbox = self.svg.selection.first().bounding_box()
 
         layer = self.svg.get_current_layer()
 

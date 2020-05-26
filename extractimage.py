@@ -39,7 +39,7 @@ class ExtractImage(inkex.EffectExtension):
             help="Location to save the images.")
 
     def effect(self):
-        elems = self.svg.get_selected(Image) \
+        elems = self.svg.selection.get(Image) \
             if self.options.selectedonly else self.svg.xpath('//svg:image')
 
         for elem in elems:

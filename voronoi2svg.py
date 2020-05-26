@@ -169,7 +169,7 @@ class Voronoi(inkex.EffectExtension):
             'stroke-linejoin': 'round'
         }
 
-        parent_group = self.svg.get_first_selected().getparent()
+        parent_group = self.svg.selection.first().getparent()
         trans = parent_group.composed_transform()
 
         invtrans = None

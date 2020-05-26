@@ -78,7 +78,7 @@ class GenerateVoronoi(inkex.EffectExtension):
         scale = self.svg.unittouu('1px')  # convert to document units
         self.options.size *= scale
         self.options.border *= scale
-        obj = self.svg.get_first_selected()
+        obj = self.svg.selection.first()
         bbox = obj.bounding_box()
         mat = obj.composed_transform().matrix
         pattern = self.svg.defs.add(Pattern())

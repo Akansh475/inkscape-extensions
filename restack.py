@@ -51,7 +51,7 @@ class Restack(inkex.EffectExtension):
 
         # process selection to get list of objects to be arranged
         parentnode = None
-        for node in self.svg.get_selected(SvgDocumentElement):
+        for node in self.svg.selection.get(SvgDocumentElement):
             parentnode = node
             self.svg.set_selection(*list(node))
 
@@ -69,7 +69,7 @@ class Restack(inkex.EffectExtension):
 
     def _sort(self, node):
         x, y = self.options.xanchor, self.options.yanchor
-        selbox = self.svg.get_selected_bbox()
+        selbox = self.svg.selection.bounding_box()
         direction = self.options.direction
         if 'custom' in self.options.nb_direction:
             direction = self.options.angle

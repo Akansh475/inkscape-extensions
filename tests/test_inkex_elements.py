@@ -1,346 +1,40 @@
 #!/usr/bin/env python
 # coding=utf-8
 """
-Test elements extra logic from svg xml lxml custom classes.
+Test specific elements API from svg xml lxml custom classes.
 """
 
-from lxml import etree
 import pytest
-
 import inkex
 
 from inkex import (
-    ShapeElement, Group, Layer, Pattern, Guide, Polyline, Use, Defs,
+    Group, Layer, Pattern, Guide, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
-    Transform, Style, load_svg, LinearGradient, RadialGradient, Stop
+    Transform, Style, LinearGradient, RadialGradient, Stop
 )
 from inkex.colors import Color
 from inkex.paths import Move, Line
-from inkex.utils import FragmentError, PY3
-from inkex.tester import TestCase
-from inkex.tester.svg import svg_file
+from inkex.utils import FragmentError
 
-class FakeShape(ShapeElement):
-    tag_name = 'fake'
+from .test_inkex_elements_base import SvgTestCase
 
-class ElementTestCase(TestCase):
-    """Base element test case"""
-    source_file = 'complextransform.test.svg'
+class ElementTestCase(SvgTestCase):
+    """Base element testing"""
     tag = 'svg'
 
     def setUp(self):
-        super(ElementTestCase, self).setUp()
-        self.svg = svg_file(self.data_file('svg', self.source_file))
+        super().setUp()
         self.elem = self.svg.getElement('//svg:{}'.format(self.tag))
 
     def test_print(self):
         """Print element as string"""
         self.assertEqual(str(self.elem), self.tag)
 
-    def assertElement(self, elem, compare):
+    def assertElement(self, elem, compare): # pylint: disable=invalid-name
         """Assert an element"""
-        if PY3:
-            self.assertEqual(elem.tostring(), compare)
+        self.assertEqual(elem.tostring(), compare)
 
-class CoreElementTestCase(ElementTestCase):
-    """Test core element functionality"""
-    tag = 'g'
-
-    def test_tag_names(self):
-        """
-        Test tag names for custom and unknown tags
-        """
-        doc = load_svg("""
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:x="http://x.com/x">
-    <g id="good"></g>
-    <badsvg id="bad">Unknown SVG tag</badsvg>
-    <x:othertag id="ugly"></x:othertag>
-</svg>""")
-        svg = doc.getroot()
-
-        good = svg.getElementById("good")
-        self.assertEqual(good.TAG, "g")
-        bad = svg.getElementById("bad")
-        self.assertEqual(bad.TAG, "badsvg")
-        ugly = svg.getElementById("ugly")
-        self.assertEqual(ugly.TAG, "othertag")
-
-    def test_reference_count(self):
-        """
-        Test inkex.element.BaseElement-derived object type is preserved on adding to group
-
-        See https://gitlab.com/inkscape/extensions/-/issues/81 for details
-        """
-        grp = Group()
-        for _ in range(10):
-            rect = Rectangle()
-            grp.add(rect)
-
-        for elem in grp:
-            self.assertEqual(type(elem), Rectangle)
-
-    def test_abstract_raises(self):
-        """Abstract classes cannot be instantiated"""
-        self.assertRaises(NotImplementedError, FakeShape().get_path)
-        self.assertRaises(AttributeError, FakeShape().set_path, None)
-
-    def test_findall(self):
-        """Findall elements in svg"""
-        groups = self.svg.findall('svg:g')
-        self.assertEqual(len(groups), 1)
-
-    def test_add(self):
-        """Can add single or multiple elements with passthrough"""
-        elem = self.svg.getElementById('D')
-        group = elem.add(Group(id='foo'))
-        self.assertEqual(group.get('id'), 'foo')
-        groups = elem.add(Group(id='f1'), Group(id='f2'))
-        self.assertEqual(len(groups), 2)
-        self.assertEqual(groups[0].get('id'), 'f1')
-        self.assertEqual(groups[1].get('id'), 'f2')
-
-    def test_creation(self):
-        """Create elements with attributes"""
-        group = Group().update(inkscape__label='Foo')
-        self.assertEqual(group.get('inkscape:label'), 'Foo')
-        group = Group().update(inkscape__label='Bar')
-        self.assertEqual(group.label, 'Bar')
-
-    def test_chained_multiple_attrs(self):
-        """Set multiple attributes at a time"""
-        group = Group().update(
-            attr1='A',
-            attr2='B'
-        ).update(
-            attr3='C',
-            attr4='D'
-        )
-        self.assertEqual(group.get('attr1'), 'A')
-        self.assertEqual(group.get('attr2'), 'B')
-        self.assertEqual(group.get('attr3'), 'C')
-        self.assertEqual(group.get('attr4'), 'D')
-
-        # remove attributes, setting them to None
-        group.update(
-            attr1=None,
-            attr4=None
-        )
-
-        self.assertEqual(group.get('attr1'), None)
-        self.assertEqual(group.get('attr2'), 'B')
-        self.assertEqual(group.get('attr3'), 'C')
-        self.assertEqual(group.get('attr4'), None)
-
-        self.assertEqual(group.pop('attr2'), 'B')
-        self.assertEqual(group.pop('attr3'), 'C')
-
-    def test_tostring(self):
-        """Elements can be printed as strings"""
-        self.assertEqual(Group().tostring(), b'<g/>')
-        elem = Group(id='bar')
-        path = elem.add(Tspan(id='foo'))
-        elem.transform.add_translate(50, 50)
-        path.style['fill'] = 'red'
-        self.assertEqual(elem.tostring(),
-            b'<g transform="translate(50, 50)"><tspan id="foo" style="fill:red"/></g>')
-
-    def test_set_wrapped_attribute(self):
-        """Remove wrapped attribute using .set()"""
-        group = Group().update(
-            transform=Transform(scale=2)
-        )
-        self.assertEqual(group.transform.matrix[0][0], 2)
-        self.assertEqual(group.transform.matrix[1][1], 2)
-
-        group.update(
-            transform=None
-        )
-        self.assertEqual(group.transform, Transform())
-
-    def test_pop_wrapped_attribute(self):
-        """Remove wrapped attribute using .pop()"""
-        group = Group()
-
-        self.assertEqual(group.pop('transform'), Transform())
-
-        group.update(
-            transform=Transform(scale=2)
-        )
-        self.assertEqual(group.pop('transform'), Transform(scale=2))
-        self.assertEqual(group.pop('transform'), Transform())
-        self.assertRaises(AttributeError, getattr, group, 'foo')
-
-    def test_pop_regular_attribute(self):
-        """Remove wrapped attribute using .pop()"""
-        group = Group()
-
-        self.assertEqual(group.get('attr1'), None)
-
-        group.update(
-            attr1="42"
-        )
-        self.assertEqual(group.pop('attr1'), "42")
-        self.assertEqual(group.pop('attr1'), None)
-
-    def test_sort_selected(self):
-        """Are the selected items sorted"""
-        self.svg.selection.set('G', 'B', 'D', 'F')
-        self.assertEqual(tuple(self.svg.selection.ids()), ('G', 'B', 'D', 'F'))
-        items = self.svg.selection.paint_order()
-        self.assertTrue(isinstance(items, dict))
-        self.assertEqual(tuple(items.ids()), ('B', 'D', 'F', 'G'))
-
-        self.svg.selected.set()
-        self.assertEqual(tuple(self.svg.selection), ())
-        a_to_g = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
-        self.svg.selection.set(*a_to_g)
-        self.assertEqual(tuple(self.svg.selection.paint_order().ids()), a_to_g)
-        self.svg.selected.set('X', 'Y', 'Z', 'A')
-        self.assertEqual(tuple(self.svg.selection.paint_order().ids()), ('A',))
-
-    def test_transform(self):
-        """In-place modified transforms are retained"""
-        elem = self.svg.getElementById('D')
-        self.assertEqual(str(elem.transform), 'translate(30, 10)')
-        elem.transform.add_translate(-10, 10)
-        self.assertEqual(str(elem.transform), 'translate(20, 20)')
-
-    def test_scale(self):
-        """In-place scaling from blank transform"""
-        elem = self.svg.getElementById('F')
-        self.assertEqual(elem.transform, Transform())
-        self.assertEqual(elem.get('transform'), None)
-        elem.transform.add_scale(1.0666666666666667, 1.0666666666666667)
-        self.assertEqual(elem.get('transform'), Transform(scale=1.06667))
-        self.assertIn(b'transform', etree.tostring(elem))
-
-    def test_in_place_transforms(self):
-        """Do style and transforms update correctly"""
-        elem = self.svg.getElementById('D')
-        self.assertEqual(type(elem.transform), Transform)
-        self.assertEqual(type(elem.style), Style)
-        self.assertTrue(elem.transform)
-        elem.transform = Transform()
-        self.assertEqual(elem.transform, Transform())
-        self.assertEqual(elem.get('transform'), None)
-        self.assertNotIn(b'transform', etree.tostring(elem))
-        elem.transform.add_translate(10, 10)
-        self.assertIn(b'transform', etree.tostring(elem))
-        elem.transform.add_translate(-10, -10)
-        self.assertNotIn(b'transform', etree.tostring(elem))
-
-    def test_update_consistant(self):
-        """Update doesn't keep callbacks around"""
-        elem = self.svg.getElementById('D')
-        tr_a = Transform(translate=(10, 10))
-        tr_b = Transform(translate=(-20, 15))
-        elem.transform = tr_a
-        elem.transform = tr_b
-        self.assertEqual(str(elem.transform), 'translate(-20, 15)')
-        tr_a.add_translate(10, 10)
-        self.assertEqual(str(elem.transform), 'translate(-20, 15)')
-        elem.set('transform', None)
-        self.assertEqual(elem.get('transform'), None)
-
-    def test_in_place_style(self):
-        """Do styles update when we set them"""
-        elem = self.svg.getElementById('D')
-        elem.style['fill'] = 'purpleberry'
-        self.assertEqual(elem.get('style'), 'fill:purpleberry')
-        elem.style = {'marker': 'flag'}
-        self.assertEqual(elem.get('style'), 'marker:flag')
-        elem.style = Style(stroke='gammon')
-        self.assertEqual(elem.get('style'), 'stroke:gammon')
-        elem.style.update('grape:2;strawberry:nice;')
-        self.assertEqual(elem.get('style'), 'stroke:gammon;grape:2;strawberry:nice')
-
-    def test_random_id(self):
-        """Test setting a random id"""
-        elem = self.svg.getElementById('D')
-        elem.set_random_id('Thing')
-        self.assertEqual(elem.get('id'), 'Thing5815')
-        elem.set_random_id('Thing', size=2)
-        self.assertEqual(elem.get('id'), 'Thing85')
-        elem.set_random_id()
-        self.assertEqual(elem.get('id'), 'path5392')
-        # No document root, no random id allowed
-        self.assertRaises(FragmentError, elem.copy().set_random_id)
-
-    def test_copy(self):
-        """Test copying elements"""
-        elem = self.svg.getElementById('D')
-        cpy = elem.copy()
-        self.assertFalse(cpy.getparent())
-        self.assertFalse(cpy.get('id'))
-
-    def test_duplicate(self):
-        """Test duplicating elements"""
-        elem = self.svg.getElementById('D')
-        dup = elem.duplicate()
-        self.assertTrue(dup.get('id'))
-        self.assertNotEqual(elem.get('id'), dup.get('id'))
-        self.assertEqual(elem.getparent(), dup.getparent())
-
-    def test_random_ids(self):
-        """Test setting a tree of ids"""
-        elem = self.svg.getElementById('D')
-        self.svg.set_random_ids(prefix='TreeItem')
-        self.assertEqual(self.svg.get('id'), 'TreeItem5815')
-        self.assertEqual(self.svg[0].get('id'), 'TreeItem8555')
-        self.assertEqual(elem.get('id'), 'TreeItem2036')
-
-    def test_set_id_backlinks(self):
-        """Changing an id can update backlinks"""
-        elem = self.svg.getElementById('path1')
-        elem.set_id('plant54', True)
-        self.assertEqual(self.svg.getElementById('G').get('xlink:href'), '#plant54')
-        self.assertEqual(self.svg.getElementById('G').href, elem)
-        self.assertEqual(str(self.svg.getElementById('B').style), 'fill:#eee;joker:url(#plant54)')
-
-    def test_bounding_box(self):
-        """Elements can have bounding boxes"""
-        elem = self.svg.getElementById('D')
-        self.assertEqual(tuple(elem.bounding_box()), ((60.0, 100.0), (130.0, 170.00)))
-        self.assertTrue(elem.bounding_box().center.is_close((80.0, 150.0)))
-        self.assertEqual(tuple(TextElement(x='10', y='5').bounding_box()), ((10, 10), (5, 5)))
-        group = Group(elem)
-        self.assertEqual(elem.bounding_box(), group.bounding_box())
-
-    def test_replace_with(self):
-        """Replacing nodes in a tree"""
-        rect = self.svg.getElementById('E')
-        path = rect.to_path_element()
-        rect.replace_with(path)
-        self.assertEqual(rect.getparent(), None)
-        self.assertEqual(path.getparent(), self.svg.getElementById('C'))
-
-    def test_path(self):
-        """Test getting paths"""
-        self.assertFalse(TextPath().get_path())
-        self.assertFalse(TextElement().get_path())
-        self.assertFalse(FlowRegion().get_path())
-        self.assertFalse(FlowRoot().get_path())
-        self.assertFalse(FlowPara().get_path())
-        self.assertFalse(FlowSpan().get_path())
-        self.assertFalse(Tspan().get_path())
-
-    def test_descendants(self):
-        """Elements can walk their descendants"""
-        ids = tuple(elem.get('id') for elem in self.svg.descendants())
-        self.assertEqual(ids, (
-            None, None, 'path1', None,
-            'base', 'metadata7',
-            None, None, None, None, None,
-            'A', 'B', 'C', 'D', 'E', 'F', 'G',
-            'H', 'I', 'J',
-        ))
-
-class LineElementTestCase(ElementTestCase):
-    """Test LineElements"""
-    def test_new_line(self):
-        line = LineElement.new((10, 10), (20, 20))
-        self.assertElement(line, b'<line x1="10" y1="10" x2="20" y2="20"/>')
 
 class PathElementTestCase(ElementTestCase):
     """Test PathElements"""
@@ -349,7 +43,7 @@ class PathElementTestCase(ElementTestCase):
 
     def test_new_path(self):
         """Test new path element"""
-        path = PathElement.new(path=[Move(10,10), Line(20, 20)])
+        path = PathElement.new(path=[Move(10, 10), Line(20, 20)])
         self.assertEqual(path.get('d'), 'M 10 10 L 20 20')
 
     def test_original_path(self):
@@ -403,6 +97,11 @@ class PolygonElementTestCase(ElementTestCase):
 class LineElementTestCase(ElementTestCase):
     """Test Line Elements"""
     tag = 'line'
+
+    def test_new_line(self):
+        """Line creation"""
+        line = LineElement.new((10, 10), (20, 20))
+        self.assertElement(line, b'<line x1="10.0" y1="10.0" x2="20.0" y2="20.0"/>')
 
     def test_type(self):
         """Lines have their own types"""
@@ -526,7 +225,9 @@ class CircleTest(ElementTestCase):
                          '50.0 a 50.0,50.0 0 0 0 -50.0, -50.0 z')
 
 class AnchorTest(ElementTestCase):
+    """Test anchor tags"""
     def test_new(self):
+        """Anchor tag creation"""
         link = Anchor.new('https://inkscape.org', Rectangle())
         self.assertElement(link, b'<a xlink:href="https://inkscape.org"><rect/></a>')
 
@@ -545,6 +246,17 @@ class TextTest(ElementTestCase):
         tap = TextPath()
         tap.append(Tspan.superscript('th'))
         self.assertEqual(len(tap), 1)
+
+    def test_path(self):
+        """Test getting paths"""
+        self.assertFalse(TextPath().get_path())
+        self.assertFalse(TextElement().get_path())
+        self.assertFalse(FlowRegion().get_path())
+        self.assertFalse(FlowRoot().get_path())
+        self.assertFalse(FlowPara().get_path())
+        self.assertFalse(FlowSpan().get_path())
+        self.assertFalse(Tspan().get_path())
+
 
 class UseTest(ElementTestCase):
     """Test extra functionality on a use element"""
@@ -576,11 +288,13 @@ class UseTest(ElementTestCase):
         self.assertEqual(elem.getparent().get('id'), 'C')
 
 class StopTests(ElementTestCase):
+    """Color stop tests"""
     black = Color('#000000')
     grey50 = Color('#080808')
     white = Color('#111111')
 
     def test_interpolate(self):
+        """Interpolate colours"""
         stl1 = Style({'stop-color': self.black, 'stop-opacity': 0.0})
         stop1 = Stop(offset='0.0', style=str(stl1))
         stl2 = Style({'stop-color': self.white, 'stop-opacity': 1.0})
@@ -591,6 +305,7 @@ class StopTests(ElementTestCase):
 
 
 class GradientTests(ElementTestCase):
+    """Gradient testing"""
     black = Color('#000000')
     grey50 = Color('#080808')
     white = Color('#111111')
@@ -604,14 +319,15 @@ class GradientTests(ElementTestCase):
     translate22 = Transform('translate(2.0, 2.0)')
 
     def test_apply_transform(self):
-        values = [ 
+        """Transform gradients"""
+        values = [
             (LinearGradient,
              {'x1': 0.0, 'y1': 0.0, 'x2': 1.0, 'y2': 1.0},
              {'x1': 1.0, 'y1': 1.0, 'x2': 2.0, 'y2': 2.0}),
             (RadialGradient,
              {'cx': 0.0, 'cy': 0.0, 'fx': 1.0, 'fy': 1.0, 'r': 1.0},
              {'cx': 1.0, 'cy': 1.0, 'fx': 2.0, 'fy': 2.0, 'r': 1.0}
-             )]
+            )]
         for classname, orientation, expected in values:
             grad = classname().update(**orientation)
             grad.gradientTransform = self.translate11
@@ -622,6 +338,7 @@ class GradientTests(ElementTestCase):
                 assert float(grad.get(key)) == pytest.approx(value, 1e-3)
 
     def test_stops(self):
+        """Gradients have stops"""
         for classname in [LinearGradient, RadialGradient]:
             grad = classname()
             stops = [
@@ -631,6 +348,7 @@ class GradientTests(ElementTestCase):
             assert [s1.tostring() == s2.tostring() for s1, s2 in zip(grad.stops, stops)]
 
     def test_stop_styles(self):
+        """Gradients have styles"""
         for classname in [LinearGradient, RadialGradient]:
             grad = classname()
             stops = [
@@ -640,24 +358,28 @@ class GradientTests(ElementTestCase):
             assert [str(s1) == str(s2.style) for s1, s2 in zip(grad.stop_styles, stops)]
 
     def test_get_stop_offsets(self):
+        """Gradients stop offsets"""
         for classname in [LinearGradient, RadialGradient]:
             grad = classname()
             stops = [
                 Stop().update(offset=0.0, style=self.whiteop0),
                 Stop().update(offset=1.0, style=self.blackop1)]
             grad.add(*stops)
-            assert [float(s1) == pytest.approx(float(s2.offset), 1e-3) for s1, s2 in zip(grad.stop_offsets, stops)]
+            for stop1, stop2 in zip(grad.stop_offsets, stops):
+                self.assertEqual(float(stop1), pytest.approx(float(stop2.offset), 1e-3))
 
     def test_interpolate(self):
-        values = [ 
-                (LinearGradient,
-                 {'x1': 0, 'y1': 0, 'x2': 1, 'y2': 1},
-                 {'x1': 2, 'y1': 2, 'x2': 1, 'y2': 1},
-                 {'x1': 1.0, 'y1': 1.0, 'x2': 1.0, 'y2': 1.0}),
-                (RadialGradient,
-                 {'cx': 0, 'cy': 0, 'fx': 1, 'fy': 1, 'r': 0},
-                 {'cx': 2, 'cy': 2, 'fx': 1, 'fy': 1, 'r': 1},
-                 {'cx': 1.0, 'cy': 1.0, 'fx': 1.0, 'fy': 1.0, 'r': 0.5})]
+        """Gradients can be interpolated"""
+        values = [
+            (LinearGradient,
+             {'x1': 0, 'y1': 0, 'x2': 1, 'y2': 1},
+             {'x1': 2, 'y1': 2, 'x2': 1, 'y2': 1},
+             {'x1': 1.0, 'y1': 1.0, 'x2': 1.0, 'y2': 1.0}),
+            (RadialGradient,
+             {'cx': 0, 'cy': 0, 'fx': 1, 'fy': 1, 'r': 0},
+             {'cx': 2, 'cy': 2, 'fx': 1, 'fy': 1, 'r': 1},
+             {'cx': 1.0, 'cy': 1.0, 'fx': 1.0, 'fy': 1.0, 'r': 0.5})
+            ]
         for classname, orientation1, orientation2, expected in values:
             # gradient 1
             grad1 = classname()
@@ -677,11 +399,12 @@ class GradientTests(ElementTestCase):
             grad2.update(gradientTransform=self.translate22)
             grad2.update(**orientation2)
             grad = grad1.interpolate(grad2, 0.5)
-            assert str(grad.stops[0].style) == str(Style({'stop-color': self.grey50, 'stop-opacity': 0.5}))
-            assert str(grad.stops[1].style) == str(Style({'stop-color': self.grey50, 'stop-opacity': 0.5}))
-            assert str(grad.gradientTransform) == 'translate(1.5, 1.5)'
+            comp = Style({'stop-color': self.grey50, 'stop-opacity': 0.5})
+            self.assertEqual(str(grad.stops[0].style), str(Style(comp)))
+            self.assertEqual(str(grad.stops[1].style), str(Style(comp)))
+            self.assertEqual(str(grad.gradientTransform), 'translate(1.5, 1.5)')
             for key, value in expected.items():
-                assert float(grad.get(key)) == pytest.approx(value, 1e-3) 
+                self.assertEqual(float(grad.get(key)), pytest.approx(value, 1e-3))
 
 
 class SymbolTest(ElementTestCase):

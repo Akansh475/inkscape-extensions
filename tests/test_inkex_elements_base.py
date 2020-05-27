@@ -294,5 +294,5 @@ class RelationshipTestCase(SvgTestCase):
             'base', 'metadata7',
             None, None, None, None, None,
             'A', 'B', 'C', 'D', 'E', 'F', 'G',
-            'H', 'I', 'J',
+            'H', 'I', 'J', 'K', 'L', 'M',
         ))

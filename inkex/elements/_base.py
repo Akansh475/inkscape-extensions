@@ -30,7 +30,7 @@ from collections import defaultdict
 from copy import deepcopy
 from lxml import etree
 
-from ..paths import Path, BoundingBox
+from ..paths import Path
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform
 from ..utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError

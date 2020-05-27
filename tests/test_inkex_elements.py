@@ -110,7 +110,7 @@ class LineElementTestCase(ElementTestCase):
     def test_conversion(self):
         """Lines are converted to paths"""
         pol = inkex.elements.Line(x1='2', y1='3', x2='4', y2='5')
-        self.assertEqual(str(pol.path), 'M 2 3 L 4 5')
+        self.assertEqual(str(pol.path), 'M 2 3 L 4 5 Z')
 
 class PatternTestCase(ElementTestCase):
     """Test Pattern elements"""
@@ -148,15 +148,16 @@ class GroupTest(ElementTestCase):
 
     def test_get_path(self):
         """Group path is combined children"""
+        print(str(self.svg.getElementById('A').get_path()))
         self.assertEqual(
             str(self.svg.getElementById('A').get_path()),
-            'M -108.539 517.61 L -87.6093 496.117 L -98.3066 492.768 L -69.9352 492.301 L -55.5172'
-            ' 506.163 L -66.2145 502.814 L -87.1445 524.307 M 60.0914 498.693 L 156.784 439.145 L'
-            ' 240.218 491.183 L 143.526 550.731 z M -176.909 458.816 a 64.2385 38.9175 -7.86455 1'
-            ' 0 88.3701 -19.0784 a 64.2385 38.9175 -7.86455 0 0 -88.3701 19.0784 z M -300.162'
-            ' 513.715 L -282.488 509.9 Z M -214.583 540.504 L -209.001 448.77 M -193.189 547.201 L'
-            ' -238.536 486.266 L -185.049 503.008 L -230.396 442.073 M -193.189 547.201 L -238.536'
-            ' 486.266 L -185.049 503.008 L -230.396 442.073 Z')
+            'M -108.539 517.61 L -87.6093 496.117 L -98.3066 492.768 L -69.9353 492.301 L -55.5172'
+            ' 506.163 L -66.2146 502.814 L -87.1446 524.307 M 60.0914 498.694 L 156.784 439.145 L'
+            ' 240.218 491.183 L 143.526 550.731 z M -176.909 458.816 a 64.2385 38.9175 -7.86457 1'
+            ' 0 88.3701 -19.0784 a 64.2385 38.9175 -7.86457 0 0 -88.3701 19.0784 z M -300.162'
+            ' 513.715 L -282.488 509.9 Z M -214.583 540.504 L -209.001 448.77 Z M -193.189 547.201 '
+            'L -238.536 486.266 L -185.049 503.008 L -230.396 442.073 M -193.189 547.201 L -238.536'
+            ' 486.266 L -185.049 503.008 L -230.396 442.073 Z M 15 15 L 15.5 20 Z')
 
     def test_bounding_box(self):
         """A group returns a bounding box"""

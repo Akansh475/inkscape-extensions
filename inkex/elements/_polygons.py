@@ -101,7 +101,7 @@ class Polygon(ShapeElement):
 class Line(ShapeElement):
     """A line connecting two points"""
     tag_name = 'line'
-    get_path = lambda self: 'M{0[x1]},{0[y1]} L{0[x2]},{0[y2]}'.format(self.attrib)
+    get_path = lambda self: 'M{0[x1]},{0[y1]} L{0[x2]},{0[y2]} Z'.format(self.attrib)
 
     @classmethod
     def new(cls, start, end, **attrs):

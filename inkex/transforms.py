@@ -28,7 +28,7 @@ Provide transformation parsing to extensions
 import re
 import sys
 from decimal import Decimal
-from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isnan
+from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isfinite
 
 from .tween import interpcoord
 from .utils import strargs, KeyDict, PY3
@@ -593,8 +593,8 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
     @overload
-    def __init__(self, other):
-        # type: (BoundingInterval) -> None
+    def __init__(self, other=None):
+        # type: (Optional[BoundingInterval]) -> None
         pass
 
     @overload
@@ -612,7 +612,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
         # type: (float, float) -> None
         pass
 
-    def __init__(self, x, y=None):
+    def __init__(self, x=None, y=None):
         if y is not None:
             if isinstance(x, (int, float, Decimal)) and isinstance(y, (int, float, Decimal)):
                 self.minimum = x
@@ -623,7 +623,10 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
 
         else:
             value = x
-            if isinstance(value, BoundingInterval):
+            if value is None:
+                # identity for addition, zero for intersection
+                self.minimum, self.maximum = float('+inf'), float('-inf')
+            elif isinstance(value, BoundingInterval):
                 self.minimum = value.minimum
                 self.maximum = value.maximum
             elif isinstance(value, (tuple, list)) and len(value) == 2:
@@ -636,7 +639,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
 
     def __bool__(self):
         # type: () -> bool
-        return not (isnan(self.minimum) or isnan(self.maximum))
+        return (isfinite(self.minimum) and isfinite(self.maximum))
 
     __nonzero__ = __bool__
 
@@ -646,6 +649,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
 
     def __add__(self, other):
         # type: (BoundingInterval) -> BoundingInterval
+        """Calculate the bounding interval that covers both given bounding intervals"""
         new = BoundingInterval(self)
         if other is not None:
             new += other
@@ -653,8 +657,6 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
 
     def __iadd__(self, other):
         # type: (BoundingInterval) -> BoundingInterval
-        if other is None:
-            return None
         other = BoundingInterval(other)
         self.minimum = min((self.minimum, other.minimum))
         self.maximum = max((self.maximum, other.maximum))
@@ -665,6 +667,29 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
         if other is None:
             return BoundingInterval(self)
         return self + other
+
+    def __and__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
+        """Calculate the bounding interval where both given bounding intervals overlap"""
+        new = BoundingInterval(self)
+        if other is not None:
+            new &= other
+        return new
+
+    def __iand__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
+        other = BoundingInterval(other)
+        self.minimum = max((self.minimum, other.minimum))
+        self.maximum = min((self.maximum, other.maximum))
+        if self.minimum > self.maximum:
+            self.minimum, self.maximum = float('+inf'), float('-inf')
+        return self
+
+    def __rand__(self, other):
+        # type: (BoundingInterval) -> BoundingInterval
+        if other is None:
+            return BoundingInterval(self)
+        return self & other
 
     def __mul__(self, other):
         # type: (BoundingInterval) -> BoundingInterval
@@ -728,8 +753,8 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
     center_y = property(lambda self: self.y.center)
 
     @overload
-    def __init__(self, other):
-        # type: (BoundingBox) -> None
+    def __init__(self, other=None):
+        # type: (Optional[BoundingBox]) -> None
         pass
 
     @overload
@@ -737,9 +762,12 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         # type: (BoundingIntervalArgs, BoundingIntervalArgs) -> None
         pass
 
-    def __init__(self, x, y=None):
+    def __init__(self, x=None, y=None):
         if y is None:
-            if isinstance(x, BoundingBox):
+            if x is None:
+                # identity for addition, zero for intersection
+                pass
+            elif isinstance(x, BoundingBox):
                 x, y = x.x, x.y
             else:
                 raise ValueError("Not a number for scaling: {} ({})"
@@ -759,15 +787,13 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
 
     def __add__(self, other):
         # type: (Optional[BoundingBox]) -> BoundingBox
+        """Calculate the bounding box that covers both given bounding boxes"""
         new = BoundingBox(self)
-        if other is not None:
-            new += other
+        new += BoundingBox(other)
         return new
 
     def __iadd__(self, other):
         # type: (Optional[BoundingBox]) -> BoundingBox
-        if other is None:
-            return self
         other = BoundingBox(other)
         self.x += other.x
         self.y += other.y
@@ -775,9 +801,28 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
 
     def __radd__(self, other):
         # type: (Optional[BoundingBox]) -> BoundingBox
-        if other is not None:
-            return self + other
+        return self + other
+
+    def __and__(self, other):
+        # type: (Optional[BoundingBox]) -> BoundingBox
+        """Calculate the bounding box where both given bounding boxes overlap"""
+        new = BoundingBox(self)
+        new &= BoundingBox(other)
+        return new
+
+    def __iand__(self, other):
+        # type: (Optional[BoundingBox]) -> BoundingBox
+        new = BoundingBox(self)
+        other = BoundingBox(other)
+        self.x = self.x & other.x
+        self.y = self.y & other.y
+        if not self.x or not self.y:
+            self.x, self.y = BoundingInterval(), BoundingInterval()
         return self
+
+    def __rand__(self, other):
+        # type: (Optional[BoundingBox]) -> BoundingBox
+        return self & other
 
     def __mul__(self, factor):
         # type: (float) -> BoundingBox

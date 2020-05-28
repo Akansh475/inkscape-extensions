@@ -6,6 +6,7 @@ import subprocess
 
 import pytest
 from inkex import (
+    BoundingBox,
     SvgDocumentElement,
     Circle,
     Rectangle,
@@ -103,6 +104,32 @@ class BoundingBoxTest(TestCase):
                     x, y, w, h = list(map(float, line.split(',')[1:]))
                     return (x, x + w), (y, y + h)
         return None, None, None, None
+
+    def test_bbox_empty_is_false(self):
+        self.assertFalse(bool(BoundingBox()))
+
+    def test_bbox_nonempty_is_true(self):
+        self.assertTrue(bool(BoundingBox((0, 0), (0, 0))))
+
+    def test_bbox_empty_is_identity_for_addition(self):
+        bbox = BoundingBox((0, 1), (2, 3))
+        self.assertEqual(BoundingBox() + bbox, bbox)
+
+    def test_bbox_empty_is_zero_for_intersection(self):
+        bbox = BoundingBox((0, 1), (2, 3))
+        self.assertEqual(BoundingBox() & bbox, BoundingBox())
+
+    def test_bbox_nonintersection_is_empty(self):
+        bbox1 = BoundingBox((0, 1), (2, 3))
+        bbox2 = BoundingBox((2, 3), (1, 2))
+        self.assertEqual(bbox1 & bbox2, BoundingBox())
+
+    def test_bbox_empty_equivalent_to_none(self):
+        bbox = BoundingBox((0, 1), (2, 3))
+        self.assertEqual(bbox + None, bbox + BoundingBox())
+        self.assertEqual(bbox & None, bbox & BoundingBox())
+        self.assertEqual(None + bbox, BoundingBox() + bbox)
+        self.assertEqual(None & bbox, BoundingBox() & bbox)
 
     def test_circle_without_attributes(self):
         circle = Circle()

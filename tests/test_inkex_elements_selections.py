@@ -56,6 +56,7 @@ class ElementListTestCase(SvgTestCase):
         self.svg.selection.set(*[self.svg.getElementById(eid) for eid in a_to_g])
         self.assertEqual(tuple(self.svg.selection.ids), tuple(a_to_g))
         self.assertRaises(ValueError, self.svg.selection.add, None)
+        self.assertRaises(ValueError, self.svg.selection.__setitem__, 'A', self.svg.getElementById('B'))
 
     def test_set_xpath(self):
         """Set a new selection from xpath"""

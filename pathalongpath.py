@@ -122,7 +122,7 @@ class PathAlongPath(pathmodifier.PathModifier):
 
         self.expand_clones(skeletons, True, False)
         self.objects_to_paths(skeletons)
-        return pattern, skeletons
+        return pattern, skeletons.id_dict()
 
     def lengthtotime(self, l):
         """

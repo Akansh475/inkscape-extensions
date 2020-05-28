@@ -117,28 +117,22 @@ class PathScatter(pathmodifier.Diffeo):
                                      help="The selected UI-tab when OK was pressed")
 
     def prepareSelectionList(self):
-
-        id_list = self.svg.selection.paint_order().ids()
-
         # first selected->pattern, all but first selected-> skeletons
-        # id = self.options.ids[-1]
-        sid = id_list[-1]
-        self.patternNode = self.svg.selected[sid]
+        pattern_node = self.svg.selected.pop()
 
         self.gNode = Group()
-        self.patternNode.getparent().append(self.gNode)
+        pattern_node.getparent().append(self.gNode)
 
         if self.options.copymode == "copy":
-            self.patternNode = self.patternNode.duplicate()
+            self.patternNode = pattern_node.duplicate()
+        elif self.options.copymode == "clone":
+            # TODO: allow 4th option: duplicate the first copy and clone the next ones.
+            self.patternNode = self.gNode.add(Use())
+            self.patternNode.href = pattern_node
+        else:
+            self.patternNode = pattern_node
 
-        # TODO: allow 4th option: duplicate the first copy and clone the next ones.
-        if self.options.copymode == "clone":
-            self.patternNode = Use()
-            self.patternNode.set('xlink:href', "#" + sid)
-            self.gNode.append(self.patternNode)
-
-        self.skeletons = dict(self.svg.selected)
-        del self.skeletons[sid]
+        self.skeletons = self.svg.selected
         self.expand_clones(self.skeletons, True, False)
         self.objects_to_paths(self.skeletons, False)
 

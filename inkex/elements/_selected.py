@@ -48,6 +48,26 @@ class ElementList(OrderedDict):
     def __contains__(self, key):
         return super().__contains__(self._to_key(key))
 
+    def __setitem__(self, orig_key, elem):
+        from ._base import BaseElement
+        if orig_key != elem and orig_key != elem.get('id'):
+            raise ValueError(f"Refusing to set bad key in ElementList {orig_key}")
+        if isinstance(elem, str):
+            key = elem
+            elem = self.svg.getElementById(elem)
+            if elem is None:
+                return
+        if isinstance(elem, BaseElement):
+            # Selection is a list of elements to select
+            key = elem.xml_path
+            element_id = elem.get('id')
+            if element_id is not None:
+                self.ids[element_id] = key
+            super().__setitem__(key, elem)
+        else:
+            kind = type(elem).__name__
+            raise ValueError(f"Unknown element type: {kind}")
+
     def _to_key(self, key, default=None):
         """Takes a key (id, element, etc) and returns an xml_path key"""
         from ._base import BaseElement
@@ -95,28 +115,12 @@ class ElementList(OrderedDict):
 
     def add(self, *ids):
         """Like set() but does not clear first"""
-        from ._base import BaseElement
-
         # Allow selecting of xpath elements directly
         if len(ids) == 1 and isinstance(ids[0], str) and ids[0].startswith('//'):
             ids = self.svg.xpath(ids[0])
 
         for elem in ids:
-            if isinstance(elem, str):
-                key = elem
-                elem = self.svg.getElementById(elem)
-                if elem is None:
-                    continue
-            if isinstance(elem, BaseElement):
-                # Selection is a list of elements to select
-                key = elem.xml_path
-                element_id = elem.get('id')
-                if element_id is not None:
-                    self.ids[element_id] = key
-                self[key] = elem
-            else:
-                kind = type(elem).__name__
-                raise ValueError(f"Unknown element type: {kind}")
+            self[elem] = elem # This doesn't matter
 
     def paint_order(self):
         """Get the selected elements, but ordered by their apperence in the document"""
@@ -129,6 +133,10 @@ class ElementList(OrderedDict):
         new_list = ElementList(self.svg)
         new_list.set(*[elem for elem in self if not types or isinstance(elem, types)])
         return new_list
+
+    def id_dict(self):
+        """For compatability, return regular dictionary of id -> element pairs"""
+        return dict([(eid, self[xid]) for eid, xid in self.ids.items()])
 
     def bounding_box(self):
         """

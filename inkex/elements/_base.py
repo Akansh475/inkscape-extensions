@@ -424,6 +424,18 @@ class ShapeElement(BaseElement):
     def path(self, path):
         self.set_path(path)
 
+    @property
+    def clip(self):
+        """Gets the clip path element (if any)"""
+        ref = self.get('clip-path')
+        if not ref:
+            return None
+        return self.root.getElementById(ref)
+
+    @clip.setter
+    def clip(self, elem):
+        self.set('clip-path', 'url(#' + elem.get_id() + ')')
+
     def get_path(self):
         """Generate a path for this object which can inform the bounding box"""
         raise NotImplementedError("Path should be provided by svg elem {}.".format(self.typename))
@@ -470,7 +482,16 @@ class ShapeElement(BaseElement):
 
     def bounding_box(self, transform=None):
         # type: (Optional[Transform]) -> Optional[BoundingBox]
-        """BoundingBox calculation based on the ShapeElement rendered to a path."""
+        """BoundingBox of the shape (adjusted for its clip path if applicable)"""
+        shape_box = self.shape_box(transform)
+        clip = self.clip
+        if clip is None or shape_box is None:
+            return shape_box
+        return shape_box & clip.bounding_box(Transform(transform) * self.transform)
+
+    def shape_box(self, transform=None):
+        # type: (Optional[Transform]) -> Optional[BoundingBox]
+        """BoundingBox of the unclipped shape"""
         path = self.path.to_absolute()
         if transform is True:
             path = path.transform(self.composed_transform())

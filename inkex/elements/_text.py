@@ -26,7 +26,7 @@ size or actual location can be generated yet.
 """
 
 from ..paths import Path
-from ..transforms import BoundingBox
+from ..transforms import Transform, BoundingBox
 from ..units import convert_unit
 
 from ._base import BaseElement, ShapeElement
@@ -95,16 +95,16 @@ class TextElement(ShapeElement):
         nodes = [self] + list(self.tspans())
         return sep.join([elem.text for elem in nodes if elem.text is not None])
 
-    def bounding_box(self, transform=None):
+    def shape_box(self, transform=None):
         """
         Returns a horrible bounding box that just contains the coord points
         of the text without width or height (which is impossible to calculate)
         """
-        transform = self.transform * transform
-        x, y = transform.apply_to_point((self.x, self.y))
+        effective_transform = Transform(transform) * self.transform
+        x, y = effective_transform.apply_to_point((self.x, self.y))
         bbox = BoundingBox(x, y)
         for tspan in self.tspans():
-            bbox += tspan.bounding_box(transform)
+            bbox += tspan.bounding_box(effective_transform)
         return bbox
 
 class TextPath(ShapeElement):
@@ -128,13 +128,13 @@ class Tspan(ShapeElement):
     def get_path(self):
         return Path()
 
-    def bounding_box(self, transform=None):
+    def shape_box(self, transform=None):
         """
         Returns a horrible bounding box that just contains the coord points
         of the text without width or height (which is impossible to calculate)
         """
-        transform = self.transform * transform
-        x1, y1 = transform.apply_to_point((self.x, self.y))
+        effective_transform = Transform(transform) * self.transform
+        x1, y1 = effective_transform.apply_to_point((self.x, self.y))
         fontsize = convert_unit(self.style.get('font-size', '1em'), 'px')
         y2 = y1 + float(fontsize)
         x2 = x1 + 0 # XXX This is impossible to calculate!

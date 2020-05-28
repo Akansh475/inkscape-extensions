@@ -21,6 +21,8 @@
 Interface for the Use and Symbol elements
 """
 
+from ..transforms import Transform, BoundingBox
+
 from ._groups import Group
 from ._base import BaseElement, ShapeElement
 
@@ -56,3 +58,7 @@ class Use(ShapeElement):
         self.replace_with(copy)
         copy.set_random_ids()
         return copy
+
+    def shape_box(self, transform=None):
+        effective_transform = Transform(transform) * self.transform
+        return self.href.bounding_box(effective_transform)

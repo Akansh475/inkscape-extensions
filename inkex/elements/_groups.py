@@ -44,17 +44,12 @@ class GroupBase(ShapeElement):
             ret += child.path.transform(child.transform)
         return ret
 
-    def bounding_box(self, transform=None):
-        # type: (Transform) -> Optional[BoundingBox]
+    def shape_box(self, transform=None):
         bbox = None
-
-        transform = Transform(transform) * self.transform
-        if not transform:
-            transform = None
-
+        effective_transform = Transform(transform) * self.transform
         for child in self:
             if isinstance(child, ShapeElement):
-                child_bbox = child.bounding_box(transform=transform)
+                child_bbox = child.bounding_box(transform=effective_transform)
                 if child_bbox is not None:
                     bbox += child_bbox
         return bbox

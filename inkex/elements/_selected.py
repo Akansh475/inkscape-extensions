@@ -23,7 +23,15 @@ When elements are selected, these structures provide an advanced API.
 from collections import OrderedDict
 
 class ElementList(OrderedDict):
-    """A list of elements, selected by id, or iterator."""
+    """
+    A list of elements, selected by id, iterator or xpath
+
+    This may look like a dictionary, but it's really not. It's a list of elements
+    the default iterator is the element objects themselves (not keys) and it's
+    possible to key elements by their numerical index.
+
+    It is also possible to lookup items by their id and the element object itself.
+    """
     def __init__(self, svg, _iter=None):
         self.svg = svg
         self.ids = OrderedDict()
@@ -32,16 +40,26 @@ class ElementList(OrderedDict):
             self.set(*list(_iter))
 
     def __iter__(self):
-        # Element list default iterator is the element itself
         return self.values().__iter__()
 
     def __getitem__(self, key):
-        try:
-            return super().__getitem__(key)
-        except KeyError:
-            if key in self.ids:
-                return self[self.ids[key]]
-            raise
+        return super().__getitem__(self._to_key(key))
+
+    def __contains__(self, key):
+        return super().__contains__(self._to_key(key))
+
+    def _to_key(self, key, default=None):
+        """Takes a key (id, element, etc) and returns an xml_path key"""
+        from ._base import BaseElement
+        if self and key is None:
+            key = default
+        if isinstance(key, int):
+            return list(self.keys())[key]
+        elif isinstance(key, BaseElement):
+            return key.xml_path
+        elif isinstance(key, str) and key[0] != '/':
+            return self.ids.get(key, key)
+        return key
 
     def clear(self):
         """Also clear ids"""
@@ -71,16 +89,7 @@ class ElementList(OrderedDict):
 
     def pop(self, key=None):
         """Remove the key item or remove the last item selected"""
-        from ._base import BaseElement
-        if self and key is None:
-            key = -1
-        if isinstance(key, int):
-            key = list(self.keys())[key]
-        if isinstance(key, BaseElement):
-            key = key.xml_path
-        if isinstance(key, str) and key[0] != '/':
-            key = self.ids.get(key, key)
-        item = super().pop(key)
+        item = super().pop(self._to_key(key, default=-1))
         self.ids.pop(item.get('id'))
 
     def add(self, *ids):

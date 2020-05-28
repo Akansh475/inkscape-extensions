@@ -3573,7 +3573,7 @@ class Gcodetools(inkex.EffectExtension):
             for i in items:
                 if selected:
                     self.svg.selected[i.get("id")] = i
-                if i.tag == inkex.addNS("g", 'svg') and i.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
+                if isinstance(i, Layer):
                     if i.get(inkex.addNS('label', 'inkscape')) == '3D':
                         self.my3Dlayer = i
                     else:
@@ -3604,7 +3604,7 @@ class Gcodetools(inkex.EffectExtension):
                 elif i.tag == inkex.addNS('path', 'svg'):
                     if "gcodetools" not in i.keys():
                         self.paths[layer] = self.paths[layer] + [i] if layer in self.paths else [i]
-                        if i.get("id") in self.svg.selected:
+                        if i.get("id") in self.svg.selected.ids:
                             self.selected_paths[layer] = self.selected_paths[layer] + [i] if layer in self.selected_paths else [i]
 
                 elif i.get("gcodetools") == "In-out reference point group":

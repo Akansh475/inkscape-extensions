@@ -354,8 +354,8 @@ def zSort(inNode, idList):
         sortedList += zSort(child, idList)
     return sortedList
 
-class DepricatedSvgMixin(object):
-    """Mixin which adds depricated API elements to the SvgDocumentElement"""
+class DeprecatedSvgMixin(object):
+    """Mixin which adds deprecated API elements to the SvgDocumentElement"""
     @property
     def selected(self):
         """svg.selection"""

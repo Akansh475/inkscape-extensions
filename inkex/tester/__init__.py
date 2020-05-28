@@ -231,7 +231,7 @@ class TestCase(MockCommandMixin, BaseCase):
                     self.assertEqual('', stderr.getvalue(), "Extra error or warnings detected")
             effect.test_output = output
 
-        if os.environ.get('FAIL_ON_DEPRICATION', False):
+        if os.environ.get('FAIL_ON_DEPRECATION', False):
             warnings = getattr(effect, 'warned_about', set())
             effect.warned_about = set()  # reset for next test
             self.assertFalse(warnings, "Deprecated API is still being used!")

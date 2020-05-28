@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #
 """
-Depricated module for running SVG-generating commands in Inkscape extensions
+Deprecated module for running SVG-generating commands in Inkscape extensions
 """
 import os
 import sys

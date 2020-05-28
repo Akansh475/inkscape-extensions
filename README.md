@@ -28,7 +28,7 @@ https://inkscape.gitlab.io/extensions/coverage/.
 
 Tests can be run with these options that are provided as environment variables:
 
-    FAIL_ON_DEPRICATION=1 - Will instantly fail any use of depricated APIs
+    FAIL_ON_DEPRECATION=1 - Will instantly fail any use of deprecated APIs
     EXPORT_COMPARE=1 - Generate output files from comparisions. This is useful for manually checking the output as well as updating the comparison data.
     NO_MOCK_COMMANDS=1 - Instead of using the mock data, actually call commands. This will also generate the msg files similar to export compare.
     INKSCAPE_COMMAND=/other/inkscape - Use a different Inkscape (for example development version) while running commands. Works outside of tests too.

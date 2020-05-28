@@ -7,11 +7,11 @@ import warnings
 from inkex.deprecated import _deprecated
 from inkex.tester import TestCase
 
-class DepricatedTests(TestCase):
+class DeprecatedTests(TestCase):
     """Test ways in which we deprecate code"""
     maxDiff = 10000
 
-    def assertDepricated(self, call, msg, *args, **kwargs): # pylint: disable=invalid-name
+    def assertDeprecated(self, call, msg, *args, **kwargs): # pylint: disable=invalid-name
         """Catch deprecation warnings and test their output"""
         with warnings.catch_warnings(record=True) as warns:
             warnings.simplefilter("always")
@@ -26,11 +26,11 @@ class DepricatedTests(TestCase):
 
     def test_warning(self):
         """What happens when we deprecate things"""
-        self.assertDepricated(_deprecated, None, "", stack=0, level=0)
-        self.assertDepricated(_deprecated, "FOO", "FOO", stack=0, level=1)
+        self.assertDeprecated(_deprecated, None, "", stack=0, level=0)
+        self.assertDeprecated(_deprecated, "FOO", "FOO", stack=0, level=1)
 
     def test_traceback(self):
         """Traceback is possible for deprecation warnings"""
-        warn = self.assertDepricated(_deprecated, False, "BAR", stack=0, level=2)
+        warn = self.assertDeprecated(_deprecated, False, "BAR", stack=0, level=2)
         self.assertIn("inkex/deprecated.py", str(warn.message))
         self.assertIn("test_inkex_deprecated.py", str(warn.message))

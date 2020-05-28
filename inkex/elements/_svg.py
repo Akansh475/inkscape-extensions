@@ -28,7 +28,7 @@ Provide a way to load lxml attributes with an svg API on top.
 import random
 from lxml import etree
 
-from ..deprecated import DepricatedSvgMixin
+from ..deprecated import DeprecatedSvgMixin
 from ..units import discover_unit, convert_unit, render_unit
 from ._selected import ElementList
 from ..transforms import BoundingBox
@@ -41,7 +41,7 @@ if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import
 
 
-class SvgDocumentElement(DepricatedSvgMixin, BaseElement):
+class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
     """Provide access to the document level svg functionality"""
     tag_name = 'svg'
 

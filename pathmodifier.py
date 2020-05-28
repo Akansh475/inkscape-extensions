@@ -30,7 +30,7 @@ to implement deformations of the form X=f(x,y), Y=g(x,y)...
 import inkex
 from inkex import PathElement, Group, Use
 
-# This depricated API is used by some external extensions.
+# This deprecated API is used by some external extensions.
 from inkex.deprecated import zSort # pylint: disable=unused-import
 
 class PathModifier(inkex.EffectExtension):

@@ -269,7 +269,7 @@ class BaseElement(etree.ElementBase):
         self.set('id', new_id)
         if backlinks and old_id:
             for elem in self.root.getElementsByHref(old_id):
-                elem.set('xlink:href', '#' + new_id)
+                elem.href = self
             for elem in self.root.getElementsByStyleUrl(old_id):
                 elem.style.update_urls(old_id, new_id)
 
@@ -384,6 +384,11 @@ class BaseElement(etree.ElementBase):
         if not ref:
             return None
         return self.root.getElementById(ref.strip('#'))
+
+    @href.setter
+    def href(self, elem):
+        """Set the href object"""
+        self.set('xlink:href', '#' + elem.get_id())
 
     def fallback_style(self, move=False):
         """Get styles falling back to element attributes"""

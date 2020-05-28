@@ -73,14 +73,6 @@ class ElementListTestCase(SvgTestCase):
         self.svg.selection.set('X', 'Y', 'Z', 'A')
         self.assertEqual(tuple(self.svg.selection.ids), ('A',))
 
-    def test_set_all(self):
-        """set all objects in the svg"""
-        self.svg.selection.set_all()
-        self.assertEqual(tuple(self.svg.selection.ids), (
-            'path1', 'base', 'metadata7',
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        ))
-
     def test_pop_items(self):
         """Can remove items from the ElementList"""
         selection = self.svg.selection
@@ -100,8 +92,7 @@ class ElementListTestCase(SvgTestCase):
 
     def test_get_constrain(self):
         """Create a sub-list of selected items"""
-        selection = self.svg.selection
-        selection.set_all()
+        selection = self.svg.descendants()
         new_list = selection.get(PathElement)
         self.assertEqual(tuple(new_list.ids), ('path1', 'D'))
 

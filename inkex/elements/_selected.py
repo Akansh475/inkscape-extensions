@@ -103,10 +103,6 @@ class ElementList(OrderedDict):
         self.clear()
         self.add(*ids)
 
-    def set_all(self, *types):
-        """Select all elements in the svg document"""
-        self.set(*list(self.svg.descendants(*types)))
-
     def pop(self, key=None):
         """Remove the key item or remove the last item selected"""
         item = super().pop(self._to_key(key, default=-1))
@@ -130,9 +126,7 @@ class ElementList(OrderedDict):
 
     def get(self, *types):
         """Gets selected elements of the given type, returns a new SelectedElements object"""
-        new_list = ElementList(self.svg)
-        new_list.set(*[elem for elem in self if not types or isinstance(elem, types)])
-        return new_list
+        return ElementList(self.svg, [e for e in self if not types or isinstance(e, types)])
 
     def id_dict(self):
         """For compatability, return regular dictionary of id -> element pairs"""

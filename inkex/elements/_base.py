@@ -35,7 +35,6 @@ from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform, BoundingBox
 from ..utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 
-
 try:
     from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
 except ImportError:
@@ -293,22 +292,35 @@ class BaseElement(etree.ElementBase):
                 self.append(node)
         return node
 
-    def descendants(self, *types):
+    def descendants(self):
         """Walks the element tree and yields all elements, parent first"""
-        if not types or isinstance(self, types):
-            yield self
-        for child in self:
-            if hasattr(child, 'descendants'):
-                for descendant in child.descendants(*types):
-                    yield descendant
+        from ._selected import ElementList
+        return ElementList(self.root, self._descendants())
 
-    def ancestors(self):
-        """Walk the parents and yield all the ancestor elements, parent first"""
+    def _descendants(self):
+        yield self
+        for child in self:
+            if hasattr(child, '_descendants'):
+                yield from child._descendants() # pylint: disable=protected-access
+
+    def ancestors(self, elem=None, stop_at=()):
+        """
+        Walk the parents and yield all the ancestor elements, parent first
+
+        If elem is provided, it will stop at the last common ancestor.
+        If stop_at is provided, it will stop at the first parent that is in this list.
+        """
+        from ._selected import ElementList
+        return ElementList(self.root, self._ancestors(elem=elem, stop_at=stop_at))
+
+    def _ancestors(self, elem, stop_at):
+        if isinstance(elem, BaseElement):
+            stop_at = list(elem.ancestors())
         parent = self.getparent()
         if parent is not None:
             yield parent
-            for child in parent.ancestors():
-                yield child
+            if parent not in stop_at:
+                yield from parent._ancestors(elem=elem, stop_at=stop_at) # pylint: disable=protected-access
 
     def backlinks(self, *types):
         """Get elements which link back to this element, like ancestors but via xlinks"""
@@ -430,8 +442,9 @@ class ShapeElement(BaseElement):
         elem.transform = self.transform
         return elem
 
-    def composed_transform(self):
-        """Calculate every transform down to the root document node"""
+    def composed_transform(self, other=None):
+        """Calculate every transform down to the other element
+          if none specified the transform is to the root document element"""
         parent = self.getparent()
         if parent is not None and isinstance(parent, ShapeElement):
             return self.transform * parent.composed_transform()

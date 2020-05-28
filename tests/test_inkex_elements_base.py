@@ -6,7 +6,7 @@ Test the element API base classes and basic functionality
 from lxml import etree
 
 from inkex.elements import (
-    load_svg, ShapeElement, Group, Rectangle, Tspan, TextElement
+    load_svg, ShapeElement, Group, Rectangle, Tspan, TextElement, Line,
 )
 from inkex.transforms import Transform
 from inkex.styles import Style
@@ -288,11 +288,26 @@ class RelationshipTestCase(SvgTestCase):
 
     def test_descendants(self):
         """Elements can walk their descendants"""
-        ids = tuple(elem.get('id') for elem in self.svg.descendants())
-        self.assertEqual(ids, (
-            None, None, 'path1', None,
-            'base', 'metadata7',
-            None, None, None, None, None,
+        self.assertEqual(tuple(self.svg.descendants().ids), (
+            'mydoc', 'path1', 'base', 'metadata7',
             'A', 'B', 'C', 'D', 'E', 'F', 'G',
             'H', 'I', 'J', 'K', 'L', 'M',
         ))
+        get = self.svg.getElementById
+        self.assertEqual(tuple(get('L').descendants().ids), ('L', 'M'))
+        self.assertEqual(tuple(get('M').descendants().ids), ('M',))
+
+    def test_ancestors(self):
+        """Element descendants of elements"""
+        get = self.svg.getElementById
+        self.assertEqual(tuple(get('M').ancestors().ids), ('L', 'K', 'A', 'mydoc'))
+        self.assertEqual(tuple(get('M').ancestors(stop_at=[None]).ids), ('L', 'K', 'A', 'mydoc'))
+        self.assertEqual(tuple(get('M').ancestors(stop_at=[get('K')]).ids), ('L', 'K'))
+        self.assertEqual(tuple(get('M').ancestors(stop_at=[get('L')]).ids), ('L',))
+
+    def test_luca(self):
+        """Test last common ancestor"""
+        get = self.svg.getElementById
+        self.assertEqual(tuple(get('M').ancestors(get('M')).ids), ('L',))
+        self.assertEqual(tuple(get('G').ancestors(get('H')).ids), ('C',))
+        self.assertEqual(tuple(get('M').ancestors(get('H')).ids), ('L', 'K', 'A'))

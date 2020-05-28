@@ -181,7 +181,7 @@ class hpglEncoder(object):
                     self.process_path(child, transform)
                 else:
                     # This only works for shape elements (not text yet!)
-                    new_elem = child.to_path_element()
+                    new_elem = child.replace_with(child.to_path_element())
                     # Element is given composed transform b/c it's not added back to doc
                     new_elem.transform = child.composed_transform()
                     self.process_path(new_elem, transform)

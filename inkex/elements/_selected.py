@@ -91,6 +91,7 @@ class ElementList(OrderedDict):
         """Remove the key item or remove the last item selected"""
         item = super().pop(self._to_key(key, default=-1))
         self.ids.pop(item.get('id'))
+        return item
 
     def add(self, *ids):
         """Like set() but does not clear first"""

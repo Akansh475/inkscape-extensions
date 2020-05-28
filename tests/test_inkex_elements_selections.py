@@ -79,7 +79,8 @@ class ElementListTestCase(SvgTestCase):
         """Can remove items from the ElementList"""
         selection = self.svg.selection
         self.assertEqual(tuple(selection.ids), ('G', 'B', 'D', 'F'))
-        selection.pop()
+        ret = selection.pop()
+        self.assertEqual(ret.get('id'), 'F')
         self.assertEqual(tuple(selection.ids), ('G', 'B', 'D'))
         selection.pop(0)
         self.assertEqual(tuple(selection.ids), ('B', 'D'))

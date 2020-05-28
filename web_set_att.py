@@ -49,7 +49,7 @@ class SetAttribute(inkwebeffect.InkWebEffect):
         # All set the last else The first set all
         split = -1 if self.options.from_and_to == "g-to-one" else 1
         el_from = list(self.svg.selected.values())[:split]
-        id_to = list(self.svg.selected.keys())[split:]
+        id_to = list(self.svg.selected.ids)[split:]
 
         ev_code = "InkWeb.setAtt({{el:['{}'], att:'{}', val:'{}'}})".format(
             "','".join(id_to), self.options.att, self.options.val)

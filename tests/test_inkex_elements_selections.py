@@ -24,6 +24,10 @@ class ElementListTestCase(SvgTestCase):
         lst = ElementList(self.svg, 'ABC')
         self.assertEqual(tuple(lst.ids), ('A', 'B', 'C'))
 
+    def test_to_dict(self):
+        """test dictionary compact"""
+        self.assertEqual(tuple(self.svg.selection.id_dict()), ('G', 'B', 'D', 'F'))
+
     def test_getitem(self):
         """Can get an item"""
         self.assertEqual(self.svg.selection['B'].xml_path, '/*/*[4]/*[1]')
@@ -56,7 +60,8 @@ class ElementListTestCase(SvgTestCase):
         self.svg.selection.set(*[self.svg.getElementById(eid) for eid in a_to_g])
         self.assertEqual(tuple(self.svg.selection.ids), tuple(a_to_g))
         self.assertRaises(ValueError, self.svg.selection.add, None)
-        self.assertRaises(ValueError, self.svg.selection.__setitem__, 'A', self.svg.getElementById('B'))
+        self.assertRaises(ValueError, self.svg.selection.__setitem__, 'A',
+                          self.svg.getElementById('B'))
 
     def test_set_xpath(self):
         """Set a new selection from xpath"""
@@ -104,4 +109,3 @@ class ElementListTestCase(SvgTestCase):
         """Selection can get a bounding box"""
         self.assertEqual(int(self.svg.selection.bounding_box().width), 540)
         self.assertEqual(int(self.svg.selection.bounding_box().height), 550)
-

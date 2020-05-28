@@ -30,7 +30,7 @@ from lxml import etree
 
 from ..deprecated import DepricatedSvgMixin
 from ..units import discover_unit, convert_unit, render_unit
-from ._selected import SelectedElements
+from ._selected import ElementList
 from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
@@ -48,7 +48,7 @@ class SvgDocumentElement(DepricatedSvgMixin, BaseElement):
     def _init(self):
         self.current_layer = None
         self.view_center = (0.0, 0.0)
-        self.selection = SelectedElements(self)
+        self.selection = ElementList(self)
         self.ids = {}
 
     def tostring(self):

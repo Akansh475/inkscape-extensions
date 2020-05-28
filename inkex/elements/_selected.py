@@ -17,29 +17,36 @@
 # Foundation, Inc.,Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-When items or nodes are selected, these structures provide functionality.
+When elements are selected, these structures provide an advanced API.
 """
 
 from collections import OrderedDict
 
-from ._base import BaseElement
-
-class SelectedElements(OrderedDict):
-    """
-    A set of selected elements in an svg document.
-
-    Default iterator is always elements (values) not ids
-    """
-    def __init__(self, svg):
+class ElementList(OrderedDict):
+    """A list of elements, selected by id, or iterator."""
+    def __init__(self, svg, _iter=None):
         self.svg = svg
+        self.ids = OrderedDict()
         super().__init__()
+        if _iter:
+            self.set(*list(_iter))
 
     def __iter__(self):
+        # Element list default iterator is the element itself
         return self.values().__iter__()
 
-    def ids(self):
-        """Return a list of ids in this selection"""
-        return list(super().__iter__())
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except KeyError:
+            if key in self.ids:
+                return self[self.ids[key]]
+            raise
+
+    def clear(self):
+        """Also clear ids"""
+        self.ids.clear()
+        super().clear()
 
     def set(self, *ids):
         """
@@ -64,41 +71,54 @@ class SelectedElements(OrderedDict):
 
     def pop(self, key=None):
         """Remove the key item or remove the last item selected"""
+        from ._base import BaseElement
         if self and key is None:
-            key = self.ids()[-1]
-        return super().pop(key)
+            key = -1
+        if isinstance(key, int):
+            key = list(self.keys())[key]
+        if isinstance(key, BaseElement):
+            key = key.xml_path
+        if isinstance(key, str) and key[0] != '/':
+            key = self.ids.get(key, key)
+        item = super().pop(key)
+        self.ids.pop(item.get('id'))
 
     def add(self, *ids):
         """Like set() but does not clear first"""
+        from ._base import BaseElement
 
         # Allow selecting of xpath elements directly
         if len(ids) == 1 and isinstance(ids[0], str) and ids[0].startswith('//'):
             ids = self.svg.xpath(ids[0])
 
-        for elem_id in ids:
-            if isinstance(elem_id, BaseElement):
-                # Selection is a list of nodes to select
-                self[elem_id.get('id')] = elem_id
-                continue
-            # Selection is a text element id, find it (or them).
-            self[elem_id] = self.svg.getElementById(elem_id)
+        for elem in ids:
+            if isinstance(elem, str):
+                key = elem
+                elem = self.svg.getElementById(elem)
+                if elem is None:
+                    continue
+            if isinstance(elem, BaseElement):
+                # Selection is a list of elements to select
+                key = elem.xml_path
+                element_id = elem.get('id')
+                if element_id is not None:
+                    self.ids[element_id] = key
+                self[key] = elem
+            else:
+                kind = type(elem).__name__
+                raise ValueError(f"Unknown element type: {kind}")
 
     def paint_order(self):
         """Get the selected elements, but ordered by their apperence in the document"""
-        output = SelectedElements(self.svg)
-        ids = self.ids()
-        for _id in self.svg.xpath('//@id'):
-            if _id in ids:
-                output[_id] = self[_id]
-        return output
+        new_list = ElementList(self.svg)
+        new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: x[0])])
+        return new_list
 
     def get(self, *types):
-        """Gets selected nodes of the given type, returns a new SelectedElements object"""
-        output = SelectedElements(self.svg)
-        for elem_id, node in self.items():
-            if not types or isinstance(node, types):
-                output[elem_id] = node
-        return output
+        """Gets selected elements of the given type, returns a new SelectedElements object"""
+        new_list = ElementList(self.svg)
+        new_list.set(*[elem for elem in self if not types or isinstance(elem, types)])
+        return new_list
 
     def bounding_box(self):
         """
@@ -111,10 +131,10 @@ class SelectedElements(OrderedDict):
         When no object is selected or when the object's location cannot be
         determined (e.g. empty group or layer), all coordinates will be None.
         """
-        return sum([node.bounding_box() for node in self], None)
+        return sum([elem.bounding_box() for elem in self], None)
 
     def first(self):
         """Returns the first item in the selected list"""
-        for node in self:
-            return node
+        for elem in self:
+            return elem
         return None

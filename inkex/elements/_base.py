@@ -35,6 +35,8 @@ from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform
 from ..utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
 
+from ._selected import ElementList
+
 try:
     from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
 except ImportError:
@@ -133,6 +135,7 @@ class BaseElement(etree.ElementBase):
         return dict([(row[0], (row[-2], row[-1])) for row in self.WRAPPED_ATTRS])
 
     typename = property(lambda self: type(self).__name__)
+    xml_path = property(lambda self: self.getroottree().getpath(self))
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""

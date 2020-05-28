@@ -4,21 +4,102 @@
 Test all selection code.
 """
 
+from inkex.elements import PathElement
+from inkex.elements._selected import ElementList
+
 from .test_inkex_elements_base import SvgTestCase
 
-class ElementSelectionsTestCase(SvgTestCase):
+
+class ElementListTestCase(SvgTestCase):
     """Test Element Selections"""
-    def test_sort_selected(self):
-        """Are the selected items sorted"""
+    def setUp(self):
+        super().setUp()
         self.svg.selection.set('G', 'B', 'D', 'F')
-        self.assertEqual(tuple(self.svg.selection.ids()), ('G', 'B', 'D', 'F'))
+
+    def test_creation(self):
+        """Creating an elementList"""
+        empty = ElementList(self.svg)
+        self.assertEqual(tuple(empty.ids), ())
+        self.assertEqual(empty.first(), None)
+        lst = ElementList(self.svg, 'ABC')
+        self.assertEqual(tuple(lst.ids), ('A', 'B', 'C'))
+
+    def test_getitem(self):
+        """Can get an item"""
+        self.assertEqual(self.svg.selection['B'].xml_path, '/*/*[4]/*[1]')
+        self.assertRaises(KeyError, self.svg.selection.__getitem__, 'A')
+
+    def test_svg_selection(self):
+        """Setting an svg selection"""
+        self.assertEqual(tuple(self.svg.selection.ids), ('G', 'B', 'D', 'F'))
+
+    def test_paint_order(self):
+        """Test paint order"""
         items = self.svg.selection.paint_order()
-        self.assertTrue(isinstance(items, dict))
-        self.assertEqual(tuple(items.ids()), ('B', 'D', 'F', 'G'))
-        self.svg.selected.set()
+        self.assertTrue(isinstance(items, ElementList))
+        self.assertEqual(tuple(items.ids), ('B', 'D', 'F', 'G'))
+
+    def test_set_nothing(self):
+        """Clear existing selection"""
+        self.svg.selection.set()
         self.assertEqual(tuple(self.svg.selection), ())
-        a_to_g = ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+
+    def test_set_ids(self):
+        """Set a new selection element ids"""
+        a_to_g = 'ABCDEFG'
         self.svg.selection.set(*a_to_g)
-        self.assertEqual(tuple(self.svg.selection.paint_order().ids()), a_to_g)
-        self.svg.selected.set('X', 'Y', 'Z', 'A')
-        self.assertEqual(tuple(self.svg.selection.paint_order().ids()), ('A',))
+        self.assertEqual(tuple(self.svg.selection.ids), tuple(a_to_g))
+
+    def test_set_elements(self):
+        """Set a new selection from element objects"""
+        a_to_g = 'ABCDEFG'
+        self.svg.selection.set(*[self.svg.getElementById(eid) for eid in a_to_g])
+        self.assertEqual(tuple(self.svg.selection.ids), tuple(a_to_g))
+        self.assertRaises(ValueError, self.svg.selection.add, None)
+
+    def test_set_xpath(self):
+        """Set a new selection from xpath"""
+        self.svg.selection.set('//svg:g')
+        self.assertEqual(tuple(self.svg.selection.ids), tuple('ABCKL'))
+
+    def test_set_invalid_ids(self):
+        """Set invalid ids"""
+        self.svg.selection.set('X', 'Y', 'Z', 'A')
+        self.assertEqual(tuple(self.svg.selection.ids), ('A',))
+
+    def test_set_all(self):
+        """set all objects in the svg"""
+        self.svg.selection.set_all()
+        self.assertEqual(tuple(self.svg.selection.ids), (
+            'path1', 'base', 'metadata7',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        ))
+
+    def test_pop_items(self):
+        """Can remove items from the ElementList"""
+        selection = self.svg.selection
+        self.assertEqual(tuple(selection.ids), ('G', 'B', 'D', 'F'))
+        selection.pop()
+        self.assertEqual(tuple(selection.ids), ('G', 'B', 'D'))
+        selection.pop(0)
+        self.assertEqual(tuple(selection.ids), ('B', 'D'))
+        selection.pop('B')
+        self.assertEqual(tuple(selection.ids), ('D',))
+        self.assertRaises(KeyError, selection.pop, 'B')
+        selection.set(*'ABDFH')
+        self.assertEqual(tuple(selection.ids), ('A', 'B', 'D', 'F', 'H'))
+        selection.pop(selection.first())
+        self.assertEqual(tuple(selection.ids), ('B', 'D', 'F', 'H'))
+
+    def test_get_constrain(self):
+        """Create a sub-list of selected items"""
+        selection = self.svg.selection
+        selection.set_all()
+        new_list = selection.get(PathElement)
+        self.assertEqual(tuple(new_list.ids), ('path1', 'D'))
+
+    def test_get_bounding_box(self):
+        """Selection can get a bounding box"""
+        self.assertEqual(int(self.svg.selection.bounding_box().width), 540)
+        self.assertEqual(int(self.svg.selection.bounding_box().height), 550)
+

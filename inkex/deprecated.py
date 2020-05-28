@@ -129,7 +129,7 @@ class DeprecatedEffect(object):
     @property
     def selected(self):
         self._deprecated('selected', _('{} is now a dict in the svg. Use `self.svg.selected`.'))
-        return dict(self.svg.selected)
+        return dict([(elem.get('id'), elem) for elem in self.svg.selected])
 
     @property
     def doc_ids(self):

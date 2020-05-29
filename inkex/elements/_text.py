@@ -136,8 +136,9 @@ class Tspan(ShapeElement):
         effective_transform = Transform(transform) * self.transform
         x1, y1 = effective_transform.apply_to_point((self.x, self.y))
         fontsize = convert_unit(self.style.get('font-size', '1em'), 'px')
-        y2 = y1 + float(fontsize)
-        x2 = x1 + 0 # XXX This is impossible to calculate!
+        x2 = self.x + 0 # XXX This is impossible to calculate!
+        y2 = self.y + float(fontsize)
+        x2, y2 = effective_transform.apply_to_point((x2, y2))
         return BoundingBox((x1, x2), (y1, y2))
 
 

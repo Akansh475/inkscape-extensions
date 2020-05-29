@@ -38,8 +38,14 @@ class Randomize(inkex.ColorExtension):
         return hsl.to_rgb()
 
     def modify_opacity(self, name, opacity):
-        if self.options.opacity_range > 0:
-            return _rand(self.options.opacity_range, opacity, roof=100.0, method=uniform) / 100
+        try:
+            opacity = float(opacity)
+        except ValueError:
+            self.msg(f"Ignoring unusual opacity value: {opacity}")
+            return opacity
+        orange = self.options.opacity_range
+        if orange > 0:
+            return _rand(orange, opacity, roof=100.0, method=uniform) / 100
         return opacity
 
 if __name__ == '__main__':

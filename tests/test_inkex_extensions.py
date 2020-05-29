@@ -54,6 +54,6 @@ class ColorBaseCase(TestCase):
             self.assertEqual(outp, got,\
                 "Color mismatch, test:{} {} != {}".format(x, outp, got))
         for x, (inp, outp) in enumerate(self._test_list(self.opacity_tests)):
-            got = self.effect.modify_opacity('opacity', float(inp))
+            got = self.effect.modify_opacity('opacity', inp)
             self.assertTrue(isinstance(got, float))
             self.assertAlmostEqual(got, outp, delta=0.1)

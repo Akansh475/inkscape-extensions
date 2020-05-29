@@ -29,4 +29,10 @@ class ColorRandomizeTest(ColorBaseCase):
         (0.0, 1.0, ['-o 100']),
         # The opacity value should be lesser than 1
         (1.0, 0.43, ['-o 100']),
+        # Other units are available
+        ('0.5', 0.654, ['-o 54']),
     ]
+
+    def test_bad_opacity(self):
+        """Bad opacity error handled"""
+        self.effect.modify_opacity('opacity', 'hello')

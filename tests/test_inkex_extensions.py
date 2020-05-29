@@ -28,6 +28,7 @@ class ColorEffectTest(ComparisonMixin, TestCase):
         ('--id=r3',), # Element Attributes
         ('--id=r4',), # Gradient stops
         ('--id=r1', '--id=r2'), # Two shapes
+        ('--id=color_svg',), # Recursive group/children
         (), # Process all shapes
     ]
 

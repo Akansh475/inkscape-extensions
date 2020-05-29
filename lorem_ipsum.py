@@ -221,7 +221,7 @@ class LoremIpsum(inkex.EffectExtension):
 
     def effect(self):
         # Existing text flow to insert new text into
-        for node in self.svg.selection.get(FlowRoot):
+        for node in self.svg.selection.filter(FlowRoot):
             self.add_text(node)
             return
 

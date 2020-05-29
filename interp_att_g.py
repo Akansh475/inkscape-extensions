@@ -102,7 +102,7 @@ class InterpAttG(inkex.EffectExtension):
             return self.svg.selected
 
         # must be a group
-        node = self.svg.selection.get(inkex.Group).first()
+        node = self.svg.selection.filter(inkex.Group).first()
         return list(node) or []
 
     def effect(self):

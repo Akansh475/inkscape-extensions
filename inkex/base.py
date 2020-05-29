@@ -287,7 +287,7 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
         self.svg = document.getroot()
         self.svg.selection.set(*self.options.ids)
         if not self.svg.selection and self.select_all:
-            self.svg.selection = self.svg.descendants().get(*self.select_all)
+            self.svg.selection = self.svg.descendants().filter(*self.select_all)
         return document
 
 

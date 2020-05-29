@@ -30,7 +30,7 @@ class Handles(inkex.EffectExtension):
     Renders the handle lines for the selected curves onto the canvas.
     """
     def effect(self):
-        for node in self.svg.selection.get(inkex.PathElement):
+        for node in self.svg.selection.filter(inkex.PathElement):
             result = Path()
             prev = Vector2d()
             start = None

@@ -24,7 +24,7 @@ from inkex.localization import inkex_gettext as _
 class Envelope(inkex.EffectExtension):
     """Distort a path to a second path"""
     def effect(self):
-        paths = list(self.svg.selection.get(inkex.PathElement))
+        paths = list(self.svg.selection.filter(inkex.PathElement))
         if len(paths) != 2:
             raise inkex.AbortExtension(_("You must select two paths only."))
 

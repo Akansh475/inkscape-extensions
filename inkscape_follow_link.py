@@ -19,7 +19,7 @@ class ThreadWebsite(threading.Thread):
 class FollowLink(inkex.EffectExtension):
     """Get the first selected item and follow it's href/url"""
     def effect(self):
-        for node in self.svg.selection.get(Anchor):
+        for node in self.svg.selection.filter(Anchor):
             vwswli = ThreadWebsite(node.get('xlink:href'))
             vwswli.start()
             break

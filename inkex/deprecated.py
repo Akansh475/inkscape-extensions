@@ -373,15 +373,15 @@ class DeprecatedSvgMixin(object):
 
     @deprecate
     def get_selected(self, *types):
-        """svg.selection.get(*types).values()"""
-        return self.selection.get(*types).values()
+        """svg.selection.filter(*types).values()"""
+        return self.selection.filter(*types).values()
 
     @deprecate
     def get_selected_or_all(self, *types):
         """Set select_all = True in extension class"""
         if not self.selection:
             self.selection.set_all()
-        return self.selection.get(*types)
+        return self.selection.filter(*types)
 
     @deprecate
     def get_selected_bbox(self):
@@ -390,5 +390,5 @@ class DeprecatedSvgMixin(object):
 
     @deprecate
     def get_first_selected(self, *types):
-        """selection.get(*types).first()"""
-        return self.selection.get(*types).first()
+        """selection.filter(*types).first() or [0] if you'd like an error"""
+        return self.selection.filter(*types).first()

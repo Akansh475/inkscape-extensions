@@ -90,11 +90,18 @@ class ElementListTestCase(SvgTestCase):
         selection.pop(selection.first())
         self.assertEqual(tuple(selection.ids), ('B', 'D', 'F', 'H'))
 
-    def test_get_constrain(self):
+    def test_filtering(self):
         """Create a sub-list of selected items"""
         selection = self.svg.descendants()
-        new_list = selection.get(PathElement)
+        new_list = selection.filter(PathElement)
         self.assertEqual(tuple(new_list.ids), ('path1', 'D'))
+
+    def test_getting_recursively(self):
+        """Create a list of children of the given type"""
+        selection = self.svg.selection
+        selection.set('B')
+        self.assertEqual(tuple(selection.ids), ('B',))
+        self.assertEqual(tuple(selection.get().ids), tuple('BCDEFGHIJ'))
 
     def test_get_bounding_box(self):
         """Selection can get a bounding box"""

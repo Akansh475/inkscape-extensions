@@ -124,9 +124,18 @@ class ElementList(OrderedDict):
         new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: x[0])])
         return new_list
 
-    def get(self, *types):
-        """Gets selected elements of the given type, returns a new SelectedElements object"""
+    def filter(self, *types):
+        """Filter selected elements of the given type, returns a new SelectedElements object"""
         return ElementList(self.svg, [e for e in self if not types or isinstance(e, types)])
+
+    def get(self, *types):
+        """Like filter, but will enter each element searching for any child of the given types"""
+        def _recurse(elem):
+            if not types or isinstance(elem, types):
+                yield elem
+            for child in elem:
+                yield from _recurse(child)
+        return ElementList(self.svg, [r for e in self for r in _recurse(e)])
 
     def id_dict(self):
         """For compatability, return regular dictionary of id -> element pairs"""

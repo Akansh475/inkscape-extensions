@@ -38,7 +38,7 @@ class ExportGimpPalette(inkex.OutputExtension):
 
     def get_colors(self):
         """Get all the colors from the selected elements"""
-        for elem in self.svg.selection.get(ShapeElement):
+        for elem in self.svg.selection.filter(ShapeElement):
             for color in self.process_element(elem):
                 if str(color).upper() == 'NONE':
                     continue

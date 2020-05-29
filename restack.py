@@ -51,7 +51,7 @@ class Restack(inkex.EffectExtension):
 
         # process selection to get list of objects to be arranged
         parentnode = None
-        for node in self.svg.selection.get(SvgDocumentElement):
+        for node in self.svg.selection.filter(SvgDocumentElement):
             parentnode = node
             self.svg.set_selection(*list(node))
 

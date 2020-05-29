@@ -80,8 +80,8 @@ class FlowSpan(ShapeElement):
 class TextElement(ShapeElement):
     """A Text element"""
     tag_name = 'text'
-    x = property(lambda self: float(self.get('x', 0)))
-    y = property(lambda self: float(self.get('y', 0)))
+    x = property(lambda self: convert_unit(self.get('x', 0), 'px'))
+    y = property(lambda self: convert_unit(self.get('y', 0), 'px'))
 
     def get_path(self):
         return Path()
@@ -117,8 +117,8 @@ class TextPath(ShapeElement):
 class Tspan(ShapeElement):
     """A tspan text element"""
     tag_name = 'tspan'
-    x = property(lambda self: float(self.get('x', 0)))
-    y = property(lambda self: float(self.get('y', 0)))
+    x = property(lambda self: convert_unit(self.get('x', 0), 'px'))
+    y = property(lambda self: convert_unit(self.get('y', 0), 'px'))
 
     @classmethod
     def superscript(cls, text):

@@ -52,8 +52,9 @@ class ExportGimpPalette(inkex.OutputExtension):
                 yield inkex.Color(style.get(name))
             except ColorIdError:
                 gradient = self.svg.getElementById(style.get(name))
-                for color in self.process_element(gradient):
-                    yield color
+                yield from self.process_element(gradient)
+                if gradient.href is not None:
+                    yield from self.process_element(gradient.href)
             except ColorError:
                 pass # Bad color
 

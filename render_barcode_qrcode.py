@@ -25,7 +25,6 @@ Provide the QR Code rendering.
 
 from __future__ import print_function
 
-import sys
 from itertools import product
 
 import inkex
@@ -36,9 +35,9 @@ class QRCode(object):
     PAD0 = 0xEC
     PAD1 = 0x11
 
-    def __init__(self):
+    def __init__(self, correction):
         self.typeNumber = 1
-        self.errorCorrectLevel = ErrorCorrectLevel.H
+        self.errorCorrectLevel = correction
         self.qrDataList = []
         self.modules = []
         self.moduleCount = 0
@@ -48,12 +47,6 @@ class QRCode(object):
 
     def setTypeNumber(self, typeNumber):
         self.typeNumber = typeNumber
-
-    def getErrorCorrectLevel(self):
-        return self.errorCorrectLevel
-
-    def setErrorCorrectLevel(self, errorCorrectLevel):
-        self.errorCorrectLevel = errorCorrectLevel
 
     def clearData(self):
         self.qrDataList = []
@@ -306,8 +299,7 @@ class QRCode(object):
     @staticmethod
     def getMinimumQRCode(data, errorCorrectLevel):
         mode = Mode.MODE_8BIT_BYTE  # fixed to 8bit byte
-        qr = QRCode()
-        qr.setErrorCorrectLevel(errorCorrectLevel)
+        qr = QRCode(correction=errorCorrectLevel)
         qr.addData(data)
         length = qr.getData(0).getLength()
         for typeNumber in range(1, 11):
@@ -324,13 +316,6 @@ class Mode(object):
     MODE_ALPHA_NUM = 1 << 1
     MODE_8BIT_BYTE = 1 << 2
     MODE_KANJI = 1 << 3
-
-
-class ErrorCorrectLevel(object):
-    L = 1  # 7%
-    M = 0  # 15%
-    Q = 3  # 25%
-    H = 2  # 30%
 
 
 class MaskPattern(object):
@@ -407,20 +392,14 @@ class QRUtil(object):
 
     @staticmethod
     def getMaxLength(typeNumber, mode, errorCorrectLevel):
-        t = typeNumber - 1
-        e = {
-            ErrorCorrectLevel.L: 0,
-            ErrorCorrectLevel.M: 1,
-            ErrorCorrectLevel.Q: 2,
-            ErrorCorrectLevel.H: 3
-        }[errorCorrectLevel]
+        e = {1: 0, 0: 1, 3: 2, 2: 3}[errorCorrectLevel]
         m = {
             Mode.MODE_NUMBER: 0,
             Mode.MODE_ALPHA_NUM: 1,
             Mode.MODE_8BIT_BYTE: 2,
             Mode.MODE_KANJI: 3
         }[mode]
-        return QRUtil.MAX_LENGTH[t][e][m]
+        return QRUtil.MAX_LENGTH[typeNumber - 1][e][m]
 
     @staticmethod
     def getErrorCorrectPolynomial(errorCorrectLength):
@@ -786,14 +765,10 @@ class RSBlock(object):
     @staticmethod
     def getRsBlockTable(typeNumber, errorCorrectLevel):
         return {
-            ErrorCorrectLevel.L:
-                RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0],
-            ErrorCorrectLevel.M:
-                RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1],
-            ErrorCorrectLevel.Q:
-                RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2],
-            ErrorCorrectLevel.H:
-                RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3]
+            1: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0],
+            0: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1],
+            3: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2],
+            2: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3]
         }[errorCorrectLevel]
 
 
@@ -829,96 +804,27 @@ class BitBuffer(object):
 
 
 class GridDrawer(object):
-    def __init__(self, boxsize, invert_code, smooth_factor, symbol_id, margin=4):
-        self.boxsize = boxsize
-        self.invertCode = invert_code
+    """Mechanism to draw grids of boxes"""
+    def __init__(self, invert_code, smooth_factor):
+        self.invert_code = invert_code
         self.smoothFactor = smooth_factor
-        self.symbolId = symbol_id
-        self.margin = margin
-
         self.grid = None
 
-    def setGrid(self, grid):
+    def set_grid(self, grid):
         if len({len(g) for g in grid}) != 1:
             raise Exception("The array is not rectangular")
         else:
             self.grid = grid
 
-    def rowCount(self):
+    def row_count(self):
         return len(self.grid) if self.grid is not None else 0
 
-    def colCount(self):
-        return len(self.grid[0]) if self.rowCount() > 0 else 0
+    def col_count(self):
+        return len(self.grid[0]) if self.row_count() > 0 else 0
 
     def isDark(self, col, row):
-        inside = col >= 0 and 0 <= row < self.rowCount() and col < self.colCount()
-        return False if not inside else self.grid[row][col] != self.invertCode
-
-    def getSVGPos(self, col, row):
-        return (col + self.margin) * self.boxsize, (row + self.margin) * self.boxsize
-
-    def makeSVGRect(self, grp):
-        for r in range(self.rowCount()):
-            for c in range(self.colCount()):
-                if self.isDark(c, r):
-                    x, y = self.getSVGPos(c, r)
-                    rect = Rectangle()
-                    rect.set('x', str(x))
-                    rect.set('y', str(y))
-                    rect.set('width', str(self.boxsize))
-                    rect.set('height', str(self.boxsize))
-                    grp.append(rect)
-
-    def makeSVGSymbol(self, grp):
-        for r in range(self.rowCount()):
-            for c in range(self.colCount()):
-                if self.isDark(c, r):
-                    x, y = self.getSVGPos(c, r)
-                    symbol = Use()
-                    symbol.set('xlink:href', self.symbolId)
-                    symbol.set('x', str(x))
-                    symbol.set('y', str(y))
-                    symbol.set('width', str(self.boxsize))
-                    symbol.set('height', str(self.boxsize))
-                    grp.append(symbol)
-
-    def getIconPathStr(self, pointStr):
-        result = ""
-        digBuffer = ""
-        for c in pointStr:
-            if c.isdigit() or c == "-" or c == '.':
-                digBuffer += c
-            else:
-                if len(digBuffer) > 0:
-                    result += str(float(digBuffer) * self.boxsize)
-                    digBuffer = ""
-                result += c
-
-        if len(digBuffer) > 0:
-            result += str(float(digBuffer) * self.boxsize)
-
-        return result
-
-    def makeSVGPath(self, grp, pointStr):
-        singlePath = self.getIconPathStr(pointStr)
-        pathStr = ""
-        for r in range(self.rowCount()):
-            for c in range(self.colCount()):
-                if self.isDark(c, r):
-                    x, y = self.getSVGPos(c, r)
-                    pathStr += "M %f,%f " % (x, y) + singlePath + " z "
-
-        path = PathElement()
-        path.set('d', pathStr)
-        grp.append(path)
-
-    def makeSVGCircle(self, grp):
-        s = 'm 0.5,0.5 ' \
-            'c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 ' \
-            'c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 ' \
-            'c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 ' \
-            'c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5'
-        self.makeSVGPath(grp, s)
+        inside = col >= 0 and 0 <= row < self.row_count() and col < self.col_count()
+        return False if not inside else self.grid[row][col] != self.invert_code
 
     @staticmethod
     def moveByDirection(xyd):
@@ -939,15 +845,15 @@ class GridDrawer(object):
         dirTable = self.makeDirectionsTable()
         result = []
         # Create vertex
-        for r in range(self.rowCount() + 1):
-            for c in range(self.colCount() + 1):
-                indx = (2 ** 0 if self.isDark(c - 0, r - 1) else 0) + \
-                       (2 ** 1 if self.isDark(c - 1, r - 1) else 0) + \
-                       (2 ** 2 if self.isDark(c - 1, r - 0) else 0) + \
-                       (2 ** 3 if self.isDark(c - 0, r - 0) else 0)
+        for row in range(self.row_count() + 1):
+            for col in range(self.col_count() + 1):
+                indx = (2 ** 0 if self.isDark(col - 0, row - 1) else 0) + \
+                       (2 ** 1 if self.isDark(col - 1, row - 1) else 0) + \
+                       (2 ** 2 if self.isDark(col - 1, row - 0) else 0) + \
+                       (2 ** 3 if self.isDark(col - 0, row - 0) else 0)
 
                 for d in dirTable[indx]:
-                    result.append((c, r, d, len(dirTable[indx]) > 1))
+                    result.append((col, row, d, len(dirTable[indx]) > 1))
 
         return result
 
@@ -957,9 +863,63 @@ class GridDrawer(object):
         sc1 = 1.0 - sc
         return (v[0] * sc1 + vn[0] * sc, v[1] * sc1 + vn[1] * sc), (v[0] * sc + vn[0] * sc1, v[1] * sc + vn[1] * sc1)
 
-    def makeSVGAdv(self, grp, greedy):
 
-        verts = self.createVertexesForAdvDrawer()
+class QrCode(inkex.GenerateExtension):
+    """Generate QR Code Extension"""
+    def add_arguments(self, pars):
+        pars.add_argument("--text", default='www.inkscape.org')
+        pars.add_argument("--typenumber", type=int, default=0)
+        pars.add_argument("--correctionlevel", type=int, default=0)
+        pars.add_argument("--encoding", default="latin_1")
+        pars.add_argument("--modulesize", type=float, default=10.0)
+        pars.add_argument("--invert", type=inkex.Boolean, default="false")
+        pars.add_argument("--drawtype", default="greedy")
+        pars.add_argument("--smoothval", type=float, default=0.2)
+        pars.add_argument("--symbolid", default='')
+
+    def generate(self):
+
+        scale = self.svg.unittouu('1px')  # convert to document units
+        opt = self.options
+
+        if not opt.text:
+            raise inkex.AbortExtension('Please enter an input text')
+        elif opt.drawtype == "symbol" and opt.symbolid == "":
+            raise inkex.AbortExtension('Please enter symbol id')
+
+        # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
+        text_bytes = bytes(opt.text, opt.encoding).decode("latin_1")
+        text_str = str(opt.text)
+
+        grp = Group()
+        grp.set('inkscape:label', 'QR Code: ' + text_str)
+        pos_x, pos_y = self.svg.namedview.center
+        grp.transform.add_translate(pos_x, pos_y)
+        if scale:
+            grp.transform.add_scale(scale)
+
+        # GENERATE THE QRCODE
+        if opt.typenumber == 0:
+            # Automatic QR code size`
+            code = QRCode.getMinimumQRCode(text_bytes, opt.correctionlevel)
+        else:
+            # Manual QR code size
+            code = QRCode(correction=opt.correctionlevel)
+            code.setTypeNumber(int(opt.typenumber))
+            code.addData(text_bytes)
+            code.make()
+
+        self.boxsize = opt.modulesize
+        self.invert_code = opt.invert
+        self.margin = 4
+        self.draw = GridDrawer(opt.invert, opt.smoothval)
+        self.draw.set_grid(code.modules)
+        self.render_svg(grp, opt.drawtype)
+        return grp
+
+    def render_adv(self, greedy):
+
+        verts = self.draw.createVertexesForAdvDrawer()
         qrPathStr = ""
         while len(verts) > 0:
             vertsIndexStart = len(verts) - 1
@@ -967,7 +927,7 @@ class GridDrawer(object):
             ringIndexes = []
             while True:
                 ringIndexes.append(vertsIndexCur)
-                nextPos = self.moveByDirection(verts[vertsIndexCur])
+                nextPos = self.draw.moveByDirection(verts[vertsIndexCur])
                 nextIndexes = [i for i, x in enumerate(verts) if x[0] == nextPos[0] and x[1] == nextPos[1]]
                 if len(nextIndexes) == 0 or len(nextIndexes) > 2:
                     raise Exception("Vertex " + str(next_c) + " has no connections")
@@ -985,8 +945,8 @@ class GridDrawer(object):
 
                 vertsIndexCur = vertsIndexNext
 
-            posStart, _ = self.getSmoothPosition(verts[ringIndexes[0]])
-            qrPathStr += "M %f,%f " % self.getSVGPos(posStart[0], posStart[1])
+            posStart, _ = self.draw.getSmoothPosition(verts[ringIndexes[0]])
+            qrPathStr += "M %f,%f " % self.get_svg_pos(posStart[0], posStart[1])
             for ri in range(len(ringIndexes)):
                 vc = verts[ringIndexes[ri]]
                 vn = verts[ringIndexes[(ri + 1) % len(ringIndexes)]]
@@ -996,17 +956,17 @@ class GridDrawer(object):
                         # Opt length http://spencermortensen.com/articles/bezier-circle/
                         # c = 0.552284749
                         ex = 1 - 0.552284749
-                        _, bs = self.getSmoothPosition(vc)
-                        _, bp1 = self.getSmoothPosition(vc, ex)
-                        bp2, _ = self.getSmoothPosition(vn, ex)
-                        bf, _ = self.getSmoothPosition(vn)
-                        qrPathStr += "L %f,%f " % self.getSVGPos(bs[0], bs[1])
+                        _, bs = self.draw.getSmoothPosition(vc)
+                        _, bp1 = self.draw.getSmoothPosition(vc, ex)
+                        bp2, _ = self.draw.getSmoothPosition(vn, ex)
+                        bf, _ = self.draw.getSmoothPosition(vn)
+                        qrPathStr += "L %f,%f " % self.get_svg_pos(bs[0], bs[1])
                         qrPathStr += "C %f,%f %f,%f %f,%f " \
-                                     % (self.getSVGPos(bp1[0], bp1[1]) + self.getSVGPos(bp2[0], bp2[1]) +
-                                        self.getSVGPos(bf[0], bf[1]))
+                                     % (self.get_svg_pos(bp1[0], bp1[1]) + self.get_svg_pos(bp2[0], bp2[1]) +
+                                        self.get_svg_pos(bf[0], bf[1]))
                     else:
                         # Add straight
-                        qrPathStr += "L %f,%f " % self.getSVGPos(vn[0], vn[1])
+                        qrPathStr += "L %f,%f " % self.get_svg_pos(vn[0], vn[1])
 
             qrPathStr += "z "
 
@@ -1016,98 +976,97 @@ class GridDrawer(object):
 
         path = PathElement()
         path.set('d', qrPathStr)
-        grp.append(path)
+        return path
 
-    def getSVGDrawer(self, drawtype):
-        drawerDict = {"neutral": lambda g: self.makeSVGAdv(g, "n"),
-                      "greedy": lambda g: self.makeSVGAdv(g, "g"),
-                      "proud": lambda g: self.makeSVGAdv(g, "p"),
-                      "simple": lambda g: self.makeSVGPath(g, "h 1 v 1 h -1"),
-                      "circle": self.makeSVGCircle,
-                      "pathcustom": lambda g: self.makeSVGPath(g, self.symbolId),
-                      "symbol": self.makeSVGSymbol,
-                      "obsolete": self.makeSVGRect
-                      }
-        return drawerDict.get(drawtype)
+    def render_obsolete(self):
+        for row in range(self.draw.row_count()):
+            for col in range(self.draw.col_count()):
+                if self.draw.isDark(col, row):
+                    x, y = self.get_svg_pos(col, row)
+                    return Rectangle.new(x, y, self.boxsize, self.boxsize)
 
-    def makeSVG(self, grp, drawtype):
-        drawer = self.getSVGDrawer(drawtype)
+    def render_path(self, pointStr):
+        singlePath = self.get_icon_path_str(pointStr)
+        pathStr = ""
+        for row in range(self.draw.row_count()):
+            for col in range(self.draw.col_count()):
+                if self.draw.isDark(col, row):
+                    x, y = self.get_svg_pos(col, row)
+                    pathStr += "M %f,%f " % (x, y) + singlePath + " z "
+
+        path = PathElement()
+        path.set('d', pathStr)
+        return path
+
+    def render_symbol(self):
+        symbol = self.svg.getElementById(self.options.symbolid)
+        if symbol is None:
+            raise inkex.AbortExtension(f"Can't find symbol {self.options.symbolid}")
+        bbox = symbol.path.bounding_box()
+        transform = inkex.Transform(scale=(
+            float(self.boxsize) / bbox.width,
+            float(self.boxsize) / bbox.height,
+        ))
+        for row in range(self.draw.row_count()):
+            for col in range(self.draw.col_count()):
+                if self.draw.isDark(col, row):
+                    x, y = self.get_svg_pos(col, row)
+                    # Inkscape doesn't support width/height on use tags
+                    return Use.new(symbol, x, y, transform=transform)
+
+    render_pathcustom = lambda self: self.render_path(self.options.symbolid)
+    render_neutral = lambda self: self.render_adv("n")
+    render_greedy = lambda self: self.render_adv("g")
+    render_proud = lambda self: self.render_adv("p")
+    render_simple = lambda self: self.render_path("h 1 v 1 h -1")
+
+    def render_circle(self):
+        s = 'm 0.5,0.5 ' \
+            'c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 ' \
+            'c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 ' \
+            'c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 ' \
+            'c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5'
+        return self.render_path(s)
+
+    def render_svg(self, grp, drawtype):
+        """Render to svg"""
+        drawer = getattr(self, f"render_{drawtype}", self.render_obsolete)
         if drawer is None:
             raise Exception("Unknown draw type: " + drawtype)
 
-        canvas_width = (self.colCount() + 2 * self.margin) * self.boxsize
-        canvas_height = (self.rowCount() + 2 * self.margin) * self.boxsize
+        canvas_width = (self.draw.col_count() + 2 * self.margin) * self.boxsize
+        canvas_height = (self.draw.row_count() + 2 * self.margin) * self.boxsize
 
         # white background providing margin:
-        rect = Rectangle()
-        rect.set('x', '0')
-        rect.set('y', '0')
-        rect.set('width', str(canvas_width))
-        rect.set('height', str(canvas_height))
-        rect.set('style', 'fill:%s;stroke:none' % ("black" if self.invertCode else "white"))
-        grp.append(rect)
+        rect = grp.add(Rectangle.new(0, 0, canvas_width, canvas_height))
+        rect.style['stroke'] = 'none'
+        rect.style['fiill'] = "black" if self.invert_code else "white"
 
-        qrg = Group()
-        qrg.set('style', 'fill:%s;stroke:none' % ("white" if self.invertCode else "black"))
-        drawer(qrg)
+        qrg = grp.add(Group())
+        qrg.style['stroke'] = 'none'
+        qrg.style['fiill'] = "white" if self.invert_code else "black"
+        qrg.add(drawer())
 
-        grp.append(qrg)
+    def get_svg_pos(self, col, row):
+        return (col + self.margin) * self.boxsize, (row + self.margin) * self.boxsize
 
-
-class QrCode(inkex.GenerateExtension):
-    def add_arguments(self, pars):
-        pars.add_argument("--text", default='www.inkscape.org')
-        pars.add_argument("--typenumber", type=int, default=0)
-        pars.add_argument("--correctionlevel", type=int, default=0)
-        pars.add_argument("--encoding", default="latin_1")
-        pars.add_argument("--modulesize", type=float, default=10.0)
-        pars.add_argument("--invert", type=inkex.Boolean, default="false")
-        pars.add_argument("--drawtype", default="greedy")
-        pars.add_argument("--smoothval", type=float, default=0.2)
-        pars.add_argument("--symbolid", default='')
-
-    def generate(self):
-
-        scale = self.svg.unittouu('1px')  # convert to document units
-        so = self.options
-
-        if so.text == '':  # abort if converting blank text
-            inkex.errormsg('Please enter an input text')
-        elif so.drawtype == "symbol" and so.symbolid == "":
-            inkex.errormsg('Please enter symbol id')
-        else:
-            # Python 2 and 3 compatibility.
-            if sys.version_info >= (3, 0, 0):
-                # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
-                text_bytes = bytes(so.text, so.encoding).decode("latin_1")
-                text_str = str(so.text)
+    def get_icon_path_str(self, pointStr):
+        result = ""
+        digBuffer = ""
+        for c in pointStr:
+            if c.isdigit() or c == "-" or c == '.':
+                digBuffer += c
             else:
-                text_bytes = so.text
-                text_str = so.text.decode('utf-8')
+                if len(digBuffer) > 0:
+                    result += str(float(digBuffer) * self.boxsize)
+                    digBuffer = ""
+                result += c
 
-            grp = Group()
-            grp.set('inkscape:label', 'QR Code: ' + text_str)
-            pos_x, pos_y = self.svg.namedview.center
-            grp.transform.add_translate(pos_x, pos_y)
-            if scale:
-                grp.transform.add_scale(scale)
+        if len(digBuffer) > 0:
+            result += str(float(digBuffer) * self.boxsize)
 
-            # GENERATE THE QRCODE
-            if so.typenumber == 0:
-                # Automatic QR code size`
-                qr = QRCode.getMinimumQRCode(text_bytes, so.correctionlevel)
-            else:
-                # Manual QR code size
-                qr = QRCode()
-                qr.setTypeNumber(int(so.typenumber))
-                qr.setErrorCorrectLevel(so.correctionlevel)
-                qr.addData(text_bytes)
-                qr.make()
+        return result
 
-            qrDraw = GridDrawer(so.modulesize, so.invert, so.smoothval, so.symbolid, 4)
-            qrDraw.setGrid(qr.modules)
-            qrDraw.makeSVG(grp, so.drawtype)
-            return grp
 
 
 if __name__ == '__main__':

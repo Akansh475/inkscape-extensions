@@ -206,6 +206,15 @@ class InkscapeExtension(object):
         """Return the folder the extension script is in"""
         return os.path.dirname(sys.modules[cls.__module__].__file__)
 
+    @classmethod
+    def get_resource(cls, name, abort_on_fail=True):
+        # type: (str) -> str
+        """Return the full filename of the resource in the extension's dir"""
+        filename = os.path.join(cls.ext_path(), name)
+        if abort_on_fail and not os.path.isfile(filename):
+            raise AbortExtension(f"Could not find resource file: {filename}")
+        return filename
+
     def absolute_href(self, filename, default='~/'):
         # type: (str, str) -> str
         """

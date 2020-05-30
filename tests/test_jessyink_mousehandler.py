@@ -1,6 +1,12 @@
 # coding=utf-8
-from jessyInk_mouseHandler import MouseHandler
+from jessyInk_mouseHandler import AddMouseHandler
 from inkex.tester import ComparisonMixin, TestCase
 
-class JessyInkCustomMouseHandlerBasicTest(ComparisonMixin, TestCase):
-    effect_class = MouseHandler
+class JessyInkAddMouseHandlerTest(ComparisonMixin, TestCase):
+    """Test jessy ink mouse handler"""
+    effect_class = AddMouseHandler
+    comparisons = [
+        ('--mouseSetting=default',),
+        ('--mouseSetting=noclick',),
+        ('--mouseSetting=draggingZoom',),
+    ]

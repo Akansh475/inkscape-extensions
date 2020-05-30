@@ -16,11 +16,8 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-import os
 import re
 from copy import deepcopy
-
-from lxml import etree
 
 import inkex
 from inkex.localization import inkex_gettext as _
@@ -28,70 +25,71 @@ from inkex.utils import NSS
 NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
 class Video(inkex.EffectExtension):
+    """Add jessyink video"""
     def add_arguments(self, pars):
         self.arg_parser.add_argument('--tab', dest='what')
 
     def effect(self):
         # Check version.
-        scriptNodes = self.document.xpath("//svg:script[@jessyink:version='1.5.5']", namespaces=NSS)
+        scripts = self.svg.getElement("//svg:script[@jessyink:version='1.5.5']")
+        if scripts is None:
+            raise inkex.AbortExtension(_(
+                "The JessyInk script is not installed in this SVG file or has a "
+                "different version than the JessyInk extensions. Please select "
+                "\"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" "
+                "menu to install or update the JessyInk script.\n\n"))
 
-        if len(scriptNodes) != 1:
-            inkex.errormsg(_("The JessyInk script is not installed in this SVG file or has a different version than the JessyInk extensions. Please select \"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" menu to install or update the JessyInk script.\n\n"))
+        base_view = self.svg.xpath("//sodipodi:namedview[@id='base']")
+        if base_view is None:
+            raise inkex.AbortExtension(_(
+                "Could not obtain the selected layer for inclusion of the video element."))
 
-        baseView = self.document.xpath("//sodipodi:namedview[@id='base']", namespaces=NSS)
+        layer = self.svg.get_current_layer()
+        if layer is None:
+            raise inkex.AbortExtension(_(
+                "Could not obtain the selected layer for inclusion of the video element.\n\n"))
 
-        if len(baseView) != 1:
-            inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
+        template = inkex.load_svg(self.get_resource('jessyInk_video.svg'))
+        root = template.getroot()
 
-        layer = self.document.xpath("//svg:g[@id='" + baseView[0].attrib["{" + NSS["inkscape"] + "}current-layer"] + "']", namespaces=NSS)
-
-        if len(layer) != 1:
-            inkex.errormsg(_("Could not obtain the selected layer for inclusion of the video element.\n\n"))
-
-        # Parse template file.
-        tmplFile = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'jessyInk_video.svg'), 'rb')
-        tmplRoot = etree.fromstring(tmplFile.read())
-        tmplFile.close()
-
-        elem = deepcopy(tmplRoot.xpath("//svg:g[@jessyink:element='core.video']", namespaces=NSS)[0])
-        nodeDict = findInternalLinks(elem, tmplRoot)
-
+        elem = root.getElement("//svg:g[@jessyink:element='core.video']").copy()
+        node_dict = findInternalLinks(elem, root)
         deleteIds(elem)
 
-        idSubst = {}
+        ids = {}
 
-        for key in nodeDict:
-            idSubst[key] = getNewId("jessyink.core.video", self.document)
-            deleteIds(nodeDict[key])
-            nodeDict[key].attrib['id'] = idSubst[key]
-            elem.insert(0, nodeDict[key])
+        for key in node_dict:
+            ids[key] = getNewId("jessyink.core.video", self.document)
+            deleteIds(node_dict[key])
+            node_dict[key].attrib['id'] = ids[key]
+            elem.insert(0, node_dict[key])
 
-        for ndIter in elem.iter():
-            for attrIter in ndIter.attrib:
-                for entryIter in idSubst:
-                    ndIter.attrib[attrIter] = ndIter.attrib[attrIter].replace("#" + entryIter, "#" + idSubst[entryIter])
+        for nd_iter in elem.iter():
+            for attrs in nd_iter.attrib:
+                for entires in ids:
+                    nd_iter.attrib[attrs] = nd_iter.attrib[attrs].replace("#" + entires, "#" + ids[entires])
 
         # Append element.
-        layer[0].append(elem)
+        layer.append(elem)
 
-def findInternalLinks(node, docRoot, nodeDict = {}):
-    for entry in re.findall(br"url\(#.*\)", etree.tostring(node)):
+def findInternalLinks(node, docRoot, node_dict = {}):
+    for entry in re.findall(br"url\(#.*\)", node.tostring()):
         entry = entry.decode()
         linkId = entry[5:len(entry) - 1]
 
-        if linkId not in nodeDict:
-            nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=NSS)[0])
-            nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
+        if linkId not in node_dict:
+            node_dict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=NSS)[0])
+            node_dict = findInternalLinks(node_dict[linkId], docRoot, node_dict)
 
     for entry in node.iter():
         if '{' + NSS['xlink'] + '}href' in entry.attrib:
             linkId = entry.attrib['{' + NSS['xlink'] + '}href'][1:len(entry.attrib['{' + NSS['xlink'] + '}href'])]
 
-            if linkId not in nodeDict:
-                nodeDict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=NSS)[0])
-                nodeDict = findInternalLinks(nodeDict[linkId], docRoot, nodeDict)
+            if linkId not in node_dict:
+                node_dict[linkId] = deepcopy(docRoot.xpath("//*[@id='" + linkId + "']", namespaces=NSS)[0])
+                node_dict = findInternalLinks(node_dict[linkId], docRoot, node_dict)
 
-    return nodeDict
+    return node_dict
 
 def getNewId(prefix, docRoot):
     import datetime

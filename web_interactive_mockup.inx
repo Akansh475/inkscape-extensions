@@ -23,7 +23,7 @@
             <label>When selecting object the last one is the one we jump to.</label>
         </page>
     </param>
-    <effect>
+    <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>
             <submenu name="Web">

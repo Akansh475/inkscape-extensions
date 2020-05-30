@@ -243,19 +243,13 @@ class MeshToPath(inkex.EffectExtension):
         pars.add_argument("--tab", help="The selected UI-tab")
         pars.add_argument("--mode", default="outline", help="Edge mode")
 
-    def process_url(self, val):
-        """Process url in property value *val*."""
-        linked_id = val[len('url(#'):val.find(')')]
-        if linked_id:
-            return self.svg.getElementById(linked_id)
-
     def process_props(self, mdict, res_type='meshgradient'):
         """Process style properties of style dict *mdict*."""
         result = []
         for key, val in mdict.items():
             if key in MG_PROPS:
                 if is_url(val):
-                    paint_server = self.process_url(val)
+                    paint_server = self.svg.getElementById(val)
                     if res_type == 'meshgradient' and is_meshgradient(paint_server):
                         result.append(paint_server)
         return result

@@ -225,3 +225,51 @@ class RadialGradient(Gradient):
 class PathEffect(BaseElement):
     """Inkscape LPE element"""
     tag_name = 'inkscape:path-effect'
+
+
+class MeshGradient(Gradient):
+    """Usable MeshGradient XML base class"""
+    tag_name = 'meshgradient'
+
+    @classmethod
+    def new_mesh(cls, pos=None, rows=1, cols=1, autocollect=True):
+        """Return skeleton of 1x1 meshgradient definition."""
+        # initial point
+        if pos is None or len(pos) != 2:
+            pos = [0.0, 0.0]
+        # create nested elements for rows x cols mesh
+        meshgradient = cls()
+        for _ in range(rows):
+            meshrow = meshgradient.add(MeshRow())
+            for _ in range(cols):
+                meshrow.append(MeshPatch())
+        # set meshgradient attributes
+        meshgradient.set('gradientUnits', 'userSpaceOnUse')
+        meshgradient.set('x', pos[0])
+        meshgradient.set('y', pos[1])
+        if autocollect:
+            meshgradient.set('inkscape:collect', 'always')
+        return meshgradient
+
+
+class MeshRow(BaseElement):
+    """Each row of a mesh gradient"""
+    tag_name = 'meshrow'
+
+class MeshPatch(BaseElement):
+    """Each column or 'patch' in a mesh gradient"""
+    tag_name = 'meshpatch'
+
+    def stops(self, edges, colors):
+        """Add or edit meshpatch stops with path and stop-color."""
+        # iterate stops based on number of edges (path data)
+        for i, edge in enumerate(edges):
+            if i < len(self):
+                stop = self[i]
+            else:
+                stop = self.add(Stop())
+
+            # set edge path data
+            stop.set('path', str(edge))
+            # set stop color
+            stop.style['stop-color'] = str(colors[i % 2])

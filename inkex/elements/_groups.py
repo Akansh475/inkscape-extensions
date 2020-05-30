@@ -23,9 +23,7 @@
 Interface for all group based elements such as Groups, Use, Markers etc.
 """
 
-from lxml import etree
-
-from ..paths import Path, BoundingBox
+from ..paths import Path
 from ..utils import addNS
 from ..transforms import Transform
 
@@ -41,7 +39,8 @@ class GroupBase(ShapeElement):
     def get_path(self):
         ret = Path()
         for child in self:
-            ret += child.path.transform(child.transform)
+            if isinstance(child, ShapeElement):
+                ret += child.path.transform(child.transform)
         return ret
 
     def shape_box(self, transform=None):

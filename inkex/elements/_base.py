@@ -399,7 +399,9 @@ class BaseElement(etree.ElementBase):
     @href.setter
     def href(self, elem):
         """Set the href object"""
-        self.set('xlink:href', '#' + elem.get_id())
+        if isinstance(elem, BaseElement):
+            elem = elem.get_id()
+        self.set('xlink:href', '#' + elem)
 
     def fallback_style(self, move=False):
         """Get styles falling back to element attributes"""

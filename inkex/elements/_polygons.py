@@ -142,7 +142,7 @@ class Rectangle(RectangleBase):
 
     @classmethod
     def new(cls, left, top, width, height, **attrs):
-        return super(Rectangle, cls).new(x=left, y=top, width=width, height=height, **attrs)
+        return super().new(x=left, y=top, width=width, height=height, **attrs)
 
 
 class EllipseBase(ShapeElement):

@@ -80,8 +80,8 @@ class FlowSpan(ShapeElement):
 class TextElement(ShapeElement):
     """A Text element"""
     tag_name = 'text'
-    x = property(lambda self: float(self.get('x', 0)))
-    y = property(lambda self: float(self.get('y', 0)))
+    x = property(lambda self: convert_unit(self.get('x', 0), 'px'))
+    y = property(lambda self: convert_unit(self.get('y', 0), 'px'))
 
     def get_path(self):
         return Path()
@@ -117,8 +117,8 @@ class TextPath(ShapeElement):
 class Tspan(ShapeElement):
     """A tspan text element"""
     tag_name = 'tspan'
-    x = property(lambda self: float(self.get('x', 0)))
-    y = property(lambda self: float(self.get('y', 0)))
+    x = property(lambda self: convert_unit(self.get('x', 0), 'px'))
+    y = property(lambda self: convert_unit(self.get('y', 0), 'px'))
 
     @classmethod
     def superscript(cls, text):
@@ -136,8 +136,9 @@ class Tspan(ShapeElement):
         effective_transform = Transform(transform) * self.transform
         x1, y1 = effective_transform.apply_to_point((self.x, self.y))
         fontsize = convert_unit(self.style.get('font-size', '1em'), 'px')
-        y2 = y1 + float(fontsize)
-        x2 = x1 + 0 # XXX This is impossible to calculate!
+        x2 = self.x + 0 # XXX This is impossible to calculate!
+        y2 = self.y + float(fontsize)
+        x2, y2 = effective_transform.apply_to_point((x2, y2))
         return BoundingBox((x1, x2), (y1, y2))
 
 

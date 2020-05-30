@@ -208,7 +208,7 @@ class InkscapeExtension(object):
 
     @classmethod
     def get_resource(cls, name, abort_on_fail=True):
-        # type: (str) -> str
+        # type: (str, bool) -> str
         """Return the full filename of the resource in the extension's dir"""
         filename = os.path.join(cls.ext_path(), name)
         if abort_on_fail and not os.path.isfile(filename):

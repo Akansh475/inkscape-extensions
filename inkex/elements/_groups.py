@@ -23,6 +23,8 @@
 Interface for all group based elements such as Groups, Use, Markers etc.
 """
 
+from lxml import etree # pylint: disable=unused-import
+
 from ..paths import Path
 from ..utils import addNS
 from ..transforms import Transform

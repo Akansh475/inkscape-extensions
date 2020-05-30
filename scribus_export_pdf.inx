@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <name>Export to PDF via Scribus</name>
+    <id>com.activdesign.export.scribus</id>
+    <dependency type="executable" location="extensions">scribus_export_pdf.py</dependency>
+    <dependency type="executable" location="path">scribus</dependency>
+    <output>
+        <extension>.pdf</extension>
+        <mimetype>application/pdf</mimetype>
+        <filetypename>Scribus CMYK PDF (*.PDF)</filetypename>
+        <filetypetooltip>Exports the document to PDF using scribus</filetypetooltip>
+    </output>
+    <script>
+        <command location="inx" interpreter="python">scribus_export_pdf.py</command>
+    </script>
+</inkscape-extension>
+

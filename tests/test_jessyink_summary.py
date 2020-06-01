@@ -1,7 +1,8 @@
 # coding=utf-8
-from jessyInk_summary import Summary
+from jessyink_summary import Summary
 from inkex.tester import ComparisonMixin, TestCase
 
 class JessyInkSummaryTest(ComparisonMixin, TestCase):
-    stderr_protect = False
+    stderr_output = True
     effect_class = Summary
+    comparisons = [()]

@@ -1,5 +1,5 @@
 # coding=utf-8
-from jessyInk_transitions import Transitions
+from jessyink_transitions import Transitions
 from inkex.tester import ComparisonMixin, TestCase
 
 class JessyInkTransitionsBasicTest(ComparisonMixin, TestCase):

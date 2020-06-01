@@ -1,5 +1,5 @@
 # coding=utf-8
-from jessyInk_export import Export
+from jessyink_export import Export
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareSize
 

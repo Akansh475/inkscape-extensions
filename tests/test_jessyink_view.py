@@ -1,5 +1,5 @@
 # coding=utf-8
-from jessyInk_view import View
+from jessyink_view import View
 from inkex.tester import ComparisonMixin, TestCase
 
 class JessyInkEffectsBasicTest(ComparisonMixin, TestCase):

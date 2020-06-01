@@ -1,6 +1,6 @@
 #!/usr/bin/en
 # coding=utf-8
-from jessyInk_autoTexts import AutoTexts
+from jessyink_autotexts import AutoTexts
 from inkex.tester import ComparisonMixin, TestCase
 
 class JessyInkAutoTextsBasicTest(ComparisonMixin, TestCase):

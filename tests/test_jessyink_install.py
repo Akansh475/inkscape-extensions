@@ -1,5 +1,5 @@
 # coding=utf-8
-from jessyInk_install import Install
+from jessyink_install import Install
 from inkex.tester import ComparisonMixin, TestCase
 
 class JessyInkInstallBasicTest(ComparisonMixin, TestCase):

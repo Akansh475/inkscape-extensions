@@ -1,5 +1,5 @@
 # coding=utf-8
-from jessyInk_mouseHandler import AddMouseHandler
+from jessyink_mouse_handler import AddMouseHandler
 from inkex.tester import ComparisonMixin, TestCase
 
 class JessyInkAddMouseHandlerTest(ComparisonMixin, TestCase):

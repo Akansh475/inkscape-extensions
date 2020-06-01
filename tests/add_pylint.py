@@ -33,6 +33,7 @@ DIR = os.path.dirname(__file__)
 REX = re.compile(r'<tr\ class=\"file\"\>.+?\">([^<]+\.py).+?\<\/tr\>')
 
 ARGS = ["--rcfile=" + os.path.join(DIR, '..', '.pylintrc')]
+stdout = sys.stdout
 
 class WritableObject(object):
     """dummy output stream for pylint"""
@@ -78,11 +79,7 @@ def add_lint(fname):
     adjust = 0
     scores = []
     for match in REX.finditer(html):
-        py_file = match.groups()[0]
-        score = run_pylint(py_file)
-        if score is None:
-            score = -11.0
-        print(f"{py_file}: {score}")
+        score = add_lint_one(match.groups()[0])
         scores.append(score)
         (start, end) = match.span()
         start += adjust
@@ -99,7 +96,18 @@ def add_lint(fname):
     with open(fname, 'w') as fhl:
         fhl.write(html)
 
+def add_lint_one(py_file):
+    score = run_pylint(py_file)
+    if score is None:
+        score = -11.0
+    return score
+
 if __name__ == '__main__':
-    for filename in sys.argv[1:]:
-        if os.path.isfile(filename):
-            add_lint(filename)
+    if len(sys.argv) == 2 and sys.argv[-1].endswith('.html'):
+        for filename in sys.argv[1:]:
+            if os.path.isfile(filename):
+                add_lint(filename)
+    else:
+        for my_py_file in sys.argv[1:]:
+            score = add_lint_one(my_py_file)
+            print(f"{score},{my_py_file}")

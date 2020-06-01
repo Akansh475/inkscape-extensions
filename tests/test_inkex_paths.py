@@ -312,6 +312,18 @@ class PathTest(TestCase):
                               'A 17.8412 11.8942 0 0 1 18 69.452 '
                               'A 17.8412 11.8942 0 0 1 35.8412 81.3462 Z')
 
+    def test_scale_relative_after_close(self):
+        """Zone close moves current position correctly after transform"""
+        # expected positions:
+        # - before scale:
+        #            M to (10,10), l by (+10,+10), Z back to (10,10), l by (+10,+10)
+        #       <=>  M to (10,10), L to (20,20),   Z back to (10,10), L to (20,20)
+        # - after scale:
+        #            M to (20,20), L to (40,40),   Z back to (20,20), L to (40,40)
+        #       <=>  M to (20,20), l by (+20,+20), Z back to (20,20), l by (+20,+20)
+        ret = Path('M 10,10 l 10,10 Z l 10,10').scale(2, 2)
+        self._assertPath(ret, 'M 20 20 l 20 20 Z l 20 20')
+
     def test_absolute(self):
         """Paths can be converted to absolute"""
         ret = Path("M 100 100 l 10 10 10 10 10 10")

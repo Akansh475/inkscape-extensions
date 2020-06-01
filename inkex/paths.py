@@ -1186,6 +1186,7 @@ class Path(list):
         previous = Vector2d()
         previous_new = Vector2d()
         first = Vector2d()
+        first_new = Vector2d()
 
         for i, seg in enumerate(self):  # type: PathCommand
             if i == 0:
@@ -1199,12 +1200,15 @@ class Path(list):
             else:
                 new_seg = seg.transform(transform)
 
+            if i == 0:
+                first_new = new_seg.end_point(first_new, previous_new)
+
             if inplace:
                 self[i] = new_seg
             else:
                 result.append(new_seg)
             previous = seg.end_point(first, previous)
-            previous_new = new_seg.end_point(first, previous_new)
+            previous_new = new_seg.end_point(first_new, previous_new)
         if inplace:
             return self
         return result

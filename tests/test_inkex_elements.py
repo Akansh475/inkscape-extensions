@@ -170,6 +170,21 @@ class RectTest(ElementTestCase):
     """Test extra functionality on a rectangle element"""
     tag = 'rect'
 
+    def test_parse(self):
+        """Test Rectangle parsed from XML"""
+        rect = Rectangle(attrib={
+            "x": "10px", "y": "20px",
+            "width": "100px", "height": "200px",
+            "rx": "15px", "ry": "30px" })
+        self.assertEqual(rect.left, 10)
+        self.assertEqual(rect.top, 20)
+        self.assertEqual(rect.right, 10+100)
+        self.assertEqual(rect.bottom, 20+200)
+        self.assertEqual(rect.width, 100)
+        self.assertEqual(rect.height, 200)
+        self.assertEqual(rect.rx, 15)
+        self.assertEqual(rect.ry, 30)
+
     def test_compose_transform(self):
         """Composed transformation"""
         self.assertEqual(self.elem.transform, Transform('rotate(16.097889)'))
@@ -211,6 +226,18 @@ class PathTest(ElementTestCase):
 class CircleTest(ElementTestCase):
     """Test extra functionality on a circle element"""
     tag = 'circle'
+
+    def test_parse(self):
+        """Test Circle parsed from XML"""
+        circle = Circle(attrib={"cx": "10px", "cy": "20px", "r": "30px"})
+        self.assertEqual(circle.center.x, 10)
+        self.assertEqual(circle.center.y, 20)
+        self.assertEqual(circle.radius, 30)
+        ellipse = Ellipse(attrib={"cx": "10px", "cy": "20px", "rx": "30px", "ry": "40px"})
+        self.assertEqual(ellipse.center.x, 10)
+        self.assertEqual(ellipse.center.y, 20)
+        self.assertEqual(ellipse.radius.x, 30)
+        self.assertEqual(ellipse.radius.y, 40)
 
     def test_new(self):
         """Test new circles"""
@@ -318,6 +345,27 @@ class GradientTests(ElementTestCase):
 
     translate11 = Transform('translate(1.0, 1.0)')
     translate22 = Transform('translate(2.0, 2.0)')
+
+    def test_parse(self):
+        """Gradients parsed from XML"""
+        values = [
+            (LinearGradient,
+             {'x1': '0px', 'y1': '1px', 'x2': '2px', 'y2': '3px'},
+             {'x1': 0.0,   'y1': 1.0,   'x2': 2.0,   'y2': 3.0},
+             ),
+            (RadialGradient,
+             {'cx': '0px', 'cy': '1px', 'fx': '2px', 'fy': '3px', 'r': '4px'},
+             {'cx': 0.0,   'cy': 1.0,   'fx': 2.0,   'fy': 3.0}
+            )]
+        for classname, attributes, expected in values:
+            grad = classname(attrib=attributes)
+            grad.apply_transform()  # identity transform
+            for key, value in expected.items():
+                assert float(grad.get(key)) == pytest.approx(value, 1e-3)
+            grad = classname(attrib=attributes)
+            grad = grad.interpolate(grad, 0.0)
+            for key, value in expected.items():
+                assert float(grad.get(key)) == pytest.approx(value, 1e-3)
 
     def test_apply_transform(self):
         """Transform gradients"""

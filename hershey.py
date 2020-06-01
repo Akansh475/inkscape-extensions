@@ -60,39 +60,37 @@ from inkex import Transform, Style, units
 from inkex import load_svg, Group, TextElement, FlowPara, \
     FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
 
-class Hershey(inkex.Effect):
-    """Heyshey Extension"""
-    def add_arguments(self, pars):
-        self.arg_parser.add_argument(
-            "--tab", \
+
+class Hershey( inkex.Effect ):
+    def __init__( self ):
+        super(Hershey, self).__init__()
+
+        self.arg_parser.add_argument( "--tab", \
             dest="mode", \
             default="render", \
-            help="The active tab or mode when Apply was pressed")
+            help="The active tab or mode when Apply was pressed" )
 
-        self.arg_parser.add_argument(
-            "--fontface", \
+        self.arg_parser.add_argument( "--fontface", \
+            dest="fontface", \
             default="HersheySans1", \
-            help="The selected font face when Apply was pressed")
+            help="The selected font face when Apply was pressed" )
 
-        self.arg_parser.add_argument(
-            "--otherfont", \
+        self.arg_parser.add_argument( "--otherfont", \
             dest="otherfont", \
-            help="Optional other font name or path to use")
-
-        self.arg_parser.add_argument(
-            "--preserve", \
+            default="", \
+            help="Optional other font name or path to use" )
+        
+        self.arg_parser.add_argument( "--preserve", \
             type=inkex.Boolean, dest="preserve_text", \
             default=False, \
             help="Preserve original text")
 
-        self.arg_parser.add_argument(
-            "--action",\
+        self.arg_parser.add_argument("--action",\
             dest="util_mode",\
             default="sample",
             help="The utility option selected")
 
-        self.arg_parser.add_argument(
-            "--text",\
+        self.arg_parser.add_argument("--text",\
             dest="sample_text",\
             default="sample",
             help="Text to use for font table")

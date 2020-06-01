@@ -35,7 +35,6 @@ The spec can be found here: http://www.autodesk.com/techpubs/autocad/acadr14/dxf
 
 from __future__ import print_function
 
-import dxf_templates
 import inkex
 from inkex import colors, bezier, Transform, Group, Layer, Use, PathElement, \
     Rectangle, Line, Circle, Ellipse
@@ -284,7 +283,8 @@ class DxfOutlines(inkex.OutputExtension):
         #              NURB Curves: A Guide for the Uninitiated By Philip J. Schneider
         #              The NURBS Book By Les Piegl and Wayne Tiller (Springer, 1995)
         # self.dxf_add("999\nDXF created by Inkscape\n")  # Some programs do not take comments in DXF files (KLayout 0.21.12 for example)
-        self.dxf_add(dxf_templates.r14_header)
+        with open(self.get_resource('dxf14_header.txt'), 'r') as fhl:
+            self.dxf_add(fhl.read())
         for node in self.svg.xpath('//svg:g'):
             if isinstance(node, Layer):
                 layer = node.label
@@ -297,7 +297,8 @@ class DxfOutlines(inkex.OutputExtension):
         self.dxf_add("  2\nLAYER\n  5\n2\n100\nAcDbSymbolTable\n 70\n%s\n" % len(self.layers))
         for i in range(len(self.layers)):
             self.dxf_add("  0\nLAYER\n  5\n%x\n100\nAcDbSymbolTableRecord\n100\nAcDbLayerTableRecord\n  2\n%s\n 70\n0\n  6\nCONTINUOUS\n" % (i + 80, self.layers[i]))
-        self.dxf_add(dxf_templates.r14_style)
+        with open(self.get_resource('dxf14_style.txt'), 'r') as fhl:
+            self.dxf_add(fhl.read())
 
         scale = eval(self.options.units)
         if not scale:
@@ -318,7 +319,8 @@ class DxfOutlines(inkex.OutputExtension):
             self.ROBO_output()
         if self.options.POLY:
             self.LWPOLY_output()
-        self.dxf_add(dxf_templates.r14_footer)
+        with open(self.get_resource('dxf14_footer.txt'), 'r') as fhl:
+            self.dxf_add(fhl.read())
         # Warn user if layer data seems wrong
         if self.options.layer_name and self.options.layer_option and self.options.layer_option == 'name':
             for layer in self.options.layer_name:

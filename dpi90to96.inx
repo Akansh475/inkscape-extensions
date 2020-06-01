@@ -2,13 +2,9 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
       <name>DPI 90 to 96</name>
       <id>org.inkscape.dpi90to96</id>
-      <param name="action" type="notebook" gui-hidden="true">
-        <page name="dpi_swicher" gui-text="Switch DPI">
-            <param name="switcher" type="optiongroup" appearance="combo" gui-hidden="true">
-                <option value="0">DPI Switch from 90 to 96</option>
-            </param>
-        </page>
-      </param>
+        <param name="switcher" type="optiongroup" appearance="combo" gui-hidden="true">
+          <option value="0">DPI Switch from 90 to 96</option>
+        </param>
       <effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>

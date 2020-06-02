@@ -57,11 +57,10 @@ class SetupTypographyCanvas(inkex.EffectExtension):
         self.create_horizontal_guideline("xheight", baseline + xheight)
         self.create_horizontal_guideline("descender", baseline - descender)
 
-        namedview = self.svg.find(inkex.addNS('namedview', 'sodipodi'))
-        namedview.set(inkex.addNS('document-units', 'inkscape'), 'px')
-        namedview.set(inkex.addNS('cx', 'inkscape'), str(emsize / 2.0))
-        namedview.set(inkex.addNS('cy', 'inkscape'), str(emsize / 2.0))
-
+        namedview = self.svg.namedview
+        namedview.set('inkscape:document-units', 'px')
+        namedview.set('inkscape:cx', str(emsize / 2.0))
+        namedview.set('inkscape:cy', str(emsize / 2.0))
 
 if __name__ == '__main__':
     SetupTypographyCanvas().run()

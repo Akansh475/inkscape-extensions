@@ -1403,11 +1403,7 @@ def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=N
     if style is None:
         style = "font-family:DejaVu Sans;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;fill:#000000;fill-opacity:1;stroke:none;"
     style += "font-size:{:f}px;".format(font_size)
-    attributes = {'x': str(x),
-                  inkex.addNS("space", "xml"): "preserve",
-                  'y': str(y),
-                  'style': style
-                  }
+    attributes = {'x': str(x), 'y': str(y), 'style': style}
     if gcodetools_tag is not None:
         attributes["gcodetools"] = str(gcodetools_tag)
 
@@ -1415,6 +1411,7 @@ def draw_text(text, x, y, group=None, style=None, font_size=10, gcodetools_tag=N
         group = options.doc_root
 
     text_elem = group.add(TextElement(**attributes))
+    text_elem.set("xml:space", "preserve")
     text = str(text).split("\n")
     for string in text:
         span = text_elem.add(Tspan(x=str(x), y=str(y)))
@@ -3444,19 +3441,19 @@ class Gcodetools(inkex.EffectExtension):
                 if self.layers[i] in self.orientation_points:
                     break
             if self.layers[i] not in self.orientation_points:
-                self.error("Orientation points for '{}' layer have not been found! Please add orientation points using Orientation tab!".format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
+                self.error(f"Orientation points for '{layer.label}' layer have not been found! Please add orientation points using Orientation tab!", "error")
             elif self.layers[i] in self.transform_matrix:
                 self.transform_matrix[layer] = self.transform_matrix[self.layers[i]]
                 self.Zcoordinates[layer] = self.Zcoordinates[self.layers[i]]
             else:
                 orientation_layer = self.layers[i]
                 if len(self.orientation_points[orientation_layer]) > 1:
-                    self.error("There are more than one orientation point groups in '{}' layer".format(orientation_layer.get(inkex.addNS('label', 'inkscape'))))
+                    self.error(f"There are more than one orientation point groups in '{orientation_layer.label}' layer")
                 points = self.orientation_points[orientation_layer][0]
                 if len(points) == 2:
                     points += [[[(points[1][0][1] - points[0][0][1]) + points[0][0][0], -(points[1][0][0] - points[0][0][0]) + points[0][0][1]], [-(points[1][1][1] - points[0][1][1]) + points[0][1][0], points[1][1][0] - points[0][1][0] + points[0][1][1]]]]
                 if len(points) == 3:
-                    print_("Layer '{}' Orientation points: ".format(orientation_layer.get(inkex.addNS('label', 'inkscape'))))
+                    print_("Layer '{orientation_layer.label}' Orientation points: ")
                     for point in points:
                         print_(point)
                     #    Zcoordinates definition taken from Orientatnion point 1 and 2
@@ -3487,7 +3484,7 @@ class Gcodetools(inkex.EffectExtension):
                     self.error("Orientation points are wrong! (if there are two orientation points they should not be the same. If there are three orientation points they should not be in a straight line.)", "error")
 
             self.transform_matrix_reverse[layer] = numpy.linalg.inv(self.transform_matrix[layer]).tolist()
-            print_("\n Layer '{}' transformation matrixes:".format(layer.get(inkex.addNS('label', 'inkscape'))))
+            print_(f"\n Layer '{layer.label}' transformation matrixes:")
             print_(self.transform_matrix)
             print_(self.transform_matrix_reverse)
 
@@ -3574,7 +3571,7 @@ class Gcodetools(inkex.EffectExtension):
                 if selected:
                     self.svg.selected[i.get("id")] = i
                 if isinstance(i, Layer):
-                    if i.get(inkex.addNS('label', 'inkscape')) == '3D':
+                    if i.label == '3D':
                         self.my3Dlayer = i
                     else:
                         self.layers += [i]
@@ -3584,24 +3581,24 @@ class Gcodetools(inkex.EffectExtension):
                     points = self.get_orientation_points(i)
                     if points is not None:
                         self.orientation_points[layer] = self.orientation_points[layer] + [points[:]] if layer in self.orientation_points else [points[:]]
-                        print_("Found orientation points in '{}' layer: {}".format(layer.get(inkex.addNS('label', 'inkscape')), points))
+                        print_(f"Found orientation points in '{layer.label}' layer: {points}")
                     else:
-                        self.error("Warning! Found bad orientation points in '{}' layer. Resulting Gcode could be corrupt!".format(layer.get(inkex.addNS('label', 'inkscape'))))
+                        self.error(f"Warning! Found bad orientation points in '{layer.label}' layer. Resulting Gcode could be corrupt!")
 
                 # Need to recognise old files ver 1.6.04 and earlier
                 elif i.get("gcodetools") == "Gcodetools tool definition" or i.get("gcodetools") == "Gcodetools tool definition":
                     tool = self.get_tool(i)
                     self.tools[layer] = self.tools[layer] + [tool.copy()] if layer in self.tools else [tool.copy()]
-                    print_("Found tool in '{}' layer: {}".format(layer.get(inkex.addNS('label', 'inkscape')), tool))
+                    print_(f"Found tool in '{layer.label}' layer: {tool}")
 
                 elif i.get("gcodetools") == "Gcodetools graffiti reference point":
                     point = self.get_graffiti_reference_points(i)
                     if point:
                         self.graffiti_reference_points[layer] = self.graffiti_reference_points[layer] + [point[:]] if layer in self.graffiti_reference_points else [point]
                     else:
-                        self.error("Warning! Found bad graffiti reference point in '{}' layer. Resulting Gcode could be corrupt!".format(layer.get(inkex.addNS('label', 'inkscape'))))
+                        self.error(f"Warning! Found bad graffiti reference point in '{layer.label}' layer. Resulting Gcode could be corrupt!")
 
-                elif i.tag == inkex.addNS('path', 'svg'):
+                elif isinstance(i, inkex.PathElement):
                     if "gcodetools" not in i.keys():
                         self.paths[layer] = self.paths[layer] + [i] if layer in self.paths else [i]
                         if i.get("id") in self.svg.selected.ids:
@@ -3614,7 +3611,7 @@ class Gcodetools(inkex.EffectExtension):
                         if j.get("gcodetools") == "In-out reference point":
                             self.in_out_reference_points.append(self.apply_transforms(j, j.path.to_superpath())[0][0][1])
 
-                elif i.tag == inkex.addNS("g", 'svg'):
+                elif isinstance(i, inkex.Group):
                     recursive_search(i, layer, (i.get("id") in self.svg.selected))
 
                 elif i.get("id") in self.svg.selected:
@@ -3655,10 +3652,11 @@ class Gcodetools(inkex.EffectExtension):
         p3 = []
         p = None
         for i in items:
-            if i.tag == inkex.addNS("g", 'svg') and i.get("gcodetools") == "Gcodetools orientation point (2 points)":
-                p2 += [i]
-            if i.tag == inkex.addNS("g", 'svg') and i.get("gcodetools") == "Gcodetools orientation point (3 points)":
-                p3 += [i]
+            if isinstance(i, inkex.Group):
+                if i.get("gcodetools") == "Gcodetools orientation point (2 points)":
+                    p2 += [i]
+                if i.get("gcodetools") == "Gcodetools orientation point (3 points)":
+                    p3 += [i]
         if len(p2) == 2:
             p = p2
         elif len(p3) == 3:
@@ -3733,10 +3731,11 @@ class Gcodetools(inkex.EffectExtension):
             if self.layers[i] != layer:
                 self.tools[layer] = self.tools[self.layers[i]]
             if len(self.tools[layer]) > 1:
-                self.error("Layer '{}' contains more than one tool!".format(self.layers[i].get(inkex.addNS('label', 'inkscape'))))
+                label = self.layers[i].label
+                self.error(f"Layer '{label}' contains more than one tool!")
             return self.tools[layer]
         else:
-            self.error("Can not find tool for '{}' layer! Please add one with Tools library tab!".format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
+            self.error(f"Can not find tool for '{layer.label}' layer! Please add one with Tools library tab!", "error")
 
     ################################################################################
     #
@@ -3852,17 +3851,15 @@ class Gcodetools(inkex.EffectExtension):
                 gcode += "(drilling dxfpoint)\nG00 Z{:f}\nG00 X{:f} Y{:f}\nG01 Z{:f} F{:f}\nG04 P{:f}\nG00 Z{:f}\n".format(self.options.Zsafe, point[0], point[1], self.Zcoordinates[layer][1], self.tools[layer][0]["penetration feed"], 0.2, self.options.Zsafe)
             return gcode
 
-        def get_path_properties(node, tags=None):
-            if tags is None:
-                tags = {inkex.addNS('desc', 'svg'): "Description",
-                        inkex.addNS('title', 'svg'): "Title"}
+        def get_path_properties(node):
             res = {}
             done = False
-            root = self.document.getroot()
-            while not done and node != root:
+            while not done and node != self.svg:
                 for i in node.getchildren():
-                    if i.tag in tags:
-                        res[tags[i.tag]] = i.text
+                    if isinstance(i, inkex.Desc):
+                        res["Description"] = i.text
+                    elif isinstance(i, inkex.Title):
+                        res["Title"] = i.text
                     done = True
                 node = node.getparent()
             return res
@@ -4089,7 +4086,7 @@ class Gcodetools(inkex.EffectExtension):
             if layer in self.selected_paths:
                 self.set_tool(layer)
                 if self.tools[layer][0]['diameter'] <= 0:
-                    self.error("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!".format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
+                    self.error(f"Tool diameter must be > 0 but tool's diameter on '{layer.label}' layer is not!", "error")
 
                 for path in self.selected_paths[layer]:
                     print_(("doing path", path.get("style"), path.get("d")))
@@ -4184,7 +4181,7 @@ class Gcodetools(inkex.EffectExtension):
             if layer in self.selected_paths:
                 self.set_tool(layer)
                 if self.tools[layer][0]['diameter'] <= 0:
-                    self.error("Tool diameter must be > 0 but tool's diameter on '{}' layer is not!".format(layer.get(inkex.addNS('label', 'inkscape'))), "error")
+                    self.error(f"Tool diameter must be > 0 but tool's diameter on '{layer.label}' layer is not!", "error")
                 tool = self.tools[layer][0]
                 for path in self.selected_paths[layer]:
                     lines = []
@@ -4339,14 +4336,12 @@ class Gcodetools(inkex.EffectExtension):
     # layer number n appears in XML as <svg:g id="layern" inkscape:label="layername">
     #
     # to create it, use
-    # Mylayer=etree.SubElement(self.document.getroot(), 'g') #Create a generic element
-    # Mylayer.set(inkex.addNS('label', 'inkscape'), "layername")   #Gives it a name
-    # Mylayer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')   #Tells Inkscape it's a layer
+    # Mylayer = self.svg.add(Layer.new('layername'))
     #
     # group appears in XML as <svg:g id="gnnnnn"> where nnnnn is a number
     #
     # to create it, use
-    # Mygroup=etree.SubElement(parent, inkex.addNS('g','svg'), {"gcodetools":"My group label"})
+    # Mygroup = parent.add(Group(gcodetools="My group label")
     # where parent may be the layer or a parent group. To get the parent group, you can use
     # parent = self.selected_paths[layer][0].getparent()
     ################################################################################
@@ -4775,7 +4770,7 @@ class Gcodetools(inkex.EffectExtension):
                     gcode_3Dright = self.my3Dlayer.add(Group(gcodetools="Gcode 3D R"))
 
                 for node in self.selected_paths[layer]:
-                    if node.tag == inkex.addNS('path', 'svg'):
+                    if isinstance(node, inkex.PathElement):
                         cspi = node.path.to_superpath()
                         # LT: Create my own list. n1LT[j] is for subpath j
                         nlLT = []

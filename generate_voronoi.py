@@ -115,7 +115,7 @@ class GenerateVoronoi(inkex.EffectExtension):
                     pts.append(voronoi.Site(x, y - bbox.height))
             elif x > -b and y > -b and x < bbox.width + b and y < bbox.height + b:
                 pts.append(voronoi.Site(x, y))  # leave border area blank
-            # dot = etree.SubElement(pattern, inkex.addNS('rect','svg'))
+            # dot = pattern.add(inkex.Rectangle())
             # dot.set('x', str(x-1))
             # dot.set('y', str(y-1))
             # dot.set('width', '2')
@@ -168,7 +168,7 @@ class GenerateVoronoi(inkex.EffectExtension):
             style = dict(inkex.Style.parse_str(obj.attrib['style']))
         style['fill'] = 'url(#%s)' % pattern.get('id')
         obj.attrib['style'] = str(inkex.Style(style))
-        if obj.tag == inkex.addNS('g', 'svg'):
+        if isinstance(obj, inkex.Group):
             for node in obj:
                 style = {}
                 if 'style' in node.attrib:

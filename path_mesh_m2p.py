@@ -21,6 +21,7 @@ Convert mesh gradient to path
 """
 
 import inkex
+from inkex.elements import MeshGradient
 
 # globals
 EPSILON = 1e-3
@@ -66,13 +67,6 @@ def join_path(csp1, sp1, csp2, sp2):
 def is_url(val):
     """Check whether attribute value is linked resource."""
     return val.startswith('url(#')
-
-
-def is_meshgradient(node):
-    """Check whether linked node is meshgradient definition."""
-    return (node.tag == inkex.addNS('meshgradient', 'svg') or
-            node.tag == inkex.addNS('meshGradient', 'svg') or
-            node.tag == inkex.addNS('mesh', 'svg'))
 
 
 def mesh_corners(meshgradient):
@@ -250,7 +244,7 @@ class MeshToPath(inkex.EffectExtension):
             if key in MG_PROPS:
                 if is_url(val):
                     paint_server = self.svg.getElementById(val)
-                    if res_type == 'meshgradient' and is_meshgradient(paint_server):
+                    if res_type == 'meshgradient' and isinstance(paint_server, MeshGradient):
                         result.append(paint_server)
         return result
 

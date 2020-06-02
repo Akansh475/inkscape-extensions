@@ -29,10 +29,8 @@ class Element(object):
     def __init__(self, node):
         self.node = node
 
-    def attr(self, val, ns=""):
+    def attr(self, val):
         """Get attribute"""
-        if ns:
-            val = inkex.addNS(val, ns)
         try:
             attr = float(self.node.get(val))
         except:
@@ -142,7 +140,6 @@ class AbstractShape(Element):
 class G(AbstractShape):
     def draw(self):
         # get layer label, if exists
-        gtype = self.attr("groupmode", "inkscape") or "group"
         if self.has_transform():
             trans_matrix = self.get_transform()
             self.ctx.transform(*trans_matrix)

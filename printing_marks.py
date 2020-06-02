@@ -75,7 +75,7 @@ class PrintingMarks(inkex.EffectExtension):
             style = {'stroke': colours[i], 'stroke-width': str(r / len(colours)),
                      'fill': 'none'}
             circle_attribs = {'style': str(inkex.Style(style)),
-                              inkex.addNS('label', 'inkscape'): name,
+                              'inkscape:label': name,
                               'cx': str(cx), 'cy': str(cy),
                               'r': str((r / len(colours)) * (i + 0.5))}
             parent.add(Circle(**circle_attribs))
@@ -114,7 +114,7 @@ class PrintingMarks(inkex.EffectExtension):
                  ' L ' + str(math.sin(i) * r) + ',' + str(math.cos(i) * r) + \
                  ' L ' + str(math.sin(i + 0.09) * r) + ',' + str(math.cos(i + 0.09) * r)
         regmark_attribs = {'style': str(inkex.Style(style)),
-                           inkex.addNS('label', 'inkscape'): name,
+                           'inkscape:label': name,
                            'transform': 'translate(' + str(cx) + ',' + str(cy) + ')',
                            'd': d}
         parent.add(inkex.PathElement(**regmark_attribs))
@@ -208,9 +208,8 @@ class PrintingMarks(inkex.EffectExtension):
         # Crop Mark
         if self.options.crop_marks:
             # Create a group for Crop Mark
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'CropMarks',
-                         'id': 'CropMarks'}
-            g_crops = layer.add(inkex.Group(**g_attribs))
+            g_crops = layer.add(inkex.Group(id='CropMarks'))
+            g_crops.label = 'CropMarks'
 
             # Top left Mark
             self.draw_crop_line(bbox.left, offset_top,
@@ -247,7 +246,7 @@ class PrintingMarks(inkex.EffectExtension):
         # Bleed Mark
         if self.options.bleed_marks:
             # Create a group for Bleed Mark
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'BleedMarks',
+            g_attribs = {'inkscape:label': 'BleedMarks',
                          'id': 'BleedMarks'}
             g_bleed = layer.add(inkex.Group(**g_attribs))
 
@@ -286,7 +285,7 @@ class PrintingMarks(inkex.EffectExtension):
         # Registration Mark
         if self.options.reg_marks:
             # Create a group for Registration Mark
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'RegistrationMarks',
+            g_attribs = {'inkscape:label': 'RegistrationMarks',
                          'id': 'RegistrationMarks'}
             g_center = layer.add(inkex.Group(**g_attribs))
 
@@ -317,7 +316,7 @@ class PrintingMarks(inkex.EffectExtension):
         # Star Target
         if self.options.star_target:
             # Create a group for Star Target
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'StarTarget',
+            g_attribs = {'inkscape:label': 'StarTarget',
                          'id': 'StarTarget'}
             g_center = layer.add(inkex.Group(**g_attribs))
 
@@ -347,7 +346,7 @@ class PrintingMarks(inkex.EffectExtension):
         # Colour Bars
         if self.options.colour_bars:
             # Create a group for Colour Bars
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'ColourBars',
+            g_attribs = {'inkscape:label': 'ColourBars',
                          'id': 'PrintingColourBars'}
             g_center = layer.add(inkex.Group(**g_attribs))
 
@@ -381,7 +380,7 @@ class PrintingMarks(inkex.EffectExtension):
         # Page Information
         if self.options.page_info:
             # Create a group for Page Information
-            g_attribs = {inkex.addNS('label', 'inkscape'): 'PageInformation',
+            g_attribs = {'inkscape:label': 'PageInformation',
                          'id': 'PageInformation'}
             g_pag_info = layer.add(inkex.Group(**g_attribs))
             y_margin = max(bmb + offset, self.min_mark_margin)

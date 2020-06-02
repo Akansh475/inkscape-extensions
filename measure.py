@@ -94,14 +94,13 @@ class MeasureLength(inkex.EffectExtension):
             self.options.method(node, str(val))
 
     def method_textonpath(self, node, lenstr):
-        _id = node.get('id')
         startOffset = self.options.startOffset
         if startOffset == "custom":
             startOffset = str(self.options.startOffsetCustom) + '%'
         if self.options.mtype == "length":
-            self.add_textonpath(self.group, 0, 0, lenstr + ' ' + self.options.unit, _id, self.options.anchor, startOffset, self.options.offset)
+            self.add_textonpath(self.group, 0, 0, lenstr + ' ' + self.options.unit, node, self.options.anchor, startOffset, self.options.offset)
         else:
-            self.add_textonpath(self.group, 0, 0, lenstr + ' ' + self.options.unit + '^2', _id, self.options.anchor, startOffset, self.options.offset)
+            self.add_textonpath(self.group, 0, 0, lenstr + ' ' + self.options.unit + '^2', node, self.options.anchor, startOffset, self.options.offset)
 
     def method_fixedtext(self, node, lenstr):
         _id = node.get('id')
@@ -118,9 +117,9 @@ class MeasureLength(inkex.EffectExtension):
             ty = csp[0][0][1][1]
             anchor = 'start'
         if self.options.mtype == "length":
-            self.add_fixedtext(self.group, tx, ty, lenstr + ' ' + self.options.unit, _id, anchor, -int(self.options.angle), self.options.offset + self.options.fontsize / 2)
+            self.add_fixedtext(self.group, tx, ty, lenstr + ' ' + self.options.unit, anchor, -int(self.options.angle), self.options.offset + self.options.fontsize / 2)
         else:
-            self.add_fixedtext(self.group, tx, ty, lenstr + ' ' + self.options.unit + '^2', _id, anchor, -int(self.options.angle), -self.options.offset + self.options.fontsize / 2)
+            self.add_fixedtext(self.group, tx, ty, lenstr + ' ' + self.options.unit + '^2', anchor, -int(self.options.angle), -self.options.offset + self.options.fontsize / 2)
 
     def method_presets(self, node, lenstr):
         """A preset option for alignments"""
@@ -154,14 +153,14 @@ class MeasureLength(inkex.EffectExtension):
         node.set('d', 'm %s,%s %s,0 %s,0 m %s,%s 0,%s 0,%s' % (str(x - l), str(y), str(l), str(l), str(-l), str(-l), str(l), str(l)))
         node.set('style', 'stroke:#000000;fill:none;stroke-width:%s' % str(0.5 * scale))
 
-    def add_textonpath(self, node, x, y, text, _id, anchor, startOffset, dy=0):
+    def add_textonpath(self, node, x, y, text, _node, anchor, startOffset, dy=0):
         new = node.add(TextPath())
         s = {'text-align': 'center', 'vertical-align': 'bottom',
              'text-anchor': anchor, 'font-size': str(self.options.fontsize),
              'fill-opacity': '1.0', 'stroke': 'none',
              'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
-        new.set('style', str(inkex.Style(s)))
-        new.set(inkex.addNS('href', 'xlink'), '#' + _id)
+        new.style = s
+        new.href = _node
         new.set('startOffset', startOffset)
         new.set('dy', str(dy))  # dubious merit
         # new.append(tp)
@@ -174,14 +173,14 @@ class MeasureLength(inkex.EffectExtension):
         node.set('x', str(x))
         node.set('y', str(y))
 
-    def add_fixedtext(self, node, x, y, text, _id, anchor, angle, dy=0):
+    def add_fixedtext(self, node, x, y, text, anchor, angle, dy=0):
         new = node.add(Tspan())
         new.set('sodipodi:role', 'line')
         s = {'text-align': 'center', 'vertical-align': 'bottom',
              'text-anchor': anchor, 'font-size': str(self.options.fontsize),
              'fill-opacity': '1.0', 'stroke': 'none',
              'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
-        new.set('style', str(inkex.Style(s)))
+        new.style = s
         new.set('dy', str(dy))
         if text[-2:] == "^2":
             new.append(Tspan.superscript("2"))

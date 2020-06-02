@@ -54,7 +54,8 @@ class PrintWin32Vector(inkex.EffectExtension):
         self.visibleLayers = True       # print only visible layers
 
     def process_shape(self, node, mat):
-        rgb = (0,0,0)                   # stroke color
+        """Process shape"""
+        rgb = (0, 0, 0)                 # stroke color
         fillcolor = None                # fill color
         stroke = 1                      # pen width in printer pixels
         # Very NB : If the pen width is greater than 1 then the output will Not be a vector output !
@@ -133,12 +134,11 @@ class PrintWin32Vector(inkex.EffectExtension):
         if trans or x or y:
             self.groupmat.append(Transform(self.groupmat[-1]) * mat)
         # get referenced node
-        refid = node.get(inkex.addNS('href','xlink'))
-        refnode = self.getElementById(refid[1:])
+        refnode = node.href
         if refnode is not None:
-            if refnode.tag == inkex.addNS('g','svg'):
+            if isinstance(refnode, inkex.Group):
                 self.process_group(refnode)
-            elif refnode.tag == inkex.addNS('use', 'svg'):
+            elif refnode.tag == 'svg:use':
                 self.process_clone(refnode)
             else:
                 self.process_shape(refnode, self.groupmat[-1])
@@ -147,7 +147,7 @@ class PrintWin32Vector(inkex.EffectExtension):
             self.groupmat.pop()
 
     def process_group(self, group):
-        if group.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
+        if isinstance(group, inkex.Layer):
             style = group.style
             if 'display' in style:
                 if style['display'] == 'none' and self.visibleLayers:

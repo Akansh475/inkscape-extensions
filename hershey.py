@@ -57,8 +57,8 @@ from copy import deepcopy
 import inkex
 from inkex import Transform, Style, units
 
-from inkex import load_svg, Group, TextElement, FlowPara, \
-    FlowSpan, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
+from inkex import load_svg, Group, TextElement, FlowPara, SVGfont, FontFace,\
+    FlowSpan, Glyph, MissingGlyph, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
 
 
 class Hershey(inkex.Effect):
@@ -509,10 +509,9 @@ Evil Mad Scientist Laboratories
 
         for node in node_list:
             if isinstance(node, Defs):
-#             if node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
                 return self.parse_svg_font(node) # Recursive call
 
-            if node.tag == inkex.addNS('font', 'svg') or node.tag == 'font':
+            if isinstance(node, SVGfont):
                 '''
                 === Internal structure for storing font information ===
 
@@ -574,13 +573,9 @@ Evil Mad Scientist Laboratories
                     geometry['horiz_adv_x'] = float(horiz_adv_x)
                 # Note: case of no horiz_adv_x value is not handled.
 
-                glyph_tag = inkex.addNS('glyph', 'svg')
-                ff_tag = inkex.addNS('font-face', 'svg')
-                mg_tag = inkex.addNS('missing-glyph', 'svg')
-
                 for element in node:
 
-                    if element.tag == 'glyph' or element.tag == glyph_tag:
+                    if isinstance(element, Glyph):
                         # First, because it is the most common element
                         try:
                             uni_text = element.get('unicode')
@@ -610,7 +605,7 @@ Evil Mad Scientist Laboratories
                         glyph_dict['d'] = element.get('d') # SVG path data
                         glyphs[uni_text] = glyph_dict
 
-                    elif element.tag == 'font-face' or element.tag == ff_tag:
+                    elif isinstance(element, FontFace):
                         digest['font_family'] = element.get('font-family')
                         units_per_em = element.get('units-per-em')
 
@@ -636,7 +631,7 @@ Evil Mad Scientist Laboratories
                         geometry['underline_position'] = element.get('underline-position')
                         '''
 
-                    elif element.tag == 'missing-glyph' or element.tag == mg_tag:
+                    elif isinstance(element, MissingGlyph):
                         horiz_adv_x = element.get('horiz-adv-x')
 
                         if horiz_adv_x is not None:
@@ -1461,10 +1456,10 @@ Evil Mad Scientist Laboratories
 
                 # Group generated paths together, to make the rendered letters
                 # easier to manipulate in Inkscape once generated:
-                g_attribs = {inkex.addNS('label', 'inkscape'):'Hershey Text'}
                 parent = node.getparent()
 
-                group = parent.add(Group(**g_attribs))
+                group = parent.add(Group())
+                group.label = 'Hershey Text'
 
                 style = {'stroke' : '#000000', 'fill' : 'none', \
                     'stroke-linecap' : 'round', 'stroke-linejoin' : 'round'}
@@ -1524,14 +1519,14 @@ Evil Mad Scientist Laboratories
                         # as a rotated rectangle -- for which text *should* flow in a diamond shape.
                         # For the time being, we skip these and issue a warning.
                         #
-                        # refid = flowref.get(inkex.addNS('href', 'xlink'))
+                        # refid = flowref.get('xlink:href')
                         # if refid is not None:
                         #     # [1:] to ignore leading '#' in reference
                         #     path = '//*[@id="%s"]' % refid[1:]
                         #     refnode = flowref.xpath(path)
                         #     if refnode is not None:
                         #         refnode = refnode[0]
-                        #         if refnode.tag == inkex.addNS("rect", "svg"):
+                        #         if isinstance(refnode, Rectangle):
                         #             start_x = refnode.get('x")
                         #             start_y = refnode.get('y")
                         #             rect_height = refnode.get('height")

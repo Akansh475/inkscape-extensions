@@ -80,8 +80,8 @@ class SvgFontToLayers(inkex.EffectExtension):
             # Option 1:
             # Using clone (svg:use) as childnode of svg:glyph
 
-            # use = self.get_or_create(glyph, inkex.addNS('use', 'svg'))
-            # use.set(inkex.addNS('href', 'xlink'), "#"+group.get("id"))
+            # use = self.get_or_create(glyph, inkex.Use())
+            # use.href = group
             # TODO: This code creates <use> nodes but they do not render on svg fonts dialog. why?
 
             ############################

@@ -52,35 +52,32 @@ def draw_SVG_circle(rad, centre, params, style, name, parent):  # draw an SVG ci
         circ_style = {'stroke': style.c_col, 'stroke-width': str(style.c_th), 'fill': style.c_fill}
 
     cx, cy = get_cartesian_pt(centre, params)
-    circ_attribs = {'style': str(inkex.Style(circ_style)),
-                    inkex.addNS('label', 'inkscape'): name,
-                    'cx': str(cx), 'cy': str(cy),
-                    'r': str(r)}
-    parent.add(Circle(**circ_attribs))
+    circ_attribs = {'cx': str(cx), 'cy': str(cy), 'r': str(r)}
+    elem = parent.add(Circle(**circ_attribs))
+    elem.style = circ_style
+    elem.label = name
 
 
 # draw an SVG triangle given in trilinar coords
 def draw_SVG_tri(vert_mat, params, style, name, parent):
     p1, p2, p3 = get_cartesian_tri(vert_mat, params)  # get the vertex matrix in cartesian points
-    tri_style = {'stroke': style.l_col, 'stroke-width': str(style.l_th), 'fill': style.l_fill}
-    tri_attribs = {'style': str(inkex.Style(tri_style)),
-                   inkex.addNS('label', 'inkscape'): name,
-                   'd': 'M ' + str(p1[0]) + ',' + str(p1[1]) +
-                        ' L ' + str(p2[0]) + ',' + str(p2[1]) +
-                        ' L ' + str(p3[0]) + ',' + str(p3[1]) +
-                        ' L ' + str(p1[0]) + ',' + str(p1[1]) + ' z'}
-    parent.add(PathElement(**tri_attribs))
+    elem = parent.add(PathElement())
+    elem.path = 'M ' + str(p1[0]) + ',' + str(p1[1]) +\
+                ' L ' + str(p2[0]) + ',' + str(p2[1]) +\
+                ' L ' + str(p3[0]) + ',' + str(p3[1]) +\
+                ' L ' + str(p1[0]) + ',' + str(p1[1]) + ' z'
+    elem.style = {'stroke': style.l_col, 'stroke-width': str(style.l_th), 'fill': style.l_fill}
+    elem.label = name
 
 
 # draw an SVG line segment between the given (raw) points
 def draw_SVG_line(a, b, style, name, parent):
     (x1, y1) = a
     (x2, y2) = b
-    line_style = {'stroke': style.l_col, 'stroke-width': str(style.l_th), 'fill': style.l_fill}
-    line_attribs = {'style': str(inkex.Style(line_style)),
-                    inkex.addNS('label', 'inkscape'): name,
-                    'd': 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)}
-    parent.add(PathElement(**line_attribs))
+    line = parent.add(PathElement())
+    line.style = {'stroke': style.l_col, 'stroke-width': str(style.l_th), 'fill': style.l_fill}
+    line.path = 'M ' + str(x1) + ',' + str(y1) + ' L ' + str(x2) + ',' + str(y2)
+    line.lavel = name
 
 
 # lines from each vertex to a corresponding point in trilinears
@@ -244,10 +241,8 @@ class DrawFromTriangle(inkex.EffectExtension):
 
             # CREATE A GROUP TO HOLD ALL GENERATED ELEMENTS IN
             # Hold relative to point A (pt[0])
-            group_translation = 'translate(' + str(pts[0][0]) + ',' + str(pts[0][1]) + ')'
-            group_attribs = {inkex.addNS('label', 'inkscape'): 'TriangleElements',
-                             'transform': group_translation}
-            layer = self.svg.get_current_layer().add(inkex.Group(**group_attribs))
+            layer = self.svg.get_current_layer().add(inkex.Group.new('TriangleElements'))
+            layer.transform = 'translate(' + str(pts[0][0]) + ',' + str(pts[0][1]) + ')'
 
             # GET METRICS OF THE TRIANGLE
             # vertices in the local coordinates (set pt[0] to be the origin)

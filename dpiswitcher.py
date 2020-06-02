@@ -137,7 +137,7 @@ def check_text_on_path(svg, element, scale_x, scale_y):
                 element.set('style', str(inkex.Style(sdict)))
             # inner tspans
             for child in element.iterdescendants():
-                if child.tag == inkex.addNS('tspan', 'svg'):
+                if isinstance(element, inkex.Tspan):
                     sdict = dict(inkex.Style.parse_str(child.get('style')))
                     if prop in sdict:
                         sdict[prop] = float(sdict[prop]) * descrim

@@ -160,26 +160,21 @@ class ParamCurves(inkex.EffectExtension):
         pars.add_argument("--tab", default="sampling")
 
     def effect(self):
-        for id, node in self.svg.selected.items():
-            if node.tag == inkex.addNS('rect', 'svg'):
+        for node in self.svg.selected:
+            if isinstance(node, inkex.Rectangle):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.PathElement()
                 x = float(node.get('x'))
                 y = float(node.get('y'))
-                w = float(node.get('width'))
-                h = float(node.get('height'))
+                width = float(node.get('width'))
+                height = float(node.get('height'))
 
                 # copy attributes of rect
-                s = node.get('style')
-                if s:
-                    newpath.set('style', s)
-
-                t = node.get('transform')
-                if t:
-                    newpath.set('transform', t)
+                newpath.style = node.style
+                newpath.transform = node.transform
 
                 # top and bottom were exchanged
-                newpath.set('d', str(inkex.Path(
+                newpath.path = \
                         drawfunction(self.options.t_start,
                                      self.options.t_end,
                                      self.options.xleft,
@@ -187,12 +182,12 @@ class ParamCurves(inkex.EffectExtension):
                                      self.options.ybottom,
                                      self.options.ytop,
                                      self.options.samples,
-                                     w, h, x, y + h,
+                                     width, height, x, y + height,
                                      self.options.fofx,
                                      self.options.fofy,
                                      self.options.times2pi,
                                      self.options.isoscale,
-                                     self.options.drawaxis))))
+                                     self.options.drawaxis)
                 newpath.set('title', self.options.fofx + " " + self.options.fofy)
 
                 # newpath.set('desc', '!func;' + self.options.fofx + ';' + self.options.fofy + ';'

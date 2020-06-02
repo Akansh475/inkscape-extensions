@@ -69,8 +69,8 @@ def export_MTEXT():
                 attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
             elif vals[groups['21']][0] == -1.0:
                 attribs.update({'transform': 'rotate (%f %f %f)' % (90, x, y)})
-        attribs.update({inkex.addNS('linespacing', 'sodipodi'): '125%'})
-        node = etree.SubElement(layer, 'text', attribs)
+        node = layer.add(inkex.Text(**attribs))
+        node.set('sodipodi:linespacing', '125%')
         text = ''
         if vals[groups['3']]:
             for i in range(0, len(vals[groups['3']])):
@@ -79,11 +79,13 @@ def export_MTEXT():
             text += vals[groups['1']][0]
         found = text.find(r'\P')  # new line
         while found > -1:
-            tspan = etree.SubElement(node, 'tspan', {inkex.addNS('role', 'sodipodi'): 'line'})
+            tspan = node.add(inkex.Tspan())
+            tspan.set('sodipodi:role', 'line')
             tspan.text = text[:found]
             text = text[(found + 2):]
             found = text.find(r'\P')
-        tspan = etree.SubElement(node, 'tspan', {inkex.addNS('role', 'sodipodi'): 'line'})
+        tspan = node.add(inkex.Tspan())
+        tspan.set('sodipodi:role', 'line')
         tspan.text = text
 
 
@@ -303,7 +305,8 @@ def export_DIMENSION():
         if dx == 0:
             attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
         node = etree.SubElement(layer, 'text', attribs)
-        tspan = etree.SubElement(node, 'tspan', {inkex.addNS('role', 'sodipodi'): 'line'})
+        tspan = node.add(inkex.Tspan())
+        tspan.set('sodipodi:role', 'line')
         tspan.text = str(float('%.2f' % d))
 
 
@@ -312,12 +315,11 @@ def export_INSERT():
     if vals[groups['2']] and vals[groups['10']] and vals[groups['20']]:
         x = vals[groups['10']][0] + scale * xmin
         y = vals[groups['20']][0] - scale * ymin - height
-        attribs = {inkex.addNS('href', 'xlink'): '#' + quote(vals[groups['2']][0].replace(" ", "_").encode("utf-8"))}
-        tform = 'translate(%f, %f)' % (x, y)
+        elem = layer.add(inkex.Use())
+        elem.set('xlink:href', '#' + quote(vals[groups['2']][0].replace(" ", "_").encode("utf-8")))
+        elem.transform = 'translate(%f, %f)' % (x, y)
         if vals[groups['41']] and vals[groups['42']]:
-            tform += ' scale(%f, %f)' % (vals[groups['41']][0], vals[groups['42']][0])
-        attribs.update({'transform': tform})
-        etree.SubElement(layer, 'use', attribs)
+            elem.transform.add_scale(vals[groups['41']][0], vals[groups['42']][0])
 
 
 def export_BLOCK():
@@ -363,9 +365,10 @@ def generate_ellipse(xc, yc, xm, ym, w, a1, a2):
 
 
 def generate_gcodetools_point(xc, yc):
-    path = 'm %s,%s 2.9375,-6.34375 0.8125,1.90625 6.84375,-6.84375 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.8125 z' % (xc, yc)
-    attribs = {'d': path, inkex.addNS('dxfpoint', 'inkscape'): '1', 'style': 'stroke:none;fill:#ff0000'}
-    etree.SubElement(layer, 'path', attribs)
+    elem = layer.add(inkex.PathElement())
+    elem.style = 'stroke:none;fill:#ff0000'
+    elem.set('inkscape:dxfpoint', '1')
+    elem.path = 'm %s,%s 2.9375,-6.34375 0.8125,1.90625 6.84375,-6.84375 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.8125 z' % (xc, yc)
 
 
 #   define DXF Entities and specify which Group Codes to monitor
@@ -437,7 +440,8 @@ class DxfInput(inkex.InputExtension):
         options = self.options
 
         doc = self.get_template(width=210 * 96 / 25.4, height=297 * 96 / 25.4)
-        defs = doc.getroot().defs
+        svg = doc.getroot()
+        defs = svg.defs
         marker = etree.SubElement(defs, 'marker', {'id': 'DistanceX', 'orient': 'auto', 'refX': '0.0', 'refY': '0.0', 'style': 'overflow:visible'})
         etree.SubElement(marker, 'path', {'d': 'M 3,-3 L -3,3 M 0,-5 L  0,5', 'style': 'stroke:#000000; stroke-width:0.5'})
         pattern = etree.SubElement(defs, 'pattern', {'id': 'Hatch', 'patternUnits': 'userSpaceOnUse', 'width': '8', 'height': '8', 'x': '0', 'y': '0'})
@@ -481,8 +485,7 @@ class DxfInput(inkex.InputExtension):
                     xmax = get_group('10')
             if flag == 1 and line[0] == '2':
                 layername = line[1]
-                attribs = {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): '%s' % layername}
-                layer_nodes[layername] = etree.SubElement(doc.getroot(), 'g', attribs)
+                layer_nodes[layername] = svg.add(inkex.Layer.new(layername))
             if flag == 2 and line[0] == '2':
                 linename = line[1]
                 linetypes[linename] = []
@@ -515,13 +518,13 @@ class DxfInput(inkex.InputExtension):
             scale = float(options.scale)  # manual scale factor
             xmin = float(options.xmin)
             ymin = float(options.ymin)
-        doc.getroot().description('%s - scale = %f, origin = (%f, %f), method = %s' % (
+        svg.description('%s - scale = %f, origin = (%f, %f), method = %s' % (
             os.path.basename(options.input_file), scale, xmin, ymin, options.scalemethod))
         scale *= 96.0 / 25.4  # convert from mm to pixels
 
         if '0' not in layer_nodes:
-            attribs = {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): '0'}
-            layer_nodes['0'] = etree.SubElement(doc.getroot(), 'g', attribs)
+            layer_nodes['0'] = svg.add(inkex.Layer.new('0'))
+
             layer_colors['0'] = 7
 
         for linename in linetypes.keys():  # scale the dashed lines
@@ -571,8 +574,7 @@ class DxfInput(inkex.InputExtension):
                         if not vals[groups['8']][0]:
                             vals[groups['8']][0] = '0'  # use default name
                         if vals[groups['8']][0] not in layer_nodes:
-                            attribs = {inkex.addNS('groupmode', 'inkscape'): 'layer', inkex.addNS('label', 'inkscape'): '%s' % vals[groups['8']][0]}
-                            layer_nodes[vals[groups['8']][0]] = etree.SubElement(doc.getroot(), 'g', attribs)
+                            layer_nodes[vals[groups['8']][0]] = svg.add(inkex.Layer.new(vals[groups['8']][0]))
                         layer = layer_nodes[vals[groups['8']][0]]
                     color = '#000000'  # default color
                     if vals[groups['8']]:

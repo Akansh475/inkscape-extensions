@@ -14,7 +14,7 @@ dpi: 96
 layout-disposition: bg-el-norepeat
 layout-position-anchor: tl</desc>
     </rect>
-  <g transform="translate(100.0,600.0)" inkscape:label="TriangleElements"/></g>
+  <g transform="translate(100, 600)" inkscape:label="TriangleElements"/></g>
   <g inkscape:groupmode="layer" id="layer2" inkscape:label="Slide2" style="display:inline">
     <circle style="display:inline;fill:#000080;stroke:none" id="c1" cx="150" cy="450" r="50" inkscape:label="#path3736"/>
     <ellipse style="display:inline;fill:none;stroke:#ff0000;stroke-width:16" id="c2" cx="400" cy="450" rx="100" ry="50" inkscape:label="#path3738"/>

@@ -83,7 +83,7 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
     @property
     def docname(self):
         """Get the document name suitable for export"""
-        return self.svg.get(inkex.addNS('docname', u'sodipodi')) or 'document'
+        return self.svg.get('sodipodi:docname') or 'document'
 
     def save(self, stream):
 

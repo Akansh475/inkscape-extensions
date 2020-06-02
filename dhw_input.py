@@ -27,9 +27,10 @@ Import a DHW file from ACECAD DigiMemo, a hardware based digitiser
 import struct
 
 import inkex
-from inkex import AbortExtension, errormsg, addNS, Group, Polyline
+from inkex.utils import NSS
+from inkex import AbortExtension, errormsg, Group, Polyline
 
-NSDM = 'http://github.com/nikitakit/DM2SVG'
+NSS['dm'] = 'http://github.com/nikitakit/DM2SVG'
 
 class DhwInput(inkex.InputExtension):
     """Open DHW files and convert to svg on the fly"""
@@ -91,7 +92,7 @@ class DhwInput(inkex.InputExtension):
 
                 poly = layer.add(Polyline())
                 poly.path = coords
-                poly.set(addNS('timestamp', NSDM), str(timestamp))
+                poly.set('dm:timestamp', timestamp)
 
         return doc
 

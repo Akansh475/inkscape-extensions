@@ -119,16 +119,15 @@ class ExportSlices(inkex.EffectExtension):
         return the nodes of the rectangles.
         """
         # get layer we intend to slice
-        document = self.document
         slice_node = None
-        slice_layer = document.findall(inkex.addNS('g', 'svg'))
+        slice_layer = self.svg.findall('svg:g')
         for node in slice_layer:
             label_value = node.label 
             if label_value == layer_name:
                 slice_node = node
 
         if slice_node is not None:
-            return slice_node.findall(inkex.addNS('rect', "svg"))
+            return slice_node.findall('svg:rect')
         return slice_node
 
 

@@ -33,13 +33,12 @@ from lxml import etree
 from ..paths import Path
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform, BoundingBox
-from ..utils import PY3, NSS, addNS, removeNS, InitSubClassPy3, FragmentError
+from ..utils import PY3, NSS, addNS, removeNS, splitNS, FragmentError
 
 try:
     from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
 except ImportError:
     overload = lambda x: x
-
 
 class NodeBasedLookup(etree.PythonElementClassLookup):
     """
@@ -52,12 +51,12 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
     @classmethod
     def register_class(cls, klass):
         """Register the given class using it's attached tag name"""
-        cls.lookup_table[removeNS(klass.tag_name, url=True)].append(klass)
+        cls.lookup_table[splitNS(klass.tag_name)].append(klass)
 
     def lookup(self, doc, element): # pylint: disable=unused-argument
         """Lookup called by lxml when assigning elements their object class"""
         try:
-            for cls in reversed(self.lookup_table[removeNS(element.tag, url=True)]):
+            for cls in reversed(self.lookup_table[splitNS(element.tag)]):
                 if cls._is_class_element(element): # pylint: disable=protected-access
                     return cls
         except TypeError:
@@ -82,9 +81,6 @@ def load_svg(stream):
 
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
-    # TODO: The next two lines are only required for python2, remove when py3 only
-    __metaclass__ = InitSubClassPy3
-    @classmethod
     def __init_subclass__(cls):
         if cls.tag_name:
             NodeBasedLookup.register_class(cls)
@@ -110,7 +106,7 @@ class BaseElement(etree.ElementBase):
         obj.update(**attrs)
         return obj
 
-    NAMESPACE = property(lambda self: removeNS(self.tag_name, url=True)[0])
+    NAMESPACE = property(lambda self: splitNS(self.tag_name)[0])
     PARSER = SVG_PARSER
     WRAPPED_ATTRS = (
         # (prop_name, [optional: attr_name], cls)

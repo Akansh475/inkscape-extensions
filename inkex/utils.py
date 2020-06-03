@@ -157,15 +157,6 @@ class DependencyError(NotImplementedError):
 class FragmentError(Exception):
     """Raised when trying to do rooty things on an xml fragment"""
 
-# TODO: Remove when python2 support is dropped
-class InitSubClassPy3(type):
-    """Provide a poly-fill for python3 __init_subclass__()"""
-    def __init__(cls, name, bases, dct):
-        if '__metaclass__' not in cls.__dict__:
-            if hasattr(cls, '__init_subclass__'):
-                cls.__init_subclass__()
-        super(InitSubClassPy3, cls).__init__(name, bases, dct)
-
 def to(kind):  # pylint: disable=invalid-name
     """
     Decorator which will turn a generator into a list, tuple or other object type.
@@ -200,17 +191,19 @@ def addNS(tag, ns=None):  # pylint: disable=invalid-name
     return tag
 
 
-def removeNS(name, url=False):  # pylint: disable=invalid-name
+def removeNS(name):  # pylint: disable=invalid-name
     """The reverse of addNS, finds any namespace and returns tuple (ns, tag)"""
-    if name:
-        if name[0] == '{':
-            (nsp, tag) = name[1:].split('}', 1)
-            return (nsp, tag) if url else (SSN.get(nsp, 'svg'), tag)
-        if ':' in name:
-            (nsp, tag) = name.rsplit(':', 1)
-            return (NSS[nsp], tag) if url else (nsp, tag)
-    return (NSS['svg'], name) if url else ('svg', name)
+    if name[0] == '{':
+        (url, tag) = name[1:].split('}', 1)
+        return SSN.get(url, 'svg'), tag
+    if ':' in name:
+        return name.rsplit(':', 1)
+    return 'svg', name
 
+def splitNS(name): # pylint: disable=invalid-name
+    """Like removeNS, but returns a url instead of a prefix"""
+    (prefix, tag) = removeNS(name)
+    return (NSS[prefix], tag)
 
 class classproperty(object):  # pylint: disable=invalid-name, too-few-public-methods
     """Combine classmethod and property decorators"""

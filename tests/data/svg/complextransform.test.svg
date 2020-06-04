@@ -61,9 +61,9 @@
           <polygon points="0,100 50,25 50,75 100,0" id="J" />
         </g>
       </g>
-      <g id="K">
-        <g id="L">
-          <line x1="5" y1="5" x2="5.5" y2="10" id="M" transform="translate(10, 10);" />
+      <g id="K" inkscape:label="Key">
+        <g id="L" inkscape:label="Elm">
+          <line x1="5" y1="5" x2="5.5" y2="10" id="M" transform="translate(10, 10);" inkscape:label="Mine" />
         </g>
       </g>
     </g>

@@ -93,7 +93,11 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         if eid is not None:
             eid = eid.strip()[4:-1] if eid.startswith('url(') else eid
             eid = eid.lstrip('#')
-        return self.getElement('//{}[@id="{}"]'.format(elm, eid))
+        return self.getElement(f'//{elm}[@id="{eid}"]')
+
+    def getElementByName(self, name, elm='*'): # pylint: disable=invalid-name
+        """Get an element by it's inkscape:label (aka name)"""
+        return self.getElement(f'//{elm}[@inkscape:label="{name}"]')
 
     def getElementsByHref(self, eid): # pylint: disable=invalid-name
         """Get elements by their href xlink attribute"""

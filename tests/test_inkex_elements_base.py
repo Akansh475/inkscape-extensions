@@ -214,6 +214,15 @@ class AttributeHandelingTestCase(SvgTestCase):
         self.assertEqual(self.svg.getElementById('G').href, elem)
         self.assertEqual(str(self.svg.getElementById('B').style), 'fill:#eee;joker:url(#plant54)')
 
+    def test_get_element_by_name(self):
+        """Get elements by name"""
+        self.assertEqual(self.svg.getElementByName('Key').get('id'), 'K')
+        self.assertEqual(self.svg.getElementByName('Elm', 'svg:g').get('id'), 'L')
+        self.assertEqual(self.svg.getElementByName('Mine').get('id'), 'M')
+        self.assertEqual(self.svg.getElementByName('doesntexist'), None)
+        self.assertEqual(self.svg.getElementByName('Key', 'rect'), None)
+
+
 class TransformationTestCase(SvgTestCase):
     """Test transformative functions"""
     def test_bounding_box(self):

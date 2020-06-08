@@ -457,7 +457,7 @@ class ShapeElement(BaseElement):
           if none specified the transform is to the root document element"""
         parent = self.getparent()
         if parent is not None and isinstance(parent, ShapeElement):
-            return self.transform * parent.composed_transform()
+            return parent.composed_transform() * self.transform
         return self.transform
 
     def composed_style(self):

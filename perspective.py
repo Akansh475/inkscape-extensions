@@ -21,7 +21,6 @@ Perspective approach & math by Dmitry Platonov, shadowjack@mail.ru, 2006
 """
 
 import inkex
-from inkex import SvgDocumentElement
 from inkex.localization import inkex_gettext as _
 
 X, Y = range(2)
@@ -35,7 +34,7 @@ except ImportError:
 
 
 class Perspective(inkex.EffectExtension):
-    """Apply a perspective to a path"""
+    """Apply a perspective to a path/group of paths"""
     def effect(self):
         if np is None:
             raise inkex.AbortExtension(
@@ -43,15 +42,13 @@ class Perspective(inkex.EffectExtension):
                   " These modules are required by this extension. Please install them."
                   "  On a Debian-like system this can be done with the command, "
                   "sudo apt-get install python-numpy."))
-        if len(self.options.ids) < 2:
-            raise inkex.AbortExtension(_("This extension requires two selected paths."))
+        if len(self.svg.selection) != 2:
+            raise inkex.AbortExtension(_("This extension requires two selected objects."))
 
-        obj = self.svg.selected[self.options.ids[0]]
-        envelope = self.svg.selected[self.options.ids[1]]
+        obj, envelope = self.svg.selection
 
         if isinstance(obj, (inkex.PathElement, inkex.Group)):
             if isinstance(envelope, inkex.PathElement):
-                obj.path = obj.path.to_absolute()
                 path = envelope.path.transform(envelope.composed_transform()).to_superpath()
 
                 if len(path) < 1 or len(path[0]) < 4:
@@ -63,8 +60,8 @@ class Perspective(inkex.EffectExtension):
                     dip[i][0] = path[0][i][1][0]
                     dip[i][1] = path[0][i][1][1]
 
-                # query inkscape about the bounding box of obj
-                bbox = obj.bounding_box()
+                # Get bounding box plus any extra composed transform of parents.
+                bbox = obj.bounding_box(obj.getparent().composed_transform())
 
                 sip = np.array([
                     [bbox.left, bbox.bottom],
@@ -78,7 +75,7 @@ class Perspective(inkex.EffectExtension):
                 raise inkex.AbortExtension(_("The second selected object is not a path.\nTry using"
                                              " the procedure Path->Object to Path."))
         else:
-            raise inkex.AbortExtension(_("The first selected object is not a path.\nTry using"
+                raise inkex.AbortExtension(_("The first selected object is neither a path nor a group.\nTry using"
                                          " the procedure Path->Object to Path."))
 
         solmatrix = np.zeros((8, 8), dtype=FLOAT)
@@ -102,22 +99,23 @@ class Perspective(inkex.EffectExtension):
             [res[0], res[1], res[2]],
             [res[3], res[4], res[5]],
             [res[6], res[7], 1.0]], dtype=FLOAT)
+
+        self.process_object(obj, projmatrix)
+
+    def process_object(self, obj, matrix):
         if isinstance(obj, inkex.PathElement):
-            self.process_path(obj, projmatrix)
-        if isinstance(obj, inkex.Group):
-            self.process_group(obj, projmatrix)
+            self.process_path(obj, matrix)
+        elif isinstance(obj, inkex.Group):
+            self.process_group(obj, matrix)
 
     def process_group(self, group, matrix):
         """Go through all groups to process all paths inside them"""
         for node in group:
-            if isinstance(node, inkex.PathElement):
-                self.process_path(node, matrix)
-            if isinstance(node, SvgDocumentElement):
-                self.process_group(node, matrix)
+            self.process_object(node, matrix)
 
     def process_path(self, element, matrix):
         """Apply the transformation to the selected path"""
-        point = element.path.to_superpath()
+        point = element.path.to_absolute().transform(element.composed_transform()).to_superpath()
         for subs in point:
             for csp in subs:
                 csp[0] = self.project_point(csp[0], matrix)

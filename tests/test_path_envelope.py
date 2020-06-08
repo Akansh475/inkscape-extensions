@@ -8,3 +8,8 @@ class PathEnvelopeTest(ComparisonMixin, TestCase):
     effect_class = Envelope
     comparisons = [('--id=text', '--id=envelope')]
     compare_file = 'svg/perspective.svg'
+
+class PathEnvelopeGroupTest(ComparisonMixin, TestCase):
+    effect_class = Envelope
+    comparisons = [('--id=obj', '--id=envelope')]
+    compare_file = 'svg/perspective_groups.svg'

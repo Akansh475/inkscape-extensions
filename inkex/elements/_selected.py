@@ -26,11 +26,11 @@ class ElementList(OrderedDict):
     """
     A list of elements, selected by id, iterator or xpath
 
-    This may look like a dictionary, but it's really not. It's a list of elements
-    the default iterator is the element objects themselves (not keys) and it's
+    This may look like a dictionary, but it is really a list of elements.
+    The default iterator is the element objects themselves (not keys) and it is
     possible to key elements by their numerical index.
 
-    It is also possible to lookup items by their id and the element object itself.
+    It is also possible to look up items by their id and the element object itself.
     """
     def __init__(self, svg, _iter=None):
         self.svg = svg
@@ -119,7 +119,7 @@ class ElementList(OrderedDict):
             self[elem] = elem # This doesn't matter
 
     def paint_order(self):
-        """Get the selected elements, but ordered by their apperence in the document"""
+        """Get the selected elements, but ordered by their appearance in the document"""
         new_list = ElementList(self.svg)
         new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: x[0])])
         return new_list
@@ -138,7 +138,7 @@ class ElementList(OrderedDict):
         return ElementList(self.svg, [r for e in self for r in _recurse(e)])
 
     def id_dict(self):
-        """For compatability, return regular dictionary of id -> element pairs"""
+        """For compatibility, return regular dictionary of id -> element pairs"""
         return dict([(eid, self[xid]) for eid, xid in self.ids.items()])
 
     def bounding_box(self):

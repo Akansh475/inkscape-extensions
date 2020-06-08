@@ -50,7 +50,7 @@ class PathElementBase(ShapeElement):
 
     @property
     def original_path(self):
-        """Returns the original path if this is an LPE, or the path if not"""
+        """Returns the original path if this is a LPE, or the path if not"""
         return Path(self.get('inkscape:original-d', self.path))
 
     @original_path.setter
@@ -97,7 +97,7 @@ class PathElement(PathElementBase):
 
 
 class Polyline(ShapeElement):
-    """Like a path, but made up of straight lines only"""
+    """Like a path, but made up of straight line segments only"""
     tag_name = 'polyline'
 
     def get_path(self):
@@ -115,7 +115,7 @@ class Polygon(ShapeElement):
 
 
 class Line(ShapeElement):
-    """A line connecting two points"""
+    """A line segment connecting two points"""
     tag_name = 'line'
     get_path = lambda self: 'M{0[x1]},{0[y1]} L{0[x2]},{0[y2]} Z'.format(self.attrib)
 
@@ -162,7 +162,7 @@ class Rectangle(RectangleBase):
 
 
 class EllipseBase(ShapeElement):
-    """Absorbs common part of Circle and Ellipse"""
+    """Absorbs common part of Circle and Ellipse classes"""
 
     def get_path(self):
         """Calculate the arc path of this circle"""

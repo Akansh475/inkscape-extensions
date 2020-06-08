@@ -2,7 +2,7 @@
 """
 This describes the core API for the inkex core modules.
 
-They provide the basis from which you can develop your inkscape extension.
+This provides the basis from which you can develop your inkscape extension.
 """
 
 # pylint: disable=wildcard-import

@@ -18,41 +18,42 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
 #
 """
-All extensions should come with tests, this package provides you will all the
-tools you need in order to create tests and make sure your extension continues
-to work with new versions of Inkscape, the Inkex python modules and other
+All Inkscape extensions should come with tests. This package provides you with
+the tools needed to create tests and thus ensure that your extension continues
+to work with future versions of Inkscape, the "inkex" python modules, and other
 python and non-python tools you may use.
 
 Make sure your extension is a python extension and is using the `inkex.generic`
-base classes. As these provide the greatest amount of functionality for testing.
+base classes. These provide the greatest amount of functionality for testing.
 
 You should start by creating a folder in your repository called `tests` with
 an empty file inside called `__init__.py` to turn it into a module folder.
 
 For each of your extensions, you should create a file called
-`test_{myextension}.py` where the name reflects the name of your extension.
+`test_{extension_name}.py` where the name reflects the name of your extension.
 
 There are two types of tests:
 
-    1. Full-process Comparison tests - These are tests which envoke your
+    1. Full-process Comparison tests - These are tests which invoke your
            extension with various arguments and attempt to compare the
-           output to a known good state. These are useful for testing
+           output to a known good reference. These are useful for testing
            that your extension would work if it was used in Inkscape.
 
            Good example of writing comparison tests can be found in the
-           inkscape core repository, each test which inherits from
-           the ComparisonMixin class are running comparison tests.
+           Inkscape core repository, each test which inherits from
+           the ComparisonMixin class is running comparison tests.
 
     2. Unit tests - These are individual test functions which call out to
            specific functions within your extension. These are typical
-           python unit testing and many good python documents exist
+           python unit tests and many good python documents exist
            to describe how to write them well. For examples here you
-           can find the tests that test the inkex modules themsleves
+           can find the tests that test the inkex modules themselves
            to be the most instructive.
 
-Your tests will hit a certain amount of code, this is called it's **coverage**
-and the higher the coverage, the better your tests are at stretching all
-the options and varients your code has.
+When running a test, it will cause a certain fraction of the code within the
+extension to execute. This fraction called it's **coverage** and a higher
+coverage score indicates that your test is better at exercising the various
+options, features, and branches within your code.
 
 Generating comparison output can be done using the EXPORT_COMPARE environment
 variable when calling pytest. For example:
@@ -60,8 +61,8 @@ variable when calling pytest. For example:
     EXPORT_COMPARE=1 pytest tests/test_my_specific_test.py
 
 This will create files in `tests/data/refs/*.out.export` and these files should
-be manually checked to make sure they are correct before being renamed, stripping
-off the `.export` suffix. pytest should then be re-run to confirm before
+be manually checked to make sure they are correct before being renamed and stripped
+of the `.export` suffix. pytest should then be re-run to confirm before
 committing to the repository.
 """
 
@@ -258,7 +259,7 @@ class TestCase(MockCommandMixin, BaseCase):
 class InkscapeExtensionTestMixin(object):
     """Automatically setup self.effect for each test and test with an empty svg"""
     def setUp(self): # pylint: disable=invalid-name
-        """Check if there's an effect_class set and create self.effect is it is"""
+        """Check if there is an effect_class set and create self.effect if it is"""
         super(InkscapeExtensionTestMixin, self).setUp()
         if self.effect_class is None:
             self.skipTest('self.effect_class is not defined for this this test')
@@ -307,7 +308,7 @@ class ComparisonMixin(object):
         """
         Compare the output of a previous run against this one.
 
-         - infile: The filename of the pre-proccessed svg (or other type of file)
+         - infile: The filename of the pre-processed svg (or other type of file)
          - outfile: The filename of the data we expect to get, if not set
                     the filename will be generated from the effect name and kwargs.
          - args: All the arguments to be passed to the effect run

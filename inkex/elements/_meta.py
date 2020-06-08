@@ -35,7 +35,7 @@ from ..transforms import Vector2d
 from ._base import BaseElement
 
 class Defs(BaseElement):
-    """An header defs element, one per document"""
+    """A header defs element, one per document"""
     tag_name = 'defs'
 
 class StyleElement(BaseElement):
@@ -112,8 +112,8 @@ class Guide(BaseElement):
         """
         Move this guide to the given x,y position,
 
-        Angle may either be a float or integer, which will change the orientation.
-        Or a pair of numbers (tuple) which will be set as the orientation directly.
+        Angle may be a float or integer, which will change the orientation. Alternately,
+        it may be a pair of numbers (tuple) which will set the orientation directly.
         """
         self.set('position', "{:g},{:g}".format(float(pos_x), float(pos_y)))
         if isinstance(angle, str):

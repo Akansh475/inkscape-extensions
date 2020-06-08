@@ -188,7 +188,7 @@ def bezierpointatt(bez, t):
 
 
 def bezierslopeatt(bez, t):
-    """Get sloap at the given time point along a bezier curve"""
+    """Get slope at the given time point along a bezier curve"""
     ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
     dx = 3 * ax * (t ** 2) + 2 * bx * t + cx
     dy = 3 * ay * (t ** 2) + 2 * by * t + cy
@@ -196,7 +196,7 @@ def bezierslopeatt(bez, t):
 
 
 def beziertatslope(bez, d):
-    """Reverse; get time from sloap along a bezier curve"""
+    """Reverse; get time from slope along a bezier curve"""
     ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
     (dy, dx) = d
     # quadratic coefficients of slope formula

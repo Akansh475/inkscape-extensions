@@ -233,7 +233,7 @@ def pairwise(iterable, start=True):
 class CloningVat(object):
     """
     When modifying defs, sometimes we want to know if every backlink would have
-    needed changing, of it was just some of them.
+    needed changing, or it was just some of them.
 
     This tracks the def elements, their promises and creates clones if needed.
     """

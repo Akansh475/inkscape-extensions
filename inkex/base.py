@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-The ultimate base functionality for every inkscape extension.
+The ultimate base functionality for every Inkscape extension.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -344,7 +344,7 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
 
 class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
     """
-    Combine the input and output svg document handling (usually for effects.
+    Combine the input and output svg document handling (usually for effects).
     """
 
     def has_changed(self, ret): # pylint: disable=unused-argument

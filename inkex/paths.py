@@ -1308,7 +1308,7 @@ class CubicSuperPath(list):
     A conversion of a path into a predictable list of cubic curves which
     can be operated on as a list of simplified instructions.
 
-    When converting back into a path, all lines, arcs etc will be coverted
+    When converting back into a path, all lines, arcs etc will be converted
     to curve instructions.
 
     Structure is held as [SubPath[(point_a, bezier, point_b), ...]], ...]

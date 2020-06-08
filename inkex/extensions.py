@@ -129,7 +129,7 @@ class GenerateExtension(EffectExtension):
     def generate(self):
         """
         Return an SVG fragment to be inserted into the selected layer of the document
-        OR yield multiple elements which will be grouped into a container Group
+        OR yield multiple elements which will be grouped into a container group
         element which will be given an automatic label and transformation.
         """
         raise NotImplementedError("Generate extensions must provide generate()")

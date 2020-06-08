@@ -185,14 +185,14 @@ SVG_COLOR = {
 COLOR_SVG = dict([(value, name) for name, value in SVG_COLOR.items()])
 
 def is_color(color):
-    """Determine if its a color we can use. If not, leave it unchanged."""
+    """Determine if it is a color that we can use. If not, leave it unchanged."""
     try:
         return bool(Color(color))
     except ColorError:
         return False
 
 def constrain(minim, value, maxim, channel):
-    """Returns the value so long as it's between min and max values"""
+    """Returns the value so long as it is between min and max values"""
     if channel == 'h': # Hue
         return value % maxim # Wrap around hue value
     return min([maxim, max([minim, value])])

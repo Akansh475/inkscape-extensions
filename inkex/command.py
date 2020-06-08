@@ -26,8 +26,8 @@ Best practice is to avoid using this API except when absolutely necessary,
 since it is resource-intensive to invoke a new Inkscape instance.
 
 However, in any circumstance when it is necessary to call Inkscape, it
-is strongly recommended that you do so through this API (rather than calling
-it yourself) to take advantage of the security settings and testing functions.
+is strongly recommended that you do so through this API, rather than calling
+it yourself, to take advantage of the security settings and testing functions.
 
 """
 
@@ -215,7 +215,7 @@ def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
 
 
 def is_inkscape_available():
-    """Return true if the inkscape executable is available."""
+    """Return true if the Inkscape executable is available."""
     try:
         return bool(which(INKSCAPE_EXECUTABLE_NAME))
     except CommandNotFound:

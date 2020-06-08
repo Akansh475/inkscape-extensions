@@ -49,7 +49,7 @@ BOTH_MATCH = re.compile(r'^\s*{}\s*{}\s*$'.format(NUMBER_MATCH.pattern, UNIT_MAT
 def parse_unit(value, default_unit='px', default_value=None):
     """
     Takes a value such as 55.32px and returns (55.32, 'px')
-    Will returns default (None) if no match can be found
+    Returns default (None) if no match can be found
     """
     ret = BOTH_MATCH.match(str(value))
     if ret:

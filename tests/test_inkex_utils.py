@@ -11,7 +11,7 @@ from argparse import ArgumentTypeError
 
 import pytest
 
-from inkex.utils import addNS, debug, errormsg, filename_arg, Boolean, to
+from inkex.utils import addNS, debug, errormsg, filename_arg, Boolean, to, strargs
 
 
 class TestInkexBasic(object):
@@ -70,6 +70,15 @@ class TestInkexBasic(object):
         assert addNS('http://www.inkscape.org/namespaces/inkscape:bar') == '{http://www.inkscape.org/namespaces/inkscape}bar'
         assert addNS('car', 'http://www.inkscape.org/namespaces/inkscape') == '{http://www.inkscape.org/namespaces/inkscape}car'
         assert addNS('{http://www.inkscape.org/namespaces/inkscape}bar', 'rdf') == '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}bar'
+
+    def test_strargs(self):
+        """Test strargs function"""
+        assert strargs('1.0 2.0 3.0 4.0') == [1.0, 2.0, 3.0, 4.0]
+        assert strargs('1 -2 3 -4') == [1.0, -2.0, 3.0, -4.0]
+        assert strargs('1,-2,3,-4') == [1.0, -2.0, 3.0, -4.0]
+        assert strargs('1-2 3-4') == [1.0, -2.0, 3.0, -4.0]
+        assert strargs('1-2,3-4') == [1.0, -2.0, 3.0, -4.0]
+        assert strargs('1-2-3-4') == [1.0, -2.0, -3.0, -4.0]
 
     def test_ascii(self, capsys):
         """Parse ABCabc"""

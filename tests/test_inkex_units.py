@@ -13,6 +13,7 @@ class UnitsTest(TestCase):
         self.assertEqual(parse_unit('50'), (50.0, 'px'))
         self.assertEqual(parse_unit('50quaks'), None)
         self.assertEqual(parse_unit('50quaks', default_value=10), (10.0, 'px'))
+        self.assertEqual(parse_unit('50%'), (50.0, '%'))
 
     def test_near(self):
         """Test the closeness of numbers"""
@@ -31,6 +32,12 @@ class UnitsTest(TestCase):
         self.assertEqual(convert_unit("10mm", 'px'), 37.79527559055118)
         self.assertEqual(convert_unit("1in", 'cm'), 2.54)
         self.assertEqual(convert_unit("37.79527559055118px", 'mm'), 10.0)
+        self.assertEqual(convert_unit("1in", ''), 96.0)
+        self.assertEqual(convert_unit("96", 'in'), 1.0)
+        self.assertEqual(convert_unit("10%", 'mm'), 0.0)
+        self.assertEqual(convert_unit("1in", 'grad'), 0.0)
+        self.assertEqual(convert_unit("10quaks", 'mm'), 0.0)
+        self.assertEqual(convert_unit("10mm", 'quaks'), 0.0)
 
     def test_render_unit(self):
         """Convert unit and value pair into rendered unit string"""

@@ -66,6 +66,15 @@ class BasicSvgTest(TestCase):
         self.assertEqual(doc.selection['apples'], doc)
         self.assertEqual(doc.selection.first(), doc)
 
+    def test_svg_by_class(self):
+        """Select elements by class"""
+        doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))
+        elems = doc.getElementsByClass('frog')
+        self.assertEqual([elem.get_id() for elem in elems],
+                         ['path3902', 'text3926', 'path3900', 'rect3898'])
+        elems = doc.getElementsByClass('apple')
+        self.assertEqual([elem.get_id() for elem in elems], ['text3926', 'rect3898'])
+
     def test_svg_by_href(self):
         """Select element by xlink href"""
         doc = svg_file(self.data_file('svg', 'multilayered-test.svg'))

@@ -99,6 +99,11 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Get an element by it's inkscape:label (aka name)"""
         return self.getElement(f'//{elm}[@inkscape:label="{name}"]')
 
+    def getElementsByClass(self, class_name): # pylint: disable=invalid-name
+        """Get elements by it's class name"""
+        from inkex.styles import ConditionalRule
+        return self.xpath(ConditionalRule(f".{class_name}").to_xpath())
+
     def getElementsByHref(self, eid): # pylint: disable=invalid-name
         """Get elements by their href xlink attribute"""
         return self.xpath('//*[@xlink:href="#{}"]'.format(eid))

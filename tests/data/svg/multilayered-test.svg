@@ -55,6 +55,7 @@
     <g
        id="g3930">
       <path
+         class="oranger bee frog"
          transform="matrix(-0.97176714,-0.23594199,0.23594199,-0.97176714,541.8979,1030.862)"
          inkscape:transform-center-y="21.296232"
          inkscape:transform-center-x="0.78818963"
@@ -74,6 +75,7 @@
          sodipodi:type="star" />
       <text
          sodipodi:linespacing="125%"
+         class="frog apple"
          id="text3926"
          y="723.79077"
          x="245.71429"
@@ -97,6 +99,7 @@
          style="fill:#ffaaaa;fill-opacity:1"
          d="m 522.85714,488.07648 c 0,73.37498 -71.63444,132.85715 -160,132.85715 -88.36556,0 -159.99999,-59.48217 -159.99999,-132.85715 0,-73.37497 71.63443,-132.85714 159.99999,-132.85714 88.36556,0 160,59.48217 160,132.85714 z"
          id="path3900"
+         class="frog"
          inkscape:connector-curvature="0" />
       <text
          xml:space="preserve"
@@ -116,6 +119,7 @@
          height="134.28572"
          width="385.71429"
          id="rect3898"
+         class="apple frog"
          style="fill:#cccccc;fill-opacity:1" />
       <text
          sodipodi:linespacing="125%"

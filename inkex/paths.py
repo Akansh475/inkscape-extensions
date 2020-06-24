@@ -1265,8 +1265,8 @@ class Path(list):
         previous = Vector2d()
         first = Vector2d()
 
-        for i, seg in enumerate(self):  # type: PathCommand
-            if i == 0:
+        for seg in self:  # type: PathCommand
+            if isinstance(seg, (move, Move)):
                 first = seg.end_point(first, previous)
 
             abspath.append(seg.to_relative(previous))

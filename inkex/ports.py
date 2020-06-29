@@ -45,8 +45,8 @@ class Serial(object):
         self.test = port == '[test]'
         if self.test:
             import pty # This does not work on windows
-            self.master, self.slave = pty.openpty()
-            port = os.ttyname(self.slave)
+            self.controller, self.peripheral = pty.openpty()
+            port = os.ttyname(self.peripheral)
 
         self.has_serial()
         self.com = serial.Serial()
@@ -82,7 +82,7 @@ class Serial(object):
             output = ' ' * 1024
             while len(output) == 1024:
                 time.sleep(0.01)
-                output = os.read(self.master, 1024)
+                output = os.read(self.controller, 1024)
                 sys.stderr.write(output.decode('utf8'))
         #self.com.read(2)
         self.com.close()

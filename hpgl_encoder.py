@@ -332,7 +332,7 @@ class hpglEncoder(object):
                     y = 0
             # select correct pen
             if self.lastPen != pen:
-                self.hpgl += ';SP%d' % pen
+                self.hpgl += ';PU;SP%d' % pen
             # do not repeat command
             if command == 'PD' and self.lastPoint[0] == 'PD' and self.lastPen == pen:
                 self.hpgl += ',%d,%d' % (x, y)

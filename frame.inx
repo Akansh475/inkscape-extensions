@@ -16,7 +16,7 @@
     </param>
     <param name="clip" type="bool" gui-text="Clip">false</param>
     <param name="group" type="bool" gui-text="Group">false</param>
-    <param name="width" type="float" min="0" max="100" gui-text="Width(px)">2</param>
+    <param name="width" type="float" min="0" max="100" gui-text="Width (px)">2</param>
     <param name="corner_radius" type="int" min="0" max="1000" gui-text="Corner Radius">0</param>
     <effect>
         <object-type>all</object-type>

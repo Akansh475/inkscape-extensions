@@ -112,7 +112,7 @@ class Interp(inkex.EffectExtension):
                 else:
                     fillstyle = 'color'
 
-                if strokestyle is 'color':
+                if strokestyle == 'color':
                     if sst['stroke'] == 'none':
                         sst['stroke-width'] = '0.0'
                         sst['stroke-opacity'] = '0.0'
@@ -122,7 +122,7 @@ class Interp(inkex.EffectExtension):
                         est['stroke-opacity'] = '0.0'
                         est['stroke'] = sst['stroke']
 
-                if fillstyle is 'color':
+                if fillstyle == 'color':
                     if sst['fill'] == 'none':
                         sst['fill-opacity'] = '0.0'
                         sst['fill'] = est['fill']

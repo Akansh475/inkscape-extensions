@@ -1116,7 +1116,7 @@ Evil Mad Scientist Laboratories
                 if "%" in line_spacing: # Handle percentage line spacing(e.g., 125%)
                     line_spacing_local = float(line_spacing.rstrip("%")) / 100.0
                 else:
-                    line_spacing_local = float(line_spacing) #(e.g., line-height:1.25)
+                    line_spacing_local = self.units_to_userunits(line_spacing)
             except KeyError:
                 pass
 
@@ -1368,8 +1368,8 @@ Evil Mad Scientist Laboratories
                 start_y = 0
 
                 # Default line spacing and font height: 125%, 16 px
-                line_spacing = "1.25"                                # Default
-                font_height = self.units_to_userunits("16px")    # Default
+                line_spacing = self.units_to_userunits("1.25")
+                font_height = self.units_to_userunits("16px")
 
                 start_x = node.get('x')    # XY Position of element
                 start_y = node.get('y')
@@ -1410,7 +1410,7 @@ Evil Mad Scientist Laboratories
                     if "%" in line_spacing_temp: # Handle percentage line spacing(e.g., 125%)
                         line_spacing = float(line_spacing_temp.rstrip("%")) / 100.0
                     else:
-                        line_spacing = float(line_spacing_temp) #(e.g., line-height:1.25)
+                        line_spacing = self.units_to_userunits(line_spacing_temp)
                 except KeyError:
                     pass
 

@@ -45,7 +45,7 @@ class PerfectBoundCover(inkex.EffectExtension):
         pars.add_argument("--paperthicknessmeasurement", default=100.0,
                           help="paper thickness measurement")
         pars.add_argument("--paperthickness", type=float, default=0.0, help="paper thickness")
-        pars.add_argument("--coverthicknessmeasurement", type=float, default=100.0,
+        pars.add_argument("--coverthicknessmeasurement", default=100.0,
                           help="cover thickness measurement")
         pars.add_argument("--coverthickness", type=float, default=0.0, help="cover thickness")
         pars.add_argument("--bleed", type=float, default=0.25, help="cover bleed (in)")

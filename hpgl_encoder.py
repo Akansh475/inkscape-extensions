@@ -274,7 +274,7 @@ class hpglEncoder(object):
             # decide if enough data is available
             if self.vData[2][1] != 'False':
                 if self.vData[1][1] == 'False':
-                    self.storePoint(*self.vData[2][:4])
+                    self.storePoint(*self.vData[2][:5])
                 else:
                     # perform tool offset correction (It's a *tad* complicated, if you want to understand it draw the data as lines on paper)
                     if self.vData[2][0] == 'PD': # If the 3rd entry in the cache is a pen down command make the line longer by the tool offset

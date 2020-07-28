@@ -4,3 +4,8 @@ from inkex.tester import ComparisonMixin, TestCase
 
 class HPGLOutputBasicTest(ComparisonMixin, TestCase):
     effect_class = HpglOutput
+    compare_file = [
+        'svg/shapes.svg',
+        'svg/hpgl_multipen.svg'
+    ]
+    comparisons = [()]

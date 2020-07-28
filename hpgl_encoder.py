@@ -31,7 +31,7 @@ class NoPathError(ValueError):
     """Raise that paths not selected"""
 
 # Find the pen number in the layer number
-FIND_PEN = re.compile(r'(\s|\A)pen\s*(\d+)(\s|\Z)')
+FIND_PEN = re.compile(r'\s*pen\s*(\d+)\s*', re.IGNORECASE)
 
 class hpglEncoder(object):
     """HPGL Encoder, used by others"""
@@ -189,9 +189,9 @@ class hpglEncoder(object):
     def get_pen_number(self, node):
         """Get pen number for node label (usually group)"""
         for parent in [node] + list(node.ancestors()):
-            match = FIND_PEN.fullmatch(parent.label or '', re.IGNORECASE)
+            match = FIND_PEN.fullmatch(parent.label or '')
             if match:
-                return int(match.group(2))
+                return int(match.group(1))
         return int(self.options.pen)
 
     def process_path(self, node, transform):

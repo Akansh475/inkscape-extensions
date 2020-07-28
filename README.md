@@ -15,7 +15,7 @@ install the files into /usr/share/inkscape/extensions or
 
 These extensions are designed to have good test coverage for python 3.6 and above.
 
-You must install the program `pytest` in order to run these tests. You may run all tests by ommitting any other paramiters or select tests by adding the test filename that you want to run.
+You must install the program `pytest` in order to run these tests. You may run all tests by omitting any other parameters or select tests by adding the test filename that you want to run.
 
     pytest
     pytest tests/test_my_extension.py

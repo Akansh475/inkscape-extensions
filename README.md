@@ -13,12 +13,10 @@ install the files into /usr/share/inkscape/extensions or
 
 ## Testing
 
-These extensions are designed to have good test coverage as well as python 2.7 
-and python 3.6 support.  
+These extensions are designed to have good test coverage for python 3.6 and above.
 Testing can be run using the setup.py command or pytest directly:
 
     ./setup.py test
-    python2 -m pytest
     python3 -m pytest
 
 The latest coverage report for master branch can be found at

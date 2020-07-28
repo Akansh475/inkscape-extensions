@@ -346,8 +346,9 @@ class hpglEncoder(object):
             # select correct pen
             if self.lastPen != pen:
                 self.hpgl += ';PU;SP%d' % pen
-            if self.lastSpeed != speed:
-                self.hpgl += ';VS%d' % speed    
+            if self.lastSpeed != speed: 
+                if speed > 0:
+                   self.hpgl += ';VS%d' % speed    
                # do not repeat command
             if command == 'PD' and self.lastPoint[0] == 'PD' and self.lastPen == pen:
                 self.hpgl += ',%d,%d' % (x, y)

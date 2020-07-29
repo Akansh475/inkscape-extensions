@@ -1043,11 +1043,11 @@ class QrCode(inkex.GenerateExtension):
         # white background providing margin:
         rect = grp.add(Rectangle.new(0, 0, canvas_width, canvas_height))
         rect.style['stroke'] = 'none'
-        rect.style['fiill'] = "black" if self.invert_code else "white"
+        rect.style['fill'] = "black" if self.invert_code else "white"
 
         qrg = grp.add(Group())
         qrg.style['stroke'] = 'none'
-        qrg.style['fiill'] = "white" if self.invert_code else "black"
+        qrg.style['fill'] = "white" if self.invert_code else "black"
         qrg.add(drawer())
 
     def get_svg_pos(self, col, row):

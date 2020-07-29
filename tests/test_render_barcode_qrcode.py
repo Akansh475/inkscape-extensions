@@ -11,6 +11,7 @@ class TestQRCodeInkscapeBasic(ComparisonMixin, TestCase):
         ('--text=BreadRolls', '--typenumber=2', '--encoding=utf8'),
         ('--text=Blue Front Yard', '--typenumber=3', '--correctionlevel=1'),
         ('--text=Waterfall', '--typenumber=1', '--drawtype=circle'),
+        ('--text=groupid', '--groupid=testid'),
     ]
 
 class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):

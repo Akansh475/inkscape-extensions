@@ -876,6 +876,7 @@ class QrCode(inkex.GenerateExtension):
         pars.add_argument("--drawtype", default="greedy")
         pars.add_argument("--smoothval", type=float, default=0.2)
         pars.add_argument("--symbolid", default='')
+        pars.add_argument("--groupid", default='')
 
     def generate(self):
 
@@ -893,6 +894,8 @@ class QrCode(inkex.GenerateExtension):
 
         grp = Group()
         grp.set('inkscape:label', 'QR Code: ' + text_str)
+        if opt.groupid:
+            grp.set('id', opt.groupid)
         pos_x, pos_y = self.svg.namedview.center
         grp.transform.add_translate(pos_x, pos_y)
         if scale:
@@ -1040,11 +1043,11 @@ class QrCode(inkex.GenerateExtension):
         # white background providing margin:
         rect = grp.add(Rectangle.new(0, 0, canvas_width, canvas_height))
         rect.style['stroke'] = 'none'
-        rect.style['fiill'] = "black" if self.invert_code else "white"
+        rect.style['fill'] = "black" if self.invert_code else "white"
 
         qrg = grp.add(Group())
         qrg.style['stroke'] = 'none'
-        qrg.style['fiill'] = "white" if self.invert_code else "black"
+        qrg.style['fill'] = "white" if self.invert_code else "black"
         qrg.add(drawer())
 
     def get_svg_pos(self, col, row):

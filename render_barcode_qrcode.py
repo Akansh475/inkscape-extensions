@@ -876,6 +876,7 @@ class QrCode(inkex.GenerateExtension):
         pars.add_argument("--drawtype", default="greedy")
         pars.add_argument("--smoothval", type=float, default=0.2)
         pars.add_argument("--symbolid", default='')
+        pars.add_argument("--groupid", default='')
 
     def generate(self):
 
@@ -893,6 +894,8 @@ class QrCode(inkex.GenerateExtension):
 
         grp = Group()
         grp.set('inkscape:label', 'QR Code: ' + text_str)
+        if opt.groupid:
+            grp.set('id', opt.groupid)
         pos_x, pos_y = self.svg.namedview.center
         grp.transform.add_translate(pos_x, pos_y)
         if scale:

@@ -20,14 +20,16 @@
 
 
 import os
+import re
 import sys
-from subprocess import call
 import inkex
+from inkex import AbortExtension
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot, call
 
 
-scribus_exe = "scribus"
+SCRIBUS_EXE = "scribus"
+VERSION_REGEX = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
 
 # several things could be taken into consideration here :
@@ -37,43 +39,95 @@ scribus_exe = "scribus"
 #   BUT currently fails to place the SVG document
 #   (object placed top-left instead of SVG placed top-left)
 class Scribus(TempDirMixin, inkex.OutputExtension):
-    def generate_script(self, stream, width, height):
-        margin = 0
-        stream.write(r"""
+    def add_arguments(self, arg_parser):
+        arg_parser.add_argument("--pdf-version", type=int, dest="pdfVersion", default="13",
+                                help="PDF version (see Scribus documentation)")
+        arg_parser.add_argument("--bleed", type=float, dest="bleed", default="0",
+                                help="Bleed value")
+        #arg_parser.add_argument("--fonts", type=int, dest="fonts", default="1", help="Embed fonts : 0 for embedding, 1 to convert to path, 2 to prevent embedding")
+
+    def generate_script(self, stream, width, height, icc):
+        margin = self.options.bleed
+        pdfVersion = self.options.pdfVersion
+        embedFonts = 1 #self.options.fonts
+        stream.write(f"""
 import scribus
 import sys
+icc = "{icc}"
+margin = {margin}
 class exportPDF():
     def __init__(self, svg=sys.argv[1], o=sys.argv[2]):
-        #scribus.newDocument((%d,%d), (%d,%d,%d,%d), PORTRAIT, 1, UNIT_MILLIMETERS, PAGE_1, 0, 1)
+        #scribus.newDocument(({width},{height}), (margin,margin,margin,margin),
+        #                    PORTRAIT, 1, UNIT_MILLIMETERS, PAGE_1, 0, 1)
         #scribus.placeSVG(svg, 0, 0)
         scribus.openDoc(svg)
         pdf = scribus.PDFfile()
+        if (margin > 0):
+            pdf.bleedl = margin
+            pdf.bleedr = margin
+            pdf.bleedt = margin
+            pdf.bleedb = margin
+            pdf.bleedMarks = True
+            pdf.colorMarks = True
+        pdf.version = {pdfVersion}
+        pdf.allowAnnots = True
+        pdf.allowChange = True
+        pdf.allowCopy = True
+        pdf.allowPrinting = True
+        pdf.noembicc = False #embed icc !
+        pdf.solidpr = icc
+        pdf.imagepr = icc
+        pdf.printprofc = icc
+        pdf.profiles = True
+        pdf.profilei = True
+        pdf.outdst = 1 # output destination : 0=screen, 1=printer
         pdf.file = o
+        pdf.compress = True
+        pdf.compressmtd = 0 # 0 = automatic, 1 = jpeg ; 2 = zip, 3 = none
+        pdf.quality = 0 #max
+        pdf.fontEmbedding = {embedFonts}
+        pdf.thumbnails = True
+
         pdf.save()
-exportPDF()
-""" % (width, height, margin, margin, margin, margin) )
-        
+exportPDF()""")
+
     def save(self, stream):
+        scribus_version = call(SCRIBUS_EXE, '-g', '--version').decode('utf-8')
+        version_match = VERSION_REGEX.search(scribus_version)
+        if version_match is None:
+            raise AbortExtension(f"Could not detect Scribus version ({scribus_version})")
+        major = int(version_match.group(1))
+        minor = int(version_match.group(2))
+        point = int(version_match.group(3))
+        if (major < 1) or (major == 1 and minor < 5):
+            raise AbortExtension(f"We detected Scribus {version_match.group(0)} which is less than 1.5.x")
+
         input_file = self.options.input_file
         py_file = os.path.join(self.tempdir, 'scribus.py')
         svg_file = os.path.join(self.tempdir, 'in.svg')
+        profiles = self.svg.defs.findall("svg:color-profile")
+        if len(profiles) == 0:
+            raise AbortExtension("You did not link a color profile in this document.")
+        elif len(profiles) > 1:
+            raise AbortExtension("More than one color profiles are linked in this document. No output generated.")
+        iccPath = profiles[0].get("xlink:href")
+
 
         with open(input_file) as f:
             with open(svg_file, "w") as f1:
                 for line in f:
                     f1.write(line)
             f.close()
-        
+
         pdf_file = os.path.join(self.tempdir, 'out.pdf')
         width = self.svg.unittouu(self.svg.get('width'))
         height = self.svg.unittouu(self.svg.get('height'))
-        
+
         with open(py_file, 'w') as fhl:
-            self.generate_script(fhl, width, height)
-        call(scribus_exe, '-g', '-py', py_file, svg_file, pdf_file)
+            self.generate_script(fhl, width, height, iccPath)
+        call(SCRIBUS_EXE, '-g', '-py', py_file, svg_file, pdf_file)
         with open(pdf_file, 'rb') as fhl:
             stream.write(fhl.read())
-
 
 if __name__ == '__main__':
     Scribus().run()

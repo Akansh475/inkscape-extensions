@@ -4,6 +4,20 @@
     <id>com.activdesign.export.scribus</id>
     <dependency type="executable" location="extensions">scribus_export_pdf.py</dependency>
     <dependency type="executable" location="path">scribus</dependency>
+    <param name="pdf-version" gui-text="PDF version" type="optiongroup" appearance="combo">
+        <option value="11">PDF/X-1a</option>
+        <option value="12">PDF/X-3</option>
+        <option value="13">PDF 1.3</option>
+        <option value="14">PDF 1.4</option>
+        <option value="15">PDF 1.5</option>
+    </param>
+    <param name="bleed" gui-text="Bleed/margin (mm) - put 0 for no bleed marks" type="float" min="0" max="1000">0</param>
+    <!-- Apparently Scribus always outlines texts when exporting *for print* ? That would make sense. -->
+    <!--<param name="fonts" gui-text="Embed fonts" type="optiongroup" appearance="combo">
+        <option value="0">Embed fonts</option>
+        <option value="1">Convert fonts to path (with Scribus)</option>
+        <option value="2">Do not embed fonts</option>
+    </param> -->
     <output>
         <extension>.pdf</extension>
         <mimetype>application/pdf</mimetype>

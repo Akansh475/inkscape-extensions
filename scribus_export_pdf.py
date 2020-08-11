@@ -44,7 +44,11 @@ class Scribus(TempDirMixin, inkex.OutputExtension):
                                 help="PDF version (see Scribus documentation)")
         arg_parser.add_argument("--bleed", type=float, dest="bleed", default="0",
                                 help="Bleed value")
-        #arg_parser.add_argument("--fonts", type=int, dest="fonts", default="1", help="Embed fonts : 0 for embedding, 1 to convert to path, 2 to prevent embedding")
+        arg_parser.add_argument("--intent", type=int, dest="intent", default="0",
+                                help="0: Perceptual, 1: Relative Colorimetric, 2: Saturation, 3: Absolute Colorimetric")
+        arg_parser.add_argument("--title", type=str, dest="title", default="", help="PDF title")
+        #arg_parser.add_argument("--fonts", type=int, dest="fonts", default="1",
+        #                        help="Embed fonts : 0 for embedding, 1 to convert to path, 2 to prevent embedding")
 
     def generate_script(self, stream, width, height, icc):
         margin = self.options.bleed
@@ -78,6 +82,9 @@ class exportPDF():
         pdf.solidpr = icc
         pdf.imagepr = icc
         pdf.printprofc = icc
+        pdf.intenti = {self.options.intent}
+        pdf.intents = {self.options.intent}
+        pdf.info = "{self.options.title}"
         pdf.profiles = True
         pdf.profilei = True
         pdf.outdst = 1 # output destination : 0=screen, 1=printer

@@ -11,7 +11,14 @@
         <option value="14">PDF 1.4</option>
         <option value="15">PDF 1.5</option>
     </param>
+    <param name="title" gui-text="PDF title (mandatory for PDF/X-3)" type="string"></param>
     <param name="bleed" gui-text="Bleed/margin (mm) - put 0 for no bleed marks" type="float" min="0" max="1000">0</param>
+    <param name="intent" gui-text="Rendering intent" type="optiongroup" appearance="combo">
+        <option value="0">Perceptual</option>
+        <option value="1">Relative Colorimetric</option>
+        <option value="2">Saturation</option>
+        <option value="3">Absolute Colorimetric</option>
+    </param>
     <!-- Apparently Scribus always outlines texts when exporting *for print* ? That would make sense. -->
     <!--<param name="fonts" gui-text="Embed fonts" type="optiongroup" appearance="combo">
         <option value="0">Embed fonts</option>

@@ -44,6 +44,10 @@ class Scribus(TempDirMixin, inkex.OutputExtension):
                                 help="PDF version (see Scribus documentation)")
         arg_parser.add_argument("--bleed", type=float, dest="bleed", default="0",
                                 help="Bleed value")
+        arg_parser.add_argument("--bleed-marks", type=inkex.Boolean, dest="bleedMarks",
+                default=False, help="Bleed marks")
+        arg_parser.add_argument("--color-marks", type=inkex.Boolean, dest="colorMarks",
+                default=False, help="Color Marks")
         arg_parser.add_argument("--intent", type=int, dest="intent", default="0",
                                 help="0: Perceptual, 1: Relative Colorimetric, 2: Saturation, 3: Absolute Colorimetric")
         arg_parser.add_argument("--title", type=str, dest="title", default="", help="PDF title")
@@ -54,6 +58,12 @@ class Scribus(TempDirMixin, inkex.OutputExtension):
         margin = self.options.bleed
         pdfVersion = self.options.pdfVersion
         embedFonts = 1 #self.options.fonts
+        bleedMarks = self.options.bleedMarks
+        colorMarks = self.options.colorMarks
+        if ((bleedMarks or colorMarks) and margin < 7):
+            raise AbortExtension("You need 7mm bleed to show cutting marks or color marks")
+        if (bleedMarks or colorMarks):
+            margin = margin - 7 #because scribus is weird. At the time of 1.5.5, it adds 7 when those are set.
         stream.write(f"""
 import scribus
 import sys
@@ -66,13 +76,14 @@ class exportPDF():
         #scribus.placeSVG(svg, 0, 0)
         scribus.openDoc(svg)
         pdf = scribus.PDFfile()
-        if (margin > 0):
-            pdf.bleedl = margin
-            pdf.bleedr = margin
-            pdf.bleedt = margin
-            pdf.bleedb = margin
-            pdf.bleedMarks = True
-            pdf.colorMarks = True
+        pdf.bleedl = margin
+        pdf.bleedr = margin
+        pdf.bleedt = margin
+        pdf.bleedb = margin
+        pdf.useDocBleeds = False
+        pdf.cropMarks = {bleedMarks}
+        pdf.bleedMarks = {bleedMarks}
+        pdf.colorMarks = {colorMarks}
         pdf.version = {pdfVersion}
         pdf.allowAnnots = True
         pdf.allowChange = True

@@ -23,10 +23,11 @@ Comparison filters for use with the ComparisonMixin.
 Each filter should be initialised in the list of
 filters that are being used.
 
-compare_filters = [
-    CompareNumericFuzzy(),
-    CompareOrderIndependentLines(option=yes),
-]
+.. code-block:: python
+.. compare_filters = [
+..    CompareNumericFuzzy(),
+..    CompareOrderIndependentLines(option=yes),
+.. ]
 """
 
 import re

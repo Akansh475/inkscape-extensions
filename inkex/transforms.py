@@ -64,11 +64,12 @@ DIRECTION = ['tb', 'bt', 'lr', 'rl', 'ro', 'ri']
 
 
 class ImmutableVector2d(object):
+    """Represents an immutable element of 2-dimensional Euclidean space"""
     _x = 0.0
     _y = 0.0
 
-    x = property(lambda self: self._x) # type: property
-    y = property(lambda self: self._y) # type: property 
+    x = property(lambda self: self._x)
+    y = property(lambda self: self._y)
 
     @overload
     def __init__(self):
@@ -204,9 +205,7 @@ class ImmutableVector2d(object):
 
 
 class Vector2d(ImmutableVector2d):
-    """
-    Represents an element of 2-dimensional Euclidean space
-    """
+    """Represents an element of 2-dimensional Euclidean space"""
 
     @ImmutableVector2d.x.setter
     def x(self, value):

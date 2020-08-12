@@ -96,7 +96,7 @@ sphinx:
     - pip3 install sphinx-autodoc-typehints
     - pip3 install typed-ast
     - pip3 install lxml
-    - sphinx-apidoc -F -o source inkex
+    - sphinx-apidoc -F -f -e -o source inkex */deprecated.py
     - cp .gitlab-ci.sphinx-conf.py source/conf.py
     - python3 setup.py build_sphinx -s source
     - echo -e "\n\n"

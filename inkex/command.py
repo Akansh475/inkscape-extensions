@@ -111,28 +111,34 @@ def to_arg(arg, oldie=False):
     return str(arg)
 
 def to_args(prog, *positionals, **arguments):
-    """
-    Convert positional arguments and key word arguments
-    into a list of strings which Popen will understand.
+    """Compile arguments and keyword arguments into a list of strings which Popen will understand.
 
-    Values can be:
+    :param prog:
+        Program executable prepended to the output.
+    :type first: ``str``
+    :param \*args:
+        See below
+    :param \**kwargs:
+        See below
 
-    args = *[
-        'strait_up_string',
-        '--or_manual_kwarg=1',
-        ('ordered list', 'version of kwargs (as below)'),
-        ...
-    ]
-    kwargs = **{
-        'name': 'val',          # --name="val"'
-        'name': ['foo', 'bar'], # --name=foo --name=bar
-        'name': True,           # --name
-        'n': 'v',               # -n=v
-        'n': True,              # -n
-    }
+    :Arguments:
+        * (``str``) -- String added as given
+        * (``tuple``) -- Ordered version of Kwyward Arguments, see below
 
-    All args appear after the kwargs, so if you need args before,
-    use the ordered list tuple and don't use kwargs.
+    :Keyword Arguments:
+        * *name* (``str``) --
+          Becomes ``--name="val"``
+        * *name* (``bool``) --
+          Becomes ``--name``
+        * *name* (``list``) --
+          Becomes ``--name="val1"`` ...
+        * *n* (``str``) --
+          Becomes ``-n=val``
+        * *n* (``bool``) --
+          Becomes ``-n``
+
+    :return: Returns a list of compiled arguments ready for Popen.
+    :rtype: ``list[str]``
     """
     args = [prog]
     oldie = arguments.pop('oldie', False)

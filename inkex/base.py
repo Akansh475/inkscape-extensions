@@ -97,8 +97,9 @@ class InkscapeExtension(object):
         ...
         self.options.tab(arguments)
         ...
-        def method_foo(self, arguments):
-            # do something
+        .. code-block:: python
+        .. def method_foo(self, arguments):
+        ..     # do something
         """
         def _inner(value):
             name = '{}_{}'.format(prefix, value.strip('"').lower()).replace('-', '_')

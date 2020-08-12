@@ -12,7 +12,7 @@
 #
 # import os
 # import sys
-# sys.path.insert(0, '/home/matto/Projects/inkscape/extensions/inkex')
+# sys.path.insert(0, '../extensions/inkex')
 
 
 # -- Project information -----------------------------------------------------

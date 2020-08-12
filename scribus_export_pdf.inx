@@ -12,7 +12,10 @@
         <option value="15">PDF 1.5</option>
     </param>
     <param name="title" gui-text="PDF title (mandatory for PDF/X-3)" type="string"></param>
-    <param name="bleed" gui-text="Bleed/margin (mm) - put 0 for no bleed marks" type="float" min="0" max="1000">0</param>
+    <param name="bleed" gui-text="bleed added to each side of the document (mm)" type="float" min="0" max="1000">0</param>
+    <param name="bleed-marks" gui-text="show bleed marks" type="bool">false</param>
+    <param name="color-marks" gui-text="show color reference" type="bool">false</param>
+
     <param name="intent" gui-text="Rendering intent" type="optiongroup" appearance="combo">
         <option value="0">Perceptual</option>
         <option value="1">Relative Colorimetric</option>

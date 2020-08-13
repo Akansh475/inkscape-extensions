@@ -69,8 +69,12 @@ class Use(ShapeElement):
             self.to_dimensionless(self.get("y", 0)),
         )
         copy.style = self.style + copy.style
+        # Preserve the id of the clone to not break links that link the <use>
+        # As we replace exactly one element by exactly one, this should be safe.
+        old_id = self.get_id()
         self.replace_with(copy)
         copy.set_random_ids()
+        copy.set_id(old_id)
         return copy
 
     def shape_box(self, transform=None):

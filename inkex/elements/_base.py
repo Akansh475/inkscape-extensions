@@ -30,6 +30,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Tuple, Optional, overload, TypeVar, List
 from lxml import etree
+import re
 
 from ..interfaces.IElement import IBaseElement, ISVGDocumentElement
 
@@ -40,7 +41,7 @@ from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
 from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
-from ..properties import BaseStyleValue, all_properties
+from ..properties import BaseStyleValue, ShorthandValue, all_properties
 from ._selected import ElementList
 from ._parser import NodeBasedLookup, SVG_PARSER
 
@@ -631,10 +632,17 @@ class BaseElement(IBaseElement):
         .. versionadded:: 1.2"""
         style = Style()
         for key in self.keys():
-            if key in all_properties and all_properties[key][2]:
-                style[key] = BaseStyleValue.factory(
-                    declaration=key + ": " + self.attrib[key]
+            if (
+                key in all_properties
+                and all_properties[key][2]
+                and not issubclass(all_properties[key][0], ShorthandValue)
+            ):
+                # Shorthands cannot be set by presentation attributes
+                result = BaseStyleValue.factory_errorhandled(
+                    key=key, value=self.attrib[key]
                 )
+                if result is not None:  # parsing error
+                    style[key] = result[1]
         return style
 
     def composed_transform(self, other=None):
@@ -664,12 +672,12 @@ class ShapeElement(BaseElement):
 
     @property
     def clip(self):
-        """Gets the clip path element (if any)
+        """Gets the clip path element (if any). May be set through CSS.
 
         .. versionadded:: 1.1"""
         ref = self.get("clip-path")
         if not ref:
-            return None
+            return self.specified_style()("clip-path")
         return self.root.getElementById(ref)
 
     @clip.setter
@@ -753,3 +761,22 @@ class ShapeElement(BaseElement):
         if parsed[1] == "%":
             return font_size * parsed[0] * 0.01
         return self.to_dimensionless(line_height)
+
+
+class ViewboxMixin:
+    """Mixin for elements with viewboxes, such as <svg>, <marker>"""
+
+    def parse_viewbox(self, vbox: Optional[str]) -> Optional[List[float]]:
+        """Parses a viewbox. If an error occurs during parsing,
+        (0, 0, 0, 0) is returned. If the viewbox is None, None is returned.
+
+        .. versionadded:: 1.3"""
+        if vbox is not None and isinstance(vbox, str):
+            try:
+                result = [float(unit) for unit in re.split(r",\s*|\s+", vbox)]
+            except ValueError:
+                result = []
+            if len(result) != 4:
+                result = [0, 0, 0, 0]
+            return result
+        return None

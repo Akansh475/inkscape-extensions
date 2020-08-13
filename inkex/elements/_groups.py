@@ -29,10 +29,10 @@ from ..paths import Path
 from ..transforms import Transform
 
 from ._utils import addNS
-from ._base import ShapeElement
+from ._base import ShapeElement, ViewboxMixin
 
 try:
-    from typing import Optional  # pylint: disable=unused-import
+    from typing import Optional, List  # pylint: disable=unused-import
 except ImportError:
     pass
 
@@ -110,17 +110,26 @@ class ClipPath(GroupBase):
     tag_name = "clipPath"
 
 
-class Marker(GroupBase):
+class Marker(GroupBase, ViewboxMixin):
     """The <marker> element defines the graphic that is to be used for drawing
     arrowheads or polymarkers on a given <path>, <line>, <polyline> or <polygon>
     element."""
 
     tag_name = "marker"
 
+    def get_viewbox(self) -> List[float]:
+        """Returns the viewbox of the Marker, falling back to
+        [0 0 markerWidth markerHeight]
 
-class Mask(GroupBase):
-    """An alpha mask for compositing an object into the background
-
-    .. versionadded:: 1.2"""
-
-    tag_name = "mask"
+        .. versionadded:: 1.3"""
+        vbox = self.get("viewBox", None)
+        result = self.parse_viewbox(vbox)
+        if result is None:
+            # use viewport, https://www.w3.org/TR/SVG11/painting.html#MarkerElement
+            return [
+                0,
+                0,
+                self.to_dimensionless(self.get("markerWidth")),
+                self.to_dimensionless(self.get("markerHeight")),
+            ]
+        return result

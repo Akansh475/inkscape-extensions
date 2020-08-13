@@ -413,6 +413,7 @@ class TempDirMixin(_Base):  # pylint: disable=abstract-method
 
     def __init__(self, *args, **kwargs):
         self.tempdir = None
+        self._tempdir = None
         super().__init__(*args, **kwargs)
 
     def load_raw(self):
@@ -432,7 +433,9 @@ class TempDirMixin(_Base):  # pylint: disable=abstract-method
         # type: () -> None
         """Delete the temporary directory"""
         self.tempdir = None
-        self._tempdir.cleanup()
+        # if the file does not exist, _tempdir is never set.
+        if self._tempdir is not None:
+            self._tempdir.cleanup()
         super().clean_up()
 
 

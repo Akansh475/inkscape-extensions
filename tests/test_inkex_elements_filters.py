@@ -17,4 +17,4 @@ class GradientTestCase(TestCase):
     def test_gradient_offset_order(self):
         _gradient = self.svg.getElementById("MyGradient")
         offsets = [stop.attrib.get("offset") for stop in _gradient.stops]
-        assert offsets == ["0%", "100%", "50"]
+        assert offsets == ["0%", "50", "100%"]

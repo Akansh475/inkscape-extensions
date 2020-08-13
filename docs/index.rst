@@ -9,6 +9,7 @@ Welcome to inkex's documentation!
    authors/index
    Inkex Development <dev/index>
    API Reference <source/index> 
+   User documentation <extensions/index>
 
 **Useful links**:
 `Source Repository <https://gitlab.com/inkscape/extensions>`_ |

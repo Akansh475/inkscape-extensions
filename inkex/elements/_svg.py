@@ -40,16 +40,18 @@ from ._selected import ElementList
 from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
-from ._base import BaseElement
+from ._base import BaseElement, ViewboxMixin
 from ._meta import StyleElement, NamedView
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 if False:  # pylint: disable=using-constant-test
     import typing  # pylint: disable=unused-import
 
 
-class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
+class SvgDocumentElement(
+    DeprecatedSvgMixin, ISVGDocumentElement, BaseElement, ViewboxMixin
+):
     """Provide access to the document level svg functionality"""
 
     # pylint: disable=too-many-public-methods
@@ -233,17 +235,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         """Return the svg defs meta element container"""
         return self.get_or_create("//svg:defs", prepend=True)
 
-    def get_viewbox(self):
+    def get_viewbox(self) -> List[float]:
         """Parse and return the document's viewBox attribute"""
-        try:
-            ret = [
-                float(unit) for unit in re.split(r",\s*|\s+", self.get("viewBox", "0"))
-            ]
-        except ValueError:
-            ret = ""
-        if len(ret) != 4:
-            return [0, 0, 0, 0]
-        return ret
+        return self.parse_viewbox(self.get("viewBox", "0")) or [0, 0, 0, 0]
 
     @property
     def viewbox_width(self) -> float:  # getDocumentWidth(self):

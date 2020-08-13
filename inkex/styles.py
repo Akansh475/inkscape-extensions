@@ -32,6 +32,8 @@ from .colors import Color
 from .properties import BaseStyleValue, all_properties, ShorthandValue
 from .css import ConditionalRule
 
+from .utils import FragmentError
+
 if TYPE_CHECKING:
     from .elements._svg import SvgDocumentElement
 
@@ -311,7 +313,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         """
         return super().__getitem__(key)
 
-    def __call__(self, key, element=None):
+    def __call__(self, key, element=None, default=None):
         """Return the parsed value of a style. Optionally, an element can be passed
         that will be used to find gradient definitions etc.
 
@@ -325,9 +327,9 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         if key in copy:
             return copy.get_store(key).parse_value(element or self.element)
         # style is not set, return the default value
-        if key in all_properties:
+        if key in all_properties or default is not None:
             defvalue = BaseStyleValue.factory(
-                attr_name=key, value=all_properties[key][1]
+                attr_name=key, value=default or all_properties[key][1]
             )
             return (
                 defvalue.parse_value()
@@ -422,7 +424,10 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         Returns:
             Style: the cascaded style
         """
-        styles = list(element.root.stylesheets.lookup_specificity(element.get_id()))
+        try:
+            styles = list(element.root.stylesheets.lookup_specificity(element.get_id()))
+        except FragmentError:
+            styles = []
 
         # presentation attributes have specificity 0,
         # see https://www.w3.org/TR/SVG/styling.html#PresentationAttributes
@@ -513,7 +518,7 @@ class StyleSheet(list):
     a css file used with a css. Will yield multiple Style() classes.
     """
 
-    comment_strip = re.compile(r"(\/\/.*?\n)|(\/\*.*?\*\/)|@.*;")
+    comment_strip = re.compile(r"(\/\/.*?\n)|(\/\*.*?\*\/|@import .*;)")
 
     def __init__(self, content=None, callback=None):
         super().__init__()

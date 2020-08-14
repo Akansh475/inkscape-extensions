@@ -76,6 +76,7 @@ class exportPDF():
         #scribus.placeSVG(svg, 0, 0)
         scribus.openDoc(svg)
         pdf = scribus.PDFfile()
+        scribus.setUnit(UNIT_MILLIMETERS)
         pdf.bleedl = margin
         pdf.bleedr = margin
         pdf.bleedt = margin

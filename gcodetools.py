@@ -5274,6 +5274,9 @@ G01 Z1 (going to cutting z)\n""",
     def tab_about(self):
         return self.tab_help()
 
+    def tab_preferences(self):
+        return self.tab_help()
+
     ################################################################################
     # Lathe
     ################################################################################

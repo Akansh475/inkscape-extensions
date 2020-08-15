@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
 #
-# Copyright (C) 2008, 2009 Alvin Penner, penner@vaxxine.com
-# Copyright (C) 2009 Christian Mayer, inkscape@christianmayer.de
+# Copyright (C) 2008-2009 Alvin Penner, penner@vaxxine.com
+#               2009, Christian Mayer, inkscape@christianmayer.de
+#               2020, MartinOwens, doctormo@geek-2.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,9 +22,6 @@
 """
 Input a DXF file >= (AutoCAD Release 13 == AC1012)
 """
-# thanks to Aaron Spike for inkex without which this would not have been possible
-
-from __future__ import absolute_import, unicode_literals
 
 import os
 import re
@@ -149,6 +147,15 @@ class ValueConstruct(defaultdict):
             value = [value]
         self[self.attrs[attr]] = value
 
+    def adjust_coords(self, xmin, ymin, scale, extrude, height):
+        """Adjust the x,y coordinates to fit on the page"""
+        for xgrp in set(['10', '11', '13', '14']) & set(self):  # scale/reflect x values
+            for i in range(len(self[xgrp])):
+                self[xgrp][i] = scale * (extrude * self[xgrp][i] - xmin)
+        for ygrp in set(['20', '21', '23', '24']) & set(self):  # scale y values
+            for i in range(len(self[ygrp])):
+                self[ygrp][i] = height - scale * (self[ygrp][i] - ymin)
+
 export_viewport = False
 export_endsec = False
 
@@ -213,10 +220,10 @@ def export_line(vals):
     """Draw a strait line from the dxf"""
     # mandatory group codes : (10, 11, 20, 21) (x1, x2, y1, y2)
     if vals.has_x1 and vals.has_x2 and vals.has_y1 and vals.has_y2:
-        #sys.stderr.write(f"Drawing line\n")
-        path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, scale * (extrude * vals.x2 - xmin), height - scale * (vals.y2 - ymin))
-        attribs = {'d': path, 'style': style}
-        etree.SubElement(layer, 'path', attribs)
+        path = inkex.PathElement()
+        path.style = style
+        path.path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, vals.x2, vals.y2)
+        layer.add(path)
 
 
 def export_spline(vals):
@@ -277,8 +284,7 @@ def export_ellipse(vals):
     # mandatory group codes : (10, 11, 20, 21, 40, 41, 42) (xc, xm, yc, ym, width ratio, angle1, angle2)
     if vals.has_x1 and vals.has_x2 and vals.has_y1 and vals.has_y2 and \
             vals.has_width_ratio and vals.has_ellipse_a1 and vals.has_ellipse_a2:
-        generate_ellipse(vals.x1, vals.y1, scale * vals.x2, scale * vals.y2,
-            vals.radius, vals.ellipse_a1, vals.ellipse_a2)
+        generate_ellipse(vals.x1, vals.y1, vals.x2, vals.y2, vals.radius, vals.ellipse_a1, vals.ellipse_a2)
 
 
 def export_leader(vals):
@@ -380,7 +386,7 @@ def export_hatch(vals):
                         i40 += 1
                         i72 += 1
                     elif vals.edge_type_list[i72] == 1:  # line
-                        path += 'L %f,%f ' % (scale * (extrude * vals.x2_list[i11] - xmin), height - scale * (vals.y2_list[i11] - ymin))
+                        path += 'L %f,%f ' % (vals.x2_list[i11], vals.y2_list[i11])
                         i11 += 1
                         i72 += 1
                     i10 += 1
@@ -411,8 +417,8 @@ def export_dimension(vals):
             return
         attribs = {'d': path, 'style': style + '; marker-start: url(#DistanceX); marker-end: url(#DistanceX); stroke-width: 0.25px'}
         etree.SubElement(layer, 'path', attribs)
-        x = scale * (extrude * vals.x2 - xmin)
-        y = height - scale * (vals.y2 - ymin)
+        x = vals.x2
+        y = vals.y2
         size = 12  # default fontsize in px
         if vals.has_mtext:
             if vals.mtext in DIMTXT:
@@ -680,14 +686,9 @@ class DxfInput(inkex.InputExtension):
                     extrude = 1.0
                     if vals.has_extrude:
                         extrude = float(vals.extrude)
-                    for xgrp in ['10', '13', '14']:  # scale/reflect x values
-                        if vals[xgrp]:
-                            for i in range(0, len(vals[xgrp])):
-                                vals[xgrp][i] = scale * (extrude * vals[xgrp][i] - xmin)
-                    for ygrp in ['20', '23', '24']:  # scale y values
-                        if vals[ygrp]:
-                            for i in range(0, len(vals[ygrp])):
-                                vals[ygrp][i] = height - scale * (vals[ygrp][i] - ymin)
+
+                    vals.adjust_coords(xmin, ymin, scale, extrude, height)
+
                     if extrude == -1.0:  # reflect angles
                         if vals.has_angle and vals.has_angle2:
                             vals.angle2, vals.angle = 180.0 - vals.angle, 180.0 - vals.angle2

@@ -119,7 +119,7 @@ exportPDF()""")
         minor = int(version_match.group(2))
         point = int(version_match.group(3))
         if (major < 1) or (major == 1 and minor < 5):
-            raise AbortExtension(f"We detected Scribus {version_match.group(0)} which is less than 1.5.x")
+            raise AbortExtension(f"Found Scribus {version_match.group(0)}. This extension requires Scribus 1.5.x")
 
         input_file = self.options.input_file
         py_file = os.path.join(self.tempdir, 'scribus.py')

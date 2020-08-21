@@ -540,6 +540,8 @@ class SegmentTest(TestCase):
     def test_segment_maths(self):
         """Segments have calculations"""
         self.assertEqual(DirectedLineSegment((0, 0), (10, 0)).angle, 0)
+        self.assertAlmostEqual(DirectedLineSegment((0,0), (0.5 * sqrt(3), 0.5)).angle,
+                               pi/6, delta=1e-6)
 
 
 class ExtremaTest(TestCase):

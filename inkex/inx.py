@@ -34,6 +34,7 @@ from .utils import Boolean
 
 NSS = {
     'inx': 'http://www.inkscape.org/namespace/inkscape/extension',
+    'inkscape': 'http://www.inkscape.org/namespaces/inkscape',
 }
 
 class InxLookup(etree.CustomElementClassLookup):
@@ -111,9 +112,15 @@ class InxFile(object):
         output = self.find_one('inx:output')
         data = {}
         if effect is not None:
-            data['type'] = 'effect'
-            data['preview'] = Boolean(effect.get('needs-live-preview', 'true'))
-            data['objects'] = self._text('inx:effect/inx:object-type', 'all')
+            template = self.find_one('inkscape:templateinfo')
+            if template is not None:
+                data['type'] = 'template'
+                data['desc'] = self._text('inkscape:templateinfo/inkscape:shortdesc')
+                data['author'] = self._text('inkscape:templateinfo/inkscape:author')
+            else:
+                data['type'] = 'effect'
+                data['preview'] = Boolean(effect.get('needs-live-preview', 'true'))
+                data['objects'] = self._text('inx:effect/inx:object-type', 'all')
         elif self.find_one('inx:input') is not None:
             data['type'] = 'input'
             data['extension'] = self._text('inx:input/inx:extension')

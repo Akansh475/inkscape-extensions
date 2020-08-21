@@ -968,7 +968,7 @@ class DirectedLineSegment(object):
     def angle(self):
         # type: () -> float
         """Get the angle of the line created by this segment"""
-        return pi * (atan2(self.dy, self.dx)) / 180
+        return atan2(self.dy, self.dx)
 
     def distance_to_point(self, x, y):
         # type: (float, float) -> Union[DirectedLineSegment, Optional[float]]

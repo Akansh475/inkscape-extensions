@@ -1,0 +1,46 @@
+# coding=utf-8
+#
+# Copyright (C) 2020 Martin Owens <doctormo@geek-2.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+"""
+Import this inkex module if you are using the extension manager
+and need virtualenv dependencies. Things like gobject, numpy etc
+
+Always import *before* anything else.
+"""
+
+import os
+import sys
+
+def activate_virtualenv():
+    """ 
+    The python that inkscape uses and the python installed into the virtualenv
+    are different pythons with different libs. To give access to dependencies
+    that are installed within the virtualenv, we activate the available venv.
+    """
+    for path in sys.path:
+        for script in [
+                'activate_this.py',
+                os.path.join('bin', 'activate_this.py'),
+                ]:
+            activate_this = os.path.join(path, script)
+            if os.path.isfile(activate_this):
+                sys.stderr.write(f"Activating virtualenv: {activate_this}")
+                exec(open(activate_this).read(), dict(__file__=activate_this))
+                return
+
+activate_virtualenv()

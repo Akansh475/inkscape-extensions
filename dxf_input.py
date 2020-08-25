@@ -188,12 +188,12 @@ def export_mtext(vals):
                 attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
             elif vals.y2 == -1.0:
                 attribs.update({'transform': 'rotate (%f %f %f)' % (90, x, y)})
-        node = layer.add(inkex.Text(**attribs))
+        node = layer.add(inkex.TextElement(**attribs))
         node.set('sodipodi:linespacing', '125%')
         text = ''
-        if vals.mtext:
+        if vals.has_mtext:
             text = ''.join(vals.mtext_list)
-        if vals.text:
+        if vals.has_text:
             text = vals.text
         found = text.find(r'\P')  # new line
         while found > -1:
@@ -524,6 +524,7 @@ class DxfInput(inkex.InputExtension):
         global xmin
         global ymin
         global height
+        global DIMTXT
 
         options = self.options
 

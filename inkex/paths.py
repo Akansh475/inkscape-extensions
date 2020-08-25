@@ -98,6 +98,11 @@ class PathCommand(object):
         """Return relative counterpart for relative commands or copy for absolute"""
         raise NotImplementedError
 
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> AbsolutePathCommand
+        """Return an absolute non-shorthand command"""
+        return self.to_absolute(prev)
+
     # The precision of the numbers when converting to string
     number_template = "{:.6g}"
 
@@ -443,6 +448,10 @@ class Horz(AbsolutePathCommand):
         # type: (Vector2d) -> horz
         return horz(self.x - prev.x)
 
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> Line
+        return self.to_line(prev)
+
     def transform(self, transformation):
         # type: (Pathlike, Transform) -> Pathlike
         raise ValueError("Horizontal lines can't be transformed directly.")
@@ -477,6 +486,10 @@ class horz(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev):  # type: (Vector2d) -> Horz
         return Horz(prev.x + self.dx)
 
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> Line
+        return self.to_line(prev)
+
     def to_line(self, prev):  # type: (Vector2d) -> Line
         """Return this path command as a Line instead"""
         return Line(prev.x + self.dx, prev.y)
@@ -503,6 +516,10 @@ class Vert(AbsolutePathCommand):
     def control_points(self, first, prev, prev_prev):
         # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
         yield Vector2d(prev.x, self.y)
+
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> Line
+        return self.to_line(prev)
 
     def to_relative(self, prev):
         # type: (Vector2d) -> vert
@@ -536,6 +553,10 @@ class vert(RelativePathCommand):  # pylint: disable=invalid-name
 
     def to_absolute(self, prev):  # type: (Vector2d) -> Vert
         return Vert(prev.y + self.dy)
+
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> Line
+        return self.to_line(prev)
 
     def to_line(self, prev): # type: (Vector2d) -> Line
         """Return this path command as a line instead"""
@@ -668,6 +689,10 @@ class Smooth(AbsolutePathCommand):
         yield Vector2d(x3, y3)
         yield Vector2d(x4, y4)
 
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> Curve
+        return self.to_curve(prev, prev_control)
+
     def to_relative(self, prev):  # type: (Vector2d) -> smooth
         return smooth(
             self.x3 - prev.x, self.y3 - prev.y,
@@ -713,6 +738,10 @@ class smooth(RelativePathCommand):  # pylint: disable=invalid-name
             self.dx3 + prev.x, self.dy3 + prev.y,
             self.dx4 + prev.x, self.dy4 + prev.y
         )
+
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> Curve
+        return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
 
 class Quadratic(AbsolutePathCommand):
@@ -829,6 +858,10 @@ class TepidQuadratic(AbsolutePathCommand):
         yield Vector2d(x2, y2)
         yield Vector2d(x3, y3)
 
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> AbsolutePathCommand
+        return self.to_quadratic(prev, prev_control)
+
     def to_relative(self, prev):  # type: (Vector2d) -> tepidQuadratic
         return tepidQuadratic(
             self.x3 - prev.x, self.y3 - prev.y
@@ -873,6 +906,10 @@ class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
         return TepidQuadratic(
             self.dx3 + prev.x, self.dy3 + prev.y
         )
+
+    def to_non_shorthand(self, prev, prev_control):
+        # type: (Vector2d, Vector2d) -> AbsolutePathCommand
+        return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
 
 class Arc(AbsolutePathCommand):
@@ -1244,6 +1281,17 @@ class Path(list):
 
     def to_absolute(self):
         """Convert this path to use only absolute coordinates"""
+        return self._to_absolute(True)
+
+    def to_non_shorthand(self):
+        # type: () -> Path
+        """Convert this path to use only absolute non-shorthand coordinates"""
+        return self._to_absolute(False)
+
+    def _to_absolute(self, shorthand):
+        """
+        :param (bool) shorthand: If false, then convert all shorthand commands to non-shorthand.
+        """
         abspath = Path()
 
         previous = Vector2d()
@@ -1253,7 +1301,16 @@ class Path(list):
             if isinstance(seg, (move, Move)):
                 first = seg.end_point(first, previous)
 
-            abspath.append(seg.to_absolute(previous))
+            if shorthand:
+                abspath.append(seg.to_absolute(previous))
+            else:
+                if abspath and isinstance(abspath[-1], (Curve, Quadratic)):
+                    prev_control = list(abspath[-1].control_points(None, None, None))[-2]
+                else:
+                    prev_control = previous
+
+                abspath.append(seg.to_non_shorthand(previous, prev_control))
+
             previous = seg.end_point(first, previous)
 
         return abspath
@@ -1292,7 +1349,7 @@ class Path(list):
             This is compatibility function for older API. Should not be used in new code
 
         """
-        return [[seg.letter, list(seg.args)] for seg in self.to_absolute()]
+        return [[seg.letter, list(seg.args)] for seg in self.to_non_shorthand()]
 
     def to_superpath(self):
         """Convert this path into a cubic super path"""

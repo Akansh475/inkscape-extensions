@@ -39,8 +39,8 @@ def activate_virtualenv():
                 ]:
             activate_this = os.path.join(path, script)
             if os.path.isfile(activate_this):
-                sys.stderr.write(f"Activating virtualenv: {activate_this}")
-                exec(open(activate_this).read(), dict(__file__=activate_this))
+                with open(activate_this, 'r') as fhl:
+                    exec(fhl.read(), dict(__file__=activate_this))
                 return
 
 activate_virtualenv()

@@ -378,7 +378,7 @@ class PathTest(TestCase):
         self.assertEqual(len(ret), 5)
         self.assertEqual(ret[0][0], 'M')
         self.assertEqual(ret[1][0], 'L')
-        self.assertEqual(ret[2][0], 'H')
+        self.assertEqual(ret[2][0], 'L')
         self.assertEqual(ret[3][0], 'C')
 
     def test_transform(self):

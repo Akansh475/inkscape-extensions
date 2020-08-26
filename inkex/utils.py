@@ -58,6 +58,29 @@ NSS = {
 }
 SSN = dict((b, a) for (a, b) in NSS.items())
 
+def _pythonpath():
+    for pth in os.environ.get('PYTHONPATH', '').split(':'):
+        if os.path.isdir(pth):
+            yield pth
+
+def get_user_directory():
+    """Return the user directory where extensions are stored."""
+    if 'INKSCAPE_PROFILE_DIR' in os.environ:
+        return os.path.abspath(
+            os.path.expanduser(
+                os.path.join(os.environ['INKSCAPE_PROFILE_DIR'], 'extensions')))
+
+    home = os.path.expanduser("~")
+    for pth in _pythonpath():
+        if pth.startswith(home):
+            return pth
+
+def get_inkscape_directory():
+    """Return the system directory where inkscape's core is."""
+    for pth in _pythonpath():
+        if os.path.isdir(os.path.join(pth, 'inkex')):
+            return pth
+
 class KeyDict(dict):
     """
     A normal dictionary, except asking for anything not in the dictionary

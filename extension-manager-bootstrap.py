@@ -36,6 +36,8 @@ except ImportError:
 TARGET_DIR = get_user_directory()
 
 class Bootstrap(InkscapeExtension):
+    multi_inx = True
+
     def add_arguments(self, pars):
         pars.add_argument('--tab')
         pars.add_argument('--version', default='inkscape-extensions-manager')

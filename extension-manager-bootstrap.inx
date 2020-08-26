@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Manage Extensions...</name>
-    <id>org.inkscape.extensions.manager2</id>
+    <id>org.inkscape.extensions.manager</id>
     <param name="tab" type="notebook">
         <page name="Help" gui-text="Help">
             <label>The Extensions Manager needs to be installed</label>
@@ -12,10 +12,10 @@
         </page>
     </param>
     <effect needs-live-preview="false" needs-document="false" implements-custom-gui="true">
-        <object-type>path</object-type>
-        <effects-menu manager="true"/>
+        <object-type>all</object-type>
+        <effects-menu/>
     </effect>
     <script>
-        <command interpreter="python">extension-manager-bootstrap.py</command>
+        <command location="inx" interpreter="python">extension-manager-bootstrap.py</command>
     </script>
 </inkscape-extension>

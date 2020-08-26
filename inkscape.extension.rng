@@ -213,9 +213,6 @@
           <attribute name="hidden">
             <ref name="data_type_boolean_strict"/>
           </attribute>
-          <attribute name="manager">
-            <ref name="data_type_boolean_strict"/>
-          </attribute>
           <ref name="inx.effect_extension.submenu"/>
         </choice>
       </element>

@@ -116,9 +116,9 @@ def to_args(prog, *positionals, **arguments):
     :param prog:
         Program executable prepended to the output.
     :type first: ``str``
-    :param \*args:
+    :param *args:
         See below
-    :param \**kwargs:
+    :param **kwargs:
         See below
 
     :Arguments:

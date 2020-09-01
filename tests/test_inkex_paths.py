@@ -324,6 +324,11 @@ class PathTest(TestCase):
         ret = Path('M 10,10 l 10,10 Z l 10,10').scale(2, 2)
         self._assertPath(ret, 'M 20 20 l 20 20 Z l 20 20')
 
+    def test_scale_multiple_zones(self):
+        """Zone close returns current position to start of zone (not start of path)"""
+        ret = Path("M 100 100 Z M 200 200 Z h 0").scale(1, 1)
+        self._assertPath(ret.to_absolute(), "M 100 100 Z M 200 200 Z L 200 200")
+
     def test_absolute(self):
         """Paths can be converted to absolute"""
         ret = Path("M 100 100 l 10 10 10 10 10 10")
@@ -341,7 +346,6 @@ class PathTest(TestCase):
 
         ret= Path("m 1 2 h 2 v 1 z m 4 0 h 2 v 1 z m 0 2 h 2 v 1 z")
         self._assertPath(ret.to_absolute(), "M 1 2 H 3 V 3 Z M 5 2 H 7 V 3 Z M 5 4 H 7 V 5 Z")
-
 
     def test_relative(self):
         """Paths can be converted to relative"""

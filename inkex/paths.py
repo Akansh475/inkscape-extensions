@@ -1222,11 +1222,12 @@ class Path(list):
         result = Path()
         previous = Vector2d()
         previous_new = Vector2d()
+        start_zone = True
         first = Vector2d()
         first_new = Vector2d()
 
         for i, seg in enumerate(self):  # type: PathCommand
-            if i == 0:
+            if start_zone:
                 first = seg.end_point(first, previous)
 
             if isinstance(seg, (horz, Horz, Vert, vert)):
@@ -1237,7 +1238,7 @@ class Path(list):
             else:
                 new_seg = seg.transform(transform)
 
-            if i == 0:
+            if start_zone:
                 first_new = new_seg.end_point(first_new, previous_new)
 
             if inplace:
@@ -1246,6 +1247,7 @@ class Path(list):
                 result.append(new_seg)
             previous = seg.end_point(first, previous)
             previous_new = new_seg.end_point(first_new, previous_new)
+            start_zone = isinstance(seg, (zoneClose, ZoneClose))
         if inplace:
             return self
         return result

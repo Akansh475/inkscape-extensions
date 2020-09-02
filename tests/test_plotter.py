@@ -13,6 +13,6 @@ class TestPlotter(ComparisonMixin, TestCase):
     ]
     comparisons = [
         ('--serialPort=[test]',), # HPGL
-        ('--serialPort=[test]', '--commandLanguage=DMPL'),
-        ('--serialPort=[test]', '--commandLanguage=KNK'),
+    #   ('--serialPort=[test]', '--commandLanguage=DMPL'),
+    #   ('--serialPort=[test]', '--commandLanguage=KNK'),
     ]

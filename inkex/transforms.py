@@ -201,7 +201,7 @@ class ImmutableVector2d(object):
     @property
     def length(self):
         # type: () -> float
-        return sqrt(fabs(self.dot(self)))
+        return sqrt(self.dot(self))
 
 
 class Vector2d(ImmutableVector2d):

@@ -24,7 +24,7 @@ import re
 import math
 
 import inkex
-from inkex.transforms import Transform
+from inkex.transforms import Transform, DirectedLineSegment, Vector2d
 from inkex.bezier import cspsubdiv
 
 class NoPathError(ValueError):
@@ -95,7 +95,7 @@ class hpglEncoder(object):
         )
         transform.add_rotate(int(self.options.orientation))
 
-        self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
+        self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         self.process_group(self.doc, transform)
         if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
             raise NoPathError("No paths found")
@@ -144,7 +144,7 @@ class hpglEncoder(object):
              -float(self.divergenceY) + self.offsetY]
         ])
         transform.add_rotate(int(self.options.orientation))
-        self.vData = [['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0], ['', 'False', 0, 0]]
+        self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
             if self.options.center:
@@ -157,16 +157,16 @@ class hpglEncoder(object):
                     precutY = self.offsetY + self.toolOffset
                 else:
                     precutY = self.offsetY - self.toolOffset
-                self.processOffset('PU', precutX, precutY, self.options.pen)
-                self.processOffset('PD', precutX, precutY + self.toolOffset * 8, self.options.pen)
+                self.processOffset('PU', Vector2d(precutX, precutY), self.options.pen)
+                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8), self.options.pen)
             else:
-                self.processOffset('PU', 0, 0, self.options.pen)
-                self.processOffset('PD', 0, self.toolOffset * 8, self.options.pen)
+                self.processOffset('PU', Vector2d(0, 0), self.options.pen)
+                self.processOffset('PD', Vector2d(0, self.toolOffset * 8), self.options.pen)
         # start conversion
         self.process_group(self.doc, transform)
         # shift an empty node in in order to process last node in cache
         if self.toolOffset > 0.0 and not self.dryRun:
-            self.processOffset('PU', 0, 0, 0)
+            self.processOffset('PU', Vector2d(0, 0), 0)
         return self.hpgl
 
     def process_group(self, group, transform):
@@ -212,7 +212,7 @@ class hpglEncoder(object):
                     posX, posY = singlePathPoint[1]
                     # check if point is repeating, if so, ignore
                     if int(round(posX)) != int(round(oldPosX)) or int(round(posY)) != int(round(oldPosY)):
-                        self.processOffset(cmd, posX, posY, pen)
+                        self.processOffset(cmd, Vector2d(posX, posY), pen)
                         cmd = 'PD'
                         oldPosX = posX
                         oldPosY = posY
@@ -225,69 +225,59 @@ class hpglEncoder(object):
                             posX, posY = singlePathPoint[1]
                             # check if point is repeating, if so, ignore
                             if int(round(posX)) != int(round(oldPosX)) or int(round(posY)) != int(round(oldPosY)):
-                                overcutLength += self.getLength(oldPosX, oldPosY, posX, posY)
+                                overcutLength += (Vector2d(posX, posY) - (oldPosX, oldPosY)).length
                                 if overcutLength >= self.overcut:
-                                    newLength = self.changeLength(oldPosX, oldPosY, posX, posY, - (overcutLength - self.overcut))
-                                    self.processOffset(cmd, newLength[0], newLength[1], pen)
+                                    newEndPoint = self.changeLength(Vector2d(oldPosX, oldPosY), Vector2d(posX, posY), - (overcutLength - self.overcut))
+                                    self.processOffset(cmd, newEndPoint, pen)
                                     break
                                 else:
-                                    self.processOffset(cmd, posX, posY, pen)
+                                    self.processOffset(cmd, Vector2d(posX, posY), pen)
                                 oldPosX = posX
                                 oldPosY = posY
 
-    def getLength(self, x1, y1, x2, y2, absolute=True):
-        """calc absolute or relative length between two points"""
-        length = math.sqrt((x2 - x1) ** 2.0 + (y2 - y1) ** 2.0)
-        if absolute:
-            length = math.fabs(length)
-        return length
-
-    def changeLength(self, x1, y1, x2, y2, offset):
+    def changeLength(self, p1, p2, offset):
         """change length of line"""
-        if offset < 0:
-            offset = max( - self.getLength(x1, y1, x2, y2), offset)
-        x = x2 + (x2 - x1) / self.getLength(x1, y1, x2, y2, False) * offset
-        y = y2 + (y2 - y1) / self.getLength(x1, y1, x2, y2, False) * offset
-        return [x, y]
+        if p1.x == p2.x and p1.y == p2.y:  # abort if points are the same
+            return p1
+        return Vector2d(DirectedLineSegment(p2, p1).point_at_length(- offset))
 
-    def processOffset(self, cmd, posX, posY, pen):
+    def processOffset(self, cmd, point, pen):
         # calculate offset correction (or don't)
         if self.toolOffset == 0.0 or self.dryRun:
-            self.storePoint(cmd, posX, posY, pen)
+            self.storePoint(cmd, point, pen)
         else:
             # insert data into cache
             self.vData.pop(0)
-            self.vData.insert(3, [cmd, posX, posY, pen])
+            self.vData.insert(3, [cmd, point, pen])
             # decide if enough data is available
             if self.vData[2][1] != 'False':
                 if self.vData[1][1] == 'False':
-                    self.storePoint(self.vData[2][0], self.vData[2][1], self.vData[2][2], self.vData[2][3])
+                    self.storePoint(self.vData[2][0], self.vData[2][1], self.vData[2][2])
                 else:
                     # perform tool offset correction (It's a *tad* complicated, if you want to understand it draw the data as lines on paper)
                     if self.vData[2][0] == 'PD': # If the 3rd entry in the cache is a pen down command make the line longer by the tool offset
-                        pointThree = self.changeLength(self.vData[1][1], self.vData[1][2], self.vData[2][1], self.vData[2][2], self.toolOffset)
-                        self.storePoint('PD', pointThree[0], pointThree[1], self.vData[2][3])
+                        pointThree = self.changeLength(self.vData[1][1], self.vData[2][1], self.toolOffset)
+                        self.storePoint('PD', pointThree, self.vData[2][2])
                     elif self.vData[0][1] != 'False':
                         # Elif the 1st entry in the cache is filled with data and the 3rd entry is a pen up command shift
                         # the 3rd entry by the current tool offset position according to the 2nd command
-                        pointThree = self.changeLength(self.vData[0][1], self.vData[0][2], self.vData[1][1], self.vData[1][2], self.toolOffset)
-                        pointThree[0] = self.vData[2][1] - (self.vData[1][1] - pointThree[0])
-                        pointThree[1] = self.vData[2][2] - (self.vData[1][2] - pointThree[1])
-                        self.storePoint('PU', pointThree[0], pointThree[1], self.vData[2][3])
+                        pointThree = self.changeLength(self.vData[0][1], self.vData[1][1], self.toolOffset)
+                        pointThree = self.vData[2][1] - (self.vData[1][1] - pointThree)
+                        self.storePoint('PU', pointThree, self.vData[2][2])
                     else:
                         # Else just write the 3rd entry
-                        pointThree = [self.vData[2][1], self.vData[2][2]]
-                        self.storePoint('PU', pointThree[0], pointThree[1], self.vData[2][3])
+                        pointThree = self.vData[2][1]
+                        self.storePoint('PU', pointThree, self.vData[2][2])
                     if self.vData[3][0] == 'PD':
                         # If the 4th entry in the cache is a pen down command guide tool to next line with a circle between the prolonged 3rd and 4th entry
-                        if self.getLength(self.vData[2][1], self.vData[2][2], self.vData[3][1], self.vData[3][2]) >= self.toolOffset:
-                            pointFour = self.changeLength(self.vData[3][1], self.vData[3][2], self.vData[2][1], self.vData[2][2], - self.toolOffset)
+                        originalSegment = DirectedLineSegment(self.vData[2][1], self.vData[3][1])
+                        if originalSegment.length >= self.toolOffset:
+                            pointFour = self.changeLength(originalSegment.end, originalSegment.start, - self.toolOffset)
                         else:
-                            pointFour = self.changeLength(self.vData[2][1], self.vData[2][2], self.vData[3][1], self.vData[3][2],
-                                (self.toolOffset - self.getLength(self.vData[2][1], self.vData[2][2], self.vData[3][1], self.vData[3][2])))
+                            pointFour = self.changeLength(originalSegment.start, originalSegment.end, self.toolOffset - originalSegment.length)
                         # get angle start and angle vector
-                        angleStart = math.atan2(pointThree[1] - self.vData[2][2], pointThree[0] - self.vData[2][1])
-                        angleVector = math.atan2(pointFour[1] - self.vData[2][2], pointFour[0] - self.vData[2][1]) - angleStart
+                        angleStart = DirectedLineSegment(self.vData[2][1], pointThree).angle
+                        angleVector = DirectedLineSegment(self.vData[2][1], pointFour).angle - angleStart
                         # switch direction when arc is bigger than 180°
                         if angleVector > math.pi:
                             angleVector -= math.pi * 2
@@ -297,18 +287,18 @@ class hpglEncoder(object):
                         if angleVector >= 0:
                             angle = angleStart + self.toolOffsetFlat
                             while angle < angleStart + angleVector:
-                                self.storePoint('PD', self.vData[2][1] + math.cos(angle) * self.toolOffset, self.vData[2][2] + math.sin(angle) * self.toolOffset, self.vData[2][3])
+                                self.storePoint('PD', self.vData[2][1] + self.toolOffset * Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
                                 angle += self.toolOffsetFlat
                         else:
                             angle = angleStart - self.toolOffsetFlat
                             while angle > angleStart + angleVector:
-                                self.storePoint('PD', self.vData[2][1] + math.cos(angle) * self.toolOffset, self.vData[2][2] + math.sin(angle) * self.toolOffset, self.vData[2][3])
+                                self.storePoint('PD', self.vData[2][1] + self.toolOffset * Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
                                 angle -= self.toolOffsetFlat
-                        self.storePoint('PD', pointFour[0], pointFour[1], self.vData[3][3])
+                        self.storePoint('PD', pointFour, self.vData[3][2])
 
-    def storePoint(self, command, x, y, pen):
-        x = int(round(x))
-        y = int(round(y))
+    def storePoint(self, command, point, pen):
+        x = int(round(point.x))
+        y = int(round(point.y))
         # skip when no change in movement
         if self.lastPoint[0] == command and self.lastPoint[1] == x and self.lastPoint[2] == y:
             return

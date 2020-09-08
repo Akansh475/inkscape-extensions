@@ -102,6 +102,20 @@ class ImmutableVector2dTest(TestCase):
         self.assertEqual(vec[0], 10)
         self.assertEqual(vec[1], 20)
 
+    def test_cross(self):
+        """Test cross product for ImmutableVector2d"""
+        vec1 = ImmutableVector2d(0, 2)
+        vec2 = ImmutableVector2d(0, 3)
+        vec3 = ImmutableVector2d(0, -3)
+        vec4 = ImmutableVector2d(3, 0)
+        vec5 = ImmutableVector2d(-3, 0)
+        vec6 = ImmutableVector2d(1, 1)
+        self.assertAlmostEqual(vec1.cross(vec2), 0)
+        self.assertAlmostEqual(vec2.cross(vec3), 0)
+        self.assertAlmostEqual(vec1.cross(vec4), -6)
+        self.assertAlmostEqual(vec1.cross(vec5), 6)
+        self.assertAlmostEqual(vec1.cross(vec6), -2.0)
+        self.assertAlmostEqual(vec6.cross(vec1), 2.0)
 
 class Vector2dTest(TestCase):
     """Test the Vector2d object"""

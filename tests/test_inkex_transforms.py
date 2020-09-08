@@ -30,6 +30,10 @@ class ImmutableVector2dTest(TestCase):
         self.assertEqual(vec3.x, 15)
         self.assertEqual(vec3.y, 22)
 
+        vec4 = ImmutableVector2d('-5,8')
+        self.assertEqual(vec4.x, -5)
+        self.assertEqual(vec4.y, 8)
+
         self.assertRaises(ValueError, ImmutableVector2d, (1))
         self.assertRaises(ValueError, ImmutableVector2d, (1, 2, 3))
 
@@ -76,6 +80,7 @@ class ImmutableVector2dTest(TestCase):
         vec = ImmutableVector2d(1, 2)
         self.assertTrue((-vec).is_close((-1, -2)))
         self.assertTrue((+vec).is_close(vec))
+        self.assertAlmostEqual(abs(vec), sqrt(5))
         self.assertTrue(+vec is not vec)  # returned value is a copy
 
     def test_representations(self):
@@ -181,6 +186,42 @@ class Vector2dTest(TestCase):
         self.assertEqual(len(vec), 2)
         self.assertEqual(vec[0], 10)
         self.assertEqual(vec[1], 20)
+
+    def test_polar_operations(self):
+        """Test polar coordinates operations"""
+        #               x  y  r  pi
+        equivilents = [(0, 0, 0, 0),
+                       (0, 0, 0, 1),
+                       (0, 0, 0, -1),
+                       (0, 0, 0, 0.5),
+                       (1, 0, 1, 0),
+                       (0, 1, 1, 0.5),
+                       (0, -1, 1, -0.5),
+                       (3, 0, 3, 0),
+                       (0, 3, 3, 0.5),
+                       (0, -3, 3, -0.5),
+                       (sqrt(2), sqrt(2), 2, 0.25),
+                       (-sqrt(2), sqrt(2), 2, 0.75),
+                       (sqrt(2), -sqrt(2), 2, -0.25),
+                       (-sqrt(2), -sqrt(2), 2, -0.75)]
+        for x, y, r, t in equivilents:
+            theta = t * pi if r != 0 else None
+            for ts in [0, 2, -2]:
+                ctx_msg = 'Test values are x: {} y: {} r: {} θ: {} * pi'.format(x, y, r, t + ts)
+                polar = Vector2d.from_polar(r, (t + ts) * pi)
+                cart = Vector2d(x, y)
+                self.assertEqual(cart.length, r, msg = ctx_msg)
+                self.assertEqual(polar.length, r, msg = ctx_msg)
+                self.assertAlmostEqual(cart.angle, theta, msg = ctx_msg, delta = 1e-12)
+                self.assertAlmostEqual(polar.angle, theta, msg = ctx_msg, delta = 1e-12)
+                self.assertEqual(cart.to_polar_tuple(), (r, cart.angle), msg = ctx_msg)
+                self.assertEqual(polar.to_polar_tuple(), (r, polar.angle), msg = ctx_msg)
+                self.assertEqual(cart.to_tuple(), (x, y), msg = ctx_msg)
+                self.assertAlmostEqual(polar.to_tuple()[0], x, msg = ctx_msg, delta = 1e-12)
+                self.assertAlmostEqual(polar.to_tuple()[1], y, msg = ctx_msg, delta = 1e-12)
+        # Test special handling of from_polar with None theta
+        self.assertEqual(Vector2d.from_polar(0, None).to_tuple(), (0.0, 0.0))
+        self.assertIsNone(Vector2d.from_polar(4, None))
 
 
 class TransformTest(TestCase):

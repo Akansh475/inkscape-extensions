@@ -184,8 +184,13 @@ class ImmutableVector2d(object):
         return (self.x, self.y)[item]
 
     def to_tuple(self):
-        # type : () -> Tuple[float, float]
+        # type: () -> Tuple[float, float]
         return self.x, self.y
+
+    def to_polar_tuple(self):
+        # type: () -> Tuple[float, Optional[float]]
+        """A tuple of the vector's magnitude and direction"""
+        return self.length, self.angle
 
     def dot(self, other):
         # type: (VectorLike) -> float
@@ -203,9 +208,31 @@ class ImmutableVector2d(object):
         # type: () -> float
         return sqrt(self.dot(self))
 
+    @property
+    def angle(self):
+        # type: () -> Optional[float]
+        """The angle of the vector when represented in polar coordinates"""
+        if self.x == 0 and self.y == 0:
+            return None
+        return atan2(self.y, self.x)
+
 
 class Vector2d(ImmutableVector2d):
     """Represents an element of 2-dimensional Euclidean space"""
+
+    @staticmethod
+    def from_polar(radius, theta):
+        # type: (float, Optional[float]) -> Optional[Vector2d]
+        """Creates a Vector2d from polar coordinates
+
+        None is returned when theta is None and radius is not zero.
+        """
+        if radius == 0.0:
+            return Vector2d(0.0, 0.0)
+        if theta is not None:
+            return Vector2d(radius * cos(theta), radius * sin(theta))
+        # A vector with a radius but no direction is invalid
+        return None
 
     @ImmutableVector2d.x.setter
     def x(self, value):

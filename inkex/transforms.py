@@ -1055,15 +1055,11 @@ class DirectedLineSegment(object):
         # type: (DirectedLineSegment) -> Optional[Vector2d]
         """Get the intersection between two segments"""
         other = DirectedLineSegment(other)
-        denom = (other.dy * self.dx) - (other.dx * self.dy)
-        num = (other.dx * (self.y0 - other.y0)) - (other.dy * (self.x0 - other.x0))
-        # num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
+        denom = self.vector.cross(other.vector)
+        num = other.vector.cross(self.start - other.start)
 
         if denom != 0:
-            return Vector2d(
-                self.x0 + ((num / denom) * self.dx),
-                self.y0 + ((num / denom) * self.dy)
-            )
+            return Vector2d(self.point_at_ratio(num / denom))
         return None
 
     def __repr__(self):

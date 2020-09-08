@@ -197,6 +197,12 @@ class ImmutableVector2d(object):
         other = Vector2d(other)
         return self.x * other.x + self.y * other.y
 
+    def cross(self, other):
+        # type: (VectorLike) -> float
+        """Z component of the cross product of the vectors extended into 3D"""
+        other = Vector2d(other)
+        return self.x * other.y - self.y * other.x
+
     def is_close(self, other, rtol=1e-5, atol=1e-8):
         # type: (Union[VectorLike, str, Tuple[float,float]], float, float) -> float
         other = Vector2d(other)
@@ -940,8 +946,8 @@ class DirectedLineSegment(object):
     y0 = property(lambda self: self.start.y)  # pylint: disable=invalid-name
     x1 = property(lambda self: self.end.x)
     y1 = property(lambda self: self.end.y)
-    dx = property(lambda self: self.x1 - self.x0)  # pylint: disable=invalid-name
-    dy = property(lambda self: self.y1 - self.y0)  # pylint: disable=invalid-name
+    dx = property(lambda self: self.vector.x)  # pylint: disable=invalid-name
+    dy = property(lambda self: self.vector.y)  # pylint: disable=invalid-name
 
     @overload
     def __init__(self):
@@ -986,10 +992,20 @@ class DirectedLineSegment(object):
         yield self.y1
 
     @property
+    def vector(self):
+        # type: () -> Vector2d
+        """The vector of the directed line segment.
+
+        The vector of the directed line segment represents the length
+        and direction of segment, but not the starting point.
+        """
+        return self.end - self.start
+
+    @property
     def length(self):
         # type: () -> float
-        """Get the length from the top left to the bottom right of the line"""
-        return sqrt((self.dx ** 2) + (self.dy ** 2))
+        """Get the length of the line segment"""
+        return self.vector.length
 
     @property
     def angle(self):
@@ -1018,7 +1034,7 @@ class DirectedLineSegment(object):
     def dot(self, other):
         # type: (DirectedLineSegment) -> float
         """Get the dot product with the segment with another"""
-        return self.dx * other.dx + self.dy * other.dy
+        return self.vector.dot(other.vector)
 
     def point_at_ratio(self, ratio):
         # type: (float) -> Tuple[float, float]
@@ -1039,15 +1055,11 @@ class DirectedLineSegment(object):
         # type: (DirectedLineSegment) -> Optional[Vector2d]
         """Get the intersection between two segments"""
         other = DirectedLineSegment(other)
-        denom = (other.dy * self.dx) - (other.dx * self.dy)
-        num = (other.dx * (self.y0 - other.y0)) - (other.dy * (self.x0 - other.x0))
-        # num2 = (self.width * (self.top - other.top)) - (self.height * (self.left - other.left))
+        denom = self.vector.cross(other.vector)
+        num = other.vector.cross(self.start - other.start)
 
         if denom != 0:
-            return Vector2d(
-                self.x0 + ((num / denom) * self.dx),
-                self.y0 + ((num / denom) * self.dy)
-            )
+            return Vector2d(self.point_at_ratio(num / denom))
         return None
 
     def __repr__(self):

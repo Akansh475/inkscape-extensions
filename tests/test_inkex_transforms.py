@@ -102,6 +102,20 @@ class ImmutableVector2dTest(TestCase):
         self.assertEqual(vec[0], 10)
         self.assertEqual(vec[1], 20)
 
+    def test_cross(self):
+        """Test cross product for ImmutableVector2d"""
+        vec1 = ImmutableVector2d(0, 2)
+        vec2 = ImmutableVector2d(0, 3)
+        vec3 = ImmutableVector2d(0, -3)
+        vec4 = ImmutableVector2d(3, 0)
+        vec5 = ImmutableVector2d(-3, 0)
+        vec6 = ImmutableVector2d(1, 1)
+        self.assertAlmostEqual(vec1.cross(vec2), 0)
+        self.assertAlmostEqual(vec2.cross(vec3), 0)
+        self.assertAlmostEqual(vec1.cross(vec4), -6)
+        self.assertAlmostEqual(vec1.cross(vec5), 6)
+        self.assertAlmostEqual(vec1.cross(vec6), -2.0)
+        self.assertAlmostEqual(vec6.cross(vec1), 2.0)
 
 class Vector2dTest(TestCase):
     """Test the Vector2d object"""
@@ -584,6 +598,57 @@ class SegmentTest(TestCase):
         self.assertAlmostEqual(DirectedLineSegment((0,0), (0.5 * sqrt(3), 0.5)).angle,
                                pi/6, delta=1e-6)
 
+    def test_segment_dx(self):
+        """Test segment dx calculation"""
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 0)).dx, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 3)).dx, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (3, 0)).dx, 3)
+        self.assertEqual(DirectedLineSegment((0, 0), (-3, 0)).dx, -3)
+        self.assertEqual(DirectedLineSegment((5, 0), (1, 0)).dx, -4)
+        self.assertEqual(DirectedLineSegment((-3, 0), (1, 0)).dx, 4)
+
+    def test_segment_dy(self):
+        """Test segment dy calculation"""
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 0)).dy, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (3, 0)).dy, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 3)).dy, 3)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, -3)).dy, -3)
+        self.assertEqual(DirectedLineSegment((0, 5), (0, 1)).dy, -4)
+        self.assertEqual(DirectedLineSegment((0, -3), (0, 1)).dy, 4)
+
+    def test_segment_vector(self):
+        """Test segment delta vector"""
+        self.assertEqual(DirectedLineSegment((0, 0), (2, 3)).vector.to_tuple(), (2, 3))
+        self.assertEqual(DirectedLineSegment((-2, -3), (2, 3)).vector.to_tuple(), (4, 6))
+
+    def test_segment_length(self):
+        """Test segment length calculation"""
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 0)).length, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (3, 0)).length, 3)
+        self.assertEqual(DirectedLineSegment((0, 0), (-3, 0)).length, 3)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 5)).length, 5)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, -5)).length, 5)
+        self.assertEqual(DirectedLineSegment((2, 0), (0, 0)).length, 2)
+        self.assertEqual(DirectedLineSegment((-2, 0), (0, 0)).length, 2)
+        self.assertEqual(DirectedLineSegment((0, 4), (0, 0)).length, 4)
+        self.assertEqual(DirectedLineSegment((0, -4), (0, 0)).length, 4)
+        self.assertEqual(DirectedLineSegment((0, 0), (3, 4)).length, 5)
+        self.assertEqual(DirectedLineSegment((-3, -4), (0, 0)).length, 5)
+
+    def test_segment_angle(self):
+        """Test segment angle calculation"""
+        self.assertEqual(DirectedLineSegment((0, 0), (3, 0)).angle, 0)
+        self.assertEqual(DirectedLineSegment((0, 0), (-3, 0)).angle, pi)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, 5)).angle, pi / 2)
+        self.assertEqual(DirectedLineSegment((0, 0), (0, -5)).angle, -pi / 2)
+        self.assertEqual(DirectedLineSegment((2, 0), (0, 0)).angle, pi)
+        self.assertEqual(DirectedLineSegment((-2, 0), (0, 0)).angle, 0)
+        self.assertEqual(DirectedLineSegment((0, 4), (0, 0)).angle, -pi / 2)
+        self.assertEqual(DirectedLineSegment((0, -4), (0, 0)).angle, pi / 2)
+        self.assertEqual(DirectedLineSegment((0, 0), (1, 1)).angle, pi / 4)
+        self.assertEqual(DirectedLineSegment((0, 0), (-1, 1)).angle, 3 * pi / 4)
+        self.assertEqual(DirectedLineSegment((0, 0), (-1, -1)).angle, -3 * pi / 4)
+        self.assertEqual(DirectedLineSegment((0, 0), (1, -1)).angle, -pi / 4)
 
 class ExtremaTest(TestCase):
     """Test school formula implementation"""

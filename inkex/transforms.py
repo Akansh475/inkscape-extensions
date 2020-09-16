@@ -570,7 +570,7 @@ class Transform(object):
     def __imul__(self, matrix):
         # type: (MatrixLike) -> Transform
         """In place multiplication of transform matrices"""
-        self.matrix = (self * matrix).matrix
+        self.matrix = (Transform(matrix) * self).matrix
         if self.callback is not None:
             self.callback(self)
         return self

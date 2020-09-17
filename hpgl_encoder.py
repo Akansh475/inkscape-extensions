@@ -89,11 +89,11 @@ class hpglEncoder(object):
     def getHpgl(self):
         """Return the HPGL instructions"""
         # dryRun to find edges
-        transform = Transform([
+
+        transform = Transform(rotate=(int(self.options.orientation)))
+        transform *= Transform([
             [self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0],
-            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
-        )
-        transform.add_rotate(int(self.options.orientation))
+            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]])
 
         self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         self.process_group(self.doc, transform)
@@ -134,8 +134,9 @@ class hpglEncoder(object):
             self.offsetX += self.toolOffset
             self.offsetY += self.toolOffset
 
-        # initialize transformation matrix and cache
-        transform = Transform([
+#         # initialize transformation matrix and cache
+        transform = Transform(rotate=(int(self.options.orientation)))
+        transform *= Transform([
             [self.mirrorX * self.scaleX * self.viewBoxTransformX,
              0.0,
              -float(self.divergenceX) + self.offsetX],
@@ -143,7 +144,7 @@ class hpglEncoder(object):
              self.mirrorY * self.scaleY * self.viewBoxTransformY,
              -float(self.divergenceY) + self.offsetY]
         ])
-        transform.add_rotate(int(self.options.orientation))
+
         self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:

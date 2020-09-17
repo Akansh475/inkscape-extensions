@@ -60,9 +60,9 @@ class Dimension(pathmodifier.PathModifier):
 
         arrow = PathElement(d='M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z ')
         if rotate:
-            arrow.set('transform', 'scale(0.8) rotate(180) translate(12.5,0)')
+            arrow.set('transform', 'translate(12.5,0) rotate(180) scale(0.8)')
         else:
-            arrow.set('transform', 'scale(0.8) translate(12.5,0)')
+            arrow.set('transform', 'translate(12.5,0) scale(0.8)')
         arrow.set('style', 'fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none')
         marker.append(arrow)
 

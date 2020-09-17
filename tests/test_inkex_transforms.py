@@ -336,6 +336,17 @@ class TransformTest(TestCase):
         tr1.add_rotate(-11.5, 50, 125) # Second rotation test with XY and order dependence
         self.assertEqual(str(tr1), 'matrix(-0.331316 0.652265 -0.824792 0.491925 132.982 27.3952)')
 
+    def test_imul_transform(self):
+        """Test in-place multiplication (*=) syntax for composing transforms"""
+        tr1 = Transform("rotate(45)")
+        tr1 *= Transform("translate(150, 10)")
+        tr1 *= Transform("scale(0.5, 1.5)")
+        tr1 *= Transform("skewX(-12.5)")
+        tr1 *= Transform("skewY(-15.5)")
+        tr1 *= Transform("matrix(0.5 0.5 -0.5 0.5 112.5 12.5)")
+        tr1 *= Transform("rotate(-11.5 50 125)")
+        self.assertEqual(str(tr1), 'matrix(-0.331316 0.652265 -0.824792 0.491925 132.982 27.3952)')
+
     def test_is_unity(self):
         """Test that unix matrix looks like rotate, scale, and translate"""
         unity = Transform()

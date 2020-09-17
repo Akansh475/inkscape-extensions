@@ -32,8 +32,8 @@ class LayersToSvgFont(inkex.EffectExtension):
 
     def flip_cordinate_system(self, path, emsize, baseline):
         path = path.copy()
-        path.transform.add_scale(1, -1)
         path.transform.add_translate(0, int(emsize) - int(baseline))
+        path.transform.add_scale(1, -1)
         path.apply_transform()
         return str(path.path)
 

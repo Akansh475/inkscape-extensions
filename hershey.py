@@ -993,7 +993,7 @@ Evil Mad Scientist Laboratories
             o_y = 0.0
 
         # Initial transform of document is based on viewbox, if present:
-        self.doc_transform = Transform(scale=(s_x, s_y), translate=(o_x, o_y))
+        self.doc_transform = Transform(translate=(o_x, o_y), scale=(s_x, s_y))
 
         self.vb_scale_factor = (s_x + s_y) / 2.0
         # In case of non-square aspect ratio, use average value.
@@ -1051,7 +1051,7 @@ Evil Mad Scientist Laboratories
         p_style = {'stroke-width': width_string}
 
         the_transform = Transform(translate=(offset + h_offset, vertoffset + v_offset))
-        the_transform *= scale_transform
+        the_transform = the_transform * scale_transform
 
         if path_string is not None:
             path_element = parent.add(PathElement())

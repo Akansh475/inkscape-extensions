@@ -224,15 +224,15 @@ class Vector2dTest(TestCase):
                 ctx_msg = 'Test values are x: {} y: {} r: {} θ: {} * pi'.format(x, y, r, t + ts)
                 polar = Vector2d.from_polar(r, (t + ts) * pi)
                 cart = Vector2d(x, y)
-                self.assertEqual(cart.length, r, msg = ctx_msg)
-                self.assertEqual(polar.length, r, msg = ctx_msg)
-                self.assertAlmostEqual(cart.angle, theta, msg = ctx_msg, delta = 1e-12)
-                self.assertAlmostEqual(polar.angle, theta, msg = ctx_msg, delta = 1e-12)
-                self.assertEqual(cart.to_polar_tuple(), (r, cart.angle), msg = ctx_msg)
-                self.assertEqual(polar.to_polar_tuple(), (r, polar.angle), msg = ctx_msg)
-                self.assertEqual(cart.to_tuple(), (x, y), msg = ctx_msg)
-                self.assertAlmostEqual(polar.to_tuple()[0], x, msg = ctx_msg, delta = 1e-12)
-                self.assertAlmostEqual(polar.to_tuple()[1], y, msg = ctx_msg, delta = 1e-12)
+                self.assertEqual(cart.length, r, msg=ctx_msg)
+                self.assertEqual(polar.length, r, msg=ctx_msg)
+                self.assertAlmostEqual(cart.angle, theta, msg=ctx_msg, delta=1e-12)
+                self.assertAlmostEqual(polar.angle, theta, msg=ctx_msg, delta=1e-12)
+                self.assertEqual(cart.to_polar_tuple(), (r, cart.angle), msg=ctx_msg)
+                self.assertEqual(polar.to_polar_tuple(), (r, polar.angle), msg=ctx_msg)
+                self.assertEqual(cart.to_tuple(), (x, y), msg=ctx_msg)
+                self.assertAlmostEqual(polar.to_tuple()[0], x, msg=ctx_msg, delta=1e-12)
+                self.assertAlmostEqual(polar.to_tuple()[1], y, msg=ctx_msg, delta=1e-12)
         # Test special handling of from_polar with None theta
         self.assertEqual(Vector2d.from_polar(0, None).to_tuple(), (0.0, 0.0))
         self.assertIsNone(Vector2d.from_polar(4, None))
@@ -270,8 +270,8 @@ class TransformTest(TestCase):
     def test_new_from_rotate(self):
         """Create a rotational transformation"""
         self.assertEqual(str(Transform('rotate(90)')), 'rotate(90)')
-        self.assertEqual(str(Transform('rotate(90 10 12)')),
-                         'matrix(6.12323e-17 1 -1 6.12323e-17 22 2)')
+        self.assertEqual(str(Transform('rotate(90 50 125)')),
+                         'matrix(6.12323e-17 1 -1 6.12323e-17 175 75)')
 
     def test_new_from_skew(self):
         """Create skew x/y transformations"""
@@ -315,23 +315,47 @@ class TransformTest(TestCase):
     def test_rotate(self):
         """Test making rotate specific items"""
         self.assertEqual(str(Transform(rotate=45)), "rotate(45)")
-        self.assertEqual(str(Transform(rotate=(45, 10, 10))), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
+        self.assertEqual(str(Transform(rotate=(45, 10, 10))), \
+                "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
     def test_add_transform(self):
-        """Quickly add known transforms"""
+        """Test add_TRANSFORM syntax for quickly composing known transforms"""
         tr1 = Transform()
-        tr1.add_scale(5.0, 1.0)
-        self.assertEqual(str(tr1), 'scale(5, 1)')
-        tr1.add_translate(10, 10)
-        self.assertEqual(str(tr1), 'matrix(5 0 0 1 50 10)')
+        tr1.add_rotate(45.0) # Order independent for this first one;
+        self.assertEqual(str(tr1), 'rotate(45)')
+        tr1.add_translate(150, 10)
+        self.assertEqual(str(tr1), 'matrix(0.707107 0.707107 -0.707107 0.707107 150 10)')
+        tr1.add_scale(0.5, 1.5)
+        self.assertEqual(str(tr1), 'matrix(0.353553 1.06066 -0.353553 1.06066 75 15)')
+        tr1.add_skewx(-12.5)
+        self.assertEqual(str(tr1), 'matrix(0.118411 1.06066 -0.588696 1.06066 71.6746 15)')
+        tr1.add_skewy(-15.5)
+        self.assertEqual(str(tr1), 'matrix(0.118411 1.02782 -0.588696 1.22392 71.6746 -4.87712)')
+        tr1.add_matrix(0.5, 0.5, -0.5, 0.5, 112.5, 12.5)
+        self.assertEqual(str(tr1), 'matrix(-0.454706 0.573116 -0.906308 0.317612 150.776 45.8987)')
+        tr1.add_rotate(-11.5, 50, 125) # Second rotation test with XY and order dependence
+        self.assertEqual(str(tr1), 'matrix(-0.331316 0.652265 -0.824792 0.491925 132.982 27.3952)')
+
+    def test_imul_transform(self):
+        """Test in-place multiplication (*=) syntax for composing transforms"""
+        tr1 = Transform("rotate(45)")
+        tr1 *= Transform("translate(150, 10)")
+        tr1 *= Transform("scale(0.5, 1.5)")
+        tr1 *= Transform("skewX(-12.5)")
+        tr1 *= Transform("skewY(-15.5)")
+        tr1 *= Transform("matrix(0.5 0.5 -0.5 0.5 112.5 12.5)")
+        tr1 *= Transform("rotate(-11.5 50 125)")
+        self.assertEqual(str(tr1), 'matrix(-0.331316 0.652265 -0.824792 0.491925 132.982 27.3952)')
 
     def test_is_unity(self):
+        """Test that unix matrix looks like rotate, scale, and translate"""
         unity = Transform()
         self.assertTrue(unity.is_rotate())
         self.assertTrue(unity.is_scale())
         self.assertTrue(unity.is_translate())
 
     def test_is_rotation(self):
+        """Test that rotations about origin are correctly identified"""
         rot1 = Transform(rotate=21)
         rot2 = Transform(rotate=35)
         rot3 = Transform(rotate=53)
@@ -363,6 +387,7 @@ class TransformTest(TestCase):
         self.assertTrue((rot1 * rot2 * rot3 * rot2 * rot1).is_rotate())
 
     def test_is_translate(self):
+        """Test that translations are correctly identified"""
         tr1 = Transform(translate=(1.1,))
         tr2 = Transform(translate=(1.3, 2.7))
         tr3 = Transform(translate=(sqrt(2) / 2, pi))
@@ -393,6 +418,7 @@ class TransformTest(TestCase):
         self.assertFalse(tr1 * tr2 * tr3 * -tr1 * -tr2 * -tr3)  # is almost unity
 
     def test_is_scale(self):
+        """Test that scale transformations are correctly identified"""
         s1 = Transform(scale=(1.1,))
         s2 = Transform(scale=(1.3, 2.7))
         s3 = Transform(scale=(sqrt(2) / 2, pi))
@@ -418,13 +444,16 @@ class TransformTest(TestCase):
         self.assertTrue(s3.is_scale())
 
     def test_rotation_degrees(self):
+        """Test parsing and composition of different rotations"""
         self.assertAlmostEqual(Transform(rotate=30).rotation_degrees(), 30)
         self.assertAlmostEqual(Transform(translate=(10, 20)).rotation_degrees(), 0)
         self.assertAlmostEqual(Transform(scale=(1, 1)).rotation_degrees(), 0)
 
         self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20)).rotation_degrees(), 35)
-        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20), scale=5).rotation_degrees(), 35)
-        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20), scale=(5, 5)).rotation_degrees(), 35)
+        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20),
+                                         scale=5).rotation_degrees(), 35)
+        self.assertAlmostEqual(Transform(rotate=35, translate=(10, 20),
+                                         scale=(5, 5)).rotation_degrees(), 35)
 
         def rotation_degrees(**kwargs):
             return Transform(**kwargs).rotation_degrees()
@@ -440,10 +469,8 @@ class TransformTest(TestCase):
             self.skipTest("Construction order is known to fail on python2 (by design).")
             return
 
-        self.assertEqual(str(Transform(scale=2.0, translate=(5, 6))),
-                         'matrix(2 0 0 2 5 6)')
-        self.assertEqual(str(Transform(scale=2.0, rotate=45)),
-                         'matrix(1.41421 1.41421 -1.41421 1.41421 0 0)')
+        self.assertEqual(str(Transform(scale=(0.5, 1.5), translate=(150, 10), rotate=45)),
+                         'matrix(0.353553 1.06066 -0.353553 1.06066 75 15)')
 
         x, y, angle = 5, 7, 31
         rotation = Transform(rotate=angle)
@@ -456,16 +483,15 @@ class TransformTest(TestCase):
         tr2 = Transform(translate=(x, y), rotate=angle)
 
         self.assertNotEqual(tr1, tr2)
-        self.assertDeepAlmostEqual(tr1.matrix, rotation_then_translation.matrix)
-        self.assertDeepAlmostEqual(tr2.matrix, translation_then_rotation.matrix)
+        self.assertDeepAlmostEqual(tr1.matrix, translation_then_rotation.matrix)
+        self.assertDeepAlmostEqual(tr2.matrix, rotation_then_translation.matrix)
 
     def test_interpolate(self):
         """Test interpolate with other transform"""
-        t1 = Transform((0,0,0,0,0,0))
-        t2 = Transform((1,1,1,1,1,1))
+        t1 = Transform((0, 0, 0, 0, 0, 0))
+        t2 = Transform((1, 1, 1, 1, 1, 1))
         val = t1.interpolate(t2, 0.5)
         assert all(getattr(val, a) == pytest.approx(0.5, 1e-3) for a in 'abcdef')
-
 
 
 class ScaleTest(TestCase):
@@ -503,7 +529,8 @@ class ScaleTest(TestCase):
     def test_combine(self):
         """Combine scales together"""
         self.assertEqual(BoundingInterval(9, 10) + BoundingInterval(4, 5), (4, 10))
-        self.assertEqual(sum([BoundingInterval(4), BoundingInterval(3), BoundingInterval(10)], None), (3, 10))
+        self.assertEqual(sum([BoundingInterval(4), BoundingInterval(3),
+                              BoundingInterval(10)], None), (3, 10))
         self.assertEqual(BoundingInterval(2, 2) * 2, (4, 4))
 
     def test_errors(self):
@@ -524,7 +551,8 @@ class BoundingBoxTest(TestCase):
 
     def test_bbox_sum(self):
         """Test adding bboxes together"""
-        self.assertEqual(tuple(BoundingBox((0, 10), (0, 10)) + BoundingBox((-10, 0), (-10, 0))), ((-10, 10), (-10, 10)))
+        self.assertEqual(tuple(BoundingBox((0, 10), (0, 10)) +
+                               BoundingBox((-10, 0), (-10, 0))), ((-10, 10), (-10, 10)))
         ret = sum([
             BoundingBox((-5, 0), (0, 0)),
             BoundingBox((0, 5), (0, 0)),
@@ -590,12 +618,13 @@ class SegmentTest(TestCase):
     def test_segment_creation(self):
         """Test segments"""
         self.assertEqual(DirectedLineSegment((1, 2), (3, 4)), (1, 3, 2, 4))
-        self.assertEqual(repr(DirectedLineSegment((1, 2), (3, 4))), 'DirectedLineSegment((1, 2), (3, 4))')
+        self.assertEqual(repr(DirectedLineSegment((1, 2), (3, 4))),
+                         'DirectedLineSegment((1, 2), (3, 4))')
 
     def test_segment_maths(self):
         """Segments have calculations"""
         self.assertEqual(DirectedLineSegment((0, 0), (10, 0)).angle, 0)
-        self.assertAlmostEqual(DirectedLineSegment((0,0), (0.5 * sqrt(3), 0.5)).angle,
+        self.assertAlmostEqual(DirectedLineSegment((0, 0), (0.5 * sqrt(3), 0.5)).angle,
                                pi/6, delta=1e-6)
 
     def test_segment_dx(self):
@@ -655,7 +684,8 @@ class ExtremaTest(TestCase):
 
     def test_cubic_extrema_1(self):
         from inkex.transforms import cubic_extrema
-        a, b, c, d = 14.644651000000003194,-4.881549508464541276,-4.8815495084645448287,14.644651000000003194
+        a, b, c, d = 14.644651000000003194, -4.881549508464541276,\
+                                      -4.8815495084645448287, 14.644651000000003194
         cmin, cmax = cubic_extrema(a, b, c, d)
         self.assertAlmostEqual(cmin, 0, delta=1e-6)
         self.assertAlmostEqual(cmax, a, delta=1e-6)
@@ -670,6 +700,6 @@ class ExtremaTest(TestCase):
     def test_quadratic_extrema_2(self):
         from inkex.transforms import quadratic_extrema
         a = 5.0
-        cmin, cmax = quadratic_extrema(a,a,a)
+        cmin, cmax = quadratic_extrema(a, a, a)
         self.assertAlmostEqual(cmin, a, delta=1e-6)
         self.assertAlmostEqual(cmax, a, delta=1e-6)

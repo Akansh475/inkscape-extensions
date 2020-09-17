@@ -101,7 +101,7 @@ class DeprecatedTest(TestCase):
 
         self.assertEqual(simpletransform.parseTransform('scale(10)'), [[10, 0, 0], [0, 10, 0]])
         self.assertEqual(simpletransform.parseTransform('translate(2,3)'), [[1, 0, 2], [0, 1, 3]])
-        self.assertEqual(simpletransform.parseTransform('translate(2,3) rotate(90)'), [
+        self.assertEqual(simpletransform.parseTransform('rotate(90) translate(2,3)'), [
             approx([0, -1, 2]), approx([1, 0, 3])
         ])
         m = simpletransform.formatTransform([[0, -1, 2], [1, 0, 3]])

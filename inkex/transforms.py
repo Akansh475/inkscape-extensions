@@ -475,8 +475,9 @@ class Transform(object):
         """Add rotation to this transformation"""
         center_x, center_y = Vector2d(*args)
         _cos, _sin = cos(radians(deg)), sin(radians(deg))
-        self.__imul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
         self.__imul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
+        self.__imul__(((_cos, -_sin, 0), (_sin, _cos, 0)))
+        self.__imul__(((1.0, 0.0, center_x), (0.0, 1.0, center_y)))
 
     def add_skewx(self, deg):
         # type: (float) -> None
@@ -570,7 +571,7 @@ class Transform(object):
     def __imul__(self, matrix):
         # type: (MatrixLike) -> Transform
         """In place multiplication of transform matrices"""
-        self.matrix = (self * matrix).matrix
+        self.matrix = (Transform(matrix) * self).matrix
         if self.callback is not None:
             self.callback(self)
         return self

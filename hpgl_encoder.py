@@ -66,12 +66,19 @@ class hpglEncoder(object):
         self.lastPen = -1
         self.offsetX = 0
         self.offsetY = 0
-        self.scaleX = self.options.resolutionX / effect.svg.unittouu("1.0in") # dots per inch to dots per user unit
-        self.scaleY = self.options.resolutionY / effect.svg.unittouu("1.0in") # dots per inch to dots per user unit
+        # dots per inch to dots per user unit:
+
+        self.scaleX = self.options.resolutionX / effect.svg.unittouu("1.0in")
+        self.scaleY = self.options.resolutionY / effect.svg.unittouu("1.0in")
         scaleXY = (self.scaleX + self.scaleY) / 2
-        self.overcut = effect.svg.unittouu(str(self.options.overcut) + "mm") * scaleXY # mm to dots (plotter coordinate system)
-        self.toolOffset = effect.svg.unittouu(str(self.options.toolOffset) + "mm") * scaleXY # mm to dots
-        self.flat = self.options.flat / (1016 / ((self.options.resolutionX + self.options.resolutionY) / 2)) # scale flatness to resolution
+
+        # mm to dots (plotter coordinate system):
+        self.overcut = effect.svg.unittouu(str(self.options.overcut) + "mm") * scaleXY
+        self.toolOffset = effect.svg.unittouu(str(self.options.toolOffset) + "mm") * scaleXY
+
+        # scale flatness to resolution:
+        self.flat = self.options.flat / (1016 / ((self.options.resolutionX + \
+                                                self.options.resolutionY) / 2))
         if self.toolOffset > 0.0:
             self.toolOffsetFlat = self.flat / self.toolOffset * 4.5 # scale flatness to offset
         else:
@@ -83,21 +90,24 @@ class hpglEncoder(object):
         self.viewBoxTransformY = 1
         viewBox = effect.svg.get_viewbox()
         if viewBox and viewBox[2] and viewBox[3]:
-            self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
-            self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
+            self.viewBoxTransformX = self.docWidth /\
+                                effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
+            self.viewBoxTransformY = self.docHeight /\
+                                effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
 
     def getHpgl(self):
         """Return the HPGL instructions"""
         # dryRun to find edges
-        transform = Transform([
+
+        transform = Transform(rotate=(int(self.options.orientation)))
+        transform *= Transform([
             [self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0],
-            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
-        )
-        transform.add_rotate(int(self.options.orientation))
+            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]])
 
         self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         self.process_group(self.doc, transform)
-        if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
+        if self.divergenceX == 'False' or self.divergenceY == 'False' or\
+                                            self.sizeX == 'False' or self.sizeY == 'False':
             raise NoPathError("No paths found")
         # live run
         self.dryRun = False
@@ -134,8 +144,9 @@ class hpglEncoder(object):
             self.offsetX += self.toolOffset
             self.offsetY += self.toolOffset
 
-        # initialize transformation matrix and cache
-        transform = Transform([
+#         # initialize transformation matrix and cache
+        transform = Transform(rotate=(int(self.options.orientation)))
+        transform *= Transform([
             [self.mirrorX * self.scaleX * self.viewBoxTransformX,
              0.0,
              -float(self.divergenceX) + self.offsetX],
@@ -143,7 +154,7 @@ class hpglEncoder(object):
              self.mirrorY * self.scaleY * self.viewBoxTransformY,
              -float(self.divergenceY) + self.offsetY]
         ])
-        transform.add_rotate(int(self.options.orientation))
+
         self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
@@ -158,7 +169,8 @@ class hpglEncoder(object):
                 else:
                     precutY = self.offsetY - self.toolOffset
                 self.processOffset('PU', Vector2d(precutX, precutY), self.options.pen)
-                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8), self.options.pen)
+                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8),\
+                                                                                self.options.pen)
             else:
                 self.processOffset('PU', Vector2d(0, 0), self.options.pen)
                 self.processOffset('PD', Vector2d(0, self.toolOffset * 8), self.options.pen)
@@ -211,27 +223,31 @@ class hpglEncoder(object):
                 for singlePathPoint in singlePath:
                     posX, posY = singlePathPoint[1]
                     # check if point is repeating, if so, ignore
-                    if int(round(posX)) != int(round(oldPosX)) or int(round(posY)) != int(round(oldPosY)):
+                    if int(round(posX)) != int(round(oldPosX)) or int(round(posY))\
+                                                                != int(round(oldPosY)):
                         self.processOffset(cmd, Vector2d(posX, posY), pen)
                         cmd = 'PD'
                         oldPosX = posX
                         oldPosY = posY
                 # perform overcut
                 if self.overcut > 0.0 and not self.dryRun:
-                    # check if last and first points are the same, otherwise the path is not closed and no overcut can be performed
-                    if int(round(oldPosX)) == int(round(singlePath[0][1][0])) and int(round(oldPosY)) == int(round(singlePath[0][1][1])):
+                    # check if last and first points are the same, otherwise the path
+                    # is not closed and no overcut can be performed
+                    if int(round(oldPosX)) == int(round(singlePath[0][1][0])) and\
+                                        int(round(oldPosY)) == int(round(singlePath[0][1][1])):
                         overcutLength = 0
                         for singlePathPoint in singlePath:
                             posX, posY = singlePathPoint[1]
                             # check if point is repeating, if so, ignore
-                            if int(round(posX)) != int(round(oldPosX)) or int(round(posY)) != int(round(oldPosY)):
+                            if int(round(posX)) != int(round(oldPosX)) or int(round(posY))\
+                                                                            != int(round(oldPosY)):
                                 overcutLength += (Vector2d(posX, posY) - (oldPosX, oldPosY)).length
                                 if overcutLength >= self.overcut:
-                                    newEndPoint = self.changeLength(Vector2d(oldPosX, oldPosY), Vector2d(posX, posY), - (overcutLength - self.overcut))
+                                    newEndPoint = self.changeLength(Vector2d(oldPosX, oldPosY),\
+                                            Vector2d(posX, posY), - (overcutLength - self.overcut))
                                     self.processOffset(cmd, newEndPoint, pen)
                                     break
-                                else:
-                                    self.processOffset(cmd, Vector2d(posX, posY), pen)
+                                self.processOffset(cmd, Vector2d(posX, posY), pen)
                                 oldPosX = posX
                                 oldPosY = posY
 
@@ -242,7 +258,7 @@ class hpglEncoder(object):
         return Vector2d(DirectedLineSegment(p2, p1).point_at_length(- offset))
 
     def processOffset(self, cmd, point, pen):
-        # calculate offset correction (or don't)
+        """ Calculate offset correction """
         if self.toolOffset == 0.0 or self.dryRun:
             self.storePoint(cmd, point, pen)
         else:
@@ -254,14 +270,20 @@ class hpglEncoder(object):
                 if self.vData[1][1] == 'False':
                     self.storePoint(self.vData[2][0], self.vData[2][1], self.vData[2][2])
                 else:
-                    # perform tool offset correction (It's a *tad* complicated, if you want to understand it draw the data as lines on paper)
-                    if self.vData[2][0] == 'PD': # If the 3rd entry in the cache is a pen down command make the line longer by the tool offset
-                        pointThree = self.changeLength(self.vData[1][1], self.vData[2][1], self.toolOffset)
+                    # perform tool offset correction (It's a *tad* complicated, if you want
+                    #                     to understand it draw the data as lines on paper)
+                    if self.vData[2][0] == 'PD':
+                        # If the 3rd entry in the cache is a pen down command,
+                        #             make the line longer by the tool offset
+                        pointThree = self.changeLength(self.vData[1][1], self.vData[2][1],\
+                                                                                self.toolOffset)
                         self.storePoint('PD', pointThree, self.vData[2][2])
                     elif self.vData[0][1] != 'False':
-                        # Elif the 1st entry in the cache is filled with data and the 3rd entry is a pen up command shift
-                        # the 3rd entry by the current tool offset position according to the 2nd command
-                        pointThree = self.changeLength(self.vData[0][1], self.vData[1][1], self.toolOffset)
+                        # Elif the 1st entry in the cache is filled with data and the 3rd entry
+                        #   is a pen up command shift the 3rd entry by the current tool offset
+                        #   position according to the 2nd command
+                        pointThree = self.changeLength(self.vData[0][1], self.vData[1][1],\
+                                                                                self.toolOffset)
                         pointThree = self.vData[2][1] - (self.vData[1][1] - pointThree)
                         self.storePoint('PU', pointThree, self.vData[2][2])
                     else:
@@ -269,15 +291,19 @@ class hpglEncoder(object):
                         pointThree = self.vData[2][1]
                         self.storePoint('PU', pointThree, self.vData[2][2])
                     if self.vData[3][0] == 'PD':
-                        # If the 4th entry in the cache is a pen down command guide tool to next line with a circle between the prolonged 3rd and 4th entry
+                        # If the 4th entry in the cache is a pen down command guide tool to next
+                        #           line with a circle between the prolonged 3rd and 4th entry
                         originalSegment = DirectedLineSegment(self.vData[2][1], self.vData[3][1])
                         if originalSegment.length >= self.toolOffset:
-                            pointFour = self.changeLength(originalSegment.end, originalSegment.start, - self.toolOffset)
+                            pointFour = self.changeLength(originalSegment.end,\
+                                                        originalSegment.start, - self.toolOffset)
                         else:
-                            pointFour = self.changeLength(originalSegment.start, originalSegment.end, self.toolOffset - originalSegment.length)
+                            pointFour = self.changeLength(originalSegment.start,\
+                                    originalSegment.end, self.toolOffset - originalSegment.length)
                         # get angle start and angle vector
                         angleStart = DirectedLineSegment(self.vData[2][1], pointThree).angle
-                        angleVector = DirectedLineSegment(self.vData[2][1], pointFour).angle - angleStart
+                        angleVector = DirectedLineSegment(self.vData[2][1], pointFour).angle\
+                                                                                    - angleStart
                         # switch direction when arc is bigger than 180°
                         if angleVector > math.pi:
                             angleVector -= math.pi * 2
@@ -287,12 +313,14 @@ class hpglEncoder(object):
                         if angleVector >= 0:
                             angle = angleStart + self.toolOffsetFlat
                             while angle < angleStart + angleVector:
-                                self.storePoint('PD', self.vData[2][1] + self.toolOffset * Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
+                                self.storePoint('PD', self.vData[2][1] + self.toolOffset *\
+                                    Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
                                 angle += self.toolOffsetFlat
                         else:
                             angle = angleStart - self.toolOffsetFlat
                             while angle > angleStart + angleVector:
-                                self.storePoint('PD', self.vData[2][1] + self.toolOffset * Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
+                                self.storePoint('PD', self.vData[2][1] + self.toolOffset *\
+                                    Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
                                 angle -= self.toolOffsetFlat
                         self.storePoint('PD', pointFour, self.vData[3][2])
 
@@ -330,4 +358,3 @@ class hpglEncoder(object):
                 self.hpgl += ';%s%d,%d' % (command, x, y)
             self.lastPen = pen
         self.lastPoint = [command, x, y]
-

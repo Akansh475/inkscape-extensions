@@ -270,8 +270,8 @@ class TransformTest(TestCase):
     def test_new_from_rotate(self):
         """Create a rotational transformation"""
         self.assertEqual(str(Transform('rotate(90)')), 'rotate(90)')
-        self.assertEqual(str(Transform('rotate(90 10 12)')),
-                         'matrix(6.12323e-17 1 -1 6.12323e-17 22 2)')
+        self.assertEqual(str(Transform('rotate(90 50 125)')),
+                         'matrix(6.12323e-17 1 -1 6.12323e-17 175 75)')
 
     def test_new_from_skew(self):
         """Create skew x/y transformations"""
@@ -318,12 +318,22 @@ class TransformTest(TestCase):
         self.assertEqual(str(Transform(rotate=(45, 10, 10))), "matrix(0.707107 0.707107 -0.707107 0.707107 10 -4.14214)")
 
     def test_add_transform(self):
-        """Quickly add known transforms"""
+        """Test add_TRANSFORM syntax for quickly composing known transforms"""
         tr1 = Transform()
-        tr1.add_scale(5.0, 1.0)
-        self.assertEqual(str(tr1), 'scale(5, 1)')
-        tr1.add_translate(10, 10)
-        self.assertEqual(str(tr1), 'matrix(5 0 0 1 50 10)')
+        tr1.add_rotate(45.0) # Order independent for this first one;
+        self.assertEqual(str(tr1), 'rotate(45)')
+        tr1.add_translate(150, 10)
+        self.assertEqual(str(tr1), 'matrix(0.707107 0.707107 -0.707107 0.707107 150 10)')
+        tr1.add_scale(0.5,1.5)
+        self.assertEqual(str(tr1), 'matrix(0.353553 1.06066 -0.353553 1.06066 75 15)')
+        tr1.add_skewx(-12.5)
+        self.assertEqual(str(tr1), 'matrix(0.118411 1.06066 -0.588696 1.06066 71.6746 15)')
+        tr1.add_skewy(-15.5)
+        self.assertEqual(str(tr1), 'matrix(0.118411 1.02782 -0.588696 1.22392 71.6746 -4.87712)')
+        tr1.add_matrix(0.5, 0.5, -0.5, 0.5, 112.5, 12.5)
+        self.assertEqual(str(tr1), 'matrix(-0.454706 0.573116 -0.906308 0.317612 150.776 45.8987)')
+        tr1.add_rotate(-11.5, 50, 125) # Second rotation test with XY and order dependence
+        self.assertEqual(str(tr1), 'matrix(-0.331316 0.652265 -0.824792 0.491925 132.982 27.3952)')
 
     def test_is_unity(self):
         unity = Transform()
@@ -440,10 +450,8 @@ class TransformTest(TestCase):
             self.skipTest("Construction order is known to fail on python2 (by design).")
             return
 
-        self.assertEqual(str(Transform(scale=2.0, translate=(5, 6))),
-                         'matrix(2 0 0 2 5 6)')
-        self.assertEqual(str(Transform(scale=2.0, rotate=45)),
-                         'matrix(1.41421 1.41421 -1.41421 1.41421 0 0)')
+        self.assertEqual(str(Transform(scale=(0.5,1.5), translate=(150, 10), rotate=45)),
+                         'matrix(0.353553 1.06066 -0.353553 1.06066 75 15)')
 
         x, y, angle = 5, 7, 31
         rotation = Transform(rotate=angle)
@@ -456,8 +464,8 @@ class TransformTest(TestCase):
         tr2 = Transform(translate=(x, y), rotate=angle)
 
         self.assertNotEqual(tr1, tr2)
-        self.assertDeepAlmostEqual(tr1.matrix, rotation_then_translation.matrix)
-        self.assertDeepAlmostEqual(tr2.matrix, translation_then_rotation.matrix)
+        self.assertDeepAlmostEqual(tr1.matrix, translation_then_rotation.matrix)
+        self.assertDeepAlmostEqual(tr2.matrix, rotation_then_translation.matrix)
 
     def test_interpolate(self):
         """Test interpolate with other transform"""
@@ -465,7 +473,6 @@ class TransformTest(TestCase):
         t2 = Transform((1,1,1,1,1,1))
         val = t1.interpolate(t2, 0.5)
         assert all(getattr(val, a) == pytest.approx(0.5, 1e-3) for a in 'abcdef')
-
 
 
 class ScaleTest(TestCase):

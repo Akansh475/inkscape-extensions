@@ -33,8 +33,8 @@ class LayersToSvgFont(inkex.EffectExtension):
     def flip_cordinate_system(self, path, emsize, baseline):
         """Flip Y axis because SVG fonts use a different orientation than regular SVG"""
         path = path.copy()
-        path.transform.add_translate(0, int(emsize) - int(baseline))
         path.transform.add_scale(1, -1)
+        path.transform.add_translate(0, int(emsize) - int(baseline))
         path.apply_transform()
         return str(path.path)
 

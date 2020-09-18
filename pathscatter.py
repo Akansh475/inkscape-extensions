@@ -237,7 +237,8 @@ class PathScatter(pathmodifier.Diffeo):
                     myid = patternList[random.randint(0, len(patternList) - 1)].tag.split('}')[-1]
                     clone.set("id", self.svg.get_unique_id(myid))
                     self.gNode.append(clone)
-                    clone.transform = clone.transform * mat
+
+                    clone.transform *= mat
                     s += dx
 
         self.patternNode.getparent().remove(self.patternNode)

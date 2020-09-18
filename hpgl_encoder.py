@@ -90,24 +90,21 @@ class hpglEncoder(object):
         self.viewBoxTransformY = 1
         viewBox = effect.svg.get_viewbox()
         if viewBox and viewBox[2] and viewBox[3]:
-            self.viewBoxTransformX = self.docWidth /\
-                                effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
-            self.viewBoxTransformY = self.docHeight /\
-                                effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
+            self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
+            self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
 
     def getHpgl(self):
         """Return the HPGL instructions"""
         # dryRun to find edges
-
-        transform = Transform(rotate=(int(self.options.orientation)))
-        transform *= Transform([
+        transform = Transform([
             [self.mirrorX * self.scaleX * self.viewBoxTransformX, 0.0, 0.0],
-            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]])
+            [0.0, self.mirrorY * self.scaleY * self.viewBoxTransformY, 0.0]]
+        )
+        transform.add_rotate(int(self.options.orientation))
 
         self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         self.process_group(self.doc, transform)
-        if self.divergenceX == 'False' or self.divergenceY == 'False' or\
-                                            self.sizeX == 'False' or self.sizeY == 'False':
+        if self.divergenceX == 'False' or self.divergenceY == 'False' or self.sizeX == 'False' or self.sizeY == 'False':
             raise NoPathError("No paths found")
         # live run
         self.dryRun = False
@@ -144,9 +141,8 @@ class hpglEncoder(object):
             self.offsetX += self.toolOffset
             self.offsetY += self.toolOffset
 
-#         # initialize transformation matrix and cache
-        transform = Transform(rotate=(int(self.options.orientation)))
-        transform *= Transform([
+        # initialize transformation matrix and cache
+        transform = Transform([
             [self.mirrorX * self.scaleX * self.viewBoxTransformX,
              0.0,
              -float(self.divergenceX) + self.offsetX],
@@ -154,7 +150,7 @@ class hpglEncoder(object):
              self.mirrorY * self.scaleY * self.viewBoxTransformY,
              -float(self.divergenceY) + self.offsetY]
         ])
-
+        transform.add_rotate(int(self.options.orientation))
         self.vData = [['', 'False', 0], ['', 'False', 0], ['', 'False', 0], ['', 'False', 0]]
         # add move to zero point and precut
         if self.toolOffset > 0.0 and self.options.precut:
@@ -169,8 +165,7 @@ class hpglEncoder(object):
                 else:
                     precutY = self.offsetY - self.toolOffset
                 self.processOffset('PU', Vector2d(precutX, precutY), self.options.pen)
-                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8),\
-                                                                                self.options.pen)
+                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8), self.options.pen)
             else:
                 self.processOffset('PU', Vector2d(0, 0), self.options.pen)
                 self.processOffset('PD', Vector2d(0, self.toolOffset * 8), self.options.pen)
@@ -358,3 +353,4 @@ class hpglEncoder(object):
                 self.hpgl += ';%s%d,%d' % (command, x, y)
             self.lastPen = pen
         self.lastPoint = [command, x, y]
+

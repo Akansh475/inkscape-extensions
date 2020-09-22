@@ -11,8 +11,8 @@ from argparse import ArgumentTypeError
 
 import pytest
 
-from inkex.utils import addNS, debug, errormsg, filename_arg, Boolean, to, strargs
-
+from inkex.utils import addNS, debug, errormsg, filename_arg, Boolean, to, strargs, math_eval
+from inkex.tester import TestCase
 
 class TestInkexBasic(object):
     """Test basic utiltiies of inkex"""
@@ -96,3 +96,17 @@ class TestInkexBasic(object):
         # """Parse Àûïàèé (unicode)"""
         errormsg(u'Àûïàèé')
         assert capsys.readouterr().err, u'Àûïàèé\n'
+
+import math
+
+class TestMathFunctions(TestCase):
+    def testExp(self):
+        """Test if the math_eval function works"""
+        function = "exp(x)"
+        f = math_eval(function)
+        self.assertAlmostEqual(f(1), math.exp(1))
+    def testErf(self):
+        """Only available in python3"""
+        function = "erf(x)"
+        f = math_eval(function)
+        self.assertAlmostEqual(f(1), math.erf(1))

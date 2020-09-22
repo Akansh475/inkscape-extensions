@@ -25,6 +25,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 import os
 import sys
 import shutil
+import random
+import math
 
 from itertools import tee
 from collections import defaultdict
@@ -294,3 +296,19 @@ class CloningVat(object):
                 for update, upkw in self.set_ids.get(elem_id, ()):
                     update(elem.get('id'), clone.get('id'), **upkw)
                 process(clone, **kwargs)
+
+EVAL_GLOBALS = {}
+EVAL_GLOBALS.update(random.__dict__)
+EVAL_GLOBALS.update(math.__dict__)
+
+def math_eval(function, variable="x"):
+    """Interpret a function string. All functions from math and random may be used.
+    @returns a lambda expression if sucessful; otherwise None.
+    """
+    try:
+        if function != "":
+            return eval(f'lambda {variable}: ' + (function.strip('"') or 't'), EVAL_GLOBALS, {})
+    # handle incomplete/invalid function gracefully
+    except SyntaxError:
+        pass
+    return None

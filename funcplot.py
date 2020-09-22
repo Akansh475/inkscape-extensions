@@ -25,17 +25,11 @@
 #  * 22-Dec-2006: Wiora : Added axis and isotropic scaling
 #  * 21-Jun-2007: Tavmjong: Added polar coordinates
 #
-import random
-import math
 from math import cos, pi, sin
 
 import inkex
 from inkex import ClipPath, Rectangle
-
-EVAL_GLOBALS = {}
-EVAL_GLOBALS.update(random.__dict__)
-EVAL_GLOBALS.update(math.__dict__)
-
+from inkex.utils import math_eval
 
 def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bottom,
                  fx="sin(x)", fpx="cos(x)", fponum=True, times2pi=False, polar=False, isoscale=True, drawaxis=True, endpts=False):
@@ -82,15 +76,10 @@ def drawfunction(xstart, xend, ybottom, ytop, samples, width, height, left, bott
             ybottom = (yzero - bottom) / scaley
             ytop = (bottom + height - yzero) / scaley
 
-    # functions specified by the user
-    try:
-        if fx != "":
-            f = eval('lambda x: ' + fx, EVAL_GLOBALS, {})
-        if fpx != "":
-            fp = eval('lambda x: ' + fpx, EVAL_GLOBALS, {})
-    # handle incomplete/invalid function gracefully
-    except SyntaxError:
-        return []
+    f = math_eval(fx)
+    fp = math_eval(fpx)
+    if (f is None or (fp is None and not(fponum))):
+        raise inkex.AbortExtension(_("Invalid function specification"))
 
     # step is the distance between nodes on x
     step = (xend - xstart) / (samples - 1)
@@ -240,7 +229,7 @@ class FuncPlot(inkex.EffectExtension):
                 if self.options.remove:
                     node.getparent().remove(node)
         if newpath is None:
-            inkex.errormsg("Please select a rectangle")
+            raise inkex.AbortExtension(_("Please select a rectangle"))
 
 
 if __name__ == '__main__':

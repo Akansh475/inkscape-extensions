@@ -15,3 +15,5 @@ old
 .idea
 dist
 *.out.export
+cov.xml
+.vscode/

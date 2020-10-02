@@ -2,6 +2,7 @@
 # coding=utf-8
 #
 # Copyright (C) 2006 Jos Hirth, kaioa.com
+#               2020 Jonathan Neuhauser, jonathan.neuhauser@outlook.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@ Example filltext sentences generated over at http://lipsum.com/
 import random
 
 import inkex
-from inkex import Layer, FlowRoot, FlowRegion, FlowPara, Rectangle
+from inkex import Layer, FlowRoot, FlowRegion, FlowPara, Rectangle, TextElement, Tspan
 
 CORPA = [
     'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ',
@@ -199,6 +200,7 @@ class LoremIpsum(inkex.EffectExtension):
                           help="Number of Sentences")
         pars.add_argument("-f", "--fluctuation", type=int, default=4, help="+/-")
         pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
+        pars.add_argument("--svg2", help="Use SVG2 flowed text", default=True, type=inkex.Boolean)
 
     def make_paragraph(self, text_index=0):
         """Make a paragraph"""
@@ -212,36 +214,74 @@ class LoremIpsum(inkex.EffectExtension):
                 index = int(random.random() * (len(CORPA) - 1))
                 yield CORPA[index]
 
-    def add_text(self, node):
+    def add_text_svg12(self, node):
         """Create many flowed text paragraph and append to node"""
         for text_index in range(self.options.num):
             para = node.add(FlowPara())
             para.text = ''.join(self.make_paragraph(text_index))
             node.append(FlowPara())
 
+    def add_text_svg2(self, node):
+        """Add paragraphs to SVG2 flowed text node"""
+        tspan = node.add(Tspan())
+        newtext = '\n\n'.join([''.join(self.make_paragraph(text_index)) 
+                               for text_index in range(self.options.num)])
+        tspan.text = newtext
+
     def effect(self):
         # Existing text flow to insert new text into
+        done = False
         for node in self.svg.selection.filter(FlowRoot):
-            self.add_text(node)
+            self.add_text_svg12(node)
+            done = True
+        for node in self.svg.selection.filter(TextElement):
+            shape = node.style.get("shape-inside")
+            inlinesize = node.style.get("inline-size")
+            if (shape is not None and self.svg.getElementById(shape[4:-1]) is not None) \
+                or inlinesize is not None:
+                self.add_text_svg2(node)
+                done = True
+
+        if done:
             return
 
-        # New text layer with lorum ipsum content
-        root = FlowRoot()
-        root.set('xml:space', 'preserve')
-        region = root.add(FlowRegion())
+        #find out where to store the rectangle in case nothing (or a simple text) was selected
+        if self.options.svg2:
+            region = self.svg.defs
+        else:
+            root = FlowRoot()
+            root.set('xml:space', 'preserve')
+            root.style["font-size"] = self.svg.unittouu("8pt")
+            region = root.add(FlowRegion())
 
         shape = self.svg.selection.first()
-        if shape is not None:
+        # find the path we'll use for the flowed text
+        if shape is not None and not isinstance(shape, TextElement):
             parent = shape.getparent()
-            region.add(shape.copy())
+            # For svg1.2 flowed text, store a copy of the shape inside the flowregion.
+            # For svg2 flowed text this is not necessary, simply link the shape in shape-inside
+            if not self.options.svg2:
+                region.add(shape.copy())
         else:
-            parent = self.svg.add(Layer.new('lorum ipsum'))
-            region.add(Rectangle(x='0', y='0',\
+            # Nothing selected, create a new flowtext
+            # Try to get the name of the current layer from namedview to create the object there
+            parent = self.svg.get_current_layer()
+            if parent is None:
+                parent = self.svg.add(Layer.new('lorum ipsum'))
+            
+            shape = region.add(Rectangle(x='0', y='0',\
                 width=str(int(self.svg.width)),\
                 height=str(int(self.svg.height))))
-
-        parent.add(root)
-        self.add_text(root)
+        # set the path as flowroot / shape-inside
+        if (self.options.svg2):
+            textelement = parent.add(TextElement())
+            textelement.style["shape-inside"] = f"url(#{shape.get_id()})"
+            textelement.style["white-space"] = "pre"
+            textelement.style["font-size"] = self.svg.unittouu("8pt")
+            self.add_text_svg2(textelement)
+        else:
+            parent.add(root)
+            self.add_text_svg12(root)
 
 
 if __name__ == '__main__':

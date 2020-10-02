@@ -28,6 +28,7 @@ import os
 
 import inkex
 from inkex import Image
+from inkex.localization import inkex_gettext as _
 
 try:
     import urllib.request as urllib
@@ -58,8 +59,11 @@ class EmbedImage(inkex.EffectExtension):
     def embed_image(self, node):
         """Embed the data of the selected Image Tag element"""
         xlink = node.get('xlink:href')
-        if xlink and xlink[:5] == 'data:':
-            # No need, data alread embedded
+        if (xlink is not None and xlink[:5] == 'data:'):
+            # No need, data already embedded
+            return
+        if xlink is None:
+            inkex.errormsg(_('Attribute "xlink:href" not set on node {}.'.format(node.get_id())))
             return
 
         url = urlparse.urlparse(xlink)

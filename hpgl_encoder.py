@@ -32,6 +32,12 @@ class NoPathError(ValueError):
 
 # Find the pen number in the layer number
 FIND_PEN = re.compile(r'\s*pen\s*(\d+)\s*', re.IGNORECASE)
+# Find the pen speed in the layer number
+FIND_SPEED = re.compile(r'\s*speed\s*(\d+)\s*', re.IGNORECASE)
+# Find pen force in the layer name
+FIND_FORCE = re.compile(r'\s*force\s*(\d+)\s*', re.IGNORECASE)
+
+
 
 class hpglEncoder(object):
     """HPGL Encoder, used by others"""
@@ -64,6 +70,8 @@ class hpglEncoder(object):
         self.dryRun = True
         self.lastPoint = [0, 0, 0]
         self.lastPen = -1
+        self.lastSpeed = -1
+        self.lastForce = -1
         self.offsetX = 0
         self.offsetY = 0
         # dots per inch to dots per user unit:
@@ -164,16 +172,16 @@ class hpglEncoder(object):
                     precutY = self.offsetY + self.toolOffset
                 else:
                     precutY = self.offsetY - self.toolOffset
-                self.processOffset('PU', Vector2d(precutX, precutY), self.options.pen)
-                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8), self.options.pen)
+                self.processOffset('PU', Vector2d(precutX, precutY), self.options.pen, self.options.speed, self.options.force)
+                self.processOffset('PD', Vector2d(precutX, precutY + self.toolOffset * 8), self.options.pen, self.options.speed, self.options.force)
             else:
-                self.processOffset('PU', Vector2d(0, 0), self.options.pen)
-                self.processOffset('PD', Vector2d(0, self.toolOffset * 8), self.options.pen)
+                self.processOffset('PU', Vector2d(0, 0), self.options.pen, self.options.speed, self.options.force)
+                self.processOffset('PD', Vector2d(0, self.toolOffset * 8), self.options.pen, self.options.speed, self.options.force)
         # start conversion
         self.process_group(self.doc, transform)
         # shift an empty node in in order to process last node in cache
         if self.toolOffset > 0.0 and not self.dryRun:
-            self.processOffset('PU', Vector2d(0, 0), 0)
+            self.processOffset('PU', Vector2d(0, 0), 0, 0, 0)
         return self.hpgl
 
     def process_group(self, group, transform):
@@ -196,14 +204,33 @@ class hpglEncoder(object):
     def get_pen_number(self, node):
         """Get pen number for node label (usually group)"""
         for parent in [node] + list(node.ancestors()):
-            match = FIND_PEN.fullmatch(parent.label or '')
+            match = FIND_PEN.search(parent.label or '')
             if match:
                 return int(match.group(1))
         return int(self.options.pen)
 
+    def get_pen_speed(self, node):
+        """Get pen speed for node label (usually group)"""
+        for parent in [node] + list(node.ancestors()):
+            match = FIND_SPEED.search(parent.label or '')
+            if match:
+                return int(match.group(1))
+        return int(self.options.speed)
+    
+    def get_pen_force(self, node):
+        """Get pen force for node label (usually group)"""
+        for parent in [node] + list(node.ancestors()):
+            match = FIND_FORCE.search(parent.label or '')
+            if match:
+                return int(match.group(1))
+        return int(self.options.force)
+
     def process_path(self, node, transform):
         """Process the given element into a plotter path"""
         pen = self.get_pen_number(node)
+        speed = self.get_pen_speed(node)
+        force = self.get_pen_force(node)
+
         path = node.path.to_absolute()\
                    .transform(node.composed_transform())\
                    .transform(transform)\
@@ -218,9 +245,9 @@ class hpglEncoder(object):
                 for singlePathPoint in singlePath:
                     posX, posY = singlePathPoint[1]
                     # check if point is repeating, if so, ignore
-                    if int(round(posX)) != int(round(oldPosX)) or int(round(posY))\
-                                                                != int(round(oldPosY)):
-                        self.processOffset(cmd, Vector2d(posX, posY), pen)
+                    if int(round(posX)) != int(round(oldPosX)) \
+                            or int(round(posY)) != int(round(oldPosY)):
+                        self.processOffset(cmd, Vector2d(posX, posY), pen, speed, force)
                         cmd = 'PD'
                         oldPosX = posX
                         oldPosY = posY
@@ -240,9 +267,9 @@ class hpglEncoder(object):
                                 if overcutLength >= self.overcut:
                                     newEndPoint = self.changeLength(Vector2d(oldPosX, oldPosY),\
                                             Vector2d(posX, posY), - (overcutLength - self.overcut))
-                                    self.processOffset(cmd, newEndPoint, pen)
+                                    self.processOffset(cmd, newEndPoint, pen, speed, force)
                                     break
-                                self.processOffset(cmd, Vector2d(posX, posY), pen)
+                                self.processOffset(cmd, Vector2d(posX, posY), pen, speed, force)
                                 oldPosX = posX
                                 oldPosY = posY
 
@@ -252,39 +279,37 @@ class hpglEncoder(object):
             return p1
         return Vector2d(DirectedLineSegment(p2, p1).point_at_length(- offset))
 
-    def processOffset(self, cmd, point, pen):
+    def processOffset(self, cmd, point, pen, speed, force):
         """ Calculate offset correction """
         if self.toolOffset == 0.0 or self.dryRun:
-            self.storePoint(cmd, point, pen)
+            self.storePoint(cmd, point, pen, speed, force)
         else:
             # insert data into cache
             self.vData.pop(0)
-            self.vData.insert(3, [cmd, point, pen])
+            self.vData.insert(3, [cmd, point, pen, speed, force])
             # decide if enough data is available
             if self.vData[2][1] != 'False':
                 if self.vData[1][1] == 'False':
-                    self.storePoint(self.vData[2][0], self.vData[2][1], self.vData[2][2])
+                    self.storePoint(self.vData[2][0], self.vData[2][1], self.vData[2][2], self.vData[2][3], self.vData[2][4])
                 else:
                     # perform tool offset correction (It's a *tad* complicated, if you want
                     #                     to understand it draw the data as lines on paper)
                     if self.vData[2][0] == 'PD':
                         # If the 3rd entry in the cache is a pen down command,
                         #             make the line longer by the tool offset
-                        pointThree = self.changeLength(self.vData[1][1], self.vData[2][1],\
-                                                                                self.toolOffset)
-                        self.storePoint('PD', pointThree, self.vData[2][2])
+                        pointThree = self.changeLength(self.vData[1][1], self.vData[2][1], self.toolOffset)
+                        self.storePoint('PD', pointThree, self.vData[2][2], self.vData[2][3], self.vData[2][4])
                     elif self.vData[0][1] != 'False':
                         # Elif the 1st entry in the cache is filled with data and the 3rd entry
                         #   is a pen up command shift the 3rd entry by the current tool offset
                         #   position according to the 2nd command
-                        pointThree = self.changeLength(self.vData[0][1], self.vData[1][1],\
-                                                                                self.toolOffset)
+                        pointThree = self.changeLength(self.vData[0][1], self.vData[1][1], self.toolOffset)
                         pointThree = self.vData[2][1] - (self.vData[1][1] - pointThree)
-                        self.storePoint('PU', pointThree, self.vData[2][2])
+                        self.storePoint('PU', pointThree, self.vData[2][2], self.vData[2][3], self.vData[2][4])
                     else:
                         # Else just write the 3rd entry
                         pointThree = self.vData[2][1]
-                        self.storePoint('PU', pointThree, self.vData[2][2])
+                        self.storePoint('PU', pointThree, self.vData[2][2], self.vData[2][3], self.vData[2][4])
                     if self.vData[3][0] == 'PD':
                         # If the 4th entry in the cache is a pen down command guide tool to next
                         #           line with a circle between the prolonged 3rd and 4th entry
@@ -309,17 +334,17 @@ class hpglEncoder(object):
                             angle = angleStart + self.toolOffsetFlat
                             while angle < angleStart + angleVector:
                                 self.storePoint('PD', self.vData[2][1] + self.toolOffset *\
-                                    Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
+                                    Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2], self.vData[2][3], self.vData[2][4])
                                 angle += self.toolOffsetFlat
                         else:
                             angle = angleStart - self.toolOffsetFlat
                             while angle > angleStart + angleVector:
                                 self.storePoint('PD', self.vData[2][1] + self.toolOffset *\
-                                    Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2])
+                                    Vector2d(math.cos(angle), math.sin(angle)), self.vData[2][2], self.vData[2][3], self.vData[2][4])
                                 angle -= self.toolOffsetFlat
-                        self.storePoint('PD', pointFour, self.vData[3][2])
+                        self.storePoint('PD', pointFour, self.vData[3][2], self.vData[2][3], self.vData[2][4])
 
-    def storePoint(self, command, point, pen):
+    def storePoint(self, command, point, pen, speed, force):
         x = int(round(point.x))
         y = int(round(point.y))
         # skip when no change in movement
@@ -346,11 +371,19 @@ class hpglEncoder(object):
             # select correct pen
             if self.lastPen != pen:
                 self.hpgl += ';PU;SP%d' % pen
-            # do not repeat command
-            if command == 'PD' and self.lastPoint[0] == 'PD' and self.lastPen == pen:
+            if self.lastSpeed != speed: 
+                if speed > 0:
+                   self.hpgl += ';VS%d' % speed
+            if self.lastForce != force: 
+                if force > 0:
+                   self.hpgl += ';FS%d' % force   
+               # do not repeat command
+            if command == 'PD' and self.lastPoint[0] == 'PD' and self.lastPen == pen: 
                 self.hpgl += ',%d,%d' % (x, y)
             else:
                 self.hpgl += ';%s%d,%d' % (command, x, y)
             self.lastPen = pen
+            self.lastSpeed = speed
+            self.lastForce = force
         self.lastPoint = [command, x, y]
-
+        

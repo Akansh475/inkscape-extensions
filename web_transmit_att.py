@@ -49,6 +49,8 @@ class TransmitAttribute(inkwebeffect.InkWebEffect):
                 el_ev_code = prev_ev_code + ";\n" + ev_code
             if self.options.compatibility == 'prepend':
                 el_ev_code = ev_code + ";\n" + prev_ev_code
+            if self.options.compatibility == 'replace':
+                el_ev_code = ev_code
             elem.set(self.options.when, el_ev_code)
 
 if __name__ == '__main__':

@@ -227,6 +227,48 @@ class LoremIpsum(inkex.EffectExtension):
         newtext = '\n\n'.join([''.join(self.make_paragraph(text_index)) 
                                for text_index in range(self.options.num)])
         tspan.text = newtext
+    def get_layer(self):
+        """Returns the current layer if set, otherwise creates a new layer to the document and 
+        returns it """
+        parent = self.svg.get_current_layer()
+        if parent is None:
+            parent = self.svg.add(Layer.new('lorum ipsum'))
+        return parent
+
+    def create_text_svg2(self, shape):
+        """Creates a new SVG2 flowed text with the given shape inside. If no shape inside was set,
+        the flowed text is appended to the selected layer"""
+        style = inkex.Style()
+        if shape is not None and not isinstance(shape, TextElement):
+            parent = shape.getparent()
+            style["shape-inside"] = f"url(#{shape.get_id()})"
+        else:
+            parent = self.get_layer()
+            style["inline-size"] = self.svg.width
+        textelement = parent.add(TextElement())
+        textelement.style = style
+        textelement.style["white-space"] = "pre"
+        textelement.style["font-size"] = self.svg.unittouu("8pt")
+        self.add_text_svg2(textelement)
+    def create_text_svg12(self, shape):
+        """Creates a new SVG1.2 flowed text with the given shape inside. If no shape inside was set,
+        the flowed text is appended to the selected layer"""
+        root = FlowRoot()
+        root.set('xml:space', 'preserve')
+        root.style["font-size"] = self.svg.unittouu("8pt")
+        region = root.add(FlowRegion())
+        if shape is not None and not isinstance(shape, TextElement):
+            parent = shape.getparent()
+            # For svg1.2 flowed text, store a copy of the shape inside the flowregion.
+            region.add(shape.copy())
+        else:
+            # Nothing selected, create a new flowtext
+            parent = self.get_layer()
+            shape = region.add(Rectangle(x='0', y='0',\
+                width=str(int(self.svg.width)),\
+                height=str(int(self.svg.height))))
+        parent.add(root)
+        self.add_text_svg12(root)
 
     def effect(self):
         # Existing text flow to insert new text into
@@ -244,44 +286,12 @@ class LoremIpsum(inkex.EffectExtension):
 
         if done:
             return
-
-        #find out where to store the rectangle in case nothing (or a simple text) was selected
-        if self.options.svg2:
-            region = self.svg.defs
-        else:
-            root = FlowRoot()
-            root.set('xml:space', 'preserve')
-            root.style["font-size"] = self.svg.unittouu("8pt")
-            region = root.add(FlowRegion())
-
+        
         shape = self.svg.selection.first()
-        # find the path we'll use for the flowed text
-        if shape is not None and not isinstance(shape, TextElement):
-            parent = shape.getparent()
-            # For svg1.2 flowed text, store a copy of the shape inside the flowregion.
-            # For svg2 flowed text this is not necessary, simply link the shape in shape-inside
-            if not self.options.svg2:
-                region.add(shape.copy())
-        else:
-            # Nothing selected, create a new flowtext
-            # Try to get the name of the current layer from namedview to create the object there
-            parent = self.svg.get_current_layer()
-            if parent is None:
-                parent = self.svg.add(Layer.new('lorum ipsum'))
-            
-            shape = region.add(Rectangle(x='0', y='0',\
-                width=str(int(self.svg.width)),\
-                height=str(int(self.svg.height))))
-        # set the path as flowroot / shape-inside
         if (self.options.svg2):
-            textelement = parent.add(TextElement())
-            textelement.style["shape-inside"] = f"url(#{shape.get_id()})"
-            textelement.style["white-space"] = "pre"
-            textelement.style["font-size"] = self.svg.unittouu("8pt")
-            self.add_text_svg2(textelement)
+            self.create_text_svg2(shape)
         else:
-            parent.add(root)
-            self.add_text_svg12(root)
+            self.create_text_svg12(shape)
 
 
 if __name__ == '__main__':

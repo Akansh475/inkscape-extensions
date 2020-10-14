@@ -12,7 +12,6 @@ class JpegOutput(inkex.RasterOutputExtension):
         pars.add_argument('--progressive', type=inkex.Boolean, default=False)
 
     def save(self, stream):
-        raise IOError("A")
         self.img.convert('RGB').save(stream,
             format='jpeg',
             quality=self.options.quality,

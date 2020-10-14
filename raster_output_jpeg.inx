@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <name>Optimized SVG Output</name>
+    <id>org.inkscape.raster_output.jpeg</id>
+
+    <param name="tab" type="notebook">
+        <page name="about" gui-text="Grave Warning">
+            <label appearance="header">Beware of JPEG!</label>
+            <label>JPEG Output is terrible for logos and other flat coloured shapes. Only use this because you HAVE to, but be aware this sucks, it will ALWAYS suck, jpeg is a terrible no good file format and anyone still using it should just feel bad.</label>
+            <spacer/>
+            <label>For details please refer to</label>
+            <label appearance="url" indent="1">https://whyjpegisbad.com</label>
+        </page>
+        <page name="options" gui-text="Options">
+            <param name="quality" type="int" min="0" max="95"
+                gui-text="Quality:"
+                gui-description="Quality between 0 and 95"
+            >75</param>
+            <param name="progressive" type="bool"
+                gui-text="Progressive:"
+                gui-description="Store image as a progressive JPEG file."
+            >true</param>
+        </page>
+    </param>
+
+    <output raster="true">
+        <extension>.jpeg</extension>
+        <mimetype>image/jpeg</mimetype>
+        <filetypename>Jpeg (*.jpeg)</filetypename>
+        <filetypetooltip>Make my image suck</filetypetooltip>
+    </output>
+
+    <script>
+        <command location="inx" interpreter="python">raster_output_jpeg.py</command>
+    </script>
+</inkscape-extension>

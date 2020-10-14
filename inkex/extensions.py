@@ -36,7 +36,8 @@ from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMi
 from .transforms import Transform
 
 # All the names that get added to the inkex API itself.
-__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension', 'OutputExtension',
+__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
+           'OutputExtension', 'RasterOutputExtension',
            'CallExtension', 'TemplateExtension', 'ColorExtension', 'TextExtension')
 
 stdout = sys.stdout
@@ -63,6 +64,23 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
     def save(self, stream):
         """But save certainly is, we give a more exact message here"""
         raise NotImplementedError("Output extensions require a save(stream) method!")
+
+class RasterOutputExtension(InkscapeExtension):
+    """
+    Takes a PNG from Inkscape and outputs it to another rather format.
+    """
+    def load(self, stream):
+        from PIL import Image
+        self.img = Image.open(stream)
+
+    def effect(self):
+        """Not needed since image isn't being changed"""
+        pass
+
+    def save(self, stream):
+        """Implement raster image saving here from PIL"""
+        raise NotImplementedError("Raster Output extension requires a save method!")
+
 
 class InputExtension(SvgOutputMixin, InkscapeExtension):
     """

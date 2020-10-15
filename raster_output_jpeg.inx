@@ -4,11 +4,12 @@
     <id>org.inkscape.raster_output.jpeg</id>
 
     <param name="tab" type="notebook">
-        <page name="about" gui-text="Grave Warning">
-            <label appearance="header">Low Quality Warning!</label>
-            <label>JPEG Output creates artefacts and distortions in logos and other flat vector images. Your artwork will lose visual quality. You should consider png or webp file formats with lossless compression instead.</label>
+        <page name="about" gui-text="Low Quality Warning!">
+            <label appearance="header">You put a lot of talet, time and energy into your work.</label>
+            <label>JPEG Output is good for photos but creates artefacts and distortions in logos and other flat vector images. Your artwork will lose visual quality.</label>
+            <label>Your work deserves better so you should consider png or webp file formats with lossless compression instead.</label>
             <spacer/>
-            <label>For details please refer to</label>
+            <label>Learn more details about jpeg:</label>
             <label appearance="url" indent="1">https://inkscape.org/learn/jpeg/</label>
         </page>
         <page name="options" gui-text="Options">

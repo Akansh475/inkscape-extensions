@@ -156,6 +156,11 @@
     <element name="output">
       <ref name="inx.input_output_extension.common"/>
       <optional>
+        <attribute name="raster">
+          <ref name="data_type_boolean_strict"/>
+        </attribute>
+      </optional>
+      <optional>
         <element name="dataloss">
           <ref name="data_type_boolean_strict"/>
         </element>

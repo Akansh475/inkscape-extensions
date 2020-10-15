@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Export to JPEG</name>
-    <id>org.inkscape.raster_output.jpeg</id>
+    <id>org.inkscape.raster.jpeg_output</id>
 
     <param name="tab" type="notebook">
         <page name="about" gui-text="Low Quality Warning!">

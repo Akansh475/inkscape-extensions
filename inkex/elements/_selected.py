@@ -119,7 +119,7 @@ class ElementList(OrderedDict):
             self[elem] = elem # This doesn't matter
 
     def paint_order(self):
-        """Get the selected elements, but ordered by their appearance in the document"""
+        """Get the selected elements by z-order (stacking order), ordered from bottom to top"""
         new_list = ElementList(self.svg)
         new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: x[0])])
         return new_list

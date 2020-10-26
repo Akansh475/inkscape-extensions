@@ -304,7 +304,8 @@ class Line(AbsolutePathCommand):
         # type: (Vector2d, Optional[Vector2d]) -> Curve
         return Curve(prev.x, prev.y, self.x, self.y, self.x, self.y)
 
-
+    def reverse(self, first, prev):
+        return Line(prev.x, prev.y)
 
 class line(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative line segment"""
@@ -322,6 +323,8 @@ class line(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev):  # type: (Vector2d) -> Line
         return Line(prev.x + self.dx, prev.y + self.dy)
 
+    def reverse(self, first, prev):
+        return line(-self.dx, -self.dy)
 
 class Move(AbsolutePathCommand):
     """Move pen segment without a line"""
@@ -360,6 +363,8 @@ class Move(AbsolutePathCommand):
         # type: (Vector2d, Optional[Vector2d]) -> Curve
         raise ValueError("Move segments can not be changed into curves.")
 
+    def reverse(self, first, prev):
+        return Move(first.x, first.y)
 
 class move(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative move segment"""
@@ -378,6 +383,8 @@ class move(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev):  # type: (Vector2d) -> Move
         return Move(prev.x + self.dx, prev.y + self.dy)
 
+    def reverse(self, first, prev):
+        return move(first.x, first.y)
 
 class ZoneClose(AbsolutePathCommand):
     """Close segment to finish a path"""
@@ -411,6 +418,8 @@ class ZoneClose(AbsolutePathCommand):
         # type: (Vector2d, Optional[Vector2d]) -> Curve
         raise ValueError("ZoneClose segments can not be changed into curves.")
 
+    def reverse(self, first, prev):
+        return Line(prev.x, prev.y)
 
 class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
     """Same as above (svg says no difference)"""
@@ -425,6 +434,8 @@ class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev):
         return ZoneClose()
 
+    def reverse(self, first, prev):
+        return line(-(first.x + (first.x - prev.x)), -(first.y + (first.y - prev.y)))
 
 class Horz(AbsolutePathCommand):
     """Horizontal Line segment"""
@@ -470,6 +481,8 @@ class Horz(AbsolutePathCommand):
         """Return this path command as a Line instead"""
         return Line(self.x, prev.y)
 
+    def reverse(self, first, prev):
+        return Horz(prev.x)
 
 class horz(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative horz line segment"""
@@ -493,6 +506,9 @@ class horz(RelativePathCommand):  # pylint: disable=invalid-name
     def to_line(self, prev):  # type: (Vector2d) -> Line
         """Return this path command as a Line instead"""
         return Line(prev.x + self.dx, prev.y)
+
+    def reverse(self, first, prev):
+        return horz(-self.dx)
 
 
 class Vert(AbsolutePathCommand):
@@ -538,6 +554,8 @@ class Vert(AbsolutePathCommand):
         """Convert a horizontal line into a curve"""
         return self.to_line(prev).to_curve(prev)
 
+    def reverse(self, first, prev):
+        return Vert(prev.y)
 
 class vert(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative vertical line segment"""
@@ -562,6 +580,8 @@ class vert(RelativePathCommand):  # pylint: disable=invalid-name
         """Return this path command as a line instead"""
         return Line(prev.x, prev.y + self.dy)
 
+    def reverse(self, first, prev):
+        return vert(-self.dy)
 
 class Curve(AbsolutePathCommand):
     """Absolute Curved Line segment"""
@@ -630,6 +650,9 @@ class Curve(AbsolutePathCommand):
         """Returns the list of coords for SuperPath"""
         return [list(self.args[:2]), list(self.args[2:4]), list(self.args[4:6])]
 
+    def reverse(self, first, prev):
+        return Curve(self.x3, self.y3, self.x2, self.y2, prev.x, prev.y)
+
 class curve(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative curved line segment"""
     nargs = 6
@@ -655,6 +678,12 @@ class curve(RelativePathCommand):  # pylint: disable=invalid-name
             self.dx4 + prev.x, self.dy4 + prev.y
         )
 
+    def reverse(self, first, prev):
+        return curve(
+            -self.dx4 + self.dx3, -self.dy4 + self.dy3, 
+            -self.dx4 + self.dx2, -self.dy4 + self.dy2, 
+            -self.dx4, -self.dy4
+        )
 
 class Smooth(AbsolutePathCommand):
     """Absolute Smoothed Curved Line segment"""
@@ -717,6 +746,9 @@ class Smooth(AbsolutePathCommand):
         (x2, y2), (x3, y3), (x4, y4) = self.control_points(prev, prev, prev_prev)
         return Curve(x2, y2, x3, y3, x4, y4)
 
+    def reverse(self, first, prev):
+        return Smooth(self.x3, self.y3, prev.x, prev.y)
+
 
 class smooth(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative smoothed curved line segment"""
@@ -743,6 +775,8 @@ class smooth(RelativePathCommand):  # pylint: disable=invalid-name
         # type: (Vector2d, Vector2d) -> Curve
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
+    def reverse(self, first, prev):
+        return smooth(-self.dx4 + self.dx3, -self.dy4 + self.dy3, -self.dx4, -self.dy4)
 
 class Quadratic(AbsolutePathCommand):
     """Absolute Quadratic Curved Line segment"""
@@ -808,6 +842,9 @@ class Quadratic(AbsolutePathCommand):
         y2 = 2. / 3 * self.y2 + 1. / 3 * self.y3
         return Curve(x1, y1, x2, y2, self.x3, self.y3)
 
+    def reverse(self, first, prev):
+        return Quadratic(self.x2, self.y2, prev.x, prev.y)
+
 
 class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative quadratic line segment"""
@@ -829,6 +866,8 @@ class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
             self.dx3 + prev.x, self.dy3 + prev.y
         )
 
+    def reverse(self, first, prev):
+        return quadratic(-self.x3 + self.x2, -self.y3 + self.y2, -self.x3, -self.y3)
 
 class TepidQuadratic(AbsolutePathCommand):
     """Continued Quadratic Line segment"""
@@ -888,6 +927,9 @@ class TepidQuadratic(AbsolutePathCommand):
         (x2, y2), (x3, y3) = self.control_points(prev, prev, prev_prev)
         return Quadratic(x2, y2, x3, y3)
 
+    def reverse(self, first, prev):
+        return TepidQuadratic(prev.x, prev.y)
+
 
 class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
@@ -911,6 +953,8 @@ class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
         # type: (Vector2d, Vector2d) -> AbsolutePathCommand
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
+    def reverse(self, first, prev):
+        return tepidQuadratic(-self.dx3, -self.dy3)   
 
 class Arc(AbsolutePathCommand):
     """Special Arc segment"""
@@ -1004,6 +1048,9 @@ class Arc(AbsolutePathCommand):
         # type: (Vector2d, Vector2d) -> Vector2d
         return Vector2d(self.x, self.y)
 
+    def reverse(self, first, prev):
+        return Arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, -self.sweep, prev.x, prev.y)
+
 
 class arc(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative Arc line segment"""
@@ -1026,6 +1073,9 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev):  # type: (Vector2d) -> "Arc"
         x1, y1 = prev
         return Arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, self.sweep, self.dx + x1, self.dy + y1)
+
+    def reverse(self, first, prev):
+        return arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, -self.sweep, -self.dx, -self.dy)
 
 
 PathCommand._letter_to_class = {
@@ -1099,6 +1149,9 @@ class Path(list):
         @property
         def end_point(self):
             return self.command.end_point(self.first_point, self.previous_end_point)
+
+        def reverse(self):
+            return self.command.reverse(self.end_point, self.previous_end_point)
 
         def to_curve(self):
             return self.command.to_curve(self.previous_end_point, self.prev2_control_point)
@@ -1254,7 +1307,18 @@ class Path(list):
 
     def reverse(self):
         """Returns a reversed path"""
-        pass
+        result = Path()
+        *_, first = self.end_points
+
+        # Go to the path in reverse order
+        for index,command in reversed(list(enumerate(self.proxy_iterator()))):
+            if index == 0:
+                result.insert(0,Move(first.x, first.y))
+            else:
+                result.append(command.reverse())
+
+        return result
+
 
     def close(self):
         """Attempt to close the last path segment"""

@@ -476,6 +476,17 @@ class PathTest(TestCase):
         self.assertAlmostTuple(list(Path("M 1 0 0 1").transform(Transform(rotate=30))
                                     .control_points), ((sqrt(3)/2, 0.5), (-0.5, sqrt(3)/2) ))
 
+    def test_reverse(self):
+        """Paths can be reversed"""
+        """Testing reverse() with relative coordinates"""
+        ret = Path("m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10 z")
+        ret = ret.reverse()
+        self._assertPath(ret, "M 10 50 l -0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40")
+        """Testing reverse() with absolute coordinates"""
+        ret = Path("M 100 35 L 100 25 L 60 10 C 45 23 32 33 10 35 L 60 75 L 60 35 Z")
+        ret = ret.reverse()
+        self._assertPath(ret, "M 100 35 L 60 35 L 60 75 L 10 35 C 32 33 45 23 60 10 L 100 25 L 100 35")
+
 class SuperPathTest(TestCase):
     """Super path tests for testing the super path class"""
     def test_closing(self):

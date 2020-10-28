@@ -87,6 +87,13 @@ COLORS = [
     '#4C262F', '#333333', '#5B5B5B', '#848484', '#ADADAD', '#D6D6D6', '#FFFFFF'
 ]
 
+def get_rgbcolor(dxfcolor):
+    if dxfcolor in range(1,len(COLORS)):
+        rgbcolor = COLORS[dxfcolor]
+    else:
+        rgbcolor = '#000000'
+    return rgbcolor
+
 class ValueConstruct(defaultdict):
     """Store values from the DXF and provide them as named attributes"""
     values = {
@@ -668,11 +675,9 @@ class DxfInput(inkex.InputExtension):
                     color = '#000000'  # default color
                     if vals.has_layer_name:
                         if vals.layer_name in layer_colors:
-                            if layer_colors[vals.layer_name] in COLORS:
-                                color = COLORS[layer_colors[vals.layer_name]]
+                            color = get_rgbcolor(layer_colors[vals.layer_name])
                     if vals.has_color:  # Common Color Number
-                        if vals.color in COLORS:
-                            color = COLORS[vals.color]
+                        color = get_rgbcolor(vals.color)
                     style = formatStyle({'stroke': '%s' % color, 'fill': 'none'})
                     w = 0.5  # default lineweight for POINT
                     if vals.has_line_weight:  # Common Lineweight

@@ -361,7 +361,7 @@ class ConditionalRule(object):
         #(re.compile(r'\s*~\s*([^\s>~\+]+)'), r'/following-sibling::\1'),
         #(re.compile(r'\s*\+\s*([^\s>~\+]+)'), r'/following-sibling::\1[1]'),
         (re.compile(r'\s*([^\s>~\+]+)'), r'//\1'), # Decendant match
-        (re.compile(r'\.(\w+)'), r"[contains(concat(' ', normalize-space(@class), ' '), ' \1 ')]"),
+        (re.compile(r'\.([-\w]+)'), r"[contains(concat(' ', normalize-space(@class), ' '), ' \1 ')]"),
         (re.compile(r'//\['), r'//*['), # Attribute only match
         (re.compile(r'//(\w+)'), r'//svg:\1'), # SVG namespace addition
     ]

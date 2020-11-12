@@ -184,7 +184,7 @@ def export_mtext(vals):
         # optional group codes : (21, 40, 50) (direction, text height mm, text angle)
         size = 12  # default fontsize in px
         if vals.has_scale:
-            size = scale * vals.scale
+            size = scale * textscale * vals.scale
         attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.1fpx; fill: %s; font-family: %s' % (size, color, options.font)}
         angle = 0  # default angle in degrees
         if vals.has_angle:
@@ -429,7 +429,7 @@ def export_dimension(vals):
         size = 12  # default fontsize in px
         if vals.has_mtext:
             if vals.mtext in DIMTXT:
-                size = scale * DIMTXT[vals.mtext]
+                size = scale * textscale * DIMTXT[vals.mtext]
                 if size < 2:
                     size = 2
         attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.1fpx; fill: %s; font-family: %s; text-anchor: middle; text-align: center' % (size, color, options.font)}
@@ -509,6 +509,7 @@ class DxfInput(inkex.InputExtension):
         pars.add_argument("--tab", default="Options")
         pars.add_argument("--scalemethod", default="manual")
         pars.add_argument("--scale", default="1.0")
+        pars.add_argument("--textscale", default="1.0")        
         pars.add_argument("--xmin", default="0.0")
         pars.add_argument("--ymin", default="0.0")
         pars.add_argument("--gcodetoolspoints", default=True, type=inkex.Boolean)
@@ -526,6 +527,7 @@ class DxfInput(inkex.InputExtension):
         global style
         global layer
         global scale
+        global textscale
         global color
         global extrude
         global xmin
@@ -612,6 +614,7 @@ class DxfInput(inkex.InputExtension):
                 scale = 210.0 / (xmax - xmin)  # scale to A4 width
         else:
             scale = float(options.scale)  # manual scale factor
+            textscale = float(options.textscale)
             xmin = float(options.xmin)
             ymin = float(options.ymin)
         svg.description('%s - scale = %f, origin = (%f, %f), method = %s' % (

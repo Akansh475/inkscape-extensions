@@ -9,10 +9,10 @@
                 <option value="auto">Automatic scaling to size A4</option>
                 <option value="file">Read from file</option>
             </param>
-            <param name="scale" type="string" gui-text="Scale factor:">1.0</param>
-            <param name="textscale" type="string" gui-text="Text scale factor:">1.0</param>            
-            <param name="xmin" type="string" gui-text="X-axis origin (mm):">0.0</param>
-            <param name="ymin" type="string" gui-text="Y-axis origin (mm):">0.0</param>
+            <param name="scale" type="string" gui-text="Manual scale factor:">1.0</param>
+            <param name="xmin" type="string" gui-text="Manual x-axis origin (mm):">0.0</param>
+            <param name="ymin" type="string" gui-text="Manual y-axis origin (mm):">0.0</param>
+            <param name="textscale" type="string" gui-text="Text scale factor:">1.0</param>
             <param name="gcodetoolspoints" type="bool" gui-text="Gcodetools compatible point import">false</param>
             <spacer/><separator/><spacer/>
             <param name="encoding" type="optiongroup" appearance="combo" gui-text="Character encoding:">

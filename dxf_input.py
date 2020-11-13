@@ -614,12 +614,12 @@ class DxfInput(inkex.InputExtension):
                 scale = 210.0 / (xmax - xmin)  # scale to A4 width
         else:
             scale = float(options.scale)  # manual scale factor
-            textscale = float(options.textscale)
             xmin = float(options.xmin)
             ymin = float(options.ymin)
         svg.description('%s - scale = %f, origin = (%f, %f), method = %s' % (
             os.path.basename(options.input_file), scale, xmin, ymin, options.scalemethod))
         scale *= 96.0 / 25.4  # convert from mm to pixels
+        textscale = float(options.textscale)
 
         if '0' not in layer_nodes:
             layer_nodes['0'] = svg.add(inkex.Layer.new('0'))

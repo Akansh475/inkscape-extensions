@@ -478,12 +478,20 @@ class PathTest(TestCase):
 
     def test_reverse(self):
         """Paths can be reversed"""
-        """Testing reverse() with relative coordinates"""
+        """Testing reverse() with relative coordinates, closed path"""
         ret = Path("m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10 z")
         ret = ret.reverse()
-        self._assertPath(ret, "M 10 50 l -0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40")
-        """Testing reverse() with absolute coordinates"""
+        self._assertPath(ret, "m 10 50 l -0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40 z")
+        """Testing reverse() with relative coordinates, open path"""
+        ret = Path("m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10")
+        ret = ret.reverse()
+        self._assertPath(ret, "m 10 49.9998 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40")
+        """Testing reverse() with absolute coordinates, closed path"""
         ret = Path("M 100 35 L 100 25 L 60 10 C 45 23 32 33 10 35 L 60 75 L 60 35 Z")
+        ret = ret.reverse()
+        self._assertPath(ret, "M 100 35 L 60 35 L 60 75 L 10 35 C 32 33 45 23 60 10 L 100 25 L 100 35 Z")
+        """Testing reverse() with absolute coordinates, open path"""
+        ret = Path("M 100 35 L 100 25 L 60 10 C 45 23 32 33 10 35 L 60 75 L 60 35 L 100 35")
         ret = ret.reverse()
         self._assertPath(ret, "M 100 35 L 60 35 L 60 75 L 10 35 C 32 33 45 23 60 10 L 100 25 L 100 35")
 

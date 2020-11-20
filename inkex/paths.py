@@ -1310,12 +1310,18 @@ class Path(list):
         result = Path()
         *_, first = self.end_points
 
-        # Go to the path in reverse order
+        # Go through the path in reverse order
         for index,command in reversed(list(enumerate(self.proxy_iterator()))):
             if index == 0:
-                result.insert(0,Move(first.x, first.y))
+                if command.letter == 'M':
+                    result.insert(0,Move(first.x, first.y))
+                elif command.letter == 'm':
+                    result.insert(0,move(first.x, first.y))
             else:
                 result.append(command.reverse())
+
+        if self[-1].letter.lower() == 'z':
+            result.append(self[-1])
 
         return result
 

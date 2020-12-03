@@ -4132,13 +4132,14 @@ class Gcodetools(inkex.EffectExtension):
                                         n = [[j[2][:], j[1][:], j[0][:]]] + n
                                     csp[i] = n[:]
 
-                        # What the absolute fudge is this doing? Closing paths? Ugh.
-                        d = str(CubicSuperPath(csp))
-                        print_(("original  d=", d))
-                        d = re.sub(r'(?i)(m[^mz]+)', r'\1 Z ', d)
-                        d = re.sub(r'(?i)\s*z\s*z\s*', r' Z ', d)
-                        d = re.sub(r'(?i)\s*([A-Za-z])\s*', r' \1 ', d)
-                        print_(("formatted d=", d))
+                    # What the absolute fudge is this doing? Closing paths? Ugh.
+                    # Not sure but it most be at this level and not in the if statement, or it will not work with dynamic offsets
+                    d = str(CubicSuperPath(csp))
+                    print_(("original  d=", d))
+                    d = re.sub(r'(?i)(m[^mz]+)', r'\1 Z ', d)
+                    d = re.sub(r'(?i)\s*z\s*z\s*', r' Z ', d)
+                    d = re.sub(r'(?i)\s*([A-Za-z])\s*', r' \1 ', d)
+                    print_(("formatted d=", d))
                     p0 = self.transform([0, 0], layer)
                     p1 = self.transform([0, 1], layer)
                     scale = (P(p0) - P(p1)).mag()
@@ -4161,11 +4162,11 @@ class Gcodetools(inkex.EffectExtension):
                         if abs(radius) > abs(r):
                             radius = -r
 
-                        elem = area_group.add(PathElement(style=MARKER_STYLE["biarc_style_i"]['area']))
+                        elem = area_group.add(PathElement(style=str(MARKER_STYLE["biarc_style_i"]['area'])))
                         elem.set('sodipodi:type', 'inkscape:offset')
                         elem.set('inkscape:radius', radius)
                         elem.set('inkscape:original', d)
-                        print_(("adding curve", area_group, d, MARKER_STYLE["biarc_style_i"]['area']))
+                        print_(("adding curve", area_group, d, str(MARKER_STYLE["biarc_style_i"]['area'])))
                         if radius == -r:
                             break
 

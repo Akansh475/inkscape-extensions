@@ -185,7 +185,7 @@ def export_mtext(vals):
         size = 12  # default fontsize in px
         if vals.has_scale:
             size = scale * textscale * vals.scale
-        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.1fpx; fill: %s; font-family: %s' % (size, color, options.font)}
+        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s' % (size, color, options.font)}
         angle = 0  # default angle in degrees
         if vals.has_angle:
             angle = vals.angle
@@ -432,7 +432,7 @@ def export_dimension(vals):
                 size = scale * textscale * DIMTXT[vals.mtext]
                 if size < 2:
                     size = 2
-        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.1fpx; fill: %s; font-family: %s; text-anchor: middle; text-align: center' % (size, color, options.font)}
+        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s; text-anchor: middle; text-align: center' % (size, color, options.font)}
         if dx == 0:
             attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
         node = etree.SubElement(layer, 'text', attribs)

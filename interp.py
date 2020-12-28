@@ -89,8 +89,8 @@ class Interp(inkex.EffectExtension):
                      'stroke-opacity': 1.0,
                      'fill-opacity': 1.0,
                      'stroke-width': 1.0,
-                     'stroke': None,
-                     'fill': None})
+                     'stroke': 'none',
+                     'fill': 'none'})
                 for key in styledefaults:
                     sst.setdefault(key, styledefaults[key])
                     est.setdefault(key, styledefaults[key])

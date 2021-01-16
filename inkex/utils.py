@@ -200,7 +200,7 @@ def strargs(string, kind=float):
     """Returns a list of floats from a string with commas or space separators, 
         also splits at -(minus) signs by adding a space in front of the - sign
     """
-    return [kind(val) for val in string.replace(',', ' ').replace('-', ' -').replace('e ', 'e').split()]
+    return [kind(val) for val in string.replace(',', ' ').replace('-', ' -').replace('e ', 'e').replace('E ','e').split()]
 
 
 def addNS(tag, ns=None):  # pylint: disable=invalid-name

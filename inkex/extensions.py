@@ -164,16 +164,25 @@ class GenerateExtension(EffectExtension):
             pos_y = 0
         return Transform(translate=(pos_x, pos_y))
 
+    def create_container(self):
+        """
+        Return the container the generated elements will go into.
+
+        Default is a new layer or current layer depending on the container_layer flag.
+        """
+        container = (Layer if self.container_layer else Group).new(self.container_label)
+        if self.container_layer:
+            self.svg.append(container)
+        else:
+            container.transform = self.container_transform()
+            self.svg.get_current_layer().append(container)
+        return container
+
     def effect(self):
         layer = self.svg.get_current_layer()
         fragment = self.generate()
         if isinstance(fragment, types.GeneratorType):
-            container = (Layer if self.container_layer else Group).new(self.container_label)
-            if self.container_layer:
-                self.svg.append(container)
-            else:
-                container.transform = self.container_transform()
-                layer.append(container)
+            container = self.create_container()
             for child in fragment:
                 if isinstance(child, BaseElement):
                     container.append(child)

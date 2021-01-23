@@ -222,6 +222,16 @@ class AttributeHandelingTestCase(SvgTestCase):
         self.assertEqual(self.svg.getElementByName('doesntexist'), None)
         self.assertEqual(self.svg.getElementByName('Key', 'rect'), None)
 
+    def test_insensitive(self):
+        """Element inkscape sensitivity"""
+        elem = self.svg.getElementByName('Key')
+        self.assertTrue(elem.is_sensitive())
+        elem.set_sensitive(False)
+        self.assertFalse(elem.is_sensitive())
+        self.assertEqual(elem.get('sodipodi:insensitive'), 'true')
+        elem.set_sensitive(True)
+        self.assertTrue(elem.is_sensitive())
+        self.assertEqual(elem.get('sodipodi:insensitive'), 'false')
 
 class TransformationTestCase(SvgTestCase):
     """Test transformative functions"""

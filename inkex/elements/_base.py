@@ -410,6 +410,14 @@ class BaseElement(etree.ElementBase):
 
     label = label.setter(lambda self, value: self.set('inkscape:label', str(value))) # type: ignore
 
+    def is_sensitive(self):
+        """Return true if this element is sensitive in inkscape"""
+        return self.get('sodipodi:insensitive', None) != 'true'
+
+    def set_sensitive(self, sensitive=True):
+        """Set the sensitivity of the element/layer"""
+        self.set('sodipodi:insensitive', str((not sensitive)).lower())
+
 
 class ShapeElement(BaseElement):
     """Elements which have a visible representation on the canvas"""

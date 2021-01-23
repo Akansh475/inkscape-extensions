@@ -57,7 +57,9 @@ class InxFile(object):
     warnings = property(lambda self: sorted(list(set(self.xml.warnings))))
 
     def __init__(self, filename):
-        if '<' in filename:
+        if isinstance(filename, str) and '<' in filename:
+            filename = filename.encode('utf8')
+        if isinstance(filename, bytes) and b'<' in filename:
             self.filename = None
             self.doc = etree.ElementTree(etree.fromstring(filename, parser=INX_PARSER))
         else:

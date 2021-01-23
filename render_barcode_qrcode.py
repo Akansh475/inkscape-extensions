@@ -306,9 +306,9 @@ class QRCode(object):
             if length <= QRUtil.getMaxLength(
                     typeNumber, mode, errorCorrectLevel):
                 qr.setTypeNumber(typeNumber)
-                break
-        qr.make()
-        return qr
+                qr.make()
+                return qr
+        raise ValueError("Couldn't get minimum QR Code length...")
 
 
 class Mode(object):
@@ -533,22 +533,18 @@ class QRUtil(object):
             data >>= 1
         return digit
 
-    @staticmethod
-    def stringToBytes(s):
-        return [ord(c) & 0xff for c in s]
-
-
 class QR8BitByte(object):
 
     def __init__(self, data):
         self.mode = Mode.MODE_8BIT_BYTE
+        if isinstance(data, str):
+            data = data.encode('ascii', 'ignore')
+        if not isinstance(data, bytes):
+            raise ValueError("Data must be in bytes!")
         self.data = data
 
     def getMode(self):
         return self.mode
-
-    def getData(self):
-        return self.data
 
     '''
     def write(self, buffer): raise Exception('not implemented.')
@@ -556,12 +552,11 @@ class QR8BitByte(object):
     '''
 
     def write(self, buffer):
-        data = QRUtil.stringToBytes(self.getData())
-        for d in data:
+        for d in self.data:
             buffer.put(d, 8)
 
     def getLength(self):
-        return len(QRUtil.stringToBytes(self.getData()))
+        return len(self.data)
 
     def getLengthInBits(self, type):
         if 1 <= type < 10:  # 1 - 9

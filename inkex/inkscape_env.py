@@ -42,7 +42,7 @@ def activate_virtualenv():
     that are installed within the virtualenv, we activate the available venv.
     """
     activate_this = get_bin('activate_this.py')
-    if os.path.isfile(activate_this):
+    if activate_this and os.path.isfile(activate_this):
         with open(activate_this, 'r') as fhl:
             exec(fhl.read(), dict(__file__=activate_this))
         return

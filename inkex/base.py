@@ -260,7 +260,8 @@ class TempDirMixin(_Base):
         # type: () -> None
         """Create the temporary directory"""
         from tempfile import mkdtemp
-        self.tempdir = mkdtemp(self.dir_suffix, self.dir_prefix, None)
+        self.tempdir = os.path.realpath(
+            mkdtemp(self.dir_suffix, self.dir_prefix, None))
         super(TempDirMixin, self).load_raw()
 
     def clean_up(self):

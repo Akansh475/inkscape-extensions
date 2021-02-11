@@ -8,7 +8,7 @@ import inkex
 class JpegOutput(inkex.RasterOutputExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab')
-        pars.add_argument('--quality', type=int, default=75)
+        pars.add_argument('--quality', type=int, default=90)
         pars.add_argument('--progressive', type=inkex.Boolean, default=False)
 
     def save(self, stream):

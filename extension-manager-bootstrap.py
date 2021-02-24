@@ -22,6 +22,7 @@ and adding the extensions package.
 """
 
 import os
+import sys
 
 import inkex
 from inkex.utils import get_user_directory
@@ -71,6 +72,6 @@ if __name__ == '__main__':
     if run_existing is not None:
         # If the extension manager is already installed
         # Run it instead of the bootstrap process.
-        run_existing()
+        run_existing(sys.args)
     else:
         Bootstrap().run()

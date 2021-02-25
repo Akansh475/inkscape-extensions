@@ -47,7 +47,8 @@ class Bootstrap(InkscapeExtension):
         pass
 
     def save_raw(self, ret):
-        self.msg("Installation Successful!")
+        from manage_extensions import run as run_existing
+        run_existing(sys.argv)
 
     def effect(self):
         try:
@@ -72,6 +73,6 @@ if __name__ == '__main__':
     if run_existing is not None:
         # If the extension manager is already installed
         # Run it instead of the bootstrap process.
-        run_existing(sys.args)
+        run_existing(sys.argv)
     else:
         Bootstrap().run()

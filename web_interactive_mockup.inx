@@ -18,7 +18,7 @@
             </param>
         </page>
         <page name="Help" gui-text="Help">
-            <label>This effect allows you to create interactive elements in your drawing. These will react to user actions when the file is viewed in a web browser.</label>
+            <label>This extension allows you to create interactive elements in your drawing. These will react to user actions when the file is viewed in a web browser.</label>
             <label>When the interaction is triggered (e.g. by a click on an object that looks like a button), the view will shift to another element. This is achieved by changing the viewbox of the SVG with JavaScript.</label>
             <label>To add interactivity to one or more elements in the drawing, select these first. Add the element that the user will see after the interaction to the selection. Select which action a user must do to make the interactivity happen and click on Apply. Each element can respond to multiple (different) actions.</label>
         </page>

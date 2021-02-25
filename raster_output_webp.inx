@@ -29,7 +29,7 @@
         <extension>.webp</extension>
         <mimetype>image/webp</mimetype>
         <filetypename>WebP (*.webp)</filetypename>
-        <filetypetooltip>Export to webp file format.</filetypetooltip>
+        <filetypetooltip>Export to WebP file format.</filetypetooltip>
     </output>
 
     <script>

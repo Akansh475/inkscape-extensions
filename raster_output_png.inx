@@ -19,9 +19,9 @@
 
         </page>
         <page name="lossy" gui-text="Lossy Options">
-            <param name="bitdepth" type="bool" gui-text="Bit Depth">false</param>
-            <param name="color" type="bool" gui-text="Color Type Reductions">false</param>
-            <param name="palette" type="bool" gui-text="Palette Reductions">false</param>
+            <param name="bitdepth" type="bool" gui-text="Allow bit depth reduction">false</param>
+            <param name="color" type="bool" gui-text="Allow color type reduction">false</param>
+            <param name="palette" type="bool" gui-text="Allow palette reduction">false</param>
         </page>
     </param>
 

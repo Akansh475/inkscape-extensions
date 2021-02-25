@@ -133,7 +133,7 @@ class DeprecatedEffect(object):
 
     @property
     def doc_ids(self):
-        self._deprecated('doc_ids', _('{} is now a method in the SvgDocumentElement class.'
+        self._deprecated('doc_ids', _('{} is now a method in the SvgDocumentElement class. '
                                       'Use `self.svg.get_ids()` instead.'))
         if self._doc_ids is None:
             self._doc_ids = dict.fromkeys(self.svg.get_ids())

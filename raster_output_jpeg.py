@@ -6,6 +6,8 @@ Convert PNG to Jpeg using Raster Output extension.
 import inkex
 
 class JpegOutput(inkex.RasterOutputExtension):
+    multi_inx = True # XXX Remove this after refactoring
+
     def add_arguments(self, pars):
         pars.add_argument('--tab')
         pars.add_argument('--quality', type=int, default=90)

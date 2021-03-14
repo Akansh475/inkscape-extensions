@@ -200,6 +200,11 @@
         </attribute>
       </optional>
       <optional>
+        <attribute name="refresh-extensions">
+          <ref name="data_type_boolean_strict"/>
+        </attribute>
+      </optional>
+      <optional>
         <attribute name="implements-custom-gui">
           <ref name="data_type_boolean_strict"/>
         </attribute>

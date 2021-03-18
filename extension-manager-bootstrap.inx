@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Manage Extensions</name>
     <id>org.inkscape.extensions.manager</id>
-    <effect needs-live-preview="false" needs-document="false" refresh-extensions="true">
+    <effect needs-live-preview="false" needs-document="false">
         <object-type>all</object-type>
         <effects-menu hidden="true"/>
     </effect>

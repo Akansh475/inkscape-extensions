@@ -192,7 +192,7 @@ class InkscapeExtension(object):
             self.file_io.close()
 
     def svg_path(self, default=None):
-        # type: () -> Optional[str]
+        # type: (Optional[str]) -> Optional[str]
         """
         Return the folder the
         Returns None if there is no file.

@@ -219,6 +219,10 @@ class InkscapeExtension(object):
          * Empty string means the document was never saved
          * 'None' means this version of Inkscape doesn't support DOCUMENT_URI
 
+        DO NOT READ OR WRITE TO THE DOCUMENT FILENAME!
+
+         * Inkscape may have not written the latest changes, leaving you reading old data.
+         * Inkscape will not respect anything you write to the file, causing data loss.
         """
         return os.environ.get('DOCUMENT_URI', None)
 

@@ -63,7 +63,9 @@ class ExtractImage(inkex.EffectExtension):
         if not xlink.startswith('data:'):
             return # Not embedded image data
 
-        save_to = self.absolute_href(self.options.filepath)
+        # This call will raise AbortExtension if the document wasn't saved
+        # and the user is trying to extract them to a relative directory.
+        save_to = self.absolute_href(self.options.filepath, default=None)
         # Make the target directory if it doesn't exist yet.
         if not os.path.isdir(save_to):
             os.makedirs(save_to)

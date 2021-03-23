@@ -83,6 +83,7 @@ import xml.etree.ElementTree as xml
 from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
 
+from .. import Transform
 from ..utils import PY3, to_bytes
 from .xmldiff import xmldiff
 from .mock import MockCommandMixin, Capture
@@ -248,6 +249,13 @@ class TestCase(MockCommandMixin, BaseCase):
                 self.assertDeepAlmostEqual(f, s, places, msg, delta)
         else:
             self.assertAlmostEqual(first, second, places, msg, delta)
+
+    def assertTransformEqual(self, lhs, rhs, places=7):
+        """Assert that two transform expressions evaluate to the same
+        transformation matrix.
+        """
+        self.assertAlmostTuple(tuple(Transform(lhs).to_hexad()),
+                               tuple(Transform(rhs).to_hexad()), places)
 
     @property
     def effect(self):

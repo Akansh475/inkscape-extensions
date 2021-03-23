@@ -175,7 +175,14 @@ class GenerateExtension(EffectExtension):
             self.svg.append(container)
         else:
             container.transform = self.container_transform()
-            self.svg.get_current_layer().append(container)
+            parent = self.svg.get_current_layer()
+            try:
+                parent_transform = parent.composed_transform()
+            except AttributeError:
+                pass
+            else:
+                container.transform = -parent_transform * container.transform
+            parent.append(container)
         return container
 
     def effect(self):

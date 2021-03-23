@@ -1,5 +1,5 @@
 # coding=utf-8
-from embedimage import EmbedImage
+from image_embed import EmbedImage
 from inkex.tester import ComparisonMixin, TestCase
 
 class EmbedderBasicTest(ComparisonMixin, TestCase):

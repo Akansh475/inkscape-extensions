@@ -191,21 +191,36 @@ class InkscapeExtension(object):
         if self.file_io is not None:
             self.file_io.close()
 
-    def svg_path(self):
+    def svg_path(self, default=None):
         # type: () -> Optional[str]
         """
-        Return the folder the svg is contained in.
+        Return the folder the
         Returns None if there is no file.
         """
-        if self.options.input_file:
-            return os.path.dirname(self.options.input_file)
-        return None
+        uri = self.document_uri()
+        if uri:
+            return os.path.dirname(uri)
+        elif default:
+            return default
+        return uri # Return None or '' for context
 
     @classmethod
     def ext_path(cls):
         # type: () -> str
         """Return the folder the extension script is in"""
         return os.path.dirname(sys.modules[cls.__module__].__file__)
+
+    @classmethod
+    def document_uri(self):
+        # type: () -> Optional[str]
+        """Returns the saved location of the document
+
+         * Normal return is a string containing the saved location
+         * Empty string means the document was never saved
+         * 'None' means this version of Inkscape doesn't support DOCUMENT_URI
+
+        """
+        return os.environ.get('DOCUMENT_URI', None)
 
     @classmethod
     def get_resource(cls, name, abort_on_fail=True):
@@ -224,12 +239,20 @@ class InkscapeExtension(object):
 
         User's home folder is also resolved. So '~/a.png` will be `/home/bob/a.png`
 
-        Default is a fallback directory to use if the svg's filename is not available.
+        Default is a fallback working directory to use if the svg's filename is not
+        available, if you set default to None, then the user will be given errors if
+        there's no working directory available from Inkscape.
         """
         filename = os.path.expanduser(filename)
         if not os.path.isabs(filename):
-            path = self.svg_path() or default
-            filename = os.path.join(path, filename)
+            filename = os.path.expanduser(filename)
+        if not os.path.isabs(filename):
+            cwd = self.svg_path(default)
+            if cwd is None:
+                raise AbortExtension(f"Can not use relative path, Inkscape isn't telling us the current working directory.")
+            elif cwd == '':
+                raise AbortExtension(f"The SVG must be saved before you can use relative paths.")
+            filename = os.path.join(cwd, filename)
         return os.path.realpath(os.path.expanduser(filename))
 
     @property

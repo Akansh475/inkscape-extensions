@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import os
-from extractimage import ExtractImage
+from image_extract import ExtractImage
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 class ExtractImageBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):

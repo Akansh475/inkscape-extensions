@@ -34,6 +34,7 @@ from ..paths import Path
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform, BoundingBox
 from ..utils import PY3, NSS, addNS, removeNS, splitNS, FragmentError
+from ._utils import ChildToProperty
 
 try:
     from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
@@ -52,6 +53,19 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
     def register_class(cls, klass):
         """Register the given class using it's attached tag name"""
         cls.lookup_table[splitNS(klass.tag_name)].append(klass)
+
+    @classmethod
+    def find_class(cls, xpath):
+        """Find the class for this type of element defined by an xpath"""
+        if isinstance(xpath, type):
+            return xpath
+        for cls in cls.lookup_table[splitNS(xpath.split('/')[-1])]:
+            # TODO: We could create a apply the xpath attrs to the test element
+            # to narrow the search, but this does everything we need right now.
+            test_element = cls()
+            if cls._is_class_element(test_element):
+                return cls
+        raise KeyError(f"Could not find svg tag for '{xpath}'")
 
     def lookup(self, doc, element): # pylint: disable=unused-argument
         """Lookup called by lxml when assigning elements their object class"""
@@ -130,6 +144,8 @@ class BaseElement(etree.ElementBase):
 
     typename = property(lambda self: type(self).__name__)
     xml_path = property(lambda self: self.getroottree().getpath(self))
+    desc = ChildToProperty("svg:desc", prepend=True)
+    title = ChildToProperty("svg:title", prepend=True)
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""
@@ -232,12 +248,6 @@ class BaseElement(etree.ElementBase):
         svg.append(self.copy())
         return svg.tostring().split(b'>\n    ', 1)[-1][:-6]
 
-    def description(self, text):
-        """Set the desc element with text"""
-        from ._meta import Desc
-        desc = self.add(Desc())
-        desc.text = text
-
     def set_random_id(self, prefix=None, size=4, backlinks=False):
         """Sets the id attribute if it is not already set."""
         prefix = str(self) if prefix is None else prefix
@@ -277,10 +287,12 @@ class BaseElement(etree.ElementBase):
             raise FragmentError("Element fragment does not have a document root!")
         return self
 
-    def get_or_create(self, xpath, nodeclass, prepend=False):
+    def get_or_create(self, xpath, nodeclass=None, prepend=False):
         """Get or create the given xpath, pre/append new node if not found."""
         node = self.findone(xpath)
         if node is None:
+            if nodeclass is None:
+                nodeclass = NodeBasedLookup.find_class(xpath)
             node = nodeclass()
             if prepend:
                 self.insert(0, node)
@@ -351,6 +363,7 @@ class BaseElement(etree.ElementBase):
 
     def remove_all(self, *types):
         """Remove all children or child types"""
+        types = tuple(NodeBasedLookup.find_class(t) for t in types)
         for child in self:
             if not types or isinstance(child, types):
                 self.remove(child)

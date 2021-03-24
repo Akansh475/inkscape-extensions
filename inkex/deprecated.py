@@ -37,6 +37,7 @@ import inkex.utils
 import inkex.units
 from inkex.base import SvgThroughMixin, InkscapeExtension
 from inkex.localization import inkex_gettext as _
+from inkex.elements._base import BaseElement
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -393,3 +394,10 @@ class DeprecatedSvgMixin(object):
     def get_first_selected(self, *types):
         """selection.filter(*types).first() or [0] if you'd like an error"""
         return self.selection.filter(*types).first()
+
+
+# This can't be handled as a mixin class because of circular importing.
+def description(self, value):
+    """elem.desc = value"""
+    self.desc = value
+BaseElement.description = deprecate(description)

@@ -616,8 +616,8 @@ class DxfInput(inkex.InputExtension):
             scale = float(options.scale)  # manual scale factor
             xmin = float(options.xmin)
             ymin = float(options.ymin)
-        svg.description('%s - scale = %f, origin = (%f, %f), method = %s' % (
-            os.path.basename(options.input_file), scale, xmin, ymin, options.scalemethod))
+        bname = os.path.basename(options.input_file)
+        svg.desc = f"{bname} - scale = {scale}, origin = ({xmin}, {ymin}), method = {options.scalemethod}"
         scale *= 96.0 / 25.4  # convert from mm to pixels
         textscale = float(options.textscale)
 

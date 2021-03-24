@@ -35,7 +35,7 @@ from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
 from ._base import BaseElement
-from ._meta import NamedView, Defs, StyleElement, Metadata
+from ._meta import StyleElement
 
 if False: # pylint: disable=using-constant-test
     import typing # pylint: disable=unused-import
@@ -123,17 +123,17 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
     @property
     def namedview(self):
         """Return the sp namedview meta information element"""
-        return self.get_or_create('//sodipodi:namedview', NamedView, True)
+        return self.get_or_create('//sodipodi:namedview', prepend=True)
 
     @property
     def metadata(self):
         """Return the svg metadata meta element container"""
-        return self.get_or_create('//svg:metadata', Metadata, True)
+        return self.get_or_create('//svg:metadata', prepend=True)
 
     @property
     def defs(self):
         """Return the svg defs meta element container"""
-        return self.get_or_create('//svg:defs', Defs, True)
+        return self.get_or_create('//svg:defs', prepend=True)
 
     def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""

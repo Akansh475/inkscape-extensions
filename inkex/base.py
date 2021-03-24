@@ -191,13 +191,14 @@ class InkscapeExtension(object):
         if self.file_io is not None:
             self.file_io.close()
 
-    def svg_path(self, default=None):
+    @classmethod
+    def svg_path(cls, default=None):
         # type: (Optional[str]) -> Optional[str]
         """
         Return the folder the
         Returns None if there is no file.
         """
-        uri = self.document_uri()
+        uri = cls.document_uri()
         if uri:
             return os.path.dirname(uri)
         elif default:
@@ -211,7 +212,16 @@ class InkscapeExtension(object):
         return os.path.dirname(sys.modules[cls.__module__].__file__)
 
     @classmethod
-    def document_uri(self):
+    def get_resource(cls, name, abort_on_fail=True):
+        # type: (str, bool) -> str
+        """Return the full filename of the resource in the extension's dir"""
+        filename = cls.absolute_href(name, cwd=cls.ext_path())
+        if abort_on_fail and not os.path.isfile(filename):
+            raise AbortExtension(f"Could not find resource file: {filename}")
+        return filename
+
+    @classmethod
+    def document_uri(cls):
         # type: () -> Optional[str]
         """Returns the saved location of the document
 
@@ -227,15 +237,7 @@ class InkscapeExtension(object):
         return os.environ.get('DOCUMENT_URI', None)
 
     @classmethod
-    def get_resource(cls, name, abort_on_fail=True):
-        # type: (str, bool) -> str
-        """Return the full filename of the resource in the extension's dir"""
-        filename = os.path.join(cls.ext_path(), name)
-        if abort_on_fail and not os.path.isfile(filename):
-            raise AbortExtension(f"Could not find resource file: {filename}")
-        return filename
-
-    def absolute_href(self, filename, default='~/'):
+    def absolute_href(cls, filename, default='~/', cwd=None):
         # type: (str, str) -> str
         """
         Process the filename such that it's turned into an absolute filename
@@ -251,7 +253,8 @@ class InkscapeExtension(object):
         if not os.path.isabs(filename):
             filename = os.path.expanduser(filename)
         if not os.path.isabs(filename):
-            cwd = self.svg_path(default)
+            if cwd is None:
+                cwd = cls.svg_path(default)
             if cwd is None:
                 raise AbortExtension(f"Can not use relative path, Inkscape isn't telling us the current working directory.")
             elif cwd == '':

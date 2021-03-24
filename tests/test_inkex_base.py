@@ -83,6 +83,16 @@ class InkscapeExtensionTest(TestCase):
         self.assertEqual(options.input_file, self.empty_svg)
         self.assertEqual(options.output, 'foo.txt')
 
+    def test_get_resource(self):
+        """We can get a resource path, based on where the extension is located"""
+        ext = ModExtension()
+        self.assertRaises(AbortExtension, ext.get_resource, 'sir-not-apearing.py')
+
+        # Test relative filename, which fails with AbortExtension if not found.
+        ret = ext.get_resource(__file__)
+        # Test absolute filename, which we already have, so just feed it back.
+        self.assertEqual(ext.get_resource(ret), ret)
+
     def test_svg_path(self):
         """Can get the svg file location"""
         output = os.path.join(self.tempdir, 'output.tmp')

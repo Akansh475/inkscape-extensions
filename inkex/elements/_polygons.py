@@ -25,9 +25,9 @@ Interface for all shapes/polygons such as lines, paths, rectangles, circles etc.
 
 from ..paths import Path
 from ..transforms import Transform, ImmutableVector2d, Vector2d
-from ..utils import addNS
 from ..units import convert_unit
 
+from ._utils import addNS
 from ._base import ShapeElement
 
 class PathElementBase(ShapeElement):

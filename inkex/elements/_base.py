@@ -33,8 +33,8 @@ from lxml import etree
 from ..paths import Path
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform, BoundingBox
-from ..utils import PY3, NSS, addNS, removeNS, splitNS, FragmentError
-from ._utils import ChildToProperty
+from ..utils import PY3, FragmentError
+from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
 
 try:
     from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import

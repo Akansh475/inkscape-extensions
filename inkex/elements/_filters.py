@@ -26,12 +26,12 @@ Element interface for patterns, filters, gradients and path effects.
 from lxml import etree
 from copy import deepcopy
 
-from ..utils import addNS
 from ..transforms import Transform
 from ..tween import interpcoord, interp
 from ..units import convert_unit
-
 from ..styles import Style
+
+from ._utils import addNS
 from ._base import BaseElement
 
 

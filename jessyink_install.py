@@ -19,11 +19,10 @@
 
 import inkex
 from inkex import Script
-from inkex.utils import NSS
 
 from inkex.localization import inkex_gettext as _
 
-NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
 
 class JessyInkMixin(object):
     """Common jessyInk items"""

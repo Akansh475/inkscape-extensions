@@ -28,10 +28,11 @@ import re
 import sys
 import types
 
-from .utils import errormsg, Boolean, CloningVat, PY3
+from .utils import errormsg, Boolean, PY3
 from .colors import Color, ColorIdError, ColorError
 from .elements import load_svg, BaseElement, ShapeElement, Group, Layer, Grid, \
                       TextElement, FlowPara, FlowDiv
+from .elements._utils import CloningVat
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
 

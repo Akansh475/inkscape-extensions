@@ -31,6 +31,7 @@ from lxml import etree
 
 from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
 from .elements._base import load_svg, BaseElement # pylint: disable=unused-import
+from .elements._utils import NSS
 from .localization import localize
 
 stdout = sys.stdout
@@ -54,9 +55,11 @@ class InkscapeExtension(object):
     variable handling features.
     """
     multi_inx = False # Set to true if this class is used by multiple inx files.
+    extra_nss = {} # type: Dict[str, Type[str]]
 
     def __init__(self):
         # type: () -> None
+        NSS.update(self.extra_nss)
         self.file_io = None # type: Optional[IO]
         self.options = Namespace()
         self.document = None # type: Union[None, bytes, str, unicode, etree]

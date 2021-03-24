@@ -11,8 +11,10 @@ from argparse import ArgumentTypeError
 
 import pytest
 
-from inkex.utils import addNS, debug, errormsg, filename_arg, Boolean, to, strargs, math_eval
+from inkex.utils import debug, errormsg, filename_arg, Boolean, to, strargs, math_eval
 from inkex.tester import TestCase
+
+from inkex import addNS
 
 class TestInkexBasic(object):
     """Test basic utiltiies of inkex"""

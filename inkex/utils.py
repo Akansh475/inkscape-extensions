@@ -29,14 +29,13 @@ import random
 import math
 
 from itertools import tee
-from collections import defaultdict
 from argparse import ArgumentTypeError
 
 # When python2 support is gone, enable tempfile's version
 # from tempfile import TemporaryDirectory
 
 # All the names that get added to the inkex API itself.
-__all__ = ('AbortExtension', 'DependencyError', 'Boolean', 'errormsg', 'addNS', 'NSS')
+__all__ = ('AbortExtension', 'DependencyError', 'Boolean', 'errormsg')
 
 ABORT_STATUS = -5
 
@@ -45,20 +44,6 @@ PY3 = sys.version_info[0] == 3
 
 if PY3:
     unicode = str  # pylint: disable=redefined-builtin,invalid-name
-
-# a dictionary of all of the xmlns prefixes in a standard inkscape doc
-NSS = {
-    'sodipodi': 'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
-    'cc': 'http://creativecommons.org/ns#',
-    'ccOLD': 'http://web.resource.org/cc/',
-    'svg': 'http://www.w3.org/2000/svg',
-    'dc': 'http://purl.org/dc/elements/1.1/',
-    'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-    'inkscape': 'http://www.inkscape.org/namespaces/inkscape',
-    'xlink': 'http://www.w3.org/1999/xlink',
-    'xml': 'http://www.w3.org/XML/1998/namespace'
-}
-SSN = dict((b, a) for (a, b) in NSS.items())
 
 def _pythonpath():
     for pth in os.environ.get('PYTHONPATH', '').split(':'):
@@ -203,35 +188,6 @@ def strargs(string, kind=float):
     return [kind(val) for val in string.replace(',', ' ').replace('-', ' -').replace('e ', 'e').replace('E ','e').split()]
 
 
-def addNS(tag, ns=None):  # pylint: disable=invalid-name
-    """Add a known namespace to a name for use with lxml"""
-    if tag.startswith('{') and ns:
-        _, tag = removeNS(tag)
-    if not tag.startswith('{'):
-        tag = tag.replace('__', ':')
-        if ':' in tag:
-            (ns, tag) = tag.rsplit(':', 1)
-        if ns in NSS:
-            ns = NSS[ns]
-        if ns is not None:
-            return "{%s}%s" % (ns, tag)
-    return tag
-
-
-def removeNS(name):  # pylint: disable=invalid-name
-    """The reverse of addNS, finds any namespace and returns tuple (ns, tag)"""
-    if name[0] == '{':
-        (url, tag) = name[1:].split('}', 1)
-        return SSN.get(url, 'svg'), tag
-    if ':' in name:
-        return name.rsplit(':', 1)
-    return 'svg', name
-
-def splitNS(name): # pylint: disable=invalid-name
-    """Like removeNS, but returns a url instead of a prefix"""
-    (prefix, tag) = removeNS(name)
-    return (NSS[prefix], tag)
-
 class classproperty(object):  # pylint: disable=invalid-name, too-few-public-methods
     """Combine classmethod and property decorators"""
 
@@ -256,46 +212,6 @@ def pairwise(iterable, start=True):
     if not start:
         starter = []
     return starter + list(zip(first, then))
-
-class CloningVat(object):
-    """
-    When modifying defs, sometimes we want to know if every backlink would have
-    needed changing, or it was just some of them.
-
-    This tracks the def elements, their promises and creates clones if needed.
-    """
-    def __init__(self, svg):
-        self.svg = svg
-        self.tracks = defaultdict(set)
-        self.set_ids = defaultdict(list)
-
-    def track(self, elem, parent, set_id=None, **kwargs):
-        """Track the element and connected parent"""
-        elem_id = elem.get('id')
-        parent_id = parent.get('id')
-        self.tracks[elem_id].add(parent_id)
-        self.set_ids[elem_id].append((set_id, kwargs))
-
-    def process(self, process, types=(), make_clones=True, **kwargs):
-        """
-        Process each tracked item if the backlinks match the parents
-
-        Optionally make clones, process the clone and set the new id.
-        """
-        for elem_id in list(self.tracks):
-            parents = self.tracks[elem_id]
-            elem = self.svg.getElementById(elem_id)
-            backlinks = set([blk.get('id') for blk in elem.backlinks(*types)])
-            if backlinks == parents:
-                # No need to clone, we're processing on-behalf of all parents
-                process(elem, **kwargs)
-            elif make_clones:
-                clone = elem.copy()
-                elem.getparent().append(clone)
-                clone.set_random_id()
-                for update, upkw in self.set_ids.get(elem_id, ()):
-                    update(elem.get('id'), clone.get('id'), **upkw)
-                process(clone, **kwargs)
 
 EVAL_GLOBALS = {}
 EVAL_GLOBALS.update(random.__dict__)

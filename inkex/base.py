@@ -238,7 +238,7 @@ class InkscapeExtension(object):
 
     @classmethod
     def absolute_href(cls, filename, default='~/', cwd=None):
-        # type: (str, str) -> str
+        # type: (str, str, Optional[str]) -> str
         """
         Process the filename such that it's turned into an absolute filename
         with the working directory being the directory of the loaded svg.

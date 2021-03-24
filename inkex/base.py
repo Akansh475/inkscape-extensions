@@ -201,12 +201,12 @@ class InkscapeExtension(object):
         Return the folder the
         Returns None if there is no file.
         """
-        uri = cls.document_uri()
-        if uri:
-            return os.path.dirname(uri)
+        path = cls.document_path()
+        if path:
+            return os.path.dirname(path)
         elif default:
             return default
-        return uri # Return None or '' for context
+        return path # Return None or '' for context
 
     @classmethod
     def ext_path(cls):
@@ -224,20 +224,20 @@ class InkscapeExtension(object):
         return filename
 
     @classmethod
-    def document_uri(cls):
+    def document_path(cls):
         # type: () -> Optional[str]
         """Returns the saved location of the document
 
          * Normal return is a string containing the saved location
          * Empty string means the document was never saved
-         * 'None' means this version of Inkscape doesn't support DOCUMENT_URI
+         * 'None' means this version of Inkscape doesn't support DOCUMENT_PATH
 
         DO NOT READ OR WRITE TO THE DOCUMENT FILENAME!
 
          * Inkscape may have not written the latest changes, leaving you reading old data.
          * Inkscape will not respect anything you write to the file, causing data loss.
         """
-        return os.environ.get('DOCUMENT_URI', None)
+        return os.environ.get('DOCUMENT_PATH', None)
 
     @classmethod
     def absolute_href(cls, filename, default='~/', cwd=None):

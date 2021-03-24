@@ -97,7 +97,7 @@ class InkscapeExtensionTest(TestCase):
         """Can get the svg file location"""
         output = os.path.join(self.tempdir, 'output.tmp')
         ext = ModExtension()
-        os.environ['DOCUMENT_URI'] = self.empty_svg
+        os.environ['DOCUMENT_PATH'] = self.empty_svg
         self.assertEqual(ext.svg_path(), os.path.join(self.datadir(), 'svg'))
         self.assertEqual(ext.absolute_href('/foo'), '/foo')
         self.assertEqual(ext.absolute_href('./foo'), os.path.join(self.datadir(), 'svg', 'foo'))
@@ -105,7 +105,7 @@ class InkscapeExtensionTest(TestCase):
 
     def test_svg_no_path(self):
         tmp_foo = os.path.realpath('/tmp/foo')
-        os.environ['DOCUMENT_URI'] = ''
+        os.environ['DOCUMENT_PATH'] = ''
         ext = ModExtension()
         # Default results in home dir
         self.assertEqual(ext.absolute_href('./foo'), os.path.realpath(os.path.expanduser('~/foo')))
@@ -114,7 +114,7 @@ class InkscapeExtensionTest(TestCase):
         # But we can ask for errors too, this one for "document not saved"
         self.assertRaises(AbortExtension, ext.absolute_href, './foo', default=None)
         # This covers inkscape old versions
-        del os.environ['DOCUMENT_URI']
+        del os.environ['DOCUMENT_PATH']
         self.assertRaises(AbortExtension, ext.absolute_href, './foo', default=None)
 
 

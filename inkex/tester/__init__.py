@@ -216,7 +216,7 @@ class TestCase(MockCommandMixin, BaseCase):
         effect = kwargs.pop('effect', self.effect_class)()
 
         args = [self.data_file(*filename)] if filename else [self.empty_svg]  # pylint: disable=no-value-for-parameter
-        os.environ['DOCUMENT_URI'] = args[0]
+        os.environ['DOCUMENT_PATH'] = args[0]
         args += kwargs.pop('args', [])
         args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
 

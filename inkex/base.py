@@ -37,7 +37,7 @@ from .localization import localize
 stdout = sys.stdout
 
 try:
-    from typing import (List, Tuple, Type, Optional, Callable, Any, Union, IO,
+    from typing import (Dict, List, Tuple, Type, Optional, Callable, Any, Union, IO,
                         TYPE_CHECKING, cast)
 except ImportError:
     cast = lambda x, y: y
@@ -55,7 +55,7 @@ class InkscapeExtension(object):
     variable handling features.
     """
     multi_inx = False # Set to true if this class is used by multiple inx files.
-    extra_nss = {} # type: Dict[str, Type[str]]
+    extra_nss = {} # type: Dict[str, str]
 
     def __init__(self):
         # type: () -> None

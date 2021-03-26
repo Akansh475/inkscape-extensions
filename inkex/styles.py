@@ -339,8 +339,8 @@ class ConditionalStyle(Style):
         content = self.to_str(";\n  ")
         rules = ",\n".join(str(rule) for rule in self.rules)
         if content:
-            return "{0} {{\n  {1};\n}}".format(rules, content)
-        return "{0} {{}}".format(rules)
+            return f"{rules} {{\n  {content};\n}}"
+        return f"{rules} {{}}"
 
     def to_xpath(self):
         """Convert all rules to an xpath"""

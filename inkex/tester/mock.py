@@ -198,7 +198,7 @@ class MockCommandMixin(MockMixin):
                 path = os.path.join(fdir, fname)
                 # We store the modified time so if a program modifies
                 # the input file in-place, it will look different.
-                ret.add(path + ';{}'.format(os.path.getmtime(path)))
+                ret.add(path + f";{os.path.getmtime(path)}")
 
         return ret
 
@@ -273,9 +273,9 @@ class MockCommandMixin(MockMixin):
             return self.load_call(program, key, outputs)
         except IOError:
             self.save_key(program, key, keystr, 'bad-key')
-            raise IOError("Problem loading call: {}/{} use the environment variable "\
+            raise IOError(f"Problem loading call: {program}/{key} use the environment variable "\
                 "NO_MOCK_COMMANDS=1 to call out to the external program and generate "\
-                "the mock call file.".format(program, key))
+                "the mock call file.")
 
     def add_call_files(self, msg, args, kwargs):
         """
@@ -331,7 +331,7 @@ class MockCommandMixin(MockMixin):
         path = self.get_call_path(program, create=create)
         fname = os.path.join(path, key + '.msg')
         if not create and not os.path.isfile(fname):
-            raise IOError("Attempted to find call test data {}".format(key))
+            raise IOError(f"Attempted to find call test data {key}")
         return fname
 
     def get_program_name(self, program):
@@ -348,9 +348,8 @@ class MockCommandMixin(MockMixin):
                 os.makedirs(command_dir)
             else:
                 raise IOError("A test is attempting to use an external program in a test:"\
-                              " {}; but there is not a command data directory which should"\
-                              " contain the results of the command here: {}"\
-                              .format(program, command_dir))
+                              f" {program}; but there is not a command data directory which should"\
+                              f" contain the results of the command here: {command_dir}")
         return command_dir
 
     def load_call(self, program, key, files):

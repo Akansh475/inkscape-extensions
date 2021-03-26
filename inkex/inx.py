@@ -69,7 +69,7 @@ class InxFile(object):
         self.xml.warnings = []
 
     def __repr__(self):
-        return "<inx '{0.filename}' '{0.name}'>".format(self)
+        return f"<inx '{self.filename}' '{self.name}'>"
 
     @property
     def script(self):
@@ -165,7 +165,7 @@ class InxElement(etree.ElementBase):
         if '}' in tag:
             (url, tag) = tag[1:].split('}', 1)
             return SSN.get(url, 'inx')
-        self.set_warning(f"No inx xml prefix.")
+        self.set_warning("No inx xml prefix.")
         return None # no default prefix
 
     def apply_nss(self, xpath, nss=None):

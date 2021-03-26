@@ -106,14 +106,14 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
 
     def getElementsByHref(self, eid): # pylint: disable=invalid-name
         """Get elements by their href xlink attribute"""
-        return self.xpath('//*[@xlink:href="#{}"]'.format(eid))
+        return self.xpath(f'//*[@xlink:href="#{eid}"]')
 
     def getElementsByStyleUrl(self, eid, style=None): # pylint: disable=invalid-name
         """Get elements by a style attribute url"""
-        url = "url(#{})".format(eid)
+        url = f"url(#{eid})"
         if style is not None:
             url = style + ":" + url
-        return self.xpath('//*[contains(@style,"{}")]'.format(url))
+        return self.xpath(f'//*[contains(@style,"{url}")]')
 
     @property
     def name(self):

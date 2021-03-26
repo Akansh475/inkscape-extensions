@@ -120,7 +120,7 @@ class CallExtension(TempDirMixin, InputExtension):
         document = self.call(input_file, output_file) or output_file
         if isinstance(document, (str, unicode)):
             if not os.path.isfile(document):
-                raise IOError("Can't find generated document: {}".format(document))
+                raise IOError(f"Can't find generated document: {document}")
 
             if self.output_ext == 'svg':
                 with open(document, 'r') as fhl:
@@ -258,7 +258,7 @@ class TemplateExtension(EffectExtension):
         self.svg.set("id", self.template_id)
         self.svg.set("width", str(width) + width_unit)
         self.svg.set("height", str(height) + height_unit)
-        self.svg.set("viewBox", "0 0 {} {}".format(width, height))
+        self.svg.set("viewBox", f"0 0 {width} {height}")
         self.set_namedview(width_px, height_px, width_unit)
 
     def set_namedview(self, width, height, unit):
@@ -317,7 +317,7 @@ class ColorExtension(EffectExtension):
 
     def _ref_cloned(self, old_id, new_id, style, name):
         self._renamed[old_id] = new_id
-        style[name] = "url(#{})".format(new_id)
+        style[name] = f"url(#{new_id})"
 
     def _xlink_cloned(self, old_id, new_id, linker):
         lid = linker.get('id')

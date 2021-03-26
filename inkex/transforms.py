@@ -107,7 +107,7 @@ class ImmutableVector2d(object):
         elif isinstance(point, str) and point.count(',') == 1:
             x, y = map(float, point.split(','))
         else:
-            raise ValueError("Can't parse {}".format(repr(point)))
+            raise ValueError(f"Can't parse {repr(point)}")
         return x, y
 
     def __add__(self, other):
@@ -164,11 +164,11 @@ class ImmutableVector2d(object):
 
     def __repr__(self):
         # type: () -> str
-        return "Vector2d({:.6g}, {:.6g})".format(self.x, self.y)
+        return f"Vector2d({self.x:.6g}, {self.y:.6g})"
 
     def __str__(self):
         # type: () -> str
-        return "{:.6g}, {:.6g}".format(self.x, self.y)
+        return f"{self.x:.6g}, {self.y:.6g}"
 
     def __iter__(self):
         # type: () -> Generator[float, None, None]
@@ -359,18 +359,18 @@ class Transform(object):
                     row2 = cast("Tuple[float, float, float]", tuple(map(float, row2)))
                     self.matrix = row1, row2
                 else:
-                    raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+                    raise ValueError(f"Matrix '{matrix}' is not a valid transformation matrix")
             else:
-                raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+                raise ValueError(f"Matrix '{matrix}' is not a valid transformation matrix")
         elif isinstance(matrix, (list, tuple)) and len(matrix) == 6:
             tmatrix = cast("Union[List[float], Tuple[float,float,float,float,float,float]]", matrix)
             row1 = (float(tmatrix[0]), float(tmatrix[2]), float(tmatrix[4]))
             row2 = (float(tmatrix[1]), float(tmatrix[3]), float(tmatrix[5]))
             self.matrix = row1, row2
         elif not isinstance(matrix, (list, tuple)):
-            raise ValueError("Invalid transform type: {}".format(type(matrix).__name__))
+            raise ValueError(f"Invalid transform type: {type(matrix).__name__}")
         else:
-            raise ValueError("Matrix '{}' is not a valid transformation matrix".format(matrix))
+            raise ValueError(f"Matrix '{matrix}' is not a valid transformation matrix")
 
 
     # These provide quick access to the svg matrix:
@@ -413,7 +413,7 @@ class Transform(object):
         elif len(args) == 2 or len(args) == 6:
             self.__imul__(Transform(args))
         else:
-            raise ValueError("Invalid number of arguments {}".format(args))
+            raise ValueError(f"Invalid number of arguments {args}")
 
     def add_kwargs(self, **kwargs):
         """Add translations, scales, rotations etc using key word arguments"""
@@ -527,20 +527,20 @@ class Transform(object):
         if self.is_translate():
             if not self:
                 return ""
-            return "translate({:.6g}, {:.6g})".format(self.e, self.f)
+            return f"translate({self.e:.6g}, {self.f:.6g})"
         elif self.is_scale():
-            return "scale({:.6g}, {:.6g})".format(self.a, self.d)
+            return f"scale({self.a:.6g}, {self.d:.6g})"
         elif self.is_rotate():
-            return "rotate({:.6g})".format(self.rotation_degrees())
-        return "matrix({})".format(" ".join(format(var, '.6g') for var in hexad))
+            return f"rotate({self.rotation_degrees():.6g})"
+        return "matrix({})".format(" ".join(f"{var:.6g}" for var in hexad))
 
     def __repr__(self):
         # type: () -> str
         """String representation of this object"""
         return "{}((({}), ({})))".format(
             type(self).__name__,
-            ', '.join(format(var, '.6g') for var in self.matrix[0]),
-            ', '.join(format(var, '.6g') for var in self.matrix[1]))
+            ', '.join(f"{var:.6g}" for var in self.matrix[0]),
+            ', '.join(f"{var:.6g}" for var in self.matrix[1]))
 
     def __eq__(self, matrix):
         # typing this requires writing a proof for mypy that matrix is really
@@ -593,7 +593,7 @@ class Transform(object):
         # type: (VectorLike) -> Vector2d
         """Transform a tuple (X, Y)"""
         if isinstance(point, str):
-            raise ValueError("Will not transform string '{}'".format(point))
+            raise ValueError(f"Will not transform string '{point}'")
         point = Vector2d(point)
         return Vector2d(self.a * point.x + self.c * point.y + self.e,
                         self.b * point.x + self.d * point.y + self.f)
@@ -650,8 +650,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
                 self.minimum = x
                 self.maximum = y
             else:
-                raise ValueError("Not a number for scaling: {} ({},{})"
-                                 .format(str((x, y)), type(x).__name__, type(y).__name__))
+                raise ValueError(f"Not a number for scaling: {str((x, y))} ({type(x).__name__},{type(y).__name__})")
 
         else:
             value = x
@@ -666,8 +665,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
             elif isinstance(value, (int, float, Decimal)):
                 self.minimum = self.maximum = value
             else:
-                raise ValueError("Not a number for scaling: {} ({})"
-                                 .format(str(value), type(value).__name__))
+                raise ValueError(f"Not a number for scaling: {str(value)} ({type(value).__name__})")
 
     def __bool__(self):
         # type: () -> bool
@@ -751,7 +749,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
 
     def __repr__(self):
         # type: () -> str
-        return "BoundingInterval({}, {})".format(self.minimum, self.maximum)
+        return f"BoundingInterval({self.minimum}, {self.maximum})"
 
     @property
     def center(self):
@@ -802,8 +800,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
             elif isinstance(x, BoundingBox):
                 x, y = x.x, x.y
             else:
-                raise ValueError("Not a number for scaling: {} ({})"
-                                 .format(str(x), type(x).__name__))
+                raise ValueError(f"Not a number for scaling: {str(x)} ({type(x).__name__})")
         self.x = BoundingInterval(x)
         self.y = BoundingInterval(y)
 
@@ -893,7 +890,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
 
     def __repr__(self):
         # type: () -> str
-        return "BoundingBox({},{})".format(tuple(self.x), tuple(self.y))
+        return f"BoundingBox({tuple(self.x)},{tuple(self.y)})"
 
     @property
     def center(self):
@@ -973,7 +970,7 @@ class DirectedLineSegment(object):
         elif len(args) == 2:  # overload 2
             start, end = args
         else:
-            raise ValueError("DirectedLineSegment() can't be constructed from {}".format(args))
+            raise ValueError(f"DirectedLineSegment() can't be constructed from {args}")
 
         self.start = Vector2d(start)
         self.end = Vector2d(end)
@@ -1064,7 +1061,7 @@ class DirectedLineSegment(object):
 
     def __repr__(self):
         # type: () -> str
-        return "DirectedLineSegment(({0.start}), ({0.end}))".format(self)
+        return f"DirectedLineSegment(({self.start}), ({self.end}))"
 
 
 def cubic_extrema(py0, py1, py2, py3):

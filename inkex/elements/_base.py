@@ -164,7 +164,7 @@ class BaseElement(etree.ElementBase):
             value = cls(self.attrib.get(attr, None), callback=_set_attr)
             setattr(self, name, value)
             return value
-        raise AttributeError("Can't find attribute {}.{}".format(self.typename, name))
+        raise AttributeError(f"Can't find attribute {self.typename}.{name}")
 
     def __setattr__(self, name, value):
         """Set the attribute, update it if needed"""
@@ -457,12 +457,12 @@ class ShapeElement(BaseElement):
 
     def get_path(self):
         """Generate a path for this object which can inform the bounding box"""
-        raise NotImplementedError("Path should be provided by svg elem {}.".format(self.typename))
+        raise NotImplementedError(f"Path should be provided by svg elem {self.typename}.")
 
     def set_path(self, path):
         """Set the path for this object (if possible)"""
         raise AttributeError(
-            "Path can not be set on this element: {} <- {}.".format(self.typename, path))
+            f"Path can not be set on this element: {self.typename} <- {path}.")
 
     def to_path_element(self):
         """Replace this element with a path element"""

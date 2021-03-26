@@ -187,7 +187,7 @@ class TestCase(MockCommandMixin, BaseCase):
             full_path = os.path.join(cls.datadir(), filename, *parts)
 
         if not os.path.isfile(full_path):
-            raise IOError("Can't find test data file: {}".format(full_path))
+            raise IOError(f"Can't find test data file: {full_path}")
         return full_path
 
     @property
@@ -329,7 +329,7 @@ class ComparisonMixin(object):
             outfile = self.get_compare_outfile(args)
 
         if not os.path.isfile(outfile):
-            raise IOError("Comparison file {} not found".format(outfile))
+            raise IOError(f"Comparison file {outfile} not found")
 
         data_a = effect.test_output.getvalue()
         if os.environ.get('EXPORT_COMPARE', False):
@@ -337,7 +337,7 @@ class ComparisonMixin(object):
                 if sys.version_info[0] == 3 and isinstance(data_a, str):
                     data_a = data_a.encode('utf-8')
                 fhl.write(self._apply_compare_filters(data_a, True))
-                print("Written output: {}.export".format(outfile))
+                print(f"Written output: {outfile}.export")
 
         data_a = self._apply_compare_filters(data_a)
 
@@ -352,7 +352,7 @@ class ComparisonMixin(object):
                 print('The XML is different, you can save the output using the EXPORT_COMPARE=1'\
                       ' envionment variable. This will save the compared file as a ".output" file'\
                       ' next to the reference file used in the test.\n')
-            diff = 'SVG Differences: {}\n\n'.format(outfile)
+            diff = f"SVG Differences: {outfile}\n\n"
             if os.environ.get('XML_DIFF', False):
                 diff = '<- ' + diff_xml
             else:
@@ -361,7 +361,7 @@ class ComparisonMixin(object):
                         # Take advantage of better text diff in testcase's own asserts.
                         self.assertEqual(value_a, value_b)
                     except AssertionError as err:
-                        diff += " {}. {}\n".format(x, str(err))
+                        diff += f" {x}. {str(err)}\n"
             self.assertTrue(delta, diff)
         else:
             # compare any content (non svg)
@@ -390,4 +390,4 @@ class ComparisonMixin(object):
                 # avoid filename-too-long error
                 opstr = hashlib.md5(opstr.encode('latin1')).hexdigest()
             opstr = '__' + opstr
-        return self.data_file("refs", "{}{}.out".format(self.effect_name, opstr))
+        return self.data_file("refs", f"{self.effect_name}{opstr}.out")

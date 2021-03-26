@@ -111,13 +111,13 @@ class InkscapeExtension(object):
             except AttributeError:
                 if name.startswith('_'):
                     return do_nothing
-                raise AbortExtension("Can not find method {}".format(name))
+                raise AbortExtension(f"Can not find method {name}")
         return _inner
 
     def debug(self, msg):
         # type: (str) -> None
         """Write a debug message"""
-        errormsg("DEBUG<{}> {}\n".format(type(self).__name__, msg))
+        errormsg(f"DEBUG<{type(self).__name__}> {msg}\n")
 
     @staticmethod
     def msg(msg):
@@ -137,7 +137,6 @@ class InkscapeExtension(object):
                 self.options.input_file = sys.stdin
 
             if self.options.output is None:
-                # assert output
                 self.options.output = output
 
             self.load_raw()
@@ -171,17 +170,17 @@ class InkscapeExtension(object):
     def load(self, stream):
         # type: (IO) -> str 
         """Takes the input stream and creates a document for parsing"""
-        raise NotImplementedError("No input handle for {}".format(self.name))
+        raise NotImplementedError(f"No input handle for {self.name}")
 
     def save(self, stream):
         # type: (IO) -> None 
         """Save the given document to the output file"""
-        raise NotImplementedError("No output handle for {}".format(self.name))
+        raise NotImplementedError(f"No output handle for {self.name}")
 
     def effect(self):
         # type: () -> Any 
         """Apply some effects on the document or local context"""
-        raise NotImplementedError("No effect handle for {}".format(self.name))
+        raise NotImplementedError(f"No effect handle for {self.name}")
 
     def has_changed(self, ret): # pylint: disable=no-self-use
         # type: (Any) -> bool

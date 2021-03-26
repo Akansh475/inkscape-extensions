@@ -76,7 +76,7 @@ def which(program):
     # There may be other methods for doing a `which` command for other
     # operating systems; These should go here as they are discovered.
 
-    raise CommandNotFound("Can not find the command: '{}'".format(program))
+    raise CommandNotFound(f"Can not find the command: '{program}'")
 
 def write_svg(svg, *filename):
     """Writes an svg to the given filename"""
@@ -107,7 +107,7 @@ def to_arg(arg, oldie=False):
             return arg
         if val is False:
             return None
-        return '{}={}'.format(arg, str(val))
+        return f"{arg}={str(val)}"
     return str(arg)
 
 def to_args(prog, *positionals, **arguments):
@@ -174,8 +174,7 @@ def _call(program, *args, **kwargs):
     (stdout, stderr) = process.communicate(input=stdin)
     if process.returncode == 0:
         return stdout
-    raise ProgramRunError("Return Code: {}: {}\n{}\nargs: {}".format(
-        process.returncode, stderr, stdout, args))
+    raise ProgramRunError(f"Return Code: {process.returncode}: {stderr}\n{stdout}\nargs: {args}")
 
 def call(program, *args, **kwargs):
     """

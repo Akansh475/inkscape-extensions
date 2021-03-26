@@ -104,7 +104,7 @@ class Polyline(ShapeElement):
         return Path('M' + self.get('points'))
 
     def set_path(self, path):
-        points = ['{:g},{:g}'.format(x, y) for x, y in Path(path).end_points]
+        points = [f'{x:g},{y:g}' for x, y in Path(path).end_points]
         self.set('points', ' '.join(points))
 
 

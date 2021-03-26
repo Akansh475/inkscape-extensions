@@ -164,14 +164,14 @@ class PathCommand(object):
         :param (list of tuple) last_two_points: list with last two control points in abs coords.
         :param (BoundingBox) bbox: bounding box to update
         """
-        raise NotImplementedError("Bounding box is not implemented for {}".format(self.name))
+        raise NotImplementedError(f"Bounding box is not implemented for {self.name}")
 
     def to_curve(self, prev, prev_prev=Vector2d()):
         # type: (Vector2d, Vector2d) -> Curve
         """Convert command to :py:class:`Curve`
         Curve().to_curve() returns a copy
         """
-        raise NotImplementedError("To curve not supported for {}".format(self.name))
+        raise NotImplementedError(f"To curve not supported for {self.name}")
 
     def to_curves(self, prev, prev_prev=Vector2d()):
         # type: (Vector2d, Vector2d) -> List[Curve]
@@ -1182,8 +1182,7 @@ class Path(list):
                 else:
                     self.append(Line(*item))
             else:
-                raise TypeError("Bad path type: {}({}, ...): {}".format(
-                    type(path_d).__name__, type(item).__name__, item))
+                raise TypeError(f"Bad path type: {type(path_d).__name__}({type(item).__name__}, ...): {item}")
 
     @classmethod
     def parse_string(cls, path_d):
@@ -1501,7 +1500,7 @@ class CubicSuperPath(list):
             item = item.to_bez()
 
         if not isinstance(item, list):
-            raise ValueError("Unknown super curve item type: {}".format(item))
+            raise ValueError(f"Unknown super curve item type: {item}")
 
         if len(item) != 3 or not all([len(bit) == 2 for bit in item]):
             # The item is already a subpath (usually from some other process)
@@ -1510,7 +1509,7 @@ class CubicSuperPath(list):
                 self._prev_prev = Vector2d(self[-1][-1][0])
                 self._prev = Vector2d(self[-1][-1][1])
                 return
-            raise ValueError("Unknown super curve list format: {}".format(item))
+            raise ValueError(f"Unknown super curve list format: {item}")
 
         if self._closed:
             # Closed means that the previous segment is closed so we need a new one

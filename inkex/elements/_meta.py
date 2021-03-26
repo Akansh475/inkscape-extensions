@@ -116,7 +116,7 @@ class Guide(BaseElement):
         it may be a pair of numbers (tuple) which will set the orientation directly.
         If not given at all, the orientation remains unchanged.
         """
-        self.set('position', "{:g},{:g}".format(float(pos_x), float(pos_y)))
+        self.set('position', f"{float(pos_x):g},{float(pos_y):g}")
         if isinstance(angle, str):
             if ',' not in angle:
                 angle = float(angle)

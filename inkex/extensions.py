@@ -28,7 +28,7 @@ import re
 import sys
 import types
 
-from .utils import errormsg, Boolean, PY3
+from .utils import errormsg, Boolean
 from .colors import Color, ColorIdError, ColorError
 from .elements import load_svg, BaseElement, ShapeElement, Group, Layer, Grid, \
                       TextElement, FlowPara, FlowDiv
@@ -42,8 +42,7 @@ __all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
            'CallExtension', 'TemplateExtension', 'ColorExtension', 'TextExtension')
 
 stdout = sys.stdout
-if PY3:
-    unicode = str  # pylint: disable=redefined-builtin,invalid-name
+
 
 class EffectExtension(SvgThroughMixin, InkscapeExtension):
     """
@@ -110,7 +109,7 @@ class CallExtension(TempDirMixin, InputExtension):
         TempDirMixin.load_raw(self)
         input_file = self.options.input_file
 
-        if not isinstance(input_file, (unicode, str)):
+        if not isinstance(input_file, str):
             data = input_file.read()
             input_file = os.path.join(self.tempdir, 'input.' + self.input_ext)
             with open(input_file, 'wb') as fhl:
@@ -118,7 +117,7 @@ class CallExtension(TempDirMixin, InputExtension):
 
         output_file = os.path.join(self.tempdir, 'output.' + self.output_ext)
         document = self.call(input_file, output_file) or output_file
-        if isinstance(document, (str, unicode)):
+        if isinstance(document, str):
             if not os.path.isfile(document):
                 raise IOError(f"Can't find generated document: {document}")
 
@@ -126,7 +125,7 @@ class CallExtension(TempDirMixin, InputExtension):
                 with open(document, 'r') as fhl:
                     document = fhl.read()
                 if '<' in document:
-                    document = load_svg(document)
+                    document = load_svg(document.encode('utf-8'))
             else:
                 with open(document, 'rb') as fhl:
                     document = fhl.read()
@@ -208,7 +207,7 @@ class TemplateExtension(EffectExtension):
     template_id = "SVGRoot"
 
     def __init__(self):
-        super(TemplateExtension, self).__init__()
+        super().__init__()
         # Arguments added on after add_arguments so it can be overloaded cleanly.
         self.arg_parser.add_argument("--size", type=self.arg_size(), dest="size")
         self.arg_parser.add_argument("--width", type=int, default=800)

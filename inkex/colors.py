@@ -22,14 +22,10 @@
 Basic color controls
 """
 
-from .utils import PY3
 from .tween import interpcoord
 
 # All the names that get added to the inkex API itself.
 __all__ = ('Color', 'ColorError', 'ColorIdError')
-
-if PY3:
-    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 SVG_COLOR = {
     'aliceblue': '#f0f8ff',
@@ -221,11 +217,11 @@ class Color(list):
     lightness = lightness.setter(lambda self, value: self._set(2, value, ('hsl',)))
 
     def __init__(self, color=None, space='rgb'):
-        super(Color, self).__init__()
+        super().__init__()
         if isinstance(color, Color):
             space, color = color.space, list(color)
 
-        if isinstance(color, (str, unicode)):
+        if isinstance(color, str):
             # String from xml or css attributes
             space, color = self.parse_str(color.strip())
 
@@ -274,7 +270,7 @@ class Color(list):
         if len(self) == len(self.space):
             raise ValueError("Can't add any more values to color.")
 
-        if isinstance(val, (unicode, str)):
+        if isinstance(val, str):
             val = val.strip()
             if val.endswith('%'):
                 val = float(val.strip('%')) / 100
@@ -289,7 +285,7 @@ class Color(list):
             val *= 255
 
         if isinstance(val, (int, float)):
-            super(Color, self).append(max(end_type(val), 0))
+            super().append(max(end_type(val), 0))
 
     @staticmethod
     def parse_str(color):

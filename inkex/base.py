@@ -19,37 +19,25 @@
 """
 The ultimate base functionality for every Inkscape extension.
 """
-from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
 import copy
-import shutil
+
+from typing import Dict, List, Tuple, Type, Optional, Callable, Any, Union, IO, TYPE_CHECKING, cast
 
 from argparse import ArgumentParser, Namespace
 from lxml import etree
 
-from .utils import PY3, filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
+from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
 from .elements._base import load_svg, BaseElement # pylint: disable=unused-import
 from .elements._utils import NSS
 from .localization import localize
 
-stdout = sys.stdout
-
-try:
-    from typing import (Dict, List, Tuple, Type, Optional, Callable, Any, Union, IO,
-                        TYPE_CHECKING, cast)
-except ImportError:
-    cast = lambda x, y: y
-    TYPE_CHECKING = False
-
-if PY3:
-    unicode = str  # pylint: disable=redefined-builtin,invalid-name
-    basestring = str  # pylint: disable=redefined-builtin,invalid-name
-    stdout = sys.stdout.buffer  # type: ignore
+stdout = sys.stdout.buffer  # type: ignore
 
 
-class InkscapeExtension(object):
+class InkscapeExtension:
     """
     The base class extension, provides argument parsing and basic
     variable handling features.
@@ -62,7 +50,7 @@ class InkscapeExtension(object):
         NSS.update(self.extra_nss)
         self.file_io = None # type: Optional[IO]
         self.options = Namespace()
-        self.document = None # type: Union[None, bytes, str, unicode, etree]
+        self.document = None # type: Union[None, bytes, str, etree]
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
         self.arg_parser.add_argument(
@@ -150,7 +138,7 @@ class InkscapeExtension(object):
     def load_raw(self):
         # type: () -> None
         """Load the input stream or filename, save everything to self"""
-        if isinstance(self.options.input_file, (str, unicode)):
+        if isinstance(self.options.input_file, str):
             self.file_io = open(self.options.input_file, 'rb')
             document = self.load(self.file_io)
         else:
@@ -161,7 +149,7 @@ class InkscapeExtension(object):
         # type: (Any) -> None
         """Save to the output stream, use everything from self"""
         if self.has_changed(ret):
-            if isinstance(self.options.output, (str, unicode)):
+            if isinstance(self.options.output, str):
                 with open(self.options.output, 'wb') as stream:
                     self.save(stream)
             else:
@@ -286,22 +274,23 @@ class TempDirMixin(_Base):
 
     def __init__(self, *args, **kwargs):
         self.tempdir = None
-        super(TempDirMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def load_raw(self):
         # type: () -> None
         """Create the temporary directory"""
-        from tempfile import mkdtemp
-        self.tempdir = os.path.realpath(
-            mkdtemp(self.dir_suffix, self.dir_prefix, None))
-        super(TempDirMixin, self).load_raw()
+        from tempfile import TemporaryDirectory
+        # Need to hold a reference to the Directory object or else it might get GC'd
+        self._tempdir = TemporaryDirectory(prefix=self.dir_prefix, suffix=self.dir_suffix)
+        self.tempdir = self._tempdir.name
+        super().load_raw()
 
     def clean_up(self):
         # type: () -> None
         """Delete the temporary directory"""
-        if self.tempdir and os.path.isdir(self.tempdir):
-            shutil.rmtree(self.tempdir)
-        super(TempDirMixin, self).clean_up()
+        self.tempdir = None
+        self._tempdir.cleanup()
+        super().clean_up()
 
 
 class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
@@ -312,7 +301,7 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
     select_all = () # type: Tuple[Type[BaseElement], ...]
 
     def __init__(self):
-        super(SvgInputMixin, self).__init__()
+        super().__init__()
 
         self.arg_parser.add_argument(
             "--id", action="append", type=str, dest="ids", default=[],
@@ -360,15 +349,14 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
     def save(self, stream):
         # type: (IO) -> None
         """Save the svg document to the given stream"""
-        if isinstance(self.document, (bytes, str, unicode)):
+        if isinstance(self.document, (bytes, str)):
             document = self.document
         elif 'Element' in type(self.document).__name__:
             # isinstance can't be used here because etree is broken
             doc = cast(etree, self.document)
             document = doc.getroot().tostring()
         else:
-            raise ValueError("Unknown type of document: {} can not save."\
-                .format(type(self.document).__name__))
+            raise ValueError(f"Unknown type of document: {type(self.document).__name__} can not save.")
 
         try:
             stream.write(document)

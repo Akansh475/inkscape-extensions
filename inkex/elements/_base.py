@@ -33,13 +33,10 @@ from lxml import etree
 from ..paths import Path
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform, BoundingBox
-from ..utils import PY3, FragmentError
+from ..utils import FragmentError
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
 
-try:
-    from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
-except ImportError:
-    overload = lambda x: x
+from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
 
 class NodeBasedLookup(etree.PythonElementClassLookup):
     """
@@ -110,7 +107,7 @@ class BaseElement(etree.ElementBase):
     def TAG(self): # pylint: disable=invalid-name
         """Return the tag_name without NS"""
         if not self.tag_name:
-            return removeNS(super(etree.ElementBase, self).tag)[-1]
+            return removeNS(super().tag)[-1]
         return removeNS(self.tag_name)[-1]
 
     @classmethod
@@ -178,7 +175,7 @@ class BaseElement(etree.ElementBase):
             else:
                 self.attrib.pop(attr, None) # pylint: disable=no-member
         else:
-            super(BaseElement, self).__setattr__(name, value)
+            super().__setattr__(name, value)
 
     def get(self, attr, default=None):
         """Get element attribute named, with addNS support."""
@@ -189,7 +186,7 @@ class BaseElement(etree.ElementBase):
             # transformations and style attributes are equiv to not-existing
             ret = str(value) if value else (default or None)
             return ret
-        return super(BaseElement, self).get(addNS(attr), default)
+        return super().get(addNS(attr), default)
 
     def set(self, attr, value):
         """Set element attribute named, with addNS support"""
@@ -203,8 +200,8 @@ class BaseElement(etree.ElementBase):
         if value is None:
             self.attrib.pop(addNS(attr), None) # pylint: disable=no-member
         else:
-            value = str(value) if PY3 else unicode(value) # pylint: disable=undefined-variable
-            super(BaseElement, self).set(addNS(attr), value)
+            value = str(value)
+            super().set(addNS(attr), value)
 
     def update(self, **kwargs):
         """
@@ -345,11 +342,11 @@ class BaseElement(etree.ElementBase):
 
     def xpath(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap xpath call and add svg namespaces"""
-        return super(BaseElement, self).xpath(pattern, namespaces=namespaces)
+        return super().xpath(pattern, namespaces=namespaces)
 
     def findall(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap findall call and add svg namespaces"""
-        return super(BaseElement, self).findall(pattern, namespaces=namespaces)
+        return super().findall(pattern, namespaces=namespaces)
 
     def findone(self, xpath):
         """Gets a single element from the given xpath or returns None"""

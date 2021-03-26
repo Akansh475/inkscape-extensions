@@ -36,7 +36,7 @@ class PathElementBase(ShapeElement):
 
     @classmethod
     def new(cls, path, **attrs):
-        return super(PathElementBase, cls).new(d=Path(path), **attrs)
+        return super().new(d=Path(path), **attrs)
 
     def set_path(self, path):
         """Set the given data as a path as the 'd' attribute"""
@@ -123,7 +123,7 @@ class Line(ShapeElement):
     def new(cls, start, end, **attrs):
         start = Vector2d(start)
         end = Vector2d(end)
-        return super(Line, cls).new(x1=start.x, y1=start.y,
+        return super().new(x1=start.x, y1=start.y,
                                     x2=end.x, y2=end.y, **attrs)
 
 
@@ -190,7 +190,7 @@ class EllipseBase(ShapeElement):
 
     @classmethod
     def new(cls, center, radius, **attrs):
-        circle = super(EllipseBase, cls).new(**attrs)
+        circle = super().new(**attrs)
         circle.center = center
         circle.radius = radius
         return circle

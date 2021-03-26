@@ -33,7 +33,7 @@ filters that are being used.
 import re
 from ..utils import to_bytes
 
-class Compare(object):
+class Compare:
     """
     Comparison base class, this acts as a passthrough unless
     the filter staticmethod is overwritten.

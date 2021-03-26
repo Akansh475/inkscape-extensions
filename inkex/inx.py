@@ -21,13 +21,9 @@ Parsing inx files for checking and generating.
 """
 
 import os
+from inspect import isclass
+from importlib import util
 from lxml import etree
-
-try:
-    from inspect import isclass
-    from importlib import util
-except ImportError:
-    util = None  # type: ignore
 
 from .base import InkscapeExtension
 from .utils import Boolean
@@ -48,7 +44,7 @@ class InxLookup(etree.CustomElementClassLookup):
 INX_PARSER = etree.XMLParser()
 INX_PARSER.set_element_class_lookup(InxLookup())
 
-class InxFile(object):
+class InxFile:
     """Open an INX file and provide useful functions"""
     name = property(lambda self: self.xml._text('name'))
     ident = property(lambda self: self.xml._text('id'))
@@ -87,7 +83,7 @@ class InxFile(object):
     def extension_class(self):
         """Attempt to get the extension class"""
         script = self.script.get('script', None)
-        if script is not None and util is not None:
+        if script is not None:
             name = script[:-3].replace('/', '.')
             spec = util.spec_from_file_location(name, script)
             mod = util.module_from_spec(spec)

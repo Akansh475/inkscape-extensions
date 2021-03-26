@@ -6,7 +6,6 @@ This provides the basis from which you can develop your inkscape extension.
 """
 
 # pylint: disable=wildcard-import
-from __future__ import print_function
 
 import sys
 MIN_VERSION = (3, 6)

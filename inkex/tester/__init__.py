@@ -66,8 +66,6 @@ of the `.export` suffix. pytest should then be re-run to confirm before
 committing to the repository.
 """
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
 import re
 import sys
@@ -84,7 +82,7 @@ from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
 
 from .. import Transform
-from ..utils import PY3, to_bytes
+from ..utils import to_bytes
 from .xmldiff import xmldiff
 from .mock import MockCommandMixin, Capture
 
@@ -116,29 +114,20 @@ class TestCase(MockCommandMixin, BaseCase):
     stderr_output = False
     stdout_protect = True
     stderr_protect = True
-    python3_only = False
 
     def __init__(self, *args, **kw):
-        super(TestCase, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
         self._temp_dir = None
         self._effect = None
 
     def setUp(self): # pylint: disable=invalid-name
         """Make sure every test is seeded the same way"""
         self._effect = None
-        super(TestCase, self).setUp()
-        if self.python3_only and not PY3:
-            self.skipTest("No available in python2")
-        try:
-            # python3, with version 1 to get the same numbers
-            # as in python2 during tests.
-            random.seed(0x35f, version=1)
-        except TypeError:
-            # But of course this kwarg doesn't exist in python2
-            random.seed(0x35f)
+        super().setUp()
+        random.seed(0x35f)
 
     def tearDown(self):
-        super(TestCase, self).tearDown()
+        super().tearDown()
         if self._temp_dir and os.path.isdir(self._temp_dir):
             shutil.rmtree(self._temp_dir)
 
@@ -265,7 +254,7 @@ class TestCase(MockCommandMixin, BaseCase):
             self._effect = self.effect_class()
         return self._effect
 
-class InkscapeExtensionTestMixin(object):
+class InkscapeExtensionTestMixin:
     """Automatically setup self.effect for each test and test with an empty svg"""
     def setUp(self): # pylint: disable=invalid-name
         """Check if there is an effect_class set and create self.effect if it is"""
@@ -277,7 +266,7 @@ class InkscapeExtensionTestMixin(object):
         """Extension works with empty svg file"""
         self.effect.run([self.empty_svg])
 
-class ComparisonMixin(object):
+class ComparisonMixin:
     """
     Add comparison tests to any existing test suite.
     """

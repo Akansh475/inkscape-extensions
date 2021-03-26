@@ -31,17 +31,13 @@ from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isfinite
 
 from .tween import interpcoord
-from .utils import strargs, KeyDict, PY3
+from .utils import strargs, KeyDict
 
-try:
-    from typing import overload, cast, List, Any, Callable, Generator, Iterator, Tuple, Union, Optional, Sequence  # pylint: disable=unused-import
+from typing import overload, cast, List, Any, Callable, Generator, Iterator, Tuple, Union, Optional, Sequence  # pylint: disable=unused-import
 
-    VectorLike = Union["ImmutableVector2d", Tuple[float, float]]  # pylint: disable=invalid-name
-    MatrixLike = Union[str, Tuple[Tuple[float,float,float], Tuple[float,float,float]], Tuple[float,float,float,float,float,float], "Transform"] 
-    BoundingIntervalArgs = Union['BoundingInterval', Tuple[float, float], float]  # pylint: disable=invalid-name
-except ImportError:
-    overload = lambda x: x
-    cast = lambda x, y: y
+VectorLike = Union["ImmutableVector2d", Tuple[float, float]]  # pylint: disable=invalid-name
+MatrixLike = Union[str, Tuple[Tuple[float,float,float], Tuple[float,float,float]], Tuple[float,float,float,float,float,float], "Transform"] 
+BoundingIntervalArgs = Union['BoundingInterval', Tuple[float, float], float]  # pylint: disable=invalid-name
 
 # All the names that get added to the inkex API itself.
 __all__ = (
@@ -52,8 +48,6 @@ __all__ = (
     'Vector2d',
 )
 
-if PY3:
-    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 # Old settings, supported because users click 'ok' without looking.
 XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})
@@ -63,7 +57,7 @@ CUSTOM_DIRECTION = {270: 'tb', 90: 'bt', 0: 'lr', 360: 'lr', 180: 'rl'}
 DIRECTION = ['tb', 'bt', 'lr', 'rl', 'ro', 'ri']
 
 
-class ImmutableVector2d(object):
+class ImmutableVector2d:
     """Represents an immutable element of 2-dimensional Euclidean space"""
     _x = 0.0
     _y = 0.0
@@ -303,7 +297,7 @@ class Vector2d(ImmutableVector2d):
 
 
 
-class Transform(object):
+class Transform:
     """A transformation object which will always reduce to a matrix and can
     then be used in combination with other transformations for reducing
     finding a point and printing svg ready output.
@@ -345,7 +339,7 @@ class Transform(object):
     def _set_matrix(self, matrix):
         # type: (MatrixLike) -> None 
         """Parse a given string as an svg transformation instruction."""
-        if isinstance(matrix, (str, unicode)):
+        if isinstance(matrix, str):
             for func, values in self.TRM.findall(matrix.strip()):
                 getattr(self, 'add_' + func.lower())(*strargs(values))
         elif isinstance(matrix, Transform):
@@ -621,7 +615,7 @@ class Transform(object):
             interpcoord(self.f, other.f, fraction)))
 
 
-class BoundingInterval(object):  # pylint: disable=too-few-public-methods
+class BoundingInterval:  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
     @overload
@@ -764,7 +758,7 @@ class BoundingInterval(object):  # pylint: disable=too-few-public-methods
         return self.maximum - self.minimum
 
 
-class BoundingBox(object):  # pylint: disable=too-few-public-methods
+class BoundingBox:  # pylint: disable=too-few-public-methods
     """
     Some functions to compute a rough bbox of a given list of objects.
 
@@ -929,7 +923,7 @@ class BoundingBox(object):  # pylint: disable=too-few-public-methods
         return [y, -y, x, -x, rot, -rot][DIRECTION.index(direction)]
 
 
-class DirectedLineSegment(object):
+class DirectedLineSegment:
     """
     A directed line segment
 

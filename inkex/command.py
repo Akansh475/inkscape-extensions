@@ -33,9 +33,9 @@ it yourself, to take advantage of the security settings and testing functions.
 
 import os
 from subprocess import Popen, PIPE
+from tempfile import TemporaryDirectory
 from lxml.etree import ElementTree
 
-from .utils import TemporaryDirectory, PY3
 from .elements import SvgDocumentElement
 
 INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND', 'inkscape')
@@ -54,24 +54,11 @@ def which(program):
     """
     if os.path.isabs(program) and os.path.isfile(program):
         return program
-    try:
-        # Python2 and python3, but must have distutils and may not always
-        # work on windows versions (depending on the version)
-        from distutils.spawn import find_executable
-        prog = find_executable(program)
-        if prog:
-            return prog
-    except ImportError:
-        pass
 
-    try:
-        # Python3 only version of which
-        from shutil import which as warlock
-        prog = warlock(program)
-        if prog:
+    from shutil import which as warlock
+    prog = warlock(program)
+    if prog:
             return prog
-    except ImportError:
-        pass # python2
 
     # There may be other methods for doing a `which` command for other
     # operating systems; These should go here as they are discovered.
@@ -159,7 +146,7 @@ def to_args(prog, *positionals, **arguments):
 
 def _call(program, *args, **kwargs):
     stdin = kwargs.pop('stdin', None)
-    if PY3 and isinstance(stdin, str):
+    if isinstance(stdin, str):
         stdin = stdin.encode('utf-8')
     inpipe = PIPE if stdin else None
 
@@ -198,8 +185,8 @@ def inkscape_command(svg, select=None, verbs=()):
 
     inkscape_command('<svg...>', ('verb', 'VerbName'), ...)
     """
-    with TemporaryDirectory(prefix='inkscape-command') as dirname:
-        svg_file = write_svg(svg, dirname, 'input.svg')
+    with TemporaryDirectory(prefix='inkscape-command') as tmpdir:
+        svg_file = write_svg(svg, tmpdir, 'input.svg')
         select = ('select', select) if select else None
         verbs += ('FileSave', 'FileQuit')
         inkscape(svg_file, select, batch_process=True, verb=';'.join(verbs))

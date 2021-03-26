@@ -35,10 +35,7 @@ from ._utils import addNS
 from ._base import BaseElement
 
 
-try:
-    from typing import overload, Iterable, List, Tuple, Union, Optional  # pylint: disable=unused-import
-except ImportError:
-    overload = lambda x: x
+from typing import overload, Iterable, List, Tuple, Union, Optional  # pylint: disable=unused-import
 
 
 class Filter(BaseElement):

@@ -28,13 +28,10 @@ from math import atan2, cos, pi, sin, sqrt, acos, tan
 from .transforms import Transform, BoundingBox, Vector2d
 from .utils import classproperty, strargs
 
-try:  # pylint: disable=using-constant-test
-    from typing import overload, Any, Type, Dict, Optional, Union, Tuple, List, Iterator, Generator  # pylint: disable=unused-import
-    from typing import TypeVar
-    Pathlike = TypeVar('Pathlike', bound="PathCommand")
-    AbsolutePathlike = TypeVar('AbsolutePathlike', bound="AbsolutePathCommand")
-except ImportError:
-    overload = lambda x: x
+from typing import overload, Any, Type, Dict, Optional, Union, Tuple, List, Iterator, Generator  # pylint: disable=unused-import
+from typing import TypeVar
+Pathlike = TypeVar('Pathlike', bound="PathCommand")
+AbsolutePathlike = TypeVar('AbsolutePathlike', bound="AbsolutePathCommand")
 
 # All the names that get added to the inkex API itself.
 __all__ = (
@@ -62,7 +59,7 @@ class InvalidPath(ValueError):
     """Raised when given an invalid path string"""
 
 
-class PathCommand(object):
+class PathCommand:
     """
     Base class of all path commands
     """
@@ -1105,7 +1102,7 @@ PathCommand._letter_to_class = {
 class Path(list):
     """A list of segment commands which combine to draw a shape"""
 
-    class PathCommandProxy(object):
+    class PathCommandProxy:
         """
         A handy class for Path traverse and coordinate access
 
@@ -1166,7 +1163,7 @@ class Path(list):
             return "<" + self.__class__.__name__ + ">" + repr(self.command)
 
     def __init__(self, path_d=None):
-        super(Path, self).__init__()
+        super().__init__()
         if isinstance(path_d, str):
             # Returns a generator returning PathCommand objects
             path_d = self.parse_string(path_d)
@@ -1443,7 +1440,7 @@ class CubicSuperPath(list):
     """
 
     def __init__(self, items):
-        super(CubicSuperPath, self).__init__()
+        super().__init__()
         self._closed = True
         self._prev = Vector2d()
         self._prev_prev = Vector2d()
@@ -1469,7 +1466,7 @@ class CubicSuperPath(list):
         if isinstance(item, PathCommand):
             if isinstance(item, Move):
                 if self._closed is False:
-                    super(CubicSuperPath, self).append([])
+                    super().append([])
                 item = [list(item.args), list(item.args), list(item.args)]
             elif isinstance(item, ZoneClose) and self and self[-1]:
                 # This duplicates the first segment to 'close' the path, it's appended directly
@@ -1505,7 +1502,7 @@ class CubicSuperPath(list):
         if len(item) != 3 or not all([len(bit) == 2 for bit in item]):
             # The item is already a subpath (usually from some other process)
             if len(item[0]) == 3 and all([len(bit) == 2 for bit in item[0]]):
-                super(CubicSuperPath, self).append(self._clean(item))
+                super().append(self._clean(item))
                 self._prev_prev = Vector2d(self[-1][-1][0])
                 self._prev = Vector2d(self[-1][-1][1])
                 return
@@ -1515,7 +1512,7 @@ class CubicSuperPath(list):
             # Closed means that the previous segment is closed so we need a new one
             # We always append to the last open segment. CSP starts out closed.
             self._closed = False
-            super(CubicSuperPath, self).append([])
+            super().append([])
 
         if self[-1]:
             # The last tuple is replaced, it's the coords of where the next segment will land.

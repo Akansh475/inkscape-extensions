@@ -104,7 +104,7 @@ class Guide(BaseElement):
 
     @classmethod
     def new(cls, pos_x, pos_y, angle, **attrs):
-        guide = super(Guide, cls).new(**attrs)
+        guide = super().new(**attrs)
         guide.move_to(pos_x, pos_y, angle=angle)
         return guide
 

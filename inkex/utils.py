@@ -20,19 +20,13 @@
 """
 Basic common utility functions for calculated things
 """
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
 import sys
-import shutil
 import random
 import math
 
 from itertools import tee
 from argparse import ArgumentTypeError
-
-# When python2 support is gone, enable tempfile's version
-# from tempfile import TemporaryDirectory
 
 # All the names that get added to the inkex API itself.
 __all__ = ('AbortExtension', 'DependencyError', 'Boolean', 'errormsg')
@@ -41,9 +35,6 @@ ABORT_STATUS = -5
 
 (X, Y) = range(2)
 PY3 = sys.version_info[0] == 3
-
-if PY3:
-    unicode = str  # pylint: disable=redefined-builtin,invalid-name
 
 def _pythonpath():
     for pth in os.environ.get('PYTHONPATH', '').split(':'):
@@ -68,6 +59,7 @@ def get_inkscape_directory():
         if os.path.isdir(os.path.join(pth, 'inkex')):
             return pth
 
+
 class KeyDict(dict):
     """
     A normal dictionary, except asking for anything not in the dictionary
@@ -75,23 +67,10 @@ class KeyDict(dict):
     """
     def __getitem__(self, key):
         try:
-            return super(KeyDict, self).__getitem__(key)
+            return super().__getitem__(key)
         except KeyError:
             return key
 
-class TemporaryDirectory(object): # pylint: disable=too-few-public-methods
-    """Tiny replacement for python3's version."""
-    def __init__(self, suffix="", prefix="tmp"):
-        self.suffix = suffix
-        self.prefix = prefix
-        self.path = None
-    def __enter__(self):
-        from tempfile import mkdtemp
-        self.path = mkdtemp(self.suffix, self.prefix, None)
-        return self.path
-    def __exit__(self, exc, value, traceback):
-        if os.path.isdir(self.path):
-            shutil.rmtree(self.path)
 
 def Boolean(value):
     """ArgParser function to turn a boolean string into a python boolean"""
@@ -132,7 +111,7 @@ def errormsg(msg):
     try:
         sys.stderr.write(msg)
     except TypeError:
-        sys.stderr.write(unicode(msg))
+        sys.stderr.write(str(msg))
     except UnicodeEncodeError:
         # Python 2:
         # Fallback for cases where sys.stderr.encoding is not Unicode.
@@ -188,7 +167,7 @@ def strargs(string, kind=float):
     return [kind(val) for val in string.replace(',', ' ').replace('-', ' -').replace('e ', 'e').replace('E ','e').split()]
 
 
-class classproperty(object):  # pylint: disable=invalid-name, too-few-public-methods
+class classproperty:  # pylint: disable=invalid-name, too-few-public-methods
     """Combine classmethod and property decorators"""
 
     def __init__(self, func):

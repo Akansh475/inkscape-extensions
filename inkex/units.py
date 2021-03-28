@@ -89,9 +89,9 @@ def discover_unit(value, viewbox, default='px'):
     return default
 
 
-def convert_unit(value, to_unit):
+def convert_unit(value, to_unit, default='px'):
     """Returns userunits given a string representation of units in another system"""
-    value, from_unit = parse_unit(value, default_value=0.0)
+    value, from_unit = parse_unit(value, default_unit=default, default_value=0.0)
     if from_unit in CONVERSIONS and to_unit in CONVERSIONS:
         return value * CONVERSIONS[from_unit] / CONVERSIONS.get(to_unit, CONVERSIONS['px'])
     return 0.0

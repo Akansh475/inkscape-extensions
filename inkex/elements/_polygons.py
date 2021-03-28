@@ -25,7 +25,6 @@ Interface for all shapes/polygons such as lines, paths, rectangles, circles etc.
 
 from ..paths import Path
 from ..transforms import Transform, ImmutableVector2d, Vector2d
-from ..units import convert_unit
 
 from ._utils import addNS
 from ._base import ShapeElement
@@ -129,14 +128,14 @@ class Line(ShapeElement):
 
 class RectangleBase(ShapeElement):
     """Provide a useful extension for rectangle elements"""
-    left = property(lambda self: convert_unit(self.get('x', '0'), 'px'))
-    top = property(lambda self: convert_unit(self.get('y', '0'), 'px'))
+    left = property(lambda self: self.uutounit(self.get('x', '0'), 'px'))
+    top = property(lambda self: self.uutounit(self.get('y', '0'), 'px'))
     right = property(lambda self: self.left + self.width)
     bottom = property(lambda self: self.top + self.height)
-    width = property(lambda self: convert_unit(self.get('width', '0'), 'px'))
-    height = property(lambda self: convert_unit(self.get('height', '0'), 'px'))
-    rx = property(lambda self: convert_unit(self.get('rx', self.get('ry', 0.0)), 'px'))
-    ry = property(lambda self: convert_unit(self.get('ry', self.get('rx', 0.0)), 'px')) # pylint: disable=invalid-name
+    width = property(lambda self: self.uutounit(self.get('width', '0'), 'px'))
+    height = property(lambda self: self.uutounit(self.get('height', '0'), 'px'))
+    rx = property(lambda self: self.uutounit(self.get('rx', self.get('ry', 0.0)), 'px'))
+    ry = property(lambda self: self.uutounit(self.get('ry', self.get('rx', 0.0)), 'px')) # pylint: disable=invalid-name
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -175,7 +174,7 @@ class EllipseBase(ShapeElement):
 
     @property
     def center(self):
-        return ImmutableVector2d(convert_unit(self.get('cx', '0'), 'px'), convert_unit(self.get('cy', '0'), 'px'))
+        return ImmutableVector2d(self.uutounit(self.get('cx', '0')), self.uutounit(self.get('cy', '0')))
 
     @center.setter
     def center(self, value):
@@ -202,11 +201,11 @@ class Circle(EllipseBase):
 
     @property
     def radius(self):
-        return convert_unit(self.get('r', '0'), 'px')
+        return self.uutounit(self.get('r', '0'), 'px')
 
     @radius.setter
     def radius(self, value):
-        self.set("r", value)
+        self.set("r", self.unittouu(value))
 
     def _rxry(self):
         r = self.radius
@@ -219,7 +218,7 @@ class Ellipse(EllipseBase):
 
     @property
     def radius(self):
-        return ImmutableVector2d(convert_unit(self.get('rx', '0'), 'px'), convert_unit(self.get('ry', '0'), 'px'))
+        return ImmutableVector2d(self.uutounit(self.get('rx', '0')), self.uutounit(self.get('ry', '0')))
 
     @radius.setter
     def radius(self, value):

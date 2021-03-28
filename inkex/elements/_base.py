@@ -34,6 +34,7 @@ from ..paths import Path
 from ..styles import Style, AttrFallbackStyle, Classes
 from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
+from ..units import convert_unit, render_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
 
 from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
@@ -427,6 +428,27 @@ class BaseElement(etree.ElementBase):
     def set_sensitive(self, sensitive=True):
         """Set the sensitivity of the element/layer"""
         self.set('sodipodi:insensitive', str((not sensitive)).lower())
+
+    @property
+    def unit(self):
+        """Return the unit being used by the owning document, cached"""
+        try:
+            return self.root.unit
+        except FragmentError:
+            return 'px' # Don't cache.
+
+    def uutounit(self, value, to_unit='px'):
+        """Convert the unit the given unit type"""
+        return convert_unit(value, to_unit, default=self.unit)
+
+    def unittouu(self, value):
+        """Convert a unit value into the document's units"""
+        return convert_unit(value, self.unit)
+
+    def add_unit(self, value):
+        """Add document unit when no unit is specified in the string """
+        return render_unit(value, self.unit)
+
 
 
 class ShapeElement(BaseElement):

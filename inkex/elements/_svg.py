@@ -29,7 +29,7 @@ import random
 from lxml import etree
 
 from ..deprecated import DeprecatedSvgMixin
-from ..units import discover_unit, convert_unit, render_unit
+from ..units import discover_unit
 from ._selected import ElementList
 from ..transforms import BoundingBox
 from ..styles import StyleSheets
@@ -175,22 +175,12 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         defines what units are used for SVG coordinates, it tries to calculate
         the unit from the SVG width and viewBox attributes.
         Defaults to 'px' units."""
-        viewbox = self.get_viewbox()
-        if viewbox and set(viewbox) != {0}:
-            return discover_unit(self.get('width'), viewbox[2], default='px')
-        return 'px'  # Default is px
-
-    def unittouu(self, value):
-        """Convert a unit value into the document's units"""
-        return convert_unit(value, self.unit)
-
-    def uutounit(self, value, to_unit):
-        """Convert from the document's units to the given unit"""
-        return convert_unit(render_unit(value, self.unit), to_unit)
-
-    def add_unit(self, value):
-        """Add document unit when no unit is specified in the string """
-        return render_unit(value, self.unit)
+        if not hasattr(self, '_unit'):
+            self._unit = 'px' # Default is px
+            viewbox = self.get_viewbox()
+            if viewbox and set(viewbox) != {0}:
+                self._unit = discover_unit(self.get('width'), viewbox[2], default='px')
+        return self._unit
 
     @property
     def stylesheets(self):

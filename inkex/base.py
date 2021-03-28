@@ -245,10 +245,10 @@ class InkscapeExtension:
         if not os.path.isabs(filename):
             if cwd is None:
                 cwd = cls.svg_path(default)
-            if cwd is None:
-                raise AbortExtension(f"Can not use relative path, Inkscape isn't telling us the current working directory.")
-            elif cwd == '':
-                raise AbortExtension(f"The SVG must be saved before you can use relative paths.")
+                if cwd is None:
+                    raise AbortExtension(f"Can not use relative path, Inkscape isn't telling us the current working directory.")
+                elif cwd == '':
+                    raise AbortExtension(f"The SVG must be saved before you can use relative paths.")
             filename = os.path.join(cwd, filename)
         return os.path.realpath(os.path.expanduser(filename))
 

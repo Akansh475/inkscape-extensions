@@ -259,11 +259,21 @@ class BaseElement(etree.ElementBase):
                 if hasattr(child, 'set_random_ids'):
                     child.set_random_ids(prefix=prefix, levels=levels-1, backlinks=backlinks)
 
-    def get_id(self):
-        """Get the id for the element, will set a new unique id if not set"""
+    eid = property(lambda self: self.get_id())
+    def get_id(self, as_url=0):
+        """Get the id for the element, will set a new unique id if not set.
+
+        as_url - If set to 1, returns #{id} as a string
+                 If set to 2, returns url(#{id}) as a string
+        """
         if 'id' not in self.attrib:
             self.set_random_id(self.TAG)
-        return self.get('id')
+        eid = self.get('id')
+        if as_url > 0:
+            eid = '#' + eid
+        if as_url > 1:
+            eid = f'url({eid})'
+        return eid
 
     def set_id(self, new_id, backlinks=False):
         """Set the id and update backlinks to xlink and style urls if needed"""
@@ -472,7 +482,7 @@ class ShapeElement(BaseElement):
 
     @clip.setter
     def clip(self, elem):
-        self.set('clip-path', 'url(#' + elem.get_id() + ')')
+        self.set('clip-path', elem.get_id(url=2))
 
     def get_path(self):
         """Generate a path for this object which can inform the bounding box"""

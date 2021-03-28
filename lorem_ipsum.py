@@ -241,7 +241,7 @@ class LoremIpsum(inkex.EffectExtension):
         style = inkex.Style()
         if shape is not None and not isinstance(shape, TextElement):
             parent = shape.getparent()
-            style["shape-inside"] = f"url(#{shape.get_id()})"
+            style["shape-inside"] = shape.get_id(as_url=2)
         else:
             parent = self.get_layer()
             style["inline-size"] = self.svg.width

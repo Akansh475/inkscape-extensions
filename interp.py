@@ -269,10 +269,10 @@ class Interp(inkex.EffectExtension):
                             newgrad = grad1.interpolate(grad2, time)
                             stops, orientation = newgrad.stops_and_orientation()
                             self.svg.defs.add(orientation)
-                            basestyle[prop] = 'url(#{})'.format(orientation.get_id())
+                            basestyle[prop] = orientation.get_id(as_url=2)
                             if len(stops):
                                 self.svg.defs.add(stops, orientation)
-                                orientation.set('xlink:href', '#{}'.format(stops.get_id()))
+                                orientation.set('xlink:href', stops.get_id(as_url=1))
 
                 new = group.add(inkex.PathElement())
                 new.style = basestyle

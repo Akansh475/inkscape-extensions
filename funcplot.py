@@ -224,7 +224,7 @@ class FuncPlot(inkex.EffectExtension):
                     clip = self.svg.defs.add(ClipPath())
                     clip.set_random_id()
                     clip.append(node.copy())
-                    newpath.set('clip-path', 'url(#' + clip.get_id() + ')')
+                    newpath.set('clip-path', clip.get_id(url=2))
                 # option whether to remove the rectangle or not.
                 if self.options.remove:
                     node.getparent().remove(node)

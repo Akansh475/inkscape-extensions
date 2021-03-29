@@ -202,12 +202,13 @@ class TestCase(MockCommandMixin, BaseCase):
 
            filename should point to a starting svg document, default is empty_svg
         """
-        effect = kwargs.pop('effect', self.effect_class)()
+        data_file = self.data_file(*filename) if filename else self.empty_svg
 
-        args = [self.data_file(*filename)] if filename else [self.empty_svg]  # pylint: disable=no-value-for-parameter
-        os.environ['DOCUMENT_PATH'] = args[0]
-        args += kwargs.pop('args', [])
+        os.environ['DOCUMENT_PATH'] = data_file
+        args = [data_file] + list(kwargs.pop('args', []))
         args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
+
+        effect = kwargs.pop('effect', self.effect_class)()
 
         # Output is redirected to this string io buffer
         if self.stderr_output:

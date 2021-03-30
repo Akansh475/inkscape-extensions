@@ -906,11 +906,11 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
         # type: (float, float, Union[int, str], Optional[BoundingBox]) -> float 
         """Using the x,y returns a single sortable value based on direction and angle
 
-        direction - int (custom angle), tb/bt (top/bottom), lr/rl (left/right), ri/ro (radial)
+        direction - int/float (custom angle), tb/bt (top/bottom), lr/rl (left/right), ri/ro (radial)
         selbox - The bounding box of the whole selection for radial anchors
         """
         rot = 0.0
-        if isinstance(direction, int):  # Angle
+        if isinstance(direction, (int, float)):  # Angle
             if direction not in CUSTOM_DIRECTION:
                 return hypot(x, y) * (cos(radians(-direction) - atan2(y, x)))
             direction = CUSTOM_DIRECTION[direction]

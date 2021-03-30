@@ -5041,7 +5041,7 @@ class Gcodetools(inkex.EffectExtension):
                 '-6.84374864039 0,0 0.6875,0.6875 -6.84375,6.84375 1.90625,0.8125000000'\
                 '01 z z'.format(graffiti_reference_points_count * 100, 0)
 
-            draw_text(axis, graffiti_reference_points_count * 100 + 10, -10, group=g, gcodetools_tag="Gcodetools graffiti reference point text")
+            draw_text(axis, graffiti_reference_points_count * 100 + 10, -10, group=group, gcodetools_tag="Gcodetools graffiti reference point text")
 
         elif self.options.orientation_points_count == "in-out reference point":
             draw_pointer(group=self.svg.get_current_layer(), x=self.svg.namedview.center, figure="arrow", pointer_type="In-out reference point", text="In-out point")

@@ -54,7 +54,7 @@ class ElementList(OrderedDict):
             raise ValueError(f"Refusing to set bad key in ElementList {orig_key}")
         if isinstance(elem, str):
             key = elem
-            elem = self.svg.getElementById(elem)
+            elem = self.svg.getElementById(elem, literal=True)
             if elem is None:
                 return
         if isinstance(elem, BaseElement):

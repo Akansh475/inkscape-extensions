@@ -88,9 +88,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Gets a single element from the given xpath or returns None"""
         return self.findone(xpath)
 
-    def getElementById(self, eid, elm='*'):  # pylint: disable=invalid-name
+    def getElementById(self, eid, elm='*', literal=False): # pylint: disable=invalid-name
         """Get an element in this svg document by it's ID attribute"""
-        if eid is not None:
+        if eid is not None and not literal:
             eid = eid.strip()[4:-1] if eid.startswith('url(') else eid
             eid = eid.lstrip('#')
         return self.getElement(f'//{elm}[@id="{eid}"]')

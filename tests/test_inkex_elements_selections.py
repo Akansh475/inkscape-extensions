@@ -107,3 +107,10 @@ class ElementListTestCase(SvgTestCase):
         """Selection can get a bounding box"""
         self.assertEqual(int(self.svg.selection.bounding_box().width), 540)
         self.assertEqual(int(self.svg.selection.bounding_box().height), 550)
+
+    def test_selecting_weird_ids(self):
+        """Selection can contain some chars"""
+        selection = self.svg.selection
+        self.svg.append(PathElement(id="#asdf"))
+        selection.set("#asdf")
+        self.assertEqual(tuple(selection.ids), ('#asdf',))

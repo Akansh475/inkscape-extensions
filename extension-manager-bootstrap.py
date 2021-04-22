@@ -22,6 +22,7 @@ and adding the extensions package.
 """
 
 import os
+import io
 import sys
 
 import inkex
@@ -29,12 +30,17 @@ from inkex.utils import get_user_directory
 from inkex.base import InkscapeExtension
 from inkex.command import CommandNotFound, ProgramRunError, call
 
+TARGET_DIR = get_user_directory()
+FALLBACK_DIR = os.path.join(TARGET_DIR, 'org.inkscape.inkman')
+if os.path.isdir(FALLBACK_DIR):
+    sys.path.insert(0, FALLBACK_DIR)
+
 try:
     from manage_extensions import run as run_existing
 except ImportError:
     run_existing = None
 
-TARGET_DIR = get_user_directory()
+FALLBACK_URL = "https://media.inkscape.org/static/extensions-manager-fallback.zip"
 
 class Bootstrap(InkscapeExtension):
     multi_inx = True
@@ -47,13 +53,23 @@ class Bootstrap(InkscapeExtension):
         pass
 
     def save_raw(self, ret):
-        from manage_extensions import run as run_existing
+        if os.path.isdir(FALLBACK_DIR):
+            sys.path.insert(0, FALLBACK_DIR)
+        else:
+            sys.path.insert(0, TARGET_DIR)
+        try:
+            from manage_extensions import run as run_existing
+        except (ImportError, ModuleNotFoundError):
+            return self.msg("Extension manager installed, please re-run.")
         run_existing(sys.argv)
 
     def effect(self):
         try:
             call('virtualenv', TARGET_DIR, p='python3')
         except CommandNotFound:
+            # Add a fallback for places like windows where python isn't available.
+            if self.install_fallback():
+                return
             raise inkex.AbortExtension(
                 "You must have the python-virtualenv package installed. This should have"
                 " been included with Inkscape, but in some special cases it might not"
@@ -68,6 +84,38 @@ class Bootstrap(InkscapeExtension):
             raise inkex.AbortExtension("Can't find pip program after environment initialisation!")
         except ProgramRunError as err:
             raise inkex.AbortExtension("Error installing extension manager package:\n" + str(err))
+
+    def install_fallback(self):
+        """
+        A pre-set zip installer which has been prepared for installation.
+        """
+        import requests
+        import zipfile
+
+        # Get remove content
+        done = False
+        session = requests.session()
+        try:
+            remote = session.get(FALLBACK_URL)
+            if remote and remote.status_code == 200:
+                with zipfile.ZipFile(io.BytesIO(remote.content)) as archive:
+                    for filename in archive.namelist():
+                        if '.inx' in filename:
+                            done = True
+                        self._install_file(archive.read(filename),
+                            os.path.join(FALLBACK_DIR, filename))
+        finally:
+            session.close()
+        return done
+
+    def _install_file(self, content, filename):
+        """Install the content into the given location"""
+        filedir = os.path.dirname(filename)
+        if not os.path.isdir(filedir):
+            os.makedirs(filedir)
+        if not os.path.isdir(filename):
+            with open(filename, 'wb') as fhl:
+                fhl.write(content)
 
 if __name__ == '__main__':
     if run_existing is not None:

@@ -31,7 +31,7 @@ from inkex.base import InkscapeExtension
 from inkex.command import CommandNotFound, ProgramRunError, call
 
 TARGET_DIR = get_user_directory()
-FALLBACK_DIR = os.path.join(TARGET_DIR, 'org.inkscape.inkman')
+FALLBACK_DIR = os.path.join(TARGET_DIR or './', 'org.inkscape.inkman')
 if os.path.isdir(FALLBACK_DIR):
     sys.path.insert(0, FALLBACK_DIR)
 
@@ -55,7 +55,7 @@ class Bootstrap(InkscapeExtension):
     def save_raw(self, ret):
         if os.path.isdir(FALLBACK_DIR):
             sys.path.insert(0, FALLBACK_DIR)
-        else:
+        elif TARGET_DIR:
             sys.path.insert(0, TARGET_DIR)
         try:
             from manage_extensions import run as run_existing

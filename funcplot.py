@@ -5,7 +5,7 @@
 # Copyright (C) 2006 Georg Wiora, xorx@quarkbox.de
 # Copyright (C) 2006 Johan Engelen, johan@shouraizou.nl
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
-#
+#url=
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -224,7 +224,7 @@ class FuncPlot(inkex.EffectExtension):
                     clip = self.svg.defs.add(ClipPath())
                     clip.set_random_id()
                     clip.append(node.copy())
-                    newpath.set('clip-path', clip.get_id(url=2))
+                    newpath.set('clip-path', clip.get_id(as_url=2))
                 # option whether to remove the rectangle or not.
                 if self.options.remove:
                     node.getparent().remove(node)

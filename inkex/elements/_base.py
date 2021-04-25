@@ -482,7 +482,7 @@ class ShapeElement(BaseElement):
 
     @clip.setter
     def clip(self, elem):
-        self.set('clip-path', elem.get_id(url=2))
+        self.set('clip-path', elem.get_id(as_url=2))
 
     def get_path(self):
         """Generate a path for this object which can inform the bounding box"""

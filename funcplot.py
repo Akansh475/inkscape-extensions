@@ -5,7 +5,7 @@
 # Copyright (C) 2006 Georg Wiora, xorx@quarkbox.de
 # Copyright (C) 2006 Johan Engelen, johan@shouraizou.nl
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
-#url=
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or

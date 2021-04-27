@@ -216,6 +216,11 @@
           <ref name="inx.effect_extension.submenu"/>
         </choice>
       </element>
+      <optional>
+        <element name="menu-tip">
+          <text/>
+        </element>
+      </optional>
     </element>
   </define>
 
@@ -230,14 +235,14 @@
   </define>
 
   <define name="inx.path-effect_extension">
-    <!-- TODO: Are we still suing these? -->
+    <!-- TODO: Are we still using these? -->
     <element name="path-effect">
       <empty/>
     </element>
   </define>
 
   <define name="inx.print_extension">
-    <!-- TODO: Are we still suing these? -->
+    <!-- TODO: Are we still using these? -->
     <element name="print">
       <empty/>
     </element>

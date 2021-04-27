@@ -64,9 +64,16 @@ class Bootstrap(InkscapeExtension):
         run_existing(sys.argv)
 
     def effect(self):
+        fallback = False
         try:
             call('virtualenv', TARGET_DIR, p='python3')
         except CommandNotFound:
+            fallback = True
+        except ProgramRunError as err:
+            raise inkex.AbortExtension(
+                "There has been a problem creating the python environment:\n" + str(err))
+
+        if fallback:
             # Add a fallback for places like windows where python isn't available.
             if self.install_fallback():
                 return
@@ -74,9 +81,6 @@ class Bootstrap(InkscapeExtension):
                 "You must have the python-virtualenv package installed. This should have"
                 " been included with Inkscape, but in some special cases it might not"
                 " be. Please install this software externally and try again.")
-        except ProgramRunError as err:
-            raise inkex.AbortExtension(
-                "There has been a problem creating the python environment:\n" + str(err))
 
         try:
             call(os.path.join(TARGET_DIR, 'bin', 'pip'), 'install', self.options.version)
@@ -89,6 +93,7 @@ class Bootstrap(InkscapeExtension):
         """
         A pre-set zip installer which has been prepared for installation.
         """
+        from urllib3.exceptions import NewConnectionError
         import requests
         import zipfile
 
@@ -104,6 +109,8 @@ class Bootstrap(InkscapeExtension):
                             done = True
                         self._install_file(archive.read(filename),
                             os.path.join(FALLBACK_DIR, filename))
+        except NewConnectionError:
+            self.msg("Could not connect to the internet, please check connection and try again!")
         finally:
             session.close()
         return done

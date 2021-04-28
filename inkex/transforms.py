@@ -284,16 +284,17 @@ class Vector2d(ImmutableVector2d):
 
     @overload
     def assign(self, x, y):
-        # type: (float, float) -> None
+        # type: (float, float) -> VectorLike
         pass
 
     @overload
     def assign(self, other):
-        # type: (VectorLike, str) -> None
+        # type: (VectorLike, str) -> VectorLike
         pass
 
     def assign(self, *args):
         self.x, self.y = Vector2d(*args)
+        return self
 
 
 
@@ -387,17 +388,17 @@ class Transform:
 
     @overload
     def add_matrix(self, a):
-        # type: (MatrixLike) -> None 
+        # type: (MatrixLike) -> Transform 
         pass
 
     @overload
     def add_matrix(self, a, b, c, d, e, f):
-        # type: (float, float, float, float, float, float) -> None 
+        # type: (float, float, float, float, float, float) -> Transform 
         pass
 
     @overload
     def add_matrix(self, a, b):
-        # type: (Tuple[float, float, float], Tuple[float, float, float]) -> None 
+        # type: (Tuple[float, float, float], Tuple[float, float, float]) -> Transform 
         pass
 
     def add_matrix(self, *args):
@@ -408,6 +409,7 @@ class Transform:
             self.__imul__(Transform(args))
         else:
             raise ValueError(f"Invalid number of arguments {args}")
+        return self
 
     def add_kwargs(self, **kwargs):
         """Add translations, scales, rotations etc using key word arguments"""
@@ -417,15 +419,16 @@ class Transform:
                 func(*value)
             elif value is not None:
                 func(value)
+        return self
 
     @overload
     def add_translate(self, dr):
-        # type: (VectorLike) -> None
+        # type: (VectorLike) -> Transform
         pass
 
     @overload
     def add_translate(self, tr_x, tr_y=0.0):
-        # type: (float, Optional[float]) -> None
+        # type: (float, Optional[float]) -> Transform
         pass
 
     def add_translate(self, *args):
@@ -434,35 +437,37 @@ class Transform:
         else:
             tr_x, tr_y = Vector2d(*args)
         self.__imul__(((1.0, 0.0, tr_x), (0.0, 1.0, tr_y)))
+        return self
 
     def add_scale(self, sc_x, sc_y=None):
         """Add scale to this transformation"""
         sc_y = sc_x if sc_y is None else sc_y
         self.__imul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
+        return self
 
     @overload
     def add_rotate(self, deg, center):
-        # type: (float, VectorLike) -> None
+        # type: (float, VectorLike) -> Transform
         pass
 
     @overload
     def add_rotate(self, deg, center_x, center_y):
-        # type: (float, float, float) -> None
+        # type: (float, float, float) -> Transform
         pass
 
     @overload
     def add_rotate(self, deg):
-        # type: (float) -> None
+        # type: (float) -> Transform
         pass
 
     @overload
     def add_rotate(self, deg, a):
-        # type: (float, Union[VectorLike, str]) -> None
+        # type: (float, Union[VectorLike, str]) -> Transform
         pass
 
     @overload
     def add_rotate(self, deg, a, b):
-        # type: (float, float, float) -> None
+        # type: (float, float, float) -> Transform
         pass
 
     def add_rotate(self, deg, *args):
@@ -471,16 +476,19 @@ class Transform:
         _cos, _sin = cos(radians(deg)), sin(radians(deg))
         self.__imul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
         self.__imul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
+        return self
 
     def add_skewx(self, deg):
-        # type: (float) -> None
+        # type: (float) -> Transform
         """Add skew x to this transformation"""
         self.__imul__(((1.0, tan(radians(deg)), 0.0), (0.0, 1.0, 0.0)))
+        return self
 
     def add_skewy(self, deg):
-        # type: (float) -> None
+        # type: (float) -> Transform
         """Add skew y to this transformation"""
         self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
+        return self
 
     def to_hexad(self):
         # type: () -> Iterator[float]

@@ -193,6 +193,9 @@ class Vector2dTest(TestCase):
         self.assertAlmostTuple(vec, (5, 10))
         vec.assign((7, 11))
         self.assertAlmostTuple(vec, (7, 11))
+        self.assertAlmostTuple(vec.assign(10, 20).assign(96, 11), (96, 11))
+        self.assertAlmostTuple(vec.assign(10, 20).assign(45, 22), (45, 22))
+        self.assertTrue(vec.assign(0, 0) is vec)
 
     def test_getitem(self):
         """Test getitem for Vector2D"""
@@ -324,6 +327,11 @@ class TransformTest(TestCase):
         self.assertEqual(str(tr1), 'scale(5, 1)')
         tr1.add_translate(10, 10)
         self.assertEqual(str(tr1), 'matrix(5 0 0 1 50 10)')
+        self.assertEqual(str(Transform().add_scale(5.0, 1.0)), 'scale(5, 1)')        
+        self.assertEqual(str(Transform().add_scale(5.0, 1.0).add_translate(10, 10)), 'matrix(5 0 0 1 50 10)')
+        tr2 = Transform()
+        self.assertTrue(tr2.add_scale(1, 1).add_translate(0, 0).add_skewy(0).add_skewx(0).add_rotate(0) is tr2)
+        self.assertEqual(str(tr2.add_kwargs(translate=(10, 10), scale=(5.0, 1.0))), 'matrix(5 0 0 1 50 10)') 
 
     def test_is_unity(self):
         """Test that unix matrix looks like rotate, scale, and translate"""

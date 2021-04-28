@@ -59,6 +59,25 @@ class StyleTest(TestCase):
         assert stl3['fill'] == [150, 0, 50]
         assert stl3['stroke-width'] == '8px'
 
+    def test_callback(self):
+        """Test callback."""
+        calls = 0
+        def cb(style):
+            nonlocal calls
+            self.assertNotIn('fill-opacity', style)
+            calls += 1
+        st = Style({'stroke-width':'0px', 'fill-opacity':1.0,'fill':Color((200, 0, 0))}, callback=cb)
+        self.assertEqual(calls, 0)
+        st.pop('fill-opacity')
+        self.assertEqual(calls, 1)
+        def cb(style):
+            nonlocal calls
+            self.assertEqual(style['fill-opacity'], '.75')
+            calls += 1
+        st.callback = cb
+        st['fill-opacity'] = '.75'
+        self.assertEqual(calls, 2)
+
 class AttribFallbackTest(TestCase):
     """Test the fallback style for handling attribute based styles"""
     def setUp(self):

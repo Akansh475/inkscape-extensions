@@ -146,6 +146,11 @@ class Style(OrderedDict):
         if self.callback is not None:
             self.callback(self)
 
+    def __delitem__(self, key):
+        super().__delitem__(key)
+        if self.callback is not None:
+            self.callback(self)
+
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
         if self.callback is not None:

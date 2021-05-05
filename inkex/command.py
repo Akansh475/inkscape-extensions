@@ -32,13 +32,20 @@ it yourself, to take advantage of the security settings and testing functions.
 """
 
 import os
+import sys
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
 from lxml.etree import ElementTree
 
 from .elements import SvgDocumentElement
 
-INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND', 'inkscape')
+INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND')
+if INKSCAPE_EXECUTABLE_NAME == None:
+    if sys.platform == 'win32':
+        # prefer inkscape.exe over inkscape.com which spawns a command window
+        INKSCAPE_EXECUTABLE_NAME = 'inkscape.exe'
+    else:
+        INKSCAPE_EXECUTABLE_NAME = 'inkscape'
 
 class CommandNotFound(IOError):
     """Command is not found"""

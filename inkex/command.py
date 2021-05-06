@@ -33,6 +33,7 @@ it yourself, to take advantage of the security settings and testing functions.
 
 import os
 import sys
+
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
 from lxml.etree import ElementTree
@@ -177,12 +178,23 @@ def call(program, *args, **kwargs):
     stdout = call('executable', arg1, arg2, dash_dash_arg='foo', d=True, ...)
 
     Will raise ProgramRunError() if return code is not 0.
+
+     * return_binary - Should stdout return raw bytes (default: False)
+     * stdin - The string or bytes containing the stdin (default: None)
+     * All other arguments converted using to_args(...) function.
     """
-    return _call(program, *args, **kwargs)
+    # We use this long input because it's less likely to conflict with --binary=
+    binary = kwargs.pop('return_binary', False)
+    stdout = _call(program, *args, **kwargs)
+    # Convert binary to string when we wish to have strings we do this here
+    # so the mock tests will also run the conversion (always returns bytes)
+    if not binary and isinstance(stdout, bytes):
+        return stdout.decode(sys.stdout.encoding or 'utf-8')
+    return stdout
 
 def inkscape(svg_file, *args, **kwargs):
     """
-    Call Inkscape with the given svg_file and the given arguments
+    Call Inkscape with the given svg_file and the given arguments, see call()
     """
     return call(INKSCAPE_EXECUTABLE_NAME, svg_file, *args, **kwargs)
 

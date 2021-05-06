@@ -111,7 +111,7 @@ class exportPDF():
 exportPDF()""")
 
     def save(self, stream):
-        scribus_version = call(SCRIBUS_EXE, '-g', '--version').decode('utf-8')
+        scribus_version = call(SCRIBUS_EXE, '-g', '--version')
         version_match = VERSION_REGEX.search(scribus_version)
         if version_match is None:
             raise AbortExtension(f"Could not detect Scribus version ({scribus_version})")

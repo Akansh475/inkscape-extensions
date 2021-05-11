@@ -248,6 +248,8 @@ class AttributeHandelingTestCase(SvgTestCase):
         elem = self.svg.getElementById('L')
         elem.desc = "Dancing"
         elem.title = "Start"
+        self.assertEqual(elem.desc, "Dancing")
+        self.assertEqual(elem.title, "Start")
         self.svg.getElementById('G').title = "After"
         # Title and Desc elements have been added
         self.assertEqual(_content(elem), ('title:Start', 'desc:Dancing', 'line:None'))

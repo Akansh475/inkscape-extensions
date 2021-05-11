@@ -74,8 +74,8 @@ class ChildToProperty(property):
         self.prepend = prepend
 
     def __get__(self, obj, klass=None):
-        elem = self.findone(self.tag)
-        return elem.text if elem else None
+        elem = obj.findone(self.tag)
+        return elem.text if elem is not None else None
 
     def __set__(self, obj, value):
         elem = obj.get_or_create(self.tag, prepend=self.prepend)

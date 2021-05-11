@@ -36,7 +36,7 @@ class ElementList(OrderedDict):
         self.svg = svg
         self.ids = OrderedDict()
         super().__init__()
-        if _iter:
+        if _iter is not None:
             self.set(*list(_iter))
 
     def __iter__(self):

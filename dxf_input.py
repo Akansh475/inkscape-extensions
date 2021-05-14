@@ -110,9 +110,9 @@ class ValueConstruct(defaultdict):
         '21': ('y2',),
         '23': ('y3',),
         '24': ('y4',),
-        '40': ('scale', 'knots', 'radius',),
-        '41': ('elipse_a1', 'insert_scale_x'),
-        '42': ('elipse_a2', 'bulge', 'insert_scale_y'),
+        '40': ('scale', 'knots', 'radius', 'width_ratio'),
+        '41': ('ellipse_a1', 'insert_scale_x'),
+        '42': ('ellipse_a2', 'bulge', 'insert_scale_y'),
         '50': ('angle',),
         '51': ('angle2',),
         '62': ('color',),
@@ -291,7 +291,7 @@ def export_ellipse(vals):
     # mandatory group codes : (10, 11, 20, 21, 40, 41, 42) (xc, xm, yc, ym, width ratio, angle1, angle2)
     if vals.has_x1 and vals.has_x2 and vals.has_y1 and vals.has_y2 and \
             vals.has_width_ratio and vals.has_ellipse_a1 and vals.has_ellipse_a2:
-        generate_ellipse(vals.x1, vals.y1, vals.x2, vals.y2, vals.radius, vals.ellipse_a1, vals.ellipse_a2)
+        generate_ellipse(vals.x1, vals.y1, vals.x2, vals.y2, vals.width_ratio, vals.ellipse_a1, vals.ellipse_a2)
 
 
 def export_leader(vals):
@@ -326,7 +326,7 @@ def export_lwpolyline(vals):
                 iseqs += 1
                 while seqs[iseqs] != '20':
                     if seqs[iseqs] == '42':
-                        bulge = vals.bulge[ibulge]
+                        bulge = vals.bulge_list[ibulge]
                         ibulge += 1
                     iseqs += 1
                 if bulge:

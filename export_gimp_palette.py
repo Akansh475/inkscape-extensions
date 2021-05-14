@@ -48,7 +48,7 @@ class ExportGimpPalette(inkex.OutputExtension):
 
     def process_element(self, elem):
         """Recursively process elements for colors"""
-        style = elem.fallback_style(move=False)
+        style = elem.specified_style()
         for col in inkex.Style.color_props:
             try:
                 col = inkex.Color(style.get(col))

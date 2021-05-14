@@ -4,6 +4,7 @@ Test Inkex style parsing functionality.
 """
 
 import pytest
+import warnings
 
 from inkex.styles import Style
 from inkex.colors import Color
@@ -85,6 +86,11 @@ class AttribFallbackTest(TestCase):
     def setUp(self):
         self.svg = svg_file(self.data_file('svg', 'css.svg'))
         self.elem = self.svg.getElementById('rect2')
+        # All the functions in this test suite are deprecated, so
+        # we don't need the warnings here.
+        self.warner = warnings.catch_warnings()
+        self.warner.__enter__()
+        warnings.simplefilter('ignore', category=DeprecationWarning)
 
     def test_fallback_read_style(self):
         """Style comes from style property"""

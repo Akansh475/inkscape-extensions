@@ -294,13 +294,13 @@ class ColorExtension(EffectExtension):
 
     def process_element(self, elem, gradients=None):
         """Process one of the selected elements"""
-        style = elem.fallback_style(move=False)
+        style = elem.specified_style()
         # Colours first
         for name in elem.style.color_props:
             value = style.get(name)
             if value is not None:
                 try:
-                    style[name] = self._modify_color(name, Color(value))
+                    elem.style[name] = self._modify_color(name, Color(value))
                 except ColorIdError:
                     gradient = self.svg.getElementById(value)
                     gradients.track(gradient, elem, self._ref_cloned, style=style, name=name)
@@ -312,7 +312,7 @@ class ColorExtension(EffectExtension):
         for name in elem.style.opacity_props:
             value = style.get(name)
             if value is not None:
-                style[name] = self.modify_opacity(name, value)
+                elem.style[name] = self.modify_opacity(name, value)
 
     def _ref_cloned(self, old_id, new_id, style, name):
         self._renamed[old_id] = new_id

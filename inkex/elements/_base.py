@@ -36,6 +36,9 @@ from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
 from ..units import convert_unit, render_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
+from ..properties import all_properties
+
+#from ..deprecated import DeprecatedShapeElementMixin
 
 from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
 
@@ -157,9 +160,11 @@ class BaseElement(etree.ElementBase):
                     self.set(attr, str(new_item))
                 else:
                     self.attrib.pop(attr, None) # pylint: disable=no-member
-
+                    
             # pylint: disable=no-member
             value = cls(self.attrib.get(attr, None), callback=_set_attr)
+            if name == "style":
+                value.element = self
             setattr(self, name, value)
             return value
         raise AttributeError(f"Can't find attribute {self.typename}.{name}")
@@ -459,7 +464,34 @@ class BaseElement(etree.ElementBase):
         """Add document unit when no unit is specified in the string """
         return render_unit(value, self.unit)
 
+    def cascaded_style(self):
+        """Returns the cascaded style of an element (all rules that apply the element itself),
+        based on the stylesheets, the presentation attributes and the inline style using the
+        respective specificity of the style
 
+        see https://www.w3.org/TR/CSS22/cascade.html#cascading-order
+
+        Returns:
+            Style: the cascaded style
+        """
+        return Style.cascaded_style(self)
+
+    def specified_style(self):
+        """Returns the specified style of an element, i.e. the cascaded style + inheritance,
+        see https://www.w3.org/TR/CSS22/cascade.html#specified-value
+
+        Returns:
+            Style: the specified style
+        """
+        return Style.specified_style(self)
+
+    def presentation_style(self):
+        """Return presentation attributes of an element as style"""
+        style = Style()
+        for key in self.keys():
+            if key in all_properties and all_properties[key][2]:
+                style[key] = self.attrib[key]
+        return style
 
 class ShapeElement(BaseElement):
     """Elements which have a visible representation on the canvas"""
@@ -509,20 +541,6 @@ class ShapeElement(BaseElement):
         if parent is not None and isinstance(parent, ShapeElement):
             return parent.composed_transform() * self.transform
         return self.transform
-
-    def composed_style(self):
-        """Calculate the final styles applied to this element"""
-        parent = self.getparent()
-        if parent is not None and isinstance(parent, ShapeElement):
-            return parent.composed_style() + self.style
-        return self.style
-
-    def cascaded_style(self):
-        """Add all cascaded styles, do not write to this Style object"""
-        ret = Style()
-        for style in self.root.stylesheets.lookup(self.get('id')):
-            ret += style
-        return ret + self.style
 
     def effective_style(self):
         """Without parent styles, what is the effective style is"""

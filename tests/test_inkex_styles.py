@@ -55,9 +55,9 @@ class StyleTest(TestCase):
         stl1 = Style({'stroke-width':'0px', 'fill-opacity':1.0,'fill':Color((200, 0, 0))})
         stl2 = Style({'stroke-width':'1pc', 'fill-opacity':0.0,'fill':Color((100, 0, 100))})
         stl3 = stl1.interpolate(stl2, 0.5)
-        assert stl3['fill-opacity'] == pytest.approx(0.5, 1e-3)
-        assert stl3['fill'] == [150, 0, 50]
-        assert stl3['stroke-width'] == '8px'
+        assert stl3('fill-opacity') == pytest.approx(0.5, 1e-3)
+        assert stl3('fill') == [150, 0, 50]
+        assert stl3('stroke-width') == '8px'
 
     def test_callback(self):
         """Test callback."""
@@ -190,13 +190,15 @@ class StyleSheetTest(TestCase):
 
     def test_lookup_by_id(self):
         """ID CSS lookup"""
-        self.assertEqual(self.css[0].to_xpath(), "//*[@id='layer1']")
+        self.assertTrue(self.css[0].to_xpath() in \
+            ["//*[@id='layer1']", "descendant-or-self::*[@id = 'layer1']"])
         elem = self.svg.getElement(self.css[0].to_xpath())
         self.assertEqual(elem.get('id'), 'layer1')
 
     def test_lookup_by_element(self):
         """Element name CSS lookup"""
-        self.assertEqual(self.css[1].to_xpath(), "//svg:circle")
+        self.assertTrue(self.css[1].to_xpath() in \
+            ["//svg:circle", "descendant-or-self::svg:circle"])
         elems = list(self.svg.xpath(self.css[1].to_xpath()))
         self.assertEqual(len(elems), 2)
         self.assertEqual(elems[0].get('id'), 'circle1')
@@ -204,22 +206,29 @@ class StyleSheetTest(TestCase):
 
     def test_lookup_by_class(self):
         """Class name CSS lookup"""
-        self.assertEqual(self.css[2].to_xpath(),\
-            "//*[contains(concat(' ', normalize-space(@class), ' '), ' two ')]")
+        self.assertTrue(self.css[2].to_xpath() in \
+            ["//*[contains(concat(' ', normalize-space(@class), ' '), ' two ')]",
+            "descendant-or-self::*[@class and contains"\
+            "(concat(' ', normalize-space(@class), ' '), ' two ')]"])
         elem = self.svg.getElement(self.css[2].to_xpath())
         self.assertEqual(elem.get('id'), 'rect2')
 
     def test_lookup_and(self):
         """Multiple CSS lookups"""
-        self.assertEqual(self.css[3].to_xpath(), "//*[@id='rect3']"\
-            "[contains(concat(' ', normalize-space(@class), ' '), ' three ')]")
+        self.assertTrue(self.css[3].to_xpath() in ["//*[@id='rect3']"\
+            "[contains(concat(' ', normalize-space(@class), ' '), ' three ')]",
+            "descendant-or-self::*[@id = 'rect3' and "\
+            "(@class and contains(concat(' ', normalize-space(@class), ' '), ' three '))]"])
         elem = self.svg.getElement(self.css[3].to_xpath())
         self.assertEqual(elem.get('id'), 'rect3')
 
     def test_lookup_or(self):
         """SVG rules can look up the right elements"""
-        self.assertEqual(self.css[6].to_xpath(), "//*[@id='circle1']|//*[@id='circle2']|"\
-             "//*[contains(concat(' ', normalize-space(@class), ' '), ' two ')]")
+        self.assertTrue(self.css[6].to_xpath() in ["//*[@id='circle1']|//*[@id='circle2']|"\
+             "//*[contains(concat(' ', normalize-space(@class), ' '), ' two ')]", 
+             "descendant-or-self::*[@id = 'circle1']|descendant-or-self::*[@id = 'circle2']"\
+             "|descendant-or-self::*[@class and contains(concat(' ', "\
+             "normalize-space(@class), ' '), ' two ')]"])
         elems = self.svg.xpath(self.css[6].to_xpath())
         self.assertEqual(len(elems), 3)
         self.assertEqual(elems[0].get('id'), 'rect2')

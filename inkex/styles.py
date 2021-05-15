@@ -1,6 +1,8 @@
 # coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#               2019-2020 Martin Owens
+#               2021 Jonathan Neuhauser, jonathan.neuhauser@outlook.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,9 +25,15 @@ and some color handling on top.
 
 import re
 from collections import OrderedDict
+from typing import MutableMapping, Optional, Union, Iterable
 
-from .colors import Color, ColorIdError
+import cssselect
+
+from .colors import Color, ColorError
 from .tween import interpcoord, interpunit
+
+from .properties import BaseStyleValue, all_properties, ShorthandValue
+
 
 
 class Classes(list):
@@ -67,19 +75,21 @@ class Classes(list):
             return self.remove(value)
         return self.append(value)
 
-class Style(OrderedDict):
+
+class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     """A list of style directives"""
     color_props = ('stroke', 'fill', 'stop-color', 'flood-color', 'lighting-color')
     opacity_props = ('stroke-opacity', 'fill-opacity', 'opacity', 'stop-opacity')
     unit_props = ('stroke-width')
 
-    def __init__(self, style=None, callback=None, **kw):
+    def __init__(self, style=None, callback=None, element=None, **kw):
+        self.element = element
         # This callback is set twice because this is 'pre-initial' data (no callback)
         self.callback = None
         # Either a string style or kwargs (with dashes as underscores).
         style = style or [(k.replace('_', '-'), v) for k, v in kw.items()]
         if isinstance(style, str):
-            style = self.parse_str(style)
+            style = self._parse_str(style)
         # Order raw dictionaries so tests can be made reliable
         if isinstance(style, dict) and not isinstance(style, OrderedDict):
             style = [(name, style[name]) for name in sorted(style)]
@@ -89,15 +99,21 @@ class Style(OrderedDict):
         self.callback = callback
 
     @staticmethod
-    def parse_str(style):
-        """Create a dictionary from the value of an inline style attribute"""
-        if style is None:
-            style = ""
-        for directive in style.split(';'):
-            if ':' in directive:
-                (name, value) = directive.split(':', 1)
-                # FUTURE: Parse value here for extra functionality
-                yield (name.strip().lower(), value.strip())
+    def _parse_str(style: str, element = None) \
+        -> Iterable[BaseStyleValue]:
+        """Create a dictionary from the value of an inline style attribute, including
+        its !important state, parsing the value if possible """
+        for declaration in style.split(';'):
+            if ":" in declaration:
+                result = BaseStyleValue.factory_errorhandled(element, \
+                   declaration=declaration.strip())
+                if result is not None:
+                    yield result
+
+    @staticmethod
+    def parse_str(style: str, element = None):
+        """Parse a style passed as string"""
+        return Style(style, element=element)
 
     def __str__(self):
         """Format an inline style attribute from a dictionary"""
@@ -105,7 +121,7 @@ class Style(OrderedDict):
 
     def to_str(self, sep=";"):
         """Convert to string using a custom delimiter"""
-        return sep.join(["{0}:{1}".format(*seg) for seg in self.items()])
+        return sep.join([self.get_store(key).declaration for key in self])
 
     def __add__(self, other):
         """Add two styles together to get a third, composing them"""
@@ -130,21 +146,60 @@ class Style(OrderedDict):
             self.pop(key, None)
         return self
 
-    def __eq__(self, other):
-        """Not equals, prefer to overload 'in' but that doesn't seem possible"""
-        if not isinstance(other, Style):
-            other = Style(other)
-        for arg in set(self) | set(other):
-            if self.get(arg, None) != other.get(arg, None):
-                return False
-        return True
-    __ne__ = lambda self, other: not self.__eq__(other)
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def copy(self):
+        ret = Style({}, element=self.element)
+        for key, value in super().items():
+            ret[key] = value
+        return ret
 
     def update(self, other):
-        """Make sure callback is called when updating"""
-        super().update(Style(other))
+        if not isinstance(other, Style):
+            other = Style(other)
+        # only update
+        if (isinstance(other, Style)):
+            for key in other.keys():
+                if not (self.get_importance(key) and not other.get_importance(key)):
+                    self[key] = other.get_store(key)
+
         if self.callback is not None:
             self.callback(self)
+
+    def add_inherited(self, parent):
+        """Creates a new Style containing all parent styles with importance "important" and
+        current styles with importance "important"
+
+        Returns:
+            Style: the merged Style object
+        """
+        ret = self.copy()
+        ret.apply_shorthands()  # parent should already have its shortcuts applied
+
+        if not (isinstance(parent, Style)):
+            return ret
+
+        apply = False
+        for key in parent.keys():
+            if key in all_properties and all_properties[key][3]:
+                # only set parent value if value is not set or parent importance is higher
+                if key not in ret:
+                    apply = True
+                elif self.get_importance(key) != parent.get_importance(key):
+                    apply = parent.get_importance(key)
+            elif key in ret and ret[key] == "inherit":
+                apply = True
+            if apply:
+                ret[key] = parent[key]
+        return ret
+
+    def apply_shorthands(self):
+        """Apply all shorthands in this style.
+        """
+        for element in list(self.values()):
+            if isinstance(element, ShorthandValue):
+                element.apply_shorthand(self)
 
     def __delitem__(self, key):
         super().__delitem__(key)
@@ -152,7 +207,75 @@ class Style(OrderedDict):
             self.callback(self)
 
     def __setitem__(self, key, value):
+        if not isinstance(value, BaseStyleValue):
+            # try to convert the value using the factory
+            value = BaseStyleValue.factory(attr_name=key, value=value)
+            # check if the set attribute is valid
+            _ = value.parse_value(self.element)
+        elif key != value.attr_name:
+            raise ValueError("""You're trying to save a value into a style attribute,
+            but the provided key is different from the attribute name given in the value""")
         super().__setitem__(key, value)
+        if self.callback is not None:
+            self.callback(self)
+
+    def __getitem__(self, key):
+        return self.get_store(key).value
+
+    def get(self, key, default=None):
+        if key in self:
+            return self.__getitem__(key)
+        return default
+
+    def get_store(self, key):
+        """Gets the BaseStyleValue of this key, since the other interfaces - __getitem__
+        and __call__ - return the original and parsed value, respectively."""
+        return super().__getitem__(key)
+
+    def __call__(self, key, element = None):
+        # check if there are shorthand properties defined. If so, apply them to a copy
+        copy = self
+        for value in super().values():
+            if isinstance(value, ShorthandValue):
+                copy = self.copy()
+                copy.apply_shorthands()
+        if (key in copy):
+            return copy.get_store(key).parse_value(element or self.element)
+        # style is not set, return the default value
+        if key in all_properties:
+            defvalue = BaseStyleValue.factory(attr_name=key, value=all_properties[key][1])
+            return defvalue.parse_value() # default values are independent of the element
+        raise KeyError("Unknown attribute")
+
+    def __eq__(self, other):
+        if not isinstance(other, Style):
+            other = Style(other)
+        selfkeys = self.keys()
+        otherkeys = other.keys()
+        if not [i for i, j in zip(sorted(selfkeys), sorted(otherkeys)) if i == j]:
+            #list of keys is not equal
+            return False
+        for arg in set(self) | set(other):
+            if self.get_store(arg) != other.get_store(arg):
+                return False
+        return True
+
+    def items(self):
+        for key, value in super().items():
+            yield key, value.value
+
+    def get_importance(self, key, default=False):
+        """Returns whether the declaration with key is marked as !important"""
+        if (key in self):
+            return super().__getitem__(key).important
+        return default
+
+    def set_importance(self, key, importance):
+        """Sets the !important state of a declaration with key key"""
+        if (key in self):
+            super().__getitem__(key).important = importance
+        else:
+            raise KeyError()
         if self.callback is not None:
             self.callback(self)
 
@@ -174,9 +297,9 @@ class Style(OrderedDict):
             if value == f"url(#{old_id})":
                 self[name] = f"url(#{new_id})"
 
-    def interpolate_prop(self, other, fraction, prop, svg=None):
+    def interpolate_prop(self, other, fraction, prop):
         """Interpolate specific property."""
-        a1 = self[prop]
+        a1 = self.get(prop, None)
         a2 = other.get(prop, None)
         if a2 is None:
             val = a1
@@ -202,9 +325,61 @@ class Style(OrderedDict):
         # type: (Style, float) -> Style
         """Interpolate all properties."""
         style = Style()
-        for prop, value in self.items():
+        for prop, _ in self.items():
             style[prop] = self.interpolate_prop(other, fraction, prop)
         return style
+
+    @classmethod
+    def cascaded_style(cls, element):
+        """Returns the cascaded style of an element (all rules that apply the element itself),
+        based on the stylesheets, the presentation attributes and the inline style using the
+        respective specificity of the style
+
+        see https://www.w3.org/TR/CSS22/cascade.html#cascading-order
+
+        Returns:
+            Style: the cascaded style
+        """
+        styles = list(element.root.stylesheets.lookup_specificity(element.get_id()))
+
+        # presentation attributes have specificity 0,
+        # see https://www.w3.org/TR/SVG/styling.html#PresentationAttributes
+        styles.append([element.presentation_style(), (0, 0, 0)])
+
+         # would be (1, 0, 0, 0), but then we'd have to extend every entry
+        styles.append([element.style, (float("inf"), 0, 0)])
+
+        # sort styles by specificity (ascending, so when overwriting it's correct)
+        styles = sorted(styles, key=lambda item: item[1])
+
+        result = styles[0][0].copy()
+        for style, _ in styles[1:]:
+            result.update(style)
+        result.element = element
+        return result
+
+    @classmethod
+    def specified_style(cls, element):
+        """Returns the specified style of an element, i.e. the cascaded style + inheritance,
+        see https://www.w3.org/TR/CSS22/cascade.html#specified-value
+
+        Returns:
+            Style: the specified style
+        """
+
+        # We currently dont treat the case where parent=absolute value and element=relative value,
+        # i.e. specified = relative * absolute.
+        cascaded = Style.cascaded_style(element)
+
+        parent = element.getparent()
+
+        # import this here, otherwise it will cause circular import problems
+        from .elements._base import BaseElement # pylint: disable=import-outside-toplevel
+        if parent is not None and isinstance(parent, BaseElement):
+            cascaded = Style.add_inherited(cascaded, parent.specified_style())
+        cascaded.element = element
+        return cascaded # doesn't have a parent
+
 
 
 class AttrFallbackStyle:
@@ -280,12 +455,24 @@ class StyleSheets(list):
             for style in sheet.lookup(element_id, svg=svg):
                 yield style
 
+    def lookup_specificity(self, element_id, svg=None):
+        """
+        Find all styles for this element and return the specificity of the match.
+        """
+        # This is aweful, but required because we can't know for sure
+        # what might have changed in the xml tree.
+        if svg is None:
+            svg = self.svg
+        for sheet in self:
+            for style in sheet.lookup_specificity(element_id, svg=svg):
+                yield style
+
 class StyleSheet(list):
     """
     A style sheet, usually the CDATA contents of a style tag, but also
     a css file used with a css. Will yield multiple Style() classes.
     """
-    comment_strip = re.compile(r"//.*?\n")
+    comment_strip = re.compile(r"(\/\/.*?\n)|(\/\*.*?\*\/)")
 
     def __init__(self, content=None, callback=None):
         super().__init__()
@@ -326,6 +513,16 @@ class StyleSheet(list):
                 if elem.get('id', None) == element_id:
                     yield style
 
+    def lookup_specificity(self, element_id, svg):
+        """Lookup the element_id against all the styles in this sheet
+        and return the specificity of the match"""
+        for style in self:
+            for rule, spec in zip(style.to_xpaths(), style.get_specificities()):
+                for elem in svg.xpath(rule):
+                    if elem.get('id', None) == element_id:
+                        yield (style, spec)
+
+
 class ConditionalStyle(Style):
     """
     Just like a Style object, but includes one or more
@@ -349,34 +546,37 @@ class ConditionalStyle(Style):
         # This can be converted to cssselect.CSSSelector (lxml.cssselect) later if we have
         # coverage problems. The main reason we're not is that cssselect is doing exactly
         # this xpath transform and provides no extra functionality for reverse lookups.
-        return '|'.join([rule.to_xpath() for rule in self.rules])
+        return '|'.join(self.to_xpaths())
+    def to_xpaths(self):
+        return [rule.to_xpath() for rule in self.rules]
+    def get_specificities(self):
+        """gets an iterator of the specificity of all rules in this ConditionalStyle"""
+        for rule in self.rules:
+            yield rule.get_specificity()
+
 
 class ConditionalRule:
     """A single css rule"""
     step_to_xpath = [
-        (re.compile(r'\[(\w+)\^=([^\]]+)\]'), r'[starts-with(@\1,\2)]'), # Starts With
-        (re.compile(r'\[(\w+)\$=([^\]]+)\]'), r'[ends-with(@\1,\2)]'), # Ends With
-        (re.compile(r'\[(\w+)\*=([^\]]+)\]'), r'[contains(@\1,\2)]'), # Contains
-        (re.compile(r'\[([^@\(\)\]]+)\]'), r'[@\1]'), # Attribute (start)
-        (re.compile(r'#(\w+)'), r"[@id='\1']"), # Id Match
-        (re.compile(r'\s*>\s*([^\s>~\+]+)'), r'/\1'), # Direct child match
-        #(re.compile(r'\s*~\s*([^\s>~\+]+)'), r'/following-sibling::\1'),
-        #(re.compile(r'\s*\+\s*([^\s>~\+]+)'), r'/following-sibling::\1[1]'),
-        (re.compile(r'\s*([^\s>~\+]+)'), r'//\1'), # Decendant match
-        (re.compile(r'\.([-\w]+)'), r"[contains(concat(' ', normalize-space(@class), ' '), ' \1 ')]"),
-        (re.compile(r'//\['), r'//*['), # Attribute only match
-        (re.compile(r'//(\w+)'), r'//svg:\1'), # SVG namespace addition
+        # namespace addition
+        (re.compile(r'(::|\/)([a-z]+)(\W)(?<!-)'), r"\1svg:\2\3"),
     ]
 
     def __init__(self, rule):
         self.rule = rule.strip()
+        self.selector = cssselect.parse(self.rule)[0]
 
     def __str__(self):
         return self.rule
 
     def to_xpath(self):
         """Attempt to convert the rule into a simplified xpath"""
-        ret = self.rule
+        # the space in the end is needed for the negative lookbehind in the regex, will be removed
+        # on return
+        ret = cssselect.HTMLTranslator().selector_to_xpath(self.selector) + " "
         for matcher, replacer in self.step_to_xpath:
             ret = matcher.sub(replacer, ret)
-        return ret
+        return ret.strip()
+    def get_specificity(self):
+        """gets the css specificity of this selector"""
+        return self.selector.specificity()

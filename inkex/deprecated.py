@@ -37,7 +37,7 @@ import inkex.utils
 import inkex.units
 from inkex.base import SvgThroughMixin, InkscapeExtension
 from inkex.localization import inkex_gettext as _
-from inkex.elements._base import BaseElement
+from inkex.elements._base import BaseElement, ShapeElement
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -401,3 +401,11 @@ def description(self, value):
     """elem.desc = value"""
     self.desc = value
 BaseElement.description = deprecate(description)
+
+
+def composed_style(element: ShapeElement):
+    """Calculate the final styles applied to this element
+    This function has been deprecated in favor of BaseElement.specified_style()"""
+    return element.specified_style()
+
+ShapeElement.composed_style = deprecate(composed_style)

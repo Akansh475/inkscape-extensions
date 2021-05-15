@@ -20,7 +20,7 @@
 Convas module for ink2canvas extension
 """
 
-from inkex import Color
+from inkex import Color, Style
 
 class Canvas(object):
     """Canvas API helper class"""
@@ -28,8 +28,8 @@ class Canvas(object):
     def __init__(self, parent, width, height, context="ctx"):
         self.obj = context
         self.code = []  # stores the code
-        self.style = {}
-        self.styleCache = {}  # stores the previous style applied
+        self.style = Style()
+        self.styleCache = Style()  # stores the previous style applied
         self.parent = parent
         self.width = width
         self.height = height
@@ -99,19 +99,13 @@ class Canvas(object):
         self.write("ctx.globalAlpha = %.1f;" % float(value))
 
     def setFill(self, value):
-        try:
-            alpha = self.style["fill-opacity"]
-        except:
-            alpha = 1
+        alpha = self.style("fill-opacity")
         if not value.startswith("url("):
             fill = self.getColor(value, alpha)
             self.write("ctx.fillStyle = %s;" % fill)
 
     def setStroke(self, value):
-        try:
-            alpha = self.style["stroke-opacity"]
-        except:
-            alpha = 1
+        alpha = self.style("stroke-opacity")
         self.write("ctx.strokeStyle = %s;" % self.getColor(value, alpha))
 
     def setStrokeWidth(self, value):
@@ -185,7 +179,7 @@ class Canvas(object):
         self.write("ctx.restore();")
 
     def closePath(self):
-        if "fill" in self.style and self.style["fill"] != "none":
+        if self.style("fill") is not None:
             self.write("ctx.fill();")
-        if "stroke" in self.style and self.style["stroke"] != "none":
+        if self.style("stroke") is not None:
             self.write("ctx.stroke();")

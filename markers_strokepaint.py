@@ -78,24 +78,24 @@ class MarkersStrokePaint(inkex.EffectExtension):
             fill, stroke = self.options.tab(node.style)
 
             for attr in MARKERS:
-                if not node.style.get(attr, '').startswith('url(#'):
+                marker_node = node.style(attr)
+                if not isinstance(marker_node, inkex.Marker):
                     continue
 
-                marker_id = node.style[attr][5:-1]
-                marker_node = self.svg.getElement('/svg:svg//svg:marker[@id="%s"]' % marker_id)
-
-                if marker_node is None:
-                    inkex.errormsg(_("unable to locate marker: %s") % marker_id)
+                if marker_node is None and attr in node.style:
+                    inkex.errormsg(_("unable to locate marker: %s") % node.style[attr])
                     continue
+
+                marker_id = marker_node.get_id()
 
                 if not self.options.modify:
                     marker_node = marker_node.copy()
                     self.svg.defs.append(marker_node)
                     marker_id = self.svg.get_unique_id(marker_id)
-
-                node.style[attr] = "url(#%s)" % marker_id
                 marker_node.set('id', marker_id)
                 marker_node.set('inkscape:stockid', marker_id)
+
+                node.style[attr] = marker_node
 
                 for child in marker_node:
                     if stroke is not None:

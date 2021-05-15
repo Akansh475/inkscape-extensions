@@ -3698,7 +3698,7 @@ class Gcodetools(inkex.EffectExtension):
         for i in g:
             # Get parameters
             if i.get("gcodetools") == "Gcodetools tool background":
-                tool["style"] = dict(inkex.Style.parse_str(i.get("style")))
+                tool["style"] = dict(i.style)
             elif i.get("gcodetools") == "Gcodetools tool parameter":
                 key = None
                 value = None
@@ -3917,8 +3917,8 @@ class Gcodetools(inkex.EffectExtension):
                         for tag in tags:
                             comment += gcode_comment_str("{}: {}".format(tag, tags[tag]))
 
-                    style = dict(inkex.Style.parse_str(path.get("style")))
-                    colors[id_] = inkex.Color(style['stroke'] if "stroke" in style and style['stroke'] != 'none' else "#000").to_rgb()
+                    stroke = path.style('stroke')
+                    colors[id_] = inkex.Color(stroke if stroke != None else "#000").to_rgb()
                     if path.get("dxfpoint") == "1":
                         tmp_curve = self.transform_csp(csp, layer)
                         x = tmp_curve[0][0][0][0]

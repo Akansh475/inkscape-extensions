@@ -151,18 +151,15 @@ class PixelSnap(inkex.EffectExtension):
 
     def stroke_width(self, elem, setval=None):
         """Get/set stroke-width in pixels, untransformed"""
-        style = dict(inkex.Style.parse_str(elem.attrib.get('style', '')))
-        stroke = style.get('stroke', None)
-        if stroke == 'none':
-            stroke = None
+        style = elem.style
+        stroke = style('stroke')
 
         stroke_width = 0
         if stroke and setval is None:
-            stroke_width = self.svg.unittouu(style.get('stroke-width', '').strip())
+            stroke_width = self.svg.unittouu(style('stroke-width').strip())
 
         if setval:
-            style['stroke-width'] = str(setval)
-            elem.attrib['style'] = str(inkex.Style(style))
+            style['stroke-width'] = setval
         else:
             return stroke_width
 

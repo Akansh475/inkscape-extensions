@@ -55,14 +55,14 @@ class Extrude(inkex.EffectExtension):
                             line += [('L', v[1])]
                     ele = inkex.PathElement()
                     paths[0].xpath('..')[0].append(ele)
-                    ele.set('d', str(inkex.Path(line)))
+                    ele.set('d', inkex.Path(line))
                     style = {
                         'fill': 'none',
                         'stroke': '#000000',
                         'stroke-opacity': 1,
                         'stroke-width': self.svg.unittouu('1px'),
                     }
-                    ele.set('style', str(inkex.Style(style)))
+                    ele.set('style', inkex.Style(style))
                 elif self.options.mode.lower() == 'polygons':
                     g = inkex.Group()
                     style = {
@@ -72,7 +72,7 @@ class Extrude(inkex.EffectExtension):
                         'stroke-opacity': 0.6,
                         'stroke-width': self.svg.unittouu('2px'),
                     }
-                    g.set('style', str(inkex.Style(style)))
+                    g.set('style', inkex.Style(style))
                     paths[0].xpath('..')[0].append(g)
                     for comp in verts:
                         for n, v in enumerate(comp):

@@ -44,7 +44,7 @@ class Html5Canvas(inkex.OutputExtension):
         gstops = gradient.href
         colors = []
         for stop in gstops:
-            colors.append(stop.get("style"))
+            colors.append(stop.style)
         if gradient.get("r"):
             return svg.RadialGradientDef(gradient, colors)
         return svg.LinearGradientDef(gradient, colors)

@@ -44,12 +44,12 @@ def set_font(node, new_font, style=None):
     """
     dirty = False
     if not style:
-        style = get_style(node)
+        style = node.style
     if style:
         for att in font_attributes:
             if att in style:
                 style[att] = new_font
-                set_style(node, style)
+                node.style = style
                 dirty = True
     return dirty
 
@@ -61,10 +61,10 @@ def find_replace_font(node, find, replace):
     Returns a dirty boolean flag
     """
     dirty = False
-    style = get_style(node)
+    style = node.style
     if style:
         for att in font_attributes:
-            if att in style and style[att].strip().lower() == find:
+            if style(att).strip().lower() == find:
                 set_font(node, replace, style)
                 dirty = True
     return dirty
@@ -84,26 +84,13 @@ def is_text(node):
     return node.tag in text_tags
 
 
-def get_style(node):
-    """
-    Sugar coated way to get style dict from a node
-    """
-    if 'style' in node.attrib:
-        return dict(inkex.Style.parse_str(node.attrib['style']))
-
-def set_style(node, style):
-    """
-    Sugar coated way to set the style dict, for node
-    """
-    node.attrib['style'] = str(inkex.Style(style))
-
 def get_fonts(node):
     """
     Given a node, returns a list containing all the fonts that
     the node is using.
     """
     fonts = []
-    s = get_style(node)
+    s = node.style
     if not s:
         return fonts
     for a in font_attributes:

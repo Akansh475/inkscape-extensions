@@ -184,14 +184,14 @@ class AttributeHandelingTestCase(SvgTestCase):
     def test_in_place_style(self):
         """Do styles update when we set them"""
         elem = self.svg.getElementById('D')
-        elem.style['fill'] = 'purpleberry'
-        self.assertEqual(elem.get('style'), 'fill:purpleberry')
-        elem.style = {'marker': 'flag'}
-        self.assertEqual(elem.get('style'), 'marker:flag')
-        elem.style = Style(stroke='gammon')
-        self.assertEqual(elem.get('style'), 'stroke:gammon')
+        elem.style['fill'] = 'purple'
+        self.assertEqual(elem.get('style'), 'fill:purple')
+        elem.style = {'stroke-dashoffset': '1'}
+        self.assertEqual(elem.get('style'), 'stroke-dashoffset:1')
+        elem.style = Style(stroke='red')
+        self.assertEqual(elem.get('style'), 'stroke:red')
         elem.style.update('grape:2;strawberry:nice;')
-        self.assertEqual(elem.get('style'), 'stroke:gammon;grape:2;strawberry:nice')
+        self.assertEqual(elem.get('style'), 'stroke:red;grape:2;strawberry:nice')
 
     def test_random_id(self):
         """Test setting a random id"""

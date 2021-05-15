@@ -5181,7 +5181,7 @@ G01 Z1 (going to cutting z)\n""",
         tools_group = layer.add(Group(gcodetools="Gcodetools tool definition"))
         bg = tools_group.add(PathElement(gcodetools="Gcodetools tool background"))
         bg.style = "fill-opacity:0.5;stroke:#444444;"
-        bg.style['fill'] = colors[tool_num % len(colors)]
+        bg.style['fill'] = "#" + colors[tool_num % len(colors)]
 
         y = 0
         keys = []

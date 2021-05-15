@@ -201,8 +201,8 @@ class RectTest(ElementTestCase):
     def test_compose_stylesheet(self):
         """Test finding the composed stylesheet for the shape"""
         self.assertEqual(str(self.elem.style), 'fill:#0000ff;stroke-width:1px')
-        self.assertEqual(str(self.elem.composed_style()),
-                         'fill:#0000ff;stroke:#d88;joker:url(#path1);stroke-width:1px')
+        self.assertEqual(str(self.elem.specified_style()),
+                         'fill:#0000ff;stroke-width:1px;stroke:#d88')
 
     def test_path(self):
         """Rectangle path"""

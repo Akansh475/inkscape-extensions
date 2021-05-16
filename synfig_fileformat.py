@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
 # ##### Constants ##########################################
 kux = 60.0  # Number of SVG units (pixels) per Synfig "unit"
-gamma = 2.2
+gamma = 1.0
 tangent_scale = 3.0  # Synfig tangents are scaled by a factor of 3
 
 # ##### Layer parameters, types, and default values ########
@@ -55,7 +55,6 @@ layers["circle"].update({
     "feather": ["real", 0.0],
     "origin": ["vector", [0.0, 0.0]],
     "invert": ["bool", False],
-    "falloff": ["integer", 2]
 })
 
 layers["rectangle"] = default_composite.copy()

@@ -16,4 +16,5 @@ old
 dist
 *.out.export
 cov.xml
+coverage.xml
 .vscode/

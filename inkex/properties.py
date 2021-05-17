@@ -324,7 +324,8 @@ class EnumValue(BaseStyleValue):
     def _parse_value(self, value : str, element = None):
         if value in self.valueset:
             return value
-        raise ValueError("Value not in list of allowed values")
+        raise ValueError(f"Value '{value}' is invalid for the property {self.attr_name}. " +
+                         f"Allowed values are: {self.valueset + ['inherit']}")
 
 
 class ShorthandValue(BaseStyleValue, ABC):
@@ -466,7 +467,7 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
                                                      "ultra-expanded"]),
     "font-style": (EnumValue, "normal", True, True, ["normal", "italic", "oblique"]),
     # a lot more values and subproperties in SVG2 / CSS-Fonts3
-    "font-variant": (EnumValue, "normal", True, True, ["normal", "small-caps", "inherit"]),
+    "font-variant": (EnumValue, "normal", True, True, ["normal", "small-caps"]),
     "font-weight": (EnumValue, "normal", True, True, ["normal", "bold"] + \
                     [str(i) for i in range(100, 901, 100)]),
     "glyph-orientation-horizontal": (BaseStyleValue, "0deg", True, True, None),

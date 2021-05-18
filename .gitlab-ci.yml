@@ -52,7 +52,7 @@ test:coverage:
     - pyenv shell 3.7.2
     - pip install coverage
     - coverage3 combine .coverage-*
-    - coverage3 report -m
+    - coverage3 report -m --precision=2
     - coverage3 html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
     - echo -e "\n\n"
       "Coverage report successfully created; you can access the full HTML report at\n"
@@ -66,7 +66,7 @@ test:coverage:
     - test:python37
     - test:python38
   when: always
-  coverage: '/TOTAL.+?(\d+%)/'
+  coverage: '/TOTAL.+?(\d+.\d+%)/'
   artifacts:
     paths:
       - htmlcov/

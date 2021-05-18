@@ -278,18 +278,32 @@ def balf(t, args):
     return math.sqrt(retval)
 
 
-def simpson(a, b, n_limit, tolerance, balarg):
-    """It's not known what this function does..."""
+def simpson(start, end, maxiter, tolerance, bezier_args):
+    """Calculate the length of a bezier curve using Simpson's algorithm:
+    http://steve.hollasch.net/cgindex/curves/cbezarclen.html
+
+    Args:
+        start (int): Start time (between 0 and 1)
+        end (int): End time (between start time and 1)
+        maxiter (int): Maximum number of iterations. If not a power of 2, the algorithm
+        will behave like the value is set to the next power of 2.
+        tolerance (float):  maximum error ratio
+        bezier_args (list): arguments as computed by bezierparametrize()
+
+    Returns:
+        float: the appoximate length of the bezier curve
+    """
+    
     n = 2
-    multiplier = (b - a) / 6.0
-    endsum = balf(a, balarg) + balf(b, balarg)
-    interval = (b - a) / 2.0
+    multiplier = (end - start) / 6.0
+    endsum = balf(start, bezier_args) + balf(end, bezier_args)
+    interval = (end - start) / 2.0
     asum = 0.0
-    bsum = balf(a + interval, balarg)
+    bsum = balf(start + interval, bezier_args)
     est1 = multiplier * (endsum + (2.0 * asum) + (4.0 * bsum))
     est0 = 2.0 * est1
     # print(multiplier, endsum, interval, asum, bsum, est1, est0)
-    while n < n_limit and abs(est1 - est0) > tolerance:
+    while n < maxiter and abs(est1 - est0) > tolerance:
         n *= 2
         multiplier /= 2.0
         interval /= 2.0
@@ -297,7 +311,7 @@ def simpson(a, b, n_limit, tolerance, balarg):
         bsum = 0.0
         est0 = est1
         for i in range(1, n, 2):
-            bsum += balf(a + (i * interval), balarg)
+            bsum += balf(start + (i * interval), bezier_args)
             est1 = multiplier * (endsum + (2.0 * asum) + (4.0 * bsum))
     # print(multiplier, endsum, interval, asum, bsum, est1, est0)
     return est1

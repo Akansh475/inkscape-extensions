@@ -16,6 +16,7 @@ from inkex import (
 from inkex.colors import Color
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError
+from inkex.units import parse_unit
 
 from .test_inkex_elements_base import SvgTestCase
 
@@ -363,9 +364,10 @@ class GradientTests(ElementTestCase):
             for key, value in expected.items():
                 assert float(grad.get(key)) == pytest.approx(value, 1e-3)
             grad = classname(attrib=attributes)
+            
             grad = grad.interpolate(grad, 0.0)
             for key, value in expected.items():
-                assert float(grad.get(key)) == pytest.approx(value, 1e-3)
+                assert float(parse_unit(grad.get(key))[0]) == pytest.approx(value, 1e-3)
 
     def test_apply_transform(self):
         """Transform gradients"""
@@ -453,7 +455,7 @@ class GradientTests(ElementTestCase):
             self.assertEqual(str(grad.stops[1].style), str(Style(comp)))
             self.assertEqual(str(grad.gradientTransform), 'translate(1.5, 1.5)')
             for key, value in expected.items():
-                self.assertEqual(float(grad.get(key)), pytest.approx(value, 1e-3))
+                self.assertEqual(float(parse_unit(grad.get(key))[0]), pytest.approx(value, 1e-3))
 
 
 class SymbolTest(ElementTestCase):

@@ -207,3 +207,11 @@ def math_eval(function, variable="x"):
     except SyntaxError:
         pass
     return None
+
+def is_number(string):
+    """Checks if a value is a number"""
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False

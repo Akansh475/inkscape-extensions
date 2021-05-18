@@ -27,7 +27,8 @@ from lxml import etree
 from copy import deepcopy
 
 from ..transforms import Transform
-from ..tween import interpcoord, interp
+from ..units import convert_unit
+
 from ..styles import Style
 
 from ._utils import addNS
@@ -112,10 +113,8 @@ class Stop(BaseElement):
         self.set('offset', number)
 
     def interpolate(self, other, fraction):
-        newstop = Stop()
-        newstop.style = self.style.interpolate(other.style, fraction)
-        newstop.offset = interpcoord(float(self.offset), float(other.offset), fraction)
-        return newstop
+        from ..tween import StopInterpolator
+        return StopInterpolator(self, other).interpolate(fraction)
 
 
 class Pattern(BaseElement):
@@ -133,7 +132,7 @@ class Gradient(BaseElement):
     @property
     def stops(self):
         """Return an ordered list of own or linked stop nodes"""
-        gradcolor = self.href if isinstance(self.href, LinearGradient) else self
+        gradcolor = self.href if isinstance(self.href, (LinearGradient, RadialGradient)) else self
         return sorted([child for child in gradcolor if isinstance(child, Stop)]
                       , key=lambda x: float(x.offset))
 
@@ -152,36 +151,11 @@ class Gradient(BaseElement):
         """Remove all orientation attributes from this element"""
         for attr in self.orientation_attributes:
             self.pop(attr)
-
-    def interpolate(self, other, fraction): # type: (LinearGradient, float) -> LinearGradient
+    from inkex.elements import SvgDocumentElement
+    def interpolate(self, other, fraction, svg=None): # type: (LinearGradient, float, SvgDocumentElement) -> LinearGradient
         """Interpolate with another gradient."""
-        if self.tag_name != other.tag_name:
-            return self
-        newgrad = self.copy()
-
-        # interpolate transforms
-        newtransform = self.gradientTransform.interpolate(other.gradientTransform, fraction)
-        newgrad.gradientTransform = newtransform
-
-        # interpolate orientation
-        for attr in self.orientation_attributes:
-            newattr = interpcoord(self.uutounit(self.get(attr)), self.uutounit(other.get(attr)), fraction)
-            newgrad.set(attr, self.unittouu(newattr))
-
-        # interpolate stops
-        if self.href is not None and self.href is other.href:
-            # both gradients link to the same stops
-            pass
-        else:
-            # gradients might have different stops
-            newoffsets = sorted(self.stop_offsets + other.stop_offsets[1:-1])
-            func = lambda x,y,f: x.interpolate(y, f)
-            sstops = interp(self.stop_offsets, list(self.stops), newoffsets, func)
-            ostops = interp(other.stop_offsets, list(other.stops), newoffsets, func)
-            newstops = [s1.interpolate(s2, fraction) for s1, s2 in zip(sstops, ostops)]
-            newgrad.remove_all(Stop)
-            newgrad.add(*newstops)
-        return newgrad
+        from ..tween import GradientInterpolator
+        return GradientInterpolator(self, other, svg).interpolate(fraction)
 
     def stops_and_orientation(self):
         """Return a copy of all the stops in this gradient"""

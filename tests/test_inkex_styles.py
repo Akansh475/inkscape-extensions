@@ -55,9 +55,10 @@ class StyleTest(TestCase):
         stl1 = Style({'stroke-width':'0px', 'fill-opacity':1.0,'fill':Color((200, 0, 0))})
         stl2 = Style({'stroke-width':'1pc', 'fill-opacity':0.0,'fill':Color((100, 0, 100))})
         stl3 = stl1.interpolate(stl2, 0.5)
-        assert stl3('fill-opacity') == pytest.approx(0.5, 1e-3)
+        print(stl3)
+        self.assertAlmostEqual(stl3('fill-opacity'), 0.5, 1e-3)
         assert stl3('fill') == [150, 0, 50]
-        assert stl3('stroke-width') == '8px'
+        assert stl3['stroke-width'] == '8px'
 
     def test_callback(self):
         """Test callback."""
@@ -77,6 +78,7 @@ class StyleTest(TestCase):
         st.callback = cb
         st['fill-opacity'] = '.75'
         self.assertEqual(calls, 2)
+
 
 class AttribFallbackTest(TestCase):
     """Test the fallback style for handling attribute based styles"""

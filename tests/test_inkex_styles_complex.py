@@ -201,6 +201,7 @@ class StyleInheritanceTests(TestCase):
             ("stroke", doc.getElementById(
                 "linearGradient847"), "url(#linearGradient847)"),
             ("fill", Color("red"), "red"),
+            ("stroke", None, "none"),
             ("opacity", 0.5, "0.5"),
             ("opacity", 1.2, "1"),
             ("opacity", -2, "0"),

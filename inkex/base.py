@@ -101,6 +101,22 @@ class InkscapeExtension:
                     return do_nothing
                 raise AbortExtension(f"Can not find method {name}")
         return _inner
+    
+    @staticmethod
+    def arg_class(options: List[Type]) -> Callable[[str], Any]:
+        """Used by add_argument to match an option with a class
+
+        Types to choose from are given by the options list
+        Usage:
+        pars.add_argument("--class", type=self.arg_class([ClassA, ClassB]), default="ClassA")
+        """
+        def _inner(value: str):
+            name = value.strip('"')
+            for i in options:
+                if name == i.__name__:
+                    return i
+            raise AbortExtension(f"Can not find class {name}")
+        return _inner
 
     def debug(self, msg):
         # type: (str) -> None

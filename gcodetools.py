@@ -5265,7 +5265,9 @@ G01 Z1 (going to cutting z)\n""",
     # TODO Launch browser on help tab
     ################################################################################
     def tab_help(self):
-        self.error("Tutorials, manuals and support can be found at\n"
+        self.error("Switch to another tab to run the extensions.\n"
+                   "No changes are made if the preferences or help tabs are active.\n\n"
+                   "Tutorials, manuals and support can be found at\n"
                    " English support forum:\n"
                    "    http://www.cnc-club.ru/gcodetools\n"
                    "and Russian support forum:\n"
@@ -5277,6 +5279,10 @@ G01 Z1 (going to cutting z)\n""",
 
     def tab_preferences(self):
         return self.tab_help()
+
+    def tab_options(self):
+        return self.tab_help()
+
 
     ################################################################################
     # Lathe

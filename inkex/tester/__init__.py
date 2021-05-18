@@ -74,6 +74,7 @@ import tempfile
 import hashlib
 import random
 import uuid
+from typing import List, Union, Tuple
 
 from io import BytesIO, StringIO
 import xml.etree.ElementTree as xml
@@ -272,7 +273,7 @@ class ComparisonMixin:
     Add comparison tests to any existing test suite.
     """
     # This input svg file sent to the extension (if any)
-    compare_file = 'svg/shapes.svg'
+    compare_file: Union[List[str], Tuple[str], str] = 'svg/shapes.svg'
     # The ways in which the output is filtered for comparision (see filters.py)
     compare_filters = [] # type: List[Compare]
     # If true, the filtered output will be saved and only applied to the

@@ -25,14 +25,16 @@ and some color handling on top.
 
 import re
 from collections import OrderedDict
-from typing import MutableMapping, Optional, Union, Iterable
+from typing import MutableMapping, Union, Iterable, TYPE_CHECKING
 
 import cssselect
 
-from .colors import Color, ColorError
-from .tween import interpcoord, interpunit
+from .colors import Color
 
 from .properties import BaseStyleValue, all_properties, ShorthandValue
+
+if TYPE_CHECKING:
+    from inkex import SvgDocumentElement
 
 
 
@@ -207,7 +209,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             self.callback(self)
 
     def __setitem__(self, key, value):
-        if not isinstance(value, BaseStyleValue):
+        if not isinstance(value, BaseStyleValue) or value is None:
             # try to convert the value using the factory
             value = BaseStyleValue.factory(attr_name=key, value=value)
             # check if the set attribute is valid
@@ -297,37 +299,16 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             if value == f"url(#{old_id})":
                 self[name] = f"url(#{new_id})"
 
-    def interpolate_prop(self, other, fraction, prop):
-        """Interpolate specific property."""
-        a1 = self.get(prop, None)
-        a2 = other.get(prop, None)
-        if a2 is None:
-            val = a1
-        else:
-            if prop in self.color_props:
-                if isinstance(a1, Color):
-                    val = a1.interpolate(Color(a2), fraction)
-                elif a1.startswith('url(') or a2.startswith('url('):
-                    # gradient requires changes to the whole svg
-                    # and needs to be handled externally
-                    val = a1
-                else:
-                    val = Color(a1).interpolate(Color(a2), fraction)
-            elif prop in self.opacity_props:
-                val = interpcoord(float(a1), float(a2), fraction)
-            elif prop in self.unit_props:
-                val = interpunit(a1, a2, fraction)
-            else:
-                val = a1
-        return val
-
     def interpolate(self, other, fraction):
-        # type: (Style, float) -> Style
+        # type: (Style, Style, float) -> Style
         """Interpolate all properties."""
-        style = Style()
-        for prop, _ in self.items():
-            style[prop] = self.interpolate_prop(other, fraction, prop)
-        return style
+        from .tween import StyleInterpolator
+        from inkex.elements import PathElement
+        if self.element is None:
+            self.element = PathElement(style=str(self))
+        if other.element is None:
+            other.element = PathElement(style=str(other))
+        return StyleInterpolator(self.element, other.element).interpolate(fraction)
 
     @classmethod
     def cascaded_style(cls, element):

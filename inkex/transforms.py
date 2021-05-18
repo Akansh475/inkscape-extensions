@@ -30,7 +30,6 @@ import sys
 from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isfinite
 
-from .tween import interpcoord
 from .utils import strargs, KeyDict
 
 from typing import overload, cast, List, Any, Callable, Generator, Iterator, Tuple, Union, Optional, Sequence  # pylint: disable=unused-import
@@ -614,13 +613,8 @@ class Transform:
     def interpolate(self, other, fraction):
         # type: (Transform, float) -> Transform
         """Interpolate with another Transform."""
-        return Transform((
-            interpcoord(self.a, other.a, fraction),
-            interpcoord(self.b, other.b, fraction),
-            interpcoord(self.c, other.c, fraction),
-            interpcoord(self.d, other.d, fraction),
-            interpcoord(self.e, other.e, fraction),
-            interpcoord(self.f, other.f, fraction)))
+        from .tween import TransformInterpolator
+        return TransformInterpolator(self, other).interpolate(fraction)
 
 
 class BoundingInterval:  # pylint: disable=too-few-public-methods

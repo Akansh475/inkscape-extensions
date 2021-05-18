@@ -22,7 +22,7 @@
 Basic color controls
 """
 
-from .tween import interpcoord
+from .utils import PY3
 
 # All the names that get added to the inkex API itself.
 __all__ = ('Color', 'ColorError', 'ColorIdError')
@@ -412,10 +412,28 @@ class Color(list):
 
     def interpolate(self, other, fraction):
         """Iterpolate two colours by the given fraction"""
-        return Color(
-            [interpcoord(c1, c2, fraction)
-             for (c1, c2) in zip(self.to_floats(), other.to_floats())]
-            )
+        from .tween import ColorInterpolator
+        return ColorInterpolator(self, other).interpolate(fraction)
+
+    @staticmethod
+    def isnone(x):
+        """Checks if a given color is none"""
+
+        if x is None or (isinstance(x, str) and x.lower() == "none"):
+            return True
+        return False
+    @staticmethod
+    def iscolor(x, accept_none=False):
+        """Checks if a given value can be parsed as a color"""
+        if isinstance(x, str) and (accept_none or not(Color.isnone(x))):
+            try:
+                Color(x)
+                return True
+            except (ColorError):
+                pass
+        if isinstance(x, Color):
+            return True
+        return False
 
 
 def rgb_to_hsl(red, green, blue):

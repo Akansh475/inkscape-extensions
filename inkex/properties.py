@@ -38,7 +38,7 @@ class BaseStyleValue():
         if (declaration is not None and ':' in declaration):
             self.attr_name, self.value, self.important = BaseStyleValue.parse_declaration(
                 declaration)
-        elif (attr_name is not None and value is not None):
+        elif (attr_name is not None):
             self.attr_name = attr_name.strip().lower()
             if isinstance(value, str):
                 self.value = value.strip()
@@ -311,6 +311,10 @@ class PaintValue(ColorValue, URLNoneValue):
                 return Color(match.group(2))
         return Color(value)
 
+    def _unparse_value(self, value: object):
+        if value is None:
+            return "none"
+        return super()._unparse_value(value)
 
 
 

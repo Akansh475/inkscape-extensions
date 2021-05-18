@@ -11,7 +11,7 @@ from argparse import ArgumentTypeError
 
 import pytest
 
-from inkex.utils import debug, errormsg, filename_arg, Boolean, to, strargs, math_eval
+from inkex.utils import debug, errormsg, filename_arg, Boolean, to, strargs, math_eval, is_number
 from inkex.tester import TestCase
 
 from inkex import addNS
@@ -103,6 +103,7 @@ class TestInkexBasic(object):
         errormsg(u'Àûïàèé')
         assert capsys.readouterr().err, u'Àûïàèé\n'
 
+
 import math
 
 class TestMathFunctions(TestCase):
@@ -116,3 +117,10 @@ class TestMathFunctions(TestCase):
         function = "erf(x)"
         f = math_eval(function)
         self.assertAlmostEqual(f(1), math.erf(1))
+    def test_is_number(self):
+        self.assertTrue(is_number("155"))
+        self.assertTrue(is_number("12.5"))
+        self.assertTrue(is_number("12.5e-5"))
+        self.assertFalse(is_number("10=3"))
+        self.assertFalse(is_number(""))
+        self.assertFalse(is_number("a"))

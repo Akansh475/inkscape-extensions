@@ -22,6 +22,9 @@ Interpolation of attributes in selected objects or group's children.
 """
 
 import inkex
+from inkex.localization import inkex_gettext as _
+from inkex.tween import ColorInterpolator, ValueInterpolator, AttributeInterpolator
+from inkex.utils import is_number
 
 class InterpAttG(inkex.EffectExtension):
     """
@@ -31,16 +34,16 @@ class InterpAttG(inkex.EffectExtension):
     def __init__(self):
         super(InterpAttG, self).__init__()
         self.arg_parser.add_argument(
-            "-a", "--att", type=str, dest="att", default="fill",
+            "-a", "--att", type=str, dest="att", default="style/fill",
             help="Attribute to be interpolated.")
         self.arg_parser.add_argument(
             "-o", "--att-other", type=str, dest="att_other",
             help="Other attribute (for a limited UI).")
         self.arg_parser.add_argument(
-            "-t", "--att-other-type", type=str, dest="att_other_type",
-            help="The other attribute type.")
+            "-t", "--att-other-type", type=self.arg_class([ColorInterpolator, ValueInterpolator]),
+            dest="att_other_type", help="The other attribute type.")
         self.arg_parser.add_argument(
-            "-w", "--att-other-where", type=str, dest="att_other_where",
+            "-w", "--att-other-where", type=str, dest="att_other_where", default="tag",
             help="That is a tag attribute or a style attribute?")
         self.arg_parser.add_argument(
             "-s", "--start-val", type=str, dest="start_val", default="#F00",
@@ -49,46 +52,14 @@ class InterpAttG(inkex.EffectExtension):
             "-e", "--end-val", type=str, dest="end_val", default="#00F",
             help="End interpolation value.")
         self.arg_parser.add_argument(
-            "-u", "--unit", type=str, dest="unit", default="color",
+            "-u", "--unit", type=str, dest="unit", default="none",
             help="Values unit.")
         self.arg_parser.add_argument(
-            "--zsort", type=inkex.Boolean, dest="zsort", default=True,
+            "--zsort", type=inkex.Boolean, dest="zsort", default=False,
             help="use z-order instead of selection order")
         self.arg_parser.add_argument(
             "--tab", type=str, dest="tab",
             help="The selected UI-tab when OK was pressed")
-
-    def get_color_steps(self, total):
-        """Get the color value, returning the start color and a single increment step"""
-        start_value = inkex.Color(self.options.start_val)
-        end_value = inkex.Color(self.options.end_val)
-
-        color_inc = [
-            (end_value[v] - start_value[v]) / float(total - 1)
-            for v in range(3)]
-
-        return start_value, color_inc
-
-    def get_number_steps(self, total):
-        """Get the number value, returning the start float and a single increment step"""
-        start_value = self.options.start_val.replace(",", ".")
-        end_value = self.options.end_val.replace(",", ".")
-        unit = self.options.unit
-
-        if unit != 'none':
-            start_value = self.svg.unittouu(start_value + unit)
-            end_value = self.svg.unittouu(end_value + unit)
-
-        try:
-            start_value = float(start_value)
-            end_value = float(end_value)
-        except ValueError:
-            inkex.errormsg(
-                _("Bad values for a number field: {}, {}.".format(start_value, end_value)))
-            return 0, 0
-
-        val_inc = (end_value - start_value) / float(total - 1)
-        return start_value, val_inc
 
     def get_elements(self):
         """Returns a list of elements to work on"""
@@ -105,68 +76,74 @@ class InterpAttG(inkex.EffectExtension):
         node = self.svg.selection.filter(inkex.Group).first()
         return list(node) or []
 
+    def create_dummy_nodes(self, path):
+        """Create dummy nodes to use the interpolation classes defined in inkex.tween"""
+        pat1 = inkex.PathElement()
+        pat2 = inkex.PathElement()
+
+        start_value = self.options.start_val.replace(",", ".")
+        end_value = self.options.end_val.replace(",", ".")
+        if self.options.unit != "none":
+            start_value += self.options.unit
+            end_value += self.options.unit
+        self.apply_value(pat1, path, start_value)
+        self.apply_value(pat2, path, end_value)
+        return pat1, pat2
+    @staticmethod
+    def apply_value(node, path, value):
+        """Applies a value to a given node. If path starts with "transform/" or "style/", the
+        value is applied to either transform or style."""
+        if path.startswith("style/"):
+            att_name = path[6:]
+            node.style[att_name] = value
+        elif path.startswith("transform/"):
+            if not is_number(value):
+                raise inkex.AbortExtension(f"Unable to set attribute {path} to {value}")
+            if path == 'transform/trans-x':
+                node.transform.add_translate(value, 0)
+            elif path == 'transform/trans-y':
+                node.transform.add_translate(0, value)
+            elif path == 'transform/scale':
+                node.transform.add_scale(value)
+        elif path == "transform":
+            node.transform *= value
+        else:
+            node.set(path, value)
+
     def effect(self):
+        method = None
         if self.options.att == 'other':
-            if self.options.att_other is not None:
-                inte_att = self.options.att_other
+            if self.options.att_other is None:
+                raise inkex.AbortExtension(\
+                            _("You selected 'Other'. Please enter an attribute to interpolate."))
+            if self.options.att_other_where == "tag":
+                path = self.options.att_other
             else:
-                inkex.errormsg(_("You selected 'Other'. Please enter an attribute to interpolate."))
-                return
-
-            inte_att_type = self.options.att_other_type
-            where = self.options.att_other_where
+                path = self.options.att_other_where + "/" + self.options.att_other
+            method = self.options.att_other_type
         else:
-            inte_att = self.options.att
-            inte_att_type = 'float'
-            if inte_att in ('width', 'height'):
-                where = 'tag'
-            elif inte_att in ('scale', 'trans-x', 'trans-y'):
-                where = 'transform'
-            elif inte_att == 'opacity':
-                where = 'style'
-            elif inte_att in ('fill', 'stroke'):
-                inte_att_type = 'color'
-                where = 'style'
+            path = self.options.att
+            if (self.options.att == "height" or self.options.att == "width"):
+                method = inkex.tween.UnitValueInterpolator
 
+        path1, path2 = self.create_dummy_nodes(path)
+        if path.startswith("transform"):
+            path = "transform"
+        try:
+            #maybe tween knows what do do with this attribute?
+            interpolator = AttributeInterpolator.create_from_attribute(path1, path2, path, None)
+        except:
+            #okay, apparently not
+            interpolator = AttributeInterpolator.create_from_attribute(path1, path2, path, method)
         collection = self.get_elements()
-
         if not collection:
-            inkex.errormsg(_('There is no selection to interpolate'))
-            return False
+            raise inkex.AbortExtension(_('There is no selection to interpolate'))
 
-        if inte_att_type == 'color':
-            cur, inc = self.get_color_steps(len(collection))
-        else:
-            cur, inc = self.get_number_steps(len(collection))
+        steps = [1.0/(len(collection)-1) * i for i in range(len(collection))]
 
-        for node in collection:
-            if inte_att_type == 'color':
-                val = inkex.Color([int(cur[i]) for i in range(3)])
-            elif inte_att_type == 'float':
-                val = cur
-            elif inte_att_type == 'int':
-                val = int(round(cur))
-            else:
-                raise KeyError("Unknown attr type: {}".format(inte_att_type))
-
-            if where == 'style':
-                node.style[inte_att] = str(val)
-            elif where == 'transform':
-                if inte_att == 'trans-x':
-                    node.transform.add_translate(val, 0)
-                elif inte_att == 'trans-y':
-                    node.transform.add_translate(0, val)
-                elif inte_att == 'scale':
-                    node.transform.add_scale(val)
-            elif where == 'tag':
-                node.set(inte_att, str(val))
-            else:
-                raise KeyError("Unknown update {}".format(where))
-
-            if inte_att_type == 'color':
-                cur = [cur[i] + inc[i] for i in range(3)]
-            else:
-                cur += inc
+        for time, node in zip(steps, collection):
+            new_value = interpolator.interpolate(time)
+            InterpAttG.apply_value(node, path, new_value)
 
         return True
 

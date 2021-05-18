@@ -248,13 +248,13 @@ class StyleInheritanceTests(TestCase):
 
         elem = doc.getElementById("path6")
         tests = [
-            ("fill", "nocolor"),
-            ("opacity", Style()),
-            ("font-variant", "red"),
-            ("stroke", "url(#missing)")]
+            ("fill", "nocolor", 'Unknown color format'),
+            ("opacity", Style(), "Value must be number"),
+            ("font-variant", "red", "Value 'red' is invalid for the property font-variant"),
+            ("stroke", "url(#missing)", "Paint server not found")]
         style = elem.style
-        for attr, value in tests:
-            with self.assertRaises(Exception):
+        for attr, value, errormsg in tests:
+            with self.assertRaisesRegex(Exception, errormsg):
                 style[attr] = value
 
     def test_gradient_id_fallback(self):

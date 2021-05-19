@@ -20,8 +20,7 @@
             <param name="att-other" type="string" gui-text="Other Attribute:" gui-description="Examples: r, width, inkscape:rounded, sodipodi:sides"></param>
             <param name="att-other-type" type="optiongroup" appearance="combo" gui-text="Other Attribute type:">
                 <option value="ColorInterpolator">Color</option>
-                <option value="ValueInterpolator">Integer Number</option>
-                <option value="ValueInterpolator">Float Number</option>
+                <option value="ValueInterpolator">Number</option>
             </param>
             <param name="att-other-where" type="optiongroup" appearance="combo" gui-text="Apply to:">
                 <option value="tag">Tag</option>

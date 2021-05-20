@@ -59,7 +59,7 @@ class Use(ShapeElement):
             group = Group(**copy.attrib)
             group.extend(copy)
             copy = group
-        copy.transform *= self.transform
+        copy.transform = self.transform * copy.transform
         copy.style = self.style + copy.style
         self.replace_with(copy)
         copy.set_random_ids()

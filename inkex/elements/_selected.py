@@ -21,6 +21,7 @@ When elements are selected, these structures provide an advanced API.
 """
 
 from collections import OrderedDict
+from ._utils import natural_sort_key
 
 class ElementList(OrderedDict):
     """
@@ -121,7 +122,9 @@ class ElementList(OrderedDict):
     def paint_order(self):
         """Get the selected elements by z-order (stacking order), ordered from bottom to top"""
         new_list = ElementList(self.svg)
-        new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: x[0])])
+        # the elements are stored with their xpath index, so a natural sort order 
+        # '3' < '20' < '100' has to be applied
+        new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: natural_sort_key(x[0]))])
         return new_list
 
     def filter(self, *types):

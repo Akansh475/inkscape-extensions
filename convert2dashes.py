@@ -56,11 +56,9 @@ class Dashit(inkex.EffectExtension):
         dashes = []
         offset = 0
         style = node.style
-        if 'stroke-dasharray' in style:
-            if style['stroke-dasharray'].find(',') > 0:
-                dashes = [float(dash) for dash in style['stroke-dasharray'].split(',')]
-        if 'stroke-dashoffset' in style:
-            offset = style['stroke-dashoffset']
+        if style('stroke-dasharray').find(',') > 0:
+            dashes = [float(dash) for dash in style('stroke-dasharray').split(',')]
+        offset = style('stroke-dashoffset')
         if not dashes:
             return
         new = []

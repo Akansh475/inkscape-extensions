@@ -184,14 +184,11 @@ class DxfOutlines(inkex.OutputExtension):
 
     def process_shape(self, node, mat):
         rgb = (0, 0, 0)
-        style = node.get('style')
-        if style:
-            style = dict(inkex.Style.parse_str(style))
-            if 'stroke' in style:
-                if style['stroke'] and style['stroke'] != 'none' and style['stroke'][0:3] != 'url':
-                    rgb = inkex.Color(style['stroke']).to_rgb()
+        style = node.style('stroke')
+        if style is not None and isinstance(style, inkex.Color):
+            rgb = style.to_rgb()
         hsl = colors.rgb_to_hsl(rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0)
-        self.color = 7  # default is black
+        self.color = 7  # default is blac
         if hsl[2]:
             self.color = 1 + (int(6 * hsl[0] + 0.5) % 6)  # use 6 hues
 
@@ -247,7 +244,7 @@ class DxfOutlines(inkex.OutputExtension):
         """Process group elements"""
         if isinstance(group, Layer):
             style = group.style
-            if style.get('display', '') == 'none' and self.options.layer_option and self.options.layer_option == 'visible':
+            if style("display") == 'none' and self.options.layer_option and self.options.layer_option == 'visible':
                 return
             layer = group.label
             if self.options.layer_name and self.options.layer_option == 'name':

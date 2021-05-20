@@ -711,9 +711,9 @@ Evil Mad Scientist Laboratories
         font_size = 0.2 # in inches -- will be scaled by viewbox factor.
         font_size_text = str(font_size / self.vb_scale_factor) + 'px'
 
-        labeltext_style = str(Style({'stroke' : 'none', \
+        labeltext_style = Style({'stroke' : 'none', \
             'font-size':font_size_text, 'fill' : 'black', \
-            'font-family' : 'sans-serif', 'text-anchor': 'end'}))
+            'font-family' : 'sans-serif', 'text-anchor': 'end'})
 
         x_offset = font_size / self.vb_scale_factor
         y_offset = 1.5 * x_offset
@@ -729,10 +729,10 @@ Evil Mad Scientist Laboratories
             textline.style = labeltext_style
             text_attribs = {'x':str(x_offset), 'y': str(y)}
 
-            sampletext_style = {'stroke' : 'none', \
+            sampletext_style = Style({'stroke' : 'none', \
                 'font-size':font_size_text, \
                 'fill' : 'black', 'font-family' : fontname, \
-                'text-anchor': 'start'}
+                'text-anchor': 'start'})
             sampleline = group.add(TextElement(**text_attribs))
 
             try: # python 2
@@ -774,9 +774,9 @@ Evil Mad Scientist Laboratories
         font_size = 0.4 # in inches -- will be scaled by viewbox factor.
         font_size_text = str(font_size / self.vb_scale_factor) + 'px'
 
-        glyph_style = str(Style({'stroke' : 'none', \
+        glyph_style = Style({'stroke' : 'none', \
             'font-size':font_size_text, 'fill' : 'black', \
-            'font-family' : fontname, 'text-anchor': 'start'}))
+            'font-family' : fontname, 'text-anchor': 'start'})
 
         x_offset = 1.5 * font_size / self.vb_scale_factor
         y_offset = x_offset
@@ -1098,37 +1098,28 @@ Evil Mad Scientist Laboratories
         text_align_local = parent_info['align']
 
         for node in node_list:
-            try:
-                node_style = node.style
-            except ValueError:
-                pass
+            node_style = node.style
 
+            font_height = node_style('font-size')
             try:
-                font_height = node_style['font-size']
                 font_height_local = self.units_to_userunits(font_height)
-            except KeyError:
+            except TypeError:
                 pass
 
+            font_family_local = self.strip_quotes(node_style('font-family'))
+            
             try:
-                font_family_local = self.strip_quotes(node_style['font-family'])
-            except:
-                pass
-
-            try:
-                line_spacing = node_style['line-height']
-                if "normal" in line_spacing:
-                    line_spacing_local = 1.25 # Inkscape default line spacing
-                elif "%" in line_spacing: # Handle percentage line spacing(e.g., 125%)
+                line_spacing = node_style('line-height')
+                if "%" in line_spacing: # Handle percentage line spacing(e.g., 125%)
                     line_spacing_local = float(line_spacing.rstrip("%")) / 100.0
+                elif line_spacing == "normal":
+                    line_spacing_local = 1.25 # Inkscape default line spacing
                 else:
                     line_spacing_local = self.units_to_userunits(line_spacing)
-            except KeyError:
+            except TypeError:
                 pass
 
-            try:
-                text_align_local = node_style['text-align'] # Use text-anchor in text nodes
-            except KeyError:
-                pass
+            text_align_local = node_style('text-align') # Use text-anchor in text nodes
 
             if node.text is not None:
                 self.text_string += node.text
@@ -1182,26 +1173,16 @@ Evil Mad Scientist Laboratories
         y_local = parent_info['y_pos']
         parent_line_spacing = parent_info['line_spacing']
 
-        try:
-            node_style = node.style
-        except:
-            pass
+        node_style = node.style
 
+        font_height = node_style('font-size')
         try:
-            font_height = node_style['font-size']
             font_height_local = self.units_to_userunits(font_height)
-        except KeyError:
+        except TypeError:
             pass
 
-        try:
-            font_family_local = self.strip_quotes(node_style['font-family'])
-        except KeyError:
-            pass
-
-        try:
-            anchor_local = node_style['text-anchor'] # Use text-anchor in text nodes
-        except KeyError:
-            pass
+        font_family_local = self.strip_quotes(node_style('font-family'))
+        anchor_local = node_style('text-anchor') # Use text-anchor in text nodes
 
         try:
             x_temp = node.get('x')
@@ -1392,33 +1373,25 @@ Evil Mad Scientist Laboratories
                 except ValueError:
                     pass
 
-                try:
-                    node_style = node.style
-                except ValueError:
-                    pass
+                node_style = node.style
 
-                font_height = 16
                 try:
-                    font_height_temp = node_style['font-size']
+                    font_height_temp = node_style.get('font-size', 16)
                     font_height = self.units_to_userunits(font_height_temp)
-                except KeyError:
+                except TypeError:
                     pass
 
-                font_family = 'sans-serif'
-                try:
-                    font_family = self.strip_quotes(node_style['font-family'])
-                except KeyError:
-                    pass
+                font_family = self.strip_quotes(node_style('font-family'))
 
                 try:
-                    line_spacing_temp = node_style['line-height']
-                    if "normal" in line_spacing_temp:
-                        line_spacing = 1.25 # Inkscape default line spacing
-                    elif "%" in line_spacing_temp: # Handle percentage line spacing(e.g., 125%)
+                    line_spacing_temp = node_style('line-height')
+                    if "%" in line_spacing_temp: # Handle percentage line spacing(e.g., 125%)
                         line_spacing = float(line_spacing_temp.rstrip("%")) / 100.0
+                    elif line_spacing_temp == "normal":
+                        line_spacing = 1.25 # Inkscape default line spacing
                     else:
                         line_spacing = self.units_to_userunits(line_spacing_temp)
-                except KeyError:
+                except TypeError:
                     pass
 
                 try:
@@ -1725,11 +1698,9 @@ Evil Mad Scientist Laboratories
                     CASE B: Handle regular(non-flowroot) text nodes
                     '''
 
-                    try:
-                        # Use text-anchor, not text-align, in text(not flowroot) elements
-                        text_align = node_style["text-anchor"]
-                    except KeyError:
-                        pass
+                    # Use text-anchor, not text-align, in text(not flowroot) elements
+                    text_align = node_style("text-anchor")
+
 
                     '''
                     Recursively loop through content of the text object,

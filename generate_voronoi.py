@@ -163,18 +163,10 @@ class GenerateVoronoi(inkex.EffectExtension):
         pattern.append(PathElement(**attribs))
 
         # link selected object to pattern
-        style = {}
-        if 'style' in obj.attrib:
-            style = dict(inkex.Style.parse_str(obj.attrib['style']))
-        style['fill'] = 'url(#%s)' % pattern.get('id')
-        obj.attrib['style'] = str(inkex.Style(style))
+        obj.style['fill'] = pattern
         if isinstance(obj, inkex.Group):
             for node in obj:
-                style = {}
-                if 'style' in node.attrib:
-                    style = dict(inkex.Style.parse_str(node.attrib['style']))
-                style['fill'] = 'url(#%s)' % pattern.get('id')
-                node.attrib['style'] = str(inkex.Style(style))
+                node.style['fill'] = pattern
 
 if __name__ == '__main__':
     GenerateVoronoi().run()

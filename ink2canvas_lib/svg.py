@@ -98,16 +98,12 @@ class AbstractShape(Element):
 
     def has_gradient(self):
         style = self.get_style()
-        if "fill" in style:
-            fill = style["fill"]
-            return fill.startswith("url(#linear") or fill.startswith("url(#radial")
-        return False
+        fill = style("fill")
+        return fill is not None and isinstance(fill, inkex.Gradient)
 
     def get_gradient_href(self):
         style = self.get_style()
-        if "fill" in style:
-            return style["fill"][5:-1]
-        return
+        return style("fill").get_id()
 
     def has_clip(self):
         return bool(self.attr("clip-path"))

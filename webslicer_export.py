@@ -146,10 +146,10 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
     def create_the_temporary_svg(self):
         (ref, self.tmp_svg) = tempfile.mkstemp('.svg')
         layer = self.get_slicer_layer()
-        current_style = ('style' in layer.attrib) and layer.attrib['style'] or ''
-        layer.attrib['style'] = 'display:none'
+        current_style = layer.style
+        layer.style = 'display:none'
         self.document.write(self.tmp_svg)
-        layer.attrib['style'] = current_style
+        layer.style = current_style
 
     def delete_the_temporary_svg(self):
         try:

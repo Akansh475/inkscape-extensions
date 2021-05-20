@@ -250,12 +250,8 @@ class MeshToPath(inkex.EffectExtension):
 
     def process_style(self, node, res_type='meshgradient'):
         """Process style of *node*."""
-        result = []
-        # Presentation attributes
-        adict = dict(node.attrib)
-        result.extend(self.process_props(adict, res_type))
-        # Inline CSS style properties
-        result.extend(self.process_props(node.style, res_type))
+        result = node.specified_style()
+        result = self.process_props(result, res_type)
         # TODO: check for child paint servers
         return result
 

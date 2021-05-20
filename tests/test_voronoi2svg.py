@@ -10,8 +10,8 @@ class TestVoronoi2svgBasic(ComparisonMixin, TestCase):
     ("--id=c1", "--id=c2", "--id=c3", "--id=p1", "--id=p2", "--id=s1", "--id=u1",
     "--diagram-type=Both", "--clip-box=Automatic from seeds", "--show-clip-box=True"),
 
-    ("--id=c1", "--id=c2", "--id=c3", "--id=p1", "--id=p2", "--id=s1", "--id=u1", "--diagram-type=Voronoi", "--clip-box=Page"),
+    ("--id=c1", "--id=c2", "--id=c3", "--id=p1", "--id=p2", "--id=s1", "--diagram-type=Voronoi", "--clip-box=Page"),
 
     ("--id=r1", "--id=r3", "--id=c1", "--id=c3", "--id=s1", "--diagram-type=Both", 
-     "--delaunay-fill-options=delaunay-fill"),
+    "--delaunay-fill-options=delaunay-fill"),
     ]

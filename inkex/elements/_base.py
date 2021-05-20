@@ -492,6 +492,14 @@ class BaseElement(etree.ElementBase):
             if key in all_properties and all_properties[key][2]:
                 style[key] = self.attrib[key]
         return style
+    
+    def composed_transform(self, other=None):
+        """Calculate every transform down to the other element
+          if none specified the transform is to the root document element"""
+        parent = self.getparent()
+        if parent is not None and isinstance(parent, BaseElement):
+            return parent.composed_transform() * self.transform
+        return self.transform
 
 class ShapeElement(BaseElement):
     """Elements which have a visible representation on the canvas"""
@@ -533,14 +541,6 @@ class ShapeElement(BaseElement):
         elem.style = self.effective_style()
         elem.transform = self.transform
         return elem
-
-    def composed_transform(self, other=None):
-        """Calculate every transform down to the other element
-          if none specified the transform is to the root document element"""
-        parent = self.getparent()
-        if parent is not None and isinstance(parent, ShapeElement):
-            return parent.composed_transform() * self.transform
-        return self.transform
 
     def effective_style(self):
         """Without parent styles, what is the effective style is"""

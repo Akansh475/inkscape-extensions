@@ -21,6 +21,7 @@ Useful utilities specifically for elements (that aren't base classes)
 """
 
 from collections import defaultdict
+import re
 
 # a dictionary of all of the xmlns prefixes in a standard inkscape doc
 NSS = {
@@ -65,6 +66,11 @@ def splitNS(name): # pylint: disable=invalid-name
     (prefix, tag) = removeNS(name)
     return (NSS[prefix], tag)
 
+def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
+    """Helper for a natural sort, see
+    https://stackoverflow.com/a/16090640/3298143"""
+    return [int(text) if text.isdigit() else text.lower()
+            for text in _nsre.split(s)]   
 
 class ChildToProperty(property):
     """Use when you have a singleton child element who's text
@@ -127,3 +133,4 @@ class CloningVat(object):
                 for update, upkw in self.set_ids.get(elem_id, ()):
                     update(elem.get('id'), clone.get('id'), **upkw)
                 process(clone, **kwargs)
+

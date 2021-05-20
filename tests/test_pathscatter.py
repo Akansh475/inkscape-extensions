@@ -5,5 +5,15 @@ from inkex.tester.filters import CompareWithoutIds
 
 class TestPathScatterBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = PathScatter
-    comparisons = [('--id=p1', '--id=r3'),]
+    compare_file = "svg/scatter.svg"
+    comparisons = [
+        # Test simple case
+        ("--id=g12668", "--id=path8143", "--follow=False"),
+        # Test follow and stretch of a path around a skeleton with multiple closed subpaths
+        ("--id=path3990", "--id=path3982", "--stretch=True", "--follow=True", "--copymode=copy"),
+        # Test cloning and rotating
+        ("--id=g12668", "--id=path8143", "--rotate=True", "--copymode=clone"),
+        # Test picking from a group pattern
+        ("--id=g12668", "--id=path8143", "--copymode=copy", "--grouppick=True", "--pickmode=seq"),
+        ]
     compare_filters = [CompareWithoutIds()]

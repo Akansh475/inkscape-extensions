@@ -22,6 +22,8 @@ When elements are selected, these structures provide an advanced API.
 
 from collections import OrderedDict
 from ._utils import natural_sort_key
+from ..localization import inkex_gettext
+from ..utils import AbortExtension
 
 class ElementList(OrderedDict):
     """
@@ -130,6 +132,25 @@ class ElementList(OrderedDict):
     def filter(self, *types):
         """Filter selected elements of the given type, returns a new SelectedElements object"""
         return ElementList(self.svg, [e for e in self if not types or isinstance(e, types)])
+
+    def filter_nonzero(self, *types, error_msg: str = None):
+        """Filter selected elements of the given type, returns a new SelectedElements object.
+        If the selection is empty, abort the extension (raise AbortExtension)
+
+        :param types: type(s) to filter the selection by
+        :type types: Type
+        :param error_msg: error message that is displayed if the selection is empty, defaults to
+        _("Please select at least one element of type(s) {}")
+        :type error_msg: str, optional
+        """
+        filtered = self.filter(*types)
+        if not filtered:
+            if error_msg is None:
+                error_msg = \
+                  inkex_gettext("Please select at least one element of the following type(s): {}"\
+                                         .format(", ".join([type.__name__ for type in types])))
+            raise AbortExtension(error_msg)
+        return filtered
 
     def get(self, *types):
         """Like filter, but will enter each element searching for any child of the given types"""

@@ -240,7 +240,7 @@ class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
     pass
 
 def deprecate(func):
-    """Function decorator for deprecation functions which have a one-liner
+    r"""Function decorator for deprecation functions which have a one-liner
     equivalent in the new API. The one-liner has to passed as a string
     to the decorator.
 
@@ -365,7 +365,7 @@ class DeprecatedSvgMixin(object):
 
     @deprecate
     def set_selected(self, *ids):
-        """svg.selection.set(*ids)"""
+        r"""svg.selection.set(\*ids)"""
         return self.selection.set(*ids)
 
     @deprecate
@@ -375,7 +375,7 @@ class DeprecatedSvgMixin(object):
 
     @deprecate
     def get_selected(self, *types):
-        """svg.selection.filter(*types).values()"""
+        r"""svg.selection.filter(\*types).values()"""
         return self.selection.filter(*types).values()
 
     @deprecate
@@ -392,7 +392,7 @@ class DeprecatedSvgMixin(object):
 
     @deprecate
     def get_first_selected(self, *types):
-        """selection.filter(*types).first() or [0] if you'd like an error"""
+        r"""selection.filter(\*types).first() or [0] if you'd like an error"""
         return self.selection.filter(*types).first()
 
 

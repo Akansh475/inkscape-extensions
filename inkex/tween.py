@@ -86,7 +86,7 @@ class AttributeInterpolator(abc.ABC):
             attribute (str): attribute name (for styles, starting with "style/")
             svg (inkex.SvgDocumentElement): the svg document
             method (Interpolator, optional): (currently only used for paths). Specifies a method
-                                             used to interpolate the attribute. Defaults to None.
+            used to interpolate the attribute. Defaults to None.
 
         Returns:
             AttributeInterpolator: an interpolator whose type depends on attribute.
@@ -398,6 +398,7 @@ class GradientInterpolator(AttributeInterpolator):
     def create(snode, enode, attribute):
         """Creates a GradientInterpolator for either fill or stroke, depending on attribute.
         Cases: (A, B) -> Interpolator
+
           - Linear Gradient, Linear Gradient -> LinearGradientInterpolator
           - Color or None, Linear Gradient -> LinearGradientInterpolator
           - Radial Gradient, Radial Gradient -> RadialGradientInterpolator
@@ -474,6 +475,8 @@ class GradientInterpolator(AttributeInterpolator):
     def interpolate_linear_list(positions, values, newpositions, func):
         """Interpolates a list of values given at n positions to the best approximation at m
         newpositions.
+
+        >>>
             |
             |         x
             |  x
@@ -481,14 +484,15 @@ class GradientInterpolator(AttributeInterpolator):
                pq  q  p   q
             (x denotes function values, p: positions, q: newpositions)
             A function may be given to interpolate between given values.
+
         Args:
             positions (list[number-like]): position of current function values
-            values (list[Type]): list of arbitrary type, len(values) == len(positions)
+            values (list[Type]): list of arbitrary type, ``len(values) == len(positions)``
             newpositions (list[number-like]): position of interpolated values
             func (Callable[[Type, Type, float], Type]): Function to interpolate between values
 
         Returns:
-            list[Type]: interpolated function values at positions
+            :list[Type]: interpolated function values at positions
         """
         newvalues = []
         positions = list(map(float, positions))

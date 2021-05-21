@@ -35,8 +35,10 @@ from ._utils import addNS
 from ._base import BaseElement
 
 
-from typing import overload, Iterable, List, Tuple, Union, Optional  # pylint: disable=unused-import
+from typing import overload, Iterable, List, Tuple, Union, Optional, TYPE_CHECKING  # pylint: disable=unused-import
 
+if TYPE_CHECKING:
+    from inkex import SvgDocumentElement
 
 class Filter(BaseElement):
     """A filter (usually in defs)"""
@@ -151,7 +153,6 @@ class Gradient(BaseElement):
         """Remove all orientation attributes from this element"""
         for attr in self.orientation_attributes:
             self.pop(attr)
-    from inkex.elements import SvgDocumentElement
     def interpolate(self, other, fraction, svg=None): # type: (LinearGradient, float, SvgDocumentElement) -> LinearGradient
         """Interpolate with another gradient."""
         from ..tween import GradientInterpolator

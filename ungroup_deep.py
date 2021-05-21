@@ -69,8 +69,7 @@ class UngroupDeep(inkex.EffectExtension):
             node.style = this_style
 
     def _merge_clippath(self, node, clippathurl):
-
-        if clippathurl:
+        if clippathurl and clippathurl != "none":
             node_transform = node.transform
             if node_transform:
                 # Clip-paths on nodes with a transform have the transform
@@ -82,8 +81,8 @@ class UngroupDeep(inkex.EffectExtension):
                 clippath = self.svg.getElementById(clippathurl[5:-1])
                 for child in clippath.iterchildren():
                     use = new_clippath.add(Use())
-                    use.add('xlink:href', '#' + child.get("id"))
-                    use.transform = -node_transform
+                    use.set('xlink:href', '#' + child.get("id"))
+                    #use.transform = -node_transform # this seems wrong
                     use.set_random_id('use')
 
                 # Set the clippathurl to be the one with the inverse transform
@@ -107,7 +106,7 @@ class UngroupDeep(inkex.EffectExtension):
         node_clippathurl = node.get('clip-path')
         for child in reversed(list(node)):
 
-            child.transform *= node_transform
+            child.transform = node_transform * child.transform
 
             if node.get("style") is not None:
                 self._merge_style(child, node_style)

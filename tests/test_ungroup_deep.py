@@ -10,3 +10,14 @@ class TestUngroupBasic(ComparisonMixin, TestCase):
         (),
         ('--id=layer2',)
     ]
+
+class TestUngroupComplex(ComparisonMixin, TestCase):
+    effect_class = UngroupDeep
+    compare_filters = [CompareOrderIndependentStyle()]
+    compare_file = "svg/deep-ungroup-complex.svg"
+    comparisons = [
+        # first one: Paths with clip-path:none (https://gitlab.com/inkscape/extensions/-/issues/184#note_490847336)
+        # second one: Paths with nested transforms (https://gitlab.com/inkscape/extensions/-/issues/340)
+        # third one: Transformed group with transformed clip-path, https://gitlab.com/inkscape/extensions/-/issues/184
+        ('--id=g1935', '--id=g6577', '--id=g115')
+    ]

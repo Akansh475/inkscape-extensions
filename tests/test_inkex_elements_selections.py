@@ -4,10 +4,11 @@
 Test all selection code.
 """
 
-from inkex.elements import PathElement
+from inkex.elements import PathElement, Circle, Rectangle
 from inkex.elements._selected import ElementList
 
 from .test_inkex_elements_base import SvgTestCase
+from inkex.utils import AbortExtension
 
 
 class ElementListTestCase(SvgTestCase):
@@ -95,6 +96,18 @@ class ElementListTestCase(SvgTestCase):
         selection = self.svg.descendants()
         new_list = selection.filter(PathElement)
         self.assertEqual(tuple(new_list.ids), ('path1', 'D'))
+    
+    def test_filternonzero(self):
+        """Filter and raise an AbortException if the list is empty"""
+        selection = self.svg.descendants()
+        new_list = selection.filter(PathElement)
+        # default error message
+        with self.assertRaisesRegex(AbortExtension, "Circle.*Rectangle"):
+            new_list.filter_nonzero(Circle, Rectangle)
+        # custom error message
+        with self.assertRaisesRegex(AbortExtension, "test string"):
+            new_list.filter_nonzero(Circle, error_msg="test string")
+        self.assertEqual(new_list, selection.filter_nonzero(PathElement))
 
     def test_getting_recursively(self):
         """Create a list of children of the given type"""

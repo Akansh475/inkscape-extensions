@@ -17,11 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+"""Adds a "drop shadow" to any selected number of path objects. Optionally, the stroke
+color can be used for the shadow"""
 
 import math
 
 import inkex
-from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path, Vert, Horz, TepidQuadratic, Quadratic, Smooth
+from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path, Vert, Horz, TepidQuadratic, \
+                        Quadratic, Smooth
 from inkex.transforms import Vector2d
 from inkex.bezier import beziertatslope, beziersplitatt
 
@@ -34,6 +37,8 @@ class Motion(inkex.EffectExtension):
                           help="direction of the motion vector")
         pars.add_argument("-m", "--magnitude", type=float, default=100.0, \
                           help="magnitude of the motion vector")
+        pars.add_argument("-f", "--fillwithstroke", type=inkex.Boolean, default=False, \
+                          help="fill shadow with stroke color if set")
 
     @staticmethod
     def makeface(last, segment, facegroup, delx, dely):
@@ -63,22 +68,41 @@ class Motion(inkex.EffectExtension):
     def effect(self):
         delx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
         dely = math.sin(math.radians(self.options.angle)) * self.options.magnitude
-        for node in self.svg.selection.filter(inkex.PathElement):
+        for node in self.svg.selection.filter_nonzero(inkex.PathElement):
             group = node.getparent().add(inkex.Group())
             facegroup = group.add(inkex.Group())
             group.append(node)
+
+            # we want delx and dely values to be correct even for the transformed path,
+            # so transform them back, but ignore the translate of the transform
+            trans = -node.transform
+            local_delx = trans.a * delx + trans.c * dely
+            local_dely = trans.b * delx + trans.d * dely
 
             if node.transform:
                 group.transform = node.transform
                 node.transform = None
 
             facegroup.style = node.style
-
+            if (self.options.fillwithstroke):
+                stroke = facegroup.style("stroke")
+                if stroke is not None and isinstance(stroke, inkex.Color):
+                    facegroup.style["fill"] = stroke
+                    facegroup.style["fill-opacity"] = facegroup.style("stroke-opacity")
+            reset_origin = True
             for cmd_proxy in node.path.to_absolute().proxy_iterator():
-                self.process_segment(cmd_proxy, facegroup, delx, dely)
+                # for each subpath, reset the origin of the following computations to the first
+                # node of the subpath -> i.e. after a Z command, move the origin to the end point
+                # of the next command
+                if reset_origin:
+                    first_point = cmd_proxy.end_point
+                    reset_origin = False
+                if isinstance(cmd_proxy.command, ZoneClose):
+                    reset_origin = True
+                self.process_segment(cmd_proxy, facegroup, local_delx, local_dely, first_point)
 
     @staticmethod
-    def process_segment(cmd_proxy, facegroup, delx, dely):
+    def process_segment(cmd_proxy, facegroup, delx, dely, first_point):
         """Process each segments"""
 
         segments = []
@@ -104,12 +128,13 @@ class Motion(inkex.EffectExtension):
         elif isinstance(cmd_proxy.command, (Line, Curve)):
             segments.append(cmd_proxy.command)
         elif isinstance(cmd_proxy.command, ZoneClose):
-            segments.append(Line(cmd_proxy.first_point.x, cmd_proxy.first_point.y))
+            segments.append(Line(*first_point))
         elif isinstance(cmd_proxy.command, (Vert, Horz)):
             segments.append(cmd_proxy.command.to_line(cmd_proxy.end_point))
 
         for seg in Path([Move(*cmd_proxy.previous_end_point)] + segments).proxy_iterator():
-            if isinstance(seg.command, Move): continue
+            if isinstance(seg.command, Move):
+                continue
             Motion.makeface(seg.previous_end_point, seg.command, facegroup, delx, dely)
 
 

@@ -96,9 +96,13 @@ sphinx:
     - pip3 install sphinx-autodoc-typehints
     - pip3 install typed-ast
     - pip3 install lxml
-    - sphinx-apidoc -F -f -e -P -o source inkex */deprecated.py
-    - cp .gitlab-ci.sphinx-conf.py source/conf.py
-    - python3 setup.py build_sphinx -s source
+    - pip3 install cssselect
+    - pip3 install numpy
+    - pip3 install pytest
+    - pip3 install sphinx-rtd-theme
+    - sphinx-apidoc -F -f -e -P -o docs/source inkex */deprecated.py
+    - cp .gitlab-ci.sphinx-conf.py docs/conf.py
+    - python3 setup.py build_sphinx -s docs
     - echo -e "\n\n"
       "Documentation for inkex module successfully created; you can access the HTML version at\n"
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/sphinx/html/index.html"
@@ -106,7 +110,6 @@ sphinx:
   artifacts:
     paths:
       - build/sphinx/
-
 pages:
   stage: deploy
   only:

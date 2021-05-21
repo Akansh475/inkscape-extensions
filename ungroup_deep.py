@@ -80,10 +80,7 @@ class UngroupDeep(inkex.EffectExtension):
                 new_clippath.set_random_id('clipPath')
                 clippath = self.svg.getElementById(clippathurl[5:-1])
                 for child in clippath.iterchildren():
-                    use = new_clippath.add(Use())
-                    use.set('xlink:href', '#' + child.get("id"))
-                    #use.transform = -node_transform # this seems wrong
-                    use.set_random_id('use')
+                    new_clippath.add(Use.new(child, 0, 0))
 
                 # Set the clippathurl to be the one with the inverse transform
                 clippathurl = "url(#" + new_clippath.get("id") + ")"

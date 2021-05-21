@@ -52,7 +52,7 @@ def run_pylint(fname):
     "run pylint on the given file"
     pylint_output = WritableObject()
     # Pipe lint errors to devnull
-    temp, sys.stderr = sys.stderr, open('/dev/null', 'w')
+    temp, sys.stderr = sys.stderr, open(os.devnull, 'w')
     try:
         lint.Run([fname]+ARGS, reporter=TextReporter(pylint_output), exit=False)
     except Exception: # pylint: disable=broad-except

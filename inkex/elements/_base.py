@@ -31,7 +31,7 @@ from copy import deepcopy
 from lxml import etree
 
 from ..paths import Path
-from ..styles import Style, AttrFallbackStyle, Classes
+from ..styles import Style, Classes
 from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
 from ..units import convert_unit, render_unit
@@ -424,10 +424,6 @@ class BaseElement(etree.ElementBase):
         if isinstance(elem, BaseElement):
             elem = elem.get_id()
         self.set('xlink:href', '#' + elem)
-
-    def fallback_style(self, move=False):
-        """Get styles falling back to element attributes"""
-        return AttrFallbackStyle(self, move=move)
 
     @property
     def label(self):

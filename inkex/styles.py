@@ -362,56 +362,6 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return cascaded # doesn't have a parent
 
 
-
-class AttrFallbackStyle:
-    """
-    A container for a style and an element that may have competing styles
-
-    If move is set to true, any new values are set to the style attribute
-    and removed from the element attributes list.
-    """
-    # TODO: This doesn't cover iterating over styles, because we don't
-    # have a list of known styles to check attribs for.
-    def __init__(self, elem, move=False):
-        self.elem = elem
-        self.styles = [elem.style]
-        self.styles.extend(elem.root.stylesheets.lookup(elem.get('id')))
-        self.move = move
-
-    def __getitem__(self, name):
-        # Style is more improtant, followed by the element
-        for style in self.styles:
-            if name in style:
-                return style[name]
-        return self.elem.attrib.get(name, None)
-
-    def __setitem__(self, name, value):
-        # Set the item back into the attribs, or move it if requested.
-        if name in self.elem.attrib:
-            # The other reason to unset the attrib is if it's already in
-            # the style dictionary so isn't needed here anyway.
-            if not self.move and name not in self.styles[0]:
-                self.elem.set(name, value)
-                return
-            self.elem.set(name, None)
-        for style in self.styles:
-            if name in style:
-                style[name] = value
-                return
-        # Not set before (anywhere), so set to element style
-        self.styles[0][name] = value
-
-    def get(self, name, default=None):
-        """Get with default"""
-        try:
-            return self[name]
-        except KeyError:
-            return default
-
-    def set(self, name, value):
-        """Set, nothing fancy"""
-        self[name] = value
-
 class StyleSheets(list):
     """
     Special mechanism which contains all the stylesheets for an svg document

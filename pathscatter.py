@@ -139,8 +139,8 @@ class PathScatter(pathmodifier.Diffeo):
                 skel_closed = all([math.isclose(i, j) for i, j in zip(skelcomp[0], skelcomp[-1])])
 
                 length = sum(lengths)
+                dx = width + self.options.space
                 if self.options.stretch:
-                    dx = width + self.options.space
                     n = int((length - self.options.toffset + self.options.space) / dx)
                     if n > 0:
                         dx = (length - self.options.toffset) / n

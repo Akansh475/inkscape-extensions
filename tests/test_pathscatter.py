@@ -8,7 +8,7 @@ class TestPathScatterBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase
     compare_file = "svg/scatter.svg"
     comparisons = [
         # Test simple case
-        ("--id=g12668", "--id=path8143", "--follow=False"),
+        ("--id=g12668", "--id=path8143", "--stretch=False", "--follow=False"),
         # Test follow and stretch of a path around a skeleton with multiple closed subpaths
         ("--id=path3990", "--id=path3982", "--stretch=True", "--follow=True", "--copymode=copy"),
         # Test cloning and rotating

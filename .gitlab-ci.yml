@@ -101,7 +101,6 @@ sphinx:
     - pip3 install pytest
     - pip3 install sphinx-rtd-theme
     - sphinx-apidoc -F -f -e -P -o docs/source inkex */deprecated.py
-    - cp .gitlab-ci.sphinx-conf.py docs/conf.py
     - python3 setup.py build_sphinx -s docs
     - echo -e "\n\n"
       "Documentation for inkex module successfully created; you can access the HTML version at\n"

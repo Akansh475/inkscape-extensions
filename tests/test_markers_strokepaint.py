@@ -11,8 +11,8 @@ class MarkerStrokePaintBasicTest(ComparisonMixin, TestCase):
     effect_class = MarkersStrokePaint
     compare_file = 'svg/markers.svg'
     comparisons = [
-        ('--tab="object"', '--id=dimension'),
-        ('--tab="custom"', '--id=dimension'),
+        ('--tab="object"', '--id=dimension', '--type=stroke'),
+        ('--tab="custom"', '--id=dimension', '--type=stroke'),
     ]
 
     def test_basic(self):

@@ -29,7 +29,7 @@ class JessyinkEffects(JessyInkMixin, inkex.EffectExtension):
         pars.add_argument('--effectInOrder', type=int, default=1)
         pars.add_argument('--effectInDuration', type=float, default=0.8)
         pars.add_argument('--effectIn', default='none')
-        pars.add_argument('--effectOutOrder', type=int, default=2)
+        pars.add_argument('--effectOutOrder', type=int, default=1)
         pars.add_argument('--effectOutDuration', type=float, default=0.8)
         pars.add_argument('--effectOut', default='none')
 

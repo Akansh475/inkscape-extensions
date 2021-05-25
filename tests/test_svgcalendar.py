@@ -19,7 +19,9 @@ class CalendarArguments(ComparisonMixin, TestCase):
     """Test arguments to calendar extensions"""
     effect_class = Calendar
     compare_filters = [CompareOrderIndependentStyle(), CompareNumericFuzzy()]
-    comparisons = [()]
+    comparisons = [("--color-year=#888", "--color-month=#666", "--color-day-name=#999",
+                    "--color-day=#000", "--color-weekend=#777", "--color-nmd=#BBB", 
+                    "--color-weeknr=#808080", "--encoding=UTF-8")]
     mocks = [
         (datetime, 'datetime', FrozenDateTime)
     ]

@@ -7,3 +7,6 @@ class RTreeTurtleBasicTest(ComparisonMixin, TestCase):
     effect_class = TurtleRtree
     comparisons = [()]
     compare_filters = [CompareNumericFuzzy(),]
+    comparisons = [
+        ("--minimum=4.0",)
+    ]

@@ -7,11 +7,13 @@ class TestQRCodeInkscapeBasic(ComparisonMixin, TestCase):
     effect_class = QrCode
     compare_file = 'svg/empty.svg'
     comparisons = [
-        ('--text=0123456789', '--typenumber=0'),
-        ('--text=BreadRolls', '--typenumber=2', '--encoding=utf8'),
-        ('--text=Blue Front Yard', '--typenumber=3', '--correctionlevel=1'),
-        ('--text=Waterfall', '--typenumber=1', '--drawtype=circle'),
-        ('--text=groupid', '--groupid=testid'),
+        ('--text=0123456789', '--typenumber=0', '--modulesize=10', '--drawtype=greedy'),
+        ('--text=BreadRolls', '--typenumber=2', '--encoding=utf8', '--modulesize=10',
+         '--drawtype=greedy'),
+        ('--text=Blue Front Yard', '--typenumber=3', '--correctionlevel=1', '--modulesize=10',
+         '--drawtype=greedy'),
+        ('--text=Waterfall', '--typenumber=1', '--drawtype=circle', '--modulesize=10'),
+        ('--text=groupid', '--groupid=testid', '--modulesize=10', '--drawtype=greedy'),
     ]
 
 class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
@@ -20,5 +22,5 @@ class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
     compare_file = 'svg/symbol.svg'
     comparisons = [
         ('--text=ThingOne', '--drawtype=symbol', '--correctionlevel=2',
-         '--symbolid=AirTransportation_Inv'),
+         '--symbolid=AirTransportation_Inv', '--modulesize=10'),
     ]

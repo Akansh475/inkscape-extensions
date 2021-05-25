@@ -45,7 +45,7 @@ class PathScatter(pathmodifier.Diffeo):
                                      help="group pick mode (rand=random seq=sequentially)")
         self.arg_parser.add_argument("-f", "--follow", type=inkex.Boolean, dest="follow", default=True,
                                      help="choose between wave or snake effect")
-        self.arg_parser.add_argument("-s", "--stretch", type=inkex.Boolean, dest="stretch", default=True,
+        self.arg_parser.add_argument("-s", "--stretch", type=inkex.Boolean, dest="stretch", default=False,
                                      help="repeat the path to fit deformer's length")
         self.arg_parser.add_argument("-p", "--space", type=float, dest="space", default=0.0)
         self.arg_parser.add_argument("-r", "--rotate", type=inkex.Boolean, dest="vertical", default=False,

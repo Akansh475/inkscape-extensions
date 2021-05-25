@@ -9,7 +9,7 @@ class TiffOutput(inkex.RasterOutputExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab')
         pars.add_argument('--compression', default=None)
-        pars.add_argument('--quality', type=int, default=95)
+        pars.add_argument('--quality', type=int, default=90)
 
     def save(self, stream):
         self.img.convert('RGB').save(stream,

@@ -34,7 +34,7 @@ class InterpAttG(inkex.EffectExtension):
     def __init__(self):
         super(InterpAttG, self).__init__()
         self.arg_parser.add_argument(
-            "-a", "--att", type=str, dest="att", default="style/fill",
+            "-a", "--att", type=str, dest="att", default="width",
             help="Attribute to be interpolated.")
         self.arg_parser.add_argument(
             "-o", "--att-other", type=str, dest="att_other",

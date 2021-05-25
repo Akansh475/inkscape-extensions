@@ -10,7 +10,7 @@
             <param name="ybottom" type="float" min="-1000.0" max="1000.0" gui-text="Y value of rectangle's bottom:">0.0</param>
             <param name="ytop" type="float" min="-1000.0" max="1000.0" gui-text="Y value of rectangle's top:">1.0</param>
             <param name="samples" type="int" min="2" max="1000" gui-text="Number of samples:">8</param>
-            <param name="isoscale" type="bool" gui-text="Isotropic scaling">false</param>
+            <param name="isoscale" type="bool" gui-text="Isotropic scaling">true</param>
             <label>When set, Isotropic scaling uses smallest of width/xrange or height/yrange</label>
             <param name="polar" type="bool" gui-text="Use polar coordinates">true</param>
         </page>
@@ -50,9 +50,9 @@ erf(x); erfc(x); gamma(x); lgamma(x).
             <label>In order to use the extension, select a rectangle first. The rectangle will serve as bounding box of the plot.</label>
         </page>
     </param>
-    <param name="fofx" type="string" gui-text="Function:">exp(-x*x)</param>
+    <param name="fofx" type="string" gui-text="Function:">sin(x)</param>
     <param name="fponum" type="bool" gui-text="Calculate first derivative numerically">true</param>
-    <param name="fpofx" type="string" gui-text="First derivative:">x</param>
+    <param name="fpofx" type="string" gui-text="First derivative:">cos(x)</param>
     <param name="clip" type="bool" gui-text="Clip with rectangle">false</param>
     <param name="remove" type="bool" gui-text="Remove rectangle">true</param>
     <param name="drawaxis" type="bool" gui-text="Draw Axes">false</param>

@@ -5,6 +5,6 @@ from inkex.tester import ComparisonMixin, TestCase
 class TestDimensionBasic(ComparisonMixin, TestCase):
     effect_class = Dimension
     comparisons = [
-        ('--id=p1', '--id=r3'),
-        ('--id=p1', '--id=r3', '--type=visual'),
+        ('--id=p1', '--id=r3', '--xoffset=100.0', '--yoffset=100.0'),
+        ('--id=p1', '--id=r3', '--type=visual', '--xoffset=100.0', '--yoffset=100.0'),
     ]

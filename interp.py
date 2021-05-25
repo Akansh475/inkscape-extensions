@@ -38,7 +38,7 @@ class Interp(inkex.EffectExtension):
             help="method of interpolation")
         pars.add_argument("-d", "--dup", type=inkex.Boolean, default=True,\
             help="duplicate endpaths")
-        pars.add_argument("--style", type=inkex.Boolean, default=True,\
+        pars.add_argument("--style", type=inkex.Boolean, default=False,\
             help="try interpolation of some style properties")
         pars.add_argument("--zsort", type=inkex.Boolean, default=False,\
             help="use z-order instead of selection order")

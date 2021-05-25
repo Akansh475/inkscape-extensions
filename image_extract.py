@@ -35,7 +35,7 @@ class ExtractImage(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("-s", "--selectedonly", type=inkex.Boolean,\
             help="Extract only selected images", default=True)
-        pars.add_argument("--filepath", default='.',\
+        pars.add_argument("--filepath", default='./images/',\
             help="Location to save the images.")
 
     def effect(self):

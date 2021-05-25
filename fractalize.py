@@ -49,9 +49,9 @@ def calculate_subdivision(smoothness, x1, y1, x2, y2):
 
 class Fractalize(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument("-s", "--subdivs", type=int, default="6",
+        pars.add_argument("-s", "--subdivs", type=int, default=6,
                           help="Number of subdivisons")
-        pars.add_argument("-f", "--smooth", type=float, default="4.0",
+        pars.add_argument("-f", "--smooth", type=float, default=4.0,
                           help="Smoothness of the subdivision")
 
     def effect(self):

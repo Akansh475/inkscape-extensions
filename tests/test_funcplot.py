@@ -8,5 +8,5 @@ class FuncPlotBasicTest(ComparisonMixin, TestCase):
     effect_class = FuncPlot
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [
-        ('--id=p1', '--id=r3'),
+        ('--id=p1', '--id=r3', '--times2pi=True', '--ybottom=-1.0', '--drawaxis=True'),
     ]

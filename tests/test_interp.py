@@ -7,9 +7,11 @@ class InterpBasicTest(ComparisonMixin, TestCase):
     effect_class = Interp
     comparisons = [
         ('--id=path1', '--id=path2', '--id=path3', '--id=path4', '--id=path5',
-         '--id=path6', '--id=path7', '--id=path8', '--id=path9', '--id=path10', '--method=equalSubsegments'),
+         '--id=path6', '--id=path7', '--id=path8', '--id=path9', '--id=path10',
+         '--method=equalSubsegments', '--style=True'),
         ('--id=path1', '--id=path2', '--id=path3', '--id=path4', '--id=path5',
-         '--id=path6', '--id=path7', '--id=path8', '--id=path9', '--id=path10', '--method=firstNodes')
+         '--id=path6', '--id=path7', '--id=path8', '--id=path9', '--id=path10',
+         '--method=firstNodes', '--style=True')
     ]
     compare_filters = [CompareNumericFuzzy()]
     compare_file = 'svg/interp_shapes.svg'

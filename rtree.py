@@ -26,7 +26,7 @@ class TurtleRtree(inkex.GenerateExtension):
     def add_arguments(self, pars):
         pars.add_argument("--size", type=float, default=100.0,
                           help="initial branch size")
-        pars.add_argument("--minimum", type=float, default=4.0,
+        pars.add_argument("--minimum", type=float, default=40.0,
                           help="minimum branch size")
         pars.add_argument("--pentoggle", type=inkex.Boolean, default=False,
                           help="Lift pen for backward steps")

@@ -5,6 +5,7 @@ from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 class SplitItBasicTest(ComparisonMixin, TestCase):
     effect_class = AddNodes
+    comparisons = [("--id=p1", "--id=r3", "--max=2.0",)]
     compare_filters = [
         CompareWithPathSpace(),
         CompareNumericFuzzy(),

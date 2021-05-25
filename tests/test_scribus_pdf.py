@@ -10,4 +10,4 @@ class ScribusBasicTest(ComparisonMixin, TestCase):
     """Test the Scribus PDF file saving functionality"""
     effect_class = Scribus
     compare_file = 'svg/shapes_cmyk.svg'
-    comparisons = [()]
+    comparisons = [("--pdf-version=13", "--bleed=0")]

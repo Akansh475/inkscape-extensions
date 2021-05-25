@@ -92,7 +92,7 @@ class Hershey(inkex.Effect):
 
         self.arg_parser.add_argument("--text", \
             dest="sample_text", \
-            default="sample", help="Text to use for font table")
+            default="\nThe Quick Brown Fox Jumps Over a Lazy Dog", help="Text to use for font table")
 
         self.font_file_list = dict()
         self.font_load_fail = False

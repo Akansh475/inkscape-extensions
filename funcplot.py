@@ -170,9 +170,9 @@ class FuncPlot(inkex.EffectExtension):
         pars.add_argument("--tab")
         pars.add_argument("--xstart", type=float, default=0.0, help="Start x-value")
         pars.add_argument("--xend", type=float, default=1.0, help="End x-value")
-        pars.add_argument("--times2pi", type=inkex.Boolean, default=True, help="* x-range by 2*pi")
+        pars.add_argument("--times2pi", type=inkex.Boolean, default=False, help="* x-range by 2*pi")
         pars.add_argument("--polar", type=inkex.Boolean, default=False, help="Use polar coords")
-        pars.add_argument("--ybottom", type=float, default=-1.0, help="y-value of rect's bottom")
+        pars.add_argument("--ybottom", type=float, default=0.0, help="y-value of rect's bottom")
         pars.add_argument("--ytop", type=float, default=1.0, help="y-value of rectangle's top")
         pars.add_argument("--samples", type=int, default=8, help="Samples")
         pars.add_argument("--fofx", default="sin(x)", help="f(x) for plotting")
@@ -181,7 +181,7 @@ class FuncPlot(inkex.EffectExtension):
         pars.add_argument("--clip", type=inkex.Boolean, default=False, help="Clip with source rect")
         pars.add_argument("--remove", type=inkex.Boolean, default=True, help="Remove source rect")
         pars.add_argument("--isoscale", type=inkex.Boolean, default=True, help="Isotropic scaling")
-        pars.add_argument("--drawaxis", type=inkex.Boolean, default=True, help="Draw axis")
+        pars.add_argument("--drawaxis", type=inkex.Boolean, default=False, help="Draw axis")
         pars.add_argument("--endpts", type=inkex.Boolean, default=False, help="Add end points")
 
     def effect(self):

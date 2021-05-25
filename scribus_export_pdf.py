@@ -40,15 +40,15 @@ VERSION_REGEX = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 #   (object placed top-left instead of SVG placed top-left)
 class Scribus(TempDirMixin, inkex.OutputExtension):
     def add_arguments(self, arg_parser):
-        arg_parser.add_argument("--pdf-version", type=int, dest="pdfVersion", default="13",
+        arg_parser.add_argument("--pdf-version", type=int, dest="pdfVersion", default=11,
                                 help="PDF version (e.g. integer numbers between 11 and 15, see Scribus documentation for details)")
-        arg_parser.add_argument("--bleed", type=float, dest="bleed", default="0",
+        arg_parser.add_argument("--bleed", type=float, dest="bleed", default=0.0,
                                 help="Bleed value")
         arg_parser.add_argument("--bleed-marks", type=inkex.Boolean, dest="bleedMarks",
                 default=False, help="Draw bleed marks")
         arg_parser.add_argument("--color-marks", type=inkex.Boolean, dest="colorMarks",
                 default=False, help="Draw color Marks")
-        arg_parser.add_argument("--intent", type=int, dest="intent", default="0",
+        arg_parser.add_argument("--intent", type=int, dest="intent", default=0,
                                 help="Rendering intent. Options: 0: Perceptual, 1: Relative Colorimetric, 2: Saturation, 3: Absolute Colorimetric")
         arg_parser.add_argument("--title", type=str, dest="title", default="", help="PDF title, required for PDF/X")
         #arg_parser.add_argument("--fonts", type=int, dest="fonts", default="1",

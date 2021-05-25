@@ -8,13 +8,14 @@ class GuidesCreatorBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCa
     effect_class = GuidesCreator
     compare_file = 'svg/guides.svg'
     compare_filters = [CompareNumericFuzzy(),]
-
+    old_defaults = ('--vertical_guides=3', '--ul=True', '--ur=True', '--ll=True', '--lr=True',
+                    '--header_margin=6', '--footer_margin=6', '--left_margin=6', '--right_margin=6')
     comparisons = [
-        ('--tab=regular_guides', '--guides_preset=custom'),
-        ('--tab=regular_guides', '--guides_preset=golden', '--delete=True'),
-        ('--tab=regular_guides', '--guides_preset=5;5', '--start_from_edges=True'),
-        ('--tab=diagonal_guides',),
-        ('--tab=margins', '--start_from_edges=True', '--margins_preset=custom'),
-        ('--tab=margins', '--start_from_edges=True', '--margins_preset=book_left'),
-        ('--tab=margins', '--start_from_edges=True', '--margins_preset=book_right'),
+        old_defaults + ('--tab=regular_guides', '--guides_preset=custom'),
+        old_defaults + ('--tab=regular_guides', '--guides_preset=golden', '--delete=True'),
+        old_defaults + ('--tab=regular_guides', '--guides_preset=5;5', '--start_from_edges=True'),
+        old_defaults + ('--tab=diagonal_guides',),
+        old_defaults + ('--tab=margins', '--start_from_edges=True', '--margins_preset=custom'),
+        old_defaults + ('--tab=margins', '--start_from_edges=True', '--margins_preset=book_left'),
+        old_defaults + ('--tab=margins', '--start_from_edges=True', '--margins_preset=book_right'),
     ]

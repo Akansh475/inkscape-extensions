@@ -41,9 +41,9 @@ class Extract(inkex.EffectExtension):
     select_all = (TextElement, FlowRoot)
 
     def add_arguments(self, pars):
-        pars.add_argument("-d", "--direction", default="tb", help="direction to extract text")
-        pars.add_argument("-x", "--xanchor", default="center_x", help="horiz point to compare")
-        pars.add_argument("-y", "--yanchor", default="center_y", help="vertical point to compare")
+        pars.add_argument("-d", "--direction", default="lr", help="direction to extract text")
+        pars.add_argument("-x", "--xanchor", default="left", help="horiz point to compare")
+        pars.add_argument("-y", "--yanchor", default="top", help="vertical point to compare")
 
     def effect(self):
         # move them to the top of the object stack in this order.

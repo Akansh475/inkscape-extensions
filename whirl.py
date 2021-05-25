@@ -26,7 +26,7 @@ class Whirl(inkex.EffectExtension):
     """Modify a path by twisting the nodes around a point"""
     def add_arguments(self, pars):
         pars.add_argument("-t", "--whirl", type=float,\
-            default=1.0, help="amount of whirl")
+            default=5.0, help="amount of whirl")
         pars.add_argument("-r", "--rotation", type=inkex.Boolean,\
             default=True, help="direction of rotation")
 

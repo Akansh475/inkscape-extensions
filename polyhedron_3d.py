@@ -252,12 +252,12 @@ class WavefrontObj(object):
 class Poly3D(inkex.GenerateExtension):
     """Generate a polyhedron from a wavefront 3d model file"""
     def add_arguments(self, pars):
-        pars.add_argument("--tab", default="object")
+        pars.add_argument("--tab", default="common")
 
         # MODEL FILE SETTINGS
         pars.add_argument("--obj", default='cube')
         pars.add_argument("--spec_file", default='great_rhombicuboct.obj')
-        pars.add_argument("--cw_wound", type=inkex.Boolean, default=True)
+        pars.add_argument("--cw_wound", type=inkex.Boolean, default=False)
         pars.add_argument("--type", default='face')
         # VEIW SETTINGS
         pars.add_argument("--r1_ax", default="x")

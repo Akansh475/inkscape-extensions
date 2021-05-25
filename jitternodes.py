@@ -30,7 +30,7 @@ class JitterNodes(inkex.EffectExtension):
         pars.add_argument("--tab")
         pars.add_argument("--radiusx", type=float, default=10.0, help="Randum radius X")
         pars.add_argument("--radiusy", type=float, default=10.0, help="Randum radius Y")
-        pars.add_argument("--ctrl", type=inkex.Boolean, default=True, help="Randomize ctrl points")
+        pars.add_argument("--ctrl", type=inkex.Boolean, default=False, help="Randomize ctrl points")
         pars.add_argument("--end", type=inkex.Boolean, default=True, help="Randomize nodes")
         pars.add_argument("--dist", type=self.arg_method('dist'),
                           default=self.dist_uniform, help="Distribution of displacement")

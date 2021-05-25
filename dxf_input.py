@@ -506,13 +506,13 @@ def generate_gcodetools_point(xc, yc):
 
 class DxfInput(inkex.InputExtension):
     def add_arguments(self, pars):
-        pars.add_argument("--tab", default="Options")
+        pars.add_argument("--tab", default="options")
         pars.add_argument("--scalemethod", default="manual")
         pars.add_argument("--scale", default="1.0")
         pars.add_argument("--textscale", default="1.0")        
         pars.add_argument("--xmin", default="0.0")
         pars.add_argument("--ymin", default="0.0")
-        pars.add_argument("--gcodetoolspoints", default=True, type=inkex.Boolean)
+        pars.add_argument("--gcodetoolspoints", default=False, type=inkex.Boolean)
         pars.add_argument("--encoding", dest="input_encode", default="latin_1")
         pars.add_argument("--font", default="Arial")
 

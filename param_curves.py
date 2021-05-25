@@ -142,12 +142,12 @@ class ParamCurves(inkex.EffectExtension):
         pars.add_argument("--xright", type=float, default=1.0, help="x-value of right")
         pars.add_argument("--ybottom", type=float, default=-1.0, help="y-value of bottom")
         pars.add_argument("--ytop", type=float, default=1.0, help="y-value of top")
-        pars.add_argument("-s", "--samples", type=int, default=8, help="Samples")
+        pars.add_argument("-s", "--samples", type=int, default=30, help="Samples")
         pars.add_argument("--fofx", default="cos(3*t)", help="fx(t) for plotting")
         pars.add_argument("--fofy", default="sin(5*t)", help="fy(t) for plotting")
         pars.add_argument("--remove", type=inkex.Boolean, default=True, help="Remove rectangle")
-        pars.add_argument("--isoscale", type=inkex.Boolean, default=True, help="Isotropic scaling")
-        pars.add_argument("--drawaxis", type=inkex.Boolean, default=True)
+        pars.add_argument("--isoscale", type=inkex.Boolean, default=False, help="Isotropic scaling")
+        pars.add_argument("--drawaxis", type=inkex.Boolean, default=False)
         pars.add_argument("--tab", default="sampling")
 
     def effect(self):

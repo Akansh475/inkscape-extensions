@@ -81,10 +81,10 @@ class NiceChart(inkex.GenerateExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab')
         pars.add_argument('--encoding', default='utf-8')
-        pars.add_argument('-w', '--what', default='22,11,67', help='Chart Values')
+        pars.add_argument('-w', '--what', default='apples:3,bananas:5,oranges:10,pears:4', help='Chart Values')
         pars.add_argument("-t", "--type", type=self.arg_method('render'),
                           default=self.render_bar, help="Chart Type")
-        pars.add_argument("-b", "--blur", type=inkex.Boolean, default=True, help="Blur Type")
+        pars.add_argument("-b", "--blur", type=inkex.Boolean, default=False, help="Blur Type")
         pars.add_argument("-f", "--filename", type=filename_arg, help="Name of File")
         pars.add_argument("-i", "--input_type", default='file', help="Chart Type")
         pars.add_argument("-d", "--delimiter", default=';', help="delimiter")
@@ -96,7 +96,7 @@ class NiceChart(inkex.GenerateExtension):
                           help="column that contains the keys")
         pars.add_argument("-v", "--col_val", type=int, default=1,
                           help="column that contains the values")
-        pars.add_argument("--headings", type=inkex.Boolean, default=True,
+        pars.add_argument("--headings", type=inkex.Boolean, default=False,
                           help="first line of the CSV file consists of headings for the columns")
         pars.add_argument("-r", "--rotate", type=inkex.Boolean, default=False,
                           help="Draw barchart horizontally")
@@ -114,7 +114,7 @@ class NiceChart(inkex.GenerateExtension):
         pars.add_argument("-F", "--font", default='sans-serif', help="font of description")
         pars.add_argument("-S", "--font-size", type=int, default=10,
                           help="font size of description")
-        pars.add_argument("-C", "--font-color", default='black', help="font color of description")
+        pars.add_argument("-C", "--font-color", default='#000000', help="font color of description")
 
         pars.add_argument("-V", "--show_values", type=inkex.Boolean, default=False,
                           help="Show values in chart")

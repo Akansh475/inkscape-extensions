@@ -221,10 +221,10 @@ class DrawFromTriangle(inkex.EffectExtension):
         pars.add_argument("--nagel_pt", type=inkex.Boolean, default=False)
         # CUSTOM POINT OPTIONS
         pars.add_argument("--mode", default='trilin')
-        pars.add_argument("--cust_str", default='s_a')
+        pars.add_argument("--cust_str", default='cos(a_a):cos(a_b):cos(a_c)')
         pars.add_argument("--cust_pt", type=inkex.Boolean, default=False)
         pars.add_argument("--cust_radius", type=inkex.Boolean, default=False)
-        pars.add_argument("--radius", default='s_a')
+        pars.add_argument("--radius", default='s_a*s_b*s_c/(4*area)')
         pars.add_argument("--isogonal_conj", type=inkex.Boolean, default=False)
         pars.add_argument("--isotomic_conj", type=inkex.Boolean, default=False)
 

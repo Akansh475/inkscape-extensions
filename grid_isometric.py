@@ -48,7 +48,7 @@ class GridIsometric(inkex.GenerateExtension):
                           help="Major X Divisions")
         pars.add_argument("--y_divs", type=int, dest="y_divs", default=5,
                           help="Major Y Divisions")
-        pars.add_argument("--dx", type=float, dest="dx", default=10.0,
+        pars.add_argument("--dx", type=float, dest="dx", default=50.0,
                           help="Major X division Spacing")
         pars.add_argument("--subdivs", type=int, dest="subdivs", default=2,
                           help="Subdivisions per Major X division")
@@ -56,10 +56,10 @@ class GridIsometric(inkex.GenerateExtension):
                           help="Subsubdivisions per Minor X division")
         pars.add_argument("--divs_th", type=float, dest="divs_th", default=2,
                           help="Major X Division Line thickness")
-        pars.add_argument("--subdivs_th", type=float, dest="subdivs_th", default=1,
+        pars.add_argument("--subdivs_th", type=float, dest="subdivs_th", default=0.5,
                           help="Minor X Division Line thickness")
         pars.add_argument("--subsubdivs_th", type=float, dest="subsubdivs_th",
-                          default=0.3, help="Subminor X Division Line thickness")
+                          default=0.1, help="Subminor X Division Line thickness")
         pars.add_argument("--border_th", type=float, dest="border_th", default=3,
                           help="Border Line thickness")
 

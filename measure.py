@@ -40,22 +40,22 @@ class MeasureLength(inkex.EffectExtension):
             help="Type of measurement")
         pars.add_argument("--method", type=self.arg_method(), default=self.method_textonpath,\
             help="Text Orientation method")
-        pars.add_argument("--presetFormat", default="TaP_start", help="Preset text layout")
+        pars.add_argument("--presetFormat", default="default", help="Preset text layout")
         pars.add_argument("--startOffset", default="custom", help="Text Offset along Path")
         pars.add_argument("--startOffsetCustom", type=int, default=50,\
             help="Text Offset along Path")
         pars.add_argument("--anchor", default="start", help="Text Anchor")
         pars.add_argument("--position", default="start", help="Text Position")
         pars.add_argument("--angle", type=float, default=0, help="Angle")
-        pars.add_argument("-f", "--fontsize", type=int, default=20,\
+        pars.add_argument("-f", "--fontsize", type=int, default=12,\
             help="Size of length label text in px")
         pars.add_argument("-o", "--offset", type=float, default=-6,\
             help="The distance above the curve")
-        pars.add_argument("-u", "--unit", default="mm",\
+        pars.add_argument("-u", "--unit", default="px",\
             help="The unit of the measurement")
         pars.add_argument("-p", "--precision", type=int, default=2,\
             help="Number of significant digits after decimal point")
-        pars.add_argument("-s", "--scale", type=float, default=1.1,\
+        pars.add_argument("-s", "--scale", type=float, default=1.0,\
             help="Scale Factor (Drawing:Real Length)")
 
     def effect(self):

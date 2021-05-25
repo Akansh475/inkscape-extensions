@@ -8,4 +8,4 @@ class HPGLOutputBasicTest(ComparisonMixin, TestCase):
         'svg/shapes.svg',
         'svg/hpgl_multipen.svg'
     ]
-    comparisons = [()]
+    comparisons = [("--force=24", "--speed=20", "--orientation=90")]

@@ -23,9 +23,9 @@ import inkex
 
 class Spirograph(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument("--primaryr", type=float, default=60.0,
+        pars.add_argument("--primaryr", type=float, default=100.0,
                           help="The radius of the outer gear")
-        pars.add_argument("--secondaryr", type=float, default=100.0,
+        pars.add_argument("--secondaryr", type=float, default=60.0,
                           help="The radius of the inner gear")
         pars.add_argument("--penr", type=float, default=50.0,
                           help="The distance of the pen from the inner gear")

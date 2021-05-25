@@ -6,4 +6,4 @@ from inkex.tester.filters import CompareSize
 class JessyInkExportBasicTest(ComparisonMixin, TestCase):
     compare_filters = [CompareSize()]
     effect_class = Export
-    comparisons = [('--resolution=1',)]
+    comparisons = [('--resolution=1', '--type=png')]

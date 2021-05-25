@@ -6,3 +6,4 @@ from inkex.tester.filters import CompareOrderIndependentStyle
 class SpirographBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = Spirograph
     compare_filters = [CompareOrderIndependentStyle()]
+    comparisons = [("--primaryr=60.0", "--secondaryr=100.0")]

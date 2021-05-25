@@ -28,7 +28,7 @@ class FoldableBox(inkex.EffectExtension):
         pars.add_argument("--width", type=float, default=10.0, help="The Box Width")
         pars.add_argument("--height", type=float, default=15.0, help="The Box Height")
         pars.add_argument("--depth", type=float, default=3.0, help="The Box Depth (z dimention)")
-        pars.add_argument("--unit", default="cm", help="The unit of the box dimensions")
+        pars.add_argument("--unit", default="px", help="The unit of the box dimensions")
         pars.add_argument("--proportion", type=float, default=0.6, help="Inner tab proportion")
         pars.add_argument("--guide", type=inkex.Boolean, default=False, help="Add guide lines")
 

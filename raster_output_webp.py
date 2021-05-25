@@ -8,8 +8,8 @@ import inkex
 class WebpOutput(inkex.RasterOutputExtension):
     def add_arguments(self, pars):
         pars.add_argument('--tab')
-        pars.add_argument('--quality', type=int, default=75)
-        pars.add_argument('--speed', type=int, default=3)
+        pars.add_argument('--quality', type=int, default=80)
+        pars.add_argument('--speed', type=int, default=0)
         pars.add_argument('--lossless', type=inkex.Boolean, default=True)
 
     def save(self, stream):

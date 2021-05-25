@@ -11,8 +11,9 @@ class TestPlotter(ComparisonMixin, TestCase):
     compare_filters = [
         CompareReplacement((';', '\n'))
     ]
+    old_defaults = ('--serialFlowControl=0', '--force=24', '--speed=20', '--orientation=90')
     comparisons = [
-        ('--serialPort=[test]',), # HPGL
-        ('--serialPort=[test]', '--commandLanguage=DMPL'),
-        ('--serialPort=[test]', '--commandLanguage=KNK'),
+        ('--serialPort=[test]',) + old_defaults, # HPGL
+        ('--serialPort=[test]', '--commandLanguage=DMPL') + old_defaults,
+        ('--serialPort=[test]', '--commandLanguage=KNK') + old_defaults,
     ]

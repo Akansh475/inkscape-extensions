@@ -25,7 +25,7 @@ from inkex.bezier import percent_point
 class SegmentStraightener(inkex.EffectExtension):
     """Make segments straiter"""
     def add_arguments(self, pars):
-        pars.add_argument("-p", "--percent", type=float, default=10.0,\
+        pars.add_argument("-p", "--percent", type=float, default=50.0,\
             help="move curve handles PERCENT percent closer to a straight line")
         pars.add_argument("-b", "--behavior", type=int, default=1,\
             help="straightening behavior for cubic segments")

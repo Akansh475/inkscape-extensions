@@ -41,9 +41,9 @@ import pathmodifier
 class Dimension(pathmodifier.PathModifier):
     """Add dimensions as a path modifier"""
     def add_arguments(self, pars):
-        pars.add_argument("--xoffset", type=float, default=100.0,\
+        pars.add_argument("--xoffset", type=float, default=50.0,\
             help="x offset of the vertical dimension arrow")
-        pars.add_argument("--yoffset", type=float, default=100.0,\
+        pars.add_argument("--yoffset", type=float, default=50.0,\
             help="y offset of the horizontal dimension arrow")
         pars.add_argument("--type", default="geometric", help="Bounding box type")
 

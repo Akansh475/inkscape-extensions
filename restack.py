@@ -38,10 +38,10 @@ class Restack(inkex.EffectExtension):
 
     def add_arguments(self, pars):
         pars.add_argument("--tab", type=self.arg_method('restack'), default=self.restack_positional)
-        pars.add_argument("--direction", default="tb", help="direction to restack")
+        pars.add_argument("--direction", default="lr", help="direction to restack")
         pars.add_argument("--angle", type=float, default=0.0, help="arbitrary angle")
-        pars.add_argument("--xanchor", default="m", help="horizontal point to compare")
-        pars.add_argument("--yanchor", default="m", help="vertical point to compare")
+        pars.add_argument("--xanchor", default="l", help="horizontal point to compare")
+        pars.add_argument("--yanchor", default="t", help="vertical point to compare")
         pars.add_argument("--zsort", default="rev", help="Restack mode based on Z-Order")
         pars.add_argument("--nb_direction", default='', help='Direction tab')
 

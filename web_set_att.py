@@ -33,8 +33,8 @@ class SetAttribute(inkwebeffect.InkWebEffect):
     """Set a web attribute accross many objects"""
     def add_arguments(self, pars):
         pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
-        pars.add_argument("--att", default="fill", help="Attribute to set.")
-        pars.add_argument("--val", default="red", help="Values to set.")
+        pars.add_argument("--att", default="fill stroke stroke-width", help="Attribute to set.")
+        pars.add_argument("--val", default="red black 5px", help="Values to set.")
         pars.add_argument("--when", default="onclick", help="When it must to set?")
         pars.add_argument("--from-and-to", dest="from_and_to", default="g-to-one")
         pars.add_argument("--compatibility", default="append",

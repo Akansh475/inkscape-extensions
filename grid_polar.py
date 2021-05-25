@@ -63,11 +63,11 @@ class GridPolar(inkex.GenerateExtension):
         pars.add_argument("--a_divs", type=int, default=24, help="Angle Divisions")
         pars.add_argument("--a_divs_cent", type=int, default=4, help="Angle Divisions at Centre")
         pars.add_argument("--a_subdivs", type=int, default=1, help="Angcular Subdivisions")
-        pars.add_argument("--a_subdivs_cent", type=int, default=1, help="Angular Subdivisions end")
+        pars.add_argument("--a_subdivs_cent", type=int, default=2, help="Angular Subdivisions end")
         pars.add_argument("--a_divs_th", type=float, default=2, help="Major Angular thickness")
         pars.add_argument("--a_subdivs_th", type=float, default=1, help="Minor Angular thickness")
         pars.add_argument("--c_dot_dia", type=float, default=5.0, help="Diameter of Centre Dot")
-        pars.add_argument("--a_labels", default='deg', help="The kind of labels to apply")
+        pars.add_argument("--a_labels", default='none', help="The kind of labels to apply")
         pars.add_argument("--a_label_size", type=int, default=18, help="Pixel size of the labels")
         pars.add_argument("--a_label_outset", type=float, default=24, help="Label Radial outset")
 

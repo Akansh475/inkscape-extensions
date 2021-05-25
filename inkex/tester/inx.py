@@ -56,6 +56,26 @@ class InxMixin(object):
                     params[param]['type'],
                     args[param]['type'],
                     "Type is not the same for {}:param:{}".format(inx.filename, param))
+            inxdefault = params[param]['default']
+            argsdefault = args[param]['default']
+            if inxdefault and argsdefault:
+                # for booleans, the inx is lowercase and the param is uppercase
+                if params[param]['type'] == "bool":
+                    argsdefault = str(argsdefault).lower()
+                elif (params[param]['type'] not in ["string", None, "color"] 
+                      or args[param]['type'] in ['int', 'float']):
+                    # try to parse the inx value to compare numbers to numbers
+                    inxdefault = float(inxdefault)
+                if args[param]['type'] == "color" or callable(args[param]['default']):
+                    # skip color, method types
+                    continue
+                self.assertEqual(argsdefault,
+                                 inxdefault,
+                                 "Default value is not the same for {}:param:{}"
+                                 .format(inx.filename, param))
+
+
+            
 
     def introspect_arg_parser(self, arg_parser):
         """Pull apart the arg parser to find out what we have in it"""

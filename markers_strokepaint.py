@@ -30,7 +30,7 @@ class MarkersStrokePaint(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--modify", type=inkex.Boolean, default=False,
                           help="Do not create a copy, modify the markers")
-        pars.add_argument("--type", dest="fill_type", default="stroke",
+        pars.add_argument("--type", dest="fill_type", default="solid",
                           help="Replace the markers' fill with the object stroke or fill color")
         pars.add_argument("--alpha", type=inkex.Boolean, dest="assign_alpha", default=True,
                           help="Assign the object fill and stroke alpha to the markers")

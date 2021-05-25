@@ -13,7 +13,7 @@ class PngOutput(TempDirMixin, inkex.RasterOutputExtension):
         pars.add_argument('--tab')
         # Lossless options
         pars.add_argument('--interlace', type=inkex.Boolean, default=True)
-        pars.add_argument('--level', type=int, default=5)
+        pars.add_argument('--level', type=int, default=0)
         # Lossy options
         pars.add_argument('--bitdepth', type=inkex.Boolean, default=False)
         pars.add_argument('--color', type=inkex.Boolean, default=False)

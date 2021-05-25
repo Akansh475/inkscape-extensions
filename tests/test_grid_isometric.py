@@ -7,4 +7,4 @@ from inkex.tester.filters import CompareOrderIndependentStyle, CompareWithPathSp
 class TestGridIsometricBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     compare_filters = [CompareOrderIndependentStyle(), CompareWithPathSpace()]
     effect_class = GridIsometric
-    comparisons = [()]
+    comparisons = [("--dx=10.0", "--subdivs_th=1", "--subsubdivs_th=0.3")]

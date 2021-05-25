@@ -5,11 +5,11 @@ from inkex.tester import ComparisonMixin, TestCase
 
 class InterpAttGBasicTest(ComparisonMixin, TestCase):
     effect_class = InterpAttG
-    comparisons = [('--id=layer1',)]
+    comparisons = [('--id=layer1', '--att=style/fill')]
 
 class InterpAttGMultipleSelectedTest(ComparisonMixin, TestCase):
     effect_class = InterpAttG
-    comparisons = [('--id=c1', '--id=c2', '--id=c3')]
+    comparisons = [('--id=c1', '--id=c2', '--id=c3', '--att=style/fill')]
 
 class InterpAttGColorRoundingTest(ComparisonMixin, TestCase):
     effect_class = InterpAttG

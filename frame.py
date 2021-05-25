@@ -40,7 +40,7 @@ class Frame(inkex.EffectExtension):
     """
     def add_arguments(self, pars):
         # Parse the options.
-        pars.add_argument('--tab', default='object')
+        pars.add_argument('--tab', default='stroke')
         pars.add_argument('--clip', type=inkex.Boolean, default=False)
         pars.add_argument('--corner_radius', type=int, default=0)
         pars.add_argument('--fill_color', type=inkex.Color, default=inkex.Color(0))

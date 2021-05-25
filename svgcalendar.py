@@ -72,25 +72,25 @@ class Calendar(inkex.EffectExtension):
             "--month-margin", type=str, dest="month_margin", default="1cm",
             help='The space between the month boxes.')
         pars.add_argument(
-            "--color-year", type=str, dest="color_year", default="#888",
+            "--color-year", type=str, dest="color_year", default="#808080",
             help='Color for the year header.')
         pars.add_argument(
-            "--color-month", type=str, dest="color_month", default="#666",
+            "--color-month", type=str, dest="color_month", default="#686868",
             help='Color for the month name header.')
         pars.add_argument(
-            "--color-day-name", type=str, dest="color_day_name", default="#999",
+            "--color-day-name", type=str, dest="color_day_name", default="#909090",
             help='Color for the week day names header.')
         pars.add_argument(
-            "--color-day", type=str, dest="color_day", default="#000",
+            "--color-day", type=str, dest="color_day", default="#000000",
             help='Color for the common day box.')
         pars.add_argument(
-            "--color-weekend", type=str, dest="color_weekend", default="#777",
+            "--color-weekend", type=str, dest="color_weekend", default="#787878",
             help='Color for the weekend days.')
         pars.add_argument(
-            "--color-nmd", type=str, dest="color_nmd", default="#BBB",
+            "--color-nmd", type=str, dest="color_nmd", default="#B0B0B0",
             help='Color for the next month day, in empty day boxes.')
         pars.add_argument(
-            "--color-weeknr", type=str, dest="color_weeknr", default="#808080",
+            "--color-weeknr", type=str, dest="color_weeknr", default="#787878",
             help='Color for the week numbers.')
         pars.add_argument(
             "--font-year", type=str, dest="font_year", default="arial",
@@ -118,7 +118,7 @@ class Calendar(inkex.EffectExtension):
             "--weeknr-name", type=str, dest="weeknr_name", default='Wk',
             help='The week number column name for localization.')
         pars.add_argument(
-            "--encoding", type=str, dest="input_encode", default='utf-8',
+            "--encoding", type=str, dest="input_encode", default='arabic',
             help='The input encoding of the names.')
 
     def validate_options(self):

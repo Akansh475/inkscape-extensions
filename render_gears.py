@@ -55,7 +55,7 @@ class Gears(inkex.GenerateExtension):
         pars.add_argument("--teeth", type=int, default=24, help="Number of teeth")
         pars.add_argument("--pitch", type=float, default=20.0, help="Circular Pitch")
         pars.add_argument("--angle", type=float, default=20.0, help="Pressure Angle")
-        pars.add_argument("--centerdiameter", type=float, default=10.0, help="Diameter of hole")
+        pars.add_argument("--centerdiameter", type=float, default=20.0, help="Diameter of hole")
         pars.add_argument("--unit", default="px", help="unit for pitch and center diameter")
 
     def generate(self):

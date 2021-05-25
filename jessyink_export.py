@@ -36,8 +36,8 @@ class Export(JessyInkMixin, TempDirMixin, inkex.OutputExtension):
 
     def add_arguments(self, pars):
         pars.add_argument('--tab', type=str, dest='what')
-        pars.add_argument('--type', type=str, dest='type', default='png')
-        pars.add_argument('--resolution', type=int, default=96)
+        pars.add_argument('--type', type=str, dest='type', default='pdf')
+        pars.add_argument('--resolution', type=int, default=92)
 
     def save(self, stream):
         self.is_installed()

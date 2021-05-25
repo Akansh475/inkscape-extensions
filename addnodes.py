@@ -34,7 +34,7 @@ class AddNodes(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--segments", type=int, default=2,
                           help="Number of segments to divide the path into")
-        pars.add_argument("--max", type=float, default=2.0,
+        pars.add_argument("--max", type=float, default=10.0,
                           help="Number of segments to divide the path into")
         pars.add_argument("--method", help="The kind of division to perform")
 

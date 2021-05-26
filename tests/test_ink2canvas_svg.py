@@ -9,3 +9,11 @@ class Ink2CanvasBasicTest(ComparisonMixin, TestCase):
     compare_file = 'svg/shapes-clipboard.svg'
     compare_filters = [CompareOrderIndependentLines()]
     comparisons = [()]
+
+class Ink2CanvasTestTextPath(ComparisonMixin, TestCase):
+    effect_class = Html5Canvas
+    compare_file = 'svg/multilayered-test.svg'
+    # This file contains a textPath
+    compare_filters = [CompareOrderIndependentLines()]
+    # We don't need a selection for this case, but we need unique filenames for the tester
+    comparisons = [("--id=rect3898",)]

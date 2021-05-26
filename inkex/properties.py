@@ -426,6 +426,17 @@ class MarkerShorthandValue(ShorthandValue, URLNoneValue):
             return ""
         return super()._parse_value(value, element)
 
+class FontSizeValue(BaseStyleValue):
+    """ Logic for the font-size property"""
+    def _parse_value(self, value: str, element=None):
+        if element is None:
+            return value #no additional logic in this case
+        try:
+            return element.unittouu(value)
+        except ValueError: #unable to parse font size, e.g. font-size:normal
+            return element.unittouu("12pt")
+
+
 # keys: attributes, right side:
 # - Subclass of BaseStyleValue used for instantiating
 # - default value
@@ -464,7 +475,7 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
     "flood-opacity": (AlphaValue, "1", True, False, None),
     "font": (FontValue, "", True, False, None),
     "font-family": (BaseStyleValue, "sans-serif", True, True, None),
-    "font-size": (BaseStyleValue, "medium", True, True, None),
+    "font-size": (FontSizeValue, "medium", True, True, None),
     "font-size-adjust": (BaseStyleValue, "none", True, True, None),
     "font-stretch": (EnumValue, "normal", True, True, ["normal", "ultra-condensed", "extra-condensed", "condensed",
                                                      "semi-condensed", "semi-expanded", "expanded", "extra-expanded",
@@ -479,7 +490,7 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
     "image-rendering": (EnumValue, "auto", True, True, ["auto", "optimizeQuality", "optimizeSpeed"]),
     "letter-spacing": (BaseStyleValue, "normal", True, True, None),
     "lighting-color": (ColorValue, "normal", True, False, None),
-    "line-height": (BaseStyleValue, "normal", False, False, None),
+    "line-height": (BaseStyleValue, "normal", False, True, None),
     "marker" : (MarkerShorthandValue, "", True, True, None),
     "marker-end": (URLNoneValue, "none", True, True, None),
     "marker-mid": (URLNoneValue, "none", True, True, None),
@@ -515,7 +526,7 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
     "white-space": (EnumValue, "normal", True, True, ["normal", "pre", "nowrap", "pre-wrap", "break-spaces", "pre-line"]),
     "word-spacing": (BaseStyleValue, "normal", True, True, None),
     # including obsolete SVG 1.1 values
-    "writing-mode": (EnumValue, "visible", True, True, ["horizontal-tb", "vertical-rl", "vertical-lr", "lr", "lr-tb", "rl", "rl-tb", "tb", "tb-rl"]),
+    "writing-mode": (EnumValue, "horizontal-tb", True, True, ["horizontal-tb", "vertical-rl", "vertical-lr", "lr", "lr-tb", "rl", "rl-tb", "tb", "tb-rl"]),
     "-inkscape-font-specification": (BaseStyleValue, "sans-serif", False, False, None)
 }
 # pylint: enable=line-too-long

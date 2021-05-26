@@ -34,7 +34,7 @@ from ..paths import Path
 from ..styles import Style, Classes
 from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
-from ..units import convert_unit, render_unit
+from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
 from ..properties import all_properties
 
@@ -570,3 +570,15 @@ class ShapeElement(BaseElement):
         if not float(self.style.get('opacity', 1.0)):
             return False
         return True
+
+    def get_line_height_uu(self):
+        """Returns the specified value of line-height, in user units"""
+        style = self.specified_style()
+        font_size = style("font-size") # already in uu
+        line_height = style("line-height")
+        parsed = parse_unit(line_height)
+        if parsed is None:
+            return font_size * 1.2
+        if parsed[1] == "%":
+            return font_size * parsed[0] * 0.01
+        return self.unittouu(line_height)

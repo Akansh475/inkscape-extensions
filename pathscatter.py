@@ -83,7 +83,7 @@ class PathScatter(pathmodifier.Diffeo):
             bbox = BoundingBox(-bbox.y, -bbox.x)
             mat = Transform([[0, -1, 0], [1, 0, 0]]) * mat
         mat.add_translate([0, self.options.noffset])
-        node.transform *= mat
+        node.transform = mat * node.transform
         return bbox
     def effect(self):
 
@@ -141,11 +141,11 @@ class PathScatter(pathmodifier.Diffeo):
                 length = sum(lengths)
                 dx = width + self.options.space
                 if self.options.stretch:
-                    n = int((length - self.options.toffset + self.options.space) / dx)
+                    n = int(length / dx + self.options.space)
                     if n > 0:
-                        dx = (length - self.options.toffset) / n
+                        dx = (length) / n
 
-                s = self.options.toffset
+                s = 0 if self.options.stretch else self.options.toffset * 0.01 * dx
                 while s <= length:
                     local_transform = self.localTransformAt(s, skelcomp, lengths, skel_closed, \
                                                             self.options.follow)

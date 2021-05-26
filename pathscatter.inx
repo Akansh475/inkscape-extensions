@@ -9,7 +9,7 @@
             <param name="stretch" type="bool" gui-text="Stretch spaces to fit skeleton length">false</param>
             <param name="space" type="float" gui-text="Space between copies:" min="-10000.0" max="10000.0">0.0</param>
             <param name="noffset" type="float" gui-text="Normal offset:" min="-10000.0" max="10000.0">0.0</param>
-            <param name="toffset" type="float" gui-text="Tangential offset:" min="-10000.0" max="10000.0">0.0</param>
+            <param name="toffset" type="float" gui-text="Tangential offset (percentage of pattern length):" min="0.0" max="100.0">0.0</param>
             <param name="rotate" type="bool" gui-text="Rotate pattern 90° clockwise">false</param>
             <param name="copymode" type="optiongroup" appearance="combo" gui-text="Original pattern will be:">
                 <option value="move">Moved</option>

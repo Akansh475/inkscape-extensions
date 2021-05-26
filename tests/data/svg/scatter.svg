@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   sodipodi:docname="scatter.svg"
-   id="svg8"
-   version="1.1"
-   viewBox="0 0 210 297"
+   width="210mm"
    height="297mm"
-   width="210mm">
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="scatter.svg"
+   inkscape:version="1.1-rc (52f87abb86, 2021-05-02)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -26,15 +26,19 @@
      inkscape:document-rotation="0"
      inkscape:current-layer="layer1"
      inkscape:document-units="mm"
-     inkscape:cy="100.07331"
-     inkscape:cx="400.44933"
+     inkscape:cy="215"
+     inkscape:cx="400.71429"
      inkscape:zoom="0.7"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
      bordercolor="#666666"
      pagecolor="#ffffff"
-     id="base" />
+     id="base"
+     objecttolerance="10.0"
+     gridtolerance="10.0"
+     guidetolerance="10.0"
+     inkscape:pagecheckerboard="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -43,7 +47,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -59,14 +63,15 @@
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     <g
        id="g12668"
-       transform="translate(71.194242,-298.0388)">
+       transform="matrix(0.41480048,0.30168733,-0.26562825,0.47110973,136.76388,-111.50467)"
+       style="stroke-width:1.90501">
       <g
          id="g8146"
          transform="matrix(0.28815881,0,0,0.5091094,-30.047692,173.62664)"
-         style="stroke-width:2.61083">
+         style="stroke-width:4.97366">
         <path
            sodipodi:type="star"
-           style="fill:#ffff00;stroke:#000000;stroke-width:1.04433;stroke-linecap:round;stroke-linejoin:round"
+           style="fill:#ffff00;stroke:#000000;stroke-width:1.98946;stroke-linecap:round;stroke-linejoin:round"
            id="path8749"
            sodipodi:sides="5"
            sodipodi:cx="-42.282467"
@@ -84,7 +89,7 @@
       </g>
       <path
          d="m -34.339907,359.37247 a 5.4897132,3.7376771 0 0 1 -5.489713,3.73767 5.4897132,3.7376771 0 0 1 -5.489714,-3.73767 5.4897132,3.7376771 0 0 1 5.489714,-3.73768 5.4897132,3.7376771 0 0 1 5.489713,3.73768"
-         style="fill:#ffff00;stroke:#000000;stroke-width:0.4;stroke-linecap:round;stroke-linejoin:round"
+         style="fill:#ffff00;stroke:#000000;stroke-width:0.762004;stroke-linecap:round;stroke-linejoin:round"
          id="path9758" />
     </g>
     <path

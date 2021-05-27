@@ -69,7 +69,13 @@ class AttributeInterpolator(abc.ABC):
         During the interpolation process, some nodes are created temporarily, such as plain
         gradients of a single color to allow solid<->gradient interpolation. These are not attached
         to the document tree and therefore have no root. Since the only style relevant for them is
-        the inline style, it is acceptable to fallback to it."""
+        the inline style, it is acceptable to fallback to it.
+
+        Args:
+            node (BaseElement): The node to get the best approximated style of
+
+        Returns:
+            Style: If the node is rooted, the CSS specified style. Else, the inline style."""
         try:
             return node.specified_style()
         except FragmentError:
@@ -81,12 +87,14 @@ class AttributeInterpolator(abc.ABC):
         supported
 
         Args:
-            snode (inkex.BaseElement): start element
-            enode (inkex.BaseElement): end element
+            snode (BaseElement): start element
+            enode (BaseElement): end element
             attribute (str): attribute name (for styles, starting with "style/")
-            svg (inkex.SvgDocumentElement): the svg document
-            method (Interpolator, optional): (currently only used for paths). Specifies a method
-            used to interpolate the attribute. Defaults to None.
+            method (AttributeInterpolator, optional): (currently only used for paths). Specifies a
+                method used to interpolate the attribute. Defaults to None.
+
+        Raises:
+            ValueError: if an attribute is passed that is not a style, path or transform attribute
 
         Returns:
             AttributeInterpolator: an interpolator whose type depends on attribute.
@@ -146,8 +154,8 @@ class StyleInterpolator(AttributeInterpolator):
         - other properties -> ValueInterpolator
 
         Args:
-            snode (inkex.BaseElement): start element
-            enode (inkex.BaseElement): end element
+            snode (BaseElement): start element
+            enode (BaseElement): end element
             attribute (str): attribute to interpolate
 
         Raises:
@@ -174,8 +182,8 @@ class StyleInterpolator(AttributeInterpolator):
         """Creates an Interpolator for a given color-like attribute
 
         Args:
-            snode (inkex.BaseElement): start element
-            enode (inkex.BaseElement): end element
+            snode (BaseElement): start element
+            enode (BaseElement): end element
             attribute (str): attribute to interpolate
 
         Raises:
@@ -216,7 +224,7 @@ class StyleInterpolator(AttributeInterpolator):
 
         Args:
             time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-            end_value is returned. Defaults to 0.
+                end_value is returned. Defaults to 0.
 
         Returns:
             inkex.Style: interpolated style
@@ -248,7 +256,7 @@ class ValueInterpolator(AttributeInterpolator):
 
         Args:
             time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-            end_value is returned. Defaults to 0.
+                end_value is returned. Defaults to 0.
 
         Returns:
             int: interpolated value
@@ -306,10 +314,10 @@ class TransformInterpolator(ArrayInterpolator):
 
         Args:
             time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-            end_value is returned. Defaults to 0.
+                end_value is returned. Defaults to 0.
 
         Returns:
-            inkex.Transform: interpolated transform
+            Transform: interpolated transform
         """
         return Transform(super().interpolate(time))
 
@@ -321,8 +329,8 @@ class ColorInterpolator(ArrayInterpolator):
         """Creates a ColorInterpolator for either Fill or stroke, depending on the attribute.
 
         Args:
-            sst (inkex.Style): Start style
-            est (inkex.Style): End style
+            sst (Style): Start style
+            est (Style): End style
             attribute (string): either fill or stroke
 
         Raises:
@@ -350,10 +358,10 @@ class ColorInterpolator(ArrayInterpolator):
 
         Args:
             time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-            end_value is returned. Defaults to 0.
+                end_value is returned. Defaults to 0.
 
         Returns:
-            inkex.Color: interpolatored color
+            Color: interpolated color
         """
         return Color(list(map(int, super().interpolate(time))))
 
@@ -381,8 +389,8 @@ class GradientInterpolator(AttributeInterpolator):
             newoffsets = sorted(list(set(self.start_value.stop_offsets
                                          + self.end_value.stop_offsets)))
 
-            def func(start, end, f): 
-                return StopInterpolator(start, end).interpolate(f)
+            def func(start, end, time):
+                return StopInterpolator(start, end).interpolate(time)
             sstops = GradientInterpolator.\
                 interpolate_linear_list(self.start_value.stop_offsets, list(self.start_value.stops),
                                         newoffsets, func)
@@ -396,7 +404,7 @@ class GradientInterpolator(AttributeInterpolator):
 
     @staticmethod
     def create(snode, enode, attribute):
-        """Creates a GradientInterpolator for either fill or stroke, depending on attribute.
+        """Creates a `GradientInterpolator` for either fill or stroke, depending on attribute.
         Cases: (A, B) -> Interpolator
 
           - Linear Gradient, Linear Gradient -> LinearGradientInterpolator
@@ -407,13 +415,13 @@ class GradientInterpolator(AttributeInterpolator):
           - Color or None, Color or None -> ValueError
 
         Args:
-            snode (inkex.BaseElement): start element
-            enode (inkex.BaseElement): end element
+            snode (BaseElement): start element
+            enode (BaseElement): end element
             attribute (string): either fill or stroke
 
         Raises:
             ValueError: if none of the styles are a gradient or if they are gradients
-            of different types
+                of different types
 
         Returns:
             GradientInterpolator: an Interpolator object
@@ -467,7 +475,7 @@ class GradientInterpolator(AttributeInterpolator):
                 iterator[index][1] = value  # is a gradient
         if interpolator is None:
             raise ValueError("None of the two styles is a gradient")
-        if interpolator == LinearGradientInterpolator or interpolator == RadialGradientInterpolator:
+        if interpolator in [LinearGradientInterpolator, RadialGradientInterpolator]:
             return interpolator(iterator[0][1], iterator[1][1], snode)
         return interpolator(iterator[0][1], iterator[1][1])
 
@@ -492,7 +500,7 @@ class GradientInterpolator(AttributeInterpolator):
             func (Callable[[Type, Type, float], Type]): Function to interpolate between values
 
         Returns:
-            :list[Type]: interpolated function values at positions
+            list[Type]: interpolated function values at positions
         """
         newvalues = []
         positions = list(map(float, positions))
@@ -521,12 +529,12 @@ class GradientInterpolator(AttributeInterpolator):
         and returns the href to the orientation gradient.
 
         Args:
-            element (inkex.BaseElement): an element inside the SVG that the gradient should be
-            added to
-            gradient (inkex.Gradient): the gradient to append to the document
+            element (BaseElement): an element inside the SVG that the gradient should be
+                added to
+            gradient (Gradient): the gradient to append to the document
 
         Returns:
-            inkex.Gradient: the orientation gradient, or the gradient object if
+            Gradient: the orientation gradient, or the gradient object if
             element has no root or is None
         """
         stops, orientation = gradient.stops_and_orientation()
@@ -558,8 +566,7 @@ class GradientInterpolator(AttributeInterpolator):
                           for interp in self.newstop_interpolator])
         if self.svg is None:
             return newgrad
-        else:
-            return GradientInterpolator.append_to_doc(self.svg, newgrad)
+        return GradientInterpolator.append_to_doc(self.svg, newgrad)
 
 
 class LinearGradientInterpolator(GradientInterpolator):
@@ -611,10 +618,10 @@ class StopInterpolator(AttributeInterpolator):
 
         Args:
             time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-            end_value is returned. Defaults to 0.
+                end_value is returned. Defaults to 0.
 
         Returns:
-            inkex.Stop: interpolated gradient stop
+            Stop: interpolated gradient stop
         """
         newstop = Stop()
         newstop.style = self.style_interpolator.interpolate(time)
@@ -689,7 +696,7 @@ class EqualSubsegmentsInterpolator(PathInterpolator):
     """Interpolates the path by rediscretizing the subpaths first."""
     @staticmethod
     def get_subpath_lenghts(path):
-        """prepare lenghts for interpolation"""
+        """prepare lengths for interpolation"""
         sp_lenghts, total = csplength(path)
         t = 0
         lenghts = []
@@ -703,7 +710,14 @@ class EqualSubsegmentsInterpolator(PathInterpolator):
     @staticmethod
     def process_path(path, other):
         """Rediscretize path so that all subpaths have an equal number of segments, so that
-        there is a node at the path "times" where path or other have a node"""
+        there is a node at the path "times" where path or other have a node
+
+        Args:
+            path (Path): the first path
+            other (Path): the second path
+
+        Returns:
+            Array: the prepared path description for the intermediate path """
         sp_lenghts, total, _ = EqualSubsegmentsInterpolator.get_subpath_lenghts(
             path)
         _, _, lenghts = EqualSubsegmentsInterpolator.get_subpath_lenghts(other)

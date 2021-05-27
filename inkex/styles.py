@@ -19,8 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-Two simple functions for working with inline css
-and some color handling on top.
+Functions for handling styles and embedded css
 """
 
 import re
@@ -35,7 +34,6 @@ from .properties import BaseStyleValue, all_properties, ShorthandValue
 
 if TYPE_CHECKING:
     from inkex import SvgDocumentElement
-
 
 
 class Classes(list):
@@ -101,10 +99,18 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         self.callback = callback
 
     @staticmethod
-    def _parse_str(style: str, element = None) \
-        -> Iterable[BaseStyleValue]:
-        """Create a dictionary from the value of an inline style attribute, including
-        its !important state, parsing the value if possible """
+    def _parse_str(style: str, element=None) -> Iterable[BaseStyleValue]:
+        """Create a dictionary from the value of a CSS rule (such as an inline style or from an
+        embedded style sheet), including its !important state, parsing the value if possible.
+
+        Args:
+            style: the content of a CSS rule to parse
+            element: the element this style is working on (can be the root SVG, is used for
+                parsing gradients etc.)
+
+        Yields:
+            BaseStyleValue: the parsed attribute
+        """
         for declaration in style.split(';'):
             if ":" in declaration:
                 result = BaseStyleValue.factory_errorhandled(element, \
@@ -113,7 +119,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
                     yield result
 
     @staticmethod
-    def parse_str(style: str, element = None):
+    def parse_str(style: str, element=None):
         """Parse a style passed as string"""
         return Style(style, element=element)
 
@@ -173,6 +179,9 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         """Creates a new Style containing all parent styles with importance "important" and
         current styles with importance "important"
 
+        Args:
+            parent: the parent style that will be merged into this one (will not be altered)
+
         Returns:
             Style: the merged Style object
         """
@@ -197,8 +206,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return ret
 
     def apply_shorthands(self):
-        """Apply all shorthands in this style.
-        """
+        """Apply all shorthands in this style."""
         for element in list(self.values()):
             if isinstance(element, ShorthandValue):
                 element.apply_shorthand(self)
@@ -231,10 +239,17 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     def get_store(self, key):
         """Gets the BaseStyleValue of this key, since the other interfaces - __getitem__
-        and __call__ - return the original and parsed value, respectively."""
+        and __call__ - return the original and parsed value, respectively.
+
+        Args:
+            key (str): the attribute name
+
+        Returns:
+            BaseStyleValue: the BaseStyleValue struct of this attribute
+        """
         return super().__getitem__(key)
 
-    def __call__(self, key, element = None):
+    def __call__(self, key, element=None):
         # check if there are shorthand properties defined. If so, apply them to a copy
         copy = self
         for value in super().values():
@@ -318,6 +333,9 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
         see https://www.w3.org/TR/CSS22/cascade.html#cascading-order
 
+        Args:
+            element (BaseElement): the element that the cascaded style will be computed for
+
         Returns:
             Style: the cascaded style
         """
@@ -343,6 +361,9 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     def specified_style(cls, element):
         """Returns the specified style of an element, i.e. the cascaded style + inheritance,
         see https://www.w3.org/TR/CSS22/cascade.html#specified-value
+
+        Args:
+            element (BaseElement): the element that the specified style will be computed for
 
         Returns:
             Style: the specified style
@@ -446,7 +467,16 @@ class StyleSheet(list):
 
     def lookup_specificity(self, element_id, svg):
         """Lookup the element_id against all the styles in this sheet
-        and return the specificity of the match"""
+        and return the specificity of the match
+
+        Args:
+            element_id (str): the id of the element that styles are being queried for
+            svg (SvgDocumentElement): The document that contains both element and the styles
+
+        Yields:
+            Tuple[ConditionalStyle, Tuple[int, int, int]]: all matched styles and the specificity
+            of the match
+        """
         for style in self:
             for rule, spec in zip(style.to_xpaths(), style.get_specificities()):
                 for elem in svg.xpath(rule):
@@ -479,6 +509,7 @@ class ConditionalStyle(Style):
         # this xpath transform and provides no extra functionality for reverse lookups.
         return '|'.join(self.to_xpaths())
     def to_xpaths(self):
+        """Gets a list of xpaths for all rules of this ConditionalStyle"""
         return [rule.to_xpath() for rule in self.rules]
     def get_specificities(self):
         """gets an iterator of the specificity of all rules in this ConditionalStyle"""

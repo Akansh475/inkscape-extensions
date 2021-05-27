@@ -55,7 +55,10 @@ class BaseStyleValue():
 
         Args:
             declaration (str): a css declaration such as:
-            "fill: #000 !important;". The trailing semicolon may be ommitted.
+                "fill: #000 !important;". The trailing semicolon may be ommitted.
+
+        Raises:
+            ValueError: Unable to parse the declaration
 
         Returns:
             Tuple[str, str, bool]: a tuple with key, value and importance
@@ -72,13 +75,13 @@ class BaseStyleValue():
         raise ValueError("Invalid declaration")
 
 
-    def parse_value(self, element = None):
+    def parse_value(self, element=None):
         """Get parsed property value with resolved urls, color, etc.
 
         Args:
             element (BaseElement): the SVG element to which this style is applied to
-            currently used for resolving gradients / masks, could be used for computing
-            percentage attributes or calc() attributes [optional]
+                currently used for resolving gradients / masks, could be used for computing
+                percentage attributes or calc() attributes [optional]
 
         Returns:
             object: parsed property value
@@ -88,12 +91,15 @@ class BaseStyleValue():
         return self._parse_value(self.value, element)
 
 
-    def _parse_value(self, value: str, element = None) -> object:
+    def _parse_value(self, value: str, element=None) -> object: # pylint: disable=unused-argument, no-self-use
         """internal parse method, to be overwritten by derived classes
 
         Args:
             value (str): unparsed value
             element (BaseElement): the SVG element to which this style is applied to [optional]
+
+        Returns:
+            object: the parsed value
         """
         return value
 
@@ -111,7 +117,7 @@ class BaseStyleValue():
         self._parse_value(result) # check if value can be parsed (value is valid)
         return result
 
-    def _unparse_value(self, value: object) -> str:
+    def _unparse_value(self, value: object) -> str: # pylint: disable=no-self-use
         return str(value)
 
     @property
@@ -124,21 +130,18 @@ class BaseStyleValue():
         return self.attr_name + ":" + self.value + (" !important" if self.important else "")
 
     @classmethod
-    def factory(cls, declaration : str=None, attr_name : str=None, \
-        value : object=None, important : bool=False):
+    def factory(cls, declaration: Optional[str] = None, attr_name: Optional[str] = None, \
+        value: Optional[object] = None, important: Optional[bool] = False):
         """Create an attribute
 
         Args:
-            svg (SvgDocumentElement, optional): the parent SVG, required for
-            looking up urls (gradients, masks...). Defaults to None.
             declaration (str, optional): the CSS declaration to parse. Defaults to None.
             attr_name (str, optional): the attribute name. Defaults to None.
             value (object, optional): the attribute value. Defaults to None.
             important (bool, optional): whether the attribute is marked !important.
-            Defaults to False.
+                Defaults to False.
 
         Raises:
-            ValueError: if the attribute is unknown
             Errors may also be raised on parsing, so make sure to handle them
 
         Returns:
@@ -167,7 +170,18 @@ class BaseStyleValue():
     @staticmethod
     def factory_errorhandled(element=None, declaration="", key="", value=""):
         """Error handling for the factory method: if something goes wrong during parsing,
-        ignore the attribute"""
+        ignore the attribute
+
+        Args:
+            element (BaseElement, optional): The element this declaration is affecting, for
+                finding gradients ect. Defaults to None.
+            declaration (str, optional): the CSS declaration to parse. Defaults to "".
+            key (str, optional): the attribute name. Defaults to "".
+            value (str, optional): the attribute value. Defaults to "".
+
+        Returns:
+            BaseStyleValue: The parsed style
+        """
         try:
             value = BaseStyleValue.factory(declaration=declaration, \
                                            attr_name=key, value=value)
@@ -187,9 +201,10 @@ class BaseStyleValue():
 class AlphaValue(BaseStyleValue):
     """Stores an alpha value (such as opacity), which may be specified as
     as percentage or absolute value.
+
     Reference: https://www.w3.org/TR/css-color/#typedef-alpha-value """
 
-    def _parse_value(self, value : str, element = None):
+    def _parse_value(self, value: str, element=None):
         if value[-1] == "%":  # percentage
             parsed_value = float(value[:-1]) * 0.01
         else:
@@ -201,7 +216,7 @@ class AlphaValue(BaseStyleValue):
         return parsed_value
 
     def _unparse_value(self, value: object) -> str:
-        if (isinstance(value, float) or isinstance(value, int)):
+        if isinstance(value, (float, int)):
             if value < 0:
                 return "0"
             if value > 1:
@@ -212,8 +227,9 @@ class AlphaValue(BaseStyleValue):
 
 class ColorValue(BaseStyleValue):
     """Stores a color value
+
     Reference: https://drafts.csswg.org/css-color-3/#valuea-def-color"""
-    def _parse_value(self, value: str, element = None):
+    def _parse_value(self, value: str, element=None):
         if value == "currentColor":
             if element is not None:
                 style = element.specified_style()
@@ -255,9 +271,10 @@ def match_url_and_return_element(string: str, svg):
 
 class URLNoneValue(BaseStyleValue):
     """Stores a marker, which is given as url.
+
     Reference: https://www.w3.org/TR/SVG2/painting.html#VertexMarkerProperties"""
 
-    def _parse_value(self, value: str, element = None):
+    def _parse_value(self, value: str, element=None):
         if value == "none":
             return None
         if value[0:4] == "url(":
@@ -283,9 +300,10 @@ class URLNoneValue(BaseStyleValue):
 class PaintValue(ColorValue, URLNoneValue):
     """Stores a paint value (such as fill and stroke), which may be specified
     as color, or url.
+
     Reference: https://www.w3.org/TR/SVG2/painting.html#SpecifyingPaint"""
 
-    def _parse_value(self, value : str, element = None):
+    def _parse_value(self, value: str, element=None):
         if value == "none":
             return None
         if value in ["context-fill", "context-stroke"]:
@@ -325,7 +343,7 @@ class EnumValue(BaseStyleValue):
         self.valueset = all_properties[attr_name][4]
         super().__init__(declaration, attr_name, value, important)
 
-    def _parse_value(self, value : str, element = None):
+    def _parse_value(self, value: str, element=None):
         if value in self.valueset:
             return value
         raise ValueError(f"Value '{value}' is invalid for the property {self.attr_name}. " +
@@ -341,7 +359,7 @@ class ShorthandValue(BaseStyleValue, ABC):
 
         Args:
             style (Style): the style that the shorthand attribute is contained in,
-            and that the shorthand attribute will be applied on
+                and that the shorthand attribute will be applied on
         """
         if self.attr_name not in style:
             return
@@ -420,7 +438,7 @@ class MarkerShorthandValue(ShorthandValue, URLNoneValue):
         if self.value == "":
             return {} # shorthand not set, nothing to do
         return {k: self.value for k in ["marker-start", "marker-end", "marker-mid"]}
-    def _parse_value(self, value : str, element = None):
+    def _parse_value(self, value: str, element=None):
         # Make sure the parsing routine doesn't choke on an empty shorthand
         if value == "":
             return ""
@@ -478,8 +496,8 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
     "font-size": (FontSizeValue, "medium", True, True, None),
     "font-size-adjust": (BaseStyleValue, "none", True, True, None),
     "font-stretch": (EnumValue, "normal", True, True, ["normal", "ultra-condensed", "extra-condensed", "condensed",
-                                                     "semi-condensed", "semi-expanded", "expanded", "extra-expanded",
-                                                     "ultra-expanded"]),
+                                                       "semi-condensed", "semi-expanded", "expanded", "extra-expanded",
+                                                       "ultra-expanded"]),
     "font-style": (EnumValue, "normal", True, True, ["normal", "italic", "oblique"]),
     # a lot more values and subproperties in SVG2 / CSS-Fonts3
     "font-variant": (EnumValue, "normal", True, True, ["normal", "small-caps"]),

@@ -79,8 +79,8 @@ class FlowSpan(ShapeElement):
 class TextElement(ShapeElement):
     """A Text element"""
     tag_name = 'text'
-    x = property(lambda self: self.uutounit(self.get('x', 0)))
-    y = property(lambda self: self.uutounit(self.get('y', 0)))
+    x = property(lambda self: self.unittouu(self.get('x', 0)))
+    y = property(lambda self: self.unittouu(self.get('y', 0)))
 
     def get_path(self):
         return Path()
@@ -116,8 +116,8 @@ class TextPath(ShapeElement):
 class Tspan(ShapeElement):
     """A tspan text element"""
     tag_name = 'tspan'
-    x = property(lambda self: self.uutounit(self.get('x', 0)))
-    y = property(lambda self: self.uutounit(self.get('y', 0)))
+    x = property(lambda self: self.unittouu(self.get('x', 0)))
+    y = property(lambda self: self.unittouu(self.get('y', 0)))
 
     @classmethod
     def superscript(cls, text):
@@ -134,7 +134,7 @@ class Tspan(ShapeElement):
         """
         effective_transform = Transform(transform) * self.transform
         x1, y1 = effective_transform.apply_to_point((self.x, self.y))
-        fontsize = self.uutounit(self.style.get('font-size', '1em'))
+        fontsize = self.unittouu(self.style.get('font-size', '12px'))
         x2 = self.x + 0 # XXX This is impossible to calculate!
         y2 = self.y + float(fontsize)
         x2, y2 = effective_transform.apply_to_point((x2, y2))

@@ -174,15 +174,15 @@ class LinearGradient(Gradient):
     def apply_transform(self): # type: () -> None
        """Apply transform to orientation points and set it to identity."""
        trans = self.pop('gradientTransform')
-       p1 = (self.uutounit(self.get('x1')), self.uutounit(self.get('y1')))
-       p2 = (self.uutounit(self.get('x2')), self.uutounit(self.get('y2')))
+       p1 = (self.unittouu(self.get('x1')), self.unittouu(self.get('y1')))
+       p2 = (self.unittouu(self.get('x2')), self.unittouu(self.get('y2')))
        p1t = trans.apply_to_point(p1)
        p2t = trans.apply_to_point(p2)
        self.update(
             x1=self.unittouu(p1t[0]),
-            y1=self.uutounit(p1t[1]),
-            x2=self.uutounit(p2t[0]),
-            y2=self.uutounit(p2t[1]))
+            y1=self.unittouu(p1t[1]),
+            x2=self.unittouu(p2t[0]),
+            y2=self.unittouu(p2t[1]))
 
 
 class RadialGradient(Gradient):
@@ -192,15 +192,15 @@ class RadialGradient(Gradient):
     def apply_transform(self): # type: () -> None
        """Apply transform to orientation points and set it to identity."""
        trans = self.pop('gradientTransform')
-       p1 = (self.uutounit(self.get('cx')), self.uutounit(self.get('cy')))
-       p2 = (self.uutounit(self.get('fx')), self.uutounit(self.get('fy')))
+       p1 = (self.unittouu(self.get('cx')), self.unittouu(self.get('cy')))
+       p2 = (self.unittouu(self.get('fx')), self.unittouu(self.get('fy')))
        p1t = trans.apply_to_point(p1)
        p2t = trans.apply_to_point(p2)
        self.update(
-            cx=self.uutounit(p1t[0]),
-            cy=self.uutounit(p1t[1]),
-            fx=self.uutounit(p2t[0]),
-            fy=self.uutounit(p2t[1]))
+            cx=self.unittouu(p1t[0]),
+            cy=self.unittouu(p1t[1]),
+            fx=self.unittouu(p2t[0]),
+            fy=self.unittouu(p2t[1]))
 
 class PathEffect(BaseElement):
     """Inkscape LPE element"""

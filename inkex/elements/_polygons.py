@@ -128,14 +128,14 @@ class Line(ShapeElement):
 
 class RectangleBase(ShapeElement):
     """Provide a useful extension for rectangle elements"""
-    left = property(lambda self: self.uutounit(self.get('x', '0'), 'px'))
-    top = property(lambda self: self.uutounit(self.get('y', '0'), 'px'))
+    left = property(lambda self: self.unittouu(self.get('x', '0')))
+    top = property(lambda self: self.unittouu(self.get('y', '0')))
     right = property(lambda self: self.left + self.width)
     bottom = property(lambda self: self.top + self.height)
-    width = property(lambda self: self.uutounit(self.get('width', '0'), 'px'))
-    height = property(lambda self: self.uutounit(self.get('height', '0'), 'px'))
-    rx = property(lambda self: self.uutounit(self.get('rx', self.get('ry', 0.0)), 'px'))
-    ry = property(lambda self: self.uutounit(self.get('ry', self.get('rx', 0.0)), 'px')) # pylint: disable=invalid-name
+    width = property(lambda self: self.unittouu(self.get('width', '0')))
+    height = property(lambda self: self.unittouu(self.get('height', '0')))
+    rx = property(lambda self: self.unittouu(self.get('rx', self.get('ry', 0.0))))
+    ry = property(lambda self: self.unittouu(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -174,7 +174,7 @@ class EllipseBase(ShapeElement):
 
     @property
     def center(self):
-        return ImmutableVector2d(self.uutounit(self.get('cx', '0')), self.uutounit(self.get('cy', '0')))
+        return ImmutableVector2d(self.unittouu(self.get('cx', '0')), self.unittouu(self.get('cy', '0')))
 
     @center.setter
     def center(self, value):
@@ -201,7 +201,7 @@ class Circle(EllipseBase):
 
     @property
     def radius(self):
-        return self.uutounit(self.get('r', '0'), 'px')
+        return self.unittouu(self.get('r', '0'))
 
     @radius.setter
     def radius(self, value):
@@ -218,7 +218,7 @@ class Ellipse(EllipseBase):
 
     @property
     def radius(self):
-        return ImmutableVector2d(self.uutounit(self.get('rx', '0')), self.uutounit(self.get('ry', '0')))
+        return ImmutableVector2d(self.unittouu(self.get('rx', '0')), self.unittouu(self.get('ry', '0')))
 
     @radius.setter
     def radius(self, value):

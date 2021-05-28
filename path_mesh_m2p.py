@@ -296,7 +296,7 @@ class MeshToPath(inkex.EffectExtension):
     def csp_to_path(self, node, csp_list, transform=None):
         """Create new paths based on csp data, return group with paths."""
         # set up stroke width, group
-        stroke_width = self.svg.unittouu('1px')
+        stroke_width = self.svg.viewport_to_unit('1px')
         stroke_color = '#000000'
         style = {
             'fill': 'none',

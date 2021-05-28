@@ -151,8 +151,8 @@ class PrintingMarks(inkex.EffectExtension):
                 i += 0.1
 
     def effect(self):
-        self.mark_size = self.svg.unittouu('1cm')
-        self.min_mark_margin = self.svg.unittouu('3mm')
+        self.mark_size = self.svg.viewport_to_unit('1cm')
+        self.min_mark_margin = self.svg.viewport_to_unit('3mm')
 
         if self.options.where == 'selection':
             bbox = self.svg.selection.bounding_box()
@@ -166,12 +166,12 @@ class PrintingMarks(inkex.EffectExtension):
         svg = self.document.getroot()
 
         # Convert parameters to user unit
-        offset = self.svg.unittouu(str(self.options.crop_offset) +
+        offset = self.svg.viewport_to_unit(str(self.options.crop_offset) +
                                    self.options.unit)
-        bt = self.svg.unittouu(str(self.options.bleed_top) + self.options.unit)
-        bb = self.svg.unittouu(str(self.options.bleed_bottom) + self.options.unit)
-        bl = self.svg.unittouu(str(self.options.bleed_left) + self.options.unit)
-        br = self.svg.unittouu(str(self.options.bleed_right) + self.options.unit)
+        bt = self.svg.viewport_to_unit(str(self.options.bleed_top) + self.options.unit)
+        bb = self.svg.viewport_to_unit(str(self.options.bleed_bottom) + self.options.unit)
+        bl = self.svg.viewport_to_unit(str(self.options.bleed_left) + self.options.unit)
+        br = self.svg.viewport_to_unit(str(self.options.bleed_right) + self.options.unit)
         # Bleed margin
         if bt < offset:
             bmt = 0
@@ -387,16 +387,17 @@ class PrintingMarks(inkex.EffectExtension):
             g_pag_info.label = 'PageInformation'
             g_pag_info.set('id', 'PageInformation')
             y_margin = max(bmb + offset, self.min_mark_margin)
+            font_size = self.svg.viewport_to_unit("9pt")
             txt_attribs = {
-                'style': 'font-size:12px;font-style:normal;font-weight:normal;fill:#000000;font-family:Bitstream Vera Sans,sans-serif;text-anchor:middle;text-align:center',
+                'style': f'font-size:{font_size}px;font-style:normal;font-weight:normal;fill:#000000;font-family:Bitstream Vera Sans,sans-serif;text-anchor:middle;text-align:center',
                 'x': str(middle_horizontal),
                 'y': str(bbox.bottom + y_margin + self.mark_size + 20)
             }
             txt = g_pag_info.add(TextElement(**txt_attribs))
             txt.text = 'Page size: ' + \
-                       str(round(self.svg.uutounit(bbox.width, self.options.unit), 2)) + \
+                       str(round(self.svg.unit_to_viewport(bbox.width, self.options.unit), 2)) + \
                        'x' + \
-                       str(round(self.svg.uutounit(bbox.height, self.options.unit), 2)) + \
+                       str(round(self.svg.unit_to_viewport(bbox.height, self.options.unit), 2)) + \
                        ' ' + self.options.unit
 
 

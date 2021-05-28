@@ -448,13 +448,25 @@ class BaseElement(etree.ElementBase):
         except FragmentError:
             return 'px' # Don't cache.
 
-    def uutounit(self, value, to_unit='px'):
-        """Convert the unit the given unit type"""
-        return convert_unit(value, to_unit, default=self.unit)
+    @staticmethod
+    def uutounit(value, to_unit='px'):
+        """Convert a value given in user units (px) the given unit type"""
+        return convert_unit(value, to_unit)
 
-    def unittouu(self, value):
-        """Convert a unit value into the document's units"""
-        return convert_unit(value, self.unit)
+    @staticmethod
+    def unittouu(value):
+        """Convert a length value into user units (px)"""
+        return convert_unit(value, "px")
+
+    def unit_to_viewport(self, value, unit="px"):
+        """Converts a length value to viewport units, as defined by the width/height
+        element on the root"""
+        return self.uutounit(self.unittouu(value) * self.root.equivalent_transform_scale, unit)
+
+    def viewport_to_unit(self, value, unit="px"):
+        """Converts a length given on the viewport to the specified unit in the user
+        coordinate system"""
+        return self.uutounit(self.unittouu(value) / self.root.equivalent_transform_scale, unit)
 
     def add_unit(self, value):
         """Add document unit when no unit is specified in the string """

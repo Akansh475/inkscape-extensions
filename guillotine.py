@@ -74,7 +74,7 @@ class Guillotine(inkex.EffectExtension):
         those outside of the canvas
         """
         horizontals = [0.0]
-        height = float(self.svg.height)
+        height = float(self.svg.viewbox_height)
         for y in self.get_all_horizontal_guides():
             if 0.0 < y <= height:
                 horizontals.append(y)
@@ -88,7 +88,7 @@ class Guillotine(inkex.EffectExtension):
         those outside of the canvas.
         """
         verticals = [0.0]
-        width = float(self.svg.width)
+        width = float(self.svg.viewbox_width)
         for x in self.get_all_vertical_guides():
             if 0.0 < x <= width:
                 verticals.append(x)
@@ -104,6 +104,9 @@ class Guillotine(inkex.EffectExtension):
         """
         hs = self.get_horizontal_slice_positions()
         vs = self.get_vertical_slice_positions()
+        # The --export-width argument is in viewport units
+        hs = [self.svg.unit_to_viewport(i) for i in hs]
+        vs = [self.svg.unit_to_viewport(j) for j in vs]
         slices = []
         for i in range(len(hs) - 1):
             for j in range(len(vs) - 1):
@@ -151,6 +154,7 @@ class Guillotine(inkex.EffectExtension):
         given.
         """
         coords = ":".join([self.get_localised_string(dim) for dim in sli])
+        inkex.errormsg(coords)
         inkscape(self.options.input_file, export_area=coords, export_filename=filename)
 
     def export_slices(self, slices):

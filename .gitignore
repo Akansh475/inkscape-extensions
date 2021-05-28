@@ -14,7 +14,8 @@ old
 .pytest_cache
 .idea
 dist
-*.out.export
 cov.xml
 coverage.xml
 .vscode/
+tests/data/refs/*
+!tests/data/refs/*.out

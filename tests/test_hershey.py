@@ -8,21 +8,21 @@ from inkex.tester.filters import CompareNumericFuzzy, CompareOrderIndependentSty
 from hershey import Hershey
 
 class HersheyComparisonMixin(ComparisonMixin):
-    comparisons_outfile_dict = {} # pairs of args and expected outputs
+    comparisons_cmpfile_dict = {} # pairs of args and expected outputs
 
     def setUp(self):
         self.effect_class = Hershey
         self.compare_filters = [CompareNumericFuzzy(), CompareOrderIndependentStyle()]
 
-        self.comparisons = self.comparisons_outfile_dict.keys()
+        self.comparisons = self.comparisons_cmpfile_dict.keys()
 
-    def get_compare_outfile(self, args, addout=None):
-        ''' get the correct outfile to compare from comparisons_dict;  '''
-        return self.data_file('refs', self.comparisons_outfile_dict[args])
+    def get_compare_cmpfile(self, args, addout=None):
+        ''' get the correct cmpfile to compare from comparisons_dict;  '''
+        return self.data_file('refs', self.comparisons_cmpfile_dict[args])
 
 class TestHersheyBasic(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase):
     compare_file = 'svg/hershey_input.svg' # a huge number of inputs
-    comparisons_outfile_dict = {
+    comparisons_cmpfile_dict = {
         # default parameters:
         (): 'hershey.out',
         # same as above, but explicit parameters. same output:
@@ -31,7 +31,7 @@ class TestHersheyBasic(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestC
 
 class TestHersheyTrivialInput(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase):
     compare_file = 'svg/hershey_trivial_input.svg'
-    comparisons_outfile_dict = {
+    comparisons_cmpfile_dict = {
         # loading a different font:
         ('--fontface="EMSAllure"', ): 'hershey_loadfont.out',
         # using the "other font" option. same output as above:
@@ -44,7 +44,7 @@ class TestHersheyTrivialInput(InkscapeExtensionTestMixin, HersheyComparisonMixin
 
 class TestHersheyTables(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase):
     compare_file = 'svg/default-inkscape-SVG.svg'
-    comparisons_outfile_dict = {
+    comparisons_cmpfile_dict = {
         # generates a simple font table:
         ('--tab="utilities"', '--action="sample"', '--text="I am a quick brown fox"'): 'hershey_fonttable.out',
         # generates a simple font table, while testing UTF-8 input

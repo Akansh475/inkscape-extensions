@@ -30,7 +30,7 @@ class TestGuillotineBasic(ComparisonMixin, TestCase):
             self.assertEffect(compare_file, args=args)
             self.assertTrue(os.path.isdir(outdir))
 
-            infile = self.get_compare_outfile(args)
+            infile = self.get_compare_cmpfile(args)
             if os.environ.get('EXPORT_COMPARE', False):
                 self.export_comparison(outdir, infile)
 
@@ -41,9 +41,9 @@ class TestGuillotineBasic(ComparisonMixin, TestCase):
                         self.assertEqual(fileobj.read(), fhl.read(), "File '{}'".format(item.name))
 
     @staticmethod
-    def export_comparison(outdir, outfile):
+    def export_comparison(outdir, cmpfile):
         """Export the files as a tar file for manual comparison"""
-        tarname = outfile + '.export'
+        tarname = cmpfile + '.export'
         tar = tarfile.open(tarname, 'w|')
 
         # We make a tar archive so we can test it.
@@ -55,4 +55,4 @@ class TestGuillotineBasic(ComparisonMixin, TestCase):
                 fhl.seek(0)
                 tar.addfile(info, fhl)
         tar.close()
-        print("Written output: {}.export".format(outfile))
+        print("Written output: {}.export".format(cmpfile))

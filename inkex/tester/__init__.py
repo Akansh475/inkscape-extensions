@@ -56,14 +56,25 @@ coverage score indicates that your test is better at exercising the various
 options, features, and branches within your code.
 
 Generating comparison output can be done using the EXPORT_COMPARE environment
-variable when calling pytest. For example:
+variable when calling pytest and comes in 3 modes, the first of which is the
+CHECK comparisons mode:
 
     EXPORT_COMPARE=1 pytest tests/test_my_specific_test.py
 
-This will create files in `tests/data/refs/*.out.export` and these files should
-be manually checked to make sure they are correct before being renamed and stripped
-of the `.export` suffix. pytest should then be re-run to confirm before
-committing to the repository.
+This will create files in `tests/data/refs/*.{ext}` and these files
+should be manually checked to make sure they are correct. Once you are happy
+with the output you can re-run the test with the WRITE comparisons mode:
+
+    EXPORT_COMPARE=2 pytest tests/test_my_specific_test.py
+
+Which will create an output file of the right name and then run the test suite
+against it. But only if the file doesn't already exist. The final mode is the
+OVERWRITE comparisons mode:
+
+    EXPORT_COMPARE=3 pytest tests/test_my_specific_test.py
+
+This is like mode 2, but will over-write any existing files too. This allows
+you to update the test compare files.
 """
 
 import os
@@ -91,6 +102,7 @@ if False: # pylint: disable=using-constant-test
     from typing import Type, List
     from .filters import Compare
 
+COMPARE_DELETE, COMPARE_CHECK, COMPARE_WRITE, COMPARE_OVERWRITE = range(4)
 
 class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
     """Test case must specify 'self.effect_class' to assertEffect."""
@@ -167,7 +179,7 @@ class TestCase(MockCommandMixin, BaseCase):
         return os.path.join(self.tempdir, filename)
 
     @classmethod
-    def data_file(cls, filename, *parts):
+    def data_file(cls, filename, *parts, check_exists=True):
         """Provide a data file from a filename, can accept directories as arguments."""
         if os.path.isabs(filename):
             # Absolute root was passed in, so we trust that (it might be a tempdir)
@@ -176,7 +188,7 @@ class TestCase(MockCommandMixin, BaseCase):
             # Otherwise we assume it's relative to the test data dir.
             full_path = os.path.join(cls.datadir(), filename, *parts)
 
-        if not os.path.isfile(full_path):
+        if not os.path.isfile(full_path) and check_exists:
             raise IOError(f"Can't find test data file: {full_path}")
         return full_path
 
@@ -285,6 +297,14 @@ class ComparisonMixin:
         ('--id=p1', '--id=r3'),
     ]
 
+    compare_file_extension = 'svg'
+    @property
+    def _compare_file_extension(self):
+        """The default extension to use when outputting check files in COMPARE_CHECK mode."""
+        if self.stderr_output:
+            return 'txt'
+        return self.compare_file_extension
+
     def test_all_comparisons(self):
         """Testing all comparisons"""
         if not isinstance(self.compare_file, (list, tuple)):
@@ -300,50 +320,86 @@ class ComparisonMixin:
         for args in self.comparisons:
             self.assertCompare(
                 compare_file,
-                self.get_compare_outfile(args, addout),
+                self.get_compare_cmpfile(args, addout),
                 args,
             )
 
-    def assertCompare(self, infile, outfile, args): #pylint: disable=invalid-name
+    def assertCompare(self, infile, cmpfile, args, outfile=None): #pylint: disable=invalid-name
         """
         Compare the output of a previous run against this one.
 
          - infile: The filename of the pre-processed svg (or other type of file)
-         - outfile: The filename of the data we expect to get, if not set
+         - cmpfile: The filename of the data we expect to get, if not set
                     the filename will be generated from the effect name and kwargs.
          - args: All the arguments to be passed to the effect run
+         - outfile: Optional, instead of returning a regular output, this extension
+                    dumps it's output to this filename instead.
 
         """
+        compare_mode = int(os.environ.get('EXPORT_COMPARE', COMPARE_DELETE))
+
         effect = self.assertEffect(infile, args=args)
 
-        if outfile is None:
-            outfile = self.get_compare_outfile(args)
+        if cmpfile is None:
+            cmpfile = self.get_compare_cmpfile(args)
 
-        if not os.path.isfile(outfile):
-            raise IOError(f"Comparison file {outfile} not found")
+        if not os.path.isfile(cmpfile) and compare_mode == COMPARE_DELETE:
+            raise IOError(
+                f"Comparison file {cmpfile} not found, set EXPORT_COMPARE=1 to create it.")
 
-        data_a = effect.test_output.getvalue()
-        if os.environ.get('EXPORT_COMPARE', False):
-            with open(outfile + '.export', 'wb') as fhl:
-                if sys.version_info[0] == 3 and isinstance(data_a, str):
+        if outfile:
+            if not os.path.isabs(outfile):
+                outfile = os.path.join(self.tempdir, outfile)
+            self.assertTrue(os.path.isfile(outfile), "No output file created! {}".format(outfile))
+            with open(outfile, 'rb') as fhl:
+                data_a = fhl.read()
+        else:
+            data_a = effect.test_output.getvalue()
+
+        write_output = None
+        if compare_mode == COMPARE_CHECK:
+            _file = cmpfile[:-4] if cmpfile.endswith('.out') else cmpfile
+            write_output = f"{_file}.{self._compare_file_extension}"
+        elif (compare_mode == COMPARE_WRITE and not os.path.isfile(cmpfile))\
+                or compare_mode == COMPARE_OVERWRITE:
+            write_output = cmpfile
+
+        try:
+            if write_output and not os.path.isfile(cmpfile):
+                raise AssertionError(f"Check the output: {write_output}")
+            with open(cmpfile, 'rb') as fhl:
+                data_b = self._apply_compare_filters(fhl.read(), False)
+            self._base_compare(data_a, data_b, compare_mode)
+        except AssertionError:
+            if write_output:
+                if isinstance(data_a, str):
                     data_a = data_a.encode('utf-8')
-                fhl.write(self._apply_compare_filters(data_a, True))
-                print(f"Written output: {outfile}.export")
+                with open(write_output, 'wb') as fhl:
+                    fhl.write(self._apply_compare_filters(data_a, True))
+                    print(f"Written output: {write_output}")
+                # This only reruns if the original test failed.
+                # The idea here is to make sure the new output file is "stable"
+                # Because some tests can produce random changes and we don't
+                # want test authors to be too reassured by a simple write.
+                if write_output == cmpfile:
+                    effect = self.assertEffect(infile, args=args)
+                    self._base_compare(data_a, cmpfile)
+            if not write_output == cmpfile:
+                raise
 
+    def _base_compare(self, data_a, data_b, compare_mode):
         data_a = self._apply_compare_filters(data_a)
-
-        with open(outfile, 'rb') as fhl:
-            data_b = self._apply_compare_filters(fhl.read(), False)
 
         if isinstance(data_a, bytes) and isinstance(data_b, bytes) \
             and data_a.startswith(b'<') and data_b.startswith(b'<'):
             # Late importing
             diff_xml, delta = xmldiff(data_a, data_b)
-            if not delta and not os.environ.get('EXPORT_COMPARE', False):
-                print('The XML is different, you can save the output using the EXPORT_COMPARE=1'\
-                      ' envionment variable. This will save the compared file as a ".output" file'\
-                      ' next to the reference file used in the test.\n')
-            diff = f"SVG Differences: {outfile}\n\n"
+            if not delta and compare_mode == COMPARE_DELETE:
+                print('The XML is different, you can save the output using the EXPORT_COMPARE'\
+                      ' envionment variable. Set it to 1 to save a file you can check, set it to'\
+                      ' 3 to overwrite this comparison, setting the new data as the correct one.\n'
+                )
+            diff = f"SVG Differences\n\n"
             if os.environ.get('XML_DIFF', False):
                 diff = '<- ' + diff_xml
             else:
@@ -368,7 +424,7 @@ class ComparisonMixin:
                 data = cfilter(data)
         return data
 
-    def get_compare_outfile(self, args, addout=None):
+    def get_compare_cmpfile(self, args, addout=None):
         """Generate an output file for the arguments given"""
         if addout is not None:
             args = list(args) + [str(addout)]
@@ -381,4 +437,4 @@ class ComparisonMixin:
                 # avoid filename-too-long error
                 opstr = hashlib.md5(opstr.encode('latin1')).hexdigest()
             opstr = '__' + opstr
-        return self.data_file("refs", f"{self.effect_name}{opstr}.out")
+        return self.data_file("refs", f"{self.effect_name}{opstr}.out", check_exists=False)

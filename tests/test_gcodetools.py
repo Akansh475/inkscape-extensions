@@ -36,8 +36,10 @@ class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
         FILESET + ('--active-tab="tools_library"',),
         FILESET + ('--active-tab="lathe_modify_path"',),
         FILESET + ('--active-tab="offset"',),
+        FILESET + ('--active-tab="plasma-prepare-path"',),
     ]
     compare_filters = [CompareOrderIndependentBytes()]
+    compare_file_extension = 'dxf'
 
     def test_all_comparisons(self):
         """
@@ -54,30 +56,5 @@ class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
                 '--directory={}'.format(self.tempdir),
                 '--filename=output.ngc',
             )
-            self.assertEffect(self.compare_file, args=args)
-
             outfile = os.path.join(self.tempdir, 'output.ngc')
-            self.assertTrue(os.path.isfile(outfile), "No output file created! {}".format(outfile))
-
-            with open(outfile, 'rb') as fhl:
-                data_a = fhl.read()
-
-            self.assertTrue(data_a, "No data produced with {}".format(tab))
-
-            outfile = self.get_compare_outfile(args)
-            if os.environ.get('EXPORT_COMPARE', False):
-                with open(outfile + '.export', 'wb') as fhl:
-                    fhl.write(data_a)
-                    print("Written output: {}.export".format(outfile))
-
-            with open(outfile, 'rb') as fhl:
-                data_b = fhl.read()
-
-            self.assertEqual(data_a, data_b)
-
-if sys.version_info[0] == 3:
-    # This changes output between python2 and python3, we don't know
-    # why and don't have the gcodetool developers to help us understand.
-    TestGcodetoolsBasic.comparisons.append(
-        FILESET + ('--active-tab="plasma-prepare-path"',),
-    )
+            self.assertCompare(self.compare_file, None, args, 'output.ngc')

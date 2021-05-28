@@ -28,8 +28,8 @@ class DocInfo(inkex.EffectExtension):
         namedview = self.svg.namedview
         self.msg(":::SVG document related info:::")
         self.msg("version: " + self.svg.get('inkscape:version', 'New Document (unsaved)'))
-        self.msg("width: {}".format(self.svg.width))
-        self.msg("height: {}".format(self.svg.height))
+        self.msg("width: {}".format(self.svg.viewport_width))
+        self.msg("height: {}".format(self.svg.viewport_height))
         self.msg("viewbox: {}".format(str(self.svg.get_viewbox())))
         self.msg("document-units: {}".format(namedview.get('inkscape:document-units', 'None')))
         self.msg("units: " + namedview.get('units', 'None'))

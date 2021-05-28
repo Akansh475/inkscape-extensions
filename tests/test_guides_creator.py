@@ -19,3 +19,10 @@ class GuidesCreatorBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCa
         old_defaults + ('--tab=margins', '--start_from_edges=True', '--margins_preset=book_left'),
         old_defaults + ('--tab=margins', '--start_from_edges=True', '--margins_preset=book_right'),
     ]
+
+class GuidesCreatorMillimeterTest(ComparisonMixin, TestCase):
+    effect_class = GuidesCreator
+    compare_file = 'svg/complextransform.test.svg'
+    compare_filters = [CompareNumericFuzzy()]
+    comparisons = [("--vertical_guides=6", "--horizontal_guides=8")]
+

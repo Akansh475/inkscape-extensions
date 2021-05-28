@@ -54,12 +54,12 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
         for guide in self.svg.namedview.get_guides():
             if guide.is_horizontal:
                 # GIMP doesn't like guides that are outside of the image
-                if 0 < guide.point.y < self.svg.height:
+                if 0 < guide.point.y < self.svg.viewbox_height:
                     # The origin is at the top in GIMP land
                     horz_guides.append(str(guide.point.y))
             elif guide.is_vertical:
                 # GIMP doesn't like guides that are outside of the image
-                if 0 < guide.point.x < self.svg.width:
+                if 0 < guide.point.x < self.svg.viewbox_width:
                     vert_guides.append(str(guide.point.x))
 
         return ('h', ' '.join(horz_guides)), ('v', ' '.join(vert_guides))

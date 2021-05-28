@@ -23,7 +23,7 @@ Test the svg interface for inkscape extensions.
 from inkex.transforms import Vector2d
 from inkex import Guide
 from inkex.tester import TestCase
-from inkex.tester.svg import svg, svg_file, uu_svg
+from inkex.tester.svg import svg, svg_file, svg_unit_scaled
 from inkex import addNS
 
 class BasicSvgTest(TestCase):
@@ -144,9 +144,9 @@ class BasicSvgTest(TestCase):
     def test_scale(self):
         """Scale of a document"""
         doc = svg('id="empty" viewBox="0 0 100 100" width="200" height="200"')
-        self.assertEqual(doc.width, 200.0)
+        self.assertEqual(doc.viewport_width, 200.0)
         self.assertEqual(doc.get_viewbox()[2], 100.0)
-        self.assertEqual(doc.scale, 2.0)
+        self.assertEqual(doc.scale, 0.5)
         doc = svg('id="empty" viewBox="0 0 0 0" width="200" height="200"')
         self.assertEqual(doc.scale, 1.0)
 
@@ -167,83 +167,94 @@ class NamedViewTest(TestCase):
 
 
 class GetDocumentWidthTest(TestCase):
-    """Tests for Effect.width."""
+    """Tests for SvgDocumentElement.viewport_width and viewbox_width."""
 
+    def assert_svg_sizes(self, creation_string, viewport_width, viewbox_width):
+        """Check viewport and viewbox width"""
+        doc = svg(creation_string)
+        self.assertAlmostEqual(doc.viewbox_width, viewbox_width)
+        self.assertAlmostEqual(doc.viewport_width, viewport_width)
     def test_no_dimensions(self):
         """An empty width value should be default zero width"""
-        self.assertEqual(svg().width, 0)
+        self.assert_svg_sizes("", 0, 0)
 
     def test_empty_width(self):
         """An empty width value should be the same as a missing width."""
-        self.assertEqual(svg('width=""').width, 0)
+        self.assert_svg_sizes('width=""', 0, 0)
 
     def test_empty_viewbox(self):
         """An empty viewBox value should be the same as a missing viewBox."""
-        self.assertEqual(svg('viewBox=""').width, 0)
+        self.assert_svg_sizes('viewBox=""', 0, 0)
 
     def test_empty_width_and_viewbox(self):
         """Empty values for both should be the same as both missing."""
-        self.assertEqual(svg('width="" viewBox=""').width, 0)
+        self.assert_svg_sizes('width="" viewBox=""', 0, 0)
 
     def test_width_only(self):
         """Test a fixed width"""
-        self.assertAlmostEqual(svg('width="120mm"').width, 453.5433071)
+        self.assert_svg_sizes('width="120mm"', 453.5433071, 453.5433071)
 
     def test_width_and_viewbox(self):
         """If both are present, width overrides viewBox."""
-        self.assertAlmostEqual(svg('width="120mm" viewBox="0 0 22 99"').width, 453.5433071)
+        self.assert_svg_sizes('width="120mm" viewBox="0 0 22 99"', 453.5433071, 22)
 
     def test_viewbox_only(self):
         """IF only the viewBox is present"""
-        self.assertEqual(svg('viewBox="0 0 22 99"').width, 22.0)
+        self.assert_svg_sizes('viewBox="0 0 22 99"', 22, 22)
 
     def test_only_valid_viewbox(self):
         """An empty width value should be the same as a missing width."""
-        self.assertEqual(svg('width="" viewBox="0 0 22 99"').width, 22.0)
+        self.assert_svg_sizes('width="" viewBox="0 0 22 99"', 22, 22)
 
     def test_non_zero_viewbox_x(self):
         """Demonstrate that a non-zero x value (viewbox[0]) does not affect the width value."""
-        self.assertEqual(svg('width="" viewBox="5 7 22 99"').width, 22.0)
+        self.assert_svg_sizes('width="" viewBox="5 7 22 99"', 22, 22)
 
 
 class GetDocumentHeightTest(TestCase):
     """Tests for Effect.height."""
 
+    def assert_svg_sizes(self, creation_string, viewport_height, viewbox_height):
+        """Check viewport and viewbox height"""
+        doc = svg(creation_string)
+        self.assertAlmostEqual(doc.viewbox_height, viewbox_height)
+        self.assertAlmostEqual(doc.viewport_height, viewport_height)
+
     def test_no_dimensions(self):
         """Test height from blank svg"""
-        self.assertEqual(svg().height, 0)
+        self.assert_svg_sizes("", 0, 0)
 
     def test_empty_height(self):
         """An empty height value should be the same as a missing height."""
-        self.assertEqual(svg('height=""').height, 0)
+        self.assert_svg_sizes('height=""', 0, 0)
 
     def test_empty_viewbox(self):
         """An empty viewBox value should be the same as a missing viewBox."""
-        self.assertEqual(svg('viewBox=""').height, 0)
+        self.assert_svg_sizes('viewBox=""', 0, 0)
 
     def test_empty_height_viewbox(self):
         """Empty values for both should be the same as both missing."""
-        self.assertEqual(svg('height="" viewBox=""').height, 0)
+        self.assert_svg_sizes('height="" viewBox=""', 0, 0)
 
     def test_height_only(self):
         """A simple height only in px"""
-        self.assertEqual(svg('height="330px"').height, 330)
+        self.assert_svg_sizes('height="330px"', 330, 330)
 
     def test_height_and_viewbox(self):
         """If both are present, height overrides viewBox."""
-        self.assertEqual(svg('height="330px" viewBox="0 0 22 99"').height, 330)
+        self.assert_svg_sizes('height="330px" viewBox="0 0 22 99"', 330, 99)
 
     def test_viewbox_only(self):
         """Height from viewBox only"""
-        self.assertEqual(svg('viewBox="0 0 22 99"').height, 99.0)
+        self.assert_svg_sizes('viewBox="0 0 22 99"', 99, 99)
 
     def test_no_height_valid_viewbox(self):
         """An empty height value should be the same as a missing height."""
-        self.assertEqual(svg('height="" viewBox="0 0 22 99"').height, 99.0)
+        self.assert_svg_sizes('height="" viewBox="0 0 22 99"', 99, 99)
 
     def test_non_zero_viewbox_y(self):
         """Demonstrate that a non-zero y value (viewbox[1]) does not affect the height value."""
-        self.assertEqual(svg('height="" viewBox="5 7 22 99"').height, 99.0)
+        self.assert_svg_sizes('height="" viewBox="5 7 22 99"', 99, 99)
 
 
 class GetDocumentUnitTest(TestCase):
@@ -333,33 +344,36 @@ class UserUnitTest(TestCase):
 
     def assertToUserUnit(self, user_unit, test_value, expected):  # pylint: disable=invalid-name
         """Checks a user unit and a test_value against the expected result"""
-        doc = uu_svg(user_unit)
+        doc = svg_unit_scaled(user_unit)
         self.assertEqual(doc.unit, user_unit, msg=svg)
         self.assertAlmostEqual(doc.unittouu(test_value), expected)
 
     def assertFromUserUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
-        self.assertAlmostEqual(uu_svg(user_unit).uutounit(value, unit), expected)
+        self.assertAlmostEqual(svg_unit_scaled(user_unit).uutounit(value, unit), expected)
 
     # Unit-ratio tests. Don't exhaustively test every unit conversion, just
     # demonstrate that the logic works.
 
     def test_unittouu_in_to_cm(self):
-        """1in is ~2.54cm"""
-        self.assertToUserUnit('cm', '1in', 2.54)
+        """1in is 96px in a cm based document"""
+        self.assertToUserUnit('cm', '1in', 96.0)
 
-    def test_unittouu_yd_to_m(self):
-        """1yd is ~0.9144m"""
-        self.assertToUserUnit('m', '1yd', 0.9144)
+    def test_yd_to_m(self):
+        """1yd is 3456px"""
+        self.assertToUserUnit('m', '1yd', 3456.0) 
+
+    def test_unittouu_no_unit(self):
+        """If no unit is given, the value must not be changed in mm based documents."""
+        self.assertToUserUnit('mm', '9.87654321', 9.87654321)
 
     def test_unittouu_identity(self):
-        """If the input and output units are the same, the input and output
-           values should exactly be the same, too."""
-        self.assertToUserUnit('pc', '9.87654321pc', 9.87654321)
+        """User units are px. If a value is given in px, the value must not change"""
+        self.assertToUserUnit('px', '9.87654321px', 9.87654321)
 
     def test_unittouu_unitless_input(self):
         """Passing a unitless value to unittouu() should treat the units as 'px'."""
-        self.assertToUserUnit('in', '96', 1)  # 1in == 96px
+        self.assertToUserUnit('in', '96', 96)  # user unit = px
 
     def test_unittouu_empty_input(self):
         """Passing an empty string to unittouu() should treat the value as zero."""
@@ -386,8 +400,8 @@ class UserUnitTest(TestCase):
 
     def test_unittouu_bad_input_number(self):
         """Bad input number"""
-        self.assertToUserUnit('cm', '1in', 2.54)
-        # Demonstrate that 1in is ~2.54cm.
+        self.assertToUserUnit('cm', '1in', 96.0)
+        # Demonstrate that 1in is ~96px, also in a "cm based" document. 
 
         # Corrupt the input to contain an invalid number component; note that
         # the result changes to zero.
@@ -395,39 +409,38 @@ class UserUnitTest(TestCase):
 
     def test_unittouu_bad_input_unit(self):
         """Bad input unit"""
-        # Demonstrate that 1.0in passes through without change.
-        self.assertToUserUnit('in', '1.0in', 1.0)
+        # Demonstrate that 1.0px passes through without change.
+        self.assertToUserUnit('mm', '1.0px', 1.0)
 
         # Corrupt the input to contain an invalid unit component; note that the
         # result changes to 0.0, because corrupt parsing is zero px.
         # it used to be the ratio between inches and pixels. This was
         # because unittouu() treats unknown units as 'px'.
-        self.assertToUserUnit('in', '1.0ABCD', 0)
+        self.assertToUserUnit('mm', '1.0ABCD', 0)
 
     # Unit-ratio tests. Don't exhaustively test every unit conversion, just
     # demonstrate that the logic works.
 
     def test_uutounit_cm_to_in(self):
-        """Convert 1 user unit ('in') to 'cm'."""
-        self.assertFromUserUnit('in', 1, 'cm', 2.54)  # 1in is ~2.54cm
+        """Convert 1 user unit (px) to 'cm' in a in-based document"""
+        self.assertFromUserUnit('in', 1, 'cm', 2.54/96)  # 1in is ~2.54cm
 
     def test_uutounit_m_to_yd(self):
-        """Convert 1 user unit ('yd') to 'm'."""
-        self.assertFromUserUnit('yd', 1, 'm', 0.9144)  # 1yd is ~0.9144m
+        """Convert 1 user unit (px) to 'm' in a yd-based document"""
+        self.assertFromUserUnit('yd', 1, 'm', 1/100*2.54/96) 
 
     def test_uutounit_identity(self):
-        """If the input and output units are the same, the input and output
-           values should exactly be the same, too."""
-        self.assertFromUserUnit('pc', 9.87654321, 'pc', 9.87654321)
+        """If the input unit is px, output value should be identical"""
+        self.assertFromUserUnit('pc', 9.87654321, 'px', 9.87654321)
 
     def test_uutounit_unknown_unit(self):
         """Demonstrate that passing an unknown unit string to uutounit()"""
-        self.assertEqual(uu_svg('in').uutounit(1, 'px'), 96.0)
+        self.assertEqual(svg_unit_scaled('in').uutounit(1, 'px'), 1)
 
     def test_adddocumentunit_common(self):
         """Test common add_unit results"""
         # For valid float inputs, the output should be the input with the user unit appended.
-        doc = uu_svg('pt')
+        doc = svg_unit_scaled('pt')
         cases = (
             # Input, expected output
             (100, '100pt'),
@@ -450,7 +463,7 @@ class UserUnitTest(TestCase):
 
     def test_adddocumentunit_non_float(self):
         """Strings that are invalid floats should pass through unchanged."""
-        doc = uu_svg('pt')
+        doc = svg_unit_scaled('pt')
         inputs = (
             '',
             'ABCD',
@@ -459,3 +472,30 @@ class UserUnitTest(TestCase):
         )
         for value in inputs:
             self.assertEqual(doc.add_unit(value), '')
+
+class ViewportUnitTestCase(TestCase):
+    def assertFromVPUnit(self, width_unit, test_value, unit, expected):  # pylint: disable=invalid-name
+        """Checks a viewport unit and a test_value against the expected result"""
+        doc = svg_unit_scaled(width_unit)
+        self.assertEqual(doc.unit, width_unit, msg=svg)
+        self.assertAlmostEqual(doc.viewport_to_unit(test_value, unit), expected)
+    
+    def assertToVPUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
+        """Check converting from a user unity for the test_value"""
+        self.assertAlmostEqual(svg_unit_scaled(user_unit).unit_to_viewport(value, unit), expected)
+
+    def test_unittovp(self):
+        """1in is ~2.54cm"""
+        self.assertToVPUnit('px', '1in', "px", 96)
+        self.assertToVPUnit('px', '1', "px", 1)
+
+        # 1 in = 96 px = 96 * 96 px/in / 2.54 cm/in on the viewport
+        self.assertToVPUnit('cm', '1in', "px", 96 * 96 / 2.54,)
+        self.assertToVPUnit('cm', '1in', "in", 96 / 2.54, )
+        self.assertToVPUnit('mm', '4', "mm", 4)
+        self.assertToVPUnit('mm', '4', "px", 4 * 96 / 25.4)
+
+    def test_vptounit(self):
+        self.assertFromVPUnit('mm', "1m", "px", 1000) 
+        self.assertFromVPUnit('mm', "4mm", 'px', 4) 
+        self.assertFromVPUnit('mm', "4mm", 'mm', 4 * 25.4/96) 

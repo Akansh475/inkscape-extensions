@@ -75,7 +75,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
 
     def get_page_bbox(self):
         """Gets the page dimensions as a bbox"""
-        return BoundingBox((0, float(self.width)), (0, float(self.height)))
+        return BoundingBox((0, float(self.viewbox_width)), (0, float(self.viewbox_height)))
 
     def get_current_layer(self):
         """Returns the currently selected layer"""
@@ -146,27 +146,53 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         return ret
 
     @property
-    def width(self):  # getDocumentWidth(self):
-        """Fault tolerance for lazily defined SVG"""
+    def viewbox_width(self):  # getDocumentWidth(self):
+        """Returns the width of the `user coordinate system
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the width
+        of the viewbox, as defined in the SVG file. If no viewbox is defined, the value of the
+        width attribute is returned. If the height is not defined, return 0."""
+        return self.get_viewbox()[2] or self.viewport_width
+
+    @property
+    def viewport_width(self):
+        """Returns the width of the `viewport coordinate system
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the width
+        attribute of the svg element converted to px"""
         return self.unittouu(self.get('width')) or self.get_viewbox()[2]
 
     @property
-    def height(self):  # getDocumentHeight(self):
-        """Returns a string corresponding to the height of the document, as
-        defined in the SVG file. If it is not defined, returns the height
-        as defined by the viewBox attribute. If viewBox is not defined,
-        returns the string '0'."""
+    def viewbox_height(self):  # getDocumentHeight(self):
+        """Returns the height of the `user coordinate system
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the height
+        of the viewbox, as defined in the SVG file. If no viewbox is defined, the value of the
+        height attribute is returned. If the height is not defined, return 0."""
+        return self.get_viewbox()[3] or self.viewport_height
+
+    @property
+    def viewport_height(self):
+        """Returns the width of the `viewport coordinate system
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the height
+        attribute of the svg element converted to px"""
         return self.unittouu(self.get('height')) or self.get_viewbox()[3]
 
     @property
     def scale(self):
-        """Return the ratio between the page width and the viewBox width"""
+        """Return the ratio between the viewBox width and the page width, which is displayed
+        as "scale" in the Inkscape document properties"""
         try:
-            scale_x = float(self.width) / float(self.get_viewbox()[2])
-            scale_y = float(self.height) / float(self.get_viewbox()[3])
-            return max([scale_x, scale_y])
+            scale_x = self.viewbox_width / self.viewport_width
+            scale_y = self.viewbox_height / self.viewport_height
+            value = min([scale_x, scale_y])
+            return 1.0 if value == 0 else value
         except (ValueError, ZeroDivisionError):
             return 1.0
+
+    @property
+    def equivalent_transform_scale(self) -> float:
+        """Return the scale of the equivalent transform of the svg tag, as defined by
+        https://www.w3.org/TR/SVG2/coords.html#ComputingAViewportsTransform
+        (highly simplified)"""
+        return 1/self.scale
 
     @property
     def unit(self):

@@ -244,18 +244,18 @@ class LoremIpsum(inkex.EffectExtension):
             style["shape-inside"] = shape.get_id(as_url=2)
         else:
             parent = self.get_layer()
-            style["inline-size"] = self.svg.width
+            style["inline-size"] = self.svg.viewbox_width
         textelement = parent.add(TextElement())
         textelement.style = style
         textelement.style["white-space"] = "pre"
-        textelement.style["font-size"] = self.svg.unittouu("8pt")
+        textelement.style["font-size"] = self.svg.viewport_to_unit("8pt")
         self.add_text_svg2(textelement)
     def create_text_svg12(self, shape):
         """Creates a new SVG1.2 flowed text with the given shape inside. If no shape inside was set,
         the flowed text is appended to the selected layer"""
         root = FlowRoot()
         root.set('xml:space', 'preserve')
-        root.style["font-size"] = self.svg.unittouu("8pt")
+        root.style["font-size"] = self.svg.viewport_to_unit("8pt")
         region = root.add(FlowRegion())
         if shape is not None and not isinstance(shape, TextElement):
             parent = shape.getparent()
@@ -265,8 +265,8 @@ class LoremIpsum(inkex.EffectExtension):
             # Nothing selected, create a new flowtext
             parent = self.get_layer()
             shape = region.add(Rectangle(x='0', y='0',\
-                width=str(int(self.svg.width)),\
-                height=str(int(self.svg.height))))
+                width=str(int(self.svg.viewbox_width)),\
+                height=str(int(self.svg.viewbox_height))))
         parent.add(root)
         self.add_text_svg12(root)
 

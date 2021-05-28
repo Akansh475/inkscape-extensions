@@ -57,8 +57,8 @@ class GuidesCreator(inkex.EffectExtension):
 
     def effect(self):
         # getting the width and height attributes of the canvas
-        self.width = float(self.svg.width)
-        self.height = float(self.svg.height)
+        self.width = float(self.svg.viewbox_width)
+        self.height = float(self.svg.viewbox_height)
 
         # getting edges coordinates
         self.h_orientation = '0,' + str(round(self.width, 4))

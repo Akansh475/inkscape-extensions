@@ -4,7 +4,6 @@ from lxml import etree
 
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareOrderIndependentStyle
-from inkex.tester.svg import svg, svg_file, uu_svg
 
 from hershey import Hershey
 

@@ -60,8 +60,8 @@ class hpglEncoder(object):
         """
         self.options = effect.options
         self.doc = effect.svg
-        self.docWidth = effect.svg.unittouu(effect.svg.get('width'))
-        self.docHeight = effect.svg.unittouu(effect.svg.get('height'))
+        self.docWidth = effect.svg.viewbox_width
+        self.docHeight = effect.svg.viewbox_height
         self.hpgl = ''
         self.divergenceX = 'False'
         self.divergenceY = 'False'
@@ -76,13 +76,13 @@ class hpglEncoder(object):
         self.offsetY = 0
         # dots per inch to dots per user unit:
 
-        self.scaleX = self.options.resolutionX / effect.svg.unittouu("1.0in")
-        self.scaleY = self.options.resolutionY / effect.svg.unittouu("1.0in")
+        self.scaleX = self.options.resolutionX / effect.svg.viewport_to_unit("1.0in")
+        self.scaleY = self.options.resolutionY / effect.svg.viewport_to_unit("1.0in")
         scaleXY = (self.scaleX + self.scaleY) / 2
 
         # mm to dots (plotter coordinate system):
-        self.overcut = effect.svg.unittouu(str(self.options.overcut) + "mm") * scaleXY
-        self.toolOffset = effect.svg.unittouu(str(self.options.toolOffset) + "mm") * scaleXY
+        self.overcut = effect.svg.viewport_to_unit(str(self.options.overcut) + "mm") * scaleXY
+        self.toolOffset = effect.svg.viewport_to_unit(str(self.options.toolOffset) + "mm") * scaleXY
 
         # scale flatness to resolution:
         self.flat = self.options.flat / (1016 / ((self.options.resolutionX + \
@@ -98,8 +98,8 @@ class hpglEncoder(object):
         self.viewBoxTransformY = 1
         viewBox = effect.svg.get_viewbox()
         if viewBox and viewBox[2] and viewBox[3]:
-            self.viewBoxTransformX = self.docWidth / effect.svg.unittouu(effect.svg.add_unit(viewBox[2]))
-            self.viewBoxTransformY = self.docHeight / effect.svg.unittouu(effect.svg.add_unit(viewBox[3]))
+            self.viewBoxTransformX = self.docWidth / effect.svg.viewport_to_unit(effect.svg.add_unit(viewBox[2]))
+            self.viewBoxTransformY = self.docHeight / effect.svg.viewport_to_unit(effect.svg.add_unit(viewBox[3]))
 
     def getHpgl(self):
         """Return the HPGL instructions"""

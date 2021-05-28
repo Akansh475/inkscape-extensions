@@ -13,3 +13,10 @@ class RestackBasicTest(ComparisonMixin, TestCase):
         ('--nb_direction=custom', '--angle=50.0', '--id=s1', '--id=p1', '--id=c3', 
          '--id=slicerect1') + old_defaults,
     ]
+
+class RestackMillimeterGrouped(ComparisonMixin, TestCase):
+    """Test for https://gitlab.com/inkscape/extensions/-/issues/372"""
+    effect_class = Restack
+    compare_file = "svg/restack_grouped.svg"
+    comparisons = [('--id=g20858', '--id=g21085', '--id=g20940', '--id=g26580', '--id=g21081',
+                    '--id=g20854'),]

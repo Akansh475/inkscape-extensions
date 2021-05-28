@@ -409,3 +409,15 @@ def composed_style(element: ShapeElement):
     return element.specified_style()
 
 ShapeElement.composed_style = deprecate(composed_style)
+
+
+def width(self):
+    """Use BaseElement.viewport_width instead"""
+    return self.viewport_width
+
+def height(self):
+    """Use BaseElement.viewport_height instead"""
+    return self.viewport_height
+
+BaseElement.width = property(deprecate(width))
+BaseElement.height = property(deprecate(height))

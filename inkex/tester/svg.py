@@ -35,12 +35,12 @@ def svg(svg_attrs=''):
         f'<svg {svg_attrs}></svg>'), parser=SVG_PARSER)
 
 
-def uu_svg(user_unit):
-    """Same as svg, but takes a user unit for the new document.
+def svg_unit_scaled(width_unit):
+    """Same as svg, but takes a width unit (top-level transform) for the new document.
 
-    It's based on the ratio between the SVG width and the viewBox width.
+    The transform is the ratio between the SVG width and the viewBox width.
     """
-    return svg(f'width="1{user_unit}" viewBox="0 0 1 1"')
+    return svg(f'width="1{width_unit}" viewBox="0 0 1 1"')
 
 def svg_file(filename):
     """Parse an svg file and return it's document root"""

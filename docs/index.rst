@@ -11,6 +11,7 @@ Welcome to inkex's documentation!
    :caption: Quickstart
 
    quickstart
+   units
 
 .. toctree::
    :maxdepth: 4

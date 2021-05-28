@@ -8,3 +8,8 @@ class TestDimensionBasic(ComparisonMixin, TestCase):
         ('--id=p1', '--id=r3', '--xoffset=100.0', '--yoffset=100.0'),
         ('--id=p1', '--id=r3', '--type=visual', '--xoffset=100.0', '--yoffset=100.0'),
     ]
+
+class TestDimensionMillimeters(ComparisonMixin, TestCase):
+    effect_class = Dimension
+    compare_file = 'svg/css.svg'
+    comparisons = [('--id=circle1',)]

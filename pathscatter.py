@@ -141,7 +141,7 @@ class PathScatter(pathmodifier.Diffeo):
                 length = sum(lengths)
                 dx = width + self.options.space
                 if self.options.stretch:
-                    n = int(length / dx + self.options.space)
+                    n = int((length + self.options.space) / dx)
                     if n > 0:
                         dx = (length) / n
 

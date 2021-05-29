@@ -14,7 +14,9 @@ class TestPathScatterBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase
         # Test cloning and rotating
         ("--id=g12668", "--id=path8143", "--stretch=True", "--rotate=True", "--copymode=clone"),
         # Test picking from a group pattern
-        ("--id=g12668", "--id=path8143", "--stretch=True", "--copymode=copy", "--grouppick=True", 
+        ("--id=g12668", "--id=path8143", "--stretch=True", "--copymode=copy", "--grouppick=True",
          "--pickmode=seq"),
+        # Test stretch and spac
+        ("--id=g12668", "--id=path8143", "--stretch=True", "--space=10"),
         ]
     compare_filters = [CompareWithoutIds()]

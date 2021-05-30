@@ -24,3 +24,21 @@ class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
         ('--text=ThingOne', '--drawtype=symbol', '--correctionlevel=2',
          '--symbolid=AirTransportation_Inv', '--modulesize=10'),
     ]
+
+class TestLargeQRCodes(ComparisonMixin, TestCase):
+    """Test large qr codes with up to 2953 bytes of payload. Also tests numeric mode"""
+    effect_class = QrCode
+    compare_file = 'svg/empty.svg'
+    comparisons = [
+        # the largest numeric QR code has 7089 characters
+        ('--text=' + (("12345" * 2000)[0:7089]), "--qrmode=1", "--correctionlevel=1"),
+    ]
+
+class TestQRCodeClasses(ComparisonMixin, TestCase):
+    """Test alphanumeric barcode"""
+    effect_class = QrCode
+    compare_file = 'svg/empty.svg'
+    comparisons = [
+        ('--text=THIS IS A TEST OF AN ALPHANUMERIC QRCODE. IT CAN STORE A LARGER NUMBER OF '
+         'UPPERSPACE CHARACTERS THAN A BYTE-ENCODED QRCODE: 123', '--qrmode=2', '--correctionlevel=1'),
+    ]

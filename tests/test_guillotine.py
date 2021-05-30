@@ -4,16 +4,9 @@ import tarfile
 from guillotine import Guillotine
 from inkex.tester import ComparisonMixin, TestCase
 
-class TestGuillotineBasic(ComparisonMixin, TestCase):
+class GuillotineTester(ComparisonMixin):
     """Test the Guillotine extension"""
-    stderr_protect = False
     effect_class = Guillotine
-    compare_file = 'svg/guides.svg'
-    comparisons = [
-        ('--image=f{}oo',),
-        ('--ignore=true',),
-    ]
-
     def test_all_comparisons(self):
         """Images are extracted to a file directory"""
         for args in self.comparisons:
@@ -40,6 +33,7 @@ class TestGuillotineBasic(ComparisonMixin, TestCase):
                     with open(os.path.join(outdir, item.name), 'rb') as fhl:
                         self.assertEqual(fileobj.read(), fhl.read(), "File '{}'".format(item.name))
 
+
     @staticmethod
     def export_comparison(outdir, cmpfile):
         """Export the files as a tar file for manual comparison"""
@@ -56,3 +50,21 @@ class TestGuillotineBasic(ComparisonMixin, TestCase):
                 tar.addfile(info, fhl)
         tar.close()
         print("Written output: {}.export".format(cmpfile))
+
+class TestGuillotineBasic(GuillotineTester, TestCase):
+    stderr_protect = False
+    effect_class = Guillotine
+    compare_file = 'svg/guides.svg'
+    comparisons = [
+        ('--image=f{}oo',),
+        ('--ignore=true',),
+    ]
+
+class TestGuillotineMillimeter(GuillotineTester, TestCase):
+    stderr_protect = False
+    effect_class = Guillotine
+    compare_file = 'svg/guides_millimeter.svg'
+    comparisons = [
+        ('--image=output',),
+    ]
+    

@@ -30,6 +30,9 @@ from itertools import product
 import inkex
 from inkex import Group, Rectangle, Use, PathElement
 
+class QRLengthError(Exception):
+    def __init__(self, message):
+        self.message = message
 
 class QRCode(object):
     PAD0 = 0xEC
@@ -52,7 +55,7 @@ class QRCode(object):
         self.qrDataList = []
 
     def addData(self, data):
-        self.qrDataList.append(QR8BitByte(data))
+        self.qrDataList.append(data)
 
     def getDataCount(self):
         return len(self.qrDataList)
@@ -220,8 +223,8 @@ class QRCode(object):
                              for rsBlock in rsBlocks)
 
         if buffer.getLengthInBits() > totalDataCount * 8:
-            raise Exception('code length overflow. (%s>%s)' %
-                            (buffer.getLengthInBits(), totalDataCount * 8))
+            raise QRLengthError('code length overflow. (%s>%s)' %
+                                (buffer.getLengthInBits(), totalDataCount * 8))
 
         # end code
         if buffer.getLengthInBits() + 4 <= totalDataCount * 8:
@@ -229,7 +232,7 @@ class QRCode(object):
 
         # padding
         while buffer.getLengthInBits() % 8 != 0:
-            buffer.put(False)
+            buffer.put(False, 1)
 
         # padding
         while True:
@@ -298,17 +301,25 @@ class QRCode(object):
 
     @staticmethod
     def getMinimumQRCode(data, errorCorrectLevel):
-        mode = Mode.MODE_8BIT_BYTE  # fixed to 8bit byte
         qr = QRCode(correction=errorCorrectLevel)
         qr.addData(data)
-        length = qr.getData(0).getLength()
-        for typeNumber in range(1, 11):
-            if length <= QRUtil.getMaxLength(
-                    typeNumber, mode, errorCorrectLevel):
-                qr.setTypeNumber(typeNumber)
+        lv=1
+        rv=40
+        while(rv - lv > 0):
+            mid = (3 * lv + rv) // 4
+            qr.setTypeNumber(mid)
+            try:
                 qr.make()
-                return qr
-        raise ValueError("Couldn't get minimum QR Code length...")
+            except QRLengthError:
+                if( mid == 40 ):
+                    raise inkex.AbortExtension(_("The string is too large to represent as QR code"))
+                lv = mid + 1
+            else:
+                rv = mid
+
+        qr.setTypeNumber(rv)
+        qr.make()
+        return qr
 
 
 class Mode(object):
@@ -376,30 +387,6 @@ class QRUtil(object):
         [6, 26, 54, 82, 110, 138, 166],
         [6, 30, 58, 86, 114, 142, 170]
     ]
-
-    MAX_LENGTH = [
-        [[41, 25, 17, 10], [34, 20, 14, 8], [27, 16, 11, 7], [17, 10, 7, 4]],
-        [[77, 47, 32, 20], [63, 38, 26, 16], [48, 29, 20, 12], [34, 20, 14, 8]],
-        [[127, 77, 53, 32], [101, 61, 42, 26], [77, 47, 32, 20], [58, 35, 24, 15]],
-        [[187, 114, 78, 48], [149, 90, 62, 38], [111, 67, 46, 28], [82, 50, 34, 21]],
-        [[255, 154, 106, 65], [202, 122, 84, 52], [144, 87, 60, 37], [106, 64, 44, 27]],
-        [[322, 195, 134, 82], [255, 154, 106, 65], [178, 108, 74, 45], [139, 84, 58, 36]],
-        [[370, 224, 154, 95], [293, 178, 122, 75], [207, 125, 86, 53], [154, 93, 64, 39]],
-        [[461, 279, 192, 118], [365, 221, 152, 93], [259, 157, 108, 66], [202, 122, 84, 52]],
-        [[552, 335, 230, 141], [432, 262, 180, 111], [312, 189, 130, 80], [235, 143, 98, 60]],
-        [[652, 395, 271, 167], [513, 311, 213, 131], [364, 221, 151, 93], [288, 174, 119, 74]]
-    ]
-
-    @staticmethod
-    def getMaxLength(typeNumber, mode, errorCorrectLevel):
-        e = {1: 0, 0: 1, 3: 2, 2: 3}[errorCorrectLevel]
-        m = {
-            Mode.MODE_NUMBER: 0,
-            Mode.MODE_ALPHA_NUM: 1,
-            Mode.MODE_8BIT_BYTE: 2,
-            Mode.MODE_KANJI: 3
-        }[mode]
-        return QRUtil.MAX_LENGTH[typeNumber - 1][e][m]
 
     @staticmethod
     def getErrorCorrectPolynomial(errorCorrectLength):
@@ -533,30 +520,24 @@ class QRUtil(object):
             data >>= 1
         return digit
 
-class QR8BitByte(object):
 
-    def __init__(self, data):
-        self.mode = Mode.MODE_8BIT_BYTE
-        if isinstance(data, str):
-            data = data.encode('ascii', 'ignore')
-        if not isinstance(data, bytes):
-            raise ValueError("Data must be in bytes!")
+class QRData(object):
+    def __init__(self, mode, data):
+        self._mode = mode
         self.data = data
 
     def getMode(self):
-        return self.mode
+        return self._mode
 
-    '''
-    def write(self, buffer): raise Exception('not implemented.')
-    def getLength(self): raise Exception('not implemented.')
-    '''
-
-    def write(self, buffer):
-        for d in self.data:
-            buffer.put(d, 8)
+    def getData(self):
+        return self.data
 
     def getLength(self):
         return len(self.data)
+
+    #    @abstractmethod
+    def write(self, buffer):
+        pass
 
     def getLengthInBits(self, type):
         if 1 <= type < 10:  # 1 - 9
@@ -565,7 +546,7 @@ class QR8BitByte(object):
                 Mode.MODE_ALPHA_NUM: 9,
                 Mode.MODE_8BIT_BYTE: 8,
                 Mode.MODE_KANJI: 8
-            }[self.mode]
+            }[self._mode]
 
         elif type < 27:  # 10 - 26
             return {
@@ -573,7 +554,7 @@ class QR8BitByte(object):
                 Mode.MODE_ALPHA_NUM: 11,
                 Mode.MODE_8BIT_BYTE: 16,
                 Mode.MODE_KANJI: 10
-            }[self.mode]
+            }[self._mode]
 
         elif type < 41:  # 27 - 40
             return {
@@ -581,10 +562,79 @@ class QR8BitByte(object):
                 Mode.MODE_ALPHA_NUM: 13,
                 Mode.MODE_8BIT_BYTE: 16,
                 Mode.MODE_KANJI: 12
-            }[self.mode]
+            }[self._mode]
 
         else:
             raise Exception('type:%s' % type)
+
+
+class QR8BitByte(QRData):
+
+    def __init__(self, data):
+        super(QR8BitByte, self).__init__(Mode.MODE_8BIT_BYTE, data)
+        if isinstance(data, str):
+            data = data.encode('ascii', 'ignore')
+        if not isinstance(data, bytes):
+            raise ValueError("Data must be in bytes!")
+
+    def write(self, buffer):
+        for d in self.data:
+            buffer.put(ord(d), 8)
+
+
+class QRAlphaNum(QRData):
+
+    def __init__(self, data):
+        super(QRAlphaNum, self).__init__(Mode.MODE_ALPHA_NUM, data)
+
+    def write(self, buffer):
+        i = 0
+        while i + 1 < len(self.data):
+            buffer.put(QRAlphaNum._getCode(self.data[i]) * 45 + QRAlphaNum._getCode(self.data[i + 1]), 11)
+            i += 2
+        if i < len(self.data):
+            buffer.put(QRAlphaNum._getCode(self.data[i]), 6)
+
+    @staticmethod
+    def _getCode(c):
+        if '0' <= c and c <= '9':
+            return ord(c) - ord('0')
+        elif 'A' <= c and c <= 'Z':
+            return ord(c) - ord('A') + 10
+        else:
+            dct = {' ': 36, '$': 37, '%': 38, '*': 39, '+': 40, '-': 41, '.': 42, '/': 43, ':': 44}
+            if (c in dct.keys()):
+                return dct[c]
+            else:
+                raise inkex.AbortExtension(
+                    _("Wrong symbol '{}' in alphanumeric representation: Should be [A-Z, 0-9] or {}").format(c, dct.keys()))
+
+
+class QRNumber(QRData):
+
+    def __init__(self, data):
+        super(QRNumber, self).__init__(Mode.MODE_NUMBER, data)
+
+    def write(self, buffer):
+        i = 0
+        try:
+            while i + 2 < len(self.data):
+                num = int(self.data[i:i + 3])
+                buffer.put(num, 10)
+                i += 3
+
+            if i < len(self.data):
+                ln = 4 if len(self.data) - i == 1 else 7
+                buffer.put(int(self.data[i:]), ln)
+        except:
+            raise ValueError("The string '{}' is not a valid number".format(self.data))
+
+
+class QRKanji(QRData):
+    def __init__(self, data):
+        super(QRKanji, self).__init__(Mode.MODE_KANJI, data)
+        raise RuntimeError("Class QRKanji is not implemented")
+
 
 
 class QRMath(object):
@@ -666,70 +716,250 @@ class Polynomial(object):
 class RSBlock(object):
     RS_BLOCK_TABLE = [
 
-        # L
-        # M
-        # Q
-        # H
+      # L
+      # M
+      # Q
+      # H
 
-        # 1
-        [1, 26, 19],
-        [1, 26, 16],
-        [1, 26, 13],
-        [1, 26, 9],
+      # 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
 
-        # 2
-        [1, 44, 34],
-        [1, 44, 28],
-        [1, 44, 22],
-        [1, 44, 16],
+      # 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
 
-        # 3
-        [1, 70, 55],
-        [1, 70, 44],
-        [2, 35, 17],
-        [2, 35, 13],
+      # 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
 
-        # 4
-        [1, 100, 80],
-        [2, 50, 32],
-        [2, 50, 24],
-        [4, 25, 9],
+      # 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
 
-        # 5
-        [1, 134, 108],
-        [2, 67, 43],
-        [2, 33, 15, 2, 34, 16],
-        [2, 33, 11, 2, 34, 12],
+      # 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
 
-        # 6
-        [2, 86, 68],
-        [4, 43, 27],
-        [4, 43, 19],
-        [4, 43, 15],
+      # 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
 
-        # 7
-        [2, 98, 78],
-        [4, 49, 31],
-        [2, 32, 14, 4, 33, 15],
-        [4, 39, 13, 1, 40, 14],
+      # 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
 
-        # 8
-        [2, 121, 97],
-        [2, 60, 38, 2, 61, 39],
-        [4, 40, 18, 2, 41, 19],
-        [4, 40, 14, 2, 41, 15],
+      # 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
 
-        # 9
-        [2, 146, 116],
-        [3, 58, 36, 2, 59, 37],
-        [4, 36, 16, 4, 37, 17],
-        [4, 36, 12, 4, 37, 13],
+      # 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
 
-        # 10
-        [2, 86, 68, 2, 87, 69],
-        [4, 69, 43, 1, 70, 44],
-        [6, 43, 19, 2, 44, 20],
-        [6, 43, 15, 2, 44, 16]
+      # 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      # 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      # 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      # 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      # 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      # 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      # 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      # 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      # 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      # 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      # 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      # 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      # 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      # 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      # 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      # 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      # 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      # 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      # 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      # 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      # 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      # 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      # 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      # 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      # 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      # 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      # 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      # 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      # 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      # 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      # 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
     ]
 
     def __init__(self, totalCount, dataCount):
@@ -865,6 +1095,7 @@ class QrCode(inkex.GenerateExtension):
         pars.add_argument("--text", default='www.inkscape.org')
         pars.add_argument("--typenumber", type=int, default=0)
         pars.add_argument("--correctionlevel", type=int, default=0)
+        pars.add_argument("--qrmode", type=int, default=0)
         pars.add_argument("--encoding", default="latin_1")
         pars.add_argument("--modulesize", type=float, default=4.0)
         pars.add_argument("--invert", type=inkex.Boolean, default="false")
@@ -884,8 +1115,9 @@ class QrCode(inkex.GenerateExtension):
             raise inkex.AbortExtension('Please enter symbol id')
 
         # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
-        text_bytes = bytes(opt.text, opt.encoding).decode("latin_1")
         text_str = str(opt.text)
+        cmode = [QR8BitByte, QRNumber, QRAlphaNum, QRKanji][opt.qrmode]
+        text_data = cmode(bytes(opt.text, opt.encoding).decode("latin_1"))
 
         grp = Group()
         grp.set('inkscape:label', 'QR Code: ' + text_str)
@@ -899,12 +1131,12 @@ class QrCode(inkex.GenerateExtension):
         # GENERATE THE QRCODE
         if opt.typenumber == 0:
             # Automatic QR code size`
-            code = QRCode.getMinimumQRCode(text_bytes, opt.correctionlevel)
+            code = QRCode.getMinimumQRCode(text_data, opt.correctionlevel)
         else:
             # Manual QR code size
             code = QRCode(correction=opt.correctionlevel)
             code.setTypeNumber(int(opt.typenumber))
-            code.addData(text_bytes)
+            code.addData(text_data)
             code.make()
 
         self.boxsize = opt.modulesize
@@ -923,10 +1155,13 @@ class QrCode(inkex.GenerateExtension):
             vertsIndexStart = len(verts) - 1
             vertsIndexCur = vertsIndexStart
             ringIndexes = []
+            ci={}
+            for i, v in enumerate(verts):
+                ci.setdefault(v[0], []).append(i)
             while True:
                 ringIndexes.append(vertsIndexCur)
                 nextPos = self.draw.moveByDirection(verts[vertsIndexCur])
-                nextIndexes = [i for i, x in enumerate(verts) if x[0] == nextPos[0] and x[1] == nextPos[1]]
+                nextIndexes = [i for i in ci[nextPos[0]] if verts[i][1] == nextPos[1]]
                 if len(nextIndexes) == 0 or len(nextIndexes) > 2:
                     raise Exception("Vertex " + str(next_c) + " has no connections")
                 elif len(nextIndexes) == 1:

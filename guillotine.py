@@ -77,7 +77,7 @@ class Guillotine(inkex.EffectExtension):
         height = float(self.svg.viewbox_height)
         for y in self.get_all_horizontal_guides():
             if 0.0 < y <= height:
-                horizontals.append(y)
+                horizontals.append(height - y)
         horizontals.append(height)
         return sorted(horizontals)
 

@@ -19,3 +19,5 @@ coverage.xml
 .vscode/
 tests/data/refs/*
 !tests/data/refs/*.out
+
+tests/data/cmd/*/*.msg.output

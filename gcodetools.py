@@ -3671,6 +3671,7 @@ class Gcodetools(inkex.EffectExtension):
                     csp = node.path.transform(node.composed_transform()).to_superpath()
                     point[0] = csp[0][0][1]
                 if node.get('gcodetools') == "Gcodetools orientation point text":
+                    inkex.errormsg(node.get_text())
                     r = re.match(r'(?i)\s*\(\s*(-?\s*\d*(?:,|\.)*\d*)\s*;\s*(-?\s*\d*(?:,|\.)*\d*)\s*;\s*(-?\s*\d*(?:,|\.)*\d*)\s*\)\s*', node.get_text())
                     point[1] = [float(r.group(1)), float(r.group(2)), float(r.group(3))]
             if point[0] != [] and point[1] != []:
@@ -5014,7 +5015,8 @@ class Gcodetools(inkex.EffectExtension):
     ################################################################################
     def tab_orientation(self, layer=None):
         self.get_info()
-
+        Zsurface = f"{self.options.Zsurface:.5f}"
+        Zdepth = f"{self.options.Zdepth:.5f}"
         if layer is None:
             layer = self.svg.get_current_layer() if self.svg.get_current_layer() is not None else self.document.getroot()
 
@@ -5062,9 +5064,9 @@ class Gcodetools(inkex.EffectExtension):
                 doc_height = 1052.3622047
                 print_("Overriding height from 100 percents to {}".format(doc_height))
             if self.options.unit == "G21 (All units in mm)":
-                points = [[0., 0., self.options.Zsurface], [100., 0., self.options.Zdepth], [0., 100., 0.]]
+                points = [[0., 0., Zsurface], [100., 0., Zdepth], [0., 100., 0.]]
             elif self.options.unit == "G20 (All units in inches)":
-                points = [[0., 0., self.options.Zsurface], [5., 0., self.options.Zdepth], [0., 5., 0.]]
+                points = [[0., 0., Zsurface], [5., 0., Zdepth], [0., 5., 0.]]
             if self.options.orientation_points_count == "2":
                 points = points[:2]
             for i in points:

@@ -58,3 +58,8 @@ class TestGcodetoolsBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
             )
             outfile = os.path.join(self.tempdir, 'output.ngc')
             self.assertCompare(self.compare_file, None, args, 'output.ngc')
+
+class TestGcodeToolsOrientationScientific(ComparisonMixin, TestCase):
+    effect_class = Gcodetools
+    compare_file = "svg/shapes.svg"
+    comparisons = [("--active-tab=orientation", "--Zsurface=0.00000000000001e-5", "--Zdepth=-9.71445146547012e-17", "--orientation-points-count=3")]

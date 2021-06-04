@@ -36,7 +36,8 @@ class AddNodes(inkex.EffectExtension):
                           help="Number of segments to divide the path into")
         pars.add_argument("--max", type=float, default=10.0,
                           help="Number of segments to divide the path into")
-        pars.add_argument("--method", help="The kind of division to perform")
+        pars.add_argument("--method", default='bymax',
+                          help="The kind of division to perform")
 
     def effect(self):
         for node in self.svg.selection.filter(PathElement):
@@ -59,7 +60,7 @@ class AddNodes(inkex.EffectExtension):
                         new[-1].append(nxt[:])
                     new[-1].append(sub[i])
                     i += 1
-            node.path = CubicSuperPath(new).to_path(curves_only=True)
+            node.path = CubicSuperPath(new).to_path(curves_only=False)
 
 if __name__ == '__main__':
     AddNodes().run()

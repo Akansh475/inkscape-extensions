@@ -6,7 +6,11 @@ from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
 class TestDxfInputBasic(ComparisonMixin, TestCase):
-    compare_file = ['io/test_r12.dxf', 'io/test_r14.dxf']
+
+    compare_file = ['io/test_r12.dxf', 'io/test_r14.dxf', 
+    # Unit test for https://gitlab.com/inkscape/extensions/-/issues/355
+    # The result for arcs currently looks wrong, but it doesn't crash anymore
+    'io/dxf_with_arc.dxf']
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
     effect_class = DxfInput
@@ -30,3 +34,4 @@ class TestDxfInputTextHeight(ComparisonMixin, TestCase):
             return data
         data = super()._apply_compare_filters(data)
         return data.replace((self.datadir() + '/').encode('utf-8'), b'')
+

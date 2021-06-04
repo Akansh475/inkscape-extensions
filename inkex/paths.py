@@ -1458,10 +1458,13 @@ class CubicSuperPath(list):
     def __str__(self):
         return str(self.to_path())
 
-    def append(self, item):
+    def append(self, item, force_shift=False):
         """Accept multiple different formats for the data"""
         if isinstance(item, list) and len(item) == 2 and isinstance(item[0], str):
             item = PathCommand.letter_to_class(item[0])(*item[1])
+        coordinate_shift = True
+        if isinstance(item, list) and len(item) == 3 and not force_shift:
+            coordinate_shift = False
         is_quadratic = False
         if isinstance(item, PathCommand):
             if isinstance(item, Move):
@@ -1480,7 +1483,7 @@ class CubicSuperPath(list):
                 # Arcs are made up of three curves (approximated)
                 for arc_curve in item.to_curves(self._prev, self._prev_prev):
                     x2, y2, x3, y3, x4, y4 = arc_curve.args
-                    self.append([[x2, y2], [x3, y3], [x4, y4]])
+                    self.append([[x2, y2], [x3, y3], [x4, y4]], force_shift=True)
                     self._prev_prev.assign(x3, y3)
                 return
             else:
@@ -1514,11 +1517,15 @@ class CubicSuperPath(list):
             self._closed = False
             super().append([])
 
-        if self[-1]:
-            # The last tuple is replaced, it's the coords of where the next segment will land.
-            self[-1][-1][-1] = item[0][:]
-        # The last coord is duplicated, but is expected to be replaced
-        self[-1].append(item[1:] + copy.deepcopy(item)[-1:])
+        if coordinate_shift:
+            if self[-1]:
+                # The last tuple is replaced, it's the coords of where the next segment will land.
+                self[-1][-1][-1] = item[0][:]
+            # The last coord is duplicated, but is expected to be replaced
+            self[-1].append(item[1:] + copy.deepcopy(item)[-1:])
+        else:
+            # Item is already a csp segment and has already been shifted.
+            self[-1].append(copy.deepcopy(item))
 
         self._prev = Vector2d(self[-1][-1][1])
         if not is_quadratic:
@@ -1562,10 +1569,39 @@ class CubicSuperPath(list):
         return self.to_path().transform(transform).to_superpath()
 
     @staticmethod
+    def is_on(a, b, c):
+        """Checks if point a is on the line between points b and c"""
+        return (CubicSuperPath.collinear(a, b, c)
+                and (CubicSuperPath.within(a[0], b[0], c[0]) if a[0] != b[0]
+                     else CubicSuperPath.within(a[1], b[1], c[1])))
+
+    @staticmethod
+    def collinear(a, b, c):
+        """Checks if points a, b, c lie on the same line"""
+        return abs((b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])) < 10e-8
+
+    @staticmethod
+    def within(b, a, c):
+        """Checks if float b is between a and c"""
+        return a <= b <= c or c <= b <= a
+
+    @staticmethod
     def is_line(previous, segment):
-        """Check whether csp segment (two points) has retracted handles."""
-        return Vector2d(previous[1]).is_close(previous[2]) and \
+        """Check whether csp segment (two points) has retracted handles or the handles can
+        be retracted without loss of information (i.e. both handles lie on the line)"""
+
+        retracted = Vector2d(previous[1]).is_close(previous[2]) and \
                Vector2d(segment[0]).is_close(segment[1])
+
+        if retracted:
+            return True
+
+        # Can both handles be retracted without loss of information?
+        # Definitely the case if the handles lie on the same line as the two nodes and in the 
+        # correct order
+        # E.g. cspbezsplitatlength outputs non-retracted handles when splitting a straight line
+        return CubicSuperPath.is_on(segment[0], segment[1], previous[2]) \
+                and CubicSuperPath.is_on(previous[2], previous[1], segment[0])
 
 def arc_to_path(point, params):
     """Approximates an arc with cubic bezier segments.

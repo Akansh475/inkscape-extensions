@@ -541,3 +541,36 @@ class SuperPathTest(TestCase):
         # Also tests if zone close is applied correctly.
         self.assertEqual(str(csp.to_path()), "M 49 88 L 119 87 C 137 104 120 146 120.7 146 "\
             "C 120.7 146 72 164 50.2 145 C 68.2 130 75.2 112.6 48.7 87.8 Z")
+
+    def test_is_line_simplify(self):
+        """Test if super path segments can detect if a segment can be simplified to a line"""
+        path = Path("M 10 10 C 20,20 30,30 40,40 C 100, 100 50, 50 60, 60")
+        csp = path.to_superpath()
+
+        self.assertTrue(csp.is_line(csp[0][0], csp[0][1])) # line can be retracted
+        self.assertFalse(csp.is_line(csp[0][1], csp[0][2])) # is line, but shoots over endpoint
+
+        self.assertEqual(str(csp.to_path()), "M 10 10 L 40 40 C 100 100 50 50 60 60")
+
+    def test_is_line_collinear(self):
+        self.assertFalse(CubicSuperPath.collinear([1, 2], [2, 2.00001], [3, 2]))
+        self.assertTrue(CubicSuperPath.collinear([1, 2], [2, 2], [3, 2]))
+        self.assertTrue(CubicSuperPath.collinear([3, 2], [2, 2], [1, 2]))
+
+    def test_is_within(self):
+        self.assertTrue(CubicSuperPath.within(2, 1, 3))
+        self.assertTrue(CubicSuperPath.within(2, 3, 1))
+        self.assertTrue(CubicSuperPath.within(2, 2, 2))
+        self.assertTrue(CubicSuperPath.within(2, 3, 2))
+        self.assertFalse(CubicSuperPath.within(3, 2.9999, 2))
+
+    def test_is_stable(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/374"""
+        path = Path("M 10 10 h 10 v 10 h -10 Z")
+
+        tempsub = path.to_superpath()
+        comparison = str(tempsub)
+        for _ in range(15):
+            tempsub = CubicSuperPath(tempsub[0])
+            self.assertEqual(comparison, str(tempsub))
+

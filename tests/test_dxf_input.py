@@ -10,7 +10,9 @@ class TestDxfInputBasic(ComparisonMixin, TestCase):
     compare_file = ['io/test_r12.dxf', 'io/test_r14.dxf', 
     # Unit test for https://gitlab.com/inkscape/extensions/-/issues/355
     # The result for arcs currently looks wrong, but it doesn't crash anymore
-    'io/dxf_with_arc.dxf']
+    'io/dxf_with_arc.dxf',
+    # test polylines
+    'io/dxf_polylines.dxf']
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
     effect_class = DxfInput

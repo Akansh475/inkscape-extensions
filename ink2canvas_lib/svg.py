@@ -88,6 +88,8 @@ class AbstractShape(Element):
             if hasattr(self.ctx, method) and style[key] != "none":
                 getattr(self.ctx, method)(style[key])
         # saves style to compare in next iteration
+        if hasattr(self.ctx, "style_cache") and self.ctx.style_cache("opacity") != style("opacity"):
+            self.ctx.setOpacity(style("opacity")) # opacity is kept in memory, need to reset
         self.ctx.style_cache = style
 
     def has_transform(self):
@@ -126,7 +128,7 @@ class AbstractShape(Element):
         self.set_style(style)
         # unpacks "data" in parameters to given method
         getattr(self.ctx, self.command)(*data)
-        self.ctx.closePath()
+        self.ctx.finishPath()
 
     def end(self):
         if self.has_transform() or self.has_clip():
@@ -189,7 +191,7 @@ class Ellipse(AbstractShape):
         self.ctx.bezierCurveTo(cx + rx, cy + (KAPPA * ry), cx + (KAPPA * rx), cy + ry, cx, cy + ry)
         self.ctx.bezierCurveTo(cx - (KAPPA * rx), cy + ry, cx - rx, cy + (KAPPA * ry), cx - rx, cy)
         self.ctx.bezierCurveTo(cx - rx, cy - (KAPPA * ry), cx - (KAPPA * rx), cy - ry, cx, cy - ry)
-        self.ctx.closePath()
+        self.ctx.finishPath()
 
 
 class Path(AbstractShape):
@@ -207,6 +209,9 @@ class Path(AbstractShape):
         self.ctx.bezierCurveTo(x1, y1, x2, y2, x, y)
         self.currentPosition = x, y
 
+    def pathClose(self, data):
+        self.ctx.closePath()
+
     def draw(self):
         """Gets the node type and calls the given method"""
         style = self.get_style()
@@ -219,13 +224,14 @@ class Path(AbstractShape):
         # Draws path commands
         path_command = {"M": self.pathMoveTo,
                         "L": self.pathLineTo,
-                        "C": self.pathCurveTo}
+                        "C": self.pathCurveTo,
+                        "Z": self.pathClose}
         # Make sure we only have Lines and curves (no arcs etc)
         for comm, data in self.node.path.to_superpath().to_path().to_arrays():
             if comm in path_command:
                 path_command[comm](data)
 
-        self.ctx.closePath()
+        self.ctx.finishPath()
 
 
 class Line(Path):

@@ -121,7 +121,7 @@ class ElementList(OrderedDict):
         for elem in ids:
             self[elem] = elem # This doesn't matter
 
-    def paint_order(self):
+    def rendering_order(self):
         """Get the selected elements by z-order (stacking order), ordered from bottom to top"""
         new_list = ElementList(self.svg)
         # the elements are stored with their xpath index, so a natural sort order 

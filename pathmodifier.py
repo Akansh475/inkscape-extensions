@@ -163,7 +163,7 @@ class PathModifier(inkex.EffectExtension):
     def get_patterns_and_skeletons(self, expand_patterns=False, duplicate=False):
         """Gets the pattern node and skeleton (with applied transforms) from selection"""
         # first selected->pattern, all but first selected-> skeletons
-        skeletons = self.svg.selection.paint_order()
+        skeletons = self.svg.selection.rendering_order()
 
         elem = skeletons.pop()
         if duplicate:

@@ -24,6 +24,7 @@
 // #c1
 	ctx.beginPath();
 	ctx.fillStyle = 'rgb(0, 0, 128)';
+	ctx.globalAlpha = 1.0;
 	ctx.arc(150.000000, 450.000000, 50.000000, 0.000000, 6.28318531, 1);
 	ctx.fill();
 	
@@ -49,6 +50,7 @@
 	ctx.bezierCurveTo(599.052409, 429.312488, 626.453123, 409.709909, 667.736130, 402.673890);
 	ctx.bezierCurveTo(709.019129, 395.637872, 754.660551, 402.791598, 780.522930, 420.351820);
 	ctx.lineTo(700.000000, 450.000000);
+	ctx.closePath();
 	ctx.fill();
 	ctx.stroke();
 	
@@ -87,6 +89,7 @@
 	ctx.lineTo(200.000000, 815.037620);
 	ctx.lineTo(245.458240, 807.599150);
 	ctx.lineTo(223.711430, 848.205300);
+	ctx.closePath();
 	ctx.fill();
 	ctx.stroke();
 	

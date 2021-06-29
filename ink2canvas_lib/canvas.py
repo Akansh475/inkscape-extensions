@@ -129,6 +129,9 @@ class Canvas(object):
     def lineTo(self, x, y):
         self.write("ctx.lineTo(%f, %f);" % (x, y))
 
+    def closePath(self):
+        self.write("ctx.closePath();")
+
     def quadraticCurveTo(self, cpx, cpy, x, y):
         data = (cpx, cpy, x, y)
         self.write("ctx.quadraticCurveTo(%f, %f, %f, %f);" % data)
@@ -178,7 +181,7 @@ class Canvas(object):
     def restore(self):
         self.write("ctx.restore();")
 
-    def closePath(self):
+    def finishPath(self):
         if self.style("fill") is not None:
             self.write("ctx.fill();")
         if self.style("stroke") is not None:

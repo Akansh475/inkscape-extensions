@@ -17,3 +17,8 @@ class Ink2CanvasTestTextPath(ComparisonMixin, TestCase):
     compare_filters = [CompareOrderIndependentLines()]
     # We don't need a selection for this case, but we need unique filenames for the tester
     comparisons = [("--id=rect3898",)]
+
+class Ink2CanvasTestClosedPath(ComparisonMixin, TestCase):
+    effect_class = Html5Canvas
+    compare_file = 'svg/multiple_closed_subpaths.svg'
+    comparisons = [("--id=path31",)]

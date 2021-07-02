@@ -121,7 +121,7 @@ class DxfTwelve(inkex.OutputExtension):
             if layer is None:
                 layer = 'Layer 1'
 
-            node.transform *= inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]])
+            node.transform = inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]]) * node.transform
             node.apply_transform()
             path = node.path.to_superpath()
 

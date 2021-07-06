@@ -111,16 +111,18 @@ class DxfTwelve(inkex.OutputExtension):
         self.dxf_insert_code('999', '"DXF R12 Output" (www.mydxf.blogspot.com)')
         self.dxf_add(r12_header)
 
-        scale = 25.4 / 90.0
-        h = self.svg.viewport_height
+        scale = 1 # TODO this assumes that one user unit corresponds to one mm
+        h = self.svg.viewbox_height
 
         path = '//svg:path'
         for node in self.svg.xpath(path):
 
-            layer = node.getparent().label
+            layer = node.getparent().label # TODO this assumes that all elements are direct
+                                           # descendants of layers
             if layer is None:
                 layer = 'Layer 1'
 
+            node.transform = node.composed_transform()
             node.transform = inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]]) * node.transform
             node.apply_transform()
             path = node.path.to_superpath()

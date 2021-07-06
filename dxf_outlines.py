@@ -301,7 +301,7 @@ class DxfOutlines(inkex.OutputExtension):
         if not scale:
             scale = 25.4 / 96  # if no scale is specified, assume inch as baseunit
         scale /= self.svg.unittouu('1px')
-        h = self.svg.viewport_height
+        h = self.svg.viewbox_height
         doc = self.document.getroot()
         # process viewBox height attribute to correct page scaling
         viewBox = doc.get('viewBox')

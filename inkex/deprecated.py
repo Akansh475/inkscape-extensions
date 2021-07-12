@@ -38,6 +38,7 @@ import inkex.units
 from inkex.base import SvgThroughMixin, InkscapeExtension
 from inkex.localization import inkex_gettext as _
 from inkex.elements._base import BaseElement, ShapeElement
+from inkex.elements._selected import ElementList
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -370,8 +371,8 @@ class DeprecatedSvgMixin(object):
 
     @deprecate
     def get_z_selected(self):
-        """svg.selection.paint_order()"""
-        return self.selection.paint_order()
+        """svg.selection.rendering_order()"""
+        return self.selection.rendering_order()
 
     @deprecate
     def get_selected(self, *types):
@@ -421,3 +422,9 @@ def height(self):
 
 BaseElement.width = property(deprecate(width))
 BaseElement.height = property(deprecate(height))
+
+def paint_order(selection : ElementList):
+    """svg.selection.rendering_order()"""
+    return selection.rendering_order()
+
+ElementList.paint_order = deprecate(paint_order) # type: ignore

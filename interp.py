@@ -90,7 +90,7 @@ class Interp(inkex.EffectExtension):
         Objects other than path objects are ignored. Transforms are baked in."""
         if self.options.zsort:
             # work around selection order swapping with Live Preview
-            objects = self.svg.selection.paint_order()
+            objects = self.svg.selection.rendering_order()
         else:
             # use selection order (default)
             objects = self.svg.selected

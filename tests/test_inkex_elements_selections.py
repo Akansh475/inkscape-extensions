@@ -38,9 +38,9 @@ class ElementListTestCase(SvgTestCase):
         """Setting an svg selection"""
         self.assertEqual(tuple(self.svg.selection.ids), ('G', 'B', 'D', 'F'))
 
-    def test_paint_order(self):
+    def test_rendering_order(self):
         """Test paint order"""
-        items = self.svg.selection.paint_order()
+        items = self.svg.selection.rendering_order()
         self.assertTrue(isinstance(items, ElementList))
         self.assertEqual(tuple(items.ids), ('B', 'D', 'F', 'G'))
 

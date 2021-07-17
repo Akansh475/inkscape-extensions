@@ -17,9 +17,9 @@ class HslAdjust(inkex.ColorExtension):
 
     def modify_color(self, name, color):
         if self.options.random_hue:
-            color.hue = int(random.random() * 360.0)
+            color.hue = int(random.random() * 255.0)
         elif self.options.hue:
-            color.hue += (self.options.hue)
+            color.hue += (self.options.hue * 0.7111)
 
         if self.options.random_saturation:
             color.saturation = int(random.random() * 255.0)

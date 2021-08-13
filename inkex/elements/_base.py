@@ -438,7 +438,8 @@ class BaseElement(etree.ElementBase):
 
     def set_sensitive(self, sensitive=True):
         """Set the sensitivity of the element/layer"""
-        self.set('sodipodi:insensitive', str((not sensitive)).lower())
+        # Sensitive requires None instead of 'false'
+        self.set('sodipodi:insensitive', ['true', None][sensitive])
 
     @property
     def unit(self):

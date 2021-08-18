@@ -557,6 +557,9 @@ class BoundingBoxTest(TestCase):
         """Bounding Boxes can be scaled"""
         self.assertEqual(tuple(BoundingBox(1, 3) * 2), ((2, 2), (6, 6)))
 
+    def test_bbox_area(self):
+        self.assertEqual(BoundingBox((-3, 7), (-5, 5)).area, 100)
+
     def test_bbox_anchor_left_right(self):
         """Bunding box anchoring (left to right)"""
         bbox = BoundingBox((-1, 1), (10, 20))

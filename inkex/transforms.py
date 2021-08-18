@@ -873,6 +873,10 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
         yield self.y
 
     @property
+    def area(self):
+        return self.width * self.height
+
+    @property
     def minimum(self):
         # type: () -> Vector2d
         """Return the minimum x,y coords"""

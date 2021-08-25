@@ -238,7 +238,7 @@ class AttributeHandelingTestCase(SvgTestCase):
         self.assertEqual(elem.get('sodipodi:insensitive'), 'true')
         elem.set_sensitive(True)
         self.assertTrue(elem.is_sensitive())
-        self.assertEqual(elem.get('sodipodi:insensitive'), 'false')
+        self.assertEqual(elem.get('sodipodi:insensitive'), None)
 
     def test_title_description(self):
         """Adding a description to an element"""

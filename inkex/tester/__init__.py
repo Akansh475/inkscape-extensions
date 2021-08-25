@@ -383,7 +383,7 @@ class ComparisonMixin:
                 # want test authors to be too reassured by a simple write.
                 if write_output == cmpfile:
                     effect = self.assertEffect(infile, args=args)
-                    self._base_compare(data_a, cmpfile)
+                    self._base_compare(data_a, cmpfile, COMPARE_CHECK)
             if not write_output == cmpfile:
                 raise
 

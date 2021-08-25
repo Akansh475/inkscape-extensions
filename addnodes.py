@@ -38,6 +38,7 @@ class AddNodes(inkex.EffectExtension):
                           help="Number of segments to divide the path into")
         pars.add_argument("--method", default='bymax',
                           help="The kind of division to perform")
+        pars.add_argument("--unit", default="px", help="Unit for maximum segment length")
 
     def effect(self):
         for node in self.svg.selection.filter(PathElement):
@@ -51,7 +52,8 @@ class AddNodes(inkex.EffectExtension):
                     if self.options.method == 'bynum':
                         splits = self.options.segments
                     else:
-                        splits = math.ceil(length / self.options.max)
+                        maxlen = self.svg.viewport_to_unit(f"{self.options.max}{self.options.unit}")
+                        splits = math.ceil(length / maxlen)
 
                     for sel in range(int(splits), 1, -1):
                         result = bezier.cspbezsplitatlength(new[-1][-1], sub[i], 1.0 / sel)

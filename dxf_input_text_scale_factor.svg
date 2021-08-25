@@ -12,8 +12,8 @@
    viewBox="0 0 210 297"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0.1 (1.0.1+r73)"
-   sodipodi:docname="input_dxf_determination_text_scale_factor.svg">
+   inkscape:version="1.0.2 (1.0.2+r75+1)"
+   sodipodi:docname="dxf_input_text_scale_factor.svg">
   <defs
      id="defs2">
     <marker
@@ -67,7 +67,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.702883"
      inkscape:cx="396.85039"
-     inkscape:cy="613.90018"
+     inkscape:cy="611.76611"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -366,7 +366,7 @@
          x="25"
          y="75.874985"
          style="stroke-width:0.264583"
-         id="tspan170">which is the Inkscape's text height for 180 pt = 240 mm (Font family: Liberation Sans or Arial)</tspan><tspan
+         id="tspan170">which is the Inkscape's text height for 180 pt = 240 px (Font family: Liberation Sans or Arial)</tspan><tspan
          sodipodi:role="line"
          x="25"
          y="81.166649"

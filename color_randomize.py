@@ -44,6 +44,8 @@ class Randomize(inkex.ColorExtension):
         return hsl.to_rgb()
 
     def modify_opacity(self, name, opacity):
+        if name != "opacity":
+            return opacity
         try:
             opacity = float(opacity)
         except ValueError:

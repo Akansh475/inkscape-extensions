@@ -35,6 +35,7 @@ from .elements import load_svg, BaseElement, ShapeElement, Group, Layer, Grid, \
 from .elements._utils import CloningVat
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
+from .properties import all_properties
 
 # All the names that get added to the inkex API itself.
 __all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
@@ -310,9 +311,10 @@ class ColorExtension(EffectExtension):
                     pass # bad color value, don't touch.
         # Then opacities (usually does nothing)
         for name in elem.style.opacity_props:
-            value = style.get(name)
-            if value is not None:
-                elem.style[name] = self.modify_opacity(name, value)
+            value = style(name)
+            result = self.modify_opacity(name, value)
+            if result != value and result != 1: # only modify if not equal to old or default
+                elem.style[name] = result
 
     def _ref_cloned(self, old_id, new_id, style, name):
         self._renamed[old_id] = new_id

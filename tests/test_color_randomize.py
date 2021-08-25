@@ -1,6 +1,7 @@
 # coding=utf-8
 from color_randomize import Randomize
 from .test_inkex_extensions import ColorBaseCase
+from inkex.tester import ComparisonMixin, TestCase
 
 class ColorRandomizeTest(ColorBaseCase):
     effect_class = Randomize
@@ -33,8 +34,32 @@ class ColorRandomizeTest(ColorBaseCase):
         (1.0, 0.43, ['-o 100']),
         # Other units are available
         ('0.5', 0.654, ['-o 54']),
+        # Test no opacity
+        # The opacity value should be lesser than 1
     ]
 
     def test_bad_opacity(self):
         """Bad opacity error handled"""
         self.effect.modify_opacity('opacity', 'hello')
+
+class TestRandomizeGradients(ComparisonMixin, TestCase):
+    """Direct tests for color mechanisms"""
+    effect_class = Randomize
+    compare_file = 'svg/colors.svg'
+    python3_only = True
+
+    comparisons = [
+        ('-y 50', '-t 50', '-m 50', '-o 100', "--id=r1", "--id=r2", "--id=r3", "--id=r4", 
+         "--id=r5", "--id=r6"),
+    ]
+
+class TestRandomizeOpacity(ComparisonMixin, TestCase):
+    """Direct tests for color mechanisms"""
+    effect_class = Randomize
+    compare_file = 'svg/dpiswitcher_96dpi.svg'
+    python3_only = True
+
+    comparisons = [
+        ('-y 0', '-t 0', '-m 0', '-o 100', "--id=layer_group_rect_uu2", "--id=layer_group_path", 
+         "--id=root_rect_uu"),
+    ]

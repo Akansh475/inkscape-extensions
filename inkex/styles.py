@@ -191,15 +191,15 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         if not (isinstance(parent, Style)):
             return ret
 
-        apply = False
         for key in parent.keys():
+            apply = False
             if key in all_properties and all_properties[key][3]:
                 # only set parent value if value is not set or parent importance is higher
                 if key not in ret:
                     apply = True
                 elif self.get_importance(key) != parent.get_importance(key):
                     apply = parent.get_importance(key)
-            elif key in ret and ret[key] == "inherit":
+            if key in ret and ret[key] == "inherit":
                 apply = True
             if apply:
                 ret[key] = parent[key]
@@ -424,7 +424,7 @@ class StyleSheet(list):
     A style sheet, usually the CDATA contents of a style tag, but also
     a css file used with a css. Will yield multiple Style() classes.
     """
-    comment_strip = re.compile(r"(\/\/.*?\n)|(\/\*.*?\*\/)")
+    comment_strip = re.compile(r"(\/\/.*?\n)|(\/\*.*?\*\/)|@.*;")
 
     def __init__(self, content=None, callback=None):
         super().__init__()
@@ -454,6 +454,8 @@ class StyleSheet(list):
             if '{' not in other:
                 return # Warning?
             rules, style = other.strip('}').split('{', 1)
+            if rules.strip().startswith("@"): # ignore @font-face and @import
+                return
             other = ConditionalStyle(rules=rules, style=style.strip(), callback=self._callback)
         super().append(other)
         self._callback()
@@ -521,7 +523,7 @@ class ConditionalRule:
     """A single css rule"""
     step_to_xpath = [
         # namespace addition
-        (re.compile(r'(::|\/)([a-z]+)(\W)(?<!-)'), r"\1svg:\2\3"),
+        (re.compile(r'(::|\/)([a-z]+)(?=\W)(?!-)'), r"\1svg:\2"),
     ]
 
     def __init__(self, rule):

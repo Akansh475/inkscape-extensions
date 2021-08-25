@@ -36,7 +36,7 @@ from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
 from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
-from ..properties import all_properties
+from ..properties import BaseStyleValue, all_properties
 
 #from ..deprecated import DeprecatedShapeElementMixin
 
@@ -499,7 +499,7 @@ class BaseElement(etree.ElementBase):
         style = Style()
         for key in self.keys():
             if key in all_properties and all_properties[key][2]:
-                style[key] = self.attrib[key]
+                style[key] = BaseStyleValue.factory(declaration=key + ": " + self.attrib[key])
         return style
     
     def composed_transform(self, other=None):

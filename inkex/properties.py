@@ -87,6 +87,8 @@ class BaseStyleValue():
             object: parsed property value
         """
         if self.value == "inherit":
+            if self.attr_name in all_properties:
+                return self._parse_value(all_properties[self.attr_name][1])
             return None
         return self._parse_value(self.value, element)
 
@@ -522,7 +524,7 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
                                                                  "visibleFill", "visibleStroke", "visible", "painted", "fill", "stroke", "all", "none"]),
     "shape-rendering": (EnumValue, "visiblePainted", True, True, ["auto", "optimizeSpeed", "crispEdges", "geometricPrecision"]),
     "stop-color": (ColorValue, "black", True, False, None),
-    "stop-opacity": (AlphaValue, "1", True, True, None),
+    "stop-opacity": (AlphaValue, "1", True, False, None),
     "stroke": (PaintValue, "none", True, True, None),
     "stroke-dasharray": (BaseStyleValue, "none", True, True, None),
     "stroke-dashoffset": (BaseStyleValue, "0", True, True, None),
@@ -545,6 +547,6 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
     "word-spacing": (BaseStyleValue, "normal", True, True, None),
     # including obsolete SVG 1.1 values
     "writing-mode": (EnumValue, "horizontal-tb", True, True, ["horizontal-tb", "vertical-rl", "vertical-lr", "lr", "lr-tb", "rl", "rl-tb", "tb", "tb-rl"]),
-    "-inkscape-font-specification": (BaseStyleValue, "sans-serif", False, False, None)
+    "-inkscape-font-specification": (BaseStyleValue, "sans-serif", False, True, None)
 }
 # pylint: enable=line-too-long

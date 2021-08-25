@@ -20,7 +20,7 @@
 """
 Some more complicated styling tests, including inheritance and shorthand attributes
 """
-
+from lxml import etree
 from typing import List, Tuple
 from inkex.styles import Style
 from inkex.colors import Color
@@ -28,7 +28,7 @@ from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
 from inkex import SvgDocumentElement, BaseElement, \
     ColorError, BaseStyleValue, RadialGradient, Stop
-
+from inkex import SVG_PARSER
 
 class StyleInheritanceTests(TestCase):
     """ Some test cases for css attribute handling """
@@ -41,7 +41,7 @@ class StyleInheritanceTests(TestCase):
         circles: List[BaseElement] = doc.xpath("//svg:circle")
         for circle in circles:
             style = circle.specified_style()
-            self.assertEqual(style("fill"), Color("red"))
+            self.assertEqual(style("fill"), Color("red"), circle.getparent().get_id())
 
         rects: List[BaseElement] = doc.xpath("//svg:rect")
         for rect in rects:
@@ -337,4 +337,46 @@ class StyleInheritanceTests(TestCase):
         #copystyle["new-attribute2"] = "test"
         #self.assertEqual(elem.style("new-attribute2"), "test")
 
+    def test_stop_opacity_inheritance(self):
+        # subtest of pservers-grad-18b SVG1.1 unit test
+        content = """ <svg><g id="test-body-content" font-family="SVGFreeSansASCII,sans-serif" font-size="18">
+            <g id="g0" stop-color="#f48" stop-opacity="0.5" color="yellow">
+            <linearGradient id="MyGradient1" stop-color="inherit">
+                <stop offset="0" stop-color="green" stop-opacity="1"/>
+                <stop offset="1" stop-color="inherit" stop-opacity="1"/>
+            </linearGradient>
+            </g></g></svg>
+        """
+        doc = etree.fromstring(content, parser=SVG_PARSER)
+        grad = doc.getElementById("MyGradient1")
+        self.assertEqual(grad[0].specified_style()("stop-opacity"), 1) # assert that stop opacity is overwritten
+        self.assertEqual(grad[1].specified_style()("stop-opacity"), 1) # assert that stop opacity is not inherited by default
 
+    def test_inheritance_second_attribute(self):
+        """Check that the second attribute is also correctly inherited"""
+        content = """<svg><g fill="red" font-size="18"><g font-size="20" id="test"></g></g></svg>"""
+        doc = etree.fromstring(content, parser=SVG_PARSER)
+        group = doc.getElementById("test")
+        self.assertEqual(group.specified_style()("font-size"), 20)
+
+    def test_inherit_fallback(self):
+        content = """<svg><g fill="inherit" style="bla: inherit"><g fill="inherit" id="test" style="bla:inherit"/></g></svg>"""
+        doc = etree.fromstring(content, parser=SVG_PARSER)
+        group = doc.getElementById("test")
+        self.assertEqual(group.specified_style()("fill"), Color("black"))
+        self.assertEqual(group.specified_style()("bla"), None)
+
+    def test_direct_child_and_import(self):
+        content = """<svg xmlns="http://www.w3.org/2000/svg">
+        <style type="text/css"><![CDATA[
+        @import url("test.css");
+        g > ellipse
+        {
+            fill: red;
+        }
+        @import url("test.css");
+        ]]></style>
+        <g><ellipse id="test"></ellipse></g></svg>"""
+        doc = etree.fromstring(content, parser=SVG_PARSER)
+        ellipse = doc.getElementById("test")
+        self.assertEqual(ellipse.specified_style()("fill"), Color("red"))

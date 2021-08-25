@@ -26,7 +26,7 @@ An `<svg>` tag has two different properties that influence its size and the mapp
 These are called *viewport coordinate system* and *user coordinate system*. 
 
 And as the name indicates, **user units always refer to the user coordinate system**. So for 
-the next section, forget user units. 
+the next section which explains the **viewport coordinate system**, forget user units. 
 
 Viewport coordinate system 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -72,8 +72,9 @@ User coordinate system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You may have noticed that we didn't explicitly specify in the above svg that we want to draw 
-everything with coordinates ``0 ≤ x ≤ 200`` and ``0 ≤ y ≤ 100``. This was done for us automatically
-since we specified ``width`` and ``height``. The ``viewBox`` attribute allows to change this.
+everything within the area with the coordinates ``0 ≤ x ≤ 200`` and ``0 ≤ y ≤ 100``. This was 
+done for us automatically since we specified ``width`` and ``height``. The ``viewBox`` attribute 
+allows to change this.
 
 Again from the specification [4]_:
 
@@ -95,7 +96,7 @@ As already mentioned: no units means user unit means pixels. So a rectangle with
 ``x="793.7" y="1122.5"`` (no units specified) is at the bottom right corner of the page. It would be
 nicer if unitless values would be implicitly in millimeters, so we could specify such a rectangle 
 with ``x="210" y="297"``. This can be done with the ``viewBox`` attribute and will be explained with
-and example SVG.
+an example SVG.
 
 Let's say we want to design a business card that should eventually be *printed on 84mm x 56mm*, so
 we specifiy ``width="84mm" height="56mm"```. We also want the user units to behave like real-world
@@ -141,7 +142,7 @@ comparable to the first circle.
 This is somewhat unintuitive. Didn't we create a mm based document? Now we can explain the 
 statement from the introduction
 "I can choose the unit of a document, so that one user unit equals one millimeter".
-We didnt change the core statement "no unit equals user unit equals pixels" by specifying width and
+We didn't change the core statement "no unit = user unit = pixels" by specifying width and
 height in mm. But the special choice of the viewbox attribute - the same width and height, but 
 without the unit) makes the following statement true: "**One user unit looks like one millimeter on 
 the output device** (e.g. screen or paper)". 
@@ -161,7 +162,7 @@ What is the position of this object [in the user coordinate system]?
 This is a question that typically needs to be answered if you want to position an object relative
 to other objects, whose coordinates may be specified in a different unit.
 
-The most conventient way to deal with this is to get rid of the units, and that means converting 
+The most convenient way to deal with this is to get rid of the units, and that means converting 
 everything to user units. 
 
 Each :class:`BaseElement <inkex.elements._base.BaseElement>` has a method 
@@ -223,7 +224,7 @@ How big does an object have to be to have the specified size on the viewport?
 
 This is useful if you want to draw a shape at a given location on the viewport, regardless of
 what the user coordinate system is. This is done using
-:meth:`BaseElement.unit_to_viewport <inkex.elements._base.BaseElement.viewport to unit>`.
+:meth:`BaseElement.viewport_to_unit <inkex.elements._base.BaseElement.viewport to unit>`.
 
 >>> svg.viewport_to_unit("4mm", "px")  
 4.0
@@ -235,7 +236,7 @@ tool as ``9pt``, you have to user
 
 >>> element.style["font-size"] = self.svg.viewport_to_unit("9pt")
 
-Again, this method does not work if the element is unrooted.
+Again, this method will raise an error if the element is unrooted.
 
 
 Document dimensions
@@ -246,6 +247,11 @@ Document dimensions
   :attr:`SvgDocumentElement.viewport_height <inkex.elements._svg.SvgDocumentElement.viewport_height>`
   are the width and height of the viewport coordinate system, i.e. the "output screen" of the 
   viewBox camera, in pixels. In above example: ``(317.480314, 211.653543)``
+
+.. code-block: 
+    84mm          *   96px/in / (25.4mm/in) = 317.480314
+    [output size]     [resolution 96dpi]      [output size in pixels]
+
 * :attr:`SvgDocumentElement.viewbox_width <inkex.elements._svg.SvgDocumentElement.viewbox_height>`
   and  
   :attr:`SvgDocumentElement.viewbox_height <inkex.elements._svg.SvgDocumentElement.viewbox_height>`

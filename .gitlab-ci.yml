@@ -44,6 +44,13 @@ test:python39:
     - pyenv shell 3.9.0
     - tox -e py39-normal
 
+test:python310:
+  extends: .tests
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.10.0
+    - tox -e py310-normal
+
 test:coverage:
   stage: coverage
   script:
@@ -64,6 +71,7 @@ test:coverage:
     - test:python37
     - test:python38
     - test:python39
+    - test:python310
   when: always
   coverage: '/TOTAL.+?(\d+.\d+%)/'
   artifacts:

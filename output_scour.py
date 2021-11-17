@@ -3,9 +3,16 @@
 Run the scour module on the svg output.
 """
 
-from distutils.version import StrictVersion
 
 import inkex
+
+try:
+    from packaging.version import Version
+except ImportError:
+    raise inkex.DependencyError("""Failed to import module 'packaging'.
+Please make sure it is installed (e.g. using 'pip install packaging'
+or 'sudo apt-get install python3-packaging') and try again.
+""")
 
 try:
     import scour
@@ -13,7 +20,7 @@ try:
 except ImportError:
     raise inkex.DependencyError("""Failed to import module 'scour'.
 Please make sure it is installed (e.g. using 'pip install scour'
-  or 'sudo apt-get install python-scour') and try again.
+  or 'sudo apt-get install python3-scour') and try again.
 """)
 
 
@@ -56,7 +63,7 @@ class ScourInkscape(inkex.OutputExtension):
         if self.options.scour_version_warn_old:
             scour_version = scour.__version__
             scour_version_min = self.options.scour_version
-            if StrictVersion(scour_version) < StrictVersion(scour_version_min):
+            if Version(scour_version) < Version(scour_version_min):
                 raise inkex.AbortExtension(f"""
 The extension 'Optimized SVG Output' is designed for Scour {scour_version_min} or later but you're
  using the older version Scour {scour_version}.

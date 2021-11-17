@@ -40,7 +40,7 @@ setup(
             'Programming Language :: Python :: 3.9',
         ],
         packages=['inkex', 'inkex.elements', 'inkex.tester'],
-        install_requires=['scour', 'numpy', 'pyserial', 'cssselect'],
+        install_requires=['scour', 'numpy', 'pyserial', 'cssselect', 'packaging'],
         setup_requires=["pytest-runner"],
         tests_require=["pytest", "pytest-cov"]
 )

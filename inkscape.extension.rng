@@ -160,6 +160,11 @@
           <ref name="data_type_boolean_strict"/>
         </element>
       </optional>
+      <optional>
+        <attribute name="savecopyonly">
+          <ref name="data_type_boolean_strict"/>
+        </attribute>
+      </optional>
     </element>
   </define>
 

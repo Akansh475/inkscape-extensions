@@ -34,6 +34,17 @@ from lxml import etree
 
 import inkex
 
+global defs
+global block   #2021.6
+global layer
+global svg
+global scale
+global xmin
+global ymin
+global height
+global style_font3
+global style_direction
+
 COLORS = [
     'PAD',
     '#FF0000', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#FF00FF', '#000000', '#808080',
@@ -88,7 +99,7 @@ COLORS = [
 ]
 
 def get_rgbcolor(dxfcolor):
-    if dxfcolor in range(1,len(COLORS)):
+    if dxfcolor in range(1, len(COLORS)):
         rgbcolor = COLORS[dxfcolor]
     else:
         rgbcolor = '#000000'
@@ -101,6 +112,7 @@ class ValueConstruct(defaultdict):
         '2': ('tag', 'block_name'),
         '3': ('mtext',),
         '6': ('line_type',),
+        '7': ('text_style',),
         '8': ('layer_name',),
         '10': ('x1',),
         '11': ('x2',),
@@ -117,6 +129,7 @@ class ValueConstruct(defaultdict):
         '51': ('angle2',),
         '62': ('color',),
         '70': ('fill', 'flags'),
+        '71': ('attach_pos',),
         '72': ('edge_type',),
         '73': ('sweep',), # ccw
         '92': ('path_type',),
@@ -149,7 +162,7 @@ class ValueConstruct(defaultdict):
 
     def __setattr__(self, attr, value):
         if not attr in self.attrs:
-            raise AttributeError(f"Can't set bad dxf attribute '{key}'")
+            raise AttributeError(f"Can't set bad dxf attribute '{attr}'")
         if not isinstance(value, list):
             value = [value]
         self[self.attrs[attr]] = value
@@ -167,56 +180,197 @@ export_viewport = False
 export_endsec = False
 
 def re_hex2unichar(m):
+    # return unichr(int(m.group(1), 16))
     return chr(int(m.group(1), 16))
 
 
 def formatStyle(style):
     return str(inkex.Style(style))
 
-def export_text(*args, **kwargs):
-    return export_mtext(*args, **kwargs)
+def export_text(vals):
+    # mandatory group codes : (11, 12, 72, 73) (fit_x, fit_y, horizon, vertical)
+    # TODO: position to display at by (x2,y2) according to 72(horizon),73(vertical)
+    # groupcode 72:0(left),1(center),2(right),3(both side),4(middle),5(fit)
+    # grouocode 73:0(standard),1(floor),2(center),3(ceiling)
+    vals['71'].append(1)    # attach=pos left in mtext
+    vals['70'].append(1)    # text: flags=1
+    return export_mtext(vals)
 
 def export_mtext(vals):
     # mandatory group codes : (1 or 3, 10, 20) (text, x, y)
+    # TODO: text-format: \Font; \W; \Q; \L..\l etc
     if (vals.has_text or vals.has_mtext) and vals.has_x1 and vals.has_y1:
         x = vals.x1
         y = vals.y1
         # optional group codes : (21, 40, 50) (direction, text height mm, text angle)
+        # optional group codes : 2: char style is defined at TABLES Section
         size = 12  # default fontsize in px
         if vals.has_scale:
             size = scale * textscale * vals.scale
-        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s' % (size, color, options.font)}
+
+        dx = dy = 0
+        if not vals.has_flags: # as mtext, putting in the box
+            dy = size
+
+        anchor = 'start'
+        if vals.has_attach_pos:
+            if vals.attach_pos in (2, 5, 8):
+                anchor = 'middle'
+            elif vals.attach_pos in (3, 6, 9):
+                anchor = 'end'
+            if vals.attach_pos in (4, 5, 6):
+                dy = size/2
+        #if vals.has_text_style and vals.text_style in style_font3 :
+        #    attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s' \
+        #            % (size, color, style_font3[vals.text_style])}
+        #else :
+        #    attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s' % (size, color, options.font)}
+        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s; text-anchor: %s' \
+                    % (size, color, options.font, anchor)}
+
         angle = 0  # default angle in degrees
-        if vals.has_angle:
-            angle = vals.angle
+        bVertical = False
+        if vals.has_angle:  # TEXT only
+            if vals.angle != 0:
+                angle = vals.angle
+            #attribs.update({'transform': 'rotate (%f %f %f)' % (-angle, x, y)})
+        elif vals.has_y2 and vals.has_x2:
+            # MTEXT
+            # recover original data
+            # (x,y)=(scale*(x-xmin), height-scale*(y-ymin)
+            orgx = vals.x2/scale+xmin
+            orgy = -(vals.y2-height)/scale+ymin
+            unit = math.sqrt(orgy*orgy + orgx*orgx)
+            if (unit < 1.01) and (unit > 0.99):
+                ang1 = math.atan2(orgy, orgx)
+                angle = 180 * ang1 / math.pi
+            #attribs.update({'transform': 'rotate (%f %f %f)' % (-angle, x, y)})
+
+        if vals.has_text_style and vals.text_style in style_direction:
+            if style_direction[vals.text_style] & 4:
+                #angle = -90
+                #attribs.update({'transform': 'rotate (%f %f %f)' % (-angle, x, y)})
+                bVertical = True
+                angle = 0
+                dx = size
+                attribs = {'x': '%f' % x, 'y': '%f' % y, \
+                    'style': 'font-size: %.3fpx; fill: %s; font-family: %s; text-anchor: %s; writing-mode: tb' \
+                    % (size, color, options.font, anchor)}
+        if angle != 0:
             attribs.update({'transform': 'rotate (%f %f %f)' % (-angle, x, y)})
-        elif vals.has_y2:
-            if vals.y2 == 1.0:
-                attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
-            elif vals.y2 == -1.0:
-                attribs.update({'transform': 'rotate (%f %f %f)' % (90, x, y)})
+
         node = layer.add(inkex.TextElement(**attribs))
         node.set('sodipodi:linespacing', '125%')
         text = ''
         if vals.has_mtext:
             text = ''.join(vals.mtext_list)
         if vals.has_text:
-            text = vals.text
+            text += vals.text
+        lines = 0
         found = text.find(r'\P')  # new line
         while found > -1:
             tspan = node.add(inkex.Tspan())
-            tspan.set('sodipodi:role', 'line')
-            tspan.text = text[:found]
+            if bVertical:
+                tspan.set('y', '%f' % y)
+                if lines > 0:
+                    tspan.set('dx', '%f' % size)
+            else:
+                tspan.set('sodipodi:role', 'line')
+                tspan.set('dx', '%f' % dx)
+                tspan.set('dy', '%f' % dy)
+            #tspan.text = text[:found]
+            text1 = text[:found]
+            mtext_separate(node, tspan, text1)
             text = text[(found + 2):]
             found = text.find(r'\P')
-        tspan = node.add(inkex.Tspan())
-        tspan.set('sodipodi:role', 'line')
-        tspan.text = text
+            lines += 1
 
+        tspan = node.add(inkex.Tspan())
+        if bVertical:
+            tspan.set('y', '%f' % y)
+            if lines > 0:
+                tspan.set('dx', '%f' % dx)
+        else:
+            tspan.set('sodipodi:role', 'line')
+            tspan.set('dx', '%f' % dx)
+            tspan.set('dy', '%f' % dy)
+        #tspan.text = text
+        text1 = text
+        mtext_separate(node, tspan, text1)
+
+def mtext_separate(node, tspan, text):
+    # sparate aaa{bbb}(ccc) -> aaa,bbb.ccc
+    tspanAdd = True
+    found = text.find(r'{')
+    while found > -1:
+        if found == 0:
+            found1 = text.find(r'}')
+            if found1 < 1:
+                break
+            text1 = text[:found1] # tspan
+            text1 = text1[found+1:]
+            if tspanAdd == False:
+                tspan = node.add(inkex.Tspan())
+            mtext_ctrl(tspan, text1)
+            #tspan.text = text1 +'+1'
+            tspanAdd = False
+            text = text[found1+1:]
+            found = text.find(r'{')
+        else:
+            text1 = text[:found]    # tspan
+            if tspanAdd == False:
+                tspan = node.add(inkex.Tspan())
+            mtext_ctrl(tspan, text1)
+            #tspan.text = text1 +'+2'
+            tspanAdd = False
+            text = text[found:]
+            found = 0
+
+    if len(text) > 0:
+        text1 = text
+        if tspanAdd == False:
+            tspan = node.add(inkex.Tspan())
+        mtext_ctrl(tspan, text1)
+        #tspan.text = text1 +'+3'
+        tspanAdd = False
+
+def mtext_ctrl(tspan, phrase):
+    if phrase[0] != '\\':
+        tspan.text = phrase
+        return
+    # if you'll add the function, you should remove the auto re.sub at setting group code:1
+    if phrase[1] in ('C', 'H', 'T', 'Q', 'W', 'A'):
+        # get the value
+        found = phrase.find(r';')
+        if found > 2:
+            cvalue = phrase[:found]
+            cvalue = cvalue[2:]
+            try:
+                value = float(cvalue)
+            except ValueError:
+                done = False
+            else:
+                done = True
+                if phrase[1] == 'C':
+                    i = int(value)
+                    color = get_rgbcolor(i)
+                    tspan.set('style', 'stroke: %s' % color)
+                elif phrase[1] == 'H':
+                    value *= scale
+                    tspan.set('style', 'font-size: %.3fpx;' % value)
+                elif phrase[1] == 'T':
+                    tspan.set('style', 'letter-spacing: %f;' % value)
+                tspan.text = phrase[found+1:]
+        else:
+            tspan.text = phrase
+    else:
+        tspan.text = phrase
 
 def export_point(vals, w):
     # mandatory group codes : (10, 20) (x, y)
     if vals.has_x1 and vals.has_y1:
+        if vals['70']:
+            inkex.errormsg('$PDMODE is ignored. A point is displayed as normal.')
         if options.gcodetoolspoints:
             generate_gcodetools_point(vals.x1, vals.y1)
         else:
@@ -224,12 +378,24 @@ def export_point(vals, w):
 
 
 def export_line(vals):
-    """Draw a strait line from the dxf"""
+    """Draw a straight line from the dxf"""
     # mandatory group codes : (10, 11, 20, 21) (x1, x2, y1, y2)
     if vals.has_x1 and vals.has_x2 and vals.has_y1 and vals.has_y2:
         path = inkex.PathElement()
         path.style = style
         path.path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, vals.x2, vals.y2)
+        layer.add(path)
+
+def export_solid(vals):
+    # arrows of dimension
+    # mandatory group codes : (10, 11, 12, 20, 21, 22) (x1, x2, x3, y1, y2, y3)
+    # TODO: 4th point
+    if vals.has_x1 and vals.has_x2 and vals.has_x3  \
+        and vals.has_y1 and vals.has_y2 and vals.has_y3:
+        path = inkex.PathElement()
+        path.style = style
+        path.path = 'M %f,%f %f,%f %f,%f z' % \
+            (vals.x1, vals.y1, vals.x2, vals.y2, vals.x3, vals.y3)
         layer.add(path)
 
 
@@ -291,7 +457,12 @@ def export_ellipse(vals):
     # mandatory group codes : (10, 11, 20, 21, 40, 41, 42) (xc, xm, yc, ym, width ratio, angle1, angle2)
     if vals.has_x1 and vals.has_x2 and vals.has_y1 and vals.has_y2 and \
             vals.has_width_ratio and vals.has_ellipse_a1 and vals.has_ellipse_a2:
-        generate_ellipse(vals.x1, vals.y1, vals.x2, vals.y2, vals.width_ratio, vals.ellipse_a1, vals.ellipse_a2)
+        #generate_ellipse(vals.x1, vals.y1, scale*vals.x2, scale*vals.y2, vals.width_ratio, vals.ellipse_a1, vals.ellipse_a2)
+        # vals are through adjust_coords : recover proper value
+        # (x,y)=(scale*x-xmin, height-scale*y-ymin)
+        x2 = vals.x2+xmin
+        y2 = vals.y2+ymin-height
+        generate_ellipse(vals.x1, vals.y1, x2, y2, vals.width_ratio, vals.ellipse_a1, vals.ellipse_a2)
 
 
 def export_leader(vals):
@@ -305,7 +476,7 @@ def export_leader(vals):
             etree.SubElement(layer, 'path', attribs)
 
 def export_polyline(vals):
-    return export_lwpolyline(vals)    
+    return export_lwpolyline(vals)
 
 def export_lwpolyline(vals):
     # mandatory group codes : (10, 20, 70) (x, y, flags)
@@ -354,6 +525,7 @@ def export_lwpolyline(vals):
 
 def export_hatch(vals):
     # mandatory group codes : (10, 20, 70, 72, 92, 93) (x, y, fill, Edge Type, Path Type, Number of edges)
+    # TODO: Hatching Pattern
     if vals.has_x1 and vals.has_y1 and vals.has_fill and vals.has_edge_type \
             and vals.has_path_type and vals.has_num_edges:
         if len(vals.x1_list) > 1 and len(vals.y1_list) == len(vals.x1_list):
@@ -410,62 +582,108 @@ def export_hatch(vals):
 
 def export_dimension(vals):
     # mandatory group codes : (10, 11, 13, 14, 20, 21, 23, 24) (x1..4, y1..4)
-    if vals.has_x1 and vals.has_x2 and vals.has_x3 and vals.has_x4 and \
-            vals.has_y1 and vals.has_y2 and vals.has_y3 and vals.has_y4:
-        dx = abs(vals.x1 - vals.x3)
-        dy = abs(vals.y1 - vals.y3)
-        if (vals.x1 == vals.x4) and dx > 0.00001:
-            d = dx / scale
-            dy = 0
-            path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, vals.x3, vals.y1)
-        elif (vals.y1 == vals.y4) and dy > 0.00001:
-            d = dy / scale
-            dx = 0
-            path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, vals.x1, vals.y3)
-        else:
-            return
-        attribs = {'d': path, 'style': style + '; marker-start: url(#DistanceX); marker-end: url(#DistanceX); stroke-width: 0.25px'}
-        etree.SubElement(layer, 'path', attribs)
-        x = vals.x2
-        y = vals.y2
-        size = 12  # default fontsize in px
-        if vals.has_mtext:
-            if vals.mtext in DIMTXT:
-                size = scale * textscale * DIMTXT[vals.mtext]
-                if size < 2:
-                    size = 2
-        attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s; text-anchor: middle; text-align: center' % (size, color, options.font)}
-        if dx == 0:
-            attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
-        node = etree.SubElement(layer, 'text', attribs)
-        tspan = node.add(inkex.Tspan())
-        tspan.set('sodipodi:role', 'line')
-        tspan.text = str(float('%.2f' % d))
+    # block_name: dimension definition for 10mm
+    if vals.has_x1 and vals.has_x2  and \
+            vals.has_y1 and vals.has_y2:
 
+        if vals.has_block_name:
+            attribs = {inkex.addNS('href', 'xlink') :   \
+            '#%s' % (vals.block_name)}      # not use quote because name *D2 etc. changed to %2AD2
+            tform = 'translate(0 0)'
+            #if vals.has_angle :
+            #    tform += ' rotate(%f,%f,%f)' % (vals.angle,vals.x4,vals.y4)
+            attribs.update({'transform' : tform})
+            etree.SubElement(layer, 'use', attribs)
+        else:
+            # TODO: improve logic when INSERT in BLOCK
+            dx = abs(vals.x1 - vals.x3)
+            dy = abs(vals.y1 - vals.y3)
+            if (vals.x1 == vals.x4) and dx > 0.00001:
+                d = dx / scale
+                dy = 0
+                path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, vals.x3, vals.y1)
+            elif (vals.y1 == vals.y4) and dy > 0.00001:
+                d = dy / scale
+                dx = 0
+                path = 'M %f,%f %f,%f' % (vals.x1, vals.y1, vals.x1, vals.y3)
+            else:
+                return
+            attribs = {'d': path, 'style': style + '; marker-start: url(#DistanceX); marker-end: url(#DistanceX); stroke-width: 0.25px'}
+            etree.SubElement(layer, 'path', attribs)
+            x = vals.x2
+            y = vals.y2
+            size = 12  # default fontsize in px
+            if vals.has_mtext:
+                if vals.mtext in DIMTXT:
+                    size = scale * textscale * DIMTXT[vals.mtext]
+                    if size < 2:
+                        size = 2
+            attribs = {'x': '%f' % x, 'y': '%f' % y, 'style': 'font-size: %.3fpx; fill: %s; font-family: %s; text-anchor: middle; text-align: center' % (size, color, options.font)}
+            if dx == 0:
+                attribs.update({'transform': 'rotate (%f %f %f)' % (-90, x, y)})
+            node = etree.SubElement(layer, 'text', attribs)
+            tspan = node.add(inkex.Tspan())
+            tspan.set('sodipodi:role', 'line')
+            tspan.text = str(float('%.2f' % d))
 
 def export_insert(vals):
     # mandatory group codes : (2, 10, 20) (block name, x, y)
+    # TODO: repeat by row and column
+    # (times,interval)= row(70,44), column(71,45)
+
     if vals.has_block_name and vals.has_x1 and vals.has_y1:
+        # vals are through adjust_coords except block
+        # block (x,y)=(0,0) : (scale*x-xmin, height-scale*y-ymin)
+        # translate(move x units,move y units)
+        # 2021.6  translate..ok  scale..x  rotate X
+        # as scale, the line is wider ->same width  -> you should fix
+        global height
+        cx = scale * xmin               # transorm-origin:
+        cy = scale * ymin + height      # center of rotation
+        #
         x = vals.x1 + scale * xmin
         y = vals.y1 - scale * ymin - height
-        elem = layer.add(inkex.Use())
-        elem.set('xlink:href', '#' + quote(vals.block_name.replace(" ", "_").encode("utf-8")))
-        elem.transform = 'translate(%f, %f)' % (x, y)
+        ixscale = iyscale = 1
+        if vals.has_insert_scale_y:
+            ixscale = vals.insert_scale_x
+        if vals.has_insert_scale_y:
+            iyscale = vals.insert_scale_y
+        x += cx*(iyscale-1)
+        y -= cy*(iyscale-1)
+        #elem = layer.add(inkex.Use())
+        #elem.set('xlink:href', '#' + quote(vals.block_name.replace(" ", "_").encode("utf-8")))
+        #elem.transform.add_translate(x, y)
+        #if vals.has_insert_scale_x and vals.has_insert_scale_y:
+        #    elem.transform.add_scale(vals.insert_scale_x, vals.insert_scale_y)
+        #
+        #attribs = {inkex.addNS('href', 'xlink') :
+        #    '#' + quote(vals.block_name.replace(" ", "_").encode("utf-8"))}
+        # for reducing thick lines
+        fwide = abs(0.5/ixscale)   # better to use w/ixscale
+        attribs = {inkex.addNS('href', 'xlink') :
+            '#' + quote(vals.block_name.replace(" ", "_").encode("utf-8")), 'style': 'stroke-width: %.3fpx' % fwide}
+        # add style stroke-width=1px 2021.jyuly
+        tform = ''
+        tform += 'translate(%f, %f) ' % (x, y)
         if vals.has_insert_scale_x and vals.has_insert_scale_y:
-            elem.transform.add_scale(vals.insert_scale_x, vals.insert_scale_y)
-
+            #tform += 'scale(%f,%f)' % (vals.insert_scale_x, vals.insert_scale_y)
+            tform += 'scale(%f,%f) ' % (ixscale, iyscale)
+        if vals.has_angle:
+            tform += 'rotate(%f,%f,%f) ' % (360 - vals.angle, -cx, cy)
+        attribs.update({'transform' : tform})
+        etree.SubElement(layer, 'use', attribs)
 
 def export_block(vals):
     # mandatory group codes : (2) (block name)
     if vals.has_block_name:
         global block
-        block = etree.SubElement(defs, 'symbol', {'id': vals.block_name.replace(" ", "_")})
+        block = etree.SubElement(defs, 'symbol',
+                                 {'id': vals.block_name.replace(" ", "_")})
 
 
 def export_endblk(vals):
     global block
     block = defs  # initiallize with dummy
-
 
 def export_attdef(vals):
     # mandatory group codes : (1, 2) (default, tag)
@@ -476,7 +694,7 @@ def export_attdef(vals):
 
 def generate_ellipse(xc, yc, xm, ym, w, a1, a2):
     rm = math.sqrt(xm * xm + ym * ym)
-    a = math.atan2(ym, xm)
+    a = -math.atan2(ym, xm)              # x-axis-rotation
     diff = (a2 - a1 + 2 * math.pi) % (2 * math.pi)
     if abs(diff) > 0.0000001 and abs(diff - 2 * math.pi) > 0.0000001:  # open arc
         large = 0  # large-arc-flag
@@ -492,7 +710,7 @@ def generate_ellipse(xc, yc, xm, ym, w, a1, a2):
         y2 = xt * math.sin(a) + yt * math.cos(a)
         path = 'M %f,%f A %f,%f %f %d 0 %f,%f' % (xc + x1, yc - y1, rm, w * rm, -180.0 * a / math.pi, large, xc + x2, yc - y2)
     else:  # closed arc
-        path = 'M %f,%f A %f,%f %f 1 0 %f,%f %f,%f %f 1 0 %f,%f z' % (xc + xm, yc - ym, rm, w * rm, -180.0 * a / math.pi, xc - xm, yc + ym, rm, w * rm, -180.0 * a / math.pi, xc + xm, yc - ym)
+        path = 'M %f,%f A %f,%f %f 0, 0 %f,%f A %f,%f %f 0, 0 %f,%f z' % (xc + xm, yc - ym, rm, w * rm, -180.0 * a / math.pi, xc - xm, yc + ym, rm, w * rm, -180.0 * a / math.pi, xc + xm, yc - ym)
     attribs = {'d': path, 'style': style}
     etree.SubElement(layer, 'path', attribs)
 
@@ -511,7 +729,7 @@ class DxfInput(inkex.InputExtension):
         pars.add_argument("--tab", default="options")
         pars.add_argument("--scalemethod", default="manual")
         pars.add_argument("--scale", default="1.0")
-        pars.add_argument("--textscale", default="1.0")        
+        pars.add_argument("--textscale", default="1.0")
         pars.add_argument("--xmin", default="0.0")
         pars.add_argument("--ymin", default="0.0")
         pars.add_argument("--gcodetoolspoints", default=False, type=inkex.Boolean)
@@ -536,6 +754,10 @@ class DxfInput(inkex.InputExtension):
         global ymin
         global height
         global DIMTXT
+        global block
+        global svg
+        global style_font3
+        global style_direction
 
         options = self.options
 
@@ -564,16 +786,38 @@ class DxfInput(inkex.InputExtension):
         xmax = xmin = ymin = 0.0
         height = 297.0 * 96.0 / 25.4  # default A4 height in pixels
         measurement = 0  # default inches
-        line = get_line()
-        polylines = 0
-        flag = 0  # (0, 1, 2, 3) = (none, LAYER, LTYPE, DIMTXT)
+        flag = 0  # (0, 1, 2, 3, 4) = (none, LAYER, LTYPE, DIMTXT, STYLE)
         layer_colors = {}  # store colors by layer
         layer_nodes = {}  # store nodes by layer
         linetypes = {}  # store linetypes by name
         DIMTXT = {}  # store DIMENSION text sizes
+        #style_name = {}     # style name
+        style_font3 = {}     # style font 1byte
+        style_font4 = {}     # style font 2byte
+        style_direction = {} # style display direction
+        line = get_line()
 
+        if (line[0] == "AutoCAD Binary DXF"):
+            inkex.errormsg('Inkscape cannot read binary DXF files. \nPlease convert to ASCII format first.' + str(len(line[0])) + " " + str(len(line[1])))
+            self.document = doc
+            return
+
+        inENTITIES = False
+        style_name = '*'
+        layername = None
+        linename = None
+        stylename = None
+        style_name = None
+        errno = 0
+        pdmode_err = False
         while line[0] and line[1] != 'BLOCKS':
             line = get_line()
+            if line[1] == 'ENTITIES':       # no BLOCK SECTION
+                inENTITIES = True
+                break
+            if (line[1] == '$PDMODE' and not pdmode_err):
+                inkex.errormsg('$PDMODE is ignored. A point is displayed as normal.')
+                pdmode_err = True
             if options.scalemethod == 'file':
                 if line[1] == '$MEASUREMENT':
                     measurement = get_group('70')
@@ -591,20 +835,61 @@ class DxfInput(inkex.InputExtension):
                 linetypes[linename] = []
             if flag == 3 and line[0] == '2':
                 stylename = line[1]
+            if flag == 4 and line[0] == '2':
+                style_name = line[1]
+                style_font3[style_name] = []
+                style_font4[style_name] = []
+                style_direction[style_name] = []
             if line[0] == '2' and line[1] == 'LAYER':
                 flag = 1
             if line[0] == '2' and line[1] == 'LTYPE':
                 flag = 2
             if line[0] == '2' and line[1] == 'DIMSTYLE':
                 flag = 3
+            if line[0] == '2' and line[1] == 'STYLE':
+                flag = 4
             if flag == 1 and line[0] == '62':
+                if layername is None:
+                    errno = 1
+                    break
                 layer_colors[layername] = int(line[1])
             if flag == 2 and line[0] == '49':
+                if linename is None:
+                    errno = 2
+                    break
                 linetypes[linename].append(float(line[1]))
             if flag == 3 and line[0] == '140':
+                if stylename is None:
+                    errno = 3
+                    break
                 DIMTXT[stylename] = float(line[1])
+            if flag == 4 and line[0] == '3':
+                if style_name is None:
+                    errno = 4
+                    break
+                style_font3[style_name].append(line[1])
+            if flag == 4 and line[0] == '4':
+                if style_name is None:
+                    errno = 4
+                    break
+                style_font4[style_name].append(line[1])
+            if flag == 4 and line[0] == '70':   # not no of STYLE
+                if style_name != '*':
+                    style_direction[style_name] = int(line[1])
             if line[0] == '0' and line[1] == 'ENDTAB':
                 flag = 0
+        if errno != 0:
+            if errno == 1:
+                errMsg = 'LAYER'
+            elif errno == 2:
+                errMsg = 'LTYPE'
+            elif errno == 3:
+                errMsg = 'DIMSTYLE'
+            else: #errno == 4
+                errMsg = 'STYLE'
+            inkex.errormsg('Import stopped. DXF is incorrect.\ngroup code 2 ('+errMsg+') is missing')
+            self.document = doc
+            return
 
         if options.scalemethod == 'file':
             scale = 25.4  # default inches
@@ -618,8 +903,8 @@ class DxfInput(inkex.InputExtension):
             scale = float(options.scale)  # manual scale factor
             xmin = float(options.xmin)
             ymin = float(options.ymin)
-        bname = os.path.basename(options.input_file)
-        svg.desc = f"{bname} - scale = {scale}, origin = ({xmin}, {ymin}), method = {options.scalemethod}"
+        svg.desc = '%s - scale = %f, origin = (%f, %f), method = %s' % (
+            os.path.basename(options.input_file), scale, xmin, ymin, options.scalemethod)
         scale *= 96.0 / 25.4  # convert from mm to pixels
         textscale = float(options.textscale)
 
@@ -641,7 +926,6 @@ class DxfInput(inkex.InputExtension):
                 linetypes[linename] = 'stroke-dasharray:' + linetype
 
         entity = ''
-        inENTITIES = False
         block = defs  # initiallize with dummy
         while line[0] and (line[1] != 'ENDSEC' or not inENTITIES):
             line = get_line()
@@ -649,13 +933,14 @@ class DxfInput(inkex.InputExtension):
                 inENTITIES = True
             if entity and vals.is_valid(line[0]):
                 seqs.append(line[0])  # list of group codes
-                if line[0] in ('1', '2', '3', '6', '8'):  # text value
+                if line[0] in ('1', '2', '3', '6', '7', '8'):  # text value
+                    # TODO: if add funs of export_mtext, delete the line
                     val = line[1].replace(r'\~', ' ')
                     val = re.sub(r'\\A.*;', '', val)
-                    val = re.sub(r'\\H.*;', '', val)
+                    #val = re.sub(r'\\H.*;', '', val)
                     val = re.sub(r'\^I', '', val)
                     val = re.sub(r'{\\L', '', val)
-                    val = re.sub(r'}', '', val)
+                    #val = re.sub(r'}', '', val)  {\\C; '}' in mtext
                     val = re.sub(r'\\S.*;', '', val)
                     val = re.sub(r'\\W.*;', '', val)
                     val = val
@@ -673,6 +958,9 @@ class DxfInput(inkex.InputExtension):
                         if not vals.layer_name:
                             vals.layer_name = '0'  # use default name
                         if vals.layer_name not in layer_nodes:
+                            #attribs = {inkex.addNS('groupmode','inkscape') :
+                            #    'layer', inkex.addNS('label','inkscape') : '%s' % vals.layer_name}
+                            #layer_nodes[vals.layer_name] = etree.SubElement(doc.getroot(), 'g', attribs)
                             layer_nodes[vals.layer_name] = svg.add(inkex.Layer.new(vals.layer_name))
                         layer = layer_nodes[vals.layer_name]
                     color = '#000000'  # default color
@@ -686,9 +974,11 @@ class DxfInput(inkex.InputExtension):
                     if vals.has_line_weight:  # Common Lineweight
                         if vals.line_weight > 0:
                             w = 96.0 / 25.4 * vals.line_weight / 100.0
+                            w *= scale          # real wide : line_weight /144 inch
                             if w < 0.5:
                                 w = 0.5
-                            style = formatStyle({'stroke': '%s' % color, 'fill': 'none', 'stroke-width': '%.1f' % w})
+                            if block == defs:  # not in a BLOCK for INSERT except stroke-width 2021.july
+                                style = formatStyle({'stroke': '%s' % color, 'fill': 'none', 'stroke-width': '%.3f' % w})
                     if vals.has_line_type:  # Common Linetype
                         if vals.line_type in linetypes:
                             style += ';' + linetypes[vals.line_type]
@@ -713,33 +1003,66 @@ class DxfInput(inkex.InputExtension):
                     entity = 'LWPOLYLINE'
                     vals = ValueConstruct()
                     seqs = []
-                    flag70  = 0     # default
+                    flag70 = 0     # default closed-line or not
+                    val8 = '0'     # default layer name
+                    val10 = 0       # x
+                    val20 = 0       # y
+                    val42 = 0       # bulge
+                    valid = True
                     while line[0] and (line[1] != 'SEQEND'):
                         line = get_line()
-                        if line[1] == 'VERTEX' :
-                            inVertexs   = True
-                        if inVertexs == False :
-                            if line[0]  == '6':  # 8:layer 6:line style
+                        if line[1] == 'VERTEX':
+                            if inVertexs == True:
+                                if valid:
+                                    seqs.append('10')
+                                    vals['10'].append(val10)
+                                    seqs.append('20')
+                                    vals['20'].append(val20)
+                                    seqs.append('42')
+                                    vals['42'].append(val42)
+                                    val42 = 0
+                            inVertexs = True
+                            valid = True
+                        if inVertexs == False:
+                            if line[0] == '6':  # 6:line style
                                 seqs.append(line[0])
                                 vals[line[0]].append(line[1])
-                            if line[0] =='70' : # flag
-                                flg70 = int(line[1])
-                        else :
-                            if line[0] == '70' :
-                                if int(line[1]) == 16 : # control point
-                                    continue
-                            if line[0] in ('10', '20') :  # vertexs
+                            if line[0] == '8':  # 8:layer
+                                val8 = line[1]
+                            if line[0] == '70': # flag
+                                flag70 = int(line[1])
+                        else:
+                            if line[0] == '70':
+                                if int(line[1]) == 16: # control point
+                                    valid = False
+                            if line[0] in ('10', '20', '42'):  # vertexs
                                 val = float(line[1])
-                                seqs.append(line[0])
-                                vals[line[0]].append(val)
-                    seqs.append('70')
+                                if line[0] == '10':
+                                    val10 = val
+                                elif line[0] == '20':
+                                    val20 = val
+                                else:
+                                    val42 = val
+                    if valid:
+                        seqs.append('8')            # layer_name
+                        vals['8'].append(val8)
+                        seqs.append('10')
+                        vals['10'].append(val10)
+                        seqs.append('20')
+                        vals['20'].append(val20)
+                        seqs.append('42')           # bulge
+                        vals['42'].append(val42)
+                    seqs.append('70')               # closed line?
                     vals['70'].append(flag70)
                     continue
-                
+
                 entity = line[1]
                 vals = ValueConstruct()
                 seqs = []
 
+        #     for debug
+        #tree = etree.ElementTree(svg)
+        #tree.write('c:\Python\svgCH2.xml')
         self.document = doc
 
 def get_export(opt):

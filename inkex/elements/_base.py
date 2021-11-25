@@ -293,12 +293,13 @@ class BaseElement(etree.ElementBase):
     @property
     def root(self):
         """Get the root document element from any element descendent"""
-        if self.getparent() is not None:
-            return self.getparent().root
+        root, parent = self, self
+        while parent is not None:
+            root, parent = parent, parent.getparent()
         from ._svg import SvgDocumentElement
-        if not isinstance(self, SvgDocumentElement):
+        if not isinstance(root, SvgDocumentElement):
             raise FragmentError("Element fragment does not have a document root!")
-        return self
+        return root
 
     def get_or_create(self, xpath, nodeclass=None, prepend=False):
         """Get or create the given xpath, pre/append new node if not found."""

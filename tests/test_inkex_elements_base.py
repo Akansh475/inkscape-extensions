@@ -344,6 +344,16 @@ class RelationshipTestCase(SvgTestCase):
         self.assertEqual(tuple(get('L').descendants().ids), ('L', 'M'))
         self.assertEqual(tuple(get('M').descendants().ids), ('M',))
 
+    def test_deep_descendants(self):
+        """Create a very deep svg and test getting decendants"""
+        svg = '<svg xmlns="http://www.w3.org/2000/svg">'
+        for i in range(1000):
+            svg += f'<g id="{i}">'
+        svg = load_svg(svg + ('</g>' * 1000) + '</svg>').getroot()
+        
+        self.assertEqual(tuple(svg.getElementById('998').descendants().ids), ('998', '999'))
+        self.assertEqual(tuple(svg.getElementById('999').descendants().ids), ('999',))
+
     def test_ancestors(self):
         """Element descendants of elements"""
         get = self.svg.getElementById

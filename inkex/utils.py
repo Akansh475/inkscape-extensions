@@ -83,6 +83,15 @@ class KeyDict(dict):
             return key
 
 
+def parse_percent(val: str):
+    """Parse strings that are either values (i.e., '3.14159') or percentages (i.e. '75%') to a float."""
+    val = val.strip()
+    if val.endswith('%'):
+        return float(val[:-1]) / 100
+    return float(val)
+
+
+
 def Boolean(value):
     """ArgParser function to turn a boolean string into a python boolean"""
     if value.upper() == 'TRUE':

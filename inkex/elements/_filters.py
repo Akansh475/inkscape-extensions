@@ -28,6 +28,7 @@ from copy import deepcopy
 
 from ..transforms import Transform
 from ..units import convert_unit
+from ..utils import parse_percent
 
 from ..styles import Style
 
@@ -136,7 +137,7 @@ class Gradient(BaseElement):
         """Return an ordered list of own or linked stop nodes"""
         gradcolor = self.href if isinstance(self.href, (LinearGradient, RadialGradient)) else self
         return sorted([child for child in gradcolor if isinstance(child, Stop)]
-                      , key=lambda x: float(x.offset))
+                      , key=lambda x: parse_percent(x.offset))
 
     @property
     def stop_offsets(self):

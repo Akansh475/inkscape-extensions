@@ -351,6 +351,7 @@ class RelationshipTestCase(SvgTestCase):
             svg += f'<g id="{i}">'
         svg = load_svg(svg + ('</g>' * 1000) + '</svg>').getroot()
         
+        self.assertEqual(tuple(svg.descendants().ids), tuple(str(i) for i in range(1000)))
         self.assertEqual(tuple(svg.getElementById('998').descendants().ids), ('998', '999'))
         self.assertEqual(tuple(svg.getElementById('999').descendants().ids), ('999',))
 
@@ -361,6 +362,14 @@ class RelationshipTestCase(SvgTestCase):
         self.assertEqual(tuple(get('M').ancestors(stop_at=[None]).ids), ('L', 'K', 'A', 'mydoc'))
         self.assertEqual(tuple(get('M').ancestors(stop_at=[get('K')]).ids), ('L', 'K'))
         self.assertEqual(tuple(get('M').ancestors(stop_at=[get('L')]).ids), ('L',))
+
+    def test_deep_ancestors(self):
+        """Create a very deep svg and test getting ancestors"""
+        svg = '<svg xmlns="http://www.w3.org/2000/svg">'
+        for i in range(1000):
+            svg += f'<g id="{i}">'
+        svg = load_svg(svg + ('</g>' * 1000) + '</svg>').getroot()        
+        self.assertEqual(tuple(svg.getElementById('999').ancestors().ids), tuple(str(i) for i in range(998, -1, -1)))
 
     def test_luca(self):
         """Test last common ancestor"""

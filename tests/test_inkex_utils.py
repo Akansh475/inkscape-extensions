@@ -11,7 +11,7 @@ from argparse import ArgumentTypeError
 
 import pytest
 
-from inkex.utils import debug, errormsg, filename_arg, Boolean, to, strargs, math_eval, is_number
+from inkex.utils import debug, errormsg, filename_arg, Boolean, parse_percent, to, strargs, math_eval, is_number
 from inkex.tester import TestCase
 
 from inkex import addNS
@@ -106,6 +106,11 @@ class TestInkexBasic(object):
         # """Parse Àûïàèé (unicode)"""
         errormsg(u'Àûïàèé')
         assert capsys.readouterr().err, u'Àûïàèé\n'
+
+    def test_parse_percent(self):
+        assert parse_percent("75%") == 0.75
+        assert parse_percent("0.75") == 0.75
+        assert parse_percent("75") == 75
 
 
 import math

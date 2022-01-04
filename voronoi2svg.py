@@ -214,9 +214,8 @@ class Voronoi(inkex.EffectExtension):
 
             # Clipbox is the box to which the Voronoi diagram is restricted
             if self.options.clip_box == 'Page':
-                svg = self.document.getroot()
-                width = self.svg.unittouu(svg.get('width'))
-                height = self.svg.unittouu(svg.get('height'))
+                width = self.svg.viewbox_width
+                height = self.svg.viewbox_height
                 clip_box = (0, width, 0, height)
             else:
                 clip_box = (group_bbox.left,

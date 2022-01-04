@@ -97,17 +97,13 @@ def _xmldiff(xml1, xml2, delta):
     # Get children and pad with nulls
     children_a = list(xml1)
     children_b = list(xml2)
-    children_a += [None] * (len(children_a) - len(children_b))
-    children_b += [None] * (len(children_b) - len(children_a))
+    children_a += [None] * (len(children_b) - len(children_a))
+    children_b += [None] * (len(children_a) - len(children_b))
 
     for child_a, child_b in zip(children_a, children_b):
         if child_a is None: # child_b exists
-            child_c = child_b.clone()
-            delta.append_tag(child_c.tag, None)
-            child_c.tag = 'XXX' + child_c.tag
-            xml1.append(child_c)
+            delta.append_tag(child_b.tag, None)
         elif child_b is None: # child_a exists
             delta.append_tag(None, child_a.tag)
-            child_a.tag += 'XXX'
         else:
             _xmldiff(child_a, child_b, delta)

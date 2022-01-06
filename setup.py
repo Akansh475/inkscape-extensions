@@ -41,7 +41,14 @@ setup(
             'Programming Language :: Python :: 3.10',
         ],
         packages=['inkex', 'inkex.elements', 'inkex.tester'],
-        install_requires=['scour', 'numpy', 'pyserial', 'cssselect', 'packaging'],
+        install_requires=[
+            'cssselect',
+            'lxml',
+            'numpy',
+            'packaging',
+            'pyserial',
+            'scour',
+        ],
         setup_requires=["pytest-runner"],
         tests_require=["pytest", "pytest-cov"]
 )

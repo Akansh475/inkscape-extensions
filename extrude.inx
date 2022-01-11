@@ -3,9 +3,15 @@
     <name>Extrude</name>
     <id>org.greygreen.inkscape.effects.extrude</id>
     <param name="mode" type="optiongroup" appearance="combo" gui-text="Mode:">
-        <option value="Lines">Lines</option>
-        <option value="Polygons">Polygons</option>
+        <option value="lines">Lines</option>
+        <option value="polygons">Polygons</option>
+        <option value="snug">Follow curves</option>
     </param>
+    <param name="subpaths" type="bool" gui-text="Combine lines to single path" 
+           gui-description="If true, connecting lines will be inserted as subpaths of a single path.
+                 If false, they will be inserted in newly created group. 
+                 Only applies to mode=lines.">true</param>
+      
     <effect>
         <object-type>path</object-type>
         <effects-menu>

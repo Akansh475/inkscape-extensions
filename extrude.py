@@ -24,6 +24,7 @@ import itertools
 from typing import List, Union
 
 import inkex
+from inkex.localization import inkex_gettext as _
 class _SubpathManager:
     def __init__(self, style):
         self.current = inkex.Path()
@@ -89,7 +90,7 @@ class Extrude(inkex.EffectExtension):
                 node.apply_transform()
             paths.append(node)
         if len(paths) < 2:
-            raise inkex.AbortExtension("Need at least 2 paths selected")
+            raise inkex.AbortExtension(_("Need at least 2 paths selected"))
 
         mode = self.options.mode.lower()
         subpaths = self.options.subpaths and mode == "lines"

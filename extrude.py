@@ -72,15 +72,13 @@ class Extrude(inkex.EffectExtension):
     def _handle_snug(manager, com1, com2):
         manager.add(inkex.paths.Move(*com1.previous_end_point))
         com1r = com1.command
-        com2r = com2.command
+        com2r = com2.reverse()
         doflag = True
         if isinstance(com1r, (inkex.paths.ZoneClose, inkex.paths.zoneClose)):
             # ZoneClose can not be used directly, must be converted to line
             com1r = inkex.paths.Line(*com1.first_point)
             if com1.previous_end_point.is_close(com1.end_point):
                 doflag = False
-        else:
-            com2r = com2.reverse()
         if doflag:
             manager.add([com1r, inkex.paths.Line(*com2.end_point),
                         com2r, inkex.paths.ZoneClose()])

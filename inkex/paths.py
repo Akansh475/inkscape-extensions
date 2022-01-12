@@ -432,7 +432,7 @@ class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
         return ZoneClose()
 
     def reverse(self, first, prev):
-        return line(-(first.x + (first.x - prev.x)), -(first.y + (first.y - prev.y)))
+        return line(prev.x - first.x, prev.y - first.y)
 
 class Horz(AbsolutePathCommand):
     """Horizontal Line segment"""

@@ -63,6 +63,7 @@ class Extrude(inkex.EffectExtension):
     The lines will be inserted between the two elements.
     """
     def add_arguments(self, pars):
+        pars.add_argument("--tab")
         pars.add_argument("-m", "--mode", default="lines", choices=["lines", "polygons", "snug"],
          help="Join paths with lines, polygons or copies of the segments (\"snug\")")
         pars.add_argument("-s", "--subpaths", default=True, type=inkex.Boolean,

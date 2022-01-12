@@ -79,10 +79,6 @@ class Extrude(inkex.EffectExtension):
             com1r = inkex.paths.Line(*com1.first_point)
             if com1.previous_end_point.is_close(com1.end_point):
                 doflag = False
-        if isinstance(com2r, (inkex.paths.ZoneClose, inkex.paths.zoneClose)):
-            com2r = inkex.paths.Line(*com2.previous_end_point)
-            if com2.previous_end_point.is_close(com2.end_point):
-                doflag = False
         else:
             com2r = com2.reverse()
         if doflag:

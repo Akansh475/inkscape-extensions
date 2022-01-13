@@ -25,6 +25,7 @@ from typing import List, Union
 
 import inkex
 from inkex.localization import inkex_gettext as _
+from inkex.paths import ZoneClose, zoneClose, Line, line, Move, move
 class _SubpathManager:
     def __init__(self, style):
         self.current = inkex.Path()
@@ -64,26 +65,46 @@ class Extrude(inkex.EffectExtension):
     """
     def add_arguments(self, pars):
         pars.add_argument("--tab")
-        pars.add_argument("-m", "--mode", default="lines", choices=["lines", "polygons", "snug"],
-         help="Join paths with lines, polygons or copies of the segments (\"snug\")")
+        pars.add_argument("-m", "--mode", default="lines", type=self.arg_method('_handle'),
+                #choices=["lines", "polygons", "snug"],
+                help="Join paths with lines, polygons or copies of the segments (\"snug\")")
         pars.add_argument("-s", "--subpaths", default=True, type=inkex.Boolean,
-         help="""If true, connecting lines will be inserted as subpaths of a single path.
-                 If false, they will be inserted in newly created group. 
-                 Only applies to mode=lines""")
+                help="""If true, connecting lines will be inserted as subpaths of a single path.
+                        If false, they will be inserted in newly created group. 
+                        Only applies to mode=lines""")
+    @staticmethod
+    def _handle_lines(manager, com1, com2):
+        if not (isinstance(com1.command, (ZoneClose, zoneClose)) or
+                isinstance(com2.command, (ZoneClose, zoneClose))):
+            # For a closed subpath, the first line has already been drawn.
+            manager.add(Move(*com1.end_point))
+            manager.add(Line(*com2.end_point))
+    @staticmethod
+    def _handle_polygons(manager, com1, com2):
+        if not (isinstance(com1.command, (Move, move)) or
+                isinstance(com2.command, (Move, move))):
+            # We skip if one of either commands is a "Move" command
+            manager.add(Move(*com1.previous_end_point))
+            manager.add([Line(*pt) for pt in
+                        [com1.end_point, com2.end_point,
+                        com2.previous_end_point, com1.previous_end_point]])
     @staticmethod
     def _handle_snug(manager, com1, com2):
-        manager.add(inkex.paths.Move(*com1.previous_end_point))
-        com1r = com1.command
-        com2r = com2.reverse()
-        doflag = True
-        if isinstance(com1r, (inkex.paths.ZoneClose, inkex.paths.zoneClose)):
-            # ZoneClose can not be used directly, must be converted to line
-            com1r = inkex.paths.Line(*com1.first_point)
-            if com1.previous_end_point.is_close(com1.end_point):
-                doflag = False
-        if doflag:
-            manager.add([com1r, inkex.paths.Line(*com2.end_point),
-                        com2r, inkex.paths.ZoneClose()])
+        if not (isinstance(com1.command, (Move, move)) or
+                isinstance(com2.command, (Move, move))):
+            # We skip if one of either commands is a "Move" command
+            manager.add(Move(*com1.previous_end_point))
+            com1r = com1.command
+            com2r = com2.reverse()
+            doflag = True
+            if isinstance(com1r, (ZoneClose, zoneClose)):
+                # ZoneClose can not be used directly, must be converted to line
+                com1r = Line(*com1.first_point)
+                if com1.previous_end_point.is_close(com1.end_point):
+                    doflag = False
+            if doflag:
+                manager.add([com1r, Line(*com2.end_point), com2r, ZoneClose()])
+    
     def effect(self):
         paths : List[inkex.PathElement] = []
         for node in self.svg.selection.rendering_order().filter(inkex.ShapeElement):
@@ -92,18 +113,17 @@ class Extrude(inkex.EffectExtension):
             paths.append(node)
         if len(paths) < 2:
             raise inkex.AbortExtension(_("Need at least 2 paths selected"))
+        lines = self.options.mode == self._handle_lines
+        subpaths = self.options.subpaths and lines
 
-        mode = self.options.mode.lower()
-        subpaths = self.options.subpaths and mode == "lines"
-
-        if mode == 'lines':
+        if lines:
             style = {
                 'fill': 'none',
                 'stroke': '#000000',
                 'stroke-opacity': 1,
                 'stroke-width': '1px',
             }
-        elif mode in ('polygons', 'snug'):
+        else:
             style = {
                 'fill': '#000000',
                 'fill-opacity': 0.3,
@@ -116,23 +136,7 @@ class Extrude(inkex.EffectExtension):
         for pa1, pa2 in itertools.combinations(paths, 2):
             manager = _SubpathManager(style) if subpaths else _GroupManager(style)
             for com1, com2 in zip(pa1.path.proxy_iterator(), pa2.path.proxy_iterator()):
-
-                if (mode == "lines" and
-                   not (isinstance(com1.command, (inkex.paths.ZoneClose, inkex.paths.zoneClose)) or
-                        isinstance(com2.command, (inkex.paths.ZoneClose, inkex.paths.zoneClose)))):
-                        # For a closed subpath, the first line has already been drawn.
-                    manager.add(inkex.paths.Move(*com1.end_point))
-                    manager.add(inkex.paths.Line(*com2.end_point))
-                if not (isinstance(com1.command, (inkex.paths.Move, inkex.paths.move)) or
-                        isinstance(com2.command, (inkex.paths.Move, inkex.paths.move))):
-                    # We skip if one of either commands is a "Move" command
-                    if mode == "polygons":
-                        manager.add(inkex.paths.Move(*com1.previous_end_point))
-                        manager.add([inkex.paths.Line(*pt) for pt in
-                                      [com1.end_point, com2.end_point,
-                                       com2.previous_end_point, com1.previous_end_point]])
-                    if mode == "snug":
-                        Extrude._handle_snug(manager, com1, com2)
+                self.options.mode(manager, com1, com2)
                 manager.terminate()
             manager.append_next(pa1)
 

@@ -19,8 +19,12 @@
 
 import math
 import random
+from typing import List, Union
 
-
+from .paths import Line, Move, Path, PathCommand
+from .elements import PathElement, Group
+from .base import BaseElement
+from .styles import Style
 class pTurtle:
     """A Python path turtle"""
 
@@ -118,3 +122,72 @@ class pTurtle:
     lt = left
     pu = penup
     pd = pendown
+
+class PathBuilder:
+    """This helper class can be used to construct a path and insert it into a document."""
+    def __init__(self, style : Style):
+        """Initializes a PathDrawHelper object
+
+        Args:
+            style (Style): Style of the path.
+        """
+        self.current = Path()
+        self.style = style
+    def add(self, command: Union[PathCommand, List[PathCommand]]):
+        """Add a Path command to the Helper
+
+        Args:
+            command (Union[PathCommand, List[PathCommand]]): A (list of) PathCommand(s) to be
+            appended.
+        """
+        self.current.append(command)
+    def terminate(self):
+        """Terminates current subpath. This method does nothing by default and is supposed to be 
+        overridden in subclasses"""
+    def append_next(self, sibling_before: BaseElement):
+        """Insert the resulting Path as :class:`inkex.PathElement` into the document tree.
+
+        Args:
+            sibling_before (BaseElement): The element the resulting path will be appended after.
+        """
+        pth = PathElement()
+        pth.path = self.current
+        pth.style = self.style
+        sibling_before.addnext(pth)
+    def Move_to(self, x, y): # pylint: disable=invalid-name
+        """Shorthand to insert an absolute move command: `M x y`.
+
+        Args:
+            x (Float): x coordinate to move to
+            y (Float): y coordinate to move to
+        """
+        self.add(Move(x, y))
+    def Line_to(self, x, y): # pylint: disable=invalid-name
+        """Shorthand to insert an absolute lineto command: `L x y`.
+
+        Args:
+            x (Float): x coordinate to draw a line to
+            y (Float): y coordinate to draw a line to
+        """
+        self.add(Line(x, y))
+
+class PathGroupBuilder(PathBuilder):
+    """This helper class can be used to construct a group of paths that all have the same style."""
+    def __init__(self, style):
+        super().__init__(style)
+        self.result = Group()
+    def terminate(self):
+        """Terminates the current Path, and appends it to the group if it is not empty."""
+        if len(self.current) > 1:
+            pth = PathElement()
+            pth.path = self.current.to_absolute()
+            pth.style = self.style
+            self.result.append(pth)
+        self.current = Path()
+    def append_next(self, sibling_before: BaseElement):
+        """Insert the resulting Path as :class:`inkex.Group` into the document tree.
+
+        Args:
+            sibling_before (BaseElement): The element the resulting group will be appended after.
+        """
+        sibling_before.addnext(self.result)

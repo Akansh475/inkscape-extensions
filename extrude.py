@@ -26,41 +26,7 @@ from typing import List, Union
 import inkex
 from inkex.localization import inkex_gettext as _
 from inkex.paths import ZoneClose, zoneClose, Line, Move, move
-class _SubpathManager:
-    def __init__(self, style):
-        self.current = inkex.Path()
-        self.style = style
-    def add(self, command: Union[inkex.paths.PathCommand, List[inkex.paths.PathCommand]]):
-        """Add a path command"""
-        self.current.append(command)
-    def terminate(self):
-        """Terminate current subpath"""
-    def append_next(self, sibling_before: inkex.BaseElement):
-        """Append result as sibling after given element"""
-        pth = inkex.PathElement()
-        pth.path = self.current
-        pth.style = self.style
-        sibling_before.addnext(pth)
-    def Move_to(self, x, y): # pylint: disable=invalid-name
-        """Shorthand for processing absolute move to (x,y)"""
-        self.add(Move(x, y))
-    def Line_to(self, x, y): # pylint: disable=invalid-name
-        """Shorthand for processing absolute line to (x,y)"""
-        self.add(Line(x, y))
-
-class _GroupManager(_SubpathManager):
-    def __init__(self, style):
-        super().__init__(style)
-        self.result = inkex.Group()
-    def terminate(self):
-        if len(self.current) > 1:
-            pth = inkex.PathElement()
-            pth.path = self.current.to_absolute()
-            pth.style = self.style
-            self.result.append(pth)
-        self.current = inkex.Path()
-    def append_next(self, sibling_before: inkex.BaseElement):
-        sibling_before.addnext(self.result)
+from inkex.turtle import PathGroupBuilder, PathBuilder
 
 
 class Extrude(inkex.EffectExtension):
@@ -143,7 +109,7 @@ class Extrude(inkex.EffectExtension):
             }
 
         for pa1, pa2 in itertools.combinations(paths, 2):
-            manager = _SubpathManager(style) if subpaths else _GroupManager(style)
+            manager = PathBuilder(style) if subpaths else PathGroupBuilder(style)
             for com1, com2 in zip(pa1.path.proxy_iterator(), pa2.path.proxy_iterator()):
                 mode(manager, com1, com2)
                 manager.terminate()

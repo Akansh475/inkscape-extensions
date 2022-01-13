@@ -138,14 +138,15 @@ class PathBuilder:
 
         Args:
             command (Union[PathCommand, List[PathCommand]]): A (list of) PathCommand(s) to be
-            appended.
+                                                             appended.
         """
         self.current.append(command)
     def terminate(self):
         """Terminates current subpath. This method does nothing by default and is supposed to be 
-        overridden in subclasses"""
+        overridden in subclasses."""
     def append_next(self, sibling_before: BaseElement):
-        """Insert the resulting Path as :class:`inkex.PathElement` into the document tree.
+        """Insert the resulting Path as :class:`inkex.elements._polygons.PathElement`
+        into the document tree.
 
         Args:
             sibling_before (BaseElement): The element the resulting path will be appended after.
@@ -185,7 +186,7 @@ class PathGroupBuilder(PathBuilder):
             self.result.append(pth)
         self.current = Path()
     def append_next(self, sibling_before: BaseElement):
-        """Insert the resulting Path as :class:`inkex.Group` into the document tree.
+        """Insert the resulting Path as :class:`inkex.elements._groups.Group` into the document tree.
 
         Args:
             sibling_before (BaseElement): The element the resulting group will be appended after.

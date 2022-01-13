@@ -65,7 +65,7 @@ class PathElement(PathElementBase):
     tag_name = 'path'
 
     @classmethod
-    def arc(cls, center, rx, ry=None, **kw): # pylint: disable=invalid-name
+    def arc(cls, center, rx, ry=None, arctype="", **kw): # pylint: disable=invalid-name
         """Generate a sodipodi arc (special type)"""
         others = [(name, kw.pop(name, None)) for name in ('start', 'end', 'open')]
         elem = cls(**kw)
@@ -74,6 +74,8 @@ class PathElement(PathElementBase):
         elem.set('sodipodi:rx', rx)
         elem.set('sodipodi:ry', ry or rx)
         elem.set('sodipodi:type', 'arc')
+        if arctype != "":
+            elem.set('sodipodi:arc-type', 'arc')
         for name, value in others:
             if value is not None:
                 elem.set('sodipodi:'+name, str(value).lower())

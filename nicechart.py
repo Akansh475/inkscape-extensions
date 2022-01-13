@@ -365,14 +365,7 @@ class NiceChart(inkex.GenerateExtension):
                     start -= 0.09  # let the first element overlap into the other direction
 
             # then add the slice
-            pieslice = inkex.PathElement()
-            pieslice.set('sodipodi:type', 'arc')
-            pieslice.set('sodipodi:cx', x)
-            pieslice.set('sodipodi:cy', y)
-            pieslice.set('sodipodi:rx', pie_radius)
-            pieslice.set('sodipodi:ry', pie_radius)
-            pieslice.set('sodipodi:start', start)
-            pieslice.set('sodipodi:end', end)
+            pieslice = inkex.PathElement.arc([x, y], pie_radius, pie_radius, start=start, end=end )
             pieslice.set("style", "fill:" + self.get_color() + ";stroke:none;fill-opacity:1")
             ang = angle / 2 + offset
 

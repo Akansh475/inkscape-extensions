@@ -432,7 +432,7 @@ class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
         return ZoneClose()
 
     def reverse(self, first, prev):
-        return line(-(first.x + (first.x - prev.x)), -(first.y + (first.y - prev.y)))
+        return line(prev.x - first.x, prev.y - first.y)
 
 class Horz(AbsolutePathCommand):
     """Horizontal Line segment"""
@@ -1046,7 +1046,7 @@ class Arc(AbsolutePathCommand):
         return Vector2d(self.x, self.y)
 
     def reverse(self, first, prev):
-        return Arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, -self.sweep, prev.x, prev.y)
+        return Arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, 1-self.sweep, prev.x, prev.y)
 
 
 class arc(RelativePathCommand):  # pylint: disable=invalid-name
@@ -1072,7 +1072,7 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
         return Arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, self.sweep, self.dx + x1, self.dy + y1)
 
     def reverse(self, first, prev):
-        return arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, -self.sweep, -self.dx, -self.dy)
+        return arc(self.rx, self.ry, self.x_axis_rotation, self.large_arc, 1-self.sweep, -self.dx, -self.dy)
 
 
 PathCommand._letter_to_class = {
@@ -1155,6 +1155,9 @@ class Path(list):
 
         def to_curves(self):
             return self.command.to_curves(self.previous_end_point, self.prev2_control_point)
+        
+        def to_absolute(self):
+            return self.command.to_absolute(self.previous_end_point)
 
         def __str__(self):
             return str(self.command)
@@ -1340,7 +1343,7 @@ class Path(list):
 
         for i, seg in enumerate(self):  # type: PathCommand
             if i == 0:
-                prev_prev = previous = first = seg.end_point(first, previous)
+                first = seg.end_point(first, previous)
             yield Path.PathCommandProxy(seg, first, previous, prev_prev)
             if isinstance(seg, (curve, tepidQuadratic, quadratic, smooth,
                                 Curve, TepidQuadratic, Quadratic, Smooth)):

@@ -481,7 +481,7 @@ class PathTest(TestCase):
         """Testing reverse() with relative coordinates, closed path"""
         ret = Path("m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10 z")
         ret = ret.reverse()
-        self._assertPath(ret, "m 10 50 l -0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40 z")
+        self._assertPath(ret, "m 10 50 l 0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40 z")
         """Testing reverse() with relative coordinates, open path"""
         ret = Path("m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10")
         ret = ret.reverse()
@@ -574,3 +574,13 @@ class SuperPathTest(TestCase):
             tempsub = CubicSuperPath(tempsub[0])
             self.assertEqual(comparison, str(tempsub))
 
+class ProxyTest():
+    def test_simple_path(self):
+        """Check coordinate computation"""
+        path = Path("M 10 10 h 10 v 10 h -10 Z")
+
+        proxycommands = list(Path.proxy_iterator())
+
+        self.assertAlmostTuple(list(proxycommands[2].previous_end_point), (10, 10))
+        self.assertAlmostTuple(list(proxycommands[2].end_point), (20, 10))
+        self.assertAlmostTuple(list(proxycommands[3].previous_end_point), (20, 10))

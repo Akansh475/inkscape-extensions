@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 #
-# Copyright (C) 2007
+# Copyright (C) 2022 Jonathan Neuhauser, jonathan.neuhauser@outlook.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,74 +20,101 @@
 """Join paths with lines or polygons"""
 
 
+import itertools
+from typing import List, Union
+
 import inkex
+from inkex.localization import inkex_gettext as _
+from inkex.paths import ZoneClose, zoneClose, Line, Move, move
+from inkex.turtle import PathGroupBuilder, PathBuilder
+
 
 class Extrude(inkex.EffectExtension):
+    """This effect draws lines between each nth node of each selected path.
+    It can be chosen whether these regions are filled and whether the fill uses rectangles
+    or copies of the path segments.
+    The lines will be inserted between the two elements.
+    """
     def add_arguments(self, pars):
-        pars.add_argument("--mode", default="Lines", help="Join paths with lines or polygons")
+        pars.add_argument("--tab")
+        pars.add_argument("-m", "--mode", default="lines", choices=["lines", "polygons", "snug"],
+                help="Join paths with lines, polygons or copies of the segments (\"snug\")")
+        pars.add_argument("-s", "--subpaths", default=True, type=inkex.Boolean,
+                help="""If true, connecting lines will be inserted as subpaths of a single path.
+                        If false, they will be inserted in newly created group. 
+                        Only applies to mode=lines""")
+    @staticmethod
+    def _handle_lines(manager, com1, com2):
+        if not (isinstance(com1.command, (ZoneClose, zoneClose)) or
+                isinstance(com2.command, (ZoneClose, zoneClose))):
+            # For a closed subpath, the first line has already been drawn.
+            manager.Move_to(*com1.end_point)
+            manager.Line_to(*com2.end_point)
+    @staticmethod
+    def _handle_polygons(manager, com1, com2):
+        if not (isinstance(com1.command, (Move, move)) or
+                isinstance(com2.command, (Move, move))):
+            # We skip if one of either commands is a "Move" command
+            manager.Move_to(*com1.previous_end_point)
+            for point in [com1.end_point, com2.end_point,
+                          com2.previous_end_point, com1.previous_end_point]:
+                manager.Line_to(*point)
+    @staticmethod
+    def _handle_snug(manager, com1, com2):
+        if not (isinstance(com1.command, (Move, move)) or
+                isinstance(com2.command, (Move, move))):
+            # We skip if one of either commands is a "Move" command
+            manager.Move_to(*com1.previous_end_point)
+            com1r = com1.command
+            com2r = com2.reverse()
+            doflag = True
+            if isinstance(com1r, (ZoneClose, zoneClose)):
+                # ZoneClose can not be used directly, must be converted to line
+                com1r = Line(*com1.first_point)
+                if com1.previous_end_point.is_close(com1.end_point):
+                    doflag = False
+            if doflag:
+                manager.add([com1r, Line(*com2.end_point), com2r, ZoneClose()])
 
     def effect(self):
-        paths = []
-        for node in self.svg.selection.filter(inkex.PathElement):
+        paths : List[inkex.PathElement] = []
+        for node in self.svg.selection.rendering_order().filter(inkex.ShapeElement):
+            if isinstance(node, inkex.PathElement):
+                node.apply_transform()
             paths.append(node)
         if len(paths) < 2:
-            raise inkex.AbortExtension("Need at least 2 paths selected")
+            raise inkex.AbortExtension(_("Need at least 2 paths selected"))
+        lines = self.options.mode.lower() == "lines"
+        subpaths = self.options.subpaths and lines
 
-        for path in paths:
-            path.apply_transform()
+        mode = self._handle_lines if lines else \
+              (self._handle_polygons if self.options.mode.lower() == "polygons"
+               else self._handle_snug)
 
-        pts = [node.path.to_superpath() for node in paths]
+        if lines:
+            style = {
+                'fill': 'none',
+                'stroke': '#000000',
+                'stroke-opacity': 1,
+                'stroke-width': '1px',
+            }
+        else:
+            style = {
+                'fill': '#000000',
+                'fill-opacity': 0.3,
+                'stroke': '#000000',
+                'stroke-opacity': 0.6,
+                'stroke-width': '1px',
+                'stroke-linejoin': 'round'
+            }
 
-        for n1 in range(0, len(paths)):
-            for n2 in range(n1 + 1, len(paths)):
-                verts = []
-                for i in range(0, min(map(len, pts))):
-                    comp = []
-                    for j in range(0, min(len(pts[n1][i]), len(pts[n2][i]))):
-                        comp.append([pts[n1][i][j][1][-2:], pts[n2][i][j][1][-2:]])
-                    verts.append(comp)
+        for pa1, pa2 in itertools.combinations(paths, 2):
+            manager = PathBuilder(style) if subpaths else PathGroupBuilder(style)
+            for com1, com2 in zip(pa1.path.proxy_iterator(), pa2.path.proxy_iterator()):
+                mode(manager, com1, com2)
+                manager.terminate()
+            manager.append_next(pa1)
 
-                if self.options.mode.lower() == 'lines':
-                    line = []
-                    for comp in verts:
-                        for n, v in enumerate(comp):
-                            line += [('M', v[0])]
-                            line += [('L', v[1])]
-                    ele = inkex.PathElement()
-                    paths[0].xpath('..')[0].append(ele)
-                    ele.set('d', inkex.Path(line))
-                    style = {
-                        'fill': 'none',
-                        'stroke': '#000000',
-                        'stroke-opacity': 1,
-                        'stroke-width': self.svg.unittouu('1px'),
-                    }
-                    ele.set('style', inkex.Style(style))
-                elif self.options.mode.lower() == 'polygons':
-                    g = inkex.Group()
-                    style = {
-                        'fill': '#000000',
-                        'fill-opacity': 0.3,
-                        'stroke': '#000000',
-                        'stroke-opacity': 0.6,
-                        'stroke-width': self.svg.unittouu('2px'),
-                    }
-                    g.set('style', inkex.Style(style))
-                    paths[0].xpath('..')[0].append(g)
-                    for comp in verts:
-                        for n, v in enumerate(comp):
-                            nn = n + 1
-                            if nn == len(comp):
-                                nn = 0
-                            line = []
-                            line += [('M', comp[n][0])]
-                            line += [('L', comp[n][1])]
-                            line += [('L', comp[nn][1])]
-                            line += [('L', comp[nn][0])]
-                            line += [('L', comp[n][0])]
-                            ele = inkex.PathElement()
-                            g.append(ele)
-                            ele.set('d', str(inkex.Path(line)))
 
 
 if __name__ == '__main__':

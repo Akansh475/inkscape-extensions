@@ -25,7 +25,7 @@ from typing import List, Union
 
 import inkex
 from inkex.localization import inkex_gettext as _
-from inkex.paths import ZoneClose, zoneClose, Line, line, Move, move
+from inkex.paths import ZoneClose, zoneClose, Line, Move, move
 class _SubpathManager:
     def __init__(self, style):
         self.current = inkex.Path()
@@ -41,6 +41,12 @@ class _SubpathManager:
         pth.path = self.current
         pth.style = self.style
         sibling_before.addnext(pth)
+    def Move_to(self, x, y): # pylint: disable=invalid-name
+        """Shorthand for processing absolute move to (x,y)"""
+        self.add(Move(x, y))
+    def Line_to(self, x, y): # pylint: disable=invalid-name
+        """Shorthand for processing absolute line to (x,y)"""
+        self.add(Line(x, y))
 
 class _GroupManager(_SubpathManager):
     def __init__(self, style):
@@ -66,7 +72,6 @@ class Extrude(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         pars.add_argument("-m", "--mode", default="lines", type=self.arg_method('_handle'),
-                #choices=["lines", "polygons", "snug"],
                 help="Join paths with lines, polygons or copies of the segments (\"snug\")")
         pars.add_argument("-s", "--subpaths", default=True, type=inkex.Boolean,
                 help="""If true, connecting lines will be inserted as subpaths of a single path.
@@ -77,23 +82,23 @@ class Extrude(inkex.EffectExtension):
         if not (isinstance(com1.command, (ZoneClose, zoneClose)) or
                 isinstance(com2.command, (ZoneClose, zoneClose))):
             # For a closed subpath, the first line has already been drawn.
-            manager.add(Move(*com1.end_point))
-            manager.add(Line(*com2.end_point))
+            manager.Move_to(*com1.end_point)
+            manager.Line_to(*com2.end_point)
     @staticmethod
     def _handle_polygons(manager, com1, com2):
         if not (isinstance(com1.command, (Move, move)) or
                 isinstance(com2.command, (Move, move))):
             # We skip if one of either commands is a "Move" command
-            manager.add(Move(*com1.previous_end_point))
-            manager.add([Line(*pt) for pt in
-                        [com1.end_point, com2.end_point,
-                        com2.previous_end_point, com1.previous_end_point]])
+            manager.Move_to(*com1.previous_end_point)
+            for point in [com1.end_point, com2.end_point,
+                          com2.previous_end_point, com1.previous_end_point]:
+                manager.Line_to(*point)
     @staticmethod
     def _handle_snug(manager, com1, com2):
         if not (isinstance(com1.command, (Move, move)) or
                 isinstance(com2.command, (Move, move))):
             # We skip if one of either commands is a "Move" command
-            manager.add(Move(*com1.previous_end_point))
+            manager.Move_to(*com1.previous_end_point)
             com1r = com1.command
             com2r = com2.reverse()
             doflag = True
@@ -104,7 +109,7 @@ class Extrude(inkex.EffectExtension):
                     doflag = False
             if doflag:
                 manager.add([com1r, Line(*com2.end_point), com2r, ZoneClose()])
-    
+
     def effect(self):
         paths : List[inkex.PathElement] = []
         for node in self.svg.selection.rendering_order().filter(inkex.ShapeElement):
@@ -113,7 +118,7 @@ class Extrude(inkex.EffectExtension):
             paths.append(node)
         if len(paths) < 2:
             raise inkex.AbortExtension(_("Need at least 2 paths selected"))
-        lines = self.options.mode == self._handle_lines
+        lines = self.options.mode == self._handle_lines # pylint: disable=comparison-with-callable
         subpaths = self.options.subpaths and lines
 
         if lines:

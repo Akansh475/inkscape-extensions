@@ -71,7 +71,7 @@ class Extrude(inkex.EffectExtension):
     """
     def add_arguments(self, pars):
         pars.add_argument("--tab")
-        pars.add_argument("-m", "--mode", default="lines", type=self.arg_method('_handle'),
+        pars.add_argument("-m", "--mode", default="lines", choices=["lines", "polygons", "snug"],
                 help="Join paths with lines, polygons or copies of the segments (\"snug\")")
         pars.add_argument("-s", "--subpaths", default=True, type=inkex.Boolean,
                 help="""If true, connecting lines will be inserted as subpaths of a single path.
@@ -118,8 +118,12 @@ class Extrude(inkex.EffectExtension):
             paths.append(node)
         if len(paths) < 2:
             raise inkex.AbortExtension(_("Need at least 2 paths selected"))
-        lines = self.options.mode == self._handle_lines # pylint: disable=comparison-with-callable
+        lines = self.options.mode.lower() == "lines"
         subpaths = self.options.subpaths and lines
+
+        mode = self._handle_lines if lines else \
+              (self._handle_polygons if self.options.mode.lower() == "polygons"
+               else self._handle_snug)
 
         if lines:
             style = {
@@ -141,7 +145,7 @@ class Extrude(inkex.EffectExtension):
         for pa1, pa2 in itertools.combinations(paths, 2):
             manager = _SubpathManager(style) if subpaths else _GroupManager(style)
             for com1, com2 in zip(pa1.path.proxy_iterator(), pa2.path.proxy_iterator()):
-                self.options.mode(manager, com1, com2)
+                mode(manager, com1, com2)
                 manager.terminate()
             manager.append_next(pa1)
 

@@ -21,7 +21,7 @@ class TesterTest(TestCase):
 
         xml, delta = xmldiff(xml_a, xml_b)
         self.assertFalse(delta)
-        self.assertEqual(str(delta), '7 xml differences')
+        self.assertEqual(str(delta), '9 xml differences')
         #self.assertEqual(str(xml), '')
         xml, delta = xmldiff(xml_a, xml_a)
         self.assertTrue(delta)

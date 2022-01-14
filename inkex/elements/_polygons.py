@@ -70,7 +70,7 @@ class PathElement(PathElementBase):
     def _arcpath(cx : float, cy : float, rx : float, ry : float, 
                  start : float, end : float, arctype : str) -> Optional[Path]:
         if abs(rx) < 1e-8 or abs(ry) < 1e-8:
-            return 
+            return None
         incr = end - start
         if incr < 0: incr += 2*pi
         numsegs = min(1 + int(incr*2.0/pi), 4)
@@ -80,7 +80,7 @@ class PathElement(PathElementBase):
         computed.append(Move(cos(start), sin(start)))
         for seg in range(1, numsegs+1):
             computed.append(Arc(1, 1, 0, 0, 1, cos(start+seg*incr), sin(start+seg*incr)))
-        if abs(incr - 2*pi) > 1e-8 and arctype == "slice":
+        if abs(incr*numsegs - 2*pi) > 1e-8 and (arctype == "slice" or arctype == ""): # slice is default
             computed.append(PathLine(0, 0))
         if arctype != "arc":
             computed.append(ZoneClose())
@@ -89,7 +89,7 @@ class PathElement(PathElementBase):
         return computed.to_relative()
         
     @classmethod
-    def arc(cls, center, rx, ry=None, arctype="arc", pathonly=False, **kw): # pylint: disable=invalid-name
+    def arc(cls, center, rx, ry=None, arctype="", pathonly=False, **kw): # pylint: disable=invalid-name
         """Generate a sodipodi arc (special type) and generate the path data for it"""
         others = [(name, kw.pop(name, None)) for name in ('start', 'end', 'open')]
         elem = cls(**kw)

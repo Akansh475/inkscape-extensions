@@ -5,6 +5,7 @@ Test specific elements API from svg xml lxml custom classes.
 """
 
 import pytest
+import math
 import inkex
 
 from inkex import (
@@ -13,6 +14,7 @@ from inkex import (
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
     Transform, Style, LinearGradient, RadialGradient, Stop
 )
+from inkex import paths
 from inkex.colors import Color
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError
@@ -66,7 +68,29 @@ class PathElementTestCase(ElementTestCase):
         nolpe.original_path = "M 60 60 L 5 5"
         self.assertEqual(nolpe.get('inkscape:original-d', None), None)
         self.assertEqual(nolpe.get('d'), 'M 60 60 L 5 5')
-
+    
+    def test_arc(self):
+        """Test arc generation"""
+        def compare_arc(cx, cy, rx, ry, start, end, reference, type="arc"):
+            arc = PathElement.arc((cx, cy), rx, ry, start=start, end=end, arctype=type)
+            self.assertEqual(arc.get("sodipodi:arc-type"), type)
+            reference = inkex.Path(reference)
+            result = inkex.Path(arc.get("d"))
+            self.assertEqual(len(reference), len(result))
+            for c1, c2 in zip(reference, result):
+                self.assertEqual(c1.letter, c2.letter)
+                self.assertAlmostTuple(c1.args, c2.args, precision=4)
+        compare_arc(10, 20, 5, 5, math.pi/4, math.pi*6/4, 
+                    """m 13.535534,23.535534 a 5,5 0 0 1 -6.035534,0.794593 
+                       5,5 0 0 1 -2.3296291,-5.624222 5,5 0 0 1 4.8296291,-3.705905""")
+        compare_arc(10, 20, 5, 5, math.pi/4, math.pi*6/4,
+                    """m 13.535534,23.535534 a 5,5 0 0 1 -6.035534,0.794593 
+                       5,5 0 0 1 -2.3296291,-5.624222 5,5 0 0 1 4.8296291,-3.705905 z""",
+                    type="chord") 
+        compare_arc(10, 20, 5, 5, math.pi/4, math.pi*28/18,
+                    """m 13.535534,23.535534 a 5,5 0 0 1 -6.2830789,0.641905 5,5 0 0 1 -1.8991927,-6.02347 
+                       5,5 0 0 1 5.5149786,-3.078008 l -0.868241,4.924039 z""",
+                    type="slice") 
 class PolylineElementTestCase(ElementTestCase):
     """Test the polyline elements support"""
     tag = 'polyline'

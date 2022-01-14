@@ -23,7 +23,10 @@
 Interface for all shapes/polygons such as lines, paths, rectangles, circles etc.
 """
 
-from ..paths import Path
+from math import cos, pi, sin
+from typing import Optional
+from ..paths import Arc, Move, Path, ZoneClose
+from ..paths import Line as PathLine
 from ..transforms import Transform, ImmutableVector2d, Vector2d
 
 from ._utils import addNS
@@ -63,10 +66,31 @@ class PathElementBase(ShapeElement):
 class PathElement(PathElementBase):
     """Provide a useful extension for path elements"""
     tag_name = 'path'
+    @staticmethod
+    def _arcpath(cx : float, cy : float, rx : float, ry : float, 
+                 start : float, end : float, arctype : str) -> Optional[Path]:
+        if abs(rx) < 1e-8 or abs(ry) < 1e-8:
+            return 
+        incr = end - start
+        if incr < 0: incr += 2*pi
+        numsegs = min(1 + int(incr*2.0/pi), 4)
+        incr = incr / numsegs
 
+        computed = Path()
+        computed.append(Move(cos(start), sin(start)))
+        for seg in range(1, numsegs+1):
+            computed.append(Arc(1, 1, 0, 0, 1, cos(start+seg*incr), sin(start+seg*incr)))
+        if abs(incr - 2*pi) > 1e-8 and arctype == "slice":
+            computed.append(PathLine(0, 0))
+        if arctype != "arc":
+            computed.append(ZoneClose())
+        computed.transform(Transform().add_translate(cx, cy).add_scale(rx, ry) \
+                                      , inplace=True)
+        return computed.to_relative()
+        
     @classmethod
-    def arc(cls, center, rx, ry=None, arctype="", **kw): # pylint: disable=invalid-name
-        """Generate a sodipodi arc (special type)"""
+    def arc(cls, center, rx, ry=None, arctype="arc", pathonly=False, **kw): # pylint: disable=invalid-name
+        """Generate a sodipodi arc (special type) and generate the path data for it"""
         others = [(name, kw.pop(name, None)) for name in ('start', 'end', 'open')]
         elem = cls(**kw)
         elem.set('sodipodi:cx', center[0])
@@ -75,11 +99,21 @@ class PathElement(PathElementBase):
         elem.set('sodipodi:ry', ry or rx)
         elem.set('sodipodi:type', 'arc')
         if arctype != "":
-            elem.set('sodipodi:arc-type', 'arc')
+            elem.set('sodipodi:arc-type', arctype)
         for name, value in others:
             if value is not None:
                 elem.set('sodipodi:'+name, str(value).lower())
+        
+
+        path = cls._arcpath(float(center[0]), float(center[1]), float(rx), float(ry or rx),
+                            float(elem.get("sodipodi:start", 0)), float(elem.get("sodipodi:end", 2*pi)), 
+                            arctype)
+        if pathonly:
+            elem = cls(**kw)
+        #inkex.errormsg(path)
+        if path != None: elem.path = path
         return elem
+
 
     @classmethod
     def star(cls, center, radi, sides, rounded=None):

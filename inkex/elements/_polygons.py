@@ -24,10 +24,11 @@ Interface for all shapes/polygons such as lines, paths, rectangles, circles etc.
 """
 
 from math import cos, pi, sin
-from typing import Optional
-from ..paths import Arc, Move, Path, ZoneClose
+from typing import Optional, Tuple
+from ..paths import Arc, Curve, Move, Path, ZoneClose
 from ..paths import Line as PathLine
 from ..transforms import Transform, ImmutableVector2d, Vector2d
+from ..bezier import pointdistance
 
 from ._utils import addNS
 from ._base import ShapeElement
@@ -67,12 +68,13 @@ class PathElement(PathElementBase):
     """Provide a useful extension for path elements"""
     tag_name = 'path'
     @staticmethod
-    def _arcpath(cx : float, cy : float, rx : float, ry : float, 
+    def _arcpath(cx : float, cy : float, rx : float, ry : float, # pylint: disable=invalid-name
                  start : float, end : float, arctype : str) -> Optional[Path]:
         if abs(rx) < 1e-8 or abs(ry) < 1e-8:
             return None
         incr = end - start
-        if incr < 0: incr += 2*pi
+        if incr < 0: 
+            incr += 2*pi
         numsegs = min(1 + int(incr*2.0/pi), 4)
         incr = incr / numsegs
 
@@ -80,17 +82,36 @@ class PathElement(PathElementBase):
         computed.append(Move(cos(start), sin(start)))
         for seg in range(1, numsegs+1):
             computed.append(Arc(1, 1, 0, 0, 1, cos(start+seg*incr), sin(start+seg*incr)))
-        if abs(incr*numsegs - 2*pi) > 1e-8 and (arctype == "slice" or arctype == ""): # slice is default
+        if abs(incr*numsegs - 2*pi) > 1e-8 and (arctype in ("slice", "")): # slice is default
             computed.append(PathLine(0, 0))
         if arctype != "arc":
             computed.append(ZoneClose())
         computed.transform(Transform().add_translate(cx, cy).add_scale(rx, ry) \
                                       , inplace=True)
         return computed.to_relative()
-        
+
     @classmethod
     def arc(cls, center, rx, ry=None, arctype="", pathonly=False, **kw): # pylint: disable=invalid-name
-        """Generate a sodipodi arc (special type) and generate the path data for it"""
+        """Generates a sodipodi elliptical arc (special type). Also computes the path that Inkscape 
+        uses under the hood.
+        All data may be given as parseable strings or using numeric data types.
+
+        Args:
+            center (tuple-like): Coordinates of the star/polygon center as tuple or Vector2d
+            rx (Union[float, str]): Radius in x direction
+            ry (Union[float, str], optional): Radius in y direction. If not given, ry=rx. 
+                                              Defaults to None.
+            arctype (str, optional): "arc", "chord" or "slice". Defaults to "", i.e. "slice".
+            pathonly (bool, optional): Whether to create the path without Inkscape-specific 
+                                       attributes. Defaults to False.
+        Keyword args:
+            start (Union[float, str]): start angle in radians
+            end (Union[float, str]): end angle in radians
+            open (str): whether the path should be open (true/false). Not used in Inkscape > 1.1
+
+        Returns:
+            PathElement : the created star/polygon
+        """
         others = [(name, kw.pop(name, None)) for name in ('start', 'end', 'open')]
         elem = cls(**kw)
         elem.set('sodipodi:cx', center[0])
@@ -103,31 +124,114 @@ class PathElement(PathElementBase):
         for name, value in others:
             if value is not None:
                 elem.set('sodipodi:'+name, str(value).lower())
-        
+
 
         path = cls._arcpath(float(center[0]), float(center[1]), float(rx), float(ry or rx),
-                            float(elem.get("sodipodi:start", 0)), float(elem.get("sodipodi:end", 2*pi)), 
-                            arctype)
+                            float(elem.get("sodipodi:start", 0)),
+                            float(elem.get("sodipodi:end", 2*pi)), arctype)
         if pathonly:
             elem = cls(**kw)
-        #inkex.errormsg(path)
-        if path != None: elem.path = path
+        if path is not None:
+             elem.path = path
         return elem
 
+    @staticmethod
+    def _starpath(c: Tuple[float, float], sides : int, r : Tuple[float, float], # pylint: disable=invalid-name
+                 arg : Tuple[float, float], rounded : float, flatsided : bool):
+        """Helper method to generate the path for an Inkscape star/ polygon; randomized is ignored."""
+        def _star_get_xy(point, index):
+            cur_arg = arg[point] + 2 * pi / sides * (index % sides)
+            return Vector2d(*c) + r[point] * Vector2d(cos(cur_arg), sin(cur_arg))
+        def _rot90_rel(origin, other):
+            """Returns a unit length vector at 90 deg from origin to other"""
+            return 1/pointdistance(other, origin) * \
+                   Vector2d(other.y - origin.y,  other.x - origin.x)
+        def _star_get_curvepoint(point, index, is_prev : bool):
+            index = index % sides
+            orig = _star_get_xy(point, index)
+            previ = (index-1 + sides) % sides
+            nexti = (index+1) % sides
+            # neighbors of the current point depend on polygon or star
+            prev = _star_get_xy(point, previ) if flatsided else \
+                   _star_get_xy(1-point, index if point == 1 else previ)
+            nextp = _star_get_xy(point, nexti) if flatsided else \
+                   _star_get_xy(1-point, index if point == 0 else nexti)
+            mid = 0.5 * (prev + nextp)
+            # direction of bezier handles
+            rot = _rot90_rel(orig, mid + 100000 * _rot90_rel(mid, nextp))
+            ret = rounded * rot * \
+                  (-1 * pointdistance(prev, orig) if is_prev else pointdistance(nextp, orig))
+            return orig + ret
+
+        pointy = abs(rounded) < 1e-4
+        result = Path()
+        result.append(Move(*_star_get_xy(0, 0)))
+        for i in range(0, sides):
+            # draw to point type 1 for stars
+            if not flatsided:
+                if pointy:
+                    result.append(PathLine(*_star_get_xy(1, i)))
+                else:
+                    result.append(Curve(*_star_get_curvepoint(0, i, False),
+                                        *_star_get_curvepoint(1, i, True), *_star_get_xy(1, i)))
+            # draw to point type 0 for both stars and rectangles
+            if pointy and i < sides -1:
+                result.append(PathLine(*_star_get_xy(0, i+1)))
+            if not pointy:
+                if not flatsided:
+                    result.append(Curve(*_star_get_curvepoint(1, i, False),
+                                        *_star_get_curvepoint(0, i+1, True), *_star_get_xy(0, i+1)))
+                else:
+                    result.append(Curve(*_star_get_curvepoint(0, i, False),
+                                        *_star_get_curvepoint(0, i+1, True), *_star_get_xy(0, i+1)))
+
+        result.append(ZoneClose())
+        return result.to_relative()
 
     @classmethod
-    def star(cls, center, radi, sides, rounded=None):
-        """Generate a sodipodi start (special type)"""
+    def star(cls, center, radii, sides=5, rounded=0, args=(0,0), flatsided=False, pathonly=False):
+        """Generate a sodipodi star / polygon. Also computes the path that Inkscape uses
+        under the hood. The arguments for center, radii, sides, rounded and args can be given
+        as strings or as numeric data.
+
+        Args:
+            center (Tuple-like): Coordinates of the star/polygon center as tuple or Vector2d
+            radii (tuple): Radii of the control points, i.e. their distances from the center. 
+                               The control points are specified in polar coordinates. 
+                               Only the first control point is used for polygons. 
+            sides (int, optional): Number of sides / tips of the polygon / star. Defaults to 5.
+            rounded (int, optional): Controls the rounding radius of the polygon / star. 
+                                     For `rounded=0`, only straight lines are used. Defaults to 0.
+            args (tuple, optional): Angle between horizontal axis and control points. 
+                                    Defaults to (0,0).
+            flatsided (bool, optional): True for polygons, False for stars. Defaults to False.
+            pathonly (bool, optional): Whether to create the path without Inkscape-specific 
+                                       attributes. Defaults to False.
+
+        Returns:
+            PathElement : the created star/polygon
+        """
         elem = cls()
         elem.set('sodipodi:cx', center[0])
         elem.set('sodipodi:cy', center[1])
-        elem.set('sodipodi:r1', radi[0])
-        elem.set('sodipodi:r2', radi[1])
-        elem.set('sodipodi:arg1', 0.85)
-        elem.set('sodipodi:arg2', 1.3)
-        elem.set('sodipodi:sides', sides)
+        elem.set('sodipodi:r1', radii[0])
+        elem.set('sodipodi:r2', radii[1])
+        elem.set('sodipodi:arg1', args[0])
+        elem.set('sodipodi:arg2', args[1])
+        elem.set('sodipodi:sides', max(sides, 3) if flatsided else max(sides, 2))
         elem.set('inkscape:rounded', rounded)
+        elem.set('inkscape:flatsided', str(flatsided).lower())
         elem.set('sodipodi:type', 'star')
+
+        path = cls._starpath((float(center[0]), float(center[1])),
+                             int(sides), (float(radii[0]), float(radii[1])),
+                             (float(args[0]), float(args[1])), float(rounded), flatsided)
+        if pathonly:
+            elem = cls()
+        #inkex.errormsg(path)
+        if path is not None:
+            elem.path = path
+
         return elem
 
 

@@ -224,7 +224,7 @@ class WavefrontObj(object):
         # we need at least 2 vertices to make an edge
         if len(vtxlist) > 1:
             # we can have more than one vertex per line - get adjacent pairs
-            self.edg.append(pairwise(vtxlist))
+            self.edg.extend(pairwise(vtxlist, start=False))
 
     def add_f(self, line):
         """Add face from parsed line"""

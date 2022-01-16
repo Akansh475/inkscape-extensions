@@ -495,8 +495,8 @@ class AlphabetSoup(inkex.EffectExtension):
 
             # compensate preserved transforms of parent layer
             if layer.getparent() is not None:
-                mat = (self.svg.get_current_layer().transform * inkex.Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
-                new.transform *= -inkex.Transform(mat)
+                mat = (self.svg.get_current_layer().transform @ inkex.Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])).matrix
+                new.transform @= -inkex.Transform(mat)
 
 
 if __name__ == '__main__':

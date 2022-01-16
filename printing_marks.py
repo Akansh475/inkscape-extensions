@@ -121,7 +121,7 @@ class PrintingMarks(inkex.EffectExtension):
 
     def draw_coluor_bars(self, cx, cy, rotate, name, parent, bbox):
         group = parent.add(inkex.Group(id=name))
-        group.transform = inkex.Transform(translate=(cx, cy)) * inkex.Transform(rotate=rotate)
+        group.transform = inkex.Transform(translate=(cx, cy)) @ inkex.Transform(rotate=rotate)
         loc = 0
         if bbox:
             loc = min(self.mark_size / 3, max(bbox.width, bbox.height) / 45)

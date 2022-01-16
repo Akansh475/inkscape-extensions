@@ -33,6 +33,7 @@ import argparse
 from argparse import ArgumentParser
 
 import inkex
+from inkex.transforms import Transform
 import inkex.utils
 import inkex.units
 from inkex.base import SvgThroughMixin, InkscapeExtension
@@ -428,3 +429,14 @@ def paint_order(selection : ElementList):
     return selection.rendering_order()
 
 ElementList.paint_order = deprecate(paint_order) # type: ignore
+
+def transform_imul(self, matrix):
+    """Use @= operator instead"""
+    return self.__imatmul__(matrix)
+
+def transform_mul(self, matrix):
+    """Use @ operator instead"""
+    return self.__matmul__(matrix)
+
+Transform.__imul__ = deprecate(transform_imul) # type: ignore
+Transform.__mul__ = deprecate(transform_mul) # type: ignore

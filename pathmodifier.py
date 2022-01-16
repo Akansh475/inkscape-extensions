@@ -43,7 +43,7 @@ class PathModifier(inkex.EffectExtension):
                 mat = node.transform
                 for child in node:
                     if transferTransform:
-                        child.transform = mat * child.transform
+                        child.transform = mat @ child.transform
                     elements.update(self.expand_groups({child.get('id'): child}))
                 if transferTransform and node.get("transform"):
                     del node.attrib["transform"]

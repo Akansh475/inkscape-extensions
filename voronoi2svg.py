@@ -201,7 +201,7 @@ class Voronoi(inkex.EffectExtension):
             group_voronoi = parent_group.add(Group())
             group_voronoi.set('inkscape:label', 'Voronoi')
             if invtrans:
-                group_voronoi.transform *= invtrans
+                group_voronoi.transform @= invtrans
         if self.options.diagramType != 'Voronoi':
             # Delaunay
             group_delaunay = parent_group.add(Group())

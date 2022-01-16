@@ -47,7 +47,7 @@ class GroupBase(ShapeElement):
 
     def shape_box(self, transform=None):
         bbox = None
-        effective_transform = Transform(transform) * self.transform
+        effective_transform = Transform(transform) @ self.transform
         for child in self:
             if isinstance(child, ShapeElement):
                 child_bbox = child.bounding_box(transform=effective_transform)

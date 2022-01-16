@@ -99,7 +99,7 @@ class TextElement(ShapeElement):
         Returns a horrible bounding box that just contains the coord points
         of the text without width or height (which is impossible to calculate)
         """
-        effective_transform = Transform(transform) * self.transform
+        effective_transform = Transform(transform) @ self.transform
         x, y = effective_transform.apply_to_point((self.x, self.y))
         bbox = BoundingBox(x, y)
         for tspan in self.tspans():
@@ -132,7 +132,7 @@ class Tspan(ShapeElement):
         Returns a horrible bounding box that just contains the coord points
         of the text without width or height (which is impossible to calculate)
         """
-        effective_transform = Transform(transform) * self.transform
+        effective_transform = Transform(transform) @ self.transform
         x1, y1 = effective_transform.apply_to_point((self.x, self.y))
         fontsize = self.unittouu(self.style.get('font-size', '12px'))
         x2 = self.x + 0 # XXX This is impossible to calculate!

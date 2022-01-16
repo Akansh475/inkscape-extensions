@@ -403,9 +403,9 @@ class Transform:
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg hexad"""
         if len(args) == 1:
-            self.__imul__(Transform(args[0]))
+            self.__imatmul__(Transform(args[0]))
         elif len(args) == 2 or len(args) == 6:
-            self.__imul__(Transform(args))
+            self.__imatmul__(Transform(args))
         else:
             raise ValueError(f"Invalid number of arguments {args}")
         return self
@@ -435,13 +435,13 @@ class Transform:
             tr_x, tr_y = args[0], 0.0
         else:
             tr_x, tr_y = Vector2d(*args)
-        self.__imul__(((1.0, 0.0, tr_x), (0.0, 1.0, tr_y)))
+        self.__imatmul__(((1.0, 0.0, tr_x), (0.0, 1.0, tr_y)))
         return self
 
     def add_scale(self, sc_x, sc_y=None):
         """Add scale to this transformation"""
         sc_y = sc_x if sc_y is None else sc_y
-        self.__imul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
+        self.__imatmul__(((sc_x, 0.0, 0.0), (0.0, sc_y, 0.0)))
         return self
 
     @overload
@@ -473,20 +473,20 @@ class Transform:
         """Add rotation to this transformation"""
         center_x, center_y = Vector2d(*args)
         _cos, _sin = cos(radians(deg)), sin(radians(deg))
-        self.__imul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
-        self.__imul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
+        self.__imatmul__(((_cos, -_sin, center_x), (_sin, _cos, center_y)))
+        self.__imatmul__(((1.0, 0.0, -center_x), (0.0, 1.0, -center_y)))
         return self
 
     def add_skewx(self, deg):
         # type: (float) -> Transform
         """Add skew x to this transformation"""
-        self.__imul__(((1.0, tan(radians(deg)), 0.0), (0.0, 1.0, 0.0)))
+        self.__imatmul__(((1.0, tan(radians(deg)), 0.0), (0.0, 1.0, 0.0)))
         return self
 
     def add_skewy(self, deg):
         # type: (float) -> Transform
         """Add skew y to this transformation"""
-        self.__imul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
+        self.__imatmul__(((1.0, 0.0, 0.0), (tan(radians(deg)), 1.0, 0.0)))
         return self
 
     def to_hexad(self):
@@ -554,7 +554,7 @@ class Transform:
             val = False
         return val
 
-    def __mul__(self, matrix):
+    def __matmul__(self, matrix):
         # type: (MatrixLike) -> Transform
         """Combine this transform's internal matrix with the given matrix"""
         # Conform the input to a known quantity (and convert if needed)
@@ -568,10 +568,10 @@ class Transform:
             self.a * other.e + self.c * other.f + self.e,
             self.b * other.e + self.d * other.f + self.f))
 
-    def __imul__(self, matrix):
+    def __imatmul__(self, matrix):
         # type: (MatrixLike) -> Transform
         """In place multiplication of transform matrices"""
-        self.matrix = (self * matrix).matrix
+        self.matrix = (self @ matrix).matrix
         if self.callback is not None:
             self.callback(self)
         return self

@@ -367,7 +367,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
     else:
         this_transform = Transform(parent_transform)
 
-    this_transform *= node.transform
+    this_transform @= node.transform
 
     # Compose the style attribs
     this_style = dict(inkex.Style.parse_str(node.get("style", "")))

@@ -993,7 +993,7 @@ class Arc(AbsolutePathCommand):
 
         T = transform  # type: Transform
         if self.x_axis_rotation != 0:
-            T = T * Transform(rotate=self.x_axis_rotation)
+            T = T @ Transform(rotate=self.x_axis_rotation)
         a, c, b, d, _, _ = list(T.to_hexad())
         # T = | a b |
         #     | c d |

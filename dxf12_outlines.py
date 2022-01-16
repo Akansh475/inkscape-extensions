@@ -123,7 +123,7 @@ class DxfTwelve(inkex.OutputExtension):
                 layer = 'Layer 1'
 
             node.transform = node.composed_transform()
-            node.transform = inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]]) * node.transform
+            node.transform = inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]]) @ node.transform
             node.apply_transform()
             path = node.path.to_superpath()
 

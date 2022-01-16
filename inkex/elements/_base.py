@@ -501,7 +501,7 @@ class BaseElement(etree.ElementBase):
           if none specified the transform is to the root document element"""
         parent = self.getparent()
         if parent is not None and isinstance(parent, BaseElement):
-            return parent.composed_transform() * self.transform
+            return parent.composed_transform() @ self.transform
         return self.transform
 
 class ShapeElement(BaseElement):

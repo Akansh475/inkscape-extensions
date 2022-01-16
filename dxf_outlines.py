@@ -197,7 +197,7 @@ class DxfOutlines(inkex.OutputExtension):
 
         # Transforming /after/ superpath is more reliable than before
         # because of some issues with arcs in transformations
-        for sub in node.path.to_superpath().transform(Transform(mat) * node.transform):
+        for sub in node.path.to_superpath().transform(Transform(mat) @ node.transform):
             for i in range(len(sub) - 1):
                 s = sub[i]
                 e = sub[i + 1]
@@ -218,14 +218,14 @@ class DxfOutlines(inkex.OutputExtension):
         y = node.get('y')
         mat = Transform([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
         if trans:
-            mat *= Transform(trans)
+            mat @= Transform(trans)
         if x:
-            mat *= Transform([[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
+            mat @= Transform([[1.0, 0.0, float(x)], [0.0, 1.0, 0.0]])
         if y:
-            mat *= Transform([[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
+            mat @= Transform([[1.0, 0.0, 0.0], [0.0, 1.0, float(y)]])
         # push transform
         if trans or x or y:
-            self.groupmat.append(Transform(self.groupmat[-1]) * mat)
+            self.groupmat.append(Transform(self.groupmat[-1]) @ mat)
         # get referenced node
         refid = node.get('xlink:href')
         refnode = self.svg.getElementById(refid[1:])
@@ -256,7 +256,7 @@ class DxfOutlines(inkex.OutputExtension):
                 self.layer = layer
         trans = group.get('transform')
         if trans:
-            self.groupmat.append(Transform(self.groupmat[-1]) * Transform(trans))
+            self.groupmat.append(Transform(self.groupmat[-1]) @ Transform(trans))
         for node in group:
             if isinstance(node, Group):
                 self.process_group(node)

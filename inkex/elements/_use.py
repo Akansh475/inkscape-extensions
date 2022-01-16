@@ -59,12 +59,12 @@ class Use(ShapeElement):
             group = Group(**copy.attrib)
             group.extend(copy)
             copy = group
-        copy.transform = self.transform * copy.transform
+        copy.transform = self.transform @ copy.transform
         copy.style = self.style + copy.style
         self.replace_with(copy)
         copy.set_random_ids()
         return copy
 
     def shape_box(self, transform=None):
-        effective_transform = Transform(transform) * self.transform
+        effective_transform = Transform(transform) @ self.transform
         return self.href.bounding_box(effective_transform)

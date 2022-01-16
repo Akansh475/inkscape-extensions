@@ -196,7 +196,7 @@ class MeasureLength(inkex.EffectExtension):
         node.set('x', str(x))
         node.set('y', str(y))
         node.set('transform', 'rotate(%s, %s, %s)' % (angle, x, y))
-        node.transform = - node.getparent().composed_transform() * node.transform
+        node.transform = - node.getparent().composed_transform() @ node.transform
 
 if __name__ == '__main__':
     MeasureLength().run()

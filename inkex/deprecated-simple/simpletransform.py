@@ -41,17 +41,17 @@ def invertTransform(mat):
 @deprecate
 def composeTransform(mat1, mat2):
     """Transform(M1) * Transform(M2)"""
-    return _lists((Transform(mat1) * Transform(mat2)).matrix)
+    return _lists((Transform(mat1) @ Transform(mat2)).matrix)
 
 @deprecate
 def composeParents(node, mat):
     """elem.composed_transform() or elem.transform * Transform(mat)"""
-    return (node.transform * Transform(mat)).matrix
+    return (node.transform @ Transform(mat)).matrix
 
 @deprecate
 def applyTransformToNode(mat, node):
     """elem.transform = Transform(mat) * elem.transform """
-    node.transform = Transform(mat) * node.transform
+    node.transform = Transform(mat) @ node.transform
 
 @deprecate
 def applyTransformToPoint(mat, pt):

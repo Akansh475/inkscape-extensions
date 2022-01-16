@@ -275,7 +275,7 @@ class MeshToPath(inkex.EffectExtension):
             return
 
         # Inkscape SVG 0.92 and SVG 2.0 draft mesh transformations
-        transform = meshgradient.gradientTransform * meshgradient.transform
+        transform = meshgradient.gradientTransform @ meshgradient.transform
 
         # parse meshpatches, calculate absolute corner coords
         corners, meshpatch_csps = mesh_corners(meshgradient)
@@ -306,7 +306,7 @@ class MeshToPath(inkex.EffectExtension):
 
         group = inkex.Group()
         # apply gradientTransform and node's preserved transform to group
-        group.transform = transform * node.transform
+        group.transform = transform @ node.transform
 
         # convert each csp to path, append to group
         for csp in csp_list:

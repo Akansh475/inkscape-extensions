@@ -212,7 +212,7 @@ class TextSplit(inkex.EffectExtension):
             # tspans between the prototype and the element. The next line says
             # "compose transforms until you reach the parent of element"
             elem.transform = (- self.current_root.getparent().transform) \
-                              * prototype.composed_transform()
+                              @ prototype.composed_transform()
             tsp = Tspan(x=str(self.current_x), y=str(self.current_y))
             tsp.text = text
             elem.add(tsp)

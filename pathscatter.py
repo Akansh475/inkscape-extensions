@@ -81,9 +81,9 @@ class PathScatter(pathmodifier.Diffeo):
         mat = Transform([[1, 0, -bbox.center.x], [0, 1, -bbox.center.y]])
         if self.options.vertical:
             bbox = BoundingBox(-bbox.y, -bbox.x)
-            mat = Transform([[0, -1, 0], [1, 0, 0]]) * mat
+            mat = Transform([[0, -1, 0], [1, 0, 0]]) @ mat
         mat.add_translate([0, self.options.noffset])
-        node.transform = mat * node.transform
+        node.transform = mat @ node.transform
         return bbox
     def effect(self):
 
@@ -117,7 +117,7 @@ class PathScatter(pathmodifier.Diffeo):
         if self.options.grouppick and isinstance(pattern_node, Group):
             mat = pattern_node.transform
             for child in pattern_node:
-                child.transform = mat * child.transform
+                child.transform = mat @ child.transform
                 pattern_list.append(child)
         else:
             pattern_list.append(pattern_node)
@@ -157,7 +157,7 @@ class PathScatter(pathmodifier.Diffeo):
 
                     g_node.append(clone)
 
-                    clone.transform = local_transform * clone.transform
+                    clone.transform = local_transform @ clone.transform
                     s += dx
                     counter += 1
 

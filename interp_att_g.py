@@ -106,7 +106,7 @@ class InterpAttG(inkex.EffectExtension):
             elif path == 'transform/scale':
                 node.transform.add_scale(value)
         elif path == "transform":
-            node.transform *= value
+            node.transform @= value
         else:
             node.set(path, value)
 

@@ -182,7 +182,7 @@ class GenerateExtension(EffectExtension):
             except AttributeError:
                 pass
             else:
-                container.transform = -parent_transform * container.transform
+                container.transform = -parent_transform @ container.transform
             parent.append(container)
         return container
 

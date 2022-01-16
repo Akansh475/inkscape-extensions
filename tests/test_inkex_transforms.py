@@ -368,9 +368,9 @@ class TransformTest(TestCase):
         self.assertFalse(rot2.is_scale())
         self.assertFalse(rot3.is_scale())
 
-        self.assertTrue((rot1 * rot1).is_rotate())
-        self.assertTrue((rot1 * rot2).is_rotate())
-        self.assertTrue((rot1 * rot2 * rot3 * rot2 * rot1).is_rotate())
+        self.assertTrue((rot1 @ rot1).is_rotate())
+        self.assertTrue((rot1 @ rot2).is_rotate())
+        self.assertTrue((rot1 @ rot2 @ rot3 @ rot2 @ rot1).is_rotate())
 
     def test_is_translate(self):
         """Test that translations are correctly identified"""
@@ -398,10 +398,10 @@ class TransformTest(TestCase):
         self.assertFalse(tr2.is_scale())
         self.assertFalse(tr3.is_scale())
 
-        self.assertTrue((tr1 * tr1).is_translate())
-        self.assertTrue((tr1 * tr2).is_translate())
-        self.assertTrue((tr1 * tr2 * tr3 * tr2 * tr1).is_translate())
-        self.assertFalse(tr1 * tr2 * tr3 * -tr1 * -tr2 * -tr3)  # is almost unity
+        self.assertTrue((tr1 @ tr1).is_translate())
+        self.assertTrue((tr1 @ tr2).is_translate())
+        self.assertTrue((tr1 @ tr2 @ tr3 @ tr2 @ tr1).is_translate())
+        self.assertFalse(tr1 @ tr2 @ tr3 @ -tr1 @ -tr2 @ -tr3)  # is almost unity
 
     def test_is_scale(self):
         """Test that scale transformations are correctly identified"""
@@ -462,8 +462,8 @@ class TransformTest(TestCase):
         rotation = Transform(rotate=angle)
         translation = Transform(translate=(x, y))
 
-        rotation_then_translation = translation * rotation
-        translation_then_rotation = rotation * translation
+        rotation_then_translation = translation @ rotation
+        translation_then_rotation = rotation @ translation
 
         tr1 = Transform(rotate=angle, translate=(x, y))
         tr2 = Transform(translate=(x, y), rotate=angle)

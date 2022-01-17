@@ -62,18 +62,16 @@ def which(program):
     """
     if os.path.isabs(program) and os.path.isfile(program):
         return program
+    # On Windows, shutil.which may give preference to .py files in the current directory 
+    # (such as pdflatex.py), e.g. if .PY is in pathext, because the current directory is 
+    # prepended to PATH. This can be suppressed by explicitly appending the current directory.
 
-    # This code can be simplified using shutil.which in Python3. However, on Windows, 
-    # shutil.which("pdflatex") returns ".\pdflatex.py", i.e. the path to the extension,
-    # probably because Windows doesn't have the concept of an execute flag. In order to not break
-    # the extension on Windows, the change e8bbec5f was partially reverted.
     try:
-        # Python2 and python3, but must have distutils and may not always
-        # work on windows versions (depending on the version)
-        from distutils.spawn import find_executable
-        prog = find_executable(program)
-        if prog:
-            return prog
+        if sys.platform == "win32":
+            from shutil import which
+            prog = which(program, path=os.environ["PATH"] + ";" + os.curdir)
+            if prog:
+                return prog
     except ImportError:
         pass
 

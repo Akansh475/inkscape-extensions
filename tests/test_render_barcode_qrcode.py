@@ -7,13 +7,14 @@ class TestQRCodeInkscapeBasic(ComparisonMixin, TestCase):
     effect_class = QrCode
     compare_file = 'svg/empty.svg'
     comparisons = [
-        ('--text=0123456789', '--typenumber=0', '--modulesize=10', '--drawtype=greedy'),
+        ('--text=0123456789', '--typenumber=0', '--modulesize=10', '--drawtype=smooth', 
+         '--smoothness=greedy'),
         ('--text=BreadRolls', '--typenumber=2', '--encoding=utf8', '--modulesize=10',
-         '--drawtype=greedy'),
+         '--drawtype=smooth', '--smoothness=greedy'),
         ('--text=Blue Front Yard', '--typenumber=3', '--correctionlevel=1', '--modulesize=10',
-         '--drawtype=greedy'),
-        ('--text=Waterfall', '--typenumber=1', '--drawtype=circle', '--modulesize=10'),
-        ('--text=groupid', '--groupid=testid', '--modulesize=10', '--drawtype=greedy'),
+         '--drawtype=smooth', '--smoothness=greedy'),
+        ('--text=Waterfall', '--typenumber=1', '--drawtype=pathpreset', '--pathtype=circle', '--modulesize=10'),
+        ('--text=groupid', '--groupid=testid', '--modulesize=10', '--drawtype=smooth', '--smoothness=greedy'),
     ]
 
 class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):

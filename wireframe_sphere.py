@@ -184,21 +184,11 @@ class WireframeSphere(inkex.GenerateExtension):
 
     def draw_ellipse(self, r_xy, c_xy, start_end=(0, 2 * pi)):
         """Creates an elipse with all the required sodipodi attributes"""
-        path = inkex.PathElement()
-        path.update(**{
-            'style': {'stroke': '#000000',
+        path = inkex.PathElement.arc(c_xy, *r_xy, start=start_end[0], end=start_end[1], 
+                                     open="true", arctype="arc")
+        path.style = {'stroke': '#000000',
                       'stroke-width': str(self.svg.unittouu('1px')),
-                      'fill': 'none'},
-            'sodipodi:cx': str(c_xy[0]),
-            'sodipodi:cy': str(c_xy[1]),
-            'sodipodi:rx': str(r_xy[0]),
-            'sodipodi:ry': str(r_xy[1]),
-            'sodipodi:start': str(start_end[0]),
-            'sodipodi:end': str(start_end[1]),
-            'sodipodi:open': 'true',  # all ellipse sectors we will draw are open
-            'sodipodi:type': 'arc',
-            'sodipodi:arc-type': 'arc',
-        })
+                      'fill': 'none'}
         return path
 
 if __name__ == '__main__':

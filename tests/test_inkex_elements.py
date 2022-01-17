@@ -5,6 +5,7 @@ Test specific elements API from svg xml lxml custom classes.
 """
 
 import pytest
+import math
 import inkex
 
 from inkex import (
@@ -13,6 +14,7 @@ from inkex import (
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
     Transform, Style, LinearGradient, RadialGradient, Stop
 )
+from inkex import paths
 from inkex.colors import Color
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError
@@ -66,7 +68,73 @@ class PathElementTestCase(ElementTestCase):
         nolpe.original_path = "M 60 60 L 5 5"
         self.assertEqual(nolpe.get('inkscape:original-d', None), None)
         self.assertEqual(nolpe.get('d'), 'M 60 60 L 5 5')
-
+    
+    def _compare_paths(self, result, reference, precision=4):
+        reference = inkex.Path(reference)
+        result = inkex.Path(result)
+        self.assertEqual(len(reference), len(result))
+        for c1, c2 in zip(reference, result):
+            self.assertEqual(c1.letter, c2.letter)
+            self.assertAlmostTuple(c1.args, c2.args, precision=precision, msg=result)
+    def test_arc(self):
+        """Test arc generation"""
+        def compare_arc(cx, cy, rx, ry, start, end, reference, type="arc"):
+            arc = PathElement.arc((cx, cy), rx, ry, start=start, end=end, arctype=type)
+            self.assertEqual(arc.get("sodipodi:arc-type"), type)
+            self._compare_paths(arc.get("d"), reference)
+        compare_arc(10, 20, 5, 5, math.pi/4, math.pi*6/4, 
+                    """m 13.535534,23.535534 a 5,5 0 0 1 -6.035534,0.794593 
+                       5,5 0 0 1 -2.3296291,-5.624222 5,5 0 0 1 4.8296291,-3.705905""")
+        compare_arc(10, 20, 5, 5, math.pi/4, math.pi*6/4,
+                    """m 13.535534,23.535534 a 5,5 0 0 1 -6.035534,0.794593 
+                       5,5 0 0 1 -2.3296291,-5.624222 5,5 0 0 1 4.8296291,-3.705905 z""",
+                    type="chord") 
+        compare_arc(10, 20, 5, 5, math.pi/4, math.pi*28/18,
+                    """m 13.535534,23.535534 a 5,5 0 0 1 -6.2830789,0.641905 5,5 0 0 1 -1.8991927,-6.02347 
+                       5,5 0 0 1 5.5149786,-3.078008 l -0.868241,4.924039 z""",
+                    type="slice") 
+    def test_stars(self):
+        def compare_star(cx, cy, sides, r1, r2, arg1, arg2, flatsided, rounded, reference, precision=4):
+            star = PathElement.star((cx, cy), (r1, r2), sides, rounded, (arg1, arg2), flatsided)
+            self.assertEqual(star.get("inkscape:flatsided"), str(flatsided).lower())
+            self._compare_paths(star.get("d"), reference, precision=precision)
+        # Test a simple polygon
+        compare_star(10, 5, 6, 5.5, 10, 7/8*math.pi, 42, True, 0, 
+        """m 4.9186625,7.1047587 0.7178942,-5.4529467 5.0813373,-2.10475872 
+            4.363443,3.34818802 -0.717894,5.4529467 -5.0813372,2.104759 z""")
+        # Test a star
+        compare_star(5, 10, 7, 35, 17, 0.95545678, 1.4790556, False, 0, 
+        """m 25.203254,38.580212 -18.6458484,-11.651701 -11.3057927,16.6865 
+           -2.5158293,-21.842628 -20.0950776,1.564637 15.508661,-15.5856099 
+           -13.752359,-14.7354284 21.8548124,2.4076898 2.94616632,-19.9394165 
+           11.74384528,18.5879506 17.426168,-10.1286176 -7.210477,20.7711057 
+           18.783909,7.3092373 -20.735163,7.313194 z""")
+        # Test a rounded polygon
+        compare_star(10, 5, 6, 5.5, 10, 7/8*math.pi, 42, True, 0.1, 
+        """m 4.9186625,7.1047587 c -0.2104759,-0.5081337 0.3830754,-5.0166024 0.7178942,-5.4529467 
+            0.3348188,-0.4363443 4.5360433,-2.17654814 5.0813373,-2.10475872 
+            0.545295,0.0717894 4.152968,2.84005422 4.363443,3.34818802 
+            0.210476,0.5081337 -0.383075,5.0166024 -0.717894,5.4529467 
+            -0.334819,0.4363443 -4.5360425,2.176548 -5.0813372,2.104759 
+            -0.5452947,-0.07179 -4.1529674,-2.8400545 -4.3634433,-3.3481883 z""")
+        compare_star(5, 10, 7, 35, 17, 0.95545678, 1.4790556, False, 1, 
+        """m 25.203254,38.580212 c -18.8526653,11.31401 3.036933,-15.296807 -18.6458484,-11.651701 
+            -19.8769816,3.341532 7.5786704,23.731873 -11.3057927,16.6865 
+            -20.6000929,-7.685438 13.8530224,-7.163034 -2.5158293,-21.842628 
+            -15.0056106,-13.4570388 -13.8291026,20.721824 -20.0950776,1.564637 
+            -6.835231,-20.8975929 14.237504,6.364651 15.508661,-15.5856099 
+            1.165291,-20.1221851 -24.823279,2.1078182 -13.752359,-14.7354284 
+            12.076699,-18.3734357 3.900854,15.0996232 21.8548124,2.4076898 
+            16.4587046,-11.6349155 -17.1250194,-18.0934175 2.94616632,-19.9394165 
+            21.89462928,-2.013706 -9.37321772,12.464272 11.74384528,18.5879506 
+            19.358377,5.61368249 3.468728,-24.6699406 17.426168,-10.1286176 
+            15.225456,15.86238583 -15.589066,0.44307 -7.210477,20.7711057 
+            7.680797,18.6350633 21.450453,-12.6694955 18.783909,7.3092373 
+            -2.908795,21.793777 -10.066029,-11.91177319 -20.735163,7.313194 
+            -9.7805797,17.623861 23.27955,8.871339 5.996985,19.243087 z""", precision=2)
+            
+        
+            
 class PolylineElementTestCase(ElementTestCase):
     """Test the polyline elements support"""
     tag = 'polyline'

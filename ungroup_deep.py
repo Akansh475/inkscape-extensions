@@ -102,7 +102,8 @@ class UngroupDeep(inkex.EffectExtension):
         node_transform = node.transform
         node_clippathurl = node.get('clip-path')
         for child in reversed(list(node)):
-
+            if not isinstance(child, inkex.BaseElement):
+                continue
             child.transform = node_transform @ child.transform
 
             if node.get("style") is not None:

@@ -21,3 +21,12 @@ class TestUngroupComplex(ComparisonMixin, TestCase):
         # third one: Transformed group with transformed clip-path, https://gitlab.com/inkscape/extensions/-/issues/184
         ('--id=g1935', '--id=g6577', '--id=g115')
     ]
+
+class TestUngroupComments(ComparisonMixin, TestCase):
+    effect_class = UngroupDeep
+    compare_filters = [CompareOrderIndependentStyle()]
+    compare_file = "svg/ellipse_group_comment.svg"
+    comparisons = [
+        # Groups with comment child elements (https://gitlab.com/inkscape/extensions/-/issues/405)
+        ('--id=g13', )
+    ]

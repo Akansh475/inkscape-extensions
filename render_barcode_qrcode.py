@@ -1103,7 +1103,6 @@ class QrCode(inkex.GenerateExtension):
                           choices=["smooth", "pathpreset", "selection", "symbol"])
         pars.add_argument("--smoothness", default="neutral", choices=["neutral", "greedy", "proud"])
         pars.add_argument("--pathtype", default="simple", choices=["simple", "circle"])
-        pars.add_argument("--pathdata", default="m 0,1 l 0.5,-1 l 0.5,1")
         pars.add_argument("--smoothval", type=float, default=0.2)
         pars.add_argument("--symbolid", default='')
         pars.add_argument("--groupid", default='')
@@ -1271,7 +1270,6 @@ class QrCode(inkex.GenerateExtension):
             return self.render_path(s)
 
 
-    render_pathcustom = lambda self: self.render_path(self.options.pathdata)
     render_smooth = lambda self: self.render_adv(self.options.smoothness[0])
 
     def render_svg(self, grp, drawtype):

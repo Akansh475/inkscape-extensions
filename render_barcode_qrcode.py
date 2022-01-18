@@ -1100,7 +1100,7 @@ class QrCode(inkex.GenerateExtension):
         pars.add_argument("--modulesize", type=float, default=4.0)
         pars.add_argument("--invert", type=inkex.Boolean, default="false")
         pars.add_argument("--drawtype", default="smooth", 
-                          choices=["smooth", "pathpreset", "pathcustom", "symbol"])
+                          choices=["smooth", "pathpreset", "selection", "symbol"])
         pars.add_argument("--smoothness", default="neutral", choices=["neutral", "greedy", "proud"])
         pars.add_argument("--pathtype", default="simple", choices=["simple", "circle"])
         pars.add_argument("--pathdata", default="m 0,1 l 0.5,-1 l 0.5,1")
@@ -1234,6 +1234,12 @@ class QrCode(inkex.GenerateExtension):
         path = PathElement()
         path.set('d', pathStr)
         return path
+    def render_selection(self):
+        if len(self.svg.selection) > 0:
+            self.options.symbolid = self.svg.selection.first().get_id()
+        else:
+            raise inkex.AbortExtension("Please select an element to clone")
+        return self.render_symbol()
 
     def render_symbol(self):
         symbol = self.svg.getElementById(self.options.symbolid)

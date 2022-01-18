@@ -17,6 +17,12 @@ class TestQRCodeInkscapeBasic(ComparisonMixin, TestCase):
         ('--text=groupid', '--groupid=testid', '--modulesize=10', '--drawtype=smooth', '--smoothness=greedy'),
     ]
 
+class TestQRCodeInkscapeSelection(ComparisonMixin, TestCase):
+    """Test QR code with a selection as input"""
+    effect_class = QrCode
+    compare_file = "svg/shapes.svg"
+    comparisons = [("--text=test", "--drawtype=selection", "--id=r3", "--modulesize=10")]
+
 class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
     """Test symbols in qr codes"""
     effect_class = QrCode

@@ -28,7 +28,7 @@
             <param name="drawing_pathWidth9" type="string" gui-text="Set path width to 9:">9</param>
             <param name="drawing_undo" type="string" gui-text="Undo last path segment:">z</param>
         </page>
-    <page name="drawing" gui-text="Path Colors">
+    <page name="drawing2" gui-text="Path Colors">
             <param name="drawing_pathColourBlue" type="string" gui-text="Set path color to blue:">b</param>
             <param name="drawing_pathColourCyan" type="string" gui-text="Set path color to cyan:">c</param>
             <param name="drawing_pathColourGreen" type="string" gui-text="Set path color to green:">g</param>

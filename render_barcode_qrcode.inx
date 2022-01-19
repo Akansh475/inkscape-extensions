@@ -67,19 +67,30 @@
   </param>
   <param name="invert" type="bool" gui-text="Invert QR code:">false</param>
   <param name="modulesize" type="float" min="0" max="1000" gui-text="Square size (px):">4</param>
-  <param name="drawtype" type="optiongroup" appearance="combo" gui-text="Drawing type:">
-    <option value="neutral">Smooth: neutral</option>
-    <option value="greedy">Smooth: greedy</option>
-    <option value="proud">Smooth: proud</option>
-    <option value="simple">Path: simple</option>
-    <option value="circle">Path: circle</option>
-    <option value="pathcustom">Path: custom</option>
-    <option value="symbol">Symbol</option>
-    <option value="obsolete">Square sharp: obsolete</option>
+  <param name="drawtype" type="notebook" gui-text="Drawing type:">
+    <page name="smooth" gui-text="Smooth">
+      <param name="smoothness" type="optiongroup" appearance="radio" 
+             gui-text="Smooth type:">
+        <option value="neutral">Neutral</option>
+        <option value="greedy">Greedy</option>
+        <option value="proud">Proud</option>
+      </param>
+    </page>
+    <page name="pathpreset" gui-text="Predefined path">
+      <param name="pathtype" type="optiongroup" appearance="radio" 
+      gui-text="Use predefined path as cell fill">
+        <option value="simple">Simple rectangle</option>
+        <option value="circle">Circle</option>
+      </param>
+    </page>
+    <page name="selection" gui-text="Clone selection">
+      <label>The first item of the selection will be cloned.</label>
+     </page>
+    <page name="symbol" gui-text="Symbol">
+      <param name="symbolid" type="string" gui-text="Symbol #url:"></param>
+    </page>
   </param>
   <param name="smoothval" type="float" min="0.01" max="1.0" precision="2" gui-text="Smooth square value (0-1):">0.2</param>
-  <label xml:space="preserve">For Path: custom set the path in relative coordinates (0,0)=(left,up) square size 1.0 </label>
-  <param name="symbolid" type="string" gui-text="Path string (Path: custom) or symbol #url:">m 0,1 l 0.5,-1 l 0.5,1</param>
   <label xml:space="preserve">Manually define the group ID. Leave blank to have it auto-generated.</label>
   <param name="groupid" type="string" gui-text="Group ID:"></param>
   <effect>

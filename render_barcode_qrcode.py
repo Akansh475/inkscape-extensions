@@ -1099,7 +1099,10 @@ class QrCode(inkex.GenerateExtension):
         pars.add_argument("--encoding", default="latin_1")
         pars.add_argument("--modulesize", type=float, default=4.0)
         pars.add_argument("--invert", type=inkex.Boolean, default="false")
-        pars.add_argument("--drawtype", default="neutral")
+        pars.add_argument("--drawtype", default="smooth", 
+                          choices=["smooth", "pathpreset", "selection", "symbol"])
+        pars.add_argument("--smoothness", default="neutral", choices=["neutral", "greedy", "proud"])
+        pars.add_argument("--pathtype", default="simple", choices=["simple", "circle"])
         pars.add_argument("--smoothval", type=float, default=0.2)
         pars.add_argument("--symbolid", default='')
         pars.add_argument("--groupid", default='')
@@ -1230,6 +1233,12 @@ class QrCode(inkex.GenerateExtension):
         path = PathElement()
         path.set('d', pathStr)
         return path
+    def render_selection(self):
+        if len(self.svg.selection) > 0:
+            self.options.symbolid = self.svg.selection.first().get_id()
+        else:
+            raise inkex.AbortExtension("Please select an element to clone")
+        return self.render_symbol()
 
     def render_symbol(self):
         symbol = self.svg.getElementById(self.options.symbolid)
@@ -1240,26 +1249,28 @@ class QrCode(inkex.GenerateExtension):
             float(self.boxsize) / bbox.width,
             float(self.boxsize) / bbox.height,
         ))
+        result = Group()
         for row in range(self.draw.row_count()):
             for col in range(self.draw.col_count()):
                 if self.draw.isDark(col, row):
                     x, y = self.get_svg_pos(col, row)
                     # Inkscape doesn't support width/height on use tags
-                    return Use.new(symbol, x, y, transform=transform)
+                    result.append(Use.new(symbol, x / transform.a, y / transform.d, transform=transform))
+        return result
 
-    render_pathcustom = lambda self: self.render_path(self.options.symbolid)
-    render_neutral = lambda self: self.render_adv("n")
-    render_greedy = lambda self: self.render_adv("g")
-    render_proud = lambda self: self.render_adv("p")
-    render_simple = lambda self: self.render_path("h 1 v 1 h -1")
+    def render_pathpreset(self):
+        if self.options.pathtype == "simple":
+            return self.render_path("h 1 v 1 h -1")
+        else:
+            s = 'm 0.5,0.5 ' \
+                'c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 ' \
+                'c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 ' \
+                'c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 ' \
+                'c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5'
+            return self.render_path(s)
 
-    def render_circle(self):
-        s = 'm 0.5,0.5 ' \
-            'c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 ' \
-            'c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 ' \
-            'c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 ' \
-            'c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5'
-        return self.render_path(s)
+
+    render_smooth = lambda self: self.render_adv(self.options.smoothness[0])
 
     def render_svg(self, grp, drawtype):
         """Render to svg"""

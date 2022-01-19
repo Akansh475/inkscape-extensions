@@ -19,7 +19,7 @@ class HslAdjust(inkex.ColorExtension):
         if self.options.random_hue:
             color.hue = int(random.random() * 255.0)
         elif self.options.hue:
-            color.hue += (self.options.hue * 0.7111)
+            color.hue += (self.options.hue * 256.0/360)
 
         if self.options.random_saturation:
             color.saturation = int(random.random() * 255.0)

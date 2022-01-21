@@ -25,6 +25,8 @@ from abc import ABC, abstractmethod
 import re
 from typing import Tuple, Dict, Type, Union, List, Optional
 
+from inkex.units import parse_unit
+
 from .colors import Color, ColorError
 
 class BaseStyleValue():
@@ -456,6 +458,31 @@ class FontSizeValue(BaseStyleValue):
         except ValueError: #unable to parse font size, e.g. font-size:normal
             return element.unittouu("12pt")
 
+class StrokeDasharrayValue(BaseStyleValue):
+    def _parse_value(self, value: str, element=None):
+        if element is None:
+            return value
+        dashes = re.findall(r'[^,\s]+', value)
+        if len(dashes) == 0:
+            return None # no dasharray applied
+        if not any([parse_unit(i) is None for i in dashes]):
+            dashes = [element.unittouu(i) for i in dashes]
+        else:
+            return None
+        if any(i < 0 for i in dashes):
+            return None # one negative value makes the dasharray invalid
+        if len(dashes) % 2 == 1:
+            dashes = 2 * dashes
+        return dashes
+    def _unparse_value(self, value: object) -> str:
+        if value == None:
+            return "none"
+        if isinstance(value, list):
+            return " ".join(map(str, value))
+        return str(value) 
+
+        
+
 
 # keys: attributes, right side:
 # - Subclass of BaseStyleValue used for instantiating
@@ -526,7 +553,7 @@ all_properties: Dict[str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[Lis
     "stop-color": (ColorValue, "black", True, False, None),
     "stop-opacity": (AlphaValue, "1", True, False, None),
     "stroke": (PaintValue, "none", True, True, None),
-    "stroke-dasharray": (BaseStyleValue, "none", True, True, None),
+    "stroke-dasharray": (StrokeDasharrayValue, "none", True, True, None),
     "stroke-dashoffset": (BaseStyleValue, "0", True, True, None),
     "stroke-linecap": (EnumValue, "butt", True, True, ["butt", "round", "square"]),
     "stroke-linejoin": (EnumValue, "miter", True, True, ["miter", "miter-clip", "round", "bevel", "arcs"]),

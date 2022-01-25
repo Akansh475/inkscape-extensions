@@ -138,3 +138,7 @@ class CompareReplacement(Compare):
         for _from, _to in self.deltas:
             contents = contents.replace(to_bytes(_from), to_bytes(_to))
         return contents
+
+class WindowsTextCompat(CompareReplacement):
+    def __init__(self):
+        super().__init__(('\r\n', '\n'))

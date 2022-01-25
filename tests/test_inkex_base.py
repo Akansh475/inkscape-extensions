@@ -99,7 +99,7 @@ class InkscapeExtensionTest(TestCase):
         ext = ModExtension()
         os.environ['DOCUMENT_PATH'] = self.empty_svg
         self.assertEqual(ext.svg_path(), os.path.join(self.datadir(), 'svg'))
-        self.assertEqual(ext.absolute_href('/foo'), '/foo')
+        self.assertIn(ext.absolute_href('/foo'), ['/foo', "C:\\foo"])
         self.assertEqual(ext.absolute_href('./foo'), os.path.join(self.datadir(), 'svg', 'foo'))
         self.assertEqual(ext.absolute_href('~/foo'), os.path.realpath(os.path.expanduser('~/foo')))
 

@@ -3,6 +3,7 @@
 from ink2canvas import Html5Canvas
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareOrderIndependentLines
+from inkex.tester.filters import WindowsTextCompat
 
 class Ink2CanvasBasicTest(ComparisonMixin, TestCase):
     effect_class = Html5Canvas
@@ -22,3 +23,4 @@ class Ink2CanvasTestClosedPath(ComparisonMixin, TestCase):
     effect_class = Html5Canvas
     compare_file = 'svg/multiple_closed_subpaths.svg'
     comparisons = [("--id=path31",)]
+    compare_filters = [WindowsTextCompat()]

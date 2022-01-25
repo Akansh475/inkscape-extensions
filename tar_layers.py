@@ -63,7 +63,10 @@ class TarLayers(inkex.OutputExtension):
         # Switch stdout to binary on Windows.
         if sys.platform == "win32":
             import msvcrt
-            msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+            try:
+                msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+            except io.UnsupportedOperation:
+                pass # The .fileno() function is not available during pytest runs
 
         template = self.make_template()
 

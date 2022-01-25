@@ -205,7 +205,6 @@ class MockCommandMixin(MockMixin):
         if self and program and arglst:
             return os.environ.get('NO_MOCK_COMMANDS')
         return False
-
     def mock_call(self, program, *args, **kwargs):
         """
         Replacement for the inkex.command.call() function, instead of calling
@@ -236,6 +235,8 @@ class MockCommandMixin(MockMixin):
             msg.attach(MIMEText(cleanin, 'plain', 'utf-8'))
 
         keystr = msg.as_string()
+        # On Windows, output is separated by CRLF
+        keystr = keystr.replace('\r\n', '\n')
         # There is a difference between python2 and python3 output
         keystr = keystr.replace('\n\n', '\n')
         keystr = keystr.replace('\n ', ' ')

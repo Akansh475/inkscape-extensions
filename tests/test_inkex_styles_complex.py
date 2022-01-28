@@ -27,7 +27,7 @@ from inkex.colors import Color
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
 from inkex import SvgDocumentElement, BaseElement, \
-    ColorError, BaseStyleValue, RadialGradient, Stop
+    ColorError, BaseStyleValue, RadialGradient, Stop, PathElement
 from inkex import SVG_PARSER
 
 class StyleInheritanceTests(TestCase):
@@ -380,3 +380,25 @@ class StyleInheritanceTests(TestCase):
         doc = etree.fromstring(content, parser=SVG_PARSER)
         ellipse = doc.getElementById("test")
         self.assertEqual(ellipse.specified_style()("fill"), Color("red"))
+    def test_dasharray(self):
+        """test parsing of dasharray"""
+        elem = PathElement()
+        style = elem.style
+        tests = [
+            ("1 2 3 4", [1, 2, 3, 4]),
+            ("1  2,3 4.5", [1, 2, 3, 4.5]),
+            ("1;2", None),
+            ("1.111", [1.111, 1.111]),
+            ("1px, 2px, 3px", [1, 2, 3, 1, 2, 3]),
+            ("", None),
+            ("1 -2", None),
+            (None, None),
+            ([1, 2, 3], [1, 2, 3, 1, 2, 3])
+        ]
+        for value, result in tests:
+            style["stroke-dasharray"] = value
+            setvalue = style("stroke-dasharray")
+            if result is None:
+                self.assertEqual(result, setvalue, f"got {setvalue}, original: {value}")
+            else:
+                self.assertAlmostTuple(result, setvalue, msg=f"Expected {result}, got {setvalue}")

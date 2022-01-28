@@ -36,6 +36,7 @@ from .elements._utils import CloningVat
 from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
 from .transforms import Transform
 from .properties import all_properties
+from .elements import LinearGradient, RadialGradient
 
 # All the names that get added to the inkex API itself.
 __all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
@@ -278,6 +279,7 @@ class ColorExtension(EffectExtension):
     """
     process_none = False # should we call modify_color for the "none" color.
     select_all = (ShapeElement,)
+    pass_rgba = False
 
     def effect(self):
         # Limiting to shapes ignores Gradients (and other things) from the select_all
@@ -297,19 +299,28 @@ class ColorExtension(EffectExtension):
         """Process one of the selected elements"""
         style = elem.specified_style()
         # Colours first
-        for name in elem.style.color_props:
-            value = style.get(name)
-            if value is not None:
-                try:
-                    elem.style[name] = self._modify_color(name, Color(value))
-                except ColorIdError:
-                    gradient = self.svg.getElementById(value)
-                    gradients.track(gradient, elem, self._ref_cloned, style=style, name=name)
-                    if gradient.href is not None:
-                        gradients.track(gradient.href, elem, self._xlink_cloned, linker=gradient)
-                except ColorError:
-                    pass # bad color value, don't touch.
+        for name in elem.style.associated_props if self.pass_rgba \
+                    else elem.style.color_props:
+            if name not in style:
+                continue # we don't want to process default values
+            try:
+                value = style(name)
+            except ColorError:
+                continue # bad color value, don't touch.
+            if isinstance(value, Color):
+                col = Color(value)
+                if self.pass_rgba:
+                    col = col.to_rgba(alpha= elem.style(elem.style.associated_props[name]))
+                rgba_result = self._modify_color(name, col)
+                elem.style.set_color(rgba_result, name)
+                
+            if isinstance(value, (LinearGradient, RadialGradient)):
+                gradients.track(value, elem, self._ref_cloned, style=style, name=name)
+                if value.href is not None:
+                    gradients.track(value.href, elem, self._xlink_cloned, linker=value)
         # Then opacities (usually does nothing)
+        if self.pass_rgba:
+            return
         for name in elem.style.opacity_props:
             value = style(name)
             result = self.modify_opacity(name, value)

@@ -81,6 +81,8 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     color_props = ('stroke', 'fill', 'stop-color', 'flood-color', 'lighting-color')
     opacity_props = ('stroke-opacity', 'fill-opacity', 'opacity', 'stop-opacity')
     unit_props = ('stroke-width')
+    associated_props = {"fill" : "fill-opacity", "stroke" : "stroke-opacity",
+                       "stop-color" : "stop-opacity"}
 
     def __init__(self, style=None, callback=None, element=None, **kw):
         self.element = element
@@ -304,9 +306,11 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     def set_color(self, color, name='fill'):
         """Sets the given color AND opacity as rgba to the fill or stroke style properties."""
         color = Color(color)
-        if color.space == 'rgba':
-            self[name + '-opacity'] = color.alpha
-        self[name] = str(color.to_rgb())
+        if color.space == 'rgba' and name in Style.associated_props:
+            self[Style.associated_props[name]] = color.alpha
+            self[name] = color.to_rgb()
+        else:
+            self[name] = color
 
     def update_urls(self, old_id, new_id):
         """Find urls in this style and replace them with the new id"""

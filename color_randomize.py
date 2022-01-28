@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 """Randomise the selected item's colours using hsl colorspace"""
 
-from random import randrange, uniform
+from random import randrange, uniform, seed
 import inkex
 
-def _rand(limit, value, roof=255, method=randrange, circular=False):
+def _rand(limit, value, roof=255, method=randrange, circular=False, deterministic=False):
     """Generates a random number which is less than limit % away from value, using the method
     supplied."""
+    if deterministic:
+        if isinstance(value, float):
+            seed(int(value * 1000))
+        else:
+            seed(value)
     limit = roof * float(limit) / 100
     limit /= 2
     max_ = type(roof)(value + limit)
@@ -25,22 +30,25 @@ def _rand(limit, value, roof=255, method=randrange, circular=False):
 
 class Randomize(inkex.ColorExtension):
     """Randomize the colours of all objects"""
+    deterministic_output=False
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         pars.add_argument("-y", "--hue_range", type=int, default=0, help="Hue range")
         pars.add_argument("-t", "--saturation_range", type=int, default=0, help="Saturation range")
         pars.add_argument("-m", "--lightness_range", type=int, default=0, help="Lightness range")
         pars.add_argument("-o", "--opacity_range", type=int, default=0, help="Opacity range")
+    def _rand(self, limit, value, roof=255, method=randrange, circular=False):
+        return _rand(limit, value, roof, method, circular, deterministic=self.deterministic_output)
 
 
     def modify_color(self, name, color):
         hsl = color.to_hsl()
         if self.options.hue_range > 0:
-            hsl.hue = int(_rand(self.options.hue_range, hsl.hue, circular=True))
+            hsl.hue = int(self._rand(self.options.hue_range, hsl.hue, circular=True))
         if self.options.saturation_range > 0:
-            hsl.saturation = int(_rand(self.options.saturation_range, hsl.saturation))
+            hsl.saturation = int(self._rand(self.options.saturation_range, hsl.saturation))
         if self.options.lightness_range > 0:
-            hsl.lightness = int(_rand(self.options.lightness_range, hsl.lightness))
+            hsl.lightness = int(self._rand(self.options.lightness_range, hsl.lightness))
         return hsl.to_rgb()
 
     def modify_opacity(self, name, opacity):
@@ -53,7 +61,7 @@ class Randomize(inkex.ColorExtension):
             return opacity
         orange = self.options.opacity_range
         if orange > 0:
-            return _rand(orange, opacity, roof=1.0, method=uniform)
+            return self._rand(orange, opacity, roof=1.0, method=uniform)
         return opacity
 
 if __name__ == '__main__':

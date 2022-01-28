@@ -6,6 +6,7 @@ omit = tests/*
        index.py
        setup.py
        inkex.py
+       other/*
 
 [report]
 exclude_lines =

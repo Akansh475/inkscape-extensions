@@ -378,6 +378,8 @@ class Color(list):
             return self.to_rgb().to_hsl()
         if self.space == 'hsl':
             return self
+        elif self.space in ('named'):
+            return self.to_rgb().to_hsl()
         elif self.space == 'rgb':
             return Color(rgb_to_hsl(*self.to_floats()), space='hsl')
         raise ColorError(f"Unknown color conversion {self.space}->hsl")

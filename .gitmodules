@@ -1,0 +1,3 @@
+[submodule "other/gcodetools"]
+	path = other/gcodetools
+	url = https://gitlab.com/inkscape/extras/extensions-gcodetools.git

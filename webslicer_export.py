@@ -62,7 +62,10 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
         return None
 
     def get_cmd_output(self, cmd):
-        pipe = subprocess.Popen(cmd)
+        try:
+            pipe = subprocess.Popen(cmd)
+        except FileNotFoundError:
+            return 1, ""
         stdout, _ = pipe.communicate()
         sts = pipe.returncode
         if sts is None:

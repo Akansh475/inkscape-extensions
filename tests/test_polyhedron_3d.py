@@ -1,6 +1,7 @@
 # coding=utf-8
 from polyhedron_3d import Poly3D
 from inkex.tester import ComparisonMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy
 
 class Poly3DBasicTest(ComparisonMixin, TestCase):
     effect_class = Poly3D
@@ -15,4 +16,5 @@ class Poly3DBasicTest(ComparisonMixin, TestCase):
         ('--show=edg', '--obj=methane', '--cw_wound=True'),
         ('--show=fce', '--obj=from_file', '--spec_file=great_stel_dodec.obj', '--cw_wound=True'),
     ]
+    compare_filters = [CompareNumericFuzzy()]
     compare_file = 'svg/empty.svg'

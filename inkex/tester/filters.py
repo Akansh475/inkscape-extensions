@@ -60,7 +60,7 @@ class CompareNumericFuzzy(Compare):
     @staticmethod
     def filter(contents):
         func = lambda m: b'%.3f' % (float(m.group(0)))
-        contents = re.sub(br'\d+\.\d+', func, contents)
+        contents = re.sub(br'\d+\.\d+(e[+-]\d+)?', func, contents)
         contents = re.sub(br'(\d\.\d+?)0+\b', br'\1', contents)
         contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)
         return contents

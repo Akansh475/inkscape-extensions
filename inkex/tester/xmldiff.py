@@ -41,7 +41,12 @@ class DeltaLogger(list):
                     return [attr] + Path(val).to_arrays()
                 return (attr, val)
             return val
-        self.append((_prep(value_a), _prep(value_b)))
+        # Only append a difference if the preprocessed values are different.
+        # This solves the issue that -0 != 0 in path data.
+        pa = _prep(value_a)
+        pb = _prep(value_b)
+        if pa != pb:
+            self.append((pa, pb))
 
     def append_text(self, text_a, text_b):
         """Record a text difference"""

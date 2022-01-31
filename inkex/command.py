@@ -172,12 +172,18 @@ def _call(program, *args, **kwargs):
     inpipe = PIPE if stdin else None
 
     args = to_args(which(program), *args, **kwargs)
+
+    kwargs = {}
+    if sys.platform == "win32":
+        kwargs["creationflags"] = 0x08000000 # create no console window
+
     process = Popen(
         args,
         shell=False, # Never have shell=True
         stdin=inpipe, # StdIn not used (yet)
         stdout=PIPE, # Grab any output (return it)
         stderr=PIPE, # Take all errors, just incase
+        **kwargs
     )
     (stdout, stderr) = process.communicate(input=stdin)
     if process.returncode == 0:

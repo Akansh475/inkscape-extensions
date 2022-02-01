@@ -32,7 +32,7 @@ test:python37:
   script:
     - source /root/pyenv-init
     - pyenv shell 3.7.2
-    - tox -e py37-normal
+    - tox -e py37-normal-linux
 
 
 test:python38:
@@ -40,32 +40,34 @@ test:python38:
   script:
     - source /root/pyenv-init
     - pyenv shell 3.8.0
-    - tox -e py38-normal
+    - tox -e py38-normal-linux
 
 test:python39:
   extends: .tests
   script:
     - source /root/pyenv-init
     - pyenv shell 3.9.0
-    - tox -e py39-normal
+    - tox -e py39-normal-linux
 
 test:python38-windows:
   stage: test
-  extends: .shared-windows-runners
+  extends: 
+    - .shared-windows-runners
+    - .tests
   script:
     - choco install python --version 3.8.3 -y -f --no-progress
     - $env:PATH += ";C:\\PYTHON38\\;C:\\PYTHON38\\Scripts" 
     - refreshenv
     - "python -m pip install --upgrade setuptools"
     - "python -m pip install --upgrade tox"
-    - "tox -e py38-normal"
+    - "tox -e py38-normal-win"
 
 test:python310:
   extends: .tests
   script:
     - source /root/pyenv-init
     - pyenv shell 3.10.0
-    - tox -e py310-normal
+    - tox -e py310-normal-linux
 
 test:coverage:
   stage: coverage
@@ -73,6 +75,7 @@ test:coverage:
     - source /root/pyenv-init
     - pyenv shell 3.7.2
     - pip install coverage
+    - ls -la | grep coverage
     - coverage3 combine .coverage-*
     - coverage3 report -m --precision=2
     - coverage3 html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"
@@ -88,6 +91,7 @@ test:coverage:
     - test:python38
     - test:python39
     - test:python310
+    - test:python38-windows
   when: always
   coverage: '/TOTAL.+?(\d+.\d+%)/'
   artifacts:

@@ -14,3 +14,10 @@ exclude_lines =
     pragma: no cover
     if __name__ == .__main__.:
 
+[paths]
+source =
+    ./
+    C:\GitLab-Runner\builds\*\extensions
+    C:\GitLab-Runner\builds\*\*\extensions
+    C:\builds\*\extensions
+    /builds/*/extensions

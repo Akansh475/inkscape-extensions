@@ -164,6 +164,9 @@ def to_args(prog, *positionals, **arguments):
     args += [to_arg(pos, oldie) for pos in positionals if pos is not None]
     # Filter out empty non-arguments
     return [arg for arg in args if arg is not None]
+def to_args_sorted(prog, *positionals, **arguments):
+    """same as to_args, but keyword arguments are sorted beforehand"""
+    return to_args(prog, *positionals, **dict(sorted(arguments.items())))
 
 def _call(program, *args, **kwargs):
     stdin = kwargs.pop('stdin', None)

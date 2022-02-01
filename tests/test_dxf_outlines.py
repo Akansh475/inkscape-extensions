@@ -1,7 +1,7 @@
 # coding=utf-8
 from dxf_outlines import DxfOutlines
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
-
+from inkex.tester.filters import WindowsTextCompat
 
 class DFXOutlineBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = DxfOutlines
@@ -11,3 +11,4 @@ class DFXOutlineBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase)
         ('--POLY=true',),
         ('--ROBO=true',),
     ]
+    compare_filters = [WindowsTextCompat()]

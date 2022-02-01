@@ -1,8 +1,11 @@
 """Test Plotter extension"""
+import pytest
+import sys
 from plotter import Plot
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareReplacement
 
+@pytest.mark.skipif(sys.platform == "win32", reason="termios not available on Windows")
 class TestPlotter(ComparisonMixin, TestCase):
     """Test the plotter extension"""
     stderr_output = True

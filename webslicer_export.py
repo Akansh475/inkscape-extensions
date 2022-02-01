@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
+import subprocess
 import os
 import sys
 import tempfile
@@ -61,21 +62,17 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
         return None
 
     def get_cmd_output(self, cmd):
-        # This solution comes from Andrew Reedick <jr9445 at ATT.COM>
-        # http://mail.python.org/pipermail/python-win32/2008-January/006606.html
-        # This method replaces the commands.getstatusoutput() usage, with the
-        # hope to correct the windows exporting bug:
-        # https://bugs.launchpad.net/inkscape/+bug/563722
-        if sys.platform != "win32":
-            cmd = '{ ' + cmd + '; }'
-        pipe = os.popen(cmd + ' 2>&1', 'r')
-        text = pipe.read()
-        sts = pipe.close()
+        try:
+            pipe = subprocess.Popen(cmd)
+        except FileNotFoundError:
+            return 1, ""
+        stdout, _ = pipe.communicate()
+        sts = pipe.returncode
         if sts is None:
             sts = 0
-        if text[-1:] == '\n':
-            text = text[:-1]
-        return sts, text
+        if stdout is not None and stdout[-1:] == '\n':
+            stdout = stdout[:-1]
+        return sts, stdout
 
     _html_ids = []
 

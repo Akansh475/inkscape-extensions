@@ -174,12 +174,18 @@ class MockCommandMixin(MockMixin):
 
     def clean_paths(self, data, files):
         """Clean a string of any files or tempdirs"""
+        def replace(indata, replaced, replacement):
+            if isinstance(indata, str):
+                indata = indata.replace(replaced, replacement)
+            else:
+                indata = [i.replace(replaced, replacement) for i in indata]
+            return indata
         try:
             for fdir in self.recorded_tempdirs:
-                data = data.replace(fdir, '.')
-                files = [fname.replace(fdir, '.') for fname in files]
+                data = replace(data, fdir, '.')
+                files = replace(files, fdir, '.')
             for fname in files:
-                data = data.replace(fname, os.path.basename(fname))
+                data = replace(data, fname, os.path.basename(fname))
         except (UnicodeDecodeError, TypeError):
             pass
         return data
@@ -205,7 +211,6 @@ class MockCommandMixin(MockMixin):
         if self and program and arglst:
             return os.environ.get('NO_MOCK_COMMANDS')
         return False
-
     def mock_call(self, program, *args, **kwargs):
         """
         Replacement for the inkex.command.call() function, instead of calling
@@ -224,18 +229,20 @@ class MockCommandMixin(MockMixin):
         # may be modified to strip out filename directories (which change)
         inputs, outputs = self.add_call_files(msg, args, kwargs)
 
-        arglst = inkex.command.to_args(program, *args, **kwargs)[1:]
-        arglst.sort()
+        arglst = inkex.command.to_args_sorted(program, *args, **kwargs)[1:]
+        arglst = self.clean_paths(arglst, inputs + outputs)
         argstr = ' '.join(arglst)
-        argstr = self.clean_paths(argstr, inputs + outputs)
         msg['Arguments'] = argstr.strip()
 
         if stdin is not None:
             # The stdin is counted as the msg body
-            cleanin = self.clean_paths(stdin, inputs + outputs)
+            cleanin = self.clean_paths(stdin, inputs + outputs)\
+                          .replace("\r\n", "\n").replace(".\\", "./")
             msg.attach(MIMEText(cleanin, 'plain', 'utf-8'))
 
         keystr = msg.as_string()
+        # On Windows, output is separated by CRLF
+        keystr = keystr.replace('\r\n', '\n')
         # There is a difference between python2 and python3 output
         keystr = keystr.replace('\n\n', '\n')
         keystr = keystr.replace('\n ', ' ')
@@ -273,7 +280,7 @@ class MockCommandMixin(MockMixin):
             self.save_key(program, key, keystr, 'bad-key')
             raise IOError(f"Problem loading call: {program}/{key} use the environment variable "\
                 "NO_MOCK_COMMANDS=1 to call out to the external program and generate "\
-                "the mock call file.")
+                f"the mock call file for call {program} {argstr}.")
 
     def add_call_files(self, msg, args, kwargs):
         """
@@ -316,6 +323,12 @@ class MockCommandMixin(MockMixin):
                 value = self.clean_paths(fhl.read().decode('utf8'), [])
             else:
                 value = fhl.read()
+                try:
+                    value = value.decode()
+                except UnicodeDecodeError: # do not attempt to process binary files further
+                    pass
+            if isinstance(value, str):
+                value = value.replace('\r\n', '\n').replace(".\\", "./")
             part = MIMEApplication(value, Name=fname)
         # After the file is closed
         part['Content-Disposition'] = 'attachment'

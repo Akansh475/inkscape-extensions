@@ -1,7 +1,7 @@
 # coding=utf-8
 """Test base inkex module functionality"""
 from __future__ import absolute_import, print_function, unicode_literals
-
+from pathlib import Path
 import warnings
 
 from inkex.deprecated import _deprecated
@@ -32,5 +32,5 @@ class DeprecatedTests(TestCase):
     def test_traceback(self):
         """Traceback is possible for deprecation warnings"""
         warn = self.assertDeprecated(_deprecated, False, "BAR", stack=0, level=2)
-        self.assertIn("inkex/deprecated.py", str(warn.message))
+        self.assertIn(str(Path("inkex") / "deprecated"), str(warn.message))
         self.assertIn("test_inkex_deprecated.py", str(warn.message))

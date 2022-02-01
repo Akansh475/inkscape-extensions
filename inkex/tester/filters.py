@@ -60,7 +60,7 @@ class CompareNumericFuzzy(Compare):
     @staticmethod
     def filter(contents):
         func = lambda m: b'%.3f' % (float(m.group(0)))
-        contents = re.sub(br'\d+\.\d+', func, contents)
+        contents = re.sub(br'\d+\.\d+(e[+-]\d+)?', func, contents)
         contents = re.sub(br'(\d\.\d+?)0+\b', br'\1', contents)
         contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)
         return contents
@@ -138,3 +138,7 @@ class CompareReplacement(Compare):
         for _from, _to in self.deltas:
             contents = contents.replace(to_bytes(_from), to_bytes(_to))
         return contents
+
+class WindowsTextCompat(CompareReplacement):
+    def __init__(self):
+        super().__init__(('\r\n', '\n'))

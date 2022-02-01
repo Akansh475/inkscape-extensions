@@ -14,7 +14,7 @@ from ._text import FlowRegion, FlowRoot, FlowPara, FlowDiv, FlowSpan, TextElemen
                    TextPath, Tspan, SVGfont, FontFace, Glyph, MissingGlyph
 from ._use import Symbol, Use
 from ._meta import Defs, StyleElement, Script, Desc, Title, NamedView, Guide, \
-                   Metadata, ForeignObject, Switch, Grid
+                   Metadata, ForeignObject, Switch, Grid, Page
 from ._filters import Filter, Pattern, Gradient, LinearGradient, RadialGradient, \
                       PathEffect, Stop, MeshGradient, MeshRow, MeshPatch
 from ._image import Image

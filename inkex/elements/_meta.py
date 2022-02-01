@@ -92,6 +92,17 @@ class NamedView(BaseElement):
             elem.set('inkscape:label', str(name))
         return self.add(elem)
 
+    def get_pages(self):
+        """Returns a list of pages"""
+        return self.findall('inkscape:page')
+
+    def new_page(self, x, y, width, height, label=None):
+        """Creates a new page in this namedview"""
+        elem = Page(width=width, height=height, x=x, y=y)
+        if label:
+            elem.set('inkscape:label', str(label))
+        return self.add(elem)
+
 
 class Guide(BaseElement):
     """An inkscape guide"""
@@ -147,3 +158,26 @@ class Switch(BaseElement):
 class Grid(BaseElement):
     """A namedview grid child"""
     tag_name = 'inkscape:grid'
+
+class Page(BaseElement):
+    """A namedview page child"""
+    tag_name = 'inkscape:page'
+
+    width = property(lambda self: self.unittouu(self.get("width") or 0))
+    height = property(lambda self: self.unittouu(self.get("height") or 0))
+    x = property(lambda self: self.unittouu(self.get("x") or 0))
+    y = property(lambda self: self.unittouu(self.get("y") or 0))
+
+    @classmethod
+    def new(cls, width, height, x, y):
+        """ Creates a new page element in the namedview"""
+        page = super().new()
+        page.move_to(x, y)
+        page.set('width', width)
+        page.set('height', height)
+        return page
+
+    def move_to(self, x, y):
+        """ Move this page to the given x,y position """
+        self.set('position', f"{float(x):g},{float(y):g}")
+        return self

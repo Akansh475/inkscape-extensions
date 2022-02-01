@@ -9,7 +9,7 @@ import math
 import inkex
 
 from inkex import (
-    Group, Layer, Pattern, Guide, Polyline, Use, Defs,
+    Group, Layer, Pattern, Guide, Page, Polyline, Use, Defs,
     TextElement, TextPath, Tspan, FlowPara, FlowRoot, FlowRegion, FlowSpan,
     PathElement, Rectangle, Circle, Ellipse, Anchor, Line as LineElement,
     Transform, Style, LinearGradient, RadialGradient, Stop
@@ -335,6 +335,20 @@ class NamedViewTest(ElementTestCase):
         self.svg.namedview.add(Guide().move_to(0, 0, 0))
         self.svg.namedview.add(Guide().move_to(0, 0, '90'))
         self.assertEqual(len(self.svg.namedview.get_guides()), 2)
+
+    def test_pages(self):
+        """Create some extra pages and see a list of them"""
+        self.assertEqual(len(self.svg.namedview.get_pages()), 0)
+        self.svg.namedview.add(Page(width='210', height='297', x='0', y='0'))
+        self.svg.namedview.new_page(x='220', y='0', width='147.5', height='210', label='TEST')
+        self.assertEqual(len(self.svg.namedview.get_pages()), 2)
+        self.assertEqual(self.svg.namedview.get_pages()[0].attrib['x'], '0')
+        self.assertEqual(self.svg.namedview.get_pages()[1].get('inkscape:label'), 'TEST')
+        self.assertEqual(self.svg.namedview.get_pages()[1].attrib['width'], '147.5')
+        self.assertEqual(self.svg.namedview.get_pages()[0].attrib['height'], '297')
+        self.assertEqual(self.svg.namedview.get_pages()[1].attrib['x'], '220')
+        self.assertEqual(self.svg.namedview.get_pages()[1].attrib['y'], '0')
+
 
 class TextTest(ElementTestCase):
     """Test all text functions"""

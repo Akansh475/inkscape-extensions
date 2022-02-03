@@ -35,6 +35,6 @@ class Ean2(EanBarcode):
     def _encode(self, num, guide=False):
         if len(num) != 2:
             num = ([0, 0] + num)[-2:]
-        self.text = " ".join(self.space(num))
+        self.text = " ".join(EanBarcode.space(num))
         family = ((num[0] * 10) + num[1]) % 4
-        return START + "01".join(self.encode_interleaved(family, num, FAMS))
+        return START + "01".join(EanBarcode.encode_interleaved(family, num, FAMS))

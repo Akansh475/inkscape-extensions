@@ -49,18 +49,19 @@ class Upce(EanBarcode):
 
     def _encode(self, num, guide=False):
         """Generate a UPC-E Barcode"""
-        self.text = self.space(["0"], 2, num[:6], 2, num[-1])
-        code = self.encode_interleaved(num[-1], num[:6], FAMS)
+        self.text = EanBarcode.space(["0"], 2, num[:6], 2, num[-1])
+        code = EanBarcode.encode_interleaved(num[-1], num[:6], FAMS)
         return self.enclose(code)
 
     def append_checksum(self, number):
         """Generate a UPCE Checksum"""
         if len(number) == 6:
-            number = self.convert_e2a(number)
+            number = Upce.convert_e2a(number)
         result = self.get_checksum(number)
-        return self.convert_a2e(number) + result
+        return Upce.convert_a2e(number) + result
 
-    def convert_a2e(self, number):
+    @staticmethod
+    def convert_a2e(number):
         """Converting UPC-A to UPC-E, may cause errors."""
         # All UPC-E Numbers use number system 0
         if number[0] != "0" or len(number) != 11:
@@ -90,11 +91,11 @@ class Upce(EanBarcode):
             # so long as the product is 00005-00009 so as not to conflict with
             # the 0-4 used above.
             return maker + product[4]
-        else:
-            # Invalid UPC-A Numbe
-            raise ValueError("Invalid UPC Number")
+        # Invalid UPC-A Numbe
+        raise ValueError("Invalid UPC Number")
 
-    def convert_e2a(self, number):
+    @staticmethod
+    def convert_e2a(number):
         """Convert UPC-E to UPC-A by padding with zeros"""
         # It's more likly to convert this without fault
         # But we still must be mindful of the 4 conversions
@@ -103,9 +104,8 @@ class Upce(EanBarcode):
 
         if number[5] in ["0", "1", "2"]:
             return "0" + number[:2] + number[5] + "0000" + number[2:5]
-        elif number[5] == "3":
+        if number[5] == "3":
             return "0" + number[:3] + "00000" + number[3:5]
-        elif number[5] == "4":
+        if number[5] == "4":
             return "0" + number[:4] + "00000" + number[4]
-        else:
-            return "0" + number[:5] + "0000" + number[5]
+        return "0" + number[:5] + "0000" + number[5]

@@ -93,6 +93,6 @@ class Code39(Barcode):
                 encoded = encoded + colour + colour
             else:
                 encoded = encoded + colour
-            colour = colour == "1" and "0" or "1"
+            colour = "0" if colour == "1" else "1"
 
         return encoded

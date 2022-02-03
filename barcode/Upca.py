@@ -33,8 +33,8 @@ class Upca(EanBarcode):
 
     def _encode(self, num, guide=False):
         """Encode for a UPC-A Barcode"""
-        self.text = self.space(num[0:1], 3, num[1:6], 4, num[6:11], 3, num[11:])
+        self.text = EanBarcode.space(num[0:1], 3, num[1:6], 4, num[6:11], 3, num[11:])
         return self.enclose(
-            self.encode_left(num[0:6]),
-            self.encode_right(num[6:12]),
+            EanBarcode.encode_left(num[0:6]),
+            EanBarcode.encode_right(num[6:12]),
         )

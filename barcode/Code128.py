@@ -178,18 +178,20 @@ class Code128(Barcode):
                 blocks.append(["C", datum])
 
         if block:
-            blocks.append(self.best_block(block))
+            blocks.append(Code128.best_block(block))
             block = ""
 
-        return self.encode_blocks(blocks)
+        return Code128.encode_blocks(blocks)
 
-    def best_block(self, block):
+    @staticmethod
+    def best_block(block):
         """If this has characters above 63, select B over A"""
         if any(ord(x) > 63 for x in block):
             return ["B", block]
         return ["A", block]
 
-    def encode_blocks(self, blocks):
+    @staticmethod
+    def encode_blocks(blocks):
         """Encode the given blocks into A, B or C codes"""
         encode = ""
         total = 0
@@ -221,7 +223,7 @@ class Code128(Barcode):
             encode = encode + CODE_MAP[num]
             pos += 1
 
-            if b_set == "A" or b_set == "B":
+            if b_set in ("A", "B"):
                 chars = CHAR_B
                 if b_set == "A":
                     chars = CHAR_A

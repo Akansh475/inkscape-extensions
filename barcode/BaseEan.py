@@ -81,20 +81,23 @@ class EanBarcode(Barcode):
     guard_bar = "202"
     center_bar = "02020"
 
-    def intarray(self, number):
+    @staticmethod
+    def intarray(number):
         """Convert a string of digits into an array of ints"""
         return [int(i) for i in number]
 
-    def encode_interleaved(self, family, number, fams=FAMILIES):
+    @staticmethod
+    def encode_interleaved(family, number, fams=FAMILIES):
         """Encode any side of the barcode, interleaved"""
         result = []
-        encset = self.intarray(fams[family])
-        for i in range(len(number)):
+        encset = EanBarcode.intarray(fams[family])
+        for i, _ in enumerate(number):
             thismap = MAPPING[encset[i]]
             result.append(thismap[number[i]])
         return result
 
-    def encode_right(self, number):
+    @staticmethod
+    def encode_right(number):
         """Encode the right side of the barcode, non-interleaved"""
         result = []
         for num in number:
@@ -102,14 +105,16 @@ class EanBarcode(Barcode):
             result.append(MAPPING[1][num][::-1])
         return result
 
-    def encode_left(self, number):
+    @staticmethod
+    def encode_left(number):
         """Encode the left side of the barcode, non-interleaved"""
         result = []
         for num in number:
             result.append(MAPPING[0][num])
         return result
 
-    def space(self, *spacing):
+    @staticmethod
+    def space(*spacing):
         """Space out an array of numbers"""
         result = ""
         for space in spacing:
@@ -126,9 +131,9 @@ class EanBarcode(Barcode):
             return [self.length]
         return self.lengths[:]
 
-    def encode(self, code):
+    def encode(self, text):
         """Encode any EAN barcode"""
-        code = code.replace(" ", "").strip()
+        code = text.replace(" ", "").strip()
         guide = code.endswith(">")
         code = code.strip(">")
 
@@ -163,7 +168,7 @@ class EanBarcode(Barcode):
                 code = self.append_checksum(code)
             elif not self.verify_checksum(code):
                 return self.error(code, "Checksum failed, omit for new sum")
-        return self._encode(self.intarray(code), guide=guide)
+        return self._encode(EanBarcode.intarray(code), guide=guide)
 
     def _encode(self, num, guide=False):
         """

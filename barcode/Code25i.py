@@ -41,9 +41,10 @@ class Code25i(Barcode):
     """Convert a text into string binary of black and white markers"""
 
     # Start and stop code are already encoded into white (0) and black(1) bars
-    def encode(self, number):
-        if not number.isdigit():
-            return self.error(number, "CODE25 can only encode numbers.")
+    def encode(self, text):
+        if not text.isdigit():
+            return self.error(text, "CODE25 can only encode numbers.")
+        number = text
 
         # Number of figures to encode must be even,
         # a 0 is added to the left in case it's odd.

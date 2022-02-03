@@ -22,7 +22,7 @@ Python barcode renderer for RM4CC barcodes. Designed for use with Inkscape.
 
 from .Base import Barcode
 
-map = {
+charmap = {
     "(": "25",
     ")": "3",
     "0": "05053535",
@@ -68,6 +68,8 @@ check = ["ZUVWXY", "501234", "B6789A", "HCDEFG", "NIJKLM", "TOPQRS"]
 
 
 class Rm4scc(Barcode):
+    """Provice a Rm4scc barcode generator"""
+
     default_height = 18
 
     def encode(self, text):
@@ -77,23 +79,24 @@ class Rm4scc(Barcode):
         text.replace("(", "")
         text.replace(")", "")
 
-        text = "(" + text + self.checksum(text) + ")"
+        text = "(" + text + Rm4scc.checksum(text) + ")"
 
         i = 0
         for char in text:
-            if char in map:
-                result = result + map[char]
+            if char in charmap:
+                result = result + charmap[char]
                 i += 1
 
         return result
 
-    # given a string of data, return the check character
-    def checksum(self, text):
+    @staticmethod
+    def checksum(text):
+        """given a string of data, return the check character"""
         total_lower = 0
         total_upper = 0
         for char in text:
-            if char in map:
-                bars = map[char][0:8:2]
+            if char in charmap:
+                bars = charmap[char][0:8:2]
                 lower = 0
                 upper = 0
 

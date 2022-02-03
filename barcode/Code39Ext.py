@@ -24,27 +24,25 @@ from .Code39 import Code39
 
 encode = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-map = {}
+charmap = {}
 
 i = 0
 for char in encode:
-    map[char] = i
+    charmap[char] = i
     i += 1
 
 
-# Extended encoding maps for full ASCII Code93
-def getMap(array):
+def get_map(array):
+    """Extended encoding maps for full ASCII Code93"""
     result = {}
-    y = 0
-    for x in array:
+    for y, x in enumerate(array):
         result[chr(x)] = encode[y]
-        y += 1
 
     return result
 
 
 # MapA is eclectic, but B, C, D are all ASCII ranges
-mapA = getMap(
+mapA = get_map(
     [
         27,
         28,
@@ -74,24 +72,26 @@ mapA = getMap(
         127,
     ]
 )  # %
-mapB = getMap(range(1, 26))  # $
-mapC = getMap(range(33, 58))  # /
-mapD = getMap(range(97, 122))  # +
+mapB = get_map(range(1, 26))  # $
+mapC = get_map(range(33, 58))  # /
+mapD = get_map(range(97, 122))  # +
 
 
 class Code39Ext(Code39):
+    """Render Code39 Barcodes"""
+
     def encode(self, text):
         # We are only going to extend the Code39 barcodes
         result = ""
-        for char in text:
-            if char in mapA:
-                char = "%" + mapA[char]
-            elif char in mapB:
-                char = "$" + mapB[char]
-            elif char in mapC:
-                char = "/" + mapC[char]
-            elif char in mapD:
-                char = "+" + mapD[char]
-            result = result + char
+        for character in text:
+            if character in mapA:
+                character = "%" + mapA[character]
+            elif character in mapB:
+                character = "$" + mapB[character]
+            elif character in mapC:
+                character = "/" + mapC[character]
+            elif character in mapD:
+                character = "+" + mapD[character]
+            result = result + character
 
         return Code39.encode(self, result)

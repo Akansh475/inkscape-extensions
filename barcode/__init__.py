@@ -41,7 +41,7 @@ For supported barcodes see Barcode module directory.
 # PDF417-GLI
 
 
-class NoBarcode(object):
+class NoBarcode:
     """Simple class for no barcode"""
 
     def __init__(self, msg):

@@ -35,9 +35,10 @@ class Ean13(EanBarcode):
 
     def _encode(self, num, guide=False):
         """Encode an ean13 barcode"""
-        self.text = self.space(num[0:1], 4, num[1:7], 5, num[7:], 7)
+        self.text = EanBarcode.space(num[0:1], 4, num[1:7], 5, num[7:], 7)
         if guide:
             self.text = self.text[:-4] + ">"
         return self.enclose(
-            self.encode_interleaved(num[0], num[1:7]), self.encode_right(num[7:])
+            EanBarcode.encode_interleaved(num[0], num[1:7]),
+            EanBarcode.encode_right(num[7:]),
         )

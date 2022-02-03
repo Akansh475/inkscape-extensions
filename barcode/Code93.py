@@ -131,16 +131,18 @@ ENCODE = [
 
 
 class Code93(Barcode):
+    """Encode Code93 Barcode"""
+
     def encode(self, text):
         # start marker
         bits = ENCODE[MAP.get("MARKER", -1)]
 
         # Extend to ASCII charset ( return Array )
-        text = self.encode_ascii(text)
+        text = Code93.encode_ascii(text)
 
         # Calculate the checksums
-        text.append(self.checksum(text, 20))  # C
-        text.append(self.checksum(text, 15))  # K
+        text.append(Code93.checksum(text, 20))  # C
+        text.append(Code93.checksum(text, 15))  # K
 
         # Now convert text into the ENCODE bits (black and white stripes)
         for char in text:
@@ -149,7 +151,8 @@ class Code93(Barcode):
         # end marker and termination bar
         return bits + ENCODE[MAP.get("MARKER", -1)] + "1"
 
-    def checksum(self, text, mod):
+    @staticmethod
+    def checksum(text, mod):
         """Generate a code 93 checksum"""
         weight = len(text) % mod
         check = 0
@@ -162,8 +165,9 @@ class Code93(Barcode):
 
         return PALLET[check % 47]
 
-    # Some characters need re-ENCODE into the code93 specification
-    def encode_ascii(self, text):
+    @staticmethod
+    def encode_ascii(text):
+        """Some characters need re-ENCODE into the code93 specification"""
         result = []
         for char in text:
             if char in MAP:

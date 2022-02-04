@@ -59,12 +59,12 @@ test:python39:
 
 test:python38-windows:
   stage: test
-  extends: 
+  extends:
     - .shared-windows-runners
     - .tests
   script:
     - choco install python --version 3.8.3 -y -f --no-progress
-    - $env:PATH += ";C:\\PYTHON38\\;C:\\PYTHON38\\Scripts" 
+    - $env:PATH += ";C:\\PYTHON38\\;C:\\PYTHON38\\Scripts"
     - refreshenv
     - "python -m pip install --upgrade setuptools"
     - "python -m pip install --upgrade tox"
@@ -94,6 +94,9 @@ test:coverage:
     - pyenv shell 3.6.8
     - pip install pylint==2.5.3
     - python3 tests/add_pylint.py htmlcov/index.html
+    - pip install anybadge
+    - pylintscore=$(grep -Eo "[0-9]+.[0-9]+</td></tr></tfoot>" htmlcov/index.html | grep -Eo "[0-9]+.[0-9]+")
+    - anybadge -l pylint -v $pylintscore -f htmlcov/pylint.svg 6=red 8=orange 9=yellow 10=green
   dependencies:
     - test:python37
     - test:python38

@@ -1,5 +1,5 @@
 # coding=utf-8
-from color_HSL_adjust import HslAdjust
+from color_hsl_adjust import HslAdjust
 from .test_inkex_extensions import ColorBaseCase
 
 

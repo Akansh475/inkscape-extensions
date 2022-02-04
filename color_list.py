@@ -2,16 +2,17 @@
 """List all colors used in an svg document"""
 
 from collections import defaultdict
+from typing import Dict
 import inkex
 
 
 class ListColours(inkex.ColorExtension):
     """Make the colours darker"""
 
-    _counts = defaultdict(int)
+    _counts: Dict = defaultdict(int)
 
     def effect(self):
-        super(ListColours, self).effect()
+        super().effect()
         items = sorted(self._counts.items(), key=lambda v: -v[1])
         for color, count in items:
             self.msg("{count}: {color}".format(color=color, count=count))

@@ -33,13 +33,13 @@ class ReplaceColor(inkex.ColorExtension):
             help="Whether color should be replaced regardless of opacity match",
         )
 
-    def modify_color(self, name, color_rgba):
-        if self.options.from_color.to_rgb() == color_rgba.to_rgb() and (
+    def modify_color(self, name, color):  # color is rgba
+        if self.options.from_color.to_rgb() == color.to_rgb() and (
             self.options.ignore_opacity
-            or abs(self.options.from_color.to_rgba().alpha - color_rgba.alpha) < 0.01
+            or abs(self.options.from_color.to_rgba().alpha - color.alpha) < 0.01
         ):
             return self.options.to_color.to_rgba()
-        return color_rgba
+        return color
 
 
 if __name__ == "__main__":

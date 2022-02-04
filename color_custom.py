@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Custom color function per channel of selected objects"""
 
 import ast
 import operator as op
@@ -30,16 +31,15 @@ def eval_expr(expr, namespace):
 def _eval(node, namespace):
     if isinstance(node, ast.Num):  # <number>
         return node.n
-    elif isinstance(node, ast.Name):  # <variable> (must be in namespace)
+    if isinstance(node, ast.Name):  # <variable> (must be in namespace)
         return namespace[node.id]
-    elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
+    if isinstance(node, ast.BinOp):  # <left> <operator> <right>
         return OPS[type(node.op)](
             _eval(node.left, namespace), _eval(node.right, namespace)
         )
-    elif isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
+    if isinstance(node, ast.UnaryOp):  # <operator> <operand> e.g., -1
         return OPS[type(node.op)](_eval(node.operand, namespace))
-    else:
-        raise TypeError(node)
+    raise TypeError(node)
 
 
 class Custom(inkex.ColorExtension):

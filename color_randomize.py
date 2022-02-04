@@ -27,8 +27,7 @@ def _rand(
             max_ -= min_
             min_ = 0
         return method(min_, max_)
-    else:
-        return method(min_, max_) % roof
+    return method(min_, max_) % roof
 
 
 class Randomize(inkex.ColorExtension):

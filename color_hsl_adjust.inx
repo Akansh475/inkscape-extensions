@@ -29,6 +29,6 @@ Options:
         </effects-menu>
     </effect>
     <script>
-        <command location="inx" interpreter="python">color_HSL_adjust.py</command>
+        <command location="inx" interpreter="python">color_hsl_adjust.py</command>
     </script>
 </inkscape-extension>

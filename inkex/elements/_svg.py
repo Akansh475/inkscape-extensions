@@ -30,7 +30,7 @@ from lxml import etree
 import math
 
 from ..deprecated import DeprecatedSvgMixin
-from ..units import discover_unit
+from ..units import discover_unit, parse_unit
 from ._selected import ElementList
 from ..transforms import BoundingBox
 from ..styles import StyleSheets
@@ -161,7 +161,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Returns the width of the `viewport coordinate system
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the width
         attribute of the svg element converted to px"""
-        return self.unittouu(self.get('width')) or self.get_viewbox()[2]
+        return self.to_dimensionless(self.get('width')) or self.get_viewbox()[2]
 
     @property
     def viewbox_height(self):  # getDocumentHeight(self):
@@ -176,16 +176,29 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Returns the width of the `viewport coordinate system
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the height
         attribute of the svg element converted to px"""
-        return self.unittouu(self.get('height')) or self.get_viewbox()[3]
+        return self.to_dimensionless(self.get('height')) or self.get_viewbox()[3]
 
     @property
     def scale(self):
-        """Return the ratio between the viewBox width and the page width, which is displayed
-        as "scale" in the Inkscape document properties"""
+        """Return the ratio between the viewBox width and the page width"""
+        return self._base_scale()
+
+    @property
+    def inkscape_scale(self):
+        """Returns the ratio between the viewBox width (in width/height units) and the
+        page width, which is displayed as "scale" in the Inkscape document properties."""
+
+        viewbox_unit = (parse_unit(self.get("width")) or parse_unit(self.get("height"))\
+                        or (0, "px"))[1]
+        return self._base_scale(viewbox_unit)
+
+
+    def _base_scale(self, unit="px"):
+        """Returns what Inkscape shows as "user units per `unit`" """
         try:
-            scale_x = self.viewbox_width / self.viewport_width
-            scale_y = self.viewbox_height / self.viewport_height
-            value = min([scale_x, scale_y])
+            scale_x = self.to_dimensional(self.viewport_width, unit) / self.viewbox_width
+            scale_y = self.to_dimensional(self.viewport_height, unit) / self.viewbox_height
+            value = max([scale_x, scale_y])
             return 1.0 if value == 0 else value
         except (ValueError, ZeroDivisionError):
             return 1.0
@@ -195,7 +208,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Return the scale of the equivalent transform of the svg tag, as defined by
         https://www.w3.org/TR/SVG2/coords.html#ComputingAViewportsTransform
         (highly simplified)"""
-        return 1/self.scale
+        return self.scale
 
     @property
     def unit(self):
@@ -210,6 +223,10 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
             if viewbox and set(viewbox) != {0}:
                 self._unit = discover_unit(self.get('width'), viewbox[2], default='px')
         return self._unit
+
+    @property
+    def document_unit(self):
+        return self.namedview.get("inkscape:document-units", "px")
 
     @property
     def stylesheets(self):

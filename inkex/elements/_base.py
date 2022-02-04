@@ -444,24 +444,39 @@ class BaseElement(etree.ElementBase):
             return 'px' # Don't cache.
 
     @staticmethod
-    def uutounit(value, to_unit='px'):
+    def to_dimensional(value, to_unit='px'):
         """Convert a value given in user units (px) the given unit type"""
         return convert_unit(value, to_unit)
 
     @staticmethod
-    def unittouu(value):
+    def to_dimensionless(value):
         """Convert a length value into user units (px)"""
         return convert_unit(value, "px")
+
+    def uutounit(self, value, to_unit='px'):
+        """Convert a unit value to a given unit. If the value does not have a unit, "Document" units
+        are assumed. "Document units" are an Inkscape-specific concept. For most use-cases, 
+        to_dimensional is more appropriate."""
+        return convert_unit(value, to_unit, default=self.unit)
+
+    def unittouu(self, value):
+        """Convert a unit value into document units. "Document unit" is an Inkscape-specific 
+        concept. For most use-cases, viewport_to_unit (when the size of an object given in viewport
+        units is needed) or to_dimensionless (when the equivalent value without unit is needed)
+        is more appropriate."""
+        return convert_unit(value, self.unit)
 
     def unit_to_viewport(self, value, unit="px"):
         """Converts a length value to viewport units, as defined by the width/height
         element on the root"""
-        return self.uutounit(self.unittouu(value) * self.root.equivalent_transform_scale, unit)
+        return self.to_dimensional(self.to_dimensionless(value) \
+                                         * self.root.equivalent_transform_scale, unit)
 
     def viewport_to_unit(self, value, unit="px"):
         """Converts a length given on the viewport to the specified unit in the user
         coordinate system"""
-        return self.uutounit(self.unittouu(value) / self.root.equivalent_transform_scale, unit)
+        return self.to_dimensional(self.to_dimensionless(value) \
+                                         / self.root.equivalent_transform_scale, unit)
 
     def add_unit(self, value):
         """Add document unit when no unit is specified in the string """
@@ -495,7 +510,7 @@ class BaseElement(etree.ElementBase):
             if key in all_properties and all_properties[key][2]:
                 style[key] = BaseStyleValue.factory(declaration=key + ": " + self.attrib[key])
         return style
-    
+
     def composed_transform(self, other=None):
         """Calculate every transform down to the other element
           if none specified the transform is to the root document element"""
@@ -588,4 +603,4 @@ class ShapeElement(BaseElement):
             return font_size * 1.2
         if parsed[1] == "%":
             return font_size * parsed[0] * 0.01
-        return self.unittouu(line_height)
+        return self.to_dimensionless(line_height)

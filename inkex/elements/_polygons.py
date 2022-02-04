@@ -268,14 +268,14 @@ class Line(ShapeElement):
 
 class RectangleBase(ShapeElement):
     """Provide a useful extension for rectangle elements"""
-    left = property(lambda self: self.unittouu(self.get('x', '0')))
-    top = property(lambda self: self.unittouu(self.get('y', '0')))
+    left = property(lambda self: self.to_dimensionless(self.get('x', '0')))
+    top = property(lambda self: self.to_dimensionless(self.get('y', '0')))
     right = property(lambda self: self.left + self.width)
     bottom = property(lambda self: self.top + self.height)
-    width = property(lambda self: self.unittouu(self.get('width', '0')))
-    height = property(lambda self: self.unittouu(self.get('height', '0')))
-    rx = property(lambda self: self.unittouu(self.get('rx', self.get('ry', 0.0))))
-    ry = property(lambda self: self.unittouu(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
+    width = property(lambda self: self.to_dimensionless(self.get('width', '0')))
+    height = property(lambda self: self.to_dimensionless(self.get('height', '0')))
+    rx = property(lambda self: self.to_dimensionless(self.get('rx', self.get('ry', 0.0))))
+    ry = property(lambda self: self.to_dimensionless(self.get('ry', self.get('rx', 0.0)))) # pylint: disable=invalid-name
 
     def get_path(self):
         """Calculate the path as the box around the rect"""
@@ -314,7 +314,8 @@ class EllipseBase(ShapeElement):
 
     @property
     def center(self):
-        return ImmutableVector2d(self.unittouu(self.get('cx', '0')), self.unittouu(self.get('cy', '0')))
+        return ImmutableVector2d(self.to_dimensionless(self.get('cx', '0')), 
+                                 self.to_dimensionless(self.get('cy', '0')))
 
     @center.setter
     def center(self, value):
@@ -341,11 +342,11 @@ class Circle(EllipseBase):
 
     @property
     def radius(self):
-        return self.unittouu(self.get('r', '0'))
+        return self.to_dimensionless(self.get('r', '0'))
 
     @radius.setter
     def radius(self, value):
-        self.set("r", self.unittouu(value))
+        self.set("r", self.to_dimensionless(value))
 
     def _rxry(self):
         r = self.radius
@@ -358,7 +359,7 @@ class Ellipse(EllipseBase):
 
     @property
     def radius(self):
-        return ImmutableVector2d(self.unittouu(self.get('rx', '0')), self.unittouu(self.get('ry', '0')))
+        return ImmutableVector2d(self.to_dimensionless(self.get('rx', '0')), self.to_dimensionless(self.get('ry', '0')))
 
     @radius.setter
     def radius(self, value):

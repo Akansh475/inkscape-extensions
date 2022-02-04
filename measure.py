@@ -61,15 +61,10 @@ class MeasureLength(inkex.EffectExtension):
     def effect(self):
         # get number of digits
         prec = int(self.options.precision)
-        scale = self.svg.unittouu('1px')  # convert to document units
+        scale = self.svg.viewport_to_unit("1" + self.svg.document_unit)  # convert to document units
         self.options.offset *= scale
-        factor = 1.0
 
-        if self.svg.get('viewBox'):
-            factor = self.svg.scale / self.svg.unittouu('1px')
-            self.options.fontsize /= factor
-
-        factor *= scale / self.svg.unittouu('1' + self.options.unit)
+        factor = self.svg.unit_to_viewport(1, self.options.unit)
 
         # loop over all selected paths
         filtered = self.svg.selection.filter(inkex.PathElement)
@@ -183,7 +178,7 @@ class MeasureLength(inkex.EffectExtension):
         new = node.add(Tspan())
         new.set('sodipodi:role', 'line')
         s = {'text-align': 'center', 'vertical-align': 'bottom',
-             'text-anchor': anchor, 'font-size': str(self.options.fontsize),
+             'text-anchor': anchor, 'font-size': self.svg.viewport_to_unit(self.options.fontsize),
              'fill-opacity': '1.0', 'stroke': 'none',
              'font-weight': 'normal', 'font-style': 'normal', 'fill': '#000000'}
         new.style = s

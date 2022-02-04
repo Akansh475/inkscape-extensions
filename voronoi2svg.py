@@ -155,7 +155,7 @@ class Voronoi(inkex.EffectExtension):
 
         linestyle = {
             'stroke': '#000000',
-            'stroke-width': str(self.svg.unittouu('1px')),
+            'stroke-width': str(self.svg.to_dimensionless('1px')),
             'fill': 'none',
             'stroke-linecap': 'round',
             'stroke-linejoin': 'round'
@@ -163,7 +163,7 @@ class Voronoi(inkex.EffectExtension):
 
         facestyle = {
             'stroke': '#000000',
-            'stroke-width': str(self.svg.unittouu('1px')),
+            'stroke-width': str(self.svg.to_dimensionless('1px')),
             'fill': 'none',
             'stroke-linecap': 'round',
             'stroke-linejoin': 'round'
@@ -277,7 +277,7 @@ class Voronoi(inkex.EffectExtension):
                     or self.options.delaunayFillOptions == "delaunay-fill-random":
                     facestyle = {
                         'stroke': fills[triangle[random.randrange(0, 2)]],
-                        'stroke-width': str(self.svg.unittouu('0.005px')),
+                        'stroke-width': str(self.svg.to_dimensionless('0.005px')),
                         'fill': fills[triangle[random.randrange(0, 2)]],
                         'stroke-linecap': 'round',
                         'stroke-linejoin': 'round'

@@ -75,8 +75,8 @@ class NamedView(BaseElement):
     @property
     def center(self):
         """Returns view_center in terms of document units"""
-        return Vector2d(self.root.unittouu(self.get('inkscape:cx') or 0),
-                        self.root.unittouu(self.get('inkscape:cy') or 0))
+        return Vector2d(self.root.viewport_to_unit(self.get('inkscape:cx') or 0),
+                        self.root.viewport_to_unit(self.get('inkscape:cy') or 0))
 
     def get_guides(self):
         """Returns a list of guides"""
@@ -163,10 +163,10 @@ class Page(BaseElement):
     """A namedview page child"""
     tag_name = 'inkscape:page'
 
-    width = property(lambda self: self.unittouu(self.get("width") or 0))
-    height = property(lambda self: self.unittouu(self.get("height") or 0))
-    x = property(lambda self: self.unittouu(self.get("x") or 0))
-    y = property(lambda self: self.unittouu(self.get("y") or 0))
+    width = property(lambda self: self.to_dimensionless(self.get("width") or 0))
+    height = property(lambda self: self.to_dimensionless(self.get("height") or 0))
+    x = property(lambda self: self.to_dimensionless(self.get("x") or 0))
+    y = property(lambda self: self.to_dimensionless(self.get("y") or 0))
 
     @classmethod
     def new(cls, width, height, x, y):

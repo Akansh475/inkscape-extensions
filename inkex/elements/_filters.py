@@ -136,8 +136,8 @@ class Gradient(BaseElement):
     def stops(self):
         """Return an ordered list of own or linked stop nodes"""
         gradcolor = self.href if isinstance(self.href, (LinearGradient, RadialGradient)) else self
-        return sorted([child for child in gradcolor if isinstance(child, Stop)]
-                      , key=lambda x: parse_percent(x.offset))
+        return sorted([child for child in gradcolor if isinstance(child, Stop)],
+                      key=lambda x: parse_percent(x.offset))
 
     @property
     def stop_offsets(self):
@@ -173,17 +173,17 @@ class LinearGradient(Gradient):
     orientation_attributes = ('x1', 'y1', 'x2', 'y2')
 
     def apply_transform(self): # type: () -> None
-       """Apply transform to orientation points and set it to identity."""
-       trans = self.pop('gradientTransform')
-       p1 = (self.unittouu(self.get('x1')), self.unittouu(self.get('y1')))
-       p2 = (self.unittouu(self.get('x2')), self.unittouu(self.get('y2')))
-       p1t = trans.apply_to_point(p1)
-       p2t = trans.apply_to_point(p2)
-       self.update(
-            x1=self.unittouu(p1t[0]),
-            y1=self.unittouu(p1t[1]),
-            x2=self.unittouu(p2t[0]),
-            y2=self.unittouu(p2t[1]))
+        """Apply transform to orientation points and set it to identity."""
+        trans = self.pop('gradientTransform')
+        p1 = (self.to_dimensionless(self.get('x1')), self.to_dimensionless(self.get('y1')))
+        p2 = (self.to_dimensionless(self.get('x2')), self.to_dimensionless(self.get('y2')))
+        p1t = trans.apply_to_point(p1)
+        p2t = trans.apply_to_point(p2)
+        self.update(
+            x1=self.to_dimensionless(p1t[0]),
+            y1=self.to_dimensionless(p1t[1]),
+            x2=self.to_dimensionless(p2t[0]),
+            y2=self.to_dimensionless(p2t[1]))
 
 
 class RadialGradient(Gradient):
@@ -191,17 +191,18 @@ class RadialGradient(Gradient):
     orientation_attributes = ('cx', 'cy', 'fx', 'fy', 'r')
 
     def apply_transform(self): # type: () -> None
-       """Apply transform to orientation points and set it to identity."""
-       trans = self.pop('gradientTransform')
-       p1 = (self.unittouu(self.get('cx')), self.unittouu(self.get('cy')))
-       p2 = (self.unittouu(self.get('fx')), self.unittouu(self.get('fy')))
-       p1t = trans.apply_to_point(p1)
-       p2t = trans.apply_to_point(p2)
-       self.update(
-            cx=self.unittouu(p1t[0]),
-            cy=self.unittouu(p1t[1]),
-            fx=self.unittouu(p2t[0]),
-            fy=self.unittouu(p2t[1]))
+        """Apply transform to orientation points and set it to identity."""
+        trans = self.pop('gradientTransform')
+        p1 = (self.to_dimensionless(self.get('cx')), self.to_dimensionless(self.get('cy')))
+        p2 = (self.to_dimensionless(self.get('fx')), self.to_dimensionless(self.get('fy')))
+        p1t = trans.apply_to_point(p1)
+        p2t = trans.apply_to_point(p2)
+        self.update(
+            cx=self.to_dimensionless(p1t[0]),
+            cy=self.to_dimensionless(p1t[1]),
+            fx=self.to_dimensionless(p2t[0]),
+            fy=self.to_dimensionless(p2t[1]))
+
 
 class PathEffect(BaseElement):
     """Inkscape LPE element"""

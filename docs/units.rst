@@ -166,17 +166,17 @@ The most convenient way to deal with this is to get rid of the units, and that m
 everything to user units. 
 
 Each :class:`BaseElement <inkex.elements._base.BaseElement>` has a method 
-:meth:`unittouu <inkex.elements._base.BaseElement.unittouu>`. This method parses a ``length`` value 
-and returns it, converted to px (user units). 
+:meth:`to_dimensionless <inkex.elements._base.BaseElement.to_dimensionless>`. This method parses a 
+``length`` value and returns it, converted to px (user units). 
 
 In these and the following examples, the above "business card" SVG will be used.
 
 >>> svg = inkex.load_svg("docs/samples/units2.svg").getroot()
->>> svg.unittouu(svg.getElementById("c1").get("cx"))
+>>> svg.to_dimensionless(svg.getElementById("c1").get("cx"))
 21.0
->>> svg.unittouu(svg.getElementById("c2").get("cx")) 
+>>> svg.to_dimensionless(svg.getElementById("c2").get("cx")) 
 21.0
->>> svg.unittouu(svg.getElementById("c3").get("cx"))
+>>> svg.to_dimensionless(svg.getElementById("c3").get("cx"))
 79.370078
 
 For some classes, e.g. :class:`Rectangle <inkex.elements._polygons.Rectangle>`, convenience
@@ -194,11 +194,11 @@ What is the dimension of an object in a specified unit in the user coordinate sy
 
 There are relatively few use cases for this, but if you want to, you can also convert from 
 user units to any unit. This is done using 
-:meth:`BaseElement.uutounit <inkex.elements._base.BaseElement.uutounit>`. 
+:meth:`BaseElement.to_dimensional <inkex.elements._base.BaseElement.to_dimensional>`. 
 
->>> svg.uutounit(svg.getElementById("c2").radius, "px")
+>>> svg.to_dimensional(svg.getElementById("c2").radius, "px")
 4.0
->>> svg.uutounit(svg.getElementById("c2").radius, "mm") 
+>>> svg.to_dimensional(svg.getElementById("c2").radius, "mm") 
 1.0583333333333333
 
 What is the dimension of an object on the viewport in arbitrary units?
@@ -264,8 +264,8 @@ Conversion between arbitrary units
 
 The functions listed above are methods of :class:`BaseElement <inkex.elements._base.BaseElement>`
 because they use properties of the root SVG. For an unrooted SVG fragment, 
-:meth:`BaseElement.unittouu <inkex.elements._base.BaseElement.unittouu>`. 
-:meth:`BaseElement.uutounit <inkex.elements._base.BaseElement.uutounit>` work as well.
+:meth:`BaseElement.to_dimensionless <inkex.elements._base.BaseElement.to_dimensionless>`. 
+:meth:`BaseElement.to_dimensional <inkex.elements._base.BaseElement.to_dimensional>` work as well.
 
 If you want to convert between arbitrary units, you can do so using the 
 :meth:`convert_unit <inkex.units.convert_units>` method:

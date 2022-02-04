@@ -454,9 +454,9 @@ class FontSizeValue(BaseStyleValue):
         if element is None:
             return value #no additional logic in this case
         try:
-            return element.unittouu(value)
+            return element.to_dimensionless(value)
         except ValueError: #unable to parse font size, e.g. font-size:normal
-            return element.unittouu("12pt")
+            return element.to_dimensionless("12pt")
 
 class StrokeDasharrayValue(BaseStyleValue):
     def _parse_value(self, value: str, element=None):
@@ -466,7 +466,7 @@ class StrokeDasharrayValue(BaseStyleValue):
         if len(dashes) == 0:
             return None # no dasharray applied
         if not any([parse_unit(i) is None for i in dashes]):
-            dashes = [element.unittouu(i) for i in dashes]
+            dashes = [element.to_dimensionless(i) for i in dashes]
         else:
             return None
         if any(i < 0 for i in dashes):

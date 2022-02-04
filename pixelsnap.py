@@ -363,10 +363,10 @@ class PixelSnap(inkex.EffectExtension):
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1
 
-        width = self.svg.unittouu(elem.attrib['width'])
-        height = self.svg.unittouu(elem.attrib['height'])
-        x = self.svg.unittouu(elem.attrib['x'])
-        y = self.svg.unittouu(elem.attrib['y'])
+        width = self.svg.to_dimensionless(elem.attrib['width'])
+        height = self.svg.to_dimensionless(elem.attrib['height'])
+        x = self.svg.to_dimensionless(elem.attrib['x'])
+        y = self.svg.to_dimensionless(elem.attrib['y'])
 
         width, height = transform_dimensions(transform, width, height)
         x, y = transform_point(transform, [x, y])

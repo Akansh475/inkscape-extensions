@@ -146,7 +146,7 @@ class BasicSvgTest(TestCase):
         doc = svg('id="empty" viewBox="0 0 100 100" width="200" height="200"')
         self.assertEqual(doc.viewport_width, 200.0)
         self.assertEqual(doc.get_viewbox()[2], 100.0)
-        self.assertEqual(doc.scale, 0.5)
+        self.assertEqual(doc.scale, 2.0)
         doc = svg('id="empty" viewBox="0 0 0 0" width="200" height="200"')
         self.assertEqual(doc.scale, 1.0)
 
@@ -346,9 +346,19 @@ class UserUnitTest(TestCase):
         """Checks a user unit and a test_value against the expected result"""
         doc = svg_unit_scaled(user_unit)
         self.assertEqual(doc.unit, user_unit, msg=svg)
+        self.assertAlmostEqual(doc.to_dimensionless(test_value), expected)
+
+    def assertToDocumentUnit(self, user_unit, test_value, expected):  # pylint: disable=invalid-name
+        """Checks a user unit and a test_value against the expected result"""
+        doc = svg_unit_scaled(user_unit)
+        self.assertEqual(doc.unit, user_unit, msg=svg)
         self.assertAlmostEqual(doc.unittouu(test_value), expected)
 
     def assertFromUserUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
+        """Check converting from a user unity for the test_value"""
+        self.assertAlmostEqual(svg_unit_scaled(user_unit).to_dimensional(value, unit), expected)
+
+    def assertFromDocumentUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(svg_unit_scaled(user_unit).uutounit(value, unit), expected)
 
@@ -356,30 +366,62 @@ class UserUnitTest(TestCase):
     # demonstrate that the logic works.
 
     def test_unittouu_in_to_cm(self):
+        """1in is ~2.54cm"""
+        self.assertToDocumentUnit('cm', '1in', 2.54)
+
+    def test_unittouu_yd_to_m(self):
+        """1yd is ~0.9144m"""
+        self.assertToDocumentUnit('m', '1yd', 0.9144)
+
+    def test_unittouu_identity(self):
+        """If the input and output units are the same, the input and output
+           values should exactly be the same, too."""
+        self.assertToDocumentUnit('pc', '9.87654321pc', 9.87654321)
+
+    def test_unittouu_bad_input_number(self):
+        """Bad input number"""
+        self.assertToDocumentUnit('cm', '1in', 2.54)
+
+        # Corrupt the input to contain an invalid number component; note that
+        # the result changes to zero.
+        self.assertToDocumentUnit('cm', 'ABCDin', 0)
+
+    def test_unittouu_bad_input_unit(self):
+        """Bad input unit"""
+        # Demonstrate that 1.0in passes through without change.
+        self.assertToDocumentUnit('in', '1.0in', 1.0)
+
+        # Corrupt the input to contain an invalid unit component; note that the
+        # result changes to 0.0, because corrupt parsing is zero px.
+        # it used to be the ratio between inches and pixels. This was
+        # because unittouu() treats unknown units as 'px'.
+        self.assertToDocumentUnit('in', '1.0ABCD', 0)
+
+    def test_to_dimensionless_in_to_cm(self):
         """1in is 96px in a cm based document"""
         self.assertToUserUnit('cm', '1in', 96.0)
 
-    def test_yd_to_m(self):
+    def test_to_dimensionless_yd_to_m(self):
         """1yd is 3456px"""
-        self.assertToUserUnit('m', '1yd', 3456.0) 
+        self.assertToUserUnit('m', '1yd', 3456.0)
 
-    def test_unittouu_no_unit(self):
+    def test_to_dimensionless_no_unit(self):
         """If no unit is given, the value must not be changed in mm based documents."""
         self.assertToUserUnit('mm', '9.87654321', 9.87654321)
 
-    def test_unittouu_identity(self):
+    def test_to_dimensionless_identity(self):
         """User units are px. If a value is given in px, the value must not change"""
         self.assertToUserUnit('px', '9.87654321px', 9.87654321)
 
-    def test_unittouu_unitless_input(self):
+    def test_to_dimensionless_unitless_input(self):
         """Passing a unitless value to unittouu() should treat the units as 'px'."""
         self.assertToUserUnit('in', '96', 96)  # user unit = px
 
-    def test_unittouu_empty_input(self):
+    def test_to_dimensionless_empty_input(self):
         """Passing an empty string to unittouu() should treat the value as zero."""
         self.assertToUserUnit('in', '', 0)
 
-    def test_unittouu_parsing(self):
+    def test_to_dimensionless_parsing(self):
         """Test user unit parsing forms"""
         for value in (
                 '100pc',
@@ -398,16 +440,16 @@ class UserUnitTest(TestCase):
             # 100pc is ~3.937in
             self.assertToUserUnit('px', value, 1600)
 
-    def test_unittouu_bad_input_number(self):
+    def test_to_dimensionless_bad_input_number(self):
         """Bad input number"""
         self.assertToUserUnit('cm', '1in', 96.0)
-        # Demonstrate that 1in is ~96px, also in a "cm based" document. 
+        # Demonstrate that 1in is ~96px, also in a "cm based" document.
 
         # Corrupt the input to contain an invalid number component; note that
         # the result changes to zero.
         self.assertToUserUnit('cm', 'ABCDin', 0)
 
-    def test_unittouu_bad_input_unit(self):
+    def test_to_dimensionless_bad_input_unit(self):
         """Bad input unit"""
         # Demonstrate that 1.0px passes through without change.
         self.assertToUserUnit('mm', '1.0px', 1.0)
@@ -415,27 +457,40 @@ class UserUnitTest(TestCase):
         # Corrupt the input to contain an invalid unit component; note that the
         # result changes to 0.0, because corrupt parsing is zero px.
         # it used to be the ratio between inches and pixels. This was
-        # because unittouu() treats unknown units as 'px'.
+        # because to_dimensionless() treats unknown units as 'px'.
         self.assertToUserUnit('mm', '1.0ABCD', 0)
 
     # Unit-ratio tests. Don't exhaustively test every unit conversion, just
     # demonstrate that the logic works.
 
-    def test_uutounit_cm_to_in(self):
+    def test_to_dimensional_cm_to_in(self):
         """Convert 1 user unit (px) to 'cm' in a in-based document"""
         self.assertFromUserUnit('in', 1, 'cm', 2.54/96)  # 1in is ~2.54cm
 
-    def test_uutounit_m_to_yd(self):
+    def test_to_dimensional_m_to_yd(self):
         """Convert 1 user unit (px) to 'm' in a yd-based document"""
-        self.assertFromUserUnit('yd', 1, 'm', 1/100*2.54/96) 
+        self.assertFromUserUnit('yd', 1, 'm', 1/100*2.54/96)
 
-    def test_uutounit_identity(self):
+    def test_to_dimensional_identity(self):
         """If the input unit is px, output value should be identical"""
         self.assertFromUserUnit('pc', 9.87654321, 'px', 9.87654321)
 
+    def test_to_dimensional_unknown_unit(self):
+        """Demonstrate that passing an unknown unit string to uutounit()"""
+        self.assertEqual(svg_unit_scaled('in').to_dimensional(1, 'px'), 1)
+
+    def test_uutounit_cm_to_in(self):
+        """Convert 1 user unit ('in') to 'cm'."""
+        self.assertFromDocumentUnit('in', 1, 'cm', 2.54)  # 1in is ~2.54cm
+
+    def test_uutounit_m_to_yd(self):
+        """Convert 1 user unit ('yd') to 'm'."""
+        self.assertFromDocumentUnit('yd', 1, 'm', 0.9144)  # 1yd is ~0.9144m
+
     def test_uutounit_unknown_unit(self):
         """Demonstrate that passing an unknown unit string to uutounit()"""
-        self.assertEqual(svg_unit_scaled('in').uutounit(1, 'px'), 1)
+        self.assertEqual(svg_unit_scaled('in').uutounit(1, 'px'), 96.0)
+
 
     def test_adddocumentunit_common(self):
         """Test common add_unit results"""
@@ -473,13 +528,26 @@ class UserUnitTest(TestCase):
         for value in inputs:
             self.assertEqual(doc.add_unit(value), '')
 
+    def test_scales(self):
+        svg1 = svg('width="793.70081" height="1122.5197" viewBox="0 0 105 148.5"')
+        self.assertAlmostEqual(svg1.scale, 7.559055, places=5)
+        self.assertAlmostEqual(svg1.inkscape_scale, 7.559055, places=5)
+
+        svg1 = svg('width="210mm" height="297mm" viewBox="0 0 105 148.5"')
+        self.assertAlmostEqual(svg1.scale, 7.559055, places=5)
+        self.assertEqual(svg1.inkscape_scale, 2)
+
+        svg1 = svg('viewBox="0 0 105 148.5"')
+        self.assertEqual(svg1.scale, 1)
+        self.assertEqual(svg1.inkscape_scale, 1)
+
 class ViewportUnitTestCase(TestCase):
     def assertFromVPUnit(self, width_unit, test_value, unit, expected):  # pylint: disable=invalid-name
         """Checks a viewport unit and a test_value against the expected result"""
         doc = svg_unit_scaled(width_unit)
         self.assertEqual(doc.unit, width_unit, msg=svg)
         self.assertAlmostEqual(doc.viewport_to_unit(test_value, unit), expected)
-    
+
     def assertToVPUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(svg_unit_scaled(user_unit).unit_to_viewport(value, unit), expected)
@@ -496,6 +564,6 @@ class ViewportUnitTestCase(TestCase):
         self.assertToVPUnit('mm', '4', "px", 4 * 96 / 25.4)
 
     def test_vptounit(self):
-        self.assertFromVPUnit('mm', "1m", "px", 1000) 
-        self.assertFromVPUnit('mm', "4mm", 'px', 4) 
-        self.assertFromVPUnit('mm', "4mm", 'mm', 4 * 25.4/96) 
+        self.assertFromVPUnit('mm', "1m", "px", 1000)
+        self.assertFromVPUnit('mm', "4mm", 'px', 4)
+        self.assertFromVPUnit('mm', "4mm", 'mm', 4 * 25.4/96)

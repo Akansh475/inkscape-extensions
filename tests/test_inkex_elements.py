@@ -21,6 +21,7 @@ from inkex.utils import FragmentError
 from inkex.units import parse_unit
 
 from .test_inkex_elements_base import SvgTestCase
+from inkex.tester.svg import svg 
 
 class ElementTestCase(SvgTestCase):
     """Base element testing"""
@@ -349,6 +350,14 @@ class NamedViewTest(ElementTestCase):
         self.assertEqual(self.svg.namedview.get_pages()[1].attrib['x'], '220')
         self.assertEqual(self.svg.namedview.get_pages()[1].attrib['y'], '0')
 
+    def test_center(self):
+        """Test that the center in mm based documents is correctly computed"""
+        mmbased = svg(f'width="210mm" viewBox="0 0 210 297"')
+        mmbased.namedview.set("inkscape:cx", 396.57881) # Values of a freshly opened mm document
+        mmbased.namedview.set("inkscape:cy", 561.81998)
+
+        self.assertAlmostTuple(mmbased.namedview.center, 
+                              [mmbased.viewbox_width / 2, mmbased.viewport_height / 2], precision=0)
 
 class TextTest(ElementTestCase):
     """Test all text functions"""

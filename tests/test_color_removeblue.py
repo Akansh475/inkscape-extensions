@@ -2,6 +2,7 @@
 from color_removeblue import RemoveBlue
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorRemoveBlueTest(ColorBaseCase):
     effect_class = RemoveBlue
     color_tests = [

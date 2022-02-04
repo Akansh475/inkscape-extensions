@@ -31,7 +31,7 @@ from inkex.base import InkscapeExtension
 from inkex.command import CommandNotFound, ProgramRunError, call
 
 TARGET_DIR = get_user_directory()
-FALLBACK_DIR = os.path.join(TARGET_DIR or './', 'org.inkscape.inkman')
+FALLBACK_DIR = os.path.join(TARGET_DIR or "./", "org.inkscape.inkman")
 if os.path.isdir(FALLBACK_DIR):
     sys.path.insert(0, FALLBACK_DIR)
 
@@ -42,12 +42,13 @@ except ImportError:
 
 FALLBACK_URL = "https://media.inkscape.org/static/extensions-manager-fallback.zip"
 
+
 class Bootstrap(InkscapeExtension):
     multi_inx = True
 
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
-        pars.add_argument('--version', default='inkscape-extensions-manager')
+        pars.add_argument("--tab")
+        pars.add_argument("--version", default="inkscape-extensions-manager")
 
     def load_raw(self):
         pass
@@ -66,12 +67,13 @@ class Bootstrap(InkscapeExtension):
     def effect(self):
         fallback = False
         try:
-            call('virtualenv', TARGET_DIR, p='python3')
+            call("virtualenv", TARGET_DIR, p="python3")
         except CommandNotFound:
             fallback = True
         except ProgramRunError as err:
             raise inkex.AbortExtension(
-                "There has been a problem creating the python environment:\n" + str(err))
+                "There has been a problem creating the python environment:\n" + str(err)
+            )
 
         if fallback:
             # Add a fallback for places like windows where python isn't available.
@@ -80,14 +82,21 @@ class Bootstrap(InkscapeExtension):
             raise inkex.AbortExtension(
                 "You must have the python-virtualenv package installed. This should have"
                 " been included with Inkscape, but in some special cases it might not"
-                " be. Please install this software externally and try again.")
+                " be. Please install this software externally and try again."
+            )
 
         try:
-            call(os.path.join(TARGET_DIR, 'bin', 'pip'), 'install', self.options.version)
+            call(
+                os.path.join(TARGET_DIR, "bin", "pip"), "install", self.options.version
+            )
         except CommandNotFound:
-            raise inkex.AbortExtension("Can't find pip program after environment initialisation!")
+            raise inkex.AbortExtension(
+                "Can't find pip program after environment initialisation!"
+            )
         except ProgramRunError as err:
-            raise inkex.AbortExtension("Error installing extension manager package:\n" + str(err))
+            raise inkex.AbortExtension(
+                "Error installing extension manager package:\n" + str(err)
+            )
 
     def install_fallback(self):
         """
@@ -105,12 +114,15 @@ class Bootstrap(InkscapeExtension):
             if remote and remote.status_code == 200:
                 with zipfile.ZipFile(io.BytesIO(remote.content)) as archive:
                     for filename in archive.namelist():
-                        if '.inx' in filename:
+                        if ".inx" in filename:
                             done = True
-                        self._install_file(archive.read(filename),
-                            os.path.join(FALLBACK_DIR, filename))
+                        self._install_file(
+                            archive.read(filename), os.path.join(FALLBACK_DIR, filename)
+                        )
         except NewConnectionError:
-            self.msg("Could not connect to the internet, please check connection and try again!")
+            self.msg(
+                "Could not connect to the internet, please check connection and try again!"
+            )
         finally:
             session.close()
         return done
@@ -121,10 +133,11 @@ class Bootstrap(InkscapeExtension):
         if not os.path.isdir(filedir):
             os.makedirs(filedir)
         if not os.path.isdir(filename):
-            with open(filename, 'wb') as fhl:
+            with open(filename, "wb") as fhl:
                 fhl.write(content)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if run_existing is not None:
         # If the extension manager is already installed
         # Run it instead of the bootstrap process.

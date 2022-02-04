@@ -28,22 +28,28 @@ from inkex.utils import KeyDict
 from inkex import SvgDocumentElement
 
 # Old settings, supported because users click 'ok' without looking.
-XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})
-YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
-CUSTOM_DIRECTION = {270: 'tb', 90: 'bt', 0: 'lr', 360: 'lr', 180: 'rl'}
+XAN = KeyDict({"l": "left", "r": "right", "m": "center_x"})
+YAN = KeyDict({"t": "top", "b": "bottom", "m": "center_y"})
+CUSTOM_DIRECTION = {270: "tb", 90: "bt", 0: "lr", 360: "lr", 180: "rl"}
+
 
 class Restack(inkex.EffectExtension):
     """Change the z-order of objects based on their position on the canvas"""
+
     restack_help = staticmethod(lambda: None)
 
     def add_arguments(self, pars):
-        pars.add_argument("--tab", type=self.arg_method('restack'), default=self.restack_positional)
+        pars.add_argument(
+            "--tab", type=self.arg_method("restack"), default=self.restack_positional
+        )
         pars.add_argument("--direction", default="lr", help="direction to restack")
         pars.add_argument("--angle", type=float, default=0.0, help="arbitrary angle")
         pars.add_argument("--xanchor", default="l", help="horizontal point to compare")
         pars.add_argument("--yanchor", default="t", help="vertical point to compare")
-        pars.add_argument("--zsort", default="rev", help="Restack mode based on Z-Order")
-        pars.add_argument("--nb_direction", default='', help='Direction tab')
+        pars.add_argument(
+            "--zsort", default="rev", help="Restack mode based on Z-Order"
+        )
+        pars.add_argument("--nb_direction", default="", help="Direction tab")
 
     def effect(self):
         if not self.svg.selected:
@@ -71,7 +77,7 @@ class Restack(inkex.EffectExtension):
         x, y = self.options.xanchor, self.options.yanchor
         selbox = self.svg.selection.bounding_box()
         direction = self.options.direction
-        if 'custom' in self.options.nb_direction:
+        if "custom" in self.options.nb_direction:
             direction = self.options.angle
         return node.bounding_box().get_anchor(x, y, direction, selbox)
 
@@ -87,5 +93,6 @@ class Restack(inkex.EffectExtension):
                 parentnode.append(item)
         return True
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Restack().run()

@@ -29,10 +29,12 @@ import struct
 import inkex
 from inkex import AbortExtension, errormsg, Group, Polyline
 
-inkex.NSS['dm'] = 'http://github.com/nikitakit/DM2SVG'
+inkex.NSS["dm"] = "http://github.com/nikitakit/DM2SVG"
+
 
 class DhwInput(inkex.InputExtension):
     """Open DHW files and convert to svg on the fly"""
+
     template = """<svg viewBox="0 0 {w} {h}"
   fill="none" stroke="black" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"
   xmlns="http://www.w3.org/2000/svg"
@@ -54,33 +56,33 @@ class DhwInput(inkex.InputExtension):
 
     def load(self, stream):
         """Load the steam as if it were an open DHW file"""
-        header = list(struct.unpack('<32sBHHBxx', stream.read(40)))
+        header = list(struct.unpack("<32sBHHBxx", stream.read(40)))
         doc = header.pop(0).decode()
-        if doc != 'ACECAD_DIGIMEMO_HANDWRITING_____':
-            raise AbortExtension('Could not load file, not a ACECAD DHW file!')
+        if doc != "ACECAD_DIGIMEMO_HANDWRITING_____":
+            raise AbortExtension("Could not load file, not a ACECAD DHW file!")
 
         height = int(header[2])
-        doc = self.get_template(**dict(zip(('v', 'w', 'h', 'p'), header)))
+        doc = self.get_template(**dict(zip(("v", "w", "h", "p"), header)))
         svg = doc.getroot()
 
         timestamp = 0
-        layer = svg.getElementById('layer1')
+        layer = svg.getElementById("layer1")
 
         while True:
             tag = stream.read(1)
-            if tag == b'':
+            if tag == b"":
                 break
 
             if ord(tag) <= 128:
-                errormsg('Unsupported tag: {}\n'.format(tag))
+                errormsg("Unsupported tag: {}\n".format(tag))
                 continue
 
-            if tag == b'\x90':
+            if tag == b"\x90":
                 # New Layer element
                 timestamp = 0
-                name = 'layer{:d}'.format(ord(stream.read(1)) + 1)
+                name = "layer{:d}".format(ord(stream.read(1)) + 1)
                 layer = svg.add(Group(inkscape_groupmode="layer", id=name))
-            elif tag == b'\x88':
+            elif tag == b"\x88":
                 # Read the timestamp next
                 timestamp += ord(stream.read(1)) * 20
             else:
@@ -91,7 +93,7 @@ class DhwInput(inkex.InputExtension):
 
                 poly = layer.add(Polyline())
                 poly.path = coords
-                poly.set('dm:timestamp', timestamp)
+                poly.set("dm:timestamp", timestamp)
 
         return doc
 
@@ -101,17 +103,18 @@ def read_point(stream, ymax):
     (in total) and return a 2D point.
     """
     # read first byte, it might be a stop byte
-    x1 = struct.unpack('B', stream.read(1))[0]
+    x1 = struct.unpack("B", stream.read(1))[0]
 
     if x1 >= 0x80:
         return None
 
-    x2, y1, y2 = struct.unpack('BBB', stream.read(3))
+    x2, y1, y2 = struct.unpack("BBB", stream.read(3))
 
     x = x1 | x2 << 7
     y = y1 | y2 << 7
 
     return x, ymax - y
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     DhwInput().run()

@@ -2,6 +2,7 @@
 from color_desaturate import Desaturate
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorDesaturateTest(ColorBaseCase):
     effect_class = Desaturate
     color_tests = [

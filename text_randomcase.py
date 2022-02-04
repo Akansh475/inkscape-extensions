@@ -4,8 +4,10 @@
 import random
 import inkex
 
+
 class RandomCase(inkex.TextExtension):
     """Randomise the case of the text (with bias)"""
+
     previous_case = 1
 
     def map_char(self, char):
@@ -25,5 +27,6 @@ class RandomCase(inkex.TextExtension):
                 return char.lower()
         return char
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     RandomCase().run()

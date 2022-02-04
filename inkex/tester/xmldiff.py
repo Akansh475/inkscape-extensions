@@ -11,6 +11,7 @@ Allow two xml files/lxml etrees to be compared, returning their differences.
 import xml.etree.ElementTree as xml
 from io import BytesIO
 
+
 def text_compare(test1, test2):
     """
     Compare two text strings while allowing for '*' to match
@@ -18,12 +19,14 @@ def text_compare(test1, test2):
     """
     if not test1 and not test2:
         return True
-    if test1 == '*' or test2 == '*':
+    if test1 == "*" or test2 == "*":
         return True
-    return (test1 or '').strip() == (test2 or '').strip()
+    return (test1 or "").strip() == (test2 or "").strip()
+
 
 class DeltaLogger(list):
     """A record keeper of the delta between two svg files"""
+
     def append_tag(self, tag_a, tag_b):
         """Record a tag difference"""
         if tag_a:
@@ -34,13 +37,16 @@ class DeltaLogger(list):
 
     def append_attr(self, attr, value_a, value_b):
         """Record an attribute difference"""
+
         def _prep(val):
             if val:
-                if attr == 'd':
+                if attr == "d":
                     from inkex.paths import Path
+
                     return [attr] + Path(val).to_arrays()
                 return (attr, val)
             return val
+
         # Only append a difference if the preprocessed values are different.
         # This solves the issue that -0 != 0 in path data.
         pa = _prep(value_a)
@@ -55,6 +61,7 @@ class DeltaLogger(list):
     def __bool__(self):
         """Returns True if there's no log, i.e. the delta is clean"""
         return not self.__len__()
+
     __nonzero__ = __bool__
 
     def __repr__(self):
@@ -62,20 +69,23 @@ class DeltaLogger(list):
             return "No differences detected"
         return f"{len(self)} xml differences"
 
+
 def to_xml(data):
     """Convert string or bytes to xml parsed root node"""
     if isinstance(data, str):
-        data = data.encode('utf8')
+        data = data.encode("utf8")
     if isinstance(data, bytes):
         return xml.parse(BytesIO(data)).getroot()
     return data
+
 
 def xmldiff(data1, data2):
     """Create an xml difference, will modify the first xml structure with a diff"""
     xml1, xml2 = to_xml(data1), to_xml(data2)
     delta = DeltaLogger()
     _xmldiff(xml1, xml2, delta)
-    return xml.tostring(xml1).decode('utf-8'), delta
+    return xml.tostring(xml1).decode("utf-8"), delta
+
 
 def _xmldiff(xml1, xml2, delta):
     if xml1.tag != xml2.tag:
@@ -106,9 +116,9 @@ def _xmldiff(xml1, xml2, delta):
     children_b += [None] * (len(children_a) - len(children_b))
 
     for child_a, child_b in zip(children_a, children_b):
-        if child_a is None: # child_b exists
+        if child_a is None:  # child_b exists
             delta.append_tag(child_b.tag, None)
-        elif child_b is None: # child_a exists
+        elif child_b is None:  # child_a exists
             delta.append_tag(None, child_a.tag)
         else:
             _xmldiff(child_a, child_b, delta)

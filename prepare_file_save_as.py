@@ -36,12 +36,16 @@ from inkex.base import TempDirMixin
 from inkex.command import inkscape_command
 from inkex import load_svg
 
+
 class PreProcess(TempDirMixin, inkex.EffectExtension):
     def effect(self):
-        self.document = load_svg(inkscape_command(
-            self.svg,
-            verbs=['EditSelectAllInAllLayers', 'EditUnlinkClone', 'ObjectToPath'],
-        ))
+        self.document = load_svg(
+            inkscape_command(
+                self.svg,
+                verbs=["EditSelectAllInAllLayers", "EditUnlinkClone", "ObjectToPath"],
+            )
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     PreProcess().run()

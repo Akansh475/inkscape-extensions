@@ -3,6 +3,7 @@
 from jessyink_autotexts import AutoTexts
 from inkex.tester import ComparisonMixin, TestCase
 
+
 class JessyInkAutoTextsBasicTest(ComparisonMixin, TestCase):
     effect_class = AutoTexts
-    comparisons = [('--autoText', 'slideTitle', '--id', 't1')]
+    comparisons = [("--autoText", "slideTitle", "--id", "t1")]

@@ -26,40 +26,77 @@ from inkex.localization import inkex_gettext as _
 from inkex.tween import ColorInterpolator, ValueInterpolator, AttributeInterpolator
 from inkex.utils import is_number
 
+
 class InterpAttG(inkex.EffectExtension):
     """
     This effect applies a value for any interpolatable attribute for all
     elements inside the selected group or for all elements in a multiple selection.
     """
+
     def __init__(self):
         super(InterpAttG, self).__init__()
         self.arg_parser.add_argument(
-            "-a", "--att", type=str, dest="att", default="width",
-            help="Attribute to be interpolated.")
+            "-a",
+            "--att",
+            type=str,
+            dest="att",
+            default="width",
+            help="Attribute to be interpolated.",
+        )
         self.arg_parser.add_argument(
-            "-o", "--att-other", type=str, dest="att_other",
-            help="Other attribute (for a limited UI).")
+            "-o",
+            "--att-other",
+            type=str,
+            dest="att_other",
+            help="Other attribute (for a limited UI).",
+        )
         self.arg_parser.add_argument(
-            "-t", "--att-other-type", type=self.arg_class([ColorInterpolator, ValueInterpolator]),
-            dest="att_other_type", help="The other attribute type.")
+            "-t",
+            "--att-other-type",
+            type=self.arg_class([ColorInterpolator, ValueInterpolator]),
+            dest="att_other_type",
+            help="The other attribute type.",
+        )
         self.arg_parser.add_argument(
-            "-w", "--att-other-where", type=str, dest="att_other_where", default="tag",
-            help="That is a tag attribute or a style attribute?")
+            "-w",
+            "--att-other-where",
+            type=str,
+            dest="att_other_where",
+            default="tag",
+            help="That is a tag attribute or a style attribute?",
+        )
         self.arg_parser.add_argument(
-            "-s", "--start-val", type=str, dest="start_val", default="#F00",
-            help="Initial interpolation value.")
+            "-s",
+            "--start-val",
+            type=str,
+            dest="start_val",
+            default="#F00",
+            help="Initial interpolation value.",
+        )
         self.arg_parser.add_argument(
-            "-e", "--end-val", type=str, dest="end_val", default="#00F",
-            help="End interpolation value.")
+            "-e",
+            "--end-val",
+            type=str,
+            dest="end_val",
+            default="#00F",
+            help="End interpolation value.",
+        )
         self.arg_parser.add_argument(
-            "-u", "--unit", type=str, dest="unit", default="none",
-            help="Values unit.")
+            "-u", "--unit", type=str, dest="unit", default="none", help="Values unit."
+        )
         self.arg_parser.add_argument(
-            "--zsort", type=inkex.Boolean, dest="zsort", default=False,
-            help="use z-order instead of selection order")
+            "--zsort",
+            type=inkex.Boolean,
+            dest="zsort",
+            default=False,
+            help="use z-order instead of selection order",
+        )
         self.arg_parser.add_argument(
-            "--tab", type=str, dest="tab",
-            help="The selected UI-tab when OK was pressed")
+            "--tab",
+            type=str,
+            dest="tab",
+            help="The selected UI-tab when OK was pressed",
+        )
 
     def get_elements(self):
         """Returns a list of elements to work on"""
@@ -89,6 +126,7 @@ class InterpAttG(inkex.EffectExtension):
         self.apply_value(pat1, path, start_value)
         self.apply_value(pat2, path, end_value)
         return pat1, pat2
+
     @staticmethod
     def apply_value(node, path, value):
         """Applies a value to a given node. If path starts with "transform/" or "style/", the
@@ -99,11 +137,11 @@ class InterpAttG(inkex.EffectExtension):
         elif path.startswith("transform/"):
             if not is_number(value):
                 raise inkex.AbortExtension(f"Unable to set attribute {path} to {value}")
-            if path == 'transform/trans-x':
+            if path == "transform/trans-x":
                 node.transform.add_translate(value, 0)
-            elif path == 'transform/trans-y':
+            elif path == "transform/trans-y":
                 node.transform.add_translate(0, value)
-            elif path == 'transform/scale':
+            elif path == "transform/scale":
                 node.transform.add_scale(value)
         elif path == "transform":
             node.transform @= value
@@ -112,10 +150,11 @@ class InterpAttG(inkex.EffectExtension):
 
     def effect(self):
         method = None
-        if self.options.att == 'other':
+        if self.options.att == "other":
             if self.options.att_other is None:
-                raise inkex.AbortExtension(\
-                            _("You selected 'Other'. Please enter an attribute to interpolate."))
+                raise inkex.AbortExtension(
+                    _("You selected 'Other'. Please enter an attribute to interpolate.")
+                )
             if self.options.att_other_where == "tag":
                 path = self.options.att_other
             else:
@@ -123,23 +162,27 @@ class InterpAttG(inkex.EffectExtension):
             method = self.options.att_other_type
         else:
             path = self.options.att
-            if (self.options.att == "height" or self.options.att == "width"):
+            if self.options.att == "height" or self.options.att == "width":
                 method = inkex.tween.UnitValueInterpolator
 
         path1, path2 = self.create_dummy_nodes(path)
         if path.startswith("transform"):
             path = "transform"
         try:
-            #maybe tween knows what do do with this attribute?
-            interpolator = AttributeInterpolator.create_from_attribute(path1, path2, path, None)
+            # maybe tween knows what do do with this attribute?
+            interpolator = AttributeInterpolator.create_from_attribute(
+                path1, path2, path, None
+            )
         except:
-            #okay, apparently not
-            interpolator = AttributeInterpolator.create_from_attribute(path1, path2, path, method)
+            # okay, apparently not
+            interpolator = AttributeInterpolator.create_from_attribute(
+                path1, path2, path, method
+            )
         collection = self.get_elements()
         if not collection:
-            raise inkex.AbortExtension(_('There is no selection to interpolate'))
+            raise inkex.AbortExtension(_("There is no selection to interpolate"))
 
-        steps = [1.0/(len(collection)-1) * i for i in range(len(collection))]
+        steps = [1.0 / (len(collection) - 1) * i for i in range(len(collection))]
 
         for time, node in zip(steps, collection):
             new_value = interpolator.interpolate(time)
@@ -147,5 +190,6 @@ class InterpAttG(inkex.EffectExtension):
 
         return True
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     InterpAttG().run()

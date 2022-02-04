@@ -3,12 +3,13 @@ from dxf_outlines import DxfOutlines
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import WindowsTextCompat
 
+
 class DFXOutlineBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
     effect_class = DxfOutlines
     comparisons = [
         (),
-        ('--id=p1', '--id=r3'),
-        ('--POLY=true',),
-        ('--ROBO=true',),
+        ("--id=p1", "--id=r3"),
+        ("--POLY=true",),
+        ("--ROBO=true",),
     ]
     compare_filters = [WindowsTextCompat()]

@@ -9,6 +9,7 @@ Generate words for testing.
 import string
 import random
 
+
 def word_generator(text_length):
     """
     Generate a word of text_length size
@@ -16,12 +17,15 @@ def word_generator(text_length):
     word = ""
 
     for _ in range(0, text_length):
-        word += random.choice(string.ascii_lowercase + \
-                              string.ascii_uppercase + \
-                              string.digits + \
-                              string.punctuation)
+        word += random.choice(
+            string.ascii_lowercase
+            + string.ascii_uppercase
+            + string.digits
+            + string.punctuation
+        )
 
     return word
+
 
 def sentencecase(word):
     """Make a word standace case"""

@@ -27,24 +27,27 @@ from inkex import ShapeElement, ColorIdError, ColorError
 
 class ExportGimpPalette(inkex.OutputExtension):
     """Export all colors in a document to a gimp pallet"""
+
     select_all = (ShapeElement,)
     names = {}
 
     def save(self, stream):
-        name = self.svg.name.replace('.svg', '')
-        stream.write('GIMP Palette\nName: {}\n#\n'.format(name).encode('utf-8'))
+        name = self.svg.name.replace(".svg", "")
+        stream.write("GIMP Palette\nName: {}\n#\n".format(name).encode("utf-8"))
 
         for key, value in sorted(list(set(self.get_colors()))):
-            stream.write("{} {}\n".format(key, value).encode('utf-8'))
-
+            stream.write("{} {}\n".format(key, value).encode("utf-8"))
 
     def get_colors(self):
         """Get all the colors from the selected elements"""
         for elem in self.svg.selection.filter(ShapeElement):
             for color in self.process_element(elem):
-                if str(color).upper() == 'NONE':
+                if str(color).upper() == "NONE":
                     continue
-                yield ("{:3d} {:3d} {:3d}".format(*color.to_rgb()), self.names.get(color) or str(color).upper())
+                yield (
+                    "{:3d} {:3d} {:3d}".format(*color.to_rgb()),
+                    self.names.get(color) or str(color).upper(),
+                )
 
     def process_element(self, elem):
         """Recursively process elements for colors"""
@@ -52,7 +55,7 @@ class ExportGimpPalette(inkex.OutputExtension):
         for col in inkex.Style.color_props:
             try:
                 col = inkex.Color(style.get(col))
-                if (elem.getparent().get('inkscape:swatch') == "solid"):
+                if elem.getparent().get("inkscape:swatch") == "solid":
                     self.names[col] = elem.getparent().get_id()
                 yield col
             except ColorIdError:
@@ -61,12 +64,14 @@ class ExportGimpPalette(inkex.OutputExtension):
                     for item in self.process_element(stop):
                         yield item
             except ColorError:
-                pass # Bad color
+                pass  # Bad color
 
-        if elem.href is not None: # Capture colors of symbols or clones pointing to defs
+        if (
+            elem.href is not None
+        ):  # Capture colors of symbols or clones pointing to defs
             for color in self.process_element(elem.href):
                 yield color
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ExportGimpPalette().run()

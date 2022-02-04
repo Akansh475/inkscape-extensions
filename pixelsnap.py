@@ -73,8 +73,10 @@ from inkex import PathElement, Group, Image, Rectangle, ShapeElement, Transform
 
 Precision = 5  # number of digits of precision for comparing float numbers
 
+
 class TransformError(Exception):
     pass
+
 
 def transform_point(transform, pt, inverse=False):
     """apply_to_point with inbuilt inverse"""
@@ -82,9 +84,10 @@ def transform_point(transform, pt, inverse=False):
         transform = -transform
     return transform.apply_to_point(pt)
 
+
 def transform_dimensions(transform, width=None, height=None, inverse=False):
-    """ Dimensions don't get translated. I'm not sure how much diff rotate/skew
-        makes in this context, but we currently ignore anything besides scale.
+    """Dimensions don't get translated. I'm not sure how much diff rotate/skew
+    makes in this context, but we currently ignore anything besides scale.
     """
     if inverse:
         transform = -transform
@@ -105,14 +108,29 @@ def transform_dimensions(transform, width=None, height=None, inverse=False):
 class PixelSnap(inkex.EffectExtension):
     def add_arguments(self, pars):
         """Add inx options"""
-        pars.add_argument("-a", "--snap_ancestors", type=inkex.Boolean, default=True,\
-            help="Snap unselected ancestors' translations "\
-                 "(groups, layers, document height) first")
-        pars.add_argument("-t", "--ancestor_offset", type=inkex.Boolean, default=True,\
-            help="Calculate offset relative to unselected ancestors' "\
-                 "transforms (includes document height offset)")
-        pars.add_argument("-g", "--max_gradient", type=float, default=0.5,\
-            help="Maximum slope to consider straight (%)")
+        pars.add_argument(
+            "-a",
+            "--snap_ancestors",
+            type=inkex.Boolean,
+            default=True,
+            help="Snap unselected ancestors' translations "
+            "(groups, layers, document height) first",
+        )
+        pars.add_argument(
+            "-t",
+            "--ancestor_offset",
+            type=inkex.Boolean,
+            default=True,
+            help="Calculate offset relative to unselected ancestors' "
+            "transforms (includes document height offset)",
+        )
+        pars.add_argument(
+            "-g",
+            "--max_gradient",
+            type=float,
+            default=0.5,
+            help="Maximum slope to consider straight (%)",
+        )
 
     def vertical(self, pt1, pt2):
         hlen = abs(pt1[0] - pt2[0])
@@ -133,17 +151,19 @@ class PixelSnap(inkex.EffectExtension):
         return (vlen / hlen) < self.options.max_gradient / 100
 
     def stroke_width_offset(self, elem, parent_transform=None):
-        """ Returns the amount the bounding-box is offset due to the stroke-width.
-            Transform is taken into account.
+        """Returns the amount the bounding-box is offset due to the stroke-width.
+        Transform is taken into account.
         """
         stroke_width = self.stroke_width(elem)
         if stroke_width == 0:
             return 0  # if there's no stroke, no need to worry about the transform
 
-        transform = (elem.transform @ Transform(parent_transform))
+        transform = elem.transform @ Transform(parent_transform)
 
-        if abs(abs(transform.a) - abs(transform.d)) > (10 ** -Precision):
-            raise TransformError("Selection contains non-symetric scaling")  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 1 functions, or maybe returning a tuple
+        if abs(abs(transform.a) - abs(transform.d)) > (10**-Precision):
+            raise TransformError(
+                "Selection contains non-symetric scaling"
+            )  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 1 functions, or maybe returning a tuple
 
         stroke_width = transform_dimensions(transform, width=stroke_width)
 
@@ -152,31 +172,30 @@ class PixelSnap(inkex.EffectExtension):
     def stroke_width(self, elem, setval=None):
         """Get/set stroke-width in pixels, untransformed"""
         style = elem.style
-        stroke = style('stroke')
+        stroke = style("stroke")
 
         stroke_width = 0
         if stroke and setval is None:
-            stroke_width = self.svg.unittouu(style('stroke-width').strip())
+            stroke_width = self.svg.unittouu(style("stroke-width").strip())
 
         if setval:
-            style['stroke-width'] = setval
+            style["stroke-width"] = setval
         else:
             return stroke_width
 
     def transform_path_node(self, transform, path, i):
-        """ Modifies a segment so that every point is transformed, including handles
-        """
+        """Modifies a segment so that every point is transformed, including handles"""
         segtype = path[i][0].lower()
 
-        if segtype == 'z':
+        if segtype == "z":
             return
-        elif segtype == 'h':
+        elif segtype == "h":
             path[i][1][0] = transform_point(transform, [path[i][1][0], 0])[0]
-        elif segtype == 'v':
+        elif segtype == "v":
             path[i][1][0] = transform_point(transform, [0, path[i][1][0]])[1]
         else:
             first_coordinate = 0
-            if segtype == 'a':
+            if segtype == "a":
                 first_coordinate = 5  # for elliptical arcs, skip the radius x/y, rotation, large-arc, and sweep
             for j in range(first_coordinate, len(path[i][1]), 2):
                 x, y = path[i][1][j], path[i][1][j + 1]
@@ -185,28 +204,28 @@ class PixelSnap(inkex.EffectExtension):
                 path[i][1][j + 1] = y
 
     def pathxy(self, path, i, setval=None):
-        """ Return the endpoint of the given path segment.
-            Inspects the segment type to know which elements are the endpoints.
+        """Return the endpoint of the given path segment.
+        Inspects the segment type to know which elements are the endpoints.
         """
         segtype = path[i][0].lower()
         x = y = 0
 
-        if segtype == 'z':
+        if segtype == "z":
             i = 0
 
-        if segtype == 'h':
+        if segtype == "h":
             if setval:
                 path[i][1][0] = setval[0]
             else:
                 x = path[i][1][0]
 
-        elif segtype == 'v':
+        elif segtype == "v":
             if setval:
                 path[i][1][0] = setval[1]
             else:
                 y = path[i][1][0]
         else:
-            if setval and segtype != 'z':
+            if setval and segtype != "z":
                 path[i][1][-2] = setval[0]
                 path[i][1][-1] = setval[1]
             else:
@@ -249,17 +268,22 @@ class PixelSnap(inkex.EffectExtension):
         bbox = elem.bounding_box()
         min_xy, max_xy = bbox.minimum, bbox.maximum
 
-        fractional_offset = min_xy[0] - round(min_xy[0]), min_xy[1] - round(min_xy[1]) - self.document_offset
-        fractional_offset = transform_dimensions(transform, fractional_offset[0], fractional_offset[1], inverse=True)
+        fractional_offset = (
+            min_xy[0] - round(min_xy[0]),
+            min_xy[1] - round(min_xy[1]) - self.document_offset,
+        )
+        fractional_offset = transform_dimensions(
+            transform, fractional_offset[0], fractional_offset[1], inverse=True
+        )
 
         for i in range(len(path)):
             self.transform_path_node(-Transform(translate=fractional_offset), path, i)
 
         path = str(inkex.Path(path))
-        if elem.get('inkscape:original-d'):
-            elem.set('inkscape:original-d', path)
+        if elem.get("inkscape:original-d"):
+            elem.set("inkscape:original-d", path)
         else:
-            elem.set('d', path)
+            elem.set("d", path)
 
     def snap_transform(self, elem):
         # Only snaps the x/y translation of the transform, nothing else.
@@ -268,7 +292,9 @@ class PixelSnap(inkex.EffectExtension):
         transform = elem.transform
         # if we've got any skew/rotation, get outta here
         if transform.c or transform.b:
-            raise TransformError("TR: Selection contains transformations with skew/rotation")
+            raise TransformError(
+                "TR: Selection contains transformations with skew/rotation"
+            )
 
         trm = list(transform.to_hexad())
         trm[4] = round(transform.e)
@@ -279,24 +305,31 @@ class PixelSnap(inkex.EffectExtension):
         transform = elem.transform @ Transform(parent_transform)
 
         stroke_width = self.stroke_width(elem)
-        if (stroke_width == 0): return                                          # no point raising a TransformError if there's no stroke to snap
+        if stroke_width == 0:
+            return  # no point raising a TransformError if there's no stroke to snap
 
         if abs(abs(transform.a) - abs(transform.d)) > (10**-Precision):
-            raise TransformError("Selection contains non-symetric scaling, can't snap stroke width")
+            raise TransformError(
+                "Selection contains non-symetric scaling, can't snap stroke width"
+            )
 
         if stroke_width:
             stroke_width = transform_dimensions(transform, width=stroke_width)
             stroke_width = round(stroke_width)
-            stroke_width = transform_dimensions(transform, width=stroke_width, inverse=True)
+            stroke_width = transform_dimensions(
+                transform, width=stroke_width, inverse=True
+            )
             self.stroke_width(elem, stroke_width)
 
     def snap_path(self, elem, parent_transform=None):
         path = elem.original_path.to_arrays()
 
-        transform = (elem.transform @ Transform(parent_transform))
+        transform = elem.transform @ Transform(parent_transform)
 
         if transform.c or transform.b:  # if we've got any skew/rotation, get outta here
-            raise TransformError("Path: Selection contains transformations with skew/rotation")
+            raise TransformError(
+                "Path: Selection contains transformations with skew/rotation"
+            )
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1
 
@@ -305,10 +338,11 @@ class PixelSnap(inkex.EffectExtension):
         for i in range(len(path)):
             segtype = path[i][0].lower()
             xy = self.pathxy(path, i)
-            if segtype == 'z':
+            if segtype == "z":
                 xy = first_xy
-            if (i == len(path) - 1) or \
-                    ((i == len(path) - 2) and path[-1][0].lower() == 'z'):
+            if (i == len(path) - 1) or (
+                (i == len(path) - 2) and path[-1][0].lower() == "z"
+            ):
                 next_xy = first_xy
             else:
                 next_xy = self.pathxy(path, i + 1)
@@ -346,27 +380,31 @@ class PixelSnap(inkex.EffectExtension):
             if on_vertical:
                 fractional_offset[0] = xy[0] - (round(xy[0] - offset) + offset)
             if on_horizontal:
-                fractional_offset[1] = xy[1] - (round(xy[1] - offset) + offset)\
-                    - self.document_offset
+                fractional_offset[1] = (
+                    xy[1] - (round(xy[1] - offset) + offset) - self.document_offset
+                )
 
             fractional_offset = transform_dimensions(
-                transform, fractional_offset[0], fractional_offset[1], inverse=True)
+                transform, fractional_offset[0], fractional_offset[1], inverse=True
+            )
             self.transform_path_node(-Transform(translate=fractional_offset), path, i)
 
         elem.original_path = path
 
     def snap_rect(self, elem, parent_transform=None):
-        transform = (elem.transform @ Transform(parent_transform))
+        transform = elem.transform @ Transform(parent_transform)
 
         if transform.c or transform.b:  # if we've got any skew/rotation, get outta here
-            raise TransformError("Rect: Selection contains transformations with skew/rotation")
+            raise TransformError(
+                "Rect: Selection contains transformations with skew/rotation"
+            )
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1
 
-        width = self.svg.to_dimensionless(elem.attrib['width'])
-        height = self.svg.to_dimensionless(elem.attrib['height'])
-        x = self.svg.to_dimensionless(elem.attrib['x'])
-        y = self.svg.to_dimensionless(elem.attrib['y'])
+        width = self.svg.to_dimensionless(elem.attrib["width"])
+        height = self.svg.to_dimensionless(elem.attrib["height"])
+        x = self.svg.to_dimensionless(elem.attrib["x"])
+        y = self.svg.to_dimensionless(elem.attrib["y"])
 
         width, height = transform_dimensions(transform, width, height)
         x, y = transform_point(transform, [x, y])
@@ -374,7 +412,9 @@ class PixelSnap(inkex.EffectExtension):
         # Snap to the nearest pixel
         height = round(height)
         width = round(width)
-        x = round(x - offset) + offset  # If there's a stroke of non-even width, it's shifted by half a pixel
+        x = (
+            round(x - offset) + offset
+        )  # If there's a stroke of non-even width, it's shifted by half a pixel
         y = round(y - offset) + offset
 
         width, height = transform_dimensions(transform, width, height, inverse=True)
@@ -383,10 +423,10 @@ class PixelSnap(inkex.EffectExtension):
         y += self.document_offset / transform.d
 
         # Position the elem at the newly calculate values
-        elem.attrib['width'] = str(width)
-        elem.attrib['height'] = str(height)
-        elem.attrib['x'] = str(x)
-        elem.attrib['y'] = str(y)
+        elem.attrib["width"] = str(width)
+        elem.attrib["height"] = str(height)
+        elem.attrib["x"] = str(x)
+        elem.attrib["y"] = str(y)
 
     def snap_image(self, elem, parent_transform=None):
         self.snap_rect(elem, parent_transform)
@@ -426,7 +466,9 @@ class PixelSnap(inkex.EffectExtension):
         if isinstance(elem, PathElement):
             self.snap_path_scale(elem, parent_transform)
             self.snap_path_pos(elem, parent_transform)
-            self.snap_path(elem, parent_transform)  # would be quite useful to make this an option, as scale/pos alone doesn't mess with the path itself, and works well for sans-serif text
+            self.snap_path(
+                elem, parent_transform
+            )  # would be quite useful to make this an option, as scale/pos alone doesn't mess with the path itself, and works well for sans-serif text
         elif isinstance(elem, Rectangle):
             self.snap_rect(elem, parent_transform)
         elif isinstance(elem, Image):
@@ -435,7 +477,9 @@ class PixelSnap(inkex.EffectExtension):
     def effect(self):
         svg = self.document.getroot()
 
-        self.document_offset = self.svg.unittouu(svg.attrib['height']) % 1  # although SVG units are absolute, the elements are positioned relative to the top of the page, rather than zero
+        self.document_offset = (
+            self.svg.unittouu(svg.attrib["height"]) % 1
+        )  # although SVG units are absolute, the elements are positioned relative to the top of the page, rather than zero
 
         for id, elem in self.svg.selected.items():
             try:
@@ -444,5 +488,5 @@ class PixelSnap(inkex.EffectExtension):
                 raise inkex.AbortExtension(str(err))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     PixelSnap().run()

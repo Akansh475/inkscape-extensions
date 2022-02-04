@@ -49,42 +49,42 @@ from inkex import Use, TextElement, transforms
 
 # globals
 SKIP_CONTAINERS = [
-    'defs',
-    'glyph',
-    'marker',
-    'mask',
-    'missing-glyph',
-    'pattern',
-    'symbol',
+    "defs",
+    "glyph",
+    "marker",
+    "mask",
+    "missing-glyph",
+    "pattern",
+    "symbol",
 ]
 CONTAINER_ELEMENTS = [
-    'a',
-    'g',
-    'switch',
+    "a",
+    "g",
+    "switch",
 ]
 GRAPHICS_ELEMENTS = [
-    'circle',
-    'ellipse',
-    'image',
-    'line',
-    'path',
-    'polygon',
-    'polyline',
-    'rect',
-    'text',
-    'use',
+    "circle",
+    "ellipse",
+    "image",
+    "line",
+    "path",
+    "polygon",
+    "polyline",
+    "rect",
+    "text",
+    "use",
 ]
 
 
 def is_3dbox(element):
     """Check whether element is an Inkscape 3dbox type."""
-    return element.get('sodipodi:type') == 'inkscape:box3d'
+    return element.get("sodipodi:type") == "inkscape:box3d"
 
 
 def is_text_on_path(element):
     """Check whether text element is put on a path."""
     if isinstance(element, TextElement):
-        text_path = element.find('svg:textPath')
+        text_path = element.find("svg:textPath")
         if text_path is not None and len(text_path):
             return True
     return False
@@ -98,7 +98,7 @@ def is_sibling(element1, element2):
 def is_in_defs(doc, element):
     """Check whether element is in defs."""
     if element is not None:
-        defs = doc.find('defs')
+        defs = doc.find("defs")
         if defs is not None:
             return element in defs.iterdescendants()
     return False
@@ -117,31 +117,31 @@ def check_3dbox(svg, element, scale_x, scale_y):
 def check_text_on_path(svg, element, scale_x, scale_y):
     """Check whether to skip scaling a text put on a path."""
     skip = False
-    path = element.find('textPath').href
+    path = element.find("textPath").href
     if not is_in_defs(svg, path):
         if is_sibling(element, path):
             # skip common element scaling if both text and path are siblings
             skip = True
             # scale offset
-            if 'transform' in element.attrib:
+            if "transform" in element.attrib:
                 element.transform.add_scale(scale_x, scale_y)
             # scale font size
-            mat = inkex.Transform('scale({},{})'.format(scale_x, scale_y)).matrix
+            mat = inkex.Transform("scale({},{})".format(scale_x, scale_y)).matrix
             det = abs(mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0])
             descrim = math.sqrt(abs(det))
-            prop = 'font-size'
+            prop = "font-size"
             # outer text
-            sdict = dict(inkex.Style.parse_str(element.get('style')))
+            sdict = dict(inkex.Style.parse_str(element.get("style")))
             if prop in sdict:
                 sdict[prop] = float(sdict[prop]) * descrim
-                element.set('style', str(inkex.Style(sdict)))
+                element.set("style", str(inkex.Style(sdict)))
             # inner tspans
             for child in element.iterdescendants():
                 if isinstance(element, inkex.Tspan):
-                    sdict = dict(inkex.Style.parse_str(child.get('style')))
+                    sdict = dict(inkex.Style.parse_str(child.get("style")))
                     if prop in sdict:
                         sdict[prop] = float(sdict[prop]) * descrim
-                        child.set('style', str(inkex.Style(sdict)))
+                        child.set("style", str(inkex.Style(sdict)))
     return skip
 
 
@@ -153,7 +153,7 @@ def check_use(svg, element, scale_x, scale_y):
         if is_sibling(element, path):
             skip = True
             # scale offset
-            if 'transform' in element.attrib:
+            if "transform" in element.attrib:
                 element.transform.add_scale(scale_x, scale_y)
     return skip
 
@@ -165,33 +165,34 @@ class DPISwitcher(inkex.EffectExtension):
     units = "px"
 
     def add_arguments(self, pars):
-        pars.add_argument("--switcher", type=str, default="0",
-                          help="Select the DPI switch you want")
+        pars.add_argument(
+            "--switcher", type=str, default="0", help="Select the DPI switch you want"
+        )
 
     # dictionaries of unit to user unit conversion factors
     __uuconvLegacy = {
-        'in': 90.0,
-        'pt': 1.25,
-        'px': 1.0,
-        'mm': 3.5433070866,
-        'cm': 35.433070866,
-        'm': 3543.3070866,
-        'km': 3543307.0866,
-        'pc': 15.0,
-        'yd': 3240.0,
-        'ft': 1080.0,
+        "in": 90.0,
+        "pt": 1.25,
+        "px": 1.0,
+        "mm": 3.5433070866,
+        "cm": 35.433070866,
+        "m": 3543.3070866,
+        "km": 3543307.0866,
+        "pc": 15.0,
+        "yd": 3240.0,
+        "ft": 1080.0,
     }
     __uuconv = {
-        'in': 96.0,
-        'pt': 1.33333333333,
-        'px': 1.0,
-        'mm': 3.77952755913,
-        'cm': 37.7952755913,
-        'm': 3779.52755913,
-        'km': 3779527.55913,
-        'pc': 16.0,
-        'yd': 3456.0,
-        'ft': 1152.0,
+        "in": 96.0,
+        "pt": 1.33333333333,
+        "px": 1.0,
+        "mm": 3.77952755913,
+        "cm": 37.7952755913,
+        "m": 3779.52755913,
+        "km": 3779527.55913,
+        "pc": 16.0,
+        "yd": 3456.0,
+        "ft": 1152.0,
     }
 
     def parse_length(self, length, percent=False):
@@ -201,31 +202,35 @@ class DPISwitcher(inkex.EffectExtension):
         else:  # dpi96to90
             known_units = list(self.__uuconv)
         if percent:
-            unitmatch = re.compile('(%s)$' % '|'.join(known_units + ['%']))
+            unitmatch = re.compile("(%s)$" % "|".join(known_units + ["%"]))
         else:
-            unitmatch = re.compile('(%s)$' % '|'.join(known_units))
-        param = re.compile(r'(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)')
+            unitmatch = re.compile("(%s)$" % "|".join(known_units))
+        param = re.compile(
+            r"(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)"
+        )
         p = param.match(length)
         u = unitmatch.search(length)
         val = 100  # fallback: assume default length of 100
-        unit = 'px'  # fallback: assume 'px' unit
+        unit = "px"  # fallback: assume 'px' unit
         if p:
-            val = float(p.string[p.start():p.end()])
+            val = float(p.string[p.start() : p.end()])
         if u:
-            unit = u.string[u.start():u.end()]
+            unit = u.string[u.start() : u.end()]
         return val, unit
 
     def convert_length(self, val, unit):
         """Convert length to self.units if unit differs."""
-        doc_unit = self.units or 'px'
+        doc_unit = self.units or "px"
         if unit != doc_unit:
             if self.options.switcher == "0":  # dpi90to96
                 val_px = val * self.__uuconvLegacy[unit]
-                val = val_px / (self.__uuconvLegacy[doc_unit] / self.__uuconvLegacy['px'])
+                val = val_px / (
+                    self.__uuconvLegacy[doc_unit] / self.__uuconvLegacy["px"]
+                )
                 unit = doc_unit
             else:  # dpi96to90
                 val_px = val * self.__uuconv[unit]
-                val = val_px / (self.__uuconv[doc_unit] / self.__uuconv['px'])
+                val = val_px / (self.__uuconv[doc_unit] / self.__uuconv["px"])
                 unit = doc_unit
         return val, unit
 
@@ -240,28 +245,31 @@ class DPISwitcher(inkex.EffectExtension):
         if attr in element.attrib:
             val, unit = self.parse_length(element.get(attr), percent=True)
             if unit in unit_list:
-                element.set(attr, '{}{}'.format(val * factor, unit))
+                element.set(attr, "{}{}".format(val * factor, unit))
 
     def scale_root(self, unit_exponent=1.0):
         """Scale all top-level elements in SVG root."""
 
         # update viewport
-        width_num = self.parse_length(self.svg.get('width'))[0]
-        height_num = self.convert_length(*self.parse_length(self.svg.get('height')))[0]
+        width_num = self.parse_length(self.svg.get("width"))[0]
+        height_num = self.convert_length(*self.parse_length(self.svg.get("height")))[0]
         width_doc = width_num * self.factor_a * unit_exponent
         height_doc = height_num * self.factor_a * unit_exponent
 
         svg = self.svg
-        if svg.get('height'):
-            svg.set('height', str(height_doc))
-        if svg.get('width'):
-            svg.set('width', str(width_doc))
+        if svg.get("height"):
+            svg.set("height", str(height_doc))
+        if svg.get("width"):
+            svg.set("width", str(width_doc))
 
         # update viewBox
-        if svg.get('viewBox'):
-            viewboxstring = re.sub(' +|, +|,', ' ', svg.get('viewBox'))
-            viewboxlist = [float(i) for i in viewboxstring.strip().split(' ', 4)]
-            svg.set('viewBox', '{} {} {} {}'.format(*[(val * self.factor_a) for val in viewboxlist]))
+        if svg.get("viewBox"):
+            viewboxstring = re.sub(" +|, +|,", " ", svg.get("viewBox"))
+            viewboxlist = [float(i) for i in viewboxstring.strip().split(" ", 4)]
+            svg.set(
+                "viewBox",
+                "{} {} {} {}".format(*[(val * self.factor_a) for val in viewboxlist]),
+            )
 
         # update guides, grids
         if self.options.switcher == "1":
@@ -290,10 +298,10 @@ class DPISwitcher(inkex.EffectExtension):
                         continue
 
                 # relative units ('%') in presentation attributes
-                for attr in ['width', 'height']:
-                    self.scale_attr_val(element, attr, ['%'], 1.0 / self.factor_a)
-                for attr in ['x', 'y']:
-                    self.scale_attr_val(element, attr, ['%'], 1.0 / self.factor_a)
+                for attr in ["width", "height"]:
+                    self.scale_attr_val(element, attr, ["%"], 1.0 / self.factor_a)
+                for attr in ["x", "y"]:
+                    self.scale_attr_val(element, attr, ["%"], 1.0 / self.factor_a)
 
                 # set preserved transforms on top-level elements
                 if width_scale != 1.0 and height_scale != 1.0:
@@ -307,24 +315,53 @@ class DPISwitcher(inkex.EffectExtension):
         """Scale the guidelines"""
         for guide in self.svg.namedview.get_guides():
             point = guide.get("position").split(",")
-            guide.set("position", str(float(point[0].strip()) * self.factor_a) + "," + str(float(point[1].strip()) * self.factor_a))
+            guide.set(
+                "position",
+                str(float(point[0].strip()) * self.factor_a)
+                + ","
+                + str(float(point[1].strip()) * self.factor_a),
+            )
 
     def scale_grid(self):
         """Scale the inkscape grid"""
-        grids = self.svg.xpath('//inkscape:grid')
+        grids = self.svg.xpath("//inkscape:grid")
         for grid in grids:
             grid.set("units", "px")
             if grid.get("spacingx"):
-                spacingx = str(float(re.sub("[a-zA-Z]", "", grid.get("spacingx"))) * self.factor_a) + "px"
+                spacingx = (
+                    str(
+                        float(re.sub("[a-zA-Z]", "", grid.get("spacingx")))
+                        * self.factor_a
+                    )
+                    + "px"
+                )
                 grid.set("spacingx", str(spacingx))
             if grid.get("spacingy"):
-                spacingy = str(float(re.sub("[a-zA-Z]", "", grid.get("spacingy"))) * self.factor_a) + "px"
+                spacingy = (
+                    str(
+                        float(re.sub("[a-zA-Z]", "", grid.get("spacingy")))
+                        * self.factor_a
+                    )
+                    + "px"
+                )
                 grid.set("spacingy", str(spacingy))
             if grid.get("originx"):
-                originx = str(float(re.sub("[a-zA-Z]", "", grid.get("originx"))) * self.factor_a) + "px"
+                originx = (
+                    str(
+                        float(re.sub("[a-zA-Z]", "", grid.get("originx")))
+                        * self.factor_a
+                    )
+                    + "px"
+                )
                 grid.set("originx", str(originx))
             if grid.get("originy"):
-                originy = str(float(re.sub("[a-zA-Z]", "", grid.get("originy"))) * self.factor_a) + "px"
+                originy = (
+                    str(
+                        float(re.sub("[a-zA-Z]", "", grid.get("originy")))
+                        * self.factor_a
+                    )
+                    + "px"
+                )
                 grid.set("originy", str(originy))
 
     def effect(self):
@@ -332,8 +369,8 @@ class DPISwitcher(inkex.EffectExtension):
         if self.options.switcher == "0":
             self.factor_a = 96.0 / 90.0
             self.factor_b = 90.0 / 96.0
-        svg.namedview.set('inkscape:document-units', "px")
-        self.units = self.parse_length(svg.get('width'))[1]
+        svg.namedview.set("inkscape:document-units", "px")
+        self.units = self.parse_length(svg.get("width"))[1]
         unit_exponent = 1.0
         if self.units and self.units != "px" and self.units != "" and self.units != "%":
             if self.options.switcher == "0":
@@ -343,5 +380,5 @@ class DPISwitcher(inkex.EffectExtension):
         self.scale_root(unit_exponent)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DPISwitcher().run()

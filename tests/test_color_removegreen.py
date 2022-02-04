@@ -2,6 +2,7 @@
 from color_removegreen import RemoveGreen
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorRemoveGreenTest(ColorBaseCase):
     effect_class = RemoveGreen
     color_tests = [

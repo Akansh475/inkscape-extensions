@@ -2,12 +2,13 @@
 from color_moresaturation import MoreSaturation
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorMoreSaturationTest(ColorBaseCase):
     effect_class = MoreSaturation
     color_tests = [
         ("none", "none"),
-        ('hsl(0, 0, 0)', 'hsl(0, 12, 0)'),
-        ('hsl(255, 255, 255)', 'hsl(255, 255, 255)'),
+        ("hsl(0, 0, 0)", "hsl(0, 12, 0)"),
+        ("hsl(255, 255, 255)", "hsl(255, 255, 255)"),
         ((0, 0, 0), "#000000"),
         ((255, 255, 255), "#ffffff"),
         ((192, 192, 192), "#c2bdbd"),

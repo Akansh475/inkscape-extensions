@@ -23,17 +23,28 @@ Python barcode renderer for EAN5 barcodes. Designed for use with Inkscape.
 
 from .BaseEan import EanBarcode
 
-FAMS = ['11000', '10100', '10010', '10001', '01100',
-        '00110', '00011', '01010', '01001', '00101']
-START = '01011'
+FAMS = [
+    "11000",
+    "10100",
+    "10010",
+    "10001",
+    "01100",
+    "00110",
+    "00011",
+    "01010",
+    "01001",
+    "00101",
+]
+START = "01011"
 
 
 class Ean5(EanBarcode):
     """Provide an Ean5 barcode generator"""
-    name = 'ean5'
+
+    name = "ean5"
     length = 5
 
     def _encode(self, num, guide=False):
-        self.text = ' '.join(self.space(num))
-        family = sum([int(n) * int(m) for n, m in zip(num, '39393')]) % 10
-        return START + '01'.join(self.encode_interleaved(family, num, FAMS))
+        self.text = " ".join(self.space(num))
+        family = sum([int(n) * int(m) for n, m in zip(num, "39393")]) % 10
+        return START + "01".join(self.encode_interleaved(family, num, FAMS))

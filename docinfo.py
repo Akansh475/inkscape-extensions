@@ -22,20 +22,31 @@
 
 import inkex
 
+
 class DocInfo(inkex.EffectExtension):
     """Show document information"""
+
     def effect(self):
         namedview = self.svg.namedview
         self.msg(":::SVG document related info:::")
-        self.msg("version: " + self.svg.get('inkscape:version', 'New Document (unsaved)'))
+        self.msg(
+            "version: " + self.svg.get("inkscape:version", "New Document (unsaved)")
+        )
         self.msg("width: {}".format(self.svg.viewport_width))
         self.msg("height: {}".format(self.svg.viewport_height))
         self.msg("viewbox: {}".format(str(self.svg.get_viewbox())))
-        self.msg("document-units: {}".format(namedview.get('inkscape:document-units', 'None')))
-        self.msg("units: " + namedview.get('units', 'None'))
+        self.msg(
+            "document-units: {}".format(
+                namedview.get("inkscape:document-units", "None")
+            )
+        )
+        self.msg("units: " + namedview.get("units", "None"))
         self.msg("Document has " + str(len(namedview.get_guides())) + " guides")
-        for i, grid in enumerate(namedview.findall('inkscape:grid')):
-            self.msg("Grid number {}: Units: {}".format(i + 1, grid.get("units", 'None')))
+        for i, grid in enumerate(namedview.findall("inkscape:grid")):
+            self.msg(
+                "Grid number {}: Units: {}".format(i + 1, grid.get("units", "None"))
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     DocInfo().run()

@@ -27,12 +27,15 @@ currently being used.
 """
 import inkex
 
-text_tags = ['{http://www.w3.org/2000/svg}tspan',
-                            '{http://www.w3.org/2000/svg}text',
-                            '{http://www.w3.org/2000/svg}flowRoot',
-                            '{http://www.w3.org/2000/svg}flowPara',
-                            '{http://www.w3.org/2000/svg}flowSpan']
-font_attributes = ['font-family', '-inkscape-font-specification']
+text_tags = [
+    "{http://www.w3.org/2000/svg}tspan",
+    "{http://www.w3.org/2000/svg}text",
+    "{http://www.w3.org/2000/svg}flowRoot",
+    "{http://www.w3.org/2000/svg}flowPara",
+    "{http://www.w3.org/2000/svg}flowSpan",
+]
+font_attributes = ["font-family", "-inkscape-font-specification"]
+
 
 def set_font(node, new_font, style=None):
     """
@@ -53,6 +56,7 @@ def set_font(node, new_font, style=None):
                 dirty = True
     return dirty
 
+
 def find_replace_font(node, find, replace):
     """
     Searches the relevant font attributes/styles of node for find, and
@@ -69,12 +73,14 @@ def find_replace_font(node, find, replace):
                 dirty = True
     return dirty
 
+
 def is_styled_text(node):
     """
     Returns true if the tag in question is a "styled" element that
     can hold text.
     """
-    return node.tag in text_tags and 'style' in node.attrib
+    return node.tag in text_tags and "style" in node.attrib
+
 
 def is_text(node):
     """
@@ -98,13 +104,19 @@ def get_fonts(node):
             fonts.append(s[a])
     return fonts
 
+
 def report_replacements(num):
     """
     Sends a message to the end user showing success of failure
     of the font replacement
     """
     if num == 0:
-        inkex.errormsg(_('Couldn\'t find anything using that font, please ensure the spelling and spacing is correct.'))
+        inkex.errormsg(
+            _(
+                "Couldn't find anything using that font, please ensure the spelling and spacing is correct."
+            )
+        )
+
 
 def report_findings(findings):
     """
@@ -114,14 +126,16 @@ def report_findings(findings):
         inkex.errormsg(_("Didn't find any fonts in this document/selection."))
     else:
         if len(findings) == 1:
-            inkex.errormsg(_(u"Found the following font only: %s") % findings[0])
+            inkex.errormsg(_("Found the following font only: %s") % findings[0])
         else:
-            inkex.errormsg(_(u"Found the following fonts:\n%s") % '\n'.join(findings))
+            inkex.errormsg(_("Found the following fonts:\n%s") % "\n".join(findings))
+
 
 class ReplaceFont(inkex.EffectExtension):
     """
     Replaces all instances of one font with another
     """
+
     def add_arguments(self, pars):
         pars.add_argument("--fr_find")
         pars.add_argument("--fr_replace")
@@ -197,7 +211,9 @@ class ReplaceFont(inkex.EffectExtension):
     def effect(self):
         if not self.options.action:
             return inkex.errormsg("Nothing to do, no action specified.")
-        action = self.options.action.strip("\"") # TODO Is this a bug? (Extra " characters)
+        action = self.options.action.strip(
+            '"'
+        )  # TODO Is this a bug? (Extra " characters)
         scope = self.options.scope
 
         relevant_items = self.relevant_items(scope)
@@ -205,19 +221,26 @@ class ReplaceFont(inkex.EffectExtension):
         if action == "find_replace":
             find = self.options.fr_find
             if find is None or find == "":
-                return inkex.errormsg(_("Please enter a search string in the find box."))
+                return inkex.errormsg(
+                    _("Please enter a search string in the find box.")
+                )
             find = find.strip().lower()
             replace = self.options.fr_replace
             if replace is None or replace == "":
-                return inkex.errormsg(_("Please enter a replacement font in the replace with box."))
+                return inkex.errormsg(
+                    _("Please enter a replacement font in the replace with box.")
+                )
             self.find_replace(relevant_items, find, replace)
         elif action == "replace_all":
             replace = self.options.r_replace
             if replace is None or replace == "":
-                return inkex.errormsg(_("Please enter a replacement font in the replace all box."))
+                return inkex.errormsg(
+                    _("Please enter a replacement font in the replace all box.")
+                )
             self.replace_all(relevant_items, replace)
         elif action == "list_only":
             self.list_all(relevant_items)
+
 
 if __name__ == "__main__":
     ReplaceFont().run()

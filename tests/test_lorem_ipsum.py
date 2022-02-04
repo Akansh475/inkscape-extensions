@@ -2,10 +2,18 @@
 from lorem_ipsum import LoremIpsum
 from inkex.tester import ComparisonMixin, TestCase
 
+
 class LorumIpsumBasicTest(ComparisonMixin, TestCase):
     effect_class = LoremIpsum
     compare_file = "svg/shapes.svg"
-    comparisons = [(), ["--svg2=false"], ["--id=r1"], ["--id=r1", "--svg2=false"], ["--id=t4"]]
+    comparisons = [
+        (),
+        ["--svg2=false"],
+        ["--id=r1"],
+        ["--id=r1", "--svg2=false"],
+        ["--id=t4"],
+    ]
+
 
 class LoremIpsumMillimeters(ComparisonMixin, TestCase):
     effect_class = LoremIpsum

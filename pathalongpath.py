@@ -32,7 +32,7 @@ Now move and bend L to make it fit a skeleton, and see what happens to the norma
 they move and rotate, deforming the pattern.
 """
 import copy
-import math 
+import math
 
 import inkex
 from inkex.bezier import tpoint
@@ -43,19 +43,37 @@ import pathmodifier
 
 class PathAlongPath(pathmodifier.PathModifier):
     """Deform a path along a second path"""
-    def add_arguments(self, pars):
-        pars.add_argument("-n", "--noffset", type=float, default=0.0, help="normal offset")
-        pars.add_argument("-t", "--toffset", type=float, default=0.0, help="tangential offset")
-        pars.add_argument("-k", "--kind", type=str, default='')
-        pars.add_argument("-c", "--copymode", default="Single",
-                          help="repeat the path to fit deformer's length")
-        pars.add_argument("-p", "--space", type=float, default=0.0)
-        pars.add_argument("-v", "--vertical", type=inkex.Boolean, default=False,
-                          help="reference path is vertical")
-        pars.add_argument("-d", "--duplicate", type=inkex.Boolean, default=True,
-                          help="duplicate pattern before deformation")
-        pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
 
+    def add_arguments(self, pars):
+        pars.add_argument(
+            "-n", "--noffset", type=float, default=0.0, help="normal offset"
+        )
+        pars.add_argument(
+            "-t", "--toffset", type=float, default=0.0, help="tangential offset"
+        )
+        pars.add_argument("-k", "--kind", type=str, default="")
+        pars.add_argument(
+            "-c",
+            "--copymode",
+            default="Single",
+            help="repeat the path to fit deformer's length",
+        )
+        pars.add_argument("-p", "--space", type=float, default=0.0)
+        pars.add_argument(
+            "-v",
+            "--vertical",
+            type=inkex.Boolean,
+            default=False,
+            help="reference path is vertical",
+        )
+        pars.add_argument(
+            "-d",
+            "--duplicate",
+            type=inkex.Boolean,
+            default=True,
+            help="duplicate pattern before deformation",
+        )
+        pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
 
     def apply_diffeomorphism(self, bpt, skelcomp, lengths, isclosed, vects=()):
         """
@@ -96,7 +114,7 @@ class PathAlongPath(pathmodifier.PathModifier):
         if len(self.options.ids) < 2:
             raise inkex.AbortExtension("This extension requires two selected paths.")
 
-        self.options.wave = (self.options.kind == "Ribbon")
+        self.options.wave = self.options.kind == "Ribbon"
         if self.options.copymode == "Single":
             self.options.repeat = False
             self.options.stretch = False
@@ -112,7 +130,7 @@ class PathAlongPath(pathmodifier.PathModifier):
 
         patterns, skels = self.get_patterns_and_skeletons(True, self.options.duplicate)
         bboxes = [pattern.bounding_box() for pattern in patterns.values()]
-        if None in bboxes: # for texts, we can't compute the bounding box
+        if None in bboxes:  # for texts, we can't compute the bounding box
             raise inkex.AbortExtension("Please convert texts to path first")
         bbox = sum(bboxes, None)
 
@@ -123,12 +141,16 @@ class PathAlongPath(pathmodifier.PathModifier):
         width = bbox.width
         delta_x = width + self.options.space
         if delta_x < 0.01:
-            raise inkex.AbortExtension("The total length of the pattern is too small\n"\
-                "Please choose a larger object or set 'Space between copies' > 0")
+            raise inkex.AbortExtension(
+                "The total length of the pattern is too small\n"
+                "Please choose a larger object or set 'Space between copies' > 0"
+            )
         for pattern in patterns.values():
             if isinstance(pattern, inkex.PathElement):
                 pattern.apply_transform()
-                pattern.path = self._do_transform(skels, pattern.path.to_superpath(), delta_x, bbox)
+                pattern.path = self._do_transform(
+                    skels, pattern.path.to_superpath(), delta_x, bbox
+                )
 
     def _do_transform(self, skeletons, p0, dx, bbox):
         if self.options.vertical:
@@ -142,9 +164,11 @@ class PathAlongPath(pathmodifier.PathModifier):
             for comp in cur_skeleton:
                 path = copy.deepcopy(p0)
                 skelcomp, lengths = self.linearize(comp)
-                
-                skel_closed = all([math.isclose(i, j) for i, j in zip(skelcomp[0], skelcomp[-1])])
-                
+
+                skel_closed = all(
+                    [math.isclose(i, j) for i, j in zip(skelcomp[0], skelcomp[-1])]
+                )
+
                 length = sum(lengths)
                 xoffset = skelcomp[0][0] - bbox.x.minimum + self.options.toffset
                 yoffset = skelcomp[0][1] - bbox.y.center - self.options.noffset
@@ -166,13 +190,21 @@ class PathAlongPath(pathmodifier.PathModifier):
 
                 if self.options.stretch:
                     if not bbox.width:
-                        raise inkex.AbortExtension("The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width.")
+                        raise inkex.AbortExtension(
+                            "The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width."
+                        )
                     for sub in path:
                         self.stretch(sub, length / bbox.width, 1, skelcomp[0])
 
                 for sub in path:
                     for ctlpt in sub:
-                        self.apply_diffeomorphism(ctlpt[1], skelcomp, lengths, skel_closed, (ctlpt[0], ctlpt[2]))
+                        self.apply_diffeomorphism(
+                            ctlpt[1],
+                            skelcomp,
+                            lengths,
+                            skel_closed,
+                            (ctlpt[0], ctlpt[2]),
+                        )
 
                 if self.options.vertical:
                     self.flipxy(path)
@@ -180,5 +212,5 @@ class PathAlongPath(pathmodifier.PathModifier):
         return CubicSuperPath(newp)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     PathAlongPath().run()

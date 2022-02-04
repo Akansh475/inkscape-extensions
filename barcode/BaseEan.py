@@ -29,26 +29,57 @@ except ImportError:
 
 MAPPING = [
     # Left side of barcode Family '0'
-    ["0001101", "0011001", "0010011", "0111101", "0100011",
-     "0110001", "0101111", "0111011", "0110111", "0001011"],
+    [
+        "0001101",
+        "0011001",
+        "0010011",
+        "0111101",
+        "0100011",
+        "0110001",
+        "0101111",
+        "0111011",
+        "0110111",
+        "0001011",
+    ],
     # Left side of barcode Family '1' and flipped to right side.
-    ["0100111", "0110011", "0011011", "0100001", "0011101",
-     "0111001", "0000101", "0010001", "0001001", "0010111"],
+    [
+        "0100111",
+        "0110011",
+        "0011011",
+        "0100001",
+        "0011101",
+        "0111001",
+        "0000101",
+        "0010001",
+        "0001001",
+        "0010111",
+    ],
 ]
 # This chooses which of the two encodings above to use.
-FAMILIES = ('000000', '001011', '001101', '001110', '010011',
-            '011001', '011100', '010101', '010110', '011010')
+FAMILIES = (
+    "000000",
+    "001011",
+    "001101",
+    "001110",
+    "010011",
+    "011001",
+    "011100",
+    "010101",
+    "010110",
+    "011010",
+)
 
 
 class EanBarcode(Barcode):
     """Simple base class for all EAN type barcodes"""
-    lengths = None # type: Optional[List[int]]
-    length = None # type: Optional[int]
-    checks = [] # type: List[int]
-    extras = {} # type: Dict[int, str] 
+
+    lengths = None  # type: Optional[List[int]]
+    length = None  # type: Optional[int]
+    checks = []  # type: List[int]
+    extras = {}  # type: Dict[int, str]
     magic = 10
-    guard_bar = '202'
-    center_bar = '02020'
+    guard_bar = "202"
+    center_bar = "02020"
 
     def intarray(self, number):
         """Convert a string of digits into an array of ints"""
@@ -80,13 +111,13 @@ class EanBarcode(Barcode):
 
     def space(self, *spacing):
         """Space out an array of numbers"""
-        result = ''
+        result = ""
         for space in spacing:
             if isinstance(space, list):
                 for i in space:
                     result += str(i)
             elif isinstance(space, int):
-                result += ' ' * space
+                result += " " * space
         return result
 
     def get_lengths(self):
@@ -97,12 +128,12 @@ class EanBarcode(Barcode):
 
     def encode(self, code):
         """Encode any EAN barcode"""
-        code = code.replace(' ', '').strip()
-        guide = code.endswith('>')
-        code = code.strip('>')
+        code = code.replace(" ", "").strip()
+        guide = code.endswith(">")
+        code = code.strip(">")
 
         if not code.isdigit():
-            return self.error(code, 'Not a Number, must be digits 0-9 only')
+            return self.error(code, "Not a Number, must be digits 0-9 only")
         lengths = self.get_lengths() + self.checks
 
         # Allow extra barcodes after the first one
@@ -111,18 +142,27 @@ class EanBarcode(Barcode):
                 sep = len(code) - extra
                 if sep in lengths:
                     # Generate a barcode along side this one.
-                    self.add_extra_barcode(self.extras[extra], text=code[sep:],
-                                           x=self.pos_x + 400 * self.scale, text_pos=TEXT_POS_TOP)
+                    self.add_extra_barcode(
+                        self.extras[extra],
+                        text=code[sep:],
+                        x=self.pos_x + 400 * self.scale,
+                        text_pos=TEXT_POS_TOP,
+                    )
                     code = code[:sep]
 
         if len(code) not in lengths:
-            return self.error(code, 'Wrong size {:d}, must be {} digits'.format(len(code), ', '.join([str(length) for length in lengths])))
+            return self.error(
+                code,
+                "Wrong size {:d}, must be {} digits".format(
+                    len(code), ", ".join([str(length) for length in lengths])
+                ),
+            )
 
         if self.checks:
             if len(code) not in self.checks:
                 code = self.append_checksum(code)
             elif not self.verify_checksum(code):
-                return self.error(code, 'Checksum failed, omit for new sum')
+                return self.error(code, "Checksum failed, omit for new sum")
         return self._encode(self.intarray(code), guide=guide)
 
     def _encode(self, num, guide=False):
@@ -137,7 +177,7 @@ class EanBarcode(Barcode):
         parts = [self.guard_bar] + left
         parts.append(self.center_bar)
         parts += list(right) + [self.guard_bar]
-        return ''.join(parts)
+        return "".join(parts)
 
     def get_checksum(self, num):
         """Generate a UPCA/EAN13/EAN8 Checksum"""
@@ -146,7 +186,7 @@ class EanBarcode(Barcode):
         # Modulous result to a single digit checksum
         checksum = self.magic - (total % self.magic)
         if checksum < 0 or checksum >= self.magic:
-            return '0'
+            return "0"
         return str(checksum)
 
     def append_checksum(self, number):

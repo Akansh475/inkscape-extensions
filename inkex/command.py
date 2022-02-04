@@ -40,21 +40,26 @@ from lxml.etree import ElementTree
 
 from .elements import SvgDocumentElement
 
-INKSCAPE_EXECUTABLE_NAME = os.environ.get('INKSCAPE_COMMAND')
+INKSCAPE_EXECUTABLE_NAME = os.environ.get("INKSCAPE_COMMAND")
 if INKSCAPE_EXECUTABLE_NAME == None:
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         # prefer inkscape.exe over inkscape.com which spawns a command window
-        INKSCAPE_EXECUTABLE_NAME = 'inkscape.exe'
+        INKSCAPE_EXECUTABLE_NAME = "inkscape.exe"
     else:
-        INKSCAPE_EXECUTABLE_NAME = 'inkscape'
+        INKSCAPE_EXECUTABLE_NAME = "inkscape"
+
 
 class CommandNotFound(IOError):
     """Command is not found"""
+
     pass
+
 
 class ProgramRunError(ValueError):
     """Command returned non-zero output"""
+
     pass
+
 
 def which(program):
     """
@@ -62,13 +67,14 @@ def which(program):
     """
     if os.path.isabs(program) and os.path.isfile(program):
         return program
-    # On Windows, shutil.which may give preference to .py files in the current directory 
-    # (such as pdflatex.py), e.g. if .PY is in pathext, because the current directory is 
+    # On Windows, shutil.which may give preference to .py files in the current directory
+    # (such as pdflatex.py), e.g. if .PY is in pathext, because the current directory is
     # prepended to PATH. This can be suppressed by explicitly appending the current directory.
 
     try:
         if sys.platform == "win32":
             from shutil import which
+
             prog = which(program, path=os.environ["PATH"] + ";" + os.curdir)
             if prog:
                 return prog
@@ -78,27 +84,28 @@ def which(program):
     try:
         # Python3 only version of which
         from shutil import which as warlock
+
         prog = warlock(program)
         if prog:
             return prog
     except ImportError:
-        pass # python2
-
+        pass  # python2
 
     # There may be other methods for doing a `which` command for other
     # operating systems; These should go here as they are discovered.
 
     raise CommandNotFound(f"Can not find the command: '{program}'")
 
+
 def write_svg(svg, *filename):
     """Writes an svg to the given filename"""
     filename = os.path.join(*filename)
     if os.path.isfile(filename):
         return filename
-    with open(filename, 'wb') as fhl:
+    with open(filename, "wb") as fhl:
         if isinstance(svg, SvgDocumentElement):
             svg = ElementTree(svg)
-        if hasattr(svg, 'write'):
+        if hasattr(svg, "write"):
             # XML document
             svg.write(fhl)
         elif isinstance(svg, bytes):
@@ -112,15 +119,16 @@ def to_arg(arg, oldie=False):
     """Convert a python argument to a command line argument"""
     if isinstance(arg, (tuple, list)):
         (arg, val) = arg
-        arg = '-' + arg
+        arg = "-" + arg
         if len(arg) > 2 and not oldie:
-            arg = '-' + arg
+            arg = "-" + arg
         if val is True:
             return arg
         if val is False:
             return None
         return f"{arg}={str(val)}"
     return str(arg)
+
 
 def to_args(prog, *positionals, **arguments):
     """Compile arguments and keyword arguments into a list of strings which Popen will understand.
@@ -149,9 +157,9 @@ def to_args(prog, *positionals, **arguments):
     :rtype: ``list[str]``
     """
     args = [prog]
-    oldie = arguments.pop('oldie', False)
+    oldie = arguments.pop("oldie", False)
     for arg, value in arguments.items():
-        arg = arg.replace('_', '-').strip()
+        arg = arg.replace("_", "-").strip()
 
         if isinstance(value, tuple):
             value = list(value)
@@ -164,34 +172,40 @@ def to_args(prog, *positionals, **arguments):
     args += [to_arg(pos, oldie) for pos in positionals if pos is not None]
     # Filter out empty non-arguments
     return [arg for arg in args if arg is not None]
+
+
 def to_args_sorted(prog, *positionals, **arguments):
     """same as to_args, but keyword arguments are sorted beforehand"""
     return to_args(prog, *positionals, **dict(sorted(arguments.items())))
 
+
 def _call(program, *args, **kwargs):
-    stdin = kwargs.pop('stdin', None)
+    stdin = kwargs.pop("stdin", None)
     if isinstance(stdin, str):
-        stdin = stdin.encode('utf-8')
+        stdin = stdin.encode("utf-8")
     inpipe = PIPE if stdin else None
 
     args = to_args(which(program), *args, **kwargs)
 
     kwargs = {}
     if sys.platform == "win32":
-        kwargs["creationflags"] = 0x08000000 # create no console window
+        kwargs["creationflags"] = 0x08000000  # create no console window
 
     process = Popen(
         args,
-        shell=False, # Never have shell=True
-        stdin=inpipe, # StdIn not used (yet)
-        stdout=PIPE, # Grab any output (return it)
-        stderr=PIPE, # Take all errors, just incase
-        **kwargs
+        shell=False,  # Never have shell=True
+        stdin=inpipe,  # StdIn not used (yet)
+        stdout=PIPE,  # Grab any output (return it)
+        stderr=PIPE,  # Take all errors, just incase
+        **kwargs,
     )
     (stdout, stderr) = process.communicate(input=stdin)
     if process.returncode == 0:
         return stdout
-    raise ProgramRunError(f"Return Code: {process.returncode}: {stderr}\n{stdout}\nargs: {args}")
+    raise ProgramRunError(
+        f"Return Code: {process.returncode}: {stderr}\n{stdout}\nargs: {args}"
+    )
+
 
 def call(program, *args, **kwargs):
     """
@@ -206,13 +220,14 @@ def call(program, *args, **kwargs):
      * All other arguments converted using to_args(...) function.
     """
     # We use this long input because it's less likely to conflict with --binary=
-    binary = kwargs.pop('return_binary', False)
+    binary = kwargs.pop("return_binary", False)
     stdout = _call(program, *args, **kwargs)
     # Convert binary to string when we wish to have strings we do this here
     # so the mock tests will also run the conversion (always returns bytes)
     if not binary and isinstance(stdout, bytes):
-        return stdout.decode(sys.stdout.encoding or 'utf-8')
+        return stdout.decode(sys.stdout.encoding or "utf-8")
     return stdout
+
 
 def inkscape(svg_file, *args, **kwargs):
     """
@@ -220,30 +235,34 @@ def inkscape(svg_file, *args, **kwargs):
     """
     return call(INKSCAPE_EXECUTABLE_NAME, svg_file, *args, **kwargs)
 
+
 def inkscape_command(svg, select=None, verbs=()):
     """
     Executes a list of commands, a mixture of verbs, selects etc.
 
     inkscape_command('<svg...>', ('verb', 'VerbName'), ...)
     """
-    with TemporaryDirectory(prefix='inkscape-command') as tmpdir:
-        svg_file = write_svg(svg, tmpdir, 'input.svg')
-        select = ('select', select) if select else None
-        verbs += ('FileSave', 'FileQuit')
-        inkscape(svg_file, select, batch_process=True, verb=';'.join(verbs))
-        with open(svg_file, 'rb') as fhl:
+    with TemporaryDirectory(prefix="inkscape-command") as tmpdir:
+        svg_file = write_svg(svg, tmpdir, "input.svg")
+        select = ("select", select) if select else None
+        verbs += ("FileSave", "FileQuit")
+        inkscape(svg_file, select, batch_process=True, verb=";".join(verbs))
+        with open(svg_file, "rb") as fhl:
             return fhl.read()
 
-def take_snapshot(svg, dirname, name='snapshot', ext='png', dpi=96, **kwargs):
+
+def take_snapshot(svg, dirname, name="snapshot", ext="png", dpi=96, **kwargs):
     """
     Take a snapshot of the given svg file.
 
     Resulting filename is yielded back, after generator finishes, the
     file is deleted so you must deal with the file inside the for loop.
     """
-    svg_file = write_svg(svg, dirname, name + '.svg')
-    ext_file = os.path.join(dirname, name + '.' + str(ext).lower())
-    inkscape(svg_file, export_dpi=dpi, export_filename=ext_file, export_type=ext, **kwargs)
+    svg_file = write_svg(svg, dirname, name + ".svg")
+    ext_file = os.path.join(dirname, name + "." + str(ext).lower())
+    inkscape(
+        svg_file, export_dpi=dpi, export_filename=ext_file, export_type=ext, **kwargs
+    )
     return ext_file
 
 

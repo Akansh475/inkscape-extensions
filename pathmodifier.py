@@ -33,10 +33,12 @@ from inkex import PathElement, Group, Use
 from inkex.bezier import pointdistance, beziersplitatt
 
 # This deprecated API is used by some external extensions.
-from inkex.deprecated import zSort # pylint: disable=unused-import
+from inkex.deprecated import zSort  # pylint: disable=unused-import
+
 
 class PathModifier(inkex.EffectExtension):
     """Select list manipulation"""
+
     def expand_groups(self, elements, transferTransform=True):
         for node_id, node in list(elements.items()):
             if isinstance(node, inkex.Group):
@@ -44,7 +46,7 @@ class PathModifier(inkex.EffectExtension):
                 for child in node:
                     if transferTransform:
                         child.transform = mat @ child.transform
-                    elements.update(self.expand_groups({child.get('id'): child}))
+                    elements.update(self.expand_groups({child.get("id"): child}))
                 if transferTransform and node.get("transform"):
                     del node.attrib["transform"]
                 # Group is now replaced, so remove it.
@@ -61,8 +63,10 @@ class PathModifier(inkex.EffectExtension):
             elif isinstance(node, Use):
                 newnode = node.unlink()
                 elements.pop(node_id)
-                newid = newnode.get('id')
-                elements.update(self.expand_clones({newid: newnode}, transferTransform, replace))
+                newid = newnode.get("id")
+                elements.update(
+                    self.expand_clones({newid: newnode}, transferTransform, replace)
+                )
         return elements
 
     def objects_to_paths(self, elements, replace=True):
@@ -71,8 +75,8 @@ class PathModifier(inkex.EffectExtension):
             elem = node.to_path_element()
             if replace:
                 node.replace_with(elem)
-                elem.set('id', node.get('id'))
-            elements[elem.get('id')] = elem
+                elem.set("id", node.get("id"))
+            elements[elem.get("id")] = elem
 
     def effect(self):
         raise NotImplementedError("overwrite this method in subclasses")
@@ -82,7 +86,7 @@ class PathModifier(inkex.EffectExtension):
             path = node.path.to_superpath()
             # do what ever you want with "path"!
             node.path = path
-    
+
     @staticmethod
     def lengthtotime(l, lengths, isclosed):
         """
@@ -101,7 +105,7 @@ class PathModifier(inkex.EffectExtension):
             i += 1
         t = l / lengths[min(i, len(lengths) - 1)]
         return i, t
-    
+
     @staticmethod
     def flipxy(path):
         """Swaps x and y coordinate of all path vertices"""
@@ -119,7 +123,7 @@ class PathModifier(inkex.EffectExtension):
             for pt in ctl:
                 pt[0] += dx
                 pt[1] += dy
-    
+
     @staticmethod
     def stretch(pathcomp, xscale, yscale, org):
         """Stretches a subpath by (xscale, yscale) relative to origin org"""
@@ -127,7 +131,7 @@ class PathModifier(inkex.EffectExtension):
             for pt in ctl:
                 pt[0] = org[0] + (pt[0] - org[0]) * xscale
                 pt[1] = org[1] + (pt[1] - org[1]) * yscale
-    
+
     @staticmethod
     def linearize(p, tolerance=0.001):
         """
@@ -147,10 +151,15 @@ class PathModifier(inkex.EffectExtension):
             box += pointdistance(p[i + 1][0], p[i + 1][1])
             chord = pointdistance(p[i][1], p[i + 1][1])
             if (box - chord) > tolerance:
-                b1, b2 = beziersplitatt([p[i][1], p[i][2], p[i + 1][0], p[i + 1][1]], 0.5)
+                b1, b2 = beziersplitatt(
+                    [p[i][1], p[i][2], p[i + 1][0], p[i + 1][1]], 0.5
+                )
                 p[i][2][0], p[i][2][1] = b1[1]
                 p[i + 1][0][0], p[i + 1][0][1] = b2[2]
-                p.insert(i + 1, [[b1[2][0], b1[2][1]], [b1[3][0], b1[3][1]], [b2[1][0], b2[1][1]]])
+                p.insert(
+                    i + 1,
+                    [[b1[2][0], b1[2][1]], [b1[3][0], b1[3][1]], [b2[1][0], b2[1][1]]],
+                )
             else:
                 d = (box + chord) / 2
                 lengths.append(d)
@@ -168,7 +177,7 @@ class PathModifier(inkex.EffectExtension):
         elem = skeletons.pop()
         if duplicate:
             elem = elem.duplicate()
-        
+
         if expand_patterns:
             patterns = {elem.get_id(): elem}
             self.expand_clones(patterns, True, False)
@@ -179,7 +188,6 @@ class PathModifier(inkex.EffectExtension):
         self.expand_clones(skeletons, True, False)
         self.objects_to_paths(skeletons)
         return patterns, skeletons.id_dict()
-
 
 
 class Diffeo(PathModifier):

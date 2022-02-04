@@ -26,8 +26,10 @@ import inkex.paths
 import inkex.elements
 from inkex.utils import PY3
 
+
 class ProtectiveGlobals(dict):
     """Python 3.3 and above globals dictionary"""
+
     def __setitem__(self, name, value):
         # This only works because setitem is called during construction It
         # does not work for getitem and that's why the python docs discourage
@@ -37,22 +39,30 @@ class ProtectiveGlobals(dict):
                 "While importing {} the API name `{}` was re-defined:"
                 "\n\t1. {}"
                 "\n\t2. {}"
-            ).format(self['__name__'], name, repr(value), repr(self[name]))
+            ).format(self["__name__"], name, repr(value), repr(self[name]))
         super(ProtectiveGlobals, self).__setitem__(name, value)
+
 
 class TestModuleCollisions(BaseCase):
     """Test imports to make sure the API is clean"""
-    def assertNoCollisions(self, module): # pylint: disable=invalid-name
+
+    def assertNoCollisions(self, module):  # pylint: disable=invalid-name
         """Make sure there are no API collisions in the give module on import"""
         if not PY3:
             self.skipTest("API testing python 3.3 and above only.")
 
-        with open(module.__file__, 'r') as fhl:
+        with open(module.__file__, "r") as fhl:
             # name and package are esential to the exec pretending to
             # be an actual module during import (and not a script)
-            exec(fhl.read(), ProtectiveGlobals({ # pylint: disable=exec-used
-                '__name__': module.__name__,
-                '__package__': module.__package__}))
+            exec(
+                fhl.read(),
+                ProtectiveGlobals(
+                    {  # pylint: disable=exec-used
+                        "__name__": module.__name__,
+                        "__package__": module.__package__,
+                    }
+                ),
+            )
 
     def test_inkex(self):
         """Test inkex API have no collisions"""

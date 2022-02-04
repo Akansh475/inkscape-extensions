@@ -31,20 +31,30 @@ from inkex.base import TempDirMixin
 from inkex.command import take_snapshot, call
 from inkex.localization import inkex_gettext as _
 
+
 class GimpXcf(TempDirMixin, inkex.OutputExtension):
     """
     Provide a quick and dirty way of using gimp to output an xcf from Inkscape.
 
     Both Inkscape and Gimp must be installed for this extension to work.
     """
-    dir_prefix = 'gimp-out-'
+
+    dir_prefix = "gimp-out-"
 
     def add_arguments(self, pars):
         pars.add_argument("--tab", dest="tab")
-        pars.add_argument("-d", "--guides", type=inkex.Boolean, help="Save the Guides in the XCF")
-        pars.add_argument("-r", "--grid", type=inkex.Boolean, help="Save the Grid with the .XCF")
-        pars.add_argument("-b", "--background", type=inkex.Boolean, help="Add background color")
-        pars.add_argument("-i", "--dpi", type=float, default=96.0, help="File resolution")
+        pars.add_argument(
+            "-d", "--guides", type=inkex.Boolean, help="Save the Guides in the XCF"
+        )
+        pars.add_argument(
+            "-r", "--grid", type=inkex.Boolean, help="Save the Grid with the .XCF"
+        )
+        pars.add_argument(
+            "-b", "--background", type=inkex.Boolean, help="Add background color"
+        )
+        pars.add_argument(
+            "-i", "--dpi", type=float, default=96.0, help="File resolution"
+        )
 
     def get_guides(self):
         """Generate a list of horzontal and vertical only guides"""
@@ -62,7 +72,7 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
                 if 0 < guide.point.x < self.svg.viewbox_width:
                     vert_guides.append(str(guide.point.x))
 
-        return ('h', ' '.join(horz_guides)), ('v', ' '.join(vert_guides))
+        return ("h", " ".join(horz_guides)), ("v", " ".join(vert_guides))
 
     def get_grid(self):
         """Get the grid if asked for and return as gimpfu script"""
@@ -71,19 +81,22 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
         xpath = "sodipodi:namedview/inkscape:grid[@type='xygrid' and (not(@units) or @units='px')]"
         if self.svg.xpath(xpath):
             node = self.svg.getElement(xpath)
-            for attr, default, target in (('spacing', 1, 'spacing'), ('origin', 0, 'offset')):
-                fmt = {'target': target}
-                for dim in 'xy':
+            for attr, default, target in (
+                ("spacing", 1, "spacing"),
+                ("origin", 0, "offset"),
+            ):
+                fmt = {"target": target}
+                for dim in "xy":
                     # These attributes could be nonexistent
                     unit = float(node.get(attr + dim, default))
                     unit = self.svg.uutounit(unit, "px") * scale
                     fmt[dim] = int(round(float(unit)))
-                yield '(gimp-image-grid-set-{target} img {x} {y})'.format(**fmt)
+                yield "(gimp-image-grid-set-{target} img {x} {y})".format(**fmt)
 
     @property
     def docname(self):
         """Get the document name suitable for export"""
-        return self.svg.get('sodipodi:docname') or 'document'
+        return self.svg.get("sodipodi:docname") or "document"
 
     def save(self, stream):
 
@@ -91,12 +104,12 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
         valid = False
 
         for node in self.svg.xpath("/svg:svg/*[name()='g' or @style][@id]"):
-            if not len(node): # pylint: disable=len-as-condition
+            if not len(node):  # pylint: disable=len-as-condition
                 # Ignore empty layers
                 continue
 
             valid = True
-            node_id = node.get('id')
+            node_id = node.get("id")
             name = node.get("inkscape:label", node_id)
 
             pngs[name] = take_snapshot(
@@ -107,11 +120,11 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
                 export_id=node_id,
                 export_id_only=True,
                 export_area_page=True,
-                export_background_opacity=int(bool(self.options.background))
+                export_background_opacity=int(bool(self.options.background)),
             )
 
         if not valid:
-            inkex.errormsg(_('This extension requires at least one non empty layer.'))
+            inkex.errormsg(_("This extension requires at least one non empty layer."))
             return
 
         xcf = os.path.join(self.tempdir, "{}.xcf".format(self.docname))
@@ -144,10 +157,10 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
 
   (gimp-image-resize-to-layers img)
 """.format(
-    dpi=self.options.dpi,
-    files='" "'.join(pngs.values()),
-    names='" "'.join(list(pngs))
-)
+            dpi=self.options.dpi,
+            files='" "'.join(pngs.values()),
+            names='" "'.join(list(pngs)),
+        )
 
         if self.options.guides:
             for dim, guides in self.get_guides():
@@ -157,7 +170,9 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
       (gimp-image-add-{d}guide img {d}Guide)
     )
     '({g})
-  )""".format(d=dim, g=guides)
+  )""".format(
+                    d=dim, g=guides
+                )
 
         # Grid
         if self.options.grid:
@@ -168,12 +183,22 @@ class GimpXcf(TempDirMixin, inkex.OutputExtension):
   (gimp-image-undo-enable img)
   (gimp-file-save RUN-NONINTERACTIVE img (car (gimp-image-get-active-layer img)) "{xcf}" "{xcf}"))
 (gimp-quit 0)
-            """.format(xcf=xcf)
+            """.format(
+            xcf=xcf
+        )
 
-        call('gimp', "-b", "-", i=True, batch_interpreter="plug-in-script-fu-eval", stdin=script_fu)
+        call(
+            "gimp",
+            "-b",
+            "-",
+            i=True,
+            batch_interpreter="plug-in-script-fu-eval",
+            stdin=script_fu,
+        )
 
-        with open(xcf, 'rb') as fhl:
+        with open(xcf, "rb") as fhl:
             stream.write(fhl.read())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     GimpXcf().run()

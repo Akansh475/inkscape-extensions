@@ -23,13 +23,15 @@ Generic template functionality controlled by the INX file.
 
 import inkex
 
+
 class InxDefinedTemplate(inkex.TemplateExtension):
     """Most functionality is in TemplateExtension"""
+
     multi_inx = True
     themes = {
-        'white': ('#ffffff', '#666666'),
-        'gray': ('#808080', '#444444'),
-        'black': ('#000000', '#999999'),
+        "white": ("#ffffff", "#666666"),
+        "gray": ("#808080", "#444444"),
+        "black": ("#000000", "#999999"),
     }
 
     def add_arguments(self, pars):
@@ -46,14 +48,15 @@ class InxDefinedTemplate(inkex.TemplateExtension):
         super(InxDefinedTemplate, self).set_namedview(width, height, unit)
         namedview = self.svg.namedview
         if self.options.background:
-            namedview.set('pagecolor', self.options.background[0])
-            namedview.set('bordercolor', self.options.background[1])
-            namedview.set('inkscape:pageopacity', "1.0")
-            namedview.set('inkscape:pageshadow', "0")
+            namedview.set("pagecolor", self.options.background[0])
+            namedview.set("bordercolor", self.options.background[1])
+            namedview.set("inkscape:pageopacity", "1.0")
+            namedview.set("inkscape:pageshadow", "0")
 
         if self.options.noborder:
-            namedview.set('bordercolor', namedview.get('pagecolor'))
-            namedview.set('borderopacity', "0")
+            namedview.set("bordercolor", namedview.get("pagecolor"))
+            namedview.set("borderopacity", "0")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     InxDefinedTemplate().run()

@@ -2,6 +2,7 @@
 from color_rgbbarrel import RgbBarrel
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorBarrelTest(ColorBaseCase):
     effect_class = RgbBarrel
     color_tests = [

@@ -31,14 +31,26 @@ from inkex import bezier, PathElement, CubicSuperPath
 
 class AddNodes(inkex.EffectExtension):
     """Extension to split a path by adding nodes to it"""
+
     def add_arguments(self, pars):
-        pars.add_argument("--segments", type=int, default=2,
-                          help="Number of segments to divide the path into")
-        pars.add_argument("--max", type=float, default=10.0,
-                          help="Number of segments to divide the path into")
-        pars.add_argument("--method", default='bymax',
-                          help="The kind of division to perform")
-        pars.add_argument("--unit", default="px", help="Unit for maximum segment length")
+        pars.add_argument(
+            "--segments",
+            type=int,
+            default=2,
+            help="Number of segments to divide the path into",
+        )
+        pars.add_argument(
+            "--max",
+            type=float,
+            default=10.0,
+            help="Number of segments to divide the path into",
+        )
+        pars.add_argument(
+            "--method", default="bymax", help="The kind of division to perform"
+        )
+        pars.add_argument(
+            "--unit", default="px", help="Unit for maximum segment length"
+        )
 
     def effect(self):
         for node in self.svg.selection.filter(PathElement):
@@ -49,20 +61,27 @@ class AddNodes(inkex.EffectExtension):
                 while i <= len(sub) - 1:
                     length = bezier.cspseglength(new[-1][-1], sub[i])
 
-                    if self.options.method == 'bynum':
+                    if self.options.method == "bynum":
                         splits = self.options.segments
                     else:
-                        maxlen = self.svg.viewport_to_unit(f"{self.options.max}{self.options.unit}")
+                        maxlen = self.svg.viewport_to_unit(
+                            f"{self.options.max}{self.options.unit}"
+                        )
                         splits = math.ceil(length / maxlen)
 
                     for sel in range(int(splits), 1, -1):
-                        result = bezier.cspbezsplitatlength(new[-1][-1], sub[i], 1.0 / sel)
-                        better_result = [[list(el) for el in elements] for elements in result]
+                        result = bezier.cspbezsplitatlength(
+                            new[-1][-1], sub[i], 1.0 / sel
+                        )
+                        better_result = [
+                            [list(el) for el in elements] for elements in result
+                        ]
                         new[-1][-1], nxt, sub[i] = better_result
                         new[-1].append(nxt[:])
                     new[-1].append(sub[i])
                     i += 1
             node.path = CubicSuperPath(new).to_path(curves_only=False)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     AddNodes().run()

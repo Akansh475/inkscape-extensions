@@ -20,12 +20,15 @@
 
 from next_glyph_layer import NextLayer
 
+
 class PreviousLayer(NextLayer):
     """Like next glyph layer, but for the previous"""
+
     @staticmethod
     def process_glyphs(glyphs, current):
         glyphs[current].set("style", "display:none")
-        glyphs[current-1].set("style", "display:inline")
+        glyphs[current - 1].set("style", "display:inline")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     PreviousLayer().run()

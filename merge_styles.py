@@ -23,17 +23,24 @@ Merges styles into class based styles and removes.
 
 import inkex
 
+
 class MergeStyles(inkex.EffectExtension):
     """Merge any styles which are the same for CSS"""
+
     def add_arguments(self, pars):
-        self.arg_parser.add_argument("-n", "--name", type=str, dest="name",\
-             help="Name of selected element's common class")
+        self.arg_parser.add_argument(
+            "-n",
+            "--name",
+            type=str,
+            dest="name",
+            help="Name of selected element's common class",
+        )
 
     def effect(self):
         """Apply the style effect"""
         newclass = self.options.name
         if not newclass:
-            newclass = self.svg.get_unique_id('css')
+            newclass = self.svg.get_unique_id("css")
 
         elements = self.svg.selected.values()
         common = None
@@ -48,12 +55,13 @@ class MergeStyles(inkex.EffectExtension):
         if not common:
             return inkex.errormsg("There are no common styles between these elements.")
 
-        self.svg.stylesheet.add('.' + newclass, inkex.Style(sorted(common)))
+        self.svg.stylesheet.add("." + newclass, inkex.Style(sorted(common)))
 
         for elem in elements:
             elem.style -= dict(common).keys()
             elem.classes.append(newclass)
         return True
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     MergeStyles().run()

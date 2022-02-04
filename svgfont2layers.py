@@ -21,11 +21,17 @@
 
 import inkex
 
+
 class SvgFontToLayers(inkex.EffectExtension):
     """Convert an svg font to layers"""
+
     def add_arguments(self, pars):
-        pars.add_argument("--count", type=int, default=30,\
-            help="Stop making layers after this number of glyphs.")
+        pars.add_argument(
+            "--count",
+            type=int,
+            default=30,
+            help="Stop making layers after this number of glyphs.",
+        )
 
     def flip_cordinate_system(self, elem, emsize, baseline):
         """Scale and translate the element's path, returns the path object"""
@@ -37,15 +43,15 @@ class SvgFontToLayers(inkex.EffectExtension):
     def effect(self):
         # TODO: detect files with multiple svg fonts declared.
         # Current code only reads the first svgfont instance
-        font = self.svg.defs.findone('svg:font')
+        font = self.svg.defs.findone("svg:font")
         if font is None:
             return inkex.errormsg("There are no svg fonts")
-        #setwidth = font.get("horiz-adv-x")
+        # setwidth = font.get("horiz-adv-x")
         baseline = font.get("horiz-origin-y")
         if baseline is None:
             baseline = 0
 
-        fontface = font.findone('svg:font-face')
+        fontface = font.findone("svg:font-face")
 
         # TODO: where should we save the font family name?
         # fontfamily = fontface.get("font-family")
@@ -66,7 +72,7 @@ class SvgFontToLayers(inkex.EffectExtension):
 
         # TODO: missing-glyph
         count = 0
-        for glyph in font.findall('svg:glyph'):
+        for glyph in font.findall("svg:glyph"):
             unicode_char = glyph.get("unicode")
             if unicode_char is None:
                 continue
@@ -74,7 +80,7 @@ class SvgFontToLayers(inkex.EffectExtension):
             layer = self.svg.add(inkex.Layer.new("GlyphLayer-" + unicode_char))
             # glyph layers (except the first one) are innitially hidden
             if count != 0:
-                layer.style['display'] = 'none'
+                layer.style["display"] = "none"
 
             ############################
             # Option 1:
@@ -87,7 +93,7 @@ class SvgFontToLayers(inkex.EffectExtension):
             ############################
             # Option 2:
             # Using svg:paths as childnodes of svg:glyph
-            for elem in glyph.findall('svg:path'):
+            for elem in glyph.findall("svg:path"):
                 new_path = layer.add(inkex.PathElement())
                 new_path.path = self.flip_cordinate_system(elem, emsize, baseline)
 
@@ -101,5 +107,6 @@ class SvgFontToLayers(inkex.EffectExtension):
             if count >= self.options.count:
                 break
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     SvgFontToLayers().run()

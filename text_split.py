@@ -45,8 +45,10 @@ from inkex.localization import inkex_gettext as _
 
 TextLike = Union[FlowRoot, TextElement]
 
+
 class TextSplit(inkex.EffectExtension):
     """Split text up."""
+
     def __init__(self):
         """Initialize State machine"""
         super().__init__()
@@ -58,15 +60,31 @@ class TextSplit(inkex.EffectExtension):
         self.process_kerns: bool = True
         self.current_root: TextLike
         self.current_fontsize: float = 0
+
     def add_arguments(self, pars):
         pars.add_argument("--tab", help="The selected UI tab when OK was pressed")
-        pars.add_argument("-t", "--splittype", default="line", choices=["letter", "word", "line"],
-                          help="type of split")
-        pars.add_argument("-p", "--preserve", type=inkex.Boolean, default=True,
-                          help="Preserve original")
-        pars.add_argument("-s", "--separation", type=float, default=1,
-                          help="Threshold for separating text with manual kerns in multiples of"
-                          "font-size")
+        pars.add_argument(
+            "-t",
+            "--splittype",
+            default="line",
+            choices=["letter", "word", "line"],
+            help="type of split",
+        )
+        pars.add_argument(
+            "-p",
+            "--preserve",
+            type=inkex.Boolean,
+            default=True,
+            help="Preserve original",
+        )
+        pars.add_argument(
+            "-s",
+            "--separation",
+            type=float,
+            default=1,
+            help="Threshold for separating text with manual kerns in multiples of"
+            "font-size",
+        )
 
     def effect(self):
         """Applies the effect"""
@@ -93,7 +111,7 @@ class TextSplit(inkex.EffectExtension):
                 if not preserve and node is not None:
                     elem.getparent().remove(elem)
             except TypeError as err:
-                inkex.errormsg(err) # if an element can not be processed
+                inkex.errormsg(err)  # if an element can not be processed
 
     @staticmethod
     def get_font_size(element):
@@ -102,28 +120,30 @@ class TextSplit(inkex.EffectExtension):
 
     @staticmethod
     def get_line_height(element: ShapeElement):
-        """ get the line height of an element"""
+        """get the line height of an element"""
         return element.get_line_height_uu()
 
     def simplify_child_tspans(self, element: TextElement):
         """Checks all child tspans if they have manual kerns.
         If it does, try to find words (characters with a distance > separation * font-size).
-        Then concatenate the words with spaces, set this string as a new text and """
+        Then concatenate the words with spaces, set this string as a new text and"""
         for child in list(element):
             # process manual kerns
             if not isinstance(child, Tspan):
                 continue
-            xvals = list(map(float, filter(len, regex.split(r"[,\s]", child.get("x") or ""))))
+            xvals = list(
+                map(float, filter(len, regex.split(r"[,\s]", child.get("x") or "")))
+            )
             content = child.text
             if content not in [None, ""] and len(xvals) >= 2:
                 fsize = self.get_font_size(child)
-                separation = self.separation*fsize
+                separation = self.separation * fsize
                 current_word_start = 0
                 for i in range(1, max(len(content), len(xvals))):
-                    if i >= len(content) -1 or i >= len(xvals) -1:
+                    if i >= len(content) - 1 or i >= len(xvals) - 1:
                         # consume the entire remaining string
                         i = len(content)
-                    if i == len(content) or abs(xvals[i] - xvals[i-1]) > separation:
+                    if i == len(content) or abs(xvals[i] - xvals[i - 1]) > separation:
                         wordspan = Tspan(x=str(xvals[current_word_start]))
                         wordspan.text = content[current_word_start:i]
                         child.add(wordspan)
@@ -145,14 +165,18 @@ class TextSplit(inkex.EffectExtension):
             oldelement.addnext(element)
             element.style = oldelement.style
             element.transform = oldelement.transform
-            flowref = oldelement.findone('svg:flowRegion')[0]
+            flowref = oldelement.findone("svg:flowRegion")[0]
             if isinstance(flowref, Rectangle):
                 flowx = element.unittouu(flowref.get("x"))
                 flowy = element.unittouu(float(flowref.get("y")))
                 first = True
             else:
-                raise TypeError(_("Element {} uses a flow region that is not a rectangle. "
-                                 "First unflow text.".format(element.get_id())))
+                raise TypeError(
+                    _(
+                        "Element {} uses a flow region that is not a rectangle. "
+                        "First unflow text.".format(element.get_id())
+                    )
+                )
             for child in oldelement:
                 if isinstance(child, FlowPara):
                     # convert the flowpara "line" (note: no automatic wrapping)
@@ -211,13 +235,13 @@ class TextSplit(inkex.EffectExtension):
             # the element will be appended to the parent of element, but there might be nested
             # tspans between the prototype and the element. The next line says
             # "compose transforms until you reach the parent of element"
-            elem.transform = (- self.current_root.getparent().transform) \
-                              @ prototype.composed_transform()
+            elem.transform = (
+                -self.current_root.getparent().transform
+            ) @ prototype.composed_transform()
             tsp = Tspan(x=str(self.current_x), y=str(self.current_y))
             tsp.text = text
             elem.add(tsp)
         self.current_root.addnext(elem)
-
 
     def split_lines(self, element: TextLike) -> TextElement:
         """Splits a text into its lines"""
@@ -233,14 +257,16 @@ class TextSplit(inkex.EffectExtension):
     def process_plain_text(self, element, splitted):
         """Appends new text elements to as sibling root for each element of splitted, starting at
         self.current_x, self.current_y, incrementing those, with prototype element (that
-        styles and transforms will be taken from) """
+        styles and transforms will be taken from)"""
         if splitted is None:
             return
         for word in splitted:
             if word != "":
                 self.append_splitted_element(word, element)
             # +1 since for words, we lost a space
-            self.current_x += self.current_fontsize * (len(word) + 1) * self.fs_multiplier
+            self.current_x += (
+                self.current_fontsize * (len(word) + 1) * self.fs_multiplier
+            )
 
     def process_plain_words(self, element, text):
         """Calls process_plain_text for splitting words"""
@@ -253,14 +279,18 @@ class TextSplit(inkex.EffectExtension):
         self.fs_multiplier = 0.25
         self.process_plain_text(element, text)
 
-
     def split_words_or_chars(self, element: TextLike) -> TextElement:
         """Splits a text into its lines"""
         self.process_kerns = True
         preprocessed = self.preprocess_text_element(element)
+
         def process_element(element) -> float:
-            elem_coords = {i: element.root.unittouu(element.get(i))
-                              if element.get(i) is not None else None for i in "xy"}
+            elem_coords = {
+                i: element.root.unittouu(element.get(i))
+                if element.get(i) is not None
+                else None
+                for i in "xy"
+            }
             if elem_coords["x"] is not None:
                 self.current_x = elem_coords["x"]
             if elem_coords["y"] is not None:
@@ -279,5 +309,5 @@ class TextSplit(inkex.EffectExtension):
         return preprocessed
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     TextSplit().run()

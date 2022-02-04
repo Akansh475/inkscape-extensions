@@ -11,11 +11,12 @@ from inkex import AbortExtension
 from inkex.base import InkscapeExtension, SvgThroughMixin
 from inkex.tester import TestCase
 
+
 class ModExtension(InkscapeExtension):
     """A non-svg extension that loads, saves and flipples"""
 
     def effect(self):
-        self.document += b'>flipple'
+        self.document += b">flipple"
 
     def load(self, stream):
         return stream.read()
@@ -35,11 +36,12 @@ class ModSvgExtension(SvgThroughMixin, InkscapeExtension):
     """Test the loading and saving of svg files"""
 
     def effect(self):
-        self.svg.set('attr', 'foo')
+        self.svg.set("attr", "foo")
 
 
 class InkscapeExtensionTest(TestCase):
     """Tests for Inkscape Extensions"""
+
     effect_class = InkscapeExtension
 
     def setUp(self):
@@ -51,7 +53,7 @@ class InkscapeExtensionTest(TestCase):
             self.e.run([])
         with self.assertRaises(NotImplementedError):
             prevarg = sys.argv
-            sys.argv = ['pytest']
+            sys.argv = ["pytest"]
             try:
                 self.e.run()
             finally:
@@ -62,7 +64,7 @@ class InkscapeExtensionTest(TestCase):
             self.e.load(sys.stdin)
         with self.assertRaises(NotImplementedError):
             self.e.save(sys.stdout)
-        self.assertEqual(self.e.name, 'InkscapeExtension')
+        self.assertEqual(self.e.name, "InkscapeExtension")
 
     def test_compat(self):
         """Test a few old functions and how we handle them"""
@@ -79,14 +81,14 @@ class InkscapeExtensionTest(TestCase):
 
     def test_arg_parser_passed(self):
         """Test arguments for the base class are parsed"""
-        options = self.e.arg_parser.parse_args(['--output', 'foo.txt', self.empty_svg])
+        options = self.e.arg_parser.parse_args(["--output", "foo.txt", self.empty_svg])
         self.assertEqual(options.input_file, self.empty_svg)
-        self.assertEqual(options.output, 'foo.txt')
+        self.assertEqual(options.output, "foo.txt")
 
     def test_get_resource(self):
         """We can get a resource path, based on where the extension is located"""
         ext = ModExtension()
-        self.assertRaises(AbortExtension, ext.get_resource, 'sir-not-apearing.py')
+        self.assertRaises(AbortExtension, ext.get_resource, "sir-not-apearing.py")
 
         # Test relative filename, which fails with AbortExtension if not found.
         ret = ext.get_resource(__file__)
@@ -95,27 +97,33 @@ class InkscapeExtensionTest(TestCase):
 
     def test_svg_path(self):
         """Can get the svg file location"""
-        output = os.path.join(self.tempdir, 'output.tmp')
+        output = os.path.join(self.tempdir, "output.tmp")
         ext = ModExtension()
-        os.environ['DOCUMENT_PATH'] = self.empty_svg
-        self.assertEqual(ext.svg_path(), os.path.join(self.datadir(), 'svg'))
-        self.assertIn(ext.absolute_href('/foo'), ['/foo', "C:\\foo"])
-        self.assertEqual(ext.absolute_href('./foo'), os.path.join(self.datadir(), 'svg', 'foo'))
-        self.assertEqual(ext.absolute_href('~/foo'), os.path.realpath(os.path.expanduser('~/foo')))
+        os.environ["DOCUMENT_PATH"] = self.empty_svg
+        self.assertEqual(ext.svg_path(), os.path.join(self.datadir(), "svg"))
+        self.assertIn(ext.absolute_href("/foo"), ["/foo", "C:\\foo"])
+        self.assertEqual(
+            ext.absolute_href("./foo"), os.path.join(self.datadir(), "svg", "foo")
+        )
+        self.assertEqual(
+            ext.absolute_href("~/foo"), os.path.realpath(os.path.expanduser("~/foo"))
+        )
 
     def test_svg_no_path(self):
-        tmp_foo = os.path.realpath('/tmp/foo')
-        os.environ['DOCUMENT_PATH'] = ''
+        tmp_foo = os.path.realpath("/tmp/foo")
+        os.environ["DOCUMENT_PATH"] = ""
         ext = ModExtension()
         # Default results in home dir
-        self.assertEqual(ext.absolute_href('./foo'), os.path.realpath(os.path.expanduser('~/foo')))
+        self.assertEqual(
+            ext.absolute_href("./foo"), os.path.realpath(os.path.expanduser("~/foo"))
+        )
         # Or override the default
-        self.assertEqual(ext.absolute_href('./foo', '/tmp/'), tmp_foo)
+        self.assertEqual(ext.absolute_href("./foo", "/tmp/"), tmp_foo)
         # But we can ask for errors too, this one for "document not saved"
-        self.assertRaises(AbortExtension, ext.absolute_href, './foo', default=None)
+        self.assertRaises(AbortExtension, ext.absolute_href, "./foo", default=None)
         # This covers inkscape old versions
-        del os.environ['DOCUMENT_PATH']
-        self.assertRaises(AbortExtension, ext.absolute_href, './foo', default=None)
+        del os.environ["DOCUMENT_PATH"]
+        self.assertRaises(AbortExtension, ext.absolute_href, "./foo", default=None)
 
 
 class SvgInputOutputTest(TestCase):
@@ -131,27 +139,27 @@ class SvgInputOutputTest(TestCase):
     def test_no_output(self):
         """Test svg output isn't saved when not modified"""
         obj = NoModSvgExtension()
-        filename = self.temp_file(suffix='.svg')
-        obj.run(['--output', filename, self.empty_svg])
-        self.assertEqual(type(obj.document).__name__, '_ElementTree')
-        self.assertEqual(type(obj.svg).__name__, 'SvgDocumentElement')
+        filename = self.temp_file(suffix=".svg")
+        obj.run(["--output", filename, self.empty_svg])
+        self.assertEqual(type(obj.document).__name__, "_ElementTree")
+        self.assertEqual(type(obj.svg).__name__, "SvgDocumentElement")
         self.assertFalse(os.path.isfile(filename))
 
     def test_svg_output(self):
         """Test svg output is saved"""
         obj = ModSvgExtension()
-        filename = self.temp_file(suffix='.svg')
-        obj.run(['--output', filename, self.empty_svg])
+        filename = self.temp_file(suffix=".svg")
+        obj.run(["--output", filename, self.empty_svg])
         self.assertTrue(os.path.isfile(filename))
-        with open(filename, 'r') as fhl:
-            self.assertIn('<svg', fhl.read())
+        with open(filename, "r") as fhl:
+            self.assertIn("<svg", fhl.read())
 
     def test_str_document(self):
         """Document is saved even if it's not bytes"""
         obj = ModSvgExtension()
-        obj.document = b'foo'
+        obj.document = b"foo"
         obj.save(BytesIO())
-        obj.document = 'foo'
+        obj.document = "foo"
         ret = BytesIO()
         obj.save(ret)
-        self.assertEqual(ret.getvalue(), b'foo')
+        self.assertEqual(ret.getvalue(), b"foo")

@@ -21,9 +21,8 @@ class TestExtensionGenerate(TestCase):
     effect_class = MyGenerateExtension
 
     def test_layer_transform(self):
-        effect = self.assertEffect('svg', 'transformed-layer.svg')
-        item = effect.svg.getElementById(
-            MyGenerateExtension.TEST_ITEM_ATTRIBS['id'])
+        effect = self.assertEffect("svg", "transformed-layer.svg")
+        item = effect.svg.getElementById(MyGenerateExtension.TEST_ITEM_ATTRIBS["id"])
         parent = item.getparent()
 
         # expect that generated items have not been modified
@@ -37,4 +36,6 @@ class TestExtensionGenerate(TestCase):
         # layer and is positioned at the current view center
         self.assertTransformEqual(
             parent.get("transform"),
-            "scale(0.5) translate(-20,-30) rotate(-30) translate(100,300)", 3)
+            "scale(0.5) translate(-20,-30) rotate(-30) translate(100,300)",
+            3,
+        )

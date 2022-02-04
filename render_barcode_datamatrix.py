@@ -59,40 +59,39 @@ INVALID_BIT = 2
 #   inter       number of interleaved Reed-Solomon blocks
 SYMBOLS = {
     # 'id': (nrow, ncol, drow, dcol, reg_row, reg_col, nd, nc, inter)
-    'sq10': (10, 10, 8, 8, 1, 1, 3, 5, 1),
-    'sq12': (12, 12, 10, 10, 1, 1, 5, 7, 1),
-    'sq14': (14, 14, 12, 12, 1, 1, 8, 10, 1),
-    'sq16': (16, 16, 14, 14, 1, 1, 12, 12, 1),
-    'sq18': (18, 18, 16, 16, 1, 1, 18, 14, 1),
-    'sq20': (20, 20, 18, 18, 1, 1, 22, 18, 1),
-    'sq22': (22, 22, 20, 20, 1, 1, 30, 20, 1),
-    'sq24': (24, 24, 22, 22, 1, 1, 36, 24, 1),
-    'sq26': (26, 26, 24, 24, 1, 1, 44, 28, 1),
-    'sq32': (32, 32, 14, 14, 2, 2, 62, 36, 1),
-    'sq36': (36, 36, 16, 16, 2, 2, 86, 42, 1),
-    'sq40': (40, 40, 18, 18, 2, 2, 114, 48, 1),
-    'sq44': (44, 44, 20, 20, 2, 2, 144, 56, 1),
-    'sq48': (48, 48, 22, 22, 2, 2, 174, 68, 1),
-    'sq52': (52, 52, 24, 24, 2, 2, 102, 42, 2),
-    'sq64': (64, 64, 14, 14, 4, 4, 140, 56, 2),
-    'sq72': (72, 72, 16, 16, 4, 4, 92, 36, 4),
-    'sq80': (80, 80, 18, 18, 4, 4, 114, 48, 4),
-    'sq88': (88, 88, 20, 20, 4, 4, 144, 56, 4),
-    'sq96': (96, 96, 22, 22, 4, 4, 174, 68, 4),
-    'sq104': (104, 104, 24, 24, 4, 4, 136, 56, 6),
-    'sq120': (120, 120, 18, 18, 6, 6, 175, 68, 6),
-    'sq132': (132, 132, 20, 20, 6, 6, 163, 62, 8),
+    "sq10": (10, 10, 8, 8, 1, 1, 3, 5, 1),
+    "sq12": (12, 12, 10, 10, 1, 1, 5, 7, 1),
+    "sq14": (14, 14, 12, 12, 1, 1, 8, 10, 1),
+    "sq16": (16, 16, 14, 14, 1, 1, 12, 12, 1),
+    "sq18": (18, 18, 16, 16, 1, 1, 18, 14, 1),
+    "sq20": (20, 20, 18, 18, 1, 1, 22, 18, 1),
+    "sq22": (22, 22, 20, 20, 1, 1, 30, 20, 1),
+    "sq24": (24, 24, 22, 22, 1, 1, 36, 24, 1),
+    "sq26": (26, 26, 24, 24, 1, 1, 44, 28, 1),
+    "sq32": (32, 32, 14, 14, 2, 2, 62, 36, 1),
+    "sq36": (36, 36, 16, 16, 2, 2, 86, 42, 1),
+    "sq40": (40, 40, 18, 18, 2, 2, 114, 48, 1),
+    "sq44": (44, 44, 20, 20, 2, 2, 144, 56, 1),
+    "sq48": (48, 48, 22, 22, 2, 2, 174, 68, 1),
+    "sq52": (52, 52, 24, 24, 2, 2, 102, 42, 2),
+    "sq64": (64, 64, 14, 14, 4, 4, 140, 56, 2),
+    "sq72": (72, 72, 16, 16, 4, 4, 92, 36, 4),
+    "sq80": (80, 80, 18, 18, 4, 4, 114, 48, 4),
+    "sq88": (88, 88, 20, 20, 4, 4, 144, 56, 4),
+    "sq96": (96, 96, 22, 22, 4, 4, 174, 68, 4),
+    "sq104": (104, 104, 24, 24, 4, 4, 136, 56, 6),
+    "sq120": (120, 120, 18, 18, 6, 6, 175, 68, 6),
+    "sq132": (132, 132, 20, 20, 6, 6, 163, 62, 8),
     # there are two separate sections of the data matrix with different interleaving
     # and reed-solomon parameters. this will be handled separately.
-    'sq144': (144, 144, 22, 22, 6, 6, 0, 0, 0),
-    'rect8x18': (8, 18, 6, 16, 1, 1, 5, 7, 1),
-    'rect8x32': (8, 32, 6, 14, 1, 2, 10, 11, 1),
-    'rect12x26': (12, 26, 10, 24, 1, 1, 16, 14, 1),
-    'rect12x36': (12, 36, 10, 16, 1, 2, 22, 18, 1),
-    'rect16x36': (16, 36, 14, 16, 1, 2, 32, 24, 1),
-    'rect16x48': (16, 48, 14, 22, 1, 2, 49, 28, 1),
+    "sq144": (144, 144, 22, 22, 6, 6, 0, 0, 0),
+    "rect8x18": (8, 18, 6, 16, 1, 1, 5, 7, 1),
+    "rect8x32": (8, 32, 6, 14, 1, 2, 10, 11, 1),
+    "rect12x26": (12, 26, 10, 24, 1, 1, 16, 14, 1),
+    "rect12x36": (12, 36, 10, 16, 1, 2, 22, 18, 1),
+    "rect16x36": (16, 36, 14, 16, 1, 2, 32, 24, 1),
+    "rect16x48": (16, 48, 14, 22, 1, 2, 49, 28, 1),
 }
-
 
 
 # CODEWORD STREAM GENERATION =========================================
@@ -100,37 +99,52 @@ SYMBOLS = {
 # including the Reed-Solomon error-correcting codes.
 # =====================================================================
 
+
 def get_codewords(text, nd, nc, inter, size144):
     # convert the data to the codewords
     data = list(encode_to_ascii(text))
 
     if not size144:  # render a "normal" datamatrix
-        data_blocks = partition_data(data, nd * inter)  # partition into data blocks of length nd*inter -> inter Reed-Solomon block
+        data_blocks = partition_data(
+            data, nd * inter
+        )  # partition into data blocks of length nd*inter -> inter Reed-Solomon block
 
-        data_blocks = interleave(data_blocks, inter)  # interleave consecutive inter blocks if required
+        data_blocks = interleave(
+            data_blocks, inter
+        )  # interleave consecutive inter blocks if required
 
-        data_blocks = reed_solomon(data_blocks, nd, nc)  # generate and append the Reed-Solomon codewords
+        data_blocks = reed_solomon(
+            data_blocks, nd, nc
+        )  # generate and append the Reed-Solomon codewords
 
-        data_blocks = combine_interleaved(data_blocks, inter, nd, nc, False)  # concatenate Reed-Solomon blocks bound for the same datamatrix
+        data_blocks = combine_interleaved(
+            data_blocks, inter, nd, nc, False
+        )  # concatenate Reed-Solomon blocks bound for the same datamatrix
 
     else:  # we have a 144x144 datamatrix
-        data_blocks = partition_data(data, 1558)  # partition the data into datamtrix-sized chunks (1558 =156*8 + 155*2 )
+        data_blocks = partition_data(
+            data, 1558
+        )  # partition the data into datamtrix-sized chunks (1558 =156*8 + 155*2 )
 
         for i in range(len(data_blocks)):  # for each datamtrix
 
             inter = 8
             nd = 156
             nc = 62
-            block1 = data_blocks[i][0:156 * 8]
+            block1 = data_blocks[i][0 : 156 * 8]
             block1 = interleave([block1], inter)  # interleave into 8 blocks
-            block1 = reed_solomon(block1, nd, nc)  # generate and append the Reed-Solomon codewords
+            block1 = reed_solomon(
+                block1, nd, nc
+            )  # generate and append the Reed-Solomon codewords
 
             inter = 2
             nd = 155
             nc = 62
-            block2 = data_blocks[i][156 * 8:]
+            block2 = data_blocks[i][156 * 8 :]
             block2 = interleave([block2], inter)  # interleave into 2 blocks
-            block2 = reed_solomon(block2, nd, nc)  # generate and append the Reed-Solomon codewords
+            block2 = reed_solomon(
+                block2, nd, nc
+            )  # generate and append the Reed-Solomon codewords
 
             blocks = block1
             blocks.extend(block2)
@@ -151,7 +165,9 @@ def interleave(blocks, inter):
         result = []
         for block in blocks:  # for each codeword block in the stream
             block_length = int(len(block) / inter)  # length of each interleaved block
-            inter_blocks = [[0] * block_length for i in range(inter)]  # the interleaved blocks
+            inter_blocks = [
+                [0] * block_length for i in range(inter)
+            ]  # the interleaved blocks
 
             for i in range(block_length):  # for each element in the interleaved blocks
                 for j in range(inter):  # for each interleaved block
@@ -171,7 +187,9 @@ def combine_interleaved(blocks, inter, nd, nc, size144):
         return blocks
     else:
         result = []
-        for i in range(len(blocks) // inter):  # for each group of "inter" blocks -> one full datamatrix
+        for i in range(
+            len(blocks) // inter
+        ):  # for each group of "inter" blocks -> one full datamatrix
             data_codewords = []  # interleaved data blocks
 
             if size144:
@@ -213,13 +231,15 @@ def partition_data(data, rs_data):
     i = 0
     while i < len(data):
         if len(data) >= i + rs_data:  # we have a whole block in our data
-            data_blocks.append(data[i:i + rs_data])
+            data_blocks.append(data[i : i + rs_data])
             i = i + rs_data
         else:  # pad out with the pad codeword
-            data_block = data[i:len(data)]  # add any remaining data
+            data_block = data[i : len(data)]  # add any remaining data
             pad_pos = len(data)
             padded = False
-            while len(data_block) < rs_data:  # and then pad with randomised pad codewords
+            while (
+                len(data_block) < rs_data
+            ):  # and then pad with randomised pad codewords
                 if not padded:
                     data_block.append(PAD_VAL)  # add a normal pad codeword
                     padded = True
@@ -311,7 +331,9 @@ def reed_solomon(data, nd, nc):
             k = block[nd] ^ block[i]
 
             for j in range(0, nc):
-                block[nd + j] = block[nd + j + 1] ^ prod(k, c[nc - j - 1], log, alog, gf)
+                block[nd + j] = block[nd + j + 1] ^ prod(
+                    k, c[nc - j - 1], log, alog, gf
+                )
 
         block.pop()
 
@@ -321,6 +343,7 @@ def reed_solomon(data, nd, nc):
 # MODULE PLACEMENT ROUTINES===========================================
 #   These routines take a steam of codewords, and place them into the
 #   DataMatrix in accordance with Annex F of BS ISO/IEC 16022:2006
+
 
 def bit(byte, bit_ch):
     """bit() returns the bit'th bit of the byte"""
@@ -345,21 +368,61 @@ def place_square(case, array, nrow, ncol, row, col, char):
     """Populate corner cases (0-3) and utah case (-1)"""
     for i in range(8):
         x, y = [
-            [(row - 1, 0), (row - 1, 1), (row - 1, 2), (0, col - 2),
-             (0, col - 1), (1, col - 1), (2, col - 1), (3, col - 1)],
-            [(row - 3, 0), (row - 2, 0), (row - 1, 0), (0, col - 4),
-             (0, col - 3), (0, col - 2), (0, col - 1), (1, col - 1)],
-            [(row - 3, 0), (row - 2, 0), (row - 1, 0), (0, col - 2),
-             (0, col - 1), (1, col - 1), (2, col - 1), (3, col - 1)],
-            [(row - 1, 0), (row - 1, col - 1), (0, col - 3), (0, col - 2),
-             (0, col - 1), (1, col - 3), (1, col - 2), (1, col - 1)],
-
+            [
+                (row - 1, 0),
+                (row - 1, 1),
+                (row - 1, 2),
+                (0, col - 2),
+                (0, col - 1),
+                (1, col - 1),
+                (2, col - 1),
+                (3, col - 1),
+            ],
+            [
+                (row - 3, 0),
+                (row - 2, 0),
+                (row - 1, 0),
+                (0, col - 4),
+                (0, col - 3),
+                (0, col - 2),
+                (0, col - 1),
+                (1, col - 1),
+            ],
+            [
+                (row - 3, 0),
+                (row - 2, 0),
+                (row - 1, 0),
+                (0, col - 2),
+                (0, col - 1),
+                (1, col - 1),
+                (2, col - 1),
+                (3, col - 1),
+            ],
+            [
+                (row - 1, 0),
+                (row - 1, col - 1),
+                (0, col - 3),
+                (0, col - 2),
+                (0, col - 1),
+                (1, col - 3),
+                (1, col - 2),
+                (1, col - 1),
+            ],
             # "utah" places the 8 bits of a utah-shaped symbol character in ECC200
-            [(row - 2, col -2), (row - 2, col -1), (row - 1, col - 2), (row - 1, col - 1),
-             (row - 1, col), (row, col - 2), (row, col - 1), (row, col)],
+            [
+                (row - 2, col - 2),
+                (row - 2, col - 1),
+                (row - 1, col - 2),
+                (row - 1, col - 1),
+                (row - 1, col),
+                (row, col - 2),
+                (row, col - 1),
+                (row, col),
+            ],
         ][case][i]
         module(array, nrow, ncol, x, y, bit(char, i + 1))
     return 1
+
 
 def place_bits(data, nrow, ncol):
     """fill an nrow x ncol array with the bits from the codewords in data."""
@@ -425,11 +488,15 @@ def add_finder_pattern(array, data_nrow, data_ncol, reg_row, reg_col):
     for i in range(reg_col):  # for each column of data regions
         for j in range(nrow):
             datamatrix[j][i * (data_ncol + 2)] = 1  # vertical black bar on left
-            datamatrix[j][i * (data_ncol + 2) + data_ncol + 1] = j % 2  # alternating blocks
+            datamatrix[j][i * (data_ncol + 2) + data_ncol + 1] = (
+                j % 2
+            )  # alternating blocks
 
     for i in range(reg_row):  # for each row of data regions
         for j in range(ncol):
-            datamatrix[i * (data_nrow + 2) + data_nrow + 1][j] = 1  # horizontal black bar at bottom
+            datamatrix[i * (data_nrow + 2) + data_nrow + 1][
+                j
+            ] = 1  # horizontal black bar at bottom
             datamatrix[i * (data_nrow + 2)][j] = (j + 1) % 2  # alternating blocks
 
     for i in range(data_nrow * reg_row):
@@ -438,18 +505,18 @@ def add_finder_pattern(array, data_nrow, data_ncol, reg_row, reg_col):
             dest_col = j + 1 + 2 * (j // data_ncol)
             dest_row = i + 1 + 2 * (i // data_nrow)
 
-            datamatrix[dest_row][dest_col] = array[i][j]  # transfer from the plain bit array
+            datamatrix[dest_row][dest_col] = array[i][
+                j
+            ]  # transfer from the plain bit array
 
     return datamatrix
 
 
-
-
 class DataMatrix(inkex.GenerateExtension):
-    container_label = 'DataMatrix'
+    container_label = "DataMatrix"
 
     def add_arguments(self, pars):
-        pars.add_argument("--text", default='Inkscape')
+        pars.add_argument("--text", default="Inkscape")
         pars.add_argument("--symbol", type=self.arg_symbols, required=True)
         pars.add_argument("--size", type=int, default=4)
 
@@ -463,8 +530,8 @@ class DataMatrix(inkex.GenerateExtension):
 
     def generate(self):
         size = str(self.options.size)
-        style = inkex.Style({'stroke': 'none', 'stroke-width': '1', 'fill': '#000000'})
-        attribs = {'style': str(style), 'height': size, 'width': size}
+        style = inkex.Style({"stroke": "none", "stroke-width": "1", "fill": "#000000"})
+        attribs = {"style": str(style), "height": size, "width": size}
 
         if not self.options.text:
             raise inkex.AbortExtension("Please enter an input string.")
@@ -472,10 +539,12 @@ class DataMatrix(inkex.GenerateExtension):
         # create a 2d list corresponding to the 1's and 0s of the DataMatrix
         encoded = self.encode(self.options.text, *self.options.symbol)
         for x, y in self.render_data_matrix(encoded):
-            attribs.update({'x': str(x), 'y': str(y)})
+            attribs.update({"x": str(x), "y": str(y)})
             yield Rectangle(**attribs)
 
-    def encode(self, text, nrow, ncol, data_nrow, data_ncol, reg_row, reg_col, nd, nc, inter):
+    def encode(
+        self, text, nrow, ncol, data_nrow, data_ncol, reg_row, reg_col, nd, nc, inter
+    ):
         """
         Take an input string and convert it to a sequence (or sequences)
         of codewords as specified in ISO/IEC 16022:2006 (section 5.2.3)
@@ -487,9 +556,13 @@ class DataMatrix(inkex.GenerateExtension):
         module_arrays = []
         for codeword_stream in codewords:  # for each datamatrix
             # place the codewords' bits across the array as modules
-            bit_array = place_bits(codeword_stream, data_nrow * reg_row, data_ncol * reg_col)
+            bit_array = place_bits(
+                codeword_stream, data_nrow * reg_row, data_ncol * reg_col
+            )
             # add finder patterns around the modules
-            module_arrays.append(add_finder_pattern(bit_array, data_nrow, data_ncol, reg_row, reg_col))
+            module_arrays.append(
+                add_finder_pattern(bit_array, data_nrow, data_ncol, reg_row, reg_col)
+            )
 
         return module_arrays
 
@@ -507,7 +580,8 @@ class DataMatrix(inkex.GenerateExtension):
                     if line[y][x] == 1:  # A binary 1 is a filled square
                         yield (x * size + i * spacing, y * size)
                     elif line[y][x] == INVALID_BIT:  # we have an invalid bit value
-                        inkex.errormsg('Invalid bit value, {}!'.format(line[y][x]))
+                        inkex.errormsg("Invalid bit value, {}!".format(line[y][x]))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     DataMatrix().run()

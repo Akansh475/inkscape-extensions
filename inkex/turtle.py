@@ -25,6 +25,8 @@ from .paths import Line, Move, Path, PathCommand
 from .elements import PathElement, Group
 from .base import BaseElement
 from .styles import Style
+
+
 class pTurtle:
     """A Python path turtle"""
 
@@ -37,12 +39,20 @@ class pTurtle:
         self.__new = True
 
     def forward(self, mag):
-        self.setpos((self.__pos[0] + math.cos(math.radians(self.__heading)) * mag,
-                     self.__pos[1] + math.sin(math.radians(self.__heading)) * mag))
+        self.setpos(
+            (
+                self.__pos[0] + math.cos(math.radians(self.__heading)) * mag,
+                self.__pos[1] + math.sin(math.radians(self.__heading)) * mag,
+            )
+        )
 
     def backward(self, mag):
-        self.setpos((self.__pos[0] - math.cos(math.radians(self.__heading)) * mag,
-                     self.__pos[1] - math.sin(math.radians(self.__heading)) * mag))
+        self.setpos(
+            (
+                self.__pos[0] - math.cos(math.radians(self.__heading)) * mag,
+                self.__pos[1] - math.sin(math.radians(self.__heading)) * mag,
+            )
+        )
 
     def right(self, deg):
         self.__heading -= deg
@@ -69,7 +79,7 @@ class pTurtle:
         self.setpos(self.__home)
 
     def clean(self):
-        self.__path = ''
+        self.__path = ""
 
     def clear(self):
         self.clean()
@@ -123,9 +133,11 @@ class pTurtle:
     pu = penup
     pd = pendown
 
+
 class PathBuilder:
     """This helper class can be used to construct a path and insert it into a document."""
-    def __init__(self, style : Style):
+
+    def __init__(self, style: Style):
         """Initializes a PathDrawHelper object
 
         Args:
@@ -133,6 +145,7 @@ class PathBuilder:
         """
         self.current = Path()
         self.style = style
+
     def add(self, command: Union[PathCommand, List[PathCommand]]):
         """Add a Path command to the Helper
 
@@ -141,9 +154,11 @@ class PathBuilder:
                                                              appended.
         """
         self.current.append(command)
+
     def terminate(self):
-        """Terminates current subpath. This method does nothing by default and is supposed to be 
+        """Terminates current subpath. This method does nothing by default and is supposed to be
         overridden in subclasses."""
+
     def append_next(self, sibling_before: BaseElement):
         """Insert the resulting Path as :class:`inkex.elements._polygons.PathElement`
         into the document tree.
@@ -155,7 +170,8 @@ class PathBuilder:
         pth.path = self.current
         pth.style = self.style
         sibling_before.addnext(pth)
-    def Move_to(self, x, y): # pylint: disable=invalid-name
+
+    def Move_to(self, x, y):  # pylint: disable=invalid-name
         """Shorthand to insert an absolute move command: `M x y`.
 
         Args:
@@ -163,7 +179,8 @@ class PathBuilder:
             y (Float): y coordinate to move to
         """
         self.add(Move(x, y))
-    def Line_to(self, x, y): # pylint: disable=invalid-name
+
+    def Line_to(self, x, y):  # pylint: disable=invalid-name
         """Shorthand to insert an absolute lineto command: `L x y`.
 
         Args:
@@ -172,11 +189,14 @@ class PathBuilder:
         """
         self.add(Line(x, y))
 
+
 class PathGroupBuilder(PathBuilder):
     """This helper class can be used to construct a group of paths that all have the same style."""
+
     def __init__(self, style):
         super().__init__(style)
         self.result = Group()
+
     def terminate(self):
         """Terminates the current Path, and appends it to the group if it is not empty."""
         if len(self.current) > 1:
@@ -185,6 +205,7 @@ class PathGroupBuilder(PathBuilder):
             pth.style = self.style
             self.result.append(pth)
         self.current = Path()
+
     def append_next(self, sibling_before: BaseElement):
         """Insert the resulting Path as :class:`inkex.elements._groups.Group` into the document tree.
 

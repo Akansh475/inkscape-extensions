@@ -7,9 +7,10 @@ This provides the basis from which you can develop your inkscape extension.
 
 # pylint: disable=wildcard-import
 
-__version__ = "1.2.0" # Version number for inkex; may differ from Inkscape version.
+__version__ = "1.2.0"  # Version number for inkex; may differ from Inkscape version.
 
 import sys
+
 MIN_VERSION = (3, 6)
 if sys.version_info < MIN_VERSION:
     sys.exit("Inkscape extensions require Python 3.6 or greater.")

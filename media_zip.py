@@ -54,10 +54,12 @@ except ImportError:  # PY3
     from urllib.parse import urlparse
     from urllib.request import url2pathname
 
-ENCODING = "cp437" if os.name == 'nt' else "latin-1"
+ENCODING = "cp437" if os.name == "nt" else "latin-1"
+
 
 class CompressedMedia(inkex.OutputExtension):
     """Output a compressed file"""
+
     def add_arguments(self, pars):
         pars.add_argument("--image_dir", help="Image directory")
         pars.add_argument("--font_list", type=inkex.Boolean, help="Add font list")
@@ -69,10 +71,10 @@ class CompressedMedia(inkex.OutputExtension):
         """
         imgdir = self.options.image_dir
 
-        for node in self.svg.xpath('//svg:image'):
-            xlink = node.get('xlink:href')
-            if xlink[:4] != 'data':
-                absref = node.get('sodipodi:absref')
+        for node in self.svg.xpath("//svg:image"):
+            xlink = node.get("xlink:href")
+            if xlink[:4] != "data":
+                absref = node.get("sodipodi:absref")
                 url = urlparse(xlink)
                 href = url2pathname(url.path)
 
@@ -87,11 +89,13 @@ class CompressedMedia(inkex.OutputExtension):
                 elif os.path.isfile(os.path.join(self.tmp_dir, absref)):
                     # TODO: please explain why this clause is necessary
                     shutil.copy(os.path.join(self.tmp_dir, absref), self.tmp_dir)
-                    z.write(os.path.join(self.tmp_dir, absref), image_path.encode(ENCODING))
+                    z.write(
+                        os.path.join(self.tmp_dir, absref), image_path.encode(ENCODING)
+                    )
                 else:
-                    inkex.errormsg('Could not locate file: %s' % absref)
+                    inkex.errormsg("Could not locate file: %s" % absref)
 
-                node.set('xlink:href', image_path)
+                node.set("xlink:href", image_path)
 
     def collect_svg(self, docstripped, z):
         """
@@ -99,9 +103,9 @@ class CompressedMedia(inkex.OutputExtension):
         and add it to the temporary compressed file
         """
         dst_file = os.path.join(self.tmp_dir, docstripped)
-        with open(dst_file, 'wb') as stream:
+        with open(dst_file, "wb") as stream:
             self.document.write(stream)
-        z.write(dst_file, docstripped + '.svg')
+        z.write(dst_file, docstripped + ".svg")
 
     def is_text(self, node):
         """
@@ -116,19 +120,19 @@ class CompressedMedia(inkex.OutputExtension):
         the node is using.
         """
         fonts = []
-        s = ''
-        if 'style' in node.attrib:
-            s = dict(inkex.Style.parse_str(node.attrib['style']))
+        s = ""
+        if "style" in node.attrib:
+            s = dict(inkex.Style.parse_str(node.attrib["style"]))
         if not s:
             return fonts
 
-        if 'font-family' in s:
-            if 'font-weight' in s:
-                fonts.append(s['font-family'] + ' ' + s['font-weight'])
+        if "font-family" in s:
+            if "font-weight" in s:
+                fonts.append(s["font-family"] + " " + s["font-weight"])
             else:
-                fonts.append(s['font-family'])
-        elif '-inkscape-font-specification' in s:
-            fonts.append(s['-inkscape-font-specification'])
+                fonts.append(s["font-family"])
+        elif "-inkscape-font-specification" in s:
+            fonts.append(s["-inkscape-font-specification"])
         return fonts
 
     def list_fonts(self, z):
@@ -147,38 +151,39 @@ class CompressedMedia(inkex.OutputExtension):
                     fonts_found.append(f)
         findings = sorted(fonts_found)
         # Write list to the temporary compressed file
-        filename = 'fontlist.txt'
+        filename = "fontlist.txt"
         dst_file = os.path.join(self.tmp_dir, filename)
-        with open(dst_file, 'w') as stream:
+        with open(dst_file, "w") as stream:
             if len(findings) == 0:
                 stream.write("Didn't find any fonts in this document/selection.")
             else:
                 if len(findings) == 1:
                     stream.write("Found the following font only: %s" % findings[0])
                 else:
-                    stream.write("Found the following fonts:\n%s" % '\n'.join(findings))
+                    stream.write("Found the following fonts:\n%s" % "\n".join(findings))
         z.write(dst_file, filename)
 
     def save(self, stream):
-        docname = self.svg.get('sodipodi:docname')
+        docname = self.svg.get("sodipodi:docname")
 
         if docname is None:
             docname = self.options.input_file
 
         # TODO: replace whatever extension
-        docstripped = os.path.basename(docname.replace('.zip', ''))
-        docstripped = docstripped.replace('.svg', '')
-        docstripped = docstripped.replace('.svgz', '')
+        docstripped = os.path.basename(docname.replace(".zip", ""))
+        docstripped = docstripped.replace(".svg", "")
+        docstripped = docstripped.replace(".svgz", "")
 
         # Create os temp dir
         self.tmp_dir = tempfile.mkdtemp()
 
         # Create destination zip in same directory as the document
-        with zipfile.ZipFile(stream, 'w') as z:
+        with zipfile.ZipFile(stream, "w") as z:
             self.collect_images(docname, z)
             self.collect_svg(docstripped, z)
             if self.options.font_list:
                 self.list_fonts(z)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     CompressedMedia().run()

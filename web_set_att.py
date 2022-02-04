@@ -29,16 +29,23 @@ import inkex
 from inkex.localization import inkex_gettext as _
 import inkwebeffect
 
+
 class SetAttribute(inkwebeffect.InkWebEffect):
     """Set a web attribute accross many objects"""
+
     def add_arguments(self, pars):
         pars.add_argument("--tab", help="The selected UI-tab when OK was pressed")
-        pars.add_argument("--att", default="fill stroke stroke-width", help="Attribute to set.")
+        pars.add_argument(
+            "--att", default="fill stroke stroke-width", help="Attribute to set."
+        )
         pars.add_argument("--val", default="red black 5px", help="Values to set.")
         pars.add_argument("--when", default="onclick", help="When it must to set?")
         pars.add_argument("--from-and-to", dest="from_and_to", default="g-to-one")
-        pars.add_argument("--compatibility", default="append",
-                          help="Compatibility with previews code to this event.")
+        pars.add_argument(
+            "--compatibility",
+            default="append",
+            help="Compatibility with previews code to this event.",
+        )
 
     def effect(self):
         self.ensureInkWebSupport()
@@ -52,20 +59,22 @@ class SetAttribute(inkwebeffect.InkWebEffect):
         id_to = list(self.svg.selected.ids)[split:]
 
         ev_code = "InkWeb.setAtt({{el:['{}'], att:'{}', val:'{}'}})".format(
-            "','".join(id_to), self.options.att, self.options.val)
+            "','".join(id_to), self.options.att, self.options.val
+        )
         for elem in el_from:
             prev_ev_code = elem.get(self.options.when)
             if prev_ev_code is None:
                 prev_ev_code = ""
 
-            if self.options.compatibility == 'append':
+            if self.options.compatibility == "append":
                 el_ev_code = prev_ev_code + ";\n" + ev_code
-            if self.options.compatibility == 'prepend':
+            if self.options.compatibility == "prepend":
                 el_ev_code = ev_code + ";\n" + prev_ev_code
-            if self.options.compatibility == 'replace':
+            if self.options.compatibility == "replace":
                 el_ev_code = ev_code
 
             elem.set(self.options.when, el_ev_code)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     SetAttribute().run()

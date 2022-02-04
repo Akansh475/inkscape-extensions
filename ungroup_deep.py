@@ -8,18 +8,33 @@ for an example how to do the transform of parent to children.
 
 import inkex
 from inkex import (
-    Group, Anchor, Switch, NamedView, Defs, Metadata, ForeignObject,
-    ClipPath, Use, SvgDocumentElement,
+    Group,
+    Anchor,
+    Switch,
+    NamedView,
+    Defs,
+    Metadata,
+    ForeignObject,
+    ClipPath,
+    Use,
+    SvgDocumentElement,
 )
+
 
 class UngroupDeep(inkex.EffectExtension):
     def add_arguments(self, pars):
-        pars.add_argument("--startdepth", type=int, default=0,
-                          help="starting depth for ungrouping")
-        pars.add_argument("--maxdepth", type=int, default=65535,
-                          help="maximum ungrouping depth")
-        pars.add_argument("--keepdepth", type=int, default=0,
-                          help="levels of ungrouping to leave untouched")
+        pars.add_argument(
+            "--startdepth", type=int, default=0, help="starting depth for ungrouping"
+        )
+        pars.add_argument(
+            "--maxdepth", type=int, default=65535, help="maximum ungrouping depth"
+        )
+        pars.add_argument(
+            "--keepdepth",
+            type=int,
+            default=0,
+            help="levels of ungrouping to leave untouched",
+        )
 
     @staticmethod
     def _merge_style(node, style):
@@ -76,8 +91,10 @@ class UngroupDeep(inkex.EffectExtension):
                 # applied to the clipPath as well, which we don't want.  So, we
                 # create new clipPath element with references to all existing
                 # clippath subelements, but with the inverse transform applied
-                new_clippath = self.svg.defs.add(ClipPath(clipPathUnits='userSpaceOnUse'))
-                new_clippath.set_random_id('clipPath')
+                new_clippath = self.svg.defs.add(
+                    ClipPath(clipPathUnits="userSpaceOnUse")
+                )
+                new_clippath.set_random_id("clipPath")
                 clippath = self.svg.getElementById(clippathurl[5:-1])
                 for child in clippath.iterchildren():
                     new_clippath.add(Use.new(child, 0, 0))
@@ -100,7 +117,7 @@ class UngroupDeep(inkex.EffectExtension):
         node_style = node.style
 
         node_transform = node.transform
-        node_clippathurl = node.get('clip-path')
+        node_clippathurl = node.get("clip-path")
         for child in reversed(list(node)):
             if not isinstance(child, inkex.BaseElement):
                 continue
@@ -114,11 +131,12 @@ class UngroupDeep(inkex.EffectExtension):
 
     # Put all ungrouping restrictions here
     def _want_ungroup(self, node, depth, height):
-        if (isinstance(node, Group) and
-                node.getparent() is not None and
-                height > self.options.keepdepth and
-                self.options.startdepth <= depth <=
-                self.options.maxdepth):
+        if (
+            isinstance(node, Group)
+            and node.getparent() is not None
+            and height > self.options.keepdepth
+            and self.options.startdepth <= depth <= self.options.maxdepth
+        ):
             return True
         return False
 
@@ -127,16 +145,13 @@ class UngroupDeep(inkex.EffectExtension):
         # max recursion depth limits, which is a problem in converted PDFs
 
         # Seed the queue (stack) with initial node
-        q = [{'node': node,
-              'depth': 0,
-              'prev': {'height': None},
-              'height': None}]
+        q = [{"node": node, "depth": 0, "prev": {"height": None}, "height": None}]
 
         while q:
             current = q[-1]
-            node = current['node']
-            depth = current['depth']
-            height = current['height']
+            node = current["node"]
+            depth = current["depth"]
+            height = current["height"]
 
             # Recursion path
             if height is None:
@@ -146,14 +161,20 @@ class UngroupDeep(inkex.EffectExtension):
 
                 # Base case: Leaf node
                 if not isinstance(node, Group) or not list(node):
-                    current['height'] = 0
+                    current["height"] = 0
 
                 # Recursive case: Group element with children
                 else:
                     depth += 1
                     for child in node.iterchildren():
-                        q.append({'node': child, 'prev': current,
-                                  'depth': depth, 'height': None})
+                        q.append(
+                            {
+                                "node": child,
+                                "prev": current,
+                                "depth": depth,
+                                "height": None,
+                            }
+                        )
 
             # Return path
             else:
@@ -163,10 +184,10 @@ class UngroupDeep(inkex.EffectExtension):
 
                 # Propagate (max) height up the call chain
                 height += 1
-                previous = current['prev']
-                prev_height = previous['height']
+                previous = current["prev"]
+                prev_height = previous["height"]
                 if prev_height is None or prev_height < height:
-                    previous['height'] = height
+                    previous["height"] = height
 
                 # Only process each node once
                 q.pop()
@@ -180,5 +201,5 @@ class UngroupDeep(inkex.EffectExtension):
                 self._deep_ungroup(node)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     UngroupDeep().run()

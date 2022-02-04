@@ -24,16 +24,16 @@ from .Base import Barcode
 
 # 1 means thick, 0 means thin
 ENCODE = {
-    '0': '00110',
-    '1': '10001',
-    '2': '01001',
-    '3': '11000',
-    '4': '00101',
-    '5': '10100',
-    '6': '01100',
-    '7': '00011',
-    '8': '10010',
-    '9': '01010',
+    "0": "00110",
+    "1": "10001",
+    "2": "01001",
+    "3": "11000",
+    "4": "00101",
+    "5": "10100",
+    "6": "01100",
+    "7": "00011",
+    "8": "10010",
+    "9": "01010",
 }
 
 
@@ -48,22 +48,22 @@ class Code25i(Barcode):
         # Number of figures to encode must be even,
         # a 0 is added to the left in case it's odd.
         if len(number) % 2 > 0:
-            number = '0' + number
+            number = "0" + number
 
         # Number is encoded by pairs of 2 figures
         size = len(number) // 2
-        encoded = '1010'
+        encoded = "1010"
         for i in range(size):
             # First in the pair is encoded in black (1), second in white (0)
             black = ENCODE[number[i * 2]]
             white = ENCODE[number[i * 2 + 1]]
             for j in range(5):
-                if black[j] == '1':
-                    encoded += '11'
+                if black[j] == "1":
+                    encoded += "11"
                 else:
-                    encoded += '1'
-                if white[j] == '1':
-                    encoded += '00'
+                    encoded += "1"
+                if white[j] == "1":
+                    encoded += "00"
                 else:
-                    encoded += '0'
-        return encoded + '1101'
+                    encoded += "0"
+        return encoded + "1101"

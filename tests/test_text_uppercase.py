@@ -6,6 +6,7 @@ from text_uppercase import Uppercase
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.word import word_generator
 
+
 class UpperCase(ComparisonMixin, TestCase):
     effect_class = Uppercase
     comparisons = [()]

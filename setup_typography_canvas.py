@@ -29,14 +29,14 @@ class SetupTypographyCanvas(inkex.EffectExtension):
 
     def add_arguments(self, pars):
         pars.add_argument("-e", "--emsize", type=int, default=1000)
-        pars.add_argument("-c", "--caps", type=int,
-                          default=700, help="Caps Height")
+        pars.add_argument("-c", "--caps", type=int, default=700, help="Caps Height")
         pars.add_argument("-x", "--xheight", type=int, default=500)
         pars.add_argument("-a", "--ascender", type=int, default=750)
         pars.add_argument("-d", "--descender", type=int, default=250)
 
-    def create_horizontal_guideline(self, name: str, position: Union[int, float]) \
-        -> inkex.BaseElement:
+    def create_horizontal_guideline(
+        self, name: str, position: Union[int, float]
+    ) -> inkex.BaseElement:
         """Create a horizontal guideline with name and position
 
         Args:
@@ -46,8 +46,9 @@ class SetupTypographyCanvas(inkex.EffectExtension):
         Returns:
             inkex.BaseElement: the created guideline
         """
-        return self.svg.namedview \
-                   .add(inkex.Guide().move_to(0, position, (0, 1)).update(inkscape__label=name))
+        return self.svg.namedview.add(
+            inkex.Guide().move_to(0, position, (0, 1)).update(inkscape__label=name)
+        )
 
     def effect(self):
         # Get all the options
@@ -71,10 +72,10 @@ class SetupTypographyCanvas(inkex.EffectExtension):
         self.create_horizontal_guideline(_("descender"), baseline - descender)
 
         namedview = self.svg.namedview
-        namedview.set('inkscape:document-units', 'px')
-        namedview.set('inkscape:cx', str(emsize / 2.0))
-        namedview.set('inkscape:cy', str(emsize / 2.0))
+        namedview.set("inkscape:document-units", "px")
+        namedview.set("inkscape:cx", str(emsize / 2.0))
+        namedview.set("inkscape:cy", str(emsize / 2.0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     SetupTypographyCanvas().run()

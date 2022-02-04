@@ -27,20 +27,32 @@ import os
 import inkex
 from inkex.command import call, which
 
+
 class PostscriptInput(inkex.CallExtension):
     """Load Postscript/EPS Files by calling ps2pdf program"""
-    input_ext = 'ps'
-    output_ext = 'pdf'
+
+    input_ext = "ps"
+    output_ext = "pdf"
     multi_inx = True
 
     def add_arguments(self, pars):
-        pars.add_argument('--crop', type=inkex.Boolean, default=False)
+        pars.add_argument("--crop", type=inkex.Boolean, default=False)
 
     def call(self, input_file, output_file):
-        crop = '-dEPSCrop' if self.options.crop else None
+        crop = "-dEPSCrop" if self.options.crop else None
         if sys.platform == "win32":
-            params = ['-q', '-P-', '-dSAFER', '-dNOPAUSE', '-dBATCH', '-sDEVICE#pdfwrite',
-            '-dCompatibilityLevel#1.4', crop, "-sOutputFile#" + output_file, input_file]
+            params = [
+                "-q",
+                "-P-",
+                "-dSAFER",
+                "-dNOPAUSE",
+                "-dBATCH",
+                "-sDEVICE#pdfwrite",
+                "-dCompatibilityLevel#1.4",
+                crop,
+                "-sOutputFile#" + output_file,
+                input_file,
+            ]
             gs_execs = ["gswin64c", "gswin32c"]
             gs_exec = None
             for executable in gs_execs:
@@ -51,8 +63,8 @@ class PostscriptInput(inkex.CallExtension):
                     pass
             if gs_exec is None:
                 if "PYTEST_CURRENT_TEST" in os.environ:
-                    gs_exec = "gswin64c" # In CI, we have neither available, 
-                                         # but there are mock files for the 64 bit version
+                    gs_exec = "gswin64c"  # In CI, we have neither available,
+                    # but there are mock files for the 64 bit version
                 else:
                     raise inkex.AbortExtension()
             call(gs_exec, *params)
@@ -60,5 +72,5 @@ class PostscriptInput(inkex.CallExtension):
             call("ps2pdf", crop, input_file, output_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     PostscriptInput().run()

@@ -23,32 +23,35 @@ from inkex.deprecated import deprecate
 from inkex.transforms import DirectedLineSegment as NewSeg
 
 try:
-    NaN = float('NaN')
+    NaN = float("NaN")
 except ValueError:
     PosInf = 1e300000
-    NaN = PosInf/PosInf
+    NaN = PosInf / PosInf
 
-class Point(namedtuple('Point', 'x y')):
+
+class Point(namedtuple("Point", "x y")):
     __slots__ = ()
+
     def __getitem__(self, key):
         if isinstance(key, str):
-            key = 'xy'.index(key)
+            key = "xy".index(key)
         return super(Point, self).__getitem__(key)
+
 
 class Segment(NewSeg):
     @deprecate
     def __init__(self, e0, e1):
         """inkex.transforms.Segment(((x1, y1), (x2, y2)))"""
         if isinstance(e0, dict):
-            e0 = (e0['x'], e0['y'])
+            e0 = (e0["x"], e0["y"])
         if isinstance(e1, dict):
-            e1 = (e1['x'], e1['y'])
+            e1 = (e1["x"], e1["y"])
         super(Segment, self).__init__((e0, e1))
 
     def __getitem__(self, key):
         if key:
-            return {'x': self.x.maximum, 'y': self.y.maximum}
-        return {'x': self.x.minimum, 'y': self.y.minimum}
+            return {"x": self.x.maximum, "y": self.y.maximum}
+        return {"x": self.x.minimum, "y": self.y.minimum}
 
     delta_x = lambda self: self.width
     delta_y = lambda self: self.height
@@ -56,10 +59,10 @@ class Segment(NewSeg):
     rise = delta_y
 
     def distanceToPoint(self, p):
-        return self.distance_to_point(p['x'], p['y'])
+        return self.distance_to_point(p["x"], p["y"])
 
     def perpDistanceToPoint(self, p):
-        return self.perp_distance(p['x'], p['y'])
+        return self.perp_distance(p["x"], p["y"])
 
     def angle(self):
         return super(Segment, self).angle
@@ -74,12 +77,14 @@ class Segment(NewSeg):
         return self.point_at_ratio(ratio)
 
     def createParallel(self, p):
-        self.parallel(p['x'], p['y'])
+        self.parallel(p["x"], p["y"])
+
 
 @deprecate
 def intersectSegments(s1, s2):
     """transforms.Segment(s1).intersect(s2)"""
     return Point(*s1.intersect(s2))
+
 
 @deprecate
 def dot(s1, s2):

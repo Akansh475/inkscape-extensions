@@ -22,8 +22,10 @@ import inkex
 from inkex.localization import inkex_gettext as _
 from webslicer_effect import WebSlicerMixin
 
+
 class CreateGroup(WebSlicerMixin, inkex.EffectExtension):
     """Create new webslicer group"""
+
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         pars.add_argument("--html-id", dest="html_id")
@@ -34,23 +36,30 @@ class CreateGroup(WebSlicerMixin, inkex.EffectExtension):
 
     def effect(self):
         if not self.svg.selected:
-            raise inkex.AbortExtension(_('You must to select some "Slicer rectangles" '
-                                         'or other "Layout groups".'))
+            raise inkex.AbortExtension(
+                _(
+                    'You must to select some "Slicer rectangles" '
+                    'or other "Layout groups".'
+                )
+            )
 
         base_elements = self.get_slicer_layer().descendants()
         for key, node in self.svg.selected.id_dict().items():
             if node not in base_elements:
-                raise inkex.AbortExtension(_(f'The element "{key}" is not in the Web Slicer layer'))
+                raise inkex.AbortExtension(
+                    _(f'The element "{key}" is not in the Web Slicer layer')
+                )
             g_parent = node.getparent()
 
         group = g_parent.add(inkex.Group())
         desc = group.add(inkex.Desc())
         desc.text = self.get_conf_text_from_list(
-            ['html_id', 'html_class', 'width_unity', 'height_unity', 'bg_color'])
+            ["html_id", "html_class", "width_unity", "height_unity", "bg_color"]
+        )
 
         for node in self.svg.selected.values():
             group.insert(1, node)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     CreateGroup().run()

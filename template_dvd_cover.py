@@ -24,14 +24,23 @@ Generic template functionality controlled by the INX file.
 
 import inkex
 
+
 class DvdCover(inkex.TemplateExtension):
     """Create an empty DVD Cover (in mm)"""
+
     multi_inx = True
+
     def add_arguments(self, pars):
-        pars.add_argument("-s", "--spine", type=float, default=14.0,
-                          help="Dvd spine width (mm)")
-        pars.add_argument("-b", "--bleed", type=float, default=3.0,
-                          help="Bleed (extra area around image")
+        pars.add_argument(
+            "-s", "--spine", type=float, default=14.0, help="Dvd spine width (mm)"
+        )
+        pars.add_argument(
+            "-b",
+            "--bleed",
+            type=float,
+            default=3.0,
+            help="Bleed (extra area around image",
+        )
 
     def get_size(self):
         # Dimensions in mm
@@ -40,8 +49,7 @@ class DvdCover(inkex.TemplateExtension):
         bleed = self.options.bleed
         spine = self.options.spine
 
-        return (width + spine + bleed * 2.0, 'mm',
-                height + bleed * 2.0, 'mm')
+        return (width + spine + bleed * 2.0, "mm", height + bleed * 2.0, "mm")
 
     def set_namedview(self, width, height, unit):
         super(DvdCover, self).set_namedview(width, height, unit)
@@ -54,5 +62,6 @@ class DvdCover(inkex.TemplateExtension):
         self.svg.namedview.new_guide((width + spine) / 2.0, False, "right spline")
         self.svg.namedview.new_guide(width - bleed, False, "top")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     DvdCover().run()

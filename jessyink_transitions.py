@@ -22,15 +22,17 @@ from inkex.styles import Style
 
 from jessyink_install import JessyInkMixin, _
 
+
 class Transitions(JessyInkMixin, inkex.EffectExtension):
     """Add transition to later"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab', dest='what')
-        pars.add_argument('--layerName', default='')
-        pars.add_argument('--effectIn', default='default')
-        pars.add_argument('--effectOut', default='default')
-        pars.add_argument('--effectInDuration', type=float, default=0.8)
-        pars.add_argument('--effectOutDuration', type=float, default=0.8)
+        pars.add_argument("--tab", dest="what")
+        pars.add_argument("--layerName", default="")
+        pars.add_argument("--effectIn", default="default")
+        pars.add_argument("--effectOut", default="default")
+        pars.add_argument("--effectInDuration", type=float, default=0.8)
+        pars.add_argument("--effectOutDuration", type=float, default=0.8)
 
     def effect(self):
         self.is_installed()
@@ -38,22 +40,33 @@ class Transitions(JessyInkMixin, inkex.EffectExtension):
         if not self.options.layerName:
             raise inkex.AbortExtension(_("Please enter a layer name."))
 
-        node = self.svg.getElement(f"//*[@inkscape:groupmode='layer' "
-                                   f"and @inkscape:label='{self.options.layerName}']")
+        node = self.svg.getElement(
+            f"//*[@inkscape:groupmode='layer' "
+            f"and @inkscape:label='{self.options.layerName}']"
+        )
         if node is None:
-            raise inkex.AbortExtension(_(f"Layer '{self.options.layerName}' not found."))
+            raise inkex.AbortExtension(
+                _(f"Layer '{self.options.layerName}' not found.")
+            )
 
         if self.options.effectIn == "default":
             node.set("jessyink:transitionIn", None)
         else:
             length = int(self.options.effectInDuration * 1000)
-            node.set("jessyink:transitionIn", Style(name=self.options.effectIn, length=length))
+            node.set(
+                "jessyink:transitionIn",
+                Style(name=self.options.effectIn, length=length),
+            )
 
         if self.options.effectOut == "default":
             node.set("jessyink:transitionOut", None)
         else:
             length = int(self.options.effectOutDuration * 1000)
-            node.set("jessyink:transitionOut", Style(name=self.options.effectOut, length=length))
+            node.set(
+                "jessyink:transitionOut",
+                Style(name=self.options.effectOut, length=length),
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Transitions().run()

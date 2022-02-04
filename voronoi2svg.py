@@ -33,27 +33,39 @@ from inkex import Group, Rectangle, PathElement, Vector2d as Point
 
 import voronoi
 
+
 class Voronoi(inkex.EffectExtension):
     """Extension to create a Voronoi diagram."""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
+        pars.add_argument("--tab")
         pars.add_argument(
-            '--diagram-type',
-            default='Voronoi', dest='diagramType',
-            choices=['Voronoi', 'Delaunay', 'Both'],
-            help='Defines the type of the diagram')
+            "--diagram-type",
+            default="Voronoi",
+            dest="diagramType",
+            choices=["Voronoi", "Delaunay", "Both"],
+            help="Defines the type of the diagram",
+        )
         pars.add_argument(
-            '--clip-box', choices=['Page', 'Automatic from seeds'],
-            default='Page', dest='clip_box',
-            help='Defines the bounding box of the Voronoi diagram')
+            "--clip-box",
+            choices=["Page", "Automatic from seeds"],
+            default="Page",
+            dest="clip_box",
+            help="Defines the bounding box of the Voronoi diagram",
+        )
         pars.add_argument(
-            '--show-clip-box', type=inkex.Boolean,
-            default=False, dest='showClipBox',
-            help='Set this to true to write the bounding box')
+            "--show-clip-box",
+            type=inkex.Boolean,
+            default=False,
+            dest="showClipBox",
+            help="Set this to true to write the bounding box",
+        )
         pars.add_argument(
-            '--delaunay-fill-options', default="delaunay-no-fill",
-            dest='delaunayFillOptions',
-            help='Set the Delaunay triangles color options')
+            "--delaunay-fill-options",
+            default="delaunay-no-fill",
+            dest="delaunayFillOptions",
+            help="Set the Delaunay triangles color options",
+        )
 
     def dot(self, x, y):
         """Clipping a line by a bounding box"""
@@ -71,9 +83,7 @@ class Voronoi(inkex.EffectExtension):
             return 0, 0, False
         und = (line[2] - self.dot(line, vt2)) / tmp
         vt0 = 1 - und
-        return und * vt1[0] + vt0 * vt2[0], \
-               und * vt1[1] + vt0 * vt2[1], \
-               True
+        return und * vt1[0] + vt0 * vt2[0], und * vt1[1] + vt0 * vt2[1], True
 
     def clip_edge(self, vertices, lines, edge, bbox):
         # bounding box corners
@@ -87,7 +97,7 @@ class Voronoi(inkex.EffectExtension):
         # record intersections of the line with bounding box edges
         if edge[0] >= len(lines):
             return []
-        line = (lines[edge[0]])
+        line = lines[edge[0]]
         interpoints = []
         for i in range(4):
             pnt = self.intersect_line_segment(line, bbc[i], bbc[(i + 1) % 4])
@@ -154,19 +164,19 @@ class Voronoi(inkex.EffectExtension):
             return
 
         linestyle = {
-            'stroke': '#000000',
-            'stroke-width': str(self.svg.to_dimensionless('1px')),
-            'fill': 'none',
-            'stroke-linecap': 'round',
-            'stroke-linejoin': 'round'
+            "stroke": "#000000",
+            "stroke-width": str(self.svg.to_dimensionless("1px")),
+            "fill": "none",
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
         }
 
         facestyle = {
-            'stroke': '#000000',
-            'stroke-width': str(self.svg.to_dimensionless('1px')),
-            'fill': 'none',
-            'stroke-linecap': 'round',
-            'stroke-linejoin': 'round'
+            "stroke": "#000000",
+            "stroke-width": str(self.svg.to_dimensionless("1px")),
+            "fill": "none",
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
         }
 
         parent_group = self.svg.selection.first().getparent()
@@ -192,42 +202,46 @@ class Voronoi(inkex.EffectExtension):
                     point = trans.apply_to_point(point)
                 pts.append(Point(*point))
                 if self.options.delaunayFillOptions != "delaunay-no-fill":
-                    fills.append(node.style.get('fill', 'none'))
+                    fills.append(node.style.get("fill", "none"))
                 seeds.append(Point(center_x, center_y))
 
         # Creation of groups to store the result
-        if self.options.diagramType != 'Delaunay':
+        if self.options.diagramType != "Delaunay":
             # Voronoi
             group_voronoi = parent_group.add(Group())
-            group_voronoi.set('inkscape:label', 'Voronoi')
+            group_voronoi.set("inkscape:label", "Voronoi")
             if invtrans:
                 group_voronoi.transform @= invtrans
-        if self.options.diagramType != 'Voronoi':
+        if self.options.diagramType != "Voronoi":
             # Delaunay
             group_delaunay = parent_group.add(Group())
-            group_delaunay.set('inkscape:label', 'Delaunay')
+            group_delaunay.set("inkscape:label", "Delaunay")
 
         # Clipping box handling
-        if self.options.diagramType != 'Delaunay':
+        if self.options.diagramType != "Delaunay":
             # Clipping bounding box creation
             group_bbox = sum([node.bounding_box() for node in nodes], None)
 
             # Clipbox is the box to which the Voronoi diagram is restricted
-            if self.options.clip_box == 'Page':
+            if self.options.clip_box == "Page":
                 width = self.svg.viewbox_width
                 height = self.svg.viewbox_height
                 clip_box = (0, width, 0, height)
             else:
-                clip_box = (group_bbox.left,
-                            group_bbox.right,
-                            group_bbox.top,
-                            group_bbox.bottom)
+                clip_box = (
+                    group_bbox.left,
+                    group_bbox.right,
+                    group_bbox.top,
+                    group_bbox.bottom,
+                )
 
             # Safebox adds points so that no Voronoi edge in clip_box is infinite
-            safe_box = (2 * clip_box[0] - clip_box[1],
-                        2 * clip_box[1] - clip_box[0],
-                        2 * clip_box[2] - clip_box[3],
-                        2 * clip_box[3] - clip_box[2])
+            safe_box = (
+                2 * clip_box[0] - clip_box[1],
+                2 * clip_box[1] - clip_box[0],
+                2 * clip_box[2] - clip_box[3],
+                2 * clip_box[3] - clip_box[2],
+            )
             pts.append(Point(safe_box[0], safe_box[2]))
             pts.append(Point(safe_box[1], safe_box[2]))
             pts.append(Point(safe_box[1], safe_box[3]))
@@ -236,14 +250,14 @@ class Voronoi(inkex.EffectExtension):
             if self.options.showClipBox:
                 # Add the clip box to the drawing
                 rect = group_voronoi.add(Rectangle())
-                rect.set('x', str(clip_box[0]))
-                rect.set('y', str(clip_box[2]))
-                rect.set('width', str(clip_box[1] - clip_box[0]))
-                rect.set('height', str(clip_box[3] - clip_box[2]))
+                rect.set("x", str(clip_box[0]))
+                rect.set("y", str(clip_box[2]))
+                rect.set("width", str(clip_box[1] - clip_box[0]))
+                rect.set("height", str(clip_box[3] - clip_box[2]))
                 rect.style = linestyle
 
         # Voronoi diagram generation
-        if self.options.diagramType != 'Delaunay':
+        if self.options.diagramType != "Delaunay":
             vertices, lines, edges = voronoi.computeVoronoiDiagram(pts)
             for edge in edges:
                 vindex1, vindex2 = edge[1:]
@@ -255,12 +269,12 @@ class Voronoi(inkex.EffectExtension):
                     if len(segment) > 1:
                         x1, y1 = segment[0]
                         x2, y2 = segment[1]
-                        cmds = [['M', [x1, y1]], ['L', [x2, y2]]]
+                        cmds = [["M", [x1, y1]], ["L", [x2, y2]]]
                         path = group_voronoi.add(PathElement())
-                        path.set('d', str(inkex.Path(cmds)))
+                        path.set("d", str(inkex.Path(cmds)))
                         path.style = linestyle
 
-        if self.options.diagramType != 'Voronoi':
+        if self.options.diagramType != "Voronoi":
             triangles = voronoi.computeDelaunayTriangulation(seeds)
             i = 0
             if self.options.delaunayFillOptions == "delaunay-fill":
@@ -269,23 +283,28 @@ class Voronoi(inkex.EffectExtension):
                 pt1 = seeds[triangle[0]]
                 pt2 = seeds[triangle[1]]
                 pt3 = seeds[triangle[2]]
-                cmds = [['M', [pt1.x, pt1.y]],
-                        ['L', [pt2.x, pt2.y]],
-                        ['L', [pt3.x, pt3.y]],
-                        ['Z', []]]
-                if self.options.delaunayFillOptions == "delaunay-fill" \
-                    or self.options.delaunayFillOptions == "delaunay-fill-random":
+                cmds = [
+                    ["M", [pt1.x, pt1.y]],
+                    ["L", [pt2.x, pt2.y]],
+                    ["L", [pt3.x, pt3.y]],
+                    ["Z", []],
+                ]
+                if (
+                    self.options.delaunayFillOptions == "delaunay-fill"
+                    or self.options.delaunayFillOptions == "delaunay-fill-random"
+                ):
                     facestyle = {
-                        'stroke': fills[triangle[random.randrange(0, 2)]],
-                        'stroke-width': str(self.svg.to_dimensionless('0.005px')),
-                        'fill': fills[triangle[random.randrange(0, 2)]],
-                        'stroke-linecap': 'round',
-                        'stroke-linejoin': 'round'
+                        "stroke": fills[triangle[random.randrange(0, 2)]],
+                        "stroke-width": str(self.svg.to_dimensionless("0.005px")),
+                        "fill": fills[triangle[random.randrange(0, 2)]],
+                        "stroke-linecap": "round",
+                        "stroke-linejoin": "round",
                     }
                 path = group_delaunay.add(PathElement())
-                path.set('d', str(inkex.Path(cmds)))
+                path.set("d", str(inkex.Path(cmds)))
                 path.style = facestyle
                 i += 1
+
 
 if __name__ == "__main__":
     Voronoi().run()

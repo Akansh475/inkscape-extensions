@@ -101,8 +101,10 @@ import sys
 TOLERANCE = 1e-9
 BIG_FLOAT = 1e38
 
+
 class CmpMixin(object):
     """Upgrade python2 cmp to python3 cmp"""
+
     def __cmp__(self, other):
         raise NotImplementedError("Shouldn't there be a __cmp__ method?")
 
@@ -124,6 +126,7 @@ class CmpMixin(object):
     def __ge__(self, other):
         return self.__cmp__(other) in (0, 1)
 
+
 # ------------------------------------------------------------------
 class Context(object):
     def __init__(self):
@@ -132,8 +135,12 @@ class Context(object):
         self.plot = 0
         self.triangulate = False
         self.vertices = []  # list of vertex 2-tuples: (x,y)
-        self.lines = []  # equation of line 3-tuple (a b c), for the equation of the line a*x+b*y = c
-        self.edges = []  # edge 3-tuple: (line index, vertex 1 index, vertex 2 index)   if either vertex index is -1, the edge extends to infiinity
+        self.lines = (
+            []
+        )  # equation of line 3-tuple (a b c), for the equation of the line a*x+b*y = c
+        self.edges = (
+            []
+        )  # edge 3-tuple: (line index, vertex 1 index, vertex 2 index)   if either vertex index is -1, the edge extends to infiinity
         self.triangles = []  # 3-tuple of vertex indices
 
     def circle(self, x, y, rad):
@@ -167,14 +174,27 @@ class Context(object):
     def outTriple(self, s1, s2, s3):
         self.triangles.append((s1.sitenum, s2.sitenum, s3.sitenum))
         if self.debug:
-            print("circle through left=%d right=%d bottom=%d" % (s1.sitenum, s2.sitenum, s3.sitenum))
+            print(
+                "circle through left=%d right=%d bottom=%d"
+                % (s1.sitenum, s2.sitenum, s3.sitenum)
+            )
         elif self.triangulate and self.doPrint and not self.plot:
             print("%d %d %d" % (s1.sitenum, s2.sitenum, s3.sitenum))
 
     def outBisector(self, edge):
         self.lines.append((edge.a, edge.b, edge.c))
         if self.debug:
-            print("line(%d) %gx+%gy=%g, bisecting %d %d" % (edge.edgenum, edge.a, edge.b, edge.c, edge.reg[0].sitenum, edge.reg[1].sitenum))
+            print(
+                "line(%d) %gx+%gy=%g, bisecting %d %d"
+                % (
+                    edge.edgenum,
+                    edge.a,
+                    edge.b,
+                    edge.c,
+                    edge.reg[0].sitenum,
+                    edge.reg[1].sitenum,
+                )
+            )
         elif self.triangulate:
             if self.plot:
                 self.line(edge.reg[0].x, edge.reg[0].y, edge.reg[1].x, edge.reg[1].y)
@@ -193,8 +213,8 @@ class Context(object):
             if self.plot:
                 self.clip_line(edge)
             elif self.doPrint:
-                print("e %d" % edge.edgenum, end=' ')
-                print(" %d " % sitenumL, end=' ')
+                print("e %d" % edge.edgenum, end=" ")
+                print(" %d " % sitenumL, end=" ")
                 print("%d" % sitenumR)
 
 
@@ -447,7 +467,7 @@ class Halfedge(CmpMixin):
         print("right: ", self.right)
         print("edge: ", self.edge)
         print("pm: ", self.pm)
-        print("vertex: ", end=' ')
+        print("vertex: ", end=" ")
         if self.vertex:
             self.vertex.dump()
         else:
@@ -509,7 +529,9 @@ class Halfedge(CmpMixin):
                     fast = 1
             if not fast:
                 dxs = topsite.x - (e.reg[0]).x
-                above = e.b * (dxp * dxp - dyp * dyp) < dxs * dyp * (1.0 + 2.0 * dxp / dxs + e.b * e.b)
+                above = e.b * (dxp * dxp - dyp * dyp) < dxs * dyp * (
+                    1.0 + 2.0 * dxp / dxs + e.b * e.b
+                )
                 if e.b < 0.0:
                     above = not above
         else:  # e.b == 1.0
@@ -550,8 +572,7 @@ class Halfedge(CmpMixin):
             e = e2
 
         rightOfSite = xint >= e.reg[1].x
-        if ((rightOfSite and he.pm == Edge.LE) or
-                (not rightOfSite and he.pm == Edge.RE)):
+        if (rightOfSite and he.pm == Edge.LE) or (not rightOfSite and he.pm == Edge.RE):
             return None
 
         # create a new site at the point of intersection - this is a new
@@ -771,17 +792,17 @@ class SiteList(object):
 
 # ------------------------------------------------------------------
 def computeVoronoiDiagram(points):
-    """ Takes a list of point objects (which must have x and y fields).
-        Returns a 3-tuple of:
+    """Takes a list of point objects (which must have x and y fields).
+    Returns a 3-tuple of:
 
-           (1) a list of 2-tuples, which are the x,y coordinates of the
-               Voronoi diagram vertices
-           (2) a list of 3-tuples (a,b,c) which are the equations of the
-               lines in the Voronoi diagram: a*x + b*y = c
-           (3) a list of 3-tuples, (l, v1, v2) representing edges of the
-               Voronoi diagram.  l is the index of the line, v1 and v2 are
-               the indices of the vetices at the end of the edge.  If
-               v1 or v2 is -1, the line extends to infinity.
+       (1) a list of 2-tuples, which are the x,y coordinates of the
+           Voronoi diagram vertices
+       (2) a list of 3-tuples (a,b,c) which are the equations of the
+           lines in the Voronoi diagram: a*x + b*y = c
+       (3) a list of 3-tuples, (l, v1, v2) representing edges of the
+           Voronoi diagram.  l is the index of the line, v1 and v2 are
+           the indices of the vetices at the end of the edge.  If
+           v1 or v2 is -1, the line extends to infinity.
     """
     Edge.EDGE_NUM = 0
     siteList = SiteList(points)
@@ -792,9 +813,9 @@ def computeVoronoiDiagram(points):
 
 # ------------------------------------------------------------------
 def computeDelaunayTriangulation(points):
-    """ Takes a list of point objects (which must have x and y fields).
-        Returns a list of 3-tuples: the indices of the points that form a
-        Delaunay triangle.
+    """Takes a list of point objects (which must have x and y fields).
+    Returns a list of 3-tuples: the indices of the points that form a
+    Delaunay triangle.
     """
     Edge.EDGE_NUM = 0
     siteList = SiteList(points)
@@ -825,7 +846,7 @@ if __name__ == "__main__":
         pts = []
         fp = sys.stdin
         if len(args) > 0:
-            fp = open(args[0], 'r')
+            fp = open(args[0], "r")
         for line in fp:
             fld = line.split()
             x = float(fld[0])

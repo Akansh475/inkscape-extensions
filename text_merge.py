@@ -28,28 +28,38 @@ Merge text blocks together.
 
 import inkex
 from inkex.utils import KeyDict
-from inkex import (
-    Rectangle, FlowRoot, FlowPara, FlowRegion, TextElement, Tspan
-)
+from inkex import Rectangle, FlowRoot, FlowPara, FlowRegion, TextElement, Tspan
 
 # Old settings, supported because users click 'ok' without looking.
-XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})
-YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
+XAN = KeyDict({"l": "left", "r": "right", "m": "center_x"})
+YAN = KeyDict({"t": "top", "b": "bottom", "m": "center_y"})
+
 
 class Merge(inkex.EffectExtension):
     """Merge text blocks together"""
+
     def add_arguments(self, pars):
-        pars.add_argument("-d", "--direction", default="lr", help="direction to merge text")
-        pars.add_argument("-x", "--xanchor", default="left", help="horiz point to compare")
-        pars.add_argument("-y", "--yanchor", default="top", help="vertical point to compare")
+        pars.add_argument(
+            "-d", "--direction", default="lr", help="direction to merge text"
+        )
+        pars.add_argument(
+            "-x", "--xanchor", default="left", help="horiz point to compare"
+        )
+        pars.add_argument(
+            "-y", "--yanchor", default="top", help="vertical point to compare"
+        )
         pars.add_argument("-k", "--keepstyle", type=inkex.Boolean, help="keep format")
-        pars.add_argument("-t", "--flowtext", type=inkex.Boolean,\
-            help="use a flow text structure instead of a normal text element")
+        pars.add_argument(
+            "-t",
+            "--flowtext",
+            type=inkex.Boolean,
+            help="use a flow text structure instead of a normal text element",
+        )
 
     def effect(self):
         if not self.svg.selected:
-            for node in self.svg.xpath('//svg:text | //svg:flowRoot'):
-                self.svg.selected[node.get('id')] = node
+            for node in self.svg.xpath("//svg:text | //svg:flowRoot"):
+                self.svg.selected[node.get("id")] = node
 
         if not self.svg.selected:
             return
@@ -64,17 +74,17 @@ class Merge(inkex.EffectExtension):
             text_span = Tspan
 
         text_root = parentnode.add(text_element())
-        text_root.set('xml:space', 'preserve')
+        text_root.set("xml:space", "preserve")
         text_root.style = {
-            'font-size': '20px',
-            'font-style': 'normal',
-            'font-weight': 'normal',
-            'line-height': '125%',
-            'letter-spacing': '0px',
-            'word-spacing': '0px',
-            'fill': '#000000',
-            'fill-opacity': 1,
-            'stroke': 'none'
+            "font-size": "20px",
+            "font-style": "normal",
+            "font-weight": "normal",
+            "line-height": "125%",
+            "letter-spacing": "0px",
+            "word-spacing": "0px",
+            "fill": "#000000",
+            "fill-opacity": 1,
+            "stroke": "none",
         }
 
         for node in sorted(self.svg.selected.values(), key=self._sort):
@@ -82,26 +92,27 @@ class Merge(inkex.EffectExtension):
 
         if self.options.flowtext:
             region = text_root.add(FlowRegion())
-            region.set('xml:space', 'preserve')
+            region.set("xml:space", "preserve")
             rect = region.add(Rectangle())
-            rect.set('xml:space', 'preserve')
-            rect.set('height', 200)
-            rect.set('width', 200)
+            rect.set("xml:space", "preserve")
+            rect.set("height", 200)
+            rect.set("width", 200)
 
     def _sort(self, node):
         return node.bounding_box().get_anchor(
-            self.options.xanchor, self.options.yanchor, self.options.direction)
+            self.options.xanchor, self.options.yanchor, self.options.direction
+        )
 
     def recurse(self, text_span, node, span):
         """Recursively go through each node self calling on child nodes"""
         if not isinstance(node, FlowRegion):
 
             newspan = span.add(text_span())
-            newspan.set('xml:space', 'preserve')
+            newspan.set("xml:space", "preserve")
 
-            newspan.set('sodipodi:role', node.get('sodipodi:role'))
+            newspan.set("sodipodi:role", node.get("sodipodi:role"))
             if isinstance(node, (TextElement, FlowPara)):
-                newspan.set('sodipodi:role', 'line')
+                newspan.set("sodipodi:role", "line")
 
             if self.options.keepstyle:
                 newspan.style = node.style
@@ -114,5 +125,5 @@ class Merge(inkex.EffectExtension):
                 newspan.tail = node.tail
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Merge().run()

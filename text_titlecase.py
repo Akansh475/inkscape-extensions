@@ -3,8 +3,10 @@
 
 import inkex
 
+
 class TitleCase(inkex.TextExtension):
     """To titlecase"""
+
     word_ended = True
 
     def process_chardata(self, text):
@@ -26,5 +28,6 @@ class TitleCase(inkex.TextExtension):
 
         return ret
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     TitleCase().run()

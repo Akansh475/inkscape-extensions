@@ -20,25 +20,31 @@
 from inkex.deprecated import deprecate
 from inkex import paths
 
+
 @deprecate
 def ArcToPath(p1, params):
     return paths.arc_to_path(p1, params)
+
 
 @deprecate
 def CubicSuperPath(simplepath):
     return paths.Path(simplepath).to_superpath()
 
+
 @deprecate
 def unCubicSuperPath(csp):
     return paths.CubicSuperPath(csp).to_path().to_arrays()
+
 
 @deprecate
 def parsePath(d):
     return paths.CubicSuperPath(paths.Path(d))
 
+
 @deprecate
 def formatPath(p):
     return str(paths.Path(unCubicSuperPath(p)))
+
 
 matprod = deprecate(paths.matprod)
 rotmat = deprecate(paths.rotmat)

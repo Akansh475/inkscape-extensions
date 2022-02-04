@@ -26,6 +26,7 @@ from subprocess import Popen, PIPE
 
 from inkex.deprecated import deprecate
 
+
 def run(command_format, prog_name):
     """inkex.commands.call(...)"""
     svgfile = tempfile.mktemp(".svg")
@@ -48,14 +49,19 @@ def run(command_format, prog_name):
             if return_code:
                 msg = "{} failed:\n{}\n{}\n".format(prog_name, out, err)
             elif err:
-                sys.stderr.write("{} executed but logged the following error:\n{}\n{}\n".format(prog_name, out, err))
+                sys.stderr.write(
+                    "{} executed but logged the following error:\n{}\n{}\n".format(
+                        prog_name, out, err
+                    )
+                )
     except Exception as inst:
         msg = "Error attempting to run {}: {}".format(prog_name, str(inst))
 
     # If successful, copy the output file to stdout.
     if msg is None:
-        if os.name == 'nt':  # make stdout work in binary on Windows
+        if os.name == "nt":  # make stdout work in binary on Windows
             import msvcrt
+
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
         try:
             with open(svgfile, "rb") as fhl:
@@ -71,4 +77,3 @@ def run(command_format, prog_name):
 
     # Output error message (if any) and exit.
     return msg
-

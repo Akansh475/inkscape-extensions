@@ -26,16 +26,20 @@ from ..transforms import Transform
 from ._groups import Group, GroupBase
 from ._base import ShapeElement
 
+
 class Symbol(GroupBase):
     """SVG symbol element"""
-    tag_name = 'symbol'
+
+    tag_name = "symbol"
+
 
 class Use(ShapeElement):
     """A 'use' element that links to another in the document"""
-    tag_name = 'use'
+
+    tag_name = "use"
 
     @classmethod
-    def new(cls, elem, x, y, **attrs): # pylint: disable=arguments-differ
+    def new(cls, elem, x, y, **attrs):  # pylint: disable=arguments-differ
         ret = super().new(x=x, y=y, **attrs)
         ret.href = elem
         return ret

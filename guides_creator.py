@@ -35,25 +35,44 @@ from inkex import Guide
 
 class GuidesCreator(inkex.EffectExtension):
     """Create a set of guides based on the given options"""
+
     def add_arguments(self, pars):
-        pars.add_argument("--tab", type=self.arg_method('generate'), default="regular_guides",\
-            help="Type of guides to create.")
-        pars.add_argument('--guides_preset', default='custom', help='Preset')
-        pars.add_argument('--vertical_guides', type=int, default=2, help='Vertical guides')
-        pars.add_argument('--horizontal_guides', type=int, default=3, help='Horizontal guides')
-        pars.add_argument('--start_from_edges', type=inkex.Boolean, help='Start from edges')
-        pars.add_argument('--ul', type=inkex.Boolean, default=False, help='Upper left corner')
-        pars.add_argument('--ur', type=inkex.Boolean, default=False, help='Upper right corner')
-        pars.add_argument('--ll', type=inkex.Boolean, default=False, help='Lower left corner')
-        pars.add_argument('--lr', type=inkex.Boolean, default=False, help='Lower right corner')
-        pars.add_argument('--margins_preset', default='custom', help='Margins preset')
-        pars.add_argument('--vert', type=int, default=0, help='Vert subdivisions')
-        pars.add_argument('--horz', type=int, default=0, help='Horz subdivisions')
-        pars.add_argument('--header_margin', default="10", help='Header margin')
-        pars.add_argument('--footer_margin', default="10", help='Footer margin')
-        pars.add_argument('--left_margin', default="10", help='Left margin')
-        pars.add_argument('--right_margin', default="10", help='Right margin')
-        pars.add_argument('--delete', type=inkex.Boolean, help='Delete existing guides')
+        pars.add_argument(
+            "--tab",
+            type=self.arg_method("generate"),
+            default="regular_guides",
+            help="Type of guides to create.",
+        )
+        pars.add_argument("--guides_preset", default="custom", help="Preset")
+        pars.add_argument(
+            "--vertical_guides", type=int, default=2, help="Vertical guides"
+        )
+        pars.add_argument(
+            "--horizontal_guides", type=int, default=3, help="Horizontal guides"
+        )
+        pars.add_argument(
+            "--start_from_edges", type=inkex.Boolean, help="Start from edges"
+        )
+        pars.add_argument(
+            "--ul", type=inkex.Boolean, default=False, help="Upper left corner"
+        )
+        pars.add_argument(
+            "--ur", type=inkex.Boolean, default=False, help="Upper right corner"
+        )
+        pars.add_argument(
+            "--ll", type=inkex.Boolean, default=False, help="Lower left corner"
+        )
+        pars.add_argument(
+            "--lr", type=inkex.Boolean, default=False, help="Lower right corner"
+        )
+        pars.add_argument("--margins_preset", default="custom", help="Margins preset")
+        pars.add_argument("--vert", type=int, default=0, help="Vert subdivisions")
+        pars.add_argument("--horz", type=int, default=0, help="Horz subdivisions")
+        pars.add_argument("--header_margin", default="10", help="Header margin")
+        pars.add_argument("--footer_margin", default="10", help="Footer margin")
+        pars.add_argument("--left_margin", default="10", help="Left margin")
+        pars.add_argument("--right_margin", default="10", help="Right margin")
+        pars.add_argument("--delete", type=inkex.Boolean, help="Delete existing guides")
 
     def effect(self):
         # getting the width and height attributes of the canvas
@@ -61,8 +80,8 @@ class GuidesCreator(inkex.EffectExtension):
         self.height = float(self.svg.viewbox_height)
 
         # getting edges coordinates
-        self.h_orientation = '0,' + str(round(self.width, 4))
-        self.v_orientation = str(round(self.height, 4)) + ',0'
+        self.h_orientation = "0," + str(round(self.width, 4))
+        self.v_orientation = str(round(self.height, 4)) + ",0"
 
         if self.options.delete:
             for guide in self.svg.namedview.get_guides():
@@ -74,7 +93,7 @@ class GuidesCreator(inkex.EffectExtension):
         """Generate a regular set of guides"""
         preset = self.options.guides_preset
         from_edges = self.options.start_from_edges
-        if preset == 'custom':
+        if preset == "custom":
             h_division = self.options.horizontal_guides
             v_division = self.options.vertical_guides
             if from_edges:
@@ -84,35 +103,35 @@ class GuidesCreator(inkex.EffectExtension):
             self.draw_guides(v_division, from_edges, vert=True)
             self.draw_guides(h_division, from_edges, vert=False)
 
-        elif preset == 'golden':
+        elif preset == "golden":
             gold = (1 + sqrt(5)) / 2
 
             # horizontal golden guides
-            position1 = '0,' + str(self.height / gold)
-            position2 = '0,' + str(self.height - (self.height / gold))
+            position1 = "0," + str(self.height / gold)
+            position2 = "0," + str(self.height - (self.height / gold))
 
             self.draw_guide(position1, self.h_orientation)
             self.draw_guide(position2, self.h_orientation)
 
             # vertical golden guides
-            position1 = str(self.width / gold) + ',0'
-            position2 = str(self.width - (self.width / gold)) + ',0'
+            position1 = str(self.width / gold) + ",0"
+            position2 = str(self.width - (self.width / gold)) + ",0"
 
             self.draw_guide(position1, self.v_orientation)
             self.draw_guide(position2, self.v_orientation)
 
             if from_edges:
                 # horizontal borders
-                self.draw_guide('0,' + str(self.height), self.h_orientation)
-                self.draw_guide(str(self.height) + ',0', self.h_orientation)
+                self.draw_guide("0," + str(self.height), self.h_orientation)
+                self.draw_guide(str(self.height) + ",0", self.h_orientation)
 
                 # vertical borders
-                self.draw_guide('0,' + str(self.width), self.v_orientation)
-                self.draw_guide(str(self.width) + ',0', self.v_orientation)
+                self.draw_guide("0," + str(self.width), self.v_orientation)
+                self.draw_guide(str(self.width) + ",0", self.v_orientation)
 
-        elif ';' in preset:
-            v_division = int(preset.split(';')[0])
-            h_division = int(preset.split(';')[1])
+        elif ";" in preset:
+            v_division = int(preset.split(";")[0])
+            h_division = int(preset.split(";")[1])
             self.draw_guides(v_division, from_edges, vert=True)
             self.draw_guides(h_division, from_edges, vert=False)
         else:
@@ -128,23 +147,23 @@ class GuidesCreator(inkex.EffectExtension):
         angle = 45
 
         if self.options.ul:
-            ul_corner = str(top) + ',' + str(left)
-            from_ul_to_lr = str(cos(angle)) + ',' + str(cos(angle))
+            ul_corner = str(top) + "," + str(left)
+            from_ul_to_lr = str(cos(angle)) + "," + str(cos(angle))
             self.draw_guide(ul_corner, from_ul_to_lr)
 
         if self.options.ur:
-            ur_corner = str(right) + ',' + str(top)
-            from_ur_to_ll = str(-sin(angle)) + ',' + str(sin(angle))
+            ur_corner = str(right) + "," + str(top)
+            from_ur_to_ll = str(-sin(angle)) + "," + str(sin(angle))
             self.draw_guide(ur_corner, from_ur_to_ll)
 
         if self.options.ll:
-            ll_corner = str(bottom) + ',' + str(left)
-            from_ll_to_ur = str(-cos(angle)) + ',' + str(cos(angle))
+            ll_corner = str(bottom) + "," + str(left)
+            from_ll_to_ur = str(-cos(angle)) + "," + str(cos(angle))
             self.draw_guide(ll_corner, from_ll_to_ur)
 
         if self.options.lr:
-            lr_corner = str(bottom) + ',' + str(right)
-            from_lr_to_ul = str(-sin(angle)) + ',' + str(-sin(angle))
+            lr_corner = str(bottom) + "," + str(right)
+            from_lr_to_ul = str(-sin(angle)) + "," + str(-sin(angle))
             self.draw_guide(lr_corner, from_lr_to_ul)
 
     def generate_margins(self):
@@ -158,14 +177,14 @@ class GuidesCreator(inkex.EffectExtension):
 
         if self.options.start_from_edges:
             # horizontal borders
-            self.draw_guide('0,' + str(self.height), self.h_orientation)
-            self.draw_guide(str(self.height) + ',0', self.h_orientation)
+            self.draw_guide("0," + str(self.height), self.h_orientation)
+            self.draw_guide(str(self.height) + ",0", self.h_orientation)
 
             # vertical borders
-            self.draw_guide('0,' + str(self.width), self.v_orientation)
-            self.draw_guide(str(self.width) + ',0', self.v_orientation)
+            self.draw_guide("0," + str(self.width), self.v_orientation)
+            self.draw_guide(str(self.width) + ",0", self.v_orientation)
 
-        if self.options.margins_preset == 'custom':
+        if self.options.margins_preset == "custom":
             y_header = self.height
             y_footer = 0
             x_left = 0
@@ -173,53 +192,53 @@ class GuidesCreator(inkex.EffectExtension):
 
             if header_margin != 0:
                 y_header = (self.height / header_margin) * (header_margin - 1)
-                self.draw_guide('0,' + str(y_header), self.h_orientation)
+                self.draw_guide("0," + str(y_header), self.h_orientation)
 
             if footer_margin != 0:
                 y_footer = self.height / footer_margin
-                self.draw_guide('0,' + str(y_footer), self.h_orientation)
+                self.draw_guide("0," + str(y_footer), self.h_orientation)
 
             if left_margin != 0:
                 x_left = self.width / left_margin
-                self.draw_guide(str(x_left) + ',0', self.v_orientation)
+                self.draw_guide(str(x_left) + ",0", self.v_orientation)
 
             if right_margin != 0:
                 x_right = (self.width / right_margin) * (right_margin - 1)
-                self.draw_guide(str(x_right) + ',0', self.v_orientation)
+                self.draw_guide(str(x_right) + ",0", self.v_orientation)
 
-        elif self.options.margins_preset == 'book_left':
+        elif self.options.margins_preset == "book_left":
             # 1/9th header
             y_header = (self.height / 9) * 8
-            self.draw_guide('0,' + str(y_header), self.h_orientation)
+            self.draw_guide("0," + str(y_header), self.h_orientation)
 
             # 2/9th footer
             y_footer = (self.height / 9) * 2
-            self.draw_guide('0,' + str(y_footer), self.h_orientation)
+            self.draw_guide("0," + str(y_footer), self.h_orientation)
 
             # 2/9th left margin
             x_left = (self.width / 9) * 2
-            self.draw_guide(str(x_left) + ',0', self.v_orientation)
+            self.draw_guide(str(x_left) + ",0", self.v_orientation)
 
             # 1/9th right margin
             x_right = (self.width / 9) * 8
-            self.draw_guide(str(x_right) + ',0', self.v_orientation)
+            self.draw_guide(str(x_right) + ",0", self.v_orientation)
 
-        elif self.options.margins_preset == 'book_right':
+        elif self.options.margins_preset == "book_right":
             # 1/9th header
             y_header = (self.height / 9) * 8
-            self.draw_guide('0,' + str(y_header), self.h_orientation)
+            self.draw_guide("0," + str(y_header), self.h_orientation)
 
             # 2/9th footer
             y_footer = (self.height / 9) * 2
-            self.draw_guide('0,' + str(y_footer), self.h_orientation)
+            self.draw_guide("0," + str(y_footer), self.h_orientation)
 
             # 2/9th left margin
-            x_left = (self.width / 9)
-            self.draw_guide(str(x_left) + ',0', self.v_orientation)
+            x_left = self.width / 9
+            self.draw_guide(str(x_left) + ",0", self.v_orientation)
 
             # 1/9th right margin
             x_right = (self.width / 9) * 7
-            self.draw_guide(str(x_right) + ',0', self.v_orientation)
+            self.draw_guide(str(x_right) + ",0", self.v_orientation)
 
         # setting up properties of the rectangle created between guides
         rectangle_height = y_header - y_footer
@@ -229,15 +248,23 @@ class GuidesCreator(inkex.EffectExtension):
             begin_from = y_footer
             # creating horizontal guides
             self._draw_guides(
-                (rectangle_width, rectangle_height), h_subdiv,
-                edges=0, shift=begin_from, vert=False)
+                (rectangle_width, rectangle_height),
+                h_subdiv,
+                edges=0,
+                shift=begin_from,
+                vert=False,
+            )
 
         if v_subdiv != 0:
             begin_from = x_left
             # creating vertical guides
             self._draw_guides(
-                (rectangle_width, rectangle_height), v_subdiv,
-                edges=0, shift=begin_from, vert=True)
+                (rectangle_width, rectangle_height),
+                v_subdiv,
+                edges=0,
+                shift=begin_from,
+                vert=True,
+            )
 
     def draw_guides(self, division, edges, vert=False):
         """Draw a vertical or horizontal lines"""
@@ -248,7 +275,7 @@ class GuidesCreator(inkex.EffectExtension):
             return
 
         # Vert controls both ort template and vector calculation
-        ort = '{},0' if vert else '0,{}'
+        ort = "{},0" if vert else "0,{}"
         var = int(bool(edges))
         for x in range(0, division - 1 + 2 * var):
             div = vector[not bool(vert)] / division
@@ -261,8 +288,9 @@ class GuidesCreator(inkex.EffectExtension):
         if isinstance(position, tuple):
             x, y = position
         elif isinstance(position, str):
-            x, y = position.split(',')
+            x, y = position.split(",")
         self.svg.namedview.add(Guide().move_to(float(x), float(y), orientation))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     GuidesCreator().run()

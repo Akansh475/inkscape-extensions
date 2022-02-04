@@ -31,63 +31,75 @@ from ..transforms import Transform, BoundingBox
 from ._base import BaseElement, ShapeElement
 from ._polygons import PathElementBase
 
+
 class FlowRegion(ShapeElement):
     """SVG Flow Region (SVG 2.0)"""
-    tag_name = 'flowRegion'
+
+    tag_name = "flowRegion"
 
     def get_path(self):
         # This ignores flowRegionExcludes
         return sum([child.path for child in self], Path())
 
+
 class FlowRoot(ShapeElement):
     """SVG Flow Root (SVG 2.0)"""
-    tag_name = 'flowRoot'
+
+    tag_name = "flowRoot"
 
     @property
     def region(self):
         """Return the first flowRegion in this flowRoot"""
-        return self.findone('svg:flowRegion')
+        return self.findone("svg:flowRegion")
 
     def get_path(self):
         region = self.region
         return region.get_path() if region is not None else Path()
 
+
 class FlowPara(ShapeElement):
     """SVG Flow Paragraph (SVG 2.0)"""
-    tag_name = 'flowPara'
+
+    tag_name = "flowPara"
 
     def get_path(self):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
+
 
 class FlowDiv(ShapeElement):
     """SVG Flow Div (SVG 2.0)"""
-    tag_name = 'flowDiv'
+
+    tag_name = "flowDiv"
 
     def get_path(self):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
+
 
 class FlowSpan(ShapeElement):
     """SVG Flow Span (SVG 2.0)"""
-    tag_name = 'flowSpan'
+
+    tag_name = "flowSpan"
 
     def get_path(self):
         # XXX: These empty paths mean the bbox for text elements will be nothing.
         return Path()
 
+
 class TextElement(ShapeElement):
     """A Text element"""
-    tag_name = 'text'
-    x = property(lambda self: self.to_dimensionless(self.get('x', 0)))
-    y = property(lambda self: self.to_dimensionless(self.get('y', 0)))
+
+    tag_name = "text"
+    x = property(lambda self: self.to_dimensionless(self.get("x", 0)))
+    y = property(lambda self: self.to_dimensionless(self.get("y", 0)))
 
     def get_path(self):
         return Path()
 
     def tspans(self):
         """Returns all children that are tspan elements"""
-        return self.findall('svg:tspan')
+        return self.findall("svg:tspan")
 
     def get_text(self, sep="\n"):
         """Return the text content including tspans"""
@@ -106,18 +118,22 @@ class TextElement(ShapeElement):
             bbox += tspan.bounding_box(effective_transform)
         return bbox
 
+
 class TextPath(ShapeElement):
     """A textPath element"""
-    tag_name = 'textPath'
+
+    tag_name = "textPath"
 
     def get_path(self):
         return Path()
 
+
 class Tspan(ShapeElement):
     """A tspan text element"""
-    tag_name = 'tspan'
-    x = property(lambda self: self.to_dimensionless(self.get('x', 0)))
-    y = property(lambda self: self.to_dimensionless(self.get('y', 0)))
+
+    tag_name = "tspan"
+    x = property(lambda self: self.to_dimensionless(self.get("x", 0)))
+    y = property(lambda self: self.to_dimensionless(self.get("y", 0)))
 
     @classmethod
     def superscript(cls, text):
@@ -134,8 +150,8 @@ class Tspan(ShapeElement):
         """
         effective_transform = Transform(transform) @ self.transform
         x1, y1 = effective_transform.apply_to_point((self.x, self.y))
-        fontsize = self.to_dimensionless(self.style.get('font-size', '12px'))
-        x2 = self.x + 0 # XXX This is impossible to calculate!
+        fontsize = self.to_dimensionless(self.style.get("font-size", "12px"))
+        x2 = self.x + 0  # XXX This is impossible to calculate!
         y2 = self.y + float(fontsize)
         x2, y2 = effective_transform.apply_to_point((x2, y2))
         return BoundingBox((x1, x2), (y1, y2))
@@ -143,16 +159,23 @@ class Tspan(ShapeElement):
 
 class SVGfont(BaseElement):
     """An svg font element"""
-    tag_name = 'font'
+
+    tag_name = "font"
+
 
 class FontFace(BaseElement):
     """An svg font font-face element"""
-    tag_name = 'font-face'
+
+    tag_name = "font-face"
+
 
 class Glyph(PathElementBase):
     """An svg font glyph element"""
-    tag_name = 'glyph'
+
+    tag_name = "glyph"
+
 
 class MissingGlyph(BaseElement):
     """An svg font missing-glyph element"""
-    tag_name = 'missing-glyph'
+
+    tag_name = "missing-glyph"

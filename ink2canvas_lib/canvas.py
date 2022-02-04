@@ -22,6 +22,7 @@ Convas module for ink2canvas extension
 
 from inkex import Color, Style
 
+
 class Canvas(object):
     """Canvas API helper class"""
 
@@ -39,6 +40,7 @@ class Canvas(object):
 
     def output(self):
         from textwrap import dedent
+
         html = """
         <!DOCTYPE html>
         <html>
@@ -69,13 +71,19 @@ class Canvas(object):
 
     def createLinearGradient(self, href, x1, y1, x2, y2):
         data = (href, x1, y1, x2, y2)
-        self.write("var %s = \
-                   ctx.createLinearGradient(%f,%f,%f,%f);" % data)
+        self.write(
+            "var %s = \
+                   ctx.createLinearGradient(%f,%f,%f,%f);"
+            % data
+        )
 
     def createRadialGradient(self, href, cx1, cy1, rx, cx2, cy2, ry):
         data = (href, cx1, cy1, rx, cx2, cy2, ry)
-        self.write("var %s = ctx.createRadialGradient\
-                   (%f,%f,%f,%f,%f,%f);" % data)
+        self.write(
+            "var %s = ctx.createRadialGradient\
+                   (%f,%f,%f,%f,%f,%f);"
+            % data
+        )
 
     def addColorStop(self, href, pos, color):
         self.write("%s.addColorStop(%f, %s);" % (href, pos, color))
@@ -121,7 +129,7 @@ class Canvas(object):
         self.write("ctx.miterLimit = %s;" % value)
 
     def setFont(self, value):
-        self.write("ctx.font = \"%s\";" % value)
+        self.write('ctx.font = "%s";' % value)
 
     def moveTo(self, x, y):
         self.write("ctx.moveTo(%f, %f);" % (x, y))
@@ -160,7 +168,7 @@ class Canvas(object):
         self.write("ctx.arc(%f, %f, %f, %f, %.8f, %d);" % data)
 
     def fillText(self, text, x, y):
-        self.write("ctx.fillText(\"%s\", %f, %f);" % (text, x, y))
+        self.write('ctx.fillText("%s", %f, %f);' % (text, x, y))
 
     def translate(self, cx, cy):
         self.write("ctx.translate(%f, %f);" % (cx, cy))

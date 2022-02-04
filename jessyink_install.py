@@ -22,19 +22,24 @@ from inkex import Script
 
 from inkex.localization import inkex_gettext as _
 
-inkex.NSS[u"jessyink"] = u"https://launchpad.net/jessyink"
+inkex.NSS["jessyink"] = "https://launchpad.net/jessyink"
+
 
 class JessyInkMixin(object):
     """Common jessyInk items"""
+
     def is_installed(self):
         """Check jessyInk is installed correctly"""
         scripts = self.svg.getElement("//svg:script[@jessyink:version='1.5.5']")
         if scripts is None:
-            raise inkex.AbortExtension(_(
-                "The JessyInk script is not installed in this SVG file or has a "
-                "different version than the JessyInk extensions. Please select "
-                "\"install/update...\" from the \"JessyInk\" sub-menu of the \"Extensions\" "
-                "menu to install or update the JessyInk script.\n\n"))
+            raise inkex.AbortExtension(
+                _(
+                    "The JessyInk script is not installed in this SVG file or has a "
+                    "different version than the JessyInk extensions. Please select "
+                    '"install/update..." from the "JessyInk" sub-menu of the "Extensions" '
+                    "menu to install or update the JessyInk script.\n\n"
+                )
+            )
 
     def attr_remove(self, prop, is_removed=True):
         """Remove a property if it exists in the svg"""
@@ -60,13 +65,14 @@ class JessyInkMixin(object):
     @staticmethod
     def list_to_prop_str(lst):
         """List of instructions to script string"""
-        return "; ".join(lst) + ';'
+        return "; ".join(lst) + ";"
 
 
 class Install(JessyInkMixin, inkex.EffectExtension):
     """Install jessyInk extension into an SVG"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab', type=str, dest='what')
+        pars.add_argument("--tab", type=str, dest="what")
 
     def effect(self):
         # Find and delete old script node
@@ -78,21 +84,27 @@ class Install(JessyInkMixin, inkex.EffectExtension):
         with open(self.get_resource("jessyInk.js")) as fhl:
             script_elem.text = fhl.read()
         script_elem.set("id", "JessyInk")
-        script_elem.set("jessyink:version", '1.5.5')
+        script_elem.set("jessyink:version", "1.5.5")
         self.svg.append(script_elem)
 
         # Remove "jessyInkInit()" in the "onload" attribute, if present.
-        prop_list = [prop.strip() for prop in self.svg.get("onload", '').split(';')]
+        prop_list = [prop.strip() for prop in self.svg.get("onload", "").split(";")]
         if "jessyInkInit()" in prop_list:
             prop_list.remove("jessyInkInit()")
         self.svg.set("onload", "; ".join(prop_list) or None)
 
         # Update jessyInk attributes to new formats
-        for attr in ('effectIn', 'effectOut', 'masterSlide',
-                     'transitionIn', 'transitionOut', 'autoText'):
+        for attr in (
+            "effectIn",
+            "effectOut",
+            "masterSlide",
+            "transitionIn",
+            "transitionOut",
+            "autoText",
+        ):
             self.attr_update(attr)
 
 
 # Create effect instance
-if __name__ == '__main__':
+if __name__ == "__main__":
     Install().run()

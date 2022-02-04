@@ -27,8 +27,9 @@ from .BaseEan import EanBarcode
 
 class Ean13(EanBarcode):
     """Provide an Ean13 barcode generator"""
-    name = 'ean13'
-    extras = {2: 'Ean2', 5: 'Ean5'}
+
+    name = "ean13"
+    extras = {2: "Ean2", 5: "Ean5"}
     checks = [13]
     lengths = [12]
 
@@ -36,8 +37,7 @@ class Ean13(EanBarcode):
         """Encode an ean13 barcode"""
         self.text = self.space(num[0:1], 4, num[1:7], 5, num[7:], 7)
         if guide:
-            self.text = self.text[:-4] + '>'
+            self.text = self.text[:-4] + ">"
         return self.enclose(
-                self.encode_interleaved(num[0], num[1:7]),
-                self.encode_right(num[7:])
+            self.encode_interleaved(num[0], num[1:7]), self.encode_right(num[7:])
         )

@@ -24,13 +24,25 @@ import os
 import sys
 import copy
 
-from typing import Dict, List, Tuple, Type, Optional, Callable, Any, Union, IO, TYPE_CHECKING, cast
+from typing import (
+    Dict,
+    List,
+    Tuple,
+    Type,
+    Optional,
+    Callable,
+    Any,
+    Union,
+    IO,
+    TYPE_CHECKING,
+    cast,
+)
 
 from argparse import ArgumentParser, Namespace
 from lxml import etree
 
 from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
-from .elements._base import load_svg, BaseElement # pylint: disable=unused-import
+from .elements._base import load_svg, BaseElement  # pylint: disable=unused-import
 from .elements._utils import NSS
 from .localization import localize
 
@@ -42,24 +54,33 @@ class InkscapeExtension:
     The base class extension, provides argument parsing and basic
     variable handling features.
     """
-    multi_inx = False # Set to true if this class is used by multiple inx files.
-    extra_nss = {} # type: Dict[str, str]
+
+    multi_inx = False  # Set to true if this class is used by multiple inx files.
+    extra_nss = {}  # type: Dict[str, str]
 
     def __init__(self):
         # type: () -> None
         NSS.update(self.extra_nss)
-        self.file_io = None # type: Optional[IO]
+        self.file_io = None  # type: Optional[IO]
         self.options = Namespace()
-        self.document = None # type: Union[None, bytes, str, etree]
+        self.document = None  # type: Union[None, bytes, str, etree]
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
         self.arg_parser.add_argument(
-            "input_file", nargs="?", metavar="INPUT_FILE", type=filename_arg,
-            help="Filename of the input file (default is stdin)", default=None)
+            "input_file",
+            nargs="?",
+            metavar="INPUT_FILE",
+            type=filename_arg,
+            help="Filename of the input file (default is stdin)",
+            default=None,
+        )
 
         self.arg_parser.add_argument(
-            "--output", type=str, default=None,
-            help="Optional output filename for saving the result (default is stdout).")
+            "--output",
+            type=str,
+            default=None,
+            help="Optional output filename for saving the result (default is stdout).",
+        )
 
         self.add_arguments(self.arg_parser)
 
@@ -80,7 +101,7 @@ class InkscapeExtension:
         """Parse the given arguments and set 'self.options'"""
         self.options = self.arg_parser.parse_args(args)
 
-    def arg_method(self, prefix='method'):
+    def arg_method(self, prefix="method"):
         # type: (str) -> Callable[[str], Callable[[Any], Any]]
         """Used by add_argument to match a tab selection with an object method
 
@@ -92,16 +113,18 @@ class InkscapeExtension:
         .. def method_foo(self, arguments):
         ..     # do something
         """
+
         def _inner(value):
-            name = '{}_{}'.format(prefix, value.strip('"').lower()).replace('-', '_')
+            name = "{}_{}".format(prefix, value.strip('"').lower()).replace("-", "_")
             try:
                 return getattr(self, name)
             except AttributeError:
-                if name.startswith('_'):
+                if name.startswith("_"):
                     return do_nothing
                 raise AbortExtension(f"Can not find method {name}")
+
         return _inner
-    
+
     @staticmethod
     def arg_class(options: List[Type]) -> Callable[[str], Any]:
         """Used by add_argument to match an option with a class
@@ -110,12 +133,14 @@ class InkscapeExtension:
         Usage:
         pars.add_argument("--class", type=self.arg_class([ClassA, ClassB]), default="ClassA")
         """
+
         def _inner(value: str):
             name = value.strip('"')
             for i in options:
                 if name == i.__name__:
                     return i
             raise AbortExtension(f"Can not find class {name}")
+
         return _inner
 
     def debug(self, msg):
@@ -155,7 +180,7 @@ class InkscapeExtension:
         # type: () -> None
         """Load the input stream or filename, save everything to self"""
         if isinstance(self.options.input_file, str):
-            self.file_io = open(self.options.input_file, 'rb')
+            self.file_io = open(self.options.input_file, "rb")
             document = self.load(self.file_io)
         else:
             document = self.load(self.options.input_file)
@@ -166,27 +191,27 @@ class InkscapeExtension:
         """Save to the output stream, use everything from self"""
         if self.has_changed(ret):
             if isinstance(self.options.output, str):
-                with open(self.options.output, 'wb') as stream:
+                with open(self.options.output, "wb") as stream:
                     self.save(stream)
             else:
                 self.save(self.options.output)
 
     def load(self, stream):
-        # type: (IO) -> str 
+        # type: (IO) -> str
         """Takes the input stream and creates a document for parsing"""
         raise NotImplementedError(f"No input handle for {self.name}")
 
     def save(self, stream):
-        # type: (IO) -> None 
+        # type: (IO) -> None
         """Save the given document to the output file"""
         raise NotImplementedError(f"No output handle for {self.name}")
 
     def effect(self):
-        # type: () -> Any 
+        # type: () -> Any
         """Apply some effects on the document or local context"""
         raise NotImplementedError(f"No effect handle for {self.name}")
 
-    def has_changed(self, ret): # pylint: disable=no-self-use
+    def has_changed(self, ret):  # pylint: disable=no-self-use
         # type: (Any) -> bool
         """Return true if the output should be saved"""
         return ret is not False
@@ -209,7 +234,7 @@ class InkscapeExtension:
             return os.path.dirname(path)
         elif default:
             return default
-        return path # Return None or '' for context
+        return path  # Return None or '' for context
 
     @classmethod
     def ext_path(cls):
@@ -240,10 +265,10 @@ class InkscapeExtension:
          * Inkscape may have not written the latest changes, leaving you reading old data.
          * Inkscape will not respect anything you write to the file, causing data loss.
         """
-        return os.environ.get('DOCUMENT_PATH', None)
+        return os.environ.get("DOCUMENT_PATH", None)
 
     @classmethod
-    def absolute_href(cls, filename, default='~/', cwd=None):
+    def absolute_href(cls, filename, default="~/", cwd=None):
         # type: (str, str, Optional[str]) -> str
         """
         Process the filename such that it's turned into an absolute filename
@@ -262,9 +287,13 @@ class InkscapeExtension:
             if cwd is None:
                 cwd = cls.svg_path(default)
                 if cwd is None:
-                    raise AbortExtension(f"Can not use relative path, Inkscape isn't telling us the current working directory.")
-                elif cwd == '':
-                    raise AbortExtension(f"The SVG must be saved before you can use relative paths.")
+                    raise AbortExtension(
+                        f"Can not use relative path, Inkscape isn't telling us the current working directory."
+                    )
+                elif cwd == "":
+                    raise AbortExtension(
+                        f"The SVG must be saved before you can use relative paths."
+                    )
             filename = os.path.join(cwd, filename)
         return os.path.realpath(os.path.expanduser(filename))
 
@@ -285,8 +314,9 @@ class TempDirMixin(_Base):
     """
     Provide a temporary directory for extensions to stash files.
     """
-    dir_suffix = ''
-    dir_prefix = 'inktmp'
+
+    dir_suffix = ""
+    dir_prefix = "inktmp"
 
     def __init__(self, *args, **kwargs):
         self.tempdir = None
@@ -296,8 +326,11 @@ class TempDirMixin(_Base):
         # type: () -> None
         """Create the temporary directory"""
         from tempfile import TemporaryDirectory
+
         # Need to hold a reference to the Directory object or else it might get GC'd
-        self._tempdir = TemporaryDirectory(prefix=self.dir_prefix, suffix=self.dir_suffix)
+        self._tempdir = TemporaryDirectory(
+            prefix=self.dir_prefix, suffix=self.dir_suffix
+        )
         self.tempdir = self._tempdir.name
         super().load_raw()
 
@@ -313,19 +346,30 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
     """
     Expects the file input to be an svg document and will parse it.
     """
+
     # Select all objects if none are selected
-    select_all = () # type: Tuple[Type[BaseElement], ...]
+    select_all = ()  # type: Tuple[Type[BaseElement], ...]
 
     def __init__(self):
         super().__init__()
 
         self.arg_parser.add_argument(
-            "--id", action="append", type=str, dest="ids", default=[],
-            help="id attribute of object to manipulate")
+            "--id",
+            action="append",
+            type=str,
+            dest="ids",
+            default=[],
+            help="id attribute of object to manipulate",
+        )
 
         self.arg_parser.add_argument(
-            "--selected-nodes", action="append", type=str, dest="selected_nodes", default=[],
-            help="id:subpath:position of selected nodes, if any")
+            "--selected-nodes",
+            action="append",
+            type=str,
+            dest="selected_nodes",
+            default=[],
+            help="id:subpath:position of selected nodes, if any",
+        )
 
     def load(self, stream):
         # type: (IO) -> etree
@@ -345,6 +389,7 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
 
     A template can be specified to kick off the svg document building process.
     """
+
     template = """<svg viewBox="0 0 {width} {height}" width="{width}{unit}" height="{height}{unit}"
         xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -359,7 +404,7 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
         MUST include all the replacement values in the template, the
         default template has 'width' and 'height' of the document.
         """
-        kwargs.setdefault('unit', '')
+        kwargs.setdefault("unit", "")
         return load_svg(str(cls.template.format(**kwargs)))
 
     def save(self, stream):
@@ -367,25 +412,28 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
         """Save the svg document to the given stream"""
         if isinstance(self.document, (bytes, str)):
             document = self.document
-        elif 'Element' in type(self.document).__name__:
+        elif "Element" in type(self.document).__name__:
             # isinstance can't be used here because etree is broken
             doc = cast(etree, self.document)
             document = doc.getroot().tostring()
         else:
-            raise ValueError(f"Unknown type of document: {type(self.document).__name__} can not save.")
+            raise ValueError(
+                f"Unknown type of document: {type(self.document).__name__} can not save."
+            )
 
         try:
             stream.write(document)
         except TypeError:
             # we hope that this happens only when document needs to be encoded
-            stream.write(document.encode('utf-8')) # type: ignore
+            stream.write(document.encode("utf-8"))  # type: ignore
+
 
 class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
     """
     Combine the input and output svg document handling (usually for effects).
     """
 
-    def has_changed(self, ret): # pylint: disable=unused-argument
+    def has_changed(self, ret):  # pylint: disable=unused-argument
         # type: (Any) -> bool
         """Return true if the svg document has changed"""
         original = etree.tostring(self.original_document)

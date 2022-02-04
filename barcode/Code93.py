@@ -22,12 +22,12 @@ Python barcode renderer for Code93 barcodes. Designed for use with Inkscape.
 
 from .Base import Barcode
 
-PALLET = list('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%')
-PALLET.append('($)')
-PALLET.append('(/)')
-PALLET.append('(+)')
-PALLET.append('(%)')
-PALLET.append('MARKER')
+PALLET = list("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%")
+PALLET.append("($)")
+PALLET.append("(/)")
+PALLET.append("(+)")
+PALLET.append("(%)")
+PALLET.append("MARKER")
 
 MAP = dict((PALLET[i], i) for i in range(len(PALLET)))
 
@@ -43,30 +43,97 @@ def get_map(array):
 
 
 # MapA is eclectic, but B, C, D are all ASCII ranges
-MAP_A = get_map([27, 28, 29, 30, 31, 59, 60, 61, 62, 63, 91, 92, 93, 94, 95,
-                 123, 124, 125, 126, 127, 0, 64, 96, 127, 127, 127])  # %
+MAP_A = get_map(
+    [
+        27,
+        28,
+        29,
+        30,
+        31,
+        59,
+        60,
+        61,
+        62,
+        63,
+        91,
+        92,
+        93,
+        94,
+        95,
+        123,
+        124,
+        125,
+        126,
+        127,
+        0,
+        64,
+        96,
+        127,
+        127,
+        127,
+    ]
+)  # %
 MAP_B = get_map(range(1, 26))  # $
 MAP_C = get_map(range(33, 58))  # /
 MAP_D = get_map(range(97, 122))  # +
 
 ENCODE = [
-    '100010100', '101001000', '101000100', '101000010', '100101000',
-    '100100100', '100100010', '101010000', '100010010', '100001010',
-    '110101000', '110100100', '110100010', '110010100', '110010010',
-    '110001010', '101101000', '101100100', '101100010', '100110100',
-    '100011010', '101011000', '101001100', '101000110', '100101100',
-    '100010110', '110110100', '110110010', '110101100', '110100110',
-    '110010110', '110011010', '101101100', '101100110', '100110110',
-    '100111010', '100101110', '111010100', '111010010', '111001010',
-    '101101110', '101110110', '110101110', '100100110', '111011010',
-    '111010110', '100110010', '101011110', ''
+    "100010100",
+    "101001000",
+    "101000100",
+    "101000010",
+    "100101000",
+    "100100100",
+    "100100010",
+    "101010000",
+    "100010010",
+    "100001010",
+    "110101000",
+    "110100100",
+    "110100010",
+    "110010100",
+    "110010010",
+    "110001010",
+    "101101000",
+    "101100100",
+    "101100010",
+    "100110100",
+    "100011010",
+    "101011000",
+    "101001100",
+    "101000110",
+    "100101100",
+    "100010110",
+    "110110100",
+    "110110010",
+    "110101100",
+    "110100110",
+    "110010110",
+    "110011010",
+    "101101100",
+    "101100110",
+    "100110110",
+    "100111010",
+    "100101110",
+    "111010100",
+    "111010010",
+    "111001010",
+    "101101110",
+    "101110110",
+    "110101110",
+    "100100110",
+    "111011010",
+    "111010110",
+    "100110010",
+    "101011110",
+    "",
 ]
 
 
 class Code93(Barcode):
     def encode(self, text):
         # start marker
-        bits = ENCODE[MAP.get('MARKER', -1)]
+        bits = ENCODE[MAP.get("MARKER", -1)]
 
         # Extend to ASCII charset ( return Array )
         text = self.encode_ascii(text)
@@ -80,7 +147,7 @@ class Code93(Barcode):
             bits = bits + ENCODE[MAP.get(char, -1)]
 
         # end marker and termination bar
-        return bits + ENCODE[MAP.get('MARKER', -1)] + '1'
+        return bits + ENCODE[MAP.get("MARKER", -1)] + "1"
 
     def checksum(self, text, mod):
         """Generate a code 93 checksum"""
@@ -102,15 +169,15 @@ class Code93(Barcode):
             if char in MAP:
                 result.append(char)
             elif char in MAP_A:
-                result.append('(%)')
+                result.append("(%)")
                 result.append(MAP_A[char])
             elif char in MAP_B:
-                result.append('($)')
+                result.append("($)")
                 result.append(MAP_B[char])
             elif char in MAP_C:
-                result.append('(/)')
+                result.append("(/)")
                 result.append(MAP_C[char])
             elif char in MAP_D:
-                result.append('(+)')
+                result.append("(+)")
                 result.append(MAP_D[char])
         return result

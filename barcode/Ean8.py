@@ -25,14 +25,12 @@ from .BaseEan import EanBarcode
 
 class Ean8(EanBarcode):
     """Provide an EAN8 barcode generator"""
-    name = 'ean8'
+
+    name = "ean8"
     checks = [8]
     lengths = [7]
 
     def _encode(self, num, guide=False):
         """Encode an ean8 barcode"""
         self.text = self.space(num[:4], 3, num[4:])
-        return self.enclose(
-                self.encode_left(num[:4]),
-                self.encode_right(num[4:])
-        )
+        return self.enclose(self.encode_left(num[:4]), self.encode_right(num[4:]))

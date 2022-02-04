@@ -24,8 +24,10 @@ from __future__ import unicode_literals
 
 import inkex
 
+
 class Element(object):
     """Base Element"""
+
     def __init__(self, node):
         self.node = node
 
@@ -88,8 +90,12 @@ class AbstractShape(Element):
             if hasattr(self.ctx, method) and style[key] != "none":
                 getattr(self.ctx, method)(style[key])
         # saves style to compare in next iteration
-        if hasattr(self.ctx, "style_cache") and self.ctx.style_cache("opacity") != style("opacity"):
-            self.ctx.setOpacity(style("opacity")) # opacity is kept in memory, need to reset
+        if hasattr(self.ctx, "style_cache") and self.ctx.style_cache(
+            "opacity"
+        ) != style("opacity"):
+            self.ctx.setOpacity(
+                style("opacity")
+            )  # opacity is kept in memory, need to reset
         self.ctx.style_cache = style
 
     def has_transform(self):
@@ -161,6 +167,7 @@ class Circle(AbstractShape):
 
     def get_data(self):
         import math
+
         cx = self.attr("cx")
         cy = self.attr("cy")
         r = self.attr("r")
@@ -177,6 +184,7 @@ class Ellipse(AbstractShape):
 
     def draw(self):
         import math
+
         cx, cy, rx, ry = self.get_data()
         style = self.get_style()
         self.ctx.beginPath()
@@ -187,10 +195,18 @@ class Ellipse(AbstractShape):
 
         KAPPA = 4 * ((math.sqrt(2) - 1) / 3)
         self.ctx.moveTo(cx, cy - ry)
-        self.ctx.bezierCurveTo(cx + (KAPPA * rx), cy - ry, cx + rx, cy - (KAPPA * ry), cx + rx, cy)
-        self.ctx.bezierCurveTo(cx + rx, cy + (KAPPA * ry), cx + (KAPPA * rx), cy + ry, cx, cy + ry)
-        self.ctx.bezierCurveTo(cx - (KAPPA * rx), cy + ry, cx - rx, cy + (KAPPA * ry), cx - rx, cy)
-        self.ctx.bezierCurveTo(cx - rx, cy - (KAPPA * ry), cx - (KAPPA * rx), cy - ry, cx, cy - ry)
+        self.ctx.bezierCurveTo(
+            cx + (KAPPA * rx), cy - ry, cx + rx, cy - (KAPPA * ry), cx + rx, cy
+        )
+        self.ctx.bezierCurveTo(
+            cx + rx, cy + (KAPPA * ry), cx + (KAPPA * rx), cy + ry, cx, cy + ry
+        )
+        self.ctx.bezierCurveTo(
+            cx - (KAPPA * rx), cy + ry, cx - rx, cy + (KAPPA * ry), cx - rx, cy
+        )
+        self.ctx.bezierCurveTo(
+            cx - rx, cy - (KAPPA * ry), cx - (KAPPA * rx), cy - ry, cx, cy - ry
+        )
         self.ctx.finishPath()
 
 
@@ -222,10 +238,12 @@ class Path(AbstractShape):
         self.set_style(style)
 
         # Draws path commands
-        path_command = {"M": self.pathMoveTo,
-                        "L": self.pathLineTo,
-                        "C": self.pathCurveTo,
-                        "Z": self.pathClose}
+        path_command = {
+            "M": self.pathMoveTo,
+            "L": self.pathLineTo,
+            "C": self.pathCurveTo,
+            "Z": self.pathClose,
+        }
         # Make sure we only have Lines and curves (no arcs etc)
         for comm, data in self.node.path.to_superpath().to_path().to_arrays():
             if comm in path_command:

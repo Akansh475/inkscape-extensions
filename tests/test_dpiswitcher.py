@@ -16,14 +16,18 @@ from dpiswitcher import DPISwitcher
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
+
 class TestDPISwitcherBasic(ComparisonMixin, TestCase):
     """Default Test with shapes.svg"""
+
     effect_class = DPISwitcher
     compare_filters = [CompareNumericFuzzy()]
 
+
 class TestDPIto90to96(ComparisonMixin, TestCase):
     """Test file with transformed objects in root"""
-    compare_file = 'svg/dpiswitcher_96dpi.svg'
-    comparisons = [('--switcher=0',), ('--switcher=1',)]
+
+    compare_file = "svg/dpiswitcher_96dpi.svg"
+    comparisons = [("--switcher=0",), ("--switcher=1",)]
     compare_filters = [CompareNumericFuzzy()]
     effect_class = DPISwitcher

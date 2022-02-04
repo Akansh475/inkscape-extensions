@@ -9,6 +9,7 @@ from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.word import sentencecase, word_generator
 from text_titlecase import TitleCase
 
+
 class TitleCaseTest(ComparisonMixin, TestCase):
     effect_class = TitleCase
     comparisons = [()]
@@ -51,17 +52,19 @@ class TitleCaseTest(ComparisonMixin, TestCase):
         self.assertEqual(self.effect.process_chardata(word_new), titlecase)
 
     def test_check_strings(self):
-        titlecase_strings = [("i love inkscape", "I Love Inkscape"),
-                             ("i LOVE inkscape", "I Love Inkscape"),
-                             ("I love Inkscape", "I Love Inkscape"),
-                             ("I LOVE INKSCAPE", "I Love Inkscape"),
-                             ("ThIs Is VeRy AwEsOmE", "This Is Very Awesome"),
-                             ("!$this is Very awesome.", "!$This Is Very Awesome."),
-                             ("this *is @very ^awesome.", "This *Is @Very ^Awesome."),
-                             ("there is a      space.", "There Is A      Space."),
-                             ("9these 5are 7numbers", "9These 5Are 7Numbers"),
-                             ("thisworddidnotend", "Thisworddidnotend"),
-                             ("This Should Not Change", "This Should Not Change")]
+        titlecase_strings = [
+            ("i love inkscape", "I Love Inkscape"),
+            ("i LOVE inkscape", "I Love Inkscape"),
+            ("I love Inkscape", "I Love Inkscape"),
+            ("I LOVE INKSCAPE", "I Love Inkscape"),
+            ("ThIs Is VeRy AwEsOmE", "This Is Very Awesome"),
+            ("!$this is Very awesome.", "!$This Is Very Awesome."),
+            ("this *is @very ^awesome.", "This *Is @Very ^Awesome."),
+            ("there is a      space.", "There Is A      Space."),
+            ("9these 5are 7numbers", "9These 5Are 7Numbers"),
+            ("thisworddidnotend", "Thisworddidnotend"),
+            ("This Should Not Change", "This Should Not Change"),
+        ]
 
         for item in titlecase_strings:
             self.assertEqual(self.effect.process_chardata(item[0]), item[1])

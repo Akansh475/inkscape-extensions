@@ -33,8 +33,10 @@ import calendar
 import time
 import inkex
 
+
 class TarLayers(inkex.OutputExtension):
     """Entry point to our layers export"""
+
     def make_template(self):
         """Returns the current document as a new empty document with the same defs"""
         newdoc = copy.deepcopy(self.document)
@@ -50,23 +52,24 @@ class TarLayers(inkex.OutputExtension):
     def io_document(self, name, doc):
         string = io.BytesIO()
         doc.write(string)
-        info = tarfile.TarInfo(name=name+'.svg')
+        info = tarfile.TarInfo(name=name + ".svg")
         info.mtime = calendar.timegm(time.gmtime())
-        info.size  = string.tell()
+        info.size = string.tell()
         string.seek(0)
         return dict(tarinfo=info, fileobj=string)
 
     def save(self, stream):
         """Save the tar file output"""
-        tar = tarfile.open(fileobj=stream, mode='w|')
+        tar = tarfile.open(fileobj=stream, mode="w|")
 
         # Switch stdout to binary on Windows.
         if sys.platform == "win32":
             import msvcrt
+
             try:
                 msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
             except io.UnsupportedOperation:
-                pass # The .fileno() function is not available during pytest runs
+                pass  # The .fileno() function is not available during pytest runs
 
         template = self.make_template()
 
@@ -82,5 +85,5 @@ class TarLayers(inkex.OutputExtension):
             tar.addfile(**self.io_document(name, template))
 
 
-if __name__ == '__main__':   #pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     TarLayers().run()

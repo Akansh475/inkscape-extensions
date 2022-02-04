@@ -23,7 +23,7 @@
 Interface for all group based elements such as Groups, Use, Markers etc.
 """
 
-from lxml import etree # pylint: disable=unused-import
+from lxml import etree  # pylint: disable=unused-import
 
 from ..paths import Path
 from ..transforms import Transform
@@ -36,8 +36,10 @@ try:
 except ImportError:
     pass
 
+
 class GroupBase(ShapeElement):
     """Base Group element"""
+
     def get_path(self):
         ret = Path()
         for child in self:
@@ -58,13 +60,13 @@ class GroupBase(ShapeElement):
 
 class Group(GroupBase):
     """Any group element (layer or regular group)"""
-    tag_name = 'g'
+
+    tag_name = "g"
 
     @classmethod
     def new(cls, label, *children, **attrs):
-        attrs['inkscape:label'] = label
+        attrs["inkscape:label"] = label
         return super().new(*children, **attrs)
-
 
     def effective_style(self):
         """A blend of each child's style mixed together (last child wins)"""
@@ -76,37 +78,40 @@ class Group(GroupBase):
     @property
     def groupmode(self):
         """Return the type of group this is"""
-        return self.get('inkscape:groupmode', 'group')
+        return self.get("inkscape:groupmode", "group")
 
 
 class Layer(Group):
     """Inkscape extension of svg:g"""
 
     def _init(self):
-        self.set('inkscape:groupmode', 'layer')
+        self.set("inkscape:groupmode", "layer")
 
     @classmethod
     def _is_class_element(cls, el):
         # type: (etree.Element) -> bool
-        return el.attrib.get(addNS('inkscape:groupmode'), None) == "layer"
+        return el.attrib.get(addNS("inkscape:groupmode"), None) == "layer"
 
 
 class Anchor(GroupBase):
     """An anchor or link tag"""
-    tag_name = 'a'
+
+    tag_name = "a"
 
     @classmethod
     def new(cls, href, *children, **attrs):
-        attrs['xlink:href'] = href
+        attrs["xlink:href"] = href
         return super().new(*children, **attrs)
 
 
 class ClipPath(GroupBase):
     """A path used to clip objects"""
-    tag_name = 'clipPath'
+
+    tag_name = "clipPath"
 
 
 class Marker(GroupBase):
     """The <marker> element defines the graphic that is to be used for drawing arrowheads
-     or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
-    tag_name = 'marker'
+    or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
+
+    tag_name = "marker"

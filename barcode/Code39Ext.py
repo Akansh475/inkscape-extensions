@@ -22,7 +22,7 @@ Python barcode renderer for Code39 Extended barcodes. Designed for Inkscape.
 
 from .Code39 import Code39
 
-encode = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+encode = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 map = {}
 
@@ -44,7 +44,36 @@ def getMap(array):
 
 
 # MapA is eclectic, but B, C, D are all ASCII ranges
-mapA = getMap([27, 28, 29, 30, 31, 59, 60, 61, 62, 63, 91, 92, 93, 94, 95, 123, 124, 125, 126, 127, 0, 64, 96, 127, 127, 127])  # %
+mapA = getMap(
+    [
+        27,
+        28,
+        29,
+        30,
+        31,
+        59,
+        60,
+        61,
+        62,
+        63,
+        91,
+        92,
+        93,
+        94,
+        95,
+        123,
+        124,
+        125,
+        126,
+        127,
+        0,
+        64,
+        96,
+        127,
+        127,
+        127,
+    ]
+)  # %
 mapB = getMap(range(1, 26))  # $
 mapC = getMap(range(33, 58))  # /
 mapD = getMap(range(97, 122))  # +
@@ -53,16 +82,16 @@ mapD = getMap(range(97, 122))  # +
 class Code39Ext(Code39):
     def encode(self, text):
         # We are only going to extend the Code39 barcodes
-        result = ''
+        result = ""
         for char in text:
             if char in mapA:
-                char = '%' + mapA[char]
+                char = "%" + mapA[char]
             elif char in mapB:
-                char = '$' + mapB[char]
+                char = "$" + mapB[char]
             elif char in mapC:
-                char = '/' + mapC[char]
+                char = "/" + mapC[char]
             elif char in mapD:
-                char = '+' + mapD[char]
+                char = "+" + mapD[char]
             result = result + char
 
         return Code39.encode(self, result)

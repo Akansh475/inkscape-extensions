@@ -3,14 +3,16 @@
 
 import inkex
 
+
 class SentenceCase(inkex.TextExtension):
     """Convert text to sentence case"""
+
     sentence_start = True
     was_punctuation = False
 
     def map_char(self, char):
         """Turn the char into a sentence using class state"""
-        if char in '.!?':
+        if char in ".!?":
             self.was_punctuation = True
         elif ((char.isspace() or self.newline) and self.was_punctuation) or self.newpar:
             self.sentence_start = True
@@ -31,5 +33,6 @@ class SentenceCase(inkex.TextExtension):
             return char.lower()
         return char
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     SentenceCase().run()

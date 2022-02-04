@@ -8,13 +8,19 @@ Revision history:
 from gimp_xcf import GimpXcf
 from inkex.tester import ComparisonMixin, TestCase
 
+
 class GimpXcfBasicTest(ComparisonMixin, TestCase):
     """Test the Gimp XCF file saving functionality"""
+
     effect_class = GimpXcf
     comparisons = [()]
 
+
 class GimpXcfGuidesTest(ComparisonMixin, TestCase):
     """Test that Gimp XCF output can include guides and grids"""
+
     effect_class = GimpXcf
-    compare_file = 'svg/guides.svg'
-    comparisons = [('-d=true', '-r=true'),]
+    compare_file = "svg/guides.svg"
+    comparisons = [
+        ("-d=true", "-r=true"),
+    ]

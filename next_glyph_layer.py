@@ -20,15 +20,17 @@
 
 import inkex
 
+
 class NextLayer(inkex.EffectExtension):
     """Show the next glyph layer"""
+
     def effect(self):
         count = 0
         glyphs = []
-        for group in self.svg.findall('svg:g'):
+        for group in self.svg.findall("svg:g"):
             if "GlyphLayer-" in group.label:
                 glyphs.append(group)
-                if group.style.get('display', '') == "inline":
+                if group.style.get("display", "") == "inline":
                     count += 1
                     current = len(glyphs) - 1
 
@@ -41,7 +43,8 @@ class NextLayer(inkex.EffectExtension):
     def process_glyphs(glyphs, current):
         """Process the glyphs"""
         glyphs[current].set("style", "display:none")
-        glyphs[(current+1)%len(glyphs)].set("style", "display:inline")
+        glyphs[(current + 1) % len(glyphs)].set("style", "display:inline")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     NextLayer().run()

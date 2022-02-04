@@ -33,38 +33,49 @@ from inkex import TextElement, FlowRoot
 from inkex.utils import KeyDict
 
 # Old settings, supported because users click 'ok' without looking.
-XAN = KeyDict({'l': 'left', 'r': 'right', 'm': 'center_x'})
-YAN = KeyDict({'t': 'top', 'b': 'bottom', 'm': 'center_y'})
+XAN = KeyDict({"l": "left", "r": "right", "m": "center_x"})
+YAN = KeyDict({"t": "top", "b": "bottom", "m": "center_y"})
+
 
 class Extract(inkex.EffectExtension):
     """Extract text and print out"""
+
     select_all = (TextElement, FlowRoot)
 
     def add_arguments(self, pars):
-        pars.add_argument("-d", "--direction", default="lr", help="direction to extract text")
-        pars.add_argument("-x", "--xanchor", default="left", help="horiz point to compare")
-        pars.add_argument("-y", "--yanchor", default="top", help="vertical point to compare")
+        pars.add_argument(
+            "-d", "--direction", default="lr", help="direction to extract text"
+        )
+        pars.add_argument(
+            "-x", "--xanchor", default="left", help="horiz point to compare"
+        )
+        pars.add_argument(
+            "-y", "--yanchor", default="top", help="vertical point to compare"
+        )
 
     def effect(self):
         # move them to the top of the object stack in this order.
-        for node in sorted(self.svg.selection.get(TextElement, FlowRoot), key=self._sort):
+        for node in sorted(
+            self.svg.selection.get(TextElement, FlowRoot), key=self._sort
+        ):
             self.recurse(node)
 
     def _sort(self, node):
         return node.bounding_box().get_anchor(
-            self.options.xanchor, self.options.yanchor, self.options.direction)
+            self.options.xanchor, self.options.yanchor, self.options.direction
+        )
 
     def recurse(self, node):
         """Go through each node and recusively self call for all children"""
         if node.text is not None or node.tail is not None:
             for child in node:
-                if child.get('sodipodi:role'):
+                if child.get("sodipodi:role"):
                     child.tail = "\n"
-            inkex.errormsg(tostring(node, encoding='unicode', method='text').strip())
+            inkex.errormsg(tostring(node, encoding="unicode", method="text").strip())
         else:
             for child in node:
                 self.recurse(child)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Extract().run()

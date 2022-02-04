@@ -22,18 +22,19 @@ Python barcode renderer for EAN2 barcodes. Designed for use with Inkscape.
 
 from .BaseEan import EanBarcode
 
-FAMS = ['00', '01', '10', '11']
-START = '01011'
+FAMS = ["00", "01", "10", "11"]
+START = "01011"
 
 
 class Ean2(EanBarcode):
     """Provide an Ean5 barcode generator"""
+
     length = 2
-    name = 'ean5'
+    name = "ean5"
 
     def _encode(self, num, guide=False):
         if len(num) != 2:
             num = ([0, 0] + num)[-2:]
-        self.text = ' '.join(self.space(num))
+        self.text = " ".join(self.space(num))
         family = ((num[0] * 10) + num[1]) % 4
-        return START + '01'.join(self.encode_interleaved(family, num, FAMS))
+        return START + "01".join(self.encode_interleaved(family, num, FAMS))

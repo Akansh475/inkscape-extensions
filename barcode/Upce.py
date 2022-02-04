@@ -24,21 +24,32 @@ from .BaseEan import EanBarcode
 
 # This is almost exactly the same as the standard FAMILIES
 # But flipped around and with the first 111000 instead of 000000.
-FAMS = ['111000', '110100', '110010', '110001', '101100',
-        '100110', '100011', '101010', '101001', '100101']
+FAMS = [
+    "111000",
+    "110100",
+    "110010",
+    "110001",
+    "101100",
+    "100110",
+    "100011",
+    "101010",
+    "101001",
+    "100101",
+]
 
 
 class Upce(EanBarcode):
     """Generate EAN6/UPC-E barcode generator"""
-    name = 'upce'
+
+    name = "upce"
     font_size = 10
     lengths = [6, 11]
     checks = [7, 12]
-    center_bar = '020'
+    center_bar = "020"
 
     def _encode(self, num, guide=False):
         """Generate a UPC-E Barcode"""
-        self.text = self.space(['0'], 2, num[:6], 2, num[-1])
+        self.text = self.space(["0"], 2, num[:6], 2, num[-1])
         code = self.encode_interleaved(num[-1], num[:6], FAMS)
         return self.enclose(code)
 
@@ -52,7 +63,7 @@ class Upce(EanBarcode):
     def convert_a2e(self, number):
         """Converting UPC-A to UPC-E, may cause errors."""
         # All UPC-E Numbers use number system 0
-        if number[0] != '0' or len(number) != 11:
+        if number[0] != "0" or len(number) != 11:
             # If not then the code is invalid
             raise ValueError("Invalid UPC Number")
 
@@ -62,19 +73,19 @@ class Upce(EanBarcode):
         product = number[6:11]
 
         # There are 4 cases to convert:
-        if maker[2:] == '000' or maker[2:] == '100' or maker[2:] == '200':
+        if maker[2:] == "000" or maker[2:] == "100" or maker[2:] == "200":
             # Maximum number product code digits can be encoded
-            if product[:2] == '00':
+            if product[:2] == "00":
                 return maker[:2] + product[2:] + maker[2]
-        elif maker[3:5] == '00':
+        elif maker[3:5] == "00":
             # Now only 2 product code digits can be used
-            if product[:3] == '000':
-                return maker[:3] + product[3:] + '3'
-        elif maker[4] == '0':
+            if product[:3] == "000":
+                return maker[:3] + product[3:] + "3"
+        elif maker[4] == "0":
             # With even more maker code we have less room for product code
-            if product[:4] == '0000':
-                return maker[0:4] + product[4] + '4'
-        elif product[:4] == '0000' and int(product[4]) > 4:
+            if product[:4] == "0000":
+                return maker[0:4] + product[4] + "4"
+        elif product[:4] == "0000" and int(product[4]) > 4:
             # The last recorse is to try and squeeze it in the last 5 numbers
             # so long as the product is 00005-00009 so as not to conflict with
             # the 0-4 used above.
@@ -90,11 +101,11 @@ class Upce(EanBarcode):
         if len(number) != 6:
             return None
 
-        if number[5] in ['0', '1', '2']:
-            return '0' + number[:2] + number[5] + '0000' + number[2:5]
-        elif number[5] == '3':
-            return '0' + number[:3] + '00000' + number[3:5]
-        elif number[5] == '4':
-            return '0' + number[:4] + '00000' + number[4]
+        if number[5] in ["0", "1", "2"]:
+            return "0" + number[:2] + number[5] + "0000" + number[2:5]
+        elif number[5] == "3":
+            return "0" + number[:3] + "00000" + number[3:5]
+        elif number[5] == "4":
+            return "0" + number[:4] + "00000" + number[4]
         else:
-            return '0' + number[:5] + '0000' + number[5]
+            return "0" + number[:5] + "0000" + number[5]

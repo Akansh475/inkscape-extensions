@@ -30,9 +30,11 @@ from itertools import product
 import inkex
 from inkex import Group, Rectangle, Use, PathElement
 
+
 class QRLengthError(Exception):
     def __init__(self, message):
         self.message = message
+
 
 class QRCode(object):
     PAD0 = 0xEC
@@ -64,8 +66,7 @@ class QRCode(object):
         return self.qrDataList[index]
 
     def isDark(self, row, col):
-        return (self.modules[row][col] if self.modules[row][col] is not None
-                else False)
+        return self.modules[row][col] if self.modules[row][col] is not None else False
 
     def getModuleCount(self):
         return self.moduleCount
@@ -87,8 +88,7 @@ class QRCode(object):
     def _make(self, test, maskPattern):
 
         self.moduleCount = self.typeNumber * 4 + 17
-        self.modules = [[None] * self.moduleCount
-                        for i in range(self.moduleCount)]
+        self.modules = [[None] * self.moduleCount for i in range(self.moduleCount)]
 
         self._setupPositionProbePattern(0, 0)
         self._setupPositionProbePattern(self.moduleCount - 7, 0)
@@ -103,17 +103,17 @@ class QRCode(object):
             self._setupTypeNumber(test)
 
         data = QRCode._createData(
-                self.typeNumber,
-                self.errorCorrectLevel,
-                self.qrDataList)
+            self.typeNumber, self.errorCorrectLevel, self.qrDataList
+        )
 
         self._mapData(data, maskPattern)
 
     def _mapData(self, data, maskPattern):
 
         rows = list(range(self.moduleCount))
-        cols = [col - 1 if col <= 6 else col
-                for col in range(self.moduleCount - 1, 0, -2)]
+        cols = [
+            col - 1 if col <= 6 else col for col in range(self.moduleCount - 1, 0, -2)
+        ]
         maskFunc = QRUtil.getMaskFunction(maskPattern)
 
         byteIndex = 0
@@ -146,19 +146,28 @@ class QRCode(object):
                 for r in range(-2, 3):
                     for c in range(-2, 3):
                         self.modules[row + r][col + c] = (
-                                r == -2 or r == 2 or c == -2 or c == 2
-                                or (r == 0 and c == 0))
+                            r == -2
+                            or r == 2
+                            or c == -2
+                            or c == 2
+                            or (r == 0 and c == 0)
+                        )
 
     def _setupPositionProbePattern(self, row, col):
         for r in range(-1, 8):
             for c in range(-1, 8):
-                if (row + r <= -1 or self.moduleCount <= row + r
-                        or col + c <= -1 or self.moduleCount <= col + c):
+                if (
+                    row + r <= -1
+                    or self.moduleCount <= row + r
+                    or col + c <= -1
+                    or self.moduleCount <= col + c
+                ):
                     continue
                 self.modules[row + r][col + c] = (
-                        (0 <= r <= 6 and (c == 0 or c == 6))
-                        or (0 <= c <= 6 and (r == 0 or r == 6))
-                        or (2 <= r <= 4 and 2 <= c <= 4))
+                    (0 <= r <= 6 and (c == 0 or c == 6))
+                    or (0 <= c <= 6 and (r == 0 or r == 6))
+                    or (2 <= r <= 4 and 2 <= c <= 4)
+                )
 
     def _setupTimingPattern(self):
         for r in range(8, self.moduleCount - 8):
@@ -174,10 +183,12 @@ class QRCode(object):
         bits = QRUtil.getBCHTypeNumber(self.typeNumber)
         for i in range(18):
             self.modules[i // 3][i % 3 + self.moduleCount - 8 - 3] = (
-                    not test and ((bits >> i) & 1) == 1)
+                not test and ((bits >> i) & 1) == 1
+            )
         for i in range(18):
             self.modules[i % 3 + self.moduleCount - 8 - 3][i // 3] = (
-                    not test and ((bits >> i) & 1) == 1)
+                not test and ((bits >> i) & 1) == 1
+            )
 
     def _setupTypeInfo(self, test, maskPattern):
 
@@ -219,12 +230,13 @@ class QRCode(object):
             buffer.put(data.getLength(), data.getLengthInBits(typeNumber))
             data.write(buffer)
 
-        totalDataCount = sum(rsBlock.getDataCount()
-                             for rsBlock in rsBlocks)
+        totalDataCount = sum(rsBlock.getDataCount() for rsBlock in rsBlocks)
 
         if buffer.getLengthInBits() > totalDataCount * 8:
-            raise QRLengthError('code length overflow. (%s>%s)' %
-                                (buffer.getLengthInBits(), totalDataCount * 8))
+            raise QRLengthError(
+                "code length overflow. (%s>%s)"
+                % (buffer.getLengthInBits(), totalDataCount * 8)
+            )
 
         # end code
         if buffer.getLengthInBits() + 4 <= totalDataCount * 8:
@@ -266,7 +278,7 @@ class QRCode(object):
 
             dcdata[r] = [0] * dcCount
             for i in range(len(dcdata[r])):
-                dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset]
+                dcdata[r][i] = 0xFF & buffer.getBuffer()[i + offset]
             offset += dcCount
 
             rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount)
@@ -278,8 +290,7 @@ class QRCode(object):
                 modIndex = i + modPoly.getLength() - len(ecdata[r])
                 ecdata[r][i] = modPoly.get(modIndex) if modIndex >= 0 else 0
 
-        totalCodeCount = sum(rsBlock.getTotalCount()
-                             for rsBlock in rsBlocks)
+        totalCodeCount = sum(rsBlock.getTotalCount() for rsBlock in rsBlocks)
 
         data = [0] * totalCodeCount
 
@@ -303,16 +314,18 @@ class QRCode(object):
     def getMinimumQRCode(data, errorCorrectLevel):
         qr = QRCode(correction=errorCorrectLevel)
         qr.addData(data)
-        lv=1
-        rv=40
-        while(rv - lv > 0):
+        lv = 1
+        rv = 40
+        while rv - lv > 0:
             mid = (3 * lv + rv) // 4
             qr.setTypeNumber(mid)
             try:
                 qr.make()
             except QRLengthError:
-                if( mid == 40 ):
-                    raise inkex.AbortExtension(_("The string is too large to represent as QR code"))
+                if mid == 40:
+                    raise inkex.AbortExtension(
+                        _("The string is too large to represent as QR code")
+                    )
                 lv = mid + 1
             else:
                 rv = mid
@@ -385,7 +398,7 @@ class QRUtil(object):
         [6, 28, 54, 80, 106, 132, 158],
         [6, 32, 58, 84, 110, 136, 162],
         [6, 26, 54, 82, 110, 138, 166],
-        [6, 30, 58, 86, 114, 142, 170]
+        [6, 30, 58, 86, 114, 142, 170],
     ]
 
     @staticmethod
@@ -398,22 +411,14 @@ class QRUtil(object):
     @staticmethod
     def getMaskFunction(maskPattern):
         return {
-            MaskPattern.PATTERN000:
-                lambda i, j: (i + j) % 2 == 0,
-            MaskPattern.PATTERN001:
-                lambda i, j: i % 2 == 0,
-            MaskPattern.PATTERN010:
-                lambda i, j: j % 3 == 0,
-            MaskPattern.PATTERN011:
-                lambda i, j: (i + j) % 3 == 0,
-            MaskPattern.PATTERN100:
-                lambda i, j: (i // 2 + j // 3) % 2 == 0,
-            MaskPattern.PATTERN101:
-                lambda i, j: (i * j) % 2 + (i * j) % 3 == 0,
-            MaskPattern.PATTERN110:
-                lambda i, j: ((i * j) % 2 + (i * j) % 3) % 2 == 0,
-            MaskPattern.PATTERN111:
-                lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0
+            MaskPattern.PATTERN000: lambda i, j: (i + j) % 2 == 0,
+            MaskPattern.PATTERN001: lambda i, j: i % 2 == 0,
+            MaskPattern.PATTERN010: lambda i, j: j % 3 == 0,
+            MaskPattern.PATTERN011: lambda i, j: (i + j) % 3 == 0,
+            MaskPattern.PATTERN100: lambda i, j: (i // 2 + j // 3) % 2 == 0,
+            MaskPattern.PATTERN101: lambda i, j: (i * j) % 2 + (i * j) % 3 == 0,
+            MaskPattern.PATTERN110: lambda i, j: ((i * j) % 2 + (i * j) % 3) % 2 == 0,
+            MaskPattern.PATTERN111: lambda i, j: ((i * j) % 3 + (i + j) % 2) % 2 == 0,
         }[maskPattern]
 
     @staticmethod
@@ -438,7 +443,7 @@ class QRUtil(object):
                         if dark == qrcode.isDark(row + r, col + c):
                             sameCount += 1
                 if sameCount > 5:
-                    lostPoint += (3 + sameCount - 5)
+                    lostPoint += 3 + sameCount - 5
 
         # LEVEL2
         for row in range(moduleCount - 1):
@@ -458,24 +463,28 @@ class QRUtil(object):
         # LEVEL3
         for row in range(moduleCount):
             for col in range(moduleCount - 6):
-                if (qrcode.isDark(row, col)
-                        and not qrcode.isDark(row, col + 1)
-                        and qrcode.isDark(row, col + 2)
-                        and qrcode.isDark(row, col + 3)
-                        and qrcode.isDark(row, col + 4)
-                        and not qrcode.isDark(row, col + 5)
-                        and qrcode.isDark(row, col + 6)):
+                if (
+                    qrcode.isDark(row, col)
+                    and not qrcode.isDark(row, col + 1)
+                    and qrcode.isDark(row, col + 2)
+                    and qrcode.isDark(row, col + 3)
+                    and qrcode.isDark(row, col + 4)
+                    and not qrcode.isDark(row, col + 5)
+                    and qrcode.isDark(row, col + 6)
+                ):
                     lostPoint += 40
 
         for col in range(moduleCount):
             for row in range(moduleCount - 6):
-                if (qrcode.isDark(row, col)
-                        and not qrcode.isDark(row + 1, col)
-                        and qrcode.isDark(row + 2, col)
-                        and qrcode.isDark(row + 3, col)
-                        and qrcode.isDark(row + 4, col)
-                        and not qrcode.isDark(row + 5, col)
-                        and qrcode.isDark(row + 6, col)):
+                if (
+                    qrcode.isDark(row, col)
+                    and not qrcode.isDark(row + 1, col)
+                    and qrcode.isDark(row + 2, col)
+                    and qrcode.isDark(row + 3, col)
+                    and qrcode.isDark(row + 4, col)
+                    and not qrcode.isDark(row + 5, col)
+                    and qrcode.isDark(row + 6, col)
+                ):
                     lostPoint += 40
 
         # LEVEL4
@@ -490,26 +499,31 @@ class QRUtil(object):
 
         return lostPoint
 
-    G15 = ((1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) |
-           (1 << 2) | (1 << 1) | (1 << 0))
-    G18 = ((1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) |
-           (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0))
+    G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0)
+    G18 = (
+        (1 << 12)
+        | (1 << 11)
+        | (1 << 10)
+        | (1 << 9)
+        | (1 << 8)
+        | (1 << 5)
+        | (1 << 2)
+        | (1 << 0)
+    )
     G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1)
 
     @staticmethod
     def getBCHTypeInfo(data):
         d = data << 10
         while QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0:
-            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) -
-                                 QRUtil.getBCHDigit(QRUtil.G15)))
+            d ^= QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15))
         return ((data << 10) | d) ^ QRUtil.G15_MASK
 
     @staticmethod
     def getBCHTypeNumber(data):
         d = data << 12
         while QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0:
-            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) -
-                                 QRUtil.getBCHDigit(QRUtil.G18)))
+            d ^= QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18))
         return (data << 12) | d
 
     @staticmethod
@@ -545,7 +559,7 @@ class QRData(object):
                 Mode.MODE_NUMBER: 10,
                 Mode.MODE_ALPHA_NUM: 9,
                 Mode.MODE_8BIT_BYTE: 8,
-                Mode.MODE_KANJI: 8
+                Mode.MODE_KANJI: 8,
             }[self._mode]
 
         elif type < 27:  # 10 - 26
@@ -553,7 +567,7 @@ class QRData(object):
                 Mode.MODE_NUMBER: 12,
                 Mode.MODE_ALPHA_NUM: 11,
                 Mode.MODE_8BIT_BYTE: 16,
-                Mode.MODE_KANJI: 10
+                Mode.MODE_KANJI: 10,
             }[self._mode]
 
         elif type < 41:  # 27 - 40
@@ -561,19 +575,18 @@ class QRData(object):
                 Mode.MODE_NUMBER: 14,
                 Mode.MODE_ALPHA_NUM: 13,
                 Mode.MODE_8BIT_BYTE: 16,
-                Mode.MODE_KANJI: 12
+                Mode.MODE_KANJI: 12,
             }[self._mode]
 
         else:
-            raise Exception('type:%s' % type)
+            raise Exception("type:%s" % type)
 
 
 class QR8BitByte(QRData):
-
     def __init__(self, data):
         super(QR8BitByte, self).__init__(Mode.MODE_8BIT_BYTE, data)
         if isinstance(data, str):
-            data = data.encode('ascii', 'ignore')
+            data = data.encode("ascii", "ignore")
         if not isinstance(data, bytes):
             raise ValueError("Data must be in bytes!")
 
@@ -583,35 +596,50 @@ class QR8BitByte(QRData):
 
 
 class QRAlphaNum(QRData):
-
     def __init__(self, data):
         super(QRAlphaNum, self).__init__(Mode.MODE_ALPHA_NUM, data)
 
     def write(self, buffer):
         i = 0
         while i + 1 < len(self.data):
-            buffer.put(QRAlphaNum._getCode(self.data[i]) * 45 + QRAlphaNum._getCode(self.data[i + 1]), 11)
+            buffer.put(
+                QRAlphaNum._getCode(self.data[i]) * 45
+                + QRAlphaNum._getCode(self.data[i + 1]),
+                11,
+            )
             i += 2
         if i < len(self.data):
             buffer.put(QRAlphaNum._getCode(self.data[i]), 6)
 
     @staticmethod
     def _getCode(c):
-        if '0' <= c and c <= '9':
-            return ord(c) - ord('0')
-        elif 'A' <= c and c <= 'Z':
-            return ord(c) - ord('A') + 10
+        if "0" <= c and c <= "9":
+            return ord(c) - ord("0")
+        elif "A" <= c and c <= "Z":
+            return ord(c) - ord("A") + 10
         else:
-            dct = {' ': 36, '$': 37, '%': 38, '*': 39, '+': 40, '-': 41, '.': 42, '/': 43, ':': 44}
-            if (c in dct.keys()):
+            dct = {
+                " ": 36,
+                "$": 37,
+                "%": 38,
+                "*": 39,
+                "+": 40,
+                "-": 41,
+                ".": 42,
+                "/": 43,
+                ":": 44,
+            }
+            if c in dct.keys():
                 return dct[c]
             else:
                 raise inkex.AbortExtension(
-                    _("Wrong symbol '{}' in alphanumeric representation: Should be [A-Z, 0-9] or {}").format(c, dct.keys()))
+                    _(
+                        "Wrong symbol '{}' in alphanumeric representation: Should be [A-Z, 0-9] or {}"
+                    ).format(c, dct.keys())
+                )
 
 
 class QRNumber(QRData):
-
     def __init__(self, data):
         super(QRNumber, self).__init__(Mode.MODE_NUMBER, data)
 
@@ -619,7 +647,7 @@ class QRNumber(QRData):
         i = 0
         try:
             while i + 2 < len(self.data):
-                num = int(self.data[i:i + 3])
+                num = int(self.data[i : i + 3])
                 buffer.put(num, 10)
                 i += 3
 
@@ -636,7 +664,6 @@ class QRKanji(QRData):
         raise RuntimeError("Class QRKanji is not implemented")
 
 
-
 class QRMath(object):
     EXP_TABLE = None
     LOG_TABLE = None
@@ -646,9 +673,14 @@ class QRMath(object):
 
         QRMath.EXP_TABLE = [0] * 256
         for i in range(256):
-            QRMath.EXP_TABLE[i] = (1 << i if i < 8 else
-                                   QRMath.EXP_TABLE[i - 4] ^ QRMath.EXP_TABLE[i - 5] ^
-                                   QRMath.EXP_TABLE[i - 6] ^ QRMath.EXP_TABLE[i - 8])
+            QRMath.EXP_TABLE[i] = (
+                1 << i
+                if i < 8
+                else QRMath.EXP_TABLE[i - 4]
+                ^ QRMath.EXP_TABLE[i - 5]
+                ^ QRMath.EXP_TABLE[i - 6]
+                ^ QRMath.EXP_TABLE[i - 8]
+            )
 
         QRMath.LOG_TABLE = [0] * 256
         for i in range(255):
@@ -657,7 +689,7 @@ class QRMath(object):
     @staticmethod
     def glog(n):
         if n < 1:
-            raise Exception('log(%s)' % n)
+            raise Exception("log(%s)" % n)
         return QRMath.LOG_TABLE[n]
 
     @staticmethod
@@ -688,19 +720,20 @@ class Polynomial(object):
         return len(self.num)
 
     def __repr__(self):
-        return ','.join([str(self.get(i))
-                         for i in range(self.getLength())])
+        return ",".join([str(self.get(i)) for i in range(self.getLength())])
 
     def toLogString(self):
-        return ','.join([str(QRMath.glog(self.get(i)))
-                         for i in range(self.getLength())])
+        return ",".join(
+            [str(QRMath.glog(self.get(i))) for i in range(self.getLength())]
+        )
 
     def multiply(self, e):
         num = [0] * (self.getLength() + e.getLength() - 1)
         for i in range(self.getLength()):
             for j in range(e.getLength()):
-                num[i + j] ^= QRMath.gexp(QRMath.glog(self.get(i)) +
-                                          QRMath.glog(e.get(j)))
+                num[i + j] ^= QRMath.gexp(
+                    QRMath.glog(self.get(i)) + QRMath.glog(e.get(j))
+                )
         return Polynomial(num)
 
     def mod(self, e):
@@ -715,251 +748,210 @@ class Polynomial(object):
 
 class RSBlock(object):
     RS_BLOCK_TABLE = [
-
-      # L
-      # M
-      # Q
-      # H
-
-      # 1
-      [1, 26, 19],
-      [1, 26, 16],
-      [1, 26, 13],
-      [1, 26, 9],
-
-      # 2
-      [1, 44, 34],
-      [1, 44, 28],
-      [1, 44, 22],
-      [1, 44, 16],
-
-      # 3
-      [1, 70, 55],
-      [1, 70, 44],
-      [2, 35, 17],
-      [2, 35, 13],
-
-      # 4
-      [1, 100, 80],
-      [2, 50, 32],
-      [2, 50, 24],
-      [4, 25, 9],
-
-      # 5
-      [1, 134, 108],
-      [2, 67, 43],
-      [2, 33, 15, 2, 34, 16],
-      [2, 33, 11, 2, 34, 12],
-
-      # 6
-      [2, 86, 68],
-      [4, 43, 27],
-      [4, 43, 19],
-      [4, 43, 15],
-
-      # 7
-      [2, 98, 78],
-      [4, 49, 31],
-      [2, 32, 14, 4, 33, 15],
-      [4, 39, 13, 1, 40, 14],
-
-      # 8
-      [2, 121, 97],
-      [2, 60, 38, 2, 61, 39],
-      [4, 40, 18, 2, 41, 19],
-      [4, 40, 14, 2, 41, 15],
-
-      # 9
-      [2, 146, 116],
-      [3, 58, 36, 2, 59, 37],
-      [4, 36, 16, 4, 37, 17],
-      [4, 36, 12, 4, 37, 13],
-
-      # 10
-      [2, 86, 68, 2, 87, 69],
-      [4, 69, 43, 1, 70, 44],
-      [6, 43, 19, 2, 44, 20],
-      [6, 43, 15, 2, 44, 16],
-
-      # 11
-      [4, 101, 81],
-      [1, 80, 50, 4, 81, 51],
-      [4, 50, 22, 4, 51, 23],
-      [3, 36, 12, 8, 37, 13],
-
-      # 12
-      [2, 116, 92, 2, 117, 93],
-      [6, 58, 36, 2, 59, 37],
-      [4, 46, 20, 6, 47, 21],
-      [7, 42, 14, 4, 43, 15],
-
-      # 13
-      [4, 133, 107],
-      [8, 59, 37, 1, 60, 38],
-      [8, 44, 20, 4, 45, 21],
-      [12, 33, 11, 4, 34, 12],
-
-      # 14
-      [3, 145, 115, 1, 146, 116],
-      [4, 64, 40, 5, 65, 41],
-      [11, 36, 16, 5, 37, 17],
-      [11, 36, 12, 5, 37, 13],
-
-      # 15
-      [5, 109, 87, 1, 110, 88],
-      [5, 65, 41, 5, 66, 42],
-      [5, 54, 24, 7, 55, 25],
-      [11, 36, 12, 7, 37, 13],
-
-      # 16
-      [5, 122, 98, 1, 123, 99],
-      [7, 73, 45, 3, 74, 46],
-      [15, 43, 19, 2, 44, 20],
-      [3, 45, 15, 13, 46, 16],
-
-      # 17
-      [1, 135, 107, 5, 136, 108],
-      [10, 74, 46, 1, 75, 47],
-      [1, 50, 22, 15, 51, 23],
-      [2, 42, 14, 17, 43, 15],
-
-      # 18
-      [5, 150, 120, 1, 151, 121],
-      [9, 69, 43, 4, 70, 44],
-      [17, 50, 22, 1, 51, 23],
-      [2, 42, 14, 19, 43, 15],
-
-      # 19
-      [3, 141, 113, 4, 142, 114],
-      [3, 70, 44, 11, 71, 45],
-      [17, 47, 21, 4, 48, 22],
-      [9, 39, 13, 16, 40, 14],
-
-      # 20
-      [3, 135, 107, 5, 136, 108],
-      [3, 67, 41, 13, 68, 42],
-      [15, 54, 24, 5, 55, 25],
-      [15, 43, 15, 10, 44, 16],
-
-      # 21
-      [4, 144, 116, 4, 145, 117],
-      [17, 68, 42],
-      [17, 50, 22, 6, 51, 23],
-      [19, 46, 16, 6, 47, 17],
-
-      # 22
-      [2, 139, 111, 7, 140, 112],
-      [17, 74, 46],
-      [7, 54, 24, 16, 55, 25],
-      [34, 37, 13],
-
-      # 23
-      [4, 151, 121, 5, 152, 122],
-      [4, 75, 47, 14, 76, 48],
-      [11, 54, 24, 14, 55, 25],
-      [16, 45, 15, 14, 46, 16],
-
-      # 24
-      [6, 147, 117, 4, 148, 118],
-      [6, 73, 45, 14, 74, 46],
-      [11, 54, 24, 16, 55, 25],
-      [30, 46, 16, 2, 47, 17],
-
-      # 25
-      [8, 132, 106, 4, 133, 107],
-      [8, 75, 47, 13, 76, 48],
-      [7, 54, 24, 22, 55, 25],
-      [22, 45, 15, 13, 46, 16],
-
-      # 26
-      [10, 142, 114, 2, 143, 115],
-      [19, 74, 46, 4, 75, 47],
-      [28, 50, 22, 6, 51, 23],
-      [33, 46, 16, 4, 47, 17],
-
-      # 27
-      [8, 152, 122, 4, 153, 123],
-      [22, 73, 45, 3, 74, 46],
-      [8, 53, 23, 26, 54, 24],
-      [12, 45, 15, 28, 46, 16],
-
-      # 28
-      [3, 147, 117, 10, 148, 118],
-      [3, 73, 45, 23, 74, 46],
-      [4, 54, 24, 31, 55, 25],
-      [11, 45, 15, 31, 46, 16],
-
-      # 29
-      [7, 146, 116, 7, 147, 117],
-      [21, 73, 45, 7, 74, 46],
-      [1, 53, 23, 37, 54, 24],
-      [19, 45, 15, 26, 46, 16],
-
-      # 30
-      [5, 145, 115, 10, 146, 116],
-      [19, 75, 47, 10, 76, 48],
-      [15, 54, 24, 25, 55, 25],
-      [23, 45, 15, 25, 46, 16],
-
-      # 31
-      [13, 145, 115, 3, 146, 116],
-      [2, 74, 46, 29, 75, 47],
-      [42, 54, 24, 1, 55, 25],
-      [23, 45, 15, 28, 46, 16],
-
-      # 32
-      [17, 145, 115],
-      [10, 74, 46, 23, 75, 47],
-      [10, 54, 24, 35, 55, 25],
-      [19, 45, 15, 35, 46, 16],
-
-      # 33
-      [17, 145, 115, 1, 146, 116],
-      [14, 74, 46, 21, 75, 47],
-      [29, 54, 24, 19, 55, 25],
-      [11, 45, 15, 46, 46, 16],
-
-      # 34
-      [13, 145, 115, 6, 146, 116],
-      [14, 74, 46, 23, 75, 47],
-      [44, 54, 24, 7, 55, 25],
-      [59, 46, 16, 1, 47, 17],
-
-      # 35
-      [12, 151, 121, 7, 152, 122],
-      [12, 75, 47, 26, 76, 48],
-      [39, 54, 24, 14, 55, 25],
-      [22, 45, 15, 41, 46, 16],
-
-      # 36
-      [6, 151, 121, 14, 152, 122],
-      [6, 75, 47, 34, 76, 48],
-      [46, 54, 24, 10, 55, 25],
-      [2, 45, 15, 64, 46, 16],
-
-      # 37
-      [17, 152, 122, 4, 153, 123],
-      [29, 74, 46, 14, 75, 47],
-      [49, 54, 24, 10, 55, 25],
-      [24, 45, 15, 46, 46, 16],
-
-      # 38
-      [4, 152, 122, 18, 153, 123],
-      [13, 74, 46, 32, 75, 47],
-      [48, 54, 24, 14, 55, 25],
-      [42, 45, 15, 32, 46, 16],
-
-      # 39
-      [20, 147, 117, 4, 148, 118],
-      [40, 75, 47, 7, 76, 48],
-      [43, 54, 24, 22, 55, 25],
-      [10, 45, 15, 67, 46, 16],
-
-      # 40
-      [19, 148, 118, 6, 149, 119],
-      [18, 75, 47, 31, 76, 48],
-      [34, 54, 24, 34, 55, 25],
-      [20, 45, 15, 61, 46, 16]
+        # L
+        # M
+        # Q
+        # H
+        # 1
+        [1, 26, 19],
+        [1, 26, 16],
+        [1, 26, 13],
+        [1, 26, 9],
+        # 2
+        [1, 44, 34],
+        [1, 44, 28],
+        [1, 44, 22],
+        [1, 44, 16],
+        # 3
+        [1, 70, 55],
+        [1, 70, 44],
+        [2, 35, 17],
+        [2, 35, 13],
+        # 4
+        [1, 100, 80],
+        [2, 50, 32],
+        [2, 50, 24],
+        [4, 25, 9],
+        # 5
+        [1, 134, 108],
+        [2, 67, 43],
+        [2, 33, 15, 2, 34, 16],
+        [2, 33, 11, 2, 34, 12],
+        # 6
+        [2, 86, 68],
+        [4, 43, 27],
+        [4, 43, 19],
+        [4, 43, 15],
+        # 7
+        [2, 98, 78],
+        [4, 49, 31],
+        [2, 32, 14, 4, 33, 15],
+        [4, 39, 13, 1, 40, 14],
+        # 8
+        [2, 121, 97],
+        [2, 60, 38, 2, 61, 39],
+        [4, 40, 18, 2, 41, 19],
+        [4, 40, 14, 2, 41, 15],
+        # 9
+        [2, 146, 116],
+        [3, 58, 36, 2, 59, 37],
+        [4, 36, 16, 4, 37, 17],
+        [4, 36, 12, 4, 37, 13],
+        # 10
+        [2, 86, 68, 2, 87, 69],
+        [4, 69, 43, 1, 70, 44],
+        [6, 43, 19, 2, 44, 20],
+        [6, 43, 15, 2, 44, 16],
+        # 11
+        [4, 101, 81],
+        [1, 80, 50, 4, 81, 51],
+        [4, 50, 22, 4, 51, 23],
+        [3, 36, 12, 8, 37, 13],
+        # 12
+        [2, 116, 92, 2, 117, 93],
+        [6, 58, 36, 2, 59, 37],
+        [4, 46, 20, 6, 47, 21],
+        [7, 42, 14, 4, 43, 15],
+        # 13
+        [4, 133, 107],
+        [8, 59, 37, 1, 60, 38],
+        [8, 44, 20, 4, 45, 21],
+        [12, 33, 11, 4, 34, 12],
+        # 14
+        [3, 145, 115, 1, 146, 116],
+        [4, 64, 40, 5, 65, 41],
+        [11, 36, 16, 5, 37, 17],
+        [11, 36, 12, 5, 37, 13],
+        # 15
+        [5, 109, 87, 1, 110, 88],
+        [5, 65, 41, 5, 66, 42],
+        [5, 54, 24, 7, 55, 25],
+        [11, 36, 12, 7, 37, 13],
+        # 16
+        [5, 122, 98, 1, 123, 99],
+        [7, 73, 45, 3, 74, 46],
+        [15, 43, 19, 2, 44, 20],
+        [3, 45, 15, 13, 46, 16],
+        # 17
+        [1, 135, 107, 5, 136, 108],
+        [10, 74, 46, 1, 75, 47],
+        [1, 50, 22, 15, 51, 23],
+        [2, 42, 14, 17, 43, 15],
+        # 18
+        [5, 150, 120, 1, 151, 121],
+        [9, 69, 43, 4, 70, 44],
+        [17, 50, 22, 1, 51, 23],
+        [2, 42, 14, 19, 43, 15],
+        # 19
+        [3, 141, 113, 4, 142, 114],
+        [3, 70, 44, 11, 71, 45],
+        [17, 47, 21, 4, 48, 22],
+        [9, 39, 13, 16, 40, 14],
+        # 20
+        [3, 135, 107, 5, 136, 108],
+        [3, 67, 41, 13, 68, 42],
+        [15, 54, 24, 5, 55, 25],
+        [15, 43, 15, 10, 44, 16],
+        # 21
+        [4, 144, 116, 4, 145, 117],
+        [17, 68, 42],
+        [17, 50, 22, 6, 51, 23],
+        [19, 46, 16, 6, 47, 17],
+        # 22
+        [2, 139, 111, 7, 140, 112],
+        [17, 74, 46],
+        [7, 54, 24, 16, 55, 25],
+        [34, 37, 13],
+        # 23
+        [4, 151, 121, 5, 152, 122],
+        [4, 75, 47, 14, 76, 48],
+        [11, 54, 24, 14, 55, 25],
+        [16, 45, 15, 14, 46, 16],
+        # 24
+        [6, 147, 117, 4, 148, 118],
+        [6, 73, 45, 14, 74, 46],
+        [11, 54, 24, 16, 55, 25],
+        [30, 46, 16, 2, 47, 17],
+        # 25
+        [8, 132, 106, 4, 133, 107],
+        [8, 75, 47, 13, 76, 48],
+        [7, 54, 24, 22, 55, 25],
+        [22, 45, 15, 13, 46, 16],
+        # 26
+        [10, 142, 114, 2, 143, 115],
+        [19, 74, 46, 4, 75, 47],
+        [28, 50, 22, 6, 51, 23],
+        [33, 46, 16, 4, 47, 17],
+        # 27
+        [8, 152, 122, 4, 153, 123],
+        [22, 73, 45, 3, 74, 46],
+        [8, 53, 23, 26, 54, 24],
+        [12, 45, 15, 28, 46, 16],
+        # 28
+        [3, 147, 117, 10, 148, 118],
+        [3, 73, 45, 23, 74, 46],
+        [4, 54, 24, 31, 55, 25],
+        [11, 45, 15, 31, 46, 16],
+        # 29
+        [7, 146, 116, 7, 147, 117],
+        [21, 73, 45, 7, 74, 46],
+        [1, 53, 23, 37, 54, 24],
+        [19, 45, 15, 26, 46, 16],
+        # 30
+        [5, 145, 115, 10, 146, 116],
+        [19, 75, 47, 10, 76, 48],
+        [15, 54, 24, 25, 55, 25],
+        [23, 45, 15, 25, 46, 16],
+        # 31
+        [13, 145, 115, 3, 146, 116],
+        [2, 74, 46, 29, 75, 47],
+        [42, 54, 24, 1, 55, 25],
+        [23, 45, 15, 28, 46, 16],
+        # 32
+        [17, 145, 115],
+        [10, 74, 46, 23, 75, 47],
+        [10, 54, 24, 35, 55, 25],
+        [19, 45, 15, 35, 46, 16],
+        # 33
+        [17, 145, 115, 1, 146, 116],
+        [14, 74, 46, 21, 75, 47],
+        [29, 54, 24, 19, 55, 25],
+        [11, 45, 15, 46, 46, 16],
+        # 34
+        [13, 145, 115, 6, 146, 116],
+        [14, 74, 46, 23, 75, 47],
+        [44, 54, 24, 7, 55, 25],
+        [59, 46, 16, 1, 47, 17],
+        # 35
+        [12, 151, 121, 7, 152, 122],
+        [12, 75, 47, 26, 76, 48],
+        [39, 54, 24, 14, 55, 25],
+        [22, 45, 15, 41, 46, 16],
+        # 36
+        [6, 151, 121, 14, 152, 122],
+        [6, 75, 47, 34, 76, 48],
+        [46, 54, 24, 10, 55, 25],
+        [2, 45, 15, 64, 46, 16],
+        # 37
+        [17, 152, 122, 4, 153, 123],
+        [29, 74, 46, 14, 75, 47],
+        [49, 54, 24, 10, 55, 25],
+        [24, 45, 15, 46, 46, 16],
+        # 38
+        [4, 152, 122, 18, 153, 123],
+        [13, 74, 46, 32, 75, 47],
+        [48, 54, 24, 14, 55, 25],
+        [42, 45, 15, 32, 46, 16],
+        # 39
+        [20, 147, 117, 4, 148, 118],
+        [40, 75, 47, 7, 76, 48],
+        [43, 54, 24, 22, 55, 25],
+        [10, 45, 15, 67, 46, 16],
+        # 40
+        [19, 148, 118, 6, 149, 119],
+        [18, 75, 47, 31, 76, 48],
+        [34, 54, 24, 34, 55, 25],
+        [20, 45, 15, 61, 46, 16],
     ]
 
     def __init__(self, totalCount, dataCount):
@@ -973,7 +965,7 @@ class RSBlock(object):
         return self.totalCount
 
     def __repr__(self):
-        return '(total=%s,data=%s)' % (self.totalCount, self.dataCount)
+        return "(total=%s,data=%s)" % (self.totalCount, self.dataCount)
 
     @staticmethod
     def getRSBlocks(typeNumber, errorCorrectLevel):
@@ -993,7 +985,7 @@ class RSBlock(object):
             1: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0],
             0: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1],
             3: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2],
-            2: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3]
+            2: RSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3],
         }[errorCorrectLevel]
 
 
@@ -1016,7 +1008,7 @@ class BitBuffer(object):
         if self.length == len(self.buffer) * 8:
             self.buffer += [0] * self.inclements
         if bit:
-            self.buffer[self.length // 8] |= (0x80 >> (self.length % 8))
+            self.buffer[self.length // 8] |= 0x80 >> (self.length % 8)
         self.length += 1
 
     def put(self, num, length):
@@ -1024,12 +1016,14 @@ class BitBuffer(object):
             self.putBit(((num >> (length - i - 1)) & 1) == 1)
 
     def __repr__(self):
-        return ''.join('1' if self.get(i) else '0'
-                       for i in range(self.getLengthInBits()))
+        return "".join(
+            "1" if self.get(i) else "0" for i in range(self.getLengthInBits())
+        )
 
 
 class GridDrawer(object):
     """Mechanism to draw grids of boxes"""
+
     def __init__(self, invert_code, smooth_factor):
         self.invert_code = invert_code
         self.smoothFactor = smooth_factor
@@ -1072,10 +1066,12 @@ class GridDrawer(object):
         # Create vertex
         for row in range(self.row_count() + 1):
             for col in range(self.col_count() + 1):
-                indx = (2 ** 0 if self.isDark(col - 0, row - 1) else 0) + \
-                       (2 ** 1 if self.isDark(col - 1, row - 1) else 0) + \
-                       (2 ** 2 if self.isDark(col - 1, row - 0) else 0) + \
-                       (2 ** 3 if self.isDark(col - 0, row - 0) else 0)
+                indx = (
+                    (2**0 if self.isDark(col - 0, row - 1) else 0)
+                    + (2**1 if self.isDark(col - 1, row - 1) else 0)
+                    + (2**2 if self.isDark(col - 1, row - 0) else 0)
+                    + (2**3 if self.isDark(col - 0, row - 0) else 0)
+                )
 
                 for d in dirTable[indx]:
                     result.append((col, row, d, len(dirTable[indx]) > 1))
@@ -1086,36 +1082,45 @@ class GridDrawer(object):
         vn = self.moveByDirection(v)
         sc = extraSmoothFactor * self.smoothFactor / 2.0
         sc1 = 1.0 - sc
-        return (v[0] * sc1 + vn[0] * sc, v[1] * sc1 + vn[1] * sc), (v[0] * sc + vn[0] * sc1, v[1] * sc + vn[1] * sc1)
+        return (v[0] * sc1 + vn[0] * sc, v[1] * sc1 + vn[1] * sc), (
+            v[0] * sc + vn[0] * sc1,
+            v[1] * sc + vn[1] * sc1,
+        )
 
 
 class QrCode(inkex.GenerateExtension):
     """Generate QR Code Extension"""
+
     def add_arguments(self, pars):
-        pars.add_argument("--text", default='www.inkscape.org')
+        pars.add_argument("--text", default="www.inkscape.org")
         pars.add_argument("--typenumber", type=int, default=0)
         pars.add_argument("--correctionlevel", type=int, default=0)
         pars.add_argument("--qrmode", type=int, default=0)
         pars.add_argument("--encoding", default="latin_1")
         pars.add_argument("--modulesize", type=float, default=4.0)
         pars.add_argument("--invert", type=inkex.Boolean, default="false")
-        pars.add_argument("--drawtype", default="smooth", 
-                          choices=["smooth", "pathpreset", "selection", "symbol"])
-        pars.add_argument("--smoothness", default="neutral", choices=["neutral", "greedy", "proud"])
+        pars.add_argument(
+            "--drawtype",
+            default="smooth",
+            choices=["smooth", "pathpreset", "selection", "symbol"],
+        )
+        pars.add_argument(
+            "--smoothness", default="neutral", choices=["neutral", "greedy", "proud"]
+        )
         pars.add_argument("--pathtype", default="simple", choices=["simple", "circle"])
         pars.add_argument("--smoothval", type=float, default=0.2)
-        pars.add_argument("--symbolid", default='')
-        pars.add_argument("--groupid", default='')
+        pars.add_argument("--symbolid", default="")
+        pars.add_argument("--groupid", default="")
 
     def generate(self):
 
-        scale = self.svg.unittouu('1px')  # convert to document units
+        scale = self.svg.unittouu("1px")  # convert to document units
         opt = self.options
 
         if not opt.text:
-            raise inkex.AbortExtension('Please enter an input text')
+            raise inkex.AbortExtension("Please enter an input text")
         elif opt.drawtype == "symbol" and opt.symbolid == "":
-            raise inkex.AbortExtension('Please enter symbol id')
+            raise inkex.AbortExtension("Please enter symbol id")
 
         # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
         text_str = str(opt.text)
@@ -1123,9 +1128,9 @@ class QrCode(inkex.GenerateExtension):
         text_data = cmode(bytes(opt.text, opt.encoding).decode("latin_1"))
 
         grp = Group()
-        grp.set('inkscape:label', 'QR Code: ' + text_str)
+        grp.set("inkscape:label", "QR Code: " + text_str)
         if opt.groupid:
-            grp.set('id', opt.groupid)
+            grp.set("id", opt.groupid)
         pos_x, pos_y = self.svg.namedview.center
         grp.transform.add_translate(pos_x, pos_y)
         if scale:
@@ -1158,7 +1163,7 @@ class QrCode(inkex.GenerateExtension):
             vertsIndexStart = len(verts) - 1
             vertsIndexCur = vertsIndexStart
             ringIndexes = []
-            ci={}
+            ci = {}
             for i, v in enumerate(verts):
                 ci.setdefault(v[0], []).append(i)
             while True:
@@ -1170,11 +1175,26 @@ class QrCode(inkex.GenerateExtension):
                 elif len(nextIndexes) == 1:
                     vertsIndexNext = nextIndexes[0]
                 else:
-                    if {verts[nextIndexes[0]][2], verts[nextIndexes[1]][2]} != {(verts[vertsIndexCur][2] - 1) % 4, (verts[vertsIndexCur][2] + 1) % 4}:
-                        raise Exception("Bad next vertex directions " + str(verts[nextIndexes[0]]) + str(verts[nextIndexes[1]]))
+                    if {verts[nextIndexes[0]][2], verts[nextIndexes[1]][2]} != {
+                        (verts[vertsIndexCur][2] - 1) % 4,
+                        (verts[vertsIndexCur][2] + 1) % 4,
+                    }:
+                        raise Exception(
+                            "Bad next vertex directions "
+                            + str(verts[nextIndexes[0]])
+                            + str(verts[nextIndexes[1]])
+                        )
 
                     # Greedy - CCW turn, proud and neutral CW turn
-                    vertsIndexNext = nextIndexes[0] if (greedy == "g") == (verts[nextIndexes[0]][2] == (verts[vertsIndexCur][2] + 1) % 4) else nextIndexes[1]
+                    vertsIndexNext = (
+                        nextIndexes[0]
+                        if (greedy == "g")
+                        == (
+                            verts[nextIndexes[0]][2]
+                            == (verts[vertsIndexCur][2] + 1) % 4
+                        )
+                        else nextIndexes[1]
+                    )
 
                 if vertsIndexNext == vertsIndexStart:
                     break
@@ -1197,9 +1217,11 @@ class QrCode(inkex.GenerateExtension):
                         bp2, _ = self.draw.getSmoothPosition(vn, ex)
                         bf, _ = self.draw.getSmoothPosition(vn)
                         qrPathStr += "L %f,%f " % self.get_svg_pos(bs[0], bs[1])
-                        qrPathStr += "C %f,%f %f,%f %f,%f " \
-                                     % (self.get_svg_pos(bp1[0], bp1[1]) + self.get_svg_pos(bp2[0], bp2[1]) +
-                                        self.get_svg_pos(bf[0], bf[1]))
+                        qrPathStr += "C %f,%f %f,%f %f,%f " % (
+                            self.get_svg_pos(bp1[0], bp1[1])
+                            + self.get_svg_pos(bp2[0], bp2[1])
+                            + self.get_svg_pos(bf[0], bf[1])
+                        )
                     else:
                         # Add straight
                         qrPathStr += "L %f,%f " % self.get_svg_pos(vn[0], vn[1])
@@ -1211,7 +1233,7 @@ class QrCode(inkex.GenerateExtension):
                 del verts[i]
 
         path = PathElement()
-        path.set('d', qrPathStr)
+        path.set("d", qrPathStr)
         return path
 
     def render_obsolete(self):
@@ -1231,8 +1253,9 @@ class QrCode(inkex.GenerateExtension):
                     pathStr += "M %f,%f " % (x, y) + singlePath + " z "
 
         path = PathElement()
-        path.set('d', pathStr)
+        path.set("d", pathStr)
         return path
+
     def render_selection(self):
         if len(self.svg.selection) > 0:
             self.options.symbolid = self.svg.selection.first().get_id()
@@ -1245,30 +1268,40 @@ class QrCode(inkex.GenerateExtension):
         if symbol is None:
             raise inkex.AbortExtension(f"Can't find symbol {self.options.symbolid}")
         bbox = symbol.path.bounding_box()
-        transform = inkex.Transform(scale=(
-            float(self.boxsize) / bbox.width,
-            float(self.boxsize) / bbox.height,
-        ))
+        transform = inkex.Transform(
+            scale=(
+                float(self.boxsize) / bbox.width,
+                float(self.boxsize) / bbox.height,
+            )
+        )
         result = Group()
         for row in range(self.draw.row_count()):
             for col in range(self.draw.col_count()):
                 if self.draw.isDark(col, row):
                     x, y = self.get_svg_pos(col, row)
                     # Inkscape doesn't support width/height on use tags
-                    result.append(Use.new(symbol, x / transform.a, y / transform.d, transform=transform))
+                    result.append(
+                        Use.new(
+                            symbol,
+                            x / transform.a,
+                            y / transform.d,
+                            transform=transform,
+                        )
+                    )
         return result
 
     def render_pathpreset(self):
         if self.options.pathtype == "simple":
             return self.render_path("h 1 v 1 h -1")
         else:
-            s = 'm 0.5,0.5 ' \
-                'c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 ' \
-                'c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 ' \
-                'c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 ' \
-                'c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5'
+            s = (
+                "m 0.5,0.5 "
+                "c 0.2761423745,0 0.5,0.2238576255 0.5,0.5 "
+                "c 0,0.2761423745 -0.2238576255,0.5 -0.5,0.5 "
+                "c -0.2761423745,0 -0.5,-0.2238576255 -0.5,-0.5 "
+                "c 0,-0.2761423745 0.2238576255,-0.5 0.5,-0.5"
+            )
             return self.render_path(s)
-
 
     render_smooth = lambda self: self.render_adv(self.options.smoothness[0])
 
@@ -1283,12 +1316,12 @@ class QrCode(inkex.GenerateExtension):
 
         # white background providing margin:
         rect = grp.add(Rectangle.new(0, 0, canvas_width, canvas_height))
-        rect.style['stroke'] = 'none'
-        rect.style['fill'] = "black" if self.invert_code else "white"
+        rect.style["stroke"] = "none"
+        rect.style["fill"] = "black" if self.invert_code else "white"
 
         qrg = grp.add(Group())
-        qrg.style['stroke'] = 'none'
-        qrg.style['fill'] = "white" if self.invert_code else "black"
+        qrg.style["stroke"] = "none"
+        qrg.style["fill"] = "white" if self.invert_code else "black"
         qrg.add(drawer())
 
     def get_svg_pos(self, col, row):
@@ -1298,7 +1331,7 @@ class QrCode(inkex.GenerateExtension):
         result = ""
         digBuffer = ""
         for c in pointStr:
-            if c.isdigit() or c == "-" or c == '.':
+            if c.isdigit() or c == "-" or c == ".":
                 digBuffer += c
             else:
                 if len(digBuffer) > 0:
@@ -1312,6 +1345,5 @@ class QrCode(inkex.GenerateExtension):
         return result
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     QrCode().run()

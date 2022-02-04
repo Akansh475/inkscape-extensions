@@ -35,8 +35,25 @@ from inkex.utils import math_eval
 
 import inkex
 
-def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, height, left, bottom,
-                 fx="cos(3*t)", fy="sin(5*t)", times2pi=False, isoscale=True, drawaxis=True):
+
+def drawfunction(
+    t_start,
+    t_end,
+    xleft,
+    xright,
+    ybottom,
+    ytop,
+    samples,
+    width,
+    height,
+    left,
+    bottom,
+    fx="cos(3*t)",
+    fy="sin(5*t)",
+    times2pi=False,
+    isoscale=True,
+    drawaxis=True,
+):
     if times2pi:
         t_start *= 2 * pi
         t_end *= 2 * pi
@@ -83,17 +100,17 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
         # check for visibility of x-axis
         if ybottom <= 0 <= ytop:
             # xaxis
-            a.append(['M', [left, coordy(0)]])
-            a.append(['l', [width, 0]])
+            a.append(["M", [left, coordy(0)]])
+            a.append(["l", [width, 0]])
         # check for visibility of y-axis
         if xleft <= 0 <= xright:
             # xaxis
-            a.append(['M', [coordx(0), bottom]])
-            a.append(['l', [0, -height]])
+            a.append(["M", [coordx(0), bottom]])
+            a.append(["l", [0, -height]])
 
     # initialize functions and derivatives for 0;
     # they are carried over from one iteration to the next, to avoid extra function calculations.
-    #print("RET: {}".format(f1(1)))
+    # print("RET: {}".format(f1(1)))
     x0 = f1(t_start)
     y0 = f2(t_start)
 
@@ -105,7 +122,7 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
     dy0 = (y1 - y0) / ds
 
     # Start curve
-    a.append(['M', [coordx(x0), coordy(y0)]])  # initial moveto
+    a.append(["M", [coordx(x0), coordy(y0)]])  # initial moveto
     for i in range(int(samples - 1)):
         t1 = (i + 1) * step + t_start
         t2 = t1 - ds  # Second point BEFORE first point (Good for last point)
@@ -119,11 +136,19 @@ def drawfunction(t_start, t_end, xleft, xright, ybottom, ytop, samples, width, h
         dy1 = (y1 - y2) / ds
 
         # create curve
-        a.append(['C',
-                  [coordx(x0 + (dx0 * third)), coordy(y0 + (dy0 * third)),
-                   coordx(x1 - (dx1 * third)), coordy(y1 - (dy1 * third)),
-                   coordx(x1), coordy(y1)]
-                  ])
+        a.append(
+            [
+                "C",
+                [
+                    coordx(x0 + (dx0 * third)),
+                    coordy(y0 + (dy0 * third)),
+                    coordx(x1 - (dx1 * third)),
+                    coordy(y1 - (dy1 * third)),
+                    coordx(x1),
+                    coordy(y1),
+                ],
+            ]
+        )
         t0 = t1  # Next segment's start is this segments end
         x0 = x1
         y0 = y1
@@ -136,17 +161,27 @@ class ParamCurves(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--t_start", type=float, default=0.0, help="Start t-value")
         pars.add_argument("--t_end", type=float, default=1.0, help="End t-value")
-        pars.add_argument("--times2pi", type=inkex.Boolean, default=True,
-                          help="Multiply t-range by 2*pi")
+        pars.add_argument(
+            "--times2pi",
+            type=inkex.Boolean,
+            default=True,
+            help="Multiply t-range by 2*pi",
+        )
         pars.add_argument("--xleft", type=float, default=-1.0, help="x-value of left")
         pars.add_argument("--xright", type=float, default=1.0, help="x-value of right")
-        pars.add_argument("--ybottom", type=float, default=-1.0, help="y-value of bottom")
+        pars.add_argument(
+            "--ybottom", type=float, default=-1.0, help="y-value of bottom"
+        )
         pars.add_argument("--ytop", type=float, default=1.0, help="y-value of top")
         pars.add_argument("-s", "--samples", type=int, default=30, help="Samples")
         pars.add_argument("--fofx", default="cos(3*t)", help="fx(t) for plotting")
         pars.add_argument("--fofy", default="sin(5*t)", help="fy(t) for plotting")
-        pars.add_argument("--remove", type=inkex.Boolean, default=True, help="Remove rectangle")
-        pars.add_argument("--isoscale", type=inkex.Boolean, default=False, help="Isotropic scaling")
+        pars.add_argument(
+            "--remove", type=inkex.Boolean, default=True, help="Remove rectangle"
+        )
+        pars.add_argument(
+            "--isoscale", type=inkex.Boolean, default=False, help="Isotropic scaling"
+        )
         pars.add_argument("--drawaxis", type=inkex.Boolean, default=False)
         pars.add_argument("--tab", default="sampling")
 
@@ -155,31 +190,35 @@ class ParamCurves(inkex.EffectExtension):
             if isinstance(node, inkex.Rectangle):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.PathElement()
-                x = float(node.get('x'))
-                y = float(node.get('y'))
-                width = float(node.get('width'))
-                height = float(node.get('height'))
+                x = float(node.get("x"))
+                y = float(node.get("y"))
+                width = float(node.get("width"))
+                height = float(node.get("height"))
 
                 # copy attributes of rect
                 newpath.style = node.style
                 newpath.transform = node.transform
 
                 # top and bottom were exchanged
-                newpath.path = \
-                        drawfunction(self.options.t_start,
-                                     self.options.t_end,
-                                     self.options.xleft,
-                                     self.options.xright,
-                                     self.options.ybottom,
-                                     self.options.ytop,
-                                     self.options.samples,
-                                     width, height, x, y + height,
-                                     self.options.fofx,
-                                     self.options.fofy,
-                                     self.options.times2pi,
-                                     self.options.isoscale,
-                                     self.options.drawaxis)
-                newpath.set('title', self.options.fofx + " " + self.options.fofy)
+                newpath.path = drawfunction(
+                    self.options.t_start,
+                    self.options.t_end,
+                    self.options.xleft,
+                    self.options.xright,
+                    self.options.ybottom,
+                    self.options.ytop,
+                    self.options.samples,
+                    width,
+                    height,
+                    x,
+                    y + height,
+                    self.options.fofx,
+                    self.options.fofy,
+                    self.options.times2pi,
+                    self.options.isoscale,
+                    self.options.drawaxis,
+                )
+                newpath.set("title", self.options.fofx + " " + self.options.fofy)
 
                 # newpath.set('desc', '!func;' + self.options.fofx + ';' + self.options.fofy + ';'
                 #                                      + `self.options.t_start` + ';'
@@ -193,5 +232,5 @@ class ParamCurves(inkex.EffectExtension):
                     node.getparent().remove(node)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ParamCurves().run()

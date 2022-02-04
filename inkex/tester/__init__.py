@@ -98,16 +98,17 @@ from ..utils import to_bytes
 from .xmldiff import xmldiff
 from .mock import MockCommandMixin, Capture
 
-if False: # pylint: disable=using-constant-test
+if False:  # pylint: disable=using-constant-test
     from typing import Type, List
     from .filters import Compare
 
 COMPARE_DELETE, COMPARE_CHECK, COMPARE_WRITE, COMPARE_OVERWRITE = range(4)
 
+
 class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
     """Test case must specify 'self.effect_class' to assertEffect."""
 
-    def __init__(self, *args, **kwargs): # pylint: disable=super-init-not-called
+    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
         raise NotImplementedError(self.__doc__)
 
     def run(self, args=None, output=None):
@@ -119,7 +120,8 @@ class TestCase(MockCommandMixin, BaseCase):
     """
     Base class for all effects tests, provides access to data_files and test_without_parameters
     """
-    effect_class = NoExtension # type: Type[InkscapeExtension]
+
+    effect_class = NoExtension  # type: Type[InkscapeExtension]
     effect_name = property(lambda self: self.effect_class.__module__)
 
     # If set to true, the output is not expected to be the stdout SVG document, but rather
@@ -133,11 +135,11 @@ class TestCase(MockCommandMixin, BaseCase):
         self._temp_dir = None
         self._effect = None
 
-    def setUp(self): # pylint: disable=invalid-name
+    def setUp(self):  # pylint: disable=invalid-name
         """Make sure every test is seeded the same way"""
         self._effect = None
         super().setUp()
-        random.seed(0x35f)
+        random.seed(0x35F)
 
     def tearDown(self):
         super().tearDown()
@@ -162,18 +164,20 @@ class TestCase(MockCommandMixin, BaseCase):
     @classmethod
     def datadir(cls):
         """Get the data directory (can be over-ridden if needed)"""
-        return os.path.join(cls._testdir(), 'data')
+        return os.path.join(cls._testdir(), "data")
 
     @property
     def tempdir(self):
         """Generate a temporary location to store files"""
         if self._temp_dir is None:
-            self._temp_dir = tempfile.mkdtemp(prefix='inkex-tests-')
+            self._temp_dir = tempfile.mkdtemp(prefix="inkex-tests-")
         if not os.path.isdir(self._temp_dir):
             raise IOError("The temporary directory has disappeared!")
         return self._temp_dir
 
-    def temp_file(self, prefix='file-', template='{prefix}{name}{suffix}', suffix='.tmp'):
+    def temp_file(
+        self, prefix="file-", template="{prefix}{name}{suffix}", suffix=".tmp"
+    ):
         """Generate the filename of a temporary file"""
         filename = template.format(prefix=prefix, suffix=suffix, name=uuid.uuid4().hex)
         return os.path.join(self.tempdir, filename)
@@ -195,9 +199,11 @@ class TestCase(MockCommandMixin, BaseCase):
     @property
     def empty_svg(self):
         """Returns a common minimal svg file"""
-        return self.data_file('svg', 'default-inkscape-SVG.svg')
+        return self.data_file("svg", "default-inkscape-SVG.svg")
 
-    def assertAlmostTuple(self, found, expected, precision=8, msg=""): # pylint: disable=invalid-name
+    def assertAlmostTuple(
+        self, found, expected, precision=8, msg=""
+    ):  # pylint: disable=invalid-name
         """
         Floating point results may vary with computer architecture; use
         assertAlmostEqual to allow a tolerance in the result.
@@ -213,32 +219,40 @@ class TestCase(MockCommandMixin, BaseCase):
     def assertEffect(self, *filename, **kwargs):  # pylint: disable=invalid-name
         """Assert an effect, capturing the output to stdout.
 
-           filename should point to a starting svg document, default is empty_svg
+        filename should point to a starting svg document, default is empty_svg
         """
         data_file = self.data_file(*filename) if filename else self.empty_svg
 
-        os.environ['DOCUMENT_PATH'] = data_file
-        args = [data_file] + list(kwargs.pop('args', []))
-        args += ['--{}={}'.format(*kw) for kw in kwargs.items()]
+        os.environ["DOCUMENT_PATH"] = data_file
+        args = [data_file] + list(kwargs.pop("args", []))
+        args += ["--{}={}".format(*kw) for kw in kwargs.items()]
 
-        effect = kwargs.pop('effect', self.effect_class)()
+        effect = kwargs.pop("effect", self.effect_class)()
 
         # Output is redirected to this string io buffer
         if self.stderr_output:
-            with Capture('stderr') as stderr:
+            with Capture("stderr") as stderr:
                 effect.run(args, output=BytesIO())
                 effect.test_output = stderr
         else:
             output = BytesIO()
-            with Capture('stdout', kwargs.get('stdout_protect', self.stdout_protect)) as stdout:
-                with Capture('stderr', kwargs.get('stderr_protect', self.stderr_protect)) as stderr:
+            with Capture(
+                "stdout", kwargs.get("stdout_protect", self.stdout_protect)
+            ) as stdout:
+                with Capture(
+                    "stderr", kwargs.get("stderr_protect", self.stderr_protect)
+                ) as stderr:
                     effect.run(args, output=output)
-                    self.assertEqual('', stdout.getvalue(), "Extra print statements detected")
-                    self.assertEqual('', stderr.getvalue(), "Extra error or warnings detected")
+                    self.assertEqual(
+                        "", stdout.getvalue(), "Extra print statements detected"
+                    )
+                    self.assertEqual(
+                        "", stderr.getvalue(), "Extra error or warnings detected"
+                    )
             effect.test_output = output
 
-        if os.environ.get('FAIL_ON_DEPRECATION', False):
-            warnings = getattr(effect, 'warned_about', set())
+        if os.environ.get("FAIL_ON_DEPRECATION", False):
+            warnings = getattr(effect, "warned_about", set())
             effect.warned_about = set()  # reset for next test
             self.assertFalse(warnings, "Deprecated API is still being used!")
 
@@ -258,8 +272,9 @@ class TestCase(MockCommandMixin, BaseCase):
         """Assert that two transform expressions evaluate to the same
         transformation matrix.
         """
-        self.assertAlmostTuple(tuple(Transform(lhs).to_hexad()),
-                               tuple(Transform(rhs).to_hexad()), places)
+        self.assertAlmostTuple(
+            tuple(Transform(lhs).to_hexad()), tuple(Transform(rhs).to_hexad()), places
+        )
 
     @property
     def effect(self):
@@ -268,41 +283,46 @@ class TestCase(MockCommandMixin, BaseCase):
             self._effect = self.effect_class()
         return self._effect
 
+
 class InkscapeExtensionTestMixin:
     """Automatically setup self.effect for each test and test with an empty svg"""
-    def setUp(self): # pylint: disable=invalid-name
+
+    def setUp(self):  # pylint: disable=invalid-name
         """Check if there is an effect_class set and create self.effect if it is"""
         super(InkscapeExtensionTestMixin, self).setUp()
         if self.effect_class is None:
-            self.skipTest('self.effect_class is not defined for this this test')
+            self.skipTest("self.effect_class is not defined for this this test")
 
     def test_default_settings(self):
         """Extension works with empty svg file"""
         self.effect.run([self.empty_svg])
 
+
 class ComparisonMixin:
     """
     Add comparison tests to any existing test suite.
     """
+
     # This input svg file sent to the extension (if any)
-    compare_file: Union[List[str], Tuple[str], str] = 'svg/shapes.svg'
+    compare_file: Union[List[str], Tuple[str], str] = "svg/shapes.svg"
     # The ways in which the output is filtered for comparision (see filters.py)
-    compare_filters = [] # type: List[Compare]
+    compare_filters = []  # type: List[Compare]
     # If true, the filtered output will be saved and only applied to the
     # extension output (and not to the reference file)
     compare_filter_save = False
     # A list of comparison runs, each entry will cause the extension to be run.
     comparisons = [
         (),
-        ('--id=p1', '--id=r3'),
+        ("--id=p1", "--id=r3"),
     ]
 
-    compare_file_extension = 'svg'
+    compare_file_extension = "svg"
+
     @property
     def _compare_file_extension(self):
         """The default extension to use when outputting check files in COMPARE_CHECK mode."""
         if self.stderr_output:
-            return 'txt'
+            return "txt"
         return self.compare_file_extension
 
     def test_all_comparisons(self):
@@ -312,8 +332,7 @@ class ComparisonMixin:
         else:
             for compare_file in self.compare_file:
                 self._test_comparisons(
-                    compare_file,
-                    addout=os.path.basename(compare_file)
+                    compare_file, addout=os.path.basename(compare_file)
                 )
 
     def _test_comparisons(self, compare_file, addout=None):
@@ -324,7 +343,9 @@ class ComparisonMixin:
                 args,
             )
 
-    def assertCompare(self, infile, cmpfile, args, outfile=None): #pylint: disable=invalid-name
+    def assertCompare(
+        self, infile, cmpfile, args, outfile=None
+    ):  # pylint: disable=invalid-name
         """
         Compare the output of a previous run against this one.
 
@@ -336,7 +357,7 @@ class ComparisonMixin:
                     dumps it's output to this filename instead.
 
         """
-        compare_mode = int(os.environ.get('EXPORT_COMPARE', COMPARE_DELETE))
+        compare_mode = int(os.environ.get("EXPORT_COMPARE", COMPARE_DELETE))
 
         effect = self.assertEffect(infile, args=args)
 
@@ -345,36 +366,40 @@ class ComparisonMixin:
 
         if not os.path.isfile(cmpfile) and compare_mode == COMPARE_DELETE:
             raise IOError(
-                f"Comparison file {cmpfile} not found, set EXPORT_COMPARE=1 to create it.")
+                f"Comparison file {cmpfile} not found, set EXPORT_COMPARE=1 to create it."
+            )
 
         if outfile:
             if not os.path.isabs(outfile):
                 outfile = os.path.join(self.tempdir, outfile)
-            self.assertTrue(os.path.isfile(outfile), "No output file created! {}".format(outfile))
-            with open(outfile, 'rb') as fhl:
+            self.assertTrue(
+                os.path.isfile(outfile), "No output file created! {}".format(outfile)
+            )
+            with open(outfile, "rb") as fhl:
                 data_a = fhl.read()
         else:
             data_a = effect.test_output.getvalue()
 
         write_output = None
         if compare_mode == COMPARE_CHECK:
-            _file = cmpfile[:-4] if cmpfile.endswith('.out') else cmpfile
+            _file = cmpfile[:-4] if cmpfile.endswith(".out") else cmpfile
             write_output = f"{_file}.{self._compare_file_extension}"
-        elif (compare_mode == COMPARE_WRITE and not os.path.isfile(cmpfile))\
-                or compare_mode == COMPARE_OVERWRITE:
+        elif (
+            compare_mode == COMPARE_WRITE and not os.path.isfile(cmpfile)
+        ) or compare_mode == COMPARE_OVERWRITE:
             write_output = cmpfile
 
         try:
             if write_output and not os.path.isfile(cmpfile):
                 raise AssertionError(f"Check the output: {write_output}")
-            with open(cmpfile, 'rb') as fhl:
+            with open(cmpfile, "rb") as fhl:
                 data_b = self._apply_compare_filters(fhl.read(), False)
             self._base_compare(data_a, data_b, compare_mode)
         except AssertionError:
             if write_output:
                 if isinstance(data_a, str):
-                    data_a = data_a.encode('utf-8')
-                with open(write_output, 'wb') as fhl:
+                    data_a = data_a.encode("utf-8")
+                with open(write_output, "wb") as fhl:
                     fhl.write(self._apply_compare_filters(data_a, True))
                     print(f"Written output: {write_output}")
                 # This only reruns if the original test failed.
@@ -390,18 +415,23 @@ class ComparisonMixin:
     def _base_compare(self, data_a, data_b, compare_mode):
         data_a = self._apply_compare_filters(data_a)
 
-        if isinstance(data_a, bytes) and isinstance(data_b, bytes) \
-            and data_a.startswith(b'<') and data_b.startswith(b'<'):
+        if (
+            isinstance(data_a, bytes)
+            and isinstance(data_b, bytes)
+            and data_a.startswith(b"<")
+            and data_b.startswith(b"<")
+        ):
             # Late importing
             diff_xml, delta = xmldiff(data_a, data_b)
             if not delta and compare_mode == COMPARE_DELETE:
-                print('The XML is different, you can save the output using the EXPORT_COMPARE'\
-                      ' envionment variable. Set it to 1 to save a file you can check, set it to'\
-                      ' 3 to overwrite this comparison, setting the new data as the correct one.\n'
+                print(
+                    "The XML is different, you can save the output using the EXPORT_COMPARE"
+                    " envionment variable. Set it to 1 to save a file you can check, set it to"
+                    " 3 to overwrite this comparison, setting the new data as the correct one.\n"
                 )
             diff = f"SVG Differences\n\n"
-            if os.environ.get('XML_DIFF', False):
-                diff = '<- ' + diff_xml
+            if os.environ.get("XML_DIFF", False):
+                diff = "<- " + diff_xml
             else:
                 for x, (value_a, value_b) in enumerate(delta):
                     try:
@@ -428,13 +458,17 @@ class ComparisonMixin:
         """Generate an output file for the arguments given"""
         if addout is not None:
             args = list(args) + [str(addout)]
-        opstr = '__'.join(args)\
-                    .replace(self.tempdir, 'TMP_DIR')\
-                    .replace(self.datadir(), 'DAT_DIR')
-        opstr = re.sub(r'[^\w-]', '__', opstr)
+        opstr = (
+            "__".join(args)
+            .replace(self.tempdir, "TMP_DIR")
+            .replace(self.datadir(), "DAT_DIR")
+        )
+        opstr = re.sub(r"[^\w-]", "__", opstr)
         if opstr:
             if len(opstr) > 127:
                 # avoid filename-too-long error
-                opstr = hashlib.md5(opstr.encode('latin1')).hexdigest()
-            opstr = '__' + opstr
-        return self.data_file("refs", f"{self.effect_name}{opstr}.out", check_exists=False)
+                opstr = hashlib.md5(opstr.encode("latin1")).hexdigest()
+            opstr = "__" + opstr
+        return self.data_file(
+            "refs", f"{self.effect_name}{opstr}.out", check_exists=False
+        )

@@ -21,11 +21,13 @@
 import inkex
 from jessyink_install import JessyInkMixin, _
 
+
 class AutoTexts(JessyInkMixin, inkex.EffectExtension):
     """Add AutoText to jessyInk"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab', dest='what')
-        pars.add_argument('--autoText', default='none')
+        pars.add_argument("--tab", dest="what")
+        pars.add_argument("--autoText", default="none")
 
     def effect(self):
         self.is_installed()
@@ -43,5 +45,6 @@ class AutoTexts(JessyInkMixin, inkex.EffectExtension):
             elif node.get("jessyink:autoText"):
                 node.set("jessyink:autoText", None)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     AutoTexts().run()

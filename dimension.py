@@ -38,32 +38,45 @@ from inkex import Group, Marker, PathElement
 
 import pathmodifier
 
+
 class Dimension(pathmodifier.PathModifier):
     """Add dimensions as a path modifier"""
+
     def add_arguments(self, pars):
-        pars.add_argument("--xoffset", type=float, default=50.0,\
-            help="x offset of the vertical dimension arrow")
-        pars.add_argument("--yoffset", type=float, default=50.0,\
-            help="y offset of the horizontal dimension arrow")
+        pars.add_argument(
+            "--xoffset",
+            type=float,
+            default=50.0,
+            help="x offset of the vertical dimension arrow",
+        )
+        pars.add_argument(
+            "--yoffset",
+            type=float,
+            default=50.0,
+            help="y offset of the horizontal dimension arrow",
+        )
         pars.add_argument("--type", default="geometric", help="Bounding box type")
 
     def add_marker(self, name, rotate):
         """Create a marker in the defs of the svg"""
         marker = Marker()
-        marker.set('id', name)
-        marker.set('orient', 'auto')
-        marker.set('refX', '0.0')
-        marker.set('refY', '0.0')
-        marker.set('style', 'overflow:visible')
-        marker.set('inkscape:stockid', name)
+        marker.set("id", name)
+        marker.set("orient", "auto")
+        marker.set("refX", "0.0")
+        marker.set("refY", "0.0")
+        marker.set("style", "overflow:visible")
+        marker.set("inkscape:stockid", name)
         self.svg.defs.append(marker)
 
-        arrow = PathElement(d='M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z ')
+        arrow = PathElement(d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z ")
         if rotate:
-            arrow.set('transform', 'scale(0.8) rotate(180) translate(12.5,0)')
+            arrow.set("transform", "scale(0.8) rotate(180) translate(12.5,0)")
         else:
-            arrow.set('transform', 'scale(0.8) translate(12.5,0)')
-        arrow.set('style', 'fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none')
+            arrow.set("transform", "scale(0.8) translate(12.5,0)")
+        arrow.set(
+            "style",
+            "fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none",
+        )
         marker.append(arrow)
 
     def horz_line(self, y, xlat, bbox):
@@ -72,7 +85,7 @@ class Dimension(pathmodifier.PathModifier):
         x1 = bbox.left - xlat[0] * self.options.xoffset
         x2 = bbox.right
         y1 = y - xlat[1] * self.options.yoffset
-        line.set('d', 'M %f %f H %f' % (x1, y1, x2))
+        line.set("d", "M %f %f H %f" % (x1, y1, x2))
         return line
 
     def vert_line(self, x, xlat, bbox):
@@ -81,11 +94,11 @@ class Dimension(pathmodifier.PathModifier):
         x = x - xlat[0] * self.options.xoffset
         y1 = bbox.top - xlat[1] * self.options.yoffset
         y2 = bbox.bottom
-        line.set('d', 'M %f %f V %f' % (x, y1, y2))
+        line.set("d", "M %f %f V %f" % (x, y1, y2))
         return line
 
     def effect(self):
-        scale = self.svg.unittouu('1px')  # convert to document units
+        scale = self.svg.unittouu("1px")  # convert to document units
         self.options.xoffset *= scale
         self.options.yoffset *= scale
 
@@ -98,40 +111,40 @@ class Dimension(pathmodifier.PathModifier):
 
         layer = self.svg.get_current_layer()
 
-        self.add_marker('Arrow1Lstart', False)
-        self.add_marker('Arrow1Lend', True)
+        self.add_marker("Arrow1Lstart", False)
+        self.add_marker("Arrow1Lend", True)
 
         group = Group()
         layer.append(group)
-        group.set('fill', 'none')
-        group.set('stroke', 'black')
+        group.set("fill", "none")
+        group.set("stroke", "black")
 
         line = self.horz_line(bbox.top, [0, 1], bbox)
-        line.set('marker-start', 'url(#Arrow1Lstart)')
-        line.set('marker-end', 'url(#Arrow1Lend)')
-        line.set('stroke-width', str(scale))
+        line.set("marker-start", "url(#Arrow1Lstart)")
+        line.set("marker-end", "url(#Arrow1Lend)")
+        line.set("stroke-width", str(scale))
         group.append(line)
 
         line = self.vert_line(bbox.left, [0, 2], bbox)
-        line.set('stroke-width', str(0.5 * scale))
+        line.set("stroke-width", str(0.5 * scale))
         group.append(line)
 
         line = self.vert_line(bbox.right, [0, 2], bbox)
-        line.set('stroke-width', str(0.5 * scale))
+        line.set("stroke-width", str(0.5 * scale))
         group.append(line)
 
         line = self.vert_line(bbox.left, [1, 0], bbox)
-        line.set('marker-start', 'url(#Arrow1Lstart)')
-        line.set('marker-end', 'url(#Arrow1Lend)')
-        line.set('stroke-width', str(scale))
+        line.set("marker-start", "url(#Arrow1Lstart)")
+        line.set("marker-end", "url(#Arrow1Lend)")
+        line.set("stroke-width", str(scale))
         group.append(line)
 
         line = self.horz_line(bbox.top, [2, 0], bbox)
-        line.set('stroke-width', str(0.5 * scale))
+        line.set("stroke-width", str(0.5 * scale))
         group.append(line)
 
         line = self.horz_line(bbox.bottom, [2, 0], bbox)
-        line.set('stroke-width', str(0.5 * scale))
+        line.set("stroke-width", str(0.5 * scale))
         group.append(line)
 
         for node in self.svg.selected.values():
@@ -141,5 +154,5 @@ class Dimension(pathmodifier.PathModifier):
         return None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Dimension().run()

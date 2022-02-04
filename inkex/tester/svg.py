@@ -24,15 +24,20 @@ from lxml import etree
 
 from inkex import SVG_PARSER
 
-def svg(svg_attrs=''):
+
+def svg(svg_attrs=""):
     """Returns xml etree based on a simple SVG element.
 
-       svg_attrs: A string containing attributes to add to the
-           root <svg> element of a minimal SVG document.
+    svg_attrs: A string containing attributes to add to the
+        root <svg> element of a minimal SVG document.
     """
-    return etree.fromstring(str.encode(
-        '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
-        f'<svg {svg_attrs}></svg>'), parser=SVG_PARSER)
+    return etree.fromstring(
+        str.encode(
+            '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
+            f"<svg {svg_attrs}></svg>"
+        ),
+        parser=SVG_PARSER,
+    )
 
 
 def svg_unit_scaled(width_unit):
@@ -42,8 +47,9 @@ def svg_unit_scaled(width_unit):
     """
     return svg(f'width="1{width_unit}" viewBox="0 0 1 1"')
 
+
 def svg_file(filename):
     """Parse an svg file and return it's document root"""
-    with open(filename, 'r') as fhl:
+    with open(filename, "r") as fhl:
         doc = etree.parse(fhl, parser=SVG_PARSER)
         return doc.getroot()

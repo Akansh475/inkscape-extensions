@@ -34,6 +34,7 @@ bezierlengthSimpson = deprecate(bezier.bezierlength)
 beziertatlength = deprecate(bezier.beziertatlength)
 bezierlength = bezierlengthSimpson
 
+
 @deprecate
 def Simpson(func, a, b, n_limit, tolerance):
     """bezier.simpson(a, b, n_limit, tolerance, balf_arguments)"""
@@ -41,4 +42,5 @@ def Simpson(func, a, b, n_limit, tolerance):
         """Because bezmisc.Simpson used global variables, it's not possible to
         call the replacement code automatically. In fact it's unlikely you were
         using the code or functionality you think you were since it's a highly
-        broken way of writing python.""")
+        broken way of writing python."""
+    )

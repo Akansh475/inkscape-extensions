@@ -22,6 +22,8 @@ Image element interface.
 
 from ._polygons import RectangleBase
 
+
 class Image(RectangleBase):
     """Provide a useful extension for image elements"""
-    tag_name = 'image'
+
+    tag_name = "image"

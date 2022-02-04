@@ -23,8 +23,19 @@ color can be used for the shadow"""
 import math
 
 import inkex
-from inkex.paths import Move, Line, Curve, ZoneClose, Arc, Path, Vert, Horz, TepidQuadratic, \
-                        Quadratic, Smooth
+from inkex.paths import (
+    Move,
+    Line,
+    Curve,
+    ZoneClose,
+    Arc,
+    Path,
+    Vert,
+    Horz,
+    TepidQuadratic,
+    Quadratic,
+    Smooth,
+)
 from inkex.transforms import Vector2d
 from inkex.bezier import beziertatslope, beziersplitatt
 
@@ -33,12 +44,27 @@ class Motion(inkex.EffectExtension):
     """Generate a motion path"""
 
     def add_arguments(self, pars):
-        pars.add_argument("-a", "--angle", type=float, default=45.0, \
-                          help="direction of the motion vector")
-        pars.add_argument("-m", "--magnitude", type=float, default=100.0, \
-                          help="magnitude of the motion vector")
-        pars.add_argument("-f", "--fillwithstroke", type=inkex.Boolean, default=False, \
-                          help="fill shadow with stroke color if set")
+        pars.add_argument(
+            "-a",
+            "--angle",
+            type=float,
+            default=45.0,
+            help="direction of the motion vector",
+        )
+        pars.add_argument(
+            "-m",
+            "--magnitude",
+            type=float,
+            default=100.0,
+            help="magnitude of the motion vector",
+        )
+        pars.add_argument(
+            "-f",
+            "--fillwithstroke",
+            type=inkex.Boolean,
+            default=False,
+            help="fill shadow with stroke color if set",
+        )
 
     @staticmethod
     def makeface(last, segment, facegroup, delx, dely):
@@ -49,21 +75,21 @@ class Motion(inkex.EffectExtension):
 
         # reverse direction of path segment
         if isinstance(segment, Curve):
-            rev = Curve(npt.x3, npt.y3, npt.x2, npt.y2,
-                        last[0] + delx, last[1] + dely
-                        )
+            rev = Curve(npt.x3, npt.y3, npt.x2, npt.y2, last[0] + delx, last[1] + dely)
         elif isinstance(segment, Line):
             rev = Line(last[0] + delx, last[1] + dely)
         else:
             raise RuntimeError("Unexpected segment type {}".format(type(segment)))
 
-        elem.path = inkex.Path([
-            Move(last[0], last[1]),
-            segment,
-            npt.to_line(Vector2d()),
-            rev,
-            ZoneClose(),
-        ])
+        elem.path = inkex.Path(
+            [
+                Move(last[0], last[1]),
+                segment,
+                npt.to_line(Vector2d()),
+                rev,
+                ZoneClose(),
+            ]
+        )
 
     def effect(self):
         delx = math.cos(math.radians(self.options.angle)) * self.options.magnitude
@@ -84,7 +110,7 @@ class Motion(inkex.EffectExtension):
                 node.transform = None
 
             facegroup.style = node.style
-            if (self.options.fillwithstroke):
+            if self.options.fillwithstroke:
                 stroke = facegroup.style("stroke")
                 if stroke is not None and isinstance(stroke, inkex.Color):
                     facegroup.style["fill"] = stroke
@@ -99,14 +125,18 @@ class Motion(inkex.EffectExtension):
                     reset_origin = False
                 if isinstance(cmd_proxy.command, ZoneClose):
                     reset_origin = True
-                self.process_segment(cmd_proxy, facegroup, local_delx, local_dely, first_point)
+                self.process_segment(
+                    cmd_proxy, facegroup, local_delx, local_dely, first_point
+                )
 
     @staticmethod
     def process_segment(cmd_proxy, facegroup, delx, dely, first_point):
         """Process each segments"""
 
         segments = []
-        if isinstance(cmd_proxy.command, (Curve, Smooth, TepidQuadratic, Quadratic, Arc)):
+        if isinstance(
+            cmd_proxy.command, (Curve, Smooth, TepidQuadratic, Quadratic, Arc)
+        ):
             prev = cmd_proxy.previous_end_point
             for curve in cmd_proxy.to_curves():
                 bez = [prev] + curve.to_bez()
@@ -132,11 +162,13 @@ class Motion(inkex.EffectExtension):
         elif isinstance(cmd_proxy.command, (Vert, Horz)):
             segments.append(cmd_proxy.command.to_line(cmd_proxy.end_point))
 
-        for seg in Path([Move(*cmd_proxy.previous_end_point)] + segments).proxy_iterator():
+        for seg in Path(
+            [Move(*cmd_proxy.previous_end_point)] + segments
+        ).proxy_iterator():
             if isinstance(seg.command, Move):
                 continue
             Motion.makeface(seg.previous_end_point, seg.command, facegroup, delx, dely)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Motion().run()

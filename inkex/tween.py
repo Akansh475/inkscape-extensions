@@ -35,8 +35,9 @@ from inkex.utils import FragmentError
 
 try:
     from typing import Tuple, TypeVar
-    Value = TypeVar('Value')
-    Number = TypeVar('Number', int, float)
+
+    Value = TypeVar("Value")
+    Number = TypeVar("Number", int, float)
 except ImportError:
     pass
 
@@ -102,7 +103,7 @@ class AttributeInterpolator(abc.ABC):
         if attribute in Style.color_props:
             return StyleInterpolator.create_from_fill_stroke(snode, enode, attribute)
         if attribute == "d":
-            if (method is None):
+            if method is None:
                 method = FirstNodesInterpolator
             return method(snode.path, enode.path)
         if attribute == "style":
@@ -129,10 +130,13 @@ class StyleInterpolator(AttributeInterpolator):
         self.interpolators = {}
         # some keys are always processed in a certain order,
         # these provide alternative interpolation routes if e.g. Color<->none is interpolated
-        all_keys = \
-            list(dict.fromkeys(["fill", "stroke", "fill-opacity", "stroke-opacity", "stroke-width"]
-                               + list(self.best_style(start_value).keys())
-                               + list(self.best_style(end_value).keys())))
+        all_keys = list(
+            dict.fromkeys(
+                ["fill", "stroke", "fill-opacity", "stroke-opacity", "stroke-width"]
+                + list(self.best_style(start_value).keys())
+                + list(self.best_style(end_value).keys())
+            )
+        )
         for attr in all_keys:
             sstyle = self.best_style(start_value)
             estyle = self.best_style(end_value)
@@ -140,7 +144,8 @@ class StyleInterpolator(AttributeInterpolator):
                 continue
             try:
                 interp = StyleInterpolator.create(
-                    self.start_value, self.end_value, attr)
+                    self.start_value, self.end_value, attr
+                )
                 self.interpolators[attr] = interp
             except ValueError:
                 # no interpolation method known for this attribute
@@ -168,12 +173,16 @@ class StyleInterpolator(AttributeInterpolator):
             return StyleInterpolator.create_from_fill_stroke(snode, enode, attribute)
 
         if attribute in Style.unit_props:
-            return UnitValueInterpolator(AttributeInterpolator.best_style(snode)(attribute),
-                                         AttributeInterpolator.best_style(enode)(attribute))
+            return UnitValueInterpolator(
+                AttributeInterpolator.best_style(snode)(attribute),
+                AttributeInterpolator.best_style(enode)(attribute),
+            )
 
         if attribute in Style.opacity_props:
-            return ValueInterpolator(AttributeInterpolator.best_style(snode)(attribute),
-                                     AttributeInterpolator.best_style(enode)(attribute))
+            return ValueInterpolator(
+                AttributeInterpolator.best_style(snode)(attribute),
+                AttributeInterpolator.best_style(enode)(attribute),
+            )
 
         raise ValueError("Unknown attribute")
 
@@ -203,12 +212,13 @@ class StyleInterpolator(AttributeInterpolator):
         for (cur, curstyle) in styles:
             if curstyle(attribute) is None:
                 cur.style[attribute + "-opacity"] = 0.0
-                if (attribute == "stroke"):
+                if attribute == "stroke":
                     cur.style["stroke-width"] = 0.0
 
-         # check if style is none, unset or a color
-        if isinstance(sstyle(attribute), (LinearGradient, RadialGradient)) or \
-                isinstance(estyle(attribute), (LinearGradient, RadialGradient)):
+        # check if style is none, unset or a color
+        if isinstance(
+            sstyle(attribute), (LinearGradient, RadialGradient)
+        ) or isinstance(estyle(attribute), (LinearGradient, RadialGradient)):
             # if one of the two styles is a gradient, use gradient interpolation.
             try:
                 return GradientInterpolator.create(snode, enode, attribute)
@@ -282,8 +292,10 @@ class ArrayInterpolator(AttributeInterpolator):
 
     def __init__(self, start_value, end_value):
         super().__init__(start_value, end_value)
-        self.interpolators = [ValueInterpolator(cur, other) for (cur, other) in
-                              zip(start_value, end_value)]
+        self.interpolators = [
+            ValueInterpolator(cur, other)
+            for (cur, other) in zip(start_value, end_value)
+        ]
 
     def interpolate(self, time=0):
         """Interpolates an array element-wise
@@ -324,6 +336,7 @@ class TransformInterpolator(ArrayInterpolator):
 
 class ColorInterpolator(ArrayInterpolator):
     """Class for color interpolation"""
+
     @staticmethod
     def create(sst, est, attribute):
         """Creates a ColorInterpolator for either Fill or stroke, depending on the attribute.
@@ -344,10 +357,10 @@ class ColorInterpolator(ArrayInterpolator):
             if not isinstance(cur(attribute), Color) or cur(attribute) is None:
                 cur[attribute] = other(attribute)
         this = ColorInterpolator(
-            Color(styles[0](attribute)), Color(styles[1](attribute)))
+            Color(styles[0](attribute)), Color(styles[1](attribute))
+        )
         if this is None:
-            raise ValueError(
-                "One of the two attribute needs to be a plain color")
+            raise ValueError("One of the two attribute needs to be a plain color")
         return this
 
     def __init__(self, start_value=Color("#000000"), end_value=Color("#000000")):
@@ -373,32 +386,49 @@ class GradientInterpolator(AttributeInterpolator):
         super().__init__(start_value, end_value)
         self.svg = svg
         # If one of the styles is empty, set it to the gradient of the other
-        if (start_value is None):
+        if start_value is None:
             self.start_value = end_value
-        if (end_value is None):
+        if end_value is None:
             self.end_value = start_value
-        self.transform_interpolator = TransformInterpolator(self.start_value.gradientTransform,
-                                                            self.end_value.gradientTransform)
-        self.orientation_interpolator = \
-            {attr: UnitValueInterpolator(self.start_value.get(attr), self.end_value.get(attr))
-             for attr in self.start_value.orientation_attributes
-             if self.start_value.get(attr) is not None and self.end_value.get(attr) is not None}
-        if not(self.start_value.href is not None and self.start_value.href is self.end_value.href):
+        self.transform_interpolator = TransformInterpolator(
+            self.start_value.gradientTransform, self.end_value.gradientTransform
+        )
+        self.orientation_interpolator = {
+            attr: UnitValueInterpolator(
+                self.start_value.get(attr), self.end_value.get(attr)
+            )
+            for attr in self.start_value.orientation_attributes
+            if self.start_value.get(attr) is not None
+            and self.end_value.get(attr) is not None
+        }
+        if not (
+            self.start_value.href is not None
+            and self.start_value.href is self.end_value.href
+        ):
             # the gradient link to different stops, interpolate between them
             # add both start and end offsets, then take distict
-            newoffsets = sorted(list(set(self.start_value.stop_offsets
-                                         + self.end_value.stop_offsets)))
+            newoffsets = sorted(
+                list(set(self.start_value.stop_offsets + self.end_value.stop_offsets))
+            )
 
             def func(start, end, time):
                 return StopInterpolator(start, end).interpolate(time)
-            sstops = GradientInterpolator.\
-                interpolate_linear_list(self.start_value.stop_offsets, list(self.start_value.stops),
-                                        newoffsets, func)
-            ostops = GradientInterpolator.\
-                interpolate_linear_list(self.end_value.stop_offsets, list(self.end_value.stops),
-                                        newoffsets, func)
-            self.newstop_interpolator =\
-                [StopInterpolator(s1, s2) for s1, s2 in zip(sstops, ostops)]
+
+            sstops = GradientInterpolator.interpolate_linear_list(
+                self.start_value.stop_offsets,
+                list(self.start_value.stops),
+                newoffsets,
+                func,
+            )
+            ostops = GradientInterpolator.interpolate_linear_list(
+                self.end_value.stop_offsets,
+                list(self.end_value.stops),
+                newoffsets,
+                func,
+            )
+            self.newstop_interpolator = [
+                StopInterpolator(s1, s2) for s1, s2 in zip(sstops, ostops)
+            ]
         else:
             self.newstop_interpolator = None
 
@@ -435,32 +465,34 @@ class GradientInterpolator(AttributeInterpolator):
             curgrad = None
             if isinstance(cur(attribute), (LinearGradient, RadialGradient)):
                 curgrad = cur(attribute)
-            for gradtype, interp in [[LinearGradient, LinearGradientInterpolator],
-                                     [RadialGradient, RadialGradientInterpolator]]:
-                if (curgrad is not None and isinstance(curgrad, gradtype)):
+            for gradtype, interp in [
+                [LinearGradient, LinearGradientInterpolator],
+                [RadialGradient, RadialGradientInterpolator],
+            ]:
+                if curgrad is not None and isinstance(curgrad, gradtype):
                     if interpolator is None:
                         interpolator = interp
                         gradienttype = gradtype
-                    if not(interp == interpolator):
+                    if not (interp == interpolator):
                         raise ValueError("Gradient types don't match")
         # If one of the styles is empty, set it to the gradient of the other, but with zero
         # opacity (and stroke-width for strokes)
         # If one of the styles is a plain color, replace it by a gradient with a single stop
-        iterator = [[snode, gradienttype(), enode], [
-            enode, gradienttype(), snode]]
+        iterator = [[snode, gradienttype(), enode], [enode, gradienttype(), snode]]
         for index in [0, 1]:
             curstyle = AttributeInterpolator.best_style(iterator[index][0])
             value = curstyle(attribute)
             if value is None:
                 # if the attribute of one of the two ends is unset, set the opacity to zero.
                 iterator[index][0].style[attribute + "-opacity"] = 0.0
-                if (attribute == "stroke"):
+                if attribute == "stroke":
                     iterator[index][0].style["stroke-width"] = 0.0
             if isinstance(value, Color):
                 # if the attribute of one of the two ends is a color, convert it to a one-stop
                 # gradient. Type depends on the type of the other gradient.
-                interpolator.initialize_position(iterator[index][1],
-                                                 iterator[index][0].bounding_box())
+                interpolator.initialize_position(
+                    iterator[index][1], iterator[index][0].bounding_box()
+                )
                 stop = Stop()
                 stop.style = Style()
                 stop.style["stop-color"] = value
@@ -506,7 +538,7 @@ class GradientInterpolator(AttributeInterpolator):
         positions = list(map(float, positions))
         newpositions = list(map(float, newpositions))
         for pos in newpositions:
-            if (len(positions) == 1):
+            if len(positions) == 1:
                 newvalues.append(values[0])
             else:
                 # current run:
@@ -514,9 +546,8 @@ class GradientInterpolator(AttributeInterpolator):
                 # p     p    |   p
                 #    q       q
                 idxl = max(0, bisect_left(positions, pos) - 1)
-                idxr = min(len(positions)-1, idxl + 1)
-                fraction = (pos - positions[idxl]) / \
-                    (positions[idxr] - positions[idxl])
+                idxr = min(len(positions) - 1, idxl + 1)
+                fraction = (pos - positions[idxl]) / (positions[idxr] - positions[idxl])
                 vall = values[idxl]
                 valr = values[idxr]
                 newval = func(vall, valr, fraction)
@@ -538,32 +569,32 @@ class GradientInterpolator(AttributeInterpolator):
             element has no root or is None
         """
         stops, orientation = gradient.stops_and_orientation()
-        if (element is None or
-                (element.getparent() is None and not isinstance(element, SvgDocumentElement))):
+        if element is None or (
+            element.getparent() is None and not isinstance(element, SvgDocumentElement)
+        ):
             return gradient
         element.root.defs.add(orientation)
         if len(stops) > 0:
             element.root.defs.add(stops, orientation)
-            orientation.set('xlink:href', f'#{stops.get_id()}')
+            orientation.set("xlink:href", f"#{stops.get_id()}")
         return orientation
 
     def interpolate(self, time=0):
         """Interpolate with another gradient."""
         newgrad = self.start_value.copy()
         # interpolate transforms
-        newgrad.gradientTransform = self.transform_interpolator.interpolate(
-            time)
+        newgrad.gradientTransform = self.transform_interpolator.interpolate(time)
 
         # interpolate orientation
         for attr in self.orientation_interpolator.keys():
-            newgrad.set(
-                attr, self.orientation_interpolator[attr].interpolate(time))
+            newgrad.set(attr, self.orientation_interpolator[attr].interpolate(time))
 
         # interpolate stops
         if self.newstop_interpolator is not None:
             newgrad.remove_all(Stop)
-            newgrad.add(*[interp.interpolate(time)
-                          for interp in self.newstop_interpolator])
+            newgrad.add(
+                *[interp.interpolate(time) for interp in self.newstop_interpolator]
+            )
         if self.svg is None:
             return newgrad
         return GradientInterpolator.append_to_doc(self.svg, newgrad)
@@ -572,8 +603,9 @@ class GradientInterpolator(AttributeInterpolator):
 class LinearGradientInterpolator(GradientInterpolator):
     """Class for interpolation of linear gradients"""
 
-    def __init__(self, start_value=LinearGradient(),
-                 end_value=LinearGradient(), svg=None):
+    def __init__(
+        self, start_value=LinearGradient(), end_value=LinearGradient(), svg=None
+    ):
         super().__init__(start_value, end_value, svg)
 
     @staticmethod
@@ -588,8 +620,9 @@ class LinearGradientInterpolator(GradientInterpolator):
 class RadialGradientInterpolator(GradientInterpolator):
     """Class to interpolate radial gradients"""
 
-    def __init__(self, start_value=RadialGradient(),
-                 end_value=RadialGradient(), svg=None):
+    def __init__(
+        self, start_value=RadialGradient(), end_value=RadialGradient(), svg=None
+    ):
         super().__init__(start_value, end_value, svg)
 
     @staticmethod
@@ -609,9 +642,9 @@ class StopInterpolator(AttributeInterpolator):
     def __init__(self, start_value, end_value):
         super().__init__(start_value, end_value)
         self.style_interpolator = StyleInterpolator(start_value, end_value)
-        self.position_interpolator = \
-            ValueInterpolator(float(start_value.offset),
-                              float(end_value.offset))
+        self.position_interpolator = ValueInterpolator(
+            float(start_value.offset), float(end_value.offset)
+        )
 
     def interpolate(self, time=0):
         """Interpolates a gradient stop by interpolating style and offset separately
@@ -668,7 +701,9 @@ class PathInterpolator(AttributeInterpolator):
         # create an interpolated path for each interval
         interp = []
         # process subpaths
-        for ssubpath, esubpath in zip(self.processed_start_path, self.processed_end_path):
+        for ssubpath, esubpath in zip(
+            self.processed_start_path, self.processed_end_path
+        ):
             if not (ssubpath or esubpath):
                 break
             # add a new subpath to the interpolated path
@@ -684,8 +719,9 @@ class PathInterpolator(AttributeInterpolator):
                     if not (point1 or point2):
                         break
                     # add a new point to the last bezier command
-                    interp[-1][-1].append(ArrayInterpolator(point1,
-                                                            point2).interpolate(time))
+                    interp[-1][-1].append(
+                        ArrayInterpolator(point1, point2).interpolate(time)
+                    )
         # remove final subpath if empty.
         if not interp[-1]:
             del interp[-1]
@@ -694,6 +730,7 @@ class PathInterpolator(AttributeInterpolator):
 
 class EqualSubsegmentsInterpolator(PathInterpolator):
     """Interpolates the path by rediscretizing the subpaths first."""
+
     @staticmethod
     def get_subpath_lenghts(path):
         """prepare lengths for interpolation"""
@@ -717,9 +754,8 @@ class EqualSubsegmentsInterpolator(PathInterpolator):
             other (Path): the second path
 
         Returns:
-            Array: the prepared path description for the intermediate path """
-        sp_lenghts, total, _ = EqualSubsegmentsInterpolator.get_subpath_lenghts(
-            path)
+            Array: the prepared path description for the intermediate path"""
+        sp_lenghts, total, _ = EqualSubsegmentsInterpolator.get_subpath_lenghts(path)
         _, _, lenghts = EqualSubsegmentsInterpolator.get_subpath_lenghts(other)
         t = 0
         s = [[]]
@@ -733,8 +769,7 @@ class EqualSubsegmentsInterpolator(PathInterpolator):
                 if lenghts and t > lenghts[0]:
                     while lenghts and lenghts[0] < t:
                         nt = (lenghts[0] - pt) / (t - pt)
-                        bezes = cspbezsplitatlength(
-                            s[-1][-1][:], path[0][0][:], nt)
+                        bezes = cspbezsplitatlength(s[-1][-1][:], path[0][0][:], nt)
                         s[-1][-1:] = bezes[:2]
                         path[0][0] = bezes[2]
                         pt = lenghts.pop(0)
@@ -746,10 +781,12 @@ class EqualSubsegmentsInterpolator(PathInterpolator):
         # rediscretisize both paths
         start_copy = copy.deepcopy(self.start_value)
         # TODO find out why self.start_value.copy() doesn't work
-        self.start_value = EqualSubsegmentsInterpolator.process_path(self.start_value,
-                                                                     self.end_value)
+        self.start_value = EqualSubsegmentsInterpolator.process_path(
+            self.start_value, self.end_value
+        )
         self.end_value = EqualSubsegmentsInterpolator.process_path(
-            self.end_value, start_copy)
+            self.end_value, start_copy
+        )
 
         self.truncate_subpaths()
 
@@ -771,15 +808,15 @@ class FirstNodesInterpolator(PathInterpolator):
             segment = 0
             for y in range(len(self.start_value)):
                 for z in range(1, len(self.start_value[y])):
-                    leng = bezlenapprx(self.start_value[y][z - 1],
-                                       self.start_value[y][z])
+                    leng = bezlenapprx(
+                        self.start_value[y][z - 1], self.start_value[y][z]
+                    )
                     if leng > maxlen:
                         maxlen = leng
                         subpath = y
                         segment = z
-            sp1, sp2 = self.start_value[subpath][segment - 1:segment + 1]
-            self.start_value[subpath][segment -
-                                      1:segment + 1] = cspbezsplit(sp1, sp2)
+            sp1, sp2 = self.start_value[subpath][segment - 1 : segment + 1]
+            self.start_value[subpath][segment - 1 : segment + 1] = cspbezsplit(sp1, sp2)
         # if swapped, swap them back
         if lengthdiff > 0:
             self.start_value, self.end_value = self.end_value, self.start_value

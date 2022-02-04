@@ -22,39 +22,48 @@ import inkex
 
 from jessyink_install import JessyInkMixin, _
 
+
 class JessyinkEffects(JessyInkMixin, inkex.EffectExtension):
     """Add ad effect to jessy ink selected items"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
-        pars.add_argument('--effectInOrder', type=int, default=1)
-        pars.add_argument('--effectInDuration', type=float, default=0.8)
-        pars.add_argument('--effectIn', default='none')
-        pars.add_argument('--effectOutOrder', type=int, default=1)
-        pars.add_argument('--effectOutDuration', type=float, default=0.8)
-        pars.add_argument('--effectOut', default='none')
+        pars.add_argument("--tab")
+        pars.add_argument("--effectInOrder", type=int, default=1)
+        pars.add_argument("--effectInDuration", type=float, default=0.8)
+        pars.add_argument("--effectIn", default="none")
+        pars.add_argument("--effectOutOrder", type=int, default=1)
+        pars.add_argument("--effectOutDuration", type=float, default=0.8)
+        pars.add_argument("--effectOut", default="none")
 
     def effect(self):
         self.is_installed()
         if not self.svg.selected:
             raise inkex.AbortExtension(
-                _("No object selected. Please select the object you want to "
-                  "assign an effect to and then press apply.\n"))
+                _(
+                    "No object selected. Please select the object you want to "
+                    "assign an effect to and then press apply.\n"
+                )
+            )
 
         for elem in self.svg.selected.values():
-            self._process(elem, 'effectIn')
-            self._process(elem, 'effectOut')
+            self._process(elem, "effectIn")
+            self._process(elem, "effectOut")
 
     def _process(self, elem, name):
         effect = getattr(self.options, name)
-        order = getattr(self.options, name + 'Order')
-        duration = int(getattr(self.options, name + 'Duration') * 1000)
+        order = getattr(self.options, name + "Order")
+        duration = int(getattr(self.options, name + "Duration") * 1000)
 
         if effect in ("appear", "fade", "pop"):
-            elem.set("jessyink:" + name, inkex.Style(name=effect, order=order, length=duration))
+            elem.set(
+                "jessyink:" + name,
+                inkex.Style(name=effect, order=order, length=duration),
+            )
             # Remove possible view argument.
-            elem.pop('jessyink:view', None)
+            elem.pop("jessyink:view", None)
         else:
-            elem.pop('jessyink:' + name, None)
+            elem.pop("jessyink:" + name, None)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     JessyinkEffects().run()

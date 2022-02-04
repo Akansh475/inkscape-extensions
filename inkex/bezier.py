@@ -33,15 +33,19 @@ from .localization import inkex_gettext as _
 
 # bez = ((bx0,by0),(bx1,by1),(bx2,by2),(bx3,by3))
 
+
 def pointdistance(point_a, point_b):
     """The straight line distance between two points"""
-    return math.sqrt(((point_b[0] - point_a[0]) ** 2) + ((point_b[1] - point_a[1]) ** 2))
+    return math.sqrt(
+        ((point_b[0] - point_a[0]) ** 2) + ((point_b[1] - point_a[1]) ** 2)
+    )
 
 
 def between_point(point_a, point_b, time=0.5):
     """Returns the point between point a and point b"""
-    return point_a[0] + time * (point_b[0] - point_a[0]),\
-           point_a[1] + time * (point_b[1] - point_a[1])
+    return point_a[0] + time * (point_b[0] - point_a[0]), point_a[1] + time * (
+        point_b[1] - point_a[1]
+    )
 
 
 def percent_point(point_a, point_b, percent=50.0):
@@ -54,32 +58,35 @@ def root_wrapper(root_a, root_b, root_c, root_d):
     if root_a:
         # Monics formula see http://en.wikipedia.org/wiki/Cubic_function#Monic_formula_of_roots
         mono_a, mono_b, mono_c = (root_b / root_a, root_c / root_a, root_d / root_a)
-        m = 2.0 * mono_a ** 3 - 9.0 * mono_a * mono_b + 27.0 * mono_c
-        k = mono_a ** 2 - 3.0 * mono_b
-        n = m ** 2 - 4.0 * k ** 3
-        w1 = -.5 + .5 * cmath.sqrt(-3.0)
-        w2 = -.5 - .5 * cmath.sqrt(-3.0)
+        m = 2.0 * mono_a**3 - 9.0 * mono_a * mono_b + 27.0 * mono_c
+        k = mono_a**2 - 3.0 * mono_b
+        n = m**2 - 4.0 * k**3
+        w1 = -0.5 + 0.5 * cmath.sqrt(-3.0)
+        w2 = -0.5 - 0.5 * cmath.sqrt(-3.0)
         if n < 0:
-            m1 = pow(complex((m + cmath.sqrt(n)) / 2), 1. / 3)
-            n1 = pow(complex((m - cmath.sqrt(n)) / 2), 1. / 3)
+            m1 = pow(complex((m + cmath.sqrt(n)) / 2), 1.0 / 3)
+            n1 = pow(complex((m - cmath.sqrt(n)) / 2), 1.0 / 3)
         else:
             if m + math.sqrt(n) < 0:
-                m1 = -pow(-(m + math.sqrt(n)) / 2, 1. / 3)
+                m1 = -pow(-(m + math.sqrt(n)) / 2, 1.0 / 3)
             else:
-                m1 = pow((m + math.sqrt(n)) / 2, 1. / 3)
+                m1 = pow((m + math.sqrt(n)) / 2, 1.0 / 3)
             if m - math.sqrt(n) < 0:
-                n1 = -pow(-(m - math.sqrt(n)) / 2, 1. / 3)
+                n1 = -pow(-(m - math.sqrt(n)) / 2, 1.0 / 3)
             else:
-                n1 = pow((m - math.sqrt(n)) / 2, 1. / 3)
-        return (-1. / 3 * (mono_a + m1 + n1),
-                -1. / 3 * (mono_a + w1 * m1 + w2 * n1),
-                -1. / 3 * (mono_a + w2 * m1 + w1 * n1))
+                n1 = pow((m - math.sqrt(n)) / 2, 1.0 / 3)
+        return (
+            -1.0 / 3 * (mono_a + m1 + n1),
+            -1.0 / 3 * (mono_a + w1 * m1 + w2 * n1),
+            -1.0 / 3 * (mono_a + w2 * m1 + w1 * n1),
+        )
     elif root_b:
-        det = root_c ** 2.0 - 4.0 * root_b * root_d
+        det = root_c**2.0 - 4.0 * root_b * root_d
         if det:
             return (
                 (-root_c + cmath.sqrt(det)) / (2.0 * root_b),
-                (-root_c - cmath.sqrt(det)) / (2.0 * root_b))
+                (-root_c - cmath.sqrt(det)) / (2.0 * root_b),
+            )
         return (-root_c / (2.0 * root_b),)
     elif root_c:
         return (1.0 * (-root_d / root_c),)
@@ -88,9 +95,11 @@ def root_wrapper(root_a, root_b, root_c, root_d):
 
 def bezlenapprx(sp1, sp2):
     """Return the aproximate length between two beziers"""
-    return pointdistance(sp1[1], sp1[2]) \
-           + pointdistance(sp1[2], sp2[0]) \
-           + pointdistance(sp2[0], sp2[1])
+    return (
+        pointdistance(sp1[1], sp1[2])
+        + pointdistance(sp1[2], sp2[0])
+        + pointdistance(sp2[0], sp2[1])
+    )
 
 
 def cspbezsplit(sp1, sp2, time=0.5):
@@ -182,16 +191,16 @@ def linebezierintersect(arg_a, bez):
 def bezierpointatt(bez, t):
     """Get coords at the given time point along a bezier curve"""
     ax, ay, bx, by, cx, cy, x0, y0 = bezierparameterize(bez)
-    x = ax * (t ** 3) + bx * (t ** 2) + cx * t + x0
-    y = ay * (t ** 3) + by * (t ** 2) + cy * t + y0
+    x = ax * (t**3) + bx * (t**2) + cx * t + x0
+    y = ay * (t**3) + by * (t**2) + cy * t + y0
     return x, y
 
 
 def bezierslopeatt(bez, t):
     """Get slope at the given time point along a bezier curve"""
     ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
-    dx = 3 * ax * (t ** 2) + 2 * bx * t + cx
-    dy = 3 * ay * (t ** 2) + 2 * by * t + cy
+    dx = 3 * ax * (t**2) + 2 * bx * t + cx
+    dy = 3 * ay * (t**2) + 2 * by * t + cy
     return dx, dy
 
 
@@ -274,7 +283,7 @@ def addifclose(bez, l, error=0.001):
 def balf(t, args):
     """Bezier Arc Length Function"""
     ax, bx, cx, ay, by, cy = args
-    retval = (ax * (t ** 2) + bx * t + cx) ** 2 + (ay * (t ** 2) + by * t + cy) ** 2
+    retval = (ax * (t**2) + bx * t + cx) ** 2 + (ay * (t**2) + by * t + cy) ** 2
     return math.sqrt(retval)
 
 
@@ -293,7 +302,7 @@ def simpson(start, end, maxiter, tolerance, bezier_args):
     Returns:
         float: the appoximate length of the bezier curve
     """
-    
+
     n = 2
     multiplier = (end - start) / 6.0
     endsum = balf(start, bezier_args) + balf(end, bezier_args)
@@ -340,10 +349,12 @@ def beziertatlength(bez, l=0.5, tolerance=0.001):
         diff = curlen - targetlen
     return time
 
+
 def maxdist(bez):
     """Get maximum distance within bezier curve"""
     seg = DirectedLineSegment(bez[0], bez[3])
     return max(seg.distance_to_point(*bez[1]), seg.distance_to_point(*bez[2]))
+
 
 def cspsubdiv(csp, flat):
     """Sub-divide cubic sub-paths"""
@@ -373,10 +384,9 @@ def subdiv(sp, flat, i=1):
 
 def csparea(csp):
     """Get area in cubic sub-path"""
-    MAT_AREA = numpy.array([[0, 2, 1, -3],
-                            [-2, 0, 1, 1],
-                            [-1, -1, 0, 2],
-                            [3, -1, -2, 0]])
+    MAT_AREA = numpy.array(
+        [[0, 2, 1, -3], [-2, 0, 1, 1], [-1, -1, 0, 2], [3, -1, -2, 0]]
+    )
     area = 0.0
     for sp in csp:
         if len(sp) < 2:
@@ -384,8 +394,12 @@ def csparea(csp):
         for x, coord in enumerate(sp):  # calculate polygon area
             area += 0.5 * sp[x - 1][1][0] * (coord[1][1] - sp[x - 2][1][1])
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
-            vec_x = numpy.array([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
-            vec_y = numpy.array([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
+            vec_x = numpy.array(
+                [sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]]
+            )
+            vec_y = numpy.array(
+                [sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]]
+            )
             vex = numpy.matmul(vec_x, MAT_AREA)
             area += 0.15 * numpy.matmul(vex, vec_y.T)
     return -area
@@ -393,47 +407,54 @@ def csparea(csp):
 
 def cspcofm(csp):
     """Get cubic sub-path coefficient"""
-    MAT_COFM_0 = numpy.array([[0, 35, 10, -45],
-                               [-35, 0, 12, 23],
-                               [-10, -12, 0, 22],
-                               [45, -23, -22, 0]])
+    MAT_COFM_0 = numpy.array(
+        [[0, 35, 10, -45], [-35, 0, 12, 23], [-10, -12, 0, 22], [45, -23, -22, 0]]
+    )
 
-    MAT_COFM_1 = numpy.array([[0, 15, 3, -18],
-                               [-15, 0, 9, 6],
-                               [-3, -9, 0, 12],
-                               [18, -6, -12, 0]])
+    MAT_COFM_1 = numpy.array(
+        [[0, 15, 3, -18], [-15, 0, 9, 6], [-3, -9, 0, 12], [18, -6, -12, 0]]
+    )
 
-    MAT_COFM_2 = numpy.array([[0, 12, 6, -18],
-                               [-12, 0, 9, 3],
-                               [-6, -9, 0, 15],
-                               [18, -3, -15, 0]])
+    MAT_COFM_2 = numpy.array(
+        [[0, 12, 6, -18], [-12, 0, 9, 3], [-6, -9, 0, 15], [18, -3, -15, 0]]
+    )
 
-    MAT_COFM_3 = numpy.array([[0, 22, 23, -45],
-                               [-22, 0, 12, 10],
-                               [-23, -12, 0, 35],
-                               [45, -10, -35, 0]])
+    MAT_COFM_3 = numpy.array(
+        [[0, 22, 23, -45], [-22, 0, 12, 10], [-23, -12, 0, 35], [45, -10, -35, 0]]
+    )
     area = csparea(csp)
     xc = 0.0
     yc = 0.0
-    if abs(area) < 1.e-8:
+    if abs(area) < 1.0e-8:
         raise ValueError(_("Area is zero, cannot calculate Center of Mass"))
     for sp in csp:
         for x, coord in enumerate(sp):  # calculate polygon moment
-            xc += sp[x - 1][1][1] * (sp[x - 2][1][0] - coord[1][0]) \
-                * (sp[x - 2][1][0] + sp[x - 1][1][0] + coord[1][0]) / 6
-            yc += sp[x - 1][1][0] * (coord[1][1] - sp[x - 2][1][1]) \
-                * (sp[x - 2][1][1] + sp[x - 1][1][1] + coord[1][1]) / 6
+            xc += (
+                sp[x - 1][1][1]
+                * (sp[x - 2][1][0] - coord[1][0])
+                * (sp[x - 2][1][0] + sp[x - 1][1][0] + coord[1][0])
+                / 6
+            )
+            yc += (
+                sp[x - 1][1][0]
+                * (coord[1][1] - sp[x - 2][1][1])
+                * (sp[x - 2][1][1] + sp[x - 1][1][1] + coord[1][1])
+                / 6
+            )
         for i in range(1, len(sp)):  # add contribution from cubic Bezier
-            vec_x = numpy.array([sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]])
-            vec_y = numpy.array([sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]])
+            vec_x = numpy.array(
+                [sp[i - 1][1][0], sp[i - 1][2][0], sp[i][0][0], sp[i][1][0]]
+            )
+            vec_y = numpy.array(
+                [sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]]
+            )
+
             def _mul(MAT):
                 return numpy.matmul(numpy.matmul(vec_x, MAT), vec_y.T)
-            vec_t = numpy.array([
-                _mul(MAT_COFM_0),
-                _mul(MAT_COFM_1),
-                _mul(MAT_COFM_2),
-                _mul(MAT_COFM_3)
-            ])
+
+            vec_t = numpy.array(
+                [_mul(MAT_COFM_0), _mul(MAT_COFM_1), _mul(MAT_COFM_2), _mul(MAT_COFM_3)]
+            )
             xc += numpy.matmul(vec_x, vec_t.T) / 280
             yc += numpy.matmul(vec_y, vec_t.T) / 280
     return -xc / area, -yc / area

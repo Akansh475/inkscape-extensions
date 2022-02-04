@@ -32,6 +32,7 @@ import inkex
 
 class RubberStretch(Diffeo):
     """Distort selected paths"""
+
     ratio = property(lambda self: -(self.options.ratio / 100))
     curve = property(lambda self: min(self.options.curve / 100, 0.99))
 
@@ -49,17 +50,42 @@ class RubberStretch(Diffeo):
         by0 = -self.bbox.center.y
 
         x, y = (bpt[0] - bx0), (bpt[1] - by0)
-        sx1 = (1 + self.curve * (x / (self.bbox.width / 2) + 1) * \
-              (x / (self.bbox.width / 2) - 1)) * 2 ** self.ratio
-        sy1 = (1 + self.curve * (y / (self.bbox.height / 2) + 1) * \
-              (y / (self.bbox.height / 2) - 1)) * 2 ** self.ratio
+        sx1 = (
+            1
+            + self.curve
+            * (x / (self.bbox.width / 2) + 1)
+            * (x / (self.bbox.width / 2) - 1)
+        ) * 2**self.ratio
+        sy1 = (
+            1
+            + self.curve
+            * (y / (self.bbox.height / 2) + 1)
+            * (y / (self.bbox.height / 2) - 1)
+        ) * 2**self.ratio
         bpt[0] = bx0 + x * sy1
         bpt[1] = by0 + y / sx1
         for vect in vects:
             dx_dx = sy1
-            dx_dy = x * 2 * self.curve * y / self.bbox.height / self.bbox.height * 2 ** self.ratio
-            dy_dx = -y * 2 * self.curve * x / self.bbox.width / \
-                        self.bbox.width * 2 ** self.ratio / sx1 / sx1
+            dx_dy = (
+                x
+                * 2
+                * self.curve
+                * y
+                / self.bbox.height
+                / self.bbox.height
+                * 2**self.ratio
+            )
+            dy_dx = (
+                -y
+                * 2
+                * self.curve
+                * x
+                / self.bbox.width
+                / self.bbox.width
+                * 2**self.ratio
+                / sx1
+                / sx1
+            )
             dy_dy = 1 / sx1
             vect[0] = dx_dx * vect[X] + dx_dy * vect[Y]
             vect[1] = dy_dx * vect[X] + dy_dy * vect[Y]

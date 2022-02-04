@@ -2,21 +2,21 @@
 # coding=utf-8
 #
 # Copyright (C) 2007-2019 Matt Harrison, matthewharrison [at] gmail.com
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-# 
+#
 """
 A script that slices images.  It might be useful for web design.
 
@@ -54,27 +54,37 @@ import tempfile
 import inkex
 from inkex.command import inkscape
 
+
 class ExportSlices(inkex.EffectExtension):
     """Exports all rectangles in the current layer"""
-    GREEN = "#00ff00"  # new export
-    GREY = "#555555"   # not exported
-    RED = "#ff0000"    # overwrite
 
+    GREEN = "#00ff00"  # new export
+    GREY = "#555555"  # not exported
+    RED = "#ff0000"  # overwrite
 
     def __init__(self):
         super(ExportSlices, self).__init__()
         self.color_map = {}  # map node id to color based on overwrite
 
-
     def add_arguments(self, pars):
         pars.add_argument("--tab")
-        pars.add_argument("--directory", default=os.path.expanduser("~"),\
-            help="Existing destination directory")
-        pars.add_argument("--layer", default="slices", help="Layer with slices (rects) in it")
+        pars.add_argument(
+            "--directory",
+            default=os.path.expanduser("~"),
+            help="Existing destination directory",
+        )
+        pars.add_argument(
+            "--layer", default="slices", help="Layer with slices (rects) in it"
+        )
         pars.add_argument("--iconmode", type=inkex.Boolean, help="Icon export mode")
-        pars.add_argument("--sizes", default="128, 64, 48, 32, 24, 16",\
-            help="sizes to export comma separated")
-        pars.add_argument("--overwrite", type=inkex.Boolean, help="Overwrite existing exports?")
+        pars.add_argument(
+            "--sizes",
+            default="128, 64, 48, 32, 24, 16",
+            help="sizes to export comma separated",
+        )
+        pars.add_argument(
+            "--overwrite", type=inkex.Boolean, help="Overwrite existing exports?"
+        )
         pars.add_argument("--dpi", default="300", help="Dots per inch (300 default)")
 
     def effect(self):
@@ -83,7 +93,9 @@ class ExportSlices(inkex.EffectExtension):
 
         nodes = self.get_layer_nodes(self.options.layer)
         if nodes is None:
-            raise inkex.AbortExtension("Slice: '{}' does not exist.".format(self.options.layer))
+            raise inkex.AbortExtension(
+                "Slice: '{}' does not exist.".format(self.options.layer)
+            )
 
         # set opacity to zero in slices
         for node in nodes:
@@ -92,8 +104,8 @@ class ExportSlices(inkex.EffectExtension):
         # save file once now
         # if we have multiple slices we will make multiple calls
         # to inkscape
-        (_, tmp_svg) = tempfile.mkstemp('.svg')
-        with open(tmp_svg, 'wb') as fout:
+        (_, tmp_svg) = tempfile.mkstemp(".svg")
+        with open(tmp_svg, "wb") as fout:
             fout.write(self.svg.tostring())
 
         # in case there are overlapping rects, clear them all out before
@@ -120,16 +132,15 @@ class ExportSlices(inkex.EffectExtension):
         """
         # get layer we intend to slice
         slice_node = None
-        slice_layer = self.svg.findall('svg:g')
+        slice_layer = self.svg.findall("svg:g")
         for node in slice_layer:
-            label_value = node.label 
+            label_value = node.label
             if label_value == layer_name:
                 slice_node = node
 
         if slice_node is not None:
-            return slice_node.findall('svg:rect')
+            return slice_node.findall("svg:rect")
         return slice_node
-
 
     def clear_color(self, node):
         """
@@ -144,7 +155,7 @@ class ExportSlices(inkex.EffectExtension):
     def change_color(self, node):
         """
         set color from color_map and set opacity to 25%
-        
+
         """
         node_id = node.attrib["id"]
         color = self.color_map[node_id]
@@ -156,13 +167,13 @@ class ExportSlices(inkex.EffectExtension):
         self.color_map[node_id] = color
         if color == ExportSlices.GREY:  # skipping
             return
-        svg_file = self.options.input_file 
+        svg_file = self.options.input_file
         inkscape(svg_file, **kwargs)
 
     def get_color_and_command_kwargs(self, node, height=None, width=None):
         directory = self.options.directory
-        node_id = node.attrib['id']
-        size = '' if height is None else '-{}x{}'.format(width, height)
+        node_id = node.attrib["id"]
+        size = "" if height is None else "-{}x{}".format(width, height)
         file_name = "{}{}.png".format(node_id, size)
         filename = os.path.join(directory, file_name)
         color = ExportSlices.GREY  # skipping
@@ -170,15 +181,19 @@ class ExportSlices(inkex.EffectExtension):
             color = ExportSlices.RED  #  overwritten
             if not os.path.exists(filename):
                 color = ExportSlices.GREEN  # new export
-            kwargs = {'export-id': node_id, 'export-filename': filename,
-                      'export-dpi': self.options.dpi}
+            kwargs = {
+                "export-id": node_id,
+                "export-filename": filename,
+                "export-dpi": self.options.dpi,
+            }
             if width:
-                kwargs['export-height'] = str(height)
-                kwargs['export-width'] = str(width)
+                kwargs["export-height"] = str(height)
+                kwargs["export-width"] = str(width)
             return color, kwargs
         else:
             inkex.errormsg("Export exists ({}) not overwriting".format(filename))
             return color, {}
+
 
 if __name__ == "__main__":
     ExportSlices().run()

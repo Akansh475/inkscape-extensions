@@ -27,9 +27,19 @@ from copy import deepcopy
 from lxml import etree
 
 import inkex
-from inkex import Group, Layer, Anchor, Switch, PathElement, \
-                  Metadata, NamedView, Gradient, SvgDocumentElement, \
-                  Path, Transform
+from inkex import (
+    Group,
+    Layer,
+    Anchor,
+    Switch,
+    PathElement,
+    Metadata,
+    NamedView,
+    Gradient,
+    SvgDocumentElement,
+    Path,
+    Transform,
+)
 
 import synfig_fileformat as sif
 from synfig_prepare import MalformedSVGError, SynfigPrep, get_dimension
@@ -38,6 +48,7 @@ from synfig_prepare import MalformedSVGError, SynfigPrep, get_dimension
 # ##### Utility Classes ####################################
 class UnsupportedException(Exception):
     """When part of an element is not supported, this exception is raised to invalidate the whole element"""
+
     pass
 
 
@@ -46,7 +57,7 @@ class SynfigDocument(object):
 
     def __init__(self, width=1024, height=768, name="Synfig Animation 1"):
         self.root_canvas = etree.fromstring(
-                """
+            """
     <canvas
         version="0.5"
         width="{:f}"
@@ -57,7 +68,9 @@ class SynfigDocument(object):
         >
       <name>{}</name>
     </canvas>
-    """.format(width, height, name)
+    """.format(
+                width, height, name
+            )
         )
 
         self._update_viewbox()
@@ -75,10 +88,12 @@ class SynfigDocument(object):
 
     def _update_viewbox(self):
         """Update the viewbox to match document width and height"""
-        attr_viewbox = "{:f} {:f} {:f} {:f}".format(-self.width / 2.0 / sif.kux,
-                                                    self.height / 2.0 / sif.kux,
-                                                    self.width / 2.0 / sif.kux,
-                                                    -self.height / 2.0 / sif.kux)
+        attr_viewbox = "{:f} {:f} {:f} {:f}".format(
+            -self.width / 2.0 / sif.kux,
+            self.height / 2.0 / sif.kux,
+            self.width / 2.0 / sif.kux,
+            -self.height / 2.0 / sif.kux,
+        )
         self.root_canvas.set("view-box", attr_viewbox)
 
     def get_width(self):
@@ -141,7 +156,9 @@ class SynfigDocument(object):
 
         y = self.height - y
 
-        assert self.coor_svg2sif([x, y]) == vector, "sif to svg coordinate conversion error"
+        assert (
+            self.coor_svg2sif([x, y]) == vector
+        ), "sif to svg coordinate conversion error"
 
         return [x, y]
 
@@ -407,7 +424,16 @@ class SynfigDocument(object):
     # ## Public layer API
     # ##  Should be used by outside functions to create layers and set layer parameters
 
-    def create_layer(self, layer_type, desc, params={}, guids={}, canvas=None, active=True, version="auto"):
+    def create_layer(
+        self,
+        layer_type,
+        desc,
+        params={},
+        guids={},
+        canvas=None,
+        active=True,
+        version="auto",
+    ):
         """Create a new layer
 
         Keyword arguments:
@@ -433,11 +459,15 @@ class SynfigDocument(object):
                 param_guid = None
 
             if param_value is not None:
-                self.build_param(layer, param_name, param_value, param_type, guid=param_guid)
+                self.build_param(
+                    layer, param_name, param_value, param_type, guid=param_guid
+                )
 
         return layer
 
-    def set_param(self, layer, name, value, param_type="auto", guid=None, modify_linked=False):
+    def set_param(
+        self, layer, name, value, param_type="auto", guid=None, modify_linked=False
+    ):
         """Set a layer parameter
 
         Keyword arguments:
@@ -480,9 +510,17 @@ class SynfigDocument(object):
         """
         for param_name in params.keys():
             if param_name in guids.keys():
-                self.set_param(layer, param_name, params[param_name], guid=guids[param_name], modify_linked=modify_linked)
+                self.set_param(
+                    layer,
+                    param_name,
+                    params[param_name],
+                    guid=guids[param_name],
+                    modify_linked=modify_linked,
+                )
             else:
-                self.set_param(layer, param_name, params[param_name], modify_linked=modify_linked)
+                self.set_param(
+                    layer, param_name, params[param_name], modify_linked=modify_linked
+                )
 
     def get_param(self, layer, name, param_type="auto"):
         """Get the value of a layer parameter
@@ -507,7 +545,9 @@ class SynfigDocument(object):
                 elif param_type == "integer":
                     return int(param[0].get("integer", "0"))
                 else:
-                    raise Exception("Getting this type of parameter not yet implemented")
+                    raise Exception(
+                        "Getting this type of parameter not yet implemented"
+                    )
 
     # ## Global defs, and related
 
@@ -517,14 +557,23 @@ class SynfigDocument(object):
         self.filters[filter_id] = f
 
     # SVG Gradients
-    def add_linear_gradient(self, gradient_id, p1, p2, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], stops=[], link="", spread_method="pad"):
+    def add_linear_gradient(
+        self,
+        gradient_id,
+        p1,
+        p2,
+        mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        stops=[],
+        link="",
+        spread_method="pad",
+    ):
         """Register a linear gradient definition"""
         gradient = {
             "type": "linear",
             "p1": p1,
             "p2": p2,
             "mtx": mtx,
-            "spreadMethod": spread_method
+            "spreadMethod": spread_method,
         }
         if stops:
             gradient["stops"] = stops
@@ -535,7 +584,17 @@ class SynfigDocument(object):
             raise MalformedSVGError("Gradient has neither stops nor link")
         self.gradients[gradient_id] = gradient
 
-    def add_radial_gradient(self, gradient_id, center, radius, focus, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], stops=[], link="", spread_method="pad"):
+    def add_radial_gradient(
+        self,
+        gradient_id,
+        center,
+        radius,
+        focus,
+        mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        stops=[],
+        link="",
+        spread_method="pad",
+    ):
         """Register a radial gradient definition"""
         gradient = {
             "type": "radial",
@@ -543,7 +602,7 @@ class SynfigDocument(object):
             "radius": radius,
             "focus": focus,
             "mtx": mtx,
-            "spreadMethod": spread_method
+            "spreadMethod": spread_method,
         }
         if stops:
             gradient["stops"] = stops
@@ -641,8 +700,10 @@ class SynfigDocument(object):
 
             # double the gradient size
             if g["type"] == "linear":
-                g["p2"] = [g["p1"][0] + 2.0 * (g["p2"][0] - g["p1"][0]),
-                           g["p1"][1] + 2.0 * (g["p2"][1] - g["p1"][1])]
+                g["p2"] = [
+                    g["p1"][0] + 2.0 * (g["p2"][0] - g["p1"][0]),
+                    g["p1"][1] + 2.0 * (g["p2"][1] - g["p1"][1]),
+                ]
             if g["type"] == "radial":
                 g["radius"] *= 2.0
 
@@ -659,12 +720,14 @@ class SynfigDocument(object):
             g["radius"] = self.distance_svg2sif(g["radius"])
 
         # Delete extra attribs
-        removed_attribs = ["type",
-                           "stops",
-                           "stops_guid",
-                           "mtx",
-                           "focus",
-                           "spreadMethod"]
+        removed_attribs = [
+            "type",
+            "stops",
+            "stops_guid",
+            "mtx",
+            "focus",
+            "spreadMethod",
+        ]
         for x in removed_attribs:
             if x in g.keys():
                 del g[x]
@@ -686,10 +749,11 @@ class SynfigDocument(object):
 
         Returns: list of layers
         """
-        blur = self.create_layer("blur", name, params={
-            "blend_method": sif.blend_methods["straight"],
-            "size": [x, y]
-        })
+        blur = self.create_layer(
+            "blur",
+            name,
+            params={"blend_method": sif.blend_methods["straight"], "size": [x, y]},
+        )
 
         if is_end:
             return layers + [blur]
@@ -714,7 +778,9 @@ class SynfigDocument(object):
             return layers
 
         overlay_enc = self.op_encapsulate([overlay])
-        self.set_param(overlay_enc[0], "blend_method", sif.blend_methods["straight onto"])
+        self.set_param(
+            overlay_enc[0], "blend_method", sif.blend_methods["straight onto"]
+        )
         ret = layers + overlay_enc
 
         if is_end:
@@ -839,14 +905,18 @@ class SynfigDocument(object):
         dest_br = Transform(mtx).apply_to_point(dest_br)
         dest_bl = Transform(mtx).apply_to_point(dest_bl)
 
-        warp = self.create_layer("warp", name, params={
-            "src_tl": self.coor_svg2sif(src_tl),
-            "src_br": self.coor_svg2sif(src_br),
-            "dest_tl": self.coor_svg2sif(dest_tl),
-            "dest_tr": self.coor_svg2sif(dest_tr),
-            "dest_br": self.coor_svg2sif(dest_br),
-            "dest_bl": self.coor_svg2sif(dest_bl)
-        })
+        warp = self.create_layer(
+            "warp",
+            name,
+            params={
+                "src_tl": self.coor_svg2sif(src_tl),
+                "src_br": self.coor_svg2sif(src_br),
+                "dest_tl": self.coor_svg2sif(dest_tl),
+                "dest_tr": self.coor_svg2sif(dest_tr),
+                "dest_br": self.coor_svg2sif(dest_br),
+                "dest_bl": self.coor_svg2sif(dest_bl),
+            },
+        )
 
         if is_end:
             return layers + [warp]
@@ -857,6 +927,7 @@ class SynfigDocument(object):
 # ##### Utility Functions ##################################
 
 # ## Path related
+
 
 def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
     """
@@ -910,11 +981,15 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
     for s in path:
         cmd, params = s
         if cmd != "M" and bline_list == []:
-            raise MalformedSVGError("Bad path data: path doesn't start with moveto, {}, {}".format(s, path))
+            raise MalformedSVGError(
+                "Bad path data: path doesn't start with moveto, {}, {}".format(s, path)
+            )
         elif cmd == "M":
             # Add previous point to subpath
             if last:
-                bline_list[-1]["points"].append([lastctrl[:], last[:], last[:], lastsplit])
+                bline_list[-1]["points"].append(
+                    [lastctrl[:], last[:], last[:], lastsplit]
+                )
             # Start a new subpath
             bline_list.append({"nodetypes": "", "loop": False, "points": []})
             # Save coordinates of this point
@@ -925,10 +1000,10 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
             nt = nt[1:]
         elif cmd in "LHV":
             bline_list[-1]["points"].append([lastctrl[:], last[:], last[:], lastsplit])
-            if cmd == 'H':
+            if cmd == "H":
                 last = [params[0], last[1]]
                 lastctrl = [params[0], last[1]]
-            elif cmd == 'V':
+            elif cmd == "V":
                 last = [last[0], params[0]]
                 lastctrl = [last[0], params[0]]
             else:
@@ -936,31 +1011,36 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
                 lastctrl = params[:]
             lastsplit = False if nt[0] == "z" else True
             nt = nt[1:]
-        elif cmd == 'C':
-            bline_list[-1]["points"].append([lastctrl[:], last[:], params[:2], lastsplit])
+        elif cmd == "C":
+            bline_list[-1]["points"].append(
+                [lastctrl[:], last[:], params[:2], lastsplit]
+            )
             last = params[-2:]
             lastctrl = params[2:4]
             lastsplit = False if nt[0] == "z" else True
             nt = nt[1:]
-        elif cmd == 'Q':
+        elif cmd == "Q":
             q0 = last[:]
             q1 = params[0:2]
             q2 = params[2:4]
             x0 = q0[0]
-            x1 = 1. / 3 * q0[0] + 2. / 3 * q1[0]
-            x2 = 2. / 3 * q1[0] + 1. / 3 * q2[0]
+            x1 = 1.0 / 3 * q0[0] + 2.0 / 3 * q1[0]
+            x2 = 2.0 / 3 * q1[0] + 1.0 / 3 * q2[0]
             x3 = q2[0]
             y0 = q0[1]
-            y1 = 1. / 3 * q0[1] + 2. / 3 * q1[1]
-            y2 = 2. / 3 * q1[1] + 1. / 3 * q2[1]
+            y1 = 1.0 / 3 * q0[1] + 2.0 / 3 * q1[1]
+            y2 = 2.0 / 3 * q1[1] + 1.0 / 3 * q2[1]
             y3 = q2[1]
-            bline_list[-1]["points"].append([lastctrl[:], [x0, y0], [x1, y1], lastsplit])
+            bline_list[-1]["points"].append(
+                [lastctrl[:], [x0, y0], [x1, y1], lastsplit]
+            )
             last = [x3, y3]
             lastctrl = [x2, y2]
             lastsplit = False if nt[0] == "z" else True
             nt = nt[1:]
-        elif cmd == 'A':
+        elif cmd == "A":
             from inkex.paths import arc_to_path
+
             arcp = arc_to_path(last[:], params[:])
             arcp[0][0] = lastctrl[:]
             last = arcp[-1][1]
@@ -981,7 +1061,9 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
                 bline_list[-1]["points"][0][0] = lastctrl[:]
             else:
                 # Otherwise draw a line to the starting point
-                bline_list[-1]["points"].append([lastctrl[:], last[:], last[:], lastsplit])
+                bline_list[-1]["points"].append(
+                    [lastctrl[:], last[:], last[:], lastsplit]
+                )
 
             # Clear the variables (no more points need to be added)
             last = []
@@ -1008,6 +1090,7 @@ def path_to_bline_list(path_d, nodetypes=None, mtx=[[1.0, 0.0, 0.0], [0.0, 1.0, 
 
 # ## Style related
 
+
 def extract_color(style, color_attrib, *opacity_attribs):
     if color_attrib in style.keys():
         if style[color_attrib] == "none":
@@ -1017,7 +1100,12 @@ def extract_color(style, color_attrib, *opacity_attribs):
         c = (0, 0, 0)
 
     # Convert color scales and adjust gamma
-    color = [pow(c[0] / 255.0, sif.gamma), pow(c[1] / 255.0, sif.gamma), pow(c[2] / 255.0, sif.gamma), 1.0]
+    color = [
+        pow(c[0] / 255.0, sif.gamma),
+        pow(c[1] / 255.0, sif.gamma),
+        pow(c[2] / 255.0, sif.gamma),
+        1.0,
+    ]
 
     for opacity in opacity_attribs:
         if opacity in style.keys():
@@ -1057,11 +1145,11 @@ class SynfigExport(SynfigPrep):
         width = get_dimension(svg.get("width", 1024))
         height = get_dimension(svg.get("height", 768))
 
-        title = svg.getElement('svg:title')
+        title = svg.getElement("svg:title")
         if title:
             name = title.text
         else:
-            name = svg.get('sodipodi:docname', "Synfig Animation 1")
+            name = svg.get("sodipodi:docname", "Synfig Animation 1")
 
         doc = SynfigDocument(width, height, name)
 
@@ -1084,7 +1172,9 @@ class SynfigExport(SynfigPrep):
         if isinstance(node, SvgDocumentElement):
             self.parse_defs(node, d)
             return []
-        elif not isinstance(node, (Group, Anchor, Switch, PathElement, Metadata, NamedView)):
+        elif not isinstance(
+            node, (Group, Anchor, Switch, PathElement, Metadata, NamedView)
+        ):
             # An unsupported element
             return []
 
@@ -1131,13 +1221,27 @@ class SynfigExport(SynfigPrep):
 
             mtx = node.gradientTransform.matrix
 
-            link = node.get('xlink:href', "#")[1:]
+            link = node.get("xlink:href", "#")[1:]
             spread_method = node.get("spreadMethod", "pad")
             if link == "":
                 stops = self.parse_stops(node, d)
-                d.add_linear_gradient(gradient_id, [x1, y1], [x2, y2], mtx, stops=stops, spread_method=spread_method)
+                d.add_linear_gradient(
+                    gradient_id,
+                    [x1, y1],
+                    [x2, y2],
+                    mtx,
+                    stops=stops,
+                    spread_method=spread_method,
+                )
             else:
-                d.add_linear_gradient(gradient_id, [x1, y1], [x2, y2], mtx, link=link, spread_method=spread_method)
+                d.add_linear_gradient(
+                    gradient_id,
+                    [x1, y1],
+                    [x2, y2],
+                    mtx,
+                    link=link,
+                    spread_method=spread_method,
+                )
         elif node.TAG == "radialGradient":
             gradient_id = node.get("id", str(id(node)))
             cx = float(node.get("cx", "0.0"))
@@ -1148,13 +1252,29 @@ class SynfigExport(SynfigPrep):
 
             mtx = node.gradientTransform.matrix
 
-            link = node.get('xlink:href', "#")[1:]
+            link = node.get("xlink:href", "#")[1:]
             spread_method = node.get("spreadMethod", "pad")
             if link == "":
                 stops = self.parse_stops(node, d)
-                d.add_radial_gradient(gradient_id, [cx, cy], r, [fx, fy], mtx, stops=stops, spread_method=spread_method)
+                d.add_radial_gradient(
+                    gradient_id,
+                    [cx, cy],
+                    r,
+                    [fx, fy],
+                    mtx,
+                    stops=stops,
+                    spread_method=spread_method,
+                )
             else:
-                d.add_radial_gradient(gradient_id, [cx, cy], r, [fx, fy], mtx, link=link, spread_method=spread_method)
+                d.add_radial_gradient(
+                    gradient_id,
+                    [cx, cy],
+                    r,
+                    [fx, fy],
+                    mtx,
+                    link=link,
+                    spread_method=spread_method,
+                )
 
     def parse_stops(self, node, d):
         stops = {}
@@ -1174,8 +1294,7 @@ class SynfigExport(SynfigPrep):
         # A filter is just like an operator (the op_* functions),
         # except that it's created here
         def the_filter(d, layers, is_end=False):
-            refs = {None: layers,  # default
-                    "SourceGraphic": layers}
+            refs = {None: layers, "SourceGraphic": layers}  # default
             encapsulate_result = not is_end
 
             for child in node.iterchildren():
@@ -1221,7 +1340,9 @@ class SynfigExport(SynfigPrep):
 
                     if child.get("in2") == "BackgroundImage":
                         encapsulate_result = False
-                        l_out = d.op_set_blend(l_in, blend_method) + d.op_set_blend(l_in, "behind")
+                        l_out = d.op_set_blend(l_in, blend_method) + d.op_set_blend(
+                            l_in, "behind"
+                        )
                     elif child.get("in2") not in refs:
                         raise UnsupportedException
                     else:
@@ -1255,7 +1376,7 @@ class SynfigExport(SynfigPrep):
         style = node.style
 
         mtx = node.transform.matrix
-        blines = path_to_bline_list(node.get("d"), node.get('sodipodi:nodetypes'), mtx)
+        blines = path_to_bline_list(node.get("d"), node.get("sodipodi:nodetypes"), mtx)
         for bline in blines:
             d.bline_coor_svg2sif(bline)
             bline_guid = d.new_guid()
@@ -1268,18 +1389,27 @@ class SynfigExport(SynfigPrep):
                 else:
                     color = extract_color(style, "fill", "fill-opacity")
 
-                layer = d.create_layer("region", node_id, {
-                    "bline": bline,
-                    "color": color,
-                    "winding_style": 1 if style.setdefault("fill-rule", "nonzero") == "evenodd" else 0,
-                }, guids={
-                    "bline": bline_guid
-                })
+                layer = d.create_layer(
+                    "region",
+                    node_id,
+                    {
+                        "bline": bline,
+                        "color": color,
+                        "winding_style": 1
+                        if style.setdefault("fill-rule", "nonzero") == "evenodd"
+                        else 0,
+                    },
+                    guids={"bline": bline_guid},
+                )
 
                 if style["fill"].startswith("url"):
-                    color_layer = self.convert_url(style["fill"][5:].split(")")[0], mtx, d)[0]
+                    color_layer = self.convert_url(
+                        style["fill"][5:].split(")")[0], mtx, d
+                    )[0]
                     layer = d.op_color([layer], overlay=color_layer)[0]
-                    layer = d.op_fade([layer], extract_opacity(style, "fill-opacity"))[0]
+                    layer = d.op_fade([layer], extract_opacity(style, "fill-opacity"))[
+                        0
+                    ]
 
                 layers.append(layer)
 
@@ -1291,21 +1421,34 @@ class SynfigExport(SynfigPrep):
                 else:
                     color = extract_color(style, "stroke", "stroke-opacity")
 
-                layer = d.create_layer("outline", node_id, {
-                    "bline": bline,
-                    "color": color,
-                    "width": extract_width(style, "stroke-width", mtx),
-                    "sharp_cusps": True if style.setdefault("stroke-linejoin", "miter") == "miter" else False,
-                    "round_tip[0]": False if style.setdefault("stroke-linecap", "butt") == "butt" else True,
-                    "round_tip[1]": False if style.setdefault("stroke-linecap", "butt") == "butt" else True
-                }, guids={
-                    "bline": bline_guid
-                })
+                layer = d.create_layer(
+                    "outline",
+                    node_id,
+                    {
+                        "bline": bline,
+                        "color": color,
+                        "width": extract_width(style, "stroke-width", mtx),
+                        "sharp_cusps": True
+                        if style.setdefault("stroke-linejoin", "miter") == "miter"
+                        else False,
+                        "round_tip[0]": False
+                        if style.setdefault("stroke-linecap", "butt") == "butt"
+                        else True,
+                        "round_tip[1]": False
+                        if style.setdefault("stroke-linecap", "butt") == "butt"
+                        else True,
+                    },
+                    guids={"bline": bline_guid},
+                )
 
                 if style["stroke"].startswith("url"):
-                    color_layer = self.convert_url(style["stroke"][5:].split(")")[0], mtx, d)[0]
+                    color_layer = self.convert_url(
+                        style["stroke"][5:].split(")")[0], mtx, d
+                    )[0]
                     layer = d.op_color([layer], overlay=color_layer)[0]
-                    layer = d.op_fade([layer], extract_opacity(style, "stroke-opacity"))[0]
+                    layer = d.op_fade(
+                        [layer], extract_opacity(style, "stroke-opacity")
+                    )[0]
 
                 layers.append(layer)
 
@@ -1319,18 +1462,24 @@ class SynfigExport(SynfigPrep):
             return [None]
 
         if gradient["type"] == "linear":
-            layer = d.create_layer("linear_gradient", url_id,
-                                   d.gradient_to_params(gradient),
-                                   guids={"gradient": gradient["stops_guid"]})
+            layer = d.create_layer(
+                "linear_gradient",
+                url_id,
+                d.gradient_to_params(gradient),
+                guids={"gradient": gradient["stops_guid"]},
+            )
 
         if gradient["type"] == "radial":
-            layer = d.create_layer("radial_gradient", url_id,
-                                   d.gradient_to_params(gradient),
-                                   guids={"gradient": gradient["stops_guid"]})
+            layer = d.create_layer(
+                "radial_gradient",
+                url_id,
+                d.gradient_to_params(gradient),
+                guids={"gradient": gradient["stops_guid"]},
+            )
 
         trm = Transform(mtx) * Transform(gradient["mtx"])
         return d.op_transform([layer], trm.matrix)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     SynfigExport().run()

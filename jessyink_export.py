@@ -28,16 +28,18 @@ from inkex.command import take_snapshot
 
 from jessyink_install import JessyInkMixin
 
+
 class Export(JessyInkMixin, TempDirMixin, inkex.OutputExtension):
     """
     JessyInkExport Output Extension saves to a zipfile each of the layers.
     """
-    dir_prefix = 'jessyInk-'
+
+    dir_prefix = "jessyInk-"
 
     def add_arguments(self, pars):
-        pars.add_argument('--tab', type=str, dest='what')
-        pars.add_argument('--type', type=str, dest='type', default='pdf')
-        pars.add_argument('--resolution', type=int, default=92)
+        pars.add_argument("--tab", type=str, dest="what")
+        pars.add_argument("--type", type=str, dest="type", default="pdf")
+        pars.add_argument("--resolution", type=int, default=92)
 
     def save(self, stream):
         self.is_installed()
@@ -53,21 +55,25 @@ class Export(JessyInkMixin, TempDirMixin, inkex.OutputExtension):
 
             for node in layers:
                 # Make all layers invisible
-                node.style['display'] = "none"
+                node.style["display"] = "none"
 
             for node in layers:
                 # Show only one layer at a time.
                 node.style.update("display:inherit;opacity:1")
 
-                name = node.get('inkscape:label')
+                name = node.get("inkscape:label")
                 newname = "{}.{}".format(name, self.options.type)
-                filename = take_snapshot(self.document, dirname=self.tempdir,
-                                         name=name, ext=self.options.type,
-                                         dpi=self.options.resolution)
+                filename = take_snapshot(
+                    self.document,
+                    dirname=self.tempdir,
+                    name=name,
+                    ext=self.options.type,
+                    dpi=self.options.resolution,
+                )
                 output.write(filename, newname)
 
-                node.style['display'] = "none"
+                node.style["display"] = "none"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Export().run()

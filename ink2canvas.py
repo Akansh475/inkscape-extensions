@@ -25,15 +25,17 @@ import inkex
 import ink2canvas_lib.svg as svg
 from ink2canvas_lib.canvas import Canvas
 
+
 class Html5Canvas(inkex.OutputExtension):
     """Creates a canvas output"""
+
     def save(self, stream):
         svg_root = self.document.getroot()
         width = self.svg.unittouu(svg_root.get("width"))
         height = self.svg.unittouu(svg_root.get("height"))
         canvas = Canvas(self, width, height)
         self.walk_tree(svg_root, canvas)
-        stream.write(canvas.output().encode('utf-8'))
+        stream.write(canvas.output().encode("utf-8"))
 
     def get_gradient_defs(self, elem):
         """Return the gradient information"""
@@ -56,12 +58,12 @@ class Html5Canvas(inkex.OutputExtension):
         the node is not an SVG shape element.
         @rtype svg.AbstractShape or NoneType
         """
-        prefix, _brace_, command = node.tag.partition('}')
-        if prefix != '{http://www.w3.org/2000/svg':
+        prefix, _brace_, command = node.tag.partition("}")
+        if prefix != "{http://www.w3.org/2000/svg":
             return None
 
         # makes pylint happy
-        assert _brace_ == '}'
+        assert _brace_ == "}"
 
         cls = getattr(svg, command.capitalize(), None)
 
@@ -82,7 +84,7 @@ class Html5Canvas(inkex.OutputExtension):
             elem.start(gradient)
             try:
                 elem.draw()
-            except ValueError as error: # print out the reason if any element can not be exported
+            except ValueError as error:  # print out the reason if any element can not be exported
                 canvas.write("// " + str(error))
                 continue
             self.walk_tree(node, canvas)

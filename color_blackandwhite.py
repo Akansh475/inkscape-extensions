@@ -3,10 +3,14 @@
 
 import inkex
 
+
 class BlackAndWhite(inkex.ColorExtension):
     """Convert colours to black and white"""
+
     def add_arguments(self, pars):
-        pars.add_argument("-t", "--threshold", type=int, default=127, help="Threshold Color Level")
+        pars.add_argument(
+            "-t", "--threshold", type=int, default=127, help="Threshold Color Level"
+        )
 
     def modify_color(self, name, color):
         # ITU-R Recommendation BT.709 (NTSC and PAL)
@@ -15,5 +19,6 @@ class BlackAndWhite(inkex.ColorExtension):
         grey = 255 if lum > self.options.threshold else 0
         return inkex.Color((grey, grey, grey))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     BlackAndWhite().run()

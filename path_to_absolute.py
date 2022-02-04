@@ -22,8 +22,10 @@ Path To Absolute
 """
 import inkex
 
+
 class ToAbsolute(inkex.EffectExtension):
     """Convert any selected object to absolute/object-to-path/bezier only paths"""
+
     def effect(self):
         """Performs the effect."""
         for node in self.svg.selected.values():
@@ -31,5 +33,6 @@ class ToAbsolute(inkex.EffectExtension):
                 node = node.replace_with(node.to_path_element())
             node.path = node.path.to_absolute().to_superpath().to_path()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     ToAbsolute().run()

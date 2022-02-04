@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-'''
+"""
 Hershey Text 3.0.5, 2021-05-17
 
 Copyright 2021, Windell H. Oskay, www.evilmadscientist.com
@@ -47,7 +47,7 @@ Major revisions in Hershey Text 3.0:
     in the document, replacing it in place. While not every possible
     method of formatting text is supported, many are.
 
-'''
+"""
 
 import os
 import math
@@ -57,42 +57,76 @@ from copy import deepcopy
 import inkex
 from inkex import Transform, Style, units, AbortExtension
 
-from inkex import load_svg, Group, TextElement, FlowPara, SVGfont, FontFace,\
-    FlowSpan, Glyph, MissingGlyph, Tspan, FlowRoot, Rectangle, Use, PathElement, Defs
+from inkex import (
+    load_svg,
+    Group,
+    TextElement,
+    FlowPara,
+    SVGfont,
+    FontFace,
+    FlowSpan,
+    Glyph,
+    MissingGlyph,
+    Tspan,
+    FlowRoot,
+    Rectangle,
+    Use,
+    PathElement,
+    Defs,
+)
 
 
 class Hershey(inkex.Effect):
 
-    '''
+    """
     An extension for use with Inkscape 1.0
-    '''
+    """
 
     def __init__(self):
         super(Hershey, self).__init__()
 
-        self.arg_parser.add_argument("--tab", \
-            dest="mode", \
-            default="render", help="The active tab or mode when Apply was pressed")
+        self.arg_parser.add_argument(
+            "--tab",
+            dest="mode",
+            default="render",
+            help="The active tab or mode when Apply was pressed",
+        )
 
-        self.arg_parser.add_argument("--fontface", \
-            dest="fontface", \
-            default="HersheySans1", help="The selected font face when Apply was pressed")
+        self.arg_parser.add_argument(
+            "--fontface",
+            dest="fontface",
+            default="HersheySans1",
+            help="The selected font face when Apply was pressed",
+        )
 
-        self.arg_parser.add_argument("--otherfont", \
-            dest="otherfont", \
-            default="", help="Optional other font name or path to use")
+        self.arg_parser.add_argument(
+            "--otherfont",
+            dest="otherfont",
+            default="",
+            help="Optional other font name or path to use",
+        )
 
-        self.arg_parser.add_argument("--preserve", \
-            type=inkex.Boolean, dest="preserve_text", \
-            default=False, help="Preserve original text")
+        self.arg_parser.add_argument(
+            "--preserve",
+            type=inkex.Boolean,
+            dest="preserve_text",
+            default=False,
+            help="Preserve original text",
+        )
 
-        self.arg_parser.add_argument("--action", \
-            dest="util_mode", \
-            default="sample", help="The utility option selected")
+        self.arg_parser.add_argument(
+            "--action",
+            dest="util_mode",
+            default="sample",
+            help="The utility option selected",
+        )
 
-        self.arg_parser.add_argument("--text", \
-            dest="sample_text", \
-            default="\nThe Quick Brown Fox Jumps Over a Lazy Dog", help="Text to use for font table")
+        self.arg_parser.add_argument(
+            "--text",
+            dest="sample_text",
+            default="\nThe Quick Brown Fox Jumps Over a Lazy Dog",
+            help="Text to use for font table",
+        )
 
         self.font_file_list = dict()
         self.font_load_fail = False
@@ -103,27 +137,29 @@ class Hershey(inkex.Effect):
         self.output_generated = False
 
         self.warn_unflow = False
-        self.warn_textpath = False    # For future use: Give warning about text attached to path.
-        self.font_dict = dict() # Font dictionary - Dictionary of loaded fonts
+        self.warn_textpath = (
+            False  # For future use: Give warning about text attached to path.
+        )
+        self.font_dict = dict()  # Font dictionary - Dictionary of loaded fonts
 
-        self.nodes_to_delete = [] # List of font elements to remove
+        self.nodes_to_delete = []  # List of font elements to remove
 
         self.vb_scale_factor = 0.0104166666
 
         self.text_string = ""
-        self.text_families = [] # List of font family for characters in the string
+        self.text_families = []  # List of font family for characters in the string
         self.text_heights = []  # List of font heights
-        self.text_spacings = [] # List of vertical line heights
-        self.text_aligns = []   # List of horizontal alignment values
-        self.text_x = []    #List; x-coordinate of text line start
-        self.text_y = []    #List; y-coordinate of text line start
+        self.text_spacings = []  # List of vertical line heights
+        self.text_aligns = []  # List of horizontal alignment values
+        self.text_x = []  # List; x-coordinate of text line start
+        self.text_y = []  # List; y-coordinate of text line start
         self.line_number = 0
         self.new_line = True
         self.render_width = 1
 
     PX_PER_INCH = 96.0
 
-    help_text = '''====== Hershey Text Help ======
+    help_text = """====== Hershey Text Help ======
 
 The Hershey Text extension is designed to replace text in your document (either
 selected text or all text) with specialized "stroke" or "engraving" fonts
@@ -275,7 +311,7 @@ this extension.
 
 (c) 2021 Windell H. Oskay
 Evil Mad Scientist Laboratories
-'''
+"""
 
     def getlength_inch(self, name):
         """
@@ -291,13 +327,12 @@ Evil Mad Scientist Laboratories
             value, unit = units.parse_unit(string_to_parse)
             if value is None:
                 return None
-            bad_units = {'%', 'ex', 'em'} # Unsupported units
+            bad_units = {"%", "ex", "em"}  # Unsupported units
             if unit in bad_units:
                 return None
 
-            return units.convert_unit(string_to_parse, 'in')
+            return units.convert_unit(string_to_parse, "in")
         return None
-
 
     def units_to_userunits(self, input_string):
         """
@@ -312,11 +347,10 @@ Evil Mad Scientist Laboratories
         if value is None:
             return None
 
-        return units.convert_unit(input_string, '')
-
+        return units.convert_unit(input_string, "")
 
     def vb_scale(self, viewbox, p_a_r, doc_width, doc_height):
-        """"
+        """ "
         Parse SVG viewbox and generate scaling parameters.
         Reference documentation: https://www.w3.org/TR/SVG11/coords.html
 
@@ -331,38 +365,40 @@ Evil Mad Scientist Laboratories
 
         """
         if viewbox is None:
-            return 1, 1, 0, 0 # No viewbox; return default transform
-        vb_array = viewbox.strip().replace(', ', ' ').split()
+            return 1, 1, 0, 0  # No viewbox; return default transform
+        vb_array = viewbox.strip().replace(", ", " ").split()
 
         if len(vb_array) < 4:
-            return 1, 1, 0, 0 # invalid viewbox; return default transform
+            return 1, 1, 0, 0  # invalid viewbox; return default transform
 
-        min_x = float(vb_array[0]) # Viewbox offset: x
-        min_y = float(vb_array[1]) # Viewbox offset: y
-        width = float(vb_array[2]) # Viewbox width
-        height = float(vb_array[3]) # Viewbox height
+        min_x = float(vb_array[0])  # Viewbox offset: x
+        min_y = float(vb_array[1])  # Viewbox offset: y
+        width = float(vb_array[2])  # Viewbox width
+        height = float(vb_array[3])  # Viewbox height
 
         if width <= 0 or height <= 0:
-            return 1, 1, 0, 0 # invalid viewbox; return default transform
-        
+            return 1, 1, 0, 0  # invalid viewbox; return default transform
+
         if doc_width is None or doc_height is None:
-            raise AbortExtension('Width or height attribute missing on toplevel <svg> tag')
-        
+            raise AbortExtension(
+                "Width or height attribute missing on toplevel <svg> tag"
+            )
+
         d_width = float(doc_width)
         d_height = float(doc_height)
 
         if d_width <= 0 or d_height <= 0:
-            return 1, 1, 0, 0 # invalid document size; return default transform
+            return 1, 1, 0, 0  # invalid document size; return default transform
 
-        ar_doc = d_height / d_width # Document aspect ratio
-        ar_vb = height / width      # Viewbox aspect ratio
+        ar_doc = d_height / d_width  # Document aspect ratio
+        ar_vb = height / width  # Viewbox aspect ratio
 
         # Default values of the two preserveAspectRatio parameters:
-        par_align = "xmidymid" # "align" parameter(lowercased)
-        par_mos = "meet"       # "meetOrSlice" parameter
+        par_align = "xmidymid"  # "align" parameter(lowercased)
+        par_mos = "meet"  # "meetOrSlice" parameter
 
         if p_a_r is not None:
-            par_array = p_a_r.strip().replace(', ', ' ').lower().split()
+            par_array = p_a_r.strip().replace(", ", " ").lower().split()
             if len(par_array) > 0:
                 par0 = par_array[0]
                 if par0 == "defer":
@@ -380,7 +416,7 @@ Evil Mad Scientist Laboratories
             # This is not default behavior, nor what happens if par_align
             # is not given; the "none" value must be _explicitly_ specified.
 
-            s_x = d_width/ width
+            s_x = d_width / width
             s_y = d_height / height
             o_x = -min_x
             o_y = -min_y
@@ -410,12 +446,13 @@ Evil Mad Scientist Laboratories
             xminymax xmidymax xmaxymax
         """
 
-        if(((ar_doc >= ar_vb) and(par_mos == "meet"))
-           or((ar_doc < ar_vb) and(par_mos == "slice"))):
+        if ((ar_doc >= ar_vb) and (par_mos == "meet")) or (
+            (ar_doc < ar_vb) and (par_mos == "slice")
+        ):
             # Case 1: Scale document up until VB fills doc in X.
 
             s_x = d_width / width
-            s_y = s_x # Uniform aspect ratio
+            s_y = s_x  # Uniform aspect ratio
             o_x = -min_x
 
             scaled_vb_height = ar_doc * width
@@ -431,7 +468,7 @@ Evil Mad Scientist Laboratories
                 o_y = -min_y + excess_height
                 #  OK: tested with Tall-Meet, Wide-Slice
 
-            else: # par_align in {"xminymid", "xmidymid", "xmaxymid"}:
+            else:  # par_align in {"xminymid", "xmidymid", "xmaxymid"}:
                 # Default case: Y-Mid: Center viewbox on page in Y
                 o_y = -min_y + excess_height / 2
                 # OK: Tested with Tall-Meet, Wide-Slice
@@ -441,7 +478,7 @@ Evil Mad Scientist Laboratories
         # Case 2: Scale document up until VB fills doc in Y.
 
         s_y = d_height / height
-        s_x = s_y # Uniform aspect ratio
+        s_x = s_y  # Uniform aspect ratio
         o_y = -min_y
 
         scaled_vb_width = height / ar_doc
@@ -457,20 +494,19 @@ Evil Mad Scientist Laboratories
             o_x = -min_x + excess_width
             # Need test: Tall-Slice, Wide-Meet
 
-        else: # par_align in {"xmidymin", "xmidymid", "xmidymax"}:
+        else:  # par_align in {"xmidymin", "xmidymid", "xmidymax"}:
             # Default case: X-Mid: Center viewbox on page in X
             o_x = -min_x + excess_width / 2
             # OK: Tested with Tall-Slice, Wide-Meet
 
         return s_x, s_y, o_x, o_y
 
-
     def strip_quotes(self, fontname):
-        '''
+        """
         A multi-word font name may have a leading and trailing
         single or double quotes, depending on the source.
         If so, remove those quotes.
-        '''
+        """
 
         if fontname.startswith("'") and fontname.endswith("'"):
             return fontname[1:-1]
@@ -479,31 +515,31 @@ Evil Mad Scientist Laboratories
         return fontname
 
     def parse_svg_font(self, node_list):
-        '''
-        Parse an input svg, searching for an SVG font. If an
-        SVG font is found, parse it and return a "digest" containing
-        structured information from the font. See below for more
-        about the digest format.
+        """
+         Parse an input svg, searching for an SVG font. If an
+         SVG font is found, parse it and return a "digest" containing
+         structured information from the font. See below for more
+         about the digest format.
 
-        If the font is not found cannot be parsed, return none.
+         If the font is not found cannot be parsed, return none.
 
-        Notable limitations:
+         Notable limitations:
 
-       (1) This function only parses the first font face found within the
-        tree. We may, in the future, support discovering multiple fonts
-        within an SVG file.
+        (1) This function only parses the first font face found within the
+         tree. We may, in the future, support discovering multiple fonts
+         within an SVG file.
 
-       (2) We are only processing left-to-right and horizontal text,
-        not vertical text nor RTL.
+        (2) We are only processing left-to-right and horizontal text,
+         not vertical text nor RTL.
 
-       (3) This function currently performs only certain recursive searches,
-        within the <defs> element. It will not discover fonts nested within
-        groups or other elements. So far as we know, that is not a limitation
-        in practice. (If you have a counterexample please contact Evil Mad
-        Scientist tech support and let us know!)
+        (3) This function currently performs only certain recursive searches,
+         within the <defs> element. It will not discover fonts nested within
+         groups or other elements. So far as we know, that is not a limitation
+         in practice. (If you have a counterexample please contact Evil Mad
+         Scientist tech support and let us know!)
 
-       (4) Kerning details are not implemented yet.
-        '''
+        (4) Kerning details are not implemented yet.
+        """
 
         digest = None
 
@@ -512,10 +548,10 @@ Evil Mad Scientist Laboratories
 
         for node in node_list:
             if isinstance(node, Defs):
-                return self.parse_svg_font(node) # Recursive call
+                return self.parse_svg_font(node)  # Recursive call
 
             if isinstance(node, SVGfont):
-                '''
+                """
                 === Internal structure for storing font information ===
 
                 We parse the SVG font file and create a keyed "digest"
@@ -561,19 +597,19 @@ Evil Mad Scientist Laboratories
                     scale
                         A numeric scaling factor computed from the
                         units_per_em value, which gives the overall scale
-                '''
+                """
 
                 digest = dict()
                 geometry = dict()
                 glyphs = dict()
                 missing_glyph = dict()
 
-                digest['font_id'] = node.get('id')
+                digest["font_id"] = node.get("id")
 
-                horiz_adv_x = node.get('horiz-adv-x')
+                horiz_adv_x = node.get("horiz-adv-x")
 
                 if horiz_adv_x is not None:
-                    geometry['horiz_adv_x'] = float(horiz_adv_x)
+                    geometry["horiz_adv_x"] = float(horiz_adv_x)
                 # Note: case of no horiz_adv_x value is not handled.
 
                 for element in node:
@@ -581,7 +617,7 @@ Evil Mad Scientist Laboratories
                     if isinstance(element, Glyph):
                         # First, because it is the most common element
                         try:
-                            uni_text = element.get('unicode')
+                            uni_text = element.get("unicode")
                         except:
                             # Can't use this point if no unicode mapping.
                             continue
@@ -596,86 +632,85 @@ Evil Mad Scientist Laboratories
                             continue
 
                         glyph_dict = dict()
-                        glyph_dict['glyph_name'] = element.get('glyph-name')
+                        glyph_dict["glyph_name"] = element.get("glyph-name")
 
-                        horiz_adv_x = element.get('horiz-adv-x')
+                        horiz_adv_x = element.get("horiz-adv-x")
 
                         if horiz_adv_x is not None:
-                            glyph_dict['horiz_adv_x'] = float(horiz_adv_x)
+                            glyph_dict["horiz_adv_x"] = float(horiz_adv_x)
                         else:
-                            glyph_dict['horiz_adv_x'] = geometry['horiz_adv_x']
+                            glyph_dict["horiz_adv_x"] = geometry["horiz_adv_x"]
 
-                        glyph_dict['d'] = element.get('d') # SVG path data
+                        glyph_dict["d"] = element.get("d")  # SVG path data
                         glyphs[uni_text] = glyph_dict
 
                     elif isinstance(element, FontFace):
-                        digest['font_family'] = element.get('font-family')
-                        units_per_em = element.get('units-per-em')
+                        digest["font_family"] = element.get("font-family")
+                        units_per_em = element.get("units-per-em")
 
                         if units_per_em is None:
                             # Default: 1000, per SVG specification.
-                            geometry['units_per_em'] = 1000.0
+                            geometry["units_per_em"] = 1000.0
                         else:
-                            geometry['units_per_em'] = float(units_per_em)
+                            geometry["units_per_em"] = float(units_per_em)
 
-                        ascent = element.get('ascent')
+                        ascent = element.get("ascent")
                         if ascent is not None:
-                            geometry['ascent'] = float(ascent)
+                            geometry["ascent"] = float(ascent)
 
-                        descent = element.get('descent')
+                        descent = element.get("descent")
                         if descent is not None:
-                            geometry['descent'] = float(descent)
+                            geometry["descent"] = float(descent)
 
-                        '''
+                        """
                         # Skip these attributes that we are not currently using
                         geometry['x_height'] = element.get('x-height')
                         geometry['cap_height'] = element.get('cap-height')
                         geometry['bbox'] = element.get('bbox')
                         geometry['underline_position'] = element.get('underline-position')
-                        '''
+                        """
 
                     elif isinstance(element, MissingGlyph):
-                        horiz_adv_x = element.get('horiz-adv-x')
+                        horiz_adv_x = element.get("horiz-adv-x")
 
                         if horiz_adv_x is not None:
-                            missing_glyph['horiz_adv_x'] = float(horiz_adv_x)
+                            missing_glyph["horiz_adv_x"] = float(horiz_adv_x)
                         else:
-                            missing_glyph['horiz_adv_x'] = geometry['horiz_adv_x']
+                            missing_glyph["horiz_adv_x"] = geometry["horiz_adv_x"]
 
-                        missing_glyph['d'] = element.get('d') # SVG path data
-                        digest['missing_glyph'] = missing_glyph
-
+                        missing_glyph["d"] = element.get("d")  # SVG path data
+                        digest["missing_glyph"] = missing_glyph
 
                 # Main scaling factor
-                digest['scale'] = 1.0 /  geometry['units_per_em']
+                digest["scale"] = 1.0 / geometry["units_per_em"]
 
-                digest['glyphs'] = glyphs
-                digest['geometry'] = geometry
+                digest["glyphs"] = glyphs
+                digest["geometry"] = geometry
 
                 return digest
         return None
 
     def load_font(self, fontname):
-        '''
+        """
         Attempt to load an SVG font from a file in our list
         of (likely) SVG font files.
         If we can, add the contents to the font library.
         Otherwise, add a "None" entry to the font library.
-        '''
+        """
 
         if fontname is None:
             return
 
         if fontname in self.font_dict:
-            return # Awesome: The font is already loaded.
+            return  # Awesome: The font is already loaded.
 
         if fontname in self.font_file_list:
             the_path = self.font_file_list[fontname]
         else:
             self.font_dict[fontname] = None
-            return # Font not located.
+            return  # Font not located.
         try:
-            '''
+            """
             Check to see if there is an SVG font file for us to read.
 
             At present, only one font file will be read per font family;
@@ -685,21 +720,20 @@ Evil Mad Scientist Laboratories
             Only the first font found in the font file will be read.
             Multiple weights and styles within a font family are not
             presently supported.
-            '''
+            """
             font_svg = load_svg(the_path)
             self.font_dict[fontname] = self.parse_svg_font(font_svg.getroot())
 
         except IOError:
             self.font_dict[fontname] = None
         except:
-            inkex.errormsg('Error parsing SVG font at ' + str(the_path))
+            inkex.errormsg("Error parsing SVG font at " + str(the_path))
             self.font_dict[fontname] = None
 
-
     def font_table(self):
-        '''
+        """
         Generate display table of all available SVG fonts
-        '''
+        """
 
         self.options.preserve_text = False
 
@@ -708,12 +742,18 @@ Evil Mad Scientist Laboratories
         for fontname in self.font_file_list:
             self.load_font(fontname)
 
-        font_size = 0.2 # in inches -- will be scaled by viewbox factor.
-        font_size_text = str(font_size / self.vb_scale_factor) + 'px'
+        font_size = 0.2  # in inches -- will be scaled by viewbox factor.
+        font_size_text = str(font_size / self.vb_scale_factor) + "px"
 
-        labeltext_style = Style({'stroke' : 'none', \
-            'font-size':font_size_text, 'fill' : 'black', \
-            'font-family' : 'sans-serif', 'text-anchor': 'end'})
+        labeltext_style = Style(
+            {
+                "stroke": "none",
+                "font-size": font_size_text,
+                "fill": "black",
+                "font-family": "sans-serif",
+                "text-anchor": "end",
+            }
+        )
 
         x_offset = font_size / self.vb_scale_factor
         y_offset = 1.5 * x_offset
@@ -721,42 +761,46 @@ Evil Mad Scientist Laboratories
 
         for fontname in sorted(self.font_dict):
             if self.font_dict[fontname] is None:
-                continue # If the SVG file did NOT contain a font, skip it.
+                continue  # If the SVG file did NOT contain a font, skip it.
 
-            text_attribs = {'x':'0', 'y': str(y), 'hershey-ignore':'true'}
+            text_attribs = {"x": "0", "y": str(y), "hershey-ignore": "true"}
             textline = group.add(TextElement(**text_attribs))
             textline.text = fontname
             textline.style = labeltext_style
-            text_attribs = {'x':str(x_offset), 'y': str(y)}
+            text_attribs = {"x": str(x_offset), "y": str(y)}
 
-            sampletext_style = Style({'stroke' : 'none', \
-                'font-size':font_size_text, \
-                'fill' : 'black', 'font-family' : fontname, \
-                'text-anchor': 'start'})
+            sampletext_style = Style(
+                {
+                    "stroke": "none",
+                    "font-size": font_size_text,
+                    "fill": "black",
+                    "font-family": fontname,
+                    "text-anchor": "start",
+                }
+            )
             sampleline = group.add(TextElement(**text_attribs))
 
-            try: # python 2
-                sampleline.text = self.options.sample_text.decode('utf-8')
-            except AttributeError: # python 3
+            try:  # python 2
+                sampleline.text = self.options.sample_text.decode("utf-8")
+            except AttributeError:  # python 3
                 sampleline.text = self.options.sample_text
 
             sampleline.style = sampletext_style
             y += y_offset
         self.recursively_traverse_svg(group, self.doc_transform)
 
-
     def glyph_table(self):
-        '''
+        """
         Generate display table of glyphs within the current SVG font. Sorted display of
         all printable characters in the font _except_ missing glyph.
-        '''
+        """
 
         self.options.preserve_text = False
 
-        fontname = self.font_load_wrapper('not_a_font_name') # force load of default
+        fontname = self.font_load_wrapper("not_a_font_name")  # force load of default
 
         if self.font_load_fail:
-            inkex.errormsg('Font not found; Unable to generate glyph table.')
+            inkex.errormsg("Font not found; Unable to generate glyph table.")
             return
 
         # Embed in group to make manipulation easier:
@@ -765,18 +809,24 @@ Evil Mad Scientist Laboratories
         # missing_glyph = self.font_dict[fontname]['missing_glyph']
 
         glyph_count = 0
-        for glyph in self.font_dict[fontname]['glyphs']:
-            if self.font_dict[fontname]['glyphs'][glyph]['d'] is not None:
+        for glyph in self.font_dict[fontname]["glyphs"]:
+            if self.font_dict[fontname]["glyphs"][glyph]["d"] is not None:
                 glyph_count += 1
 
         columns = int(math.floor(math.sqrt(glyph_count)))
 
-        font_size = 0.4 # in inches -- will be scaled by viewbox factor.
-        font_size_text = str(font_size / self.vb_scale_factor) + 'px'
+        font_size = 0.4  # in inches -- will be scaled by viewbox factor.
+        font_size_text = str(font_size / self.vb_scale_factor) + "px"
 
-        glyph_style = Style({'stroke' : 'none', \
-            'font-size':font_size_text, 'fill' : 'black', \
-            'font-family' : fontname, 'text-anchor': 'start'})
+        glyph_style = Style(
+            {
+                "stroke": "none",
+                "font-size": font_size_text,
+                "fill": "black",
+                "font-family": fontname,
+                "text-anchor": "start",
+            }
+        )
 
         x_offset = 1.5 * font_size / self.vb_scale_factor
         y_offset = x_offset
@@ -785,13 +835,13 @@ Evil Mad Scientist Laboratories
 
         draw_position = 0
 
-        for glyph in sorted(self.font_dict[fontname]['glyphs']):
-            if self.font_dict[fontname]['glyphs'][glyph]['d'] is None:
+        for glyph in sorted(self.font_dict[fontname]["glyphs"]):
+            if self.font_dict[fontname]["glyphs"][glyph]["d"] is None:
                 continue
             y_pos, x_pos = divmod(draw_position, columns)
-            x = x_offset *(x_pos + 1)
-            y = y_offset *(y_pos + 1)
-            text_attribs = {'x':str(x), 'y': str(y)}
+            x = x_offset * (x_pos + 1)
+            y = y_offset * (y_pos + 1)
+            text_attribs = {"x": str(x), "y": str(y)}
             sampleline = group.add(TextElement(**text_attribs))
             sampleline.text = glyph
             sampleline.style = glyph_style
@@ -799,49 +849,47 @@ Evil Mad Scientist Laboratories
 
         self.recursively_traverse_svg(group, self.doc_transform)
 
-
     def find_font_files(self):
-        '''
-        Create list of "plausible" SVG font files
+        """
+         Create list of "plausible" SVG font files
 
-        List items in primary svg_fonts directory, typically located in the
-        directory where this script is being executed from.
+         List items in primary svg_fonts directory, typically located in the
+         directory where this script is being executed from.
 
-        If there is text given in the "Other name/path" input, that text may
-        represent one of the following:
+         If there is text given in the "Other name/path" input, that text may
+         represent one of the following:
 
-       (A) The name of a font file, located in the svg_fonts directory.
-            - This may be given with or without the .svg suffix.
-            - If it is a font file, and the font face selected is "other",
-                then use this as the default font face.
+        (A) The name of a font file, located in the svg_fonts directory.
+             - This may be given with or without the .svg suffix.
+             - If it is a font file, and the font face selected is "other",
+                 then use this as the default font face.
 
-       (B) The path to a font file, located elsewhere.
-            - If it is a font file, and the font face selected is "other",
-                then use this as the default font face.
-            - ALSO: Search the directory where that file is located for
-                any other SVG fonts.
+        (B) The path to a font file, located elsewhere.
+             - If it is a font file, and the font face selected is "other",
+                 then use this as the default font face.
+             - ALSO: Search the directory where that file is located for
+                 any other SVG fonts.
 
-       (C) The path to a directory
-            - It may or may not have a trailing separator
-            - Search that directory for SVG fonts.
+        (C) The path to a directory
+             - It may or may not have a trailing separator
+             - Search that directory for SVG fonts.
 
-        This function will create a list of available files that
-        appear to be SVG(SVG font) files. It does not parse the files.
-        We will format it as a dictionary, that maps each file name
-        (without extension) to a path.
-        '''
+         This function will create a list of available files that
+         appear to be SVG(SVG font) files. It does not parse the files.
+         We will format it as a dictionary, that maps each file name
+         (without extension) to a path.
+        """
 
         self.font_file_list = dict()
 
         # List contents of primary font directory:
-        font_directory_name = 'svg_fonts'
+        font_directory_name = "svg_fonts"
 
-        font_dir = os.path.realpath(
-            os.path.join(os.getcwd(), font_directory_name))
+        font_dir = os.path.realpath(os.path.join(os.getcwd(), font_directory_name))
         for dir_item in os.listdir(font_dir):
             if dir_item.endswith((".svg", ".SVG")):
                 file_path = os.path.join(font_dir, dir_item)
-                if os.path.isfile(file_path): # i.e., if not a directory
+                if os.path.isfile(file_path):  # i.e., if not a directory
                     root, _ = os.path.splitext(dir_item)
                     self.font_file_list[root] = file_path
 
@@ -875,7 +923,7 @@ Evil Mad Scientist Laboratories
             for dir_item in os.listdir(directory):
                 if dir_item.endswith((".svg", ".SVG")):
                     file_path = os.path.join(directory, dir_item)
-                    if os.path.isfile(file_path): # i.e., if not a directory
+                    if os.path.isfile(file_path):  # i.e., if not a directory
                         root, _ = os.path.splitext(dir_item)
                         self.font_file_list[root] = file_path
             return
@@ -885,13 +933,12 @@ Evil Mad Scientist Laboratories
             for dir_item in os.listdir(test_path):
                 if dir_item.endswith((".svg", ".SVG")):
                     file_path = os.path.join(test_path, dir_item)
-                    if os.path.isfile(file_path): # i.e., if not a directory
+                    if os.path.isfile(file_path):  # i.e., if not a directory
                         root, _ = os.path.splitext(dir_item)
                         self.font_file_list[root] = file_path
 
-
     def font_load_wrapper(self, fontname):
-        '''
+        """
 
         This implements the following logic:
 
@@ -918,79 +965,83 @@ Evil Mad Scientist Laboratories
         * If a font is loaded and available, return the font name.
             Otherwise, return none.
 
-        '''
+        """
 
-        self.load_font(fontname) # Load the font if available
+        self.load_font(fontname)  # Load the font if available
 
-        '''
+        """
         It *may* be worth building one stroke font (e.g., Hershey Sans 1-stroke) as a
             variable defined in this file so that it can be used even if no external
             SVG font files are available.
-        '''
+        """
 
         if self.font_dict[fontname] is None:
 
             # If we were not able to load the requested font::
-            fontname = self.options.fontface    # Fallback
+            fontname = self.options.fontface  # Fallback
             if fontname not in self.font_dict:
                 self.load_font(fontname)
             else:
                 pass
 
         if self.font_dict[fontname] is None:
-            self.font_load_fail = True # Set a flag so that we only generate one copy of this error.
+            self.font_load_fail = (
+                True  # Set a flag so that we only generate one copy of this error.
+            )
             return None
         return fontname
 
-
     def get_font_char(self, fontname, char):
-        '''
+        """
         Given a font face name and a character(unicode point),
             return an SVG path, horizontal advance value,
             and scaling factor.
 
         If the font is not available by name, use the default font.
-        '''
+        """
 
-        fontname = self.font_load_wrapper(fontname) # Load the font if available
+        fontname = self.font_load_wrapper(fontname)  # Load the font if available
 
         if fontname is None:
             return None
 
         try:
-            scale_factor = self.font_dict[fontname]['scale']
+            scale_factor = self.font_dict[fontname]["scale"]
         except:
             scale_factor = 0.001  # Default: 1/1000
 
         try:
-            if char not in self.font_dict[fontname]['glyphs']:
-                x_adv = self.font_dict[fontname]['missing_glyph']['horiz_adv_x']
+            if char not in self.font_dict[fontname]["glyphs"]:
+                x_adv = self.font_dict[fontname]["missing_glyph"]["horiz_adv_x"]
 
-                return self.font_dict[fontname]['missing_glyph']['d'], \
-                    x_adv, scale_factor
-            x_adv = self.font_dict[fontname]['glyphs'][char]['horiz_adv_x']
+                return (
+                    self.font_dict[fontname]["missing_glyph"]["d"],
+                    x_adv,
+                    scale_factor,
+                )
+            x_adv = self.font_dict[fontname]["glyphs"][char]["horiz_adv_x"]
 
-            return self.font_dict[fontname]['glyphs'][char]['d'], \
-                x_adv, scale_factor
+            return self.font_dict[fontname]["glyphs"][char]["d"], x_adv, scale_factor
         except:
             return None
 
-
     def handle_viewbox(self):
-        '''
+        """
         Wrapper function for processing viewbox information
-        '''
+        """
 
-        self.svg_height = self.getlength_inch('height')
-        self.svg_width = self.getlength_inch('width')
+        self.svg_height = self.getlength_inch("height")
+        self.svg_width = self.getlength_inch("width")
 
         self.svg = self.document.getroot()
-        viewbox = self.svg.get('viewBox')
+        viewbox = self.svg.get("viewBox")
         if viewbox:
-            p_a_r = self.svg.get('preserveAspectRatio')
-            s_x, s_y, o_x, o_y = self.vb_scale(viewbox, p_a_r, self.svg_width, self.svg_height)
+            p_a_r = self.svg.get("preserveAspectRatio")
+            s_x, s_y, o_x, o_y = self.vb_scale(
+                viewbox, p_a_r, self.svg_width, self.svg_height
+            )
         else:
-            s_x = 1.0 / float(self.PX_PER_INCH) # Handle case of no viewbox
+            s_x = 1.0 / float(self.PX_PER_INCH)  # Handle case of no viewbox
             s_y = s_x
             o_x = 0.0
             o_y = 0.0
@@ -1001,20 +1052,19 @@ Evil Mad Scientist Laboratories
         self.vb_scale_factor = (s_x + s_y) / 2.0
         # In case of non-square aspect ratio, use average value.
 
-
     def draw_svg_text(self, chardata, parent):
-        '''
+        """
         Render an individual svg glyph
-        '''
-        char = chardata['char']
-        font_family = chardata['font_family']
-        offset = chardata['offset']
-        vertoffset = chardata['vertoffset']
-        font_height = chardata['font_height']
+        """
+        char = chardata["char"]
+        font_family = chardata["font_family"]
+        offset = chardata["offset"]
+        vertoffset = chardata["vertoffset"]
+        font_height = chardata["font_height"]
         font_scale = 1.0
 
         # Stroke scale factor, including external transformations:
-        stroke_scale = chardata['stroke_scale'] * self.vb_scale_factor
+        stroke_scale = chardata["stroke_scale"] * self.vb_scale_factor
 
         try:
             path_string, adv_x, scale_factor = self.get_font_char(font_family, char)
@@ -1051,7 +1101,7 @@ Evil Mad Scientist Laboratories
             prec = int(math.ceil(-log_ten) + 3)
             width_string = "{0:.{1}f}in".format(stroke_width, prec)
 
-        p_style = {'stroke-width': width_string}
+        p_style = {"stroke-width": width_string}
 
         the_transform = Transform(translate=(offset + h_offset, vertoffset + v_offset))
         the_transform @= scale_transform
@@ -1065,17 +1115,16 @@ Evil Mad Scientist Laboratories
 
         return offset + float(adv_x) * font_scale  # new horizontal offset value
 
-
     def recursive_get_encl_transform(self, node):
 
-        '''
+        """
         Determine the cumulative transform which node inherits from
         its chain of ancestors.
-        '''
+        """
         node = node.getparent()
         if node is not None:
             parent_transform = self.recursive_get_encl_transform(node)
-            node_transform = node.get('transform', None)
+            node_transform = node.get("transform", None)
             if node_transform is None:
                 return parent_transform
             trans = Transform(node_transform).matrix
@@ -1085,41 +1134,40 @@ Evil Mad Scientist Laboratories
             return Transform(parent_transform) * Transform(trans)
         return self.doc_transform
 
-
     def recursively_parse_flowroot(self, node_list, parent_info):
-        '''
+        """
         Parse a flowroot node and its children
-        '''
+        """
 
         # By default, inherit these values from parent:
-        font_height_local = parent_info['font_height']
-        font_family_local = parent_info['font_family']
-        line_spacing_local = parent_info['line_spacing']
-        text_align_local = parent_info['align']
+        font_height_local = parent_info["font_height"]
+        font_family_local = parent_info["font_family"]
+        line_spacing_local = parent_info["line_spacing"]
+        text_align_local = parent_info["align"]
 
         for node in node_list:
             node_style = node.style
 
-            font_height = node_style('font-size')
+            font_height = node_style("font-size")
             try:
                 font_height_local = self.units_to_userunits(font_height)
             except TypeError:
                 pass
 
-            font_family_local = self.strip_quotes(node_style('font-family'))
-            
+            font_family_local = self.strip_quotes(node_style("font-family"))
+
             try:
-                line_spacing = node_style('line-height')
-                if "%" in line_spacing: # Handle percentage line spacing(e.g., 125%)
+                line_spacing = node_style("line-height")
+                if "%" in line_spacing:  # Handle percentage line spacing(e.g., 125%)
                     line_spacing_local = float(line_spacing.rstrip("%")) / 100.0
                 elif line_spacing == "normal":
-                    line_spacing_local = 1.25 # Inkscape default line spacing
+                    line_spacing_local = 1.25  # Inkscape default line spacing
                 else:
                     line_spacing_local = self.units_to_userunits(line_spacing)
             except TypeError:
                 pass
 
-            text_align_local = node_style('text-align') # Use text-anchor in text nodes
+            text_align_local = node_style("text-align")  # Use text-anchor in text nodes
 
             if node.text is not None:
                 self.text_string += node.text
@@ -1132,20 +1180,20 @@ Evil Mad Scientist Laboratories
 
             if isinstance(node, (FlowPara, FlowSpan)):
                 the_style = dict()
-                the_style['font_height'] = font_height_local
-                the_style['font_family'] = font_family_local
-                the_style['line_spacing'] = line_spacing_local
-                the_style['align'] = text_align_local
+                the_style["font_height"] = font_height_local
+                the_style["font_family"] = font_family_local
+                the_style["line_spacing"] = line_spacing_local
+                the_style["align"] = text_align_local
 
                 self.recursively_parse_flowroot(node, the_style)
 
             if node.tail is not None:
                 # By default, inherit these values from parent:
-                font_height_local = parent_info['font_height']
-                font_family_local = parent_info['font_family']
-                line_spacing_local = parent_info['line_spacing']
+                font_height_local = parent_info["font_height"]
+                font_family_local = parent_info["font_family"]
+                line_spacing_local = parent_info["line_spacing"]
 
-                text_align_local = parent_info['align']
+                text_align_local = parent_info["align"]
                 self.text_string += node.tail
                 for _ in node.tail:
                     self.text_families.append(font_family_local)
@@ -1154,45 +1202,45 @@ Evil Mad Scientist Laboratories
                     self.text_aligns.append(text_align_local)
 
             if isinstance(node, FlowPara):
-                self.text_string += "\n"    # Conclude every flowpara with a return
+                self.text_string += "\n"  # Conclude every flowpara with a return
                 self.text_families.append(font_family_local)
                 self.text_heights.append(font_height_local)
                 self.text_spacings.append(line_spacing_local)
                 self.text_aligns.append(text_align_local)
 
     def recursively_parse_text(self, node, parent_info):
-        '''
+        """
         parse a text node and its children
-        '''
+        """
 
         # By default, inherit these values from parent:
-        font_height_local = parent_info['font_height']
-        font_family_local = parent_info['font_family']
-        anchor_local = parent_info['anchor']
-        x_local = parent_info['x_pos']
-        y_local = parent_info['y_pos']
-        parent_line_spacing = parent_info['line_spacing']
+        font_height_local = parent_info["font_height"]
+        font_family_local = parent_info["font_family"]
+        anchor_local = parent_info["anchor"]
+        x_local = parent_info["x_pos"]
+        y_local = parent_info["y_pos"]
+        parent_line_spacing = parent_info["line_spacing"]
 
         node_style = node.style
 
-        font_height = node_style('font-size')
+        font_height = node_style("font-size")
         try:
             font_height_local = self.units_to_userunits(font_height)
         except TypeError:
             pass
 
-        font_family_local = self.strip_quotes(node_style('font-family'))
-        anchor_local = node_style('text-anchor') # Use text-anchor in text nodes
+        font_family_local = self.strip_quotes(node_style("font-family"))
+        anchor_local = node_style("text-anchor")  # Use text-anchor in text nodes
 
         try:
-            x_temp = node.get('x')
+            x_temp = node.get("x")
             if x_temp is not None:
                 x_local = x_temp
         except ValueError:
             pass
 
         try:
-            y_temp = node.get('y')
+            y_temp = node.get("y")
             if y_temp is not None:
                 y_local = y_temp
             else:
@@ -1200,8 +1248,10 @@ Evil Mad Scientist Laboratories
                 # elements that do not have y values
                 if y_local is None:
                     y_local = 0
-                y_local = float(y_local) + \
-                   self.line_number * parent_line_spacing * font_height_local
+                y_local = (
+                    float(y_local)
+                    + self.line_number * parent_line_spacing * font_height_local
+                )
         except ValueError:
             pass
 
@@ -1215,7 +1265,6 @@ Evil Mad Scientist Laboratories
                 self.text_x.append(x_local)
                 self.text_y.append(y_local)
 
-
         for sub_node in node:
             # If text is located within a sub_node of this node,
             #   process that sub_node, with this very routine.
@@ -1224,15 +1273,15 @@ Evil Mad Scientist Laboratories
                 # Note: There may be additional types of text tags that
                 #   we should recursively search as well.
                 node_info = dict()
-                node_info['font_height'] = font_height_local
-                node_info['font_family'] = font_family_local
-                node_info['anchor'] = anchor_local
-                node_info['x_pos'] = x_local
-                node_info['y_pos'] = y_local
-                node_info['line_spacing'] = parent_line_spacing
+                node_info["font_height"] = font_height_local
+                node_info["font_family"] = font_family_local
+                node_info["anchor"] = anchor_local
+                node_info["x_pos"] = x_local
+                node_info["y_pos"] = y_local
+                node_info["line_spacing"] = parent_line_spacing
 
                 adv_line = False
-                role = sub_node.get('sodipodi:role')
+                role = sub_node.get("sodipodi:role")
                 if role == "line":
                     adv_line = True
 
@@ -1246,11 +1295,11 @@ Evil Mad Scientist Laboratories
             _stripped_tail = node.tail.strip()
             if _stripped_tail is not None:
                 # By default, inherit these values from parent:
-                font_height_local = parent_info['font_height']
-                font_family_local = parent_info['font_family']
-                text_align_local = parent_info['anchor']
-                x_local = parent_info['x_pos']
-                y_local = parent_info['y_pos']
+                font_height_local = parent_info["font_height"]
+                font_family_local = parent_info["font_family"]
+                text_align_local = parent_info["anchor"]
+                x_local = parent_info["x_pos"]
+                y_local = parent_info["y_pos"]
                 self.text_string += _stripped_tail
                 for _ in _stripped_tail:
                     self.text_heights.append(font_height_local)
@@ -1259,21 +1308,24 @@ Evil Mad Scientist Laboratories
                     self.text_x.append(x_local)
                     self.text_y.append(y_local)
 
-    def recursively_traverse_svg(self, anode_list,
-                                 mat_current=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
-                                 parent_visibility='visible'):
-        '''
+    def recursively_traverse_svg(
+        self,
+        anode_list,
+        mat_current=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+        parent_visibility="visible",
+    ):
+        """
         recursively parse the full document and its children,
         looking for nodes that may contain text
-        '''
+        """
 
         for node in anode_list:
 
             # Ignore invisible nodes
-            vis = node.get('visibility', parent_visibility)
-            if vis == 'inherit':
+            vis = node.get("visibility", parent_visibility)
+            if vis == "inherit":
                 vis = parent_visibility
-            if vis in ('hidden', 'collapse'):
+            if vis in ("hidden", "collapse"):
                 continue
 
             # First apply the current matrix transform to this node's tranform
@@ -1283,13 +1335,15 @@ Evil Mad Scientist Laboratories
             if isinstance(node, Group):
 
                 recurse_group = True
-                ink_label = node.get('inkscape:label')
+                ink_label = node.get("inkscape:label")
 
                 if not ink_label:
                     pass
                 else:
-                    if(ink_label == 'Hershey Text'):
-                        recurse_group = False    # Do not traverse groups of rendered text.
+                    if ink_label == "Hershey Text":
+                        recurse_group = (
+                            False  # Do not traverse groups of rendered text.
+                        )
                 if recurse_group:
                     self.recursively_traverse_svg(node, mat_new, vis)
 
@@ -1309,29 +1363,31 @@ Evil Mad Scientist Laboratories
 
                 refnode = node.href
                 if refnode is None:
-                    continue # missing reference
+                    continue  # missing reference
 
                 local_transform = Transform(_matrix)
-                x = float(node.get('x', '0'))
-                y = float(node.get('y', '0'))
+                x = float(node.get("x", "0"))
+                y = float(node.get("y", "0"))
                 # Note: the transform has already been applied
-                if(x != 0) or(y != 0):
-                    _trans_string = 'translate({0:.6E}, {1:.6E})'.format(x, y)
+                if (x != 0) or (y != 0):
+                    _trans_string = "translate({0:.6E}, {1:.6E})".format(x, y)
                     ref_transform = Transform(_matrix) * Transform(_trans_string)
                 else:
                     ref_transform = local_transform
 
                 try:
-                    ref_group = anode_list.add(Group())# Add a subgroup
+                    ref_group = anode_list.add(Group())  # Add a subgroup
                 except AttributeError:
-                    inkex.errormsg('Unable to process text. Consider unlinking cloned text.')
+                    inkex.errormsg(
+                        "Unable to process text. Consider unlinking cloned text."
+                    )
                     continue
 
                 # Tests are not using the preset seed for this atm
-                #if 'id' not in ref_group.attrib:
+                # if 'id' not in ref_group.attrib:
                 #    ref_group.set_random_id('')
 
-                ref_group.set('transform', ref_transform)
+                ref_group.set("transform", ref_transform)
 
                 ref_group.append(deepcopy(refnode))
 
@@ -1340,55 +1396,60 @@ Evil Mad Scientist Laboratories
                     # or they will persist if original elements are preserved.
                     self.nodes_to_delete.append(sub_node)
 
-                #Preserve original element?
+                # Preserve original element?
                 if not self.options.preserve_text:
                     self.nodes_to_delete.append(node)
-
 
             elif isinstance(node, (TextElement, FlowRoot)):
 
                 # Flag for when we start a new line of text, for use with indents:
                 self.new_line = True
 
-                start_x = 0  # Defaults; Fail gracefully in case xy position is not given.
+                start_x = (
+                    0  # Defaults; Fail gracefully in case xy position is not given.
+                )
                 start_y = 0
 
                 # Default line spacing and font height: 125%, 16 px
                 line_spacing = self.units_to_userunits("1.25")
                 font_height = self.units_to_userunits("16px")
 
-                start_x = node.get('x')    # XY Position of element
-                start_y = node.get('y')
+                start_x = node.get("x")  # XY Position of element
+                start_y = node.get("y")
 
                 bounding_rect = False
-                #rect_height = 100        #default size of bounding rectangle for flowroot object
-                rect_width = 100         #default size of bounding rectangle for flowroot object
-                transform = ""          #transform(scale, translate, matrix, etc.)
+                # rect_height = 100        #default size of bounding rectangle for flowroot object
+                rect_width = (
+                    100  # default size of bounding rectangle for flowroot object
+                )
+                transform = ""  # transform(scale, translate, matrix, etc.)
                 text_align = "start"
 
                 try:
-                    hershey_ignore = node.get('hershey-ignore')
+                    hershey_ignore = node.get("hershey-ignore")
                     if hershey_ignore is not None:
-                        continue # If the attribute is present, skip this node.
+                        continue  # If the attribute is present, skip this node.
                 except ValueError:
                     pass
 
                 node_style = node.style
 
                 try:
-                    font_height_temp = node_style.get('font-size', 16)
+                    font_height_temp = node_style.get("font-size", 16)
                     font_height = self.units_to_userunits(font_height_temp)
                 except TypeError:
                     pass
 
-                font_family = self.strip_quotes(node_style('font-family'))
+                font_family = self.strip_quotes(node_style("font-family"))
 
                 try:
-                    line_spacing_temp = node_style('line-height')
-                    if "%" in line_spacing_temp: # Handle percentage line spacing(e.g., 125%)
+                    line_spacing_temp = node_style("line-height")
+                    if (
+                        "%" in line_spacing_temp
+                    ):  # Handle percentage line spacing(e.g., 125%)
                         line_spacing = float(line_spacing_temp.rstrip("%")) / 100.0
                     elif line_spacing_temp == "normal":
-                        line_spacing = 1.25 # Inkscape default line spacing
+                        line_spacing = 1.25  # Inkscape default line spacing
                     else:
                         line_spacing = self.units_to_userunits(line_spacing_temp)
                 except TypeError:
@@ -1399,10 +1460,10 @@ Evil Mad Scientist Laboratories
                 except ValueError:
                     pass
 
-                if(transform is not None):
+                if transform is not None:
                     transform2 = Transform(transform).matrix
 
-                    '''
+                    """
                     Compute estimate of transformation scale applied to
                     this element, for purposes of calculating the
                     stroke width to apply. When all transforms are applied
@@ -1412,62 +1473,75 @@ Evil Mad Scientist Laboratories
                     scale_x = sqrt(a * a + b * b),
                     scale_y = sqrt(c * c + d * d)
                     Take estimated scale as the mean of the two.
-                    '''
+                    """
 
-                    scale_x = math.sqrt(transform2[0][0] * transform2[0][0] +
-                                        transform2[1][0] * transform2[1][0])
-                    scale_y = math.sqrt(transform2[0][1] * transform2[0][1] +
-                                        transform2[1][1] * transform2[1][1])
+                    scale_x = math.sqrt(
+                        transform2[0][0] * transform2[0][0]
+                        + transform2[1][0] * transform2[1][0]
+                    )
+                    scale_y = math.sqrt(
+                        transform2[0][1] * transform2[0][1]
+                        + transform2[1][1] * transform2[1][1]
+                    )
 
-                    scale_r = (scale_x + scale_y) / 2.0 # Average. ¯\_(ツ)_/¯
+                    scale_r = (scale_x + scale_y) / 2.0  # Average. ¯\_(ツ)_/¯
                 else:
                     scale_r = 1.0
 
-                the_id = node.get('id')
+                the_id = node.get("id")
 
-                #Initialize text attribute lists for each top-level text object:
+                # Initialize text attribute lists for each top-level text object:
                 self.text_string = ""
-                self.text_families = [] # Lis of font family for characters in the string
+                self.text_families = (
+                    []
+                )  # Lis of font family for characters in the string
                 self.text_heights = []  # List of font heights
-                self.text_spacings = [] # List of vertical line heights
-                self.text_aligns = []   # List of horizontal alignment values
-                self.text_x = []    #List; x-coordinate of text line start
-                self.text_y = []    #List; y-coordinate of text line start
+                self.text_spacings = []  # List of vertical line heights
+                self.text_aligns = []  # List of horizontal alignment values
+                self.text_x = []  # List; x-coordinate of text line start
+                self.text_y = []  # List; y-coordinate of text line start
 
                 # Group generated paths together, to make the rendered letters
                 # easier to manipulate in Inkscape once generated:
                 parent = node.getparent()
 
                 group = parent.add(Group())
-                group.label = 'Hershey Text'
+                group.label = "Hershey Text"
 
-                style = {'stroke' : '#000000', 'fill' : 'none', \
-                    'stroke-linecap' : 'round', 'stroke-linejoin' : 'round'}
+                style = {
+                    "stroke": "#000000",
+                    "fill": "none",
+                    "stroke-linecap": "round",
+                    "stroke-linejoin": "round",
+                }
 
                 # Apply rounding to ends to improve final engraved text appearance.
                 group.style = style
                 # Some common variables used in both cases A and B:
-                str_pos = 0      # Position through the full string that we are rendering
-                i = 0           # Dummy(index) variable for looping over letters in string
-                w = 0           # Initial spacing offset
-                w_temp = 0       # Temporary variable for horizontal spacing offset
-                width_this_line = 0 # Estimated width of characters to be stored on this line
+                str_pos = 0  # Position through the full string that we are rendering
+                i = 0  # Dummy(index) variable for looping over letters in string
+                w = 0  # Initial spacing offset
+                w_temp = 0  # Temporary variable for horizontal spacing offset
+                width_this_line = (
+                    0  # Estimated width of characters to be stored on this line
+                )
 
-                '''
+                """
                 CASE A: Handle flowed text nodes
-                '''
+                """
 
                 if isinstance(node, FlowRoot):
 
                     try:
-                        text_align = node_style['text-align']
+                        text_align = node_style["text-align"]
                         # Use text-align, not text-anchor, in flowroot
                     except KeyError:
                         pass
 
-                    #selects the flowRegion's child(svg:rect) to get @X and @Y
-                    flowref = \
-                      self.svg.getElement('/svg:svg//*[@id="%s"]/svg:flowRegion[1]' % the_id)[0]
+                    # selects the flowRegion's child(svg:rect) to get @X and @Y
+                    flowref = self.svg.getElement(
+                        '/svg:svg//*[@id="%s"]/svg:flowRegion[1]' % the_id
+                    )[0]
 
                     if isinstance(flowref, Rectangle):
                         start_x = flowref.left
@@ -1517,7 +1591,7 @@ Evil Mad Scientist Laboratories
                         self.warn_unflow = True
                         continue
 
-                    '''
+                    """
                     Recursively loop through content of the flowroot object,
                     looping through text, flowpara, and other things.
 
@@ -1526,21 +1600,21 @@ Evil Mad Scientist Laboratories
 
                     then, loop through those lists, one line at a time,
                     finding how many words fit on a line, etc.
-                    '''
+                    """
 
                     the_style = dict()
-                    the_style['font_height'] = font_height
-                    the_style['font_family'] = font_family
-                    the_style['line_spacing'] = line_spacing
-                    the_style['align'] = text_align
+                    the_style["font_height"] = font_height
+                    the_style["font_family"] = font_family
+                    the_style["line_spacing"] = line_spacing
+                    the_style["align"] = text_align
 
                     self.recursively_parse_flowroot(node, the_style)
 
-                    if(self.text_string == ""):
-                        continue # No convertable text in this SVG element.
+                    if self.text_string == "":
+                        continue  # No convertable text in this SVG element.
 
-                    if(self.text_string.isspace()):
-                        continue # No convertable text in this SVG element.
+                    if self.text_string.isspace():
+                        continue  # No convertable text in this SVG element.
 
                     # Initial vertical offset for the flowed text block:
                     v = 0
@@ -1559,21 +1633,21 @@ Evil Mad Scientist Laboratories
 
                     text_lines = self.text_string.splitlines()
                     extd_text_lines = self.text_string.splitlines(True)
-                    str_pos_eol = 0 # str_pos after end of previous text_line.
+                    str_pos_eol = 0  # str_pos after end of previous text_line.
 
-                    nbsp = u'\xa0' # Unicode non-breaking space character
+                    nbsp = "\xa0"  # Unicode non-breaking space character
 
                     for line_number, text_line in enumerate(text_lines):
 
                         line_length = len(text_line)
                         extd_line_length = len(extd_text_lines[line_number])
 
-                        i = 0   # Position within this text_line.
+                        i = 0  # Position within this text_line.
 
                         # A given text_line may take more than one strip
                         # to render, if it overflows our box width.
 
-                        line_start = 0 # Value of i when the current strip started.
+                        line_start = 0  # Value of i when the current strip started.
 
                         if line_length == 0:
                             str_pos_temp = str_pos_eol
@@ -1582,22 +1656,27 @@ Evil Mad Scientist Laboratories
                             char_v_spacing = charline_spacing * char_height
                             v = v + char_v_spacing
                         else:
-                            while(i < line_length):
+                            while i < line_length:
 
-                                word_start = i # Value of i at beginning of the current word.
+                                word_start = (
+                                    i  # Value of i at beginning of the current word.
+                                )
 
-                                while(i < line_length): # Step through the line
+                                while i < line_length:  # Step through the line
                                     # until we reach the end of the line or word.
-                                    #(i.e., until we reach whitespace)
-                                    character = text_line[i] # character is unicode(not byte string)
+                                    # (i.e., until we reach whitespace)
+                                    character = text_line[
+                                        i
+                                    ]  # character is unicode(not byte string)
                                     str_pos_temp = str_pos_eol + i
 
                                     char_height = self.text_heights[str_pos_temp]
                                     char_family = self.text_families[str_pos_temp]
 
                                     try:
-                                        _, x_adv, scale_factor = \
-                                                    self.get_font_char(char_family, character)
+                                        _, x_adv, scale_factor = self.get_font_char(
+                                            char_family, character
+                                        )
                                     except:
                                         x_adv = 0
                                         scale_factor = 1
@@ -1606,10 +1685,12 @@ Evil Mad Scientist Laboratories
 
                                     i += 1
                                     if character.isspace() and not character == nbsp:
-                                        break # Break at space, except non-breaking
+                                        break  # Break at space, except non-breaking
 
                                 render_line = False
-                                if w_temp > rect_width: # If the word will overflow the box
+                                if (
+                                    w_temp > rect_width
+                                ):  # If the word will overflow the box
                                     if word_start == line_start:
                                         # This is the first word in the strip, so this
                                         # word(alone) is wider than the box. Render it.
@@ -1635,33 +1716,37 @@ Evil Mad Scientist Laboratories
 
                                     j = line_start
 
-                                    while(j < i): # Calculate max height for the strip:
+                                    while j < i:  # Calculate max height for the strip:
                                         str_pos_temp = str_pos_eol + j
-                                        char_height = float(self.text_heights[str_pos_temp])
-                                        charline_spacing = float(self.text_spacings[str_pos_temp])
+                                        char_height = float(
+                                            self.text_heights[str_pos_temp]
+                                        )
+                                        charline_spacing = float(
+                                            self.text_spacings[str_pos_temp]
+                                        )
                                         char_v_spacing = charline_spacing * char_height
-                                        if(char_v_spacing > line_max_v_spacing):
+                                        if char_v_spacing > line_max_v_spacing:
                                             line_max_v_spacing = char_v_spacing
                                         j = j + 1
 
                                     v = v + line_max_v_spacing
 
                                     char_data = dict()
-                                    char_data['vertoffset'] = v
-                                    char_data['stroke_scale'] = scale_r
+                                    char_data["vertoffset"] = v
+                                    char_data["stroke_scale"] = scale_r
 
                                     j = line_start
-                                    while(j < i): # Render the strip on the page
+                                    while j < i:  # Render the strip on the page
                                         str_pos = str_pos_eol + j
 
                                         char_height = self.text_heights[str_pos]
                                         char_family = self.text_families[str_pos]
                                         text_align = self.text_aligns[str_pos]
 
-                                        char_data['char'] = text_line[j]
-                                        char_data['font_height'] = char_height
-                                        char_data['font_family'] = char_family
-                                        char_data['offset'] = w
+                                        char_data["char"] = text_line[j]
+                                        char_data["font_height"] = char_height
+                                        char_data["font_family"] = char_family
+                                        char_data["offset"] = w
 
                                         w = self.draw_svg_text(char_data, line_group)
 
@@ -1675,34 +1760,44 @@ Evil Mad Scientist Laboratories
                                     # Alignment for the strip:
 
                                     the_transform = None
-                                    if(text_align == "center"):    # when using text-align
-                                        the_transform = Transform(translate=\
-                                                    ((float(rect_width) - width_this_line)/2))
-                                    elif(text_align == "end"):
-                                        the_transform = Transform(translate=\
-                                                    (float(rect_width) - width_this_line))
+                                    if text_align == "center":  # when using text-align
+                                        the_transform = Transform(
+                                            translate=(
+                                                (float(rect_width) - width_this_line)
+                                                / 2
+                                            )
+                                        )
+                                    elif text_align == "end":
+                                        the_transform = Transform(
+                                            translate=(
+                                                float(rect_width) - width_this_line
+                                            )
+                                        )
                                     if the_transform is not None:
                                         line_group.transform = the_transform
 
                                     if first_line:
-                                        y_offs_overall = line_max_v_spacing / 3  # Heuristic
+                                        y_offs_overall = (
+                                            line_max_v_spacing / 3
+                                        )  # Heuristic
                                         first_line = False
 
                         str_pos_eol = str_pos_eol + extd_line_length
                         str_pos = str_pos_eol
 
-                    the_transform = Transform(translate=(start_x, float(start_y) - y_offs_overall))
+                    the_transform = Transform(
+                        translate=(start_x, float(start_y) - y_offs_overall)
+                    )
 
-                else:    # If this is a text object, rather than a flowroot object:
-                    '''
+                else:  # If this is a text object, rather than a flowroot object:
+                    """
                     CASE B: Handle regular(non-flowroot) text nodes
-                    '''
+                    """
 
                     # Use text-anchor, not text-align, in text(not flowroot) elements
                     text_align = node_style("text-anchor")
 
-
-                    '''
+                    """
                     Recursively loop through content of the text object,
                     looping through text, tspan, and other things as necessary.
                     (A recursive search since style elements may be nested.)
@@ -1728,15 +1823,15 @@ Evil Mad Scientist Laboratories
                     of text; it does not create multiline text by including
                     line returns within the text itself. Multiple lines of text
                     are created with multiple text or tspan elements.
-                    '''
+                    """
 
                     node_info = dict()
-                    node_info['font_height'] = font_height
-                    node_info['font_family'] = font_family
-                    node_info['anchor'] = text_align
-                    node_info['x_pos'] = start_x
-                    node_info['y_pos'] = start_y
-                    node_info['line_spacing'] = line_spacing
+                    node_info["font_height"] = font_height
+                    node_info["font_family"] = font_family
+                    node_info["anchor"] = text_align
+                    node_info["x_pos"] = start_x
+                    node_info["y_pos"] = start_y
+                    node_info["line_spacing"] = line_spacing
 
                     # Keep track of line number. Used in cases where daughter
                     # tspan elements do not have Y positions given.
@@ -1746,10 +1841,10 @@ Evil Mad Scientist Laboratories
                     self.recursively_parse_text(node, node_info)
                     # self.recursively_parse_text(node, font_height, text_align, start_x, start_y)
 
-                    if(self.text_string == ""):
-                        continue # No convertable text in this SVG element.
-                    if(self.text_string.isspace()):
-                        continue # No convertable text in this SVG element.
+                    if self.text_string == "":
+                        continue  # No convertable text in this SVG element.
+                    if self.text_string.isspace():
+                        continue  # No convertable text in this SVG element.
 
                     letter_vals = [q for q in self.text_string]
                     str_len = len(letter_vals)
@@ -1758,12 +1853,14 @@ Evil Mad Scientist Laboratories
                     line_group = group.add(Group())
 
                     i = 0
-                    while(i < str_len):    # Loop through the entire text of the string.
+                    while i < str_len:  # Loop through the entire text of the string.
 
-                        x_start_line = float(self.text_x[i]) # We are starting a new line here.
+                        x_start_line = float(
+                            self.text_x[i]
+                        )  # We are starting a new line here.
                         y_start_line = float(self.text_y[i])
 
-                        while(i < str_len):
+                        while i < str_len:
                             # Inner while loop, that we will break out of,
                             # back to the outer while loop.
 
@@ -1771,13 +1868,13 @@ Evil Mad Scientist Laboratories
                             charfont_height = self.text_heights[i]
 
                             char_data = dict()
-                            char_data['char'] = q_val
-                            char_data['font_family'] = self.text_families[i]
+                            char_data["char"] = q_val
+                            char_data["font_family"] = self.text_families[i]
 
-                            char_data['font_height'] = charfont_height
-                            char_data['offset'] = w
-                            char_data['vertoffset'] = 0
-                            char_data['stroke_scale'] = scale_r
+                            char_data["font_height"] = charfont_height
+                            char_data["offset"] = w
+                            char_data["vertoffset"] = 0
+                            char_data["stroke_scale"] = scale_r
 
                             w = self.draw_svg_text(char_data, line_group)
                             width_this_line = w
@@ -1788,10 +1885,11 @@ Evil Mad Scientist Laboratories
 
                             set_alignment = False
                             i_next = i + 1
-                            if(i_next >= str_len):  # End of the string; last character.
+                            if i_next >= str_len:  # End of the string; last character.
                                 set_alignment = True
-                            elif((float(self.text_x[i_next]) != x_start_line) or \
-                                 (float(self.text_y[i_next]) != y_start_line)):
+                            elif (float(self.text_x[i_next]) != x_start_line) or (
+                                float(self.text_y[i_next]) != y_start_line
+                            ):
                                 set_alignment = True
 
                             if set_alignment:
@@ -1807,9 +1905,9 @@ Evil Mad Scientist Laboratories
                                 # as it is created.
 
                                 x_shift = 0
-                                if(text_align == "middle"): # when using text-anchor
-                                    x_shift = x_start_line -(width_this_line / 2)
-                                elif(text_align == "end"):
+                                if text_align == "middle":  # when using text-anchor
+                                    x_shift = x_start_line - (width_this_line / 2)
+                                elif text_align == "end":
                                     x_shift = x_start_line - width_this_line
                                 else:
                                     x_shift = x_start_line
@@ -1820,13 +1918,15 @@ Evil Mad Scientist Laboratories
 
                                 line_group.transform = the_transform
 
-                                line_group = group.add(Group()) # Create new group for this line
+                                line_group = group.add(
+                                    Group()
+                                )  # Create new group for this line
 
-                                self.new_line = True # Used for managing indent defects
+                                self.new_line = True  # Used for managing indent defects
                                 w = 0
                                 i += 1
                                 break
-                            i += 1    # Only executed when set_alignment is false.
+                            i += 1  # Only executed when set_alignment is false.
 
                     the_transform = Transform()
 
@@ -1834,9 +1934,9 @@ Evil Mad Scientist Laboratories
                     parent = line_group.getparent()
                     parent.remove(line_group)
 
-                #End cases A & B. Apply transform to text/flowroot object:
+                # End cases A & B. Apply transform to text/flowroot object:
 
-                if(transform is not None):
+                if transform is not None:
                     result = Transform(transform) @ the_transform
                 else:
                     result = the_transform
@@ -1845,24 +1945,23 @@ Evil Mad Scientist Laboratories
 
                 if not self.output_generated:
                     parent = group.getparent()
-                    parent.remove(group)    #remove empty group
+                    parent.remove(group)  # remove empty group
 
-                #Preserve original element?
+                # Preserve original element?
                 if not self.options.preserve_text and self.output_generated:
                     self.nodes_to_delete.append(node)
 
-
     def effect(self):
-        '''
+        """
         Main entry point; Execute the extension's function.
-        '''
+        """
 
         # Input sanitization:
-        self.options.mode = self.options.mode.strip("\"")
-        self.options.fontface = self.options.fontface.strip("\"")
-        self.options.otherfont = self.options.otherfont.strip("\"")
-        self.options.util_mode = self.options.util_mode.strip("\"")
-        self.options.sample_text = self.options.sample_text.strip("\"")
+        self.options.mode = self.options.mode.strip('"')
+        self.options.fontface = self.options.fontface.strip('"')
+        self.options.otherfont = self.options.otherfont.strip('"')
+        self.options.util_mode = self.options.util_mode.strip('"')
+        self.options.sample_text = self.options.sample_text.strip('"')
 
         self.doc_transform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
@@ -1873,7 +1972,7 @@ Evil Mad Scientist Laboratories
         # Calculate "ideal" effective width of rendered strokes:
         #   Default: 1/800 of page width or height, whichever is smaller
 
-        _rendered_stroke_scale = 1 /(self.PX_PER_INCH * 800.0)
+        _rendered_stroke_scale = 1 / (self.PX_PER_INCH * 800.0)
 
         if self.svg_width is not None:
             if self.svg_width < self.svg_height:
@@ -1893,10 +1992,16 @@ Evil Mad Scientist Laboratories
             if self.options.ids:
                 # Traverse selected objects
                 for id_ref in self.options.ids:
-                    transform = self.recursive_get_encl_transform(self.svg.selected[id_ref])
-                    self.recursively_traverse_svg([self.svg.selected[id_ref]], transform)
-            else: # Traverse entire document
-                self.recursively_traverse_svg(self.document.getroot(), self.doc_transform)
+                    transform = self.recursive_get_encl_transform(
+                        self.svg.selected[id_ref]
+                    )
+                    self.recursively_traverse_svg(
+                        [self.svg.selected[id_ref]], transform
+                    )
+            else:  # Traverse entire document
+                self.recursively_traverse_svg(
+                    self.document.getroot(), self.doc_transform
+                )
 
         for element_to_remove in self.nodes_to_delete:
             if element_to_remove is not None:
@@ -1905,13 +2010,16 @@ Evil Mad Scientist Laboratories
                     parent.remove(element_to_remove)
 
         if self.font_load_fail:
-            inkex.errormsg('Warning: unable to load SVG stroke fonts.')
+            inkex.errormsg("Warning: unable to load SVG stroke fonts.")
 
         if self.warn_unflow:
-            inkex.errormsg('Warning: unable to convert text flowed into a frame.\n'
-                           + 'Please use Text > Unflow to convert it prior to use.\n'
-                           + 'If you are unable to identify the object in question, '
-                           + 'please contact technical support for help.')
+            inkex.errormsg(
+                "Warning: unable to convert text flowed into a frame.\n"
+                + "Please use Text > Unflow to convert it prior to use.\n"
+                + "If you are unable to identify the object in question, "
+                + "please contact technical support for help."
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Hershey().run()

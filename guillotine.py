@@ -42,8 +42,10 @@ import locale
 import inkex
 from inkex.command import inkscape
 
+
 class Guillotine(inkex.EffectExtension):
     """Exports slices made using guides"""
+
     def add_arguments(self, pars):
         pars.add_argument("--directory", type=str, dest="directory")
         pars.add_argument("--image", type=str, dest="image")
@@ -126,20 +128,21 @@ class Guillotine(inkex.EffectExtension):
                 raise inkex.AbortExtension("Please enter an image name")
             return self.options.directory, self.options.image
         else:
-            '''
+            """
             First get the export-filename from the document, if the
             document has been exported before (TODO: Will not work if it
             hasn't been exported yet), then uses this to return a tuple
             consisting of the directory to export to, and the filename
             without extension.
-            '''
+            """
             try:
-                export_file = self.svg.get('inkscape:export-filename')
+                export_file = self.svg.get("inkscape:export-filename")
             except KeyError:
                 raise inkex.AbortExtension(
-                        "To use the export hints option, you "
-                        "need to have previously exported the document. "
-                        "Otherwise no export hints exist!")
+                    "To use the export hints option, you "
+                    "need to have previously exported the document. "
+                    "Otherwise no export hints exist!"
+                )
             dirname, filename = os.path.split(export_file)
             filename = filename.rsplit(".", 1)[0]  # Without extension
             return dirname, filename
@@ -164,22 +167,26 @@ class Guillotine(inkex.EffectExtension):
         """
         dirname, filename = self.get_filename_parts()
         # Remove some crusty extensions from name template
-        if filename.endswith('.svg') or filename.endswith('.png'):
-            filename = filename.rsplit('.', 1)[0]
-        if '{' not in filename:
-            filename += '_{}'
+        if filename.endswith(".svg") or filename.endswith(".png"):
+            filename = filename.rsplit(".", 1)[0]
+        if "{" not in filename:
+            filename += "_{}"
 
-        dirname = os.path.abspath(os.path.expanduser(os.path.expandvars(dirname or './')))
+        dirname = os.path.abspath(
+            os.path.expanduser(os.path.expandvars(dirname or "./"))
+        )
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
 
         output_files = []
         for i, slico in enumerate(slices):
-            fname = os.path.join(dirname, filename.format(i) + '.png')
+            fname = os.path.join(dirname, filename.format(i) + ".png")
             output_files.append(fname)
             self.export_slice(slico, fname)
 
-        self.debug("The sliced bitmaps have been saved as:" + "\n\n" + "\n".join(output_files))
+        self.debug(
+            "The sliced bitmaps have been saved as:" + "\n\n" + "\n".join(output_files)
+        )
 
     def effect(self):
         self.export_slices(self.get_slices())

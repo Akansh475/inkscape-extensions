@@ -2,6 +2,7 @@
 from color_darker import Darker
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorDarkerTest(ColorBaseCase):
     effect_class = Darker
     color_tests = [

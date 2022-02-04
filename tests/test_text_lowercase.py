@@ -6,6 +6,7 @@ from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.word import word_generator
 from text_lowercase import Lowercase
 
+
 class LowerCase(ComparisonMixin, TestCase):
     effect_class = Lowercase
     comparisons = [()]

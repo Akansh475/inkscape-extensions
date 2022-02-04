@@ -34,13 +34,17 @@ from ..transforms import Vector2d
 
 from ._base import BaseElement
 
+
 class Defs(BaseElement):
     """A header defs element, one per document"""
-    tag_name = 'defs'
+
+    tag_name = "defs"
+
 
 class StyleElement(BaseElement):
     """A CSS style element containing multiple style definitions"""
-    tag_name = 'style'
+
+    tag_name = "style"
 
     def set_text(self, content):
         """Sets the style content text as a CDATA section"""
@@ -50,37 +54,47 @@ class StyleElement(BaseElement):
         """Return the StyleSheet() object for the style tag"""
         return StyleSheet(self.text, callback=self.set_text)
 
+
 class Script(BaseElement):
     """A javascript tag in SVG"""
-    tag_name = 'script'
+
+    tag_name = "script"
 
     def set_text(self, content):
         """Sets the style content text as a CDATA section"""
         self.text = etree.CDATA(str(content))
 
+
 class Desc(BaseElement):
     """Description element"""
-    tag_name = 'desc'
+
+    tag_name = "desc"
+
 
 class Title(BaseElement):
     """Title element"""
-    tag_name = 'title'
+
+    tag_name = "title"
+
 
 class NamedView(BaseElement):
     """The NamedView element is Inkscape specific metadata about the file"""
-    tag_name = 'sodipodi:namedview'
 
-    current_layer = property(lambda self: self.get('inkscape:current-layer'))
+    tag_name = "sodipodi:namedview"
+
+    current_layer = property(lambda self: self.get("inkscape:current-layer"))
 
     @property
     def center(self):
         """Returns view_center in terms of document units"""
-        return Vector2d(self.root.viewport_to_unit(self.get('inkscape:cx') or 0),
-                        self.root.viewport_to_unit(self.get('inkscape:cy') or 0))
+        return Vector2d(
+            self.root.viewport_to_unit(self.get("inkscape:cx") or 0),
+            self.root.viewport_to_unit(self.get("inkscape:cy") or 0),
+        )
 
     def get_guides(self):
         """Returns a list of guides"""
-        return self.findall('sodipodi:guide')
+        return self.findall("sodipodi:guide")
 
     def new_guide(self, position, orient=True, name=None):
         """Creates a new guide in this namedview"""
@@ -89,29 +103,32 @@ class NamedView(BaseElement):
         elif orient is False:
             elem = Guide().move_to(position, 0, (1, 0))
         if name:
-            elem.set('inkscape:label', str(name))
+            elem.set("inkscape:label", str(name))
         return self.add(elem)
 
     def get_pages(self):
         """Returns a list of pages"""
-        return self.findall('inkscape:page')
+        return self.findall("inkscape:page")
 
     def new_page(self, x, y, width, height, label=None):
         """Creates a new page in this namedview"""
         elem = Page(width=width, height=height, x=x, y=y)
         if label:
-            elem.set('inkscape:label', str(label))
+            elem.set("inkscape:label", str(label))
         return self.add(elem)
 
 
 class Guide(BaseElement):
     """An inkscape guide"""
-    tag_name = 'sodipodi:guide'
 
-    is_horizontal = property(lambda self: self.get('orientation').startswith('0,') and not
-                                          self.get('orientation') == '0,0')
-    is_vertical = property(lambda self: self.get('orientation').endswith(',0'))
-    point = property(lambda self: Vector2d(self.get('position')))
+    tag_name = "sodipodi:guide"
+
+    is_horizontal = property(
+        lambda self: self.get("orientation").startswith("0,")
+        and not self.get("orientation") == "0,0"
+    )
+    is_vertical = property(lambda self: self.get("orientation").endswith(",0"))
+    point = property(lambda self: Vector2d(self.get("position")))
 
     @classmethod
     def new(cls, pos_x, pos_y, angle, **attrs):
@@ -127,9 +144,9 @@ class Guide(BaseElement):
         it may be a pair of numbers (tuple) which will set the orientation directly.
         If not given at all, the orientation remains unchanged.
         """
-        self.set('position', f"{float(pos_x):g},{float(pos_y):g}")
+        self.set("position", f"{float(pos_x):g},{float(pos_y):g}")
         if isinstance(angle, str):
-            if ',' not in angle:
+            if "," not in angle:
                 angle = float(angle)
 
         if isinstance(angle, (float, int)):
@@ -140,28 +157,38 @@ class Guide(BaseElement):
             angle = "{:g},{:g}".format(*angle)
 
         if angle is not None:
-            self.set('orientation', angle)
+            self.set("orientation", angle)
         return self
+
 
 class Metadata(BaseElement):
     """Inkscape Metadata element"""
-    tag_name = 'metadata'
+
+    tag_name = "metadata"
+
 
 class ForeignObject(BaseElement):
     """SVG foreignObject element"""
-    tag_name = 'foreignObject'
+
+    tag_name = "foreignObject"
+
 
 class Switch(BaseElement):
     """A switch element"""
-    tag_name = 'switch'
+
+    tag_name = "switch"
+
 
 class Grid(BaseElement):
     """A namedview grid child"""
-    tag_name = 'inkscape:grid'
+
+    tag_name = "inkscape:grid"
+
 
 class Page(BaseElement):
     """A namedview page child"""
-    tag_name = 'inkscape:page'
+
+    tag_name = "inkscape:page"
 
     width = property(lambda self: self.to_dimensionless(self.get("width") or 0))
     height = property(lambda self: self.to_dimensionless(self.get("height") or 0))
@@ -170,14 +197,14 @@ class Page(BaseElement):
 
     @classmethod
     def new(cls, width, height, x, y):
-        """ Creates a new page element in the namedview"""
+        """Creates a new page element in the namedview"""
         page = super().new()
         page.move_to(x, y)
-        page.set('width', width)
-        page.set('height', height)
+        page.set("width", width)
+        page.set("height", height)
         return page
 
     def move_to(self, x, y):
-        """ Move this page to the given x,y position """
-        self.set('position', f"{float(x):g},{float(y):g}")
+        """Move this page to the given x,y position"""
+        self.set("position", f"{float(x):g},{float(y):g}")
         return self

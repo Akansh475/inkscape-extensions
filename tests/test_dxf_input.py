@@ -5,17 +5,21 @@ from dxf_input import DxfInput
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
+
 class TestDxfInputBasic(ComparisonMixin, TestCase):
-    compare_file = ['io/test_r12.dxf', 'io/test_r14.dxf',
-    # Unit test for https://gitlab.com/inkscape/extensions/-/issues/355
-    'io/dxf_with_arc.dxf',
-    # test polylines
-    'io/dxf_polylines.dxf',
-    # File missing a BLOCKS session
-    'io/no_block_section.dxf',
-    # test placement of graphical objects from BLOCKS section
-    # ellipses currently are too large
-    'io/dxf_multiple_inserts.dxf']
+    compare_file = [
+        "io/test_r12.dxf",
+        "io/test_r14.dxf",
+        # Unit test for https://gitlab.com/inkscape/extensions/-/issues/355
+        "io/dxf_with_arc.dxf",
+        # test polylines
+        "io/dxf_polylines.dxf",
+        # File missing a BLOCKS session
+        "io/no_block_section.dxf",
+        # test placement of graphical objects from BLOCKS section
+        # ellipses currently are too large
+        "io/dxf_multiple_inserts.dxf",
+    ]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
     effect_class = DxfInput
@@ -25,13 +29,14 @@ class TestDxfInputBasic(ComparisonMixin, TestCase):
         if is_saving is True:
             return data
         data = super()._apply_compare_filters(data)
-        return data.replace((self.datadir() + '/').encode('utf-8'), b'')
+        return data.replace((self.datadir() + "/").encode("utf-8"), b"")
+
 
 class TestDxfInputBasicError(ComparisonMixin, TestCase):
     TestCase.stderr_protect = False
     # sample uses POLYLINE,TEXT (R12), LWPOLYLINE,MTEXT (R13, R14)
     # however has warnings when handling points with a display mode
-    compare_file = ['io/test2_r12.dxf', 'io/test2_r13.dxf', 'io/test2_r14.dxf']
+    compare_file = ["io/test2_r12.dxf", "io/test2_r13.dxf", "io/test2_r14.dxf"]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
     effect_class = DxfInput
@@ -41,12 +46,13 @@ class TestDxfInputBasicError(ComparisonMixin, TestCase):
         if is_saving is True:
             return data
         data = super()._apply_compare_filters(data)
-        return data.replace((self.datadir() + '/').encode('utf-8'), b'')
+        return data.replace((self.datadir() + "/").encode("utf-8"), b"")
+
 
 class TestDxfInputTextHeight(ComparisonMixin, TestCase):
-    compare_file = ['io/CADTextHeight.dxf']
+    compare_file = ["io/CADTextHeight.dxf"]
     compare_filters = [CompareNumericFuzzy()]
-    comparisons = [(), ('--textscale=1.411',)]
+    comparisons = [(), ("--textscale=1.411",)]
     effect_class = DxfInput
 
     def _apply_compare_filters(self, data, is_saving=None):
@@ -54,5 +60,4 @@ class TestDxfInputTextHeight(ComparisonMixin, TestCase):
         if is_saving is True:
             return data
         data = super()._apply_compare_filters(data)
-        return data.replace((self.datadir() + '/').encode('utf-8'), b'')
-
+        return data.replace((self.datadir() + "/").encode("utf-8"), b"")

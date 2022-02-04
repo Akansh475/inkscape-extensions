@@ -7,8 +7,9 @@ from inkex.tester.filters import CompareNumericFuzzy, CompareOrderIndependentSty
 
 from hershey import Hershey
 
+
 class HersheyComparisonMixin(ComparisonMixin):
-    comparisons_cmpfile_dict = {} # pairs of args and expected outputs
+    comparisons_cmpfile_dict = {}  # pairs of args and expected outputs
 
     def setUp(self):
         self.effect_class = Hershey
@@ -17,40 +18,60 @@ class HersheyComparisonMixin(ComparisonMixin):
         self.comparisons = self.comparisons_cmpfile_dict.keys()
 
     def get_compare_cmpfile(self, args, addout=None):
-        ''' get the correct cmpfile to compare from comparisons_dict;  '''
-        return self.data_file('refs', self.comparisons_cmpfile_dict[args])
+        """get the correct cmpfile to compare from comparisons_dict;"""
+        return self.data_file("refs", self.comparisons_cmpfile_dict[args])
+
 
 class TestHersheyBasic(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase):
-    compare_file = 'svg/hershey_input.svg' # a huge number of inputs
+    compare_file = "svg/hershey_input.svg"  # a huge number of inputs
     comparisons_cmpfile_dict = {
         # default parameters:
-        (): 'hershey.out',
+        (): "hershey.out",
         # same as above, but explicit parameters. same output:
-        ('--tab="render"', '--fontface="HersheySans1"', '--preserve="False"'): 'hershey.out',
+        (
+            '--tab="render"',
+            '--fontface="HersheySans1"',
+            '--preserve="False"',
+        ): "hershey.out",
     }
 
-class TestHersheyTrivialInput(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase):
-    compare_file = 'svg/hershey_trivial_input.svg'
+
+class TestHersheyTrivialInput(
+    InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase
+):
+    compare_file = "svg/hershey_trivial_input.svg"
     comparisons_cmpfile_dict = {
         # loading a different font:
-        ('--fontface="EMSAllure"', ): 'hershey_loadfont.out',
+        ('--fontface="EMSAllure"',): "hershey_loadfont.out",
         # using the "other font" option. same output as above:
-        ('--fontface="other"', '--otherfont="EMSAllure"'): 'hershey_loadfont.out',
+        ('--fontface="other"', '--otherfont="EMSAllure"'): "hershey_loadfont.out",
         # tests preserve text option
-        ('--fontface="EMSOsmotron"', '--preserve=true'): 'hershey_preservetext.out',
+        ('--fontface="EMSOsmotron"', "--preserve=true"): "hershey_preservetext.out",
         # tests when just part of the input file is selected
-        ('--id=A',): 'hershey_partialselection.out',
+        ("--id=A",): "hershey_partialselection.out",
     }
 
+
 class TestHersheyTables(InkscapeExtensionTestMixin, HersheyComparisonMixin, TestCase):
-    compare_file = 'svg/default-inkscape-SVG.svg'
+    compare_file = "svg/default-inkscape-SVG.svg"
     comparisons_cmpfile_dict = {
         # generates a simple font table:
-        ('--tab="utilities"', '--action="sample"', '--text="I am a quick brown fox"'): 'hershey_fonttable.out',
+        (
+            '--tab="utilities"',
+            '--action="sample"',
+            '--text="I am a quick brown fox"',
+        ): "hershey_fonttable.out",
         # generates a simple font table, while testing UTF-8 input
-        ('--tab="utilities"', '--action="sample"', '--text="Î âm å qù¡çk brõwñ fø×"'): 'hershey_encoding.out',
+        (
+            '--tab="utilities"',
+            '--action="sample"',
+            '--text="Î âm å qù¡çk brõwñ fø×"',
+        ): "hershey_encoding.out",
         # generates a glyph table in the font "EMSOsmotron"
-        ('--tab="utilities"', '--action="table"', '--fontface="other"', '--otherfont="EMSOsmotron"'): 'hershey_glyphtable.out',
-        }
-
-
+        (
+            '--tab="utilities"',
+            '--action="table"',
+            '--fontface="other"',
+            '--otherfont="EMSOsmotron"',
+        ): "hershey_glyphtable.out",
+    }

@@ -40,6 +40,7 @@ For supported barcodes see Barcode module directory.
 # PDF417-Truncated
 # PDF417-GLI
 
+
 class NoBarcode(object):
     """Simple class for no barcode"""
 
@@ -60,9 +61,9 @@ def get_barcode(code, **kw):
     if not code:
         return NoBarcode("No barcode format given.")
 
-    code = str(code).replace('-', '').strip()
-    module = 'barcode.' + code
-    lst = ['barcode']
+    code = str(code).replace("-", "").strip()
+    module = "barcode." + code
+    lst = ["barcode"]
     try:
         return getattr(__import__(module, fromlist=lst), code)(kw)
     except ImportError as err:
@@ -70,4 +71,6 @@ def get_barcode(code, **kw):
             return NoBarcode("Invalid type of barcode: {}.{}".format(module, code))
         raise
     except AttributeError:
-        return NoBarcode("Barcode module is missing barcode class: {}.{}".format(module, code))
+        return NoBarcode(
+            "Barcode module is missing barcode class: {}.{}".format(module, code)
+        )

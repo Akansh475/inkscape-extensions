@@ -63,24 +63,36 @@ try:
 except:
     numpy = None
 
+
 def draw_circle(r, cx, cy, width, fill, name, parent):
     """Draw an SVG circle"""
     circle = parent.add(Circle(cx=str(cx), cy=str(cy), r=str(r)))
-    circle.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
+    circle.style = {"stroke": "#000000", "stroke-width": str(width), "fill": fill}
     circle.label = name
 
 
 def draw_line(x1, y1, x2, y2, width, name, parent):
     elem = parent.add(inkex.PathElement())
-    elem.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none',
-                  'stroke-linecap': 'round'}
-    elem.set('inkscape:label', name)
+    elem.style = {
+        "stroke": "#000000",
+        "stroke-width": str(width),
+        "fill": "none",
+        "stroke-linecap": "round",
+    }
+    elem.set("inkscape:label", name)
     elem.path = [Move(x1, y1), Line(x2, y2)]
+
 
 def draw_poly(pts, face, st, name, parent):
     """Draw polygone"""
-    style = {'stroke': '#000000', 'stroke-width': str(st.th), 'stroke-linejoin': st.linejoin,
-             'stroke-opacity': st.s_opac, 'fill': st.fill, 'fill-opacity': st.f_opac}
+    style = {
+        "stroke": "#000000",
+        "stroke-width": str(st.th),
+        "stroke-linejoin": st.linejoin,
+        "stroke-opacity": st.s_opac,
+        "fill": st.fill,
+        "fill-opacity": st.f_opac,
+    }
     path = inkex.Path()
     for facet in face:
         if not path:  # for first point
@@ -99,41 +111,61 @@ def draw_edges(edge_list, pts, st, parent):
     for edge in edge_list:  # for every edge
         pt_1 = pts[edge[0] - 1][0:2]  # the point at the start
         pt_2 = pts[edge[1] - 1][0:2]  # the point at the end
-        name = 'Edge' + str(edge[0]) + '-' + str(edge[1])
+        name = "Edge" + str(edge[0]) + "-" + str(edge[1])
         draw_line(pt_1[0], -pt_1[1], pt_2[0], -pt_2[1], st.th, name, parent)
 
 
 def draw_faces(faces_data, pts, obj, shading, fill_col, st, parent):
     for face in faces_data:  # for every polygon that has been sorted
         if shading:
-            st.fill = get_darkened_colour(fill_col, face[1] / pi)  # darken proportionally to angle to lighting vector
+            st.fill = get_darkened_colour(
+                fill_col, face[1] / pi
+            )  # darken proportionally to angle to lighting vector
         else:
             st.fill = get_darkened_colour(fill_col, 1)  # do not darken colour
 
         face_no = face[3]  # the number of the face to draw
-        draw_poly(pts, obj.fce[face_no], st, 'Face:' + str(face_no), parent)
+        draw_poly(pts, obj.fce[face_no], st, "Face:" + str(face_no), parent)
 
 
 def get_darkened_colour(rgb, factor):
     """return a hex triplet of colour, reduced in lightness 0.0-1.0"""
-    return '#' + "%02X" % floor(factor * rgb[0]) \
-           + "%02X" % floor(factor * rgb[1]) \
-           + "%02X" % floor(factor * rgb[2])  # make the colour string
+    return (
+        "#"
+        + "%02X" % floor(factor * rgb[0])
+        + "%02X" % floor(factor * rgb[1])
+        + "%02X" % floor(factor * rgb[2])
+    )  # make the colour string
 
 
 def make_rotation_log(options):
     """makes a string recording the axes and angles of each rotation, so an object can be repeated"""
-    return options.r1_ax + str('%.2f' % options.r1_ang) + ':' + \
-           options.r2_ax + str('%.2f' % options.r2_ang) + ':' + \
-           options.r3_ax + str('%.2f' % options.r3_ang) + ':' + \
-           options.r1_ax + str('%.2f' % options.r4_ang) + ':' + \
-           options.r2_ax + str('%.2f' % options.r5_ang) + ':' + \
-           options.r3_ax + str('%.2f' % options.r6_ang)
+    return (
+        options.r1_ax
+        + str("%.2f" % options.r1_ang)
+        + ":"
+        + options.r2_ax
+        + str("%.2f" % options.r2_ang)
+        + ":"
+        + options.r3_ax
+        + str("%.2f" % options.r3_ang)
+        + ":"
+        + options.r1_ax
+        + str("%.2f" % options.r4_ang)
+        + ":"
+        + options.r2_ax
+        + str("%.2f" % options.r5_ang)
+        + ":"
+        + options.r3_ax
+        + str("%.2f" % options.r6_ang)
+    )
+
 
 def normalise(vector):
     """return the unit vector pointing in the same direction as the argument"""
     length = sqrt(numpy.dot(vector, vector))
     return numpy.array(vector) / length
+
 
 def get_normal(pts, face):
     """normal vector for the plane passing though the first three elements of face of pts"""
@@ -141,6 +173,7 @@ def get_normal(pts, face):
         (numpy.array(pts[face[0] - 1]) - numpy.array(pts[face[1] - 1])),
         (numpy.array(pts[face[0] - 1]) - numpy.array(pts[face[2] - 1])),
     ).flatten()
+
 
 def get_unit_normal(pts, face, cw_wound):
     """
@@ -151,39 +184,43 @@ def get_unit_normal(pts, face, cw_wound):
     winding = -1 if cw_wound else 1
     return winding * normalise(get_normal(pts, face))
 
+
 def rotate(matrix, rads, axis):
     """choose the correct rotation matrix to use"""
-    if axis == 'x':
-        trans_mat = numpy.array([
-            [1, 0, 0], [0, cos(rads), -sin(rads)], [0, sin(rads), cos(rads)]])
-    elif axis == 'y':
-        trans_mat = numpy.array([
-            [cos(rads), 0, sin(rads)], [0, 1, 0], [-sin(rads), 0, cos(rads)]])
-    elif axis == 'z':
-        trans_mat = numpy.array([
-            [cos(rads), -sin(rads), 0], [sin(rads), cos(rads), 0], [0, 0, 1]])
+    if axis == "x":
+        trans_mat = numpy.array(
+            [[1, 0, 0], [0, cos(rads), -sin(rads)], [0, sin(rads), cos(rads)]]
+        )
+    elif axis == "y":
+        trans_mat = numpy.array(
+            [[cos(rads), 0, sin(rads)], [0, 1, 0], [-sin(rads), 0, cos(rads)]]
+        )
+    elif axis == "z":
+        trans_mat = numpy.array(
+            [[cos(rads), -sin(rads), 0], [sin(rads), cos(rads), 0], [0, 0, 1]]
+        )
     return numpy.matmul(trans_mat, matrix)
+
 
 class Style(object):  # container for style information
     def __init__(self, options):
         self.th = options.th
-        self.fill = '#ff0000'
-        self.col = '#000000'
+        self.fill = "#ff0000"
+        self.col = "#000000"
         self.r = 2
         self.f_opac = str(options.f_opac / 100.0)
         self.s_opac = str(options.s_opac / 100.0)
-        self.linecap = 'round'
-        self.linejoin = 'round'
+        self.linecap = "round"
+        self.linejoin = "round"
 
 
 class WavefrontObj(object):
     """Wavefront based 3d object defined by the vertices and the faces (eg a polyhedron)"""
-    name = property(lambda self: self.meta.get('name', None))
+
+    name = property(lambda self: self.meta.get("name", None))
 
     def __init__(self, filename):
-        self.meta = {
-            'name': os.path.basename(filename).rsplit('.', 1)[0]
-        }
+        self.meta = {"name": os.path.basename(filename).rsplit(".", 1)[0]}
         self.vtx = []
         self.edg = []
         self.fce = []
@@ -192,25 +229,25 @@ class WavefrontObj(object):
     def _parse_file(self, filename):
         if not os.path.isfile(filename):
             raise IOError("Can't find wavefront object file {}".format(filename))
-        with open(filename, 'r') as fhl:
+        with open(filename, "r") as fhl:
             for line in fhl:
                 self._parse_line(line.strip())
 
     def _parse_line(self, line):
-        if line.startswith('#'):
-            if ':' in line:
-                name, value = line.split(':', 1)
+        if line.startswith("#"):
+            if ":" in line:
+                name, value = line.split(":", 1)
                 self.meta[name.lower()] = value
         elif line:
             (kind, line) = line.split(None, 1)
-            kind_name = 'add_' + kind
+            kind_name = "add_" + kind
             if hasattr(self, kind_name):
                 getattr(self, kind_name)(line)
 
     @staticmethod
     def _parse_numbers(line, typ=str):
         # Ignore any slash options and always pick the first one
-        return [typ(v.split('/')[0]) for v in line.split()]
+        return [typ(v.split("/")[0]) for v in line.split()]
 
     def add_v(self, line):
         """Add vertex from parsed line"""
@@ -237,7 +274,9 @@ class WavefrontObj(object):
         """translate vertex points according to the matrix"""
         transformed_pts = []
         for vtx in self.vtx:
-            transformed_pts.append((numpy.matmul(trans_mat, numpy.array(vtx).T)).T.tolist())
+            transformed_pts.append(
+                (numpy.matmul(trans_mat, numpy.array(vtx).T)).T.tolist()
+            )
         return transformed_pts
 
     def get_edge_list(self):
@@ -249,16 +288,18 @@ class WavefrontObj(object):
                 edge_list.append(sorted([edge, face[(j + 1) % len(face)]]))
         return [list(x) for x in sorted(set(tuple(x) for x in edge_list))]
 
+
 class Poly3D(inkex.GenerateExtension):
     """Generate a polyhedron from a wavefront 3d model file"""
+
     def add_arguments(self, pars):
         pars.add_argument("--tab", default="common")
 
         # MODEL FILE SETTINGS
-        pars.add_argument("--obj", default='cube')
-        pars.add_argument("--spec_file", default='great_rhombicuboct.obj')
+        pars.add_argument("--obj", default="cube")
+        pars.add_argument("--spec_file", default="great_rhombicuboct.obj")
         pars.add_argument("--cw_wound", type=inkex.Boolean, default=False)
-        pars.add_argument("--type", default='face')
+        pars.add_argument("--type", default="face")
         # VEIW SETTINGS
         pars.add_argument("--r1_ax", default="x")
         pars.add_argument("--r2_ax", default="x")
@@ -274,7 +315,7 @@ class Poly3D(inkex.GenerateExtension):
         pars.add_argument("--r6_ang", type=float, default=0.0)
         pars.add_argument("--scl", type=float, default=100.0)
         # STYLE SETTINGS
-        pars.add_argument("--show", type=self.arg_method('gen'))
+        pars.add_argument("--show", type=self.arg_method("gen"))
         pars.add_argument("--shade", type=inkex.Boolean, default=True)
         pars.add_argument("--f_r", type=int, default=255)
         pars.add_argument("--f_g", type=int, default=0)
@@ -286,17 +327,19 @@ class Poly3D(inkex.GenerateExtension):
         pars.add_argument("--lv_y", type=float, default=1)
         pars.add_argument("--lv_z", type=float, default=-2)
         pars.add_argument("--back", type=inkex.Boolean, default=False)
-        pars.add_argument("--z_sort", type=self.arg_method('z_sort'), default=self.z_sort_min)
+        pars.add_argument(
+            "--z_sort", type=self.arg_method("z_sort"), default=self.z_sort_min
+        )
 
     def get_filename(self):
         """Get the filename for the spec file"""
         name = ""
-        if self.options.obj == 'from_file':
+        if self.options.obj == "from_file":
             name = self.options.spec_file
         else:
-            name = self.options.obj + '.obj'
+            name = self.options.obj + ".obj"
         moddir = self.ext_path()
-        return os.path.join(moddir, 'Poly3DObjects', name)
+        return os.path.join(moddir, "Poly3DObjects", name)
 
     def generate(self):
         if numpy is None:
@@ -305,11 +348,11 @@ class Poly3D(inkex.GenerateExtension):
 
         obj = WavefrontObj(self.get_filename())
 
-        scale = self.svg.unittouu('1px')  # convert to document units
+        scale = self.svg.unittouu("1px")  # convert to document units
         st = Style(so)  # initialise style
 
         # we will put all the rotations in the object name, so it can be repeated in
-        poly = Group.new(obj.name + ':' + make_rotation_log(so))
+        poly = Group.new(obj.name + ":" + make_rotation_log(so))
         (pos_x, pos_y) = self.svg.namedview.center
         poly.transform.add_translate(pos_x, pos_y)
         poly.transform.add_scale(scale)
@@ -317,8 +360,8 @@ class Poly3D(inkex.GenerateExtension):
         # TRANSFORMATION OF THE OBJECT (ROTATION, SCALE, ETC)
         trans_mat = numpy.identity(3, float)  # init. trans matrix as identity matrix
         for i in range(1, 7):  # for each rotation
-            axis = getattr(so, 'r{}_ax'.format(i))
-            angle = getattr(so, 'r{}_ang'.format(i)) * pi / 180
+            axis = getattr(so, "r{}_ax".format(i))
+            angle = getattr(so, "r{}_ang".format(i)) * pi / 180
             trans_mat = rotate(trans_mat, angle, axis)
         # scale by linear factor (do this only after the transforms to reduce round-off)
         trans_mat = trans_mat * so.scl
@@ -331,7 +374,7 @@ class Poly3D(inkex.GenerateExtension):
     def gen_vtx(self, obj, st, poly, transformed_pts):
         """Generate Vertex"""
         for i, pts in enumerate(transformed_pts):
-            draw_circle(st.r, pts[0], pts[1], st.th, '#000000', 'Point' + str(i), poly)
+            draw_circle(st.r, pts[0], pts[1], st.th, "#000000", "Point" + str(i), poly)
 
     def gen_edg(self, obj, st, poly, transformed_pts):
         """Generate edges"""
@@ -367,7 +410,9 @@ class Poly3D(inkex.GenerateExtension):
                     # light, along with the face ID and normal
                     z_list.append((z_sort_param, angle, norm, i))
 
-            z_list.sort(key=lambda x: x[0])  # sort by ascending sort parameter of the face
+            z_list.sort(
+                key=lambda x: x[0]
+            )  # sort by ascending sort parameter of the face
             draw_faces(z_list, transformed_pts, obj, so.shade, fill_col, st, poly)
 
         else:  # we cannot generate a list of faces from the edges without a lot of computation
@@ -388,5 +433,6 @@ class Poly3D(inkex.GenerateExtension):
         """returns the centroid z_value of any point in the face"""
         return sum([pts[facet - 1][2] for facet in face]) / len(face)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Poly3D().run()

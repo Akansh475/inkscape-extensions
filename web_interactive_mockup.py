@@ -19,24 +19,30 @@
 import inkwebeffect
 import inkex
 
+
 class InteractiveMockup(inkwebeffect.InkWebEffect):
     def add_arguments(self, pars):
-        pars.add_argument("--when", default="onclick", help="Event that will trigger the action")
+        pars.add_argument(
+            "--when", default="onclick", help="Event that will trigger the action"
+        )
         pars.add_argument("--tab")
 
     def effect(self):
         self.ensureInkWebSupport()
 
         if len(self.options.ids) < 2:
-            raise inkex.AbortExtension("You must select at least two elements. The last one is the object you want to go to.")
+            raise inkex.AbortExtension(
+                "You must select at least two elements. The last one is the object you want to go to."
+            )
 
         el_from = list(self.svg.selected.values())[:-1]
 
-        ev_code = "InkWeb.moveViewbox({from:this, to:'" + self.options.ids[-1] +"'})"
+        ev_code = "InkWeb.moveViewbox({from:this, to:'" + self.options.ids[-1] + "'})"
         for elem in el_from:
             prev_ev_code = elem.get(self.options.when)
-            el_ev_code = ev_code +";" + (prev_ev_code or '')
+            el_ev_code = ev_code + ";" + (prev_ev_code or "")
             elem.set(self.options.when, el_ev_code)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     InteractiveMockup().run()

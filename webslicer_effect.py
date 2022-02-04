@@ -23,21 +23,23 @@ Common elements between webslicer extensions
 import inkex
 from inkex import Group
 
+
 def is_empty(val):
-    return val in ('', None)
+    return val in ("", None)
 
 
 class WebSlicerMixin(object):
     def get_slicer_layer(self, force_creation=False):
         # Test if webslicer-layer layer existis
         layer = self.svg.getElement(
-            '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]')
+            '//*[@id="webslicer-layer" and @inkscape:groupmode="layer"]'
+        )
         if layer is None:
             if force_creation:
                 # Create a new layer
-                layer = Group(id='webslicer-layer')
-                layer.set('inkscape:label', 'Web Slicer')
-                layer.set('inkscape:groupmode', 'layer')
+                layer = Group(id="webslicer-layer")
+                layer.set("inkscape:label", "Web Slicer")
+                layer.set("inkscape:groupmode", "layer")
                 self.document.getroot().append(layer)
             else:
                 layer = None
@@ -48,6 +50,6 @@ class WebSlicerMixin(object):
         for att in conf_atts:
             if not is_empty(getattr(self.options, att)):
                 conf_list.append(
-                        att.replace('_', '-') + ': ' + str(getattr(self.options, att))
+                    att.replace("_", "-") + ": " + str(getattr(self.options, att))
                 )
         return "\n".join(conf_list)

@@ -22,13 +22,21 @@
 import math
 import inkex
 
+
 class Whirl(inkex.EffectExtension):
     """Modify a path by twisting the nodes around a point"""
+
     def add_arguments(self, pars):
-        pars.add_argument("-t", "--whirl", type=float,\
-            default=5.0, help="amount of whirl")
-        pars.add_argument("-r", "--rotation", type=inkex.Boolean,\
-            default=True, help="direction of rotation")
+        pars.add_argument(
+            "-t", "--whirl", type=float, default=5.0, help="amount of whirl"
+        )
+        pars.add_argument(
+            "-r",
+            "--rotation",
+            type=inkex.Boolean,
+            default=True,
+            help="direction of rotation",
+        )
 
     def effect(self):
         view_center = self.svg.namedview.center
@@ -50,12 +58,12 @@ class Whirl(inkex.EffectExtension):
                     if dist != 0:
                         art = direction * dist * ammount
                         theta = math.atan2(point[1], point[0]) + art
-                        point[0] = (dist * math.cos(theta))
-                        point[1] = (dist * math.sin(theta))
+                        point[0] = dist * math.cos(theta)
+                        point[1] = dist * math.sin(theta)
                     point[0] += center[0]
                     point[1] += center[1]
         node.path = path
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Whirl().run()

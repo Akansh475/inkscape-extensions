@@ -26,9 +26,13 @@ Clean up any old `.msg` files with invalid or old keys.
 from pdflatex import PdfLatex
 from inkex.tester import ComparisonMixin, TestCase
 
+
 class PdfLatexTest(ComparisonMixin, TestCase):
-    compare_file = 'svg/empty.svg'
+    compare_file = "svg/empty.svg"
     effect_class = PdfLatex
     comparisons = [
-        ('--formule=\\(\\displaystyle\\frac{\\pi^2}{6}=\\lim_{n \\to \\infty}\\sum_{k=1}^n \\frac{1}{k^2}\\)', '--packages='),
+        (
+            "--formule=\\(\\displaystyle\\frac{\\pi^2}{6}=\\lim_{n \\to \\infty}\\sum_{k=1}^n \\frac{1}{k^2}\\)",
+            "--packages=",
+        ),
     ]

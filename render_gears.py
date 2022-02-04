@@ -29,7 +29,7 @@ from inkex import PathElement
 
 def involute_intersect_angle(Rb, R):
     Rb, R = float(Rb), float(R)
-    return (sqrt(R ** 2 - Rb ** 2) / Rb) - (acos(Rb / R))
+    return (sqrt(R**2 - Rb**2) / Rb) - (acos(Rb / R))
 
 
 def point_on_circle(radius, angle):
@@ -41,28 +41,36 @@ def point_on_circle(radius, angle):
 def points_to_svgd(p):
     f = p[0]
     p = p[1:]
-    svgd = 'M{:.5f},{:.5f}'.format(f[0], f[1])
+    svgd = "M{:.5f},{:.5f}".format(f[0], f[1])
     for x in p:
-        svgd += ' L{:.5f},{:.5f}'.format(x[0], x[1])
-    svgd += 'z'
+        svgd += " L{:.5f},{:.5f}".format(x[0], x[1])
+    svgd += "z"
     return svgd
 
 
 class Gears(inkex.GenerateExtension):
-    container_label = 'Rendered Gears'
+    container_label = "Rendered Gears"
 
     def add_arguments(self, pars):
         pars.add_argument("--teeth", type=int, default=24, help="Number of teeth")
         pars.add_argument("--pitch", type=float, default=20.0, help="Circular Pitch")
         pars.add_argument("--angle", type=float, default=20.0, help="Pressure Angle")
-        pars.add_argument("--centerdiameter", type=float, default=20.0, help="Diameter of hole")
-        pars.add_argument("--unit", default="px", help="unit for pitch and center diameter")
+        pars.add_argument(
+            "--centerdiameter", type=float, default=20.0, help="Diameter of hole"
+        )
+        pars.add_argument(
+            "--unit", default="px", help="unit for pitch and center diameter"
+        )
 
     def generate(self):
         teeth = self.options.teeth
         pitch = self.svg.unittouu(str(self.options.pitch) + self.options.unit)
-        angle = self.options.angle  # Angle of tangent to tooth at circular pitch wrt radial line.
-        centerdiameter = self.svg.unittouu(str(self.options.centerdiameter) + self.options.unit)
+        angle = (
+            self.options.angle
+        )  # Angle of tangent to tooth at circular pitch wrt radial line.
+        centerdiameter = self.svg.unittouu(
+            str(self.options.centerdiameter) + self.options.unit
+        )
 
         # print >>sys.stderr, "Teeth: %s\n"        % teeth
 
@@ -91,7 +99,7 @@ class Gears(inkex.GenerateExtension):
         tooth = (pi * pitch_diameter) / (2.0 * float(teeth))
 
         # Undercut?
-        undercut = (2.0 / (sin(radians(angle)) ** 2))
+        undercut = 2.0 / (sin(radians(angle)) ** 2)
         needs_undercut = teeth < undercut
 
         # Clearance: Radial distance between top of tooth on one gear to bottom of gap on another.
@@ -106,7 +114,9 @@ class Gears(inkex.GenerateExtension):
 
         half_thick_angle = two_pi / (4.0 * float(teeth))
         pitch_to_base_angle = involute_intersect_angle(base_radius, pitch_radius)
-        pitch_to_outer_angle = involute_intersect_angle(base_radius, outer_radius) - pitch_to_base_angle
+        pitch_to_outer_angle = (
+            involute_intersect_angle(base_radius, outer_radius) - pitch_to_base_angle
+        )
 
         centers = [(x * two_pi / float(teeth)) for x in range(teeth)]
 
@@ -133,7 +143,9 @@ class Gears(inkex.GenerateExtension):
             o2 = point_on_circle(outer_radius, outer2)
 
             if root_radius > base_radius:
-                pitch_to_root_angle = pitch_to_base_angle - involute_intersect_angle(base_radius, root_radius)
+                pitch_to_root_angle = pitch_to_base_angle - involute_intersect_angle(
+                    base_radius, root_radius
+                )
                 root1 = pitch1 - pitch_to_root_angle
                 root2 = pitch2 + pitch_to_root_angle
                 r1 = point_on_circle(root_radius, root1)
@@ -149,7 +161,11 @@ class Gears(inkex.GenerateExtension):
         path = points_to_svgd(points)
 
         # Create SVG Path for gear
-        style = {'stroke': '#000000', 'fill': 'none', 'stroke-width': str(self.svg.unittouu('1px'))}
+        style = {
+            "stroke": "#000000",
+            "fill": "none",
+            "stroke-width": str(self.svg.unittouu("1px")),
+        }
         gear = PathElement()
         gear.style = style
         gear.path = path
@@ -161,5 +177,5 @@ class Gears(inkex.GenerateExtension):
             yield arc
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Gears().run()

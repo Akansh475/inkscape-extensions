@@ -25,8 +25,10 @@ import sys
 import inkex
 from inkex import Script
 
+
 class InkWebEffect(inkex.EffectExtension):
-    reUpdateJS = '/\\*\\s* inkweb.js [^*]* InkWebEffect:AutoUpdate \\s*\\*/'
+    reUpdateJS = "/\\*\\s* inkweb.js [^*]* InkWebEffect:AutoUpdate \\s*\\*/"
+
     def effect(self):
         pass
 
@@ -44,7 +46,7 @@ class InkWebEffect(inkex.EffectExtension):
     def ensureInkWebSupport(self):
         # Search for the script tag with the inkweb.js code:
         script = None
-        for child in self.svg.xpath('//svg:script'):
+        for child in self.svg.xpath("//svg:script"):
             if re.search(self.reUpdateJS, child.text):
                 script = child
 

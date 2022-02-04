@@ -26,17 +26,27 @@ from inkex.styles import Style
 from inkex.colors import Color
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
-from inkex import SvgDocumentElement, BaseElement, \
-    ColorError, BaseStyleValue, RadialGradient, Stop, PathElement
+from inkex import (
+    SvgDocumentElement,
+    BaseElement,
+    ColorError,
+    BaseStyleValue,
+    RadialGradient,
+    Stop,
+    PathElement,
+)
 from inkex import SVG_PARSER
 
+
 class StyleInheritanceTests(TestCase):
-    """ Some test cases for css attribute handling """
+    """Some test cases for css attribute handling"""
+
     def test_style_sheet_1(self):
         """File from https://commons.wikimedia.org/wiki/File:Test_only.svg, public domain
         note that Inkscape fails the same test: https://gitlab.com/inkscape/inbox/-/issues/1929"""
         doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'style_inheritance.svg'))
+            self.data_file("svg", "style_inheritance.svg")
+        )
 
         circles: List[BaseElement] = doc.xpath("//svg:circle")
         for circle in circles:
@@ -53,15 +63,22 @@ class StyleInheritanceTests(TestCase):
         https://www.w3.org/Graphics/SVG/Test/20061213/htmlObjectHarness/full-styling-css-04-f.html
         Note that the "good" preview image attached on the site is wrong per the explanation"""
         doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'styling-css-04-f.svg'))
+            self.data_file("svg", "styling-css-04-f.svg")
+        )
 
         rects: List[BaseElement] = doc.xpath("//svg:rect")
 
-        results = {"A": "blue", "B": "green", "C": "orange",
-                   "D": "gold", "E": "purple", "F": "red"}
+        results = {
+            "A": "blue",
+            "B": "green",
+            "C": "orange",
+            "D": "gold",
+            "E": "purple",
+            "F": "red",
+        }
         for rect in rects:
             ident = rect.get_id()
-            if (len(ident) != 2):
+            if len(ident) != 2:
                 continue
             result = results[ident[0]]
 
@@ -75,7 +92,8 @@ class StyleInheritanceTests(TestCase):
         """
 
         doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'styling-inherit-01-b.svg'))
+            self.data_file("svg", "styling-inherit-01-b.svg")
+        )
 
         objects: List[BaseElement] = doc.xpath("//svg:rect|//svg:ellipse")
 
@@ -96,11 +114,10 @@ class StyleInheritanceTests(TestCase):
         stroke = objects[3].specified_style()("stroke")
         self.assertEqual(stroke, Color("red"))
 
-
     def test_marker_style(self):
         """Check if markers are read and written correctly"""
 
-        doc: SvgDocumentElement = svg_file(self.data_file('svg', 'markers.svg'))
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "markers.svg"))
         elem = doc.getElementById("dimension")
         style = elem.specified_style()
         marker = style("marker-start")
@@ -129,15 +146,13 @@ class StyleInheritanceTests(TestCase):
         elem.style["marker"] = ""
         self.assertEqual(elem.style("marker-start"), doc.getElementById("Arrow1Lend"))
 
-
     def test_get_default(self):
-        """ Test if the default values are returned for missing attributes """
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
+        """Test if the default values are returned for missing attributes"""
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
         elem = doc.getElementById("path6")
 
-        assert(elem.style("stroke-dashoffset") == "0")
-        assert(elem.style("font") == "")
+        assert elem.style("stroke-dashoffset") == "0"
+        assert elem.style("font") == ""
 
     def parse_style_and_compare(self, tests: List[Tuple[str, dict]]):
         """Parses a style and compares the output to a dictionary of attributes"""
@@ -149,41 +164,73 @@ class StyleInheritanceTests(TestCase):
     def test_font_shorthand(self):
         """Test whether shorthand properties are applied correctly"""
         tests: List[Tuple[str, dict]] = [
-            ('font: ', {"font-size": "medium"}),
-            (r'font: 12px/14px sans-serif',
-                {"font-size": "12px", "line-height": "14px", "font-family": "sans-serif"}),
-            (r'font: 80% sans-serif',
-                {"font-size": "80%", "font-family": "sans-serif"}),
-            (r'font: x-large/110% "New Century Schoolbook", serif',
-                {"font-size": "x-large", "line-height": "110%",
-                 "font-family": '"New Century Schoolbook", serif'}),
-            (r'font: semi-condensed bold italic large Palatino, serif',
-                {"font-weight": "bold", "font-style": "italic", "font-size": "large",
-                 "font-family": "Palatino, serif", "font-stretch": "semi-condensed"}),
-            (r'font: normal small-caps 120%/120% fantasy',
-                {"font-weight": "normal", "font-style": "normal", "font-variant": "small-caps",
-                 "font-size": "120%", "line-height": "120%", "font-family": "fantasy"})]
+            ("font: ", {"font-size": "medium"}),
+            (
+                r"font: 12px/14px sans-serif",
+                {
+                    "font-size": "12px",
+                    "line-height": "14px",
+                    "font-family": "sans-serif",
+                },
+            ),
+            (
+                r"font: 80% sans-serif",
+                {"font-size": "80%", "font-family": "sans-serif"},
+            ),
+            (
+                r'font: x-large/110% "New Century Schoolbook", serif',
+                {
+                    "font-size": "x-large",
+                    "line-height": "110%",
+                    "font-family": '"New Century Schoolbook", serif',
+                },
+            ),
+            (
+                r"font: semi-condensed bold italic large Palatino, serif",
+                {
+                    "font-weight": "bold",
+                    "font-style": "italic",
+                    "font-size": "large",
+                    "font-family": "Palatino, serif",
+                    "font-stretch": "semi-condensed",
+                },
+            ),
+            (
+                r"font: normal small-caps 120%/120% fantasy",
+                {
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "font-variant": "small-caps",
+                    "font-size": "120%",
+                    "line-height": "120%",
+                    "font-family": "fantasy",
+                },
+            ),
+        ]
         self.parse_style_and_compare(tests)
-
 
     def test_shorthand_overwrites(self):
         """Test whether shorthands correctly follow precedence: only overwrite rules which are
         defined before and not important"""
         tests: List[Tuple[str, dict]] = [
-            ("""font-size: large;
+            (
+                """font-size: large;
                 font-family: Verdana !important;
                 font: bold 12px/14px sans-serif;
                 font-weight: normal;""",
-                {"font-size": "12px", "font-family": "Verdana", "line-height": "14px",
-                 "font-weight": "normal"})]
+                {
+                    "font-size": "12px",
+                    "font-family": "Verdana",
+                    "line-height": "14px",
+                    "font-weight": "normal",
+                },
+            )
+        ]
         self.parse_style_and_compare(tests)
-
-
 
     def test_gradient_parsing(self):
         """Test if the style correctly outputs Gradient objects"""
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
         elem = doc.getElementById("path6")
         style = elem.style
         grad = style("stroke")
@@ -191,21 +238,23 @@ class StyleInheritanceTests(TestCase):
 
     def test_attribute_set(self):
         """Tests if we can set attributes with parsed values"""
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
 
         elem = doc.getElementById("path6")
         style = elem.style
 
         tests = [
-            ("stroke", doc.getElementById(
-                "linearGradient847"), "url(#linearGradient847)"),
+            (
+                "stroke",
+                doc.getElementById("linearGradient847"),
+                "url(#linearGradient847)",
+            ),
             ("fill", Color("red"), "red"),
             ("stroke", None, "none"),
             ("opacity", 0.5, "0.5"),
             ("opacity", 1.2, "1"),
             ("opacity", -2, "0"),
-            ("font-variant", "small-caps", "small-caps")
+            ("font-variant", "small-caps", "small-caps"),
         ]
         for attr, value, result in tests:
             style[attr] = value
@@ -227,32 +276,37 @@ class StyleInheritanceTests(TestCase):
 
     def test_style_parsing_error(self):
         """Test if bad attribute data raises an exception during parsing"""
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
         tests: List[Tuple[str, Exception]] = [
-            (r'opacity: abc', ValueError),
-            (r'fill: #GHI', ColorError),
-            (r'stroke: url(#missing)', ValueError),
-            (r'fill: ', ColorError),
-            (r"font-variant: blue", ValueError)]
+            (r"opacity: abc", ValueError),
+            (r"fill: #GHI", ColorError),
+            (r"stroke: url(#missing)", ValueError),
+            (r"fill: ", ColorError),
+            (r"font-variant: blue", ValueError),
+        ]
         for decl, exceptiontype in tests:
             with self.assertRaises(exceptiontype):
                 value = BaseStyleValue.factory(declaration=decl)
                 _ = value.parse_value(doc)
-            self.assertEqual(BaseStyleValue.factory_errorhandled(
-                element=doc, declaration=decl), None)
+            self.assertEqual(
+                BaseStyleValue.factory_errorhandled(element=doc, declaration=decl), None
+            )
 
     def test_attribute_set_invalid(self):
         """Test if bad attribute data raises an exception when setting it on a style"""
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
 
         elem = doc.getElementById("path6")
         tests = [
-            ("fill", "nocolor", 'Unknown color format'),
+            ("fill", "nocolor", "Unknown color format"),
             ("opacity", Style(), "Value must be number"),
-            ("font-variant", "red", "Value 'red' is invalid for the property font-variant"),
-            ("stroke", "url(#missing)", "Paint server not found")]
+            (
+                "font-variant",
+                "red",
+                "Value 'red' is invalid for the property font-variant",
+            ),
+            ("stroke", "url(#missing)", "Paint server not found"),
+        ]
         style = elem.style
         for attr, value, errormsg in tests:
             with self.assertRaisesRegex(Exception, errormsg):
@@ -260,9 +314,8 @@ class StyleInheritanceTests(TestCase):
 
     def test_gradient_id_fallback(self):
         """Test if the gradient fallback (color after nonexistent url) works"""
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
-        sty = Style(element = doc)
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
+        sty = Style(element=doc)
         sty["stroke"] = "url(#nonexistent) red"
         self.assertEqual(sty("stroke"), Color("red"))
 
@@ -315,10 +368,9 @@ class StyleInheritanceTests(TestCase):
         # set the importance on a value that doesn't exist
         with self.assertRaises(KeyError):
             style.set_importance("stroke", True)
-    
+
     def test_style_exchange(self):
-        doc: SvgDocumentElement = svg_file(
-            self.data_file('svg', 'interp_shapes.svg'))
+        doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
 
         elem = doc.getElementById("path6")
         style = elem.style
@@ -334,8 +386,8 @@ class StyleInheritanceTests(TestCase):
         self.assertEqual(elem.style("new-attribute"), "test")
         # callback is set after accessing the element
         self.assertIsNotNone(elem.style.callback)
-        #copystyle["new-attribute2"] = "test"
-        #self.assertEqual(elem.style("new-attribute2"), "test")
+        # copystyle["new-attribute2"] = "test"
+        # self.assertEqual(elem.style("new-attribute2"), "test")
 
     def test_stop_opacity_inheritance(self):
         # subtest of pservers-grad-18b SVG1.1 unit test
@@ -349,8 +401,12 @@ class StyleInheritanceTests(TestCase):
         """
         doc = etree.fromstring(content, parser=SVG_PARSER)
         grad = doc.getElementById("MyGradient1")
-        self.assertEqual(grad[0].specified_style()("stop-opacity"), 1) # assert that stop opacity is overwritten
-        self.assertEqual(grad[1].specified_style()("stop-opacity"), 1) # assert that stop opacity is not inherited by default
+        self.assertEqual(
+            grad[0].specified_style()("stop-opacity"), 1
+        )  # assert that stop opacity is overwritten
+        self.assertEqual(
+            grad[1].specified_style()("stop-opacity"), 1
+        )  # assert that stop opacity is not inherited by default
 
     def test_inheritance_second_attribute(self):
         """Check that the second attribute is also correctly inherited"""
@@ -380,6 +436,7 @@ class StyleInheritanceTests(TestCase):
         doc = etree.fromstring(content, parser=SVG_PARSER)
         ellipse = doc.getElementById("test")
         self.assertEqual(ellipse.specified_style()("fill"), Color("red"))
+
     def test_dasharray(self):
         """test parsing of dasharray"""
         elem = PathElement()
@@ -393,7 +450,7 @@ class StyleInheritanceTests(TestCase):
             ("", None),
             ("1 -2", None),
             (None, None),
-            ([1, 2, 3], [1, 2, 3, 1, 2, 3])
+            ([1, 2, 3], [1, 2, 3, 1, 2, 3]),
         ]
         for value, result in tests:
             style["stroke-dasharray"] = value
@@ -401,4 +458,6 @@ class StyleInheritanceTests(TestCase):
             if result is None:
                 self.assertEqual(result, setvalue, f"got {setvalue}, original: {value}")
             else:
-                self.assertAlmostTuple(result, setvalue, msg=f"Expected {result}, got {setvalue}")
+                self.assertAlmostTuple(
+                    result, setvalue, msg=f"Expected {result}, got {setvalue}"
+                )

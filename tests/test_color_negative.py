@@ -2,6 +2,7 @@
 from color_negative import Negative
 from .test_inkex_extensions import ColorBaseCase
 
+
 class ColorNegativeTest(ColorBaseCase):
     effect_class = Negative
     color_tests = [

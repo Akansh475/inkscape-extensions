@@ -28,7 +28,7 @@ import re
 import inkex
 from inkex.bezier import cspsubdiv
 
-r12_header = ''' 0 
+r12_header = """ 0 
 SECTION
  2 
 HEADER
@@ -54,35 +54,36 @@ ENDSEC
 SECTION
  2 
 ENTITIES
-'''
+"""
 
-r12_footer = ''' 0 
+r12_footer = """ 0 
 ENDSEC
  0 
-EOF'''
+EOF"""
 
 
 class DxfTwelve(inkex.OutputExtension):
     """Create dxf12 output from the svg"""
+
     def __init__(self):
         super(DxfTwelve, self).__init__()
         self.handle = 255
         self.flatness = 0.1
 
     def dxf_add(self, line):
-        self._stream.write(line.encode('utf-8'))
+        self._stream.write(line.encode("utf-8"))
 
     def dxf_insert_code(self, code, value):
         self.dxf_add(code + "\n" + value + "\n")
 
     def dxf_line(self, layer, csp):
-        self.dxf_insert_code('0', 'LINE')
-        self.dxf_insert_code('8', layer)
+        self.dxf_insert_code("0", "LINE")
+        self.dxf_insert_code("8", layer)
         # self.dxf_insert_code(  '62', '1' )  #Change the Line Color
-        self.dxf_insert_code('10', '{:f}'.format(csp[0][0]))
-        self.dxf_insert_code('20', '{:f}'.format(csp[0][1]))
-        self.dxf_insert_code('11', '{:f}'.format(csp[1][0]))
-        self.dxf_insert_code('21', '{:f}'.format(csp[1][1]))
+        self.dxf_insert_code("10", "{:f}".format(csp[0][0]))
+        self.dxf_insert_code("20", "{:f}".format(csp[0][1]))
+        self.dxf_insert_code("11", "{:f}".format(csp[1][0]))
+        self.dxf_insert_code("21", "{:f}".format(csp[1][1]))
 
     def dxf_path_to_lines(self, layer, p):
         f = self.flatness
@@ -108,26 +109,31 @@ class DxfTwelve(inkex.OutputExtension):
 
     def save(self, stream):
         self._stream = stream
-        self.dxf_insert_code('999', '"DXF R12 Output" (www.mydxf.blogspot.com)')
+        self.dxf_insert_code("999", '"DXF R12 Output" (www.mydxf.blogspot.com)')
         self.dxf_add(r12_header)
 
-        scale = 1 # TODO this assumes that one user unit corresponds to one mm
+        scale = 1  # TODO this assumes that one user unit corresponds to one mm
         h = self.svg.viewbox_height
 
-        path = '//svg:path'
+        path = "//svg:path"
         for node in self.svg.xpath(path):
 
-            layer = node.getparent().label # TODO this assumes that all elements are direct
-                                           # descendants of layers
+            layer = (
+                node.getparent().label
+            )  # TODO this assumes that all elements are direct
+            # descendants of layers
             if layer is None:
-                layer = 'Layer 1'
+                layer = "Layer 1"
 
             node.transform = node.composed_transform()
-            node.transform = inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]]) @ node.transform
+            node.transform = (
+                inkex.Transform([[scale, 0, 0], [0, -scale, h * scale]])
+                @ node.transform
+            )
             node.apply_transform()
             path = node.path.to_superpath()
 
-            if re.search('drill$', layer, re.I) is None:
+            if re.search("drill$", layer, re.I) is None:
                 # if layer == 'Brackets Drill':
                 self.dxf_path_to_lines(layer, path)
             else:
@@ -136,5 +142,5 @@ class DxfTwelve(inkex.OutputExtension):
         self.dxf_add(r12_footer)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DxfTwelve().run()

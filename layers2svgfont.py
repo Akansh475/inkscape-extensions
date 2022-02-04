@@ -22,8 +22,10 @@
 import inkex
 from inkex import SVGfont, FontFace, Glyph
 
+
 class LayersToSvgFont(inkex.EffectExtension):
     """Convert layers to an svg font"""
+
     def guideline_value(self, label, index):
         for guide in self.svg.namedview.get_guides():
             if guide.label == label:
@@ -47,11 +49,11 @@ class LayersToSvgFont(inkex.EffectExtension):
         xheight = self.guideline_value("xheight", 1) - baseline
         descender = baseline - self.guideline_value("descender", 1)
 
-        font = self.svg.defs.get_or_create('svg:font', SVGfont)
+        font = self.svg.defs.get_or_create("svg:font", SVGfont)
         font.set("horiz-adv-x", str(emsize))
         font.set("horiz-origin-y", str(baseline))
 
-        fontface = font.get_or_create('font-face', FontFace)
+        fontface = font.get_or_create("font-face", FontFace)
         fontface.set("font-family", "SVGFont")
         fontface.set("units-per-em", str(emsize))
         fontface.set("cap-height", str(caps))
@@ -59,11 +61,13 @@ class LayersToSvgFont(inkex.EffectExtension):
         fontface.set("ascent", str(ascender))
         fontface.set("descent", str(descender))
 
-        for group in self.svg.findall('svg:g'):
+        for group in self.svg.findall("svg:g"):
             label = group.label
             if "GlyphLayer-" in label:
                 unicode_char = label.split("GlyphLayer-")[1]
-                glyph = font.get_or_create("svg:glyph[@unicode='{}']".format(unicode_char), Glyph)
+                glyph = font.get_or_create(
+                    "svg:glyph[@unicode='{}']".format(unicode_char), Glyph
+                )
                 glyph.set("unicode", unicode_char)
 
                 ############################
@@ -89,9 +93,10 @@ class LayersToSvgFont(inkex.EffectExtension):
                 # Using curve description in d attribute of svg:glyph
 
                 path_d = ""
-                for path in group.findall('svg:path'):
+                for path in group.findall("svg:path"):
                     path_d += " " + self.flip_cordinate_system(path, emsize, baseline)
                 glyph.set("d", path_d)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     LayersToSvgFont().run()

@@ -40,31 +40,63 @@ VERSION_REGEX = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 #   (object placed top-left instead of SVG placed top-left)
 class Scribus(TempDirMixin, inkex.OutputExtension):
     def add_arguments(self, arg_parser):
-        arg_parser.add_argument("--pdf-version", type=int, dest="pdfVersion", default=11,
-                                help="PDF version (e.g. integer numbers between 11 and 15, see Scribus documentation for details)")
-        arg_parser.add_argument("--bleed", type=float, dest="bleed", default=0.0,
-                                help="Bleed value")
-        arg_parser.add_argument("--bleed-marks", type=inkex.Boolean, dest="bleedMarks",
-                default=False, help="Draw bleed marks")
-        arg_parser.add_argument("--color-marks", type=inkex.Boolean, dest="colorMarks",
-                default=False, help="Draw color Marks")
-        arg_parser.add_argument("--intent", type=int, dest="intent", default=0,
-                                help="Rendering intent. Options: 0: Perceptual, 1: Relative Colorimetric, 2: Saturation, 3: Absolute Colorimetric")
-        arg_parser.add_argument("--title", type=str, dest="title", default="", help="PDF title, required for PDF/X")
-        #arg_parser.add_argument("--fonts", type=int, dest="fonts", default="1",
+        arg_parser.add_argument(
+            "--pdf-version",
+            type=int,
+            dest="pdfVersion",
+            default=11,
+            help="PDF version (e.g. integer numbers between 11 and 15, see Scribus documentation for details)",
+        )
+        arg_parser.add_argument(
+            "--bleed", type=float, dest="bleed", default=0.0, help="Bleed value"
+        )
+        arg_parser.add_argument(
+            "--bleed-marks",
+            type=inkex.Boolean,
+            dest="bleedMarks",
+            default=False,
+            help="Draw bleed marks",
+        )
+        arg_parser.add_argument(
+            "--color-marks",
+            type=inkex.Boolean,
+            dest="colorMarks",
+            default=False,
+            help="Draw color Marks",
+        )
+        arg_parser.add_argument(
+            "--intent",
+            type=int,
+            dest="intent",
+            default=0,
+            help="Rendering intent. Options: 0: Perceptual, 1: Relative Colorimetric, 2: Saturation, 3: Absolute Colorimetric",
+        )
+        arg_parser.add_argument(
+            "--title",
+            type=str,
+            dest="title",
+            default="",
+            help="PDF title, required for PDF/X",
+        )
+        # arg_parser.add_argument("--fonts", type=int, dest="fonts", default="1",
         #                        help="Embed fonts : 0 for embedding, 1 to convert to path, 2 to prevent embedding")
 
     def generate_script(self, stream, width, height, icc):
         margin = self.options.bleed
         pdfVersion = self.options.pdfVersion
-        embedFonts = 1 #self.options.fonts
+        embedFonts = 1  # self.options.fonts
         bleedMarks = self.options.bleedMarks
         colorMarks = self.options.colorMarks
-        if ((bleedMarks or colorMarks) and margin < 7):
-            raise AbortExtension("You need at least 7mm bleed to show cutting marks or color marks")
-        if (bleedMarks or colorMarks):
-            margin = margin - 7 #because scribus is weird. At the time of 1.5.5, it adds 7 when those are set.
-        stream.write(f"""
+        if (bleedMarks or colorMarks) and margin < 7:
+            raise AbortExtension(
+                "You need at least 7mm bleed to show cutting marks or color marks"
+            )
+        if bleedMarks or colorMarks:
+            margin = (
+                margin - 7
+            )  # because scribus is weird. At the time of 1.5.5, it adds 7 when those are set.
+        stream.write(
+            f"""
 import scribus
 import sys
 icc = "{icc}"
@@ -108,29 +140,37 @@ class exportPDF():
         pdf.thumbnails = True
 
         pdf.save()
-exportPDF()""")
+exportPDF()"""
+        )
 
     def save(self, stream):
-        scribus_version = call(SCRIBUS_EXE, '-g', '--version')
+        scribus_version = call(SCRIBUS_EXE, "-g", "--version")
         version_match = VERSION_REGEX.search(scribus_version)
         if version_match is None:
-            raise AbortExtension(f"Could not detect Scribus version ({scribus_version})")
+            raise AbortExtension(
+                f"Could not detect Scribus version ({scribus_version})"
+            )
         major = int(version_match.group(1))
         minor = int(version_match.group(2))
         point = int(version_match.group(3))
         if (major < 1) or (major == 1 and minor < 5):
-            raise AbortExtension(f"Found Scribus {version_match.group(0)}. This extension requires Scribus 1.5.x.")
+            raise AbortExtension(
+                f"Found Scribus {version_match.group(0)}. This extension requires Scribus 1.5.x."
+            )
 
         input_file = self.options.input_file
-        py_file = os.path.join(self.tempdir, 'scribus.py')
-        svg_file = os.path.join(self.tempdir, 'in.svg')
+        py_file = os.path.join(self.tempdir, "scribus.py")
+        svg_file = os.path.join(self.tempdir, "in.svg")
         profiles = self.svg.defs.findall("svg:color-profile")
         if len(profiles) == 0:
-            raise AbortExtension("Please select a color profile in the document settings.")
+            raise AbortExtension(
+                "Please select a color profile in the document settings."
+            )
         elif len(profiles) > 1:
-            raise AbortExtension("Please only link a single color profile in the document settings. No output generated.")
+            raise AbortExtension(
+                "Please only link a single color profile in the document settings. No output generated."
+            )
         iccPath = profiles[0].get("xlink:href")
-
 
         with open(input_file) as f:
             with open(svg_file, "w") as f1:
@@ -138,16 +178,16 @@ exportPDF()""")
                     f1.write(line)
             f.close()
 
-        pdf_file = os.path.join(self.tempdir, 'out.pdf')
-        width = self.svg.unittouu(self.svg.get('width'))
-        height = self.svg.unittouu(self.svg.get('height'))
+        pdf_file = os.path.join(self.tempdir, "out.pdf")
+        width = self.svg.unittouu(self.svg.get("width"))
+        height = self.svg.unittouu(self.svg.get("height"))
 
-        with open(py_file, 'w') as fhl:
+        with open(py_file, "w") as fhl:
             self.generate_script(fhl, width, height, iccPath)
-        call(SCRIBUS_EXE, '-g', '-py', py_file, svg_file, pdf_file)
-        with open(pdf_file, 'rb') as fhl:
+        call(SCRIBUS_EXE, "-g", "-py", py_file, svg_file, pdf_file)
+        with open(pdf_file, "rb") as fhl:
             stream.write(fhl.read())
 
-if __name__ == '__main__':
-    Scribus().run()
 
+if __name__ == "__main__":
+    Scribus().run()

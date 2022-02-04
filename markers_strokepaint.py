@@ -23,30 +23,71 @@
 import inkex
 from inkex.localization import inkex_gettext as _
 
-MARKERS = ['marker', 'marker-start', 'marker-mid', 'marker-end']
+MARKERS = ["marker", "marker-start", "marker-mid", "marker-end"]
+
 
 class MarkersStrokePaint(inkex.EffectExtension):
     """Add marker stroke to outline markers on selected objects."""
+
     def add_arguments(self, pars):
-        pars.add_argument("--modify", type=inkex.Boolean, default=False,
-                          help="Do not create a copy, modify the markers")
-        pars.add_argument("--type", dest="fill_type", default="solid",
-                          help="Replace the markers' fill with the object stroke or fill color")
-        pars.add_argument("--alpha", type=inkex.Boolean, dest="assign_alpha", default=True,
-                          help="Assign the object fill and stroke alpha to the markers")
-        pars.add_argument("--invert", type=inkex.Boolean, default=False,
-                          help="Invert fill and stroke colors")
-        pars.add_argument("--assign_fill", type=inkex.Boolean, default=True,
-                          help="Assign a fill color to the markers")
-        pars.add_argument("--fill_color", type=inkex.Color, default=inkex.Color(1364325887),
-                          help="Choose a custom fill color")
-        pars.add_argument("--assign_stroke", type=inkex.Boolean, default=True,
-                          help="Assign a stroke color to the markers")
-        pars.add_argument("--stroke_color", type=inkex.Color, default=inkex.Color(1364325887),
-                          help="Choose a custom fill color")
-        pars.add_argument("--tab", type=self.arg_method('method'), default=self.method_custom,
-                          help="The selected UI-tab when OK was pressed")
-        pars.add_argument("--colortab", help="The selected custom color tab when OK was pressed")
+        pars.add_argument(
+            "--modify",
+            type=inkex.Boolean,
+            default=False,
+            help="Do not create a copy, modify the markers",
+        )
+        pars.add_argument(
+            "--type",
+            dest="fill_type",
+            default="solid",
+            help="Replace the markers' fill with the object stroke or fill color",
+        )
+        pars.add_argument(
+            "--alpha",
+            type=inkex.Boolean,
+            dest="assign_alpha",
+            default=True,
+            help="Assign the object fill and stroke alpha to the markers",
+        )
+        pars.add_argument(
+            "--invert",
+            type=inkex.Boolean,
+            default=False,
+            help="Invert fill and stroke colors",
+        )
+        pars.add_argument(
+            "--assign_fill",
+            type=inkex.Boolean,
+            default=True,
+            help="Assign a fill color to the markers",
+        )
+        pars.add_argument(
+            "--fill_color",
+            type=inkex.Color,
+            default=inkex.Color(1364325887),
+            help="Choose a custom fill color",
+        )
+        pars.add_argument(
+            "--assign_stroke",
+            type=inkex.Boolean,
+            default=True,
+            help="Assign a stroke color to the markers",
+        )
+        pars.add_argument(
+            "--stroke_color",
+            type=inkex.Color,
+            default=inkex.Color(1364325887),
+            help="Choose a custom fill color",
+        )
+        pars.add_argument(
+            "--tab",
+            type=self.arg_method("method"),
+            default=self.method_custom,
+            help="The selected UI-tab when OK was pressed",
+        )
+        pars.add_argument(
+            "--colortab", help="The selected custom color tab when OK was pressed"
+        )
 
     def method_custom(self, _):
         """Choose custom colors"""
@@ -56,8 +97,8 @@ class MarkersStrokePaint(inkex.EffectExtension):
 
     def method_object(self, style):
         """Use object colors"""
-        fill = style.get_color('fill')
-        stroke = style.get_color('stroke')
+        fill = style.get_color("fill")
+        stroke = style.get_color("stroke")
 
         if self.options.fill_type == "solid":
             fill = stroke
@@ -92,16 +133,17 @@ class MarkersStrokePaint(inkex.EffectExtension):
                     marker_node = marker_node.copy()
                     self.svg.defs.append(marker_node)
                     marker_id = self.svg.get_unique_id(marker_id)
-                marker_node.set('id', marker_id)
-                marker_node.set('inkscape:stockid', marker_id)
+                marker_node.set("id", marker_id)
+                marker_node.set("inkscape:stockid", marker_id)
 
                 node.style[attr] = marker_node
 
                 for child in marker_node:
                     if stroke is not None:
-                        child.style.set_color(stroke, 'stroke')
+                        child.style.set_color(stroke, "stroke")
                     if fill is not None:
-                        child.style.set_color(fill, 'fill')
+                        child.style.set_color(fill, "fill")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     MarkersStrokePaint().run()

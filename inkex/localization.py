@@ -26,11 +26,12 @@ import os
 
 # Get gettext domain and matching locale directory for translation of extensions strings
 # (both environment variables are set by Inkscape)
-GETTEXT_DOMAIN = os.environ.get('INKEX_GETTEXT_DOMAIN')
-GETTEXT_DIRECTORY = os.environ.get('INKEX_GETTEXT_DIRECTORY')
+GETTEXT_DOMAIN = os.environ.get("INKEX_GETTEXT_DOMAIN")
+GETTEXT_DIRECTORY = os.environ.get("INKEX_GETTEXT_DIRECTORY")
 
 # INKSCAPE_LOCALEDIR can be used to override the default locale directory Inkscape uses
-INKSCAPE_LOCALEDIR = os.environ.get('INKSCAPE_LOCALEDIR')
+INKSCAPE_LOCALEDIR = os.environ.get("INKSCAPE_LOCALEDIR")
+
 
 def localize(domain=GETTEXT_DOMAIN, localedir=GETTEXT_DIRECTORY):
     """Configure gettext and install _() function into builtins namespace for easy access"""
@@ -50,17 +51,17 @@ def localize(domain=GETTEXT_DOMAIN, localedir=GETTEXT_DIRECTORY):
     trans.install()
 
 
-
 def inkex_localize():
     """
     Return internal Translations instance for translation of the inkex module itself
     Those will always use the 'inkscape' domain and attempt to lookup the same catalog Inkscape uses
     """
 
-    domain = 'inkscape'
+    domain = "inkscape"
     localedir = INKSCAPE_LOCALEDIR
     languages = None
 
     return gettext.translation(domain, localedir, languages, fallback=True)
+
 
 inkex_gettext = inkex_localize().gettext  # pylint: disable=invalid-name

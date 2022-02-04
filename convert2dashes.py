@@ -28,6 +28,7 @@ from inkex import bezier, CubicSuperPath, Group, PathElement
 
 class Dashit(inkex.EffectExtension):
     """Extension to convert paths into dash-array line"""
+
     def __init__(self):
         super(Dashit, self).__init__()
         self.not_converted = []
@@ -36,8 +37,11 @@ class Dashit(inkex.EffectExtension):
         for node in self.svg.selection:
             self.convert2dash(node)
         if self.not_converted:
-            inkex.errormsg(_('Total number of objects not converted: {}\n').format(
-                len(self.not_converted)))
+            inkex.errormsg(
+                _("Total number of objects not converted: {}\n").format(
+                    len(self.not_converted)
+                )
+            )
             # return list of IDs in case the user needs to find a specific object
             inkex.debug(self.not_converted)
 
@@ -49,15 +53,15 @@ class Dashit(inkex.EffectExtension):
         elif isinstance(node, PathElement):
             self._convert(node)
         else:
-            self.not_converted.append(node.get('id'))
+            self.not_converted.append(node.get("id"))
 
     @staticmethod
     def _convert(node):
         dashes = []
         offset = 0
         style = node.specified_style()
-        dashes = style('stroke-dasharray')
-        offset = style('stroke-dashoffset')
+        dashes = style("stroke-dasharray")
+        offset = style("stroke-dashoffset")
         if not dashes:
             return
         new = []
@@ -75,11 +79,12 @@ class Dashit(inkex.EffectExtension):
                 dash = dash - length
                 length = bezier.cspseglength(new[-1][-1], sub[i])
                 while dash < length:
-                    new[-1][-1], nxt, sub[i] = \
-                        bezier.cspbezsplitatlength(new[-1][-1], sub[i], dash/length)
-                    if idash % 2:           # create a gap
+                    new[-1][-1], nxt, sub[i] = bezier.cspbezsplitatlength(
+                        new[-1][-1], sub[i], dash / length
+                    )
+                    if idash % 2:  # create a gap
                         new.append([nxt[:]])
-                    else:                   # splice the curve
+                    else:  # splice the curve
                         new[-1].append(nxt[:])
                     length = length - dash
                     idash = (idash + 1) % len(dashes)
@@ -89,10 +94,11 @@ class Dashit(inkex.EffectExtension):
                 else:
                     new[-1].append(sub[i])
                 i += 1
-        style.pop('stroke-dasharray')
-        node.pop('sodipodi:type')
+        style.pop("stroke-dasharray")
+        node.pop("sodipodi:type")
         node.path = CubicSuperPath(new)
         node.style = style
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Dashit().run()

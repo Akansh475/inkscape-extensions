@@ -23,11 +23,13 @@ import inkex
 
 from jessyink_install import JessyInkMixin, _
 
+
 class MasterSlide(JessyInkMixin, inkex.EffectExtension):
     """Effect Extension for master slide"""
+
     def add_arguments(self, pars):
-        self.arg_parser.add_argument('--tab')
-        self.arg_parser.add_argument('--layerName', default='')
+        self.arg_parser.add_argument("--tab")
+        self.arg_parser.add_argument("--layerName", default="")
 
     def effect(self):
         self.is_installed()
@@ -37,15 +39,24 @@ class MasterSlide(JessyInkMixin, inkex.EffectExtension):
 
         # Set new master slide.
         if self.options.layerName != "":
-            nodes = self.svg.xpath(f"//*[@inkscape:groupmode='layer' "
-                                   f"and @inkscape:label='{self.options.layerName}']")
+            nodes = self.svg.xpath(
+                f"//*[@inkscape:groupmode='layer' "
+                f"and @inkscape:label='{self.options.layerName}']"
+            )
             if not nodes:
-                inkex.errormsg(_("Layer not found. Removed current master slide selection.\n"))
+                inkex.errormsg(
+                    _("Layer not found. Removed current master slide selection.\n")
+                )
             elif len(nodes) > 1:
-                inkex.errormsg(_("More than one layer with this name found. "
-                                 "Removed current master slide selection.\n"))
+                inkex.errormsg(
+                    _(
+                        "More than one layer with this name found. "
+                        "Removed current master slide selection.\n"
+                    )
+                )
             else:
                 nodes[0].set("jessyink:masterSlide", "masterSlide")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     MasterSlide().run()

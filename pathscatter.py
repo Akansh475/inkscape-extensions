@@ -34,27 +34,84 @@ from inkex.localization import inkex_gettext as _
 
 import pathmodifier
 
+
 class PathScatter(pathmodifier.Diffeo):
     def __init__(self):
         super(PathScatter, self).__init__()
-        self.arg_parser.add_argument("-n", "--noffset", type=float, dest="noffset", default=0.0, help="normal offset")
-        self.arg_parser.add_argument("-t", "--toffset", type=float, dest="toffset", default=0.0, help="tangential offset")
-        self.arg_parser.add_argument("-g", "--grouppick", type=inkex.Boolean, dest="grouppick", default=False,
-                                     help="if pattern is a group then randomly pick group members")
-        self.arg_parser.add_argument("-m", "--pickmode", type=str, dest="pickmode", default="rand",
-                                     help="group pick mode (rand=random seq=sequentially)")
-        self.arg_parser.add_argument("-f", "--follow", type=inkex.Boolean, dest="follow", default=True,
-                                     help="choose between wave or snake effect")
-        self.arg_parser.add_argument("-s", "--stretch", type=inkex.Boolean, dest="stretch", default=False,
-                                     help="repeat the path to fit deformer's length")
-        self.arg_parser.add_argument("-p", "--space", type=float, dest="space", default=0.0)
-        self.arg_parser.add_argument("-r", "--rotate", type=inkex.Boolean, dest="vertical", default=False,
-                                     help="reference path is vertical")
-        self.arg_parser.add_argument("-c", "--copymode", type=str, dest="copymode", default="move",
-                                     help="""How the pattern is duplicated. Default: 'move', 
-                                     Options: 'clone', 'duplicate', 'move'""")
-        self.arg_parser.add_argument("--tab", type=str, dest="tab",
-                                     help="The selected UI-tab when OK was pressed")
+        self.arg_parser.add_argument(
+            "-n",
+            "--noffset",
+            type=float,
+            dest="noffset",
+            default=0.0,
+            help="normal offset",
+        )
+        self.arg_parser.add_argument(
+            "-t",
+            "--toffset",
+            type=float,
+            dest="toffset",
+            default=0.0,
+            help="tangential offset",
+        )
+        self.arg_parser.add_argument(
+            "-g",
+            "--grouppick",
+            type=inkex.Boolean,
+            dest="grouppick",
+            default=False,
+            help="if pattern is a group then randomly pick group members",
+        )
+        self.arg_parser.add_argument(
+            "-m",
+            "--pickmode",
+            type=str,
+            dest="pickmode",
+            default="rand",
+            help="group pick mode (rand=random seq=sequentially)",
+        )
+        self.arg_parser.add_argument(
+            "-f",
+            "--follow",
+            type=inkex.Boolean,
+            dest="follow",
+            default=True,
+            help="choose between wave or snake effect",
+        )
+        self.arg_parser.add_argument(
+            "-s",
+            "--stretch",
+            type=inkex.Boolean,
+            dest="stretch",
+            default=False,
+            help="repeat the path to fit deformer's length",
+        )
+        self.arg_parser.add_argument(
+            "-p", "--space", type=float, dest="space", default=0.0
+        )
+        self.arg_parser.add_argument(
+            "-r",
+            "--rotate",
+            type=inkex.Boolean,
+            dest="vertical",
+            default=False,
+            help="reference path is vertical",
+        )
+        self.arg_parser.add_argument(
+            "-c",
+            "--copymode",
+            type=str,
+            dest="copymode",
+            default="move",
+            help="""How the pattern is duplicated. Default: 'move', 
+                                     Options: 'clone', 'duplicate', 'move'""",
+        )
+        self.arg_parser.add_argument(
+            "--tab",
+            type=str,
+            dest="tab",
+            help="The selected UI-tab when OK was pressed",
+        )
 
     def localTransformAt(self, s, skelcomp, lengths, isclosed, follow=True):
         """
@@ -75,6 +132,7 @@ class PathScatter(pathmodifier.Diffeo):
         else:
             mat = [[1, 0, x], [0, 1, y]]
         return Transform(mat)
+
     def center_node_at_origin(self, node):
         """Translates a node to the origin and applies translation if requested"""
         bbox = node.bounding_box()
@@ -85,6 +143,7 @@ class PathScatter(pathmodifier.Diffeo):
         mat.add_translate([0, self.options.noffset])
         node.transform = mat @ node.transform
         return bbox
+
     def effect(self):
 
         if len(self.svg.selection) < 2:
@@ -109,8 +168,10 @@ class PathScatter(pathmodifier.Diffeo):
         if dx < 0.01:
             if isinstance(original_pattern_node, inkex.TextElement):
                 raise inkex.AbortExtension("Please convert texts to path first")
-            raise inkex.AbortExtension("The total length of the pattern is too small\n"\
-                "Please choose a larger object or set 'Space between copies' > 0")
+            raise inkex.AbortExtension(
+                "The total length of the pattern is too small\n"
+                "Please choose a larger object or set 'Space between copies' > 0"
+            )
 
         # check if group and expand it
         pattern_list = []
@@ -136,7 +197,9 @@ class PathScatter(pathmodifier.Diffeo):
             cur_skeleton = skelnode.path.to_superpath()
             for comp in cur_skeleton:
                 skelcomp, lengths = self.linearize(comp)
-                skel_closed = all([math.isclose(i, j) for i, j in zip(skelcomp[0], skelcomp[-1])])
+                skel_closed = all(
+                    [math.isclose(i, j) for i, j in zip(skelcomp[0], skelcomp[-1])]
+                )
 
                 length = sum(lengths)
                 dx = width + self.options.space
@@ -147,11 +210,15 @@ class PathScatter(pathmodifier.Diffeo):
 
                 s = 0 if self.options.stretch else self.options.toffset * 0.01 * dx
                 while s <= length:
-                    local_transform = self.localTransformAt(s, skelcomp, lengths, skel_closed, \
-                                                            self.options.follow)
+                    local_transform = self.localTransformAt(
+                        s, skelcomp, lengths, skel_closed, self.options.follow
+                    )
 
-                    pattern_idx = random.randint(0, len(pattern_list) - 1) if \
-                                    self.options.pickmode == "rand" else counter % len(pattern_list)
+                    pattern_idx = (
+                        random.randint(0, len(pattern_list) - 1)
+                        if self.options.pickmode == "rand"
+                        else counter % len(pattern_list)
+                    )
 
                     clone = pattern_list[pattern_idx].copy()
 
@@ -161,5 +228,6 @@ class PathScatter(pathmodifier.Diffeo):
                     s += dx
                     counter += 1
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     PathScatter().run()

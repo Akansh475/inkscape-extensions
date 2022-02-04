@@ -25,6 +25,7 @@ An Inkscape extension to assist with importing AI SVG files.
 import inkex
 from inkex import units
 
+
 class DocAiConvert(inkex.EffectExtension):
     """
     Main class of the doc_ai_convert extension
@@ -45,13 +46,14 @@ class DocAiConvert(inkex.EffectExtension):
         - We re-label these as layers such that Inkscape will recognize them.
 
     """
+
     def effect(self):
         """
         Main entry point of the doc_ai_convert extension
         """
         # 1) Recognize intended dimensions of original document, if given
-        width_string = self.svg.get('width')
-        height_string = self.svg.get('height')
+        width_string = self.svg.get("width")
+        height_string = self.svg.get("height")
 
         if width_string and height_string:
             width_num, width_units = units.parse_unit(width_string)
@@ -61,16 +63,17 @@ class DocAiConvert(inkex.EffectExtension):
             #    for unitless values, and not None.
 
             if width_num:
-                if width_units == 'px':
-                    self.svg.set('width', units.render_unit(width_num, 'pt'))
+                if width_units == "px":
+                    self.svg.set("width", units.render_unit(width_num, "pt"))
             if height_num:
-                if height_units == 'px':
-                    self.svg.set('height', units.render_unit(height_num, 'pt'))
+                if height_units == "px":
+                    self.svg.set("height", units.render_unit(height_num, "pt"))
 
         # 2) Recognize Adobe Illustrator layers.
-        for node in self.svg.xpath('//svg:g[@data-name]'):
-            node.set('inkscape:groupmode', 'layer')
-            node.set('inkscape:label', node.pop('data-name'))
+        for node in self.svg.xpath("//svg:g[@data-name]"):
+            node.set("inkscape:groupmode", "layer")
+            node.set("inkscape:label", node.pop("data-name"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     DocAiConvert().run()

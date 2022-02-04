@@ -26,10 +26,19 @@ import tempfile
 from subprocess import PIPE, Popen
 
 import inkex
-from inkex import load_svg, Group, PathElement, ShapeElement,\
-                           Anchor, Switch, SvgDocumentElement, Transform
+from inkex import (
+    load_svg,
+    Group,
+    PathElement,
+    ShapeElement,
+    Anchor,
+    Switch,
+    SvgDocumentElement,
+    Transform,
+)
 
 ###### Utility Classes ####################################
+
 
 class MalformedSVGError(Exception):
     """Raised when the SVG document is invalid or contains unsupported features"""
@@ -43,7 +52,9 @@ class MalformedSVGError(Exception):
 Error message: %s
 
 The SVG to Synfig converter is designed to handle SVG files that were created using Inkscape. Unsupported features are most likely to occur in SVG files written by other programs.
-""" % repr(self.value)
+""" % repr(
+            self.value
+        )
 
 
 class InkscapeActionGroup(object):
@@ -129,7 +140,12 @@ class InkscapeActionGroup(object):
             return
 
         cmd = self.init_args + " " + self.command + "--verb=FileSave --verb=FileQuit"
-        p = Popen('inkscape "{}" {}'.format(filename, cmd), shell=True, stdout=PIPE, stderr=PIPE)
+        p = Popen(
+            'inkscape "{}" {}'.format(filename, cmd),
+            shell=True,
+            stdout=PIPE,
+            stderr=PIPE,
+        )
         rc = p.wait()
         f = p.stdout
         err = p.stderr
@@ -150,7 +166,7 @@ class InkscapeActionGroup(object):
         self.run_file(svgfile)
 
         # Open the resulting file
-        with open(svgfile, 'r') as stream:
+        with open(svgfile, "r") as stream:
             self.svg_document = load_svg(stream)
 
         # Clean up.
@@ -187,7 +203,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
             "svg:line",
             "svg:polyline",
             "svg:polygon",
-            "svg:text"
+            "svg:text",
         ]
 
         # Build an xpath command to select these nodes
@@ -212,6 +228,7 @@ class SynfigExportActionGroup(InkscapeActionGroup):
 
 ### Path related
 
+
 def fuse_subpaths(path_node):
     """Fuse subpaths of a path. Should only be used on unstroked paths"""
     path = path_node.path.to_arrays()
@@ -229,27 +246,27 @@ def fuse_subpaths(path_node):
             path.remove(["Z", []])
             continue
 
-        if path[i][0] == 'V':
+        if path[i][0] == "V":
             prev_end[0] = path[i][1][0]
             i += 1
             continue
-        elif path[i][0] == 'H':
+        elif path[i][0] == "H":
             prev_end[1] = path[i][1][0]
             i += 1
             continue
-        elif path[1][0] != 'M' or i == 0:
+        elif path[1][0] != "M" or i == 0:
             prev_end = path[i][1][-2:]
             i += 1
             continue
 
         # This element begins a new path - it should be a moveto
-        assert (path[i][0] == 'M')
+        assert path[i][0] == "M"
 
         # Swap it for a lineto
-        path[i][0] = 'L'
+        path[i][0] = "L"
         # If the old subpath has not been closed yet, close it
         if prev_end != initial_point:
-            path.insert(i, ['L', initial_point])
+            path.insert(i, ["L", initial_point])
             i += 1
 
         # Set the initial point of this subpath
@@ -261,7 +278,7 @@ def fuse_subpaths(path_node):
 
     # Now pop the entire return stack
     while return_stack:
-        el = ['L', return_stack.pop()]
+        el = ["L", return_stack.pop()]
         path.insert(i, el)
         i += 1
 
@@ -286,19 +303,18 @@ def split_fill_and_stroke(path_node):
     if "stroke" not in style.keys() or style["stroke"] == "none":
         return [path_node, None]
 
-
     group = Group()
     fill = group.add(PathElement())
     stroke = group.add(PathElement())
 
-    d = path_node.pop('d')
+    d = path_node.pop("d")
     if d is None:
         raise AssertionError("Cannot split stroke and fill of non-path element")
 
-    nodetypes = path_node.pop('sodipodi:nodetypes', None)
-    path_id = path_node.pop('id', str(id(path_node)))
-    transform = path_node.pop('transform', None)
-    path_node.pop('style')
+    nodetypes = path_node.pop("sodipodi:nodetypes", None)
+    path_id = path_node.pop("id", str(id(path_node)))
+    transform = path_node.pop("transform", None)
+    path_node.pop("style")
 
     # Pass along all remaining attributes to the group
     for attrib_name, attrib_value in path_node.attrib.items():
@@ -334,8 +350,8 @@ def split_fill_and_stroke(path_node):
     fill.set("d", d)
     stroke.set("d", d)
     if nodetypes is not None:
-        fill.set('sodipodi:nodetypes', nodetypes)
-        stroke.set('sodipodi:nodetypes', nodetypes)
+        fill.set("sodipodi:nodetypes", nodetypes)
+        stroke.set("sodipodi:nodetypes", nodetypes)
     fill.set("id", path_id + "-fill")
     stroke.set("id", path_id + "-stroke")
     if transform is not None:
@@ -350,7 +366,10 @@ def split_fill_and_stroke(path_node):
 
 ### Object related
 
-def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
+
+def propagate_attribs(
+    node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+):
     """Propagate style and transform to remove inheritance"""
 
     # Don't enter non-graphical portions of the document
@@ -419,6 +438,7 @@ def propagate_attribs(node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], 
 
 ### Style related
 
+
 def get_dimension(s="1024"):
     """Convert an SVG length string from arbitrary units to pixels"""
     return inkex.units.convert_unit(s, "px")
@@ -436,7 +456,7 @@ class SynfigPrep(inkex.EffectExtension):
         propagate_attribs(self.document.getroot())
 
         # Fuse multiple subpaths in fills
-        for node in self.document.getroot().xpath('//svg:path'):
+        for node in self.document.getroot().xpath("//svg:path"):
             if node.get("d", "").lower().count("m") > 1:
                 # There are multiple subpaths
                 fill = split_fill_and_stroke(node)[0]
@@ -444,5 +464,5 @@ class SynfigPrep(inkex.EffectExtension):
                     fuse_subpaths(fill)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     SynfigPrep().run()

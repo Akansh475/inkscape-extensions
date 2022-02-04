@@ -8,8 +8,10 @@ import os
 
 from inkex import load_svg, TemplateExtension, Transform
 
+
 class SeamlessPattern(TemplateExtension):
     """Generate a seamless pattern template"""
+
     multi_inx = True
 
     @classmethod
@@ -34,34 +36,40 @@ class SeamlessPattern(TemplateExtension):
         for child in self.svg.getElementById("designTop"):
             child.transform = Transform(scale=scale)
 
-        text_preview = self.svg.getElementById('textPreview')
+        text_preview = self.svg.getElementById("textPreview")
         if text_preview is not None:
             x = width / 100.0 / factor
             y = height / 100.0
             if factor <= 1:
                 x *= factor
                 y *= factor
-            text_preview.transform = Transform(translate=(int(width) * 2, 0), scale=(x, y))
+            text_preview.transform = Transform(
+                translate=(int(width) * 2, 0), scale=(x, y)
+            )
 
-        info_group = self.svg.getElementById('infoGroup')
+        info_group = self.svg.getElementById("infoGroup")
         if info_group is not None:
             scale = 100 if factor <= 1 else 1000
-            info_group.transform = Transform(scale=(width / scale, height / scale * factor))
+            info_group.transform = Transform(
+                scale=(width / scale, height / scale * factor)
+            )
 
         sides = [(x, y) for y in (-height, 0, height) for x in (-width, 0, width)]
         for i, (x, y) in enumerate(sides):
-            top = self.svg.getElementById('top{i}'.format(i=i+1))
-            bottom = self.svg.getElementById('bottom{i}'.format(i=i+1))
+            top = self.svg.getElementById("top{i}".format(i=i + 1))
+            bottom = self.svg.getElementById("bottom{i}".format(i=i + 1))
             if top is not None and bottom is not None:
                 bottom.transform = top.transform = Transform(translate=(x, y))
 
-        clones = [(x, y) for x in (0, width, width * 2) for y in (0, height, height * 2)]
+        clones = [
+            (x, y) for x in (0, width, width * 2) for y in (0, height, height * 2)
+        ]
         for i, (x, y) in enumerate(clones):
             preview = self.svg.getElementById("clonePreview{i}".format(i=i))
             if preview is not None:
                 preview.transform = Transform(translate=(x, y))
 
-        pattern_generator = self.svg.getElementById('fullPatternClone')
+        pattern_generator = self.svg.getElementById("fullPatternClone")
         if pattern_generator is not None:
             pattern_generator.transform = Transform(translate=(width * 2, -height))
             pattern_generator.set("inkscape:tile-cx", width / 2)
@@ -74,10 +82,11 @@ class SeamlessPattern(TemplateExtension):
             pattern_generator.set("height", height)
 
         namedview = self.svg.namedview
-        namedview.set('inkscape:document-units', 'px')
-        namedview.set('inkscape:cx', (width * 5.5) / 2)
-        namedview.set('inkscape:cy', "0")
-        namedview.set('inkscape:zoom', 1 / (width / 100))
+        namedview.set("inkscape:document-units", "px")
+        namedview.set("inkscape:cx", (width * 5.5) / 2)
+        namedview.set("inkscape:cy", "0")
+        namedview.set("inkscape:zoom", 1 / (width / 100))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     SeamlessPattern().run()

@@ -27,6 +27,14 @@ variables:
     - windows
     - windows-1809
 
+codestyle:black:
+  stage: test
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.7.2
+    - pip install black
+    - black . --check --verbose --diff --color --exclude=other/
+
 test:python37:
   extends: .tests
   script:

@@ -30,7 +30,7 @@ from itertools import tee
 from argparse import ArgumentTypeError
 
 # All the names that get added to the inkex API itself.
-__all__ = ('AbortExtension', 'DependencyError', 'Boolean', 'errormsg')
+__all__ = ("AbortExtension", "DependencyError", "Boolean", "errormsg")
 
 ABORT_STATUS = -5
 
@@ -38,36 +38,43 @@ ABORT_STATUS = -5
 PY3 = sys.version_info[0] == 3
 
 # Taken from https://www.w3.org/Graphics/SVG/1.1/paths.html#PathDataBNF
-DIGIT_REX_PART = r'[0-9]'
-DIGIT_SEQUENCE_REX_PART = fr'(?:{DIGIT_REX_PART}+)'
+DIGIT_REX_PART = r"[0-9]"
+DIGIT_SEQUENCE_REX_PART = rf"(?:{DIGIT_REX_PART}+)"
 INTEGER_CONSTANT_REX_PART = DIGIT_SEQUENCE_REX_PART
-SIGN_REX_PART = r'[+-]'
-EXPONENT_REX_PART = fr'(?:[eE]{SIGN_REX_PART}?{DIGIT_SEQUENCE_REX_PART})'
-FRACTIONAL_CONSTANT_REX_PART = fr'(?:{DIGIT_SEQUENCE_REX_PART}?\.{DIGIT_SEQUENCE_REX_PART}|{DIGIT_SEQUENCE_REX_PART}\.)'
-FLOATING_POINT_CONSTANT_REX_PART = fr'(?:{FRACTIONAL_CONSTANT_REX_PART}{EXPONENT_REX_PART}?|{DIGIT_SEQUENCE_REX_PART}{EXPONENT_REX_PART})'
-NUMBER_REX = re.compile(fr'(?:{SIGN_REX_PART}?{FLOATING_POINT_CONSTANT_REX_PART}|{SIGN_REX_PART}?{INTEGER_CONSTANT_REX_PART})')
+SIGN_REX_PART = r"[+-]"
+EXPONENT_REX_PART = rf"(?:[eE]{SIGN_REX_PART}?{DIGIT_SEQUENCE_REX_PART})"
+FRACTIONAL_CONSTANT_REX_PART = rf"(?:{DIGIT_SEQUENCE_REX_PART}?\.{DIGIT_SEQUENCE_REX_PART}|{DIGIT_SEQUENCE_REX_PART}\.)"
+FLOATING_POINT_CONSTANT_REX_PART = rf"(?:{FRACTIONAL_CONSTANT_REX_PART}{EXPONENT_REX_PART}?|{DIGIT_SEQUENCE_REX_PART}{EXPONENT_REX_PART})"
+NUMBER_REX = re.compile(
+    rf"(?:{SIGN_REX_PART}?{FLOATING_POINT_CONSTANT_REX_PART}|{SIGN_REX_PART}?{INTEGER_CONSTANT_REX_PART})"
+)
+
 
 def _pythonpath():
-    for pth in os.environ.get('PYTHONPATH', '').split(':'):
+    for pth in os.environ.get("PYTHONPATH", "").split(":"):
         if os.path.isdir(pth):
             yield pth
 
+
 def get_user_directory():
     """Return the user directory where extensions are stored."""
-    if 'INKSCAPE_PROFILE_DIR' in os.environ:
+    if "INKSCAPE_PROFILE_DIR" in os.environ:
         return os.path.abspath(
             os.path.expanduser(
-                os.path.join(os.environ['INKSCAPE_PROFILE_DIR'], 'extensions')))
+                os.path.join(os.environ["INKSCAPE_PROFILE_DIR"], "extensions")
+            )
+        )
 
     home = os.path.expanduser("~")
     for pth in _pythonpath():
         if pth.startswith(home):
             return pth
 
+
 def get_inkscape_directory():
     """Return the system directory where inkscape's core is."""
     for pth in _pythonpath():
-        if os.path.isdir(os.path.join(pth, 'inkex')):
+        if os.path.isdir(os.path.join(pth, "inkex")):
             return pth
 
 
@@ -76,6 +83,7 @@ class KeyDict(dict):
     A normal dictionary, except asking for anything not in the dictionary
     always returns the key itself. This is used for translation dictionaries.
     """
+
     def __getitem__(self, key):
         try:
             return super().__getitem__(key)
@@ -86,19 +94,19 @@ class KeyDict(dict):
 def parse_percent(val: str):
     """Parse strings that are either values (i.e., '3.14159') or percentages (i.e. '75%') to a float."""
     val = val.strip()
-    if val.endswith('%'):
+    if val.endswith("%"):
         return float(val[:-1]) / 100
     return float(val)
 
 
-
 def Boolean(value):
     """ArgParser function to turn a boolean string into a python boolean"""
-    if value.upper() == 'TRUE':
+    if value.upper() == "TRUE":
         return True
-    elif value.upper() == 'FALSE':
+    elif value.upper() == "FALSE":
         return False
     return None
+
 
 def to_bytes(content):
     """Ensures the content is bytes"""
@@ -106,27 +114,30 @@ def to_bytes(content):
         return content
     return str(content).encode("utf8")
 
+
 def debug(what):
     """Print debug message if debugging is switched on"""
     errormsg(what)
     return what
 
-def do_nothing(*args, **kwargs): # pylint: disable=unused-argument
+
+def do_nothing(*args, **kwargs):  # pylint: disable=unused-argument
     """A blank function to do nothing"""
     pass
+
 
 def errormsg(msg):
     """Intended for end-user-visible error messages.
 
-       (Currently just writes to stderr with an appended newline, but could do
-       something better in future: e.g. could add markup to distinguish error
-       messages from status messages or debugging output.)
+    (Currently just writes to stderr with an appended newline, but could do
+    something better in future: e.g. could add markup to distinguish error
+    messages from status messages or debugging output.)
 
-       Note that this should always be combined with translation:
+    Note that this should always be combined with translation:
 
-         import inkex
-         ...
-         inkex.errormsg(_("This extension requires two selected paths."))
+      import inkex
+      ...
+      inkex.errormsg(_("This extension requires two selected paths."))
     """
     try:
         sys.stderr.write(msg)
@@ -142,11 +153,11 @@ def errormsg(msg):
 
         # This will be None by default if stderr is piped, so use ASCII as a
         # last resort.
-        encoding = sys.stderr.encoding or 'ascii'
-        sys.stderr.write(msg.encode(encoding, 'backslashreplace'))
+        encoding = sys.stderr.encoding or "ascii"
+        sys.stderr.write(msg.encode(encoding, "backslashreplace"))
 
     # Write '\n' separately to avoid dealing with different string types.
-    sys.stderr.write('\n')
+    sys.stderr.write("\n")
 
 
 class AbortExtension(Exception):
@@ -163,8 +174,10 @@ class AbortExtension(Exception):
 class DependencyError(NotImplementedError):
     """Raised when we need an external python module that isn't available"""
 
+
 class FragmentError(Exception):
     """Raised when trying to do rooty things on an xml fragment"""
+
 
 def to(kind):  # pylint: disable=invalid-name
     """
@@ -181,8 +194,8 @@ def to(kind):  # pylint: disable=invalid-name
 
 
 def strargs(string, kind=float):
-    """Returns a list of floats from a string with commas or space separators, 
-        also splits at -(minus) signs by adding a space in front of the - sign
+    """Returns a list of floats from a string with commas or space separators,
+    also splits at -(minus) signs by adding a space in front of the - sign
     """
     return [kind(val) for val in NUMBER_REX.findall(string)]
 
@@ -204,6 +217,7 @@ def filename_arg(name):
         raise ArgumentTypeError("File not found: {}".format(name))
     return filename
 
+
 def pairwise(iterable, start=True):
     "Iterate over a list with overlapping pairs (see itertools recipes)"
     first, then = tee(iterable)
@@ -212,9 +226,11 @@ def pairwise(iterable, start=True):
         starter = []
     return starter + list(zip(first, then))
 
+
 EVAL_GLOBALS = {}
 EVAL_GLOBALS.update(random.__dict__)
 EVAL_GLOBALS.update(math.__dict__)
+
 
 def math_eval(function, variable="x"):
     """Interpret a function string. All functions from math and random may be used.
@@ -222,11 +238,14 @@ def math_eval(function, variable="x"):
     """
     try:
         if function != "":
-            return eval(f'lambda {variable}: ' + (function.strip('"') or 't'), EVAL_GLOBALS, {})
+            return eval(
+                f"lambda {variable}: " + (function.strip('"') or "t"), EVAL_GLOBALS, {}
+            )
     # handle incomplete/invalid function gracefully
     except SyntaxError:
         pass
     return None
+
 
 def is_number(string):
     """Checks if a value is a number"""

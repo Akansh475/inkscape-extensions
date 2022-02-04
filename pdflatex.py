@@ -28,30 +28,41 @@ from inkex.base import TempDirMixin
 from inkex.command import call, inkscape
 from inkex import load_svg, ShapeElement, Defs
 
+
 class PdfLatex(TempDirMixin, inkex.GenerateExtension):
     """
     Use pdflatex to generate LaTeX, this whole hack is required because
     we don't want to open a LaTeX document as a document, but as a
     generated fragment (like import, but done manually).
     """
+
     def add_arguments(self, pars):
-        pars.add_argument('--formule', type=str, default='')
-        pars.add_argument('--packages', type=str, default='')
+        pars.add_argument("--formule", type=str, default="")
+        pars.add_argument("--packages", type=str, default="")
 
     def generate(self):
-        tex_file = os.path.join(self.tempdir, 'input.tex')
-        pdf_file = os.path.join(self.tempdir, 'input.pdf') # Auto-generate by pdflatex
-        svg_file = os.path.join(self.tempdir, 'output.svg')
+        tex_file = os.path.join(self.tempdir, "input.tex")
+        pdf_file = os.path.join(self.tempdir, "input.pdf")  # Auto-generate by pdflatex
+        svg_file = os.path.join(self.tempdir, "output.svg")
 
-        with open(tex_file, 'w') as fhl:
+        with open(tex_file, "w") as fhl:
             self.write_latex(fhl)
 
-        call('pdflatex', tex_file,\
-            output_directory=self.tempdir,\
-            halt_on_error=True, oldie=True)
+        call(
+            "pdflatex",
+            tex_file,
+            output_directory=self.tempdir,
+            halt_on_error=True,
+            oldie=True,
+        )
 
-        inkscape(pdf_file, export_filename=svg_file, pdf_page=1,
-                 pdf_poppler=True, export_type="svg")
+        inkscape(
+            pdf_file,
+            export_filename=svg_file,
+            pdf_page=1,
+            pdf_poppler=True,
+            export_type="svg",
+        )
 
         if not os.path.isfile(svg_file):
             fn = os.path.basename(svg_file)
@@ -59,7 +70,7 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
                 # Inkscape bug detected, file got saved wrong
                 svg_file = fn
 
-        with open(svg_file, 'r') as fhl:
+        with open(svg_file, "r") as fhl:
             svg = load_svg(fhl).getroot()
             svg.set_random_ids(backlinks=True)
             for child in svg:
@@ -67,24 +78,27 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
                     yield child
                 elif isinstance(child, Defs):
                     for def_child in child:
-                        #def_child.set_random_id()
+                        # def_child.set_random_id()
                         self.svg.defs.append(def_child)
 
     def write_latex(self, stream):
         """Takes a forumle and wraps it in latex"""
-        stream.write(r"""%% processed with pdflatex.py
+        stream.write(
+            r"""%% processed with pdflatex.py
 \documentclass{minimal}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
-""")
-        for package in self.options.packages.split(','):
+"""
+        )
+        for package in self.options.packages.split(","):
             if package:
-                stream.write('\\usepackage{{{}}}\n'.format(package))
+                stream.write("\\usepackage{{{}}}\n".format(package))
         stream.write("\n\\begin{document}\n")
         stream.write(self.options.formule)
         stream.write("\n\\end{document}\n")
         stream.flush()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     PdfLatex().run()

@@ -24,12 +24,15 @@ Simple wrapper around fig2dev
 import inkex
 from inkex.command import call
 
+
 class FigInput(inkex.CallExtension):
     """Load FIG Files by calling fig2dev program"""
-    input_ext = 'fig'
+
+    input_ext = "fig"
 
     def call(self, input_file, output_file):
-        call('fig2dev', '-L', 'svg', input_file, output_file)
+        call("fig2dev", "-L", "svg", input_file, output_file)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     FigInput().run()

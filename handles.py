@@ -25,10 +25,12 @@ import inkex
 from inkex.paths import Path, Curve, Move, Line, Quadratic
 from inkex.transforms import Vector2d
 
+
 class Handles(inkex.EffectExtension):
     """
     Renders the handle lines for the selected curves onto the canvas.
     """
+
     def effect(self):
         for node in self.svg.selection.filter(inkex.PathElement):
             result = Path()
@@ -39,13 +41,17 @@ class Handles(inkex.EffectExtension):
                     start = seg.end_point(start, prev)
                 if isinstance(seg, Curve):
                     result += [
-                        Move(seg.x2, seg.y2), Line(prev.x, prev.y),
-                        Move(seg.x3, seg.y3), Line(seg.x4, seg.y4),
+                        Move(seg.x2, seg.y2),
+                        Line(prev.x, prev.y),
+                        Move(seg.x3, seg.y3),
+                        Line(seg.x4, seg.y4),
                     ]
                 elif isinstance(seg, Quadratic):
                     result += [
-                        Move(seg.x2, seg.y2), Line(prev.x, prev.y),
-                        Move(seg.x2, seg.y2), Line(seg.x3, seg.y3)
+                        Move(seg.x2, seg.y2),
+                        Line(prev.x, prev.y),
+                        Move(seg.x2, seg.y2),
+                        Line(seg.x3, seg.y3),
                     ]
                 prev = seg.end_point(start, prev)
 
@@ -54,10 +60,16 @@ class Handles(inkex.EffectExtension):
 
             elem = node.getparent().add(inkex.PathElement())
             elem.path = result.transform(node.transform)
-            elem.style = {'stroke-linejoin': 'miter', 'stroke-width': '1.0px',
-                          'stroke-opacity': '1.0', 'fill-opacity': '1.0',
-                          'stroke': '#000000', 'stroke-linecap': 'butt',
-                          'fill': 'none'}
+            elem.style = {
+                "stroke-linejoin": "miter",
+                "stroke-width": "1.0px",
+                "stroke-opacity": "1.0",
+                "fill-opacity": "1.0",
+                "stroke": "#000000",
+                "stroke-linecap": "butt",
+                "fill": "none",
+            }
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Handles().run()

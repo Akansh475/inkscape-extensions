@@ -57,13 +57,45 @@ from inkex.paths import Move, line
 
 # www.sapdesignguild.org/goodies/diagram_guidelines/color_palettes.html#mss
 COLOUR_TABLE = {
-    "red": ["#460101", "#980101", "#d40000", "#f44800", "#fb8b00", "#eec73e", "#d9bb7a", "#fdd99b"],
+    "red": [
+        "#460101",
+        "#980101",
+        "#d40000",
+        "#f44800",
+        "#fb8b00",
+        "#eec73e",
+        "#d9bb7a",
+        "#fdd99b",
+    ],
     "blue": ["#000442", "#0F1781", "#252FB7", "#3A45E1", "#656DDE", "#8A91EC"],
-    "gray": ["#222222", "#444444", "#666666", "#888888", "#aaaaaa", "#cccccc", "#eeeeee"],
+    "gray": [
+        "#222222",
+        "#444444",
+        "#666666",
+        "#888888",
+        "#aaaaaa",
+        "#cccccc",
+        "#eeeeee",
+    ],
     "contrast": ["#0000FF", "#FF0000", "#00FF00", "#CF9100", "#FF00FF", "#00FFFF"],
-    "sap": ["#f8d753", "#5c9746", "#3e75a7", "#7a653e", "#e1662a", "#74796f", "#c4384f",
-            "#fff8a3", "#a9cc8f", "#b2c8d9", "#bea37a", "#f3aa79", "#b5b5a9", "#e6a5a5"]
+    "sap": [
+        "#f8d753",
+        "#5c9746",
+        "#3e75a7",
+        "#7a653e",
+        "#e1662a",
+        "#74796f",
+        "#c4384f",
+        "#fff8a3",
+        "#a9cc8f",
+        "#b2c8d9",
+        "#bea37a",
+        "#f3aa79",
+        "#b5b5a9",
+        "#e6a5a5",
+    ],
 }
+
 
 class NiceChart(inkex.GenerateExtension):
     """
@@ -71,53 +103,116 @@ class NiceChart(inkex.GenerateExtension):
     (stacked, single, horizontally or vertically)
     with optional drop shadow, from a csv file or from pasted text
     """
+
     container_layer = True
 
     @property
     def container_label(self):
         """Layer title/label"""
-        return 'Chart-Layer: {}'.format(self.options.what)
+        return "Chart-Layer: {}".format(self.options.what)
 
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
-        pars.add_argument('--encoding', default='utf-8')
-        pars.add_argument('-w', '--what', default='apples:3,bananas:5,oranges:10,pears:4', help='Chart Values')
-        pars.add_argument("-t", "--type", type=self.arg_method('render'),
-                          default=self.render_bar, help="Chart Type")
-        pars.add_argument("-b", "--blur", type=inkex.Boolean, default=False, help="Blur Type")
+        pars.add_argument("--tab")
+        pars.add_argument("--encoding", default="utf-8")
+        pars.add_argument(
+            "-w",
+            "--what",
+            default="apples:3,bananas:5,oranges:10,pears:4",
+            help="Chart Values",
+        )
+        pars.add_argument(
+            "-t",
+            "--type",
+            type=self.arg_method("render"),
+            default=self.render_bar,
+            help="Chart Type",
+        )
+        pars.add_argument(
+            "-b", "--blur", type=inkex.Boolean, default=False, help="Blur Type"
+        )
         pars.add_argument("-f", "--filename", type=filename_arg, help="Name of File")
-        pars.add_argument("-i", "--input_type", default='file', help="Chart Type")
-        pars.add_argument("-d", "--delimiter", default=';', help="delimiter")
-        pars.add_argument("-c", "--colors", default='default', help="color-scheme")
+        pars.add_argument("-i", "--input_type", default="file", help="Chart Type")
+        pars.add_argument("-d", "--delimiter", default=";", help="delimiter")
+        pars.add_argument("-c", "--colors", default="default", help="color-scheme")
         pars.add_argument("--colors_override", help="color-scheme-override")
-        pars.add_argument("--reverse_colors", type=inkex.Boolean, default=False,
-                          help="reverse color-scheme")
-        pars.add_argument("-k", "--col_key", type=int, default=0,
-                          help="column that contains the keys")
-        pars.add_argument("-v", "--col_val", type=int, default=1,
-                          help="column that contains the values")
-        pars.add_argument("--headings", type=inkex.Boolean, default=False,
-                          help="first line of the CSV file consists of headings for the columns")
-        pars.add_argument("-r", "--rotate", type=inkex.Boolean, default=False,
-                          help="Draw barchart horizontally")
-        pars.add_argument("-W", "--bar-width", type=int, default=10, help="width of bars")
-        pars.add_argument("-p", "--pie-radius", type=int, default=100, help="radius of pie-charts")
-        pars.add_argument("-H", "--bar-height", type=int, default=100, help="height of bars")
-        pars.add_argument("-O", "--bar-offset", type=int, default=5, help="distance between bars")
+        pars.add_argument(
+            "--reverse_colors",
+            type=inkex.Boolean,
+            default=False,
+            help="reverse color-scheme",
+        )
+        pars.add_argument(
+            "-k", "--col_key", type=int, default=0, help="column that contains the keys"
+        )
+        pars.add_argument(
+            "-v",
+            "--col_val",
+            type=int,
+            default=1,
+            help="column that contains the values",
+        )
+        pars.add_argument(
+            "--headings",
+            type=inkex.Boolean,
+            default=False,
+            help="first line of the CSV file consists of headings for the columns",
+        )
+        pars.add_argument(
+            "-r",
+            "--rotate",
+            type=inkex.Boolean,
+            default=False,
+            help="Draw barchart horizontally",
+        )
+        pars.add_argument(
+            "-W", "--bar-width", type=int, default=10, help="width of bars"
+        )
+        pars.add_argument(
+            "-p", "--pie-radius", type=int, default=100, help="radius of pie-charts"
+        )
+        pars.add_argument(
+            "-H", "--bar-height", type=int, default=100, help="height of bars"
+        )
+        pars.add_argument(
+            "-O", "--bar-offset", type=int, default=5, help="distance between bars"
+        )
         pars.add_argument("--stroke-width", type=float, default=1.0)
-        pars.add_argument("-o", "--text-offset", type=int, default=5,
-                          help="distance between bar and descriptions")
-        pars.add_argument("--heading-offset", type=int, default=50,
-                          help="distance between chart and chart title")
-        pars.add_argument("--segment-overlap", type=inkex.Boolean, default=False,
-                          help="Remove aliasing effects by letting pie chart segments overlap")
-        pars.add_argument("-F", "--font", default='sans-serif', help="font of description")
-        pars.add_argument("-S", "--font-size", type=int, default=10,
-                          help="font size of description")
-        pars.add_argument("-C", "--font-color", default='#000000', help="font color of description")
+        pars.add_argument(
+            "-o",
+            "--text-offset",
+            type=int,
+            default=5,
+            help="distance between bar and descriptions",
+        )
+        pars.add_argument(
+            "--heading-offset",
+            type=int,
+            default=50,
+            help="distance between chart and chart title",
+        )
+        pars.add_argument(
+            "--segment-overlap",
+            type=inkex.Boolean,
+            default=False,
+            help="Remove aliasing effects by letting pie chart segments overlap",
+        )
+        pars.add_argument(
+            "-F", "--font", default="sans-serif", help="font of description"
+        )
+        pars.add_argument(
+            "-S", "--font-size", type=int, default=10, help="font size of description"
+        )
+        pars.add_argument(
+            "-C", "--font-color", default="#000000", help="font color of description"
+        )
 
-        pars.add_argument("-V", "--show_values", type=inkex.Boolean, default=False,
-                          help="Show values in chart")
+        pars.add_argument(
+            "-V",
+            "--show_values",
+            type=inkex.Boolean,
+            default=False,
+            help="Show values in chart",
+        )
 
     def get_data(self):
         """Process the data"""
@@ -128,7 +223,9 @@ class NiceChart(inkex.GenerateExtension):
             """Confirm the values from files or direct"""
             val = float(val)
             if val < 0:
-                raise inkex.AbortExtension("Negative values are currently not supported!")
+                raise inkex.AbortExtension(
+                    "Negative values are currently not supported!"
+                )
             return val
 
         if self.options.input_type == "file":
@@ -144,12 +241,16 @@ class NiceChart(inkex.GenerateExtension):
                     header = next(reader)
                     title = header[col_val]
 
-                values = [(line[col_key], process_value(line[col_val])) for line in reader]
+                values = [
+                    (line[col_key], process_value(line[col_val])) for line in reader
+                ]
                 return (title,) + tuple(zip(*values))
 
         elif self.options.input_type == "direct_input":
-            (keys, values) = zip(*[l.split(':', 1) for l in self.options.what.split(',')])
-            return ('Direct Input', keys, [process_value(val) for val in values])
+            (keys, values) = zip(
+                *[l.split(":", 1) for l in self.options.what.split(",")]
+            )
+            return ("Direct Input", keys, [process_value(val) for val in values])
 
         raise inkex.AbortExtension("Unknown input type")
 
@@ -158,15 +259,15 @@ class NiceChart(inkex.GenerateExtension):
         if self.options.blur:
             defs = self.svg.defs
             # Create new Filter
-            filt = defs.add(Filter(height='3', width='3', x='-0.5', y='-0.5'))
+            filt = defs.add(Filter(height="3", width="3", x="-0.5", y="-0.5"))
             # Append Gaussian Blur to that Filter
-            filt.add_primitive('feGaussianBlur', stdDeviation='1.1')
+            filt.add_primitive("feGaussianBlur", stdDeviation="1.1")
             return inkex.Style(filter=filt.get_id(as_url=2))
         return inkex.Style()
 
     def get_color(self):
         """Get the next available color"""
-        if not hasattr(self, '_colors'):
+        if not hasattr(self, "_colors"):
             # Generate list of available colours
             if self.options.colors_override:
                 colors = self.options.colors_override.strip()
@@ -174,13 +275,13 @@ class NiceChart(inkex.GenerateExtension):
                 colors = self.options.colors
 
             if colors[0].isalpha():
-                colors = COLOUR_TABLE.get(colors.lower(), COLOUR_TABLE['red'])
+                colors = COLOUR_TABLE.get(colors.lower(), COLOUR_TABLE["red"])
 
             else:
                 colors = re.findall("(#[0-9a-fA-F]{6})", colors)
                 # to be sure we create a fallback:
                 if not colors:
-                    colors = COLOUR_TABLE['red']
+                    colors = COLOUR_TABLE["red"]
 
             if self.options.reverse_colors:
                 colors.reverse()
@@ -202,8 +303,8 @@ class NiceChart(inkex.GenerateExtension):
             raise inkex.AbortExtension("No data to render into a chart.")
 
         # Get the page attributes:
-        self.width = self.svg.unittouu(self.svg.get('width'))
-        self.height = self.svg.unittouu(self.svg.attrib['height'])
+        self.width = self.svg.unittouu(self.svg.get("width"))
+        self.height = self.svg.unittouu(self.svg.attrib["height"])
         self.fontoff = float(self.options.font_size) / 3
 
         # Check if a drop shadow should be drawn:
@@ -216,7 +317,7 @@ class NiceChart(inkex.GenerateExtension):
     def draw_header(self, heading_x):
         """Draw an optional header text"""
         if self.options.headings and self.title:
-            headingtext = self.draw_text(self.title, 4, anchor='end')
+            headingtext = self.draw_text(self.title, 4, anchor="end")
             headingtext.set("y", str(self.height / 2 + self.options.heading_offset))
             headingtext.set("x", str(heading_x))
             return headingtext
@@ -253,15 +354,19 @@ class NiceChart(inkex.GenerateExtension):
 
             # If keys are given, create text elements
             if keys:
-                text = self.draw_text(keys[cnt], anchor='end')
+                text = self.draw_text(keys[cnt], anchor="end")
                 if not self.options.rotate:  # =vertical
                     text.set("transform", "rotate(-90)")
                     # y after rotation:
                     text.set("x", "-" + str(self.height / 2 + self.options.text_offset))
                     # x after rotation:
-                    text.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                    text.set(
+                        "y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff)
+                    )
                 else:  # =horizontal
-                    text.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                    text.set(
+                        "y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff)
+                    )
                     text.set("x", str(self.height / 2 - self.options.text_offset))
 
                 yield text
@@ -271,12 +376,21 @@ class NiceChart(inkex.GenerateExtension):
                 if not self.options.rotate:  # =vertical
                     vtext.set("transform", "rotate(-90)")
                     # y after rotation:
-                    vtext.set("x", "-" + str(self.height / 2 + value - self.options.text_offset))
+                    vtext.set(
+                        "x",
+                        "-" + str(self.height / 2 + value - self.options.text_offset),
+                    )
                     # x after rotation:
-                    vtext.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
+                    vtext.set(
+                        "y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff)
+                    )
                 else:  # =horizontal
-                    vtext.set("y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff))
-                    vtext.set("x", str(self.height / 2 + value + self.options.text_offset))
+                    vtext.set(
+                        "y", str(self.width / 2 + offset + bar_width / 2 + self.fontoff)
+                    )
+                    vtext.set(
+                        "x", str(self.height / 2 + value + self.options.text_offset)
+                    )
                 yield vtext
 
         yield self.draw_header(self.width / 2)
@@ -284,7 +398,9 @@ class NiceChart(inkex.GenerateExtension):
     def draw_rectangle(self, x, y, width, height):
         """Draw a rectangle bar with optional shadow"""
         if self.blur:
-            shadow = Rectangle(x=str(x+1), y=str(y+1), width=str(width), height=str(height))
+            shadow = Rectangle(
+                x=str(x + 1), y=str(y + 1), width=str(width), height=str(height)
+            )
             shadow.style = self.blur
             yield shadow
 
@@ -292,20 +408,20 @@ class NiceChart(inkex.GenerateExtension):
         rect.set("style", "fill:" + self.get_color())
         yield rect
 
-    def draw_text(self, text, add_size=0, anchor='start', **kwargs):
+    def draw_text(self, text, add_size=0, anchor="start", **kwargs):
         """Draw a textual label"""
         vtext = TextElement(**kwargs)
         vtext.style = {
-            'fill': self.options.font_color,
-            'font-family': self.options.font,
-            'font-size': str(self.options.font_size + add_size) + 'px',
-            'font-style': 'normal',
-            'font-variant': 'normal',
-            'font-weight': 'normal',
-            'font-stretch': 'normal',
-            '-inkscape-font-specification': 'Bitstream Charter',
-            'text-align': anchor,
-            'text-anchor': anchor,
+            "fill": self.options.font_color,
+            "font-family": self.options.font,
+            "font-size": str(self.options.font_size + add_size) + "px",
+            "font-style": "normal",
+            "font-variant": "normal",
+            "font-weight": "normal",
+            "font-stretch": "normal",
+            "-inkscape-font-specification": "Bitstream Charter",
+            "text-align": anchor,
+            "text-anchor": anchor,
         }
         vtext.text = str(text)
         return vtext
@@ -328,8 +444,8 @@ class NiceChart(inkex.GenerateExtension):
         # Create the shadow first (if it should be created):
         if self.blur:
             shadow = Circle(cx=str(x), cy=str(y))
-            shadow.set('r', str(pie_radius))
-            shadow.style = self.blur + inkex.Style(fill='#000000')
+            shadow.set("r", str(pie_radius))
+            shadow.style = self.blur + inkex.Style(fill="#000000")
             yield shadow
 
         # Add a grey background circle with a light stroke
@@ -362,11 +478,17 @@ class NiceChart(inkex.GenerateExtension):
                 if cnt != len(values) - 1:
                     end += 0.09  # add a 5° overlap
                 if cnt == 0:
-                    start -= 0.09  # let the first element overlap into the other direction
+                    start -= (
+                        0.09  # let the first element overlap into the other direction
+                    )
 
             # then add the slice
-            pieslice = inkex.PathElement.arc([x, y], pie_radius, pie_radius, start=start, end=end )
-            pieslice.set("style", "fill:" + self.get_color() + ";stroke:none;fill-opacity:1")
+            pieslice = inkex.PathElement.arc(
+                [x, y], pie_radius, pie_radius, start=start, end=end
+            )
+            pieslice.set(
+                "style", "fill:" + self.get_color() + ";stroke:none;fill-opacity:1"
+            )
             ang = angle / 2 + offset
 
             # If text is given, draw short paths and add the text
@@ -376,26 +498,27 @@ class NiceChart(inkex.GenerateExtension):
                     Move(
                         (self.width / 2) + pie_radius * math.cos(ang),
                         (self.height / 2) + pie_radius * math.sin(ang),
-                    ), line(
+                    ),
+                    line(
                         (self.options.text_offset - 2) * math.cos(ang),
                         (self.options.text_offset - 2) * math.sin(ang),
                     ),
                 ]
 
                 elem.style = {
-                    'fill': 'none',
-                    'stroke': self.options.font_color,
-                    'stroke-width': self.options.stroke_width,
-                    'stroke-linecap': 'butt',
+                    "fill": "none",
+                    "stroke": self.options.font_color,
+                    "stroke-width": self.options.stroke_width,
+                    "stroke-linecap": "butt",
                 }
                 yield elem
 
                 label = keys[cnt]
                 if self.options.show_values:
-                    label += ' ({}{})'.format(str(value), ('', '%')[pie_abs])
+                    label += " ({}{})".format(str(value), ("", "%")[pie_abs])
 
                 # check if it is right or left of the Pie
-                anchor = 'start' if math.cos(ang) > 0 else 'end'
+                anchor = "start" if math.cos(ang) > 0 else "end"
                 text = self.draw_text(label, anchor=anchor)
 
                 off = pie_radius + self.options.text_offset
@@ -440,8 +563,10 @@ class NiceChart(inkex.GenerateExtension):
 
             # Create rectangle element
             shadow = Rectangle(
-                x=str(x), y=str(shy),
-                width=str(width), height=str(height),
+                x=str(x),
+                y=str(shy),
+                width=str(width),
+                height=str(height),
             )
 
             # Set shadow blur (connect to filter object in xml path)
@@ -459,13 +584,13 @@ class NiceChart(inkex.GenerateExtension):
 
             # Set chart position to center of document.
             if not self.options.rotate:
-                rect.set('x', str(self.width / 2))
-                rect.set('y', str(self.height / 2 - offset - normedvalue))
+                rect.set("x", str(self.width / 2))
+                rect.set("y", str(self.height / 2 - offset - normedvalue))
                 rect.set("width", str(self.options.bar_width))
                 rect.set("height", str(normedvalue))
             else:
-                rect.set('x', str(self.width / 2 + offset))
-                rect.set('y', str(self.height / 2))
+                rect.set("x", str(self.width / 2 + offset))
+                rect.set("y", str(self.height / 2))
                 rect.set("height", str(self.options.bar_width))
                 rect.set("width", str(normedvalue))
 
@@ -479,25 +604,37 @@ class NiceChart(inkex.GenerateExtension):
                     y1 = y - offset - (normedvalue / 2)
                     x2 = self.options.bar_width / 2 + self.options.text_offset
                     y2 = 0
-                    txt = self.width / 2 + self.options.bar_width + self.options.text_offset + 1
+                    txt = (
+                        self.width / 2
+                        + self.options.bar_width
+                        + self.options.text_offset
+                        + 1
+                    )
                     tyt = y - offset + self.fontoff - (normedvalue / 2)
                 else:
                     x1 = x + offset + normedvalue / 2
                     y1 = y + self.options.bar_width / 2
                     x2 = 0
-                    y2 = self.options.bar_width / 2 + (self.options.font_size \
-                            * cnt) + self.options.text_offset
+                    y2 = (
+                        self.options.bar_width / 2
+                        + (self.options.font_size * cnt)
+                        + self.options.text_offset
+                    )
                     txt = x + offset + normedvalue / 2 - self.fontoff
-                    tyt = (y) + self.options.bar_width + (self.options.font_size \
-                            * (cnt + 1)) + self.options.text_offset
+                    tyt = (
+                        (y)
+                        + self.options.bar_width
+                        + (self.options.font_size * (cnt + 1))
+                        + self.options.text_offset
+                    )
 
                 elem = inkex.PathElement()
                 elem.path = [Move(x1, y1), line(x2, y2)]
                 elem.style = {
-                    'fill': 'none',
-                    'stroke': self.options.font_color,
-                    'stroke-width': self.options.stroke_width,
-                    'stroke-linecap': 'butt',
+                    "fill": "none",
+                    "stroke": self.options.font_color,
+                    "stroke-width": self.options.stroke_width,
+                    "stroke-linecap": "butt",
                 }
                 yield elem
                 yield self.draw_text(keys[cnt], x=str(txt), y=str(tyt))
@@ -512,5 +649,5 @@ class NiceChart(inkex.GenerateExtension):
         yield self.draw_header(self.width / 2 + offset + normedvalue)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     NiceChart().run()

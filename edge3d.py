@@ -26,24 +26,37 @@ from inkex import ClipPath, Filter
 
 class Edge3D(inkex.EffectExtension):
     """Generate a 3d edge"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--angle', type=float, default=45.0,
-                          help='angle of illumination, clockwise, 45 = upper right')
-        pars.add_argument('--stddev', type=float, default=5.0, help='Gaussian Blur stdDeviation')
-        pars.add_argument('--blurheight', type=float, default=2.0, help='Gaussian Blur height')
-        pars.add_argument('--blurwidth', type=float, default=2.0, help='Gaussian Blur width')
-        pars.add_argument('--shades', type=int, default=2, help="Number of shades")
-        pars.add_argument('--bw', type=inkex.Boolean, help="Black and white")
-        pars.add_argument('--thick', type=float, default=10.0, help='stroke-width for pieces')
+        pars.add_argument(
+            "--angle",
+            type=float,
+            default=45.0,
+            help="angle of illumination, clockwise, 45 = upper right",
+        )
+        pars.add_argument(
+            "--stddev", type=float, default=5.0, help="Gaussian Blur stdDeviation"
+        )
+        pars.add_argument(
+            "--blurheight", type=float, default=2.0, help="Gaussian Blur height"
+        )
+        pars.add_argument(
+            "--blurwidth", type=float, default=2.0, help="Gaussian Blur width"
+        )
+        pars.add_argument("--shades", type=int, default=2, help="Number of shades")
+        pars.add_argument("--bw", type=inkex.Boolean, help="Black and white")
+        pars.add_argument(
+            "--thick", type=float, default=10.0, help="stroke-width for pieces"
+        )
 
     def angle_between(self, start, end, angle):
         """Return true if angle (degrees, clockwise, 0 = up/north) is between
-           angles start and end"""
+        angles start and end"""
 
         def f(x):
             """Add 360 to x if x is less than 0"""
             if x < 0:
-                return x + 360.
+                return x + 360.0
             return x
 
         # rotate all inputs by start, => start = 0
@@ -53,9 +66,9 @@ class Edge3D(inkex.EffectExtension):
 
     def effect(self):
         """Check each internode to see if it's in one of the wedges
-           for the current shade.  shade is a floating point 0-1 white-black"""
+        for the current shade.  shade is a floating point 0-1 white-black"""
         # size of a wedge for shade i, wedges come in pairs
-        delta = 360. / self.options.shades / 2.
+        delta = 360.0 / self.options.shades / 2.0
         for node in self.svg.selection.filter(inkex.PathElement):
             array = node.path.to_arrays()
             group = None
@@ -71,20 +84,21 @@ class Edge3D(inkex.EffectExtension):
                 last = []
                 result = []
                 for cmd, params in array:
-                    if cmd == 'Z':
+                    if cmd == "Z":
                         last = []
                         continue
                     if last:
-                        if cmd == 'V':
+                        if cmd == "V":
                             point = [last[0], params[-2:][0]]
-                        elif cmd == 'H':
+                        elif cmd == "H":
                             point = [params[-2:][0], last[1]]
                         else:
                             point = params[-2:]
                         ang = degrees(atan2(point[0] - last[0], point[1] - last[1]))
-                        if (self.angle_between(start[0], end[0], ang) or \
-                            self.angle_between(start[1], end[1], ang)):
-                            result.append(('M', last))
+                        if self.angle_between(
+                            start[0], end[0], ang
+                        ) or self.angle_between(start[1], end[1], ang):
+                            result.append(("M", last))
                             result.append((cmd, params))
                         ref = point
                     else:
@@ -95,10 +109,10 @@ class Edge3D(inkex.EffectExtension):
                         group, filt = self.get_group(node)
                     new_node = group.add(node.copy())
                     new_node.path = result
-                    new_node.style = 'fill:none;stroke-opacity:1;stroke-width:10'
+                    new_node.style = "fill:none;stroke-opacity:1;stroke-width:10"
                     new_node.style += filt
-                    col = 255 - int(255. * level)
-                    new_node.style['stroke'] = inkex.Color((col, col, col))
+                    col = 255 - int(255.0 * level)
+                    new_node.style["stroke"] = inkex.Color((col, col, col))
 
     def get_group(self, node):
         """
@@ -110,15 +124,21 @@ class Edge3D(inkex.EffectExtension):
         new_node = clip.add(node.copy())
         clip_group = node.getparent().add(inkex.Group())
         group = clip_group.add(inkex.Group())
-        clip_group.set('clip-path', clip.get_id(as_url=2))
+        clip_group.set("clip-path", clip.get_id(as_url=2))
 
         # make a blur filter reference by the style of each path
-        filt = defs.add(Filter(x='-0.5', y='-0.5',\
-            height=str(self.options.blurheight),\
-            width=str(self.options.blurwidth)))
+        filt = defs.add(
+            Filter(
+                x="-0.5",
+                y="-0.5",
+                height=str(self.options.blurheight),
+                width=str(self.options.blurwidth),
+            )
+        )
 
-        filt.add_primitive('feGaussianBlur', stdDeviation=self.options.stddev)
+        filt.add_primitive("feGaussianBlur", stdDeviation=self.options.stddev)
         return group, inkex.Style(filter=filt.get_id(as_url=2))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Edge3D().run()

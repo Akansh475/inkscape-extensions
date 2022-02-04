@@ -20,16 +20,18 @@
 import inkex
 from jessyink_install import JessyInkMixin
 
+
 class Uninstall(JessyInkMixin, inkex.EffectExtension):
     """Uninstall jessyInk from this svg"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
-        pars.add_argument('--remove_script', type=inkex.Boolean, default=True)
-        pars.add_argument('--remove_effects', type=inkex.Boolean, default=True)
-        pars.add_argument('--remove_masterSlide', type=inkex.Boolean, default=True)
-        pars.add_argument('--remove_transitions', type=inkex.Boolean, default=True)
-        pars.add_argument('--remove_autoTexts', type=inkex.Boolean, default=True)
-        pars.add_argument('--remove_views', type=inkex.Boolean, default=True)
+        pars.add_argument("--tab")
+        pars.add_argument("--remove_script", type=inkex.Boolean, default=True)
+        pars.add_argument("--remove_effects", type=inkex.Boolean, default=True)
+        pars.add_argument("--remove_masterSlide", type=inkex.Boolean, default=True)
+        pars.add_argument("--remove_transitions", type=inkex.Boolean, default=True)
+        pars.add_argument("--remove_autoTexts", type=inkex.Boolean, default=True)
+        pars.add_argument("--remove_views", type=inkex.Boolean, default=True)
 
     def effect(self):
         # Remove script, if so desired.
@@ -63,5 +65,5 @@ class Uninstall(JessyInkMixin, inkex.EffectExtension):
 
 
 # Create effect instance.
-if __name__ == '__main__':
+if __name__ == "__main__":
     Uninstall().run()

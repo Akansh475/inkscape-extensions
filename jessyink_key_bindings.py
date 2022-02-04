@@ -21,16 +21,29 @@ import inkex
 from inkex import Group, Script
 from jessyink_install import JessyInkMixin
 
-KEY_CODES = ('LEFT', 'RIGHT', 'DOWN', 'UP', 'HOME', 'END',
-             'ENTER', 'SPACE', 'PAGE_UP', 'PAGE_DOWN', 'ESCAPE')
+KEY_CODES = (
+    "LEFT",
+    "RIGHT",
+    "DOWN",
+    "UP",
+    "HOME",
+    "END",
+    "ENTER",
+    "SPACE",
+    "PAGE_UP",
+    "PAGE_DOWN",
+    "ESCAPE",
+)
+
 
 class KeyBindings(JessyInkMixin, inkex.EffectExtension):
     """Add key bindings to slide show"""
-    modes = ('slide', 'index', 'drawing')
+
+    modes = ("slide", "index", "drawing")
 
     def set_options(self, namespace, opt_str, value):
         """Sort through all the options and combine them"""
-        slot, action = opt_str.split('_', 1)
+        slot, action = opt_str.split("_", 1)
         keycodes = getattr(namespace, f"{slot}KeyCodes", {})
         charcodes = getattr(namespace, f"{slot}CharCodes", {})
         if value:
@@ -44,7 +57,7 @@ class KeyBindings(JessyInkMixin, inkex.EffectExtension):
         setattr(namespace, f"{slot}CharCodes", charcodes)
 
     actions = {
-        'slide': {
+        "slide": {
             "export": "slideUpdateExportLayer();",
             "addSlide": "slideAddSlide(activeSlide);",
             "resetTimer": "slideResetTimer();",
@@ -59,7 +72,7 @@ class KeyBindings(JessyInkMixin, inkex.EffectExtension):
             "firstSlide": "slideSetActiveSlide(0);",
             "lastSlide": "slideSetActiveSlide(slides.length - 1);",
         },
-        'drawing': {
+        "drawing": {
             "undo": "drawingUndo();",
             "switchToSlideMode": "drawingSwitchToSlideMode();",
             "pathWidthDefault": "drawingResetPathWidth();",
@@ -68,17 +81,17 @@ class KeyBindings(JessyInkMixin, inkex.EffectExtension):
             "pathWidth5": "drawingSetPathWidth(5.0);",
             "pathWidth7": "drawingSetPathWidth(7.0);",
             "pathWidth9": "drawingSetPathWidth(9.0);",
-            "pathColourBlue": "drawingSetPathColour(\"blue\");",
-            "pathColourCyan": "drawingSetPathColour(\"cyan\");",
-            "pathColourGreen": "drawingSetPathColour(\"green\");",
-            "pathColourBlack": "drawingSetPathColour(\"black\");",
-            "pathColourMagenta": "drawingSetPathColour(\"magenta\");",
-            "pathColourOrange": "drawingSetPathColour(\"orange\");",
-            "pathColourRed": "drawingSetPathColour(\"red\");",
-            "pathColourWhite": "drawingSetPathColour(\"white\");",
-            "pathColourYellow": "drawingSetPathColour(\"yellow\");",
+            "pathColourBlue": 'drawingSetPathColour("blue");',
+            "pathColourCyan": 'drawingSetPathColour("cyan");',
+            "pathColourGreen": 'drawingSetPathColour("green");',
+            "pathColourBlack": 'drawingSetPathColour("black");',
+            "pathColourMagenta": 'drawingSetPathColour("magenta");',
+            "pathColourOrange": 'drawingSetPathColour("orange");',
+            "pathColourRed": 'drawingSetPathColour("red");',
+            "pathColourWhite": 'drawingSetPathColour("white");',
+            "pathColourYellow": 'drawingSetPathColour("yellow");',
         },
-        'index': {
+        "index": {
             "selectSlideToLeft": "indexSetPageSlide(activeSlide - 1);",
             "selectSlideToRight": "indexSetPageSlide(activeSlide + 1);",
             "selectSlideAbove": "indexSetPageSlide(activeSlide - INDEX_COLUMNS);",
@@ -91,24 +104,26 @@ class KeyBindings(JessyInkMixin, inkex.EffectExtension):
             "decreaseNumberOfColumns": "indexDecreaseNumberOfColumns();",
             "increaseNumberOfColumns": "indexIncreaseNumberOfColumns();",
             "setNumberOfColumnsToDefault": "indexResetNumberOfColumns();",
-        }
+        },
     }
 
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
+        pars.add_argument("--tab")
         for slot, actions in self.actions.items():
             for action in actions:
-                pars.add_argument(f'--{slot}_{action}')
+                pars.add_argument(f"--{slot}_{action}")
 
     def effect(self):
         self.is_installed()
 
         for name in list(self.options.__dict__):
-            if '_' in name:
+            if "_" in name:
                 self.set_options(self.options, name, self.options.__dict__.pop(name))
 
         # Remove old master slide property
-        for node in self.svg.xpath("//svg:g[@jessyink:customKeyBindings='customKeyBindings']"):
+        for node in self.svg.xpath(
+            "//svg:g[@jessyink:customKeyBindings='customKeyBindings']"
+        ):
             node.delete()
 
         # Set custom key bindings.
@@ -124,7 +139,9 @@ class KeyBindings(JessyInkMixin, inkex.EffectExtension):
             node_text += f"    keyDict[SLIDE_MODE][{key}] = function() {{ {value} }};\n"
 
         for key, value in self.options.drawingKeyCodes.items():
-            node_text += f"    keyDict[DRAWING_MODE][{key}] = function() {{ {value} }};\n"
+            node_text += (
+                f"    keyDict[DRAWING_MODE][{key}] = function() {{ {value} }};\n"
+            )
 
         for key, value in self.options.indexKeyCodes.items():
             node_text += f"    keyDict[INDEX_MODE][{key}] = function() {{ {value} }};\n"
@@ -142,13 +159,19 @@ function getCustomCharBindingsSub()
 """
 
         for key, value in self.options.slideCharCodes.items():
-            node_text += f'    charDict[SLIDE_MODE]["{key}"] = function() {{ {value} }};\n'
+            node_text += (
+                f'    charDict[SLIDE_MODE]["{key}"] = function() {{ {value} }};\n'
+            )
 
         for key, value in self.options.drawingCharCodes.items():
-            node_text += f'    charDict[DRAWING_MODE]["{key}"] = function() {{ {value} }};\n'
+            node_text += (
+                f'    charDict[DRAWING_MODE]["{key}"] = function() {{ {value} }};\n'
+            )
 
         for key, value in self.options.indexCharCodes.items():
-            node_text += f'    charDict[INDEX_MODE]["{key}"] = function() {{ {value} }};\n'
+            node_text += (
+                f'    charDict[INDEX_MODE]["{key}"] = function() {{ {value} }};\n'
+            )
 
         node_text += "    return charDict;" + "\n"
         node_text += "}" + "\n"
@@ -158,10 +181,13 @@ function getCustomCharBindingsSub()
         script = group.add(Script())
         script.text = node_text
         group.set("jessyink:customKeyBindings", "customKeyBindings")
-        group.set("onload", "this.getCustomCharBindings = function() { "\
-            "return getCustomCharBindingsSub(); }; "\
-            "this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };")
+        group.set(
+            "onload",
+            "this.getCustomCharBindings = function() { "
+            "return getCustomCharBindingsSub(); }; "
+            "this.getCustomKeyBindings = function() { return getCustomKeyBindingsSub(); };",
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     KeyBindings().run()

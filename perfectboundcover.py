@@ -31,7 +31,7 @@ def caliper_to_ppi(caliper):
 
 
 def bond_weight_to_ppi(bond_weight):
-    return caliper_to_ppi(bond_weight * .0002)
+    return caliper_to_ppi(bond_weight * 0.0002)
 
 
 def points_to_ppi(points):
@@ -43,19 +43,31 @@ class PerfectBoundCover(inkex.EffectExtension):
         pars.add_argument("--width", type=float, default=6.0, help="cover width (in)")
         pars.add_argument("--height", type=float, default=9.0, help="cover height (in)")
         pars.add_argument("--pages", type=int, default=64, help="number of pages")
-        pars.add_argument("--paperthicknessmeasurement", default="ppi",
-                          help="""Measurement for determining the thickness of the spine.
+        pars.add_argument(
+            "--paperthicknessmeasurement",
+            default="ppi",
+            help="""Measurement for determining the thickness of the spine.
                           Options: 'ppi': pages per inch; 'caliper': caliper (inches);
                             'points': caliper in points (1/1000 in);
                             'bond_weight': Bond (pounds);
-                            'width': absolute width of spine (in)""")
-        pars.add_argument("--paperthickness", type=float, default=0.0, help="paper thickness")
-        pars.add_argument("--coverthicknessmeasurement", default="ppi",
-                          help="Measurement for determining the thickness of the cover. For "
-                          "available options, see --paperthicknessmeasurement")
-        pars.add_argument("--coverthickness", type=float, default=0.0, help="cover thickness")
+                            'width': absolute width of spine (in)""",
+        )
+        pars.add_argument(
+            "--paperthickness", type=float, default=0.0, help="paper thickness"
+        )
+        pars.add_argument(
+            "--coverthicknessmeasurement",
+            default="ppi",
+            help="Measurement for determining the thickness of the cover. For "
+            "available options, see --paperthicknessmeasurement",
+        )
+        pars.add_argument(
+            "--coverthickness", type=float, default=0.0, help="cover thickness"
+        )
         pars.add_argument("--bleed", type=float, default=0.25, help="cover bleed (in)")
-        pars.add_argument("--removeguides", type=inkex.Boolean, default=False, help="remove guide")
+        pars.add_argument(
+            "--removeguides", type=inkex.Boolean, default=False, help="remove guide"
+        )
 
     def effect(self):
         switch = {
@@ -63,14 +75,16 @@ class PerfectBoundCover(inkex.EffectExtension):
             "caliper": caliper_to_ppi,
             "bond_weight": bond_weight_to_ppi,
             "points": points_to_ppi,
-            "width": lambda x: x
+            "width": lambda x: x,
         }
 
         if self.options.paperthickness > 0:
             if self.options.paperthicknessmeasurement == "width":
                 paper_spine = self.options.paperthickness
             else:
-                paper_spine = self.options.pages / switch[self.options.paperthicknessmeasurement](self.options.paperthickness)
+                paper_spine = self.options.pages / switch[
+                    self.options.paperthicknessmeasurement
+                ](self.options.paperthickness)
         else:
             paper_spine = 0
 
@@ -78,7 +92,9 @@ class PerfectBoundCover(inkex.EffectExtension):
             if self.options.coverthicknessmeasurement == "width":
                 cover_spine = self.options.coverthickness
             else:
-                cover_spine = 4.0 / switch[self.options.coverthicknessmeasurement](self.options.coverthickness)
+                cover_spine = 4.0 / switch[self.options.coverthicknessmeasurement](
+                    self.options.coverthickness
+                )
         else:
             cover_spine = 0
 
@@ -111,5 +127,6 @@ class PerfectBoundCover(inkex.EffectExtension):
                 newguide.set("orientation", guide[0])
                 newguide.set("position", "%f" % (guide[1] * 96))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     PerfectBoundCover().run()

@@ -26,6 +26,7 @@ from ._base import BaseElement
 from ..localization import inkex_gettext
 from ..utils import AbortExtension
 
+
 class ElementList(OrderedDict):
     """
     A list of elements, selected by id, iterator or xpath
@@ -36,6 +37,7 @@ class ElementList(OrderedDict):
 
     It is also possible to look up items by their id and the element object itself.
     """
+
     def __init__(self, svg, _iter=None):
         self.svg = svg
         self.ids = OrderedDict()
@@ -54,7 +56,8 @@ class ElementList(OrderedDict):
 
     def __setitem__(self, orig_key, elem):
         from ._base import BaseElement
-        if orig_key != elem and orig_key != elem.get('id'):
+
+        if orig_key != elem and orig_key != elem.get("id"):
             raise ValueError(f"Refusing to set bad key in ElementList {orig_key}")
         if isinstance(elem, str):
             key = elem
@@ -64,7 +67,7 @@ class ElementList(OrderedDict):
         if isinstance(elem, BaseElement):
             # Selection is a list of elements to select
             key = elem.xml_path
-            element_id = elem.get('id')
+            element_id = elem.get("id")
             if element_id is not None:
                 self.ids[element_id] = key
             super().__setitem__(key, elem)
@@ -75,13 +78,14 @@ class ElementList(OrderedDict):
     def _to_key(self, key, default=None):
         """Takes a key (id, element, etc) and returns an xml_path key"""
         from ._base import BaseElement
+
         if self and key is None:
             key = default
         if isinstance(key, int):
             return list(self.keys())[key]
         elif isinstance(key, BaseElement):
             return key.xml_path
-        elif isinstance(key, str) and key[0] != '/':
+        elif isinstance(key, str) and key[0] != "/":
             return self.ids.get(key, key)
         return key
 
@@ -110,29 +114,38 @@ class ElementList(OrderedDict):
     def pop(self, key=None):
         """Remove the key item or remove the last item selected"""
         item = super().pop(self._to_key(key, default=-1))
-        self.ids.pop(item.get('id'))
+        self.ids.pop(item.get("id"))
         return item
 
     def add(self, *ids):
         """Like set() but does not clear first"""
         # Allow selecting of xpath elements directly
-        if len(ids) == 1 and isinstance(ids[0], str) and ids[0].startswith('//'):
+        if len(ids) == 1 and isinstance(ids[0], str) and ids[0].startswith("//"):
             ids = self.svg.xpath(ids[0])
 
         for elem in ids:
-            self[elem] = elem # This doesn't matter
+            self[elem] = elem  # This doesn't matter
 
     def rendering_order(self):
         """Get the selected elements by z-order (stacking order), ordered from bottom to top"""
         new_list = ElementList(self.svg)
-        # the elements are stored with their xpath index, so a natural sort order 
+        # the elements are stored with their xpath index, so a natural sort order
         # '3' < '20' < '100' has to be applied
-        new_list.set(*[elem for _, elem in sorted(self.items(), key=lambda x: natural_sort_key(x[0]))])
+        new_list.set(
+            *[
+                elem
+                for _, elem in sorted(
+                    self.items(), key=lambda x: natural_sort_key(x[0])
+                )
+            ]
+        )
         return new_list
 
     def filter(self, *types):
         """Filter selected elements of the given type, returns a new SelectedElements object"""
-        return ElementList(self.svg, [e for e in self if not types or isinstance(e, types)])
+        return ElementList(
+            self.svg, [e for e in self if not types or isinstance(e, types)]
+        )
 
     def filter_nonzero(self, *types, error_msg: str = None):
         """Filter selected elements of the given type, returns a new SelectedElements object.
@@ -147,20 +160,27 @@ class ElementList(OrderedDict):
         filtered = self.filter(*types)
         if not filtered:
             if error_msg is None:
-                error_msg = \
-                  inkex_gettext("Please select at least one element of the following type(s): {}"\
-                                         .format(", ".join([type.__name__ for type in types])))
+                error_msg = inkex_gettext(
+                    "Please select at least one element of the following type(s): {}".format(
+                        ", ".join([type.__name__ for type in types])
+                    )
+                )
             raise AbortExtension(error_msg)
         return filtered
 
     def get(self, *types):
         """Like filter, but will enter each element searching for any child of the given types"""
+
         def _recurse(elem):
             if not types or isinstance(elem, types):
                 yield elem
             for child in elem:
                 yield from _recurse(child)
-        return ElementList(self.svg, [r for e in self for r in _recurse(e) if isinstance(r, (BaseElement, str))])
+
+        return ElementList(
+            self.svg,
+            [r for e in self for r in _recurse(e) if isinstance(r, (BaseElement, str))],
+        )
 
     def id_dict(self):
         """For compatibility, return regular dictionary of id -> element pairs"""

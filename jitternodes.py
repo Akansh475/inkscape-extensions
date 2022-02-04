@@ -26,14 +26,23 @@ import inkex
 
 class JitterNodes(inkex.EffectExtension):
     """Jiggle nodes around"""
+
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         pars.add_argument("--radiusx", type=float, default=10.0, help="Randum radius X")
         pars.add_argument("--radiusy", type=float, default=10.0, help="Randum radius Y")
-        pars.add_argument("--ctrl", type=inkex.Boolean, default=False, help="Randomize ctrl points")
-        pars.add_argument("--end", type=inkex.Boolean, default=True, help="Randomize nodes")
-        pars.add_argument("--dist", type=self.arg_method('dist'),
-                          default=self.dist_uniform, help="Distribution of displacement")
+        pars.add_argument(
+            "--ctrl", type=inkex.Boolean, default=False, help="Randomize ctrl points"
+        )
+        pars.add_argument(
+            "--end", type=inkex.Boolean, default=True, help="Randomize nodes"
+        )
+        pars.add_argument(
+            "--dist",
+            type=self.arg_method("dist"),
+            default=self.dist_uniform,
+            help="Distribution of displacement",
+        )
 
     def effect(self):
         for node in self.svg.selection.filter(inkex.PathElement):
@@ -42,8 +51,8 @@ class JitterNodes(inkex.EffectExtension):
                 closed = subpath[0] == subpath[-1]
                 for index, csp in enumerate(subpath):
                     if closed and index == len(subpath) - 1:
-                            subpath[index] = subpath[0]
-                            break
+                        subpath[index] = subpath[0]
+                        break
                     if self.options.end:
                         delta = self.randomize([0, 0])
                         csp[0][0] += delta[0]
@@ -76,20 +85,23 @@ class JitterNodes(inkex.EffectExtension):
         # The idea is to get spiky distributions, any distribution with long-tails is
         # good (ideal would be Levy distribution).
         sign = random.uniform(-1.0, 1.0)
-        return x * math.copysign(min(random.paretovariate(1.0), 20.0) / 20.0, sign),\
-               y * math.copysign(min(random.paretovariate(1.0), 20.0) / 20.0, sign)
+        return x * math.copysign(
+            min(random.paretovariate(1.0), 20.0) / 20.0, sign
+        ), y * math.copysign(min(random.paretovariate(1.0), 20.0) / 20.0, sign)
 
     @staticmethod
     def dist_lognorm(x, y):
         """Log Norm distribution"""
         sign = random.uniform(-1.0, 1.0)
-        return x * math.copysign(random.lognormvariate(0.0, 1.0) / 3.5, sign),\
-               y * math.copysign(random.lognormvariate(0.0, 1.0) / 3.5, sign)
+        return x * math.copysign(
+            random.lognormvariate(0.0, 1.0) / 3.5, sign
+        ), y * math.copysign(random.lognormvariate(0.0, 1.0) / 3.5, sign)
 
     @staticmethod
     def dist_uniform(x, y):
         """Uniform distribution"""
         return random.uniform(-x, x), random.uniform(-y, y)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     JitterNodes().run()

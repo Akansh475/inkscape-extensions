@@ -30,18 +30,41 @@ import types
 
 from .utils import errormsg, Boolean
 from .colors import Color, ColorIdError, ColorError
-from .elements import load_svg, BaseElement, ShapeElement, Group, Layer, Grid, \
-                      TextElement, FlowPara, FlowDiv
+from .elements import (
+    load_svg,
+    BaseElement,
+    ShapeElement,
+    Group,
+    Layer,
+    Grid,
+    TextElement,
+    FlowPara,
+    FlowDiv,
+)
 from .elements._utils import CloningVat
-from .base import InkscapeExtension, SvgThroughMixin, SvgInputMixin, SvgOutputMixin, TempDirMixin
+from .base import (
+    InkscapeExtension,
+    SvgThroughMixin,
+    SvgInputMixin,
+    SvgOutputMixin,
+    TempDirMixin,
+)
 from .transforms import Transform
 from .properties import all_properties
 from .elements import LinearGradient, RadialGradient
 
 # All the names that get added to the inkex API itself.
-__all__ = ('EffectExtension', 'GenerateExtension', 'InputExtension',
-           'OutputExtension', 'RasterOutputExtension',
-           'CallExtension', 'TemplateExtension', 'ColorExtension', 'TextExtension')
+__all__ = (
+    "EffectExtension",
+    "GenerateExtension",
+    "InputExtension",
+    "OutputExtension",
+    "RasterOutputExtension",
+    "CallExtension",
+    "TemplateExtension",
+    "ColorExtension",
+    "TextExtension",
+)
 
 stdout = sys.stdout
 
@@ -51,7 +74,9 @@ class EffectExtension(SvgThroughMixin, InkscapeExtension):
     Takes the SVG from Inkscape, modifies the selection or the document
     and returns an SVG to Inkscape.
     """
+
     pass
+
 
 class OutputExtension(SvgInputMixin, InkscapeExtension):
     """
@@ -59,6 +84,7 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
 
     Used in functions for `Save As`
     """
+
     def effect(self):
         """Effect isn't needed for a lot of Output extensions"""
         pass
@@ -67,12 +93,15 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
         """But save certainly is, we give a more exact message here"""
         raise NotImplementedError("Output extensions require a save(stream) method!")
 
+
 class RasterOutputExtension(InkscapeExtension):
     """
     Takes a PNG from Inkscape and outputs it to another rather format.
     """
+
     def load(self, stream):
         from PIL import Image
+
         self.img = Image.open(stream)
 
     def effect(self):
@@ -90,6 +119,7 @@ class InputExtension(SvgOutputMixin, InkscapeExtension):
 
     Used in functions for `Open`
     """
+
     def effect(self):
         """Effect isn't needed for a lot of Input extensions"""
         pass
@@ -98,13 +128,15 @@ class InputExtension(SvgOutputMixin, InkscapeExtension):
         """But load certainly is, we give a more exact message here"""
         raise NotImplementedError("Input extensions require a load(stream) method!")
 
+
 class CallExtension(TempDirMixin, InputExtension):
     """Call an external program to get the output"""
-    input_ext = 'svg'
-    output_ext = 'svg'
+
+    input_ext = "svg"
+    output_ext = "svg"
 
     def load(self, stream):
-        pass # Not called (load_raw instead)
+        pass  # Not called (load_raw instead)
 
     def load_raw(self):
         # Don't call InputExtension.load_raw
@@ -113,23 +145,23 @@ class CallExtension(TempDirMixin, InputExtension):
 
         if not isinstance(input_file, str):
             data = input_file.read()
-            input_file = os.path.join(self.tempdir, 'input.' + self.input_ext)
-            with open(input_file, 'wb') as fhl:
+            input_file = os.path.join(self.tempdir, "input." + self.input_ext)
+            with open(input_file, "wb") as fhl:
                 fhl.write(data)
 
-        output_file = os.path.join(self.tempdir, 'output.' + self.output_ext)
+        output_file = os.path.join(self.tempdir, "output." + self.output_ext)
         document = self.call(input_file, output_file) or output_file
         if isinstance(document, str):
             if not os.path.isfile(document):
                 raise IOError(f"Can't find generated document: {document}")
 
-            if self.output_ext == 'svg':
-                with open(document, 'r', encoding='utf-8') as fhl:
+            if self.output_ext == "svg":
+                with open(document, "r", encoding="utf-8") as fhl:
                     document = fhl.read()
-                if '<' in document:
-                    document = load_svg(document.encode('utf-8'))
+                if "<" in document:
+                    document = load_svg(document.encode("utf-8"))
             else:
-                with open(document, 'rb') as fhl:
+                with open(document, "rb") as fhl:
                     document = fhl.read()
 
         self.document = document
@@ -138,12 +170,14 @@ class CallExtension(TempDirMixin, InputExtension):
         """Call whatever programs are needed to get the desired result."""
         raise NotImplementedError("Call extensions require a call(in, out) method!")
 
+
 class GenerateExtension(EffectExtension):
     """
     Does not need any SVG, but instead just outputs an SVG fragment which is
     inserted into Inkscape, centered on the selection.
     """
-    container_label = ''
+
+    container_label = ""
     container_layer = False
 
     def generate(self):
@@ -205,7 +239,8 @@ class TemplateExtension(EffectExtension):
     """
     Provide a standard way of creating templates.
     """
-    size_rex = re.compile(r'([\d.]*)(\w\w)?x([\d.]*)(\w\w)?')
+
+    size_rex = re.compile(r"([\d.]*)(\w\w)?x([\d.]*)(\w\w)?")
     template_id = "SVGRoot"
 
     def __init__(self):
@@ -222,8 +257,9 @@ class TemplateExtension(EffectExtension):
         """Can be over-ridden with custom svg loading here"""
         return self.document
 
-    def arg_size(self, unit='px'):
+    def arg_size(self, unit="px"):
         """Argument is a string of the form X[unit]xY[unit], default units apply when missing"""
+
         def _inner(value):
             try:
                 value = float(value)
@@ -233,26 +269,40 @@ class TemplateExtension(EffectExtension):
             match = self.size_rex.match(str(value))
             if match is not None:
                 size = match.groups()
-                return (float(size[0]), size[1] or unit, float(size[2]), size[3] or unit)
+                return (
+                    float(size[0]),
+                    size[1] or unit,
+                    float(size[2]),
+                    size[3] or unit,
+                )
             return None
+
         return _inner
 
     def get_size(self):
         """Get the size of the new template (defaults to size options)"""
         size = self.options.size
         if self.options.size is None:
-            size = (self.options.width, self.options.unit,
-                    self.options.height, self.options.unit)
-        if self.options.orientation == "horizontal" and size[0] < size[2] \
-                or self.options.orientation == "vertical" and size[0] > size[2]:
+            size = (
+                self.options.width,
+                self.options.unit,
+                self.options.height,
+                self.options.unit,
+            )
+        if (
+            self.options.orientation == "horizontal"
+            and size[0] < size[2]
+            or self.options.orientation == "vertical"
+            and size[0] > size[2]
+        ):
             size = size[2:4] + size[0:2]
         return size
 
     def effect(self):
         """Creates a template, do not over-ride"""
         (width, width_unit, height, height_unit) = self.get_size()
-        width_px = int(self.svg.uutounit(width, 'px'))
-        height_px = int(self.svg.uutounit(height, 'px'))
+        width_px = int(self.svg.uutounit(width, "px"))
+        height_px = int(self.svg.uutounit(height, "px"))
 
         self.document = self.get_template()
         self.svg = self.document.getroot()
@@ -264,12 +314,12 @@ class TemplateExtension(EffectExtension):
 
     def set_namedview(self, width, height, unit):
         """Setup the document namedview"""
-        self.svg.namedview.set('inkscape:document-units', unit)
-        self.svg.namedview.set('inkscape:zoom', '0.25')
-        self.svg.namedview.set('inkscape:cx', str(width / 2.0))
-        self.svg.namedview.set('inkscape:cy', str(height / 2.0))
+        self.svg.namedview.set("inkscape:document-units", unit)
+        self.svg.namedview.set("inkscape:zoom", "0.25")
+        self.svg.namedview.set("inkscape:cx", str(width / 2.0))
+        self.svg.namedview.set("inkscape:cy", str(height / 2.0))
         if self.options.grid:
-            self.svg.namedview.set('showgrid', "true")
+            self.svg.namedview.set("showgrid", "true")
             self.svg.namedview.add(Grid(type="xygrid"))
 
 
@@ -277,7 +327,8 @@ class ColorExtension(EffectExtension):
     """
     A standard way to modify colours in an svg document.
     """
-    process_none = False # should we call modify_color for the "none" color.
+
+    process_none = False  # should we call modify_color for the "none" color.
     select_all = (ShapeElement,)
     pass_rgba = False
 
@@ -299,21 +350,24 @@ class ColorExtension(EffectExtension):
         """Process one of the selected elements"""
         style = elem.specified_style()
         # Colours first
-        for name in elem.style.associated_props if self.pass_rgba \
-                    else elem.style.color_props:
+        for name in (
+            elem.style.associated_props if self.pass_rgba else elem.style.color_props
+        ):
             if name not in style:
-                continue # we don't want to process default values
+                continue  # we don't want to process default values
             try:
                 value = style(name)
             except ColorError:
-                continue # bad color value, don't touch.
+                continue  # bad color value, don't touch.
             if isinstance(value, Color):
                 col = Color(value)
                 if self.pass_rgba:
-                    col = col.to_rgba(alpha= elem.style(elem.style.associated_props[name]))
+                    col = col.to_rgba(
+                        alpha=elem.style(elem.style.associated_props[name])
+                    )
                 rgba_result = self._modify_color(name, col)
                 elem.style.set_color(rgba_result, name)
-                
+
             if isinstance(value, (LinearGradient, RadialGradient)):
                 gradients.track(value, elem, self._ref_cloned, style=style, name=name)
                 if value.href is not None:
@@ -324,7 +378,9 @@ class ColorExtension(EffectExtension):
         for name in elem.style.opacity_props:
             value = style(name)
             result = self.modify_opacity(name, value)
-            if result != value and result != 1: # only modify if not equal to old or default
+            if (
+                result != value and result != 1
+            ):  # only modify if not equal to old or default
                 elem.style[name] = result
 
     def _ref_cloned(self, old_id, new_id, style, name):
@@ -332,9 +388,9 @@ class ColorExtension(EffectExtension):
         style[name] = f"url(#{new_id})"
 
     def _xlink_cloned(self, old_id, new_id, linker):
-        lid = linker.get('id')
+        lid = linker.get("id")
         linker = self.svg.getElementById(self._renamed.get(lid, lid))
-        linker.set('xlink:href', '#' + new_id)
+        linker.set("xlink:href", "#" + new_id)
 
     def _modify_color(self, name, color):
         """Pre-process color value to filter out bad colors"""
@@ -350,10 +406,12 @@ class ColorExtension(EffectExtension):
         """Optional opacity modification"""
         return opacity
 
+
 class TextExtension(EffectExtension):
     """
     A base effect for changing text in a document.
     """
+
     newline = True
     newpar = True
 
@@ -364,7 +422,7 @@ class TextExtension(EffectExtension):
 
     def process_element(self, node):
         """Reverse the node text"""
-        if node.get('sodipodi:role') == 'line':
+        if node.get("sodipodi:role") == "line":
             self.newline = True
         elif isinstance(node, (TextElement, FlowPara, FlowDiv)):
             self.newline = True
@@ -383,9 +441,11 @@ class TextExtension(EffectExtension):
 
     def process_chardata(self, text):
         """Replaceable chardata method for processing the text"""
-        return ''.join(map(self.map_char, text))
+        return "".join(map(self.map_char, text))
 
     @staticmethod
     def map_char(char):
         """Replaceable map_char method for processing each letter"""
-        raise NotImplementedError("Please provide a process_chardata or map_char static method.")
+        raise NotImplementedError(
+            "Please provide a process_chardata or map_char static method."
+        )

@@ -20,10 +20,14 @@
 import inkex
 from inkex import bezier
 
+
 class Flatten(inkex.EffectExtension):
     """Flattern a path"""
+
     def add_arguments(self, pars):
-        pars.add_argument("--flatness", type=float, default=10.0, help="Minimum flattness")
+        pars.add_argument(
+            "--flatness", type=float, default=10.0, help="Minimum flattness"
+        )
 
     def effect(self):
         for node in self.svg.selection.filter(inkex.PathElement):
@@ -33,12 +37,13 @@ class Flatten(inkex.EffectExtension):
             for subpath in path:
                 first = True
                 for csp in subpath:
-                    cmd = 'L'
+                    cmd = "L"
                     if first:
-                        cmd = 'M'
+                        cmd = "M"
                     first = False
                     newpath.append([cmd, [csp[1][0], csp[1][1]]])
             node.path = newpath
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Flatten().run()

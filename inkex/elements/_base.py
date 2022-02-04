@@ -38,17 +38,28 @@ from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
 from ..properties import BaseStyleValue, all_properties
 
-#from ..deprecated import DeprecatedShapeElementMixin
+# from ..deprecated import DeprecatedShapeElementMixin
 
-from typing import overload, DefaultDict, Type, Any, List, Tuple, Union, Optional  # pylint: disable=unused-import
+from typing import (
+    overload,
+    DefaultDict,
+    Type,
+    Any,
+    List,
+    Tuple,
+    Union,
+    Optional,
+)  # pylint: disable=unused-import
+
 
 class NodeBasedLookup(etree.PythonElementClassLookup):
     """
     We choose what kind of Elements we should return for each element, providing useful
     SVG based API to our extensions system.
     """
+
     # (ns,tag) -> list(cls) ; ascending priority
-    lookup_table = defaultdict(list) # type: DefaultDict[str, List[Any]]
+    lookup_table = defaultdict(list)  # type: DefaultDict[str, List[Any]]
 
     @classmethod
     def register_class(cls, klass):
@@ -60,7 +71,7 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
         """Find the class for this type of element defined by an xpath"""
         if isinstance(xpath, type):
             return xpath
-        for cls in cls.lookup_table[splitNS(xpath.split('/')[-1])]:
+        for cls in cls.lookup_table[splitNS(xpath.split("/")[-1])]:
             # TODO: We could create a apply the xpath attrs to the test element
             # to narrow the search, but this does everything we need right now.
             test_element = cls()
@@ -68,11 +79,11 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
                 return cls
         raise KeyError(f"Could not find svg tag for '{xpath}'")
 
-    def lookup(self, doc, element): # pylint: disable=unused-argument
+    def lookup(self, doc, element):  # pylint: disable=unused-argument
         """Lookup called by lxml when assigning elements their object class"""
         try:
             for cls in reversed(self.lookup_table[splitNS(element.tag)]):
-                if cls._is_class_element(element): # pylint: disable=protected-access
+                if cls._is_class_element(element):  # pylint: disable=protected-access
                     return cls
         except TypeError:
             # Handle non-element proxies case
@@ -87,15 +98,19 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
 SVG_PARSER = etree.XMLParser(huge_tree=True, strip_cdata=False)
 SVG_PARSER.set_element_class_lookup(NodeBasedLookup())
 
+
 def load_svg(stream):
     """Load SVG file using the SVG_PARSER"""
-    if (isinstance(stream, str) and stream.lstrip().startswith('<'))\
-      or (isinstance(stream, bytes) and stream.lstrip().startswith(b'<')):
+    if (isinstance(stream, str) and stream.lstrip().startswith("<")) or (
+        isinstance(stream, bytes) and stream.lstrip().startswith(b"<")
+    ):
         return etree.ElementTree(etree.fromstring(stream, parser=SVG_PARSER))
     return etree.parse(stream, parser=SVG_PARSER)
 
+
 class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
+
     def __init_subclass__(cls):
         if cls.tag_name:
             NodeBasedLookup.register_class(cls)
@@ -105,10 +120,10 @@ class BaseElement(etree.ElementBase):
         """Hook to do more restrictive check in addition to (ns,tag) match"""
         return True
 
-    tag_name = ''
+    tag_name = ""
 
     @property
-    def TAG(self): # pylint: disable=invalid-name
+    def TAG(self):  # pylint: disable=invalid-name
         """Return the tag_name without NS"""
         if not self.tag_name:
             return removeNS(super().tag)[-1]
@@ -125,10 +140,10 @@ class BaseElement(etree.ElementBase):
     PARSER = SVG_PARSER
     WRAPPED_ATTRS = (
         # (prop_name, [optional: attr_name], cls)
-        ('transform', Transform),
-        ('style', Style),
-        ('classes', 'class', Classes),
-    ) # type: Tuple[Tuple[Any, ...], ...]
+        ("transform", Transform),
+        ("style", Style),
+        ("classes", "class", Classes),
+    )  # type: Tuple[Tuple[Any, ...], ...]
 
     # We do this because python2 and python3 have different ways
     # of combining two dictionaries that are incompatible.
@@ -159,8 +174,8 @@ class BaseElement(etree.ElementBase):
                 if new_item:
                     self.set(attr, str(new_item))
                 else:
-                    self.attrib.pop(attr, None) # pylint: disable=no-member
-                    
+                    self.attrib.pop(attr, None)  # pylint: disable=no-member
+
             # pylint: disable=no-member
             value = cls(self.attrib.get(attr, None), callback=_set_attr)
             if name == "style":
@@ -179,7 +194,7 @@ class BaseElement(etree.ElementBase):
                     value = cls(value)
                 self.attrib[attr] = str(value)
             else:
-                self.attrib.pop(attr, None) # pylint: disable=no-member
+                self.attrib.pop(attr, None)  # pylint: disable=no-member
         else:
             super().__setattr__(name, value)
 
@@ -204,7 +219,7 @@ class BaseElement(etree.ElementBase):
             if not value:
                 return
         if value is None:
-            self.attrib.pop(addNS(attr), None) # pylint: disable=no-member
+            self.attrib.pop(addNS(attr), None)  # pylint: disable=no-member
         else:
             value = str(value)
             super().set(addNS(attr), value)
@@ -231,7 +246,7 @@ class BaseElement(etree.ElementBase):
             value = getattr(self, prop)
             setattr(self, prop, cls(None))
             return value
-        return self.attrib.pop(addNS(attr), default) # pylint: disable=no-member
+        return self.attrib.pop(addNS(attr), default)  # pylint: disable=no-member
 
     def add(self, *children):
         """
@@ -247,9 +262,10 @@ class BaseElement(etree.ElementBase):
         # This kind of hack is pure maddness, but etree provides very little
         # in the way of fragment printing, prefering to always output valid xml
         from ..base import SvgOutputMixin
+
         svg = SvgOutputMixin.get_template(width=0, height=0).getroot()
         svg.append(self.copy())
-        return svg.tostring().split(b'>\n    ', 1)[-1][:-6]
+        return svg.tostring().split(b">\n    ", 1)[-1][:-6]
 
     def set_random_id(self, prefix=None, size=4, backlinks=False):
         """Sets the id attribute if it is not already set."""
@@ -261,29 +277,32 @@ class BaseElement(etree.ElementBase):
         self.set_random_id(prefix=prefix, backlinks=backlinks)
         if levels != 0:
             for child in self:
-                if hasattr(child, 'set_random_ids'):
-                    child.set_random_ids(prefix=prefix, levels=levels-1, backlinks=backlinks)
+                if hasattr(child, "set_random_ids"):
+                    child.set_random_ids(
+                        prefix=prefix, levels=levels - 1, backlinks=backlinks
+                    )
 
     eid = property(lambda self: self.get_id())
+
     def get_id(self, as_url=0):
         """Get the id for the element, will set a new unique id if not set.
 
         as_url - If set to 1, returns #{id} as a string
                  If set to 2, returns url(#{id}) as a string
         """
-        if 'id' not in self.attrib:
+        if "id" not in self.attrib:
             self.set_random_id(self.TAG)
-        eid = self.get('id')
+        eid = self.get("id")
         if as_url > 0:
-            eid = '#' + eid
+            eid = "#" + eid
         if as_url > 1:
-            eid = f'url({eid})'
+            eid = f"url({eid})"
         return eid
 
     def set_id(self, new_id, backlinks=False):
         """Set the id and update backlinks to xlink and style urls if needed"""
-        old_id = self.get('id', None)
-        self.set('id', new_id)
+        old_id = self.get("id", None)
+        self.set("id", new_id)
         if backlinks and old_id:
             for elem in self.root.getElementsByHref(old_id):
                 elem.href = self
@@ -297,6 +316,7 @@ class BaseElement(etree.ElementBase):
         while parent is not None:
             root, parent = parent, parent.getparent()
         from ._svg import SvgDocumentElement
+
         if not isinstance(root, SvgDocumentElement):
             raise FragmentError("Element fragment does not have a document root!")
         return root
@@ -317,7 +337,15 @@ class BaseElement(etree.ElementBase):
     def descendants(self):
         """Walks the element tree and yields all elements, parent first"""
         from ._selected import ElementList
-        return ElementList(self.root, [element for element in self.iter() if isinstance(element, (BaseElement, str))])
+
+        return ElementList(
+            self.root,
+            [
+                element
+                for element in self.iter()
+                if isinstance(element, (BaseElement, str))
+            ],
+        )
 
     def ancestors(self, elem=None, stop_at=()):
         """
@@ -327,6 +355,7 @@ class BaseElement(etree.ElementBase):
         If stop_at is provided, it will stop at the first parent that is in this list.
         """
         from ._selected import ElementList
+
         return ElementList(self.root, self._ancestors(elem=elem, stop_at=stop_at))
 
     def _ancestors(self, elem, stop_at):
@@ -336,17 +365,18 @@ class BaseElement(etree.ElementBase):
             yield parent
             if parent in stop_at:
                 break
-            
+
     def backlinks(self, *types):
         """Get elements which link back to this element, like ancestors but via xlinks"""
         if not types or isinstance(self, types):
             yield self
-        my_id = self.get('id')
+        my_id = self.get("id")
         if my_id is not None:
-            elems = list(self.root.getElementsByHref(my_id)) \
-                  + list(self.root.getElementsByStyleUrl(my_id))
+            elems = list(self.root.getElementsByHref(my_id)) + list(
+                self.root.getElementsByStyleUrl(my_id)
+            )
             for elem in elems:
-                if hasattr(elem, 'backlinks'):
+                if hasattr(elem, "backlinks"):
                     for child in elem.backlinks(*types):
                         yield child
 
@@ -354,7 +384,9 @@ class BaseElement(etree.ElementBase):
         """Wrap xpath call and add svg namespaces"""
         return super().xpath(pattern, namespaces=namespaces)
 
-    def findall(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
+    def findall(
+        self, pattern, namespaces=NSS
+    ):  # pylint: disable=dangerous-default-value
         """Wrap findall call and add svg namespaces"""
         return super().findall(pattern, namespaces=namespaces)
 
@@ -378,8 +410,8 @@ class BaseElement(etree.ElementBase):
     def replace_with(self, elem):
         """Replace this element with the given element"""
         self.addnext(elem)
-        if not elem.get('id') and self.get('id'):
-            elem.set('id', self.get('id'))
+        if not elem.get("id") and self.get("id"):
+            elem.set("id", self.get("id"))
         if not elem.label and self.label:
             elem.label = self.label
         self.delete()
@@ -388,7 +420,7 @@ class BaseElement(etree.ElementBase):
     def copy(self):
         """Make a copy of the element and return it"""
         elem = deepcopy(self)
-        elem.set('id', None)
+        elem.set("id", None)
         return elem
 
     def duplicate(self):
@@ -402,38 +434,38 @@ class BaseElement(etree.ElementBase):
         # We would do more here, but lxml is VERY unpleseant when it comes to
         # namespaces, basically over printing details and providing no
         # supression mechanisms to turn off xml's over engineering.
-        return str(self.tag).split('}')[-1]
+        return str(self.tag).split("}")[-1]
 
     @property
     def href(self):
         """Returns the referred-to element if available"""
-        ref = self.get('xlink:href')
+        ref = self.get("xlink:href")
         if not ref:
             return None
-        return self.root.getElementById(ref.strip('#'))
+        return self.root.getElementById(ref.strip("#"))
 
     @href.setter
     def href(self, elem):
         """Set the href object"""
         if isinstance(elem, BaseElement):
             elem = elem.get_id()
-        self.set('xlink:href', '#' + elem)
+        self.set("xlink:href", "#" + elem)
 
     @property
     def label(self):
         """Returns the inkscape label"""
-        return self.get('inkscape:label', None)
+        return self.get("inkscape:label", None)
 
-    label = label.setter(lambda self, value: self.set('inkscape:label', str(value))) # type: ignore
+    label = label.setter(lambda self, value: self.set("inkscape:label", str(value)))  # type: ignore
 
     def is_sensitive(self):
         """Return true if this element is sensitive in inkscape"""
-        return self.get('sodipodi:insensitive', None) != 'true'
+        return self.get("sodipodi:insensitive", None) != "true"
 
     def set_sensitive(self, sensitive=True):
         """Set the sensitivity of the element/layer"""
         # Sensitive requires None instead of 'false'
-        self.set('sodipodi:insensitive', ['true', None][sensitive])
+        self.set("sodipodi:insensitive", ["true", None][sensitive])
 
     @property
     def unit(self):
@@ -441,10 +473,10 @@ class BaseElement(etree.ElementBase):
         try:
             return self.root.unit
         except FragmentError:
-            return 'px' # Don't cache.
+            return "px"  # Don't cache.
 
     @staticmethod
-    def to_dimensional(value, to_unit='px'):
+    def to_dimensional(value, to_unit="px"):
         """Convert a value given in user units (px) the given unit type"""
         return convert_unit(value, to_unit)
 
@@ -453,14 +485,14 @@ class BaseElement(etree.ElementBase):
         """Convert a length value into user units (px)"""
         return convert_unit(value, "px")
 
-    def uutounit(self, value, to_unit='px'):
+    def uutounit(self, value, to_unit="px"):
         """Convert a unit value to a given unit. If the value does not have a unit, "Document" units
-        are assumed. "Document units" are an Inkscape-specific concept. For most use-cases, 
+        are assumed. "Document units" are an Inkscape-specific concept. For most use-cases,
         to_dimensional is more appropriate."""
         return convert_unit(value, to_unit, default=self.unit)
 
     def unittouu(self, value):
-        """Convert a unit value into document units. "Document unit" is an Inkscape-specific 
+        """Convert a unit value into document units. "Document unit" is an Inkscape-specific
         concept. For most use-cases, viewport_to_unit (when the size of an object given in viewport
         units is needed) or to_dimensionless (when the equivalent value without unit is needed)
         is more appropriate."""
@@ -469,17 +501,19 @@ class BaseElement(etree.ElementBase):
     def unit_to_viewport(self, value, unit="px"):
         """Converts a length value to viewport units, as defined by the width/height
         element on the root"""
-        return self.to_dimensional(self.to_dimensionless(value) \
-                                         * self.root.equivalent_transform_scale, unit)
+        return self.to_dimensional(
+            self.to_dimensionless(value) * self.root.equivalent_transform_scale, unit
+        )
 
     def viewport_to_unit(self, value, unit="px"):
         """Converts a length given on the viewport to the specified unit in the user
         coordinate system"""
-        return self.to_dimensional(self.to_dimensionless(value) \
-                                         / self.root.equivalent_transform_scale, unit)
+        return self.to_dimensional(
+            self.to_dimensionless(value) / self.root.equivalent_transform_scale, unit
+        )
 
     def add_unit(self, value):
-        """Add document unit when no unit is specified in the string """
+        """Add document unit when no unit is specified in the string"""
         return render_unit(value, self.unit)
 
     def cascaded_style(self):
@@ -508,19 +542,23 @@ class BaseElement(etree.ElementBase):
         style = Style()
         for key in self.keys():
             if key in all_properties and all_properties[key][2]:
-                style[key] = BaseStyleValue.factory(declaration=key + ": " + self.attrib[key])
+                style[key] = BaseStyleValue.factory(
+                    declaration=key + ": " + self.attrib[key]
+                )
         return style
 
     def composed_transform(self, other=None):
         """Calculate every transform down to the other element
-          if none specified the transform is to the root document element"""
+        if none specified the transform is to the root document element"""
         parent = self.getparent()
         if parent is not None and isinstance(parent, BaseElement):
             return parent.composed_transform() @ self.transform
         return self.transform
 
+
 class ShapeElement(BaseElement):
     """Elements which have a visible representation on the canvas"""
+
     @property
     def path(self):
         """Gets the outline or path of the element, this may be a simple bounding box"""
@@ -533,27 +571,31 @@ class ShapeElement(BaseElement):
     @property
     def clip(self):
         """Gets the clip path element (if any)"""
-        ref = self.get('clip-path')
+        ref = self.get("clip-path")
         if not ref:
             return None
         return self.root.getElementById(ref)
 
     @clip.setter
     def clip(self, elem):
-        self.set('clip-path', elem.get_id(as_url=2))
+        self.set("clip-path", elem.get_id(as_url=2))
 
     def get_path(self):
         """Generate a path for this object which can inform the bounding box"""
-        raise NotImplementedError(f"Path should be provided by svg elem {self.typename}.")
+        raise NotImplementedError(
+            f"Path should be provided by svg elem {self.typename}."
+        )
 
     def set_path(self, path):
         """Set the path for this object (if possible)"""
         raise AttributeError(
-            f"Path can not be set on this element: {self.typename} <- {path}.")
+            f"Path can not be set on this element: {self.typename} <- {path}."
+        )
 
     def to_path_element(self):
         """Replace this element with a path element"""
         from ._polygons import PathElement
+
         elem = PathElement()
         elem.path = self.path
         elem.style = self.effective_style()
@@ -587,16 +629,16 @@ class ShapeElement(BaseElement):
 
     def is_visible(self):
         """Returns false if the css says this object is invisible"""
-        if self.style.get('display', '') == 'none':
+        if self.style.get("display", "") == "none":
             return False
-        if not float(self.style.get('opacity', 1.0)):
+        if not float(self.style.get("opacity", 1.0)):
             return False
         return True
 
     def get_line_height_uu(self):
         """Returns the specified value of line-height, in user units"""
         style = self.specified_style()
-        font_size = style("font-size") # already in uu
+        font_size = style("font-size")  # already in uu
         line_height = style("line-height")
         parsed = parse_unit(line_height)
         if parsed is None:

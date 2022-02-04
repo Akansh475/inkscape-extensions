@@ -38,14 +38,16 @@ from email.parser import Parser as EmailParser
 
 import inkex.command
 
-if False: # pylint: disable=using-constant-test
-    from typing import List, Tuple, Callable, Any # pylint: disable=unused-import
+if False:  # pylint: disable=using-constant-test
+    from typing import List, Tuple, Callable, Any  # pylint: disable=unused-import
 
-FIXED_BOUNDARY = '--CALLDATA--//--CALLDATA--'
+FIXED_BOUNDARY = "--CALLDATA--//--CALLDATA--"
+
 
 class Capture:
     """Capture stdout or stderr. Used as `with Capture('stdout') as stream:`"""
-    def __init__(self, io_name='stdout', swap=True):
+
+    def __init__(self, io_name="stdout", swap=True):
         self.io_name = io_name
         self.original = getattr(sys, io_name)
         self.stream = io.StringIO()
@@ -62,8 +64,10 @@ class Capture:
             self.original.write(self.stream.getvalue())
         setattr(sys, self.io_name, self.original)
 
+
 class ManualVerbosity:
     """Change the verbosity of the test suite manually"""
+
     result = property(lambda self: self.test._current_result)
 
     def __init__(self, test, okay=True, dots=False):
@@ -71,7 +75,9 @@ class ManualVerbosity:
         self.okay = okay
         self.dots = dots
 
-    def flip(self, exc_type=None, exc_val=None, exc_tb=None): # pylint: disable=unused-argument
+    def flip(
+        self, exc_type=None, exc_val=None, exc_tb=None
+    ):  # pylint: disable=unused-argument
         """Swap the stored verbosity with the original"""
         self.okay, self.result.showAll = self.result.showAll, self.okay
         self.dots, self.result.dots = self.result.dots, self.okay
@@ -92,21 +98,26 @@ class MockMixin:
     class SomeTest(MockingMixin, TestBase):
         mocks = [(sys, 'exit', NoSystemExit("Nope!")]
     """
-    mocks = [] # type: List[Tuple[Any, str, Any]]
 
-    def setUpMock(self, owner, name, new): # pylint: disable=invalid-name
+    mocks = []  # type: List[Tuple[Any, str, Any]]
+
+    def setUpMock(self, owner, name, new):  # pylint: disable=invalid-name
         """Setup the mock here, taking name and function and returning (name, old)"""
         old = getattr(owner, name)
         if isinstance(new, str):
             if hasattr(self, new):
                 new = getattr(self, new)
         if isinstance(new, Exception):
-            def _error_function(*args2, **kw2): # pylint: disable=unused-argument
+
+            def _error_function(*args2, **kw2):  # pylint: disable=unused-argument
                 raise type(new)(str(new))
+
             setattr(owner, name, _error_function)
         elif new is None or isinstance(new, (str, int, float, list, tuple)):
-            def _value_function(*args, **kw): # pylint: disable=unused-argument
+
+            def _value_function(*args, **kw):  # pylint: disable=unused-argument
                 return new
+
             setattr(owner, name, _value_function)
         else:
             setattr(owner, name, new)
@@ -114,16 +125,18 @@ class MockMixin:
         # length 4, this stops remocking and reunmocking from taking place.
         return (owner, name, old, False)
 
-    def setUp(self): # pylint: disable=invalid-name
+    def setUp(self):  # pylint: disable=invalid-name
         """For each mock instruction, set it up and store the return"""
         super().setUp()
         for x, mock in enumerate(self.mocks):
             if len(mock) == 4:
-                logging.error("Mock was already set up, so it wasn't cleared previously!")
+                logging.error(
+                    "Mock was already set up, so it wasn't cleared previously!"
+                )
                 continue
             self.mocks[x] = self.setUpMock(*mock)
 
-    def tearDown(self): # pylint: disable=invalid-name
+    def tearDown(self):  # pylint: disable=invalid-name
         """For each returned stored, tear it down and restore mock instruction"""
         super().tearDown()
         try:
@@ -140,50 +153,56 @@ class MockMixin:
                 return arg[2]
         return lambda: None
 
+
 class MockCommandMixin(MockMixin):
     """
     Replace all the command functions with testable replacements.
 
     This stops the pipeline and people without the programs, running into problems.
     """
-    mocks = [
-        (inkex.command, '_call', 'mock_call'),
-        (tempfile, 'mkdtemp', 'record_tempdir'),
-    ]
-    recorded_tempdirs = [] # type:List[str]
 
-    def setUp(self): # pylint: disable=invalid-name
+    mocks = [
+        (inkex.command, "_call", "mock_call"),
+        (tempfile, "mkdtemp", "record_tempdir"),
+    ]
+    recorded_tempdirs = []  # type:List[str]
+
+    def setUp(self):  # pylint: disable=invalid-name
         super().setUp()
         # This is a the daftest thing I've ever seen, when in the middle
         # of a mock, the 'self' variable magically turns from a FooTest
         # into a TestCase, this makes it impossible to find the datadir.
         from . import TestCase
+
         TestCase._mockdatadir = self.datadir()
 
     @classmethod
     def cmddir(cls):
         """Returns the location of all the mocked command results"""
         from . import TestCase
-        return os.path.join(TestCase._mockdatadir, 'cmd')
+
+        return os.path.join(TestCase._mockdatadir, "cmd")
 
     def record_tempdir(self, *args, **kwargs):
         """Record any attempts to make tempdirs"""
-        newdir = self.old_call('mkdtemp')(*args, **kwargs)
+        newdir = self.old_call("mkdtemp")(*args, **kwargs)
         self.recorded_tempdirs.append(newdir)
         return newdir
 
     def clean_paths(self, data, files):
         """Clean a string of any files or tempdirs"""
+
         def replace(indata, replaced, replacement):
             if isinstance(indata, str):
                 indata = indata.replace(replaced, replacement)
             else:
                 indata = [i.replace(replaced, replacement) for i in indata]
             return indata
+
         try:
             for fdir in self.recorded_tempdirs:
-                data = replace(data, fdir, '.')
-                files = replace(files, fdir, '.')
+                data = replace(data, fdir, ".")
+                files = replace(files, fdir, ".")
             for fname in files:
                 data = replace(data, fname, os.path.basename(fname))
         except (UnicodeDecodeError, TypeError):
@@ -197,7 +216,7 @@ class MockCommandMixin(MockMixin):
             if not os.path.isdir(fdir):
                 continue
             for fname in os.listdir(fdir):
-                if fname in ('.', '..'):
+                if fname in (".", ".."):
                     continue
                 path = os.path.join(fdir, fname)
                 # We store the modified time so if a program modifies
@@ -209,8 +228,9 @@ class MockCommandMixin(MockMixin):
     def ignore_command_mock(self, program, arglst):
         """Return true if the mock is ignored"""
         if self and program and arglst:
-            return os.environ.get('NO_MOCK_COMMANDS')
+            return os.environ.get("NO_MOCK_COMMANDS")
         return False
+
     def mock_call(self, program, *args, **kwargs):
         """
         Replacement for the inkex.command.call() function, instead of calling
@@ -218,12 +238,12 @@ class MockCommandMixin(MockMixin):
         hash to find a command result.
         """
         # Remove stdin first because it needs to NOT be in the Arguments list.
-        stdin = kwargs.pop('stdin', None)
+        stdin = kwargs.pop("stdin", None)
         args = list(args)
 
         # We use email
         msg = MIMEMultipart(boundary=FIXED_BOUNDARY)
-        msg['Program'] = self.get_program_name(program)
+        msg["Program"] = self.get_program_name(program)
 
         # Gather any output files and add any input files to msg, args and kwargs
         # may be modified to strip out filename directories (which change)
@@ -231,56 +251,61 @@ class MockCommandMixin(MockMixin):
 
         arglst = inkex.command.to_args_sorted(program, *args, **kwargs)[1:]
         arglst = self.clean_paths(arglst, inputs + outputs)
-        argstr = ' '.join(arglst)
-        msg['Arguments'] = argstr.strip()
+        argstr = " ".join(arglst)
+        msg["Arguments"] = argstr.strip()
 
         if stdin is not None:
             # The stdin is counted as the msg body
-            cleanin = self.clean_paths(stdin, inputs + outputs)\
-                          .replace("\r\n", "\n").replace(".\\", "./")
-            msg.attach(MIMEText(cleanin, 'plain', 'utf-8'))
+            cleanin = (
+                self.clean_paths(stdin, inputs + outputs)
+                .replace("\r\n", "\n")
+                .replace(".\\", "./")
+            )
+            msg.attach(MIMEText(cleanin, "plain", "utf-8"))
 
         keystr = msg.as_string()
         # On Windows, output is separated by CRLF
-        keystr = keystr.replace('\r\n', '\n')
+        keystr = keystr.replace("\r\n", "\n")
         # There is a difference between python2 and python3 output
-        keystr = keystr.replace('\n\n', '\n')
-        keystr = keystr.replace('\n ', ' ')
-        if 'verb' in keystr:
+        keystr = keystr.replace("\n\n", "\n")
+        keystr = keystr.replace("\n ", " ")
+        if "verb" in keystr:
             # Verbs seperated by colons cause diff in py2/3
-            keystr = keystr.replace('; ', ';')
+            keystr = keystr.replace("; ", ";")
         # Generate a unique key for this call based on _all_ it's inputs
-        key = hashlib.md5(keystr.encode('utf-8')).hexdigest()
+        key = hashlib.md5(keystr.encode("utf-8")).hexdigest()
 
         if self.ignore_command_mock(program, arglst):
             # Call original code. This is so programmers can run the test suite
             # against the external programs too, to see how their fair.
             if stdin is not None:
-                kwargs['stdin'] = stdin
+                kwargs["stdin"] = stdin
 
             before = self.get_all_tempfiles()
-            stdout = self.old_call('_call')(program, *args, **kwargs)
+            stdout = self.old_call("_call")(program, *args, **kwargs)
             outputs += list(self.get_all_tempfiles() - before)
             # Remove the modified time from the call
-            outputs = [out.rsplit(';', 1)[0] for out in outputs]
+            outputs = [out.rsplit(";", 1)[0] for out in outputs]
 
             # After the program has run, we collect any file outputs and store
             # them, then store any stdout or stderr created during the run.
             # A developer can then use this to build new test cases.
             reply = MIMEMultipart(boundary=FIXED_BOUNDARY)
-            reply['Program'] = self.get_program_name(program)
-            reply['Arguments'] = argstr
+            reply["Program"] = self.get_program_name(program)
+            reply["Arguments"] = argstr
             self.save_call(program, key, stdout, outputs, reply)
-            self.save_key(program, key, keystr, 'key')
+            self.save_key(program, key, keystr, "key")
             return stdout
 
         try:
             return self.load_call(program, key, outputs)
         except IOError:
-            self.save_key(program, key, keystr, 'bad-key')
-            raise IOError(f"Problem loading call: {program}/{key} use the environment variable "\
-                "NO_MOCK_COMMANDS=1 to call out to the external program and generate "\
-                f"the mock call file for call {program} {argstr}.")
+            self.save_key(program, key, keystr, "bad-key")
+            raise IOError(
+                f"Problem loading call: {program}/{key} use the environment variable "
+                "NO_MOCK_COMMANDS=1 to call out to the external program and generate "
+                f"the mock call file for call {program} {argstr}."
+            )
 
     def add_call_files(self, msg, args, kwargs):
         """
@@ -308,10 +333,10 @@ class MockCommandMixin(MockMixin):
         # or are existing files on the disk.
         files = [[], []]
         for value in values:
-            if os.path.isfile(value): # Input file
+            if os.path.isfile(value):  # Input file
                 files[0].append(value)
                 self.add_call_file(msg, value)
-            elif os.path.isdir(os.path.dirname(value)): # Output file
+            elif os.path.isdir(os.path.dirname(value)):  # Output file
                 files[1].append(value)
         return files
 
@@ -319,20 +344,20 @@ class MockCommandMixin(MockMixin):
         """Add a single file to the given mime message"""
         fname = os.path.basename(filename)
         with open(filename, "rb") as fhl:
-            if filename.endswith('.svg'):
-                value = self.clean_paths(fhl.read().decode('utf8'), [])
+            if filename.endswith(".svg"):
+                value = self.clean_paths(fhl.read().decode("utf8"), [])
             else:
                 value = fhl.read()
                 try:
                     value = value.decode()
-                except UnicodeDecodeError: # do not attempt to process binary files further
+                except UnicodeDecodeError:  # do not attempt to process binary files further
                     pass
             if isinstance(value, str):
-                value = value.replace('\r\n', '\n').replace(".\\", "./")
+                value = value.replace("\r\n", "\n").replace(".\\", "./")
             part = MIMEApplication(value, Name=fname)
         # After the file is closed
-        part['Content-Disposition'] = 'attachment'
-        part['Filename'] = fname
+        part["Content-Disposition"] = "attachment"
+        part["Filename"] = fname
         msg.attach(part)
 
     def get_call_filename(self, program, key, create=False):
@@ -340,7 +365,7 @@ class MockCommandMixin(MockMixin):
         Get the filename for the call testing information.
         """
         path = self.get_call_path(program, create=create)
-        fname = os.path.join(path, key + '.msg')
+        fname = os.path.join(path, key + ".msg")
         if not create and not os.path.isfile(fname):
             raise IOError(f"Attempted to find call test data {key}")
         return fname
@@ -348,7 +373,7 @@ class MockCommandMixin(MockMixin):
     def get_program_name(self, program):
         """Takes a program and returns a program name"""
         if program == inkex.command.INKSCAPE_EXECUTABLE_NAME:
-            return 'inkscape'
+            return "inkscape"
         return program
 
     def get_call_path(self, program, create=True):
@@ -358,9 +383,11 @@ class MockCommandMixin(MockMixin):
             if create:
                 os.makedirs(command_dir)
             else:
-                raise IOError("A test is attempting to use an external program in a test:"\
-                              f" {program}; but there is not a command data directory which should"\
-                              f" contain the results of the command here: {command_dir}")
+                raise IOError(
+                    "A test is attempting to use an external program in a test:"
+                    f" {program}; but there is not a command data directory which should"
+                    f" contain the results of the command here: {command_dir}"
+                )
         return command_dir
 
     def load_call(self, program, key, files):
@@ -368,16 +395,16 @@ class MockCommandMixin(MockMixin):
         Load the given call
         """
         fname = self.get_call_filename(program, key, create=False)
-        with open(fname, 'rb') as fhl:
-            msg = EmailParser().parsestr(fhl.read().decode('utf-8'))
+        with open(fname, "rb") as fhl:
+            msg = EmailParser().parsestr(fhl.read().decode("utf-8"))
 
         stdout = None
         for part in msg.walk():
-            if 'attachment' in part.get("Content-Disposition", ''):
-                base_name = part['Filename']
+            if "attachment" in part.get("Content-Disposition", ""):
+                base_name = part["Filename"]
                 for out_file in files:
                     if out_file.endswith(base_name):
-                        with open(out_file, 'wb') as fhl:
+                        with open(out_file, "wb") as fhl:
                             fhl.write(part.get_payload(decode=True))
                             part = None
                 if part is not None:
@@ -386,14 +413,16 @@ class MockCommandMixin(MockMixin):
                     # hitting on of them.
                     for fdir in self.recorded_tempdirs:
                         if os.path.isdir(fdir):
-                            with open(os.path.join(fdir, base_name), 'wb') as fhl:
+                            with open(os.path.join(fdir, base_name), "wb") as fhl:
                                 fhl.write(part.get_payload(decode=True))
             elif part.get_content_type() == "text/plain":
                 stdout = part.get_payload(decode=True)
 
         return stdout
 
-    def save_call(self, program, key, stdout, files, msg, ext='output'): # pylint: disable=too-many-arguments
+    def save_call(
+        self, program, key, stdout, files, msg, ext="output"
+    ):  # pylint: disable=too-many-arguments
         """
         Saves the results from the call into a debug output file, the resulting files
         should be a Mime msg file format with each attachment being one of the input
@@ -401,24 +430,24 @@ class MockCommandMixin(MockMixin):
         """
         if stdout is not None and stdout.strip():
             # The stdout is counted as the msg body here
-            msg.attach(MIMEText(stdout.decode('utf-8'), 'plain', 'utf-8'))
+            msg.attach(MIMEText(stdout.decode("utf-8"), "plain", "utf-8"))
 
         for fname in set(files):
             if os.path.isfile(fname):
-                #print("SAVING FILE INTO MSG: {}".format(fname))
+                # print("SAVING FILE INTO MSG: {}".format(fname))
                 self.add_call_file(msg, fname)
             else:
-                part = MIMEText("Missing File", 'plain', 'utf-8')
-                part.add_header('Filename', os.path.basename(fname))
+                part = MIMEText("Missing File", "plain", "utf-8")
+                part.add_header("Filename", os.path.basename(fname))
                 msg.attach(part)
 
-        fname = self.get_call_filename(program, key, create=True) + '.' + ext
-        with open(fname, 'wb') as fhl:
-            fhl.write(msg.as_string().encode('utf-8'))
+        fname = self.get_call_filename(program, key, create=True) + "." + ext
+        with open(fname, "wb") as fhl:
+            fhl.write(msg.as_string().encode("utf-8"))
 
-    def save_key(self, program, key, keystr, ext='key'):
+    def save_key(self, program, key, keystr, ext="key"):
         """Save the key file if we are debugging the key data"""
-        if os.environ.get('DEBUG_KEY'):
-            fname = self.get_call_filename(program, key, create=True) + '.' + ext
-            with open(fname, 'wb') as fhl:
-                fhl.write(keystr.encode('utf-8'))
+        if os.environ.get("DEBUG_KEY"):
+            fname = self.get_call_filename(program, key, create=True) + "." + ext
+            with open(fname, "wb") as fhl:
+                fhl.write(keystr.encode("utf-8"))

@@ -38,6 +38,7 @@ import inkex
 from inkex import TextElement
 
 if sys.version_info[0] > 2:
+
     def unicode(stringlike, encoding):
         """Compatibility for python 2 strings"""
         if isinstance(stringlike, bytes):
@@ -47,116 +48,225 @@ if sys.version_info[0] > 2:
 
 class Calendar(inkex.EffectExtension):
     """Generate Calendar in SVG"""
+
     def add_arguments(self, pars):
         pars.add_argument("--tab", type=str, dest="tab")
-        pars.add_argument("--month", type=int, default=0,\
-            help="Month to be generated. If 0, then the entry year will be generated.")
-        pars.add_argument("--year", type=int, default=0,\
-            help="Year to be generated. If 0, then the current year will be generated.")
-        pars.add_argument("--fill-empty-day-boxes", type=inkex.Boolean,\
-            dest="fill_edb", default=True, help="Fill empty day boxes with next month days.")
-        pars.add_argument("--show-week-number", type=inkex.Boolean,\
-            dest="show_weeknr", default=False, help="Include a week number column.")
-        pars.add_argument("--start-day", default="sun", help='Week start day. ("sun" or "mon")')
-        pars.add_argument("--weekend", default="sat+sun",\
-            help='Define the weekend days. ("sat+sun" or "sat" or "sun")')
         pars.add_argument(
-            "--auto-organize", type=inkex.Boolean, dest="auto_organize", default=True,
-            help='Automatically set the size and positions.')
+            "--month",
+            type=int,
+            default=0,
+            help="Month to be generated. If 0, then the entry year will be generated.",
+        )
         pars.add_argument(
-            "--months-per-line", type=int, dest="months_per_line", default=3,
-            help='Number of months side by side.')
+            "--year",
+            type=int,
+            default=0,
+            help="Year to be generated. If 0, then the current year will be generated.",
+        )
         pars.add_argument(
-            "--month-width", type=str, dest="month_width", default="6cm",
-            help='The width of the month days box.')
+            "--fill-empty-day-boxes",
+            type=inkex.Boolean,
+            dest="fill_edb",
+            default=True,
+            help="Fill empty day boxes with next month days.",
+        )
         pars.add_argument(
-            "--month-margin", type=str, dest="month_margin", default="1cm",
-            help='The space between the month boxes.')
+            "--show-week-number",
+            type=inkex.Boolean,
+            dest="show_weeknr",
+            default=False,
+            help="Include a week number column.",
+        )
         pars.add_argument(
-            "--color-year", type=inkex.Color, dest="color_year", default=inkex.Color(0x808080FF),
-            help='Color for the year header.')
+            "--start-day", default="sun", help='Week start day. ("sun" or "mon")'
+        )
         pars.add_argument(
-            "--color-month", type=inkex.Color, dest="color_month", default=inkex.Color(0x686868FF),
-            help='Color for the month name header.')
+            "--weekend",
+            default="sat+sun",
+            help='Define the weekend days. ("sat+sun" or "sat" or "sun")',
+        )
         pars.add_argument(
-            "--color-day-name", type=inkex.Color, dest="color_day_name",
+            "--auto-organize",
+            type=inkex.Boolean,
+            dest="auto_organize",
+            default=True,
+            help="Automatically set the size and positions.",
+        )
+        pars.add_argument(
+            "--months-per-line",
+            type=int,
+            dest="months_per_line",
+            default=3,
+            help="Number of months side by side.",
+        )
+        pars.add_argument(
+            "--month-width",
+            type=str,
+            dest="month_width",
+            default="6cm",
+            help="The width of the month days box.",
+        )
+        pars.add_argument(
+            "--month-margin",
+            type=str,
+            dest="month_margin",
+            default="1cm",
+            help="The space between the month boxes.",
+        )
+        pars.add_argument(
+            "--color-year",
+            type=inkex.Color,
+            dest="color_year",
+            default=inkex.Color(0x808080FF),
+            help="Color for the year header.",
+        )
+        pars.add_argument(
+            "--color-month",
+            type=inkex.Color,
+            dest="color_month",
+            default=inkex.Color(0x686868FF),
+            help="Color for the month name header.",
+        )
+        pars.add_argument(
+            "--color-day-name",
+            type=inkex.Color,
+            dest="color_day_name",
             default=inkex.Color(0x909090FF),
-            help='Color for the week day names header.')
+            help="Color for the week day names header.",
+        )
         pars.add_argument(
-            "--color-day", type=inkex.Color, dest="color_day", default=inkex.Color(0x000000FF),
-            help='Color for the common day box.')
+            "--color-day",
+            type=inkex.Color,
+            dest="color_day",
+            default=inkex.Color(0x000000FF),
+            help="Color for the common day box.",
+        )
         pars.add_argument(
-            "--color-weekend", type=inkex.Color, dest="color_weekend",
+            "--color-weekend",
+            type=inkex.Color,
+            dest="color_weekend",
             default=inkex.Color(0x787878FF),
-            help='Color for the weekend days.')
+            help="Color for the weekend days.",
+        )
         pars.add_argument(
-            "--color-nmd", type=inkex.Color, dest="color_nmd", default=inkex.Color(0xB0B0B0FF),
-            help='Color for the next month day, in empty day boxes.')
+            "--color-nmd",
+            type=inkex.Color,
+            dest="color_nmd",
+            default=inkex.Color(0xB0B0B0FF),
+            help="Color for the next month day, in empty day boxes.",
+        )
         pars.add_argument(
-            "--color-weeknr", type=inkex.Color, dest="color_weeknr",
+            "--color-weeknr",
+            type=inkex.Color,
+            dest="color_weeknr",
             default=inkex.Color(0x787878FF),
-            help='Color for the week numbers.')
+            help="Color for the week numbers.",
+        )
         pars.add_argument(
-            "--font-year", type=str, dest="font_year", default="arial",
-            help='Font for the year string.')
+            "--font-year",
+            type=str,
+            dest="font_year",
+            default="arial",
+            help="Font for the year string.",
+        )
         pars.add_argument(
-            "--font-month", type=str, dest="font_month", default="arial",
-            help='Font for the month strings.')
+            "--font-month",
+            type=str,
+            dest="font_month",
+            default="arial",
+            help="Font for the month strings.",
+        )
         pars.add_argument(
-            "--font-day-name", type=str, dest="font_day_name", default="arial",
-            help='Font for the days of the week strings.')
+            "--font-day-name",
+            type=str,
+            dest="font_day_name",
+            default="arial",
+            help="Font for the days of the week strings.",
+        )
         pars.add_argument(
-            "--font-day", type=str, dest="font_day", default="arial",
-            help='Font for the day strings.')
+            "--font-day",
+            type=str,
+            dest="font_day",
+            default="arial",
+            help="Font for the day strings.",
+        )
         pars.add_argument(
-            "--month-names", type=str, dest="month_names",
-            default='January February March '
-                    'April May June July '
-                    'August September October '
-                    'November December',
-            help='The month names for localization.')
+            "--month-names",
+            type=str,
+            dest="month_names",
+            default="January February March "
+            "April May June July "
+            "August September October "
+            "November December",
+            help="The month names for localization.",
+        )
         pars.add_argument(
-            "--day-names", type=str, dest="day_names", default='Sun Mon Tue Wed Thu Fri Sat',
-            help='The week day names for localization.')
+            "--day-names",
+            type=str,
+            dest="day_names",
+            default="Sun Mon Tue Wed Thu Fri Sat",
+            help="The week day names for localization.",
+        )
         pars.add_argument(
-            "--weeknr-name", type=str, dest="weeknr_name", default='Wk',
-            help='The week number column name for localization.')
+            "--weeknr-name",
+            type=str,
+            dest="weeknr_name",
+            default="Wk",
+            help="The week number column name for localization.",
+        )
         pars.add_argument(
-            "--encoding", type=str, dest="input_encode", default='arabic',
-            help='The input encoding of the names.')
+            "--encoding",
+            type=str,
+            dest="input_encode",
+            default="arabic",
+            help="The input encoding of the names.",
+        )
 
     def validate_options(self):
         """Validity check for various text inputs"""
         # inkex.errormsg( self.options.input_encode )
         # Convert string names lists in real lists
-        month_name = re.match(r'\s*(.*[^\s])\s*', self.options.month_names)
-        self.options.month_names = re.split(r'\s+', month_name.group(1))
-        month_name = re.match(r'\s*(.*[^\s])\s*', self.options.day_names)
-        self.options.day_names = re.split(r'\s+', month_name.group(1))
+        month_name = re.match(r"\s*(.*[^\s])\s*", self.options.month_names)
+        self.options.month_names = re.split(r"\s+", month_name.group(1))
+        month_name = re.match(r"\s*(.*[^\s])\s*", self.options.day_names)
+        self.options.day_names = re.split(r"\s+", month_name.group(1))
 
         # Validate names lists
         if len(self.options.month_names) != 12:
-            inkex.errormsg('The month name list "' +
-                           str(self.options.month_names) +
-                           '" is invalid. Using default.')
-            self.options.month_names = ['January', 'February', 'March',
-                                        'April', 'May', 'June',
-                                        'July', 'August', 'September',
-                                        'October', 'November', 'December']
+            inkex.errormsg(
+                'The month name list "'
+                + str(self.options.month_names)
+                + '" is invalid. Using default.'
+            )
+            self.options.month_names = [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ]
         if len(self.options.day_names) != 7:
-            inkex.errormsg('The day name list "' +
-                           str(self.options.day_names) +
-                           '" is invalid. Using default.')
-            self.options.day_names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu',
-                                      'Fri', 'Sat']
+            inkex.errormsg(
+                'The day name list "'
+                + str(self.options.day_names)
+                + '" is invalid. Using default.'
+            )
+            self.options.day_names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         # Convert year 0 to current year
         if self.options.year == 0:
             self.options.year = datetime.datetime.today().year
         # Year 1 starts it's week at monday, obligatorily
         if self.options.year == 1:
-            self.options.start_day = 'mon'
+            self.options.start_day = "mon"
         # Set the calendar start day
-        if self.options.start_day == 'sun':
+        if self.options.start_day == "sun":
             calendar.setfirstweekday(6)
         else:
             calendar.setfirstweekday(0)
@@ -171,8 +281,8 @@ class Calendar(inkex.EffectExtension):
 
     def calculate_size_and_positions(self):
         """month_margin month_width months_per_line auto_organize"""
-        self.doc_w = self.svg.unittouu(self.document.getroot().get('width'))
-        self.doc_h = self.svg.unittouu(self.document.getroot().get('height'))
+        self.doc_w = self.svg.unittouu(self.document.getroot().get("width"))
+        self.doc_h = self.svg.unittouu(self.document.getroot().get("height"))
         if self.options.show_weeknr:
             self.cols_before = 1
         else:
@@ -195,60 +305,62 @@ class Calendar(inkex.EffectExtension):
         self.day_h = self.month_w / 9
         self.month_h = self.day_w * 7
         if self.options.month == 0:
-            self.year_margin = ((self.doc_w + self.day_w -
-                                 (self.month_w * self.months_per_line) -
-                                 (self.month_margin *
-                                  (self.months_per_line - 1))) / 2)  # - self.month_margin
+            self.year_margin = (
+                self.doc_w
+                + self.day_w
+                - (self.month_w * self.months_per_line)
+                - (self.month_margin * (self.months_per_line - 1))
+            ) / 2  # - self.month_margin
         else:
             self.year_margin = (self.doc_w - self.month_w) / 2
         self.style_day = {
-            'font-size': str(self.day_w / 2),
-            'font-family': self.options.font_day,
-            'text-anchor': 'middle',
-            'text-align': 'center',
-            'fill': self.options.color_day
+            "font-size": str(self.day_w / 2),
+            "font-family": self.options.font_day,
+            "text-anchor": "middle",
+            "text-align": "center",
+            "fill": self.options.color_day,
         }
         self.style_weekend = self.style_day.copy()
-        self.style_weekend['fill'] = self.options.color_weekend
+        self.style_weekend["fill"] = self.options.color_weekend
         self.style_nmd = self.style_day.copy()
-        self.style_nmd['fill'] = self.options.color_nmd
+        self.style_nmd["fill"] = self.options.color_nmd
         self.style_month = self.style_day.copy()
-        self.style_month['fill'] = self.options.color_month
-        self.style_month['font-family'] = self.options.font_month
-        self.style_month['font-size'] = str(self.day_w / 1.5)
-        self.style_month['font-weight'] = 'bold'
+        self.style_month["fill"] = self.options.color_month
+        self.style_month["font-family"] = self.options.font_month
+        self.style_month["font-size"] = str(self.day_w / 1.5)
+        self.style_month["font-weight"] = "bold"
         self.style_day_name = self.style_day.copy()
-        self.style_day_name['fill'] = self.options.color_day_name
-        self.style_day_name['font-family'] = self.options.font_day_name
-        self.style_day_name['font-size'] = str(self.day_w / 3)
+        self.style_day_name["fill"] = self.options.color_day_name
+        self.style_day_name["font-family"] = self.options.font_day_name
+        self.style_day_name["font-size"] = str(self.day_w / 3)
         self.style_year = self.style_day.copy()
-        self.style_year['fill'] = self.options.color_year
-        self.style_year['font-family'] = self.options.font_year
-        self.style_year['font-size'] = str(self.day_w * 2)
-        self.style_year['font-weight'] = 'bold'
+        self.style_year["fill"] = self.options.color_year
+        self.style_year["font-family"] = self.options.font_year
+        self.style_year["font-size"] = str(self.day_w * 2)
+        self.style_year["font-weight"] = "bold"
         self.style_weeknr = self.style_day.copy()
-        self.style_weeknr['fill'] = self.options.color_weeknr
-        self.style_weeknr['font-size'] = str(self.day_w / 3)
+        self.style_weeknr["fill"] = self.options.color_weeknr
+        self.style_weeknr["font-size"] = str(self.day_w / 3)
 
     def is_weekend(self, pos):
         """Detect weekend days; weekend values: "sat+sun" or "sat" or "sun" """
-        if self.options.start_day == 'sun':
-            if self.options.weekend == 'sat+sun' and pos == 0:
+        if self.options.start_day == "sun":
+            if self.options.weekend == "sat+sun" and pos == 0:
                 return True
-            if self.options.weekend == 'sat+sun' and pos == 6:
+            if self.options.weekend == "sat+sun" and pos == 6:
                 return True
-            if self.options.weekend == 'sat' and pos == 6:
+            if self.options.weekend == "sat" and pos == 6:
                 return True
-            if self.options.weekend == 'sun' and pos == 0:
+            if self.options.weekend == "sun" and pos == 0:
                 return True
         else:
-            if self.options.weekend == 'sat+sun' and pos == 5:
+            if self.options.weekend == "sat+sun" and pos == 5:
                 return True
-            if self.options.weekend == 'sat+sun' and pos == 6:
+            if self.options.weekend == "sat+sun" and pos == 6:
                 return True
-            if self.options.weekend == 'sat' and pos == 5:
+            if self.options.weekend == "sat" and pos == 5:
                 return True
-            if self.options.weekend == 'sun' and pos == 6:
+            if self.options.weekend == "sun" and pos == 6:
                 return True
         return False
 
@@ -263,19 +375,21 @@ class Calendar(inkex.EffectExtension):
 
     def write_month_header(self, g, m):
         """Write month header"""
-        txt_atts = {'style': str(inkex.Style(self.style_month)),
-                    'x': str((self.month_w - self.day_w) / 2),
-                    'y': str(self.day_h / 5)}
+        txt_atts = {
+            "style": str(inkex.Style(self.style_month)),
+            "x": str((self.month_w - self.day_w) / 2),
+            "y": str(self.day_h / 5),
+        }
         try:
             g.add(TextElement(**txt_atts)).text = unicode(
-                self.options.month_names[m - 1],
-                self.options.input_encode)
+                self.options.month_names[m - 1], self.options.input_encode
+            )
         except:
-            raise ValueError('You must select a correct system encoding.')
+            raise ValueError("You must select a correct system encoding.")
 
         week_group = g.add(inkex.Group())
         week_x = 0
-        if self.options.start_day == 'sun':
+        if self.options.start_day == "sun":
             day_names = self.options.day_names[:]
         else:
             day_names = self.options.day_names[1:]
@@ -285,49 +399,53 @@ class Calendar(inkex.EffectExtension):
             day_names.insert(0, self.options.weeknr_name)
 
         for wday in day_names:
-            txt_atts = {'style': str(inkex.Style(self.style_day_name)),
-                        'x': str(self.day_w * week_x),
-                        'y': str(self.day_h)}
+            txt_atts = {
+                "style": str(inkex.Style(self.style_day_name)),
+                "x": str(self.day_w * week_x),
+                "y": str(self.day_h),
+            }
             try:
                 week_group.add(TextElement(**txt_atts)).text = unicode(
-                    wday, self.options.input_encode)
+                    wday, self.options.input_encode
+                )
             except:
-                raise ValueError('You must select a correct system encoding.')
+                raise ValueError("You must select a correct system encoding.")
 
             week_x += 1
 
     def create_month(self, m):
         """Lay out one month in place on the calendar"""
         txt_atts = {
-            'transform': 'translate(' +
-                         str(self.year_margin +
-                             (self.month_w + self.month_margin) *
-                             self.month_x_pos) +
-                         ',' +
-                         str((self.day_h * 4) +
-                             (self.month_h * self.month_y_pos)) +
-                         ')',
-            'id': 'month_' +
-                  str(m) +
-                  '_' +
-                  str(self.options.year)}
+            "transform": "translate("
+            + str(
+                self.year_margin + (self.month_w + self.month_margin) * self.month_x_pos
+            )
+            + ","
+            + str((self.day_h * 4) + (self.month_h * self.month_y_pos))
+            + ")",
+            "id": "month_" + str(m) + "_" + str(self.options.year),
+        }
         g = self.year_g.add(inkex.Group(**txt_atts))
         self.write_month_header(g, m)
         gdays = g.add(inkex.Group())
         cal = calendar.monthcalendar(self.options.year, m)
         if m == 1:
             if self.options.year > 1:
-                before_month = \
-                    self.in_line_month(calendar.monthcalendar(self.options.year - 1, 12))
+                before_month = self.in_line_month(
+                    calendar.monthcalendar(self.options.year - 1, 12)
+                )
         else:
-            before_month = \
-                self.in_line_month(calendar.monthcalendar(self.options.year, m - 1))
+            before_month = self.in_line_month(
+                calendar.monthcalendar(self.options.year, m - 1)
+            )
         if m == 12:
-            next_month = \
-                self.in_line_month(calendar.monthcalendar(self.options.year + 1, 1))
+            next_month = self.in_line_month(
+                calendar.monthcalendar(self.options.year + 1, 1)
+            )
         else:
-            next_month = \
-                self.in_line_month(calendar.monthcalendar(self.options.year, m + 1))
+            next_month = self.in_line_month(
+                calendar.monthcalendar(self.options.year, m + 1)
+            )
         if len(cal) < 6:
             # add a line after the last week
             cal.append([0, 0, 0, 0, 0, 0, 0])
@@ -341,21 +459,30 @@ class Calendar(inkex.EffectExtension):
         before = True
         week_y = 0
         for week in cal:
-            if (self.weeknr != 0 and
-                ((self.options.start_day == 'mon' and week[0] != 0) or
-                 (self.options.start_day == 'sun' and week[1] != 0))) or \
-                    (self.weeknr == 0 and
-                     ((self.options.start_day == 'mon' and week[3] > 0) or
-                      (self.options.start_day == 'sun' and week[4] > 0))):
+            if (
+                self.weeknr != 0
+                and (
+                    (self.options.start_day == "mon" and week[0] != 0)
+                    or (self.options.start_day == "sun" and week[1] != 0)
+                )
+            ) or (
+                self.weeknr == 0
+                and (
+                    (self.options.start_day == "mon" and week[3] > 0)
+                    or (self.options.start_day == "sun" and week[4] > 0)
+                )
+            ):
                 self.weeknr += 1
             week_x = 0
             if self.options.show_weeknr:
                 # Remove leap week (starting previous year) and empty weeks
                 if self.weeknr != 0 and not (week[0] == 0 and week[6] == 0):
                     style = self.style_weeknr
-                    txt_atts = {'style': str(inkex.Style(style)),
-                                'x': str(self.day_w * week_x),
-                                'y': str(self.day_h * (week_y + 2))}
+                    txt_atts = {
+                        "style": str(inkex.Style(style)),
+                        "x": str(self.day_w * week_x),
+                        "y": str(self.day_h * (week_y + 2)),
+                    }
                     gdays.add(TextElement(**txt_atts)).text = str(self.weeknr)
                     week_x += 1
                 else:
@@ -366,9 +493,11 @@ class Calendar(inkex.EffectExtension):
                     style = self.style_weekend
                 if day == 0:
                     style = self.style_nmd
-                txt_atts = {'style': str(inkex.Style(style)),
-                            'x': str(self.day_w * week_x),
-                            'y': str(self.day_h * (week_y + 2))}
+                txt_atts = {
+                    "style": str(inkex.Style(style)),
+                    "x": str(self.day_w * week_x),
+                    "y": str(self.day_h * (week_y + 2)),
+                }
                 text = None
                 if day == 0 and not self.options.fill_edb:
                     pass  # draw nothing
@@ -395,11 +524,13 @@ class Calendar(inkex.EffectExtension):
         self.validate_options()
         self.calculate_size_and_positions()
         parent = self.document.getroot()
-        txt_atts = {'id': 'year_' + str(self.options.year)}
+        txt_atts = {"id": "year_" + str(self.options.year)}
         self.year_g = parent.add(inkex.Group(**txt_atts))
-        txt_atts = {'style': str(inkex.Style(self.style_year)),
-                    'x': str(self.doc_w / 2),
-                    'y': str(self.day_w * 1.5)}
+        txt_atts = {
+            "style": str(inkex.Style(self.style_year)),
+            "x": str(self.doc_w / 2),
+            "y": str(self.day_w * 1.5),
+        }
         self.year_g.add(TextElement(**txt_atts)).text = str(self.options.year)
         try:
             if self.options.month == 0:
@@ -411,5 +542,6 @@ class Calendar(inkex.EffectExtension):
             return inkex.errormsg(str(err))
         return None
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Calendar().run()

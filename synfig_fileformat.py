@@ -37,94 +37,108 @@ default_composite = {
 }
 
 layers["PasteCanvas"] = default_composite.copy()
-layers["PasteCanvas"].update({
-    "origin": ["vector", [0.0, 0.0]],
-    "canvas": ["canvas", None],
-    "zoom": ["real", 0.0],
-    "time_offset": ["time", "0s"],
-    "children_lock": ["bool", False],
-    "focus": ["vector", [0.0, 0.0]]
-})
+layers["PasteCanvas"].update(
+    {
+        "origin": ["vector", [0.0, 0.0]],
+        "canvas": ["canvas", None],
+        "zoom": ["real", 0.0],
+        "time_offset": ["time", "0s"],
+        "children_lock": ["bool", False],
+        "focus": ["vector", [0.0, 0.0]],
+    }
+)
 
 # Layers in mod_geometry
 
 layers["circle"] = default_composite.copy()
-layers["circle"].update({
-    "color": ["color", [0, 0, 0, 1]],
-    "radius": ["real", 1.0],
-    "feather": ["real", 0.0],
-    "origin": ["vector", [0.0, 0.0]],
-    "invert": ["bool", False],
-})
+layers["circle"].update(
+    {
+        "color": ["color", [0, 0, 0, 1]],
+        "radius": ["real", 1.0],
+        "feather": ["real", 0.0],
+        "origin": ["vector", [0.0, 0.0]],
+        "invert": ["bool", False],
+    }
+)
 
 layers["rectangle"] = default_composite.copy()
-layers["rectangle"].update({
-    "color": ["color", [0, 0, 0, 1]],
-    "point1": ["vector", [0, 0]],
-    "point2": ["vector", [1, 1]],
-    "expand": ["real", 0.0],
-    "invert": ["bool", False]
-})
+layers["rectangle"].update(
+    {
+        "color": ["color", [0, 0, 0, 1]],
+        "point1": ["vector", [0, 0]],
+        "point2": ["vector", [1, 1]],
+        "expand": ["real", 0.0],
+        "invert": ["bool", False],
+    }
+)
 
 default_shape = default_composite.copy()
-default_shape.update({
-    "color": ["color", [0, 0, 0, 1]],
-    "origin": ["vector", [0.0, 0.0]],
-    "invert": ["bool", False],
-    "antialias": ["bool", True],
-    "feather": ["real", 0.0],
-    "blurtype": ["integer", 1],
-    "winding_style": ["integer", 0]
-})
+default_shape.update(
+    {
+        "color": ["color", [0, 0, 0, 1]],
+        "origin": ["vector", [0.0, 0.0]],
+        "invert": ["bool", False],
+        "antialias": ["bool", True],
+        "feather": ["real", 0.0],
+        "blurtype": ["integer", 1],
+        "winding_style": ["integer", 0],
+    }
+)
 
 layers["region"] = default_shape.copy()
-layers["region"].update({
-    "bline": ["bline", None]
-})
+layers["region"].update({"bline": ["bline", None]})
 
 layers["outline"] = default_shape.copy()
-layers["outline"].update({
-    "bline": ["bline", None],
-    "round_tip[0]": ["bool", True],
-    "round_tip[1]": ["bool", True],
-    "sharp_cusps": ["bool", True],
-    "width": ["real", 1.0],
-    "loopyness": ["real", 1.0],
-    "expand": ["real", 0.0],
-    "homogeneous_width": ["bool", True]
-})
+layers["outline"].update(
+    {
+        "bline": ["bline", None],
+        "round_tip[0]": ["bool", True],
+        "round_tip[1]": ["bool", True],
+        "sharp_cusps": ["bool", True],
+        "width": ["real", 1.0],
+        "loopyness": ["real", 1.0],
+        "expand": ["real", 0.0],
+        "homogeneous_width": ["bool", True],
+    }
+)
 
 # Layers in mod_gradient
 
 layers["linear_gradient"] = default_composite.copy()
-layers["linear_gradient"].update({
-    "p1": ["vector", [0, 0]],
-    "p2": ["vector", [1, 1]],
-    "gradient": ["gradient", {0.0: [0, 0, 0, 1], 1.0: [1, 1, 1, 1]}],
-    "loop": ["bool", False],
-    "zigzag": ["bool", False]
-})
+layers["linear_gradient"].update(
+    {
+        "p1": ["vector", [0, 0]],
+        "p2": ["vector", [1, 1]],
+        "gradient": ["gradient", {0.0: [0, 0, 0, 1], 1.0: [1, 1, 1, 1]}],
+        "loop": ["bool", False],
+        "zigzag": ["bool", False],
+    }
+)
 
 layers["radial_gradient"] = default_composite.copy()
-layers["radial_gradient"].update({
-    "gradient": ["gradient", {0.0: [0, 0, 0, 1], 1.0: [1, 1, 1, 1]}],
-    "center": ["vector", [0, 0]],
-    "radius": ["real", 1.0],
-    "loop": ["bool", False],
-    "zigzag": ["bool", False]
-})
+layers["radial_gradient"].update(
+    {
+        "gradient": ["gradient", {0.0: [0, 0, 0, 1], 1.0: [1, 1, 1, 1]}],
+        "center": ["vector", [0, 0]],
+        "radius": ["real", 1.0],
+        "loop": ["bool", False],
+        "zigzag": ["bool", False],
+    }
+)
 
 # Layers in lyr_std
 
 layers["import"] = default_composite.copy()
-layers["import"].update({
-    "tl": ["vector", [-1, 1]],
-    "br": ["vector", [1, -1]],
-    "c": ["integer", 1],
-    "gamma_adjust": ["real", 1.0],
-    "filename": ["string", ""],  # <string>foo</string>
-    "time_offset": ["time", "0s"]
-})
+layers["import"].update(
+    {
+        "tl": ["vector", [-1, 1]],
+        "br": ["vector", [1, -1]],
+        "c": ["integer", 1],
+        "gamma_adjust": ["real", 1.0],
+        "filename": ["string", ""],  # <string>foo</string>
+        "time_offset": ["time", "0s"],
+    }
+)
 
 # transforms are not blending
 layers["warp"] = {
@@ -135,24 +149,24 @@ layers["warp"] = {
     "dest_br": ["vector", [1, -1]],
     "dest_bl": ["vector", [-1, -1]],
     "clip": ["bool", False],
-    "horizon": ["real", 4.0]
+    "horizon": ["real", 4.0],
 }
 
 layers["rotate"] = {
     "origin": ["vector", [0.0, 0.0]],
-    "amount": ["angle", 0]  # <angle value=.../>
+    "amount": ["angle", 0],  # <angle value=.../>
 }
 
-layers["translate"] = {
-    "origin": ["vector", [0.0, 0.0]]
-}
+layers["translate"] = {"origin": ["vector", [0.0, 0.0]]}
 
 # Layers in mod_filter
 layers["blur"] = default_composite.copy()
-layers["blur"].update({
-    "size": ["vector", [1, 1]],
-    "type": ["integer", 3]  # 1 is fast gaussian, 3 is regular
-})
+layers["blur"].update(
+    {
+        "size": ["vector", [1, 1]],
+        "type": ["integer", 3],  # 1 is fast gaussian, 3 is regular
+    }
+)
 
 # ##### Layer versions #####################################
 layer_versions = {
@@ -160,7 +174,7 @@ layer_versions = {
     "rectangle": "0.2",
     "linear_gradient": "0.0",
     "blur": "0.2",
-    None: "0.1"  # default
+    None: "0.1",  # default
 }
 
 # ##### Blend Methods ######################################
@@ -186,7 +200,7 @@ blend_method_names = {
     11: "luminance",
     14: "alpha brighten",  # deprecated
     15: "alpha darken",  # deprecated
-    19: "alpha over"  # deprecated
+    19: "alpha over",  # deprecated
 }
 
 blend_methods = dict((v, k) for (k, v) in blend_method_names.items())

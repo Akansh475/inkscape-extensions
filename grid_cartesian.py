@@ -31,18 +31,19 @@ from math import log
 import inkex
 from inkex import Group, PathElement, Rectangle
 
+
 def draw_line(x1, y1, x2, y2, width, name, parent):
     """Draw an SVG line"""
     line = parent.add(PathElement())
-    line.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': 'none'}
-    line.path = 'M {},{} L {},{}'.format(x1, y1, x2, y2)
+    line.style = {"stroke": "#000000", "stroke-width": str(width), "fill": "none"}
+    line.path = "M {},{} L {},{}".format(x1, y1, x2, y2)
     line.label = name
 
 
 def draw_rect(x, y, w, h, width, fill, name, parent):
     """Draw an SVG Rectangle"""
     rect = parent.add(Rectangle(x=str(x), y=str(y), width=str(w), height=str(h)))
-    rect.style = {'stroke': '#000000', 'stroke-width': str(width), 'fill': fill}
+    rect.style = {"stroke": "#000000", "stroke-width": str(width), "fill": fill}
     rect.label = name
 
 
@@ -75,17 +76,31 @@ class GridCartesian(inkex.GenerateExtension):
         pars.add_argument("--y_div_unit", default="px")
 
     def generate(self):
-        self.options.border_th = self.svg.unittouu(str(self.options.border_th) + self.options.border_th_unit)
+        self.options.border_th = self.svg.unittouu(
+            str(self.options.border_th) + self.options.border_th_unit
+        )
 
         self.options.dx = self.svg.unittouu(str(self.options.dx) + self.options.dx_unit)
-        self.options.x_divs_th = self.svg.unittouu(str(self.options.x_divs_th) + self.options.x_div_unit)
-        self.options.x_subdivs_th = self.svg.unittouu(str(self.options.x_subdivs_th) + self.options.x_div_unit)
-        self.options.x_subsubdivs_th = self.svg.unittouu(str(self.options.x_subsubdivs_th) + self.options.x_div_unit)
+        self.options.x_divs_th = self.svg.unittouu(
+            str(self.options.x_divs_th) + self.options.x_div_unit
+        )
+        self.options.x_subdivs_th = self.svg.unittouu(
+            str(self.options.x_subdivs_th) + self.options.x_div_unit
+        )
+        self.options.x_subsubdivs_th = self.svg.unittouu(
+            str(self.options.x_subsubdivs_th) + self.options.x_div_unit
+        )
 
         self.options.dy = self.svg.unittouu(str(self.options.dy) + self.options.dy_unit)
-        self.options.y_divs_th = self.svg.unittouu(str(self.options.y_divs_th) + self.options.y_div_unit)
-        self.options.y_subdivs_th = self.svg.unittouu(str(self.options.y_subdivs_th) + self.options.y_div_unit)
-        self.options.y_subsubdivs_th = self.svg.unittouu(str(self.options.y_subsubdivs_th) + self.options.y_div_unit)
+        self.options.y_divs_th = self.svg.unittouu(
+            str(self.options.y_divs_th) + self.options.y_div_unit
+        )
+        self.options.y_subdivs_th = self.svg.unittouu(
+            str(self.options.y_subdivs_th) + self.options.y_div_unit
+        )
+        self.options.y_subsubdivs_th = self.svg.unittouu(
+            str(self.options.y_subsubdivs_th) + self.options.y_div_unit
+        )
 
         # find the pixel dimensions of the overall grid
         ymax = self.options.dy * self.options.y_divs
@@ -120,8 +135,9 @@ class GridCartesian(inkex.GenerateExtension):
         if self.options.y_subsubdivs > 1:  # if there are any minor minor x gridlines
             mmingly = grid.add(Group.new("SubMinorYGridlines"))
 
-        draw_rect(0, 0, xmax, ymax, self.options.border_th,
-                      'none', 'Border', grid)  # border rectangle
+        draw_rect(
+            0, 0, xmax, ymax, self.options.border_th, "none", "Border", grid
+        )  # border rectangle
 
         # DO THE X DIVISIONS======================================
         sd = self.options.x_subdivs  # sub divs per div
@@ -129,42 +145,74 @@ class GridCartesian(inkex.GenerateExtension):
 
         for i in range(0, self.options.x_divs):  # Major x divisions
             if i > 0:  # don't draw first line (we made a proper border)
-                draw_line(self.options.dx * i, 0,
-                              self.options.dx * i, ymax,
-                              self.options.x_divs_th,
-                              'MajorXDiv' + str(i), majglx)
+                draw_line(
+                    self.options.dx * i,
+                    0,
+                    self.options.dx * i,
+                    ymax,
+                    self.options.x_divs_th,
+                    "MajorXDiv" + str(i),
+                    majglx,
+                )
 
             if self.options.x_log:  # log x subdivs
                 for j in range(1, sd):
                     if j > 1:  # the first loop is only for subsubdivs
-                        draw_line(self.options.dx * (i + log(j, sd)), 0,
-                                      self.options.dx * (i + log(j, sd)), ymax,
-                                      self.options.x_subdivs_th,
-                                      'MinorXDiv' + str(i) + ':' + str(j), minglx)
+                        draw_line(
+                            self.options.dx * (i + log(j, sd)),
+                            0,
+                            self.options.dx * (i + log(j, sd)),
+                            ymax,
+                            self.options.x_subdivs_th,
+                            "MinorXDiv" + str(i) + ":" + str(j),
+                            minglx,
+                        )
 
                     for k in range(1, ssd):  # subsub divs
-                        if (j <= self.options.x_half_freq) or (k % 2 == 0):  # only draw half the subsubdivs past the half-freq point
-                            if (ssd % 2 > 0) and (j > self.options.y_half_freq):  # half frequency won't work with odd numbers of subsubdivs,
+                        if (j <= self.options.x_half_freq) or (
+                            k % 2 == 0
+                        ):  # only draw half the subsubdivs past the half-freq point
+                            if (ssd % 2 > 0) and (
+                                j > self.options.y_half_freq
+                            ):  # half frequency won't work with odd numbers of subsubdivs,
                                 ssd2 = ssd + 1  # make even
                             else:
                                 ssd2 = ssd  # no change
-                            draw_line(self.options.dx * (i + log(j + k / float(ssd2), sd)), 0,
-                                          self.options.dx * (i + log(j + k / float(ssd2), sd)), ymax,
-                                          self.options.x_subsubdivs_th, 'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mminglx)
+                            draw_line(
+                                self.options.dx * (i + log(j + k / float(ssd2), sd)),
+                                0,
+                                self.options.dx * (i + log(j + k / float(ssd2), sd)),
+                                ymax,
+                                self.options.x_subsubdivs_th,
+                                "SubminorXDiv" + str(i) + ":" + str(j) + ":" + str(k),
+                                mminglx,
+                            )
 
             else:  # linear x subdivs
                 for j in range(0, sd):
-                    if j > 0:  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
-                        draw_line(self.options.dx * (i + j / float(sd)), 0,
-                                      self.options.dx * (i + j / float(sd)), ymax,
-                                      self.options.x_subdivs_th,
-                                      'MinorXDiv' + str(i) + ':' + str(j), minglx)
+                    if (
+                        j > 0
+                    ):  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
+                        draw_line(
+                            self.options.dx * (i + j / float(sd)),
+                            0,
+                            self.options.dx * (i + j / float(sd)),
+                            ymax,
+                            self.options.x_subdivs_th,
+                            "MinorXDiv" + str(i) + ":" + str(j),
+                            minglx,
+                        )
 
                     for k in range(1, ssd):  # subsub divs
-                        draw_line(self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), 0,
-                                      self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)), ymax,
-                                      self.options.x_subsubdivs_th,
-                                      'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mminglx)
+                        draw_line(
+                            self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)),
+                            0,
+                            self.options.dx * (i + (j * ssd + k) / (float(sd) * ssd)),
+                            ymax,
+                            self.options.x_subsubdivs_th,
+                            "SubminorXDiv" + str(i) + ":" + str(j) + ":" + str(k),
+                            mminglx,
+                        )
 
         # DO THE Y DIVISIONS========================================
         sd = self.options.y_subdivs  # sub divs per div
@@ -172,45 +220,78 @@ class GridCartesian(inkex.GenerateExtension):
 
         for i in range(0, self.options.y_divs):  # Major y divisions
             if i > 0:  # don't draw first line (we will make a border)
-                draw_line(0, self.options.dy * i,
-                              xmax, self.options.dy * i,
-                              self.options.y_divs_th,
-                              'MajorYDiv' + str(i), majgly)
+                draw_line(
+                    0,
+                    self.options.dy * i,
+                    xmax,
+                    self.options.dy * i,
+                    self.options.y_divs_th,
+                    "MajorYDiv" + str(i),
+                    majgly,
+                )
 
             if self.options.y_log:  # log y subdivs
                 for j in range(1, sd):
                     if j > 1:  # the first loop is only for subsubdivs
-                        draw_line(0, self.options.dy * (i + 1 - log(j, sd)),
-                                      xmax, self.options.dy * (i + 1 - log(j, sd)),
-                                      self.options.y_subdivs_th,
-                                      'MinorXDiv' + str(i) + ':' + str(j), mingly)
+                        draw_line(
+                            0,
+                            self.options.dy * (i + 1 - log(j, sd)),
+                            xmax,
+                            self.options.dy * (i + 1 - log(j, sd)),
+                            self.options.y_subdivs_th,
+                            "MinorXDiv" + str(i) + ":" + str(j),
+                            mingly,
+                        )
 
                     for k in range(1, ssd):  # subsub divs
-                        if (j <= self.options.y_half_freq) or (k % 2 == 0):  # only draw half the subsubdivs past the half-freq point
-                            if (ssd % 2 > 0) and (j > self.options.y_half_freq):  # half frequency won't work with odd numbers of subsubdivs,
+                        if (j <= self.options.y_half_freq) or (
+                            k % 2 == 0
+                        ):  # only draw half the subsubdivs past the half-freq point
+                            if (ssd % 2 > 0) and (
+                                j > self.options.y_half_freq
+                            ):  # half frequency won't work with odd numbers of subsubdivs,
                                 ssd2 = ssd + 1
                             else:
                                 ssd2 = ssd  # no change
-                            draw_line(0, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
-                                          xmax, self.options.dx * (i + 1 - log(j + k / float(ssd2), sd)),
-                                          self.options.y_subsubdivs_th,
-                                          'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)
+                            draw_line(
+                                0,
+                                self.options.dx
+                                * (i + 1 - log(j + k / float(ssd2), sd)),
+                                xmax,
+                                self.options.dx
+                                * (i + 1 - log(j + k / float(ssd2), sd)),
+                                self.options.y_subsubdivs_th,
+                                "SubminorXDiv" + str(i) + ":" + str(j) + ":" + str(k),
+                                mmingly,
+                            )
             else:  # linear y subdivs
                 for j in range(0, self.options.y_subdivs):
-                    if j > 0:  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
-                        draw_line(0, self.options.dy * (i + j / float(sd)),
-                                      xmax, self.options.dy * (i + j / float(sd)),
-                                      self.options.y_subdivs_th,
-                                      'MinorXYiv' + str(i) + ':' + str(j), mingly)
+                    if (
+                        j > 0
+                    ):  # not for the first loop (this loop is for the subsubdivs before the first subdiv)
+                        draw_line(
+                            0,
+                            self.options.dy * (i + j / float(sd)),
+                            xmax,
+                            self.options.dy * (i + j / float(sd)),
+                            self.options.y_subdivs_th,
+                            "MinorXYiv" + str(i) + ":" + str(j),
+                            mingly,
+                        )
 
                     for k in range(1, ssd):  # subsub divs
-                        draw_line(0, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
-                                      xmax, self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
-                                      self.options.y_subsubdivs_th,
-                                      'SubminorXDiv' + str(i) + ':' + str(j) + ':' + str(k), mmingly)
+                        draw_line(
+                            0,
+                            self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
+                            xmax,
+                            self.options.dy * (i + (j * ssd + k) / (float(sd) * ssd)),
+                            self.options.y_subsubdivs_th,
+                            "SubminorXDiv" + str(i) + ":" + str(j) + ":" + str(k),
+                            mmingly,
+                        )
 
         return grid
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     GridCartesian().run()

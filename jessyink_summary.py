@@ -22,10 +22,12 @@ import inkex
 
 from jessyink_install import JessyInkMixin, _
 
+
 class Summary(JessyInkMixin, inkex.EffectExtension):
     """Print of jessyInk summary"""
+
     def add_arguments(self, pars):
-        pars.add_argument('--tab')
+        pars.add_argument("--tab")
 
     def effect(self):
         self.is_installed()
@@ -49,11 +51,14 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
 
         if master_slide is not None:
             self.msg(_("\nMaster slide:"))
-            self.describe_node(master_slide, "\t",\
-                ["<the number of the slide>", len(slides), "<the title of the slide>"])
+            self.describe_node(
+                master_slide,
+                "\t",
+                ["<the number of the slide>", len(slides), "<the title of the slide>"],
+            )
 
         for i, slide in enumerate(slides):
-            self.msg(_("\nSlide {0!s}:").format(i+1))
+            self.msg(_("\nSlide {0!s}:").format(i + 1))
             self.describe_node(slide, "\t", [i + 1, len(slides), slide.label])
 
     def describe_node(self, node, prefix, dat):
@@ -78,15 +83,18 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
 
     def describe_autotext(self, node, prefix, dat):
         """Display information about auto-texts."""
-        auto_texts = {"slide_num" : dat[0], "num" : dat[1], "title" : dat[2]}
+        auto_texts = {"slide_num": dat[0], "num": dat[1], "title": dat[2]}
         for x, child in enumerate(node.xpath(".//*[@jessyink:autoText]")):
             if not x:
                 self.msg(_(f"\n{prefix}Auto-texts:"))
 
             pid = child.getparent().get("id")
-            val = auto_texts[child.get('jessyink:autoText')]
-            self.msg(_(
-                f'{prefix}\t"{child.text}" (object id "{pid}") will be replaced by "{val}".'))
+            val = auto_texts[child.get("jessyink:autoText")]
+            self.msg(
+                _(
+                    f'{prefix}\t"{child.text}" (object id "{pid}") will be replaced by "{val}".'
+                )
+            )
 
     def describe_effects(self, node, prefix):
         """Display information about effects."""
@@ -103,9 +111,9 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
             for item in effect:
                 eid = item["id"]
                 if item["type"] == "view":
-                    ret += _(f"{prefix}\tView will be set according to object \"{eid}\"")
+                    ret += _(f'{prefix}\tView will be set according to object "{eid}"')
                 else:
-                    ret += _(f"{prefix}\tObject \"{eid}\"")
+                    ret += _(f'{prefix}\tObject "{eid}"')
 
                     if item["direction"] == "in":
                         ret += _(" will appear")
@@ -113,7 +121,7 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
                         ret += _(" will disappear")
 
                 if item["name"] != "appear":
-                    ret += _(" using effect \"{0}\"").format(item["name"])
+                    ret += _(' using effect "{0}"').format(item["name"])
 
                 if "length" in item:
                     ret += _(" in {0!s} s").format(int(item["length"]) / 1000.0)
@@ -125,25 +133,26 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
         """Collect information about effects."""
         effects = defaultdict(list)
         for child in node.xpath(".//*[@jessyink:effectIn]"):
-            effect_data = inkex.Style(child.get('jessyink:effectIn'))
+            effect_data = inkex.Style(child.get("jessyink:effectIn"))
             effect_data["direction"] = "in"
             effect_data["id"] = child.get("id")
             effect_data["type"] = "effect"
             effects[effect_data["order"]].append(effect_data)
 
         for child in node.xpath(".//*[@jessyink:effectOut]"):
-            effect_data = inkex.Style(child.get('jessyink:effectOut'))
+            effect_data = inkex.Style(child.get("jessyink:effectOut"))
             effect_data["direction"] = "out"
             effect_data["id"] = child.get("id")
             effect_data["type"] = "effect"
             effects[effect_data["order"]].append(effect_data)
 
         for child in node.xpath(".//*[@jessyink:view]"):
-            effect_data = inkex.Style(child.get('jessyink:view'))
+            effect_data = inkex.Style(child.get("jessyink:view"))
             effect_data["id"] = child.get("id")
             effect_data["type"] = "view"
             effects[effect_data["order"]].append(effect_data)
         return effects
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Summary().run()

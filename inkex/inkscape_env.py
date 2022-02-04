@@ -26,25 +26,28 @@ Always import *before* anything else.
 import os
 import sys
 
+
 def get_bin(fname):
     """Get a virtualenv binary for execution, returns full filename"""
     for path in sys.path:
-        for script in [fname, os.path.join('bin', fname)]:
+        for script in [fname, os.path.join("bin", fname)]:
             result = os.path.abspath(os.path.join(path, script))
             if os.path.isfile(result):
                 return result
     return None
 
+
 def activate_virtualenv():
-    """ 
+    """
     The python that inkscape uses and the python installed into the virtualenv
     are different pythons with different libs. To give access to dependencies
     that are installed within the virtualenv, we activate the available venv.
     """
-    activate_this = get_bin('activate_this.py')
+    activate_this = get_bin("activate_this.py")
     if activate_this and os.path.isfile(activate_this):
-        with open(activate_this, 'r') as fhl:
+        with open(activate_this, "r") as fhl:
             exec(fhl.read(), dict(__file__=activate_this))
         return
+
 
 activate_virtualenv()

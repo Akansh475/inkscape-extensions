@@ -30,13 +30,15 @@ from pylint import lint
 from pylint.reporters.text import TextReporter
 
 DIR = os.path.dirname(__file__)
-REX = re.compile(r'<tr\ class=\"file\"\>.+?\">([^<]+\.py).+?\<\/tr\>')
+REX = re.compile(r"<tr\ class=\"file\"\>.+?\">([^<]+\.py).+?\<\/tr\>")
 
-ARGS = ["--rcfile=" + os.path.join(DIR, '..', '.pylintrc')]
+ARGS = ["--rcfile=" + os.path.join(DIR, "..", ".pylintrc")]
 stdout = sys.stdout
+
 
 class WritableObject(object):
     """dummy output stream for pylint"""
+
     def __init__(self):
         self.content = []
 
@@ -48,21 +50,22 @@ class WritableObject(object):
         "dummy read"
         return self.content
 
+
 def run_pylint(fname):
     "run pylint on the given file"
     pylint_output = WritableObject()
     # Pipe lint errors to devnull
-    temp, sys.stderr = sys.stderr, open(os.devnull, 'w')
+    temp, sys.stderr = sys.stderr, open(os.devnull, "w")
     try:
-        lint.Run([fname]+ARGS, reporter=TextReporter(pylint_output), exit=False)
-    except Exception: # pylint: disable=broad-except
+        lint.Run([fname] + ARGS, reporter=TextReporter(pylint_output), exit=False)
+    except Exception:  # pylint: disable=broad-except
         return None
     sys.stderr = temp
     for output in pylint_output.read():
-        rates = re.findall(r'rated at (\-?[\d\.]+)', output)
+        rates = re.findall(r"rated at (\-?[\d\.]+)", output)
         for rate in rates:
             return float(rate)
-        if ' rated ' in output:
+        if " rated " in output:
             print(f"FAIL: {output}")
     return None
 
@@ -72,8 +75,8 @@ def add_lint(fname):
     Parse index.html and append in the needed pylint score for this file.
     """
     # Read in index file and strip out html whitespace (for easier rex'ing)
-    with open(fname, 'r') as fhl:
-        html = re.sub(r'\>\s+\<', '><', fhl.read())
+    with open(fname, "r") as fhl:
+        html = re.sub(r"\>\s+\<", "><", fhl.read())
 
     # Keep a tab on how much we've inserted into the html
     adjust = 0
@@ -85,16 +88,17 @@ def add_lint(fname):
         start += adjust
         end += adjust
         old_content = html[start:end]
-        new_content = old_content[:-5] + f'<td>{score}</td></tr>'
+        new_content = old_content[:-5] + f"<td>{score}</td></tr>"
         html = html[:start] + new_content + html[end:]
         adjust += len(new_content) - len(old_content)
 
     total = sum(scores) / len(scores)
-    html = html.replace('coverage</th>', 'coverage</th><th>pylint</th>')
-    html = html.replace('</tr></tfoot>', f'<td>{total:.2f}</td></tr></tfoot>')
+    html = html.replace("coverage</th>", "coverage</th><th>pylint</th>")
+    html = html.replace("</tr></tfoot>", f"<td>{total:.2f}</td></tr></tfoot>")
 
-    with open(fname, 'w') as fhl:
+    with open(fname, "w") as fhl:
         fhl.write(html)
+
 
 def add_lint_one(py_file):
     score = run_pylint(py_file)
@@ -102,8 +106,9 @@ def add_lint_one(py_file):
         score = -11.0
     return score
 
-if __name__ == '__main__':
-    if len(sys.argv) == 2 and sys.argv[-1].endswith('.html'):
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[-1].endswith(".html"):
         for filename in sys.argv[1:]:
             if os.path.isfile(filename):
                 add_lint(filename)

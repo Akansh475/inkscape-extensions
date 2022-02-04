@@ -23,12 +23,13 @@ import sys
 
 import inkex
 
+
 class NewGlyphLayer(inkex.EffectExtension):
     def add_arguments(self, pars):
-        self.arg_parser.add_argument("--text", default='', help="Unicode chars")
+        self.arg_parser.add_argument("--text", default="", help="Unicode chars")
 
         self.encoding = sys.stdin.encoding
-        if self.encoding == 'cp0' or self.encoding is None:
+        if self.encoding == "cp0" or self.encoding is None:
             self.encoding = locale.getpreferredencoding()
 
     def effect(self):
@@ -41,13 +42,14 @@ class NewGlyphLayer(inkex.EffectExtension):
 
         for char in unicode_chars:
             # Create a new layer.
-            layer = self.svg.add(inkex.Layer.new(u'GlyphLayer-' + char))
-            layer.set('style', 'display:none')  # initially not visible
+            layer = self.svg.add(inkex.Layer.new("GlyphLayer-" + char))
+            layer.set("style", "display:none")  # initially not visible
 
             # TODO: make it optional ("Use current selection as template glyph")
             # Move selection to the newly created layer
             for node in self.svg.selected.values():
                 layer.append(node)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     NewGlyphLayer().run()

@@ -31,6 +31,7 @@ try:
 except ImportError:
     serial = None
 
+
 class Serial:
     """
     Attempt to get access to the computer's serial port.
@@ -41,10 +42,12 @@ class Serial:
     Provides access to the debug/testing ports which are pretend ports
     able to accept the same input but allow for debugging.
     """
+
     def __init__(self, port, baud=9600, timeout=0.1, **options):
-        self.test = port == '[test]'
+        self.test = port == "[test]"
         if self.test:
-            import pty # This does not work on windows
+            import pty  # This does not work on windows
+
             self.controller, self.peripheral = pty.openpty()
             port = os.ttyname(self.peripheral)
 
@@ -57,34 +60,36 @@ class Serial:
 
     def set_options(self, stop=1, size=8, flow=None, parity=None):
         """Set further options on the serial port"""
-        size = {5: 'five', 6: 'six', 7: 'seven', 8: 'eight'}.get(size, size)
-        stop = {'onepointfive': 1.5}.get(stop.lower(), stop)
-        stop = {1: 'one', 1.5: 'one_point_five', 2: 'two'}.get(stop, stop)
-        self.com.bytesize = getattr(serial, str(str(size).upper()) + 'BITS')
-        self.com.stopbits = getattr(serial, 'STOPBITS_' + str(stop).upper())
-        self.com.parity = getattr(serial, 'PARITY_' + str(parity).upper())
+        size = {5: "five", 6: "six", 7: "seven", 8: "eight"}.get(size, size)
+        stop = {"onepointfive": 1.5}.get(stop.lower(), stop)
+        stop = {1: "one", 1.5: "one_point_five", 2: "two"}.get(stop, stop)
+        self.com.bytesize = getattr(serial, str(str(size).upper()) + "BITS")
+        self.com.stopbits = getattr(serial, "STOPBITS_" + str(stop).upper())
+        self.com.parity = getattr(serial, "PARITY_" + str(parity).upper())
         # set flow control
-        self.com.xonxoff = flow == 'xonxoff'
-        self.com.rtscts = flow in ('rtscts', 'dsrdtrrtscts')
-        self.com.dsrdtr = flow == 'dsrdtrrtscts'
+        self.com.xonxoff = flow == "xonxoff"
+        self.com.rtscts = flow in ("rtscts", "dsrdtrrtscts")
+        self.com.dsrdtr = flow == "dsrdtrrtscts"
 
     def __enter__(self):
         try:
             # try to establish connection
             self.com.open()
         except serial.SerialException:
-            raise AbortExtension("Could not open serial port. Please check your device"\
-                                 " is running, connected and the settings are correct")
+            raise AbortExtension(
+                "Could not open serial port. Please check your device"
+                " is running, connected and the settings are correct"
+            )
         return self.com
 
     def __exit__(self, exc, value, traceback):
         if not traceback and self.test:
-            output = ' ' * 1024
+            output = " " * 1024
             while len(output) == 1024:
                 time.sleep(0.01)
                 output = os.read(self.controller, 1024)
-                sys.stderr.write(output.decode('utf8'))
-        #self.com.read(2)
+                sys.stderr.write(output.decode("utf8"))
+        # self.com.read(2)
         self.com.close()
 
     @staticmethod
@@ -96,5 +101,5 @@ class Serial:
     @staticmethod
     def list_ports():
         """Return a list of available serial ports"""
-        Serial.has_serial() # Cause DependencyError error
+        Serial.has_serial()  # Cause DependencyError error
         return [hw.name for hw in list_ports.comports(True)]

@@ -33,11 +33,13 @@ filters that are being used.
 import re
 from ..utils import to_bytes
 
+
 class Compare:
     """
     Comparison base class, this acts as a passthrough unless
     the filter staticmethod is overwritten.
     """
+
     def __init__(self, **options):
         self.options = options
 
@@ -49,6 +51,7 @@ class Compare:
         """Replace this filter method with your own filtering"""
         return contents
 
+
 class CompareNumericFuzzy(Compare):
     """
     Turn all numbers into shorter standard formats
@@ -57,78 +60,102 @@ class CompareNumericFuzzy(Compare):
     1.2300 -> 1.23, 50.0000 -> 50.0
     50.0 -> 50
     """
+
     @staticmethod
     def filter(contents):
-        func = lambda m: b'%.3f' % (float(m.group(0)))
-        contents = re.sub(br'\d+\.\d+(e[+-]\d+)?', func, contents)
-        contents = re.sub(br'(\d\.\d+?)0+\b', br'\1', contents)
-        contents = re.sub(br'(\d)\.0+(?=\D|\b)', br'\1', contents)
+        func = lambda m: b"%.3f" % (float(m.group(0)))
+        contents = re.sub(rb"\d+\.\d+(e[+-]\d+)?", func, contents)
+        contents = re.sub(rb"(\d\.\d+?)0+\b", rb"\1", contents)
+        contents = re.sub(rb"(\d)\.0+(?=\D|\b)", rb"\1", contents)
         return contents
+
 
 class CompareWithoutIds(Compare):
     """Remove all ids from the svg"""
+
     @staticmethod
     def filter(contents):
-        return re.sub(br' id="([^"]*)"', b'', contents)
+        return re.sub(rb' id="([^"]*)"', b"", contents)
+
 
 class CompareWithPathSpace(Compare):
     """Make sure that path segment commands have spaces around them"""
+
     @staticmethod
     def filter(contents):
         def func(match):
             """We've found a path command, process it"""
-            new = re.sub(br'\s*([LZMHVCSQTAatqscvhmzl])\s*', br' \1 ', match.group(1))
-            return b' d="' + new.replace(b',', b' ') + b'"'
-        return re.sub(br' d="([^"]*)"', func, contents)
+            new = re.sub(rb"\s*([LZMHVCSQTAatqscvhmzl])\s*", rb" \1 ", match.group(1))
+            return b' d="' + new.replace(b",", b" ") + b'"'
+
+        return re.sub(rb' d="([^"]*)"', func, contents)
+
 
 class CompareSize(Compare):
     """Compare the length of the contents instead of the contents"""
+
     @staticmethod
     def filter(contents):
         return len(contents)
 
+
 class CompareOrderIndependentBytes(Compare):
     """Take all the bytes and sort them"""
+
     @staticmethod
     def filter(contents):
         return b"".join([bytes(i) for i in sorted(contents)])
 
+
 class CompareOrderIndependentLines(Compare):
     """Take all the lines and sort them"""
+
     @staticmethod
     def filter(contents):
         return b"\n".join(sorted(contents.splitlines()))
 
+
 class CompareOrderIndependentStyle(Compare):
     """Take all styles and sort the results"""
+
     @staticmethod
     def filter(contents):
         contents = CompareNumericFuzzy.filter(contents)
+
         def func(match):
             """Search and replace function for sorting"""
-            sty = b';'.join(sorted(match.group(1).split(b';')))
+            sty = b";".join(sorted(match.group(1).split(b";")))
             return b'style="%s"' % (sty,)
-        return re.sub(br'style="([^"]*)"', func, contents)
+
+        return re.sub(rb'style="([^"]*)"', func, contents)
+
 
 class CompareOrderIndependentStyleAndPath(Compare):
     """Take all styles and paths and sort them both"""
+
     @staticmethod
     def filter(contents):
         contents = CompareOrderIndependentStyle.filter(contents)
+
         def func(match):
             """Search and replace function for sorting"""
-            path = b'X'.join(sorted(re.split(br'[A-Z]', match.group(1))))
+            path = b"X".join(sorted(re.split(rb"[A-Z]", match.group(1))))
             return b'd="%s"' % (path,)
-        return re.sub(br'\bd="([^"]*)"', func, contents)
+
+        return re.sub(rb'\bd="([^"]*)"', func, contents)
+
 
 class CompareOrderIndependentTags(Compare):
     """Sorts all the XML tags"""
+
     @staticmethod
     def filter(contents):
-        return b"\n".join(sorted(re.split(br'>\s*<', contents)))
+        return b"\n".join(sorted(re.split(rb">\s*<", contents)))
+
 
 class CompareReplacement(Compare):
     """Replace pieces to make output more comparable"""
+
     def __init__(self, *replacements):
         self.deltas = replacements
         super().__init__()
@@ -139,6 +166,7 @@ class CompareReplacement(Compare):
             contents = contents.replace(to_bytes(_from), to_bytes(_to))
         return contents
 
+
 class WindowsTextCompat(CompareReplacement):
     def __init__(self):
-        super().__init__(('\r\n', '\n'))
+        super().__init__(("\r\n", "\n"))

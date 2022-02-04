@@ -38,13 +38,14 @@ from ..styles import StyleSheets
 from ._base import BaseElement
 from ._meta import StyleElement
 
-if False: # pylint: disable=using-constant-test
-    import typing # pylint: disable=unused-import
+if False:  # pylint: disable=using-constant-test
+    import typing  # pylint: disable=unused-import
 
 
 class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
     """Provide access to the document level svg functionality"""
-    tag_name = 'svg'
+
+    tag_name = "svg"
 
     def _init(self):
         self.current_layer = None
@@ -59,17 +60,17 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
     def get_ids(self):
         """Returns a set of unique document ids"""
         if not self.ids:
-            self.ids = set(self.xpath('//@id'))
+            self.ids = set(self.xpath("//@id"))
         return self.ids
 
     def get_unique_id(self, prefix, size=None):
         """Generate a new id from an existing old_id"""
         ids = self.get_ids()
         if size is None:
-            size = max(math.ceil(math.log10(len(ids) or 1000))+1, 4)
+            size = max(math.ceil(math.log10(len(ids) or 1000)) + 1, 4)
         new_id = None
-        _from = 10 ** size - 1
-        _to = 10 ** size
+        _from = 10**size - 1
+        _to = 10**size
         while new_id is None or new_id in ids:
             # Do not use randint because py2/3 incompatibility
             new_id = prefix + str(int(random.random() * _from - _to) + _to)
@@ -78,11 +79,13 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
 
     def get_page_bbox(self):
         """Gets the page dimensions as a bbox"""
-        return BoundingBox((0, float(self.viewbox_width)), (0, float(self.viewbox_height)))
+        return BoundingBox(
+            (0, float(self.viewbox_width)), (0, float(self.viewbox_height))
+        )
 
     def get_current_layer(self):
         """Returns the currently selected layer"""
-        layer = self.getElementById(self.namedview.current_layer, 'svg:g')
+        layer = self.getElementById(self.namedview.current_layer, "svg:g")
         if layer is None:
             return self
         return layer
@@ -91,27 +94,30 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Gets a single element from the given xpath or returns None"""
         return self.findone(xpath)
 
-    def getElementById(self, eid, elm='*', literal=False): # pylint: disable=invalid-name
+    def getElementById(
+        self, eid, elm="*", literal=False
+    ):  # pylint: disable=invalid-name
         """Get an element in this svg document by it's ID attribute"""
         if eid is not None and not literal:
-            eid = eid.strip()[4:-1] if eid.startswith('url(') else eid
-            eid = eid.lstrip('#')
+            eid = eid.strip()[4:-1] if eid.startswith("url(") else eid
+            eid = eid.lstrip("#")
         return self.getElement(f'//{elm}[@id="{eid}"]')
 
-    def getElementByName(self, name, elm='*'): # pylint: disable=invalid-name
+    def getElementByName(self, name, elm="*"):  # pylint: disable=invalid-name
         """Get an element by it's inkscape:label (aka name)"""
         return self.getElement(f'//{elm}[@inkscape:label="{name}"]')
 
-    def getElementsByClass(self, class_name): # pylint: disable=invalid-name
+    def getElementsByClass(self, class_name):  # pylint: disable=invalid-name
         """Get elements by it's class name"""
         from inkex.styles import ConditionalRule
+
         return self.xpath(ConditionalRule(f".{class_name}").to_xpath())
 
-    def getElementsByHref(self, eid): # pylint: disable=invalid-name
+    def getElementsByHref(self, eid):  # pylint: disable=invalid-name
         """Get elements by their href xlink attribute"""
         return self.xpath(f'//*[@xlink:href="#{eid}"]')
 
-    def getElementsByStyleUrl(self, eid, style=None): # pylint: disable=invalid-name
+    def getElementsByStyleUrl(self, eid, style=None):  # pylint: disable=invalid-name
         """Get elements by a style attribute url"""
         url = f"url(#{eid})"
         if style is not None:
@@ -121,29 +127,29 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
     @property
     def name(self):
         """Returns the Document Name"""
-        return self.get('sodipodi:docname', '')
+        return self.get("sodipodi:docname", "")
 
     @property
     def namedview(self):
         """Return the sp namedview meta information element"""
-        return self.get_or_create('//sodipodi:namedview', prepend=True)
+        return self.get_or_create("//sodipodi:namedview", prepend=True)
 
     @property
     def metadata(self):
         """Return the svg metadata meta element container"""
-        return self.get_or_create('//svg:metadata', prepend=True)
+        return self.get_or_create("//svg:metadata", prepend=True)
 
     @property
     def defs(self):
         """Return the svg defs meta element container"""
-        return self.get_or_create('//svg:defs', prepend=True)
+        return self.get_or_create("//svg:defs", prepend=True)
 
     def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""
         try:
-            ret = [float(unit) for unit in self.get('viewBox', '0').split()]
+            ret = [float(unit) for unit in self.get("viewBox", "0").split()]
         except ValueError:
-            ret = ''
+            ret = ""
         if len(ret) != 4:
             return [0, 0, 0, 0]
         return ret
@@ -161,7 +167,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Returns the width of the `viewport coordinate system
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the width
         attribute of the svg element converted to px"""
-        return self.to_dimensionless(self.get('width')) or self.get_viewbox()[2]
+        return self.to_dimensionless(self.get("width")) or self.get_viewbox()[2]
 
     @property
     def viewbox_height(self):  # getDocumentHeight(self):
@@ -176,7 +182,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Returns the width of the `viewport coordinate system
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the height
         attribute of the svg element converted to px"""
-        return self.to_dimensionless(self.get('height')) or self.get_viewbox()[3]
+        return self.to_dimensionless(self.get("height")) or self.get_viewbox()[3]
 
     @property
     def scale(self):
@@ -188,16 +194,20 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         """Returns the ratio between the viewBox width (in width/height units) and the
         page width, which is displayed as "scale" in the Inkscape document properties."""
 
-        viewbox_unit = (parse_unit(self.get("width")) or parse_unit(self.get("height"))\
-                        or (0, "px"))[1]
+        viewbox_unit = (
+            parse_unit(self.get("width")) or parse_unit(self.get("height")) or (0, "px")
+        )[1]
         return self._base_scale(viewbox_unit)
-
 
     def _base_scale(self, unit="px"):
         """Returns what Inkscape shows as "user units per `unit`" """
         try:
-            scale_x = self.to_dimensional(self.viewport_width, unit) / self.viewbox_width
-            scale_y = self.to_dimensional(self.viewport_height, unit) / self.viewbox_height
+            scale_x = (
+                self.to_dimensional(self.viewport_width, unit) / self.viewbox_width
+            )
+            scale_y = (
+                self.to_dimensional(self.viewport_height, unit) / self.viewbox_height
+            )
             value = max([scale_x, scale_y])
             return 1.0 if value == 0 else value
         except (ValueError, ZeroDivisionError):
@@ -217,11 +227,11 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
         defines what units are used for SVG coordinates, it tries to calculate
         the unit from the SVG width and viewBox attributes.
         Defaults to 'px' units."""
-        if not hasattr(self, '_unit'):
-            self._unit = 'px' # Default is px
+        if not hasattr(self, "_unit"):
+            self._unit = "px"  # Default is px
             viewbox = self.get_viewbox()
             if viewbox and set(viewbox) != {0}:
-                self._unit = discover_unit(self.get('width'), viewbox[2], default='px')
+                self._unit = discover_unit(self.get("width"), viewbox[2], default="px")
         return self._unit
 
     @property
@@ -232,7 +242,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
     def stylesheets(self):
         """Get all the stylesheets, bound together to one, (for reading)"""
         sheets = StyleSheets(self)
-        for node in self.xpath('//svg:style'):
+        for node in self.xpath("//svg:style"):
             sheets.append(node.stylesheet())
         return sheets
 

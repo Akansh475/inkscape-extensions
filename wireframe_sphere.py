@@ -60,7 +60,8 @@ EPSILON = 0.001
 
 class WireframeSphere(inkex.GenerateExtension):
     """Writeframe extension, generate a wireframe"""
-    container_label = 'WireframeSphere'
+
+    container_label = "WireframeSphere"
 
     def container_transform(self):
         transform = super(WireframeSphere, self).container_transform()
@@ -74,17 +75,19 @@ class WireframeSphere(inkex.GenerateExtension):
         pars.add_argument("--radius", type=float, dest="RADIUS", default=100.0)
         pars.add_argument("--tilt", type=float, dest="TILT", default=35.0)
         pars.add_argument("--rotation", type=float, dest="ROT_OFFSET", default=4)
-        pars.add_argument("--hide_back", type=inkex.Boolean, dest="HIDE_BACK", default=False)
+        pars.add_argument(
+            "--hide_back", type=inkex.Boolean, dest="HIDE_BACK", default=False
+        )
 
     def generate(self):
         opt = self.options
 
         # PARAMETER PROCESSING
         if opt.NUM_LONG % 2 != 0:  # lines of longitude are odd : abort
-            inkex.errormsg('Please enter an even number of lines of longitude.')
+            inkex.errormsg("Please enter an even number of lines of longitude.")
             return
 
-        radius = self.svg.unittouu(str(opt.RADIUS) + 'px')
+        radius = self.svg.unittouu(str(opt.RADIUS) + "px")
         tilt = abs(opt.TILT) * (pi / 180)  # Convert to radians
         rotate = opt.ROT_OFFSET * pi / 180  # Convert to radians
 
@@ -105,10 +108,10 @@ class WireframeSphere(inkex.GenerateExtension):
         """Add lines of latitude as a group"""
         # GROUP FOR THE LINES OF LONGITUDE
         grp_long = inkex.Group()
-        grp_long.set('inkscape:label', 'Lines of Longitude')
+        grp_long.set("inkscape:label", "Lines of Longitude")
 
         # angle between neighbouring lines of longitude in degrees
-        #delta_long = 360.0 / number
+        # delta_long = 360.0 / number
 
         for i in range(0, number // 2):
             # The longitude of this particular line in radians
@@ -124,8 +127,7 @@ class WireframeSphere(inkex.GenerateExtension):
 
             # The rotation of the ellipse to get it to pass through the pole (degs)
             rotation = atan(
-                (radius * sin(long_angle) * sin(tilt)) /
-                (radius * cos(long_angle))
+                (radius * sin(long_angle) * sin(tilt)) / (radius * cos(long_angle))
             ) * (180.0 / pi)
 
             # remove the hidden side of the ellipses if required
@@ -148,20 +150,20 @@ class WireframeSphere(inkex.GenerateExtension):
         """Add lines of latitude as a group"""
         # GROUP FOR THE LINES OF LATITUDE
         grp_lat = inkex.Group()
-        grp_lat.set('inkscape:label', 'Lines of Latitude')
+        grp_lat.set("inkscape:label", "Lines of Latitude")
 
         # Angle between the line of latitude (subtended at the centre)
         delta_lat = 180.0 / number
 
         for i in range(1, number):
             # The angle of this line of latitude (from a pole)
-            lat_angle = ((delta_lat * i) * (pi / 180))
+            lat_angle = (delta_lat * i) * (pi / 180)
 
             # The width of the LoLat (no change due to projection)
             # The projected height of the line of latitude
             rads = (
-                radius * sin(lat_angle), # major
-                (radius * sin(lat_angle) * sin(tilt)) + EPSILON, # minor
+                radius * sin(lat_angle),  # major
+                (radius * sin(lat_angle) * sin(tilt)) + EPSILON,  # minor
             )
 
             # The x position is the sphere center, The projected y position of the LoLat
@@ -172,8 +174,10 @@ class WireframeSphere(inkex.GenerateExtension):
                     if lat_angle > pi - tilt:  # this LoLat is fully visible
                         grp_lat.add(self.draw_ellipse(rads, pos))
                     else:  # this LoLat is partially visible
-                        proportion = -(acos(tan(lat_angle - pi / 2) \
-                                       / tan(pi / 2 - tilt))) / pi + 1
+                        proportion = (
+                            -(acos(tan(lat_angle - pi / 2) / tan(pi / 2 - tilt))) / pi
+                            + 1
+                        )
                         # make the start and end angles (mirror image around pi/2)
                         start_end = (pi / 2 - proportion * pi, pi / 2 + proportion * pi)
                         grp_lat.add(self.draw_ellipse(rads, pos, start_end))
@@ -184,12 +188,21 @@ class WireframeSphere(inkex.GenerateExtension):
 
     def draw_ellipse(self, r_xy, c_xy, start_end=(0, 2 * pi)):
         """Creates an elipse with all the required sodipodi attributes"""
-        path = inkex.PathElement.arc(c_xy, *r_xy, start=start_end[0], end=start_end[1], 
-                                     open="true", arctype="arc")
-        path.style = {'stroke': '#000000',
-                      'stroke-width': str(self.svg.unittouu('1px')),
-                      'fill': 'none'}
+        path = inkex.PathElement.arc(
+            c_xy,
+            *r_xy,
+            start=start_end[0],
+            end=start_end[1],
+            open="true",
+            arctype="arc"
+        )
+        path.style = {
+            "stroke": "#000000",
+            "stroke-width": str(self.svg.unittouu("1px")),
+            "fill": "none",
+        }
         return path
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     WireframeSphere().run()

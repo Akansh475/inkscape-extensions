@@ -28,6 +28,7 @@ from inkex import PathElement, Pattern
 
 import voronoi
 
+
 def clip_line(x1, y1, x2, y2, w, h):
     if x1 < 0 and x2 < 0:
         return [0, 0, 0, 0]
@@ -69,30 +70,36 @@ def clip_line(x1, y1, x2, y2, w, h):
 class GenerateVoronoi(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--tab")
-        pars.add_argument("--size", type=int, default=10, help="Average size of cell (px)")
+        pars.add_argument(
+            "--size", type=int, default=10, help="Average size of cell (px)"
+        )
         pars.add_argument("--border", type=int, default=0, help="Size of Border (px)")
 
     def effect(self):
         if not self.options.ids:
             return inkex.errormsg(_("Please select an object"))
-        scale = self.svg.unittouu('1px')  # convert to document units
+        scale = self.svg.unittouu("1px")  # convert to document units
         self.options.size *= scale
         self.options.border *= scale
         obj = self.svg.selection.first()
         bbox = obj.bounding_box()
         mat = obj.composed_transform().matrix
         pattern = self.svg.defs.add(Pattern())
-        pattern.set_random_id('Voronoi')
-        pattern.set('width', str(bbox.width))
-        pattern.set('height', str(bbox.height))
-        pattern.set('patternUnits', 'userSpaceOnUse')
-        pattern.patternTransform.add_translate(bbox.left - mat[0][2], bbox.top - mat[1][2])
+        pattern.set_random_id("Voronoi")
+        pattern.set("width", str(bbox.width))
+        pattern.set("height", str(bbox.height))
+        pattern.set("patternUnits", "userSpaceOnUse")
+        pattern.patternTransform.add_translate(
+            bbox.left - mat[0][2], bbox.top - mat[1][2]
+        )
 
         # generate random pattern of points
         c = voronoi.Context()
         pts = []
         b = float(self.options.border)  # width of border
-        for i in range(int(bbox.width * bbox.height / self.options.size / self.options.size)):
+        for i in range(
+            int(bbox.width * bbox.height / self.options.size / self.options.size)
+        ):
             x = random.random() * bbox.width
             y = random.random() * bbox.height
             if b > 0:  # duplicate border area
@@ -129,7 +136,14 @@ class GenerateVoronoi(inkex.EffectExtension):
         path = ""
         for edge in c.edges:
             if edge[1] >= 0 and edge[2] >= 0:  # two vertices
-                [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], c.vertices[edge[2]][0], c.vertices[edge[2]][1], bbox.width, bbox.height)
+                [x1, y1, x2, y2] = clip_line(
+                    c.vertices[edge[1]][0],
+                    c.vertices[edge[1]][1],
+                    c.vertices[edge[2]][0],
+                    c.vertices[edge[2]][1],
+                    bbox.width,
+                    bbox.height,
+                )
             elif edge[1] >= 0:  # only one vertex
                 if c.lines[edge[0]][1] == 0:  # vertical line
                     xtemp = c.lines[edge[0]][2] / c.lines[edge[0]][0]
@@ -139,8 +153,17 @@ class GenerateVoronoi(inkex.EffectExtension):
                         ytemp = 0
                 else:
                     xtemp = bbox.width
-                    ytemp = (c.lines[edge[0]][2] - bbox.width * c.lines[edge[0]][0]) / c.lines[edge[0]][1]
-                [x1, y1, x2, y2] = clip_line(c.vertices[edge[1]][0], c.vertices[edge[1]][1], xtemp, ytemp, bbox.width, bbox.height)
+                    ytemp = (
+                        c.lines[edge[0]][2] - bbox.width * c.lines[edge[0]][0]
+                    ) / c.lines[edge[0]][1]
+                [x1, y1, x2, y2] = clip_line(
+                    c.vertices[edge[1]][0],
+                    c.vertices[edge[1]][1],
+                    xtemp,
+                    ytemp,
+                    bbox.width,
+                    bbox.height,
+                )
             elif edge[2] >= 0:  # only one vertex
                 if edge[0] >= len(c.lines):
                     xtemp = 0
@@ -154,19 +177,27 @@ class GenerateVoronoi(inkex.EffectExtension):
                 else:
                     xtemp = 0
                     ytemp = c.lines[edge[0]][2] / c.lines[edge[0]][1]
-                [x1, y1, x2, y2] = clip_line(xtemp, ytemp, c.vertices[edge[2]][0], c.vertices[edge[2]][1], bbox.width, bbox.height)
+                [x1, y1, x2, y2] = clip_line(
+                    xtemp,
+                    ytemp,
+                    c.vertices[edge[2]][0],
+                    c.vertices[edge[2]][1],
+                    bbox.width,
+                    bbox.height,
+                )
             if x1 or x2 or y1 or y2:
-                path += 'M %.3f,%.3f %.3f,%.3f ' % (x1, y1, x2, y2)
+                path += "M %.3f,%.3f %.3f,%.3f " % (x1, y1, x2, y2)
 
-        patternstyle = {'stroke': '#000000', 'stroke-width': str(scale)}
-        attribs = {'d': path, 'style': str(inkex.Style(patternstyle))}
+        patternstyle = {"stroke": "#000000", "stroke-width": str(scale)}
+        attribs = {"d": path, "style": str(inkex.Style(patternstyle))}
         pattern.append(PathElement(**attribs))
 
         # link selected object to pattern
-        obj.style['fill'] = pattern
+        obj.style["fill"] = pattern
         if isinstance(obj, inkex.Group):
             for node in obj:
-                node.style['fill'] = pattern
+                node.style["fill"] = pattern
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     GenerateVoronoi().run()

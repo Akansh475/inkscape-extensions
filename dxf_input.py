@@ -183,142 +183,6 @@ COLORS = [
     "#009898",
     "#4C9898",
     "#007F7F",
-    "#FF0000",
-    "#FFFF00",
-    "#00FF00",
-    "#00FFFF",
-    "#0000FF",
-    "#FF00FF",
-    "#000000",
-    "#808080",
-    "#C0C0C0",
-    "#FF0000",
-    "#FF7F7F",
-    "#CC0000",
-    "#CC6666",
-    "#990000",
-    "#994C4C",
-    "#7F0000",
-    "#7F3F3F",
-    "#4C0000",
-    "#4C2626",
-    "#FF3F00",
-    "#FF9F7F",
-    "#CC3300",
-    "#CC7F66",
-    "#992600",
-    "#995F4C",
-    "#7F1F00",
-    "#7F4F3F",
-    "#4C1300",
-    "#4C2F26",
-    "#FF7F00",
-    "#FFBF7F",
-    "#CC6600",
-    "#CC9966",
-    "#994C00",
-    "#99724C",
-    "#7F3F00",
-    "#7F5F3F",
-    "#4C2600",
-    "#4C3926",
-    "#FFBF00",
-    "#FFDF7F",
-    "#CC9900",
-    "#CCB266",
-    "#997200",
-    "#99854C",
-    "#7F5F00",
-    "#7F6F3F",
-    "#4C3900",
-    "#4C4226",
-    "#FFFF00",
-    "#FFFF7F",
-    "#CCCC00",
-    "#CCCC66",
-    "#989800",
-    "#98984C",
-    "#7F7F00",
-    "#7F7F3F",
-    "#4C4C00",
-    "#4C4C26",
-    "#BFFF00",
-    "#DFFF7F",
-    "#99CC00",
-    "#B2CC66",
-    "#729800",
-    "#85984C",
-    "#5F7F00",
-    "#6F7F3F",
-    "#394C00",
-    "#424C26",
-    "#7FFF00",
-    "#BFFF7F",
-    "#66CC00",
-    "#99CC66",
-    "#4C9800",
-    "#72984C",
-    "#3F7F00",
-    "#5F7F3F",
-    "#264C00",
-    "#394C26",
-    "#3FFF00",
-    "#9FFF7F",
-    "#33CC00",
-    "#7FCC66",
-    "#269800",
-    "#5F984C",
-    "#1F7F00",
-    "#4F7F3F",
-    "#134C00",
-    "#2F4C26",
-    "#00FF00",
-    "#7FFF7F",
-    "#00CC00",
-    "#66CC66",
-    "#009800",
-    "#4C984C",
-    "#007F00",
-    "#3F7F3F",
-    "#004C00",
-    "#264C26",
-    "#00FF3F",
-    "#7FFF9F",
-    "#00CC33",
-    "#66CC7F",
-    "#009826",
-    "#4C985F",
-    "#007F1F",
-    "#3F7F4F",
-    "#004C13",
-    "#264C2F",
-    "#00FF7F",
-    "#7FFFBF",
-    "#00CC66",
-    "#66CC99",
-    "#00984C",
-    "#4C9872",
-    "#007F3F",
-    "#3F7F5F",
-    "#004C26",
-    "#264C39",
-    "#00FFBF",
-    "#7FFFDF",
-    "#00CC99",
-    "#66CCB2",
-    "#009872",
-    "#4C9885",
-    "#007F5F",
-    "#3F7F6F",
-    "#004C39",
-    "#264C42",
-    "#00FFFF",
-    "#7FFFFF",
-    "#00CCCC",
-    "#66CCCC",
-    "#009898",
-    "#4C9898",
-    "#007F7F",
     "#3F7F7F",
     "#004C4C",
     "#264C4C",
@@ -441,11 +305,24 @@ COLORS = [
 ]
 
 
-def get_rgbcolor(dxfcolor):
+def get_rgbcolor(dxfcolor, parent_color="#000000"):
+    """Returns hex color code corresponding to a color value
+
+    dxfcolor     -- dxf code to convert to hex color code
+                    0 (BYBLOCK) and 256 (BYLAYER) use parent_color
+                    No more differentiation is currently done
+                    Negative values are ignored (specification
+                    allows layer to be hidden here)
+                    Negative values also use parent_color
+    parent_color -- hex color code from parent layer.
+                    Use default color '#000000' if
+                    parent layer color undefined.
+    """
+    rgbcolor = None
     if dxfcolor in range(1, len(COLORS)):
         rgbcolor = COLORS[dxfcolor]
-    else:
-        rgbcolor = "#000000"
+    if not rgbcolor:
+        rgbcolor = parent_color
     return rgbcolor
 
 
@@ -1563,9 +1440,9 @@ class DxfInput(inkex.InputExtension):
                     color = "#000000"  # default color
                     if vals.has_layer_name:
                         if vals.layer_name in layer_colors:
-                            color = get_rgbcolor(layer_colors[vals.layer_name])
+                            color = get_rgbcolor(layer_colors[vals.layer_name], color)
                     if vals.has_color:  # Common Color Number
-                        color = get_rgbcolor(vals.color)
+                        color = get_rgbcolor(vals.color, color)
                     style = formatStyle({"stroke": "%s" % color, "fill": "none"})
                     w = 0.5  # default lineweight for POINT
                     if vals.has_line_weight:  # Common Lineweight

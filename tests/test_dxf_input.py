@@ -19,6 +19,9 @@ class TestDxfInputBasic(ComparisonMixin, TestCase):
         # test placement of graphical objects from BLOCKS section
         # ellipses currently are too large
         "io/dxf_multiple_inserts.dxf",
+        # test correct colors generated
+        # currently BYLAYER and BYBLOCK colors in inserted block are wrong
+        "io/color.dxf",
     ]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]

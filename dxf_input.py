@@ -1011,7 +1011,7 @@ def export_insert(vals):
         global height
         cx = scale * xmin  # transorm-origin:
         cy = scale * ymin + height  # center of rotation
-        #
+
         x = vals.x1 + scale * xmin
         y = vals.y1 - scale * ymin - height
         ixscale = iyscale = 1
@@ -1021,31 +1021,25 @@ def export_insert(vals):
             iyscale = vals.insert_scale_y
         x += cx * (iyscale - 1)
         y -= cy * (iyscale - 1)
-        # elem = layer.add(inkex.Use())
-        # elem.set('xlink:href', '#' + quote(vals.block_name.replace(" ", "_").encode("utf-8")))
-        # elem.transform.add_translate(x, y)
-        # if vals.has_insert_scale_x and vals.has_insert_scale_y:
-        #    elem.transform.add_scale(vals.insert_scale_x, vals.insert_scale_y)
-        #
-        # attribs = {inkex.addNS('href', 'xlink') :
-        #    '#' + quote(vals.block_name.replace(" ", "_").encode("utf-8"))}
-        # for reducing thick lines
+
+        elem = layer.add(inkex.Use())
+        elem.set(
+            inkex.addNS("href", "xlink"),
+            "#" + quote(vals.block_name.replace(" ", "_").encode("utf-8")),
+        )
+
+        # add style stroke-width=1px for reducing thick line
         fwide = abs(0.5 / ixscale)  # better to use w/ixscale
-        attribs = {
-            inkex.addNS("href", "xlink"): "#"
-            + quote(vals.block_name.replace(" ", "_").encode("utf-8")),
-            "style": "stroke-width: %.3fpx" % fwide,
-        }
-        # add style stroke-width=1px 2021.jyuly
-        tform = ""
-        tform += "translate(%f, %f) " % (x, y)
+        elem.style["stroke-width"] = "%.3fpx" % fwide
+
+        elem.transform.add_translate(x, y)
         if vals.has_insert_scale_x and vals.has_insert_scale_y:
-            # tform += 'scale(%f,%f)' % (vals.insert_scale_x, vals.insert_scale_y)
-            tform += "scale(%f,%f) " % (ixscale, iyscale)
+            elem.transform.add_scale(ixscale, iyscale)
         if vals.has_angle:
-            tform += "rotate(%f,%f,%f) " % (360 - vals.angle, -cx, cy)
-        attribs.update({"transform": tform})
-        etree.SubElement(layer, "use", attribs)
+            rotated_angle = vals.angle
+            if ixscale * iyscale > 0:
+                rotated_angle = 360 - rotated_angle
+            elem.transform.add_rotate(rotated_angle, -cx, cy)
 
 
 def export_block(vals):
@@ -1242,6 +1236,7 @@ class DxfInput(inkex.InputExtension):
             return 0.0
 
         xmax = xmin = ymin = 0.0
+        ltscale = 1.0  # $LTSCALE:global scale of line-style
         height = 297.0 * 96.0 / 25.4  # default A4 height in pixels
         measurement = 0  # default inches
         flag = 0  # (0, 1, 2, 3, 4) = (none, LAYER, LTYPE, DIMTXT, STYLE)
@@ -1290,6 +1285,8 @@ class DxfInput(inkex.InputExtension):
                     ymin = get_group("20")
                 if line[1] == "$EXTMAX":
                     xmax = get_group("10")
+            if line[1] == "$LTSCALE":
+                ltscale = get_group("40")
             if flag == 1 and line[0] == "2":
                 layername = line[1]
                 layer_nodes[layername] = svg.add(inkex.Layer.new(layername))
@@ -1391,7 +1388,7 @@ class DxfInput(inkex.InputExtension):
                 if length == 0:  # test for dot
                     linetype += " 0.5,"
                 else:
-                    linetype += "%.4f," % math.fabs(length * scale)
+                    linetype += "%.4f," % math.fabs(length * scale * ltscale)
             if linetype == "":
                 linetypes[linename] = "stroke-linecap: round"
             else:

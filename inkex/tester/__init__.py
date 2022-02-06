@@ -85,7 +85,7 @@ import tempfile
 import hashlib
 import random
 import uuid
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Type, TYPE_CHECKING
 
 from io import BytesIO, StringIO
 import xml.etree.ElementTree as xml
@@ -98,8 +98,7 @@ from ..utils import to_bytes
 from .xmldiff import xmldiff
 from .mock import MockCommandMixin, Capture
 
-if False:  # pylint: disable=using-constant-test
-    from typing import Type, List
+if TYPE_CHECKING:
     from .filters import Compare
 
 COMPARE_DELETE, COMPARE_CHECK, COMPARE_WRITE, COMPARE_OVERWRITE = range(4)
@@ -113,19 +112,20 @@ class NoExtension(InkscapeExtension):  # pylint: disable=too-few-public-methods
 
     def run(self, args=None, output=None):
         """Fake run"""
-        pass
 
 
 class TestCase(MockCommandMixin, BaseCase):
     """
-    Base class for all effects tests, provides access to data_files and test_without_parameters
+    Base class for all effects tests, provides access to data_files and
+    test_without_parameters
     """
 
     effect_class = NoExtension  # type: Type[InkscapeExtension]
     effect_name = property(lambda self: self.effect_class.__module__)
 
-    # If set to true, the output is not expected to be the stdout SVG document, but rather
-    # text or a message sent to the stderr, this is highly weird. But sometimes happens.
+    # If set to true, the output is not expected to be the stdout SVG document, but
+    # rather text or a message sent to the stderr, this is highly weird. But sometimes
+    # happens.
     stderr_output = False
     stdout_protect = True
     stderr_protect = True
@@ -221,11 +221,14 @@ class TestCase(MockCommandMixin, BaseCase):
 
         filename should point to a starting svg document, default is empty_svg
         """
-        data_file = self.data_file(*filename) if filename else self.empty_svg
+        if filename:
+            data_file = self.data_file(*filename)
+        else:
+            data_file = self.empty_svg
 
         os.environ["DOCUMENT_PATH"] = data_file
         args = [data_file] + list(kwargs.pop("args", []))
-        args += ["--{}={}".format(*kw) for kw in kwargs.items()]
+        args += [f"--{kw[0]}={kw[1]}" for kw in kwargs.items()]
 
         effect = kwargs.pop("effect", self.effect_class)()
 
@@ -258,7 +261,9 @@ class TestCase(MockCommandMixin, BaseCase):
 
         return effect
 
+    # pylint: disable=invalid-name
     def assertDeepAlmostEqual(self, first, second, places=None, msg=None, delta=None):
+        """Asserts that two objects, possible nested lists, are almost equal."""
         if delta is None and places is None:
             places = 7
         if isinstance(first, (list, tuple)):
@@ -276,6 +281,8 @@ class TestCase(MockCommandMixin, BaseCase):
             tuple(Transform(lhs).to_hexad()), tuple(Transform(rhs).to_hexad()), places
         )
 
+    # pylint: enable=invalid-name
+
     @property
     def effect(self):
         """Generate an effect object"""
@@ -289,7 +296,7 @@ class InkscapeExtensionTestMixin:
 
     def setUp(self):  # pylint: disable=invalid-name
         """Check if there is an effect_class set and create self.effect if it is"""
-        super(InkscapeExtensionTestMixin, self).setUp()
+        super().setUp()
         if self.effect_class is None:
             self.skipTest("self.effect_class is not defined for this this test")
 
@@ -320,7 +327,8 @@ class ComparisonMixin:
 
     @property
     def _compare_file_extension(self):
-        """The default extension to use when outputting check files in COMPARE_CHECK mode."""
+        """The default extension to use when outputting check files in COMPARE_CHECK
+        mode."""
         if self.stderr_output:
             return "txt"
         return self.compare_file_extension
@@ -366,14 +374,15 @@ class ComparisonMixin:
 
         if not os.path.isfile(cmpfile) and compare_mode == COMPARE_DELETE:
             raise IOError(
-                f"Comparison file {cmpfile} not found, set EXPORT_COMPARE=1 to create it."
+                f"Comparison file {cmpfile} not found, set EXPORT_COMPARE=1 to create "
+                "it."
             )
 
         if outfile:
             if not os.path.isabs(outfile):
                 outfile = os.path.join(self.tempdir, outfile)
             self.assertTrue(
-                os.path.isfile(outfile), "No output file created! {}".format(outfile)
+                os.path.isfile(outfile), f"No output file created! {outfile}"
             )
             with open(outfile, "rb") as fhl:
                 data_a = fhl.read()
@@ -425,11 +434,12 @@ class ComparisonMixin:
             diff_xml, delta = xmldiff(data_a, data_b)
             if not delta and compare_mode == COMPARE_DELETE:
                 print(
-                    "The XML is different, you can save the output using the EXPORT_COMPARE"
-                    " envionment variable. Set it to 1 to save a file you can check, set it to"
-                    " 3 to overwrite this comparison, setting the new data as the correct one.\n"
+                    "The XML is different, you can save the output using the "
+                    "EXPORT_COMPARE envionment variable. Set it to 1 to save a file "
+                    "you can check, set it to 3 to overwrite this comparison, setting "
+                    "the new data as the correct one.\n"
                 )
-            diff = f"SVG Differences\n\n"
+            diff = "SVG Differences\n\n"
             if os.environ.get("XML_DIFF", False):
                 diff = "<- " + diff_xml
             else:

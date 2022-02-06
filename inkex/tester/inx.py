@@ -17,7 +17,7 @@ ARG_TYPES = {
 }
 
 
-class InxMixin(object):
+class InxMixin:
     """Tools for Testing INX files, use as a mixin class:
 
     class MyTests(InxMixin, TestCase):
@@ -34,29 +34,28 @@ class InxMixin(object):
             return
         cls = inx.extension_class
         # Check class can be matched in python file
-        self.assertTrue(cls, "Can not find class for {}".format(inx.filename))
+        self.assertTrue(cls, f"Can not find class for {inx.filename}")
         # Check name is reasonable for the class
         if not cls.multi_inx:
             self.assertEqual(
                 cls.__name__,
                 inx.slug,
-                "Name of extension class {}.{} is different from ident {}".format(
-                    cls.__module__, cls.__name__, inx.slug
-                ),
+                f"Name of extension class {cls.__module__}.{cls.__name__} "
+                f"is different from ident {inx.slug}",
             )
             self.assertParams(inx, cls)
 
     def assertParams(self, inx, cls):  # pylint: disable=invalid-name
         """Confirm the params in the inx match the python script"""
-        params = dict([(param.name, self.parse_param(param)) for param in inx.params])
+        params = {param.name: self.parse_param(param) for param in inx.params}
         args = dict(self.introspect_arg_parser(cls().arg_parser))
         mismatch_a = list(set(params) ^ set(args) & set(params))
         mismatch_b = list(set(args) ^ set(params) & set(args))
         self.assertFalse(
-            mismatch_a, "{}: Inx params missing from arg parser".format(inx.filename)
+            mismatch_a, f"{inx.filename}: Inx params missing from arg parser"
         )
         self.assertFalse(
-            mismatch_b, "{}: Script args missing from inx xml".format(inx.filename)
+            mismatch_b, f"{inx.filename}: Script args missing from inx xml"
         )
 
         for param in args:
@@ -64,7 +63,7 @@ class InxMixin(object):
                 self.assertEqual(
                     params[param]["type"],
                     args[param]["type"],
-                    "Type is not the same for {}:param:{}".format(inx.filename, param),
+                    f"Type is not the same for {inx.filename}:param:{param}",
                 )
             inxdefault = params[param]["default"]
             argsdefault = args[param]["default"]
@@ -83,9 +82,7 @@ class InxMixin(object):
                 self.assertEqual(
                     argsdefault,
                     inxdefault,
-                    "Default value is not the same for {}:param:{}".format(
-                        inx.filename, param
-                    ),
+                    f"Default value is not the same for {inx.filename}:param:{param}",
                 )
 
     def introspect_arg_parser(self, arg_parser):

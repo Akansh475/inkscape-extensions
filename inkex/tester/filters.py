@@ -168,5 +168,7 @@ class CompareReplacement(Compare):
 
 
 class WindowsTextCompat(CompareReplacement):
+    """Normalize newlines so tests comparing plain text work"""
+
     def __init__(self):
         super().__init__(("\r\n", "\n"))

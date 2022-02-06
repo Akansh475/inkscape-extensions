@@ -52,24 +52,25 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
         """Find the class for this type of element defined by an xpath"""
         if isinstance(xpath, type):
             return xpath
-        for cls in cls.lookup_table[splitNS(xpath.split("/")[-1])]:
+        for kls in cls.lookup_table[splitNS(xpath.split("/")[-1])]:
             # TODO: We could create a apply the xpath attrs to the test element
             # to narrow the search, but this does everything we need right now.
-            test_element = cls()
-            if cls._is_class_element(test_element):
-                return cls
+            test_element = kls()
+            if kls.is_class_element(test_element):
+                return kls
         raise KeyError(f"Could not find svg tag for '{xpath}'")
 
     def lookup(self, doc, element):  # pylint: disable=unused-argument
         """Lookup called by lxml when assigning elements their object class"""
         try:
-            for cls in reversed(self.lookup_table[splitNS(element.tag)]):
-                if cls._is_class_element(element):  # pylint: disable=protected-access
-                    return cls
+            for kls in reversed(self.lookup_table[splitNS(element.tag)]):
+                if kls.is_class_element(element):  # pylint: disable=protected-access
+                    return kls
         except TypeError:
             # Handle non-element proxies case
             # The documentation implies that it's not possible
-            # Didn't found a reliable way to check whether proxy corresponds to element or not
+            # Didn't found a reliable way to check whether proxy corresponds to element
+            # or not
             # Look like lxml issue to me.
             # The troubling element is "<!--Comment-->"
             return None

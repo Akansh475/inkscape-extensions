@@ -50,6 +50,6 @@ def svg_unit_scaled(width_unit):
 
 def svg_file(filename):
     """Parse an svg file and return it's document root"""
-    with open(filename, "r") as fhl:
+    with open(filename, "r", encoding="utf-8") as fhl:
         doc = etree.parse(fhl, parser=SVG_PARSER)
         return doc.getroot()

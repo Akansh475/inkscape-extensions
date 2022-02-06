@@ -26,10 +26,11 @@ Provide a way to load lxml attributes with an svg API on top.
 """
 
 import random
-from lxml import etree
 import math
-from ..css import ConditionalRule
 
+from lxml import etree
+
+from ..css import ConditionalRule
 from ..interfaces.IElement import ISVGDocumentElement
 
 from ..deprecated.meta import DeprecatedSvgMixin
@@ -48,6 +49,7 @@ if False:  # pylint: disable=using-constant-test
 class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
     """Provide access to the document level svg functionality"""
 
+    # pylint: disable=too-many-public-methods
     tag_name = "svg"
 
     def _init(self):
@@ -157,33 +159,35 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         return ret
 
     @property
-    def viewbox_width(self):  # getDocumentWidth(self):
+    def viewbox_width(self) -> float:  # getDocumentWidth(self):
         """Returns the width of the `user coordinate system
-        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the width
-        of the viewbox, as defined in the SVG file. If no viewbox is defined, the value of the
-        width attribute is returned. If the height is not defined, return 0."""
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e.
+        the width of the viewbox, as defined in the SVG file. If no viewbox is defined,
+        the value of the width attribute is returned. If the height is not defined,
+        returns 0."""
         return self.get_viewbox()[2] or self.viewport_width
 
     @property
-    def viewport_width(self):
+    def viewport_width(self) -> float:
         """Returns the width of the `viewport coordinate system
-        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the width
-        attribute of the svg element converted to px"""
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the
+        width attribute of the svg element converted to px"""
         return self.to_dimensionless(self.get("width")) or self.get_viewbox()[2]
 
     @property
-    def viewbox_height(self):  # getDocumentHeight(self):
+    def viewbox_height(self) -> float:  # getDocumentHeight(self):
         """Returns the height of the `user coordinate system
-        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the height
-        of the viewbox, as defined in the SVG file. If no viewbox is defined, the value of the
-        height attribute is returned. If the height is not defined, return 0."""
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the
+        height of the viewbox, as defined in the SVG file. If no viewbox is defined, the
+        value of the height attribute is returned. If the height is not defined,
+        returns 0."""
         return self.get_viewbox()[3] or self.viewport_height
 
     @property
-    def viewport_height(self):
+    def viewport_height(self) -> float:
         """Returns the width of the `viewport coordinate system
-        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the height
-        attribute of the svg element converted to px"""
+        <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the
+        height attribute of the svg element converted to px"""
         return self.to_dimensionless(self.get("height")) or self.get_viewbox()[3]
 
     @property
@@ -194,7 +198,8 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
     @property
     def inkscape_scale(self):
         """Returns the ratio between the viewBox width (in width/height units) and the
-        page width, which is displayed as "scale" in the Inkscape document properties."""
+        page width, which is displayed as "scale" in the Inkscape document
+        properties."""
 
         viewbox_unit = (
             parse_unit(self.get("width")) or parse_unit(self.get("height")) or (0, "px")
@@ -238,6 +243,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
 
     @property
     def document_unit(self):
+        """Returns the display unit (Inkscape-specific attribute) of the document"""
         return self.namedview.get("inkscape:document-units", "px")
 
     @property

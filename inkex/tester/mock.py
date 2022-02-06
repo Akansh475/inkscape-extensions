@@ -30,6 +30,7 @@ import sys
 import logging
 import hashlib
 import tempfile
+from typing import List, Tuple, Any
 
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -38,8 +39,6 @@ from email.parser import Parser as EmailParser
 
 import inkex.command
 
-if False:  # pylint: disable=using-constant-test
-    from typing import List, Tuple, Callable, Any  # pylint: disable=unused-import
 
 FIXED_BOUNDARY = "--CALLDATA--//--CALLDATA--"
 
@@ -121,8 +120,8 @@ class MockMixin:
             setattr(owner, name, _value_function)
         else:
             setattr(owner, name, new)
-        # When we start, mocks contains length 3 tuples, when we're finished, it contains
-        # length 4, this stops remocking and reunmocking from taking place.
+        # When we start, mocks contains length 3 tuples, when we're finished, it
+        # contains length 4, this stops remocking and reunmocking from taking place.
         return (owner, name, old, False)
 
     def setUp(self):  # pylint: disable=invalid-name
@@ -243,7 +242,7 @@ class MockCommandMixin(MockMixin):
 
         # We use email
         msg = MIMEMultipart(boundary=FIXED_BOUNDARY)
-        msg["Program"] = self.get_program_name(program)
+        msg["Program"] = MockCommandMixin.get_program_name(program)
 
         # Gather any output files and add any input files to msg, args and kwargs
         # may be modified to strip out filename directories (which change)
@@ -291,7 +290,7 @@ class MockCommandMixin(MockMixin):
             # them, then store any stdout or stderr created during the run.
             # A developer can then use this to build new test cases.
             reply = MIMEMultipart(boundary=FIXED_BOUNDARY)
-            reply["Program"] = self.get_program_name(program)
+            reply["Program"] = MockCommandMixin.get_program_name(program)
             reply["Arguments"] = argstr
             self.save_call(program, key, stdout, outputs, reply)
             self.save_key(program, key, keystr, "key")
@@ -299,13 +298,13 @@ class MockCommandMixin(MockMixin):
 
         try:
             return self.load_call(program, key, outputs)
-        except IOError:
+        except IOError as err:
             self.save_key(program, key, keystr, "bad-key")
             raise IOError(
                 f"Problem loading call: {program}/{key} use the environment variable "
                 "NO_MOCK_COMMANDS=1 to call out to the external program and generate "
                 f"the mock call file for call {program} {argstr}."
-            )
+            ) from err
 
     def add_call_files(self, msg, args, kwargs):
         """
@@ -350,8 +349,8 @@ class MockCommandMixin(MockMixin):
                 value = fhl.read()
                 try:
                     value = value.decode()
-                except UnicodeDecodeError:  # do not attempt to process binary files further
-                    pass
+                except UnicodeDecodeError:
+                    pass  # do not attempt to process binary files further
             if isinstance(value, str):
                 value = value.replace("\r\n", "\n").replace(".\\", "./")
             part = MIMEApplication(value, Name=fname)
@@ -370,7 +369,8 @@ class MockCommandMixin(MockMixin):
             raise IOError(f"Attempted to find call test data {key}")
         return fname
 
-    def get_program_name(self, program):
+    @staticmethod
+    def get_program_name(program):
         """Takes a program and returns a program name"""
         if program == inkex.command.INKSCAPE_EXECUTABLE_NAME:
             return "inkscape"
@@ -378,15 +378,17 @@ class MockCommandMixin(MockMixin):
 
     def get_call_path(self, program, create=True):
         """Get where this program would store it's test data"""
-        command_dir = os.path.join(self.cmddir(), self.get_program_name(program))
+        command_dir = os.path.join(
+            self.cmddir(), MockCommandMixin.get_program_name(program)
+        )
         if not os.path.isdir(command_dir):
             if create:
                 os.makedirs(command_dir)
             else:
                 raise IOError(
                     "A test is attempting to use an external program in a test:"
-                    f" {program}; but there is not a command data directory which should"
-                    f" contain the results of the command here: {command_dir}"
+                    f" {program}; but there is not a command data directory which "
+                    f"should contain the results of the command here: {command_dir}"
                 )
         return command_dir
 

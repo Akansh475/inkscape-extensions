@@ -28,7 +28,7 @@ give path, transform, and property access easily.
 from __future__ import annotations
 import math
 
-from typing import Optional, Tuple
+from typing import Optional
 
 from lxml import etree
 
@@ -187,7 +187,7 @@ class Guide(BaseElement):
             angle = (math.sin(math.radians(angle)), -math.cos(math.radians(angle)))
 
         if isinstance(angle, (tuple, list)) and len(angle) == 2:
-            angle = "{:g},{:g}".format(*angle)
+            angle = ",".join(f"{i:g}" for i in angle)
 
         if angle is not None:
             self.set("orientation", angle)

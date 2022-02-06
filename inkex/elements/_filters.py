@@ -23,11 +23,11 @@
 Element interface for patterns, filters, gradients and path effects.
 """
 
+from typing import List, Tuple, TYPE_CHECKING
+
 from lxml import etree
-from copy import deepcopy
 
 from ..transforms import Transform
-from ..units import convert_unit
 from ..utils import parse_percent
 
 from ..styles import Style
@@ -35,16 +35,6 @@ from ..styles import Style
 from ._utils import addNS
 from ._base import BaseElement
 
-
-from typing import (
-    overload,
-    Iterable,
-    List,
-    Tuple,
-    Union,
-    Optional,
-    TYPE_CHECKING,
-)  # pylint: disable=unused-import
 
 if TYPE_CHECKING:
     from ._svg import SvgDocumentElement
@@ -62,63 +52,97 @@ class Filter(BaseElement):
         return elem
 
     class Primitive(BaseElement):
-        pass
+        """Any filter primitive"""
 
     class Blend(Primitive):
+        """Blend Filter element"""
+
         tag_name = "feBlend"
 
     class ColorMatrix(Primitive):
+        """ColorMatrix Filter element"""
+
         tag_name = "feColorMatrix"
 
     class ComponentTransfer(Primitive):
+        """ComponentTransfer Filter element"""
+
         tag_name = "feComponentTransfer"
 
     class Composite(Primitive):
+        """Composite Filter element"""
+
         tag_name = "feComposite"
 
     class ConvolveMatrix(Primitive):
+        """ConvolveMatrix Filter element"""
+
         tag_name = "feConvolveMatrix"
 
     class DiffuseLighting(Primitive):
+        """DiffuseLightning Filter element"""
+
         tag_name = "feDiffuseLighting"
 
     class DisplacementMap(Primitive):
+        """Flood Filter element"""
+
         tag_name = "feDisplacementMap"
 
     class Flood(Primitive):
+        """DiffuseLightning Filter element"""
+
         tag_name = "feFlood"
 
     class GaussianBlur(Primitive):
+        """GaussianBlur Filter element"""
+
         tag_name = "feGaussianBlur"
 
     class Image(Primitive):
+        """Image Filter element"""
+
         tag_name = "feImage"
 
     class Merge(Primitive):
+        """Merge Filter element"""
+
         tag_name = "feMerge"
 
     class Morphology(Primitive):
+        """Morphology Filter element"""
+
         tag_name = "feMorphology"
 
     class Offset(Primitive):
+        """Offset Filter element"""
+
         tag_name = "feOffset"
 
     class SpecularLighting(Primitive):
+        """SpecularLighting Filter element"""
+
         tag_name = "feSpecularLighting"
 
     class Tile(Primitive):
+        """Tile Filter element"""
+
         tag_name = "feTile"
 
     class Turbulence(Primitive):
+        """Turbulence Filter element"""
+
         tag_name = "feTurbulence"
 
 
 class Stop(BaseElement):
+    """Gradient stop"""
+
     tag_name = "stop"
 
     @property
-    def offset(self):
-        # type: () -> float
+    def offset(self) -> float:
+        """The offset of the gradient stop"""
         return self.get("offset")
 
     @offset.setter
@@ -126,6 +150,7 @@ class Stop(BaseElement):
         self.set("offset", number)
 
     def interpolate(self, other, fraction):
+        """Interpolate gradient stops"""
         from ..tween import StopInterpolator
 
         return StopInterpolator(self, other).interpolate(fraction)
@@ -192,22 +217,24 @@ class Gradient(BaseElement):
 
 
 class LinearGradient(Gradient):
+    """LinearGradient element"""
+
     tag_name = "linearGradient"
     orientation_attributes = ("x1", "y1", "x2", "y2")
 
     def apply_transform(self):  # type: () -> None
         """Apply transform to orientation points and set it to identity."""
         trans = self.pop("gradientTransform")
-        p1 = (
+        pt1 = (
             self.to_dimensionless(self.get("x1")),
             self.to_dimensionless(self.get("y1")),
         )
-        p2 = (
+        pt2 = (
             self.to_dimensionless(self.get("x2")),
             self.to_dimensionless(self.get("y2")),
         )
-        p1t = trans.apply_to_point(p1)
-        p2t = trans.apply_to_point(p2)
+        p1t = trans.apply_to_point(pt1)
+        p2t = trans.apply_to_point(pt2)
         self.update(
             x1=self.to_dimensionless(p1t[0]),
             y1=self.to_dimensionless(p1t[1]),
@@ -217,22 +244,24 @@ class LinearGradient(Gradient):
 
 
 class RadialGradient(Gradient):
+    """RadialGradient element"""
+
     tag_name = "radialGradient"
     orientation_attributes = ("cx", "cy", "fx", "fy", "r")
 
     def apply_transform(self):  # type: () -> None
         """Apply transform to orientation points and set it to identity."""
         trans = self.pop("gradientTransform")
-        p1 = (
+        pt1 = (
             self.to_dimensionless(self.get("cx")),
             self.to_dimensionless(self.get("cy")),
         )
-        p2 = (
+        pt2 = (
             self.to_dimensionless(self.get("fx")),
             self.to_dimensionless(self.get("fy")),
         )
-        p1t = trans.apply_to_point(p1)
-        p2t = trans.apply_to_point(p2)
+        p1t = trans.apply_to_point(pt1)
+        p2t = trans.apply_to_point(pt2)
         self.update(
             cx=self.to_dimensionless(p1t[0]),
             cy=self.to_dimensionless(p1t[1]),
@@ -261,7 +290,7 @@ class MeshGradient(Gradient):
         # create nested elements for rows x cols mesh
         meshgradient = cls()
         for _ in range(rows):
-            meshrow = meshgradient.add(MeshRow())
+            meshrow: BaseElement = meshgradient.add(MeshRow())
             for _ in range(cols):
                 meshrow.append(MeshPatch())
         # set meshgradient attributes

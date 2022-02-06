@@ -138,7 +138,7 @@ expected-line-ending-format=
 bad-functions=map,filter,input
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=i,j,k,x,y,z,ex,Run,_,__,js,rx,ry,x1,y1,x2,y2,cx,cy,dx,dy,r,x3,x4,y3,y4,dr
+good-names=i,j,k,x,y,z,ex,Run,_,__,js,rx,ry,x1,y1,x2,y2,cx,cy,dx,dy,r,x3,x4,y3,y4,dr,c
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz,toto,tutu,tata
@@ -333,7 +333,7 @@ int-import-graph=
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=5
+max-args=8
 
 # Argument names that match this expression will be ignored. Default to name
 # with leading underscore

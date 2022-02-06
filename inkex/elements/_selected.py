@@ -76,7 +76,15 @@ class ElementList(OrderedDict):
             kind = type(elem).__name__
             raise ValueError(f"Unknown element type: {kind}")
 
-    def _to_key(self, key, default=None):
+    @overload
+    def _to_key(self, key: None, default: Any) -> Any:
+        ...
+
+    @overload
+    def _to_key(self, key: Union[int, IBaseElement, str], default: Any) -> str:
+        ...
+
+    def _to_key(self, key, default=None) -> str:
         """Takes a key (id, element, etc) and returns an xml_path key"""
 
         if self and key is None:
@@ -85,7 +93,7 @@ class ElementList(OrderedDict):
             return list(self.keys())[key]
         if isinstance(key, IBaseElement):
             return key.xml_path
-        elif isinstance(key, str) and key[0] != "/":
+        if isinstance(key, str) and key[0] != "/":
             return self.ids.get(key, key)
         return key
 
@@ -127,7 +135,8 @@ class ElementList(OrderedDict):
             self[elem] = elem  # This doesn't matter
 
     def rendering_order(self):
-        """Get the selected elements by z-order (stacking order), ordered from bottom to top"""
+        """Get the selected elements by z-order (stacking order), ordered from bottom to
+        top"""
         new_list = ElementList(self.svg)
         # the elements are stored with their xpath index, so a natural sort order
         # '3' < '20' < '100' has to be applied
@@ -142,18 +151,21 @@ class ElementList(OrderedDict):
         return new_list
 
     def filter(self, *types):
-        """Filter selected elements of the given type, returns a new SelectedElements object"""
+        """Filter selected elements of the given type, returns a new SelectedElements
+        object"""
         return ElementList(
             self.svg, [e for e in self if not types or isinstance(e, types)]
         )
 
     def filter_nonzero(self, *types, error_msg: str = None):
-        """Filter selected elements of the given type, returns a new SelectedElements object.
+        """Filter selected elements of the given type, returns a new SelectedElements
+        object.
         If the selection is empty, abort the extension (raise AbortExtension)
 
         :param types: type(s) to filter the selection by
         :type types: Type
-        :param error_msg: error message that is displayed if the selection is empty, defaults to
+        :param error_msg: error message that is displayed if the selection is empty,
+        defaults to
         _("Please select at least one element of type(s) {}")
         :type error_msg: str, optional
         """
@@ -161,15 +173,14 @@ class ElementList(OrderedDict):
         if not filtered:
             if error_msg is None:
                 error_msg = inkex_gettext(
-                    "Please select at least one element of the following type(s): {}".format(
-                        ", ".join([type.__name__ for type in types])
-                    )
-                )
+                    "Please select at least one element of the following type(s): {}"
+                ).format(", ".join([type.__name__ for type in types]))
             raise AbortExtension(error_msg)
         return filtered
 
     def get(self, *types):
-        """Like filter, but will enter each element searching for any child of the given types"""
+        """Like filter, but will enter each element searching for any child of the given
+        types"""
 
         def _recurse(elem):
             if not types or isinstance(elem, types):
@@ -189,7 +200,7 @@ class ElementList(OrderedDict):
 
     def id_dict(self):
         """For compatibility, return regular dictionary of id -> element pairs"""
-        return dict([(eid, self[xid]) for eid, xid in self.ids.items()])
+        return {eid: self[xid] for eid, xid in self.ids.items()}
 
     def bounding_box(self):
         """

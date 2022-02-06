@@ -88,9 +88,9 @@ class Layer(Group):
         self.set("inkscape:groupmode", "layer")
 
     @classmethod
-    def _is_class_element(cls, el):
+    def is_class_element(cls, elem):
         # type: (etree.Element) -> bool
-        return el.attrib.get(addNS("inkscape:groupmode"), None) == "layer"
+        return elem.attrib.get(addNS("inkscape:groupmode"), None) == "layer"
 
 
 class Anchor(GroupBase):
@@ -111,7 +111,8 @@ class ClipPath(GroupBase):
 
 
 class Marker(GroupBase):
-    """The <marker> element defines the graphic that is to be used for drawing arrowheads
-    or polymarkers on a given <path>, <line>, <polyline> or <polygon> element."""
+    """The <marker> element defines the graphic that is to be used for drawing
+    arrowheads or polymarkers on a given <path>, <line>, <polyline> or <polygon>
+    element."""
 
     tag_name = "marker"

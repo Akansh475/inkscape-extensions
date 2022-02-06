@@ -25,8 +25,10 @@ Provide extra utility to each svg element type specific to its type.
 This is useful for having a common interface for each element which can
 give path, transform, and property access easily.
 """
+from __future__ import annotations
 
 from copy import deepcopy
+from typing import Any, Tuple, Optional, overload, TypeVar
 from lxml import etree
 
 from ..interfaces.IElement import IBaseElement, ISVGDocumentElement
@@ -42,27 +44,22 @@ from ..properties import BaseStyleValue, all_properties
 from ._selected import ElementList
 from ._parser import NodeBasedLookup, SVG_PARSER
 
-from typing import (
-    overload,
-    DefaultDict,
-    Type,
-    Any,
-    List,
-    Tuple,
-    Union,
-    Optional,
-)  # pylint: disable=unused-import
+T = TypeVar("T", bound="BaseElement")  # pylint: disable=invalid-name
 
 
 class BaseElement(IBaseElement):
     """Provide automatic namespaces to all calls"""
+
+    # pylint: disable=too-many-public-methods
 
     def __init_subclass__(cls):
         if cls.tag_name:
             NodeBasedLookup.register_class(cls)
 
     @classmethod
-    def _is_class_element(cls, el):  # type: (etree.Element) -> bool
+    def is_class_element(  # pylint: disable=unused-argument
+        cls, elem: etree.Element
+    ) -> bool:
         """Hook to do more restrictive check in addition to (ns,tag) match"""
         return True
 
@@ -97,12 +94,12 @@ class BaseElement(IBaseElement):
     @property
     def wrapped_attrs(self):
         """Map attributes to property name and wrapper class"""
-        return dict([(row[-2], (row[0], row[-1])) for row in self.WRAPPED_ATTRS])
+        return {row[-2]: (row[0], row[-1]) for row in self.WRAPPED_ATTRS}
 
     @property
     def wrapped_props(self):
         """Map properties to attribute name and wrapper class"""
-        return dict([(row[0], (row[-2], row[-1])) for row in self.WRAPPED_ATTRS])
+        return {row[0]: (row[-2], row[-1]) for row in self.WRAPPED_ATTRS}
 
     typename = property(lambda self: type(self).__name__)
     xml_path = property(lambda self: self.getroottree().getpath(self))
@@ -193,6 +190,14 @@ class BaseElement(IBaseElement):
             setattr(self, prop, cls(None))
             return value
         return self.attrib.pop(addNS(attr), default)  # pylint: disable=no-member
+
+    @overload
+    def add(self, child1: BaseElement, *children: BaseElement) -> Tuple[BaseElement]:
+        ...
+
+    @overload
+    def add(self, child: T) -> T:
+        ...
 
     def add(self, *children):
         """
@@ -309,7 +314,8 @@ class BaseElement(IBaseElement):
                 break
 
     def backlinks(self, *types):
-        """Get elements which link back to this element, like ancestors but via xlinks"""
+        """Get elements which link back to this element, like ancestors but via
+        xlinks"""
         if not types or isinstance(self, types):
             yield self
         my_id = self.get("id")
@@ -377,7 +383,7 @@ class BaseElement(IBaseElement):
         # We would do more here, but lxml is VERY unpleseant when it comes to
         # namespaces, basically over printing details and providing no
         # supression mechanisms to turn off xml's over engineering.
-        return str(self.tag).split("}")[-1]
+        return str(self.tag).split("}", maxsplit=1)[-1]
 
     @property
     def href(self):
@@ -399,7 +405,10 @@ class BaseElement(IBaseElement):
         """Returns the inkscape label"""
         return self.get("inkscape:label", None)
 
-    label = label.setter(lambda self, value: self.set("inkscape:label", str(value)))  # type: ignore
+    @label.setter
+    def label(self, value):
+        """Sets the inkscape label"""
+        self.set("inkscape:label", str(value))
 
     def is_sensitive(self):
         """Return true if this element is sensitive in inkscape"""
@@ -429,16 +438,16 @@ class BaseElement(IBaseElement):
         return convert_unit(value, "px")
 
     def uutounit(self, value, to_unit="px"):
-        """Convert a unit value to a given unit. If the value does not have a unit, "Document" units
-        are assumed. "Document units" are an Inkscape-specific concept. For most use-cases,
-        to_dimensional is more appropriate."""
+        """Convert a unit value to a given unit. If the value does not have a unit,
+        "Document" units are assumed. "Document units" are an Inkscape-specific concept.
+        For most use-cases, to_dimensional is more appropriate."""
         return convert_unit(value, to_unit, default=self.unit)
 
     def unittouu(self, value):
-        """Convert a unit value into document units. "Document unit" is an Inkscape-specific
-        concept. For most use-cases, viewport_to_unit (when the size of an object given in viewport
-        units is needed) or to_dimensionless (when the equivalent value without unit is needed)
-        is more appropriate."""
+        """Convert a unit value into document units. "Document unit" is an
+        Inkscape-specific concept. For most use-cases, viewport_to_unit (when the size
+        of an object given in viewport units is needed) or to_dimensionless (when the
+        equivalent value without unit is needed) is more appropriate."""
         return convert_unit(value, self.unit)
 
     def unit_to_viewport(self, value, unit="px"):
@@ -460,9 +469,9 @@ class BaseElement(IBaseElement):
         return render_unit(value, self.unit)
 
     def cascaded_style(self):
-        """Returns the cascaded style of an element (all rules that apply the element itself),
-        based on the stylesheets, the presentation attributes and the inline style using the
-        respective specificity of the style
+        """Returns the cascaded style of an element (all rules that apply the element
+        itself), based on the stylesheets, the presentation attributes and the inline
+        style using the respective specificity of the style
 
         see https://www.w3.org/TR/CSS22/cascade.html#cascading-order
 
@@ -472,8 +481,8 @@ class BaseElement(IBaseElement):
         return Style.cascaded_style(self)
 
     def specified_style(self):
-        """Returns the specified style of an element, i.e. the cascaded style + inheritance,
-        see https://www.w3.org/TR/CSS22/cascade.html#specified-value
+        """Returns the specified style of an element, i.e. the cascaded style +
+        inheritance, see https://www.w3.org/TR/CSS22/cascade.html#specified-value
 
         Returns:
             Style: the specified style

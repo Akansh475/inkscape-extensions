@@ -14,6 +14,9 @@ from io import BytesIO
 from inkex.paths import Path
 
 
+from inkex.paths import Path
+
+
 def text_compare(test1, test2):
     """
     Compare two text strings while allowing for '*' to match
@@ -49,10 +52,10 @@ class DeltaLogger(list):
 
         # Only append a difference if the preprocessed values are different.
         # This solves the issue that -0 != 0 in path data.
-        pa = _prep(value_a)
-        pb = _prep(value_b)
-        if pa != pb:
-            self.append((pa, pb))
+        prep_a = _prep(value_a)
+        prep_b = _prep(value_b)
+        if prep_a != prep_b:
+            self.append((prep_a, prep_b))
 
     def append_text(self, text_a, text_b):
         """Record a text difference"""

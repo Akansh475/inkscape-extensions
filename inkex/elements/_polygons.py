@@ -76,7 +76,7 @@ class PathElement(PathElementBase):
         cx: float,
         cy: float,
         rx: float,
-        ry: float,  # pylint: disable=invalid-name
+        ry: float,
         start: float,
         end: float,
         arctype: str,
@@ -110,22 +110,25 @@ class PathElement(PathElementBase):
     def arc(
         cls, center, rx, ry=None, arctype="", pathonly=False, **kw
     ):  # pylint: disable=invalid-name
-        """Generates a sodipodi elliptical arc (special type). Also computes the path that Inkscape
-        uses under the hood.
+        """Generates a sodipodi elliptical arc (special type). Also computes the path
+        that Inkscape uses under the hood.
         All data may be given as parseable strings or using numeric data types.
 
         Args:
-            center (tuple-like): Coordinates of the star/polygon center as tuple or Vector2d
+            center (tuple-like): Coordinates of the star/polygon center as tuple or
+                Vector2d
             rx (Union[float, str]): Radius in x direction
-            ry (Union[float, str], optional): Radius in y direction. If not given, ry=rx.
-                                              Defaults to None.
-            arctype (str, optional): "arc", "chord" or "slice". Defaults to "", i.e. "slice".
-            pathonly (bool, optional): Whether to create the path without Inkscape-specific
-                                       attributes. Defaults to False.
+            ry (Union[float, str], optional): Radius in y direction. If not given,
+                ry=rx. Defaults to None.
+            arctype (str, optional): "arc", "chord" or "slice". Defaults to "", i.e.
+                "slice".
+            pathonly (bool, optional): Whether to create the path without
+                Inkscape-specific attributes. Defaults to False.
         Keyword args:
             start (Union[float, str]): start angle in radians
             end (Union[float, str]): end angle in radians
-            open (str): whether the path should be open (true/false). Not used in Inkscape > 1.1
+            open (str): whether the path should be open (true/false). Not used in
+                Inkscape > 1.1
 
         Returns:
             PathElement : the created star/polygon
@@ -167,7 +170,8 @@ class PathElement(PathElementBase):
         rounded: float,
         flatsided: bool,
     ):
-        """Helper method to generate the path for an Inkscape star/ polygon; randomized is ignored."""
+        """Helper method to generate the path for an Inkscape star/ polygon; randomized
+        is ignored."""
 
         def _star_get_xy(point, index):
             cur_arg = arg[point] + 2 * pi / sides * (index % sides)
@@ -263,22 +267,25 @@ class PathElement(PathElementBase):
         pathonly=False,
     ):
         """Generate a sodipodi star / polygon. Also computes the path that Inkscape uses
-        under the hood. The arguments for center, radii, sides, rounded and args can be given
-        as strings or as numeric data.
+        under the hood. The arguments for center, radii, sides, rounded and args can be
+        given as strings or as numeric data.
 
         Args:
-            center (Tuple-like): Coordinates of the star/polygon center as tuple or Vector2d
-            radii (tuple): Radii of the control points, i.e. their distances from the center.
-                               The control points are specified in polar coordinates.
-                               Only the first control point is used for polygons.
-            sides (int, optional): Number of sides / tips of the polygon / star. Defaults to 5.
+            center (Tuple-like): Coordinates of the star/polygon center as tuple or
+                Vector2d
+            radii (tuple): Radii of the control points, i.e. their distances from the
+                center. The control points are specified in polar coordinates. Only the
+                first control point is used for polygons.
+            sides (int, optional): Number of sides / tips of the polygon / star.
+                Defaults to 5.
             rounded (int, optional): Controls the rounding radius of the polygon / star.
-                                     For `rounded=0`, only straight lines are used. Defaults to 0.
+                For `rounded=0`, only straight lines are used. Defaults to 0.
             args (tuple, optional): Angle between horizontal axis and control points.
-                                    Defaults to (0,0).
-            flatsided (bool, optional): True for polygons, False for stars. Defaults to False.
-            pathonly (bool, optional): Whether to create the path without Inkscape-specific
-                                       attributes. Defaults to False.
+                Defaults to (0,0).
+            flatsided (bool, optional): True for polygons, False for stars.
+                Defaults to False.
+            pathonly (bool, optional): Whether to create the path without
+                Inkscape-specific attributes. Defaults to False.
 
         Returns:
             PathElement : the created star/polygon
@@ -336,7 +343,11 @@ class Line(ShapeElement):
     """A line segment connecting two points"""
 
     tag_name = "line"
-    get_path = lambda self: "M{0[x1]},{0[y1]} L{0[x2]},{0[y2]} Z".format(self.attrib)
+    x1 = property(lambda self: self.to_dimensionless(self.get("x1", 0)))
+    y1 = property(lambda self: self.to_dimensionless(self.get("y1", 0)))
+    x2 = property(lambda self: self.to_dimensionless(self.get("x2", 0)))
+    y2 = property(lambda self: self.to_dimensionless(self.get("y2", 0)))
+    get_path = lambda self: f"M{self.x1},{self.y1} L{self.x2},{self.y2} Z"
 
     @classmethod
     def new(cls, start, end, **attrs):
@@ -365,23 +376,20 @@ class RectangleBase(ShapeElement):
         """Calculate the path as the box around the rect"""
         if self.rx:
             rx, ry = self.rx, self.ry  # pylint: disable=invalid-name
+            cpts = [self.left + rx, self.right - rx, self.top + ry, self.bottom - ry]
             return (
-                "M {1},{0.top}"
-                "L {2},{0.top}    A {0.rx},{0.ry} 0 0 1 {0.right},{3}"
-                "L {0.right},{4}  A {0.rx},{0.ry} 0 0 1 {2},{0.bottom}"
-                "L {1},{0.bottom} A {0.rx},{0.ry} 0 0 1 {0.left},{4}"
-                "L {0.left},{3}   A {0.rx},{0.ry} 0 0 1 {1},{0.top} z".format(
-                    self,
-                    self.left + rx,
-                    self.right - rx,
-                    self.top + ry,
-                    self.bottom - ry,
-                )
+                f"M {cpts[0]},{self.top}"
+                f"L {cpts[1]},{self.top}    "
+                f"A {self.rx},{self.ry} 0 0 1 {self.right},{cpts[2]}"
+                f"L {self.right},{cpts[3]}  "
+                f"A {self.rx},{self.ry} 0 0 1 {cpts[1]},{self.bottom}"
+                f"L {cpts[0]},{self.bottom} "
+                f"A {self.rx},{self.ry} 0 0 1 {self.left},{cpts[3]}"
+                f"L {self.left},{cpts[2]}   "
+                f"A {self.rx},{self.ry} 0 0 1 {cpts[0]},{self.top} z"
             )
 
-        return "M {0.left},{0.top} h{0.width}v{0.height}h{1} z".format(
-            self, -self.width
-        )
+        return f"M {self.left},{self.top} h{self.width}v{self.height}h{-self.width} z"
 
 
 class Rectangle(RectangleBase):
@@ -409,6 +417,7 @@ class EllipseBase(ShapeElement):
 
     @property
     def center(self):
+        """Return center of circle/ellipse"""
         return ImmutableVector2d(
             self.to_dimensionless(self.get("cx", "0")),
             self.to_dimensionless(self.get("cy", "0")),
@@ -439,7 +448,8 @@ class Circle(EllipseBase):
     tag_name = "circle"
 
     @property
-    def radius(self):
+    def radius(self) -> float:
+        """Return radius of circle"""
         return self.to_dimensionless(self.get("r", "0"))
 
     @radius.setter
@@ -452,12 +462,13 @@ class Circle(EllipseBase):
 
 
 class Ellipse(EllipseBase):
-    """Provide a similar extension to the Circle interface"""
+    """Provide a similar extension to the Circle interface for ellipses"""
 
     tag_name = "ellipse"
 
     @property
-    def radius(self):
+    def radius(self) -> ImmutableVector2d:
+        """Return radii of ellipse"""
         return ImmutableVector2d(
             self.to_dimensionless(self.get("rx", "0")),
             self.to_dimensionless(self.get("ry", "0")),

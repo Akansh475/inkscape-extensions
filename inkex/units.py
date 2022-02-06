@@ -81,11 +81,9 @@ UNITS = [
     "dppx",
 ]
 
-UNIT_MATCH = re.compile(r"({})".format("|".join(UNITS)))
+UNIT_MATCH = re.compile(rf"({'|'.join(UNITS)})")
 NUMBER_MATCH = re.compile(r"(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)")
-BOTH_MATCH = re.compile(
-    r"^\s*{}\s*{}\s*$".format(NUMBER_MATCH.pattern, UNIT_MATCH.pattern)
-)
+BOTH_MATCH = re.compile(rf"^\s*{NUMBER_MATCH.pattern}\s*{UNIT_MATCH.pattern}\s*$")
 
 
 def parse_unit(value, default_unit="px", default_value=None):
@@ -114,7 +112,8 @@ def discover_unit(value, viewbox, default="px"):
         return default
     this_factor = CONVERSIONS[unit] * value / viewbox
 
-    # try to find the svgunitfactor in the list of units known. If we don't find something, ...
+    # try to find the svgunitfactor in the list of units known. If we don't find
+    # something, ...
     for unit, unit_factor in CONVERSIONS.items():
         if unit != "":
             # allow 1% error in factor

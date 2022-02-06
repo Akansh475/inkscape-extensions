@@ -62,21 +62,22 @@ class AttributeInterpolator(abc.ABC):
 
     @staticmethod
     def best_style(node):
-        """Gets the best possible approximation to a node's style. For nodes inside the element
-        tree of an SVG file, stylesheets defined in the defs of that file can be taken into account.
-        This should be the case for input elements, but is not required - in that case, only the
-        local inline style is used.
+        """Gets the best possible approximation to a node's style. For nodes inside the
+        element tree of an SVG file, stylesheets defined in the defs of that file can be
+        taken into account. This should be the case for input elements, but is not
+        required - in that case, only the local inline style is used.
 
-        During the interpolation process, some nodes are created temporarily, such as plain
-        gradients of a single color to allow solid<->gradient interpolation. These are not attached
-        to the document tree and therefore have no root. Since the only style relevant for them is
-        the inline style, it is acceptable to fallback to it.
+        During the interpolation process, some nodes are created temporarily, such as
+        plain gradients of a single color to allow solid<->gradient interpolation. These
+        are not attached to the document tree and therefore have no root. Since the only
+        style relevant for them is the inline style, it is acceptable to fallback to it.
 
         Args:
             node (BaseElement): The node to get the best approximated style of
 
         Returns:
-            Style: If the node is rooted, the CSS specified style. Else, the inline style."""
+            Style: If the node is rooted, the CSS specified style. Else, the inline
+                style."""
         try:
             return node.specified_style()
         except FragmentError:
@@ -84,18 +85,19 @@ class AttributeInterpolator(abc.ABC):
 
     @staticmethod
     def create_from_attribute(snode, enode, attribute, method=None):
-        """Creates an interpolator for an attribute. Currently, only path and style attributes are
-        supported
+        """Creates an interpolator for an attribute. Currently, only path, transform and
+        style attributes are supported
 
         Args:
             snode (BaseElement): start element
             enode (BaseElement): end element
             attribute (str): attribute name (for styles, starting with "style/")
-            method (AttributeInterpolator, optional): (currently only used for paths). Specifies a
-                method used to interpolate the attribute. Defaults to None.
+            method (AttributeInterpolator, optional): (currently only used for paths).
+                Specifies a method used to interpolate the attribute. Defaults to None.
 
         Raises:
-            ValueError: if an attribute is passed that is not a style, path or transform attribute
+            ValueError: if an attribute is passed that is not a style, path or transform
+                attribute
 
         Returns:
             AttributeInterpolator: an interpolator whose type depends on attribute.
@@ -128,8 +130,8 @@ class StyleInterpolator(AttributeInterpolator):
     def __init__(self, start_value, end_value):
         super().__init__(start_value, end_value)
         self.interpolators = {}
-        # some keys are always processed in a certain order,
-        # these provide alternative interpolation routes if e.g. Color<->none is interpolated
+        # some keys are always processed in a certain order, these provide alternative
+        # interpolation routes if e.g. Color<->none is interpolated
         all_keys = list(
             dict.fromkeys(
                 ["fill", "stroke", "fill-opacity", "stroke-opacity", "stroke-width"]
@@ -154,7 +156,8 @@ class StyleInterpolator(AttributeInterpolator):
     @staticmethod
     def create(snode, enode, attribute):
         """Creates an Interpolator for a given style attribute, depending on its type:
-        - Color properties (such as fill, stroke) -> ColorInterpolator, GradientInterpolator ect.
+        - Color properties (such as fill, stroke) -> ColorInterpolator,
+            GradientInterpolator ect.
         - Unit properties -> UnitValueInterpolator
         - other properties -> ValueInterpolator
 
@@ -167,7 +170,8 @@ class StyleInterpolator(AttributeInterpolator):
             ValueError: if the attribute is not in any of the lists
 
         Returns:
-            AttributeInterpolator: an interpolator object whose type depends on the attribute.
+            AttributeInterpolator: an interpolator object whose type depends on the
+                attribute.
         """
         if attribute in Style.color_props:
             return StyleInterpolator.create_from_fill_stroke(snode, enode, attribute)
@@ -200,7 +204,8 @@ class StyleInterpolator(AttributeInterpolator):
             ValueError: if the attribute is unset on both start and end style
 
         Returns:
-            AttributeInterpolator: an interpolator object whose type depends on the attribute.
+            AttributeInterpolator: an interpolator object whose type depends on the
+                attribute.
         """
         if attribute not in Style.color_props:
             raise ValueError("attribute must be a color property")
@@ -233,8 +238,8 @@ class StyleInterpolator(AttributeInterpolator):
         """Interpolates a style using the interpolators set in self.interpolators
 
         Args:
-            time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-                end_value is returned. Defaults to 0.
+            time (int, optional): Interpolation position. If 0, start_value is returned,
+                if 1, end_value is returned. Defaults to 0.
 
         Returns:
             inkex.Style: interpolated style
@@ -265,8 +270,8 @@ class ValueInterpolator(AttributeInterpolator):
         """(Linearly) interpolates a value
 
         Args:
-            time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-                end_value is returned. Defaults to 0.
+            time (int, optional): Interpolation position. If 0, start_value is returned,
+                if 1, end_value is returned. Defaults to 0.
 
         Returns:
             int: interpolated value
@@ -288,7 +293,8 @@ class UnitValueInterpolator(ValueInterpolator):
 
 
 class ArrayInterpolator(AttributeInterpolator):
-    """Interpolates array-like objects element-wise, e.g. color, transform, coordinate"""
+    """Interpolates array-like objects element-wise, e.g. color, transform,
+    coordinate"""
 
     def __init__(self, start_value, end_value):
         super().__init__(start_value, end_value)
@@ -316,17 +322,20 @@ class TransformInterpolator(ArrayInterpolator):
         """Creates a transform interpolator.
 
         Args:
-            start_value (inkex.Transform, optional): start transform. Defaults to inkex.Transform().
-            end_value (inkex.Transform, optional): end transform. Defaults to inkex.Transform().
+            start_value (inkex.Transform, optional): start transform. Defaults to
+                inkex.Transform().
+            end_value (inkex.Transform, optional): end transform. Defaults to
+                inkex.Transform().
         """
         super().__init__(start_value.to_hexad(), end_value.to_hexad())
 
     def interpolate(self, time=0):
-        """Interpolates a transform by interpolating each item in the transform hexad separately.
+        """Interpolates a transform by interpolating each item in the transform hexad
+        separately.
 
         Args:
-            time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-                end_value is returned. Defaults to 0.
+            time (int, optional): Interpolation position. If 0, start_value is returned,
+                if 1, end_value is returned. Defaults to 0.
 
         Returns:
             Transform: interpolated transform
@@ -339,7 +348,8 @@ class ColorInterpolator(ArrayInterpolator):
 
     @staticmethod
     def create(sst, est, attribute):
-        """Creates a ColorInterpolator for either Fill or stroke, depending on the attribute.
+        """Creates a ColorInterpolator for either Fill or stroke, depending on the
+        attribute.
 
         Args:
             sst (Style): Start style
@@ -370,8 +380,8 @@ class ColorInterpolator(ArrayInterpolator):
         """Interpolates a color by interpolating its r, g, b, a channels separately.
 
         Args:
-            time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-                end_value is returned. Defaults to 0.
+            time (int, optional): Interpolation position. If 0, start_value is returned,
+                if 1, end_value is returned. Defaults to 0.
 
         Returns:
             Color: interpolated color
@@ -434,7 +444,9 @@ class GradientInterpolator(AttributeInterpolator):
 
     @staticmethod
     def create(snode, enode, attribute):
-        """Creates a `GradientInterpolator` for either fill or stroke, depending on attribute.
+        """Creates a `GradientInterpolator` for either fill or stroke, depending on
+        attribute.
+
         Cases: (A, B) -> Interpolator
 
           - Linear Gradient, Linear Gradient -> LinearGradientInterpolator
@@ -475,21 +487,23 @@ class GradientInterpolator(AttributeInterpolator):
                         gradienttype = gradtype
                     if not (interp == interpolator):
                         raise ValueError("Gradient types don't match")
-        # If one of the styles is empty, set it to the gradient of the other, but with zero
-        # opacity (and stroke-width for strokes)
-        # If one of the styles is a plain color, replace it by a gradient with a single stop
+        # If one of the styles is empty, set it to the gradient of the other, but with
+        # zero opacity (and stroke-width for strokes)
+        # If one of the styles is a plain color, replace it by a gradient with a single
+        # stop
         iterator = [[snode, gradienttype(), enode], [enode, gradienttype(), snode]]
         for index in [0, 1]:
             curstyle = AttributeInterpolator.best_style(iterator[index][0])
             value = curstyle(attribute)
             if value is None:
-                # if the attribute of one of the two ends is unset, set the opacity to zero.
+                # if the attribute of one of the two ends is unset, set the opacity to
+                # zero.
                 iterator[index][0].style[attribute + "-opacity"] = 0.0
                 if attribute == "stroke":
                     iterator[index][0].style["stroke-width"] = 0.0
             if isinstance(value, Color):
-                # if the attribute of one of the two ends is a color, convert it to a one-stop
-                # gradient. Type depends on the type of the other gradient.
+                # if the attribute of one of the two ends is a color, convert it to a
+                # one-stop gradient. Type depends on the type of the other gradient.
                 interpolator.initialize_position(
                     iterator[index][1], iterator[index][0].bounding_box()
                 )
@@ -513,8 +527,8 @@ class GradientInterpolator(AttributeInterpolator):
 
     @staticmethod
     def interpolate_linear_list(positions, values, newpositions, func):
-        """Interpolates a list of values given at n positions to the best approximation at m
-        newpositions.
+        """Interpolates a list of values given at n positions to the best approximation
+        at m newpositions.
 
         >>>
             |
@@ -527,9 +541,11 @@ class GradientInterpolator(AttributeInterpolator):
 
         Args:
             positions (list[number-like]): position of current function values
-            values (list[Type]): list of arbitrary type, ``len(values) == len(positions)``
+            values (list[Type]): list of arbitrary type,
+                ``len(values) == len(positions)``
             newpositions (list[number-like]): position of interpolated values
-            func (Callable[[Type, Type, float], Type]): Function to interpolate between values
+            func (Callable[[Type, Type, float], Type]): Function to interpolate between
+                values
 
         Returns:
             list[Type]: interpolated function values at positions
@@ -556,8 +572,8 @@ class GradientInterpolator(AttributeInterpolator):
 
     @staticmethod
     def append_to_doc(element, gradient):
-        """Splits a gradient into stops and orientation, appends it to the document's defs
-        and returns the href to the orientation gradient.
+        """Splits a gradient into stops and orientation, appends it to the document's
+        defs and returns the href to the orientation gradient.
 
         Args:
             element (BaseElement): an element inside the SVG that the gradient should be
@@ -650,8 +666,8 @@ class StopInterpolator(AttributeInterpolator):
         """Interpolates a gradient stop by interpolating style and offset separately
 
         Args:
-            time (int, optional): Interpolation position. If 0, start_value is returned, if 1,
-                end_value is returned. Defaults to 0.
+            time (int, optional): Interpolation position. If 0, start_value is returned,
+                if 1, end_value is returned. Defaults to 0.
 
         Returns:
             Stop: interpolated gradient stop
@@ -667,10 +683,12 @@ class PathInterpolator(AttributeInterpolator):
 
     def __init__(self, start_value=Path(), end_value=Path()):
         super().__init__(start_value.to_superpath(), end_value.to_superpath())
+        self.processed_end_path = None
+        self.processed_start_path = None
 
     def truncate_subpaths(self):
-        """Truncates the longer path so that all subpaths in both paths have an equal number of
-        bezier commands"""
+        """Truncates the longer path so that all subpaths in both paths have an equal
+        number of bezier commands"""
         s = [[]]
         e = [[]]
         # loop through all subpaths as long as there are remaining ones
@@ -679,8 +697,9 @@ class PathInterpolator(AttributeInterpolator):
             if self.start_value[0] and self.end_value[0]:
                 s[-1].append(self.start_value[0].pop(0))
                 e[-1].append(self.end_value[0].pop(0))
-            # if the subpath of start_value is empty, add the remaining empty list as new subpath of
-            # s and one more item of end_value as new subpath of e. Afterwards, the loop terminates
+            # if the subpath of start_value is empty, add the remaining empty list as
+            # new subpath of s and one more item of end_value as new subpath of e.
+            # Afterwards, the loop terminates
             elif self.end_value[0]:
                 s.append(self.start_value.pop(0))
                 e[-1].append(self.end_value[0][0])
@@ -689,8 +708,8 @@ class PathInterpolator(AttributeInterpolator):
                 e.append(self.end_value.pop(0))
                 s[-1].append(self.start_value[0][0])
                 s.append([self.start_value[0].pop(0)])
-            # if there are no commands left in both start_value or end_value, add empty list
-            # to both start_value and end_value
+            # if there are no commands left in both start_value or end_value, add empty
+            # list to both start_value and end_value
             else:
                 s.append(self.start_value.pop(0))
                 e.append(self.end_value.pop(0))
@@ -746,8 +765,8 @@ class EqualSubsegmentsInterpolator(PathInterpolator):
 
     @staticmethod
     def process_path(path, other):
-        """Rediscretize path so that all subpaths have an equal number of segments, so that
-        there is a node at the path "times" where path or other have a node
+        """Rediscretize path so that all subpaths have an equal number of segments,
+        so that there is a node at the path "times" where path or other have a node
 
         Args:
             path (Path): the first path
@@ -806,7 +825,7 @@ class FirstNodesInterpolator(PathInterpolator):
             maxlen = 0
             subpath = 0
             segment = 0
-            for y in range(len(self.start_value)):
+            for y, _ in enumerate(self.start_value):
                 for z in range(1, len(self.start_value[y])):
                     leng = bezlenapprx(
                         self.start_value[y][z - 1], self.start_value[y][z]

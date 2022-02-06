@@ -46,7 +46,7 @@ class Serial:
     def __init__(self, port, baud=9600, timeout=0.1, **options):
         self.test = port == "[test]"
         if self.test:
-            import pty  # This does not work on windows
+            import pty  # This does not work on windows #pylint: disable=import-outside-toplevel
 
             self.controller, self.peripheral = pty.openpty()
             port = os.ttyname(self.peripheral)
@@ -75,11 +75,11 @@ class Serial:
         try:
             # try to establish connection
             self.com.open()
-        except serial.SerialException:
+        except serial.SerialException as error:
             raise AbortExtension(
                 "Could not open serial port. Please check your device"
                 " is running, connected and the settings are correct"
-            )
+            ) from error
         return self.com
 
     def __exit__(self, exc, value, traceback):

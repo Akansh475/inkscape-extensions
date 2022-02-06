@@ -745,6 +745,9 @@ class PathTest(TestCase):
             ret,
             "M 100 35 L 60 35 L 60 75 L 10 35 C 32 33 45 23 60 10 L 100 25 L 100 35",
         )
+        ret = Path("M 100,250 q 250,100 400,250")
+        ret = ret.reverse()
+        self._assertPath(ret, "M 500 500 q -150 -150 -400 -250")
 
 
 class SuperPathTest(TestCase):

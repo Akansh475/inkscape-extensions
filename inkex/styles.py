@@ -107,13 +107,14 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     @staticmethod
     def _parse_str(style: str, element=None) -> Iterable[BaseStyleValue]:
-        """Create a dictionary from the value of a CSS rule (such as an inline style or from an
-        embedded style sheet), including its !important state, parsing the value if possible.
+        """Create a dictionary from the value of a CSS rule (such as an inline style or
+        from an embedded style sheet), including its !important state, parsing the value
+        if possible.
 
         Args:
             style: the content of a CSS rule to parse
-            element: the element this style is working on (can be the root SVG, is used for
-                parsing gradients etc.)
+            element: the element this style is working on (can be the root SVG, is used
+                for parsing gradients etc.)
 
         Yields:
             BaseStyleValue: the parsed attribute
@@ -184,11 +185,12 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             self.callback(self)
 
     def add_inherited(self, parent):
-        """Creates a new Style containing all parent styles with importance "important" and
-        current styles with importance "important"
+        """Creates a new Style containing all parent styles with importance "important"
+        and current styles with importance "important"
 
         Args:
-            parent: the parent style that will be merged into this one (will not be altered)
+            parent: the parent style that will be merged into this one (will not be
+                altered)
 
         Returns:
             Style: the merged Style object
@@ -202,7 +204,8 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         for key in parent.keys():
             apply = False
             if key in all_properties and all_properties[key][3]:
-                # only set parent value if value is not set or parent importance is higher
+                # only set parent value if value is not set or parent importance is
+                # higher
                 if key not in ret:
                     apply = True
                 elif self.get_importance(key) != parent.get_importance(key):
@@ -232,8 +235,8 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             _ = value.parse_value(self.element)
         elif key != value.attr_name:
             raise ValueError(
-                """You're trying to save a value into a style attribute,
-            but the provided key is different from the attribute name given in the value"""
+                """You're trying to save a value into a style attribute, but the
+                provided key is different from the attribute name given in the value"""
             )
         super().__setitem__(key, value)
         if self.callback is not None:
@@ -316,7 +319,8 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return color.to_rgba(self.get(name + "-opacity", 1.0))
 
     def set_color(self, color, name="fill"):
-        """Sets the given color AND opacity as rgba to the fill or stroke style properties."""
+        """Sets the given color AND opacity as rgba to the fill or stroke style
+        properties."""
         color = Color(color)
         if color.space == "rgba" and name in Style.associated_props:
             self[Style.associated_props[name]] = color.alpha
@@ -344,14 +348,15 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     @classmethod
     def cascaded_style(cls, element):
-        """Returns the cascaded style of an element (all rules that apply the element itself),
-        based on the stylesheets, the presentation attributes and the inline style using the
-        respective specificity of the style
+        """Returns the cascaded style of an element (all rules that apply the element
+        itself), based on the stylesheets, the presentation attributes and the inline
+        style using the respective specificity of the style
 
         see https://www.w3.org/TR/CSS22/cascade.html#cascading-order
 
         Args:
-            element (BaseElement): the element that the cascaded style will be computed for
+            element (BaseElement): the element that the cascaded style will be
+                computed for
 
         Returns:
             Style: the cascaded style
@@ -376,26 +381,27 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     @classmethod
     def specified_style(cls, element):
-        """Returns the specified style of an element, i.e. the cascaded style + inheritance,
-        see https://www.w3.org/TR/CSS22/cascade.html#specified-value
+        """Returns the specified style of an element, i.e. the cascaded style +
+        inheritance, see https://www.w3.org/TR/CSS22/cascade.html#specified-value
 
         Args:
-            element (BaseElement): the element that the specified style will be computed for
+            element (BaseElement): the element that the specified style will be computed
+                for
 
         Returns:
             Style: the specified style
         """
 
-        # We currently dont treat the case where parent=absolute value and element=relative value,
-        # i.e. specified = relative * absolute.
+        # We currently dont treat the case where parent=absolute value and
+        # element=relative value, i.e. specified = relative * absolute.
         cascaded = Style.cascaded_style(element)
 
         parent = element.getparent()
 
         # import this here, otherwise it will cause circular import problems
-        from .elements._base import (
+        from .elements._base import (  # pylint: disable=import-outside-toplevel
             BaseElement,
-        )  # pylint: disable=import-outside-toplevel
+        )
 
         if parent is not None and isinstance(parent, BaseElement):
             cascaded = Style.add_inherited(cascaded, parent.specified_style())
@@ -500,11 +506,12 @@ class StyleSheet(list):
 
         Args:
             element_id (str): the id of the element that styles are being queried for
-            svg (SvgDocumentElement): The document that contains both element and the styles
+            svg (SvgDocumentElement): The document that contains both element and the
+                styles
 
         Yields:
-            Tuple[ConditionalStyle, Tuple[int, int, int]]: all matched styles and the specificity
-            of the match
+            Tuple[ConditionalStyle, Tuple[int, int, int]]: all matched styles and the
+                specificity of the match
         """
         for style in self:
             for rule, spec in zip(style.to_xpaths(), style.get_specificities()):
@@ -534,9 +541,10 @@ class ConditionalStyle(Style):
 
     def to_xpath(self):
         """Convert all rules to an xpath"""
-        # This can be converted to cssselect.CSSSelector (lxml.cssselect) later if we have
-        # coverage problems. The main reason we're not is that cssselect is doing exactly
-        # this xpath transform and provides no extra functionality for reverse lookups.
+        # This can be converted to cssselect.CSSSelector (lxml.cssselect) later if we
+        # have coverage problems. The main reason we're not is that cssselect is doing
+        # exactly this xpath transform and provides no extra functionality for reverse
+        # lookups.
         return "|".join(self.to_xpaths())
 
     def to_xpaths(self):
@@ -566,8 +574,8 @@ class ConditionalRule:
 
     def to_xpath(self):
         """Attempt to convert the rule into a simplified xpath"""
-        # the space in the end is needed for the negative lookbehind in the regex, will be removed
-        # on return
+        # the space in the end is needed for the negative lookbehind in the regex, will
+        # be removed on return
         ret = cssselect.HTMLTranslator().selector_to_xpath(self.selector) + " "
         for matcher, replacer in self.step_to_xpath:
             ret = matcher.sub(replacer, ret)

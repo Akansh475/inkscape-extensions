@@ -56,7 +56,8 @@ def percent_point(point_a, point_b, percent=50.0):
 def root_wrapper(root_a, root_b, root_c, root_d):
     """Get the Cubic function, moic formular of roots, simple root"""
     if root_a:
-        # Monics formula see http://en.wikipedia.org/wiki/Cubic_function#Monic_formula_of_roots
+        # Monics formula, see
+        # http://en.wikipedia.org/wiki/Cubic_function#Monic_formula_of_roots
         mono_a, mono_b, mono_c = (root_b / root_a, root_c / root_a, root_d / root_a)
         m = 2.0 * mono_a**3 - 9.0 * mono_a * mono_b + 27.0 * mono_c
         k = mono_a**2 - 3.0 * mono_b
@@ -80,7 +81,7 @@ def root_wrapper(root_a, root_b, root_c, root_d):
             -1.0 / 3 * (mono_a + w1 * m1 + w2 * n1),
             -1.0 / 3 * (mono_a + w2 * m1 + w1 * n1),
         )
-    elif root_b:
+    if root_b:
         det = root_c**2.0 - 4.0 * root_b * root_d
         if det:
             return (
@@ -88,7 +89,7 @@ def root_wrapper(root_a, root_b, root_c, root_d):
                 (-root_c - cmath.sqrt(det)) / (2.0 * root_b),
             )
         return (-root_c / (2.0 * root_b),)
-    elif root_c:
+    if root_c:
         return (1.0 * (-root_d / root_c),)
     return ()
 
@@ -449,7 +450,7 @@ def cspcofm(csp):
                 [sp[i - 1][1][1], sp[i - 1][2][1], sp[i][0][1], sp[i][1][1]]
             )
 
-            def _mul(MAT):
+            def _mul(MAT, vec_x=vec_x, vec_y=vec_y):
                 return numpy.matmul(numpy.matmul(vec_x, MAT), vec_y.T)
 
             vec_t = numpy.array(

@@ -22,7 +22,6 @@
 Basic color controls
 """
 
-from .utils import PY3
 
 # All the names that get added to the inkex API itself.
 __all__ = ("Color", "ColorError", "ColorIdError")
@@ -178,7 +177,7 @@ SVG_COLOR = {
     "yellowgreen": "#9acd32",
     "none": None,
 }
-COLOR_SVG = dict([(value, name) for name, value in SVG_COLOR.items()])
+COLOR_SVG = {value: name for name, value in SVG_COLOR.items()}
 
 
 def is_color(color):
@@ -207,20 +206,28 @@ class ColorIdError(ColorError):
 class Color(list):
     """An RGB array for the color"""
 
-    red = property(lambda self: self.to_rgb()[0])
-    red = red.setter(lambda self, value: self._set(0, value))
-    green = property(lambda self: self.to_rgb()[1])
-    green = green.setter(lambda self, value: self._set(1, value))
-    blue = property(lambda self: self.to_rgb()[2])
-    blue = blue.setter(lambda self, value: self._set(2, value))
-    alpha = property(lambda self: self.to_rgba()[3])
-    alpha = alpha.setter(lambda self, value: self._set(3, value, ("rgba",)))
-    hue = property(lambda self: self.to_hsl()[0])
-    hue = hue.setter(lambda self, value: self._set(0, value, ("hsl",)))
-    saturation = property(lambda self: self.to_hsl()[1])
-    saturation = saturation.setter(lambda self, value: self._set(1, value, ("hsl",)))
-    lightness = property(lambda self: self.to_hsl()[2])
-    lightness = lightness.setter(lambda self, value: self._set(2, value, ("hsl",)))
+    red = property(
+        lambda self: self.to_rgb()[0], lambda self, value: self._set(0, value)
+    )
+    green = property(
+        lambda self: self.to_rgb()[1], lambda self, value: self._set(1, value)
+    )
+    blue = property(
+        lambda self: self.to_rgb()[2], lambda self, value: self._set(2, value)
+    )
+    alpha = property(
+        lambda self: self.to_rgba()[3],
+        lambda self, value: self._set(3, value, ("rgba",)),
+    )
+    hue = property(
+        lambda self: self.to_hsl()[0], lambda self, value: self._set(0, value, ("hsl",))
+    )
+    saturation = property(
+        lambda self: self.to_hsl()[1], lambda self, value: self._set(1, value, ("hsl",))
+    )
+    lightness = property(
+        lambda self: self.to_hsl()[2], lambda self, value: self._set(2, value, ("hsl",))
+    )
 
     def __init__(self, color=None, space="rgb"):
         super().__init__()
@@ -246,8 +253,8 @@ class Color(list):
         try:
             for val in color:
                 self.append(val)
-        except ValueError:
-            raise ColorError("Bad color list")
+        except ValueError as error:
+            raise ColorError("Bad color list") from error
 
     def __hash__(self):
         """Allow colors to be hashable"""
@@ -312,13 +319,14 @@ class Color(list):
             # FUTURE: We could use icc or ilab information
             col = color.split(" ")[0]
             if len(col) == 4:
+                # pylint: disable=consider-using-f-string
                 col = "#{1}{1}{2}{2}{3}{3}".format(*col)
 
             # Convert hex to integers
             try:
                 return "rgb", (int(col[1:3], 16), int(col[3:5], 16), int(col[5:], 16))
-            except ValueError:
-                raise ColorError(f"Bad RGB hex color value {col}")
+            except ValueError as error:
+                raise ColorError(f"Bad RGB hex color value {col}") from error
 
         # Handle other css color values
         elif "(" in color and ")" in color:
@@ -350,6 +358,7 @@ class Color(list):
 
     def __str__(self):
         """int array to #rrggbb"""
+        # pylint: disable=consider-using-f-string
         if not self:
             return "none"
         if self.space == "named":
@@ -363,7 +372,7 @@ class Color(list):
             if self[3] == 1.0:
                 return "rgb({:g}, {:g}, {:g})".format(*self[:3])
             return "rgba({:g}, {:g}, {:g}, {:g})".format(*self)
-        elif self.space == "hsl":
+        if self.space == "hsl":
             return "hsl({0:g}, {1:g}, {2:g})".format(*self)
         raise ColorError(f"Can't print colour space '{self.space}'")
 
@@ -379,7 +388,7 @@ class Color(list):
             + (int(color[3] * 255))
         )
 
-    def to(self, space):
+    def to(self, space):  # pylint: disable=invalid-name
         """Dynamic caller for to_hsl, to_rgb, etc"""
         return getattr(self, "to_" + space)()
 
@@ -389,9 +398,9 @@ class Color(list):
             return self.to_rgb().to_hsl()
         if self.space == "hsl":
             return self
-        elif self.space in ("named"):
+        if self.space in ("named"):
             return self.to_rgb().to_hsl()
-        elif self.space == "rgb":
+        if self.space == "rgb":
             return Color(rgb_to_hsl(*self.to_floats()), space="hsl")
         raise ColorError(f"Unknown color conversion {self.space}->hsl")
 
@@ -403,7 +412,7 @@ class Color(list):
             return self
         if self.space in ("rgba", "named"):
             return Color(self[:3], space="rgb")
-        elif self.space == "hsl":
+        if self.space == "hsl":
             return Color(hsl_to_rgb(*self.to_floats()), space="rgb")
         raise ColorError(f"Unknown color conversion {self.space}->rgb")
 
@@ -425,7 +434,7 @@ class Color(list):
 
     def interpolate(self, other, fraction):
         """Iterpolate two colours by the given fraction"""
-        from .tween import ColorInterpolator
+        from .tween import ColorInterpolator  # pylint: disable=import-outside-toplevel
 
         return ColorInterpolator(self, other).interpolate(fraction)
 

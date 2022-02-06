@@ -33,6 +33,7 @@ it yourself, to take advantage of the security settings and testing functions.
 
 import os
 import sys
+from shutil import which as warlock
 
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
@@ -41,7 +42,7 @@ from lxml.etree import ElementTree
 from .elements import SvgDocumentElement
 
 INKSCAPE_EXECUTABLE_NAME = os.environ.get("INKSCAPE_COMMAND")
-if INKSCAPE_EXECUTABLE_NAME == None:
+if INKSCAPE_EXECUTABLE_NAME is None:
     if sys.platform == "win32":
         # prefer inkscape.exe over inkscape.com which spawns a command window
         INKSCAPE_EXECUTABLE_NAME = "inkscape.exe"
@@ -52,13 +53,9 @@ if INKSCAPE_EXECUTABLE_NAME == None:
 class CommandNotFound(IOError):
     """Command is not found"""
 
-    pass
-
 
 class ProgramRunError(ValueError):
     """Command returned non-zero output"""
-
-    pass
 
 
 def which(program):
@@ -69,13 +66,12 @@ def which(program):
         return program
     # On Windows, shutil.which may give preference to .py files in the current directory
     # (such as pdflatex.py), e.g. if .PY is in pathext, because the current directory is
-    # prepended to PATH. This can be suppressed by explicitly appending the current directory.
+    # prepended to PATH. This can be suppressed by explicitly appending the current
+    # directory.
 
     try:
         if sys.platform == "win32":
-            from shutil import which
-
-            prog = which(program, path=os.environ["PATH"] + ";" + os.curdir)
+            prog = warlock(program, path=os.environ["PATH"] + ";" + os.curdir)
             if prog:
                 return prog
     except ImportError:
@@ -83,8 +79,6 @@ def which(program):
 
     try:
         # Python3 only version of which
-        from shutil import which as warlock
-
         prog = warlock(program)
         if prog:
             return prog
@@ -131,7 +125,8 @@ def to_arg(arg, oldie=False):
 
 
 def to_args(prog, *positionals, **arguments):
-    """Compile arguments and keyword arguments into a list of strings which Popen will understand.
+    """Compile arguments and keyword arguments into a list of strings which Popen will
+    understand.
 
     :param prog:
         Program executable prepended to the output.
@@ -191,20 +186,20 @@ def _call(program, *args, **kwargs):
     if sys.platform == "win32":
         kwargs["creationflags"] = 0x08000000  # create no console window
 
-    process = Popen(
+    with Popen(
         args,
         shell=False,  # Never have shell=True
         stdin=inpipe,  # StdIn not used (yet)
         stdout=PIPE,  # Grab any output (return it)
         stderr=PIPE,  # Take all errors, just incase
         **kwargs,
-    )
-    (stdout, stderr) = process.communicate(input=stdin)
-    if process.returncode == 0:
-        return stdout
-    raise ProgramRunError(
-        f"Return Code: {process.returncode}: {stderr}\n{stdout}\nargs: {args}"
-    )
+    ) as process:
+        (stdout, stderr) = process.communicate(input=stdin)
+        if process.returncode == 0:
+            return stdout
+        raise ProgramRunError(
+            f"Return Code: {process.returncode}: {stderr}\n{stdout}\nargs: {args}"
+        )
 
 
 def call(program, *args, **kwargs):

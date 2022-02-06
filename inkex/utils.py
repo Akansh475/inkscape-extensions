@@ -25,9 +25,8 @@ import sys
 import random
 import re
 import math
-
-from itertools import tee
 from argparse import ArgumentTypeError
+from itertools import tee
 
 # All the names that get added to the inkex API itself.
 __all__ = ("AbortExtension", "DependencyError", "Boolean", "errormsg")
@@ -37,6 +36,7 @@ ABORT_STATUS = -5
 (X, Y) = range(2)
 PY3 = sys.version_info[0] == 3
 
+# pylint: disable=line-too-long
 # Taken from https://www.w3.org/Graphics/SVG/1.1/paths.html#PathDataBNF
 DIGIT_REX_PART = r"[0-9]"
 DIGIT_SEQUENCE_REX_PART = rf"(?:{DIGIT_REX_PART}+)"
@@ -48,6 +48,7 @@ FLOATING_POINT_CONSTANT_REX_PART = rf"(?:{FRACTIONAL_CONSTANT_REX_PART}{EXPONENT
 NUMBER_REX = re.compile(
     rf"(?:{SIGN_REX_PART}?{FLOATING_POINT_CONSTANT_REX_PART}|{SIGN_REX_PART}?{INTEGER_CONSTANT_REX_PART})"
 )
+# pylint: enable=line-too-long
 
 
 def _pythonpath():
@@ -69,6 +70,7 @@ def get_user_directory():
     for pth in _pythonpath():
         if pth.startswith(home):
             return pth
+    return None
 
 
 def get_inkscape_directory():
@@ -76,6 +78,7 @@ def get_inkscape_directory():
     for pth in _pythonpath():
         if os.path.isdir(os.path.join(pth, "inkex")):
             return pth
+    raise ValueError("Unable to determine the location of Inkscape")
 
 
 class KeyDict(dict):
@@ -92,7 +95,8 @@ class KeyDict(dict):
 
 
 def parse_percent(val: str):
-    """Parse strings that are either values (i.e., '3.14159') or percentages (i.e. '75%') to a float."""
+    """Parse strings that are either values (i.e., '3.14159') or percentages
+    (i.e. '75%') to a float."""
     val = val.strip()
     if val.endswith("%"):
         return float(val[:-1]) / 100
@@ -103,7 +107,7 @@ def Boolean(value):
     """ArgParser function to turn a boolean string into a python boolean"""
     if value.upper() == "TRUE":
         return True
-    elif value.upper() == "FALSE":
+    if value.upper() == "FALSE":
         return False
     return None
 
@@ -123,7 +127,6 @@ def debug(what):
 
 def do_nothing(*args, **kwargs):  # pylint: disable=unused-argument
     """A blank function to do nothing"""
-    pass
 
 
 def errormsg(msg):
@@ -162,13 +165,6 @@ def errormsg(msg):
 
 class AbortExtension(Exception):
     """Raised to print a message to the user without backtrace"""
-
-    def __init__(self, message=""):
-        self.message = message
-
-    def write(self):
-        """write the error message out to the user"""
-        errormsg(self.message)
 
 
 class DependencyError(NotImplementedError):
@@ -214,7 +210,7 @@ def filename_arg(name):
     """Existing file to read or option used in script arguments"""
     filename = os.path.abspath(os.path.expanduser(name))
     if not os.path.isfile(filename):
-        raise ArgumentTypeError("File not found: {}".format(name))
+        raise ArgumentTypeError(f"File not found: {name}")
     return filename
 
 

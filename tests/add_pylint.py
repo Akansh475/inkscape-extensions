@@ -55,7 +55,7 @@ def run_pylint(fname):
     "run pylint on the given file"
     pylint_output = WritableObject()
     # Pipe lint errors to devnull
-    temp, sys.stderr = sys.stderr, open(os.devnull, "w")
+    temp, sys.stderr = sys.stderr, open(os.devnull, "w", encoding="utf-8")
     try:
         lint.Run([fname] + ARGS, reporter=TextReporter(pylint_output), exit=False)
     except Exception:  # pylint: disable=broad-except
@@ -75,7 +75,7 @@ def add_lint(fname):
     Parse index.html and append in the needed pylint score for this file.
     """
     # Read in index file and strip out html whitespace (for easier rex'ing)
-    with open(fname, "r") as fhl:
+    with open(fname, "r", encoding="utf-8") as fhl:
         html = re.sub(r"\>\s+\<", "><", fhl.read())
 
     # Keep a tab on how much we've inserted into the html

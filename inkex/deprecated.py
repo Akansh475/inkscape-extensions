@@ -65,13 +65,15 @@ def _deprecated(msg, stack=2, level=DEPRECATION_LEVEL):
         warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 
 
-class DeprecatedEffect(object):
+class DeprecatedEffect:
     """An Inkscape effect, takes SVG in and outputs SVG, providing a deprecated layer"""
 
-    def __init__(self):
-        super(DeprecatedEffect, self).__init__()
+    options = argparse.Namespace()
 
+    def __init__(self):
+        super().__init__()
         self._doc_ids = None
+        self._args = None
 
         # These are things we reference in the deprecated code, they are provided
         # by the new effects code, but we want to keep this as a Mixin so these
@@ -136,7 +138,8 @@ class DeprecatedEffect(object):
         self._deprecated(
             "current_layer",
             _(
-                "{} is now a method in the SvgDocumentElement class. Use `self.svg.get_current_layer()` instead."
+                "{} is now a method in the SvgDocumentElement class. "
+                "Use `self.svg.get_current_layer()` instead."
             ),
         )
         return self.svg.get_current_layer()
@@ -146,7 +149,8 @@ class DeprecatedEffect(object):
         self._deprecated(
             "view_center",
             _(
-                "{} is now a method in the SvgDocumentElement class. Use `self.svg.get_center_position()` instead."
+                "{} is now a method in the SvgDocumentElement class. "
+                "Use `self.svg.get_center_position()` instead."
             ),
         )
         return self.svg.namedview.center
@@ -156,10 +160,11 @@ class DeprecatedEffect(object):
         self._deprecated(
             "selected",
             _(
-                "{} is now a dict in the SvgDocumentElement class. Use `self.svg.selected`."
+                "{} is now a dict in the SvgDocumentElement class. "
+                "Use `self.svg.selected`."
             ),
         )
-        return dict([(elem.get("id"), elem) for elem in self.svg.selected])
+        return {elem.get("id"): elem for elem in self.svg.selected}
 
     @property
     def doc_ids(self):
@@ -188,7 +193,8 @@ class DeprecatedEffect(object):
         self._deprecated(
             "getElementById",
             _(
-                "{} is now a method in the SvgDocumentElement class. Use `self.svg.getElementById(eid)` instead."
+                "{} is now a method in the SvgDocumentElement class. "
+                "Use `self.svg.getElementById(eid)` instead."
             ),
         )
         return self.svg.getElementById(eid)
@@ -254,7 +260,8 @@ class DeprecatedEffect(object):
 
     def save_raw(self, ret):
         # Derived class may implement "output()"
-        # Attention: 'cubify.py' implements __getattr__ -> hasattr(self, 'output') returns True
+        # Attention: 'cubify.py' implements __getattr__ -> hasattr(self, 'output')
+        # returns True
         if hasattr(self.__class__, "output"):
             self._deprecated("output", "Use `save()` or `save_raw()` instead.", stack=5)
             return getattr(self, "output")()
@@ -334,8 +341,6 @@ class DeprecatedEffect(object):
 class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
     """An Inkscape effect, takes SVG in and outputs SVG"""
 
-    pass
-
 
 def deprecate(func):
     r"""Function decorator for deprecation functions which have a one-liner
@@ -354,7 +359,7 @@ def deprecate(func):
     """
 
     def _inner(*args, **kwargs):
-        _deprecated("{0.__module__}.{0.__name__} -> {0.__doc__}".format(func), stack=2)
+        _deprecated(f"{func.__module__}.{func.__name__} -> {func.__doc__}", stack=2)
         return func(*args, **kwargs)
 
     _inner.__name__ = func.__name__
@@ -366,17 +371,17 @@ def deprecate(func):
 class DeprecatedDict(dict):
     @deprecate
     def __getitem__(self, key):
-        return super(DeprecatedDict, self).__getitem__(key)
+        return super().__getitem__(key)
 
     @deprecate
     def __iter__(self):
-        return super(DeprecatedDict, self).__iter__()
+        return super().__iter__()
 
 
 # legacy inkex members
 
 
-class lazyproxy(object):
+class lazyproxy:
     """Proxy, use as decorator on a function with provides the wrapped object.
     The decorated function is called when a member is accessed on the proxy.
     """
@@ -412,11 +417,11 @@ def etree():
 
 @lazyproxy
 def InkOption():
-    import optparse
+    import optparse as optprs
 
-    class wrapped(optparse.Option):
-        TYPES = optparse.Option.TYPES + ("inkbool",)
-        TYPE_CHECKER = dict(optparse.Option.TYPE_CHECKER)
+    class wrapped(optprs.Option):
+        TYPES = optprs.Option.TYPES + ("inkbool",)
+        TYPE_CHECKER = dict(optprs.Option.TYPE_CHECKER)
         TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == "True"
 
     return wrapped
@@ -481,7 +486,7 @@ def zSort(inNode, idList):
     return sortedList
 
 
-class DeprecatedSvgMixin(object):
+class DeprecatedSvgMixin:
     """Mixin which adds deprecated API elements to the SvgDocumentElement"""
 
     @property

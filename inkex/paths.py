@@ -17,19 +17,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-functions for digesting paths into a simple list structure
+functions for digesting paths
 """
+from __future__ import annotations
 
 import re
 import copy
+import abc
 
 from math import atan2, cos, pi, sin, sqrt, acos, tan
-
-from .transforms import Transform, BoundingBox, Vector2d
-from .utils import classproperty, strargs
-
 from typing import (
-    overload,
     Any,
     Type,
     Dict,
@@ -37,10 +34,18 @@ from typing import (
     Union,
     Tuple,
     List,
-    Iterator,
     Generator,
-)  # pylint: disable=unused-import
-from typing import TypeVar
+    TypeVar,
+)
+from .transforms import (
+    Transform,
+    BoundingBox,
+    Vector2d,
+    cubic_extrema,
+    quadratic_extrema,
+)
+from .utils import classproperty, strargs
+
 
 Pathlike = TypeVar("Pathlike", bound="PathCommand")
 AbsolutePathlike = TypeVar("AbsolutePathlike", bound="AbsolutePathCommand")
@@ -82,7 +87,7 @@ class InvalidPath(ValueError):
     """Raised when given an invalid path string"""
 
 
-class PathCommand:
+class PathCommand(abc.ABC):
     """
     Base class of all path commands
     """
@@ -90,24 +95,32 @@ class PathCommand:
     # Number of arguments that follow this path commands letter
     nargs = -1
 
-    # The full name of the segment (i.e. Line, Arc, etc)
-    name = classproperty(lambda cls: cls.__name__)
+    @classproperty  # From python 3.9 on, just combine @classmethod and @property
+    def name(cls):  # pylint: disable=no-self-argument
+        """The full name of the segment (i.e. Line, Arc, etc)"""
+        return cls.__name__  # pylint: disable=no-member
 
-    # The single letter representation of this command (i.e. L, A, etc)
-    letter = classproperty(lambda cls: cls.name[0])
+    @classproperty
+    def letter(cls):  # pylint: disable=no-self-argument
+        """The single letter representation of this command (i.e. L, A, etc)"""
+        return cls.name[0]
 
-    # The implicit next command. This is for automatic chains where the next command
-    # isn't given, just a bunch on numbers which we automatically parse.
     @classproperty
     def next_command(self):
+        """The implicit next command. This is for automatic chains where the next
+        command isn't given, just a bunch on numbers which we automatically parse."""
         return self
 
     @property
     def is_relative(self):  # type: () -> bool
+        """Whether the command is defined in relative coordinates, i.e. relative to
+        the previous endpoint (lower case path command letter)"""
         raise NotImplementedError
 
     @property
     def is_absolute(self):  # type: () -> bool
+        """Whether the command is defined in absolute coordinates (upper case path
+        command letter)"""
         raise NotImplementedError
 
     def to_relative(self, prev):  # type: (Vector2d) -> RelativePathCommand
@@ -118,7 +131,10 @@ class PathCommand:
         """Return relative counterpart for relative commands or copy for absolute"""
         raise NotImplementedError
 
-    def to_non_shorthand(self, prev, prev_control):
+    def reverse(self, first, prev):
+        """Reverse path command"""
+
+    def to_non_shorthand(self, prev, prev_control):  # pylint: disable=unused-argument
         # type: (Vector2d, Vector2d) -> AbsolutePathCommand
         """Return an absolute non-shorthand command"""
         return self.to_absolute(prev)
@@ -140,8 +156,9 @@ class PathCommand:
         """Returns path command arguments as tuple of floats"""
         raise NotImplementedError()
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Union[List[Vector2d], Generator[Vector2d, None, None]]
+    def control_points(
+        self, first: Vector2d, prev: Vector2d, prev_prev: Vector2d
+    ) -> Union[List[Vector2d], Generator[Vector2d, None, None]]:
         """Returns list of path command control points"""
         raise NotImplementedError
 
@@ -150,9 +167,10 @@ class PathCommand:
         return sep.join([cls.number_template] * cls.nargs)
 
     def __str__(self):
-        return "{} {}".format(self.letter, self._argt(" ").format(*self.args)).strip()
+        return f"{self.letter} {self._argt(' ').format(*self.args)}".strip()
 
     def __repr__(self):
+        # pylint: disable=consider-using-f-string
         return "{{}}({})".format(self._argt(", ")).format(self.name, *self.args)
 
     def __eq__(self, other):
@@ -174,16 +192,19 @@ class PathCommand:
         """Returns last control point of path command"""
         raise NotImplementedError()
 
-    def update_bounding_box(self, first, last_two_points, bbox):
-        # type: (Vector2d, List[Vector2d], BoundingBox) -> None
+    def update_bounding_box(
+        self, first: Vector2d, last_two_points: List[Vector2d], bbox: BoundingBox
+    ):
         # pylint: disable=unused-argument
-        """
-        Enlarges given bbox to contain path element.
+        """Enlarges given bbox to contain path element.
 
-        :param (tuple of float) first: first point of path. Required to calculate Z segment
-        :param (list of tuple) last_two_points: list with last two control points in abs coords.
-        :param (BoundingBox) bbox: bounding box to update
+        Args:
+            first (Vector2d): first point of path. Required to calculate Z segment
+            last_two_points (List[Vector2d]): list with last two control points in abs
+                coords.
+            bbox (BoundingBox): bounding box to update
         """
+
         raise NotImplementedError(f"Bounding box is not implemented for {self.name}")
 
     def to_curve(self, prev, prev_prev=Vector2d()):
@@ -220,8 +241,9 @@ class RelativePathCommand(PathCommand):
     def is_absolute(self):
         return False
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Union[List[Vector2d], Generator[Vector2d, None, None]]
+    def control_points(
+        self, first: Vector2d, prev: Vector2d, prev_prev: Vector2d
+    ) -> Union[List[Vector2d], Generator[Vector2d, None, None]]:
         return self.to_absolute(prev).control_points(first, prev, prev_prev)
 
     def to_relative(self, prev):
@@ -247,9 +269,8 @@ class RelativePathCommand(PathCommand):
 
 
 class AbsolutePathCommand(PathCommand):
-    """
-    Absolute path command. Unlike :py:class:`RelativePathCommand` can be transformed directly.
-    """
+    """Absolute path command. Unlike :py:class:`RelativePathCommand` can be transformed
+    directly."""
 
     @property
     def is_relative(self):
@@ -260,7 +281,7 @@ class AbsolutePathCommand(PathCommand):
         return True
 
     def to_absolute(
-        self, previous
+        self, prev
     ):  # type: (AbsolutePathlike, Vector2d) -> AbsolutePathlike
         return self.__class__(*self.args)
 
@@ -503,7 +524,7 @@ class Horz(AbsolutePathCommand):
         # type: (Vector2d, Vector2d) -> Line
         return self.to_line(prev)
 
-    def transform(self, transformation):
+    def transform(self, transform):
         # type: (Pathlike, Transform) -> Pathlike
         raise ValueError("Horizontal lines can't be transformed directly.")
 
@@ -637,7 +658,7 @@ class Curve(AbsolutePathCommand):
     def args(self):
         return self.x2, self.y2, self.x3, self.y3, self.x4, self.y4
 
-    def __init__(self, x2, y2, x3, y3, x4, y4):
+    def __init__(self, x2, y2, x3, y3, x4, y4):  # pylint: disable=too-many-arguments
         self.x2 = x2
         self.y2 = y2
 
@@ -648,7 +669,6 @@ class Curve(AbsolutePathCommand):
         self.y4 = y4
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        from .transforms import cubic_extrema
 
         x1, x2, x3, x4 = last_two_points[-1].x, self.x2, self.x3, self.x4
         y1, y2, y3, y4 = last_two_points[-1].y, self.y2, self.y3, self.y4
@@ -708,7 +728,9 @@ class curve(RelativePathCommand):  # pylint: disable=invalid-name
     def args(self):
         return self.dx2, self.dy2, self.dx3, self.dy3, self.dx4, self.dy4
 
-    def __init__(self, dx2, dy2, dx3, dy3, dx4, dy4):
+    def __init__(
+        self, dx2, dy2, dx3, dy3, dx4, dy4
+    ):  # pylint: disable=too-many-arguments
         self.dx2 = dx2
         self.dy2 = dy2
 
@@ -853,7 +875,6 @@ class Quadratic(AbsolutePathCommand):
         self.y3 = y3
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        from .transforms import quadratic_extrema
 
         x1, x2, x3 = last_two_points[-1].x, self.x2, self.x3
         y1, y2, y3 = last_two_points[-1].y, self.y2, self.y3
@@ -920,7 +941,9 @@ class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
         )
 
     def reverse(self, first, prev):
-        return quadratic(-self.x3 + self.x2, -self.y3 + self.y2, -self.x3, -self.y3)
+        return quadratic(
+            -self.dx3 + self.dx2, -self.dy3 + self.dy2, -self.dx3, -self.dy3
+        )
 
 
 class TepidQuadratic(AbsolutePathCommand):
@@ -1028,7 +1051,9 @@ class Arc(AbsolutePathCommand):
             self.y,
         )
 
-    def __init__(self, rx, ry, x_axis_rotation, large_arc, sweep, x, y):
+    def __init__(
+        self, rx, ry, x_axis_rotation, large_arc, sweep, x, y
+    ):  # pylint: disable=too-many-arguments
         self.rx = rx
         self.ry = ry
         self.x_axis_rotation = x_axis_rotation
@@ -1058,6 +1083,7 @@ class Arc(AbsolutePathCommand):
 
     def transform(self, transform):
         # type: (Transform) -> Arc
+        # pylint: disable=invalid-name, too-many-locals
         x_, y_ = transform.apply_to_point((self.x, self.y))
 
         T = transform  # type: Transform
@@ -1159,7 +1185,9 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
             self.dy,
         )
 
-    def __init__(self, rx, ry, x_axis_rotation, large_arc, sweep, dx, dy):
+    def __init__(
+        self, rx, ry, x_axis_rotation, large_arc, sweep, dx, dy
+    ):  # pylint: disable=too-many-arguments
         self.rx = rx
         self.ry = ry
         self.x_axis_rotation = x_axis_rotation
@@ -1192,7 +1220,7 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
         )
 
 
-PathCommand._letter_to_class = {
+PathCommand._letter_to_class = {  # pylint: disable=protected-access
     "M": Move,
     "L": Line,
     "V": Vert,
@@ -1223,7 +1251,8 @@ class Path(list):
         """
         A handy class for Path traverse and coordinate access
 
-        Reduces number of arguments in user code compared to bare :py:class:`PathCommand` methods
+        Reduces number of arguments in user code compared to bare
+        :py:class:`PathCommand` methods
         """
 
         def __init__(
@@ -1236,52 +1265,68 @@ class Path(list):
 
         @property
         def name(self):
+            """The full name of the segment (i.e. Line, Arc, etc)"""
             return self.command.name
 
         @property
         def letter(self):
+            """The single letter representation of this command (i.e. L, A, etc)"""
             return self.command.letter
 
         @property
         def next_command(self):
+            """The implicit next command."""
             return self.command.next_command
 
         @property
         def is_relative(self):
+            """Whether the command is defined in relative coordinates, i.e. relative to
+            the previous endpoint (lower case path command letter)"""
             return self.command.is_relative
 
         @property
         def is_absolute(self):
+            """Whether the command is defined in absolute coordinates (upper case path
+            command letter)"""
             return self.command.is_absolute
 
         @property
         def args(self):
+            """Returns path command arguments as tuple of floats"""
             return self.command.args
 
         @property
         def control_points(self):
+            """Returns list of path command control points"""
             return self.command.control_points(
                 self.first_point, self.previous_end_point, self.prev2_control_point
             )
 
         @property
         def end_point(self):
+            """Returns last control point of path command"""
             return self.command.end_point(self.first_point, self.previous_end_point)
 
         def reverse(self):
+            """Reverse path command"""
             return self.command.reverse(self.end_point, self.previous_end_point)
 
         def to_curve(self):
+            """Convert command to :py:class:`Curve`
+            Curve().to_curve() returns a copy
+            """
             return self.command.to_curve(
                 self.previous_end_point, self.prev2_control_point
             )
 
         def to_curves(self):
+            """Convert command to list of :py:class:`Curve` commands"""
             return self.command.to_curves(
                 self.previous_end_point, self.prev2_control_point
             )
 
         def to_absolute(self):
+            """Return relative counterpart for relative commands or copy for absolute"""
             return self.command.to_absolute(self.previous_end_point)
 
         def __str__(self):
@@ -1308,7 +1353,8 @@ class Path(list):
                     self.append(Line(*item))
             else:
                 raise TypeError(
-                    f"Bad path type: {type(path_d).__name__}({type(item).__name__}, ...): {item}"
+                    f"Bad path type: {type(path_d).__name__}"
+                    f"({type(item).__name__}, ...): {item}"
                 )
 
     @classmethod
@@ -1351,7 +1397,7 @@ class Path(list):
         if isinstance(cmd, list):
             self.extend(cmd)
         elif isinstance(cmd, PathCommand):
-            super(Path, self).append(cmd)
+            super().append(cmd)
 
     def translate(self, x, y, inplace=False):  # pylint: disable=invalid-name
         """Move all coords in this path by the given amount"""
@@ -1377,7 +1423,7 @@ class Path(list):
 
     @property
     def control_points(self):
-
+        """Returns all control points of the Path"""
         prev = Vector2d()
         prev_prev = Vector2d()
         first = Vector2d()
@@ -1385,13 +1431,14 @@ class Path(list):
         for i, seg in enumerate(self):  # type: PathCommand
             if i == 0:
                 first = seg.end_point(first, prev)
-            for cp in seg.control_points(first, prev, prev_prev):
+            for cpt in seg.control_points(first, prev, prev_prev):
                 prev_prev = prev
-                prev = cp
-                yield cp
+                prev = cpt
+                yield cpt
 
     @property
     def end_points(self):
+        """Returns all endpoints of all path commands (i.e. the nodes)"""
         prev = Vector2d()
         first = Vector2d()
 
@@ -1506,10 +1553,17 @@ class Path(list):
         """Convert this path to use only absolute non-shorthand coordinates"""
         return self._to_absolute(False)
 
-    def _to_absolute(self, shorthand):
+    def _to_absolute(self, shorthand: bool) -> Path:
+        """Make entire Path absolute.
+
+        Args:
+            shorthand (bool): If false, then convert all shorthand commands to
+                non-shorthand.
+
+        Returns:
+            Path: the input path, converted to absolute coordinates.
         """
-        :param (bool) shorthand: If false, then convert all shorthand commands to non-shorthand.
-        """
+
         abspath = Path()
 
         previous = Vector2d()
@@ -1523,9 +1577,9 @@ class Path(list):
                 abspath.append(seg.to_absolute(previous))
             else:
                 if abspath and isinstance(abspath[-1], (Curve, Quadratic)):
-                    prev_control = list(abspath[-1].control_points(None, None, None))[
-                        -2
-                    ]
+                    prev_control = list(
+                        abspath[-1].control_points(Vector2d(), Vector2d(), Vector2d())
+                    )[-2]
                 else:
                     prev_control = previous
 
@@ -1563,7 +1617,8 @@ class Path(list):
         return acopy
 
     def to_arrays(self):
-        """Returns path in format of parsePath output, returning arrays of absolute command data
+        """Returns path in format of parsePath output, returning arrays of absolute
+        command data
 
         .. deprecated:: 1.0
             This is compatibility function for older API. Should not be used in new code
@@ -1623,8 +1678,9 @@ class CubicSuperPath(list):
                     super().append([])
                 item = [list(item.args), list(item.args), list(item.args)]
             elif isinstance(item, ZoneClose) and self and self[-1]:
-                # This duplicates the first segment to 'close' the path, it's appended directly
-                # because we don't want to last coord to change for the final segment.
+                # This duplicates the first segment to 'close' the path, it's appended
+                # directly because we don't want to last coord to change for the final
+                # segment.
                 self[-1].append(
                     [self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]]
                 )
@@ -1645,12 +1701,12 @@ class CubicSuperPath(list):
                 )
                 if isinstance(item, (Horz, Vert)):
                     item = item.to_line(self._prev)
-                pp = self._prev_prev
+                prp = self._prev_prev
                 if is_quadratic:
                     self._prev_prev = list(
-                        item.control_points(self._first, self._prev, pp)
+                        item.control_points(self._first, self._prev, prp)
                     )[-2:-1][0]
-                item = item.to_curve(self._prev, pp)
+                item = item.to_curve(self._prev, prp)
 
         if isinstance(item, Curve):
             # Curves are cut into three tuples for the super path.
@@ -1659,9 +1715,9 @@ class CubicSuperPath(list):
         if not isinstance(item, list):
             raise ValueError(f"Unknown super curve item type: {item}")
 
-        if len(item) != 3 or not all([len(bit) == 2 for bit in item]):
+        if len(item) != 3 or not all(len(bit) == 2 for bit in item):
             # The item is already a subpath (usually from some other process)
-            if len(item[0]) == 3 and all([len(bit) == 2 for bit in item[0]]):
+            if len(item[0]) == 3 and all(len(bit) == 2 for bit in item[0]):
                 super().append(self._clean(item))
                 self._prev_prev = Vector2d(self[-1][-1][0])
                 self._prev = Vector2d(self[-1][-1][1])
@@ -1676,7 +1732,8 @@ class CubicSuperPath(list):
 
         if coordinate_shift:
             if self[-1]:
-                # The last tuple is replaced, it's the coords of where the next segment will land.
+                # The last tuple is replaced, it's the coords of where the next segment
+                # will land.
                 self[-1][-1][-1] = item[0][:]
             # The last coord is duplicated, but is expected to be replaced
             self[-1].append(item[1:] + copy.deepcopy(item)[-1:])
@@ -1728,30 +1785,35 @@ class CubicSuperPath(list):
         return self.to_path().transform(transform).to_superpath()
 
     @staticmethod
-    def is_on(a, b, c):
-        """Checks if point a is on the line between points b and c"""
-        return CubicSuperPath.collinear(a, b, c) and (
-            CubicSuperPath.within(a[0], b[0], c[0])
-            if a[0] != b[0]
-            else CubicSuperPath.within(a[1], b[1], c[1])
+    def is_on(pt_a, pt_b, pt_c):
+        """Checks if point pt_a is on the line between points pt_b and pt_c"""
+        return CubicSuperPath.collinear(pt_a, pt_b, pt_c) and (
+            CubicSuperPath.within(pt_a[0], pt_b[0], pt_c[0])
+            if pt_a[0] != pt_b[0]
+            else CubicSuperPath.within(pt_a[1], pt_b[1], pt_c[1])
         )
 
     @staticmethod
-    def collinear(a, b, c):
-        """Checks if points a, b, c lie on the same line"""
+    def collinear(pt_a, pt_b, pt_c):
+        """Checks if points pt_a, pt_b, pt_c lie on the same line"""
         return (
-            abs((b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])) < 10e-8
+            abs(
+                (pt_b[0] - pt_a[0]) * (pt_c[1] - pt_a[1])
+                - (pt_c[0] - pt_a[0]) * (pt_b[1] - pt_a[1])
+            )
+            < 10e-8
         )
 
     @staticmethod
-    def within(b, a, c):
-        """Checks if float b is between a and c"""
-        return a <= b <= c or c <= b <= a
+    def within(val_b, val_a, val_c):
+        """Checks if float val_b is between val_a and val_c"""
+        return val_a <= val_b <= val_c or val_c <= val_b <= val_a
 
     @staticmethod
     def is_line(previous, segment):
-        """Check whether csp segment (two points) has retracted handles or the handles can
-        be retracted without loss of information (i.e. both handles lie on the line)"""
+        """Check whether csp segment (two points) has retracted handles or the handles
+        can be retracted without loss of information (i.e. both handles lie on the
+        line)"""
 
         retracted = Vector2d(previous[1]).is_close(previous[2]) and Vector2d(
             segment[0]
@@ -1761,9 +1823,10 @@ class CubicSuperPath(list):
             return True
 
         # Can both handles be retracted without loss of information?
-        # Definitely the case if the handles lie on the same line as the two nodes and in the
-        # correct order
-        # E.g. cspbezsplitatlength outputs non-retracted handles when splitting a straight line
+        # Definitely the case if the handles lie on the same line as the two nodes and
+        # in the correct order
+        # E.g. cspbezsplitatlength outputs non-retracted handles when splitting a
+        # straight line
         return CubicSuperPath.is_on(
             segment[0], segment[1], previous[2]
         ) and CubicSuperPath.is_on(previous[2], previous[1], segment[0])
@@ -1777,9 +1840,12 @@ def arc_to_path(point, params):
     params: Arcs parameters as per
               https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 
-    Returns a list of triplets of points : [control_point_before, node, control_point_after]
+    Returns a list of triplets of points :
+    [control_point_before, node, control_point_after]
     (first and last returned triplets are [p1, p1, *] and [*, p2, p2])
     """
+
+    # pylint: disable=invalid-name, too-many-locals
     A = point[:]
     rx, ry, teta, longflag, sweepflag, x2, y2 = params[:]
     teta = teta * pi / 180.0
@@ -1800,11 +1866,12 @@ def arc_to_path(point, params):
     d = sqrt(max(0, 1 - d / 4.0))
     # k is the unit normal to AB vector, pointing to center O
     # d is distance from center to AB segment (distance from O to the midpoint of AB)
-    # for the last line, remember this is a unit circle, and kd vector is ortogonal to AB (Pythagorean thm)
+    # for the last line, remember this is a unit circle, and kd vector is ortogonal to
+    # AB (Pythagorean thm)
 
-    if (
-        longflag == sweepflag
-    ):  # top-right ellipse in SVG example https://www.w3.org/TR/SVG/images/paths/arcs02.svg
+    if longflag == sweepflag:
+        # top-right ellipse in SVG example
+        # https://www.w3.org/TR/SVG/images/paths/arcs02.svg
         d *= -1
 
     O = [(B[0] + A[0]) / 2.0 + d * k[0], (B[1] + A[1]) / 2.0 + d * k[1]]

@@ -27,9 +27,10 @@ import os
 import re
 import sys
 import types
+from abc import ABC
 
 from .utils import errormsg, Boolean
-from .colors import Color, ColorIdError, ColorError
+from .colors import Color, ColorError
 from .elements import (
     load_svg,
     BaseElement,
@@ -50,7 +51,6 @@ from .base import (
     TempDirMixin,
 )
 from .transforms import Transform
-from .properties import all_properties
 from .elements import LinearGradient, RadialGradient
 
 # All the names that get added to the inkex API itself.
@@ -69,13 +69,11 @@ __all__ = (
 stdout = sys.stdout
 
 
-class EffectExtension(SvgThroughMixin, InkscapeExtension):
+class EffectExtension(SvgThroughMixin, InkscapeExtension, ABC):
     """
     Takes the SVG from Inkscape, modifies the selection or the document
     and returns an SVG to Inkscape.
     """
-
-    pass
 
 
 class OutputExtension(SvgInputMixin, InkscapeExtension):
@@ -87,7 +85,6 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
 
     def effect(self):
         """Effect isn't needed for a lot of Output extensions"""
-        pass
 
     def save(self, stream):
         """But save certainly is, we give a more exact message here"""
@@ -99,6 +96,10 @@ class RasterOutputExtension(InkscapeExtension):
     Takes a PNG from Inkscape and outputs it to another rather format.
     """
 
+    def __init__(self):
+        super().__init__()
+        self.img = None
+
     def load(self, stream):
         from PIL import Image
 
@@ -106,7 +107,6 @@ class RasterOutputExtension(InkscapeExtension):
 
     def effect(self):
         """Not needed since image isn't being changed"""
-        pass
 
     def save(self, stream):
         """Implement raster image saving here from PIL"""
@@ -122,7 +122,6 @@ class InputExtension(SvgOutputMixin, InkscapeExtension):
 
     def effect(self):
         """Effect isn't needed for a lot of Input extensions"""
-        pass
 
     def load(self, stream):
         """But load certainly is, we give a more exact message here"""
@@ -244,6 +243,7 @@ class TemplateExtension(EffectExtension):
     template_id = "SVGRoot"
 
     def __init__(self):
+        self.svg = None
         super().__init__()
         # Arguments added on after add_arguments so it can be overloaded cleanly.
         self.arg_parser.add_argument("--size", type=self.arg_size(), dest="size")
@@ -252,13 +252,15 @@ class TemplateExtension(EffectExtension):
         self.arg_parser.add_argument("--orientation", default=None)
         self.arg_parser.add_argument("--unit", default="px")
         self.arg_parser.add_argument("--grid", type=Boolean)
+        # self.svg = None
 
-    def get_template(self):
+    def get_template(self, **kwargs):
         """Can be over-ridden with custom svg loading here"""
         return self.document
 
     def arg_size(self, unit="px"):
-        """Argument is a string of the form X[unit]xY[unit], default units apply when missing"""
+        """Argument is a string of the form X[unit]xY[unit], default units apply
+        when missing"""
 
         def _inner(value):
             try:
@@ -332,6 +334,10 @@ class ColorExtension(EffectExtension):
     select_all = (ShapeElement,)
     pass_rgba = False
 
+    def __init__(self):
+        super().__init__()
+        self._renamed = {}
+
     def effect(self):
         # Limiting to shapes ignores Gradients (and other things) from the select_all
         # this prevents defs from being processed twice.
@@ -378,16 +384,14 @@ class ColorExtension(EffectExtension):
         for name in elem.style.opacity_props:
             value = style(name)
             result = self.modify_opacity(name, value)
-            if (
-                result != value and result != 1
-            ):  # only modify if not equal to old or default
+            if result not in (value, 1):  # only modify if not equal to old or default
                 elem.style[name] = result
 
     def _ref_cloned(self, old_id, new_id, style, name):
         self._renamed[old_id] = new_id
         style[name] = f"url(#{new_id})"
 
-    def _xlink_cloned(self, old_id, new_id, linker):
+    def _xlink_cloned(self, old_id, new_id, linker):  # pylint: disable=unused-argument
         lid = linker.get("id")
         linker = self.svg.getElementById(self._renamed.get(lid, lid))
         linker.set("xlink:href", "#" + new_id)
@@ -402,7 +406,9 @@ class ColorExtension(EffectExtension):
         """Replace this method with your colour modifier method"""
         raise NotImplementedError("Provide a modify_color method.")
 
-    def modify_opacity(self, name, opacity):
+    def modify_opacity(
+        self, name, opacity
+    ):  # pylint: disable=no-self-use, unused-argument
         """Optional opacity modification"""
         return opacity
 

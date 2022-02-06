@@ -34,17 +34,21 @@ INKSCAPE_LOCALEDIR = os.environ.get("INKSCAPE_LOCALEDIR")
 
 
 def localize(domain=GETTEXT_DOMAIN, localedir=GETTEXT_DIRECTORY):
-    """Configure gettext and install _() function into builtins namespace for easy access"""
+    """Configure gettext and install _() function into builtins namespace for easy
+    access"""
 
     # Do not enable translation if GETTEXT_DOMAIN is unset.
-    # This is the case when translationdomain="none", but also when no catalog was found.
-    # Install a NullTranslation just to be sure (so we do not get errors about undefined '_')
+    # This is the case when translationdomain="none", but also when no catalog was
+    # found.
+    # Install a NullTranslation just to be sure
+    # (so we do not get errors about undefined '_')
     if domain is None:
         gettext.NullTranslations().install()
         return
 
     # Use the default system locale by default,
-    # but prefer LANGUAGE environment variable (which is set by Inkscape according to UI language)
+    # but prefer LANGUAGE environment variable
+    # (which is set by Inkscape according to UI language)
     languages = None
 
     trans = gettext.translation(domain, localedir, languages, fallback=True)
@@ -54,7 +58,8 @@ def localize(domain=GETTEXT_DOMAIN, localedir=GETTEXT_DIRECTORY):
 def inkex_localize():
     """
     Return internal Translations instance for translation of the inkex module itself
-    Those will always use the 'inkscape' domain and attempt to lookup the same catalog Inkscape uses
+    Those will always use the 'inkscape' domain and attempt to lookup the same catalog
+    Inkscape uses
     """
 
     domain = "inkscape"

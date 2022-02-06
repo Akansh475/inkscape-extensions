@@ -32,7 +32,7 @@ NSS = {
     "inx": "http://www.inkscape.org/namespace/inkscape/extension",
     "inkscape": "http://www.inkscape.org/namespaces/inkscape",
 }
-SSN = dict([(b, a) for (a, b) in NSS.items()])
+SSN = {b: a for (a, b) in NSS.items()}
 
 
 class InxLookup(etree.CustomElementClassLookup):
@@ -53,8 +53,8 @@ INX_PARSER.set_element_class_lookup(InxLookup())
 class InxFile:
     """Open an INX file and provide useful functions"""
 
-    name = property(lambda self: self.xml._text("name"))
-    ident = property(lambda self: self.xml._text("id"))
+    name = property(lambda self: self.xml.get_text("name"))
+    ident = property(lambda self: self.xml.get_text("id"))
     slug = property(lambda self: self.ident.split(".")[-1].title().replace("_", ""))
     kind = property(lambda self: self.metadata["type"])
     warnings = property(lambda self: sorted(list(set(self.xml.warnings))))
@@ -116,25 +116,29 @@ class InxFile:
             template = self.xml.find_one("inkscape:templateinfo")
             if template is not None:
                 data["type"] = "template"
-                data["desc"] = self.xml._text("templateinfo/shortdesc", nss="inkscape")
-                data["author"] = self.xml._text("templateinfo/author", nss="inkscape")
+                data["desc"] = self.xml.get_text(
+                    "templateinfo/shortdesc", nss="inkscape"
+                )
+                data["author"] = self.xml.get_text(
+                    "templateinfo/author", nss="inkscape"
+                )
             else:
                 data["type"] = "effect"
                 data["preview"] = Boolean(effect.get("needs-live-preview", "true"))
-                data["objects"] = effect._text("object-type", "all")
+                data["objects"] = effect.get_text("object-type", "all")
         elif inputs is not None:
             data["type"] = "input"
-            data["extension"] = inputs._text("extension")
-            data["mimetype"] = inputs._text("mimetype")
-            data["tooltip"] = inputs._text("filetypetooltip")
-            data["name"] = inputs._text("filetypename")
+            data["extension"] = inputs.get_text("extension")
+            data["mimetype"] = inputs.get_text("mimetype")
+            data["tooltip"] = inputs.get_text("filetypetooltip")
+            data["name"] = inputs.get_text("filetypename")
         elif output is not None:
             data["type"] = "output"
-            data["dataloss"] = Boolean(output._text("dataloss", "false"))
-            data["extension"] = output._text("extension")
-            data["mimetype"] = output._text("mimetype")
-            data["tooltip"] = output._text("filetypetooltip")
-            data["name"] = output._text("filetypename")
+            data["dataloss"] = Boolean(output.get_text("dataloss", "false"))
+            data["extension"] = output.get_text("extension")
+            data["mimetype"] = output.get_text("mimetype")
+            data["tooltip"] = output.get_text("filetypetooltip")
+            data["name"] = output.get_text("filetypename")
         return data
 
     @property
@@ -159,7 +163,10 @@ class InxFile:
 
 
 class InxElement(etree.ElementBase):
+    """Any element in an inx file"""
+
     def set_warning(self, msg):
+        """Set a warning for slightly incorrect inx contents"""
         root = self.get_root()
         if hasattr(root, "warnings"):
             root.warnings.append(msg)
@@ -171,6 +178,7 @@ class InxElement(etree.ElementBase):
         return self
 
     def get_default_prefix(self):
+        """Set default xml namespace prefix. If none is defined, set warning"""
         tag = self.get_root().tag
         if "}" in tag:
             (url, tag) = tag[1:].split("}", 1)
@@ -200,7 +208,7 @@ class InxElement(etree.ElementBase):
             return elem
         return None
 
-    def _text(self, name, default=None, nss=None):
+    def get_text(self, name, default=None, nss=None):
         """Get text content agnostically"""
         for pref in ("", "_"):
             elem = self.find_one(pref + name, nss=nss)

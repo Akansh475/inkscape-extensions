@@ -94,7 +94,7 @@ class InkscapeExtension:
             pars.add_argument("--num-cool-things", type=int, default=3)
             pars.add_argument("--pos-in-doc", type=str, default="doobry")
         """
-        pass  # No extra arguments by default so super is not required
+        # No extra arguments by default so super is not required
 
     def parse_arguments(self, args):
         # type: (List[str]) -> None
@@ -115,13 +115,13 @@ class InkscapeExtension:
         """
 
         def _inner(value):
-            name = "{}_{}".format(prefix, value.strip('"').lower()).replace("-", "_")
+            name = f"""{prefix}_{value.strip('"').lower()}"""
             try:
                 return getattr(self, name)
-            except AttributeError:
+            except AttributeError as error:
                 if name.startswith("_"):
                     return do_nothing
-                raise AbortExtension(f"Can not find method {name}")
+                raise AbortExtension(f"Can not find method {name}") from error
 
         return _inner
 
@@ -131,7 +131,8 @@ class InkscapeExtension:
 
         Types to choose from are given by the options list
         Usage:
-        pars.add_argument("--class", type=self.arg_class([ClassA, ClassB]), default="ClassA")
+        pars.add_argument("--class", type=self.arg_class([ClassA, ClassB]),
+        default="ClassA")
         """
 
         def _inner(value: str):
@@ -171,7 +172,7 @@ class InkscapeExtension:
             self.load_raw()
             self.save_raw(self.effect())
         except AbortExtension as err:
-            err.write()
+            errormsg(str(err))
             sys.exit(ABORT_STATUS)
         finally:
             self.clean_up()
@@ -180,6 +181,7 @@ class InkscapeExtension:
         # type: () -> None
         """Load the input stream or filename, save everything to self"""
         if isinstance(self.options.input_file, str):
+            # pylint: disable=consider-using-with
             self.file_io = open(self.options.input_file, "rb")
             document = self.load(self.file_io)
         else:
@@ -232,7 +234,7 @@ class InkscapeExtension:
         path = cls.document_path()
         if path:
             return os.path.dirname(path)
-        elif default:
+        if default:
             return default
         return path  # Return None or '' for context
 
@@ -262,7 +264,8 @@ class InkscapeExtension:
 
         DO NOT READ OR WRITE TO THE DOCUMENT FILENAME!
 
-         * Inkscape may have not written the latest changes, leaving you reading old data.
+         * Inkscape may have not written the latest changes, leaving you reading old
+           data.
          * Inkscape will not respect anything you write to the file, causing data loss.
         """
         return os.environ.get("DOCUMENT_PATH", None)
@@ -288,11 +291,12 @@ class InkscapeExtension:
                 cwd = cls.svg_path(default)
                 if cwd is None:
                     raise AbortExtension(
-                        f"Can not use relative path, Inkscape isn't telling us the current working directory."
+                        "Can not use relative path, Inkscape isn't telling us the "
+                        "current working directory."
                     )
-                elif cwd == "":
+                if cwd == "":
                     raise AbortExtension(
-                        f"The SVG must be saved before you can use relative paths."
+                        "The SVG must be saved before you can use relative paths."
                     )
             filename = os.path.join(cwd, filename)
         return os.path.realpath(os.path.expanduser(filename))
@@ -310,7 +314,7 @@ else:
     _Base = object
 
 
-class TempDirMixin(_Base):
+class TempDirMixin(_Base):  # pylint: disable=abstract-method
     """
     Provide a temporary directory for extensions to stash files.
     """
@@ -325,10 +329,11 @@ class TempDirMixin(_Base):
     def load_raw(self):
         # type: () -> None
         """Create the temporary directory"""
+        # pylint: disable=import-outside-toplevel
         from tempfile import TemporaryDirectory
 
         # Need to hold a reference to the Directory object or else it might get GC'd
-        self._tempdir = TemporaryDirectory(
+        self._tempdir = TemporaryDirectory(  # pylint: disable=consider-using-with
             prefix=self.dir_prefix, suffix=self.dir_suffix
         )
         self.tempdir = self._tempdir.name
@@ -342,7 +347,7 @@ class TempDirMixin(_Base):
         super().clean_up()
 
 
-class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
+class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods, abstract-method
     """
     Expects the file input to be an svg document and will parse it.
     """
@@ -383,14 +388,15 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods
         return document
 
 
-class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
+class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods, abstract-method
     """
     Expects the output document to be an svg document and will write an etree xml.
 
     A template can be specified to kick off the svg document building process.
     """
 
-    template = """<svg viewBox="0 0 {width} {height}" width="{width}{unit}" height="{height}{unit}"
+    template = """<svg viewBox="0 0 {width} {height}"
+        width="{width}{unit}" height="{height}{unit}"
         xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink"
         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -418,7 +424,8 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
             document = doc.getroot().tostring()
         else:
             raise ValueError(
-                f"Unknown type of document: {type(self.document).__name__} can not save."
+                f"Unknown type of document: {type(self.document).__name__} can not"
+                + "save."
             )
 
         try:
@@ -428,7 +435,7 @@ class SvgOutputMixin(_Base):  # pylint: disable=too-few-public-methods
             stream.write(document.encode("utf-8"))  # type: ignore
 
 
-class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):
+class SvgThroughMixin(SvgInputMixin, SvgOutputMixin):  # pylint: disable=abstract-method
     """
     Combine the input and output svg document handling (usually for effects).
     """

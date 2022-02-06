@@ -83,8 +83,8 @@ class BaseStyleValue:
 
         Args:
             element (BaseElement): the SVG element to which this style is applied to
-                currently used for resolving gradients / masks, could be used for computing
-                percentage attributes or calc() attributes [optional]
+                currently used for resolving gradients / masks, could be used for
+                computing percentage attributes or calc() attributes [optional]
 
         Returns:
             object: parsed property value
@@ -95,14 +95,15 @@ class BaseStyleValue:
             return None
         return self._parse_value(self.value, element)
 
-    def _parse_value(
+    def _parse_value(  # pylint: disable=unused-argument, no-self-use
         self, value: str, element=None
-    ) -> object:  # pylint: disable=unused-argument, no-self-use
+    ) -> object:
         """internal parse method, to be overwritten by derived classes
 
         Args:
             value (str): unparsed value
-            element (BaseElement): the SVG element to which this style is applied to [optional]
+            element (BaseElement): the SVG element to which this style is applied to
+                [optional]
 
         Returns:
             object: the parsed value
@@ -184,12 +185,12 @@ class BaseStyleValue:
 
     @staticmethod
     def factory_errorhandled(element=None, declaration="", key="", value=""):
-        """Error handling for the factory method: if something goes wrong during parsing,
-        ignore the attribute
+        """Error handling for the factory method: if something goes wrong during
+        parsing, ignore the attribute
 
         Args:
-            element (BaseElement, optional): The element this declaration is affecting, for
-                finding gradients ect. Defaults to None.
+            element (BaseElement, optional): The element this declaration is affecting,
+                for finding gradients ect. Defaults to None.
             declaration (str, optional): the CSS declaration to parse. Defaults to "".
             key (str, optional): the attribute name. Defaults to "".
             value (str, optional): the attribute value. Defaults to "".
@@ -494,13 +495,15 @@ class FontSizeValue(BaseStyleValue):
 
 
 class StrokeDasharrayValue(BaseStyleValue):
+    """Logic for the stroke-dasharray property"""
+
     def _parse_value(self, value: str, element=None):
         if element is None:
             return value
         dashes = re.findall(r"[^,\s]+", value)
         if len(dashes) == 0:
             return None  # no dasharray applied
-        if not any([parse_unit(i) is None for i in dashes]):
+        if not any(parse_unit(i) is None for i in dashes):
             dashes = [element.to_dimensionless(i) for i in dashes]
         else:
             return None
@@ -511,7 +514,7 @@ class StrokeDasharrayValue(BaseStyleValue):
         return dashes
 
     def _unparse_value(self, value: object) -> str:
-        if value == None:
+        if value is None:
             return "none"
         if isinstance(value, list):
             return " ".join(map(str, value))

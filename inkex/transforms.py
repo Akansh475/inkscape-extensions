@@ -24,27 +24,25 @@
 """
 Provide transformation parsing to extensions
 """
-
+from __future__ import annotations
 import re
-import sys
 from decimal import Decimal
 from math import cos, radians, sin, sqrt, tan, fabs, atan2, hypot, pi, isfinite
-
-from .utils import strargs, KeyDict
-
 from typing import (
     overload,
     cast,
-    List,
-    Any,
     Callable,
     Generator,
     Iterator,
     Tuple,
     Union,
     Optional,
-    Sequence,
-)  # pylint: disable=unused-import
+    List,
+)
+
+
+from .utils import strargs, KeyDict
+
 
 VectorLike = Union[
     "ImmutableVector2d", Tuple[float, float]
@@ -185,8 +183,7 @@ class ImmutableVector2d:
         # type: () -> str
         return f"{self.x:.6g}, {self.y:.6g}"
 
-    def __iter__(self):
-        # type: () -> Generator[float, None, None]
+    def __iter__(self) -> Generator[float, None, None]:
         yield self.x
         yield self.y
 
@@ -198,17 +195,17 @@ class ImmutableVector2d:
         # type: (int) -> float
         return (self.x, self.y)[item]
 
-    def to_tuple(self):
-        # type: () -> Tuple[float, float]
-        return self.x, self.y
+    def to_tuple(self) -> Tuple[float, float]:
+        """A tuple of the vector's components"""
+        return cast(Tuple[float, float], tuple(self))
 
     def to_polar_tuple(self):
         # type: () -> Tuple[float, Optional[float]]
         """A tuple of the vector's magnitude and direction"""
         return self.length, self.angle
 
-    def dot(self, other):
-        # type: (VectorLike) -> float
+    def dot(self, other: VectorLike) -> float:
+        """Multiply Vectors component-wise"""
         other = Vector2d(other)
         return self.x * other.x + self.y * other.y
 
@@ -218,15 +215,21 @@ class ImmutableVector2d:
         other = Vector2d(other)
         return self.x * other.y - self.y * other.x
 
-    def is_close(self, other, rtol=1e-5, atol=1e-8):
-        # type: (Union[VectorLike, str, Tuple[float,float]], float, float) -> float
+    def is_close(
+        self,
+        other: Union[VectorLike, str, Tuple[float, float]],
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
+    ) -> float:
+        """Checks if two vectors are (almost) identical, up to both absolute and
+        relative tolerance."""
         other = Vector2d(other)
         delta = (self - other).length
         return delta < (atol + rtol * other.length)
 
     @property
-    def length(self):
-        # type: () -> float
+    def length(self) -> float:
+        """Returns the length of the vector"""
         return sqrt(self.dot(self))
 
     @property
@@ -314,6 +317,7 @@ class Vector2d(ImmutableVector2d):
         pass
 
     def assign(self, *args):
+        """Assigns a different vector in place"""
         self.x, self.y = Vector2d(*args)
         return self
 
@@ -371,8 +375,8 @@ class Transform:
             row2 = matrix[1]
             if isinstance(row1, (tuple, list)) and isinstance(row2, (tuple, list)):
                 if len(row1) == 3 and len(row2) == 3:
-                    row1 = cast("Tuple[float, float, float]", tuple(map(float, row1)))
-                    row2 = cast("Tuple[float, float, float]", tuple(map(float, row2)))
+                    row1 = cast(Tuple[float, float, float], tuple(map(float, row1)))
+                    row2 = cast(Tuple[float, float, float], tuple(map(float, row2)))
                     self.matrix = row1, row2
                 else:
                     raise ValueError(
@@ -384,7 +388,8 @@ class Transform:
                 )
         elif isinstance(matrix, (list, tuple)) and len(matrix) == 6:
             tmatrix = cast(
-                "Union[List[float], Tuple[float,float,float,float,float,float]]", matrix
+                Union[List[float], Tuple[float, float, float, float, float, float]],
+                matrix,
             )
             row1 = (float(tmatrix[0]), float(tmatrix[2]), float(tmatrix[4]))
             row2 = (float(tmatrix[1]), float(tmatrix[3]), float(tmatrix[5]))
@@ -418,8 +423,9 @@ class Transform:
         pass
 
     @overload
-    def add_matrix(self, a, b, c, d, e, f):
-        # type: (float, float, float, float, float, float) -> Transform
+    def add_matrix(  # pylint: disable=too-many-arguments
+        self, a: float, b: float, c: float, d: float, e: float, f: float
+    ) -> Transform:
         pass
 
     @overload
@@ -458,6 +464,7 @@ class Transform:
         pass
 
     def add_translate(self, *args):
+        """Add translate to this transformation"""
         if len(args) == 1 and isinstance(args[0], (int, float)):
             tr_x, tr_y = args[0], 0.0
         else:
@@ -559,7 +566,8 @@ class Transform:
         """Return the amount of rotation in this transform"""
         if not self._is_URT(exactly=False):
             raise ValueError(
-                "Rotation angle is undefined for non-uniformly scaled or skewed matrices"
+                "Rotation angle is undefined for non-uniformly scaled or skewed "
+                "matrices"
             )
         return atan2(self.b, self.a) * 180 / pi
 
@@ -571,19 +579,18 @@ class Transform:
             if not self:
                 return ""
             return f"translate({self.e:.6g}, {self.f:.6g})"
-        elif self.is_scale():
+        if self.is_scale():
             return f"scale({self.a:.6g}, {self.d:.6g})"
-        elif self.is_rotate():
+        if self.is_rotate():
             return f"rotate({self.rotation_degrees():.6g})"
-        return "matrix({})".format(" ".join(f"{var:.6g}" for var in hexad))
+        return f"matrix({' '.join(f'{var:.6g}' for var in hexad)})"
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         """String representation of this object"""
-        return "{}((({}), ({})))".format(
-            type(self).__name__,
-            ", ".join(f"{var:.6g}" for var in self.matrix[0]),
-            ", ".join(f"{var:.6g}" for var in self.matrix[1]),
+        return (
+            f"{type(self).__name__}(("
+            f"({', '.join(f'{var:.6g}' for var in self.matrix[0])}), "
+            f"({', '.join(f'{var:.6g}' for var in self.matrix[1])})))"
         )
 
     def __eq__(self, matrix):
@@ -692,6 +699,10 @@ class BoundingInterval:  # pylint: disable=too-few-public-methods
         pass
 
     def __init__(self, x=None, y=None):
+        self.x: Union[int, float, Decimal]
+        self.y: Union[int, float, Decimal]
+        self.minimum: float
+        self.maximum: float
         if y is not None:
             if isinstance(x, (int, float, Decimal)) and isinstance(
                 y, (int, float, Decimal)
@@ -700,7 +711,8 @@ class BoundingInterval:  # pylint: disable=too-few-public-methods
                 self.maximum = y
             else:
                 raise ValueError(
-                    f"Not a number for scaling: {str((x, y))} ({type(x).__name__},{type(y).__name__})"
+                    f"Not a number for scaling: {str((x, y))} "
+                    f"({type(x).__name__},{type(y).__name__})"
                 )
 
         else:
@@ -728,7 +740,7 @@ class BoundingInterval:  # pylint: disable=too-few-public-methods
 
     def __neg__(self):
         # type: () -> BoundingInterval
-        return BoundingInterval((-self.maximum, -self.minimum))
+        return BoundingInterval((-1 * self.maximum, -1 * self.minimum))
 
     def __add__(self, other):
         # type: (BoundingInterval) -> BoundingInterval
@@ -751,9 +763,9 @@ class BoundingInterval:  # pylint: disable=too-few-public-methods
             return BoundingInterval(self)
         return self + other
 
-    def __and__(self, other):
-        # type: (BoundingInterval) -> BoundingInterval
-        """Calculate the bounding interval where both given bounding intervals overlap"""
+    def __and__(self, other: BoundingInterval) -> BoundingInterval:
+        """Calculate the bounding interval where both given bounding intervals
+        overlap"""
         new = BoundingInterval(self)
         if other is not None:
             new &= other
@@ -774,34 +786,28 @@ class BoundingInterval:  # pylint: disable=too-few-public-methods
             return BoundingInterval(self)
         return self & other
 
-    def __mul__(self, other):
-        # type: (BoundingInterval) -> BoundingInterval
+    def __mul__(self, other: float) -> BoundingInterval:
         new = BoundingInterval(self)
         if other is not None:
             new *= other
         return new
 
-    def __imul__(self, other):
-        # type: (BoundingInterval) -> BoundingInterval
+    def __imul__(self, other: float) -> BoundingInterval:
         self.minimum *= other
         self.maximum *= other
         return self
 
-    def __iter__(self):
-        # type: () -> Generator[BoundingInterval, None, None]
+    def __iter__(self) -> Generator[float, None, None]:
         yield self.minimum
         yield self.maximum
 
-    def __eq__(self, other):
-        # type (object) -> bool
+    def __eq__(self, other) -> bool:
         return tuple(self) == tuple(BoundingInterval(other))
 
-    def __contains__(self, value):
-        # type: (float) -> bool
+    def __contains__(self, value: float) -> bool:
         return self.minimum <= value <= self.maximum
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return f"BoundingInterval({self.minimum}, {self.maximum})"
 
     @property
@@ -894,9 +900,7 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
         new &= BoundingBox(other)
         return new
 
-    def __iand__(self, other):
-        # type: (Optional[BoundingBox]) -> BoundingBox
-        new = BoundingBox(self)
+    def __iand__(self, other: Optional[BoundingBox]) -> BoundingBox:
         other = BoundingBox(other)
         self.x = self.x & other.x
         self.y = self.y & other.y
@@ -926,13 +930,13 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
             return tuple(self) == tuple(other)
         return False
 
-    def __iter__(self):
-        # type: () -> Generator[BoundingBox, None, None]
+    def __iter__(self) -> Generator[BoundingBox, None, None]:
         yield self.x
         yield self.y
 
     @property
     def area(self):
+        """Return area of the bounding box"""
         return self.width * self.height
 
     @property
@@ -968,13 +972,30 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
         )
 
     @staticmethod
-    def anchor_distance(x, y, direction=0, selbox=None):
-        # type: (float, float, Union[int, str], Optional[BoundingBox]) -> float
+    def anchor_distance(
+        x: float,
+        y: float,
+        direction: Union[int, str] = 0,
+        selbox: Optional[BoundingBox] = None,
+    ) -> float:
         """Using the x,y returns a single sortable value based on direction and angle
 
-        direction - int/float (custom angle), tb/bt (top/bottom), lr/rl (left/right), ri/ro (radial)
-        selbox - The bounding box of the whole selection for radial anchors
+        Args:
+            x (float): input x coordinate
+            y (float): input y coordinate
+            direction (Union[int, str], optional): int/float (custom angle),
+                tb/bt (top/bottom), lr/rl (left/right), ri/ro (radial). Defaults to 0.
+            selbox (Optional[BoundingBox], optional): The bounding box of the whole
+                selection for radial anchors. Defaults to None.
+
+        Raises:
+            ValueError: if radial distance is requested without the optional selbox
+                parameter.
+
+        Returns:
+            float: the anchor distance with respect to the direction.
         """
+
         rot = 0.0
         if isinstance(direction, (int, float)):  # Angle
             if direction not in CUSTOM_DIRECTION:
@@ -1137,7 +1158,7 @@ def cubic_extrema(py0, py1, py2, py3):
     pd3 = py3 - py2
 
     def _is_bigger(point):
-        if (point > 0) and (point < 1):
+        if 0 < point < 1:
             pyx = (
                 py0 * (1 - point) * (1 - point) * (1 - point)
                 + 3 * py1 * point * (1 - point) * (1 - point)
@@ -1161,11 +1182,12 @@ def cubic_extrema(py0, py1, py2, py3):
 
 def quadratic_extrema(py0, py1, py2):
     # type: (float, float, float) -> Tuple[float, float]
+    """Returns the extreme value, given a set of quadratic bezier coordinates"""
     atol = 1e-9
     cmin, cmax = min(py0, py2), max(py0, py2)
 
     def _is_bigger(point):
-        if (point > 0) and (point < 1):
+        if 0 < point < 1:
             pyx = (
                 py0 * (1 - point) * (1 - point)
                 + 2 * py1 * point * (1 - point)

@@ -18,9 +18,6 @@ from .elements import *
 
 # legacy proxies
 from .deprecated import Effect
-from .deprecated import optparse
-from .deprecated import InkOption
-from .deprecated import etree
 from .deprecated import localize
 from .deprecated import debug
 

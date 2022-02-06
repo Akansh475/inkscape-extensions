@@ -162,48 +162,6 @@ class DeprecatedTest(TestCase):
         self.assertTrue(simpletransform.computeBBox)
         self.assertTrue(simpletransform.computePointInNode)
 
-    def test_namespace_pollution(self):
-        """Test modules with legacy proxies"""
-
-        import optparse
-
-        self.assertEqual(optparse.OptionParser, inkex.optparse.OptionParser)
-
-        import lxml.etree
-
-        self.assertEqual(lxml.etree.Element, inkex.etree.Element)
-
-        # skip:
-        # - copy
-        # - os
-        # - random
-        # - re
-        # - sys
-        # - math.*
-
-    def test_inkex_namespace(self):
-        """Test inkex namespace API"""
-        from inkex import InkOption
-
-        self.assertIn("inkbool", InkOption.TYPES)
-        self.assertIn("inkbool", InkOption.TYPE_CHECKER)
-
-        from inkex import NSS
-
-        self.assertEqual(NSS["svg"], "http://www.w3.org/2000/svg")
-
-        from inkex import addNS
-
-        self.assertEqual(addNS("rect", "svg"), "{http://www.w3.org/2000/svg}rect")
-
-        from inkex import are_near_relative
-
-        self.assertTrue(are_near_relative(123.4, 123.5, 1e-3))
-        self.assertFalse(are_near_relative(123.4, 123.5, 1e-4))
-
-        # skip:
-        # - from inkex import check_inkbool (InkOption implementation detail)
-
     def test_inkex_effect(self):
         """Test original Effect base class"""
         from inkex import Effect

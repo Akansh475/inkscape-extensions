@@ -400,34 +400,6 @@ class lazyproxy:
 
 
 @lazyproxy
-def optparse():
-    _deprecated('inkex.optparse was removed, use "import optparse"', stack=3)
-    import optparse as wrapped
-
-    return wrapped
-
-
-@lazyproxy
-def etree():
-    _deprecated('inkex.etree was removed, use "from lxml import etree"', stack=3)
-    from lxml import etree as wrapped
-
-    return wrapped
-
-
-@lazyproxy
-def InkOption():
-    import optparse as optprs
-
-    class wrapped(optprs.Option):
-        TYPES = optprs.Option.TYPES + ("inkbool",)
-        TYPE_CHECKER = dict(optprs.Option.TYPE_CHECKER)
-        TYPE_CHECKER["inkbool"] = lambda _1, _2, v: str(v).capitalize() == "True"
-
-    return wrapped
-
-
-@lazyproxy
 def localize():
     _deprecated("inkex.localize was moved to inkex.localization.localize.", stack=3)
     from .localization import localize as wrapped

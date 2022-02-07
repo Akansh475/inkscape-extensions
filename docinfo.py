@@ -46,6 +46,20 @@ class DocInfo(inkex.EffectExtension):
             self.msg(
                 "Grid number {}: Units: {}".format(i + 1, grid.get("units", "None"))
             )
+        if len(namedview.get_pages()) > 1:
+            self.msg("Document has " + str(len(namedview.get_pages())) + " pages")
+            for i, page in enumerate(namedview.get_pages()):
+                self.msg(
+                    "Page number {}: x: {} y: {} width: {} height: {}".format(
+                        i + 1,
+                        page.get("x"),
+                        page.get("y"),
+                        page.get("width"),
+                        page.get("height"),
+                    )
+                )
+        else:
+            self.msg("This is a single page document.")
 
 
 if __name__ == "__main__":

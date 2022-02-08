@@ -6,6 +6,8 @@ from inkex.tester.filters import CompareNumericFuzzy
 
 
 class GuidesCreatorBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    """Basic tests for GuidesCreator"""
+
     effect_class = GuidesCreator
     compare_file = "svg/guides.svg"
     compare_filters = [
@@ -39,7 +41,26 @@ class GuidesCreatorBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCa
 
 
 class GuidesCreatorMillimeterTest(ComparisonMixin, TestCase):
+    """Test that guides are correctly created in a mm based document"""
+
     effect_class = GuidesCreator
     compare_file = "svg/complextransform.test.svg"
     compare_filters = [CompareNumericFuzzy()]
-    comparisons = [("--vertical_guides=6", "--horizontal_guides=8")]
+    comparisons = [
+        ("--vertical_guides=6", "--horizontal_guides=8"),
+        ("--tab=regular_guides", "--start_from_edges=True", "--guides_preset=golden"),
+        (
+            "--tab=regular_guides",
+            "--start_from_edges=True",
+            "--guides_preset=custom",
+            "--vertical_guides=4",
+            "--horizontal_guides=5",
+        ),
+        (
+            "--tab=margins",
+            "--start_from_edges=False",
+            "--margins_preset=book_right",
+            "--vert=3",
+            "--horz=2",
+        ),
+    ]

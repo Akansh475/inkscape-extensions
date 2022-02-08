@@ -2,6 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Guides creator</name>
   <id>org.inkscape.effect.guides_creator</id>
+
+  <param name="pages" type="string" gui-text="Apply to pages" gui-description='On which pages the guides are created, e.g. "1, 2, 4-6, 8-". Default: All pages.'>1-</param>
   <param name="tab" type="notebook">
     <page name="regular_guides" gui-text="Regular guides">
       <param name="guides_preset" type="optiongroup" appearance="combo" gui-text="Guides preset:">
@@ -23,6 +25,8 @@
         <option value="custom">Custom...</option>
         <option value="book_left">Left book page</option>
         <option value="book_right">Right book page</option>
+        <option value="book_alternating_right">Book pages, starting with right</option>
+        <option value="book_alternating_left">Book pages, starting with left</option>
       </param>
       <param name="header_margin" type="optiongroup" appearance="combo" gui-text="Header margin:">
         <option translatable="no" value="10">1/10</option>
@@ -72,12 +76,13 @@
         <option translatable="no" value="2">1/2</option>
         <option context="Margin" value="0">None</option>
       </param>
-      <param name="vert"    type="int"   min="1" max="1000" gui-text="Columns:">2</param>
-      <param name="horz"  type="int"   min="1" max="1000" gui-text="Rows:">3</param>
+      <param name="vert" type="int" min="1" max="1000" gui-text="Columns:">2</param>
+      <param name="horz" type="int" min="1" max="1000" gui-text="Rows:">3</param>
     </page>
   </param>
   <param name="start_from_edges" type="bool" gui-text="Start from edges">false</param>
   <param name="delete" type="bool" gui-text="Delete existing guides">false</param>
+  <param name="nodup" type="bool" gui-text="Omit duplicated guides">true</param>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

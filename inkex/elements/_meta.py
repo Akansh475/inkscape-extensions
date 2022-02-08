@@ -25,12 +25,15 @@ This is useful for having a common interface for each element which can
 give path, transform, and property access easily.
 """
 
+from __future__ import annotations
 import math
+
+from typing import Optional, Tuple
 
 from lxml import etree
 
 from ..styles import StyleSheet
-from ..transforms import Vector2d
+from ..transforms import Vector2d, VectorLike, DirectedLineSegment
 
 from ._base import BaseElement
 
@@ -102,8 +105,20 @@ class NamedView(BaseElement):
             elem = Guide().move_to(0, position, (0, 1))
         elif orient is False:
             elem = Guide().move_to(position, 0, (1, 0))
+        else:
+            elem = Guide().move_to(*position, orient)
         if name:
             elem.set("inkscape:label", str(name))
+        return self.add(elem)
+
+    def new_unique_guide(
+        self, position: VectorLike, orientation: VectorLike
+    ) -> Optional[Guide]:
+        """Add a guide iif there is no guide that looks the same."""
+        elem = Guide().move_to(position[0], position[1], orientation)
+        for guide in self.get_guides():
+            if Guide.guides_coincident(guide, elem):
+                return None
         return self.add(elem)
 
     def get_pages(self):
@@ -123,12 +138,30 @@ class Guide(BaseElement):
 
     tag_name = "sodipodi:guide"
 
+    @property
+    def orientation(self) -> Vector2d:
+        """Vector normal to the guide"""
+        try:
+            return Vector2d(self.get("orientation"))
+        except ValueError:
+            return Vector2d(1, 0)
+
     is_horizontal = property(
-        lambda self: self.get("orientation").startswith("0,")
-        and not self.get("orientation") == "0,0"
+        lambda self: self.orientation[0] == 0 and self.orientation[1] != 0
     )
-    is_vertical = property(lambda self: self.get("orientation").endswith(",0"))
-    point = property(lambda self: Vector2d(self.get("position")))
+    is_vertical = property(
+        lambda self: self.orientation[0] != 0 and self.orientation[1] == 0
+    )
+
+    @property
+    def point(self) -> Vector2d:
+        """Position of the guide handle. The y coordinate is flipped and relative
+        to the bottom of the viewbox, this is a remnant of the pre-1.0 coordinate system
+        """
+        try:
+            return Vector2d(self.get("position"))
+        except ValueError:
+            return Vector2d(0, 0)
 
     @classmethod
     def new(cls, pos_x, pos_y, angle, **attrs):
@@ -159,6 +192,26 @@ class Guide(BaseElement):
         if angle is not None:
             self.set("orientation", angle)
         return self
+
+    @staticmethod
+    def guides_coincident(guide1, guide2):
+        """Check if two guides defined by (position, orientation) and (opos, oor) look
+        identical (i.e. the position lies on the other guide AND the guide is
+        (anti)parallel to the other guide)."""
+        # normalize orientations first
+        orientation = guide1.orientation / guide1.orientation.length
+        oor = guide2.orientation / guide2.orientation.length
+
+        position = guide1.point
+        opos = guide2.point
+
+        return (
+            DirectedLineSegment(
+                position, position + Vector2d(orientation[1], -orientation[0])
+            ).perp_distance(*opos)
+            < 1e-6
+            and abs(abs(orientation[1] * oor[0]) - abs(orientation[0] * oor[1])) < 1e-6
+        )
 
 
 class Metadata(BaseElement):

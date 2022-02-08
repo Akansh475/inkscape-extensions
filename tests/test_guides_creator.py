@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-from guides_creator import GuidesCreator
+from guides_creator import GuidesCreator, GuidesOpts
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
@@ -64,3 +64,26 @@ class GuidesCreatorMillimeterTest(ComparisonMixin, TestCase):
             "--horz=2",
         ),
     ]
+
+
+class GuidesCreatorFunctionalityTests(TestCase):
+    """Test some methods on their own"""
+
+    def test_page_descriptor(self):
+        """Test that page descriptions are parsed correctly"""
+
+        def parsetest(string, length, comparison):
+            self.assertTupleEqual(
+                GuidesCreator.parse_page_descriptor(string, length), comparison
+            )
+
+        parsetest("1, 2,3", 10, (1, 2, 3))
+        parsetest("1-3, 5, 10", 10, (1, 2, 3, 5, 10))
+        parsetest("2, 4-, 6, 7-", 10, (2, 4, 5, 6, 7, 8, 9, 10))
+        parsetest("2-5, 7-9, 10-", 12, (2, 3, 4, 5, 7, 8, 9, 10, 11, 12))
+        parsetest("6, 7, 8", 3, tuple())
+        parsetest("2, 216-218, 10", 300, (2, 10, 216, 217, 218))
+
+
+class GuidesTestMulitpage(TestCase):
+    pass

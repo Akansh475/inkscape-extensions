@@ -26,14 +26,14 @@ import re
 from collections import OrderedDict
 from typing import MutableMapping, Union, Iterable, TYPE_CHECKING
 
-import cssselect
+from .interfaces.IElement import IBaseElement
 
 from .colors import Color
-
 from .properties import BaseStyleValue, all_properties, ShorthandValue
+from .css import ConditionalRule
 
 if TYPE_CHECKING:
-    from inkex import SvgDocumentElement
+    from .elements._svg import SvgDocumentElement
 
 
 class Classes(list):
@@ -398,12 +398,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
         parent = element.getparent()
 
-        # import this here, otherwise it will cause circular import problems
-        from .elements._base import (  # pylint: disable=import-outside-toplevel
-            BaseElement,
-        )
-
-        if parent is not None and isinstance(parent, BaseElement):
+        if parent is not None and isinstance(parent, IBaseElement):
             cascaded = Style.add_inherited(cascaded, parent.specified_style())
         cascaded.element = element
         return cascaded  # doesn't have a parent
@@ -555,32 +550,3 @@ class ConditionalStyle(Style):
         """gets an iterator of the specificity of all rules in this ConditionalStyle"""
         for rule in self.rules:
             yield rule.get_specificity()
-
-
-class ConditionalRule:
-    """A single css rule"""
-
-    step_to_xpath = [
-        # namespace addition
-        (re.compile(r"(::|\/)([a-z]+)(?=\W)(?!-)"), r"\1svg:\2"),
-    ]
-
-    def __init__(self, rule):
-        self.rule = rule.strip()
-        self.selector = cssselect.parse(self.rule)[0]
-
-    def __str__(self):
-        return self.rule
-
-    def to_xpath(self):
-        """Attempt to convert the rule into a simplified xpath"""
-        # the space in the end is needed for the negative lookbehind in the regex, will
-        # be removed on return
-        ret = cssselect.HTMLTranslator().selector_to_xpath(self.selector) + " "
-        for matcher, replacer in self.step_to_xpath:
-            ret = matcher.sub(replacer, ret)
-        return ret.strip()
-
-    def get_specificity(self):
-        """gets the css specificity of this selector"""
-        return self.selector.specificity()

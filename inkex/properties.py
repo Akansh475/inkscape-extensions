@@ -24,8 +24,9 @@ from abc import ABC, abstractmethod
 
 import re
 from typing import Tuple, Dict, Type, Union, List, Optional
+from .interfaces.IElement import IBaseElement, ISVGDocumentElement
 
-from inkex.units import parse_unit
+from .units import parse_unit
 
 from .colors import Color, ColorError
 
@@ -302,19 +303,16 @@ class URLNoneValue(BaseStyleValue):
         raise ValueError("Invalid property value")
 
     def _unparse_value(self, value: object):
-        from inkex import BaseElement  # pylint: disable=import-outside-toplevel
-
-        if isinstance(value, BaseElement):
+        if isinstance(value, IBaseElement):
             return f"url(#{value.get_id()})"
         return super()._unparse_value(value)
 
     @staticmethod
     def element_has_root(element) -> bool:
         "Checks if an element has a root, i.e. if element.root will fail"
-        from inkex import SvgDocumentElement  # pylint: disable=import-outside-toplevel
 
         return not (
-            element.getparent() is None and not isinstance(element, SvgDocumentElement)
+            element.getparent() is None and not isinstance(element, ISVGDocumentElement)
         )
 
 

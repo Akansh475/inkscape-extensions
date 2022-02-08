@@ -41,8 +41,9 @@ from typing import (
 from argparse import ArgumentParser, Namespace
 from lxml import etree
 
+from .interfaces.IElement import IBaseElement
 from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
-from .elements._base import load_svg, BaseElement  # pylint: disable=unused-import
+from .elements._parser import load_svg
 from .elements._utils import NSS
 from .localization import localize
 
@@ -63,7 +64,7 @@ class InkscapeExtension:
         NSS.update(self.extra_nss)
         self.file_io = None  # type: Optional[IO]
         self.options = Namespace()
-        self.document = None  # type: Union[None, bytes, str, etree]
+        self.document = None  # type: Union[None, bytes, str, etree.element]
         self.arg_parser = ArgumentParser(description=self.__doc__)
 
         self.arg_parser.add_argument(
@@ -353,7 +354,7 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods, abstract-
     """
 
     # Select all objects if none are selected
-    select_all = ()  # type: Tuple[Type[BaseElement], ...]
+    select_all: Tuple[Type[IBaseElement], ...] = ()
 
     def __init__(self):
         super().__init__()

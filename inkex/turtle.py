@@ -23,8 +23,7 @@ import random
 from typing import List, Union
 
 from .paths import Line, Move, Path, PathCommand
-from .elements import PathElement, Group
-from .base import BaseElement
+from .elements import PathElement, Group, BaseElement
 from .styles import Style
 
 

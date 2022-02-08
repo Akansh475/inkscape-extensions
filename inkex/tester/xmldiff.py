@@ -11,6 +11,8 @@ Allow two xml files/lxml etrees to be compared, returning their differences.
 import xml.etree.ElementTree as xml
 from io import BytesIO
 
+from inkex.paths import Path
+
 
 def text_compare(test1, test2):
     """
@@ -41,8 +43,6 @@ class DeltaLogger(list):
         def _prep(val):
             if val:
                 if attr == "d":
-                    from inkex.paths import Path
-
                     return [attr] + Path(val).to_arrays()
                 return (attr, val)
             return val

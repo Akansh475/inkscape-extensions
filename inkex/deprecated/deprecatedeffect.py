@@ -17,7 +17,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """
-Provide some documentation to existing extensions about why they're failing.
+Deprecation functionality for the pre-1.0 Inkex main effect class.
 """
 #
 # We ignore a lot of pylint warnings here:
@@ -25,44 +25,15 @@ Provide some documentation to existing extensions about why they're failing.
 # pylint: disable=invalid-name,unused-argument,missing-docstring,too-many-public-methods
 #
 
-import os
 import sys
-import traceback
-import warnings
 import argparse
 from argparse import ArgumentParser
 
-import inkex
-from inkex.transforms import Transform
-import inkex.utils
-import inkex.units
-from inkex.base import SvgThroughMixin, InkscapeExtension
-from inkex.localization import inkex_gettext as _
-from inkex.elements._base import BaseElement, ShapeElement
-from inkex.elements._selected import ElementList
-
-warnings.simplefilter("default")
-# To load each of the deprecated sub-modules (the ones without a namespace)
-# we will add the directory to our pythonpath so older scripts can find them
-
-INKEX_DIR = os.path.abspath(os.path.dirname(__file__))
-SIMPLE_DIR = os.path.join(INKEX_DIR, "deprecated-simple")
-
-if os.path.isdir(SIMPLE_DIR):
-    sys.path.append(SIMPLE_DIR)
-
-try:
-    DEPRECATION_LEVEL = int(os.environ.get("INKEX_DEPRECATION_LEVEL", 1))
-except ValueError:
-    DEPRECATION_LEVEL = 1
-
-
-def _deprecated(msg, stack=2, level=DEPRECATION_LEVEL):
-    """Internal method for raising a deprecation warning"""
-    if level > 1:
-        msg += " ; ".join(traceback.format_stack())
-    if level:
-        warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
+from .. import utils
+from .. import base
+from ..base import SvgThroughMixin, InkscapeExtension
+from ..localization import inkex_gettext as _
+from .meta import _deprecated
 
 
 class DeprecatedEffect:
@@ -79,7 +50,7 @@ class DeprecatedEffect:
         # by the new effects code, but we want to keep this as a Mixin so these
         # items will keep pylint happy and let use check our code as we write.
         if not hasattr(self, "svg"):
-            from .elements import SvgDocumentElement
+            from ..elements import SvgDocumentElement
 
             self.svg = SvgDocumentElement()
         if not hasattr(self, "arg_parser"):
@@ -116,7 +87,7 @@ class DeprecatedEffect:
                 "string": str,
                 "int": int,
                 "float": float,
-                "inkbool": inkex.utils.Boolean,
+                "inkbool": utils.Boolean,
             }.get(kw["type"])
         if kw.get("action", None) == "store":
             # Default store action not required, removed.
@@ -227,7 +198,7 @@ class DeprecatedEffect:
         return self.svg.namedview
 
     def createGuide(self, posX, posY, angle):
-        from .elements import Guide
+        from ..elements import Guide
 
         self._deprecated(
             "createGuide",
@@ -265,7 +236,7 @@ class DeprecatedEffect:
         if hasattr(self.__class__, "output"):
             self._deprecated("output", "Use `save()` or `save_raw()` instead.", stack=5)
             return getattr(self, "output")()
-        return inkex.base.InkscapeExtension.save_raw(self, ret)
+        return base.InkscapeExtension.save_raw(self, ret)
 
     def uniqueId(self, old_id, make_new_id=True):
         self._deprecated(
@@ -340,214 +311,3 @@ class DeprecatedEffect:
 
 class Effect(SvgThroughMixin, DeprecatedEffect, InkscapeExtension):
     """An Inkscape effect, takes SVG in and outputs SVG"""
-
-
-def deprecate(func):
-    r"""Function decorator for deprecation functions which have a one-liner
-    equivalent in the new API. The one-liner has to passed as a string
-    to the decorator.
-
-    >>> @deprecate
-    >>> def someOldFunction(*args):
-    >>>     '''Example replacement code someNewFunction('foo', ...)'''
-    >>>     someNewFunction('foo', *args)
-
-    Or if the args API is the same:
-
-    >>> someOldFunction = deprecate(someNewFunction)
-
-    """
-
-    def _inner(*args, **kwargs):
-        _deprecated(f"{func.__module__}.{func.__name__} -> {func.__doc__}", stack=2)
-        return func(*args, **kwargs)
-
-    _inner.__name__ = func.__name__
-    if func.__doc__:
-        _inner.__doc__ = "Deprecated -> " + func.__doc__
-    return _inner
-
-
-class DeprecatedDict(dict):
-    @deprecate
-    def __getitem__(self, key):
-        return super().__getitem__(key)
-
-    @deprecate
-    def __iter__(self):
-        return super().__iter__()
-
-
-# legacy inkex members
-
-
-class lazyproxy:
-    """Proxy, use as decorator on a function with provides the wrapped object.
-    The decorated function is called when a member is accessed on the proxy.
-    """
-
-    def __init__(self, getwrapped):
-        """
-        :param getwrapped: Callable which returns the wrapped object
-        """
-        self._getwrapped = getwrapped
-
-    def __getattr__(self, name):
-        return getattr(self._getwrapped(), name)
-
-    def __call__(self, *args, **kwargs):
-        return self._getwrapped()(*args, **kwargs)
-
-
-@lazyproxy
-def localize():
-    _deprecated("inkex.localize was moved to inkex.localization.localize.", stack=3)
-    from .localization import localize as wrapped
-
-    return wrapped
-
-
-def are_near_relative(a, b, eps):
-    _deprecated(
-        "inkex.are_near_relative was moved to " "inkex.units.are_near_relative", stack=2
-    )
-    return inkex.units.are_near_relative(a, b, eps)
-
-
-def debug(what):
-    _deprecated("inkex.debug was moved to inkex.utils.debug.", stack=2)
-    return inkex.utils.debug(what)
-
-
-# legacy inkex members <= 0.48.x
-
-
-def unittouu(string):
-    _deprecated(
-        "inkex.unittouu is now a method in the SvgDocumentElement class. "
-        "Use `self.svg.unittouu(str)` instead.",
-        stack=2,
-    )
-    return inkex.units.convert_unit(string, "px")
-
-
-# optparse.Values.ensure_value
-
-
-def ensure_value(self, attr, value):
-    _deprecated("Effect().options.ensure_value was removed.", stack=2)
-    if getattr(self, attr, None) is None:
-        setattr(self, attr, value)
-    return getattr(self, attr)
-
-
-argparse.Namespace.ensure_value = ensure_value  # type: ignore
-
-
-@deprecate
-def zSort(inNode, idList):
-    """self.svg.get_z_selected()"""
-    sortedList = []
-    theid = inNode.get("id")
-    if theid in idList:
-        sortedList.append(theid)
-    for child in inNode:
-        if len(sortedList) == len(idList):
-            break
-        sortedList += zSort(child, idList)
-    return sortedList
-
-
-class DeprecatedSvgMixin:
-    """Mixin which adds deprecated API elements to the SvgDocumentElement"""
-
-    @property
-    def selected(self):
-        """svg.selection"""
-        return self.selection
-
-    @deprecate
-    def set_selected(self, *ids):
-        r"""svg.selection.set(\*ids)"""
-        return self.selection.set(*ids)
-
-    @deprecate
-    def get_z_selected(self):
-        """svg.selection.rendering_order()"""
-        return self.selection.rendering_order()
-
-    @deprecate
-    def get_selected(self, *types):
-        r"""svg.selection.filter(\*types).values()"""
-        return self.selection.filter(*types).values()
-
-    @deprecate
-    def get_selected_or_all(self, *types):
-        """Set select_all = True in extension class"""
-        if not self.selection:
-            self.selection.set_all()
-        return self.selection.filter(*types)
-
-    @deprecate
-    def get_selected_bbox(self):
-        """selection.bounding_box()"""
-        return self.selection.bounding_box()
-
-    @deprecate
-    def get_first_selected(self, *types):
-        r"""selection.filter(\*types).first() or [0] if you'd like an error"""
-        return self.selection.filter(*types).first()
-
-
-# This can't be handled as a mixin class because of circular importing.
-def description(self, value):
-    """elem.desc = value"""
-    self.desc = value
-
-
-BaseElement.description = deprecate(description)
-
-
-def composed_style(element: ShapeElement):
-    """Calculate the final styles applied to this element
-    This function has been deprecated in favor of BaseElement.specified_style()"""
-    return element.specified_style()
-
-
-ShapeElement.composed_style = deprecate(composed_style)
-
-
-def width(self):
-    """Use BaseElement.viewport_width instead"""
-    return self.viewport_width
-
-
-def height(self):
-    """Use BaseElement.viewport_height instead"""
-    return self.viewport_height
-
-
-BaseElement.width = property(deprecate(width))
-BaseElement.height = property(deprecate(height))
-
-
-def paint_order(selection: ElementList):
-    """svg.selection.rendering_order()"""
-    return selection.rendering_order()
-
-
-ElementList.paint_order = deprecate(paint_order)  # type: ignore
-
-
-def transform_imul(self, matrix):
-    """Use @= operator instead"""
-    return self.__imatmul__(matrix)
-
-
-def transform_mul(self, matrix):
-    """Use @ operator instead"""
-    return self.__matmul__(matrix)
-
-
-Transform.__imul__ = deprecate(transform_imul)  # type: ignore
-Transform.__mul__ = deprecate(transform_mul)  # type: ignore

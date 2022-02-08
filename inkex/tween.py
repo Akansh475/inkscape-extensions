@@ -22,15 +22,15 @@ from bisect import bisect_left
 import abc
 import copy
 
-from inkex.styles import Style
-from inkex.elements._filters import LinearGradient, RadialGradient, Stop
-from inkex.transforms import Transform
-from inkex.colors import Color
-from inkex.units import convert_unit, parse_unit, render_unit
-from inkex.bezier import bezlenapprx, cspbezsplit, cspbezsplitatlength, csplength
-from inkex.paths import Path, CubicSuperPath
-from inkex.elements import SvgDocumentElement
-from inkex.utils import FragmentError
+from .styles import Style
+from .elements._filters import LinearGradient, RadialGradient, Stop
+from .transforms import Transform
+from .colors import Color
+from .units import convert_unit, parse_unit, render_unit
+from .bezier import bezlenapprx, cspbezsplit, cspbezsplitatlength, csplength
+from .paths import Path, CubicSuperPath
+from .elements import SvgDocumentElement
+from .utils import FragmentError
 
 
 try:

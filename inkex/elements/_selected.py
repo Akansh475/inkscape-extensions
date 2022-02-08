@@ -21,8 +21,10 @@ When elements are selected, these structures provide an advanced API.
 """
 
 from collections import OrderedDict
+from typing import Any, overload, Union
+
+from ..interfaces.IElement import IBaseElement
 from ._utils import natural_sort_key
-from ._base import BaseElement
 from ..localization import inkex_gettext
 from ..utils import AbortExtension
 
@@ -55,7 +57,6 @@ class ElementList(OrderedDict):
         return super().__contains__(self._to_key(key))
 
     def __setitem__(self, orig_key, elem):
-        from ._base import BaseElement
 
         if orig_key != elem and orig_key != elem.get("id"):
             raise ValueError(f"Refusing to set bad key in ElementList {orig_key}")
@@ -64,7 +65,7 @@ class ElementList(OrderedDict):
             elem = self.svg.getElementById(elem, literal=True)
             if elem is None:
                 return
-        if isinstance(elem, BaseElement):
+        if isinstance(elem, IBaseElement):
             # Selection is a list of elements to select
             key = elem.xml_path
             element_id = elem.get("id")
@@ -77,13 +78,12 @@ class ElementList(OrderedDict):
 
     def _to_key(self, key, default=None):
         """Takes a key (id, element, etc) and returns an xml_path key"""
-        from ._base import BaseElement
 
         if self and key is None:
             key = default
         if isinstance(key, int):
             return list(self.keys())[key]
-        elif isinstance(key, BaseElement):
+        if isinstance(key, IBaseElement):
             return key.xml_path
         elif isinstance(key, str) and key[0] != "/":
             return self.ids.get(key, key)
@@ -179,7 +179,12 @@ class ElementList(OrderedDict):
 
         return ElementList(
             self.svg,
-            [r for e in self for r in _recurse(e) if isinstance(r, (BaseElement, str))],
+            [
+                r
+                for e in self
+                for r in _recurse(e)
+                if isinstance(r, (IBaseElement, str))
+            ],
         )
 
     def id_dict(self):

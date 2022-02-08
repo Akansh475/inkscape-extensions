@@ -26,10 +26,12 @@ This is useful for having a common interface for each element which can
 give path, transform, and property access easily.
 """
 
-from collections import defaultdict
 from copy import deepcopy
 from lxml import etree
 
+from ..interfaces.IElement import IBaseElement, ISVGDocumentElement
+
+from ..base import SvgOutputMixin
 from ..paths import Path
 from ..styles import Style, Classes
 from ..transforms import Transform, BoundingBox
@@ -37,8 +39,8 @@ from ..utils import FragmentError
 from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
 from ..properties import BaseStyleValue, all_properties
-
-# from ..deprecated import DeprecatedShapeElementMixin
+from ._selected import ElementList
+from ._parser import NodeBasedLookup, SVG_PARSER
 
 from typing import (
     overload,
@@ -52,63 +54,7 @@ from typing import (
 )  # pylint: disable=unused-import
 
 
-class NodeBasedLookup(etree.PythonElementClassLookup):
-    """
-    We choose what kind of Elements we should return for each element, providing useful
-    SVG based API to our extensions system.
-    """
-
-    # (ns,tag) -> list(cls) ; ascending priority
-    lookup_table = defaultdict(list)  # type: DefaultDict[str, List[Any]]
-
-    @classmethod
-    def register_class(cls, klass):
-        """Register the given class using it's attached tag name"""
-        cls.lookup_table[splitNS(klass.tag_name)].append(klass)
-
-    @classmethod
-    def find_class(cls, xpath):
-        """Find the class for this type of element defined by an xpath"""
-        if isinstance(xpath, type):
-            return xpath
-        for cls in cls.lookup_table[splitNS(xpath.split("/")[-1])]:
-            # TODO: We could create a apply the xpath attrs to the test element
-            # to narrow the search, but this does everything we need right now.
-            test_element = cls()
-            if cls._is_class_element(test_element):
-                return cls
-        raise KeyError(f"Could not find svg tag for '{xpath}'")
-
-    def lookup(self, doc, element):  # pylint: disable=unused-argument
-        """Lookup called by lxml when assigning elements their object class"""
-        try:
-            for cls in reversed(self.lookup_table[splitNS(element.tag)]):
-                if cls._is_class_element(element):  # pylint: disable=protected-access
-                    return cls
-        except TypeError:
-            # Handle non-element proxies case
-            # The documentation implies that it's not possible
-            # Didn't found a reliable way to check whether proxy corresponds to element or not
-            # Look like lxml issue to me.
-            # The troubling element is "<!--Comment-->"
-            return None
-        return BaseElement
-
-
-SVG_PARSER = etree.XMLParser(huge_tree=True, strip_cdata=False)
-SVG_PARSER.set_element_class_lookup(NodeBasedLookup())
-
-
-def load_svg(stream):
-    """Load SVG file using the SVG_PARSER"""
-    if (isinstance(stream, str) and stream.lstrip().startswith("<")) or (
-        isinstance(stream, bytes) and stream.lstrip().startswith(b"<")
-    ):
-        return etree.ElementTree(etree.fromstring(stream, parser=SVG_PARSER))
-    return etree.parse(stream, parser=SVG_PARSER)
-
-
-class BaseElement(etree.ElementBase):
+class BaseElement(IBaseElement):
     """Provide automatic namespaces to all calls"""
 
     def __init_subclass__(cls):
@@ -261,7 +207,6 @@ class BaseElement(etree.ElementBase):
         """Return this element as it would appear in an svg document"""
         # This kind of hack is pure maddness, but etree provides very little
         # in the way of fragment printing, prefering to always output valid xml
-        from ..base import SvgOutputMixin
 
         svg = SvgOutputMixin.get_template(width=0, height=0).getroot()
         svg.append(self.copy())
@@ -315,9 +260,8 @@ class BaseElement(etree.ElementBase):
         root, parent = self, self
         while parent is not None:
             root, parent = parent, parent.getparent()
-        from ._svg import SvgDocumentElement
 
-        if not isinstance(root, SvgDocumentElement):
+        if not isinstance(root, ISVGDocumentElement):
             raise FragmentError("Element fragment does not have a document root!")
         return root
 
@@ -336,7 +280,6 @@ class BaseElement(etree.ElementBase):
 
     def descendants(self):
         """Walks the element tree and yields all elements, parent first"""
-        from ._selected import ElementList
 
         return ElementList(
             self.root,
@@ -354,7 +297,6 @@ class BaseElement(etree.ElementBase):
         If elem is provided, it will stop at the last common ancestor.
         If stop_at is provided, it will stop at the first parent that is in this list.
         """
-        from ._selected import ElementList
 
         return ElementList(self.root, self._ancestors(elem=elem, stop_at=stop_at))
 
@@ -554,6 +496,9 @@ class BaseElement(etree.ElementBase):
         if parent is not None and isinstance(parent, BaseElement):
             return parent.composed_transform() @ self.transform
         return self.transform
+
+
+NodeBasedLookup.default = BaseElement
 
 
 class ShapeElement(BaseElement):

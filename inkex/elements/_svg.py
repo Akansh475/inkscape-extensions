@@ -28,8 +28,11 @@ Provide a way to load lxml attributes with an svg API on top.
 import random
 from lxml import etree
 import math
+from ..css import ConditionalRule
 
-from ..deprecated import DeprecatedSvgMixin
+from ..interfaces.IElement import ISVGDocumentElement
+
+from ..deprecated.meta import DeprecatedSvgMixin
 from ..units import discover_unit, parse_unit
 from ._selected import ElementList
 from ..transforms import BoundingBox
@@ -42,7 +45,7 @@ if False:  # pylint: disable=using-constant-test
     import typing  # pylint: disable=unused-import
 
 
-class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
+class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
     """Provide access to the document level svg functionality"""
 
     tag_name = "svg"
@@ -109,7 +112,6 @@ class SvgDocumentElement(DeprecatedSvgMixin, BaseElement):
 
     def getElementsByClass(self, class_name):  # pylint: disable=invalid-name
         """Get elements by it's class name"""
-        from inkex.styles import ConditionalRule
 
         return self.xpath(ConditionalRule(f".{class_name}").to_xpath())
 

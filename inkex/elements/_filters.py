@@ -47,7 +47,7 @@ from typing import (
 )  # pylint: disable=unused-import
 
 if TYPE_CHECKING:
-    from inkex import SvgDocumentElement
+    from ._svg import SvgDocumentElement
 
 
 class Filter(BaseElement):

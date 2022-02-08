@@ -28,8 +28,6 @@ This basic extension allows you to automatically draw guides in inkscape.
 """
 
 from math import cos, sin, sqrt
-import math
-from typing import List, Tuple
 import re
 
 import inkex
@@ -52,6 +50,7 @@ class GuidesOpts:
 
     def set_page(self, pagenumber):
         """Update guide origin and width/height based on page number (1-indexed)"""
+        self.pagenumber = pagenumber
         pagenumber = pagenumber - 1
         if pagenumber < len(self.pages):
             self.page_origin = (self.pages[pagenumber].x, self.pages[pagenumber].y)
@@ -125,14 +124,10 @@ class GuidesCreator(inkex.EffectExtension):
         )
         pars.add_argument("--vert", type=int, default=0, help="Vert subdivisions")
         pars.add_argument("--horz", type=int, default=0, help="Horz subdivisions")
-        pars.add_argument(
-            "--header_margin", type=int, default="10", help="Header margin"
-        )
-        pars.add_argument(
-            "--footer_margin", type=int, default="10", help="Footer margin"
-        )
-        pars.add_argument("--left_margin", type=int, default="10", help="Left margin")
-        pars.add_argument("--right_margin", type=int, default="10", help="Right margin")
+        pars.add_argument("--header_margin", type=int, default=10, help="Header margin")
+        pars.add_argument("--footer_margin", type=int, default=10, help="Footer margin")
+        pars.add_argument("--left_margin", type=int, default=10, help="Left margin")
+        pars.add_argument("--right_margin", type=int, default=10, help="Right margin")
         pars.add_argument("--delete", type=inkex.Boolean, help="Delete existing guides")
         pars.add_argument(
             "--nodup", type=inkex.Boolean, help="Omit duplicated guides", default=True
@@ -238,10 +233,10 @@ class GuidesCreator(inkex.EffectExtension):
         if self.options.start_from_edges:
             # horizontal borders
             self.draw_guide((0, self.opts.height), self.opts.orientation[1])
-            self.draw_guide((self.opts.height, 0), self.opts.orientation[1])
+            self.draw_guide((self.opts.width, 0), self.opts.orientation[1])
 
             # vertical borders
-            self.draw_guide((0, self.opts.width), self.opts.orientation[0])
+            self.draw_guide((0, self.opts.height), self.opts.orientation[0])
             self.draw_guide((self.opts.width, 0), self.opts.orientation[0])
 
         if self.options.margins_preset == "custom":
@@ -267,11 +262,19 @@ class GuidesCreator(inkex.EffectExtension):
             "book_left": (8 / 9, 2 / 9, 2 / 9, 8 / 9),
             "book_right": (8 / 9, 2 / 9, 1 / 9, 7 / 9),
         }
-        if self.options.margins_preset in book_options:
+        margins_preset = self.options.margins_preset
+        if margins_preset.startswith("book_alternating"):
+            margins_preset = (
+                "book_left"
+                if self.opts.pagenumber % 2 == (1 if "left" in margins_preset else 0)
+                else "book_right"
+            )
+
+        if margins_preset in book_options:
             margins = [
                 i * j
                 for i, j in zip(
-                    book_options[self.options.margins_preset],
+                    book_options[margins_preset],
                     2 * [self.opts.height] + 2 * [self.opts.width],
                 )
             ]

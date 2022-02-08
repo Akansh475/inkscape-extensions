@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-from guides_creator import GuidesCreator, GuidesOpts
+from guides_creator import GuidesCreator
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
 
@@ -30,7 +30,7 @@ class GuidesCreatorBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCa
         + ("--tab=regular_guides", "--guides_preset=golden", "--delete=True"),
         old_defaults
         + ("--tab=regular_guides", "--guides_preset=5;5", "--start_from_edges=True"),
-        old_defaults + ("--tab=diagonal_guides",),
+        old_defaults + ("--tab=diagonal_guides", "--nodup=False"),
         old_defaults
         + ("--tab=margins", "--start_from_edges=True", "--margins_preset=custom"),
         old_defaults
@@ -85,5 +85,44 @@ class GuidesCreatorFunctionalityTests(TestCase):
         parsetest("2, 216-218, 10", 300, (2, 10, 216, 217, 218))
 
 
-class GuidesTestMulitpage(TestCase):
-    pass
+class GuidesTestMulitpage(ComparisonMixin, TestCase):
+    """Test multipage functionality"""
+
+    effect_class = GuidesCreator
+    compare_file = "svg/empty_multipage.svg"
+    compare_filters = [CompareNumericFuzzy()]
+    comparisons = [
+        (),  # by default, all pages
+        # selection of pages
+        ("--vertical_guides=4", "--horizontal_guides=3", "--pages=1,,3-7,12"),
+        # diagonal guides
+        (
+            "--tab=diagonal_guides",
+            "--nodup=False",
+            "--pages=1-3",
+            "--ul=True",
+            "--ur=True",
+            "--ll=True",
+            "--lr=True",
+        ),
+        # There is one diagonal guide already in the file, it should be unchanged
+        (
+            "--tab=diagonal_guides",
+            "--nodup=True",
+            "--pages=1-3",
+            "--ul=True",
+            "--ur=True",
+            "--ll=True",
+            "--lr=True",
+        ),
+        (
+            "--tab=margins",
+            "--start_from_edges=True",
+            "--margins_preset=book_alternating_left",
+        ),
+        (
+            "--tab=margins",
+            "--start_from_edges=False",
+            "--margins_preset=book_alternating_right",
+        ),
+    ]

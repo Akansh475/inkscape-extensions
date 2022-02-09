@@ -142,27 +142,31 @@ class InkscapeExtension:
         """
 
         def _inner(value):
-            # replace 4-7 with 4, 5, 6, 7
-            pages = re.sub(
-                r"(\d+)\s?-\s?(\d+)",
-                lambda m: ",".join(
-                    map(str, range(int(m.group(1)), int(m.group(2)) + 1))
-                ),
-                value,
-            )
-
-            def method(lastvalue, pages):
-                # replace 5- with 5, 6, ..., lastpage
+            def method(pages, lastvalue, startvalue=1):
+                # replace ranges, such as -3, 10- with startvalue,2,3,10..lastvalue
                 pages = re.sub(
-                    r"(\d+)\s?-",
-                    lambda m: ",".join(map(str, range(int(m.group(1)), lastvalue + 1))),
+                    r"(\d+|)\s?-\s?(\d+|)",
+                    lambda m: ",".join(
+                        map(
+                            str,
+                            range(
+                                int(m.group(1) or startvalue),
+                                int(m.group(2) or lastvalue) + 1,
+                            ),
+                        )
+                    )
+                    if not (m.group(1) or m.group(2)) == ""
+                    else "",
                     pages,
                 )
+
                 pages = map(int, re.findall(r"(\d+)", pages))
                 pages = tuple({i for i in pages if i <= lastvalue})
                 return pages
 
-            return lambda lastvalue: method(lastvalue, pages)
+            return lambda lastvalue, startvalue=1: method(
+                value, lastvalue, startvalue=startvalue
+            )
 
         return _inner
 

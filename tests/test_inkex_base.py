@@ -132,9 +132,11 @@ class TestArgumentDatatypes(TestCase):
     def test_page_descriptor(self):
         """Test that page descriptions are parsed correctly"""
 
-        def parsetest(string, length, comparison):
+        def parsetest(string, length, comparison, startvalue=1):
             result = InkscapeExtension.arg_number_ranges()
-            self.assertTupleEqual(result(string)(length), comparison)
+            self.assertTupleEqual(
+                result(string)(length, startvalue=startvalue), comparison
+            )
 
         parsetest("1, 2,3", 10, (1, 2, 3))
         parsetest("1-3, 5, 10", 10, (1, 2, 3, 5, 10))
@@ -142,6 +144,9 @@ class TestArgumentDatatypes(TestCase):
         parsetest("2-5, 7-9, 10-", 12, (2, 3, 4, 5, 7, 8, 9, 10, 11, 12))
         parsetest("6, 7, 8", 3, tuple())
         parsetest("2, 216-218, 10", 300, (2, 10, 216, 217, 218))
+        parsetest("-3,10-,5", 12, (1, 2, 3, 5, 10, 11, 12))
+        parsetest("-5, 7-", 7, (3, 4, 5, 7), 3)
+        parsetest("-", 7, (), 3)
 
 
 class SvgInputOutputTest(TestCase):

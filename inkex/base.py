@@ -21,6 +21,7 @@ The ultimate base functionality for every Inkscape extension.
 """
 
 import os
+import re
 import sys
 import copy
 
@@ -123,6 +124,45 @@ class InkscapeExtension:
                 if name.startswith("_"):
                     return do_nothing
                 raise AbortExtension(f"Can not find method {name}") from error
+
+        return _inner
+
+    @staticmethod
+    def arg_number_ranges():
+
+        """Parses a number descriptor. e.g:
+        1,2,4-5,7,9- is parsed to 1, 2, 4, 5, 7, 9, 10, ..., lastvalue
+
+        .. code-block:: python
+        .. # in add_arguments()
+        .. pars.add_argument("--pages", type=self.arg_number_ranges(), default=1-)
+        .. # later on, pages is then a list of ints
+        .. pages = self.options.pages(lastvalue)
+
+        """
+
+        def _inner(value):
+            # replace 4-7 with 4, 5, 6, 7
+            pages = re.sub(
+                r"(\d+)\s?-\s?(\d+)",
+                lambda m: ",".join(
+                    map(str, range(int(m.group(1)), int(m.group(2)) + 1))
+                ),
+                value,
+            )
+
+            def method(lastvalue, pages):
+                # replace 5- with 5, 6, ..., lastpage
+                pages = re.sub(
+                    r"(\d+)\s?-",
+                    lambda m: ",".join(map(str, range(int(m.group(1)), lastvalue + 1))),
+                    pages,
+                )
+                pages = map(int, re.findall(r"(\d+)", pages))
+                pages = tuple({i for i in pages if i <= lastvalue})
+                return pages
+
+            return lambda lastvalue: method(lastvalue, pages)
 
         return _inner
 

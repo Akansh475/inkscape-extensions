@@ -148,6 +148,33 @@ class Vector2dTest(TestCase):
 
         self.assertRaises(ValueError, Vector2d, (1))
         self.assertRaises(ValueError, Vector2d, (1, 2, 3))
+        self.assertRaises(ValueError, Vector2d, 1, 2, 3)
+
+    def test_vector_default_creation(self):
+        """Test fallback for vectors"""
+
+        # no fallback
+        vec0 = Vector2d("1,2", fallback=None)
+        self.assertEqual(vec0.x, 1)
+        self.assertEqual(vec0.y, 2)
+
+        self.assertRaises(ValueError, Vector2d, "a,2")
+        self.assertRaises(ValueError, Vector2d, 1)
+        # invalid fallback
+        self.assertRaises(ValueError, Vector2d, 1, fallback="a")
+
+        # fallback
+        vec0 = Vector2d("a,3", fallback=(1, 2))
+        self.assertEqual(vec0.x, 1)
+        self.assertEqual(vec0.y, 2)
+
+        vec0 = Vector2d(("a", "b"), fallback=(1, 2))
+        self.assertEqual(vec0.x, 1)
+        self.assertEqual(vec0.y, 2)
+
+        vec0 = Vector2d((3, 4, 5), fallback=(1, 2))
+        self.assertEqual(vec0.x, 1)
+        self.assertEqual(vec0.y, 2)
 
     def test_binary_operators(self):
         """Test binary operators for vector2d"""

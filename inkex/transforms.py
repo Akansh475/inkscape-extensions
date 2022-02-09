@@ -90,8 +90,8 @@ class ImmutableVector2d:
         pass
 
     @overload
-    def __init__(self, v):
-        # type: (Union[VectorLike, str]) -> None
+    def __init__(self, v, fallback=None):
+        # type: (Union[VectorLike, str], Optional[Union[VectorLike, str]]) -> None
         pass
 
     @overload
@@ -99,15 +99,20 @@ class ImmutableVector2d:
         # type: (float, float) -> None
         pass
 
-    def __init__(self, *args):
-        if len(args) == 0:
-            x, y = 0.0, 0.0
-        elif len(args) == 1:
-            x, y = self._parse(args[0])
-        elif len(args) == 2:
-            x, y = map(float, args)
-        else:
-            raise ValueError("too many arguments")
+    def __init__(self, *args, fallback=None):
+        try:
+            if len(args) == 0:
+                x, y = 0.0, 0.0
+            elif len(args) == 1:
+                x, y = self._parse(args[0])
+            elif len(args) == 2:
+                x, y = map(float, args)
+            else:
+                raise ValueError("too many arguments")
+        except (ValueError, TypeError) as error:
+            if fallback is None:
+                raise ValueError("Cannot parse vector and no fallback given") from error
+            x, y = ImmutableVector2d(fallback)
         self._x, self._y = float(x), float(y)
 
     @staticmethod

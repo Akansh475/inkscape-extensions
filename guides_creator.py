@@ -36,7 +36,7 @@ from inkex.localization import inkex_gettext as _
 
 
 class GuidesOpts:
-    """Value storage for Guides Creator"""
+    """Manager of current-page-related values for GuidesCreator"""
 
     # pylint: disable=too-few-public-methods
     def __init__(self, svg: inkex.SvgDocumentElement) -> None:
@@ -77,7 +77,7 @@ class GuidesCreator(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument(
             "--pages",
-            type=str,
+            type=self.arg_number_ranges(),
             help='On which pages the guides are created, e.g. "1, 2, 4-6, 8-". '
             "Default: All pages.",
             default="1-",
@@ -135,27 +135,7 @@ class GuidesCreator(inkex.EffectExtension):
 
     def __init__(self):
         super().__init__()
-        self.opts: GuidesOpts = None
-
-    @staticmethod
-    def parse_page_descriptor(pages, lastpage):
-        """Parses a page descriptor. e.g:
-        1,2,4-5,7,9- is parsed to 1, 2, 4, 5, 7, 9, 10, ..., lastpage"""
-        # replace 4-7 with 4, 5, 6, 7
-        pages = re.sub(
-            r"(\d+)\s?-\s?(\d+)",
-            lambda m: ",".join(map(str, range(int(m.group(1)), int(m.group(2)) + 1))),
-            pages,
-        )
-        # replace 5- with 5, 6, ..., lastpage
-        pages = re.sub(
-            r"(\d+)\s?-",
-            lambda m: ",".join(map(str, range(int(m.group(1)), lastpage + 1))),
-            pages,
-        )
-        pages = map(int, re.findall(r"(\d+)", pages))
-        pages = tuple({i for i in pages if i <= lastpage})
-        return pages
+        self.store: GuidesOpts = None
 
     def effect(self):
 
@@ -163,11 +143,9 @@ class GuidesCreator(inkex.EffectExtension):
             for guide in self.svg.namedview.get_guides():
                 guide.delete()
 
-        self.opts = GuidesOpts(self.svg)
-        for i in self.parse_page_descriptor(
-            self.options.pages, max(len(self.svg.namedview.get_pages()), 1)
-        ):
-            self.opts.set_page(i)
+        self.store = GuidesOpts(self.svg)
+        for i in self.options.pages(max(len(self.svg.namedview.get_pages()), 1)):
+            self.store.set_page(i)
             self.options.tab()
 
     def generate_regular_guides(self):
@@ -188,10 +166,10 @@ class GuidesCreator(inkex.EffectExtension):
             gold = (1 + sqrt(5)) / 2
 
             for fraction, index in zip([1 / gold, 1 - 1 / gold] * 2, [1, 1, 0, 0]):
-                position = fraction * (self.opts.width, self.opts.height)[index]
+                position = fraction * (self.store.width, self.store.height)[index]
                 self.draw_guide(
                     (0, position) if index == 1 else (position, 0),
-                    self.opts.orientation[index],
+                    self.store.orientation[index],
                 )
 
             if from_edges:
@@ -211,7 +189,7 @@ class GuidesCreator(inkex.EffectExtension):
         """Generate diagonal guides"""
         # Dimentions
         left, bottom = (0, 0)
-        right, top = (self.opts.width, self.opts.height)
+        right, top = (self.store.width, self.store.height)
 
         # Diagonal angle
         angle = 45
@@ -232,22 +210,22 @@ class GuidesCreator(inkex.EffectExtension):
 
         if self.options.start_from_edges:
             # horizontal borders
-            self.draw_guide((0, self.opts.height), self.opts.orientation[1])
-            self.draw_guide((self.opts.width, 0), self.opts.orientation[1])
+            self.draw_guide((0, self.store.height), self.store.orientation[1])
+            self.draw_guide((self.store.width, 0), self.store.orientation[1])
 
             # vertical borders
-            self.draw_guide((0, self.opts.height), self.opts.orientation[0])
-            self.draw_guide((self.opts.width, 0), self.opts.orientation[0])
+            self.draw_guide((0, self.store.height), self.store.orientation[0])
+            self.draw_guide((self.store.width, 0), self.store.orientation[0])
 
         if self.options.margins_preset == "custom":
             margins = [
                 (i / j if int(j) != 0 else None)
                 for i, j in zip(
                     (
-                        self.opts.height * (self.options.header_margin - 1),  # header
-                        self.opts.height,  # footer
-                        self.opts.width,  # left
-                        self.opts.width * (self.options.right_margin - 1),  # right
+                        self.store.height * (self.options.header_margin - 1),  # header
+                        self.store.height,  # footer
+                        self.store.width,  # left
+                        self.store.width * (self.options.right_margin - 1),  # right
                     ),
                     (
                         self.options.header_margin,
@@ -266,7 +244,7 @@ class GuidesCreator(inkex.EffectExtension):
         if margins_preset.startswith("book_alternating"):
             margins_preset = (
                 "book_left"
-                if self.opts.pagenumber % 2 == (1 if "left" in margins_preset else 0)
+                if self.store.pagenumber % 2 == (1 if "left" in margins_preset else 0)
                 else "book_right"
             )
 
@@ -275,12 +253,12 @@ class GuidesCreator(inkex.EffectExtension):
                 i * j
                 for i, j in zip(
                     book_options[margins_preset],
-                    2 * [self.opts.height] + 2 * [self.opts.width],
+                    2 * [self.store.height] + 2 * [self.store.width],
                 )
             ]
 
         y_header, y_footer, x_left, x_right = [
-            i or j for i, j in zip(margins, [self.opts.height, 0, 0, self.opts.width])
+            i or j for i, j in zip(margins, [self.store.height, 0, 0, self.store.width])
         ]
 
         for length, position in zip(margins, [1, 1, 0, 0]):
@@ -288,7 +266,7 @@ class GuidesCreator(inkex.EffectExtension):
                 continue
             self.draw_guide(
                 (length, 0) if position == 0 else (0, length),
-                self.opts.orientation[position],
+                self.store.orientation[position],
             )
 
         # setting up properties of the rectangle created between guides
@@ -310,7 +288,7 @@ class GuidesCreator(inkex.EffectExtension):
     def draw_guides(self, division, edges, vert=False):
         """Draw a vertical or horizontal lines"""
         return self._draw_guides(
-            (self.opts.width, self.opts.height), division, edges, vert=vert
+            (self.store.width, self.store.height), division, edges, vert=vert
         )
 
     def _draw_guides(self, vector, division, edges, shift=0, vert=False):
@@ -331,11 +309,11 @@ class GuidesCreator(inkex.EffectExtension):
     def draw_guide(self, position, orientation):
         """Draw the guides"""
         newpos = [
-            position[0] + self.opts.page_origin[0],
+            position[0] + self.store.page_origin[0],
             position[1]
-            + self.opts.viewbox[3]
-            - self.opts.height
-            - self.opts.page_origin[1],
+            + self.store.viewbox[3]
+            - self.store.height
+            - self.store.page_origin[1],
         ]
         if self.options.nodup:
             self.svg.namedview.new_unique_guide(newpos, orientation)

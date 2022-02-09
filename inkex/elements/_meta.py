@@ -116,10 +116,16 @@ class NamedView(BaseElement):
     ) -> Optional[Guide]:
         """Add a guide iif there is no guide that looks the same."""
         elem = Guide().move_to(position[0], position[1], orientation)
+        return self.add(elem) if self.get_similar_guide(elem) is None else None
+
+    def get_similar_guide(self, other: Guide) -> Optional[Guide]:
+        """Check if the namedview contains a guide that looks identical to one
+        defined by (position, orientation). If such a guide exists, return it;
+        otherwise, return None."""
         for guide in self.get_guides():
-            if Guide.guides_coincident(guide, elem):
-                return None
-        return self.add(elem)
+            if Guide.guides_coincident(guide, other):
+                return guide
+        return None
 
     def get_pages(self):
         """Returns a list of pages"""
@@ -141,10 +147,7 @@ class Guide(BaseElement):
     @property
     def orientation(self) -> Vector2d:
         """Vector normal to the guide"""
-        try:
-            return Vector2d(self.get("orientation"))
-        except ValueError:
-            return Vector2d(1, 0)
+        return Vector2d(self.get("orientation"), fallback=(1, 0))
 
     is_horizontal = property(
         lambda self: self.orientation[0] == 0 and self.orientation[1] != 0
@@ -158,10 +161,7 @@ class Guide(BaseElement):
         """Position of the guide handle. The y coordinate is flipped and relative
         to the bottom of the viewbox, this is a remnant of the pre-1.0 coordinate system
         """
-        try:
-            return Vector2d(self.get("position"))
-        except ValueError:
-            return Vector2d(0, 0)
+        return Vector2d(self.get("position"), fallback=(0, 0))
 
     @classmethod
     def new(cls, pos_x, pos_y, angle, **attrs):

@@ -126,6 +126,24 @@ class InkscapeExtensionTest(TestCase):
         self.assertRaises(AbortExtension, ext.absolute_href, "./foo", default=None)
 
 
+class TestArgumentDatatypes(TestCase):
+    """Test special argument types for the dataparser"""
+
+    def test_page_descriptor(self):
+        """Test that page descriptions are parsed correctly"""
+
+        def parsetest(string, length, comparison):
+            result = InkscapeExtension.arg_number_ranges()
+            self.assertTupleEqual(result(string)(length), comparison)
+
+        parsetest("1, 2,3", 10, (1, 2, 3))
+        parsetest("1-3, 5, 10", 10, (1, 2, 3, 5, 10))
+        parsetest("2, 4-, 6, 7-", 10, (2, 4, 5, 6, 7, 8, 9, 10))
+        parsetest("2-5, 7-9, 10-", 12, (2, 3, 4, 5, 7, 8, 9, 10, 11, 12))
+        parsetest("6, 7, 8", 3, tuple())
+        parsetest("2, 216-218, 10", 300, (2, 10, 216, 217, 218))
+
+
 class SvgInputOutputTest(TestCase):
     """Test SVG Input Mixin"""
 

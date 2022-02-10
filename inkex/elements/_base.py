@@ -366,10 +366,11 @@ class BaseElement(IBaseElement):
         return elem
 
     def duplicate(self):
-        """Like copy(), but the copy stays in the tree and sets a random id"""
+        """Like copy(), but the copy stays in the tree and sets a random id on the
+        duplicate and all its descendants"""
         elem = self.copy()
         self.addnext(elem)
-        elem.set_random_id()
+        elem.set_random_ids()
         return elem
 
     def __str__(self):

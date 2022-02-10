@@ -14,7 +14,7 @@ from inkex.elements import (
     TextElement,
     Line,
 )
-from inkex.elements._base import NodeBasedLookup
+from inkex.elements._base import NodeBasedLookup, BaseElement
 from inkex.transforms import Transform
 from inkex.styles import Style
 from inkex.utils import FragmentError
@@ -335,6 +335,18 @@ class RelationshipTestCase(SvgTestCase):
         self.assertTrue(dup.get("id"))
         self.assertNotEqual(elem.get("id"), dup.get("id"))
         self.assertEqual(elem.getparent(), dup.getparent())
+
+    def test_duplicate_group(self):
+        """Check that when duplicating a group, all ids are replaced
+        (Issue https://gitlab.com/inkscape/extensions/-/issues/379)"""
+        elem: BaseElement = self.svg.getElementById("A")
+        dup = elem.duplicate()
+        elem_ids = [i.get_id() for i in elem.iter() if hasattr(i, "get_id")]
+        dup_ids = [i.get_id() for i in dup.iter() if hasattr(i, "get_id")]
+
+        in_both = [i for i in elem_ids if i in dup_ids]
+
+        self.assertListEqual(in_both, [])
 
     def test_replace_with(self):
         """Replacing nodes in a tree"""

@@ -419,7 +419,7 @@ class Move(AbsolutePathCommand):
         raise ValueError("Move segments can not be changed into curves.")
 
     def reverse(self, first, prev):
-        return Move(first.x, first.y)
+        return Move(prev.x, prev.y)
 
 
 class move(RelativePathCommand):  # pylint: disable=invalid-name
@@ -440,7 +440,7 @@ class move(RelativePathCommand):  # pylint: disable=invalid-name
         return Move(prev.x + self.dx, prev.y + self.dy)
 
     def reverse(self, first, prev):
-        return move(first.x, first.y)
+        return move(prev.x - first.x, prev.y - first.y)
 
 
 class ZoneClose(AbsolutePathCommand):

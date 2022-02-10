@@ -749,6 +749,26 @@ class PathTest(TestCase):
         ret = ret.reverse()
         self._assertPath(ret, "M 500 500 q -150 -150 -400 -250")
 
+    def test_reverse_multiple_subpaths(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/445. First two
+        examples are from the issue"""
+        ret = Path("M 128,64 L 128,128 M 128,196 L 128,256").reverse()
+        self._assertPath(ret, "M 128 256 L 128 196 M 128 128 L 128 64")
+
+        ret = Path("M 128,64 L 128,128 m 128,196 L 128,256").reverse()
+        self._assertPath(ret, "M 128 256 L 256 324 m -128 -196 L 128 64")
+
+        # More complex example with absolute and relative move commands
+        ret = Path(
+            "m 58,88 c -10,2 3,13 10,4 z M 32,67 c 14,-5 23,-3 35,7 m 2,-21 c"
+            "10,11 20,19 34,11 M 24,43 c 23,-14 18,-5 39,4"
+        ).reverse()
+        self._assertPath(
+            ret,
+            "m 63 47 c -21 -9 -16 -18 -39 -4 M 103 64 c -14 8 -24 0 -34 -11 "
+            "m -2 21 c -12 -10 -21 -12 -35 -7 M 58 88 l 10 4 c -7 9 -20 -2 -10 -4",
+        )
+
 
 class SuperPathTest(TestCase):
     """Super path tests for testing the super path class"""

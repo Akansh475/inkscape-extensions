@@ -37,7 +37,7 @@ class JessyinkEffects(JessyInkMixin, inkex.EffectExtension):
 
     def effect(self):
         self.is_installed()
-        if not self.svg.selected:
+        if not self.svg.selection:
             raise inkex.AbortExtension(
                 _(
                     "No object selected. Please select the object you want to "
@@ -45,7 +45,7 @@ class JessyinkEffects(JessyInkMixin, inkex.EffectExtension):
                 )
             )
 
-        for elem in self.svg.selected.values():
+        for elem in self.svg.selection.values():
             self._process(elem, "effectIn")
             self._process(elem, "effectOut")
 

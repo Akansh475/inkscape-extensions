@@ -165,7 +165,7 @@ class ReplaceFont(inkex.EffectExtension):
 
         selected = self.svg
         if scope == "selection_only":
-            selected = self.svg.selected.values()
+            selected = self.svg.selection.values()
 
         for item in selected:
             items.extend(self.find_child_text_items(item))

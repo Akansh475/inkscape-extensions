@@ -35,7 +35,7 @@ class InteractiveMockup(inkwebeffect.InkWebEffect):
                 "You must select at least two elements. The last one is the object you want to go to."
             )
 
-        el_from = list(self.svg.selected.values())[:-1]
+        el_from = list(self.svg.selection.values())[:-1]
 
         ev_code = "InkWeb.moveViewbox({from:this, to:'" + self.options.ids[-1] + "'})"
         for elem in el_from:

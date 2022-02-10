@@ -34,7 +34,7 @@ class View(JessyInkMixin, inkex.EffectExtension):
     def effect(self):
         self.is_installed()
 
-        rect = self.svg.selected.first()
+        rect = self.svg.selection.first()
 
         if rect is None:
             raise inkex.AbortExtension(

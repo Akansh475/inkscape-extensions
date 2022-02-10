@@ -159,7 +159,7 @@ class Voronoi(inkex.EffectExtension):
 
     def effect(self):
         # Check that elements have been selected
-        if not self.svg.selected:
+        if not self.svg.selection:
             inkex.errormsg(_("Please select objects!"))
             return
 
@@ -192,7 +192,7 @@ class Voronoi(inkex.EffectExtension):
         seeds = []
         fills = []
 
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             nodes.append(node)
             bbox = node.bounding_box()
             if bbox:

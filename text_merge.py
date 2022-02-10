@@ -57,11 +57,11 @@ class Merge(inkex.EffectExtension):
         )
 
     def effect(self):
-        if not self.svg.selected:
+        if not self.svg.selection:
             for node in self.svg.xpath("//svg:text | //svg:flowRoot"):
-                self.svg.selected[node.get("id")] = node
+                self.svg.selection[node.get("id")] = node
 
-        if not self.svg.selected:
+        if not self.svg.selection:
             return
 
         parentnode = self.svg.get_current_layer()
@@ -87,7 +87,7 @@ class Merge(inkex.EffectExtension):
             "stroke": "none",
         }
 
-        for node in sorted(self.svg.selected.values(), key=self._sort):
+        for node in sorted(self.svg.selection.values(), key=self._sort):
             self.recurse(text_span, node, text_root)
 
         if self.options.flowtext:

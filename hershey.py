@@ -1993,10 +1993,10 @@ Evil Mad Scientist Laboratories
                 # Traverse selected objects
                 for id_ref in self.options.ids:
                     transform = self.recursive_get_encl_transform(
-                        self.svg.selected[id_ref]
+                        self.svg.selection[id_ref]
                     )
                     self.recursively_traverse_svg(
-                        [self.svg.selected[id_ref]], transform
+                        [self.svg.selection[id_ref]], transform
                     )
             else:  # Traverse entire document
                 self.recursively_traverse_svg(

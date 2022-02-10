@@ -323,7 +323,7 @@ class MeshToPath(inkex.EffectExtension):
     def effect(self):
         """Main routine to convert mesh geometry to path data."""
         # loop through selection
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             meshgradients = self.find_meshgradients(node)
             # if style references meshgradient
             if meshgradients:

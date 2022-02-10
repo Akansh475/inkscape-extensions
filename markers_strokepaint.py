@@ -115,7 +115,7 @@ class MarkersStrokePaint(inkex.EffectExtension):
         return fill, stroke
 
     def effect(self):
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             fill, stroke = self.options.tab(node.style)
 
             for attr in MARKERS:

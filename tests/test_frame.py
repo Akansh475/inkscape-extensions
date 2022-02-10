@@ -106,7 +106,7 @@ class FrameTest(InkscapeExtensionTestMixin, TestCase):
         new_frame = self.get_frame(uut.svg)
         self.assertIsNotNone(new_frame)
         self.assertEqual("{http://www.w3.org/2000/svg}path", new_frame.tag)
-        orig = list(uut.svg.selected.values())[0]
+        orig = list(uut.svg.selection.values())[0]
         self.assertEqual("url(#clipPath5815)", orig.get("clip-path"))
         clip_path = uut.svg.getElement("//svg:defs/svg:clipPath")
         self.assertEqual("{http://www.w3.org/2000/svg}clipPath", clip_path.tag)

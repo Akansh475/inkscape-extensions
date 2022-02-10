@@ -102,7 +102,7 @@ class Dimension(pathmodifier.PathModifier):
         self.options.xoffset *= scale
         self.options.yoffset *= scale
 
-        if not self.svg.selected:
+        if not self.svg.selection:
             raise inkex.AbortExtension("Please select an object")
         if self.options.type == "geometric":
             bbox = self.svg.selection.bounding_box()
@@ -147,7 +147,7 @@ class Dimension(pathmodifier.PathModifier):
         line.set("stroke-width", str(0.5 * scale))
         group.append(line)
 
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             group.append(node)
 
         layer.append(group)

@@ -107,7 +107,7 @@ class InterpAttG(inkex.EffectExtension):
             # multiple selection
             if self.options.zsort:
                 return list(self.svg.selection.rendering_order().values())
-            return list(self.svg.selected.values())
+            return list(self.svg.selection.values())
 
         # must be a group
         node = self.svg.selection.filter(inkex.Group).first()

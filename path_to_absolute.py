@@ -28,7 +28,7 @@ class ToAbsolute(inkex.EffectExtension):
 
     def effect(self):
         """Performs the effect."""
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             if not isinstance(node, inkex.PathElement):
                 node = node.replace_with(node.to_path_element())
             node.path = node.path.to_absolute().to_superpath().to_path()

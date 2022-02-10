@@ -155,7 +155,7 @@ class Frame(inkex.EffectExtension):
         style.set_color(self.options.stroke_color, "stroke")
         layer = self.svg.get_current_layer()
 
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             box = node.bounding_box()
             if self.options.position == "outside":
                 box = size_box(box, (width / 2))

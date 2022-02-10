@@ -422,7 +422,7 @@ class TextExtension(EffectExtension):
     newpar = True
 
     def effect(self):
-        nodes = self.svg.selected or {None: self.document.getroot()}
+        nodes = self.svg.selection or {None: self.document.getroot()}
         for elem in nodes.values():
             self.process_element(elem)
 

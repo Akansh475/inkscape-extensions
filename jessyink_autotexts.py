@@ -32,10 +32,10 @@ class AutoTexts(JessyInkMixin, inkex.EffectExtension):
     def effect(self):
         self.is_installed()
 
-        if not self.svg.selected:
+        if not self.svg.selection:
             inkex.errormsg(_("To assign an effect, please select an object.\n\n"))
 
-        for node in self.svg.selected.get(inkex.Tspan):
+        for node in self.svg.selection.get(inkex.Tspan):
             if self.options.autoText == "slideTitle":
                 node.set("jessyink:autoText", "slideTitle")
             elif self.options.autoText == "slideNumber":

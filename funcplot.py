@@ -238,7 +238,7 @@ class FuncPlot(inkex.EffectExtension):
 
     def effect(self):
         newpath = None
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             if isinstance(node, Rectangle):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.PathElement()

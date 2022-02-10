@@ -125,7 +125,7 @@ class Interp(inkex.EffectExtension):
             objects = self.svg.selection.rendering_order()
         else:
             # use selection order (default)
-            objects = self.svg.selected
+            objects = self.svg.selection
 
         objects = [
             node for node in objects.values() if isinstance(node, inkex.PathElement)

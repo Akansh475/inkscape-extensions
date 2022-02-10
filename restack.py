@@ -52,7 +52,7 @@ class Restack(inkex.EffectExtension):
         pars.add_argument("--nb_direction", default="", help="Direction tab")
 
     def effect(self):
-        if not self.svg.selected:
+        if not self.svg.selection:
             raise inkex.AbortExtension("There is no selection to restack.")
 
         # process selection to get list of objects to be arranged
@@ -69,7 +69,7 @@ class Restack(inkex.EffectExtension):
     def restack_positional(self, parentnode):
         """Restack based on canvas position"""
         # move them to the top of the object stack in this order.
-        for node in sorted(self.svg.selected.values(), key=self._sort):
+        for node in sorted(self.svg.selection.values(), key=self._sort):
             parentnode.append(node)
         return True
 
@@ -83,7 +83,7 @@ class Restack(inkex.EffectExtension):
 
     def restack_z_order(self, parentnode):
         """Restack based on z-order"""
-        objects = list(self.svg.selected.rendering_order())
+        objects = list(self.svg.selection.rendering_order())
         if self.options.zsort == "rev":
             objects.reverse()
         elif self.options.zsort == "rand":

@@ -47,7 +47,7 @@ class NewGlyphLayer(inkex.EffectExtension):
 
             # TODO: make it optional ("Use current selection as template glyph")
             # Move selection to the newly created layer
-            for node in self.svg.selected.values():
+            for node in self.svg.selection.values():
                 layer.append(node)
 
 

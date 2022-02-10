@@ -67,7 +67,7 @@ class BasicSvgTest(TestCase):
         self.assertEqual(doc.selection["bananas"], doc)
         self.assertEqual(doc.selection.first(), doc)
         doc = svg('id="apples"')
-        doc.selected.set(doc.getElementById("apples"))
+        doc.selection.set(doc.getElementById("apples"))
         self.assertEqual(doc.selection["apples"], doc)
         self.assertEqual(doc.selection.first(), doc)
 
@@ -105,7 +105,7 @@ class BasicSvgTest(TestCase):
     def test_selected_bbox(self):
         """Can we get a bounding box from the selected items"""
         doc = svg_file(self.data_file("svg", "multilayered-test.svg"))
-        doc.selected.set("path3904", "path3902")
+        doc.selection.set("path3904", "path3902")
         from inkex.transforms import BoundingBox
 
         x, y, w, h = 199.544, 156.412, 377.489, 199.972  # from inkscape --query-all

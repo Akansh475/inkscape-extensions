@@ -122,7 +122,7 @@ class ImageAttributes(inkex.EffectExtension):
     def method_tab_basic(self):
         """Render all bitmap images like in older Inskcape versions"""
         self.change_in_document(
-            self.svg.selected,
+            self.svg.selection,
             {
                 "preserveAspectRatio": (
                     "none" if self.options.fix_scaling else "unset"
@@ -139,13 +139,13 @@ class ImageAttributes(inkex.EffectExtension):
         if self.options.aspect_clip != "unset":
             attr_val.append(self.options.aspect_clip)
         self.options.aspect_ratio_scope(
-            self.svg.selected, {"preserveAspectRatio": " ".join(attr_val)}
+            self.svg.selection, {"preserveAspectRatio": " ".join(attr_val)}
         )
 
     def method_tab_image_rendering(self):
         """Image Rendering Quality"""
         self.options.image_rendering_scope(
-            self.svg.selected, {"image-rendering": self.options.image_rendering}
+            self.svg.selection, {"image-rendering": self.options.image_rendering}
         )
 
 

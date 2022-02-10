@@ -35,7 +35,7 @@ class CreateGroup(WebSlicerMixin, inkex.EffectExtension):
         pars.add_argument("--bg-color", dest="bg_color")
 
     def effect(self):
-        if not self.svg.selected:
+        if not self.svg.selection:
             raise inkex.AbortExtension(
                 _(
                     'You must to select some "Slicer rectangles" '
@@ -44,7 +44,7 @@ class CreateGroup(WebSlicerMixin, inkex.EffectExtension):
             )
 
         base_elements = self.get_slicer_layer().descendants()
-        for key, node in self.svg.selected.id_dict().items():
+        for key, node in self.svg.selection.id_dict().items():
             if node not in base_elements:
                 raise inkex.AbortExtension(
                     _(f'The element "{key}" is not in the Web Slicer layer')
@@ -57,7 +57,7 @@ class CreateGroup(WebSlicerMixin, inkex.EffectExtension):
             ["html_id", "html_class", "width_unity", "height_unity", "bg_color"]
         )
 
-        for node in self.svg.selected.values():
+        for node in self.svg.selection.values():
             group.insert(1, node)
 
 

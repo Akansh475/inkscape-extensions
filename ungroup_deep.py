@@ -193,8 +193,8 @@ class UngroupDeep(inkex.EffectExtension):
                 q.pop()
 
     def effect(self):
-        if self.svg.selected:
-            for node in self.svg.selected.values():
+        if self.svg.selection:
+            for node in self.svg.selection.values():
                 self._deep_ungroup(node)
         else:
             for node in self.document.getroot():

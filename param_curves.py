@@ -186,7 +186,7 @@ class ParamCurves(inkex.EffectExtension):
         pars.add_argument("--tab", default="sampling")
 
     def effect(self):
-        for node in self.svg.selected:
+        for node in self.svg.selection:
             if isinstance(node, inkex.Rectangle):
                 # create new path with basic dimensions of selected rectangle
                 newpath = inkex.PathElement()

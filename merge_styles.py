@@ -42,7 +42,7 @@ class MergeStyles(inkex.EffectExtension):
         if not newclass:
             newclass = self.svg.get_unique_id("css")
 
-        elements = self.svg.selected.values()
+        elements = self.svg.selection.values()
         common = None
 
         for elem in elements:

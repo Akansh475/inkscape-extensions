@@ -106,6 +106,8 @@ def transform_dimensions(transform, width=None, height=None, inverse=False):
 
 
 class PixelSnap(inkex.EffectExtension):
+    """Snap objects to pixels"""
+
     def add_arguments(self, pars):
         """Add inx options"""
         pars.add_argument(
@@ -130,6 +132,13 @@ class PixelSnap(inkex.EffectExtension):
             type=float,
             default=0.5,
             help="Maximum slope to consider straight (%)",
+        )
+        pars.add_argument(
+            "-s",
+            "--snap_to",
+            default="tl",
+            choices=["tl", "bl"],
+            help="Origin of the coordinate system",
         )
 
     def vertical(self, pt1, pt2):
@@ -176,7 +185,7 @@ class PixelSnap(inkex.EffectExtension):
 
         stroke_width = 0
         if stroke and setval is None:
-            stroke_width = self.svg.unittouu(style("stroke-width").strip())
+            stroke_width = self.svg.to_dimensionless(style("stroke-width").strip())
 
         if setval:
             style["stroke-width"] = setval
@@ -419,7 +428,6 @@ class PixelSnap(inkex.EffectExtension):
 
         width, height = transform_dimensions(transform, width, height, inverse=True)
         x, y = transform_point(transform, [x, y], inverse=True)
-
         y += self.document_offset / transform.d
 
         # Position the elem at the newly calculate values
@@ -475,12 +483,12 @@ class PixelSnap(inkex.EffectExtension):
             self.snap_image(elem, parent_transform)
 
     def effect(self):
-        svg = self.document.getroot()
-
-        self.document_offset = (
-            self.svg.unittouu(svg.attrib["height"]) % 1
-        )  # although SVG units are absolute, the elements are positioned relative to the top of the page, rather than zero
-
+        if self.options.snap_to == "bl":
+            self.document_offset = (
+                self.svg.to_dimensionless(self.svg.get_viewbox()[3]) % 1
+            )
+        else:
+            self.document_offset = 0
         for id, elem in self.svg.selection.items():
             try:
                 self.pixel_snap(elem)

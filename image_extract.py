@@ -24,6 +24,7 @@ Extract embedded images.
 import os
 import inkex
 from inkex import Image
+from inkex.localization import inkex_gettext as _
 
 try:
     from base64 import decodebytes
@@ -86,11 +87,11 @@ class ExtractImage(inkex.EffectExtension):
             (mimetype, data) = data.split(";", 1)
             (base, data) = data.split(",", 1)
         except ValueError:
-            inkex.errormsg("Invalid image format found")
+            inkex.errormsg(_("Invalid image format found"))
             return
 
         if base != "base64":
-            inkex.errormsg("Can't decode encoding: {}".format(base))
+            inkex.errormsg(_("Can't decode encoding: {}").format(base))
             return
 
         file_ext = self.mime_to_ext(mimetype)
@@ -98,11 +99,11 @@ class ExtractImage(inkex.EffectExtension):
         pathwext = os.path.join(save_to, node.get("id") + file_ext)
         if os.path.isfile(pathwext):
             inkex.errormsg(
-                "Can't extract image, filename already used: {}".format(pathwext)
+                _("Can't extract image, filename already used: {}").format(pathwext)
             )
             return
 
-        self.msg("Image extracted to: {}".format(pathwext))
+        self.msg(_("Image extracted to: {}").format(pathwext))
 
         with open(pathwext, "wb") as fhl:
             fhl.write(decodebytes(data.encode("utf-8")))

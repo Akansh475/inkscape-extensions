@@ -31,6 +31,8 @@ import inkex
 from inkex import ClipPath, Rectangle
 from inkex.utils import math_eval
 
+from inkex.localization import inkex_gettext as _
+
 
 def drawfunction(
     xstart,
@@ -58,7 +60,10 @@ def drawfunction(
     # coords and scales based on the source rect
     if xstart == xend:
         inkex.errormsg(
-            "x-interval cannot be zero. Please modify 'Start X value' or 'End X value'"
+            _(
+                "x-interval cannot be zero. Please modify 'Start X value' "
+                "or 'End X value'"
+            )
         )
         return []
     scalex = width / (xend - xstart)
@@ -72,7 +77,10 @@ def drawfunction(
 
     if ytop == ybottom:
         inkex.errormsg(
-            "y-interval cannot be zero. Please modify 'Y value of rectangle's top' or 'Y value of rectangle's bottom'"
+            _(
+                "y-interval cannot be zero. Please modify 'Y value of rectangle's top' "
+                "or 'Y value of rectangle's bottom'"
+            )
         )
         return []
     scaley = height / (ytop - ybottom)

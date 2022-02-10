@@ -53,6 +53,7 @@ import tempfile
 
 import inkex
 from inkex.command import inkscape
+from inkex.localization import inkex_gettext as _
 
 
 class ExportSlices(inkex.EffectExtension):
@@ -94,7 +95,7 @@ class ExportSlices(inkex.EffectExtension):
         nodes = self.get_layer_nodes(self.options.layer)
         if nodes is None:
             raise inkex.AbortExtension(
-                "Slice: '{}' does not exist.".format(self.options.layer)
+                _("Slice: '{}' does not exist.").format(self.options.layer)
             )
 
         # set opacity to zero in slices
@@ -104,7 +105,7 @@ class ExportSlices(inkex.EffectExtension):
         # save file once now
         # if we have multiple slices we will make multiple calls
         # to inkscape
-        (_, tmp_svg) = tempfile.mkstemp(".svg")
+        (__, tmp_svg) = tempfile.mkstemp(".svg")
         with open(tmp_svg, "wb") as fout:
             fout.write(self.svg.tostring())
 
@@ -191,7 +192,7 @@ class ExportSlices(inkex.EffectExtension):
                 kwargs["export-width"] = str(width)
             return color, kwargs
         else:
-            inkex.errormsg("Export exists ({}) not overwriting".format(filename))
+            inkex.errormsg(_("Export exists ({}), not overwriting").format(filename))
             return color, {}
 
 

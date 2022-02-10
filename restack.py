@@ -26,6 +26,7 @@ import random
 import inkex
 from inkex.utils import KeyDict
 from inkex import SvgDocumentElement
+from inkex.localization import inkex_gettext as _
 
 # Old settings, supported because users click 'ok' without looking.
 XAN = KeyDict({"l": "left", "r": "right", "m": "center_x"})
@@ -53,7 +54,7 @@ class Restack(inkex.EffectExtension):
 
     def effect(self):
         if not self.svg.selection:
-            raise inkex.AbortExtension("There is no selection to restack.")
+            raise inkex.AbortExtension(_("There is no selection to restack."))
 
         # process selection to get list of objects to be arranged
         parentnode = None

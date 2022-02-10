@@ -37,6 +37,7 @@ import math
 import inkex
 from inkex.bezier import tpoint
 from inkex.paths import CubicSuperPath
+from inkex.localization import inkex_gettext as _
 
 import pathmodifier
 
@@ -112,7 +113,7 @@ class PathAlongPath(pathmodifier.PathModifier):
 
     def effect(self):
         if len(self.options.ids) < 2:
-            raise inkex.AbortExtension("This extension requires two selected paths.")
+            raise inkex.AbortExtension(_("This extension requires two selected paths."))
 
         self.options.wave = self.options.kind == "Ribbon"
         if self.options.copymode == "Single":
@@ -131,7 +132,7 @@ class PathAlongPath(pathmodifier.PathModifier):
         patterns, skels = self.get_patterns_and_skeletons(True, self.options.duplicate)
         bboxes = [pattern.bounding_box() for pattern in patterns.values()]
         if None in bboxes:  # for texts, we can't compute the bounding box
-            raise inkex.AbortExtension("Please convert texts to path first")
+            raise inkex.AbortExtension(_("Please convert texts to path first"))
         bbox = sum(bboxes, None)
 
         if self.options.vertical:
@@ -142,8 +143,10 @@ class PathAlongPath(pathmodifier.PathModifier):
         delta_x = width + self.options.space
         if delta_x < 0.01:
             raise inkex.AbortExtension(
-                "The total length of the pattern is too small\n"
-                "Please choose a larger object or set 'Space between copies' > 0"
+                _(
+                    "The total length of the pattern is too small\n"
+                    "Please choose a larger object or set 'Space between copies' > 0"
+                )
             )
         for pattern in patterns.values():
             if isinstance(pattern, inkex.PathElement):
@@ -191,7 +194,10 @@ class PathAlongPath(pathmodifier.PathModifier):
                 if self.options.stretch:
                     if not bbox.width:
                         raise inkex.AbortExtension(
-                            "The 'stretch' option requires that the pattern must have non-zero width :\nPlease edit the pattern width."
+                            _(
+                                "The 'stretch' option requires that the pattern must "
+                                "have non-zero width :\nPlease edit the pattern width."
+                            )
                         )
                     for sub in path:
                         self.stretch(sub, length / bbox.width, 1, skelcomp[0])

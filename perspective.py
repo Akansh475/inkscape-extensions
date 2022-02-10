@@ -41,8 +41,8 @@ class Perspective(inkex.EffectExtension):
         if np is None:
             raise inkex.AbortExtension(
                 _(
-                    "Failed to import the numpy or numpy.linalg modules."
-                    " These modules are required by this extension. Please install them."
+                    "Failed to import the numpy or numpy.linalg modules. "
+                    "These modules are required by this extension. Please install them."
                     "  On a Debian-like system this can be done with the command, "
                     "sudo apt-get install python-numpy."
                 )
@@ -63,7 +63,8 @@ class Perspective(inkex.EffectExtension):
                 if len(path) < 1 or len(path[0]) < 4:
                     raise inkex.AbortExtension(
                         _(
-                            "This extension requires that the second path be four nodes long."
+                            "This extension requires that the second path be four "
+                            "nodes long."
                         )
                     )
 
@@ -101,8 +102,8 @@ class Perspective(inkex.EffectExtension):
         else:
             raise inkex.AbortExtension(
                 _(
-                    "The first selected object is neither a path nor a group.\nTry using"
-                    " the procedure Path->Object to Path."
+                    "The first selected object is neither a path nor a group.\nTry "
+                    "using the procedure Path->Object to Path."
                 )
             )
 

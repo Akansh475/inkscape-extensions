@@ -21,6 +21,7 @@ Some basic common code shared between EAN and UCP generators.
 """
 
 from .Base import Barcode, TEXT_POS_TOP
+from inkex.localization import inkex_gettext as _
 
 try:
     from typing import Optional, List, Dict
@@ -138,7 +139,7 @@ class EanBarcode(Barcode):
         code = code.strip(">")
 
         if not code.isdigit():
-            return self.error(code, "Not a Number, must be digits 0-9 only")
+            return self.error(code, _("Not a Number, must be digits 0-9 only"))
         lengths = self.get_lengths() + self.checks
 
         # Allow extra barcodes after the first one
@@ -158,7 +159,7 @@ class EanBarcode(Barcode):
         if len(code) not in lengths:
             return self.error(
                 code,
-                "Wrong size {:d}, must be {} digits".format(
+                _("Wrong size {:d}, must be {} digits").format(
                     len(code), ", ".join([str(length) for length in lengths])
                 ),
             )
@@ -167,7 +168,7 @@ class EanBarcode(Barcode):
             if len(code) not in self.checks:
                 code = self.append_checksum(code)
             elif not self.verify_checksum(code):
-                return self.error(code, "Checksum failed, omit for new sum")
+                return self.error(code, _("Checksum failed, omit for new sum"))
         return self._encode(EanBarcode.intarray(code), guide=guide)
 
     def _encode(self, num, guide=False):

@@ -36,6 +36,7 @@ import sys
 
 import inkex
 from inkex import TextElement
+from inkex.localization import inkex_gettext as _
 
 if sys.version_info[0] > 2:
 
@@ -385,7 +386,7 @@ class Calendar(inkex.EffectExtension):
                 self.options.month_names[m - 1], self.options.input_encode
             )
         except:
-            raise ValueError("You must select a correct system encoding.")
+            raise ValueError(_("You must select a correct system encoding."))
 
         week_group = g.add(inkex.Group())
         week_x = 0
@@ -409,7 +410,7 @@ class Calendar(inkex.EffectExtension):
                     wday, self.options.input_encode
                 )
             except:
-                raise ValueError("You must select a correct system encoding.")
+                raise ValueError(_("You must select a correct system encoding."))
 
             week_x += 1
 

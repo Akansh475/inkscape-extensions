@@ -21,6 +21,7 @@ Python barcode renderer for UPCE barcodes. Designed for use with Inkscape.
 """
 
 from .BaseEan import EanBarcode
+from inkex.localization import inkex_gettext as _
 
 # This is almost exactly the same as the standard FAMILIES
 # But flipped around and with the first 111000 instead of 000000.
@@ -66,7 +67,7 @@ class Upce(EanBarcode):
         # All UPC-E Numbers use number system 0
         if number[0] != "0" or len(number) != 11:
             # If not then the code is invalid
-            raise ValueError("Invalid UPC Number")
+            raise ValueError(_("Invalid UPC Number"))
 
         # Most of the conversions deal
         # with the specific code parts
@@ -92,7 +93,7 @@ class Upce(EanBarcode):
             # the 0-4 used above.
             return maker + product[4]
         # Invalid UPC-A Numbe
-        raise ValueError("Invalid UPC Number")
+        raise ValueError(_("Invalid UPC Number"))
 
     @staticmethod
     def convert_e2a(number):

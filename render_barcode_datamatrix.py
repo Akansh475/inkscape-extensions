@@ -46,6 +46,7 @@ The basis processing flow is;
 
 import inkex
 from inkex import Rectangle
+from inkex.localization import inkex_gettext as _
 
 INVALID_BIT = 2
 
@@ -526,7 +527,7 @@ class DataMatrix(inkex.GenerateExtension):
         try:
             return SYMBOLS[value]
         except KeyError:
-            raise inkex.AbortExtension("Invalid symbol size.")
+            raise inkex.AbortExtension(_("Invalid symbol size."))
 
     def generate(self):
         size = str(self.options.size)
@@ -534,7 +535,7 @@ class DataMatrix(inkex.GenerateExtension):
         attribs = {"style": str(style), "height": size, "width": size}
 
         if not self.options.text:
-            raise inkex.AbortExtension("Please enter an input string.")
+            raise inkex.AbortExtension(_("Please enter an input string."))
 
         # create a 2d list corresponding to the 1's and 0s of the DataMatrix
         encoded = self.encode(self.options.text, *self.options.symbol)
@@ -580,7 +581,7 @@ class DataMatrix(inkex.GenerateExtension):
                     if line[y][x] == 1:  # A binary 1 is a filled square
                         yield (x * size + i * spacing, y * size)
                     elif line[y][x] == INVALID_BIT:  # we have an invalid bit value
-                        inkex.errormsg("Invalid bit value, {}!".format(line[y][x]))
+                        inkex.errormsg(_("Invalid bit value, {}!").format(line[y][x]))
 
 
 if __name__ == "__main__":

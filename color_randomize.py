@@ -3,6 +3,7 @@
 
 from random import randrange, uniform, seed
 import inkex
+from inkex.localization import inkex_gettext as _
 
 
 def _rand(
@@ -76,7 +77,7 @@ class Randomize(inkex.ColorExtension):
         try:
             opacity = float(opacity)
         except ValueError:
-            self.msg(f"Ignoring unusual opacity value: {opacity}")
+            self.msg(_("Ignoring unusual opacity value: {}").format(opacity))
             return opacity
         orange = self.options.opacity_range
         if orange > 0:

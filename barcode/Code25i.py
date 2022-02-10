@@ -21,6 +21,7 @@ Generate barcodes for Code25-interleaved 2 of 5, for Inkscape.
 """
 
 from .Base import Barcode
+from inkex.localization import inkex_gettext as _
 
 # 1 means thick, 0 means thin
 ENCODE = {
@@ -43,7 +44,7 @@ class Code25i(Barcode):
     # Start and stop code are already encoded into white (0) and black(1) bars
     def encode(self, text):
         if not text.isdigit():
-            return self.error(text, "CODE25 can only encode numbers.")
+            return self.error(text, _("CODE25 can only encode numbers."))
         number = text
 
         # Number of figures to encode must be even,

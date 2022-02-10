@@ -52,6 +52,7 @@ sphere were opaque.
 from math import acos, atan, cos, pi, sin, tan
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 # add a tiny value to the ellipse radii, so that if we get a
 # zero radius, the ellipse still shows up as a line
@@ -84,7 +85,7 @@ class WireframeSphere(inkex.GenerateExtension):
 
         # PARAMETER PROCESSING
         if opt.NUM_LONG % 2 != 0:  # lines of longitude are odd : abort
-            inkex.errormsg("Please enter an even number of lines of longitude.")
+            inkex.errormsg(_("Please enter an even number of lines of longitude."))
             return
 
         radius = self.svg.unittouu(str(opt.RADIUS) + "px")

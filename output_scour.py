@@ -5,15 +5,18 @@ Run the scour module on the svg output.
 
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 try:
     from packaging.version import Version
 except ImportError:
     raise inkex.DependencyError(
-        """Failed to import module 'packaging'.
+        _(
+            """Failed to import module 'packaging'.
 Please make sure it is installed (e.g. using 'pip install packaging'
 or 'sudo apt-get install python3-packaging') and try again.
 """
+        )
     )
 
 try:
@@ -21,10 +24,12 @@ try:
     from scour.scour import scourString
 except ImportError:
     raise inkex.DependencyError(
-        """Failed to import module 'scour'.
+        _(
+            """Failed to import module 'scour'.
 Please make sure it is installed (e.g. using 'pip install scour'
   or 'sudo apt-get install python3-scour') and try again.
 """
+        )
     )
 
 

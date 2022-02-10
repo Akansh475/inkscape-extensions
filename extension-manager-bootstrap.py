@@ -29,6 +29,7 @@ import inkex
 from inkex.utils import get_user_directory
 from inkex.base import InkscapeExtension
 from inkex.command import CommandNotFound, ProgramRunError, call
+from inkex.localization import inkex_gettext as _
 
 TARGET_DIR = get_user_directory()
 FALLBACK_DIR = os.path.join(TARGET_DIR or "./", "org.inkscape.inkman")
@@ -61,7 +62,7 @@ class Bootstrap(InkscapeExtension):
         try:
             from manage_extensions import run as run_existing
         except (ImportError, ModuleNotFoundError):
-            return self.msg("Extension manager installed, please re-run.")
+            return self.msg(_("Extension manager installed, please re-run."))
         run_existing(sys.argv)
 
     def effect(self):
@@ -72,7 +73,8 @@ class Bootstrap(InkscapeExtension):
             fallback = True
         except ProgramRunError as err:
             raise inkex.AbortExtension(
-                "There has been a problem creating the python environment:\n" + str(err)
+                _("There has been a problem creating the python environment:\n")
+                + str(err)
             )
 
         if fallback:
@@ -80,9 +82,12 @@ class Bootstrap(InkscapeExtension):
             if self.install_fallback():
                 return
             raise inkex.AbortExtension(
-                "You must have the python-virtualenv package installed. This should have"
-                " been included with Inkscape, but in some special cases it might not"
-                " be. Please install this software externally and try again."
+                _(
+                    "You must have the python-virtualenv package installed. This "
+                    "should have been included with Inkscape, but in some special "
+                    "cases it might not be. Please install this software externally "
+                    "and try again."
+                )
             )
 
         try:
@@ -91,11 +96,11 @@ class Bootstrap(InkscapeExtension):
             )
         except CommandNotFound:
             raise inkex.AbortExtension(
-                "Can't find pip program after environment initialisation!"
+                _("Can't find pip program after environment initialisation!")
             )
         except ProgramRunError as err:
             raise inkex.AbortExtension(
-                "Error installing extension manager package:\n" + str(err)
+                _("Error installing extension manager package:\n") + str(err)
             )
 
     def install_fallback(self):
@@ -121,7 +126,9 @@ class Bootstrap(InkscapeExtension):
                         )
         except NewConnectionError:
             self.msg(
-                "Could not connect to the internet, please check connection and try again!"
+                _(
+                    "Could not connect to the internet, please check connection and try again!"
+                )
             )
         finally:
             session.close()

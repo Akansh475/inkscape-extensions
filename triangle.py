@@ -37,6 +37,7 @@ import sys
 from math import acos, asin, cos, pi, sin, sqrt
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 X, Y = range(2)
 
@@ -122,7 +123,7 @@ def draw_tri_from_3_sides(
 
         draw_SVG_tri(a, b, c, offset, width, "Triangle", parent)
     else:
-        inkex.errormsg("Invalid Triangle Specifications.")
+        inkex.errormsg(_("Invalid Triangle Specifications."))
 
 
 class Triangle(inkex.EffectExtension):

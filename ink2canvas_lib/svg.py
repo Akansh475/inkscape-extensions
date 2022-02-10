@@ -24,6 +24,7 @@ from __future__ import unicode_literals
 import math
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 
 # pylint: disable=missing-function-docstring, missing-class-docstring
@@ -310,7 +311,7 @@ class Text(AbstractShape):
     def draw(self):
         for tspan in self.node:
             if isinstance(tspan, inkex.TextPath):
-                raise ValueError("TextPath elements are not supported")
+                raise ValueError(_("TextPath elements are not supported"))
         style = self.get_style()
         if self.has_transform():
             trans_matrix = self.get_transform()

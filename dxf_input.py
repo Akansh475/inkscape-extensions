@@ -33,6 +33,7 @@ from urllib.parse import quote
 from lxml import etree
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 global defs
 global block  # 2021.6
@@ -1252,7 +1253,10 @@ class DxfInput(inkex.InputExtension):
 
         if line[0] == "AutoCAD Binary DXF":
             inkex.errormsg(
-                "Inkscape cannot read binary DXF files. \nPlease convert to ASCII format first."
+                _(
+                    "Inkscape cannot read binary DXF files. \n"
+                    "Please convert to ASCII format first."
+                )
                 + str(len(line[0]))
                 + " "
                 + str(len(line[1]))

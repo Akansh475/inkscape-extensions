@@ -29,6 +29,7 @@ from itertools import product
 
 import inkex
 from inkex import Group, Rectangle, Use, PathElement
+from inkex.localization import inkex_gettext as _
 
 
 class QRLengthError(Exception):
@@ -1118,9 +1119,9 @@ class QrCode(inkex.GenerateExtension):
         opt = self.options
 
         if not opt.text:
-            raise inkex.AbortExtension("Please enter an input text")
+            raise inkex.AbortExtension(_("Please enter an input text"))
         elif opt.drawtype == "symbol" and opt.symbolid == "":
-            raise inkex.AbortExtension("Please enter symbol id")
+            raise inkex.AbortExtension(_("Please enter symbol id"))
 
         # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
         text_str = str(opt.text)
@@ -1260,13 +1261,15 @@ class QrCode(inkex.GenerateExtension):
         if len(self.svg.selection) > 0:
             self.options.symbolid = self.svg.selection.first().get_id()
         else:
-            raise inkex.AbortExtension("Please select an element to clone")
+            raise inkex.AbortExtension(_("Please select an element to clone"))
         return self.render_symbol()
 
     def render_symbol(self):
         symbol = self.svg.getElementById(self.options.symbolid)
         if symbol is None:
-            raise inkex.AbortExtension(f"Can't find symbol {self.options.symbolid}")
+            raise inkex.AbortExtension(
+                _("Can't find symbol {}").format(self.options.symbolid)
+            )
         bbox = symbol.path.bounding_box()
         transform = inkex.Transform(
             scale=(

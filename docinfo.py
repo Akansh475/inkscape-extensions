@@ -22,35 +22,39 @@
 
 import inkex
 
+from inkex.localization import inkex_gettext as _
+
 
 class DocInfo(inkex.EffectExtension):
     """Show document information"""
 
     def effect(self):
         namedview = self.svg.namedview
-        self.msg(":::SVG document related info:::")
+        self.msg(_(":::SVG document related info:::"))
         self.msg(
-            "version: " + self.svg.get("inkscape:version", "New Document (unsaved)")
+            _("version: {}").format(
+                self.svg.get("inkscape:version", _("New Document (unsaved)"))
+            )
         )
-        self.msg("width: {}".format(self.svg.viewport_width))
-        self.msg("height: {}".format(self.svg.viewport_height))
-        self.msg("viewbox: {}".format(str(self.svg.get_viewbox())))
+        self.msg(_("width: {}").format(self.svg.viewport_width))
+        self.msg(_("height: {}").format(self.svg.viewport_height))
+        self.msg(_("viewbox: {}").format(str(self.svg.get_viewbox())))
         self.msg(
-            "document-units: {}".format(
+            _("document-units: {}").format(
                 namedview.get("inkscape:document-units", "None")
             )
         )
-        self.msg("units: " + namedview.get("units", "None"))
-        self.msg("Document has " + str(len(namedview.get_guides())) + " guides")
+        self.msg(_("units: ") + namedview.get("units", "None"))
+        self.msg(_("Document has {} guides").format(len(namedview.get_guides())))
         for i, grid in enumerate(namedview.findall("inkscape:grid")):
             self.msg(
-                "Grid number {}: Units: {}".format(i + 1, grid.get("units", "None"))
+                _("Grid number {}: Units: {}").format(i + 1, grid.get("units", "None"))
             )
         if len(namedview.get_pages()) > 1:
-            self.msg("Document has " + str(len(namedview.get_pages())) + " pages")
+            self.msg(_("Document has {} pages").format(len(namedview.get_pages())))
             for i, page in enumerate(namedview.get_pages()):
                 self.msg(
-                    "Page number {}: x: {} y: {} width: {} height: {}".format(
+                    _("Page number {}: x: {} y: {} width: {} height: {}").format(
                         i + 1,
                         page.get("x"),
                         page.get("y"),
@@ -59,7 +63,7 @@ class DocInfo(inkex.EffectExtension):
                     )
                 )
         else:
-            self.msg("This is a single page document.")
+            self.msg(_("This is a single page document."))
 
 
 if __name__ == "__main__":

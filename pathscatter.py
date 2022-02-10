@@ -103,7 +103,7 @@ class PathScatter(pathmodifier.Diffeo):
             type=str,
             dest="copymode",
             default="move",
-            help="""How the pattern is duplicated. Default: 'move', 
+            help="""How the pattern is duplicated. Default: 'move',
                                      Options: 'clone', 'duplicate', 'move'""",
         )
         self.arg_parser.add_argument(
@@ -167,10 +167,12 @@ class PathScatter(pathmodifier.Diffeo):
         dx = width + self.options.space
         if dx < 0.01:
             if isinstance(original_pattern_node, inkex.TextElement):
-                raise inkex.AbortExtension("Please convert texts to path first")
+                raise inkex.AbortExtension(_("Please convert texts to path first"))
             raise inkex.AbortExtension(
-                "The total length of the pattern is too small\n"
-                "Please choose a larger object or set 'Space between copies' > 0"
+                _(
+                    "The total length of the pattern is too small\n"
+                    "Please choose a larger object or set 'Space between copies' > 0"
+                )
             )
 
         # check if group and expand it

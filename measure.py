@@ -32,6 +32,7 @@ import inkex
 
 from inkex import TextElement, TextPath, Tspan
 from inkex.bezier import csparea, cspcofm, csplength
+from inkex.localization import inkex_gettext as _
 
 
 class MeasureLength(inkex.EffectExtension):
@@ -104,7 +105,7 @@ class MeasureLength(inkex.EffectExtension):
         # loop over all selected paths
         filtered = self.svg.selection.filter(inkex.PathElement)
         if not filtered:
-            raise inkex.AbortExtension("Please select at least one path object.")
+            raise inkex.AbortExtension(_("Please select at least one path object."))
         for node in filtered:
             csp = node.path.transform(node.composed_transform()).to_superpath()
             inverse_parent_transform = -node.getparent().composed_transform()

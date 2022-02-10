@@ -28,6 +28,7 @@ import struct
 
 import inkex
 from inkex import AbortExtension, errormsg, Group, Polyline
+from inkex.localization import inkex_gettext as _
 
 inkex.NSS["dm"] = "http://github.com/nikitakit/DM2SVG"
 
@@ -59,7 +60,7 @@ class DhwInput(inkex.InputExtension):
         header = list(struct.unpack("<32sBHHBxx", stream.read(40)))
         doc = header.pop(0).decode()
         if doc != "ACECAD_DIGIMEMO_HANDWRITING_____":
-            raise AbortExtension("Could not load file, not a ACECAD DHW file!")
+            raise AbortExtension(_("Could not load file, not a ACECAD DHW file!"))
 
         height = int(header[2])
         doc = self.get_template(**dict(zip(("v", "w", "h", "p"), header)))
@@ -74,7 +75,7 @@ class DhwInput(inkex.InputExtension):
                 break
 
             if ord(tag) <= 128:
-                errormsg("Unsupported tag: {}\n".format(tag))
+                errormsg(_("Unsupported tag: {}\n").format(tag))
                 continue
 
             if tag == b"\x90":

@@ -22,6 +22,7 @@ Merges styles into class based styles and removes.
 """
 
 import inkex
+from inkex.localization import inkex_gettext as _
 
 
 class MergeStyles(inkex.EffectExtension):
@@ -53,7 +54,9 @@ class MergeStyles(inkex.EffectExtension):
                 common = style
 
         if not common:
-            return inkex.errormsg("There are no common styles between these elements.")
+            return inkex.errormsg(
+                _("There are no common styles between these elements.")
+            )
 
         self.svg.stylesheet.add("." + newclass, inkex.Style(sorted(common)))
 

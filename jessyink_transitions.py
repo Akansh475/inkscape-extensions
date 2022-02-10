@@ -46,7 +46,7 @@ class Transitions(JessyInkMixin, inkex.EffectExtension):
         )
         if node is None:
             raise inkex.AbortExtension(
-                _(f"Layer '{self.options.layerName}' not found.")
+                _("Layer '{}' not found.").format(self.options.layerName)
             )
 
         if self.options.effectIn == "default":

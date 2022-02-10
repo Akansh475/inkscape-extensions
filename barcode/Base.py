@@ -24,6 +24,7 @@ import itertools
 import sys
 
 from inkex import Group, TextElement, Rectangle
+from inkex.localization import inkex_gettext as _
 
 (TEXT_POS_BOTTOM, TEXT_POS_TOP) = range(2)
 (WHITE_BAR, BLACK_BAR, TALL_BAR) = range(3)
@@ -45,7 +46,7 @@ class Barcode(object):
     def error(self, text, msg):
         """Cause an error to be reported"""
         sys.stderr.write(
-            "Error encoding '{}' as {} barcode: {}\n".format(text, self.name, msg)
+            _("Error encoding '{}' as {} barcode: {}\n").format(text, self.name, msg)
         )
         return "ERROR"
 
@@ -73,7 +74,7 @@ class Barcode(object):
             self.known_ids = list(self.document.xpath("//@id"))
 
         if not self.text:
-            raise ValueError("No string specified for barcode.")
+            raise ValueError(_("No string specified for barcode."))
 
     def get_id(self, name="element"):
         """Get the next useful id (and claim it)"""

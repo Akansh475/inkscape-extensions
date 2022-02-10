@@ -46,6 +46,7 @@ import zipfile
 
 import inkex
 from inkex import TextElement, Tspan, FlowRoot, FlowPara, FlowSpan
+from inkex.localization import inkex_gettext as _
 
 try:  # PY2
     from urllib import url2pathname
@@ -93,7 +94,7 @@ class CompressedMedia(inkex.OutputExtension):
                         os.path.join(self.tmp_dir, absref), image_path.encode(ENCODING)
                     )
                 else:
-                    inkex.errormsg("Could not locate file: %s" % absref)
+                    inkex.errormsg(_("Could not locate file: %s") % absref)
 
                 node.set("xlink:href", image_path)
 
@@ -155,12 +156,14 @@ class CompressedMedia(inkex.OutputExtension):
         dst_file = os.path.join(self.tmp_dir, filename)
         with open(dst_file, "w") as stream:
             if len(findings) == 0:
-                stream.write("Didn't find any fonts in this document/selection.")
+                stream.write(_("Didn't find any fonts in this document/selection."))
             else:
                 if len(findings) == 1:
-                    stream.write("Found the following font only: %s" % findings[0])
+                    stream.write(_("Found the following font only: %s") % findings[0])
                 else:
-                    stream.write("Found the following fonts:\n%s" % "\n".join(findings))
+                    stream.write(
+                        _("Found the following fonts:\n%s") % "\n".join(findings)
+                    )
         z.write(dst_file, filename)
 
     def save(self, stream):

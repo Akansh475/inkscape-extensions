@@ -26,6 +26,7 @@ import inkex
 from inkex import AbortExtension
 from inkex.base import TempDirMixin
 from inkex.command import take_snapshot, call
+from inkex.localization import inkex_gettext as _
 
 
 SCRIBUS_EXE = "scribus"
@@ -89,7 +90,7 @@ class Scribus(TempDirMixin, inkex.OutputExtension):
         colorMarks = self.options.colorMarks
         if (bleedMarks or colorMarks) and margin < 7:
             raise AbortExtension(
-                "You need at least 7mm bleed to show cutting marks or color marks"
+                _("You need at least 7mm bleed to show cutting marks or color marks")
             )
         if bleedMarks or colorMarks:
             margin = (
@@ -148,14 +149,16 @@ exportPDF()"""
         version_match = VERSION_REGEX.search(scribus_version)
         if version_match is None:
             raise AbortExtension(
-                f"Could not detect Scribus version ({scribus_version})"
+                _("Could not detect Scribus version ()").format(scribus_version)
             )
         major = int(version_match.group(1))
         minor = int(version_match.group(2))
         point = int(version_match.group(3))
         if (major < 1) or (major == 1 and minor < 5):
             raise AbortExtension(
-                f"Found Scribus {version_match.group(0)}. This extension requires Scribus 1.5.x."
+                _("Found Scribus {}. This extension requires Scribus 1.5.x.").format(
+                    version_match.group(0)
+                )
             )
 
         input_file = self.options.input_file
@@ -164,11 +167,14 @@ exportPDF()"""
         profiles = self.svg.defs.findall("svg:color-profile")
         if len(profiles) == 0:
             raise AbortExtension(
-                "Please select a color profile in the document settings."
+                __("Please select a color profile in the document settings.")
             )
         elif len(profiles) > 1:
             raise AbortExtension(
-                "Please only link a single color profile in the document settings. No output generated."
+                _(
+                    "Please only link a single color profile in the document settings. "
+                    "No output generated."
+                )
             )
         iccPath = profiles[0].get("xlink:href")
 

@@ -41,6 +41,7 @@ import locale
 
 import inkex
 from inkex.command import inkscape
+from inkex.localization import inkex_gettext as _
 
 
 class Guillotine(inkex.EffectExtension):
@@ -125,7 +126,7 @@ class Guillotine(inkex.EffectExtension):
 
         if not self.options.ignore:
             if self.options.image == "" or self.options.image is None:
-                raise inkex.AbortExtension("Please enter an image name")
+                raise inkex.AbortExtension(_("Please enter an image name"))
             return self.options.directory, self.options.image
         else:
             """
@@ -139,9 +140,11 @@ class Guillotine(inkex.EffectExtension):
                 export_file = self.svg.get("inkscape:export-filename")
             except KeyError:
                 raise inkex.AbortExtension(
-                    "To use the export hints option, you "
-                    "need to have previously exported the document. "
-                    "Otherwise no export hints exist!"
+                    _(
+                        "To use the export hints option, you "
+                        "need to have previously exported the document. "
+                        "Otherwise no export hints exist!"
+                    )
                 )
             dirname, filename = os.path.split(export_file)
             filename = filename.rsplit(".", 1)[0]  # Without extension
@@ -185,7 +188,7 @@ class Guillotine(inkex.EffectExtension):
             self.export_slice(slico, fname)
 
         self.debug(
-            "The sliced bitmaps have been saved as:" + "\n\n" + "\n".join(output_files)
+            _("The sliced bitmaps have been saved as:\n\n") + "\n".join(output_files)
         )
 
     def effect(self):

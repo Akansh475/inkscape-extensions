@@ -24,6 +24,7 @@ It is a modification of the file addnodes.py
 """
 import inkex
 from inkex import bezier, CubicSuperPath, Group, PathElement
+from inkex.localization import inkex_gettext as _
 
 
 class Dashit(inkex.EffectExtension):

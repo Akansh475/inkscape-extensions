@@ -26,6 +26,7 @@ It can also replace all fonts indiscriminately, and list all fonts
 currently being used.
 """
 import inkex
+from inkex.localization import inkex_gettext as _
 
 text_tags = [
     "{http://www.w3.org/2000/svg}tspan",
@@ -113,7 +114,8 @@ def report_replacements(num):
     if num == 0:
         inkex.errormsg(
             _(
-                "Couldn't find anything using that font, please ensure the spelling and spacing is correct."
+                "Couldn't find anything using that font, please ensure the spelling "
+                "and spacing is correct."
             )
         )
 
@@ -210,7 +212,7 @@ class ReplaceFont(inkex.EffectExtension):
 
     def effect(self):
         if not self.options.action:
-            return inkex.errormsg("Nothing to do, no action specified.")
+            return inkex.errormsg(_("Nothing to do, no action specified."))
         action = self.options.action.strip(
             '"'
         )  # TODO Is this a bug? (Extra " characters)

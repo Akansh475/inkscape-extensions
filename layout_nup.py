@@ -22,6 +22,7 @@ from __future__ import absolute_import, unicode_literals
 import inkex
 from inkex import Use, Rectangle
 from inkex.base import SvgOutputMixin
+from inkex.localization import inkex_gettext as _
 
 
 class Nup(inkex.OutputExtension, SvgOutputMixin):
@@ -159,7 +160,7 @@ class Nup(inkex.OutputExtension, SvgOutputMixin):
         #    num = tuple(map(lambda ev: eval(str(ev)), num))
 
         if not pgMargin or not pgPadding:
-            return inkex.errormsg("No padding or margin available.")
+            return inkex.errormsg(_("No padding or margin available."))
 
         page_edge = list(map(sum, zip(pgMargin, pgPadding)))
 

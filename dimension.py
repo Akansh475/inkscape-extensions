@@ -35,6 +35,7 @@ extensions library, and marker data from markers.svg.
 
 import inkex
 from inkex import Group, Marker, PathElement
+from inkex.localization import inkex_gettext as _
 
 import pathmodifier
 
@@ -103,7 +104,7 @@ class Dimension(pathmodifier.PathModifier):
         self.options.yoffset *= scale
 
         if not self.svg.selection:
-            raise inkex.AbortExtension("Please select an object")
+            raise inkex.AbortExtension(_("Please select an object"))
         if self.options.type == "geometric":
             bbox = self.svg.selection.bounding_box()
         else:

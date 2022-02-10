@@ -49,6 +49,7 @@ from inkex import (
     Circle,
     Ellipse,
 )
+from inkex.localization import inkex_gettext as _
 
 
 def get_matrix(u, i, j):
@@ -208,7 +209,11 @@ class DxfOutlines(inkex.OutputExtension):
             from numpy.linalg import solve
         except ImportError:
             inkex.errormsg(
-                "Failed to import the numpy or numpy.linalg modules. These modules are required by the ROBO option. Please install them and try again."
+                _(
+                    "Failed to import the numpy or numpy.linalg modules. "
+                    "These modules are required by the ROBO option."
+                    "Please install them and try again."
+                )
             )
             return
 
@@ -353,7 +358,10 @@ class DxfOutlines(inkex.OutputExtension):
             and not self.options.layer_name
         ):
             return inkex.errormsg(
-                "Error: Field 'Layer match name' must be filled when using 'By name match' option"
+                _(
+                    "Error: Field 'Layer match name' must be filled when using "
+                    "'By name match' option"
+                )
             )
 
         # Split user layer data into a list: "layerA,layerb,LAYERC" becomes ["layera", "layerb", "layerc"]
@@ -420,7 +428,7 @@ class DxfOutlines(inkex.OutputExtension):
         ):
             for layer in self.options.layer_name:
                 if layer not in self.layernames:
-                    inkex.errormsg("Warning: Layer '%s' not found!" % layer)
+                    inkex.errormsg(_("Warning: Layer '{}' not found!").format(layer))
 
 
 if __name__ == "__main__":

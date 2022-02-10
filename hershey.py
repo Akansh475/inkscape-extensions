@@ -56,6 +56,7 @@ from copy import deepcopy
 
 import inkex
 from inkex import Transform, Style, units, AbortExtension
+from inkex.localization import inkex_gettext as _
 
 from inkex import (
     load_svg,
@@ -381,7 +382,7 @@ Evil Mad Scientist Laboratories
 
         if doc_width is None or doc_height is None:
             raise AbortExtension(
-                "Width or height attribute missing on toplevel <svg> tag"
+                _("Width or height attribute missing on toplevel <svg> tag")
             )
 
         d_width = float(doc_width)
@@ -727,7 +728,7 @@ Evil Mad Scientist Laboratories
         except IOError:
             self.font_dict[fontname] = None
         except:
-            inkex.errormsg("Error parsing SVG font at " + str(the_path))
+            inkex.errormsg(_("Error parsing SVG font at {}").format(str(the_path)))
             self.font_dict[fontname] = None
 
     def font_table(self):
@@ -800,7 +801,7 @@ Evil Mad Scientist Laboratories
         fontname = self.font_load_wrapper("not_a_font_name")  # force load of default
 
         if self.font_load_fail:
-            inkex.errormsg("Font not found; Unable to generate glyph table.")
+            inkex.errormsg(_("Font not found; Unable to generate glyph table."))
             return
 
         # Embed in group to make manipulation easier:
@@ -1379,7 +1380,7 @@ Evil Mad Scientist Laboratories
                     ref_group = anode_list.add(Group())  # Add a subgroup
                 except AttributeError:
                     inkex.errormsg(
-                        "Unable to process text. Consider unlinking cloned text."
+                        _("Unable to process text. Consider unlinking cloned text.")
                     )
                     continue
 
@@ -2010,14 +2011,16 @@ Evil Mad Scientist Laboratories
                     parent.remove(element_to_remove)
 
         if self.font_load_fail:
-            inkex.errormsg("Warning: unable to load SVG stroke fonts.")
+            inkex.errormsg(_("Warning: unable to load SVG stroke fonts."))
 
         if self.warn_unflow:
             inkex.errormsg(
-                "Warning: unable to convert text flowed into a frame.\n"
-                + "Please use Text > Unflow to convert it prior to use.\n"
-                + "If you are unable to identify the object in question, "
-                + "please contact technical support for help."
+                _(
+                    "Warning: unable to convert text flowed into a frame.\n"
+                    + "Please use Text > Unflow to convert it prior to use.\n"
+                    + "If you are unable to identify the object in question, "
+                    + "please contact technical support for help."
+                )
             )
 
 

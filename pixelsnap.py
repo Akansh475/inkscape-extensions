@@ -70,6 +70,7 @@ import sys
 
 import inkex
 from inkex import PathElement, Group, Image, Rectangle, ShapeElement, Transform
+from inkex.localization import inkex_gettext as _
 
 Precision = 5  # number of digits of precision for comparing float numbers
 
@@ -171,7 +172,7 @@ class PixelSnap(inkex.EffectExtension):
 
         if abs(abs(transform.a) - abs(transform.d)) > (10**-Precision):
             raise TransformError(
-                "Selection contains non-symetric scaling"
+                _("Selection contains non-symetric scaling")
             )  # *** wouldn't be hard to get around this by calculating vertical_offset & horizontal_offset separately, maybe 1 functions, or maybe returning a tuple
 
         stroke_width = transform_dimensions(transform, width=stroke_width)
@@ -302,7 +303,7 @@ class PixelSnap(inkex.EffectExtension):
         # if we've got any skew/rotation, get outta here
         if transform.c or transform.b:
             raise TransformError(
-                "TR: Selection contains transformations with skew/rotation"
+                _("TR: Selection contains transformations with skew/rotation")
             )
 
         trm = list(transform.to_hexad())
@@ -319,7 +320,7 @@ class PixelSnap(inkex.EffectExtension):
 
         if abs(abs(transform.a) - abs(transform.d)) > (10**-Precision):
             raise TransformError(
-                "Selection contains non-symetric scaling, can't snap stroke width"
+                _("Selection contains non-symetric scaling, can't snap stroke width")
             )
 
         if stroke_width:
@@ -337,7 +338,7 @@ class PixelSnap(inkex.EffectExtension):
 
         if transform.c or transform.b:  # if we've got any skew/rotation, get outta here
             raise TransformError(
-                "Path: Selection contains transformations with skew/rotation"
+                _("Path: Selection contains transformations with skew/rotation")
             )
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1
@@ -405,7 +406,7 @@ class PixelSnap(inkex.EffectExtension):
 
         if transform.c or transform.b:  # if we've got any skew/rotation, get outta here
             raise TransformError(
-                "Rect: Selection contains transformations with skew/rotation"
+                _("Rect: Selection contains transformations with skew/rotation")
             )
 
         offset = self.stroke_width_offset(elem, parent_transform) % 1

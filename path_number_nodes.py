@@ -21,6 +21,7 @@ import math
 
 import inkex
 from inkex import TextElement, Circle
+from inkex.localization import inkex_gettext as _
 
 
 class NumberNodes(inkex.EffectExtension):
@@ -42,7 +43,7 @@ class NumberNodes(inkex.EffectExtension):
     def effect(self):
         filtered = self.svg.selection.filter(inkex.PathElement)
         if not filtered:
-            raise inkex.AbortExtension("Please select at least one path object.")
+            raise inkex.AbortExtension(_("Please select at least one path object."))
         for node in filtered:
             self.add_dot(node)
 

@@ -23,6 +23,7 @@ Renderer for barcodes, SVG extension for Inkscape.
 For supported barcodes see Barcode module directory.
 """
 
+from inkex.localization import inkex_gettext as _
 
 # This lists all known Barcodes missing from this package
 # ===== UPC-Based Extensions ====== #
@@ -49,7 +50,7 @@ class NoBarcode:
 
     def encode(self, text):
         """Encode the text into a barcode pattern"""
-        raise ValueError("No barcode encoder: {}".format(self.msg))
+        raise ValueError(_("No barcode encoder: {}").format(self.msg))
 
     def generate(self):
         """Generate actual svg from the barcode pattern"""
@@ -59,7 +60,7 @@ class NoBarcode:
 def get_barcode(code, **kw):
     """Gets a barcode from a list of available barcode formats"""
     if not code:
-        return NoBarcode("No barcode format given.")
+        return NoBarcode(_("No barcode format given."))
 
     code = str(code).replace("-", "").strip()
     module = "barcode." + code
@@ -68,9 +69,9 @@ def get_barcode(code, **kw):
         return getattr(__import__(module, fromlist=lst), code)(kw)
     except ImportError as err:
         if code in str(err):
-            return NoBarcode("Invalid type of barcode: {}.{}".format(module, code))
+            return NoBarcode(_("Invalid type of barcode: {}.{}").format(module, code))
         raise
     except AttributeError:
         return NoBarcode(
-            "Barcode module is missing barcode class: {}.{}".format(module, code)
+            _("Barcode module is missing barcode class: {}.{}").format(module, code)
         )

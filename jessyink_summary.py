@@ -36,7 +36,7 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
         for node in self.svg.xpath("//svg:script[@id='JessyInk']"):
             version = node.get("jessyink:version")
             if version:
-                self.msg(_(f"JessyInk script version {version} installed."))
+                self.msg(_("JessyInk script version {} installed.".format(version)))
             else:
                 self.msg(_("JessyInk script installed."))
 
@@ -77,7 +77,13 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
             name = trans["name"]
             if name != "appear" and "length" in trans:
                 length = int(trans["length"] / 1000.0)
-                self.msg(_(f"{prefix}Transition {transition}: {name} ({length!s} s)"))
+                self.msg(
+                    _(
+                        "{0}Transition {1}: {2} ({3!s} s)".format(
+                            prefix, transition, name, length
+                        )
+                    )
+                )
             else:
                 self.msg(_(f"{prefix}Transition {transition}: {name}"))
 
@@ -86,13 +92,15 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
         auto_texts = {"slide_num": dat[0], "num": dat[1], "title": dat[2]}
         for x, child in enumerate(node.xpath(".//*[@jessyink:autoText]")):
             if not x:
-                self.msg(_(f"\n{prefix}Auto-texts:"))
+                self.msg(_("\n{0}Auto-texts:").format(prefix))
 
             pid = child.getparent().get("id")
             val = auto_texts[child.get("jessyink:autoText")]
             self.msg(
                 _(
-                    f'{prefix}\t"{child.text}" (object id "{pid}") will be replaced by "{val}".'
+                    _('{0}\t"{1}" (object id "{2}") will be replaced by "{3}".').format(
+                        prefix, child.text, pid, val
+                    )
                 )
             )
 
@@ -104,16 +112,22 @@ class Summary(JessyInkMixin, inkex.EffectExtension):
 
             order = effect[0]["order"]
             if not x:
-                ret += _(f"\n{prefix}Initial effect (order number {order}):")
+                ret += _("\n{0}Initial effect (order number {1}):").format(
+                    prefix, order
+                )
             else:
-                ret += _(f"\n{prefix}Effect {enum!s} (order number {order}):")
+                ret += _("\n{0}Effect {1} (order number {2}):").format(
+                    prefix, enum, order
+                )
 
             for item in effect:
                 eid = item["id"]
                 if item["type"] == "view":
-                    ret += _(f'{prefix}\tView will be set according to object "{eid}"')
+                    ret += _('{0}\tView will be set according to object "{1}"').format(
+                        prefix, eid
+                    )
                 else:
-                    ret += _(f'{prefix}\tObject "{eid}"')
+                    ret += _('{0}\tObject "{1}"').format(prefix, eid)
 
                     if item["direction"] == "in":
                         ret += _(" will appear")

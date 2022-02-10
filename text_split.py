@@ -174,8 +174,8 @@ class TextSplit(inkex.EffectExtension):
                 raise TypeError(
                     _(
                         "Element {} uses a flow region that is not a rectangle. "
-                        "First unflow text.".format(element.get_id())
-                    )
+                        "First unflow text."
+                    ).format(element.get_id())
                 )
             for child in oldelement:
                 if isinstance(child, FlowPara):

@@ -57,6 +57,7 @@ import inkex
 from inkex.utils import pairwise
 from inkex import Group, Circle
 from inkex.paths import Move, Line
+from inkex.localization import inkex_gettext as _
 
 try:
     import numpy
@@ -228,7 +229,7 @@ class WavefrontObj(object):
 
     def _parse_file(self, filename):
         if not os.path.isfile(filename):
-            raise IOError("Can't find wavefront object file {}".format(filename))
+            raise IOError(_("Can't find wavefront object file {}").format(filename))
         with open(filename, "r") as fhl:
             for line in fhl:
                 self._parse_line(line.strip())
@@ -343,7 +344,7 @@ class Poly3D(inkex.GenerateExtension):
 
     def generate(self):
         if numpy is None:
-            raise inkex.AbortExtension("numpy is required.")
+            raise inkex.AbortExtension(_("numpy is required."))
         so = self.options
 
         obj = WavefrontObj(self.get_filename())
@@ -416,7 +417,7 @@ class Poly3D(inkex.GenerateExtension):
             draw_faces(z_list, transformed_pts, obj, so.shade, fill_col, st, poly)
 
         else:  # we cannot generate a list of faces from the edges without a lot of computation
-            raise inkex.AbortExtension("Face data not found.")
+            raise inkex.AbortExtension(_("Face data not found."))
 
     @staticmethod
     def z_sort_max(pts, face):

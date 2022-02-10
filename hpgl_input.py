@@ -63,7 +63,8 @@ class HpglInput(inkex.InputExtension):
         if "UNKNOWN_COMMANDS" in warnings:
             inkex.errormsg(
                 _(
-                    "The HPGL data contained unknown (unsupported) commands, there is a possibility that the drawing is missing some content."
+                    "The HPGL data contained unknown (unsupported) commands, "
+                    "there is a possibility that the drawing is missing some content."
                 )
             )
 

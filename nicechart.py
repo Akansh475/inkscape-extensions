@@ -54,6 +54,7 @@ import inkex
 from inkex.utils import filename_arg
 from inkex import Filter, TextElement, Circle, Rectangle
 from inkex.paths import Move, line
+from inkex.localization import inkex_gettext as _
 
 # www.sapdesignguild.org/goodies/diagram_guidelines/color_palettes.html#mss
 COLOUR_TABLE = {
@@ -109,7 +110,7 @@ class NiceChart(inkex.GenerateExtension):
     @property
     def container_label(self):
         """Layer title/label"""
-        return "Chart-Layer: {}".format(self.options.what)
+        return _("Chart-Layer: {}").format(self.options.what)
 
     def add_arguments(self, pars):
         pars.add_argument("--tab")
@@ -224,13 +225,13 @@ class NiceChart(inkex.GenerateExtension):
             val = float(val)
             if val < 0:
                 raise inkex.AbortExtension(
-                    "Negative values are currently not supported!"
+                    _("Negative values are currently not supported!")
                 )
             return val
 
         if self.options.input_type == "file":
             if self.options.filename is None:
-                raise inkex.AbortExtension("Filename not specified!")
+                raise inkex.AbortExtension(_("Filename not specified!"))
 
             # Future: use encoding when opening the file here (if ever needed)
             with open(self.options.filename, "r") as fhl:
@@ -252,7 +253,7 @@ class NiceChart(inkex.GenerateExtension):
             )
             return ("Direct Input", keys, [process_value(val) for val in values])
 
-        raise inkex.AbortExtension("Unknown input type")
+        raise inkex.AbortExtension(_("Unknown input type"))
 
     def get_blur(self):
         """Add blur to the svg and return if needed"""
@@ -300,7 +301,7 @@ class NiceChart(inkex.GenerateExtension):
         # Process the data from a file or text box
         (self.title, keys, values) = self.get_data()
         if not values:
-            raise inkex.AbortExtension("No data to render into a chart.")
+            raise inkex.AbortExtension(_("No data to render into a chart."))
 
         # Get the page attributes:
         self.width = self.svg.unittouu(self.svg.get("width"))

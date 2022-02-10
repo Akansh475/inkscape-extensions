@@ -18,6 +18,7 @@
 #
 import inkwebeffect
 import inkex
+from inkex.localization import inkex_gettext as _
 
 
 class InteractiveMockup(inkwebeffect.InkWebEffect):
@@ -32,7 +33,10 @@ class InteractiveMockup(inkwebeffect.InkWebEffect):
 
         if len(self.options.ids) < 2:
             raise inkex.AbortExtension(
-                "You must select at least two elements. The last one is the object you want to go to."
+                _(
+                    "You must select at least two elements. "
+                    "The last one is the object you want to go to."
+                )
             )
 
         el_from = list(self.svg.selection.values())[:-1]

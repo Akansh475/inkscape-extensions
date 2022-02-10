@@ -136,7 +136,9 @@ class InterpAttG(inkex.EffectExtension):
             node.style[att_name] = value
         elif path.startswith("transform/"):
             if not is_number(value):
-                raise inkex.AbortExtension(f"Unable to set attribute {path} to {value}")
+                raise inkex.AbortExtension(
+                    _("Unable to set attribute {} to {}").format(path, value)
+                )
             if path == "transform/trans-x":
                 node.transform.add_translate(value, 0)
             elif path == "transform/trans-y":

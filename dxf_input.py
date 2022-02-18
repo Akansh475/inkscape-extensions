@@ -346,7 +346,7 @@ class ValueConstruct(defaultdict):
         "23": ("y3",),
         "24": ("y4",),
         "40": ("scale", "knots", "radius", "width_ratio"),
-        "41": ("ellipse_a1", "insert_scale_x"),
+        "41": ("ellipse_a1", "insert_scale_x", "mtext_width"),
         "42": ("ellipse_a2", "bulge", "insert_scale_y"),
         "50": ("angle",),
         "51": ("angle2",),
@@ -500,6 +500,20 @@ def export_mtext(vals):
             text = "".join(vals.mtext_list)
         if vals.has_text:
             text += vals.text
+        # folding long text
+        if vals.has_mtext_width and vals.has_scale:
+            if vals.mtext_width > 10.0 and vals.scale > 1.0:
+                charsperline = vals.mtext_width * 2 / vals.scale  # or 1.6?
+                nochars = int(charsperline)
+                if len(text) > charsperline:
+                    # plain text only no \P,{} better divide by space
+                    if (text.find(r"\P") < 0) and (text.find(r"{") < 0):
+                        pos = 0
+                        while len(text) > pos:
+                            text = text[:pos] + "\P" + text[pos:]
+                            pos += nochars + 2
+
+        text = mtext_normalize(text)
         lines = 0
         found = text.find(r"\P")  # new line
         while found > -1:
@@ -510,7 +524,10 @@ def export_mtext(vals):
                     tspan.set("dx", "%f" % size)
             else:
                 tspan.set("sodipodi:role", "line")
-                tspan.set("dx", "%f" % dx)
+                if lines > 0:
+                    tspan.set("x", x + dx)
+                else:
+                    tspan.set("dx", "%f" % dx)
                 tspan.set("dy", "%f" % dy)
             # tspan.text = text[:found]
             text1 = text[:found]
@@ -526,11 +543,39 @@ def export_mtext(vals):
                 tspan.set("dx", "%f" % dx)
         else:
             tspan.set("sodipodi:role", "line")
-            tspan.set("dx", "%f" % dx)
+            if lines > 0:
+                tspan.set("x", x + dx)
+            else:
+                tspan.set("dx", "%f" % dx)
             tspan.set("dy", "%f" % dy)
         # tspan.text = text
         text1 = text
         mtext_separate(node, tspan, text1)
+
+
+def mtext_normalize(text):
+    # {  \P  } -> {  }\P{  }
+    found = text.find(r"\P")
+    while found > -1:
+        nest = False
+        posL = text.rfind(r"{", 0, found)
+        posR = text.rfind(r"}", 0, found)
+        if posL > -1:
+            if posR == -1:
+                nest = True
+            else:
+                if posL > posR:
+                    nest = True
+        if nest:
+            # paste }\P{
+            control = ""
+            if text[posL + 1] == "\\":
+                posC = text.find(r";", posL)
+                if posC != -1 and (posC - posL) < 20:
+                    control = text[posL + 1 : posC + 1]
+            text = text[:found] + "}\P{" + control + text[found + 2 :]
+        found = text.find(r"\P", found + 2)
+    return text
 
 
 def mtext_separate(node, tspan, text):
@@ -575,7 +620,7 @@ def mtext_ctrl(tspan, phrase):
         tspan.text = phrase
         return
     # if you'll add the function, you should remove the auto re.sub at setting group code:1
-    if phrase[1] in ("C", "H", "T", "Q", "W", "A"):
+    if phrase[1].upper() in ("C", "H", "T", "Q", "W", "A"):
         # get the value
         found = phrase.find(r";")
         if found > 2:
@@ -587,20 +632,35 @@ def mtext_ctrl(tspan, phrase):
                 done = False
             else:
                 done = True
-                if phrase[1] == "C":
+                if phrase[1].upper() == "C":
                     i = int(value)
                     color = get_rgbcolor(i)
                     tspan.set("style", "stroke: %s" % color)
-                elif phrase[1] == "H":
+                elif phrase[1].upper() == "H":
                     value *= scale
                     tspan.set("style", "font-size: %.3fpx;" % value)
-                elif phrase[1] == "T":
+                elif phrase[1].upper() == "T":
                     tspan.set("style", "letter-spacing: %f;" % value)
+                elif phrase[1].upper() == "A":
+                    if value == 0:
+                        tspan.set("dominant-baseline", "text-bottom")
+                    elif value == 1:
+                        tspan.set("dominant-baseline", "central")
+                    elif value == 2:
+                        tspan.set("dominant-baseline", "text-top")
                 tspan.text = phrase[found + 1 :]
         else:
             tspan.text = phrase
     else:
-        tspan.text = phrase
+        if phrase[1].upper() == "F":
+            # get the value font-name & style & cut from text             2022.March
+            # \FArial|b0|i0|c0|p0; b:bold,i:italic,c:charset,ppitch
+            found = phrase.find(r";")
+            if found > 2:
+                cvalue = phrase[:found]
+                tspan.text = phrase[found + 1 :]
+        else:
+            tspan.text = phrase
 
 
 def export_point(vals, w):
@@ -1156,6 +1216,7 @@ class DxfInput(inkex.InputExtension):
         global svg
         global style_font3
         global style_direction
+        global be_extrude
 
         options = self.options
 
@@ -1249,6 +1310,7 @@ class DxfInput(inkex.InputExtension):
         style_font3 = {}  # style font 1byte
         style_font4 = {}  # style font 2byte
         style_direction = {}  # style display direction
+        be_extrude = False
         line = get_line()
 
         if line[0] == "AutoCAD Binary DXF":
@@ -1409,7 +1471,7 @@ class DxfInput(inkex.InputExtension):
                 if line[0] in ("1", "2", "3", "6", "7", "8"):  # text value
                     # TODO: if add funs of export_mtext, delete the line
                     val = line[1].replace(r"\~", " ")
-                    val = re.sub(r"\\A.*;", "", val)
+                    # val = re.sub(r"\\A.*;", "", val)
                     # val = re.sub(r'\\H.*;', '', val)
                     val = re.sub(r"\^I", "", val)
                     val = re.sub(r"{\\L", "", val)
@@ -1467,7 +1529,10 @@ class DxfInput(inkex.InputExtension):
                             style += ";" + linetypes[vals.line_type]
                     extrude = 1.0
                     if vals.has_extrude:
-                        extrude = float(vals.extrude)
+                        if (entity != "LINE") and (entity != "POINT"):
+                            extrude = float(vals.extrude)
+                            if extrude < 1.0:
+                                be_extrude = True
 
                     vals.adjust_coords(xmin, ymin, scale, extrude, height)
 
@@ -1549,6 +1614,13 @@ class DxfInput(inkex.InputExtension):
         #     for debug
         # tree = etree.ElementTree(svg)
         # tree.write('c:\Python\svgCH2.xml')
+        if be_extrude:
+            inkex.errormsg(
+                _(
+                    "An object that has the extrude parameter set was detected. "
+                    "The imported figure may be displayed incorrectly."
+                )
+            )
         self.document = doc
 
 

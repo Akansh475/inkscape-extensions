@@ -39,7 +39,12 @@ class TestDxfInputBasicError(ComparisonMixin, TestCase):
     TestCase.stderr_protect = False
     # sample uses POLYLINE,TEXT (R12), LWPOLYLINE,MTEXT (R13, R14)
     # however has warnings when handling points with a display mode
-    compare_file = ["io/test2_r12.dxf", "io/test2_r13.dxf", "io/test2_r14.dxf"]
+    compare_file = [
+        "io/test2_r12.dxf",
+        "io/test2_r13.dxf",
+        "io/test2_r14.dxf",
+        "io/test_extrude.dxf",
+    ]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]
     effect_class = DxfInput

@@ -141,7 +141,21 @@ def csplength(csp):
 
 
 def bezierparameterize(bez):
-    """Return the bezier parameter size"""
+    """Return the bezier parameter size
+    Converts the bezier parametrisation from the default form
+    P(t) = (1-t)³ P_1 + 3(1-t)²t P_2 + 3(1-t)t² P_3 + t³ x_4
+    to the a form which can be differentiated more easily
+    P(t) = a t³ + b t² + c t + P0
+
+    Args:
+        bez (List[Tuple[float, float]]): the Bezier curve. The elements of the list the
+            coordinates of the points (in this order): Start point, Start control point,
+            End control point, End point.
+
+    Returns:
+        Tuple[float, float, float, float, float, float, float, float]:
+            the values ax, ay, bx, by, cx, cy, x0, y0
+    """
     ((bx0, by0), (bx1, by1), (bx2, by2), (bx3, by3)) = bez
     # parametric bezier
     x0 = bx0
@@ -198,7 +212,20 @@ def bezierpointatt(bez, t):
 
 
 def bezierslopeatt(bez, t):
-    """Get slope at the given time point along a bezier curve"""
+    """Get slope at the given time point along a bezier curve
+        The slope is computed as (dx, dy) where dx = df_x(t)/dt and dy = df_y(t)/dt.
+        Note that for lines P1=P2 and P3=P4, so the slope at the end points is dx=dy=0
+        (slope not defined).
+
+    Args:
+        bez (List[Tuple[float, float]]): the Bezier curve. The elements of the list the
+            coordinates of the points (in this order): Start point, Start control point,
+            End control point, End point.
+        t (float): time in the interval [0, 1]
+
+    Returns:
+        Tuple[float, float]: x and y increment
+    """
     ax, ay, bx, by, cx, cy, _, _ = bezierparameterize(bez)
     dx = 3 * ax * (t**2) + 2 * bx * t + cx
     dy = 3 * ay * (t**2) + 2 * by * t + cy

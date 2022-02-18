@@ -64,6 +64,10 @@ class Use(ShapeElement):
             group.extend(copy)
             copy = group
         copy.transform = self.transform @ copy.transform
+        copy.transform.add_translate(
+            self.to_dimensionless(self.get("x", 0)),
+            self.to_dimensionless(self.get("y", 0)),
+        )
         copy.style = self.style + copy.style
         self.replace_with(copy)
         copy.set_random_ids()

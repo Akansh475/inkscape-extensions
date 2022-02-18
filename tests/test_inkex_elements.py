@@ -290,7 +290,7 @@ class LineElementTestCase(ElementTestCase):
     def test_conversion(self):
         """Lines are converted to paths"""
         pol = inkex.elements.Line(x1="2", y1="3", x2="4", y2="5")
-        self.assertEqual(str(pol.path), "M 2 3 L 4 5 Z")
+        self.assertEqual(str(pol.path), "M 2 3 L 4 5")
 
 
 class PatternTestCase(ElementTestCase):
@@ -343,9 +343,9 @@ class GroupTest(ElementTestCase):
             " 506.163 L -66.2146 502.814 L -87.1446 524.307 M 60.0914 498.694 L 156.784 439.145 L"
             " 240.218 491.183 L 143.526 550.731 z M -176.909 458.816 a 64.2385 38.9175 -7.86457 1"
             " 0 88.3701 -19.0784 a 64.2385 38.9175 -7.86457 0 0 -88.3701 19.0784 z M -300.162"
-            " 513.715 L -282.488 509.9 Z M -214.583 540.504 L -209.001 448.77 Z M -193.189 547.201 "
+            " 513.715 L -282.488 509.9 Z M -214.583 540.504 L -209.001 448.77 M -193.189 547.201 "
             "L -238.536 486.266 L -185.049 503.008 L -230.396 442.073 M -193.189 547.201 L -238.536"
-            " 486.266 L -185.049 503.008 L -230.396 442.073 Z M 15 15 L 15.5 20 Z",
+            " 486.266 L -185.049 503.008 L -230.396 442.073 Z M 15 15 L 15.5 20",
         )
 
     def test_bounding_box(self):
@@ -592,6 +592,22 @@ class UseTest(ElementTestCase):
         self.assertEqual(str(elem.path), "M 0 0 L 10 10 Z")
         self.assertEqual(elem.tag_name, "path")
         self.assertEqual(elem.getparent().get("id"), "C")
+
+    def test_unlink_xy(self):
+        """Check that unlink works if both transform and x, y are set on a clone"""
+        elem = self.svg.add(Use())
+        elem.set("xlink:href", "path1")
+        elem.set("x", "100")
+        elem.set("y", "20")
+        elem.set("transform", "rotate(20,-100,100)")
+        elem2 = elem.unlink()
+        self.assertEqual(str(elem2.path), "M 0 0 L 10 10 Z")
+        self.assertEqual(elem2.tag_name, "path")
+        self.assertAlmostTuple(
+            tuple(elem2.transform.to_hexad()),
+            tuple(inkex.Transform("rotate(20,-206.71282,373.56409)").to_hexad()),
+            3,
+        )
 
 
 class StopTests(ElementTestCase):

@@ -37,7 +37,7 @@ from ._base import ShapeElement
 class PathElementBase(ShapeElement):
     """Base element for path based shapes"""
 
-    get_path = lambda self: self.get("d")
+    get_path = lambda self: Path(self.get("d"))
 
     @classmethod
     def new(cls, path, **attrs):
@@ -336,7 +336,7 @@ class Polygon(ShapeElement):
     """A closed polyline"""
 
     tag_name = "polygon"
-    get_path = lambda self: "M" + self.get("points") + " Z"
+    get_path = lambda self: Path("M" + self.get("points") + " Z")
 
 
 class Line(ShapeElement):
@@ -347,7 +347,7 @@ class Line(ShapeElement):
     y1 = property(lambda self: self.to_dimensionless(self.get("y1", 0)))
     x2 = property(lambda self: self.to_dimensionless(self.get("x2", 0)))
     y2 = property(lambda self: self.to_dimensionless(self.get("y2", 0)))
-    get_path = lambda self: f"M{self.x1},{self.y1} L{self.x2},{self.y2} Z"
+    get_path = lambda self: Path(f"M{self.x1},{self.y1} L{self.x2},{self.y2}")
 
     @classmethod
     def new(cls, start, end, **attrs):

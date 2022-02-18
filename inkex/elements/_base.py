@@ -535,7 +535,7 @@ class ShapeElement(BaseElement):
     def clip(self, elem):
         self.set("clip-path", elem.get_id(as_url=2))
 
-    def get_path(self):
+    def get_path(self) -> Path:
         """Generate a path for this object which can inform the bounding box"""
         raise NotImplementedError(
             f"Path should be provided by svg elem {self.typename}."

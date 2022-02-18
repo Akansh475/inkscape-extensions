@@ -34,6 +34,8 @@ from inkex.paths import (
 from inkex.transforms import Transform, Vector2d
 from inkex.tester import TestCase
 
+# pylint: disable=too-many-public-methods
+
 
 class SegmentTest(TestCase):
     """
@@ -871,13 +873,24 @@ class SuperPathTest(TestCase):
             self.assertEqual(comparison, str(tempsub))
 
 
-class ProxyTest:
+class ProxyTest(TestCase):
     def test_simple_path(self):
         """Check coordinate computation"""
         path = Path("M 10 10 h 10 v 10 h -10 Z")
 
-        proxycommands = list(Path.proxy_iterator())
+        proxycommands = list(path.proxy_iterator())
 
-        self.assertAlmostTuple(list(proxycommands[2].previous_end_point), (10, 10))
-        self.assertAlmostTuple(list(proxycommands[2].end_point), (20, 10))
-        self.assertAlmostTuple(list(proxycommands[3].previous_end_point), (20, 10))
+        self.assertAlmostTuple(list(proxycommands[1].previous_end_point), (10, 10))
+        self.assertAlmostTuple(list(proxycommands[1].end_point), (20, 10))
+        self.assertAlmostTuple(list(proxycommands[2].previous_end_point), (20, 10))
+
+
+class TestPathErrorHandling(TestCase):
+    """Path data error handling"""
+
+    def test_incorrect_parameter_amount(self):
+        """Check that extra args (or rather, missing args of the next path) is
+        handled correctly, i.e. according to
+        https://www.w3.org/TR/SVG/paths.html#PathDataErrorHandling"""
+        path = Path("M 10,10 L 20,20,30")
+        self.assertEqual(str(path), "M 10 10 L 20 20")

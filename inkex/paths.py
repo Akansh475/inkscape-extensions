@@ -1365,6 +1365,8 @@ class Path(list):
             cmd = PathCommand.letter_to_class(cmd)
             i = 0
             while i < len(args) or cmd.nargs == 0:
+                if len(args[i : i + cmd.nargs]) != cmd.nargs:
+                    return
                 seg = cmd(*args[i : i + cmd.nargs])
                 i += cmd.nargs
                 cmd = seg.next_command

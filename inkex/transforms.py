@@ -870,6 +870,11 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
         self.x = BoundingInterval(x)
         self.y = BoundingInterval(y)
 
+    @staticmethod
+    def new_xywh(x: float, y: float, width: float, height: float) -> BoundingBox:
+        """Create a bounding box using x, y, width and height"""
+        return BoundingBox((x, x + width), (y, y + height))
+
     def __bool__(self):
         # type: () -> bool
         return bool(self.x) and bool(self.y)
@@ -966,6 +971,11 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
         """Returns the middle of the bounding box"""
         return Vector2d(self.x.center, self.y.center)
 
+    @property
+    def size(self):
+        """Returns a vector containing width and height of the bounding box"""
+        return Vector2d(self.x.size, self.y.size)
+
     def get_anchor(self, xanchor, yanchor, direction=0, selbox=None):
         # type: (str, str, Union[int, str], Optional[BoundingBox]) -> float
         """Calls get_distance with the given anchor options"""
@@ -1015,6 +1025,16 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
             rot = hypot(selbox.x.center - x, selbox.y.center - y)
 
         return [y, -y, x, -x, rot, -rot][DIRECTION.index(direction)]
+
+    def resize(self, delta_x: float, delta_y: float = None) -> BoundingBox:
+        """Enlarges / shrinks a bounding box by a constant value. If only delta_x
+        is given, each side is moved by the same amount; if delta_y is given,
+        different deltas are applied to horizontal and vertical intervals."""
+        delta_y = delta_y or delta_x
+        return BoundingBox(
+            (self.x.minimum - delta_x, self.x.maximum + delta_x),
+            (self.y.minimum - delta_y, self.y.maximum + delta_y),
+        )
 
 
 class DirectedLineSegment:

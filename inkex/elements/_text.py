@@ -24,12 +24,31 @@ Provide text based element classes interface.
 Because text is not rendered at all, no information about a text's path
 size or actual location can be generated yet.
 """
+from __future__ import annotations
 
+from tempfile import TemporaryDirectory
+
+from ..interfaces.IElement import BaseElementProtocol
 from ..paths import Path
 from ..transforms import Transform, BoundingBox
-
+from ..command import inkscape, write_svg
 from ._base import BaseElement, ShapeElement
 from ._polygons import PathElementBase
+
+
+class TextBBMixin:  # pylint: disable=too-few-public-methods
+    """Mixin to query the bounding box from Inkscape"""
+
+    def get_inkscape_bbox(self: BaseElementProtocol) -> BoundingBox:
+        """Query the bbbox of a single object. This calls the Inkscape command,
+        so it is rather slow to use in a loop."""
+        with TemporaryDirectory(prefix="inkscape-command") as tmpdir:
+            svg_file = write_svg(self.root, tmpdir, "input.svg")
+            out = inkscape(svg_file, "-X", "-Y", "-W", "-H", query_id=self.get_id())
+            out = list(map(self.root.viewport_to_unit, out.splitlines()))
+            if len(out) != 4:
+                raise ValueError("Error: Bounding box computation failed")
+            return BoundingBox.new_xywh(*out)
 
 
 class FlowRegion(ShapeElement):
@@ -42,7 +61,7 @@ class FlowRegion(ShapeElement):
         return sum([child.path for child in self], Path())
 
 
-class FlowRoot(ShapeElement):
+class FlowRoot(ShapeElement, TextBBMixin):
     """SVG Flow Root (SVG 2.0)"""
 
     tag_name = "flowRoot"
@@ -87,7 +106,7 @@ class FlowSpan(ShapeElement):
         return Path()
 
 
-class TextElement(ShapeElement):
+class TextElement(ShapeElement, TextBBMixin):
     """A Text element"""
 
     tag_name = "text"
@@ -119,7 +138,7 @@ class TextElement(ShapeElement):
         return bbox
 
 
-class TextPath(ShapeElement):
+class TextPath(ShapeElement, TextBBMixin):
     """A textPath element"""
 
     tag_name = "textPath"
@@ -128,7 +147,7 @@ class TextPath(ShapeElement):
         return Path()
 
 
-class Tspan(ShapeElement):
+class Tspan(ShapeElement, TextBBMixin):
     """A tspan text element"""
 
     tag_name = "tspan"

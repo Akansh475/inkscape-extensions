@@ -568,7 +568,7 @@ class ShapeElement(BaseElement):
         clip = self.clip
         if clip is None or shape_box is None:
             return shape_box
-        return shape_box & clip.bounding_box(Transform(transform) * self.transform)
+        return shape_box & clip.bounding_box(Transform(transform) @ self.transform)
 
     def shape_box(self, transform=None):
         # type: (Optional[Transform]) -> Optional[BoundingBox]

@@ -326,6 +326,8 @@ class StyleInheritanceTests(TestCase):
         self.assertNotEqual(st1, st2)
         st2["fill"] = "blue"
         self.assertEqual(st1, st2)
+        st1["font-size"] = 1
+        self.assertNotEqual(st1, st2)
 
     def test_basestylevalue(self):
         """Create BaseStyleValue's directly and work on them"""

@@ -284,10 +284,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     def __eq__(self, other):
         if not isinstance(other, Style):
             other = Style(other)
-        selfkeys = self.keys()
-        otherkeys = other.keys()
-        if not [i for i, j in zip(sorted(selfkeys), sorted(otherkeys)) if i == j]:
-            # list of keys is not equal
+        if self.keys() != other.keys():
             return False
         for arg in set(self) | set(other):
             if self.get_store(arg) != other.get_store(arg):

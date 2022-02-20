@@ -158,7 +158,7 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
         f.close()
 
     def create_the_temporary_svg(self):
-        (ref, self.tmp_svg) = tempfile.mkstemp(".svg")
+        (self.tmp_svg_ref, self.tmp_svg) = tempfile.mkstemp(".svg")
         layer = self.get_slicer_layer()
         current_style = layer.style
         layer.style = "display:none"
@@ -167,6 +167,7 @@ class Export(WebSlicerMixin, inkex.OutputExtension):
 
     def delete_the_temporary_svg(self):
         try:
+            os.close(self.tmp_svg_ref)
             os.remove(self.tmp_svg)
         except (IOError, OSError, PermissionError):
             pass

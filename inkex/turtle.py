@@ -57,12 +57,18 @@ class PathTurtle:
         )
 
     def right(self, deg):
-        """Rotate turtle right by deg degrees."""
-        self.__heading -= deg
+        """Rotate turtle right by deg degrees.
+
+        Changed in inkex 1.2: The turtle now rotates right (previously left) when calling this
+            method."""
+        self.__heading += deg
 
     def left(self, deg):
-        """Rotate turtle left by deg degrees."""
-        self.__heading += deg
+        """Rotate turtle left by deg degrees.
+
+        Changed in inkex 1.2: The turtle now rotates left (previously right) when calling this
+            method."""
+        self.__heading -= deg
 
     def penup(self):
         """Enable non-drawing / moving mode"""
@@ -130,13 +136,13 @@ class PathTurtle:
             return
         self.fd(size)
         turn = random.uniform(20, 40)
-        self.lt(turn)
-        self.rtree(size * random.uniform(0.5, 0.9), minimum, pt)
         self.rt(turn)
+        self.rtree(size * random.uniform(0.5, 0.9), minimum, pt)
+        self.lt(turn)
         turn = random.uniform(20, 40)
-        self.rt(turn)
-        self.rtree(size * random.uniform(0.5, 0.9), minimum, pt)
         self.lt(turn)
+        self.rtree(size * random.uniform(0.5, 0.9), minimum, pt)
+        self.rt(turn)
         if pt:
             self.pu()
         self.bk(size)

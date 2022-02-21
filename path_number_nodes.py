@@ -47,9 +47,9 @@ class NumberNodes(inkex.EffectExtension):
         for node in filtered:
             self.add_dot(node)
 
-    def add_dot(self, node):
+    def add_dot(self, node: inkex.PathElement):
         """Add a dot label for this path element"""
-        group = node.getparent().add(inkex.Group())
+        group: inkex.Group = node.getparent().add(inkex.Group())
         dot_group = group.add(inkex.Group())
         num_group = group.add(inkex.Group())
         path_trans_applied = node.path.transform(node.composed_transform())

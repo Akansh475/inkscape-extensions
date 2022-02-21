@@ -1430,10 +1430,11 @@ class Path(list):
         prev_prev = Vector2d()
         first = Vector2d()
 
-        for i, seg in enumerate(self):  # type: PathCommand
-            if i == 0:
-                first = seg.end_point(first, prev)
-            for cpt in seg.control_points(first, prev, prev_prev):
+        for seg in self:  # type: PathCommand
+            cpts = list(seg.control_points(first, prev, prev_prev))
+            if isinstance(seg, (zoneClose, ZoneClose, move, Move)):
+                first = cpts[-1]
+            for cpt in cpts:
                 prev_prev = prev
                 prev = cpt
                 yield cpt
@@ -1444,10 +1445,10 @@ class Path(list):
         prev = Vector2d()
         first = Vector2d()
 
-        for i, seg in enumerate(self):  # type: PathCommand
-            if i == 0:
-                first = seg.end_point(first, prev)
+        for seg in self:  # type: PathCommand
             end_point = seg.end_point(first, prev)
+            if isinstance(seg, (zoneClose, ZoneClose, move, Move)):
+                first = end_point
             prev = end_point
             yield end_point
 
@@ -1494,19 +1495,29 @@ class Path(list):
         """Returns a reversed path"""
         result = Path()
         *_, first = self.end_points
+        closer = None
 
         # Go through the path in reverse order
-        for index, command in reversed(list(enumerate(self.proxy_iterator()))):
+        for index, prcom in reversed(list(enumerate(self.proxy_iterator()))):
+            if isinstance(prcom.command, (Move, move, ZoneClose, zoneClose)):
+                if closer is not None:
+                    if len(result) > 0 and isinstance(
+                        result[-1], (Line, line, Vert, vert, Horz, horz)
+                    ):
+                        result.pop()  # We can replace simple lines with Z
+                    result.append(closer)  # replace with same type (rel or abs)
+                if isinstance(prcom.command, (ZoneClose, zoneClose)):
+                    closer = prcom.command
+                else:
+                    closer = None
+
             if index == 0:
-                if command.letter == "M":
+                if prcom.letter == "M":
                     result.insert(0, Move(first.x, first.y))
-                elif command.letter == "m":
+                elif prcom.letter == "m":
                     result.insert(0, move(first.x, first.y))
             else:
-                result.append(command.reverse())
-
-        if self[-1].letter.lower() == "z":
-            result.append(self[-1])
+                result.append(prcom.reverse())
 
         return result
 
@@ -1526,8 +1537,8 @@ class Path(list):
         prev_prev = Vector2d()
         first = Vector2d()
 
-        for i, seg in enumerate(self):  # type: PathCommand
-            if i == 0:
+        for seg in self:  # type: PathCommand#
+            if isinstance(seg, (zoneClose, ZoneClose, move, Move)):
                 first = seg.end_point(first, previous)
             yield Path.PathCommandProxy(seg, first, previous, prev_prev)
             if isinstance(

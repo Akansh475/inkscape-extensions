@@ -192,7 +192,9 @@ class BaseElement(IBaseElement):
         return self.attrib.pop(addNS(attr), default)  # pylint: disable=no-member
 
     @overload
-    def add(self, child1: BaseElement, *children: BaseElement) -> Tuple[BaseElement]:
+    def add(
+        self, child1: BaseElement, child2: BaseElement, *children: BaseElement
+    ) -> Tuple[BaseElement]:
         ...
 
     @overload

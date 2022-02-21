@@ -713,16 +713,16 @@ class PathTest(TestCase):
 
     def test_reverse(self):
         """Paths can be reversed"""
-        """Testing reverse() with relative coordinates, closed path"""
+        # Testing reverse() with relative coordinates, closed path
         ret = Path(
             "m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10 z"
         )
         ret = ret.reverse()
         self._assertPath(
             ret,
-            "m 10 50 l 0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40 z",
+            "m 10 50 l 0 -0.0002 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 z",
         )
-        """Testing reverse() with relative coordinates, open path"""
+        # Testing reverse() with relative coordinates, open path
         ret = Path(
             "m 10 50 h 40 v -40 l 50 39.9998 c -22 2 -35 12 -50 25 l -40 -15 l 0 -10"
         )
@@ -731,14 +731,14 @@ class PathTest(TestCase):
             ret,
             "m 10 49.9998 l -0 10 l 40 15 c 15 -13 28 -23 50 -25 l -50 -39.9998 v 40 h -40",
         )
-        """Testing reverse() with absolute coordinates, closed path"""
+        # Testing reverse() with absolute coordinates, closed path
         ret = Path("M 100 35 L 100 25 L 60 10 C 45 23 32 33 10 35 L 60 75 L 60 35 Z")
         ret = ret.reverse()
         self._assertPath(
             ret,
-            "M 100 35 L 60 35 L 60 75 L 10 35 C 32 33 45 23 60 10 L 100 25 L 100 35 Z",
+            "M 100 35 L 60 35 L 60 75 L 10 35 C 32 33 45 23 60 10 L 100 25 Z",
         )
-        """Testing reverse() with absolute coordinates, open path"""
+        # Testing reverse() with absolute coordinates, open path
         ret = Path(
             "M 100 35 L 100 25 L 60 10 C 45 23 32 33 10 35 L 60 75 L 60 35 L 100 35"
         )
@@ -768,7 +768,7 @@ class PathTest(TestCase):
         self._assertPath(
             ret,
             "m 63 47 c -21 -9 -16 -18 -39 -4 M 103 64 c -14 8 -24 0 -34 -11 "
-            "m -2 21 c -12 -10 -21 -12 -35 -7 M 58 88 l 10 4 c -7 9 -20 -2 -10 -4",
+            "m -2 21 c -12 -10 -21 -12 -35 -7 M 58 88 l 10 4 c -7 9 -20 -2 -10 -4 z",
         )
 
 
@@ -871,6 +871,60 @@ class SuperPathTest(TestCase):
         for _ in range(15):
             tempsub = CubicSuperPath(tempsub[0])
             self.assertEqual(comparison, str(tempsub))
+
+    def test_multiple_relative(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/450"""
+
+        def compare_complex(current, epts):
+            for point, comp in zip(current.end_points, epts):
+                self.assertAlmostTuple(point, comp, msg=f"got {point}, expected {comp}")
+            for point, comp in zip(current.control_points, epts):
+                self.assertAlmostTuple(point, comp, msg=f"got {point}, expected {comp}")
+            # now reverse the path
+            p_rev = current.reverse()
+            for point, comp in zip(p_rev.end_points, epts[::-1]):
+                self.assertAlmostTuple(point, comp, msg=f"got {point}, expected {comp}")
+            # We expect to have the same amount of closed subpaths after the operation
+            self.assertEqual(
+                len(re.findall(r"[Zz]", str(p_rev))),
+                len(re.findall(r"[Zz]", str(current))),
+            )
+            # now check that transform works correctly
+            p_trans = current.transform(Transform("translate(10, 20)"))
+            for point, comp in zip(p_trans.end_points, epts):
+                comp = comp + Vector2d(10, 20)
+                self.assertAlmostTuple(point, comp, msg=f"got {point}, expected {comp}")
+
+        path = Path("m 50,20 v -10 h -10 z m 30,-20 v 20 h 20 z m -50,20 v -15 h -15 z")
+        path2 = Path(
+            "m 50,20 v -10 h -10 l 10, 10 m 30,-20 v 20 h 20 l -20,-20 m -50,20 v -15 h -15 z"
+        )
+        path3 = Path(
+            "m 50,20 v -10 h -10 z m 30,-20 v 20 h 20 l -20,-20 m -50,20 v -15 h -15 l 15 15"
+        )
+        pts = [
+            (50, 20),
+            (50, 10),
+            (40, 10),
+            (50, 20),
+            (80, 0),
+            (80, 20),
+            (100, 20),
+            (80, 0),
+            (30, 20),
+            (30, 5),
+            (15, 5),
+            (30, 20),
+        ]
+        compare_complex(path, pts)
+        compare_complex(path2, pts)
+        compare_complex(path3, pts)
+        path4 = Path("m 50,20 v -10 h -10 z z z")
+        pts4 = [(50, 20), (50, 10), (40, 10), (50, 20), (50, 20), (50, 20)]
+        compare_complex(path4, pts4)
+        path5 = Path("m 50,20 z m 10, 10 m 20, 20 v -10 h -10 z")
+        pts5 = [(50, 20), (50, 20), (60, 30), (80, 50), (80, 40), (70, 40), (80, 50)]
+        compare_complex(path5, pts5)
 
 
 class ProxyTest(TestCase):

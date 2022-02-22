@@ -5,7 +5,8 @@
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     <param name="tab" type="notebook">
         <page name="options" gui-text="Options">
-            <param name="ROBO" type="bool" gui-text="use ROBO-Master type of spline output">false</param>
+            <param name="ROBO" type="bool" gui-text="ROBO-Master compatible spline output (may distort some shapes)"
+            gui-description="Unlinke Bézier curves, ROBO-Master compatible splines have zero curvature at the end points. This may lead to distorted shapes.">false</param>
             <param name="POLY" type="bool" gui-text="use LWPOLYLINE type of line output">true</param>
             <param name="units" type="optiongroup" appearance="combo" gui-text="Base unit:">
                 <option value="72./96">pt</option>

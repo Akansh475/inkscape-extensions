@@ -116,3 +116,9 @@ class Marker(GroupBase):
     element."""
 
     tag_name = "marker"
+
+
+class Mask(GroupBase):
+    """An alpha mask for compositing an object into the background"""
+
+    tag_name = "mask"

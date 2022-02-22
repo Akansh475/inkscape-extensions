@@ -9,6 +9,7 @@ class TestDXF12OutlinesBasic(ComparisonMixin, TestCase):
         "svg/shapes.svg",
         "svg/preserved-transforms.svg",
         "svg/dxf_nested_transforms.svg",
+        "svg/clips_and_masks.svg",
     ]
     comparisons = [()]
     effect_class = DxfTwelve

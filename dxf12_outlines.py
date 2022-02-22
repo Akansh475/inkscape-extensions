@@ -117,6 +117,13 @@ class DxfTwelve(inkex.OutputExtension):
 
         path = "//svg:path"
         for node in self.svg.xpath(path):
+            visible = True
+            for parent in node.iterancestors():
+                if isinstance(parent, (inkex.ClipPath, inkex.Mask)):
+                    visible = False
+                    break
+            if not visible:
+                continue
 
             layer = (
                 node.getparent().label

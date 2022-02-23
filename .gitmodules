@@ -4,3 +4,6 @@
 [submodule "other/inkman"]
 	path = other/inkman
 	url = https://gitlab.com/inkscape/extras/extension-manager.git
+[submodule "other/clipart"]
+	path = other/clipart
+	url = https://gitlab.com/inkscape/extras/inkscape-import-clipart.git

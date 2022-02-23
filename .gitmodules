@@ -1,3 +1,6 @@
 [submodule "other/gcodetools"]
 	path = other/gcodetools
 	url = https://gitlab.com/inkscape/extras/extensions-gcodetools.git
+[submodule "other/inkman"]
+	path = other/inkman
+	url = https://gitlab.com/inkscape/extras/extension-manager.git

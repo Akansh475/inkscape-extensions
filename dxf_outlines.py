@@ -341,12 +341,20 @@ class DxfOutlines(inkex.OutputExtension):
         if trans:
             self.groupmat.append(Transform(self.groupmat[-1]) @ Transform(trans))
         for node in group:
-            if isinstance(node, Group):
-                self.process_group(node)
-            elif isinstance(node, Use):
-                self.process_clone(node)
-            else:
-                self.process_shape(node, self.groupmat[-1])
+            try:
+                if isinstance(node, Group):
+                    self.process_group(node)
+                    inkex.errormsg(node.get_id())
+                elif isinstance(node, Use):
+                    self.process_clone(node)
+                else:
+                    self.process_shape(node, self.groupmat[-1])
+            except RecursionError as e:
+                raise inkex.AbortExtension(
+                    _(
+                        'Too many nested groups. Please use the "Deep Ungroup" extension first.'
+                    )
+                ) from e  # pylint: disable=line-too-long
         if trans:
             self.groupmat.pop()
 

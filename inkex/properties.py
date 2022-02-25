@@ -33,7 +33,7 @@ import re
 from typing import Tuple, Dict, Type, Union, List, Optional
 from .interfaces.IElement import IBaseElement, ISVGDocumentElement
 
-from .units import parse_unit
+from .units import parse_unit, convert_unit
 
 from .colors import Color, ColorError
 
@@ -99,7 +99,7 @@ class BaseStyleValue:
         """
         if self.value == "inherit":
             if self.attr_name in all_properties:
-                return self._parse_value(all_properties[self.attr_name][1])
+                return self._parse_value(all_properties[self.attr_name][1], element)
             return None
         return self._parse_value(self.value, element)
 
@@ -503,13 +503,11 @@ class StrokeDasharrayValue(BaseStyleValue):
     """Logic for the stroke-dasharray property"""
 
     def _parse_value(self, value: str, element=None):
-        if element is None:
-            return value
         dashes = re.findall(r"[^,\s]+", value)
-        if len(dashes) == 0:
+        if len(dashes) == 0 or value == "none":
             return None  # no dasharray applied
         if not any(parse_unit(i) is None for i in dashes):
-            dashes = [element.to_dimensionless(i) for i in dashes]
+            dashes = [convert_unit(i, "px") for i in dashes]
         else:
             return None
         if any(i < 0 for i in dashes):

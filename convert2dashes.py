@@ -97,7 +97,7 @@ class Dashit(inkex.EffectExtension):
                 i += 1
         style.pop("stroke-dasharray")
         node.pop("sodipodi:type")
-        node.path = CubicSuperPath(new)
+        node.path = CubicSuperPath(new).to_path(rtol=1e-10)
         node.style = style
 
 

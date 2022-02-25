@@ -1785,20 +1785,35 @@ class CubicSuperPath(list):
         except IndexError:
             return Vector2d()
 
-    def to_path(self, curves_only=False):
-        """Convert the super path back to an svg path"""
-        return Path(list(self.to_segments(curves_only)))
+    def to_path(self, curves_only=False, rtol=1e-5, atol=1e-8):
+        """Convert the super path back to an svg path
 
-    def to_segments(self, curves_only=False):
-        """Generate a set of segments for this cubic super path"""
+        Arguments: see :func:`to_segments` for parameters"""
+        return Path(list(self.to_segments(curves_only, rtol, atol)))
+
+    def to_segments(self, curves_only=False, rtol=1e-5, atol=1e-8):
+        """Generate a set of segments for this cubic super path
+
+        Arguments:
+            curves_only (bool, optional): If False, curves that can be represented
+                by Lineto / ZoneClose commands, will be. Defaults to False.
+            rtol (float, optional): relative tolerance, passed to :func:`is_line` and
+                :func:`inkex.transforms.ImmutableVector2d.is_close` for checking if a
+                line can be replaced by a ZoneClose command. Defaults to 1e-5.
+
+                .. versionadded:: 1.2
+            atol: absolute tolerance, passed to :func:`is_line` and
+                :func:`inkex.transforms.ImmutableVector2d.is_close`. Defaults to 1e-8.
+
+                .. versionadded:: 1.2"""
         for subpath in self:
             previous = []
             for segment in subpath:
                 if not previous:
                     yield Move(*segment[1][:])
-                elif self.is_line(previous, segment) and not curves_only:
+                elif self.is_line(previous, segment, rtol, atol) and not curves_only:
                     if segment is subpath[-1] and Vector2d(segment[1]).is_close(
-                        subpath[0][1]
+                        subpath[0][1], rtol, atol
                     ):
                         yield ZoneClose()
                     else:
@@ -1812,19 +1827,20 @@ class CubicSuperPath(list):
         return self.to_path().transform(transform).to_superpath()
 
     @staticmethod
-    def is_on(pt_a, pt_b, pt_c):
+    def is_on(pt_a, pt_b, pt_c, tol=1e-8):
         """Checks if point pt_a is on the line between points pt_b and pt_c
 
         .. versionadded:: 1.2"""
-        return CubicSuperPath.collinear(pt_a, pt_b, pt_c) and (
+        return CubicSuperPath.collinear(pt_a, pt_b, pt_c, tol) and (
             CubicSuperPath.within(pt_a[0], pt_b[0], pt_c[0])
             if pt_a[0] != pt_b[0]
             else CubicSuperPath.within(pt_a[1], pt_b[1], pt_c[1])
         )
 
     @staticmethod
-    def collinear(pt_a, pt_b, pt_c):
-        """Checks if points pt_a, pt_b, pt_c lie on the same line
+    def collinear(pt_a, pt_b, pt_c, tol=1e-8):
+        """Checks if points pt_a, pt_b, pt_c lie on the same line,
+        i.e. that the cross product (b-a) x (c-a) < tol
 
         .. versionadded:: 1.2"""
         return (
@@ -1832,7 +1848,7 @@ class CubicSuperPath(list):
                 (pt_b[0] - pt_a[0]) * (pt_c[1] - pt_a[1])
                 - (pt_c[0] - pt_a[0]) * (pt_b[1] - pt_a[1])
             )
-            < 10e-8
+            < tol
         )
 
     @staticmethod
@@ -1843,14 +1859,37 @@ class CubicSuperPath(list):
         return val_a <= val_b <= val_c or val_c <= val_b <= val_a
 
     @staticmethod
-    def is_line(previous, segment):
-        """Check whether csp segment (two points) has retracted handles or the handles
+    def is_line(previous, segment, rtol=1e-5, atol=1e-8):
+        """Check whether csp segment (two points) can be expressed as a line has retracted handles or the handles
         can be retracted without loss of information (i.e. both handles lie on the
-        line)"""
+        line)
 
-        retracted = Vector2d(previous[1]).is_close(previous[2]) and Vector2d(
-            segment[0]
-        ).is_close(segment[1])
+        .. versionchanged:: 1.2
+            Previously, it was only checked if both control points have retracted
+            handles. Now it is also checked if the handles can be retracted without
+            (visible) loss of information (i.e. both handles lie on the line connecting
+            the nodes).
+
+        Arguments:
+            previous: first node in superpath notation
+            segment: second node in superpath notation
+            rtol (float, optional): relative tolerance, passed to
+                :func:`inkex.transforms.ImmutableVector2d.is_close` for checking handle
+                retraction. Defaults to 1e-5.
+
+                .. versionadded:: 1.2
+            atol (float, optional): absolute tolerance, passed to
+                :func:`inkex.transforms.ImmutableVector2d.is_close` for checking handle
+                retraction and
+                :func:`inkex.paths.CubicSuperPath.is_on` for checking if all points
+                (nodes + handles) lie on a line. Defaults to 1e-8.
+
+                .. versionadded:: 1.2
+        """
+
+        retracted = Vector2d(previous[1]).is_close(
+            previous[2], rtol, atol
+        ) and Vector2d(segment[0]).is_close(segment[1], rtol, atol)
 
         if retracted:
             return True
@@ -1861,8 +1900,8 @@ class CubicSuperPath(list):
         # E.g. cspbezsplitatlength outputs non-retracted handles when splitting a
         # straight line
         return CubicSuperPath.is_on(
-            segment[0], segment[1], previous[2]
-        ) and CubicSuperPath.is_on(previous[2], previous[1], segment[0])
+            segment[0], segment[1], previous[2], atol
+        ) and CubicSuperPath.is_on(previous[2], previous[1], segment[0], atol)
 
 
 def arc_to_path(point, params):

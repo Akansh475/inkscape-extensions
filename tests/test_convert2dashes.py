@@ -20,4 +20,4 @@ class DashitBasicTest(ComparisonMixin, TestCase):
 class DashitCommaTest(ComparisonMixin, TestCase):
     comparisons = (["--id=dashme2"],)
     effect_class = Dashit
-    compare_file = "svg/dash.svg"
+    compare_file = ["svg/dash.svg", "svg/dash_zerolength.svg"]

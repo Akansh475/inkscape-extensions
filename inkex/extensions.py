@@ -103,6 +103,9 @@ class RasterOutputExtension(InkscapeExtension):
     def load(self, stream):
         from PIL import Image
 
+        # disable the PIL decompression bomb DOS attack check.
+        Image.MAX_IMAGE_PIXELS = None
+
         self.img = Image.open(stream)
 
     def effect(self):

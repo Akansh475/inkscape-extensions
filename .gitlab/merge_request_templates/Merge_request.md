@@ -2,7 +2,7 @@
 
 ...
 
-<!-- Summary of changes and referenced issues, e.g. "closes #123" -->
+<!-- Summary of changes and referenced issues, e.g. "closes #<issue-id>" -->
 
 ### Implementation notes
 

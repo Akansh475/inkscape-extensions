@@ -40,32 +40,49 @@ creates a zip archive containing all images and the document
 """
 
 import os
-import shutil
 import tempfile
 import zipfile
+
+from typing import List, Tuple
+from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 import inkex
 from inkex import TextElement, Tspan, FlowRoot, FlowPara, FlowSpan
 from inkex.localization import inkex_gettext as _
 
-try:  # PY2
-    from urllib import url2pathname
-    from urlparse import urlparse
-except ImportError:  # PY3
-    from urllib.parse import urlparse
-    from urllib.request import url2pathname
-
-ENCODING = "cp437" if os.name == "nt" else "latin-1"
-
 
 class CompressedMedia(inkex.OutputExtension):
     """Output a compressed file"""
 
+    def __init__(self):
+        super().__init__()
+        self.path_dict = {}
+
     def add_arguments(self, pars):
-        pars.add_argument("--image_dir", help="Image directory")
+        pars.add_argument("--image_dir", help="Image directory", default="images")
         pars.add_argument("--font_list", type=inkex.Boolean, help="Add font list")
 
-    def collect_images(self, docname, z):
+    def process_path(self, path: str) -> Tuple[str, bool]:
+        """Processes an absolute path and returns
+        (unique filename, exists)."""
+
+        if path in self.path_dict:
+            return os.path.split(path)[1], True
+
+        index = 0
+        pth, ext = os.path.splitext(path)
+        _, filename = os.path.split(pth)
+        trypath = filename + ext
+        while True:
+            if trypath in list(self.path_dict.values()):
+                index += 1
+                trypath = f"{filename}{index}{ext}"
+            else:
+                self.path_dict[path] = trypath
+                return trypath, False
+
+    def collect_images(self, docname, z: zipfile.ZipFile):
         """
         Collects all images in the document
         and copy them to the temporary directory.
@@ -75,30 +92,30 @@ class CompressedMedia(inkex.OutputExtension):
         for node in self.svg.xpath("//svg:image"):
             xlink = node.get("xlink:href")
             if xlink[:4] != "data":
-                absref = node.get("sodipodi:absref")
                 url = urlparse(xlink)
                 href = url2pathname(url.path)
 
-                if href is not None and os.path.isfile(href):
-                    absref = os.path.realpath(href)
+                image_path = self.absolute_href(href or "")
 
-                image_path = os.path.join(imgdir, os.path.basename(absref))
+                # Backup directory where we can find the image
+                if not os.path.isfile(image_path):
+                    image_path = node.get("sodipodi:absref", image_path)
 
-                if os.path.isfile(absref):
-                    shutil.copy(absref, self.tmp_dir)
-                    z.write(absref, image_path.encode(ENCODING))
-                elif os.path.isfile(os.path.join(self.tmp_dir, absref)):
-                    # TODO: please explain why this clause is necessary
-                    shutil.copy(os.path.join(self.tmp_dir, absref), self.tmp_dir)
-                    z.write(
-                        os.path.join(self.tmp_dir, absref), image_path.encode(ENCODING)
+                if not os.path.isfile(image_path):
+                    inkex.errormsg(
+                        _('File not found "{}". Unable to embed image.').format(
+                            image_path
+                        )
                     )
+                    continue
                 else:
-                    inkex.errormsg(_("Could not locate file: %s") % absref)
+                    zippath, exists = self.process_path(image_path)
+                    if not exists:
+                        z.write(image_path, os.path.join(imgdir, zippath))
 
-                node.set("xlink:href", image_path)
+                    node.set("xlink:href", f"{imgdir}/{zippath}")
 
-    def collect_svg(self, docstripped, z):
+    def collect_svg(self, docstripped, z: zipfile.ZipFile):
         """
         Copy SVG document to the temporary directory
         and add it to the temporary compressed file
@@ -136,14 +153,14 @@ class CompressedMedia(inkex.OutputExtension):
             fonts.append(s["-inkscape-font-specification"])
         return fonts
 
-    def list_fonts(self, z):
+    def list_fonts(self, z: zipfile.ZipFile):
         """
         Walks through nodes, building a list of all fonts found, then
         reports to the user with that list.
         Based on Craig Marshall's replace_font.py
         """
-        nodes = []
-        items = self.document.getroot().getiterator()
+        nodes: List[inkex.BaseElement] = []
+        items = self.svg.iterdescendants()
         nodes.extend(filter(self.is_text, items))
         fonts_found = []
         for node in nodes:

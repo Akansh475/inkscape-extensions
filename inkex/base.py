@@ -42,7 +42,7 @@ from typing import (
 from argparse import ArgumentParser, Namespace
 from lxml import etree
 
-from .interfaces.IElement import IBaseElement
+from .interfaces.IElement import IBaseElement, ISVGDocumentElement
 from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
 from .elements._parser import load_svg
 from .elements._utils import NSS
@@ -221,6 +221,8 @@ class InkscapeExtension:
             self.parse_arguments(args)
             if self.options.input_file is None:
                 self.options.input_file = sys.stdin
+            else:
+                os.environ["DOCUMENT_PATH"] = self.options.input_file
 
             if self.options.output is None:
                 self.options.output = output
@@ -252,6 +254,26 @@ class InkscapeExtension:
                 with open(self.options.output, "wb") as stream:
                     self.save(stream)
             else:
+                if sys.platform == "win32" and not "PYTEST_CURRENT_TEST" in os.environ:
+                    # When calling an extension from within Inkscape on Windows,
+                    # Python thinks that the output stream is seekable
+                    # (https://gitlab.com/inkscape/inkscape/-/issues/3273)
+                    self.options.output.seekable = lambda self: False
+
+                    def seek_replacement(offset: int, whence: int = 0):
+                        raise AttributeError(
+                            "We can't seek in the stream passed by Inkscape on Windows"
+                        )
+
+                    def tell_replacement():
+                        raise AttributeError(
+                            "We can't tell in the stream passed by Inkscape on Windows"
+                        )
+
+                    # Some libraries (e.g. ZipFile) don't query seekable, but check for an error
+                    # on seek
+                    self.options.output.seek = seek_replacement
+                    self.options.output.tell = tell_replacement
                 self.save(self.options.output)
 
     def load(self, stream):
@@ -448,7 +470,7 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods, abstract-
         """Load the stream as an svg xml etree and make a backup"""
         document = load_svg(stream)
         self.original_document = copy.deepcopy(document)
-        self.svg = document.getroot()
+        self.svg: ISVGDocumentElement = document.getroot()
         self.svg.selection.set(*self.options.ids)
         if not self.svg.selection and self.select_all:
             self.svg.selection = self.svg.descendants().filter(*self.select_all)

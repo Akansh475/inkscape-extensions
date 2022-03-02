@@ -425,7 +425,7 @@ class TempDirMixin(_Base):  # pylint: disable=abstract-method
         self._tempdir = TemporaryDirectory(  # pylint: disable=consider-using-with
             prefix=self.dir_prefix, suffix=self.dir_suffix
         )
-        self.tempdir = self._tempdir.name
+        self.tempdir = os.path.realpath(self._tempdir.name)
         super().load_raw()
 
     def clean_up(self):

@@ -114,7 +114,7 @@ class TestCase(MockCommandMixin, BaseCase):
     def tempdir(self):
         """Generate a temporary location to store files"""
         if self._temp_dir is None:
-            self._temp_dir = tempfile.mkdtemp(prefix="inkex-tests-")
+            self._temp_dir = os.path.realpath(tempfile.mkdtemp(prefix="inkex-tests-"))
         if not os.path.isdir(self._temp_dir):
             raise IOError("The temporary directory has disappeared!")
         return self._temp_dir

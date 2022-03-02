@@ -185,7 +185,7 @@ class MockCommandMixin(MockMixin):
     def record_tempdir(self, *args, **kwargs):
         """Record any attempts to make tempdirs"""
         newdir = self.old_call("mkdtemp")(*args, **kwargs)
-        self.recorded_tempdirs.append(newdir)
+        self.recorded_tempdirs.append(os.path.realpath(newdir))
         return newdir
 
     def clean_paths(self, data, files):

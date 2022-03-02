@@ -24,6 +24,8 @@ will use are not given easy to use convience functions.
 This makes Gtk programming WET, unattractive and error prone. This module steps
 inbetween and adds in all those missing bits. It's not meant to replace Gtk and
 certainly it's possible to use Gtk and threading directly.
+
+.. versionadded:: 1.2
 """
 
 import threading

@@ -37,7 +37,9 @@ from ._polygons import PathElementBase
 
 
 class TextBBMixin:  # pylint: disable=too-few-public-methods
-    """Mixin to query the bounding box from Inkscape"""
+    """Mixin to query the bounding box from Inkscape
+
+    .. versionadded:: 1.2"""
 
     def get_inkscape_bbox(self: BaseElementProtocol) -> BoundingBox:
         """Query the bbbox of a single object. This calls the Inkscape command,

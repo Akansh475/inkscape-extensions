@@ -206,7 +206,9 @@ class ImmutableVector2d:
 
     def to_polar_tuple(self):
         # type: () -> Tuple[float, Optional[float]]
-        """A tuple of the vector's magnitude and direction"""
+        """A tuple of the vector's magnitude and direction
+
+        .. versionadded:: 1.1"""
         return self.length, self.angle
 
     def dot(self, other: VectorLike) -> float:
@@ -216,7 +218,9 @@ class ImmutableVector2d:
 
     def cross(self, other):
         # type: (VectorLike) -> float
-        """Z component of the cross product of the vectors extended into 3D"""
+        """Z component of the cross product of the vectors extended into 3D
+
+        .. versionadded:: 1.1"""
         other = Vector2d(other)
         return self.x * other.y - self.y * other.x
 
@@ -240,7 +244,9 @@ class ImmutableVector2d:
     @property
     def angle(self):
         # type: () -> Optional[float]
-        """The angle of the vector when represented in polar coordinates"""
+        """The angle of the vector when represented in polar coordinates
+
+        .. versionadded:: 1.1"""
         if self.x == 0 and self.y == 0:
             return None
         return atan2(self.y, self.x)
@@ -255,6 +261,8 @@ class Vector2d(ImmutableVector2d):
         """Creates a Vector2d from polar coordinates
 
         None is returned when theta is None and radius is not zero.
+
+        .. versionadded:: 1.1
         """
         if radius == 0.0:
             return Vector2d(0.0, 0.0)
@@ -369,7 +377,9 @@ class Transform:
 
     def _set_matrix(self, matrix):
         # type: (MatrixLike) -> None
-        """Parse a given string as an svg transformation instruction."""
+        """Parse a given string as an svg transformation instruction.
+
+        .. versionadded:: 1.1"""
         if isinstance(matrix, str):
             for func, values in self.TRM.findall(matrix.strip()):
                 getattr(self, "add_" + func.lower())(*strargs(values))
@@ -674,7 +684,10 @@ class Transform:
 
     def interpolate(self, other, fraction):
         # type: (Transform, float) -> Transform
-        """Interpolate with another Transform."""
+        """Interpolate with another Transform.
+
+        .. versionadded:: 1.1
+        """
         from .tween import TransformInterpolator
 
         return TransformInterpolator(self, other).interpolate(fraction)
@@ -872,7 +885,9 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def new_xywh(x: float, y: float, width: float, height: float) -> BoundingBox:
-        """Create a bounding box using x, y, width and height"""
+        """Create a bounding box using x, y, width and height
+
+        .. versionadded:: 1.2"""
         return BoundingBox((x, x + width), (y, y + height))
 
     def __bool__(self):
@@ -946,7 +961,9 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
 
     @property
     def area(self):
-        """Return area of the bounding box"""
+        """Return area of the bounding box
+
+        .. versionadded:: 1.2"""
         return self.width * self.height
 
     @property
@@ -973,7 +990,9 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
 
     @property
     def size(self):
-        """Returns a vector containing width and height of the bounding box"""
+        """Returns a vector containing width and height of the bounding box
+
+        .. versionadded:: 1.2"""
         return Vector2d(self.x.size, self.y.size)
 
     def get_anchor(self, xanchor, yanchor, direction=0, selbox=None):
@@ -1029,7 +1048,9 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
     def resize(self, delta_x: float, delta_y: float = None) -> BoundingBox:
         """Enlarges / shrinks a bounding box by a constant value. If only delta_x
         is given, each side is moved by the same amount; if delta_y is given,
-        different deltas are applied to horizontal and vertical intervals."""
+        different deltas are applied to horizontal and vertical intervals.
+
+        .. versionadded:: 1.2"""
         delta_y = delta_y or delta_x
         return BoundingBox(
             (self.x.minimum - delta_x, self.x.maximum + delta_x),
@@ -1103,6 +1124,8 @@ class DirectedLineSegment:
 
         The vector of the directed line segment represents the length
         and direction of segment, but not the starting point.
+
+        .. versionadded:: 1.1
         """
         return self.end - self.start
 

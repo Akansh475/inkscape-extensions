@@ -140,11 +140,11 @@ def zSort(inNode, idList):
 
 # This can't be handled as a mixin class because of circular importing.
 def description(self, value):
-    """elem.desc = value"""
+    """Use elem.desc = value"""
     self.desc = value
 
 
-BaseElement.description = deprecate(description)
+BaseElement.description = deprecate(description, "1.1")
 
 
 def composed_style(element: ShapeElement):
@@ -153,29 +153,15 @@ def composed_style(element: ShapeElement):
     return element.specified_style()
 
 
-ShapeElement.composed_style = deprecate(composed_style)
-
-
-def width(self):
-    """Use BaseElement.viewport_width instead"""
-    return self.viewport_width
-
-
-def height(self):
-    """Use BaseElement.viewport_height instead"""
-    return self.viewport_height
-
-
-BaseElement.width = property(deprecate(width))
-BaseElement.height = property(deprecate(height))
+ShapeElement.composed_style = deprecate(composed_style, "1.2")
 
 
 def paint_order(selection: ElementList):
-    """svg.selection.rendering_order()"""
+    """Use :func:`rendering_order`"""
     return selection.rendering_order()
 
 
-ElementList.paint_order = deprecate(paint_order)  # type: ignore
+ElementList.paint_order = deprecate(paint_order, "1.2")  # type: ignore
 
 
 def transform_imul(self, matrix):
@@ -188,5 +174,5 @@ def transform_mul(self, matrix):
     return self.__matmul__(matrix)
 
 
-Transform.__imul__ = deprecate(transform_imul)  # type: ignore
-Transform.__mul__ = deprecate(transform_mul)  # type: ignore
+Transform.__imul__ = deprecate(transform_imul, "1.2")  # type: ignore
+Transform.__mul__ = deprecate(transform_mul, "1.2")  # type: ignore

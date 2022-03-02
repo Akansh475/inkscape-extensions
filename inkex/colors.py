@@ -433,14 +433,18 @@ class Color(list):
         return Color(COLOR_SVG.get(str(self), str(self)))
 
     def interpolate(self, other, fraction):
-        """Iterpolate two colours by the given fraction"""
+        """Interpolate two colours by the given fraction
+
+        .. versionadded:: 1.1"""
         from .tween import ColorInterpolator  # pylint: disable=import-outside-toplevel
 
         return ColorInterpolator(self, other).interpolate(fraction)
 
     @staticmethod
     def isnone(x):
-        """Checks if a given color is none"""
+        """Checks if a given color is none
+
+        .. versionadded:: 1.2"""
 
         if x is None or (isinstance(x, str) and x.lower() == "none"):
             return True
@@ -448,7 +452,9 @@ class Color(list):
 
     @staticmethod
     def iscolor(x, accept_none=False):
-        """Checks if a given value can be parsed as a color"""
+        """Checks if a given value can be parsed as a color
+
+        .. versionadded:: 1.2"""
         if isinstance(x, str) and (accept_none or not (Color.isnone(x))):
             try:
                 Color(x)

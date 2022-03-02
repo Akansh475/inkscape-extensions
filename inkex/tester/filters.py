@@ -24,10 +24,12 @@ Each filter should be initialised in the list of
 filters that are being used.
 
 .. code-block:: python
-.. compare_filters = [
-..    CompareNumericFuzzy(),
-..    CompareOrderIndependentLines(option=yes),
-.. ]
+
+    compare_filters = [
+        CompareNumericFuzzy(),
+        CompareOrderIndependentLines(option=yes),
+    ]
+
 """
 
 import re
@@ -154,7 +156,9 @@ class CompareOrderIndependentTags(Compare):
 
 
 class CompareReplacement(Compare):
-    """Replace pieces to make output more comparable"""
+    """Replace pieces to make output more comparable
+
+    .. versionadded:: 1.1"""
 
     def __init__(self, *replacements):
         self.deltas = replacements
@@ -168,7 +172,9 @@ class CompareReplacement(Compare):
 
 
 class WindowsTextCompat(CompareReplacement):
-    """Normalize newlines so tests comparing plain text work"""
+    """Normalize newlines so tests comparing plain text work
+
+    .. versionadded:: 1.2"""
 
     def __init__(self):
         super().__init__(("\r\n", "\n"))

@@ -9,7 +9,7 @@ This provides the basis from which you can develop your inkscape extension.
 import sys
 
 from .extensions import *
-from .utils import *
+from .utils import AbortExtension, DependencyError, Boolean, errormsg
 from .styles import *
 from .paths import Path, CubicSuperPath  # Path commands are not exported
 from .colors import *

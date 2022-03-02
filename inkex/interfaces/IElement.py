@@ -1,3 +1,7 @@
+"""Element abstractions for type comparisons without circular imports
+
+.. versionadded:: 1.2"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

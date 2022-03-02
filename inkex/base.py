@@ -131,13 +131,18 @@ class InkscapeExtension:
     def arg_number_ranges():
 
         """Parses a number descriptor. e.g:
-        1,2,4-5,7,9- is parsed to 1, 2, 4, 5, 7, 9, 10, ..., lastvalue
+        ``1,2,4-5,7,9-`` is parsed to ``1, 2, 4, 5, 7, 9, 10, ..., lastvalue``
+
+        .. versionadded:: 1.2
+
+        Usage:
 
         .. code-block:: python
-        .. # in add_arguments()
-        .. pars.add_argument("--pages", type=self.arg_number_ranges(), default=1-)
-        .. # later on, pages is then a list of ints
-        .. pages = self.options.pages(lastvalue)
+
+            # in add_arguments()
+            pars.add_argument("--pages", type=self.arg_number_ranges(), default=1-)
+            # later on, pages is then a list of ints
+            pages = self.options.pages(lastvalue)
 
         """
 
@@ -175,9 +180,15 @@ class InkscapeExtension:
         """Used by add_argument to match an option with a class
 
         Types to choose from are given by the options list
+
+        .. versionadded:: 1.2
+
         Usage:
-        pars.add_argument("--class", type=self.arg_class([ClassA, ClassB]),
-        default="ClassA")
+
+        .. code-block:: python
+
+            pars.add_argument("--class", type=self.arg_class([ClassA, ClassB]),
+                              default="ClassA")
         """
 
         def _inner(value: str):
@@ -273,8 +284,12 @@ class InkscapeExtension:
     def svg_path(cls, default=None):
         # type: (Optional[str]) -> Optional[str]
         """
-        Return the folder the
+        Return the folder the svg is contained in.
         Returns None if there is no file.
+
+        .. versionchanged:: 1.1
+            A default path can be given which is returned in case no path to the
+            SVG file can be determined.
         """
         path = cls.document_path()
         if path:
@@ -292,7 +307,9 @@ class InkscapeExtension:
     @classmethod
     def get_resource(cls, name, abort_on_fail=True):
         # type: (str, bool) -> str
-        """Return the full filename of the resource in the extension's dir"""
+        """Return the full filename of the resource in the extension's dir
+
+        .. versionadded:: 1.1"""
         filename = cls.absolute_href(name, cwd=cls.ext_path())
         if abort_on_fail and not os.path.isfile(filename):
             raise AbortExtension(f"Could not find resource file: {filename}")
@@ -312,6 +329,8 @@ class InkscapeExtension:
          * Inkscape may have not written the latest changes, leaving you reading old
            data.
          * Inkscape will not respect anything you write to the file, causing data loss.
+
+        .. versionadded:: 1.1
         """
         return os.environ.get("DOCUMENT_PATH", None)
 
@@ -325,8 +344,11 @@ class InkscapeExtension:
         User's home folder is also resolved. So '~/a.png` will be `/home/bob/a.png`
 
         Default is a fallback working directory to use if the svg's filename is not
-        available, if you set default to None, then the user will be given errors if
-        there's no working directory available from Inkscape.
+        available.
+
+        .. versionchanged:: 1.1
+            If you set default to None, then the user will be given errors if
+            there's no working directory available from Inkscape.
         """
         filename = os.path.expanduser(filename)
         if not os.path.isabs(filename):

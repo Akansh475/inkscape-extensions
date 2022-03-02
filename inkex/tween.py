@@ -17,7 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-"""Module for interpolating attributes and styles"""
+"""Module for interpolating attributes and styles
+
+.. versionchanged:: 1.2
+    Rewritten in inkex 1.2 in an object-oriented structure to support more attributes.
+"""
 from bisect import bisect_left
 import abc
 import copy
@@ -77,7 +81,7 @@ class AttributeInterpolator(abc.ABC):
 
         Returns:
             Style: If the node is rooted, the CSS specified style. Else, the inline
-                style."""
+            style."""
         try:
             return node.specified_style()
         except FragmentError:
@@ -156,10 +160,11 @@ class StyleInterpolator(AttributeInterpolator):
     @staticmethod
     def create(snode, enode, attribute):
         """Creates an Interpolator for a given style attribute, depending on its type:
-        - Color properties (such as fill, stroke) -> ColorInterpolator,
-            GradientInterpolator ect.
-        - Unit properties -> UnitValueInterpolator
-        - other properties -> ValueInterpolator
+
+            - Color properties (such as fill, stroke) -> :class:`ColorInterpolator`,
+              :class:`GradientInterpolator` ect.
+            - Unit properties -> :class:`UnitValueInterpolator`
+            - other properties -> :class:`ValueInterpolator`
 
         Args:
             snode (BaseElement): start element
@@ -171,7 +176,7 @@ class StyleInterpolator(AttributeInterpolator):
 
         Returns:
             AttributeInterpolator: an interpolator object whose type depends on the
-                attribute.
+            attribute.
         """
         if attribute in Style.color_props:
             return StyleInterpolator.create_from_fill_stroke(snode, enode, attribute)
@@ -205,7 +210,7 @@ class StyleInterpolator(AttributeInterpolator):
 
         Returns:
             AttributeInterpolator: an interpolator object whose type depends on the
-                attribute.
+            attribute.
         """
         if attribute not in Style.color_props:
             raise ValueError("attribute must be a color property")

@@ -28,7 +28,10 @@ from .styles import Style
 
 
 class PathTurtle:
-    """A Python path turtle"""
+    """A Python path turtle
+
+    .. versionchanged:: 1.2
+        pTurtle has been renamed to PathTurtle."""
 
     def __init__(self, home=(0, 0)):
         self.__home = [home[0], home[1]]
@@ -59,15 +62,15 @@ class PathTurtle:
     def right(self, deg):
         """Rotate turtle right by deg degrees.
 
-        Changed in inkex 1.2: The turtle now rotates right (previously left) when calling this
-            method."""
+        Changed in inkex 1.2: The turtle now rotates right (previously left) when
+            calling this method."""
         self.__heading += deg
 
     def left(self, deg):
         """Rotate turtle left by deg degrees.
 
-        Changed in inkex 1.2: The turtle now rotates left (previously right) when calling this
-            method."""
+        Changed in inkex 1.2: The turtle now rotates left (previously right) when
+            calling this method."""
         self.__heading -= deg
 
     def penup(self):
@@ -163,7 +166,9 @@ pTurtle = PathTurtle  # should be deprecated
 
 class PathBuilder:
     """This helper class can be used to construct a path and insert it into a
-    document."""
+    document.
+
+    .. versionadded:: 1.2"""
 
     def __init__(self, style: Style):
         """Initializes a PathDrawHelper object
@@ -221,7 +226,9 @@ class PathBuilder:
 
 class PathGroupBuilder(PathBuilder):
     """This helper class can be used to construct a group of paths that all have the
-    same style."""
+    same style.
+
+    .. versionadded:: 1.2"""
 
     def __init__(self, style):
         super().__init__(style)

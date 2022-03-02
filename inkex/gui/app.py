@@ -32,9 +32,11 @@ class GtkApp:
     This wraps gtk builder and allows for some extra functionality with
     windows, especially the management of gtk main loops.
 
-      start_loop - If set to true will start a new gtk main loop.
-      **kwargs   - Used as local propertes if unset and passed to
-                   primary window when loaded.
+    Args:
+        start_loop (bool, optional): If set to true will start a new gtk main loop.
+            Defaults to False.
+        start_gui (bool, optional): Used as local propertes if unset and passed to
+                primary window when loaded. Defaults to True.
     """
 
     @property
@@ -73,6 +75,7 @@ class GtkApp:
         return self._primary
 
     def __init__(self, start_loop=False, start_gui=True, **kwargs):
+        """Creates a new GtkApp."""
         self.kwargs = kwargs
         self._loaded = {}
         self._initial = {}

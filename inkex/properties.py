@@ -18,6 +18,13 @@
 #
 """
 Property management and parsing, CSS cascading, default value storage
+
+.. versionadded:: 1.2
+
+.. data:: all_properties
+
+    A list of all properties, their parser class, and additional information
+    such as whether they are inheritable or can be given as presentation attributes
 """
 
 from abc import ABC, abstractmethod
@@ -60,7 +67,7 @@ class BaseStyleValue:
 
         Args:
             declaration (str): a css declaration such as:
-                "fill: #000 !important;". The trailing semicolon may be ommitted.
+                ``fill: #000 !important;``. The trailing semicolon may be ommitted.
 
         Raises:
             ValueError: Unable to parse the declaration
@@ -289,7 +296,7 @@ def match_url_and_return_element(string: str, svg):
 
 
 class URLNoneValue(BaseStyleValue):
-    """Stores a marker, which is given as url.
+    """Stores a value that is either none or an url, such as markers or masks.
 
     Reference: https://www.w3.org/TR/SVG2/painting.html#VertexMarkerProperties"""
 
@@ -531,7 +538,6 @@ class StrokeDasharrayValue(BaseStyleValue):
 # Source for this list: https://www.w3.org/TR/SVG2/styling.html#PresentationAttributes
 
 
-# pylint: disable=line-too-long
 all_properties: Dict[
     str, Tuple[Type[BaseStyleValue], str, bool, bool, Union[List[str], None]]
 ] = {
@@ -794,4 +800,3 @@ all_properties: Dict[
     ),
     "-inkscape-font-specification": (BaseStyleValue, "sans-serif", False, True, None),
 }
-# pylint: enable=line-too-long

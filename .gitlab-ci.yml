@@ -132,23 +132,17 @@ sphinx:
   script:
     - source /root/pyenv-init
     - pyenv shell 3.9.0
-    - pip3 install Sphinx==4.2.0
-    - pip3 install sphinx-autodoc-typehints
-    - pip3 install typed-ast
-    - pip3 install lxml
-    - pip3 install cssselect
-    - pip3 install numpy
-    - pip3 install pytest
-    - pip3 install sphinx-rtd-theme
-    - sphinx-apidoc -F -f -e -P -o docs/source inkex */deprecated.py
-    - python3 setup.py build_sphinx -s docs
+    - pip install -r pip/docs.txt
+    - sphinx-apidoc -e -P -o docs/source inkex */deprecated.py
+    - cd docs
+    - make html
     - echo -e "\n\n"
       "Documentation for inkex module successfully created; you can access the HTML version at\n"
-      "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/sphinx/html/index.html"
+      "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/html/index.html"
       "\n\n"
   artifacts:
     paths:
-      - build/sphinx/
+      - build/html/
 pages:
   stage: deploy
   only:
@@ -157,7 +151,7 @@ pages:
   script:
     - mkdir -p public
     - if test -e htmlcov; then cp -r htmlcov public/coverage; fi
-    - if test -e build/sphinx/html; then cp -r build/sphinx/html public/documentation; fi
+    - if test -e build/html; then cp -r build/html public/documentation; fi
   artifacts:
     paths:
       - public

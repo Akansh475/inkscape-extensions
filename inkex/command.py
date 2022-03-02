@@ -170,7 +170,9 @@ def to_args(prog, *positionals, **arguments):
 
 
 def to_args_sorted(prog, *positionals, **arguments):
-    """same as to_args, but keyword arguments are sorted beforehand"""
+    """same as :func:`to_args`, but keyword arguments are sorted beforehand
+
+    .. versionadded:: 1.2"""
     return to_args(prog, *positionals, **dict(sorted(arguments.items())))
 
 
@@ -204,15 +206,19 @@ def _call(program, *args, **kwargs):
 
 def call(program, *args, **kwargs):
     """
-    Generic caller to open any program and return its stdout.
+    Generic caller to open any program and return its stdout::
 
-    stdout = call('executable', arg1, arg2, dash_dash_arg='foo', d=True, ...)
+        stdout = call('executable', arg1, arg2, dash_dash_arg='foo', d=True, ...)
 
-    Will raise ProgramRunError() if return code is not 0.
+    Will raise :class:`ProgramRunError` if return code is not 0.
 
-     * return_binary - Should stdout return raw bytes (default: False)
-     * stdin - The string or bytes containing the stdin (default: None)
-     * All other arguments converted using to_args(...) function.
+    Keyword arguments:
+        return_binary: Should stdout return raw bytes (default: False)
+
+            .. versionadded:: 1.1
+        stdin: The string or bytes containing the stdin (default: None)
+
+    All other arguments converted using :func:`to_args` function.
     """
     # We use this long input because it's less likely to conflict with --binary=
     binary = kwargs.pop("return_binary", False)

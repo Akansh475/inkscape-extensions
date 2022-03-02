@@ -38,7 +38,7 @@ def _deprecated(msg, stack=2, level=DEPRECATION_LEVEL):
         warnings.warn(msg, category=DeprecationWarning, stacklevel=stack + 1)
 
 
-def deprecate(func):
+def deprecate(func, version: str = None):
     r"""Function decorator for deprecation functions which have a one-liner
     equivalent in the new API. The one-liner has to passed as a string
     to the decorator.
@@ -60,7 +60,10 @@ def deprecate(func):
 
     _inner.__name__ = func.__name__
     if func.__doc__:
-        _inner.__doc__ = "Deprecated -> " + func.__doc__
+        if version is None:
+            _inner.__doc__ = "Deprecated -> " + func.__doc__
+        else:
+            _inner.__doc__ = f"""{func.__doc__}\n\n.. deprecated:: {version}\n"""
     return _inner
 
 

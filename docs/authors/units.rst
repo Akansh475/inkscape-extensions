@@ -1,3 +1,5 @@
+.. _units:
+
 Units
 =================
 
@@ -157,7 +159,7 @@ Units in Inkex
 As an extension autor, you may have four different questions regarding units. 
 
 What is the position of this object [in the user coordinate system]?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This is a question that typically needs to be answered if you want to position an object relative
 to other objects, whose coordinates may be specified in a different unit.
@@ -168,6 +170,11 @@ everything to user units.
 Each :class:`BaseElement <inkex.elements._base.BaseElement>` has a method 
 :meth:`to_dimensionless <inkex.elements._base.BaseElement.to_dimensionless>`. This method parses a 
 ``length`` value and returns it, converted to px (user units). 
+
+:meth:`~inkex.elements._base.BaseElement.to_dimensionless` fulfils the following task:
+**Convert this string from the XML into a number, while processing the unit.
+When using this function on any SVG attribute and replacing the
+original value with the result, the output doesn't change visually.**
 
 In these and the following examples, the above "business card" SVG will be used.
 
@@ -192,8 +199,7 @@ Vector2d(79.3701, 52.9134)
 What is the dimension of an object in a specified unit in the user coordinate system?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are relatively few use cases for this, but if you want to, you can also convert from 
-user units to any unit. This is done using 
+You can also convert from user units to any unit. This is done using 
 :meth:`BaseElement.to_dimensional <inkex.elements._base.BaseElement.to_dimensional>`. 
 
 >>> svg.to_dimensional(svg.getElementById("c2").radius, "px")
@@ -216,15 +222,24 @@ The method for this is called :meth:`BaseElement.unit_to_viewport <inkex.element
 >>> svg.unit_to_viewport("4", "mm")
 4.0
 
+In other words, ``unit_to_viewport(value, unit="px")`` answers the following
+question: **What does the the width/height widget of the selection
+tool (set to** ``unit`` **) show when selecting an element with width**
+``value`` **as defined in the SVG?** Consider again 
+``<svg width="210mm" viewBox="0 0 105 147.5"><rect width="100" height="100"/></svg>``
+, i.e. a "mm-based" document with scale=2. When selecting this rectangle, the rectangle tool 
+shows ``viewport_to_unit("100", unit="mm") = 200``, if the rectangle tool is set to mm.
+
 Obviously the element needs to know the viewport of its SVG document for this. This method therefore
 does not work if the element is unrooted.
+
 
 How big does an object have to be to have the specified size on the viewport?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This is useful if you want to draw a shape at a given location on the viewport, regardless of
 what the user coordinate system is. This is done using
-:meth:`BaseElement.viewport_to_unit <inkex.elements._base.BaseElement.viewport to unit>`.
+:meth:`BaseElement.viewport_to_unit <inkex.elements._base.BaseElement.viewport_to_unit>`.
 
 >>> svg.viewport_to_unit("4mm", "px")  
 4.0
@@ -238,6 +253,19 @@ tool as ``9pt``, you have to user
 
 Again, this method will raise an error if the element is unrooted.
 
+In other words, ``viewport_to_unit(value, target_unit="px")`` answers the following question: 
+**What is the SVG representation of entering** ``value`` **in the width/height widget of the 
+selection tool (set to the unit of value)?** Consider 
+``<svg width="210mm" viewBox="0 0 105 147.5"><rect width="?" height="?"/></svg>``,
+i.e. a "mm-based" SVG with scale=2. When typing ``200`` in the
+rectangle tool, set to mm, the XML editor shows ``100`` =
+``100px``. That's what ``viewport_to_unit("200mm") = 100`` does.
+
+Note that this is different than
+``viewport_to_unit("200", "mm")``, which would be for a rectangle
+with a width (in the width/height widget of the rectangle tool) of
+200 (px), while writing the width in ``mm`` *in the SVG*:
+``<rect width="7.00043mm" height="7.00043mm"/>``.
 
 Document dimensions
 ^^^^^^^^^^^^^^^^^^^^^^^^

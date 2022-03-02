@@ -14,9 +14,6 @@ from io import BytesIO
 from inkex.paths import Path
 
 
-from inkex.paths import Path
-
-
 def text_compare(test1, test2):
     """
     Compare two text strings while allowing for '*' to match

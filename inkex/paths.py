@@ -54,6 +54,9 @@ AbsolutePathlike = TypeVar("AbsolutePathlike", bound="AbsolutePathCommand")
 __all__ = (
     "Path",
     "CubicSuperPath",
+    "PathCommand",
+    "AbsolutePathCommand",
+    "RelativePathCommand",
     # Path commands:
     "Line",
     "line",
@@ -132,11 +135,15 @@ class PathCommand(abc.ABC):
         raise NotImplementedError
 
     def reverse(self, first, prev):
-        """Reverse path command"""
+        """Reverse path command
+
+        .. versionadded:: 1.1"""
 
     def to_non_shorthand(self, prev, prev_control):  # pylint: disable=unused-argument
         # type: (Vector2d, Vector2d) -> AbsolutePathCommand
-        """Return an absolute non-shorthand command"""
+        """Return an absolute non-shorthand command
+
+        .. versionadded:: 1.1"""
         return self.to_absolute(prev)
 
     # The precision of the numbers when converting to string
@@ -210,6 +217,7 @@ class PathCommand(abc.ABC):
     def to_curve(self, prev, prev_prev=Vector2d()):
         # type: (Vector2d, Vector2d) -> Curve
         """Convert command to :py:class:`Curve`
+
         Curve().to_curve() returns a copy
         """
         raise NotImplementedError(f"To curve not supported for {self.name}")
@@ -1252,7 +1260,7 @@ class Path(list):
         A handy class for Path traverse and coordinate access
 
         Reduces number of arguments in user code compared to bare
-        :py:class:`PathCommand` methods
+        :class:`PathCommand` methods
         """
 
         def __init__(
@@ -1563,7 +1571,9 @@ class Path(list):
 
     def to_non_shorthand(self):
         # type: () -> Path
-        """Convert this path to use only absolute non-shorthand coordinates"""
+        """Convert this path to use only absolute non-shorthand coordinates
+
+        .. versionadded:: 1.1"""
         return self._to_absolute(False)
 
     def _to_absolute(self, shorthand: bool) -> Path:
@@ -1678,7 +1688,11 @@ class CubicSuperPath(list):
         return str(self.to_path())
 
     def append(self, item, force_shift=False):
-        """Accept multiple different formats for the data"""
+        """Accept multiple different formats for the data
+
+        .. versionchanged:: 1.2
+            ``force_shift`` parameter has been added
+        """
         if isinstance(item, list) and len(item) == 2 and isinstance(item[0], str):
             item = PathCommand.letter_to_class(item[0])(*item[1])
         coordinate_shift = True
@@ -1799,7 +1813,9 @@ class CubicSuperPath(list):
 
     @staticmethod
     def is_on(pt_a, pt_b, pt_c):
-        """Checks if point pt_a is on the line between points pt_b and pt_c"""
+        """Checks if point pt_a is on the line between points pt_b and pt_c
+
+        .. versionadded:: 1.2"""
         return CubicSuperPath.collinear(pt_a, pt_b, pt_c) and (
             CubicSuperPath.within(pt_a[0], pt_b[0], pt_c[0])
             if pt_a[0] != pt_b[0]
@@ -1808,7 +1824,9 @@ class CubicSuperPath(list):
 
     @staticmethod
     def collinear(pt_a, pt_b, pt_c):
-        """Checks if points pt_a, pt_b, pt_c lie on the same line"""
+        """Checks if points pt_a, pt_b, pt_c lie on the same line
+
+        .. versionadded:: 1.2"""
         return (
             abs(
                 (pt_b[0] - pt_a[0]) * (pt_c[1] - pt_a[1])
@@ -1819,7 +1837,9 @@ class CubicSuperPath(list):
 
     @staticmethod
     def within(val_b, val_a, val_c):
-        """Checks if float val_b is between val_a and val_c"""
+        """Checks if float val_b is between val_a and val_c
+
+        .. versionadded:: 1.2"""
         return val_a <= val_b <= val_c or val_c <= val_b <= val_a
 
     @staticmethod
@@ -1849,8 +1869,8 @@ def arc_to_path(point, params):
     """Approximates an arc with cubic bezier segments.
 
     Arguments:
-    point:  Starting point (absolute coords)
-    params: Arcs parameters as per
+        point:  Starting point (absolute coords)
+        params: Arcs parameters as per
               https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 
     Returns a list of triplets of points :

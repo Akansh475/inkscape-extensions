@@ -17,7 +17,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-"""Toplevel CSS utils that do not depend on other inkex functionality"""
+"""Toplevel CSS utils that do not depend on other inkex functionality
+
+.. versionadded:: 1.2
+    Previously a part of :py:mod:`inkex.styles`"""
 
 
 import re
@@ -25,7 +28,10 @@ import cssselect
 
 
 class ConditionalRule:
-    """A single css rule"""
+    """A single css rule
+
+    .. versionchanged:: 1.2
+        The CSS rule is now processed using cssselect."""
 
     step_to_xpath = [
         # namespace addition
@@ -49,5 +55,7 @@ class ConditionalRule:
         return ret.strip()
 
     def get_specificity(self):
-        """gets the css specificity of this selector"""
+        """gets the css specificity of this selector
+
+        .. versionadded:: 1.2"""
         return self.selector.specificity()

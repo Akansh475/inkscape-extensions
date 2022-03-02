@@ -28,9 +28,6 @@ import math
 from argparse import ArgumentTypeError
 from itertools import tee
 
-# All the names that get added to the inkex API itself.
-__all__ = ("AbortExtension", "DependencyError", "Boolean", "errormsg")
-
 ABORT_STATUS = -5
 
 (X, Y) = range(2)
@@ -58,7 +55,9 @@ def _pythonpath():
 
 
 def get_user_directory():
-    """Return the user directory where extensions are stored."""
+    """Return the user directory where extensions are stored.
+
+    .. versionadded:: 1.1"""
     if "INKSCAPE_PROFILE_DIR" in os.environ:
         return os.path.abspath(
             os.path.expanduser(
@@ -74,7 +73,9 @@ def get_user_directory():
 
 
 def get_inkscape_directory():
-    """Return the system directory where inkscape's core is."""
+    """Return the system directory where inkscape's core is.
+
+    .. versionadded:: 1.1"""
     for pth in _pythonpath():
         if os.path.isdir(os.path.join(pth, "inkex")):
             return pth
@@ -96,7 +97,9 @@ class KeyDict(dict):
 
 def parse_percent(val: str):
     """Parse strings that are either values (i.e., '3.14159') or percentages
-    (i.e. '75%') to a float."""
+    (i.e. '75%') to a float.
+
+    .. versionadded:: 1.2"""
     val = val.strip()
     if val.endswith("%"):
         return float(val[:-1]) / 100
@@ -113,7 +116,9 @@ def Boolean(value):
 
 
 def to_bytes(content):
-    """Ensures the content is bytes"""
+    """Ensures the content is bytes
+
+    .. versionadded:: 1.1"""
     if isinstance(content, bytes):
         return content
     return str(content).encode("utf8")
@@ -126,7 +131,9 @@ def debug(what):
 
 
 def do_nothing(*args, **kwargs):  # pylint: disable=unused-argument
-    """A blank function to do nothing"""
+    """A blank function to do nothing
+
+    .. versionadded:: 1.1"""
 
 
 def errormsg(msg):
@@ -136,7 +143,7 @@ def errormsg(msg):
     something better in future: e.g. could add markup to distinguish error
     messages from status messages or debugging output.)
 
-    Note that this should always be combined with translation:
+    Note that this should always be combined with translation::
 
       import inkex
       ...
@@ -190,8 +197,14 @@ def to(kind):  # pylint: disable=invalid-name
 
 
 def strargs(string, kind=float):
-    """Returns a list of floats from a string with commas or space separators,
-    also splits at -(minus) signs by adding a space in front of the - sign
+    """Returns a list of floats from a string
+
+    .. versionchanged:: 1.1
+        also splits at -(minus) signs by adding a space in front of the - sign
+
+    .. versionchanged:: 1.2
+        Full support for the `SVG Path data BNF
+        <https://www.w3.org/Graphics/SVG/1.1/paths.html#PathDataBNF>`_
     """
     return [kind(val) for val in NUMBER_REX.findall(string)]
 
@@ -230,7 +243,11 @@ EVAL_GLOBALS.update(math.__dict__)
 
 def math_eval(function, variable="x"):
     """Interpret a function string. All functions from math and random may be used.
-    @returns a lambda expression if sucessful; otherwise None.
+
+    .. versionadded:: 1.1
+
+    Returns:
+        a lambda expression if sucessful; otherwise None.
     """
     try:
         if function != "":
@@ -244,7 +261,9 @@ def math_eval(function, variable="x"):
 
 
 def is_number(string):
-    """Checks if a value is a number"""
+    """Checks if a value is a number
+
+    .. versionadded:: 1.2"""
     try:
         float(string)
         return True

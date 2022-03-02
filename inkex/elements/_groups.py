@@ -119,6 +119,8 @@ class Marker(GroupBase):
 
 
 class Mask(GroupBase):
-    """An alpha mask for compositing an object into the background"""
+    """An alpha mask for compositing an object into the background
+
+    .. versionadded:: 1.2"""
 
     tag_name = "mask"

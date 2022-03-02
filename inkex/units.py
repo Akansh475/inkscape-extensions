@@ -123,7 +123,15 @@ def discover_unit(value, viewbox, default="px"):
 
 
 def convert_unit(value, to_unit, default="px"):
-    """Returns userunits given a string representation of units in another system"""
+    """Returns userunits given a string representation of units in another system
+
+    Args:
+        value: <length> string
+        to_unit: unit to convert to
+        default: if ``value`` contains no unit, what unit should be assumed.
+
+            .. versionadded:: 1.1
+    """
     value, from_unit = parse_unit(value, default_unit=default, default_value=0.0)
     if from_unit in CONVERSIONS and to_unit in CONVERSIONS:
         return (

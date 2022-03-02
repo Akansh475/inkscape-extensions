@@ -68,18 +68,19 @@ class PixmapFilter:  # pylint: disable=too-few-public-methods
 class OverlayFilter(PixmapFilter):
     """Adds an overlay to output images, overlay can be any name that
     the owning pixmap manager can find.
-
-    overlay  : Name of overlay image
-    location : Location of the image:
-      0      - Full size (1 to 1 overlay, default)
-      (x,y)  - Percentage from one end to the other position 0-1
-    alpha    : Blending alpha, 0 - 255
-
     """
 
     overlay = None
+    """Name of the overlay image"""
+
     placement = (0, 0)
+    """Location of the image:
+
+        - 0  - Full size (1 to 1 overlay, default)
+        - (x,y) - Percentage from one end to the other position 0-1"""
+
     alpha = 255
+    """Blending alpha, 0 - 255"""
 
     def filter(self, img, **kwargs):
         overlay = kwargs.get("overlay", None)

@@ -18,63 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA.
 #
 """
-All Inkscape extensions should come with tests. This package provides you with
-the tools needed to create tests and thus ensure that your extension continues
-to work with future versions of Inkscape, the "inkex" python modules, and other
-python and non-python tools you may use.
-
-Make sure your extension is a python extension and is using the `inkex.generic`
-base classes. These provide the greatest amount of functionality for testing.
-
-You should start by creating a folder in your repository called `tests` with
-an empty file inside called `__init__.py` to turn it into a module folder.
-
-For each of your extensions, you should create a file called
-`test_{extension_name}.py` where the name reflects the name of your extension.
-
-There are two types of tests:
-
-    1. Full-process Comparison tests - These are tests which invoke your
-           extension with various arguments and attempt to compare the
-           output to a known good reference. These are useful for testing
-           that your extension would work if it was used in Inkscape.
-
-           Good example of writing comparison tests can be found in the
-           Inkscape core repository, each test which inherits from
-           the ComparisonMixin class is running comparison tests.
-
-    2. Unit tests - These are individual test functions which call out to
-           specific functions within your extension. These are typical
-           python unit tests and many good python documents exist
-           to describe how to write them well. For examples here you
-           can find the tests that test the inkex modules themselves
-           to be the most instructive.
-
-When running a test, it will cause a certain fraction of the code within the
-extension to execute. This fraction called it's **coverage** and a higher
-coverage score indicates that your test is better at exercising the various
-options, features, and branches within your code.
-
-Generating comparison output can be done using the EXPORT_COMPARE environment
-variable when calling pytest and comes in 3 modes, the first of which is the
-CHECK comparisons mode:
-
-    EXPORT_COMPARE=1 pytest tests/test_my_specific_test.py
-
-This will create files in `tests/data/refs/*.{ext}` and these files
-should be manually checked to make sure they are correct. Once you are happy
-with the output you can re-run the test with the WRITE comparisons mode:
-
-    EXPORT_COMPARE=2 pytest tests/test_my_specific_test.py
-
-Which will create an output file of the right name and then run the test suite
-against it. But only if the file doesn't already exist. The final mode is the
-OVERWRITE comparisons mode:
-
-    EXPORT_COMPARE=3 pytest tests/test_my_specific_test.py
-
-This is like mode 2, but will over-write any existing files too. This allows
-you to update the test compare files.
+Testing module. See :ref:`unittests` for details.
 """
 
 import os
@@ -184,7 +128,10 @@ class TestCase(MockCommandMixin, BaseCase):
 
     @classmethod
     def data_file(cls, filename, *parts, check_exists=True):
-        """Provide a data file from a filename, can accept directories as arguments."""
+        """Provide a data file from a filename, can accept directories as arguments.
+
+        .. versionchanged:: 1.2
+            ``check_exists`` parameter added"""
         if os.path.isabs(filename):
             # Absolute root was passed in, so we trust that (it might be a tempdir)
             full_path = os.path.join(filename, *parts)
@@ -276,6 +223,8 @@ class TestCase(MockCommandMixin, BaseCase):
     def assertTransformEqual(self, lhs, rhs, places=7):
         """Assert that two transform expressions evaluate to the same
         transformation matrix.
+
+        .. versionadded:: 1.1
         """
         self.assertAlmostTuple(
             tuple(Transform(lhs).to_hexad()), tuple(Transform(rhs).to_hexad()), places
@@ -310,18 +259,21 @@ class ComparisonMixin:
     Add comparison tests to any existing test suite.
     """
 
-    # This input svg file sent to the extension (if any)
     compare_file: Union[List[str], Tuple[str], str] = "svg/shapes.svg"
-    # The ways in which the output is filtered for comparision (see filters.py)
+    """This input svg file sent to the extension (if any)"""
+
     compare_filters = []  # type: List[Compare]
-    # If true, the filtered output will be saved and only applied to the
-    # extension output (and not to the reference file)
+    """The ways in which the output is filtered for comparision (see filters.py)"""
+
     compare_filter_save = False
-    # A list of comparison runs, each entry will cause the extension to be run.
+    """If true, the filtered output will be saved and only applied to the
+    extension output (and not to the reference file)"""
+
     comparisons = [
         (),
         ("--id=p1", "--id=r3"),
     ]
+    """A list of comparison runs, each entry will cause the extension to be run."""
 
     compare_file_extension = "svg"
 
@@ -357,12 +309,13 @@ class ComparisonMixin:
         """
         Compare the output of a previous run against this one.
 
-         - infile: The filename of the pre-processed svg (or other type of file)
-         - cmpfile: The filename of the data we expect to get, if not set
-                    the filename will be generated from the effect name and kwargs.
-         - args: All the arguments to be passed to the effect run
-         - outfile: Optional, instead of returning a regular output, this extension
-                    dumps it's output to this filename instead.
+        Args:
+            infile: The filename of the pre-processed svg (or other type of file)
+            cmpfile: The filename of the data we expect to get, if not set
+                the filename will be generated from the effect name and kwargs.
+            args: All the arguments to be passed to the effect run
+            outfile: Optional, instead of returning a regular output, this extension
+                dumps it's output to this filename instead.
 
         """
         compare_mode = int(os.environ.get("EXPORT_COMPARE", COMPARE_DELETE))

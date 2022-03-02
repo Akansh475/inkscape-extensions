@@ -18,6 +18,8 @@
 #
 """
 When elements are selected, these structures provide an advanced API.
+
+.. versionadded:: 1.1
 """
 
 from collections import OrderedDict
@@ -108,7 +110,7 @@ class ElementList(OrderedDict):
         selection is cleared.
 
         Arguments a list of element ids, element objects or
-            a single xpath expression starting with "//".
+        a single xpath expression starting with ``//``.
 
         All element objects must have an id to be correctly set.
 
@@ -136,7 +138,10 @@ class ElementList(OrderedDict):
 
     def rendering_order(self):
         """Get the selected elements by z-order (stacking order), ordered from bottom to
-        top"""
+        top
+
+        .. versionadded:: 1.2
+            :func:`paint_order` has been renamed to :func:`rendering_order`"""
         new_list = ElementList(self.svg)
         # the elements are stored with their xpath index, so a natural sort order
         # '3' < '20' < '100' has to be applied
@@ -159,15 +164,25 @@ class ElementList(OrderedDict):
 
     def filter_nonzero(self, *types, error_msg: str = None):
         """Filter selected elements of the given type, returns a new SelectedElements
-        object.
-        If the selection is empty, abort the extension (raise AbortExtension)
+        object. If the selection is empty, abort the extension.
 
-        :param types: type(s) to filter the selection by
-        :type types: Type
-        :param error_msg: error message that is displayed if the selection is empty,
-        defaults to
-        _("Please select at least one element of type(s) {}")
+        .. versionadded:: 1.2
+
+        :param error_msg: e
         :type error_msg: str, optional
+
+        Args:
+            *types (Type) : type(s) to filter the selection by
+            error_msg (str, optional): error message that is displayed if the selection
+                is empty, defaults to
+                ``_("Please select at least one element of type(s) {}")``.
+                Defaults to None.
+
+        Raises:
+            AbortExtension: if the selection is empty
+
+        Returns:
+            ElementList: filtered selection
         """
         filtered = self.filter(*types)
         if not filtered:

@@ -163,7 +163,9 @@ class InxFile:
 
 
 class InxElement(etree.ElementBase):
-    """Any element in an inx file"""
+    """Any element in an inx file
+
+    .. versionadded:: 1.1"""
 
     def set_warning(self, msg):
         """Set a warning for slightly incorrect inx contents"""
@@ -199,11 +201,15 @@ class InxElement(etree.ElementBase):
         return "/".join([_process(seg) for seg in xpath.split("/")])
 
     def xpath(self, xpath, nss=None):
-        """Namespace specific xpath searches"""
+        """Namespace specific xpath searches
+
+        .. versionadded:: 1.1"""
         return super().xpath(self.apply_nss(xpath, nss=nss), namespaces=NSS)
 
     def find_one(self, name, nss=None):
-        """Return the first element matching the given name"""
+        """Return the first element matching the given name
+
+        .. versionadded:: 1.1"""
         for elem in self.xpath(name, nss=nss):
             return elem
         return None

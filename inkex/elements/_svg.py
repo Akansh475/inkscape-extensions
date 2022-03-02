@@ -33,7 +33,7 @@ from lxml import etree
 from ..css import ConditionalRule
 from ..interfaces.IElement import ISVGDocumentElement
 
-from ..deprecated.meta import DeprecatedSvgMixin
+from ..deprecated.meta import DeprecatedSvgMixin, deprecate
 from ..units import discover_unit, parse_unit
 from ._selected import ElementList
 from ..transforms import BoundingBox
@@ -51,6 +51,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
 
     # pylint: disable=too-many-public-methods
     tag_name = "svg"
+
+    selection: ElementList
+    """The selection as passed by Inkscape (readonly)"""
 
     def _init(self):
         self.current_layer = None
@@ -100,9 +103,22 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         return self.findone(xpath)
 
     def getElementById(
-        self, eid, elm="*", literal=False
+        self, eid: str, elm="*", literal=False
     ):  # pylint: disable=invalid-name
-        """Get an element in this svg document by it's ID attribute"""
+        """Get an element in this svg document by it's ID attribute.
+
+        Args:
+            eid (str): element id
+            elm (str, optional): element type, including namespace, e.g. ``svg:path``.
+                Defaults to "*".
+            literal (bool, optional): If ``False``, ``#url()`` is stripped from ``eid``.
+                Defaults to False.
+
+                .. versionadded:: 1.1
+
+        Returns:
+            Union[BaseElement, None]: found element
+        """
         if eid is not None and not literal:
             eid = eid.strip()[4:-1] if eid.startswith("url(") else eid
             eid = eid.lstrip("#")
@@ -164,14 +180,18 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e.
         the width of the viewbox, as defined in the SVG file. If no viewbox is defined,
         the value of the width attribute is returned. If the height is not defined,
-        returns 0."""
+        returns 0.
+
+        .. versionadded:: 1.2"""
         return self.get_viewbox()[2] or self.viewport_width
 
     @property
     def viewport_width(self) -> float:
         """Returns the width of the `viewport coordinate system
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the
-        width attribute of the svg element converted to px"""
+        width attribute of the svg element converted to px
+
+        .. versionadded:: 1.2"""
         return self.to_dimensionless(self.get("width")) or self.get_viewbox()[2]
 
     @property
@@ -180,26 +200,37 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the
         height of the viewbox, as defined in the SVG file. If no viewbox is defined, the
         value of the height attribute is returned. If the height is not defined,
-        returns 0."""
+        returns 0.
+
+        .. versionadded:: 1.2"""
         return self.get_viewbox()[3] or self.viewport_height
 
     @property
     def viewport_height(self) -> float:
         """Returns the width of the `viewport coordinate system
         <https://www.w3.org/TR/SVG2/coords.html#Introduction>`_ in user units, i.e. the
-        height attribute of the svg element converted to px"""
+        height attribute of the svg element converted to px
+
+        .. versionadded:: 1.2"""
         return self.to_dimensionless(self.get("height")) or self.get_viewbox()[3]
 
     @property
     def scale(self):
-        """Return the ratio between the viewBox width and the page width"""
+        """Returns the ratio between the viewBox width and the page width.
+
+        .. versionchanged:: 1.2
+            Previously, the scale as shown by the document properties was computed,
+            but the computation of this in core Inkscape changed in Inkscape 1.2, so
+            this was moved to :attr:`inkscape_scale`."""
         return self._base_scale()
 
     @property
     def inkscape_scale(self):
         """Returns the ratio between the viewBox width (in width/height units) and the
         page width, which is displayed as "scale" in the Inkscape document
-        properties."""
+        properties.
+
+        .. versionadded:: 1.2"""
 
         viewbox_unit = (
             parse_unit(self.get("width")) or parse_unit(self.get("height")) or (0, "px")
@@ -207,7 +238,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         return self._base_scale(viewbox_unit)
 
     def _base_scale(self, unit="px"):
-        """Returns what Inkscape shows as "user units per `unit`" """
+        """Returns what Inkscape shows as "user units per `unit`"
+
+        .. versionadded:: 1.2"""
         try:
             scale_x = (
                 self.to_dimensional(self.viewport_width, unit) / self.viewbox_width
@@ -224,7 +257,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
     def equivalent_transform_scale(self) -> float:
         """Return the scale of the equivalent transform of the svg tag, as defined by
         https://www.w3.org/TR/SVG2/coords.html#ComputingAViewportsTransform
-        (highly simplified)"""
+        (highly simplified)
+
+        .. versionadded:: 1.2"""
         return self.scale
 
     @property
@@ -243,7 +278,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
 
     @property
     def document_unit(self):
-        """Returns the display unit (Inkscape-specific attribute) of the document"""
+        """Returns the display unit (Inkscape-specific attribute) of the document
+
+        .. versionadded:: 1.2"""
         return self.namedview.get("inkscape:document-units", "px")
 
     @property
@@ -263,3 +300,17 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         style_node = StyleElement()
         self.defs.append(style_node)
         return style_node.stylesheet()
+
+
+def width(self):
+    """Use :func:`viewport_width` instead"""
+    return self.viewport_width
+
+
+def height(self):
+    """Use :func:`viewport_height` instead"""
+    return self.viewport_height
+
+
+SvgDocumentElement.width = property(deprecate(width, "1.2"))
+SvgDocumentElement.height = property(deprecate(height, "1.2"))

@@ -46,7 +46,10 @@ class InxMixin:
             self.assertParams(inx, cls)
 
     def assertParams(self, inx, cls):  # pylint: disable=invalid-name
-        """Confirm the params in the inx match the python script"""
+        """Confirm the params in the inx match the python script
+
+        .. versionchanged:: 1.2
+            Also checks that the default values are identical"""
         params = {param.name: self.parse_param(param) for param in inx.params}
         args = dict(self.introspect_arg_parser(cls().arg_parser))
         mismatch_a = list(set(params) ^ set(args) & set(params))

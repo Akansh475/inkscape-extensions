@@ -81,6 +81,11 @@ class PathElement(PathElementBase):
         end: float,
         arctype: str,
     ) -> Optional[Path]:
+        """Compute the path for an arc defined by Inkscape-specific attributes.
+
+        For details on arguments, see :func:`arc`.
+
+        .. versionadded:: 1.2"""
         if abs(rx) < 1e-8 or abs(ry) < 1e-8:
             return None
         incr = end - start
@@ -122,8 +127,13 @@ class PathElement(PathElementBase):
                 ry=rx. Defaults to None.
             arctype (str, optional): "arc", "chord" or "slice". Defaults to "", i.e.
                 "slice".
+
+                .. versionadded:: 1.2
+                    Previously set to "arc" as fixed value
             pathonly (bool, optional): Whether to create the path without
                 Inkscape-specific attributes. Defaults to False.
+
+                .. versionadded:: 1.2
         Keyword args:
             start (Union[float, str]): start angle in radians
             end (Union[float, str]): end angle in radians
@@ -171,7 +181,11 @@ class PathElement(PathElementBase):
         flatsided: bool,
     ):
         """Helper method to generate the path for an Inkscape star/ polygon; randomized
-        is ignored."""
+        is ignored.
+
+        For details on arguments, see :func:`star`.
+
+        .. versionadded:: 1.2"""
 
         def _star_get_xy(point, index):
             cur_arg = arg[point] + 2 * pi / sides * (index % sides)
@@ -270,6 +284,8 @@ class PathElement(PathElementBase):
         under the hood. The arguments for center, radii, sides, rounded and args can be
         given as strings or as numeric data.
 
+        .. versionadded:: 1.1
+
         Args:
             center (Tuple-like): Coordinates of the star/polygon center as tuple or
                 Vector2d
@@ -282,10 +298,17 @@ class PathElement(PathElementBase):
                 For `rounded=0`, only straight lines are used. Defaults to 0.
             args (tuple, optional): Angle between horizontal axis and control points.
                 Defaults to (0,0).
+
+                .. versionadded:: 1.2
+                    Previously fixed to (0.85, 1.3)
             flatsided (bool, optional): True for polygons, False for stars.
                 Defaults to False.
+
+                .. versionadded:: 1.2
             pathonly (bool, optional): Whether to create the path without
                 Inkscape-specific attributes. Defaults to False.
+
+                .. versionadded:: 1.2
 
         Returns:
             PathElement : the created star/polygon

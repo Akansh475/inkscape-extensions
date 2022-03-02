@@ -94,6 +94,8 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
 class RasterOutputExtension(InkscapeExtension):
     """
     Takes a PNG from Inkscape and outputs it to another rather format.
+
+    .. versionadded:: 1.1
     """
 
     def __init__(self):
@@ -206,7 +208,10 @@ class GenerateExtension(EffectExtension):
         """
         Return the container the generated elements will go into.
 
-        Default is a new layer or current layer depending on the container_layer flag.
+        Default is a new layer or current layer depending on the :attr:`container_layer`
+        flag.
+
+        .. versionadded:: 1.1
         """
         container = (Layer if self.container_layer else Group).new(self.container_label)
         if self.container_layer:
@@ -336,6 +341,15 @@ class ColorExtension(EffectExtension):
     process_none = False  # should we call modify_color for the "none" color.
     select_all = (ShapeElement,)
     pass_rgba = False
+    """
+    If true, color and opacity are processed together (as RGBA color) 
+    by :func:`modify_color`.
+
+    If false (default), they are processed independently by `modify_color` and 
+    `modify_opacity`.
+
+    .. versionadded:: 1.2
+    """
 
     def __init__(self):
         super().__init__()

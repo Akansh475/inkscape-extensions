@@ -78,16 +78,33 @@ class Classes(list):
 
 
 class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
-    """A list of style directives"""
+    """A list of style directives
+
+    .. versionchanged:: 1.2
+        The Style API now allows for access to parsed / processed styles via the
+        :func:`call` method.
+
+    .. automethod:: __call__
+    .. automethod:: __getitem__
+    .. automethod:: __setitem__
+    """
 
     color_props = ("stroke", "fill", "stop-color", "flood-color", "lighting-color")
     opacity_props = ("stroke-opacity", "fill-opacity", "opacity", "stop-opacity")
     unit_props = "stroke-width"
+    """Dictionary of attributes with units. 
+    
+    ..versionadded:: 1.2
+    """
     associated_props = {
         "fill": "fill-opacity",
         "stroke": "stroke-opacity",
         "stop-color": "stop-opacity",
     }
+    """Dictionary of association between color and opacity attributes.
+
+    .. versionadded:: 1.2
+    """
 
     def __init__(self, style=None, callback=None, element=None, **kw):
         self.element = element
@@ -117,7 +134,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
                 for parsing gradients etc.)
 
         Yields:
-            BaseStyleValue: the parsed attribute
+            :class:`~inkex.properties.BaseStyleValue`: the parsed attribute
         """
         for declaration in style.split(";"):
             if ":" in declaration:
@@ -147,7 +164,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return ret
 
     def __iadd__(self, other):
-        """Add style to this style, the same as style.update(dict)"""
+        """Add style to this style, the same as ``style.update(dict)``"""
         self.update(other)
         return self
 
@@ -167,12 +184,16 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return not self.__eq__(other)
 
     def copy(self):
+        """Create a copy of the style.
+
+        .. versionadded:: 1.2"""
         ret = Style({}, element=self.element)
         for key, value in super().items():
             ret[key] = value
         return ret
 
     def update(self, other):
+        """Update, while respecting ``!important`` declarations."""
         if not isinstance(other, Style):
             other = Style(other)
         # only update
@@ -185,8 +206,10 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             self.callback(self)
 
     def add_inherited(self, parent):
-        """Creates a new Style containing all parent styles with importance "important"
-        and current styles with importance "important"
+        """Creates a new Style containing all parent styles with importance "!important"
+        and current styles with importance "!important"
+
+        .. versionadded:: 1.2
 
         Args:
             parent: the parent style that will be merged into this one (will not be
@@ -228,6 +251,24 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             self.callback(self)
 
     def __setitem__(self, key, value):
+        """Sets a style value.
+
+        .. versionchanged:: 1.2
+            ``value`` can now also be non-string objects such as a Gradient.
+
+        Args:
+            key (str): the attribute name
+            value (Any):
+
+                - a :class:`BaseStyleValue`
+                - a string with the value
+                - any other object. The :class:`~inkex.properties.BaseStyleValue`
+                  subclass of the provided key will attempt to create a string out of
+                  the passed value.
+        Raises:
+            ValueError: when ``value`` is a :class:`~inkex.properties.BaseStyleValue`
+                for a different attribute than `key`
+            Error: Other exceptions may be raised when converting non-string objects."""
         if not isinstance(value, BaseStyleValue) or value is None:
             # try to convert the value using the factory
             value = BaseStyleValue.factory(attr_name=key, value=value)
@@ -243,6 +284,11 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             self.callback(self)
 
     def __getitem__(self, key):
+        """Returns the unparsed value of the element (minus a possible ``!important``)
+
+        .. versionchanged:: 1.2
+            ``!important`` is removed from the value.
+        """
         return self.get_store(key).value
 
     def get(self, key, default=None):
@@ -251,8 +297,11 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return default
 
     def get_store(self, key):
-        """Gets the BaseStyleValue of this key, since the other interfaces - __getitem__
-        and __call__ - return the original and parsed value, respectively.
+        """Gets the :class:`~inkex.properties.BaseStyleValue` of this key, since the
+        other interfaces - :func:`__getitem__` and :func:`__call__` - return the
+        original and parsed value, respectively.
+
+        .. versionadded:: 1.2
 
         Args:
             key (str): the attribute name
@@ -263,6 +312,10 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return super().__getitem__(key)
 
     def __call__(self, key, element=None):
+        """Return the parsed value of a style. Optionally, an element can be passed
+        that will be used to find gradient definitions ect.
+
+        .. versionadded:: 1.2"""
         # check if there are shorthand properties defined. If so, apply them to a copy
         copy = self
         for value in super().values():
@@ -292,17 +345,24 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         return True
 
     def items(self):
+        """The styles's parsed items
+
+        .. versionadded:: 1.2"""
         for key, value in super().items():
             yield key, value.value
 
     def get_importance(self, key, default=False):
-        """Returns whether the declaration with key is marked as !important"""
+        """Returns whether the declaration with ``key`` is marked as ``!important``
+
+        .. versionadded:: 1.2"""
         if key in self:
             return super().__getitem__(key).important
         return default
 
     def set_importance(self, key, importance):
-        """Sets the !important state of a declaration with key key"""
+        """Sets the ``!important`` state of a declaration with key ``key``
+
+        .. versionadded:: 1.2"""
         if key in self:
             super().__getitem__(key).important = importance
         else:
@@ -333,7 +393,9 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     def interpolate(self, other, fraction):
         # type: (Style, Style, float) -> Style
-        """Interpolate all properties."""
+        """Interpolate all properties.
+
+        .. versionadded:: 1.1"""
         from .tween import StyleInterpolator
         from inkex.elements import PathElement
 
@@ -350,6 +412,8 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         style using the respective specificity of the style
 
         see https://www.w3.org/TR/CSS22/cascade.html#cascading-order
+
+        .. versionadded:: 1.2
 
         Args:
             element (BaseElement): the element that the cascaded style will be
@@ -380,6 +444,8 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     def specified_style(cls, element):
         """Returns the specified style of an element, i.e. the cascaded style +
         inheritance, see https://www.w3.org/TR/CSS22/cascade.html#specified-value
+
+        .. versionadded:: 1.2
 
         Args:
             element (BaseElement): the element that the specified style will be computed
@@ -429,6 +495,8 @@ class StyleSheets(list):
     def lookup_specificity(self, element_id, svg=None):
         """
         Find all styles for this element and return the specificity of the match.
+
+        .. versionadded:: 1.2
         """
         # This is aweful, but required because we can't know for sure
         # what might have changed in the xml tree.
@@ -503,7 +571,7 @@ class StyleSheet(list):
 
         Yields:
             Tuple[ConditionalStyle, Tuple[int, int, int]]: all matched styles and the
-                specificity of the match
+            specificity of the match
         """
         for style in self:
             for rule, spec in zip(style.to_xpaths(), style.get_specificities()):
@@ -540,10 +608,14 @@ class ConditionalStyle(Style):
         return "|".join(self.to_xpaths())
 
     def to_xpaths(self):
-        """Gets a list of xpaths for all rules of this ConditionalStyle"""
+        """Gets a list of xpaths for all rules of this ConditionalStyle
+
+        .. versionadded:: 1.2"""
         return [rule.to_xpath() for rule in self.rules]
 
     def get_specificities(self):
-        """gets an iterator of the specificity of all rules in this ConditionalStyle"""
+        """Gets an iterator of the specificity of all rules in this ConditionalStyle
+
+        .. versionadded:: 1.2"""
         for rule in self.rules:
             yield rule.get_specificity()

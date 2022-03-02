@@ -18,6 +18,9 @@
 #
 """
 Useful utilities specifically for elements (that aren't base classes)
+
+.. versionadded:: 1.1
+    Most of the methods in this module were moved from inkex.utils.
 """
 
 from collections import defaultdict

@@ -136,7 +136,9 @@ class Filter(BaseElement):
 
 
 class Stop(BaseElement):
-    """Gradient stop"""
+    """Gradient stop
+
+    .. versionadded:: 1.1"""
 
     tag_name = "stop"
 
@@ -164,15 +166,22 @@ class Pattern(BaseElement):
 
 
 class Gradient(BaseElement):
-    """A gradient instruction usually in the defs"""
+    """A gradient instruction usually in the defs."""
 
     WRAPPED_ATTRS = BaseElement.WRAPPED_ATTRS + (("gradientTransform", Transform),)
+    """Additional to the :attr:`~inkex.elements._base.BaseElement.WRAPPED_ATTRS` of 
+    :class:`~inkex.elements._base.BaseElement`, ``gradientTransform`` is wrapped."""
 
     orientation_attributes = ()  # type: Tuple[str, ...]
+    """
+    .. versionadded:: 1.1
+    """
 
     @property
     def stops(self):
-        """Return an ordered list of own or linked stop nodes"""
+        """Return an ordered list of own or linked stop nodes
+
+        .. versionadded:: 1.1"""
         gradcolor = (
             self.href
             if isinstance(self.href, (LinearGradient, RadialGradient))
@@ -186,29 +195,39 @@ class Gradient(BaseElement):
     @property
     def stop_offsets(self):
         # type: () -> List[float]
-        """Return a list of own or linked stop offsets"""
+        """Return a list of own or linked stop offsets
+
+        .. versionadded:: 1.1"""
         return [child.offset for child in self.stops]
 
     @property
     def stop_styles(self):  # type: () -> List[Style]
-        """Return a list of own or linked offset styles"""
+        """Return a list of own or linked offset styles
+
+        .. versionadded:: 1.1"""
         return [child.style for child in self.stops]
 
     def remove_orientation(self):
-        """Remove all orientation attributes from this element"""
+        """Remove all orientation attributes from this element
+
+        .. versionadded:: 1.1"""
         for attr in self.orientation_attributes:
             self.pop(attr)
 
     def interpolate(
         self, other, fraction, svg=None
     ):  # type: (LinearGradient, float, SvgDocumentElement) -> LinearGradient
-        """Interpolate with another gradient."""
+        """Interpolate with another gradient.
+
+        .. versionadded:: 1.1"""
         from ..tween import GradientInterpolator
 
         return GradientInterpolator(self, other, svg).interpolate(fraction)
 
     def stops_and_orientation(self):
-        """Return a copy of all the stops in this gradient"""
+        """Return a copy of all the stops in this gradient
+
+        .. versionadded:: 1.1"""
         stops = self.copy()
         stops.remove_orientation()
         orientation = self.copy()
@@ -221,9 +240,14 @@ class LinearGradient(Gradient):
 
     tag_name = "linearGradient"
     orientation_attributes = ("x1", "y1", "x2", "y2")
+    """
+    .. versionadded:: 1.1
+    """
 
     def apply_transform(self):  # type: () -> None
-        """Apply transform to orientation points and set it to identity."""
+        """Apply transform to orientation points and set it to identity.
+        .. versionadded:: 1.1
+        """
         trans = self.pop("gradientTransform")
         pt1 = (
             self.to_dimensionless(self.get("x1")),
@@ -248,9 +272,15 @@ class RadialGradient(Gradient):
 
     tag_name = "radialGradient"
     orientation_attributes = ("cx", "cy", "fx", "fy", "r")
+    """
+    .. versionadded:: 1.1
+    """
 
     def apply_transform(self):  # type: () -> None
-        """Apply transform to orientation points and set it to identity."""
+        """Apply transform to orientation points and set it to identity.
+
+        .. versionadded:: 1.1
+        """
         trans = self.pop("gradientTransform")
         pt1 = (
             self.to_dimensionless(self.get("cx")),
@@ -277,7 +307,9 @@ class PathEffect(BaseElement):
 
 
 class MeshGradient(Gradient):
-    """Usable MeshGradient XML base class"""
+    """Usable MeshGradient XML base class
+
+    .. versionadded:: 1.1"""
 
     tag_name = "meshgradient"
 
@@ -303,13 +335,17 @@ class MeshGradient(Gradient):
 
 
 class MeshRow(BaseElement):
-    """Each row of a mesh gradient"""
+    """Each row of a mesh gradient
+
+    .. versionadded:: 1.1"""
 
     tag_name = "meshrow"
 
 
 class MeshPatch(BaseElement):
-    """Each column or 'patch' in a mesh gradient"""
+    """Each column or 'patch' in a mesh gradient
+
+    .. versionadded:: 1.1"""
 
     tag_name = "meshpatch"
 

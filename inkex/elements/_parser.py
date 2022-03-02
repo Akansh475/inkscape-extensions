@@ -19,7 +19,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-"""Utilities for parsing SVG documents."""
+"""Utilities for parsing SVG documents.
+
+.. versionadded:: 1.2
+    Separated out from :py:mod:`inkex.elements._base`"""
 
 from collections import defaultdict
 from typing import DefaultDict, List, Any, Type
@@ -49,7 +52,9 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
 
     @classmethod
     def find_class(cls, xpath):
-        """Find the class for this type of element defined by an xpath"""
+        """Find the class for this type of element defined by an xpath
+
+        .. versionadded:: 1.1"""
         if isinstance(xpath, type):
             return xpath
         for kls in cls.lookup_table[splitNS(xpath.split("/")[-1])]:

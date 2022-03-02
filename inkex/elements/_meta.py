@@ -100,7 +100,23 @@ class NamedView(BaseElement):
         return self.findall("sodipodi:guide")
 
     def new_guide(self, position, orient=True, name=None):
-        """Creates a new guide in this namedview"""
+        """Creates a new guide in this namedview
+
+        Args:
+            position: a float containing the y position for ``orient is True``, or
+                the x position for ``orient is False``
+
+                .. versionchanged:: 1.2
+                    Alternatively, the position may be given as Tuple (or VectorLike)
+            orient: True for horizontal, False for Vertical
+
+                .. versionchanged:: 1.2
+                    Tuple / Vector specifying x and y coordinates of the normal vector
+                    of the guide.
+            name: label of the guide
+
+        Returns:
+            the created guide"""
         if orient is True:
             elem = Guide().move_to(0, position, (0, 1))
         elif orient is False:
@@ -114,25 +130,33 @@ class NamedView(BaseElement):
     def new_unique_guide(
         self, position: VectorLike, orientation: VectorLike
     ) -> Optional[Guide]:
-        """Add a guide iif there is no guide that looks the same."""
+        """Add a guide iif there is no guide that looks the same.
+
+        .. versionadded:: 1.2"""
         elem = Guide().move_to(position[0], position[1], orientation)
         return self.add(elem) if self.get_similar_guide(elem) is None else None
 
     def get_similar_guide(self, other: Guide) -> Optional[Guide]:
         """Check if the namedview contains a guide that looks identical to one
         defined by (position, orientation). If such a guide exists, return it;
-        otherwise, return None."""
+        otherwise, return None.
+
+        .. versionadded:: 1.2"""
         for guide in self.get_guides():
             if Guide.guides_coincident(guide, other):
                 return guide
         return None
 
     def get_pages(self):
-        """Returns a list of pages"""
+        """Returns a list of pages
+
+        .. versionadded:: 1.2"""
         return self.findall("inkscape:page")
 
     def new_page(self, x, y, width, height, label=None):
-        """Creates a new page in this namedview"""
+        """Creates a new page in this namedview
+
+        .. versionadded:: 1.2"""
         elem = Page(width=width, height=height, x=x, y=y)
         if label:
             elem.set("inkscape:label", str(label))
@@ -146,7 +170,9 @@ class Guide(BaseElement):
 
     @property
     def orientation(self) -> Vector2d:
-        """Vector normal to the guide"""
+        """Vector normal to the guide
+
+        .. versionadded:: 1.2"""
         return Vector2d(self.get("orientation"), fallback=(1, 0))
 
     is_horizontal = property(
@@ -197,7 +223,9 @@ class Guide(BaseElement):
     def guides_coincident(guide1, guide2):
         """Check if two guides defined by (position, orientation) and (opos, oor) look
         identical (i.e. the position lies on the other guide AND the guide is
-        (anti)parallel to the other guide)."""
+        (anti)parallel to the other guide).
+
+        .. versionadded:: 1.2"""
         # normalize orientations first
         orientation = guide1.orientation / guide1.orientation.length
         oor = guide2.orientation / guide2.orientation.length
@@ -239,7 +267,9 @@ class Grid(BaseElement):
 
 
 class Page(BaseElement):
-    """A namedview page child"""
+    """A namedview page child
+
+    .. versionadded:: 1.2"""
 
     tag_name = "inkscape:page"
 

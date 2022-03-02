@@ -10,16 +10,16 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, '../extensions/inkex')
+import os
+import sys
 
-import sphinx_rtd_theme
+sys.path.insert(0, os.path.abspath("../"))
+
 import datetime
 
 # -- Project information -----------------------------------------------------
 
-project = "inkex"
+project = "inkex documentation"
 copyright = f"{datetime.datetime.now().year} The Inkscape Project"
 author = "The Inkscape Project"
 
@@ -33,7 +33,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
-    "sphinx_rtd_theme",
     "sphinx.ext.napoleon",
 ]
 
@@ -58,12 +57,25 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
+
+html_theme_options = {
+    "show_toc_level": 2,
+    "use_edit_page_button": True,
+    "gitlab_url": "https://gitlab.com/inkscape/extensions",
+}
+
+html_context = {
+    "gitlab_user": "inkscape",
+    "gitlab_repo": "extensions",
+    "gitlab_version": "master",
+    "doc_path": "docs",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # -- Extension configuration -------------------------------------------------
 
@@ -73,3 +85,9 @@ always_document_param_types = True
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+autodoc_member_order = "bysource"
+
+autodoc_preserve_defaults = True
+
+html_favicon = "favicon.svg"

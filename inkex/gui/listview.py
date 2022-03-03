@@ -346,7 +346,7 @@ class IconView(BaseView):
         return default(item, "icon", None)
 
     def _get_icon(self, item):
-        return self.pixmaps.get(self.get_icon(item))
+        return self.pixmaps.get(self.get_icon(item), item=item)
 
     def _add_item(self, item):
         """

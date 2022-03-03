@@ -29,7 +29,17 @@ from inkex.utils import DependencyError
 
 try:
     from inkex.gui.tester import MainLoopProtection
-    from inkex.gui.pixmap import PixmapLoadError, PixmapFilter, OverlayFilter
+    from inkex.gui.pixmap import (
+        PixmapLoadError,
+        PixmapFilter,
+        OverlayFilter,
+        PadFilter,
+        SizeFilter,
+        SIZE_ASPECT,
+        SIZE_ASPECT_GROW,
+        SIZE_ASPECT_CROP,
+        SIZE_STRETCH,
+    )
     from inkex.gui import PixmapManager
 except DependencyError:
     PixmapFilter = object
@@ -62,35 +72,103 @@ class GtkPixmapsTest(TestCase):
         null_filter = NullFilter(None, underpants=True)
         self.assertRaises(NotImplementedError, null_filter.filter, "not")
 
-    def test_filter_overlay(self):
-        """Test overlay filters"""
+    def test_manager_filter_overlay(self):
+        """Test overlay filter in use"""
 
         class MyOverlayFilter(OverlayFilter):
             overlay = "application-default-icon"
             placement = (0.25, 0.25)
 
         pixmaps = self.construct_manager(filters=[MyOverlayFilter])("svg")
-        image = pixmaps.get("colors.svg")
-        self.assertTrue(image)
-
-        pixmaps._filters[0].set_position(image, 0, 0)
-
-    def test_load_file(self):
-        """Test loading a filename"""
-        pixmaps = self.construct_manager()("svg")
         self.assertTrue(pixmaps.get("colors.svg"))
-        self.assertFalse(pixmaps.get("colors-no-file.svg"))
 
-    def test_size_file(self):
+    def test_manger_filter_size(self):
         """Test resizing a file pixmap"""
-        pixmaps = self.construct_manager()("svg", size=512, resize_mode=3)
-        self.assertTrue(pixmaps.get("colors.svg"))
+        pixmaps = self.construct_manager()("svg", size=150)
+        pix = pixmaps.get("colors.svg")
+        self.assertEqual(pix.get_width(), 150)
+        self.assertEqual(pix.get_height(), 50)
         self.assertRaises(PixmapLoadError, pixmaps.load_from_name, "no-file.svg")
         self.assertRaises(
             PixmapLoadError,
             pixmaps.load_from_name,
             os.path.join(self.datadir(), "ui", "window-test.ui"),
         )
+
+    def test_overlay_filter(self):
+        """Test overlay filter"""
+        pixmaps = self.construct_manager(filters=[])("svg")
+        start = pixmaps.get("gradient_with_mixed_offsets.svg")
+
+        # 1. Simple overlay
+        ret = OverlayFilter(pixmaps).filter(start, overlay="colors.svg")
+        comp = pixmaps.get("img/color_overlay_a.png")
+        self.assertPixbuf(ret, comp)
+
+        # 2. Overlay at bottom
+        ret = OverlayFilter(pixmaps, position=1).filter(start, overlay="colors.svg")
+        comp = pixmaps.get("img/color_overlay_b.png")
+        self.assertPixbuf(ret, comp)
+
+    def test_pad_filter(self):
+        """Test padding filter"""
+        pixmaps = self.construct_manager(filters=[])("svg")
+        start = pixmaps.get("colors.svg")
+
+        # 1. Add no padding
+        ret = PadFilter(pixmaps, size=(300, 100)).filter(start)
+        self.assertPixbuf(ret, start)
+
+        # 2a. Add padding at top-left
+        ret = PadFilter(pixmaps, size=300, padding=0.0).filter(start)
+        comp = pixmaps.get("img/color_pad_a.png")
+        self.assertPixbuf(ret, comp)
+
+        # 12b. Add padding at top-left
+        ret = PadFilter(pixmaps, size=300, padding=1.0).filter(start)
+        comp = pixmaps.get("img/color_pad_b.png")
+        self.assertPixbuf(ret, comp)
+
+        # 12c. Add padding at top-left
+        ret = PadFilter(pixmaps, size=300, padding=0.5).filter(start)
+        comp = pixmaps.get("img/color_pad_c.png")
+        self.assertPixbuf(ret, comp)
+
+        # 3. Take image and pad to 1px x 150px
+        ret = PadFilter(pixmaps, size=(1, 150)).filter(start)
+        self.assertEqual((ret.get_width(), ret.get_height()), (300, 150))
+
+    def test_size_filter(self):
+        """Test the size pixbuf filter"""
+        pixmaps = self.construct_manager(filters=[])("svg")
+        start = pixmaps.get("colors.svg")
+        self.assertEqual((start.get_width(), start.get_height()), (300, 100))
+
+        ret = SizeFilter(pixmaps, size=600, resize_mode=SIZE_ASPECT).filter(start)
+        self.assertEqual((ret.get_width(), ret.get_height()), (300, 100))
+        self.assertEqual((start.get_width(), start.get_height()), (300, 100))
+
+        ret = SizeFilter(pixmaps, size=60, resize_mode=SIZE_ASPECT).filter(start)
+        self.assertEqual((ret.get_width(), ret.get_height()), (60, 20))
+        self.assertEqual((start.get_width(), start.get_height()), (300, 100))
+
+        ret = SizeFilter(pixmaps, size=600, resize_mode=SIZE_ASPECT_GROW).filter(start)
+        self.assertEqual((ret.get_width(), ret.get_height()), (600, 200))
+        self.assertEqual((start.get_width(), start.get_height()), (300, 100))
+
+        ret = SizeFilter(pixmaps, size=60, resize_mode=SIZE_ASPECT_CROP).filter(start)
+        self.assertEqual((ret.get_width(), ret.get_height()), (180, 60))
+        self.assertEqual((start.get_width(), start.get_height()), (300, 100))
+
+        ret = SizeFilter(pixmaps, size=600, resize_mode=SIZE_STRETCH).filter(start)
+        self.assertEqual((ret.get_width(), ret.get_height()), (600, 600))
+        self.assertEqual((start.get_width(), start.get_height()), (300, 100))
+
+    def test_load_file(self):
+        """Test loading a filename"""
+        pixmaps = self.construct_manager()("svg")
+        self.assertTrue(pixmaps.get("colors.svg"))
+        self.assertFalse(pixmaps.get("colors-no-file.svg"))
 
     def test_load_name(self):
         """Test loading from a Gtk named theme icon"""
@@ -108,7 +186,7 @@ class GtkPixmapsTest(TestCase):
         """Test loading a data png"""
         pixmaps = self.construct_manager()()
         with open(os.path.join(self.datadir(), "svg", "img", "green.png"), "rb") as fhl:
-            self.assertTrue(pixmaps.get(fhl.read()))
+            self.assertPixbuf(pixmaps.get(fhl.read()), pixmaps.get("svg/img/green.png"))
 
     def test_load_default(self):
         pixmaps = self.construct_manager()()
@@ -117,3 +195,37 @@ class GtkPixmapsTest(TestCase):
         self.assertTrue(pixmaps.get(None))
         pixmaps = self.construct_manager(missing_image="image-missing")()
         self.assertTrue(pixmaps.get("bad-image"))
+
+    def assertFilter(self, filter_cls, input_img, output_img, **kwargs):
+        """Test lots of different filters"""
+        pixmaps = self.construct_manager(filters=[filter_cls])("svg")
+        output_img = pixmaps.get(output_img)
+        compare_img = pixmaps._filters[0].filter(input_img, **kwargs)
+        self.assertPixbuf(output_img, compare_img)
+
+    def assertPixbuf(self, img_a, img_b, forgive=0.02):
+        """Compare to Gobject pixbufs"""
+        try:
+            self._assert_pixbuf(img_a, img_b, forgive)
+        except Exception:
+            img_a.savev("image_a.png", "png", [], [])
+            img_b.savev("image_b.png", "png", [], [])
+            raise
+
+    def _assert_pixbuf(self, img_a, img_b, forgive):
+        self.assertEqual(img_a.get_colorspace(), img_b.get_colorspace())
+        self.assertEqual(img_a.get_width(), img_b.get_width(), "Width is different")
+        self.assertEqual(img_a.get_height(), img_b.get_height(), "Height is different")
+
+        # Bitmap comparison
+        array = zip(img_a.get_pixels(), img_b.get_pixels())
+        delta, size = 0, 0
+        for a, b in array:
+            delta += a - b
+            size += 1
+
+        pcent = int(forgive * 100)
+        ret = int((delta / 256 / float(size)) * 100)
+        self.assertLess(
+            ret, pcent, f"Result image is not as expected; {ret}% > {pcent}%"
+        )

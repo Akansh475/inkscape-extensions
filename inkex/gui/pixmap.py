@@ -29,6 +29,11 @@ ICON_THEME = Gtk.IconTheme.get_default()
 BILINEAR = GdkPixbuf.InterpType.BILINEAR
 HYPER = GdkPixbuf.InterpType.HYPER
 
+SIZE_ASPECT = 0
+SIZE_ASPECT_GROW = 1
+SIZE_ASPECT_CROP = 2
+SIZE_STRETCH = 3
+
 
 class PixmapLoadError(ValueError):
     """Failed to load a pixmap"""
@@ -68,49 +73,48 @@ class PixmapFilter:  # pylint: disable=too-few-public-methods
 class OverlayFilter(PixmapFilter):
     """Adds an overlay to output images, overlay can be any name that
     the owning pixmap manager can find.
+
+    overlay  : Name of overlay image
+    position : Location of the image:
+      0      - Full size (1 to 1 overlay, default)
+      (x,y)  - Percentage from one end to the other position 0-1
+    alpha    : Blending alpha, 0 - 255
+
     """
 
-    overlay = None
-    """Name of the overlay image"""
+    def __init__(self, *args, **kwargs):
+        self.position = (0, 0)
+        self.overlay = None
+        self.alpha = 255
+        super().__init__(*args, **kwargs)
+        self.pad_x, self.pad_y = SizeFilter.to_size(self.position)
 
-    placement = (0, 0)
-    """Location of the image:
-
-        - 0  - Full size (1 to 1 overlay, default)
-        - (x,y) - Percentage from one end to the other position 0-1"""
-
-    alpha = 255
-    """Blending alpha, 0 - 255"""
+    def get_overlay(self, **kwargs):
+        return self.manager.get(
+            kwargs.get("overlay", None) or self.overlay, exempt=True
+        )
 
     def filter(self, img, **kwargs):
-        overlay = kwargs.get("overlay", None)
-        overlay = overlay or self.overlay
-        if overlay is not None:
-            overlay = self.manager.get(overlay, exempt=True)
+        overlay = self.get_overlay(**kwargs)
+        if overlay:
+            img = img.copy()
 
-            # Default values for full sized overlay
-            width = img.get_width()
-            height = img.get_height()
-            (x, y) = (0, 0)
-
-            if self.placement[0] or self.placement[1]:
-                (x, y, width, height) = self.set_position(overlay, width, height)
-
-            if overlay:
-                overlay.composite(
-                    img, x, y, width, height, x, y, 1, 1, BILINEAR, self.alpha
-                )
+            (x, y, width, height) = self.set_position(overlay, img)
+            overlay.composite(
+                img, x, y, width, height, x, y, 1, 1, BILINEAR, self.alpha
+            )
         return img
 
-    def set_position(self, img, width, height):
+    def set_position(self, overlay, img):
         """Sets the position of img on the given width and height"""
-        img_w = img.get_width()
-        img_h = img.get_height()
-        if img_w > width or img_h > height:
-            return (0, 0, int(width), int(height))
-        x = (width - img_w) * self.placement[0]
-        y = (height - img_h) * self.placement[1]
-        return (int(x), int(y), int(img_w), int(img_h))
+        img_w, img_h = img.get_width(), img.get_height()
+        ovl_w, ovl_h = overlay.get_width(), overlay.get_height()
+        return (
+            max([0, (img_w - ovl_w) * self.pad_x]),
+            max([0, (img_h - ovl_h) * self.pad_y]),
+            min([ovl_w, img_w]),
+            min([ovl_h, img_h]),
+        )
 
 
 class SizeFilter(PixmapFilter):
@@ -124,10 +128,10 @@ class SizeFilter(PixmapFilter):
     """
 
     required = ["size"]
-    resize_mode = 0
 
     def __init__(self, *args, **kwargs):
         self.size = None
+        self.resize_mode = SIZE_ASPECT
         super().__init__(*args, **kwargs)
         self.img_w, self.img_h = self.to_size(self.size) or (0, 0)
 
@@ -142,18 +146,54 @@ class SizeFilter(PixmapFilter):
 
     def aspect(self, img_w, img_h):
         """Get the aspect ratio of the image resized"""
-        if self.resize_mode == 3 or (
-            self.resize_mode == 0 and img_w < self.img_w and img_h < self.img_h
+        if self.resize_mode == SIZE_STRETCH:
+            return (self.img_w, self.img_h)
+
+        if (
+            self.resize_mode == SIZE_ASPECT
+            and img_w < self.img_w
+            and img_h < self.img_h
         ):
             return (img_w, img_h)
         (pcw, pch) = (self.img_w / img_w, self.img_h / img_h)
-        factor = max(pcw, pch) if self.resize_mode == 2 else min(pcw, pch)
+        factor = (
+            max(pcw, pch) if self.resize_mode == SIZE_ASPECT_CROP else min(pcw, pch)
+        )
         return (int(img_w * factor), int(img_h * factor))
 
     def filter(self, img, **kwargs):
         if self.size is not None:
             (width, height) = self.aspect(img.get_width(), img.get_height())
             return img.scale_simple(width, height, HYPER)
+        return img
+
+
+class PadFilter(SizeFilter):
+    """Add padding to the image to make it a standard size"""
+
+    def __init__(self, *args, **kwargs):
+        self.size = None
+        self.padding = 0.5
+        super().__init__(*args, **kwargs)
+        self.pad_x, self.pad_y = self.to_size(self.padding)
+
+    def filter(self, img, **kwargs):
+        (width, height) = (img.get_width(), img.get_height())
+        if width < self.img_w or height < self.img_h:
+            target = GdkPixbuf.Pixbuf.new(
+                img.get_colorspace(),
+                True,
+                img.get_bits_per_sample(),
+                max([width, self.img_w]),
+                max([height, self.img_h]),
+            )
+            target.fill(0x0)  # Transparent black
+
+            x = (target.get_width() - width) * self.pad_x
+            y = (target.get_height() - height) * self.pad_y
+
+            img.composite(target, x, y, width, height, x, y, 1, 1, BILINEAR, 255)
+            return target
         return img
 
 

@@ -33,6 +33,7 @@ from inkex.utils import DependencyError
 
 try:
     from inkex.gui.tester import MainLoopProtection
+    from inkex.gui.listview import label
     from inkex.gui import GtkApp, Window, asyncme
     from gi.repository import Gtk, GLib
 
@@ -130,6 +131,8 @@ class GtkAppTest(TestCase):
 
     def test_args(self):
         """Test app arguments"""
+        self.assertEqual(label(4), "int")
+        self.assertEqual(label((4, 5)), "int or int")
         GtkApp(
             app_name="inline-app",
             ui_dir=self.datadir(),

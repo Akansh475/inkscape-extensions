@@ -4,9 +4,11 @@ Writing Extensions: In-Depth
 .. toctree::
    :maxdepth: 2
 
-   inx
+   inx-overview
+   inx-widgets
    interpreters
    unit-tests
+   submit
 
 Highlevel explanation of specific inkex features
 ----------------------------------------------------

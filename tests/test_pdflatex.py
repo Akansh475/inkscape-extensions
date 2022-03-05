@@ -28,11 +28,29 @@ from inkex.tester import ComparisonMixin, TestCase
 
 
 class PdfLatexTest(ComparisonMixin, TestCase):
+    """Test some basic latex formulas"""
+
     compare_file = "svg/empty.svg"
     effect_class = PdfLatex
     comparisons = [
+        ("--font_size=15",),  # pdflatex 6cb1964
+        ("--font_size=15", "--standalone=False"),  # pdflatex acb7040
         (
-            "--formule=\\(\\displaystyle\\frac{\\pi^2}{6}=\\lim_{n \\to \\infty}\\sum_{k=1}^n \\frac{1}{k^2}\\)",
-            "--packages=",
-        ),
+            "--font_size=8",
+            r"""--formule=\(\begin{matrix}
+  a & b & c \\
+  d & e & f \\
+  g & h & i
+ \end{matrix}\)""",
+        ),  # pdflatex fa0bf1f8
+    ]
+
+
+class PdfLatexTestmm(ComparisonMixin, TestCase):
+    compare_file = "svg/empty_mm.svg"
+    effect_class = PdfLatex
+    comparisons = [
+        ("--font_size=20", r"--formule=\(\frac{1+\sqrt{5}}{2}\)"),  # pdflatex 93c25fa3
+        # pdflatex b78a3100
+        ("--font_size=20", "--standalone=False", r"--formule=\(\frac{1+\sqrt{5}}{2}\)"),
     ]

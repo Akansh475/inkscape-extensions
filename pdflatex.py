@@ -25,8 +25,9 @@ import os
 
 import inkex
 from inkex.base import TempDirMixin
-from inkex.command import call, inkscape
+from inkex.command import ProgramRunError, call, inkscape
 from inkex import load_svg, ShapeElement, Defs
+from inkex.units import convert_unit
 
 
 class PdfLatex(TempDirMixin, inkex.GenerateExtension):
@@ -37,8 +38,21 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
     """
 
     def add_arguments(self, pars):
-        pars.add_argument("--formule", type=str, default="")
-        pars.add_argument("--packages", type=str, default="")
+        pars.add_argument(
+            "--formule",
+            type=str,
+            default=r"\(\displaystyle\frac{\pi^2}{6}=\lim_{n \to \infty}\sum_{k=1}^n \frac{1}{k^2}\)",
+        )
+        pars.add_argument(
+            "--preamble",
+            type=str,
+            default="".join(
+                f"\\usepackage{{ams{i}}}" for i in ["math", "symb", "fonts"]
+            ),
+        )
+        pars.add_argument("--font_size", type=int, default=10)
+        pars.add_argument("--page", choices=["basic", "advanced"])
+        pars.add_argument("--standalone", type=inkex.Boolean, default=True)
 
     def generate(self):
         tex_file = os.path.join(self.tempdir, "input.tex")
@@ -48,13 +62,23 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
         with open(tex_file, "w") as fhl:
             self.write_latex(fhl)
 
-        call(
-            "pdflatex",
-            tex_file,
-            output_directory=self.tempdir,
-            halt_on_error=True,
-            oldie=True,
-        )
+        try:
+            call(
+                "pdflatex",
+                tex_file,
+                output_directory=self.tempdir,
+                halt_on_error=True,
+                oldie=True,
+            )
+        except ProgramRunError as err:
+            inkex.errormsg("An exception occured during LaTeX compilation:\n")
+            inkex.errormsg(
+                str(err)
+                .replace("\\r\\n", "\n")
+                .replace("\\n", "\n")
+                .replace("\\\\", "\\")
+            )
+            raise inkex.AbortExtension()
 
         inkscape(
             pdf_file,
@@ -62,6 +86,10 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
             pdf_page=1,
             pdf_poppler=True,
             export_type="svg",
+            actions=(
+                "select-all;page-fit-to-selection;"
+                "clone-unlink-recursively;vacuum-defs"
+            ),
         )
 
         if not os.path.isfile(svg_file):
@@ -71,32 +99,38 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
                 svg_file = fn
 
         with open(svg_file, "r") as fhl:
-            svg = load_svg(fhl).getroot()
-            svg.set_random_ids(backlinks=True)
+            svg: inkex.SvgDocumentElement = load_svg(fhl).getroot()
+
+            scale = convert_unit("1pt", "px") / self.svg.scale
+            if not self.options.standalone:
+                scale *= self.options.font_size / 10
+
             for child in svg:
                 if isinstance(child, ShapeElement):
+                    child.transform = inkex.Transform(scale=scale) @ child.transform
                     yield child
                 elif isinstance(child, Defs):
                     for def_child in child:
-                        # def_child.set_random_id()
                         self.svg.defs.append(def_child)
 
     def write_latex(self, stream):
         """Takes a forumle and wraps it in latex"""
+        if self.options.standalone:
+            docclass = (
+                f"\\documentclass[fontsize={self.options.font_size}pt, "
+                + "class=scrreprt, preview]{standalone}"
+            )
+        else:
+            docclass = r"\documentclass{minimal}"
         stream.write(
-            r"""%% processed with pdflatex.py
-\documentclass{minimal}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsfonts}
+            f"""%% processed with pdflatex.py
+{docclass}
+{self.options.preamble}
+\\begin{{document}}
+{self.options.formule}
+\\end{{document}}
 """
         )
-        for package in self.options.packages.split(","):
-            if package:
-                stream.write("\\usepackage{{{}}}\n".format(package))
-        stream.write("\n\\begin{document}\n")
-        stream.write(self.options.formule)
-        stream.write("\n\\end{document}\n")
         stream.flush()
 
 

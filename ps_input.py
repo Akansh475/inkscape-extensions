@@ -25,7 +25,8 @@ import sys
 import os
 
 import inkex
-from inkex.command import call, which
+from inkex.command import ProgramRunError, call, which
+from inkex.localization import inkex_gettext as _
 
 
 class PostscriptInput(inkex.CallExtension):
@@ -66,10 +67,27 @@ class PostscriptInput(inkex.CallExtension):
                     gs_exec = "gswin64c"  # In CI, we have neither available,
                     # but there are mock files for the 64 bit version
                 else:
-                    raise inkex.AbortExtension()
-            call(gs_exec, *params)
+                    raise inkex.AbortExtension(_("No GhostScript executable was found"))
+            try:
+                call(gs_exec, *params)
+            except ProgramRunError as err:
+                self.handle_gs_error(err)
         else:
-            call("ps2pdf", crop, input_file, output_file)
+            try:
+                call("ps2pdf", crop, input_file, output_file)
+            except ProgramRunError as err:
+                self.handle_gs_error(err)
+
+    def handle_gs_error(self, err: ProgramRunError):
+        inkex.errormsg(
+            _(
+                "Ghostscript was unable to read the file. \nThe following error message was returned:"
+            )
+            + "\n"
+        )
+        inkex.errormsg(err.stderr.decode("utf8"))
+        inkex.errormsg(err.stdout.decode("utf8"))
+        raise inkex.AbortExtension()
 
 
 if __name__ == "__main__":

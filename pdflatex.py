@@ -28,6 +28,7 @@ from inkex.base import TempDirMixin
 from inkex.command import ProgramRunError, call, inkscape
 from inkex import load_svg, ShapeElement, Defs
 from inkex.units import convert_unit
+from inkex.localization import inkex_gettext as _
 
 
 class PdfLatex(TempDirMixin, inkex.GenerateExtension):
@@ -71,13 +72,8 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
                 oldie=True,
             )
         except ProgramRunError as err:
-            inkex.errormsg("An exception occured during LaTeX compilation:\n")
-            inkex.errormsg(
-                str(err)
-                .replace("\\r\\n", "\n")
-                .replace("\\n", "\n")
-                .replace("\\\\", "\\")
-            )
+            inkex.errormsg(_("An exception occured during LaTeX compilation: ") + "\n")
+            inkex.errormsg(err.stdout.decode("utf8").replace("\r\n", "\n"))
             raise inkex.AbortExtension()
 
         inkscape(

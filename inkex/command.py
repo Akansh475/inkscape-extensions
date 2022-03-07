@@ -37,6 +37,7 @@ from shutil import which as warlock
 
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
+from typing import List
 from lxml.etree import ElementTree
 
 from .elements import SvgDocumentElement
@@ -55,7 +56,42 @@ class CommandNotFound(IOError):
 
 
 class ProgramRunError(ValueError):
-    """Command returned non-zero output"""
+    """A specialized ValueError that is raised when a call to an external command fails.
+    It stores additional information about a failed call to an external program.
+
+    If only the ``program`` parameter is given, it is interpreted as the error message.
+    Otherwise, the error message is compiled from all constructor parameters."""
+
+    program: str
+    """The absolute path to the called executable"""
+
+    returncode: int
+    """Return code of the program call"""
+
+    stderr: str
+    """stderr stream output of the call"""
+
+    stdout: str
+    """stdout stream output of the call"""
+
+    arguments: List
+    """Arguments of the call"""
+
+    def __init__(self, program, returncode=None, stderr=None, stdout=None, args=None):
+        self.program = program
+        self.returncode = returncode
+        self.stderr = stderr
+        self.stdout = stdout
+        self.arguments = args
+        super().__init__(str(self))
+
+    def __str__(self):
+        if self.returncode is None:
+            return self.program
+        return (
+            f"Return Code: {self.returncode}: {self.stderr}\n{self.stdout}"
+            "\nargs: {self.args}"
+        )
 
 
 def which(program):
@@ -199,9 +235,7 @@ def _call(program, *args, **kwargs):
         (stdout, stderr) = process.communicate(input=stdin)
         if process.returncode == 0:
             return stdout
-        raise ProgramRunError(
-            f"Return Code: {process.returncode}: {stderr}\n{stdout}\nargs: {args}"
-        )
+        raise ProgramRunError(program, process.returncode, stderr, stdout, args)
 
 
 def call(program, *args, **kwargs):

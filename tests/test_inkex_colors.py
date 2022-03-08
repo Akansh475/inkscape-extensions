@@ -109,6 +109,15 @@ class ColorTest(TestCase):
         self.assertEqual(Color("rgb(50%,0%,1%)"), [127, 0, 2])
         self.assertEqual(Color("rgb(66.667%,0%,6.667%)"), [170, 0, 17])
 
+    def test_rgba_one(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/402"""
+        self.assertEqual(Color("rgb(1, 100%,1.0)"), [1, 255, 255])
+        self.assertEqual(Color("rgba(1, 100%,1.0, 100%)"), [1, 255, 255, 1])
+        self.assertEqual(Color("rgba(1, 100%, 1.0, 1.0)"), [1, 255, 255, 1])
+        self.assertEqual(Color("rgba(1, 100%, 1.0, 1)"), [1, 255, 255, 1])
+        self.assertEqual(Color("rgba(1, 0, 0, 1)"), [1, 0, 0, 1])
+        self.assertEqual(Color([1, 1.0, 1.0, 1], "rgba"), [1, 255, 255, 1])
+
     def test_rgba_color(self):
         """Parse RGBA colours"""
         self.assertEqual(Color("rgba(45,50,55,1.0)"), [45, 50, 55, 1.0])

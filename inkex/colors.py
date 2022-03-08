@@ -204,7 +204,16 @@ class ColorIdError(ColorError):
 
 
 class Color(list):
-    """An RGB array for the color"""
+    """An RGB array for the color
+
+    Can be constructed from valid CSS color attributes, as well as
+    tuple/list + color space. Percentage values are supported.
+
+    .. versionchanged:: 1.2
+        Clarification with respect to values denoting unity: For RGB color channels,
+        "1.0", 1.0 and "100%" are treated as 255, while "1" and 1 are treated as 1.
+
+    """
 
     red = property(
         lambda self: self.to_rgb()[0], lambda self, value: self._set(0, value)
@@ -287,8 +296,10 @@ class Color(list):
             val = val.strip()
             if val.endswith("%"):
                 val = float(val.strip("%")) / 100
-            else:
+            elif "." in val:
                 val = float(val)
+            else:
+                val = int(val)
 
         end_type = int
         if len(self) == 3:  # Alpha value

@@ -22,6 +22,7 @@ Extract embedded images.
 """
 
 import os
+import pathlib
 import inkex
 from inkex import Image
 from inkex.localization import inkex_gettext as _
@@ -109,7 +110,7 @@ class ExtractImage(inkex.EffectExtension):
             fhl.write(decodebytes(data.encode("utf-8")))
 
         # absolute for making in-mem cycles work
-        node.set("xlink:href", os.path.realpath(pathwext))
+        node.set("xlink:href", pathlib.Path(os.path.realpath(pathwext)).as_uri())
 
 
 if __name__ == "__main__":

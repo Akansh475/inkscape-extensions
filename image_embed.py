@@ -75,9 +75,10 @@ class EmbedImage(inkex.EffectExtension):
         url = urlparse.urlparse(xlink)
         href = urllib.url2pathname(url.path)
 
-        # Primary location always the filename itself, we allow this
-        # call to search the user's home folder too.
-        path = self.absolute_href(href or "")
+        # Look relative to the *temporary* filename instead of the original filename.
+        path = self.absolute_href(
+            href or "", cwd=os.path.dirname(self.options.input_file)
+        )
 
         # Backup directory where we can find the image
         if not os.path.isfile(path):

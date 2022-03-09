@@ -221,7 +221,7 @@ class InkscapeExtension:
             self.parse_arguments(args)
             if self.options.input_file is None:
                 self.options.input_file = sys.stdin
-            else:
+            elif "DOCUMENT_PATH" not in os.environ:
                 os.environ["DOCUMENT_PATH"] = self.options.input_file
 
             if self.options.output is None:

@@ -22,7 +22,7 @@ Allow extensions to translate messages.
 """
 
 import gettext
-import os
+import os, sys
 
 # Get gettext domain and matching locale directory for translation of extensions strings
 # (both environment variables are set by Inkscape)
@@ -70,6 +70,12 @@ def inkex_localize():
 
 
 inkex_gettext = inkex_localize().gettext  # pylint: disable=invalid-name
+"""
+Shortcut for gettext. Import as::
+
+    from inkex.localize import inkex_gettext as _
+
+"""
 
 inkex_ngettext = inkex_localize().ngettext
 """
@@ -77,3 +83,20 @@ Shortcut for ngettext
 
     .. versionadded:: 1.2
 """
+
+
+if sys.version_info >= (3, 8):
+    inkex_pgettext = inkex_localize().pgettext
+    """
+    Gettext with context. Import as::
+
+        from inkex.localize import inkex_pgettext as pgettext
+
+    Both parameters **must** be string literals. The call to xgettext must contain::
+
+        --keyword=pgettext:1c,2
+
+    .. versionadded:: 1.2
+    """
+else:
+    inkex_pgettext = lambda context, message: message

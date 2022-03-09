@@ -22,7 +22,8 @@
 
 import inkex
 
-from inkex.localization import inkex_gettext as _
+from inkex.localization import inkex_gettext as _, inkex_pgettext as pgettext
+import inkex.localization
 
 
 class DocInfo(inkex.EffectExtension):
@@ -30,21 +31,31 @@ class DocInfo(inkex.EffectExtension):
 
     def effect(self):
         namedview = self.svg.namedview
-        self.msg(_(":::SVG document related info:::"))
+        self.msg(pgettext("Docinfo Extension", ":::SVG document related info:::"))
         self.msg(
             _("version: {}").format(
                 self.svg.get("inkscape:version", _("New Document (unsaved)"))
             )
         )
-        self.msg(_("width: {}").format(self.svg.viewport_width))
-        self.msg(_("height: {}").format(self.svg.viewport_height))
-        self.msg(_("viewbox: {}").format(str(self.svg.get_viewbox())))
         self.msg(
-            _("document-units: {}").format(
+            pgettext("Docinfo Extension", "width: {}").format(self.svg.viewport_width)
+        )
+        self.msg(
+            pgettext("Docinfo Extension", "height: {}").format(self.svg.viewport_height)
+        )
+        self.msg(
+            pgettext("Docinfo Extension", "viewbox: {}").format(
+                str(self.svg.get_viewbox())
+            )
+        )
+        self.msg(
+            pgettext("Docinfo Extension", "document-units: {}").format(
                 namedview.get("inkscape:document-units", "None")
             )
         )
-        self.msg(_("units: ") + namedview.get("units", "None"))
+        self.msg(
+            pgettext("Docinfo Extension", "units: ") + namedview.get("units", "None")
+        )
         self.msg(_("Document has {} guides").format(len(namedview.get_guides())))
         for i, grid in enumerate(namedview.findall("inkscape:grid")):
             self.msg(

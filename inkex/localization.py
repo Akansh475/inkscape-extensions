@@ -85,6 +85,21 @@ Shortcut for ngettext
 """
 
 
+def inkex_fgettext(message, *args, **kwargs):
+    """
+    Shortcut for gettext and subsequent formatting. Import as::
+
+        from inkex.localize import inkex_fgettext as _f
+
+    The positionals and keyword arguments are passed to ``str.format()``.
+
+    The call to xgettext must contain::
+
+        --keyword=_f
+    """
+    return inkex_gettext(message).format(*args, **kwargs)
+
+
 if sys.version_info >= (3, 8):
     inkex_pgettext = inkex_localize().pgettext
     """

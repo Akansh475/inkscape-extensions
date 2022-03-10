@@ -22,7 +22,11 @@
 
 import inkex
 
-from inkex.localization import inkex_gettext as _, inkex_pgettext as pgettext
+from inkex.localization import (
+    inkex_gettext as _,
+    inkex_fgettext as _f,
+    inkex_pgettext as pgettext,
+)
 import inkex.localization
 
 
@@ -33,8 +37,9 @@ class DocInfo(inkex.EffectExtension):
         namedview = self.svg.namedview
         self.msg(pgettext("Docinfo Extension", ":::SVG document related info:::"))
         self.msg(
-            _("version: {}").format(
-                self.svg.get("inkscape:version", _("New Document (unsaved)"))
+            _f(
+                "version: {}",
+                self.svg.get("inkscape:version", _("New Document (unsaved)")),
             )
         )
         self.msg(
@@ -56,16 +61,15 @@ class DocInfo(inkex.EffectExtension):
         self.msg(
             pgettext("Docinfo Extension", "units: ") + namedview.get("units", "None")
         )
-        self.msg(_("Document has {} guides").format(len(namedview.get_guides())))
+        self.msg(_f("Document has {} guides", len(namedview.get_guides())))
         for i, grid in enumerate(namedview.findall("inkscape:grid")):
-            self.msg(
-                _("Grid number {}: Units: {}").format(i + 1, grid.get("units", "None"))
-            )
+            self.msg(_f("Grid number {}: Units: {}", i + 1, grid.get("units", "None")))
         if len(namedview.get_pages()) > 1:
-            self.msg(_("Document has {} pages").format(len(namedview.get_pages())))
+            self.msg(_f("Document has {} pages", len(namedview.get_pages())))
             for i, page in enumerate(namedview.get_pages()):
                 self.msg(
-                    _("Page number {}: x: {} y: {} width: {} height: {}").format(
+                    _f(
+                        "Page number {}: x: {} y: {} width: {} height: {}",
                         i + 1,
                         page.get("x"),
                         page.get("y"),

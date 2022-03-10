@@ -33,9 +33,13 @@ Python setup
 On every operating system, you need a working Python environment. Currently, inkex is tested 
 against Python 3.7-3.10.
 
+inkex manages its dependencies using `poetry <https://python-poetry.org/docs/>`_. It can be installed using::
+
+    pip install poetry
+
 Install the dependencies and the pre-commit hook::
 
-    pip install -r requirements.txt
+    poetry install
     pre-commit install
 
 Testing changes in Inkscape
@@ -103,4 +107,42 @@ author's username) ``xyz``::
     git push git@gitlab.com:xyz/extensions.git mr-origin-123:source-branch-name 
 
 
+Adding/Updating dependencies
+----------------------------
+
+.. highlight:: bash
+
+The *direct* dependencies of inkex are declared in the ``pyproject.toml`` file.
+
+There is also a lockfile named ``poetry.lock`` which has *all* the dependencies 
+(direct, dependencies of direct, dependencies of dependencies of direct and so on till the leaf dependencies) 
+pinned to specific versions (versions which were compatible the last time lockfile was updated).
+
+To update all the dependencies in the lockfile to latest compatible versions, enter::
+
+    poetry lock
+
+To add/update a particular dependency, add it to ``pyproject.toml`` manually. The dependency should be declared in the 
+``[tool.poetry.dependencies]`` TOML table, while a dependency required only during development of inkex should be declared in 
+``[tool.poetry.dev-dependencies]``.
+
+Then update the lockfile using::
+
+    poetry lock
+
+Alternatively, you can add a dependency and update the lockfile in a single command::
+
+    poetry add "lxml@^4.5.0" --lock
+
+Both the ``pyproject.toml`` and ``poetry.lock`` are to be committed to the repository.
+
+.. note::
+
+    You don't need to install the dependencies to add/update them. So, the commands above don't install anything. 
+    However, if you are using poetry to manage the environment, and want to also install the dependencies, 
+    remove the ``--lock`` options from the commands and use ``poetry update`` instead of ``poetry lock``.
+
+.. note::
+
+    Dependencies should be updated according to the `policy <https://wiki.inkscape.org/wiki/Tracking_Dependencies#Distros>`_ defined in Inkscape wiki .
 

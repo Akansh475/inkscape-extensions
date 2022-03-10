@@ -66,8 +66,8 @@ test:python38-windows:
     - choco install python --version 3.8.3 -y -f --no-progress
     - $env:PATH += ";C:\\PYTHON38\\;C:\\PYTHON38\\Scripts"
     - refreshenv
-    - "python -m pip install --upgrade setuptools"
-    - "python -m pip install --upgrade tox"
+    - "python -m pip install --upgrade pip"
+    - "python -m pip install --upgrade tox poetry tox-poetry"
     - "tox -e py38-normal-win"
 
 test:python310:
@@ -132,10 +132,10 @@ sphinx:
   script:
     - source /root/pyenv-init
     - pyenv shell 3.9.0
-    - pip install -r pip/docs.txt
-    - sphinx-apidoc -e -P -o docs/source inkex */deprecated.py
+    - poetry install
+    - poetry run sphinx-apidoc -e -P -o docs/source/ inkex */deprecated.py
     - cd docs
-    - make html
+    - poetry run make html
     - echo -e "\n\n"
       "Documentation for inkex module successfully created; you can access the HTML version at\n"
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/build/html/index.html"
@@ -143,6 +143,7 @@ sphinx:
   artifacts:
     paths:
       - build/html/
+
 pages:
   stage: deploy
   only:
@@ -150,8 +151,12 @@ pages:
   when: always
   script:
     - mkdir -p public
-    - if test -e htmlcov; then cp -r htmlcov public/coverage; fi
-    - if test -e build/html; then cp -r build/html public/documentation; fi
+    - if test -d htmlcov/; then cp -r htmlcov/ public/coverage/; fi
+    - if test -d build/html/; then cp -r build/html/ public/documentation/; fi
+    - source /root/pyenv-init
+    - pyenv shell 3.9.0
+    - poetry show --no-dev --no-ansi > public/python-dependencies.txt # Flattened list of all dependencies
+    - poetry show --no-dev --tree --no-ansi > public/python-dependency-tree.txt # List of all dependencies in a tree
   artifacts:
     paths:
-      - public
+      - public/

@@ -2,6 +2,7 @@
 # coding=utf-8
 #
 # Copyright (C) 2005 Aaron Spike, aaron@ekips.org
+#               2022 Jonathan Neuhauser, jonathan.neuhauser@outlook.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,16 +22,14 @@
 Extract embedded images.
 """
 
+import math
 import os
-import pathlib
-import inkex
-from inkex import Image
-from inkex.localization import inkex_gettext as _
+from pathlib import Path
+from typing import Iterable
+from base64 import decodebytes
 
-try:
-    from base64 import decodebytes
-except ImportError:
-    from base64 import decodestring as decodebytes
+import inkex
+from inkex.localization import inkex_gettext as _, inkex_ngettext as ngettext
 
 
 class ExtractImage(inkex.EffectExtension):
@@ -45,72 +44,161 @@ class ExtractImage(inkex.EffectExtension):
             default=True,
         )
         pars.add_argument(
-            "--filepath", default="./images/", help="Location to save the images."
+            "--directory",
+            default="./images/",
+            help="Location to save the images. "
+            "If the directory starts with ./, the filename is interpreted "
+            "relative to the location of the opened file.",
+        )
+        pars.add_argument("--basename", default="", help="Optional file name prefix.")
+        pars.add_argument(
+            "--filepath",
+            default="",
+            help="Path to a new file. If given, --basename and --directory "
+            "options are ignored.",
         )
 
+    def __init__(self):
+        super().__init__()
+        self.errcount = 0
+
+    def message(self, elem, message, error=True):
+        """Write an error message"""
+        inkex.errormsg(elem.get_id() + ": " + message)
+        if error:
+            self.errcount += 1
+
     def effect(self):
-        elems = (
-            self.svg.selection.filter(Image)
+        self.errcount = 0
+
+        elems: Iterable[inkex.BaseElement] = (
+            self.svg.selection.filter(inkex.Image)
             if self.options.selectedonly
             else self.svg.xpath("//svg:image")
         )
+        if len(elems) == 0:
+            return
 
-        for elem in elems:
-            self.extract_image(elem)
+        filename, directory = self.process_options()
+
+        counter = 1
+        for __, elem in enumerate(elems):
+            data, file_ext = self.prepare(elem)
+            if data is None:
+                continue
+
+            # If no filename is set, use id
+            cname = filename
+            if cname.strip() == "":
+                cname = elem.get_id()
+            elif len(elems) > 1:
+                # if more than one element is selected and a common filename is used,
+                # insert ID
+                while True:
+                    suffix = "_" + str(counter).rjust(int(math.log10(len(elems))) + 1)
+                    if os.path.isfile(
+                        os.path.join(directory, cname + suffix + file_ext)
+                    ):
+                        counter += 1
+                    else:
+                        cname = cname + suffix
+                        break
+
+            pathwext = os.path.join(directory, cname + file_ext)
+            if self.save_image(elem, data, pathwext):
+
+                # absolute for making in-mem cycles work
+                elem.set("xlink:href", Path(os.path.realpath(pathwext)).as_uri())
+                counter += 1
+
+        if self.errcount > 0:
+            inkex.errormsg(
+                ngettext(
+                    "{} error occurred", "{} errors occurred.", self.errcount
+                ).format(self.errcount)
+            )
+
+    def process_options(self):
+        """Prepare directory and base filename, independent of particular images"""
+        # First case: Extension called from the context menu
+        if self.options.filepath.strip() != "":
+            directory, filename = os.path.split(self.options.filepath)
+            filename, __ = os.path.splitext(filename)
+        elif self.options.directory.strip() != "":
+            # If the extension is called from the
+            # Effects menu, directory is passed and can be absolute or relative
+            directory = self.options.directory
+            filename = os.path.splitext(self.options.basename)[0]
+
+        # create the directory if it doesn't exist
+        directory = self.absolute_href(directory)
+        try:
+            os.makedirs(directory, exist_ok=True)
+        except OSError:
+            raise inkex.AbortExtension(
+                _("Unable to create directory {}.").format(directory)
+            )
+
+        return filename, directory
 
     @staticmethod
     def mime_to_ext(mime):
-        """Return an extension based on the mime type"""
+        """Return a file extension (incl. leading dot) based on the mime type"""
         # Most extensions are automatic (i.e. extension is same as minor part of mime type)
         part = mime.split("/", 1)[1].split("+")[0]
         return "." + {
             # These are the non-matching ones.
-            "svg+xml": ".svg",
-            "jpeg": ".jpg",
-            "icon": ".ico",
+            "svg+xml": "svg",
+            "jpeg": "jpg",
+            "icon": "ico",
         }.get(part, part)
 
-    def extract_image(self, node):
-        """Extract the node as if it were an image."""
+    def prepare(self, node):
+        """Check if we can process the data attribute"""
         xlink = node.get("xlink:href")
         if not xlink.startswith("data:"):
-            return  # Not embedded image data
-
-        # This call will raise AbortExtension if the document wasn't saved
-        # and the user is trying to extract them to a relative directory.
-        save_to = self.absolute_href(self.options.filepath, default=None)
-        # Make the target directory if it doesn't exist yet.
-        if not os.path.isdir(save_to):
-            os.makedirs(save_to)
+            self.message(
+                node, _("Unable to extract image, is it maybe already linked?")
+            )
+            return None, None  # Not embedded image data
 
         try:
             data = xlink[5:]
             (mimetype, data) = data.split(";", 1)
             (base, data) = data.split(",", 1)
-        except ValueError:
-            inkex.errormsg(_("Invalid image format found"))
-            return
+            file_ext = self.mime_to_ext(mimetype)
+        except (ValueError, IndexError):
+            self.message(node, _("Invalid image format found."))
+            return None, None
 
         if base != "base64":
-            inkex.errormsg(_("Can't decode encoding: {}").format(base))
-            return
+            self.message(node, _("Unable to decode encoding {}.").format(base))
+            return None, None
 
-        file_ext = self.mime_to_ext(mimetype)
+        return data, file_ext
 
-        pathwext = os.path.join(save_to, node.get("id") + file_ext)
+    def save_image(self, node, data, pathwext):
+        """Save the image contained in the base64-encoded string data to pathwext.
+
+        Returns whether the operation succeded."""
+
         if os.path.isfile(pathwext):
-            inkex.errormsg(
-                _("Can't extract image, filename already used: {}").format(pathwext)
+            self.message(
+                node,
+                _("Unable to extract image, file {} already exists.").format(pathwext),
             )
-            return
+            return False
 
-        self.msg(_("Image extracted to: {}").format(pathwext))
+        try:
+            with open(pathwext, "wb") as fhl:
+                fhl.write(decodebytes(data.encode("utf-8")))
+        except (OSError, ValueError):
+            self.message(node, _("Unable to write to {}").format(pathwext))
+            return False
 
-        with open(pathwext, "wb") as fhl:
-            fhl.write(decodebytes(data.encode("utf-8")))
+        self.message(node, _("Image extracted to: {}").format(pathwext), False)
 
-        # absolute for making in-mem cycles work
-        node.set("xlink:href", pathlib.Path(os.path.realpath(pathwext)).as_uri())
+        return True
 
 
 if __name__ == "__main__":

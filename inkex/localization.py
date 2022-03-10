@@ -70,3 +70,10 @@ def inkex_localize():
 
 
 inkex_gettext = inkex_localize().gettext  # pylint: disable=invalid-name
+
+inkex_ngettext = inkex_localize().ngettext
+"""
+Shortcut for ngettext
+
+    .. versionadded:: 1.2
+"""

@@ -219,3 +219,11 @@ Other additions to inkex
 -  API functions for the new `multipage
    feature <Release_notes/1.2#Page_tool>`__ have been added: `MR
    extensions#499 <https://gitlab.com/inkscape/extensions/-/merge_requests/399>`__.
+
+.. _other_deprecations_to_inkex_1_2
+
+Other deprecations to inkex
+----------------------------
+
+- Pre Inkscape 1.0 way of declaring the dependency on inkex in the ``*.inx`` file has been removed entirely. (It was deprecated in Inkscape 1.0. For details, see :ref:`remove_dependency_listings`)
+

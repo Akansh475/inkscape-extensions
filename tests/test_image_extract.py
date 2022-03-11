@@ -36,24 +36,38 @@ class ExtractImageComponentTests(TestCase, MockCommandMixin):
     def test_extract_multiple(self):
         """test extraction in a multi-image file"""
         args = [
-            "tests/data/svg/images_multiple.svg",
+            self.data_file("svg", "images_multiple.svg"),
             f"--directory={self.tempdir}/",
             f"--output={self.tempdir}/out.svg",
             "--selectedonly=True",
             "--id=embedded_image01",
             "--id=embedded_image02",
             "--basename=image.jpg",  # test that bad file extensions are corrected
+            "--linkextracted=false",
         ]
+
         ext = ExtractImage()
-        with Capture("stderr") as stderr:
-            ext.run(args)
-            # There should be two images saved to the tempdir
-            self.assertListEqual(
-                sorted(os.listdir(self.tempdir)),
-                ["image_1.png", "image_2.png", "out.svg"],
-            )
-            self.assertEqual(len(stderr.getvalue().split("extracted")), 3)
-            self.assertEqual(ext.errcount, 0)
+
+        def run_test(outexists):
+            with Capture("stderr") as stderr:
+                ext.run(args)
+                # There should be two images saved to the tempdir
+                self.assertListEqual(
+                    sorted(os.listdir(self.tempdir)),
+                    ["image_1.png", "image_2.png"] + (["out.svg"] if outexists else []),
+                )
+                self.assertEqual(len(stderr.getvalue().split("extracted")), 3)
+                self.assertEqual(ext.errcount, 0)
+
+        # the out file only exists if it was changed, in this case, no change should
+        # be made
+        run_test(False)
+        for file in os.scandir(self.tempdir):
+            os.remove(file.path)
+        # We can do the same test again, because of linkextracted=False, the file is
+        # unchaged when running it on the output file.
+        args[-1] = "--linkextracted=true"
+        run_test(True)
 
         # Now save all images again from the temp file, two images will raise an error
         # because they are already embedded
@@ -143,7 +157,7 @@ class ExtractImageComponentTests(TestCase, MockCommandMixin):
         with Capture("stderr") as stderr:
             ext = ExtractImage()
 
-            if sys.version_info > (3, 8, 0):
+            if sys.version_info > (3, 8, 0) or filename == "<":
                 ext.run(args)
 
                 self.assertIn("Unable to write to", stderr.getvalue())

@@ -44,6 +44,13 @@ class ExtractImage(inkex.EffectExtension):
             default=True,
         )
         pars.add_argument(
+            "-l",
+            "--linkextracted",
+            type=inkex.Boolean,
+            help="Replace image data with link to image",
+            default=True,
+        )
+        pars.add_argument(
             "--directory",
             default="./images/",
             help="Location to save the images. "
@@ -108,7 +115,8 @@ class ExtractImage(inkex.EffectExtension):
             if self.save_image(elem, data, pathwext):
 
                 # absolute for making in-mem cycles work
-                elem.set("xlink:href", Path(os.path.realpath(pathwext)).as_uri())
+                if self.options.linkextracted:
+                    elem.set("xlink:href", Path(os.path.realpath(pathwext)).as_uri())
                 counter += 1
 
         if self.errcount > 0:

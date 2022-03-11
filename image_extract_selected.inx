@@ -7,6 +7,7 @@
     <param name="directory" type="string" gui-hidden="true"></param>
     <param name="basename" type="string" gui-hidden="true"></param>
     <param name="selectedonly" type="bool" gui-hidden="true">true</param>
+    <param name="linkextracted" type="bool" gui-text="Link extracted images" gui-description="After saving the image file, the image data is replaced with a link to that file.">true</param>
     
     <effect needs-live-preview="false">
         <object-type>all</object-type>

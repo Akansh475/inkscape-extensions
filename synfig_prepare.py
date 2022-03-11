@@ -24,6 +24,9 @@ Simplifies SVG files in preparation for sif export.
 import os
 import tempfile
 from subprocess import PIPE, Popen
+from inkex.command import inkscape, write_svg, ProgramRunError
+from inkex.localization import inkex_gettext as _
+from inkex.base import TempDirMixin
 
 import inkex
 from inkex import (
@@ -47,181 +50,17 @@ class MalformedSVGError(Exception):
         self.value = value
 
     def __str__(self):
-        return """SVG document is invalid or contains unsupported features
+        return (
+            _(
+                """SVG document is invalid or contains unsupported features
 
 Error message: %s
 
 The SVG to Synfig converter is designed to handle SVG files that were created using Inkscape. Unsupported features are most likely to occur in SVG files written by other programs.
-""" % repr(
-            self.value
+"""
+            )
+            % repr(self.value)
         )
-
-
-class InkscapeActionGroup(object):
-    """A class for calling Inkscape to perform operations on a document"""
-
-    def __init__(self, svg_document=None):
-        self.command = ""
-        self.init_args = ""
-        self.has_selection = False
-        self.has_action = False
-        self.set_svg_document(svg_document)
-
-    def set_svg_document(self, svg_document):
-        """Set the SVG document that Inkscape will operate on"""
-        self.svg_document = svg_document
-        self.svg = svg_document.getroot()
-
-    def set_init_args(self, cmd):
-        """Set the initial arguments to Inkscape subprocess
-
-        Can be used to pass additional arguments to Inkscape, or an initializer
-        command (e.g. unlock all objects before proceeding).
-        """
-        self.init_args = cmd
-
-    def clear(self):
-        """Clear all actions"""
-        self.command = ""
-        self.has_action = False
-        self.has_selection = False
-
-    def verb(self, verb):
-        """Run an Inkscape verb
-
-        For a list of verbs, run `inkscape --verb-list`
-        """
-        if self.has_selection:
-            self.command += "--verb=%s " % verb
-
-            if not self.has_action:
-                self.has_action = True
-
-    def select_id(self, object_id):
-        """Select object with given id"""
-        self.command += "--select=%s " % object_id
-        if not self.has_selection:
-            self.has_selection = True
-
-    def select_node(self, node):
-        """Select the object represented by the SVG node
-
-        Selection will fail if node has no id attribute
-        """
-        node_id = node.get("id", None)
-        if node_id is None:
-            raise MalformedSVGError("Node has no id")
-        self.select_id(node_id)
-
-    def select_nodes(self, nodes):
-        """Select objects represented by SVG nodes
-
-        Selection will fail if any node has no id attribute
-        """
-        for node in nodes:
-            self.select_node(node)
-
-    def select_xpath(self, xpath):
-        """Select objects matching a given XPath expression
-
-        Selection will fail if any matching node has no id attribute
-        """
-        self.select_nodes(self.svg.xpath(xpath))
-
-    def deselect(self):
-        """Deselect all objects"""
-        if self.has_selection:
-            self.verb("EditDeselect")
-            self.has_selection = False
-
-    def run_file(self, filename):
-        """Run the actions on a specific file"""
-        if not self.has_action:
-            return
-
-        cmd = self.init_args + " " + self.command + "--verb=FileSave --verb=FileQuit"
-        p = Popen(
-            'inkscape "{}" {}'.format(filename, cmd),
-            shell=True,
-            stdout=PIPE,
-            stderr=PIPE,
-        )
-        rc = p.wait()
-        f = p.stdout
-        err = p.stderr
-
-        f.close()
-        err.close()
-
-    def run_document(self):
-        """Run the actions on the svg xml tree"""
-        if not self.has_action:
-            return self.svg_document
-
-        # First save the document
-        svgfile = tempfile.mktemp(".svg")
-        self.svg_document.write(svgfile)
-
-        # Run the action on the document
-        self.run_file(svgfile)
-
-        # Open the resulting file
-        with open(svgfile, "r") as stream:
-            self.svg_document = load_svg(stream)
-
-        # Clean up.
-        try:
-            os.remove(svgfile)
-        except Exception:
-            pass
-
-        # Return the new document
-        return self.svg_document
-
-
-class SynfigExportActionGroup(InkscapeActionGroup):
-    """An action group with stock commands designed for Synfig exporting"""
-
-    def __init__(self, svg_document=None):
-        InkscapeActionGroup.__init__(self, svg_document)
-        self.set_init_args("--verb=UnlockAllInAllLayers")
-        self.objects_to_paths()
-        self.unlink_clones()
-
-    def objects_to_paths(self):
-        """Convert unsupported objects to paths"""
-        # Flow roots contain rectangles inside them, so they need to be
-        # converted to paths separately from other shapes
-        self.select_xpath("//svg:flowRoot")
-        self.verb("ObjectToPath")
-        self.deselect()
-
-        non_paths = [
-            "svg:rect",
-            "svg:circle",
-            "svg:ellipse",
-            "svg:line",
-            "svg:polyline",
-            "svg:polygon",
-            "svg:text",
-        ]
-
-        # Build an xpath command to select these nodes
-        xpath_cmd = " | ".join(["//" + np for np in non_paths])
-
-        # Select all of these elements
-        # Note: already selected elements are not deselected
-        self.select_xpath(xpath_cmd)
-
-        # Convert them to paths
-        self.verb("ObjectToPath")
-        self.deselect()
-
-    def unlink_clones(self):
-        """Unlink clones (remove <svg:use> elements)"""
-        self.select_xpath("//svg:use")
-        self.verb("EditUnlinkClone")
-        self.deselect()
 
 
 ###### Utility Functions ##################################
@@ -366,7 +205,7 @@ def split_fill_and_stroke(path_node):
 
 ### Object related
 
-
+# TODO replace by self.specified_style
 def propagate_attribs(
     node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 ):
@@ -445,12 +284,11 @@ def get_dimension(s="1024"):
 
 
 ###### Main Class #########################################
-class SynfigPrep(inkex.EffectExtension):
+class SynfigPrep(TempDirMixin, inkex.EffectExtension):
     def effect(self):
         """Transform document in preparation for exporting it into the Synfig format"""
 
-        a = SynfigExportActionGroup(self.document)
-        self.document = a.run_document()
+        self.preprocess()
 
         # Remove inheritance of attributes
         propagate_attribs(self.document.getroot())
@@ -462,6 +300,39 @@ class SynfigPrep(inkex.EffectExtension):
                 fill = split_fill_and_stroke(node)[0]
                 if fill is not None:
                     fuse_subpaths(fill)
+
+    def preprocess(self):
+
+        actions = [
+            "unlock-all",
+            # Flow roots contain rectangles inside them, so they need to be
+            # converted to paths separately from other shapes
+            "select-by-element:flowRoot",
+            "object-to-path",
+            "select-clear",
+        ]
+
+        # Now convert all non-paths to paths
+        elements = ["rect", "circle", "ellipse", "line", "polyline", "polygon", "text"]
+        actions += ["select-by-element:" + i for i in elements]
+        actions += ["object-to-path", "select-clear"]
+        # unlink clones
+        actions += ["select-by-element:use", "object-unlink-clones"]
+        # save and overwrite
+        actions += ["export-overwrite", "export-do"]
+
+        infile = os.path.join(self.tempdir, "input.svg")
+        write_svg(self.document, infile)
+        try:
+            inkscape(infile, actions=";".join(actions))
+        except ProgramRunError as err:
+            inkex.errormsg(_("An error occurred during document preparation"))
+            inkex.errormsg(err.stderr.decode("utf-8"))
+
+        with open(infile, "r") as stream:
+            self.document = load_svg(stream)
+
+        return self.document
 
 
 if __name__ == "__main__":

@@ -68,61 +68,45 @@ The SVG to Synfig converter is designed to handle SVG files that were created us
 ### Path related
 
 
-def fuse_subpaths(path_node):
-    """Fuse subpaths of a path. Should only be used on unstroked paths"""
-    path = path_node.path.to_arrays()
+def fuse_subpaths(path: inkex.Path):
+    """Fuse subpaths of a path. Should only be used on unstroked paths.
+    The idea is to replace every moveto by a lineto, and then walk all the extra lines
+    backwards to get the same fill. For unfilled paths, this gives visually good results
+    in cases with not-too-complex paths, i.e. no intersections.
+    There may be extra zero-length Lineto commands."""
 
-    if len(path) == 0:
-        return
-
-    i = 0
-    initial_point = [path[i][1][-2], path[i][1][-1]]
-    prev_end = initial_point[:]
+    result = inkex.Path()
     return_stack = []
-    while i < len(path):
-        # Remove any terminators: they are redundant
-        if path[i][0] == "Z":
-            path.remove(["Z", []])
-            continue
+    for i, seg in enumerate(path.proxy_iterator()):
+        if seg.letter not in "zZmM":
+            result.append(seg.command)
+        elif i == 0:
+            result.append(seg.command)
+            first = seg.end_point
+        else:
+            # Add a line instead of the ZoneClose / Move command, and store
+            # the initial position.
+            return_to = seg.previous_end_point
+            if seg.letter in "mM":
+                if seg.previous_end_point != first:  # only close if needed
+                    # all paths must be closed for this algorithm to work. Since
+                    # the path doesn't have a stroke, it's visually irrellevant.
+                    result.append(inkex.paths.Line(*first))
+                    return_to = first
 
-        if path[i][0] == "V":
-            prev_end[0] = path[i][1][0]
-            i += 1
-            continue
-        elif path[i][0] == "H":
-            prev_end[1] = path[i][1][0]
-            i += 1
-            continue
-        elif path[1][0] != "M" or i == 0:
-            prev_end = path[i][1][-2:]
-            i += 1
-            continue
+                return_stack += [return_to]
+            result.append(inkex.paths.Line(*seg.end_point))
 
-        # This element begins a new path - it should be a moveto
-        assert path[i][0] == "M"
+            first = seg.end_point
 
-        # Swap it for a lineto
-        path[i][0] = "L"
-        # If the old subpath has not been closed yet, close it
-        if prev_end != initial_point:
-            path.insert(i, ["L", initial_point])
-            i += 1
+    # also close the last subpath
+    return_stack += [first]
 
-        # Set the initial point of this subpath
-        initial_point = path[i][1][-2:]
+    # now apply the return stack backwards
+    for point in return_stack[::-1]:
+        result.append(inkex.paths.Line(*point))
 
-        # Append this point to the return stack
-        return_stack.append(initial_point)
-    # end while
-
-    # Now pop the entire return stack
-    while return_stack:
-        el = ["L", return_stack.pop()]
-        path.insert(i, el)
-        i += 1
-
-    path_d = str(inkex.Path(path))
-    path_node.set("d", path_d)
+    return result
 
 
 def split_fill_and_stroke(path_node):
@@ -205,7 +189,7 @@ def split_fill_and_stroke(path_node):
 
 ### Object related
 
-# TODO replace by self.specified_style
+
 def propagate_attribs(
     node, parent_style={}, parent_transform=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 ):
@@ -299,7 +283,7 @@ class SynfigPrep(TempDirMixin, inkex.EffectExtension):
                 # There are multiple subpaths
                 fill = split_fill_and_stroke(node)[0]
                 if fill is not None:
-                    fuse_subpaths(fill)
+                    fill.path = fuse_subpaths(fill.path)
 
     def preprocess(self):
 

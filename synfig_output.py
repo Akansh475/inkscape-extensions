@@ -1146,7 +1146,7 @@ class SynfigExport(SynfigPrep):
         height = get_dimension(svg.get("height", 768))
 
         title = svg.getElement("svg:title")
-        if title:
+        if title is not None:
             name = title.text
         else:
             name = svg.get("sodipodi:docname", "Synfig Animation 1")

@@ -219,6 +219,10 @@ class GetDocumentWidthTest(TestCase):
         """Demonstrate that a non-zero x value (viewbox[0]) does not affect the width value."""
         self.assert_svg_sizes('width="" viewBox="5 7 22 99"', 22, 22)
 
+    def test_comma_separated_viewbox(self):
+        """Viewbox values can be separated by comma"""
+        self.assert_svg_sizes('width="" viewBox="5,7,22,99"', 22, 22)
+
 
 class GetDocumentHeightTest(TestCase):
     """Tests for Effect.height."""

@@ -27,6 +27,7 @@ Provide a way to load lxml attributes with an svg API on top.
 
 import random
 import math
+import re
 
 from lxml import etree
 
@@ -167,7 +168,9 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
     def get_viewbox(self):
         """Parse and return the document's viewBox attribute"""
         try:
-            ret = [float(unit) for unit in self.get("viewBox", "0").split()]
+            ret = [
+                float(unit) for unit in re.split(",\s*|\s+", self.get("viewBox", "0"))
+            ]
         except ValueError:
             ret = ""
         if len(ret) != 4:

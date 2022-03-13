@@ -7,7 +7,7 @@
     <label>Optimize PNG with 'optipng'</label>
     <param name="tab" type="notebook">
         <page name="lossless" gui-text="Lossless">
-            <param name="interlace" type="bool" gui-text="Interlaced">true</param>
+            <param name="interlace" type="bool" gui-text="Interlaced">false</param>
 
             <param name="level" type="optiongroup" appearance="combo" gui-text="Level:">
                 <option value="0">Minimal Effort</option>

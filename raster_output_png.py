@@ -6,14 +6,14 @@ Optimise PNG file using optipng
 import os
 import inkex
 from inkex.extensions import TempDirMixin
-from inkex.command import call
+from inkex.command import ProgramRunError, call
 
 
 class PngOutput(TempDirMixin, inkex.RasterOutputExtension):
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         # Lossless options
-        pars.add_argument("--interlace", type=inkex.Boolean, default=True)
+        pars.add_argument("--interlace", type=inkex.Boolean, default=False)
         pars.add_argument("--level", type=int, default=0)
         # Lossy options
         pars.add_argument("--bitdepth", type=inkex.Boolean, default=False)
@@ -35,7 +35,23 @@ class PngOutput(TempDirMixin, inkex.RasterOutputExtension):
             "nc": not self.options.color,
             "np": not self.options.palette,
         }
-        call("optipng", self.png_file, oldie=True, clobber=True, **options)
+        try:
+            call("optipng", self.png_file, oldie=True, clobber=True, **options)
+        except ProgramRunError as err:
+            if "IDAT recoding is necessary" in err.stderr.decode("utf-8"):
+                raise inkex.AbortExtension(
+                    _(
+                        "The optipng command failed, possibly due to a mismatch of the"
+                        "interlacing and compression level options. Please try to disable "
+                        '"Interlaced" or set "Level" to 1 or higher.'
+                    )
+                )
+            else:
+                raise inkex.AbortExtension(
+                    _("The optipng command failed with the following message:")
+                    + "\n"
+                    + err.stderr.decode("utf-8")
+                )
 
         if os.path.isfile(self.png_file):
             with open(self.png_file, "rb") as fhl:

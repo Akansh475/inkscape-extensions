@@ -25,7 +25,9 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import re
+
 import inkex
+import inkex.units
 from inkex.bezier import cspsubdiv
 
 r12_header = """ 0 
@@ -112,7 +114,8 @@ class DxfTwelve(inkex.OutputExtension):
         self.dxf_insert_code("999", '"DXF R12 Output" (www.mydxf.blogspot.com)')
         self.dxf_add(r12_header)
 
-        scale = 1  # TODO this assumes that one user unit corresponds to one mm
+        # Scale, but assume that the viewport is based on mm (dxf expects mm)
+        scale = self.svg.scale / inkex.units.convert_unit("1mm", "px")
         h = self.svg.viewbox_height
 
         path = "//svg:path"

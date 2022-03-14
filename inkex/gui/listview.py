@@ -458,13 +458,15 @@ class ViewColumn(object):
          size - Restrict the images to this size.
         """
         # Manager where icons will be pulled from
-        pixmaps = pixmaps or PixmapManager("", pixmap_dir="./", size=size)
-        size = SizeFilter(pixmaps, size=size) if size else None
+        filters = [SizeFilter] if size else []
+        pixmaps = pixmaps or PixmapManager(
+            "", pixmap_dir="./", filters=filters, size=size
+        )
 
         renderer = Gtk.CellRendererPixbuf()
         renderer.set_property("ypad", pad)
         renderer.set_property("xpad", pad)
-        func = self.image_func(icon or self.default_icon, pixmaps, size)
+        func = self.image_func(icon or self.default_icon, pixmaps)
         return self.add_renderer(renderer, func, expand=False)
 
     def add_text_renderer(self, text, wrap=None, template=None):
@@ -526,7 +528,7 @@ class ViewColumn(object):
 
         return internal
 
-    def image_func(self, call, pixmaps=None, size=None):
+    def image_func(self, call, pixmaps=None):
         """Wrap, wrap wrap the func"""
         callout = self.get_callout(call)
 
@@ -539,8 +541,8 @@ class ViewColumn(object):
             if isinstance(icon or "", str) and pixmaps:
                 # Expect a Gnome theme icon
                 icon = pixmaps.get(icon)
-            elif icon and size:
-                icon = size.filter(icon)
+            elif icon:
+                icon = pixmaps.apply_filters(icon)
 
             cell.set_property("pixbuf", icon)
             cell.set_property("visible", True)

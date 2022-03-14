@@ -52,15 +52,19 @@ class PixmapFilter:  # pylint: disable=too-few-public-methods
     """
 
     required: List[str] = []
+    optional: List[str] = []
 
-    def __init__(self, manager, **kwargs):
-        self.manager = manager
-        missing = self.required[:]
-        for key in kwargs:
-            if key in missing:
-                missing.remove(key)
-            setattr(self, key, kwargs[key])
-        self.enabled = len(missing) == 0
+    def __init__(self, **kwargs):
+        self.enabled = True
+        for key in self.required:
+            if key not in kwargs:
+                self.enabled = False
+            else:
+                setattr(self, key, kwargs[key])
+
+        for key in self.optional:
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
 
     def filter(self, img, **kwargs):
         """Run filter, replace this methodwith your own"""
@@ -68,6 +72,15 @@ class PixmapFilter:  # pylint: disable=too-few-public-methods
             "Please add 'filter' method to your PixmapFilter class %s."
             % type(self).__name__
         )
+
+    @staticmethod
+    def to_size(dat):
+        """Tries to calculate a size that will work for the data"""
+        if isinstance(dat, (int, float)):
+            return (dat, dat)
+        if isinstance(dat, Iterable) and len(dat) >= 2:
+            return (dat[0], dat[1])
+        return None
 
 
 class OverlayFilter(PixmapFilter):
@@ -82,19 +95,27 @@ class OverlayFilter(PixmapFilter):
 
     """
 
+    optional = ["position", "overlay", "alpha"]
+
     def __init__(self, *args, **kwargs):
         self.position = (0, 0)
         self.overlay = None
         self.alpha = 255
         super().__init__(*args, **kwargs)
-        self.pad_x, self.pad_y = SizeFilter.to_size(self.position)
+        self.pad_x, self.pad_y = self.to_size(self.position)
 
     def get_overlay(self, **kwargs):
-        return self.manager.get(
-            kwargs.get("overlay", None) or self.overlay, exempt=True
+        if "manager" not in kwargs:
+            raise ValueError("PixmapManager must be provided when adding an overlay.")
+        return kwargs["manager"].get(
+            kwargs.get("overlay", None) or self.overlay, no_overlay=True
         )
 
-    def filter(self, img, **kwargs):
+    def filter(self, img, no_overlay=False, **kwargs):
+        # Recursion protection
+        if no_overlay:
+            return img
+
         overlay = self.get_overlay(**kwargs)
         if overlay:
             img = img.copy()
@@ -128,21 +149,13 @@ class SizeFilter(PixmapFilter):
     """
 
     required = ["size"]
+    optional = ["resize_mode"]
 
     def __init__(self, *args, **kwargs):
         self.size = None
         self.resize_mode = SIZE_ASPECT
         super().__init__(*args, **kwargs)
         self.img_w, self.img_h = self.to_size(self.size) or (0, 0)
-
-    @staticmethod
-    def to_size(dat):
-        """Tries to calculate a size that will work for the data"""
-        if isinstance(dat, (int, float)):
-            return (dat, dat)
-        if isinstance(dat, Iterable) and len(dat) >= 2:
-            return (dat[0], dat[1])
-        return None
 
     def aspect(self, img_w, img_h):
         """Get the aspect ratio of the image resized"""
@@ -170,6 +183,8 @@ class SizeFilter(PixmapFilter):
 
 class PadFilter(SizeFilter):
     """Add padding to the image to make it a standard size"""
+
+    optional = ["padding"]
 
     def __init__(self, *args, **kwargs):
         self.size = None
@@ -205,7 +220,7 @@ class PixmapManager:
     default_image = "application-default-icon"
     icon_theme = ICON_THEME
     theme_size = 32
-    filters = [SizeFilter]
+    filters: List[type] = []
     pixmap_dir = None
 
     def __init__(self, location="", **kwargs):
@@ -213,16 +228,16 @@ class PixmapManager:
         if self.pixmap_dir and not os.path.isabs(location):
             self.location = os.path.join(self.pixmap_dir, location)
 
-        self.loader_size = SizeFilter.to_size(kwargs.pop("load_size", None))
-        if "size" not in kwargs:
-            kwargs["size"] = self.theme_size
+        self.loader_size = PixmapFilter.to_size(kwargs.pop("load_size", None))
 
         # Add any instance specified filters first
-        self._filters = kwargs.get("filters", [])
-        for lens in self.filters:
-            # Now add any class specified filters with optional kwargs
-            # Default: SizeFiler( size=required_field )
-            self._filters.append(lens(self, **kwargs))
+        self._filters = []
+        for item in kwargs.get("filters", []) + self.filters:
+            if isinstance(item, PixmapFilter):
+                self._filters.append(item)
+            elif callable(item):
+                # Now add any class specified filters with optional kwargs
+                self._filters.append(item(**kwargs))
 
         self.cache = {}
         self.get_pixmap(self.default_image)
@@ -231,12 +246,16 @@ class PixmapManager:
         """Get a pixmap of any kind"""
         return self.get_pixmap(*args, **kwargs)
 
+    def get_missing_image(self):
+        """Get a missing image when other images aren't found"""
+        return self.get(self.missing_image)
+
     @staticmethod
     def data_is_file(data):
         """Test the file to see if it's a filename or not"""
         return isinstance(data, str) and "<svg" not in data
 
-    def get_pixmap(self, data, exempt=False, **kwargs):
+    def get_pixmap(self, data, **kwargs):
         """
         There are three types of images this might return.
 
@@ -246,6 +265,9 @@ class PixmapManager:
 
         All pixmaps are cached for multiple use.
         """
+        if "manager" not in kwargs:
+            kwargs["manager"] = self
+
         if not data:
             if not self.default_image:
                 return None
@@ -254,22 +276,27 @@ class PixmapManager:
         key = data[-30:]  # bytes or string
         if not key in self.cache:
             # load the image from data or a filename/theme icon
+            img = None
             try:
                 if self.data_is_file(data):
-                    self.cache[key] = self.load_from_name(data)
+                    img = self.load_from_name(data)
                 else:
-                    self.cache[key] = self.load_from_data(data)
+                    img = self.load_from_data(data)
             except PixmapLoadError as err:
                 logging.warning(str(err))
-                return self.missing_image
+                return self.get_missing_image()
 
-            # Filer the new image if not exempt from such things
-            if key in self.cache and self.cache[key] and not exempt:
-                for lens in self._filters:
-                    if lens.enabled:
-                        self.cache[key] = lens.filter(self.cache[key], **kwargs)
+            if img is not None:
+                self.cache[key] = self.apply_filters(img, **kwargs)
 
-        return self.cache.get(key, self.missing_image)
+        return self.cache[key]
+
+    def apply_filters(self, img, **kwargs):
+        """Apply all the filters to the given image"""
+        for lens in self._filters:
+            if lens.enabled:
+                img = lens.filter(img, **kwargs)
+        return img
 
     def load_from_data(self, data):
         """Load in memory picture file (jpeg etc)"""

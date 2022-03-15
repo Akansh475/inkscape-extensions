@@ -3,6 +3,7 @@
 Convert PNG to Tiff using Raster Output extension.
 """
 
+import io
 import inkex
 
 
@@ -13,12 +14,14 @@ class TiffOutput(inkex.RasterOutputExtension):
         pars.add_argument("--quality", type=int, default=90)
 
     def save(self, stream):
+        tempstream = io.BytesIO()
         self.img.convert("RGB").save(
-            stream,
+            tempstream,
             format="tiff",
             compression=(self.options.compression or None),
             quality=100,
         )
+        stream.write(tempstream.getvalue())
         # TODO: Add other fields such as copyright etc.
 
 

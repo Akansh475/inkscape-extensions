@@ -38,6 +38,9 @@ class PostscriptInput(inkex.CallExtension):
 
     def add_arguments(self, pars):
         pars.add_argument("--crop", type=inkex.Boolean, default=False)
+        pars.add_argument(
+            "--autorotate", choices=["None", "PageByPage", "All"], default="None"
+        )
 
     def call(self, input_file, output_file):
         crop = "-dEPSCrop" if self.options.crop else None
@@ -52,6 +55,7 @@ class PostscriptInput(inkex.CallExtension):
                 "-dCompatibilityLevel#1.4",
                 crop,
                 "-sOutputFile#" + output_file,
+                "-dAutoRotatePages#/" + self.options.autorotate,
                 input_file,
             ]
             gs_execs = ["gswin64c", "gswin32c"]
@@ -74,7 +78,13 @@ class PostscriptInput(inkex.CallExtension):
                 self.handle_gs_error(err)
         else:
             try:
-                call("ps2pdf", crop, input_file, output_file)
+                call(
+                    "ps2pdf",
+                    crop,
+                    "-dAutoRotatePages=/" + self.options.autorotate,
+                    input_file,
+                    output_file,
+                )
             except ProgramRunError as err:
                 self.handle_gs_error(err)
 

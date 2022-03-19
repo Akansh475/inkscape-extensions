@@ -88,7 +88,7 @@ class AbstractShape(Element):
         return None
 
     def get_style(self):
-        return self.node.style
+        return self.node.specified_style()
 
     def set_style(self, style):
         """Translates style properties names into method calls"""

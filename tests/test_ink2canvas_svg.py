@@ -27,3 +27,12 @@ class Ink2CanvasTestClosedPath(ComparisonMixin, TestCase):
     compare_file = "svg/multiple_closed_subpaths.svg"
     comparisons = [("--id=path31",)]
     compare_filters = [WindowsTextCompat()]
+
+
+class Ink2CanvasTestCSS(ComparisonMixin, TestCase):
+    """Test CSS styles"""
+
+    effect_class = Html5Canvas
+    compare_file = "svg/styling-css-04-f.svg"
+    comparisons = [("--id=alpha",)]
+    compare_filters = [WindowsTextCompat()]

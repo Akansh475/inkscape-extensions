@@ -31,8 +31,8 @@ class Html5Canvas(inkex.OutputExtension):
 
     def save(self, stream):
         svg_root = self.document.getroot()
-        width = self.svg.unittouu(svg_root.get("width"))
-        height = self.svg.unittouu(svg_root.get("height"))
+        width = self.svg.viewbox_width
+        height = self.svg.viewbox_height
         canvas = Canvas(self, width, height)
         self.walk_tree(svg_root, canvas)
         stream.write(canvas.output().encode("utf-8"))
@@ -58,7 +58,10 @@ class Html5Canvas(inkex.OutputExtension):
         the node is not an SVG shape element.
         @rtype svg.AbstractShape or NoneType
         """
-        prefix, _brace_, command = node.tag.partition("}")
+        try:
+            prefix, _brace_, command = node.tag.partition("}")
+        except AttributeError:
+            return None  # skip comments
         if prefix != "{http://www.w3.org/2000/svg":
             return None
 

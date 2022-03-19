@@ -167,7 +167,7 @@ exportPDF()"""
         profiles = self.svg.defs.findall("svg:color-profile")
         if len(profiles) == 0:
             raise AbortExtension(
-                __("Please select a color profile in the document settings.")
+                _("Please select a color profile in the document settings.")
             )
         elif len(profiles) > 1:
             raise AbortExtension(

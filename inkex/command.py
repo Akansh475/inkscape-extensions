@@ -90,7 +90,7 @@ class ProgramRunError(ValueError):
             return self.program
         return (
             f"Return Code: {self.returncode}: {self.stderr}\n{self.stdout}"
-            "\nargs: {self.args}"
+            f"\nargs: {self.args}"
         )
 
 

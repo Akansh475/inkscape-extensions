@@ -1093,7 +1093,7 @@ class QrCode(inkex.GenerateExtension):
     """Generate QR Code Extension"""
 
     def add_arguments(self, pars):
-        pars.add_argument("--text", default="www.inkscape.org")
+        pars.add_argument("--text", default="https://inkscape.org")
         pars.add_argument("--typenumber", type=int, default=0)
         pars.add_argument("--correctionlevel", type=int, default=0)
         pars.add_argument("--qrmode", type=int, default=0)

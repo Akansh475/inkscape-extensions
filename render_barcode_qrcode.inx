@@ -2,9 +2,8 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>QR Code</name>
   <id>org.inkscape.qr_code</id>
-  <label xml:space="preserve">See http://www.denso-wave.com/qrcode/index-e.html for details</label>
-  <param name="text" type="string" gui-text="Text:">www.inkscape.org</param>
-  <param name="typenumber" type="optiongroup" appearance="combo" gui-text="Size, in unit squares:">
+  <param name="text" type="string" gui-text="Text:" gui-description="The content of the QR code, most commonly a web link.">https://inkscape.org</param>
+  <param name="typenumber" type="optiongroup" appearance="combo" gui-description="With 'Auto', the extension will choose the best size, depending upon the length of the text and the selected error correction level." gui-text="Size, in unit squares:">
     <option value="0">Auto</option>
     <option translatable="no" value="1">21x21</option>
     <option translatable="no" value="2">25x25</option>
@@ -47,14 +46,13 @@
     <option translatable="no" value="39">173x173</option>
     <option translatable="no" value="40">177x177</option>
   </param>
-  <label xml:space="preserve">With "Auto", the size of the barcode depends on the length of the text and the error correction level</label>
-  <param name="correctionlevel" type="optiongroup" appearance="combo" gui-text="Error correction level:">
+  <param name="correctionlevel" type="optiongroup" appearance="combo" gui-description="If your QR code is likely to get smudged or readability will be reduced in some other way, choose a high error correction level. Higher error correction levels mean that the text that can be encoded must be shorter." gui-text="Error correction level:">
     <option value="1">L (Approx. 7%)</option>
     <option value="0">M (Approx. 15%)</option>
     <option value="3">Q (Approx. 25%)</option>
     <option value="2">H (Approx. 30%)</option>
   </param>
-  <param name="qrmode" type="optiongroup" appearance="combo" gui-text="QR Mode:">
+  <param name="qrmode" type="optiongroup" appearance="combo" gui-text="QR Mode:" gui-description="'Bytes array': can encode any text, 'Only numbers': can only encode numbers, 'ALPHAnum': can only encode capital letters and some symbols, sufficient for most web urls.">
     <option translatable="yes" value="0">Bytes array</option>
     <option translatable="yes" value="1">Only numbers</option>
     <option translatable="no" value="2">ALPHAnum</option>
@@ -65,7 +63,7 @@
     <option translatable="no" value="cp1252">CP 1252</option>
     <option translatable="no" value="utf_8">UTF-8</option>
   </param>
-  <param name="invert" type="bool" gui-text="Invert QR code:">false</param>
+  <param name="invert" type="bool" gui-text="Invert QR code:" gui-description="Invert the colors, may fail for symbols option">false</param>
   <param name="modulesize" type="float" min="0" max="1000" gui-text="Square size (px):">4</param>
   <param name="drawtype" type="notebook" gui-text="Drawing type:">
     <page name="smooth" gui-text="Smooth">
@@ -76,23 +74,25 @@
         <option value="proud">Proud</option>
       </param>
     </page>
-    <page name="pathpreset" gui-text="Predefined path">
+    <page name="pathpreset" gui-text="Shapes">
       <param name="pathtype" type="optiongroup" appearance="radio" 
-      gui-text="Use predefined path as cell fill">
-        <option value="simple">Simple rectangle</option>
+      gui-text="Use predefined shape:">
+        <option value="simple">Square</option>
         <option value="circle">Circle</option>
       </param>
     </page>
-    <page name="selection" gui-text="Clone selection">
-      <label>The first item of the selection will be cloned.</label>
+    <page name="selection" gui-text="Clones">
+      <label>The first selected object will be cloned.</label>
      </page>
-    <page name="symbol" gui-text="Symbol">
-      <param name="symbolid" type="string" gui-text="Symbol #url:"></param>
+    <page name="symbol" gui-text="Symbols">
+      <param name="symbolid" type="string" gui-description="The ID of the selected symbol. Open the XML editor to find it as the value for 'xlink:href' for a selected instance of the symbol." gui-text="Symbol ID:"></param>
     </page>
   </param>
   <param name="smoothval" type="float" min="0.01" max="1.0" precision="2" gui-text="Smooth square value (0-1):">0.2</param>
-  <label xml:space="preserve">Manually define the group ID. Leave blank to have it auto-generated.</label>
+  <label>Manually define the group ID of the generated QR code. Leave blank to have it auto-generated.</label>
   <param name="groupid" type="string" gui-text="Group ID:"></param>
+  <label>For details about QR codes, see:</label>
+  <label appearance="url" indent="1">https://www.qrcode.com</label>
   <effect>
     <object-type>all</object-type>
     <effects-menu>

@@ -10,13 +10,12 @@
 Hershey Text
 </label>
 
-<label indent="2" xml:space="preserve">A tool to replace text with stroke fonts
+<label indent="2">A tool to replace text with stroke fonts</label>
 
-Version 3.0.5, 2021-05-17
+<label indent="3" translatable="no" xml:space="preserve">Version 3.0.5, 2021-05-17
 
-
+  
 </label>
-
 	<param indent="1" name="fontface" type="optiongroup" appearance="combo" gui-text="Font face:">
 		<option value="HersheySans1" context="Font name">Hershey Sans 1-stroke</option>
 		<option value="HersheySansMed" translatable="no">Hershey Sans medium</option>

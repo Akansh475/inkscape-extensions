@@ -4,7 +4,7 @@
     <id>org.ekips.filter.interp</id>
     <param name="exponent" type="float" min="0" max="100" gui-text="Exponent:">1.00</param>
     <param name="steps" type="int" min="1" max="1000" gui-text="Interpolation steps:">5</param>
-    <param name="method" gui-text="Interpolation method:" type="optiongroup" appearance="radio" gui-description="The first option rediscretizes both paths before the interpolation with the other path's node positions. The second option removes extra nodes of the longer path (yields good results if both subpaths have equal length)">
+    <param name="method" gui-text="Interpolation method:" type="optiongroup" appearance="radio" gui-description="The first option rediscretizes both paths before the interpolation with the other path's node positions. The second option removes extra nodes of the longer path.">
                 <option value="equalSubsegments" >Split paths into segments of equal lengths</option>
                 <option value="firstNodes">Discard extra nodes of longer path</option>
             </param>

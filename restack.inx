@@ -39,10 +39,16 @@
             </param>
         </page>
         <page name="help" gui-text="Help">
-      <label>This extension changes the z-order of objects based on their position on the canvas or their current z-order.
-
-Selection:
-The extension restacks either objects inside a single selected group, or a selection of multiple objects on the current drawing level (layer or group).</label>
+            <label xml:space="preserve">
+This extension changes the z-order of objects based on their position
+on the canvas or their current z-order.
+The extension restacks all the selected objects. Groups are treated as
+a single object.
+If elements of a group are selected together with external objects,
+the elements of the group are extracted and positioned next to the other
+objects being restacked (elements on different layers are brought together
+to the same layer).
+            </label>
         </page>
     </param>
     <effect>

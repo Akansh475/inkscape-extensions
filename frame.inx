@@ -14,7 +14,7 @@
     <param name="offset_relative" type="float" min="-50" max="1000" precision="1"
         gui-text="Relative offset (percentage)"
         gui-description="A positive value moves the frame to the outside of the bounding box of the selected object(s).
-        Relative offest is usually preferable over absolute offset if the selection height and with differ significantly.">1</param>
+        Relative offset is usually preferable over absolute offset if the selection height and width differ significantly.">1</param>
 
     <label appearance="header">Style of the frame:</label>
 

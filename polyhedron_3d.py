@@ -344,7 +344,7 @@ class Poly3D(inkex.GenerateExtension):
 
     def generate(self):
         if numpy is None:
-            raise inkex.AbortExtension(_("numpy is required."))
+            raise inkex.AbortExtension(_("This extension requires the numpy library."))
         so = self.options
 
         obj = WavefrontObj(self.get_filename())

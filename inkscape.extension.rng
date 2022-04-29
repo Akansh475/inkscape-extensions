@@ -12,6 +12,14 @@
       </element>
 
       <zeroOrMore>
+        <element name="description"><text/></element>
+      </zeroOrMore>
+
+      <zeroOrMore>
+        <element name="category"><text/></element>
+      </zeroOrMore>
+
+      <zeroOrMore>
         <ref name="inx.dependency"/>
       </zeroOrMore>
 
@@ -25,6 +33,7 @@
         <ref name="inx.effect_extension"/>
         <ref name="inx.path-effect_extension"/>
         <ref name="inx.print_extension"/>
+        <ref name="inx.template_extension"/>
       </choice>
 
       <optional>
@@ -254,6 +263,24 @@
   </define>
 
 
+  <define name="inx.template_extension">
+    <element name="template">
+      <zeroOrMore>
+        <attribute>
+          <anyName/>
+        </attribute>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="preset">
+          <zeroOrMore>
+            <attribute>
+              <anyName/>
+            </attribute>
+          </zeroOrMore>
+        </element>
+      </zeroOrMore>
+    </element>
+  </define>
 
 
 <!-- WIDGETS AND PARAMETERS -->

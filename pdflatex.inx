@@ -13,7 +13,7 @@
         <param name="standalone" type="bool" gui-text="Use standalone document class"
         gui-description="Without the standalone document class, font sizes other than 10pt are achieved by
 scaling the resulting PDF output (internally, the document class 'minimal' is used). 
-More correct spacing for all font sizes can be achived by using 'standalone'.
+More correct spacing for all font sizes can be achieved by using 'standalone'.
 However, the required packages might not be available on all systems.">true</param>
         <param name="preamble" type="string" gui-text="Custom preamble code"
         >\usepackage{amsmath}\usepackage{amssymb}\usepackage{amsfonts}</param>

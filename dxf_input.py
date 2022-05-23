@@ -510,7 +510,7 @@ def export_mtext(vals):
                     if (text.find(r"\P") < 0) and (text.find(r"{") < 0):
                         pos = 0
                         while len(text) > pos:
-                            text = text[:pos] + "\P" + text[pos:]
+                            text = text[:pos] + r"\P" + text[pos:]
                             pos += nochars + 2
 
         text = mtext_normalize(text)
@@ -573,7 +573,7 @@ def mtext_normalize(text):
                 posC = text.find(r";", posL)
                 if posC != -1 and (posC - posL) < 20:
                     control = text[posL + 1 : posC + 1]
-            text = text[:found] + "}\P{" + control + text[found + 2 :]
+            text = text[:found] + r"}\P{" + control + text[found + 2 :]
         found = text.find(r"\P", found + 2)
     return text
 

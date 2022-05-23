@@ -169,7 +169,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         """Parse and return the document's viewBox attribute"""
         try:
             ret = [
-                float(unit) for unit in re.split(",\s*|\s+", self.get("viewBox", "0"))
+                float(unit) for unit in re.split(r",\s*|\s+", self.get("viewBox", "0"))
             ]
         except ValueError:
             ret = ""

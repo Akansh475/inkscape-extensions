@@ -15,7 +15,7 @@
   <defs
      id="defs2">
      <style id="style1">
-// Not in a CDATA for testing.
+/* Not in a CDATA for testing.*/
 #layer1 {
    stroke: yellow;
 }

@@ -41,7 +41,7 @@ from ..transforms import BoundingBox
 from ..styles import StyleSheets
 
 from ._base import BaseElement
-from ._meta import StyleElement
+from ._meta import StyleElement, NamedView
 
 if False:  # pylint: disable=using-constant-test
     import typing  # pylint: disable=unused-import
@@ -86,11 +86,27 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         self.ids.add(new_id)
         return new_id
 
-    def get_page_bbox(self):
-        """Gets the page dimensions as a bbox"""
-        return BoundingBox(
-            (0, float(self.viewbox_width)), (0, float(self.viewbox_height))
-        )
+    def get_page_bbox(self, page=None) -> BoundingBox:
+        """Gets the page dimensions as a bbox. For single-page documents, the viewbox
+        dimensions are returned.
+
+        Args:
+            page (int, optional): Page number. Defaults to the first page.
+
+                .. versionadded:: 1.3
+
+        Raises:
+            IndexError: if the page number provided does not exist in the document.
+
+        Returns:
+            BoundingBox: the bounding box of the page
+        """
+        if page is None:
+            page = 0
+        pages = self.namedview.get_pages()
+        if 0 <= page < len(pages):
+            return pages[page].bounding_box
+        raise IndexError("Invalid page number")
 
     def get_current_layer(self):
         """Returns the currently selected layer"""
@@ -151,7 +167,7 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
         return self.get("sodipodi:docname", "")
 
     @property
-    def namedview(self):
+    def namedview(self) -> NamedView:
         """Return the sp namedview meta information element"""
         return self.get_or_create("//sodipodi:namedview", prepend=True)
 

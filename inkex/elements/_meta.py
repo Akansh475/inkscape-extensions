@@ -28,12 +28,12 @@ give path, transform, and property access easily.
 from __future__ import annotations
 import math
 
-from typing import Optional
+from typing import List, Optional
 
 from lxml import etree
 
 from ..styles import StyleSheet
-from ..transforms import Vector2d, VectorLike, DirectedLineSegment
+from ..transforms import BoundingBox, Vector2d, VectorLike, DirectedLineSegment
 
 from ._base import BaseElement
 
@@ -147,16 +147,41 @@ class NamedView(BaseElement):
                 return guide
         return None
 
-    def get_pages(self):
-        """Returns a list of pages
-
-        .. versionadded:: 1.2"""
+    def _get_pages(self) -> List[Page]:
+        """Returns all page elements"""
         return self.findall("inkscape:page")
 
-    def new_page(self, x, y, width, height, label=None):
-        """Creates a new page in this namedview
+    def _equivalent_page(self) -> Page:
+        """Returns an unrooted page based on the viewbox dimensions"""
+        return Page.new(self.root.viewbox_width, self.root.viewbox_height, 0, 0)
 
-        .. versionadded:: 1.2"""
+    def get_pages(self) -> List[Page]:
+        """Returns a list of pages within the document. For single page documents,
+        a detached page element with dimensions according to the viewbox will be
+        returned.
+
+        .. versionadded:: 1.2
+
+        .. versionchanged:: 1.3
+            For single-page documents, this function now returns the viewbox
+            dimensions.
+        """
+        pages = self._get_pages()
+        if len(pages) < 2:
+            return [self._equivalent_page()]
+        return pages
+
+    def new_page(self, x, y, width, height, label=None):
+        """Creates a new page in this namedview. Always add pages through this
+        function to ensure that single-page documents are treated correctly.
+
+        .. versionadded:: 1.2
+
+        .. versionchanged:: 1.3
+            If none exists, a page element with the viewbox dimensions will be
+            inserted before the new page."""
+        if len(self._get_pages()) == 0:
+            self.add(self._equivalent_page())
         elem = Page(width=width, height=height, x=x, y=y)
         if label:
             elem.set("inkscape:label", str(label))
@@ -289,5 +314,13 @@ class Page(BaseElement):
 
     def move_to(self, x, y):
         """Move this page to the given x,y position"""
-        self.set("position", f"{float(x):g},{float(y):g}")
+        self.set("x", f"{float(x):g}")
+        self.set("y", f"{float(y):g}")
         return self
+
+    @property
+    def bounding_box(self) -> BoundingBox:
+        """Returns the bounding box of the page."""
+        return BoundingBox(
+            (self.x, self.x + self.width), (self.y, self.y + self.height)
+        )

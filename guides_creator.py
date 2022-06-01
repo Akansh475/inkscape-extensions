@@ -52,18 +52,10 @@ class GuidesOpts:
         """Update guide origin and width/height based on page number (1-indexed)"""
         self.pagenumber = pagenumber
         pagenumber = pagenumber - 1
-        if pagenumber < len(self.pages):
+        if 0 <= pagenumber < len(self.pages):
             self.page_origin = (self.pages[pagenumber].x, self.pages[pagenumber].y)
             self.width = self.pages[pagenumber].width
             self.height = self.pages[pagenumber].height
-        elif pagenumber == 0:  # Single page document
-            self.page_origin = (
-                self.viewbox[:2]
-                if not self.pages
-                else (self.pages[0].x, self.pages[0].y)
-            )
-            self.width = self.viewbox[2]
-            self.height = self.viewbox[3]
         else:
             raise ValueError("Invalid page number")
 

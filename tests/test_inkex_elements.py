@@ -40,7 +40,8 @@ from inkex import paths
 from inkex.colors import Color
 from inkex.paths import Move, Line
 from inkex.utils import FragmentError
-from inkex.units import parse_unit
+from inkex.units import parse_unit, convert_unit
+from inkex.transforms import BoundingBox
 
 from .test_inkex_elements_base import SvgTestCase
 from inkex.tester.svg import svg
@@ -513,8 +514,7 @@ class NamedViewTest(ElementTestCase):
 
     def test_pages(self):
         """Create some extra pages and see a list of them"""
-        self.assertEqual(len(self.svg.namedview.get_pages()), 0)
-        self.svg.namedview.add(Page(width="210", height="297", x="0", y="0"))
+        self.assertEqual(len(self.svg.namedview.get_pages()), 1)
         self.svg.namedview.new_page(
             x="220", y="0", width="147.5", height="210", label="TEST"
         )
@@ -524,9 +524,26 @@ class NamedViewTest(ElementTestCase):
             self.svg.namedview.get_pages()[1].get("inkscape:label"), "TEST"
         )
         self.assertEqual(self.svg.namedview.get_pages()[1].attrib["width"], "147.5")
-        self.assertEqual(self.svg.namedview.get_pages()[0].attrib["height"], "297")
+        self.assertAlmostEqual(
+            float(self.svg.namedview.get_pages()[0].attrib["height"]),
+            297 * convert_unit("1mm", "px"),
+        )
         self.assertEqual(self.svg.namedview.get_pages()[1].attrib["x"], "220")
         self.assertEqual(self.svg.namedview.get_pages()[1].attrib["y"], "0")
+
+    def test_get_page_bbox(self):
+        self.assertEqual(
+            self.svg.get_page_bbox(),
+            BoundingBox(
+                (0, 210 * convert_unit("1mm", "px")),
+                (0, 297 * convert_unit("1mm", "px")),
+            ),
+        )
+        self.svg.namedview.add(Page(width="210", height="297", x="0", y="0"))
+        self.svg.namedview.new_page(x="220", y="0", width="147.5", height="210")
+        self.assertEqual(self.svg.get_page_bbox(), BoundingBox((0, 210), (0, 297)))
+        self.assertEqual(self.svg.get_page_bbox(0), BoundingBox((0, 210), (0, 297)))
+        self.assertEqual(self.svg.get_page_bbox(1), BoundingBox((220, 367.5), (0, 210)))
 
     def test_center(self):
         """Test that the center in mm based documents is correctly computed"""

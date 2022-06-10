@@ -93,7 +93,7 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
 
 class RasterOutputExtension(InkscapeExtension):
     """
-    Takes a PNG from Inkscape and outputs it to another rather format.
+    Takes a PNG from Inkscape and outputs it to another raster format.
 
     .. versionadded:: 1.1
     """

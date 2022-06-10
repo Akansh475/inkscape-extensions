@@ -170,7 +170,7 @@ def to_args(prog, *positionals, **arguments):
 
     :Arguments:
         * (``str``) -- String added as given
-        * (``tuple``) -- Ordered version of Kwyward Arguments, see below
+        * (``tuple``) -- Ordered version of Keyword Arguments, see below
 
     :Keyword Arguments:
         * *name* (``str``) --

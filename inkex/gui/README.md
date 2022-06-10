@@ -4,7 +4,7 @@ This module is a Gtk based GUI creator. It helps extensions launch their own use
 
 # How do I use it
 
-You can create custom user interfaces by using the Gnome Glade builder program. Once you have a layout of all the widgets you want, you then make a GtkApp and Window classes inside your Python program, when the GtkApp is run, the windows will be shown to the user and all signals specified for the widgets will call functions on your window class.
+You can create custom user interfaces by using the [Gnome Glade builder program](https://gitlab.gnome.org/GNOME/glade). Once you have a layout of all the widgets you want, you then make a GtkApp and Window classes inside your Python program, when the GtkApp is run, the windows will be shown to the user and all signals specified for the widgets will call functions on your window class.
 
 Please see the existing code for examples of how to do this.
 

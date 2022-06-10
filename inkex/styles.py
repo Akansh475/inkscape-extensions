@@ -313,7 +313,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     def __call__(self, key, element=None):
         """Return the parsed value of a style. Optionally, an element can be passed
-        that will be used to find gradient definitions ect.
+        that will be used to find gradient definitions etc.
 
         .. versionadded:: 1.2"""
         # check if there are shorthand properties defined. If so, apply them to a copy

@@ -43,6 +43,8 @@ from ..styles import StyleSheets
 from ._base import BaseElement
 from ._meta import StyleElement, NamedView
 
+from typing import Optional, List
+
 if False:  # pylint: disable=using-constant-test
     import typing  # pylint: disable=unused-import
 
@@ -72,11 +74,42 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
             self.ids = set(self.xpath("//@id"))
         return self.ids
 
-    def get_unique_id(self, prefix, size=None):
-        """Generate a new id from an existing old_id"""
+    def get_unique_id(
+        self,
+        prefix: str,
+        size: Optional[int] = None,
+        blacklist: Optional[List[str]] = None,
+    ):
+        """Generate a new id from an existing old_id
+
+        The id consists of a prefix and an appended random integer with size digits.
+
+        If size is not given, it is determined automatically from the length of
+        existing ids, i.e. those in the document plus those in the blacklist.
+
+        Args:
+            prefix (str): the prefix of the new ID.
+            size (Optional[int], optional): number of digits of the second part of the
+                id. If None, the length is chosen based on the amount of existing
+                objects. Defaults to None.
+
+                .. versionchanged:: 1.1
+                    The default of this parameter has been changed from 4 to None.
+            blacklist (Optional[Iterable[str]], optional): An additional iterable of ids
+                that are not allowed to be used. This is useful when bulk inserting
+                objects.
+                Defaults to None.
+
+                .. versionadded:: 1.2
+
+        Returns:
+            _type_: _description_
+        """
         ids = self.get_ids()
         if size is None:
             size = max(math.ceil(math.log10(len(ids) or 1000)) + 1, 4)
+        if blacklist is not None:
+            ids.update(blacklist)
         new_id = None
         _from = 10**size - 1
         _to = 10**size
@@ -150,9 +183,28 @@ class SvgDocumentElement(DeprecatedSvgMixin, ISVGDocumentElement, BaseElement):
 
         return self.xpath(ConditionalRule(f".{class_name}").to_xpath())
 
-    def getElementsByHref(self, eid):  # pylint: disable=invalid-name
-        """Get elements by their href xlink attribute"""
-        return self.xpath(f'//*[@xlink:href="#{eid}"]')
+    def getElementsByHref(
+        self, eid: str, attribute="xlink:href"
+    ):  # pylint: disable=invalid-name
+        """Get elements that reference the element with id eid.
+
+        Args:
+            eid (str): _description_
+            attribute (str, optional): Attribute to look for.
+                Valid choices: "xlink:href", "mask", "clip-path".
+                Defaults to "xlink:href".
+
+                .. versionadded:: 1.2
+
+        Returns:
+            Any: list of elements
+        """
+        if attribute == "xlink:href":
+            return self.xpath(f'//*[@xlink:href="#{eid}"]')
+        elif attribute == "mask":
+            return self.xpath(f'//*[@mask="url(#{eid})"]')
+        elif attribute == "clip-path":
+            return self.xpath(f'//*[@clip-path="url(#{eid})"]')
 
     def getElementsByStyleUrl(self, eid, style=None):  # pylint: disable=invalid-name
         """Get elements by a style attribute url"""

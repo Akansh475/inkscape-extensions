@@ -28,7 +28,7 @@ give path, transform, and property access easily.
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Tuple, Optional, overload, TypeVar
+from typing import Any, Tuple, Optional, overload, TypeVar, List
 from lxml import etree
 
 from ..interfaces.IElement import IBaseElement, ISVGDocumentElement
@@ -236,14 +236,61 @@ class BaseElement(IBaseElement):
         svg.append(self.copy())
         return svg.tostring().split(b">\n    ", 1)[-1][:-6]
 
-    def set_random_id(self, prefix=None, size=4, backlinks=False):
-        """Sets the id attribute if it is not already set."""
-        prefix = str(self) if prefix is None else prefix
-        self.set_id(self.root.get_unique_id(prefix, size=size), backlinks=backlinks)
+    def set_random_id(
+        self,
+        prefix: str = None,
+        size: Optional[int] = None,
+        backlinks: bool = False,
+        blacklist: Optional[List[str]] = None,
+    ):
+        """Sets the id attribute if it is not already set.
 
-    def set_random_ids(self, prefix=None, levels=-1, backlinks=False):
-        """Same as set_random_id, but will apply also to children"""
-        self.set_random_id(prefix=prefix, backlinks=backlinks)
+        The id consists of a prefix and an appended random integer of length size.
+        Args:
+            prefix (str, optional): the prefix of the new ID. Defaults to the tag name.
+            size (Optional[int], optional): number of digits of the second part of the
+                id. If None, the length is chosen based on the amount of existing
+                objects. Defaults to None.
+
+                .. versionchanged:: 1.2
+                    The default of this value has been changed from 4 to None.
+            backlinks (bool, optional): Whether to update the links in existing objects
+                that reference this element. Defaults to False.
+            blacklist (List[str], optional): An additional list of ids that are not
+                allowed to be used. This is useful when bulk inserting objects.
+                Defaults to None.
+
+                .. versionadded:: 1.2
+        """
+        prefix = str(self) if prefix is None else prefix
+        self.set_id(
+            self.root.get_unique_id(prefix, size=size, blacklist=blacklist),
+            backlinks=backlinks,
+        )
+
+    def set_random_ids(
+        self,
+        prefix: str = None,
+        levels: int = -1,
+        backlinks: bool = False,
+        blacklist: Optional[List[str]] = None,
+    ):
+        """Same as set_random_id, but will apply also to children
+
+        The id consists of a prefix and an appended random integer of length size.
+        Args:
+            prefix (str, optional): the prefix of the new ID. Defaults to the tag name.
+            levels (int, optional): the depth of the tree traversion, if negative, no
+                limit is imposed. Defaults to -1.
+            backlinks (bool, optional): Whether to update the links in existing objects
+                that reference this element. Defaults to False.
+            blacklist (List[str], optional): An additional list of ids that are not
+                allowed to be used. This is useful when bulk inserting objects.
+                Defaults to None.
+
+                .. versionadded:: 1.2
+        """
+        self.set_random_id(prefix=prefix, backlinks=backlinks, blacklist=blacklist)
         if levels != 0:
             for child in self:
                 if hasattr(child, "set_random_ids"):
@@ -288,6 +335,9 @@ class BaseElement(IBaseElement):
         if backlinks and old_id:
             for elem in self.root.getElementsByHref(old_id):
                 elem.href = self
+            for attr in ["clip-path", "mask"]:
+                for elem in self.root.getElementsByHref(old_id, attribute=attr):
+                    elem.set(attr, self.get_id(2))
             for elem in self.root.getElementsByStyleUrl(old_id):
                 elem.style.update_urls(old_id, new_id)
 

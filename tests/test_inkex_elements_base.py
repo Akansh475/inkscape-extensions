@@ -3,6 +3,7 @@
 """
 Test the element API base classes and basic functionality
 """
+import random
 from lxml import etree
 
 from inkex.elements import (
@@ -217,12 +218,31 @@ class AttributeHandelingTestCase(SvgTestCase):
     def test_set_id_backlinks(self):
         """Changing an id can update backlinks"""
         elem = self.svg.getElementById("path1")
+        rect1 = Rectangle()
+        rect1.set("clip-path", "url(#path1)")
+        rect2 = Rectangle()
+        rect2.set("mask", "url(#path1)")
+        elem.addnext(rect1)
+        self.svg.getElementById("G").add(rect2)
         elem.set_id("plant54", True)
         self.assertEqual(self.svg.getElementById("G").get("xlink:href"), "#plant54")
         self.assertEqual(self.svg.getElementById("G").href, elem)
         self.assertEqual(
             str(self.svg.getElementById("B").style), "fill:#eee;joker:url(#plant54)"
         )
+        self.assertEqual(rect1.get("clip-path"), "url(#plant54)")
+        self.assertEqual(rect2.get("mask"), "url(#plant54)")
+
+    def test_set_id_blacklist(self):
+        """Test that the set_random_id function respects a blacklist"""
+        elem: BaseElement = self.svg.getElementById("D")
+
+        state = random.getstate()
+        elem.set_random_id("Thing")
+        self.assertEqual(elem.get("id"), "Thing5815")
+        random.setstate(state)
+        elem.set_random_id("Other", blacklist=["Other5815"])
+        self.assertEqual(elem.get("id"), "Other8555")
 
     def test_get_element_by_name(self):
         """Get elements by name"""

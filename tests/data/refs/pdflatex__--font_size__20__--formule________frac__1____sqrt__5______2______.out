@@ -1,6 +1,6 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) --><svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" version="1.1" width="210mm" height="297mm" viewbox="0 0 210 297">
-<svg:defs><svg:clipPath id="clip1">
-      <svg:path d="m 16,18 h 7 v 10.449219 h -7 z m 0,0" id="path25"/>
+<svg:defs><svg:clipPath id="clipPath5815">
+      <svg:path d="m 16,18 h 7 v 10.449219 h -7 z m 0,0" id="path8555"/>
     </svg:clipPath>
   </svg:defs><ns0:namedview xmlns:ns0="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"/><svg:g xmlns:ns1="http://www.inkscape.org/namespaces/inkscape" ns1:label=""><svg:g id="surface1" transform="matrix(1.33333 0 0 1.33333 -1.59375 -0.759833)">
     <svg:g style="fill:#000000;fill-opacity:1" id="g34">
@@ -23,7 +23,7 @@
       </svg:g>
     </svg:g>
     <svg:path style="fill:none;stroke:#000000;stroke-width:0.826;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1" d="M -6.875e-4,-1.5625e-4 H 36.929" transform="matrix(1,0,0,-1,1.196,16.16)" id="path46"/>
-    <svg:g clip-path="url(#clip1)" clip-rule="nonzero" id="g52">
+    <svg:g clip-path="url(#clipPath5815)" clip-rule="nonzero" id="g52">
       <svg:g style="fill:#000000;fill-opacity:1" id="g50">
         <svg:g id="use48" transform="translate(16.148001,28.451)">
           <svg:path style="stroke:none" d="M 6.3125,-2.40625 H 6 c -0.046875,0.234375 -0.15625,1.03125 -0.3125,1.265625 -0.09375,0.125 -0.90625,0.125 -1.34375,0.125 H 1.6875 c 0.390625,-0.328125 1.265625,-1.25 1.640625,-1.59375 2.1875,-2.015625 2.984375,-2.75 2.984375,-4.171875 0,-1.65625 -1.3125,-2.75 -2.96875,-2.75 -1.671875,0 -2.640625,1.40625 -2.640625,2.640625 0,0.734375 0.625,0.734375 0.671875,0.734375 0.296875,0 0.671875,-0.21875 0.671875,-0.671875 C 2.046875,-7.234375 1.78125,-7.5 1.375,-7.5 1.25,-7.5 1.21875,-7.5 1.171875,-7.484375 1.453125,-8.46875 2.21875,-9.125 3.15625,-9.125 4.375,-9.125 5.125,-8.109375 5.125,-6.78125 5.125,-5.5625 4.421875,-4.5 3.59375,-3.578125 L 0.703125,-0.34375 V 0 H 5.9375 Z m 0,0" id="path75"/>

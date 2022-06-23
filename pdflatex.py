@@ -107,10 +107,15 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
                     yield child
                 elif isinstance(child, Defs):
                     for def_child in child:
+                        # The ids of both the imported and the target document should
+                        # be off-limits
+                        def_child.set_random_ids(
+                            backlinks=True, blacklist=self.svg.get_ids()
+                        )
                         self.svg.defs.append(def_child)
 
     def write_latex(self, stream):
-        """Takes a forumle and wraps it in latex"""
+        """Takes a formula and wraps it in latex"""
         if self.options.standalone:
             docclass = (
                 f"\\documentclass[fontsize={self.options.font_size}pt, "

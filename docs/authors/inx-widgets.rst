@@ -181,7 +181,7 @@ attributes ``width/heigth`` to override the default size (in this case
 
 Images are aligned in the horizontal center of the current box; different alignment
 can be realized by wrapping the image in a `hbox <#hbox-vbox>`__ and adding a 
-`spacer <#spacer>`__ with ``size=expand``
+`spacer <#spacer>`__ with ``size="expand"``
 before (for right alignment) or after (for left alignment) of the image.
 
 *Implementation note: Loadable image formats are determined by GdkPixbuf
@@ -205,8 +205,8 @@ the text content that will be rendered.
    <label>Some text here.</label>
 
 *Note: Labels are intended to provide additional information / help. For
-labeling parameters use the ``gui-text`` attribute; for short help texts
-that are specific to a single parameter prefer ``gui-description`` which
+labeling parameters use the* ``gui-text`` *attribute; for short help texts
+that are specific to a single parameter prefer* ``gui-description`` *which
 will render as a tooltip.*
 
 -  When setting the attribute ``appearance="header"`` the text is styled

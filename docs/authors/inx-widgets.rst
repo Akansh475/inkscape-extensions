@@ -287,7 +287,7 @@ Creates a checkbox to set a **boolean value**. Allowed values are
 
 .. code:: xml
 
-   <param name="name" type="boolean" gui-text="Some label text">false</param>
+   <param name="name" type="bool" gui-text="Some label text">false</param>
 
 .. figure:: widgets/bool.png
    :alt: Checkbox

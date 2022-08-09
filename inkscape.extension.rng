@@ -36,10 +36,6 @@
         <ref name="inx.template_extension"/>
       </choice>
 
-      <optional>
-        <ref name="inx.templateinfo"/>
-      </optional>
-
       <choice>
         <ref name="inx.script"/>
         <ref name="inx.xslt"/>
@@ -48,25 +44,6 @@
     </element>
   </start>
 <!-- END EXTENSION DESCRIPTION (uses defines below) -->
-
-
-
-
-
-
-<!-- TEMPLATEINFO FOR PROCEDURAL TEMPLATES -->
-
-  <define name="inx.templateinfo">
-    <element name="templateinfo" ns="http://www.inkscape.org/namespaces/inkscape">
-      <element name="name"><text/></element>
-      <element name="author"><text/></element>
-      <element name="shortdesc"><text/></element>
-      <element name="date"><text/></element>
-      <element name="keywords"><text/></element>
-    </element>
-  </define>
-
-
 
 
 <!-- DEPENDENCIES (INCLDUING SCRIPTS, XSLT AND PLUGINS) -->
@@ -178,6 +155,11 @@
   </define>
 
   <define name="inx.input_output_extension.common">
+    <optional>
+      <attribute name="priority">
+        <data type="integer"/>
+      </attribute>
+    </optional>
     <element name="extension">
       <text/>
     </element>

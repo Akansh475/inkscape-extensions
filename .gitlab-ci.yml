@@ -59,6 +59,7 @@ test:python39:
 
 test:python38-windows:
   stage: test
+  allow_failure: true # The windows run is less reliable than the Linux test runs.
   extends:
     - .shared-windows-runners
     - .tests
@@ -67,7 +68,7 @@ test:python38-windows:
     - $env:PATH += ";C:\\PYTHON38\\;C:\\PYTHON38\\Scripts"
     - refreshenv
     - "python -m pip install --upgrade pip"
-    - "python -m pip install --upgrade tox poetry tox-poetry"
+    - "python -m pip install --upgrade tox poetry==1.1.14 tox-poetry"
     - "tox -e py38-normal-win"
 
 test:python310:

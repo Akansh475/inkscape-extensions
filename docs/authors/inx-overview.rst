@@ -36,24 +36,55 @@ under "Inkscape extensions".
 Translation of extensions
 -------------------------
 
-Extension dialog windows, described in INX files, can be prepared for
-translation or localisation by adding an ``_`` (underscore) to the XML
-tags or attributes. Only add underscores when text needs to be
-translated (not numeric values, for example!).
-
-Example::
-
-   <_name>Some translatable extension name</_name>
-
-Or::
-
-   <param name="..." type="..." _gui-text="Some translatable label text">
+Inkscape extensions repository
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When extensions are included in the `Inkscape Extensions Repository`_,
 various scripts will scan each INX file for translatable text and
 prepare `translation files`_ for others to translate.
 
-See also: `Ted's blog`_.
+Use ``translatable="no"`` to make an item (e.g. a unit name) untranslatable.
+
+Third party extensions
+~~~~~~~~~~~~~~~~~~~~~~
+
+Third party extensions can set their own translation files by setting up their own unique
+translation domain.
+
+Example::
+
+    <inkscape-extension translationdomain="my_extension" xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+
+Use the `inx.its`_ file from the Inkscape main repo and run
+``xgettext my_extension.inx --its=inx.its -o my_extension.pot``. This will generate the pot file,
+which you can distribute to translators. Use the .mo files generated from those in a special
+structure:
+
+::
+
+    locale/
+    ├── ar
+    │   └── LC_MESSAGES
+    │       └── my_extension.mo
+    ├── as
+    │   └── LC_MESSAGES
+    │       └── my_extension.mo
+    ├── az
+    │   └── LC_MESSAGES
+    │       └── my_extension.mo
+    ...
+
+If the files are, for instance, in
+``.config/inkscape/extensions/my_extension/locale/<lang>/LC_MESSAGES/my_extension.mo``, then an inx
+file at ``.config/inkscape/extensions/my_extension/my_extension.inx`` with the translationdomain
+``my_extension`` will be translated in the interface.
+
+The following three locations are recursively searched for "${translationdomain}.mo":
+
+-  the 'locale' directory in the .inx file's folder
+-  the 'locale' directory in the "extensions" folder containing the .inx file
+-  the system location for gettext catalogs, i.e. where Inkscape's own catalog is located
+
 
 .. _attributes_description:
 
@@ -124,26 +155,26 @@ Example
 
    <?xml version="1.0" encoding="UTF-8"?>
    <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-     <_name>{Friendly Extension Name}</_name>
+     <name>{Friendly Extension Name}</name>
      <id>{org.domain.sub-domain.extension-name}</id>
      <dependency type="executable" location="[extensions|path|plugins|{location}]">program.ext</dependency>
-     <param name="tab" type="notebook">  
-       <page name="controls" _gui-text="Controls">
+     <param name="tab" type="notebook">
+       <page name="controls" gui-text="Controls">
          <param name="{argumentName}" type="[int|float|string|bool]" min="{number}" max="{number}"
-           _gui-text="{Friendly Argument Name}">{default value}</param>
+           gui-text="{Friendly Argument Name}">{default value}</param>
        </page>
-       <page name="help" _gui-text="Help">
+       <page name="help" gui-text="Help">
          <param name="help_text" type="description">{Friendly Extension Help}</param>
        </page>
      </param>
      <effect>
        <object-type>[all|{element type}]</object-type>
          <effects-menu>
-           <submenu _name="{Extension Group Name}"/>
+           <submenu name="{Extension Group Name}"/>
          </effects-menu>
      </effect>
      <script>
-       <command reldir="extensions" interpreter="[python|perl|ruby|bash|{some other}]">program.ext</command>
+       <command location="[inx|extensions]" interpreter="[python|perl|ruby|bash|{some other}]">program.ext</command>
      </script>
    </inkscape-extension>
 
@@ -235,4 +266,4 @@ Git repository`_. This is a `RELAX NG schema`_.
 .. _Inkscape Extensions Repository: https://gitlab.com/inkscape/extensions
 .. _a GUI with control widgets: Extensions:_INX_widgets_and_parameters
 .. _translation files: https://gitlab.com/inkscape/inkscape/-/tree/master/po
-.. _Ted's blog: http://gould.cx/ted/blog/Translating_Custom_XML
+.. _inx.its: https://gitlab.com/inkscape/inkscape/-/raw/master/po/its/inx.its

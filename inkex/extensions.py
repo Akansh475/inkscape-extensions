@@ -53,6 +53,9 @@ from .base import (
 )
 from .transforms import Transform
 from .elements import LinearGradient, RadialGradient
+from .command import write_svg, inkscape, ProgramRunError
+from .utils import errormsg
+from .localization import inkex_gettext as _
 
 # All the names that get added to the inkex API itself.
 __all__ = (
@@ -77,7 +80,7 @@ class EffectExtension(SvgThroughMixin, InkscapeExtension, ABC):
     """
 
 
-class OutputExtension(SvgInputMixin, InkscapeExtension):
+class OutputExtension(SvgInputMixin, TempDirMixin, InkscapeExtension):
     """
     Takes the SVG from Inkscape and outputs it to something that's not an SVG.
 
@@ -90,6 +93,62 @@ class OutputExtension(SvgInputMixin, InkscapeExtension):
     def save(self, stream):
         """But save certainly is, we give a more exact message here"""
         raise NotImplementedError("Output extensions require a save(stream) method!")
+
+    def preprocess(self, types_to_path=None, unlink_clones=True):
+        """Preprocess the SVG into an export-friendly document by converting
+        certain objects to path beforehand.
+
+        Args:
+            types_to_path (List[str], optional): List of element types to convert to
+                path. Defaults to all text elements and all non-path shape elements.
+            unlink_clones (bool, optional): If clones should be unlinked. Defaults to
+                True.
+
+        Returns:
+            _type_: _description_
+        """
+        if types_to_path is None:
+            types_to_path = [
+                "flowRoot",
+                "rect",
+                "circle",
+                "ellipse",
+                "line",
+                "polyline",
+                "polygon",
+                "text",
+            ]
+        actions = ["unlock-all"]
+        if "flowRoot" in types_to_path:
+            # Flow roots contain rectangles inside them, so they need to be
+            # converted to paths separately from other shapes
+            actions += [
+                "select-by-element:flowRoot",
+                "object-to-path",
+                "select-clear",
+            ]
+            types_to_path.remove("flowRoot")
+
+        # Now convert all non-paths to paths
+        actions += ["select-by-element:" + i for i in types_to_path]
+        actions += ["object-to-path", "select-clear"]
+        # unlink clones
+        if unlink_clones:
+            actions += ["select-by-element:use", "object-unlink-clones"]
+        # save and overwrite
+        actions += ["export-overwrite", "export-do"]
+
+        infile = os.path.join(self.tempdir, "input.svg")
+        write_svg(self.document, infile)
+        try:
+            inkscape(infile, actions=";".join(actions))
+        except ProgramRunError as err:
+            errormsg(_("An error occurred during document preparation"))
+            errormsg(err.stderr.decode("utf-8"))
+
+        with open(infile, "r") as stream:
+            self.document = load_svg(stream)
+            self.svg = self.document.getroot()
 
 
 class RasterOutputExtension(InkscapeExtension):

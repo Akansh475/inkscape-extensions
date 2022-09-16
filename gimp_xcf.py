@@ -32,7 +32,7 @@ from inkex.command import take_snapshot, call
 from inkex.localization import inkex_gettext as _
 
 
-class GimpXcf(TempDirMixin, inkex.OutputExtension):
+class GimpXcf(inkex.OutputExtension):
     """
     Provide a quick and dirty way of using gimp to output an xcf from Inkscape.
 

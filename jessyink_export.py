@@ -29,7 +29,7 @@ from inkex.command import take_snapshot
 from jessyink_install import JessyInkMixin
 
 
-class Export(JessyInkMixin, TempDirMixin, inkex.OutputExtension):
+class Export(JessyInkMixin, inkex.OutputExtension):
     """
     JessyInkExport Output Extension saves to a zipfile each of the layers.
     """

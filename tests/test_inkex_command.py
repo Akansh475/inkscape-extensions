@@ -2,9 +2,11 @@
 """
 Test Inkex command launching functionality.
 """
+import os
+import tempfile
 import pytest
 import sys
-from inkex.tester import BaseCase
+from inkex.tester import BaseCase, TestCase
 from inkex.command import (
     ProgramRunError,
     which,
@@ -16,6 +18,7 @@ from inkex.command import (
     inkscape_command,
     take_snapshot,
 )
+from pathlib import Path
 
 
 class CommandTest(BaseCase):
@@ -43,3 +46,29 @@ class CommandTest(BaseCase):
         self.assertIn("can't open file", exc.stderr.decode("utf8"))
         self.assertEqual("", exc.stdout.decode("utf8"))
         self.assertIn("can't open file", str(exc))
+
+
+class InkscapeCommandTest(TestCase):
+    def test_long_action_string(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/482 (export)"""
+
+        tmpfile = Path(self.tempdir) / "test.png"
+        args = {
+            "actions": (
+                "select-clear;" * 1000
+                + f"export-id:r1;export-filename:{tmpfile};export-do;"
+            )
+        }
+        out = inkscape("tests/data/svg/shapes.svg", **args)
+
+        self.assertEqual(out.strip(), "")
+        self.assertTrue(os.path.isfile(tmpfile))
+
+    def test_long_action_string_stdout(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/482 with stdout"""
+        args = {"actions": "select-clear;" * 1000 + "select-by-id:r1;query-x;query-y;"}
+        # Need to provide a different svg so the call IDs are unique
+        out = inkscape("tests/data/svg/shapes_no_text.svg", **args)
+
+        self.assertEqual(out.splitlines()[0], "100")
+        self.assertEqual(out.splitlines()[1], "200")

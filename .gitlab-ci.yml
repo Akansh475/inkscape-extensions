@@ -35,6 +35,18 @@ codestyle:black:
     - pip install black
     - black . --check --verbose --diff --color --exclude=other/
 
+archive:
+  stage: test
+  script:
+    - cd ..
+    - apt-get update && apt-get install zip -y
+    - zip -r extensions.zip extensions -x extensions/tests/\* -x extensions/.git/\*
+    - mv extensions.zip extensions/extensions.zip
+  artifacts:
+    paths:
+      - extensions.zip
+
+
 test:python37:
   extends: .tests
   script:

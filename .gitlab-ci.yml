@@ -93,7 +93,7 @@ test:coverage:
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
       "\n\n"
     - pyenv shell 3.9.0
-    - pip install pylint==2.12.2
+    - pip install pylint==2.13.9
     - python3 tests/add_pylint.py htmlcov/index.html
     - pip install anybadge
     - pylintscore=$(grep -Eo "[0-9]+.[0-9]+</td></tr></tfoot>" htmlcov/index.html | grep -Eo "[0-9]+.[0-9]+")

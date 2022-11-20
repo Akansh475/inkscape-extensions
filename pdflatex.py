@@ -73,7 +73,11 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
             )
         except ProgramRunError as err:
             inkex.errormsg(_("An exception occurred during LaTeX compilation: ") + "\n")
-            inkex.errormsg(err.stdout.decode("utf8").replace("\r\n", "\n"))
+            inkex.errormsg(
+                err.stdout.decode("utf8")
+                .replace("\r\n", "\n")
+                .split("Transcript written on")[0]
+            )
             raise inkex.AbortExtension()
 
         inkscape(

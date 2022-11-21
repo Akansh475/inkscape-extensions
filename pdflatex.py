@@ -83,7 +83,7 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
         inkscape(
             pdf_file,
             export_filename=svg_file,
-            pdf_page=1,
+            pages=1,
             pdf_poppler=True,
             export_type="svg",
             actions=(
@@ -123,7 +123,7 @@ class PdfLatex(TempDirMixin, inkex.GenerateExtension):
         if self.options.standalone:
             docclass = (
                 f"\\documentclass[fontsize={self.options.font_size}pt, "
-                + "class=scrreprt, preview]{standalone}"
+                + "class=scrreprt, preview, border=2pt]{standalone}"
             )
         else:
             docclass = r"\documentclass{minimal}"

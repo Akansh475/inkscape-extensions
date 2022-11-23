@@ -28,9 +28,10 @@ certainly it's possible to use Gtk and threading directly.
 .. versionadded:: 1.2
 """
 
-import threading
 import os
+import sys
 import logging
+import threading
 
 from ..utils import DependencyError
 
@@ -38,6 +39,13 @@ try:
     import gi
 
     gi.require_version("Gtk", "3.0")
+
+    # Importing while covering stderr because pygobject has broken
+    # warnings support and will force import warnings on our users.
+    tmp, sys.stderr = sys.stderr, None  # type: ignore
+    from gi.repository import Gtk, GLib
+
+    sys.stderr = tmp  # type: ignore
 except ImportError:  # pragma: no cover
     raise DependencyError(
         "You are missing the required libraries for Gtk."

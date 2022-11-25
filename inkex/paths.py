@@ -1525,6 +1525,27 @@ class Path(list):
 
         return result
 
+    def break_apart(self) -> List[Path]:
+        """Breaks apart a path into its subpaths
+
+        .. versionadded:: 1.3"""
+        result = [Path()]
+        current = result[0]
+
+        for cmnd in self.proxy_iterator():
+            if cmnd.letter.lower() == "m":
+                current = Path()
+                result.append(current)
+                current.append(Move(*cmnd.end_point))
+            else:
+                current.append(cmnd.command)
+        # Remove all subpaths that are empty or only contain move commands
+        return [
+            i
+            for i in result
+            if len(i) != 0 and not all(j.letter.lower() == "m" for j in i)
+        ]
+
     def close(self):
         """Attempt to close the last path segment"""
         if self and not isinstance(self[-1], (zoneClose, ZoneClose)):

@@ -770,6 +770,24 @@ class PathTest(TestCase):
             "m -2 21 c -12 -10 -21 -12 -35 -7 M 58 88 l 10 4 c -7 9 -20 -2 -10 -4 z",
         )
 
+    def test_break_apart(self):
+        """Test breaking apart a path"""
+        data = """m 233,142 a 12,13 0 0 1 16,0 12,13 0 0 1 2,17 12,13 0 0 1 -15,4 l 5,-12 z 
+        m 30,-55 c 0,0 -22,25 2,35 24,9 31,1 23,15 -7,13 -7,13 -7,13 m -40,-28 -35,-20 35,-20 z"""
+        ret = Path(data).break_apart()
+        self.assertEqual(len(ret), 3)
+        self.assertEqual(ret[2].to_absolute(), Path("M 241,122 206,102 241,82 Z"))
+        self.assertEqual(
+            ret[1].to_relative(),
+            Path("m 263,87 c 0,0 -22,25 2,35 24,9 31,1 23,15 -7,13 -7,13 -7,13"),
+        )
+        self.assertEqual(
+            ret[0].to_relative(),
+            Path(
+                "m 233,142 a 12,13 0 0 1 16,0 12,13 0 0 1 2,17 12,13 0 0 1 -15,4 l 5,-12 z"
+            ),
+        )
+
 
 class SuperPathTest(TestCase):
     """Super path tests for testing the super path class"""

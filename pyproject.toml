@@ -32,7 +32,7 @@ numpy = [
 Pillow = ">=7.0.0" # Used by RasterOutputExtension
 scour = "^0.37" # Used by Optimized SVG Extension
 packaging = ">=20.3" # Used by Optimized SVG Extension to compare scour versions
-
+pyparsing = ">=3.0.9"
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
 pytest-cov = "^3.0.0"

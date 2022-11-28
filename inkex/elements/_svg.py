@@ -42,6 +42,7 @@ from ..styles import StyleSheets
 
 from ._base import BaseElement, ViewboxMixin
 from ._meta import StyleElement, NamedView
+from ._utils import registerNS
 
 from typing import Optional, List, Tuple
 
@@ -149,6 +150,36 @@ class SvgDocumentElement(
         if layer is None:
             return self
         return layer
+
+    def add_namespace(self, prefix, url):
+        """Adds an xml namespace to the xml parser with the desired prefix.
+
+        If the prefix or url are already in use with different values, this
+        function will raise an error. Remove any attributes or elements using
+        this namespace before calling this function in order to rename it.
+
+        .. versionadded:: 1.3
+        """
+        if self.nsmap.get(prefix, None) == url:
+            registerNS(prefix, url)
+            return
+
+        # Attempt to clean any existing namespaces
+        if prefix in self.nsmap or url in self.nsmap.values():
+            nskeep = [k for k, v in self.nsmap.items() if k != prefix and v != url]
+            etree.cleanup_namespaces(self, keep_ns_prefixes=nskeep)
+            if prefix in self.nsmap:
+                raise KeyError("ns prefix already used with a different url")
+            if url in self.nsmap.values():
+                raise ValueError("ns url already used with a different prefix")
+
+        # These are globals, but both will overwrite previous uses.
+        registerNS(prefix, url)
+        etree.register_namespace(prefix, url)
+
+        # Set and unset an attribute to add the namespace to this root element.
+        self.set(f"{prefix}:temp", "1")
+        self.set(f"{prefix}:temp", None)
 
     def getElement(self, xpath):  # pylint: disable=invalid-name
         """Gets a single element from the given xpath or returns None"""

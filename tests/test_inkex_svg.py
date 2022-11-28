@@ -46,6 +46,43 @@ class BasicSvgTest(TestCase):
         )
         self.assertEqual(addNS("{p}j"), "{p}j")
 
+    def test_register_ns(self):
+        """Test adding a namespace prefix to a root tag"""
+        root = svg()
+
+        # Namespace is not currently in use
+        self.assertNotIn("hotel", root.nsmap)
+        self.assertEqual(root.attrib.keys(), [])
+
+        # We can add a namespace to the document
+        root.add_namespace("hotel", "http://www.inkscape.org/namespaces/hotel")
+        self.assertEqual(root.attrib.keys(), [])
+        self.assertEqual(
+            root.nsmap["hotel"], "http://www.inkscape.org/namespaces/hotel"
+        )
+
+        # We can use the new namespace
+        root.set("hotel:name", "value")
+        self.assertEqual(
+            root.attrib.keys(), ["{http://www.inkscape.org/namespaces/hotel}name"]
+        )
+
+        # We will fail to set the namespace if it's already used
+        root.add_namespace("hotel", "http://www.inkscape.org/namespaces/hotel")
+        self.assertRaises(KeyError, root.add_namespace, "hotel", "http://other.url/")
+        self.assertRaises(
+            ValueError,
+            root.add_namespace,
+            "other",
+            "http://www.inkscape.org/namespaces/hotel",
+        )
+
+        # Releasing the use, will allow us to replace the namespace
+        root.set("hotel:name", None)
+        self.assertEqual(root.attrib.keys(), [])
+        root.add_namespace("hotel", "http://other.url/")
+        self.assertEqual(root.nsmap["hotel"], "http://other.url/")
+
     def test_svg_ids(self):
         """Test a list of ids from an svg document"""
         self.assertEqual(svg('id="apples"').get_ids(), {"apples"})

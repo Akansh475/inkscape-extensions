@@ -41,6 +41,12 @@ NSS = {
 SSN = dict((b, a) for (a, b) in NSS.items())
 
 
+def registerNS(prefix, url):
+    """Register the given prefix as a namespace url."""
+    NSS[prefix] = url
+    SSN[url] = prefix
+
+
 def addNS(tag, ns=None, namespaces=NSS):  # pylint: disable=invalid-name
     """Add a known namespace to a name for use with lxml"""
     if tag.startswith("{") and ns:

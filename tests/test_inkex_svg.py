@@ -21,7 +21,7 @@
 Test the svg interface for inkscape extensions.
 """
 from inkex.transforms import Vector2d
-from inkex import Guide
+from inkex import Guide, Rectangle
 from inkex.tester import TestCase
 from inkex.tester.svg import svg, svg_file, svg_unit_scaled
 from inkex import addNS
@@ -82,6 +82,31 @@ class BasicSvgTest(TestCase):
         self.assertEqual(root.attrib.keys(), [])
         root.add_namespace("hotel", "http://other.url/")
         self.assertEqual(root.nsmap["hotel"], "http://other.url/")
+
+    def test_register_ns_children(self):
+        """Test namespace registration when children are added before / after
+        modification of the namespaces"""
+        root = svg()
+
+        rect = root.add(Rectangle.new(10, 10, 10, 10))
+        self.assertNotIn("hotel", rect.nsmap)
+        root.add_namespace("hotel", "http://www.inkscape.org/namespaces/hotel")
+
+        # The namespace should also be available on children that were added before
+        # the add_namespace method was called.
+        self.assertIn("hotel", rect.nsmap)
+        rect.set("hotel:name", "value")
+        self.assertIn(
+            "{http://www.inkscape.org/namespaces/hotel}name", rect.attrib.keys()
+        )
+
+        # and also on children created afterwards
+        rect2 = root.add(Rectangle.new(10, 10, 10, 10))
+        self.assertIn("hotel", rect2.nsmap)
+        rect2.set("hotel:name2", "value2")
+        self.assertIn(
+            "{http://www.inkscape.org/namespaces/hotel}name2", rect2.attrib.keys()
+        )
 
     def test_svg_ids(self):
         """Test a list of ids from an svg document"""

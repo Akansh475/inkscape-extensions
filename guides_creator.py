@@ -302,15 +302,14 @@ class GuidesCreator(inkex.EffectExtension):
         """Draw the guides"""
         newpos = [
             position[0] + self.store.page_origin[0],
-            position[1]
-            + self.store.viewbox[3]
-            - self.store.height
-            - self.store.page_origin[1],
+            -position[1] + self.store.height + self.store.page_origin[1],
         ]
+        # orientations are computed in the pre-1.0 coordinate system
+        orientation = [orientation[0], -orientation[1]]
         if self.options.nodup:
-            self.svg.namedview.new_unique_guide(newpos, orientation)
+            self.svg.namedview.add_unique_guide(newpos, orientation)
         else:
-            self.svg.namedview.new_guide(newpos, orientation)
+            self.svg.namedview.add_guide(newpos, orientation)
 
 
 if __name__ == "__main__":

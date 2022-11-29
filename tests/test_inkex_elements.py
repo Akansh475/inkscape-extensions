@@ -484,16 +484,31 @@ class NamedViewTest(ElementTestCase):
 
     def test_guides(self):
         """Create a guide and see a list of them"""
-        self.svg.namedview.add(Guide().move_to(0, 0, 0))
-        self.svg.namedview.add(Guide().move_to(0, 0, "90"))
+        self.svg.namedview.add_guide(0, False, 0)
+        self.svg.namedview.add_guide(0, False, "90")
         self.assertEqual(len(self.svg.namedview.get_guides()), 2)
+        self.svg.namedview.add_guide((1, 1), (1, 0))
+        guides = self.svg.namedview.get_guides()
+        self.assertAlmostEqual(
+            guides[2].raw_position.y, self.svg.viewport_height - 1, 2
+        )
+        self.assertAlmostEqual(guides[2].raw_position.x, 1, 2)
+        self.assertAlmostEqual(guides[2].position.y, 1, 2)
+        self.assertAlmostEqual(guides[2].position.x, 1, 2)
+        # Test angle specifications
+
+    def test_guide_angles(self):
+        g = self.svg.namedview.add_guide((1, 1), 30)
+        self.assertAlmostEqual(g.angle, 30, 4)
+        g = self.svg.namedview.add_guide((1, 1), (2.5, -5 * math.sqrt(3) / 2))
+        self.assertAlmostEqual(g.angle, 30, 4)
 
     def test_guides_coincident(self):
         """Test the detection of coincident guides"""
 
         def coincidence_test(data, result):
-            guide1 = Guide().move_to(*data[0], angle=data[1])
-            guide2 = Guide().move_to(*data[2], angle=data[3])
+            guide1 = self.svg.namedview.add_guide(data[0], orient=data[1])
+            guide2 = self.svg.namedview.add_guide(data[2], orient=data[3])
             self.assertEqual(Guide.guides_coincident(guide1, guide2), result)
 
         # both are good

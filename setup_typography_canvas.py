@@ -46,8 +46,8 @@ class SetupTypographyCanvas(inkex.EffectExtension):
         Returns:
             inkex.BaseElement: the created guideline
         """
-        return self.svg.namedview.add(
-            inkex.Guide().move_to(0, position, (0, 1)).update(inkscape__label=name)
+        return self.svg.namedview.add_guide(
+            self.svg.viewbox_height - position, True, name
         )
 
     def effect(self):

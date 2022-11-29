@@ -29,7 +29,7 @@ class LayersToSvgFont(inkex.EffectExtension):
     def guideline_value(self, label, index):
         for guide in self.svg.namedview.get_guides():
             if guide.label == label:
-                return guide.point[index]
+                return guide.raw_position[index]
         return 0
 
     def flip_cordinate_system(self, path, emsize, baseline):

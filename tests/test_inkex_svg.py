@@ -229,11 +229,11 @@ class NamedViewTest(TestCase):
         namedview = doc.namedview
         self.assertEqual(len(namedview.get_guides()), 0)
 
-        namedview.add(Guide().move_to(50, 50, 45))
+        namedview.add_guide((50, doc.viewbox_height - 50), 45)
         self.assertEqual(len(namedview.get_guides()), 1)
         (guide,) = namedview.get_guides()
         self.assertEqual(guide.get("position"), "50,50")
-        self.assertEqual(guide.get("orientation"), "0.707107,-0.707107")
+        self.assertEqual(guide.get("orientation"), "0.707107,0.707107")
 
 
 class GetDocumentWidthTest(TestCase):

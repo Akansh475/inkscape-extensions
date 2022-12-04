@@ -3,6 +3,10 @@
 # the new ones here in these builds.
 image: registry.gitlab.com/inkscape/inkscape-ci-docker/extensions
 
+workflow:
+  rules:
+    - when: always
+
 stages:
   - build
   - test

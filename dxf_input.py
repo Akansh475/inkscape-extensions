@@ -840,7 +840,7 @@ def export_ellipse(vals):
         # vals are through adjust_coords : recover proper value
         # (x,y)=(scale*x-xmin, height-scale*y-ymin)
         x2 = vals.x2 + xmin
-        y2 = vals.y2 + ymin - height
+        y2 = -vals.y2 + ymin + height
         generate_ellipse(
             vals.x1, vals.y1, x2, y2, vals.width_ratio, vals.ellipse_a1, vals.ellipse_a2
         )
@@ -1126,7 +1126,7 @@ def export_attdef(vals):
 
 def generate_ellipse(xc, yc, xm, ym, w, a1, a2):
     rm = math.sqrt(xm * xm + ym * ym)
-    a = -math.atan2(ym, xm)  # x-axis-rotation
+    a = math.atan2(ym, xm)  # x-axis-rotation
     diff = (a2 - a1 + 2 * math.pi) % (2 * math.pi)
     if abs(diff) > 0.0000001 and abs(diff - 2 * math.pi) > 0.0000001:  # open arc
         large = 0  # large-arc-flag

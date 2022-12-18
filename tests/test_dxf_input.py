@@ -17,11 +17,11 @@ class TestDxfInputBasic(ComparisonMixin, TestCase):
         # File missing a BLOCKS session
         "io/no_block_section.dxf",
         # test placement of graphical objects from BLOCKS section
-        # ellipses currently are too large
         "io/dxf_multiple_inserts.dxf",
         # test correct colors generated
         # currently BYLAYER and BYBLOCK colors in inserted block are wrong
         "io/color.dxf",
+        "io/test_input_rotated_ellipse_r14.dxf",
     ]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]

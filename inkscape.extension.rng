@@ -147,9 +147,9 @@
         </element>
       </optional>
       <optional>
-        <attribute name="savecopyonly">
+        <element name="savecopyonly">
           <ref name="data_type_boolean_strict"/>
-        </attribute>
+        </element>
       </optional>
     </element>
   </define>

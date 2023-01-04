@@ -22,6 +22,7 @@ class TestDxfInputBasic(ComparisonMixin, TestCase):
         # currently BYLAYER and BYBLOCK colors in inserted block are wrong
         "io/color.dxf",
         "io/test_input_rotated_ellipse_r14.dxf",
+        "io/test_one_blankline_at_the_end.dxf",
     ]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]

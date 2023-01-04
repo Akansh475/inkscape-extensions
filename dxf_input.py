@@ -616,6 +616,8 @@ def mtext_separate(node, tspan, text):
 
 
 def mtext_ctrl(tspan, phrase):
+    if len(phrase) == 0:
+        return
     if phrase[0] != "\\":
         tspan.text = phrase
         return

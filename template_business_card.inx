@@ -20,7 +20,7 @@
     </param>
 
     <template icon="businesscard_landscape">
-        <preset name='Business Card' label='Various Countries' selectable="true"/>
+        <preset name='Business Card' label='Various Countries' visibility="icon"/>
     </template>
     <script>
         <command location="inx" interpreter="python">template.py</command>

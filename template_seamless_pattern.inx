@@ -10,7 +10,7 @@
     <param name="height" gui-text="Custom Height (px):" type="int" min="1" max="99999999">100</param>
     
     <template icon='seamless_pattern'>
-        <preset name="Seamless Pattern" label="Tiled Canvas" selectable="true"/>
+        <preset name="Seamless Pattern" label="Tiled Canvas" visibility="icon"/>
     </template>
 
     <script>

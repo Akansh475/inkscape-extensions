@@ -16,7 +16,7 @@
     <param name="bleed" gui-text="DVD cover bleed (mm):" type="float" min="0" max="25">3</param>
 
     <template icon="dvd_box">
-      <preset name="DVD Cover" label="Various Sizes" selectable="true"/>
+      <preset name="DVD Cover" label="Various Sizes" visibility="icon"/>
     </template>
     <script>
         <command location="inx" interpreter="python">template_dvd_cover.py</command>

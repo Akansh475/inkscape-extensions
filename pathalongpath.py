@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
 #               2021 Jonathan Neuhauser, jonathan.neuhauser@outlook.com

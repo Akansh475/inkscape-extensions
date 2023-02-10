@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2019 Marc Jeanmougin, Cédric Gémy, a-l-e

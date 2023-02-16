@@ -106,7 +106,6 @@ class Merge(inkex.EffectExtension):
     def recurse(self, text_span, node, span):
         """Recursively go through each node self calling on child nodes"""
         if not isinstance(node, FlowRegion):
-
             newspan = span.add(text_span())
             newspan.set("xml:space", "preserve")
 

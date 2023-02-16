@@ -145,7 +145,6 @@ class PathScatter(pathmodifier.Diffeo):
         return bbox
 
     def effect(self):
-
         if len(self.svg.selection) < 2:
             inkex.errormsg(_("This extension requires two selected paths."))
             return

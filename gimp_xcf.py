@@ -101,7 +101,6 @@ class GimpXcf(inkex.OutputExtension):
         return self.svg.get("sodipodi:docname") or "document"
 
     def save(self, stream):
-
         pngs = OrderedDict()
         valid = False
 

@@ -42,6 +42,7 @@ from inkex import PathElement, Circle
 
 # DRAWING ROUTINES
 
+
 # draw an SVG triangle given in trilinar coords
 def draw_SVG_circle(
     rad, centre, params, style, name, parent

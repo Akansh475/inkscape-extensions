@@ -88,7 +88,6 @@ class Spirograph(inkex.EffectExtension):
         maxPointCount = 1000
 
         for i in range(maxPointCount):
-
             theta = i * scale
 
             view_center = self.svg.namedview.center

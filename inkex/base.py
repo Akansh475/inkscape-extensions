@@ -129,7 +129,6 @@ class InkscapeExtension:
 
     @staticmethod
     def arg_number_ranges():
-
         """Parses a number descriptor. e.g:
         ``1,2,4-5,7,9-`` is parsed to ``1, 2, 4, 5, 7, 9, 10, ..., lastvalue``
 

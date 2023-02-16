@@ -252,7 +252,6 @@ class SegmentTest(TestCase):
         self.assertEqual(horz(3).to_line(Vector2d(5, 11)), Line(8, 11))
 
     def test_args(self):
-
         commands = (
             Line,
             Move,

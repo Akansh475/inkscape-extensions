@@ -93,7 +93,6 @@ class BoundingBoxTest(TestCase):
         root = deepcopy(obj.getroottree().getroot())
         svg.add(root)
         with TemporaryDirectory() as tmp:
-
             temp_svg = os.path.join(tmp, "tmp.svg")
 
             with open(temp_svg, "wb") as out:
@@ -228,7 +227,6 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(rect, (0, 0), (0, 0))
 
     def test_rectangle_without_dimensions(self):
-
         x, y = 10, 15
         w, h = 0, 0
 
@@ -237,7 +235,6 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(rect, (x, x + w), (y, y + h))
 
     def test_rectangle_without_coordinates(self):
-
         x, y = 0, 0
         w, h = 7, 20
 
@@ -246,7 +243,6 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(rect, (x, x + w), (y, y + h))
 
     def test_regular_rectangle(self):
-
         x, y = 10, 20
         w, h = 7, 20
 
@@ -255,7 +251,6 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(rect, (x, x + w), (y, y + h))
 
     def test_regular_rectangle_scaled(self):
-
         x, y = 10, 20
         w, h = 7, 20
 
@@ -272,7 +267,6 @@ class BoundingBoxTest(TestCase):
 
     @skip_stroke_tests
     def test_regular_rectangle_with_stroke(self):
-
         x, y = 10, 20
         w, h = 7, 20
         stroke_half_width = 1
@@ -289,7 +283,6 @@ class BoundingBoxTest(TestCase):
 
     @skip_stroke_tests
     def test_regular_rectangle_with_stroke_scaled(self):
-
         x, y = 10, 20
         w, h = 7, 20
         stroke_half_width = 1
@@ -417,7 +410,6 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(group, (x, x + w), (y, y + h))
 
     def test_group_with_number_of_rects(self):
-
         group = Group()
 
         xmin, ymin = 1000, 1000
@@ -442,7 +434,6 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(group, (xmin, xmax), (ymin, ymax))
 
     def test_group_with_number_of_rects_scaled(self):
-
         group = Group()
 
         scale_x, scale_y = 5, 10
@@ -471,7 +462,6 @@ class BoundingBoxTest(TestCase):
         )
 
     def test_group_with_number_of_rects_translated(self):
-
         group = Group()
 
         dx, dy = 5, 10

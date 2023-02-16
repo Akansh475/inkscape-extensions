@@ -77,8 +77,7 @@ class Interp(inkex.EffectExtension):
         if not objectpairs:
             raise inkex.AbortExtension(_("At least two paths need to be selected"))
 
-        for (elem1, elem2) in objectpairs:
-
+        for elem1, elem2 in objectpairs:
             method = EqualSubsegmentsInterpolator
             if self.options.method == "firstNodes":
                 method = FirstNodesInterpolator
@@ -102,7 +101,8 @@ class Interp(inkex.EffectExtension):
 
     def get_steps(self):
         """Returns the interpolation steps as a monotonous array with elements between 0 and 1.
-        0 and 1 are added as first and last elements if the source paths should be duplicated"""
+        0 and 1 are added as first and last elements if the source paths should be duplicated
+        """
         exponent = self.options.exponent
         # if exponent >= 0:
         #    exponent += 1.0

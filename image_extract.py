@@ -113,7 +113,6 @@ class ExtractImage(inkex.EffectExtension):
 
             pathwext = os.path.join(directory, cname + file_ext)
             if self.save_image(elem, data, pathwext):
-
                 # absolute for making in-mem cycles work
                 if self.options.linkextracted:
                     elem.set("xlink:href", Path(os.path.realpath(pathwext)).as_uri())

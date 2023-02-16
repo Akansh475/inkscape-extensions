@@ -128,6 +128,7 @@ class BaseElement(IBaseElement):
         """Get the attribute, but load it if it is not available yet"""
         if name in self.wrapped_props:
             (attr, cls) = self.wrapped_props[name]
+
             # The reason we do this here and not in _init is because lxml
             # is inconsistant about when elements are initialised.
             # So we make this a lazy property.

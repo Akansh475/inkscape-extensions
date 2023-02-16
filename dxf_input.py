@@ -1008,7 +1008,6 @@ def export_dimension(vals):
     # mandatory group codes : (10, 11, 13, 14, 20, 21, 23, 24) (x1..4, y1..4)
     # block_name: dimension definition for 10mm
     if vals.has_x1 and vals.has_x2 and vals.has_y1 and vals.has_y2:
-
         if vals.has_block_name:
             attribs = {
                 inkex.addNS("href", "xlink"): "#%s" % (vals.block_name)

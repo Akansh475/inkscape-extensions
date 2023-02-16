@@ -215,7 +215,7 @@ class TestCase(MockCommandMixin, BaseCase):
             places = 7
         if isinstance(first, (list, tuple)):
             assert len(first) == len(second)
-            for (f, s) in zip(first, second):
+            for f, s in zip(first, second):
                 self.assertDeepAlmostEqual(f, s, places, msg, delta)
         else:
             self.assertAlmostEqual(first, second, places, msg, delta)

@@ -45,7 +45,6 @@ class Export(JessyInkMixin, inkex.OutputExtension):
         self.is_installed()
 
         with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as output:
-
             # Find layers.
             layers = self.svg.xpath("//svg:g[@inkscape:groupmode='layer']")
 

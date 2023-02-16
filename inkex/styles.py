@@ -389,7 +389,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     def update_urls(self, old_id, new_id):
         """Find urls in this style and replace them with the new id"""
-        for (name, value) in self.items():
+        for name, value in self.items():
             if value == f"url(#{old_id})":
                 self[name] = f"url(#{new_id})"
 

@@ -246,7 +246,6 @@ class PixelSnap(inkex.EffectExtension):
             return [x, y]
 
     def snap_path_scale(self, elem, parent_transform=None):
-
         path = elem.original_path.to_arrays()
         transform = elem.transform @ Transform(parent_transform)
         bbox = elem.bounding_box()

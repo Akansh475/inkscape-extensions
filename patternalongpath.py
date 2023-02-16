@@ -42,7 +42,7 @@ from inkex.localization import inkex_gettext as _
 import pathmodifier
 
 
-class PathAlongPath(pathmodifier.PathModifier):
+class PatternAlongPath(pathmodifier.PathModifier):
     """Deform a path along a second path"""
 
     def add_arguments(self, pars):
@@ -219,4 +219,4 @@ class PathAlongPath(pathmodifier.PathModifier):
 
 
 if __name__ == "__main__":
-    PathAlongPath().run()
+    PatternAlongPath().run()

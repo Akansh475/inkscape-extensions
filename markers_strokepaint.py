@@ -26,7 +26,7 @@ from inkex.localization import inkex_gettext as _
 MARKERS = ["marker", "marker-start", "marker-mid", "marker-end"]
 
 
-class MarkersStrokePaint(inkex.EffectExtension):
+class ColorMarkers(inkex.EffectExtension):
     """Add marker stroke to outline markers on selected objects."""
 
     def add_arguments(self, pars):
@@ -146,4 +146,4 @@ class MarkersStrokePaint(inkex.EffectExtension):
 
 
 if __name__ == "__main__":
-    MarkersStrokePaint().run()
+    ColorMarkers().run()

@@ -35,9 +35,9 @@ from inkex.localization import inkex_gettext as _
 import pathmodifier
 
 
-class PathScatter(pathmodifier.Diffeo):
+class DistributeAlongPath(pathmodifier.Diffeo):
     def __init__(self):
-        super(PathScatter, self).__init__()
+        super().__init__()
         self.arg_parser.add_argument(
             "-n",
             "--noffset",
@@ -231,4 +231,4 @@ class PathScatter(pathmodifier.Diffeo):
 
 
 if __name__ == "__main__":
-    PathScatter().run()
+    DistributeAlongPath().run()

@@ -40,7 +40,7 @@ from inkex.transforms import Vector2d
 from inkex.bezier import beziertatslope, beziersplitatt
 
 
-class Motion(inkex.EffectExtension):
+class LongShadow(inkex.EffectExtension):
     """Generate a motion path"""
 
     def add_arguments(self, pars):
@@ -167,8 +167,10 @@ class Motion(inkex.EffectExtension):
         ).proxy_iterator():
             if isinstance(seg.command, Move):
                 continue
-            Motion.makeface(seg.previous_end_point, seg.command, facegroup, delx, dely)
+            LongShadow.makeface(
+                seg.previous_end_point, seg.command, facegroup, delx, dely
+            )
 
 
 if __name__ == "__main__":
-    Motion().run()
+    LongShadow().run()

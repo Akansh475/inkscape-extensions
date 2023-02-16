@@ -220,6 +220,7 @@ class Context(object):
 
 # ------------------------------------------------------------------
 def voronoi(siteList, context):
+    Edge.EDGE_NUM = 0
     edgeList = EdgeList(siteList.xmin, siteList.xmax, len(siteList))
     priorityQ = PriorityQueue(siteList.ymin, siteList.ymax, len(siteList))
     siteIter = siteList.iterator()

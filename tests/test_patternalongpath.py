@@ -1,5 +1,5 @@
 # coding=utf-8
-from pathalongpath import PathAlongPath
+from patternalongpath import PatternAlongPath
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
@@ -57,13 +57,13 @@ class TestPathAlongPathBasic(ComparisonMixin, TestCase):
             "--id=path2405",
         ),
     ]
-    effect_class = PathAlongPath
+    effect_class = PatternAlongPath
 
 
 class TestPathAlongPathCloneTransforms(ComparisonMixin, TestCase):
     """Tests for issue https://gitlab.com/inkscape/extensions/-/issues/241"""
 
-    effect_class = PathAlongPath
+    effect_class = PatternAlongPath
     compare_file = "svg/pattern_along_path_clone_transform.svg"
     comparisons = [
         # a clone with a transform in a group with a transform

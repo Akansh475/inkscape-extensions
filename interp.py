@@ -33,7 +33,7 @@ from inkex.tween import (
 from inkex.localization import inkex_gettext as _
 
 
-class Interp(inkex.EffectExtension):
+class Interpolate(inkex.EffectExtension):
     """Interpolate extension"""
 
     def add_arguments(self, pars):
@@ -139,4 +139,4 @@ class Interp(inkex.EffectExtension):
 
 
 if __name__ == "__main__":
-    Interp().run()
+    Interpolate().run()

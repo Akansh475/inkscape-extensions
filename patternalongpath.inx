@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Pattern along Path</name>
-    <id>org.inkscape.generate.path_along_path</id>
+    <name>Pattern Along Path</name>
+    <id>effect.pattern_along_path</id>
     <dependency type="file" location="inx">pathmodifier.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
@@ -37,6 +37,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command location="inx" interpreter="python">pathalongpath.py</command>
+        <command location="inx" interpreter="python">patternalongpath.py</command>
     </script>
 </inkscape-extension>

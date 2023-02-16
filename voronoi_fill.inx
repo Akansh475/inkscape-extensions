@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Voronoi Pattern</name>
-    <id>com.inkscape.generate.generate_voronoi</id>
+    <name>Voronoi Pattern Fill</name>
+    <id>effect.voronoi_fill</id>
     <dependency type="file" location="inx">voronoi.py</dependency>
     <param name="tab" type="notebook">
         <page name="Options" gui-text="Options">
@@ -21,6 +21,6 @@ If border is zero, the pattern will be discontinuous at the edges. Use a positiv
         </effects-menu>
     </effect>
     <script>
-        <command location="inx" interpreter="python">generate_voronoi.py</command>
+        <command location="inx" interpreter="python">voronoi_fill.py</command>
     </script>
 </inkscape-extension>

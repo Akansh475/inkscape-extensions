@@ -324,7 +324,7 @@ class MockCommandMixin(MockMixin):
             else:
                 values.append(str(arg))
 
-        for (_, value) in loargs:
+        for _, value in loargs:
             if isinstance(value, (tuple, list)):
                 for val in value:
                     if val is not True:

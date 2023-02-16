@@ -1,5 +1,5 @@
 # coding=utf-8
-from draw_from_triangle import DrawFromTriangle
+from construct_from_triangle import DrawFromTriangle
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright 2008, 2009 Hannes Hochreiner
@@ -45,7 +45,6 @@ class Export(JessyInkMixin, inkex.OutputExtension):
         self.is_installed()
 
         with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as output:
-
             # Find layers.
             layers = self.svg.xpath("//svg:g[@inkscape:groupmode='layer']")
 

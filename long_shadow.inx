@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Motion</name>
-    <id>org.ekips.filter.motion</id>
+    <name>Long Shadow</name>
+    <id>effect.long_shadow</id>
     <param name="magnitude" type="float" min="0" max="1000" gui-text="Length (document units):">100</param>
     <param name="angle" type="float" min="-360.0" max="360.0" gui-text="Angle:">45</param>
     <param name="fillwithstroke" type="bool" 
@@ -13,6 +13,6 @@
         </effects-menu>
     </effect>
     <script>
-        <command location="inx" interpreter="python">motion.py</command>
+        <command location="inx" interpreter="python">long_shadow.py</command>
     </script>
 </inkscape-extension>

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2008 Jonas Termeau - jonas.termeau **AT** gmail.com
@@ -40,7 +40,6 @@ class GuidesOpts:
 
     # pylint: disable=too-few-public-methods
     def __init__(self, svg: inkex.SvgDocumentElement) -> None:
-
         # get page bounds
         self.pages = svg.namedview.get_pages()
         self.viewbox = svg.get_viewbox()
@@ -130,7 +129,6 @@ class GuidesCreator(inkex.EffectExtension):
         self.store: GuidesOpts = None
 
     def effect(self):
-
         if self.options.delete:
             for guide in self.svg.namedview.get_guides():
                 guide.delete()
@@ -165,7 +163,6 @@ class GuidesCreator(inkex.EffectExtension):
                 )
 
             if from_edges:
-
                 self.draw_guides(1, True, vert=False)
                 self.draw_guides(1, True, vert=True)
 

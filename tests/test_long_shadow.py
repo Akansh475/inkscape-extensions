@@ -1,11 +1,11 @@
 # coding=utf-8
-from motion import Motion
+from long_shadow import LongShadow
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 
 class MotionBasicTest(ComparisonMixin, TestCase):
-    effect_class = Motion
+    effect_class = LongShadow
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
     comparisons = [
         ("--id=c3", "--id=p2"),
@@ -17,7 +17,7 @@ class MotionSubpathsTest(ComparisonMixin, TestCase):
     (b): see https://gitlab.com/inkscape/extensions/-/issues/266"""
 
     compare_file = "svg/motion_tests.svg"
-    effect_class = Motion
+    effect_class = LongShadow
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
     comparisons = [
         (

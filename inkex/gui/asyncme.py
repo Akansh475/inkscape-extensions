@@ -163,7 +163,6 @@ class DebouncedSyncVar:
         """
         while True:
             with self._cv:
-
                 # If there's no value, either wait for one or return
                 # failure.
                 while not self._have_value:

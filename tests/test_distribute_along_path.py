@@ -1,11 +1,11 @@
 # coding=utf-8
-from pathscatter import PathScatter
+from distribute_along_path import DistributeAlongPath
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareWithoutIds
 
 
 class TestPathScatterBasic(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = PathScatter
+    effect_class = DistributeAlongPath
     compare_file = "svg/scatter.svg"
     comparisons = [
         # Test simple case

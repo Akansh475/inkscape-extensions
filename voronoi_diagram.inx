@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <name>Voronoi Diagram</name>
-  <id>org.inkscape.effect.voronoi</id>
+  <id>effect.voronoi</id>
   <dependency type="file" location="inx">voronoi.py</dependency>
   <param name="tab" type="notebook">
     <page name="options" gui-text="Options">
@@ -34,6 +34,6 @@
     </effects-menu>
   </effect>
   <script>
-    <command location="inx" interpreter="python">voronoi2svg.py</command>
+    <command location="inx" interpreter="python">voronoi_diagram.py</command>
   </script>
 </inkscape-extension>

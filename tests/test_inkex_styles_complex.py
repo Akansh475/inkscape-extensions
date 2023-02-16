@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2021 Jonathan Neuhauser, jonathan.neuhauser@outlook.com
@@ -43,7 +43,8 @@ class StyleInheritanceTests(TestCase):
 
     def test_style_sheet_1(self):
         """File from https://commons.wikimedia.org/wiki/File:Test_only.svg, public domain
-        note that Inkscape fails the same test: https://gitlab.com/inkscape/inbox/-/issues/1929"""
+        note that Inkscape fails the same test: https://gitlab.com/inkscape/inbox/-/issues/1929
+        """
         doc: SvgDocumentElement = svg_file(
             self.data_file("svg", "style_inheritance.svg")
         )
@@ -61,7 +62,8 @@ class StyleInheritanceTests(TestCase):
     def test_style_sheet_2(self):
         """This is the unit test styling-css-04-f.svg from
         https://www.w3.org/Graphics/SVG/Test/20061213/htmlObjectHarness/full-styling-css-04-f.html
-        Note that the "good" preview image attached on the site is wrong per the explanation"""
+        Note that the "good" preview image attached on the site is wrong per the explanation
+        """
         doc: SvgDocumentElement = svg_file(
             self.data_file("svg", "styling-css-04-f.svg")
         )

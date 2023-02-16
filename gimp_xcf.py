@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2006 Aaron Spike, aaron@ekips.org
@@ -101,7 +101,6 @@ class GimpXcf(inkex.OutputExtension):
         return self.svg.get("sodipodi:docname") or "document"
 
     def save(self, stream):
-
         pngs = OrderedDict()
         valid = False
 

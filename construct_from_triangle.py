@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2007 John Beard john.j.beard@gmail.com
@@ -41,6 +41,7 @@ from inkex import PathElement, Circle
 (X, Y) = range(2)
 
 # DRAWING ROUTINES
+
 
 # draw an SVG triangle given in trilinar coords
 def draw_SVG_circle(

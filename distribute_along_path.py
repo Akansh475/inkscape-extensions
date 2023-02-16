@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2006 Jean-Francois Barraud, barraud@math.univ-lille1.fr
@@ -35,9 +35,9 @@ from inkex.localization import inkex_gettext as _
 import pathmodifier
 
 
-class PathScatter(pathmodifier.Diffeo):
+class DistributeAlongPath(pathmodifier.Diffeo):
     def __init__(self):
-        super(PathScatter, self).__init__()
+        super().__init__()
         self.arg_parser.add_argument(
             "-n",
             "--noffset",
@@ -145,7 +145,6 @@ class PathScatter(pathmodifier.Diffeo):
         return bbox
 
     def effect(self):
-
         if len(self.svg.selection) < 2:
             inkex.errormsg(_("This extension requires two selected paths."))
             return
@@ -232,4 +231,4 @@ class PathScatter(pathmodifier.Diffeo):
 
 
 if __name__ == "__main__":
-    PathScatter().run()
+    DistributeAlongPath().run()

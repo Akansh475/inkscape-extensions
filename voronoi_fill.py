@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 #
 # Copyright (C) 2010 Alvin Penner, penner@vaxxine.com
@@ -25,6 +25,7 @@ import random
 
 import inkex
 from inkex import PathElement, Pattern
+from inkex.localization import inkex_gettext as _
 
 import voronoi
 
@@ -67,7 +68,7 @@ def clip_line(x1, y1, x2, y2, w, h):
     return [x1, y1, x2, y2]
 
 
-class GenerateVoronoi(inkex.EffectExtension):
+class VoronoiFill(inkex.EffectExtension):
     def add_arguments(self, pars):
         pars.add_argument("--tab")
         pars.add_argument(
@@ -200,4 +201,4 @@ class GenerateVoronoi(inkex.EffectExtension):
 
 
 if __name__ == "__main__":
-    GenerateVoronoi().run()
+    VoronoiFill().run()

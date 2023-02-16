@@ -184,7 +184,11 @@ class StyleSheetTest(TestCase):
             in [
                 "//*[@id='rect3']"
                 "[contains(concat(' ', normalize-space(@class), ' '), ' three ')]",
+                # cssselect 1.1.0
                 "descendant-or-self::*[@id = 'rect3' and "
+                "(@class and contains(concat(' ', normalize-space(@class), ' '), ' three '))]",
+                # cssselect 1.2.0
+                "descendant-or-self::*[(@id = 'rect3') and "
                 "(@class and contains(concat(' ', normalize-space(@class), ' '), ' three '))]",
             ]
         )

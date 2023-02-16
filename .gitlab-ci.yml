@@ -172,8 +172,7 @@ pages:
     - if test -d build/html/; then cp -r build/html/ public/documentation/; fi
     - source /root/pyenv-init
     - pyenv shell 3.9.0
-    - poetry show --no-dev --no-ansi > public/python-dependencies.txt # Flattened list of all dependencies
-    - poetry show --no-dev --tree --no-ansi > public/python-dependency-tree.txt # List of all dependencies in a tree
+    - bash docs/poentry.sh > public/python-dependencies.txt # Flattened list of all dependencies
   artifacts:
     paths:
       - public/

@@ -19,14 +19,14 @@ classifiers=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 PyGObject = {version = ">=3.36", markers = "platform_system!='Windows'"}
 pySerial = "^3.4"
 lxml = "^4.5.0"
 cssselect = "^1.1.0"
 numpy = [
     #numpy incorrectly specifies its required Python version until 1.21.2
-    {version = "^1.17.0", python = "^3.6, <3.10"},
+    {version = "^1.17.0", python = "^3.7, <3.10"},
     {version = "^1.21.2", python = "^3.10"},
 ]
 Pillow = ">=7.0.0" # Used by RasterOutputExtension

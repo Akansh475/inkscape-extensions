@@ -6,9 +6,9 @@ these commands are in the Extensions menu.
 
 ## Installation
 
-These scripts should be installed with an Inkscape package already (if you have 
-installed Inkscape). For packagers or people testing newer releases, you can 
-install the files into /usr/share/inkscape/extensions or 
+These scripts should be installed with an Inkscape package already (if you have
+installed Inkscape). For packagers or people testing newer releases, you can
+install the files into /usr/share/inkscape/extensions or
 ~/.config/inkscape/extensions .
 
 ## Testing
@@ -35,20 +35,20 @@ Development of both the core inkex modules, tests and each of the extensions
 contained within the core inkscape extensions repository should follow these
 basic rules of quality assurance:
 
- * Use python3.6 or later, no python2 code would be used here.
- * Use pylint to ensure code is written consistantly
- * Have tests so that each line of an extension is covered in the coverage report
- * Not cross streams between extensions, so your extension should import from
-   a module and not from another extension.
- * Use translations on text for display to users using get text.
- * Should not require external programs to work (with some exceptions)
+* Use python3.6 or later, no python2 code would be used here.
+* Use pylint to ensure code is written consistantly
+* Have tests so that each line of an extension is covered in the coverage report
+* Not cross streams between extensions, so your extension should import from
+  a module and not from another extension.
+* Use translations on text for display to users using get text.
+* Should not require external programs to work (with some exceptions)
 
 Also join the community on chat.inkscape.org channel #inkscape_extensions with any
 doubts or problems.
 
 ## Building Docs
 
-You may wish to compile to docs for use outside of the Inkscape docs, this can 
+You may wish to compile to docs for use outside of the Inkscape docs, this can
 be done with these commands:
 
     sphinx-apidoc -F -o source inkex
@@ -57,11 +57,11 @@ be done with these commands:
 
 All documentation should be included INSIDE of each python module.
 
-The latest documentation for master branch can be found at
-https://inkscape.gitlab.io/extensions/documentation/.
+The latest documentation for master branch can be found [here](https://inkscape.gitlab.io/extensions/documentation/).
 
 ## License Requirements
 
 Only include extensions here which are GPL-compatible.  This includes
-Apache-2, MPL 1.1, certain Creative Commons licenses, and more.  See
-https://www.gnu.org/licenses/license-list.html for guidance.
+Apache-2, MPL 1.1, certain Creative Commons licenses, and more. See the GNU project's page
+[Various Licenses and Comments about Them](https://www.gnu.org/licenses/license-list.html.en)
+for guidance.

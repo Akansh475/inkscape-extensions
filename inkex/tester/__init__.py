@@ -37,6 +37,7 @@ import xml.etree.ElementTree as xml
 
 from unittest import TestCase as BaseCase
 from inkex.base import InkscapeExtension
+from inkex.extensions import OutputExtension
 
 from .. import Transform, load_svg, SvgDocumentElement
 from ..utils import to_bytes
@@ -253,6 +254,20 @@ class TestCase(MockCommandMixin, BaseCase):
         decoded = out.read().decode("utf-8")
         document = load_svg(decoded)
         return document
+
+    def export_svg(self, document, *args) -> str:
+        """Runs a svg through an export extension, with optional arguments
+        provided as "--arg=value" arguments"""
+        assert isinstance(self, OutputExtension)
+        output = StringIO()
+        writer = self.effect_class()
+        writer.parse_arguments([*args])
+        writer.svg = document.getroot()
+        writer.document = document
+        writer.effect()
+        writer.save(output)
+        output.seek(0)
+        return output.read()
 
 
 class InkscapeExtensionTestMixin:

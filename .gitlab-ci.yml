@@ -44,8 +44,8 @@ archive:
   script:
     - cd ..
     - apt-get update && apt-get install zip -y
-    - zip -r extensions.zip extensions -x extensions/tests/\* -x extensions/.git/\*
-    - mv extensions.zip extensions/extensions.zip
+    - zip -r extensions.zip $CI_PROJECT_NAME -x $CI_PROJECT_NAME/tests/\* -x $CI_PROJECT_NAME/.git/\*
+    - mv extensions.zip $CI_PROJECT_NAME/extensions.zip
   artifacts:
     paths:
       - extensions.zip
@@ -109,6 +109,7 @@ test:coverage:
     - pyenv shell 3.7.2
     - pip install coverage
     - ls -la | grep coverage
+    - echo "     C:\GitLab-Runner\builds\*\*\$CI_PROJECT_NAME" >> .coveragerc
     - coverage3 combine .coverage-*
     - coverage3 report -m --precision=2
     - coverage3 html --ignore-errors --title="Coverage for Inkscape Extensions (${CI_COMMIT_REF_NAME} branch)"

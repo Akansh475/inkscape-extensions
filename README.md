@@ -53,12 +53,26 @@ channel with any doubts or problems.
 
 ## Building Docs
 
-You may wish to compile to docs for use outside of the Inkscape docs, this can
-be done with these commands:
+If you improve the documentation, you might like to compile it to check what it looks like.
+This section should get you set up.
 
-    sphinx-apidoc -F -o source inkex
-    ./setup.py build_sphinx -s source
-    firefox ./build/sphinx/html/inkex.html
+1. Install [Poetry](https://pypi.org/project/poetry/) and the dependencies.
+   ```
+   pip3 install poetry
+   poetry install
+   poetry run sphinx-apidoc -e -P -o docs/source/ inkex */deprecated.py
+   ```
+2. Build the documentation
+   ```
+   cd docs
+   poetry run make html
+   ```
+3. Open the documentation in the `build/html` directory.
+   ```
+   firefox ../build/html/index.html
+   ``` 
+
+If that does not work, please have a look at the [.gitlab-ci.yml](.gitlab-ci.yml) and update this documentation!
 
 All documentation should be included __inside__ of each python module.
 

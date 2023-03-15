@@ -4,16 +4,21 @@ This folder contains the stock Inkscape extensions, i.e. the scripts that
 implement some commands that you can use from within Inkscape. Most of
 these commands are in the Extensions menu.
 
+It also contains the Python package `inkex` which powers the Inkscape extensions.
+The package has a [separate readme here](package-readme.md).
+
+This readme concerns the development of the core extensions and `inkex` itself.
+
 ## Installation
 
-These scripts should be installed with an Inkscape package already (if you have
-installed Inkscape). For packagers or people testing newer releases, you can
-install the files into `/usr/share/inkscape/extensions` or
-`~/.config/inkscape/extensions`.
+These scripts should be installed with an Inkscape package already (if you have 
+installed Inkscape). For packagers or people testing newer releases, you can 
+install the files into `/usr/share/inkscape/extensions` or 
+`~/.config/inkscape/extensions` .
 
 ## Testing
 
-These extensions are designed to have good test coverage for Python 3.6 and above.
+These extensions are designed to have good test coverage for Python 3.7 and above.
 
 You must install the program `pytest` in order to run these tests. You may run
 all tests by omitting any other parameters or select tests by adding the test
@@ -37,7 +42,7 @@ Development of both the core inkex modules, tests and each of the extensions
 contained within the core inkscape extensions repository should follow these
 basic rules of quality assurance:
 
-* Use Python 3.6 or later, no Python 2 code would be used here.
+* Use Python 3.7 or later, no Python 2 code would be used here.
 * Use [Black](https://black.readthedocs.io/en/stable/) to ensure code is written
   consistantly.
 * Write tests so that each line of an extension is covered in the coverage report.

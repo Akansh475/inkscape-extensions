@@ -8,7 +8,7 @@ maintainers = [
     "Jonathan Neuhauser <jonathan.neuhauser@outlook.com>",
 ]
 license = "GPL-2.0-or-later"
-readme = "README.md"
+readme = "package-readme.md"
 repository = "https://gitlab.com/inkscape/extensions"
 keywords = ["extensions", "graphics", "inkscape", "svg", "vector"]
 classifiers=[

@@ -17,6 +17,9 @@ classifiers=[
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Multimedia :: Graphics :: Editors :: Vector-Based",
 ]
+packages = [
+  { include = "inkex"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"

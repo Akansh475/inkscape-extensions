@@ -141,4 +141,6 @@ class InxTestCase(InxMixin, TestCase):
             self.skipTest("No INX testing in python2")
             return
         for inx_file in glob(os.path.join(self._testdir(), "..", "*.inx")):
-            self.assertInxIsGood(inx_file)
+            with self.subTest(inx_file=inx_file):
+                self.assertInxSchemaValid(inx_file)
+                self.assertInxIsGood(inx_file)

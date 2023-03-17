@@ -258,7 +258,7 @@ Git repository`_. This is a `RELAX NG schema`_.
 .. _see_also:
 
 .. _next paragraph: INX_extension_descriptor_format#RELAX_NG_XML_schema
-.. _Inkscape extensions Git repository: https://gitlab.com/inkscape/extensions/-/blob/master/inkscape.extension.rng
+.. _Inkscape extensions Git repository: https://gitlab.com/inkscape/extensions/-/blob/master/inkex/tester/inkscape.extension.rng
 .. _RELAX NG schema: http://www.relaxng.org/
 .. _INX Parameters: Extensions:_INX_widgets_and_parameters
 .. _ScriptingHOWTO: ScriptingHOWTO

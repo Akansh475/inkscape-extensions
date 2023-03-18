@@ -18,9 +18,9 @@
 #
 
 """
-Hershey Text 3.0.6, 2022-07-21
+Hershey Text 3.0.7, 2022-03-16
 
-Copyright 2022, Windell H. Oskay, www.evilmadscientist.com
+Copyright 2023, Windell H. Oskay, www.evilmadscientist.com
 
 Major revisions in Hershey Text 3.0:
 

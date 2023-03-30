@@ -44,7 +44,7 @@ class Dashit(inkex.EffectExtension):
                 )
             )
             # return list of IDs in case the user needs to find a specific object
-            inkex.debug(self.not_converted)
+            inkex.utils.debug(self.not_converted)
 
     def convert2dash(self, node):
         """Convert each selected node's dash array"""

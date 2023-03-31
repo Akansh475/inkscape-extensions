@@ -318,8 +318,9 @@ class InkscapeExtension:
     def clean_up(self):
         # type: () -> None
         """Clean up any open handles and other items"""
-        if self.bin_stdout is not None:
-            self.bin_stdout.close()
+        if hasattr(self, "bin_stdout"):
+            if self.bin_stdout is not None:
+                self.bin_stdout.close()
         if self.file_io is not None:
             self.file_io.close()
 

@@ -332,6 +332,14 @@ class TransformationTestCase(SvgTestCase):
         elem.transform.add_translate(-10, -10)
         self.assertNotIn(b"transform", etree.tostring(elem))
 
+    def test_composed_transform(self):
+        """Calculate every transform down to the other element"""
+        elem = self.svg.getElementById("F")
+        grandparent = elem.getparent().getparent()
+        transform3 = elem.composed_transform(grandparent)
+        transform4 = elem.composed_transform()
+        self.assertNotEqual(transform3, transform4)
+
 
 class RelationshipTestCase(SvgTestCase):
     """Test relationships between elements"""

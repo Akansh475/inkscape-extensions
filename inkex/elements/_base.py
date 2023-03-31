@@ -651,8 +651,8 @@ class BaseElement(IBaseElement):
         if none specified the transform is to the root document element
         """
         parent = self.getparent()
-        if parent is not None and isinstance(parent, BaseElement):
-            return parent.composed_transform() @ self.transform
+        if parent is not other and isinstance(parent, BaseElement):
+            return parent.composed_transform(other) @ self.transform
         return self.transform
 
 

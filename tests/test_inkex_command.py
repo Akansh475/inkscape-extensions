@@ -49,6 +49,29 @@ class CommandTest(BaseCase):
 
 
 class InkscapeCommandTest(TestCase):
+    def test_inkscape_command(self):
+        """Test inkscape_command("<svg>", ...)"""
+
+        svg = b"""<svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="100mm" viewBox="0 0 100 100"><path id="path1" d="M 0, 0 0, 100 100, 50 z" /><path id="path2" d="M 100, 0 100, 20 80, 0 z" /></svg>"""
+        out1 = inkscape_command(svg, export_id="path1", export_id_only=True).strip()
+
+        self.assertNotEqual(out1, svg)
+        self.assertIn(b"path1", out1)
+        self.assertNotIn(b"path2", out1)
+        # reapply again to compare both outputs
+        out2 = inkscape_command(out1).strip()
+        self.assertEqual(out2, out1)
+
+    def test_inkscape_command_export(self):
+        """Test inkscape_command("<svg>", actions=...)"""
+
+        svg = b"""<svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="100mm" viewBox="0 0 100 100"><path d="M 0, 0" /></svg>"""
+        tmpfile = Path(self.tempdir) / "test.svg"
+        actions = f"export-filename:{tmpfile};export-do;"
+        out = inkscape_command(svg, actions=actions)
+
+        self.assertTrue(os.path.isfile(tmpfile))
+
     def test_long_action_string(self):
         """Test for https://gitlab.com/inkscape/extensions/-/issues/482 (export)"""
 

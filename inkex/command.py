@@ -302,17 +302,24 @@ def inkscape(svg_file, *args, **kwargs):
     return stdout
 
 
-def inkscape_command(svg, select=None, verbs=()):
+def inkscape_command(svg, select=None, actions=None, *args, **kwargs):
     """
-    Executes a list of commands, a mixture of verbs, selects etc.
+    Executes Inkscape batch actions with the given <svg> input and returns a new <svg>.
 
-    inkscape_command('<svg...>', ('verb', 'VerbName'), ...)
+    inkscape_command('<svg...>', [select=...], [actions=...], [...])
     """
     with TemporaryDirectory(prefix="inkscape-command") as tmpdir:
         svg_file = write_svg(svg, tmpdir, "input.svg")
         select = ("select", select) if select else None
-        verbs += ("FileSave", "FileQuit")
-        inkscape(svg_file, select, batch_process=True, verb=";".join(verbs))
+        inkscape(
+            svg_file,
+            select,
+            batch_process=True,
+            export_overwrite=True,
+            actions=actions,
+            *args,
+            **kwargs,
+        )
         with open(svg_file, "rb") as fhl:
             return fhl.read()
 

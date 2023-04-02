@@ -94,6 +94,14 @@ test:python310:
     - pyenv shell 3.10.0
     - tox -e py310-normal-linux
 
+test:python311:
+  allow_failure: true # python 3.11 compatibility is not yet complete.
+  extends: .tests
+  script:
+    - source /root/pyenv-init
+    - pyenv shell 3.11.0
+    - tox -e py311-normal-linux
+
 test:coverage:
   stage: coverage
   script:

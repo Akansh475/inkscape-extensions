@@ -618,6 +618,47 @@ class UseTest(ElementTestCase):
         elem.set("xlink:href", self.elem.get("xlink:href"))
         self.assertEqual(elem.href.get("id"), "path1")
 
+    def test_href_compat_xlink_getElementsByHref(self):
+        """Test attribute `href` is used according to SVG2 spec
+        while considering `xlink:href` for SVG1.1 compatibility"""
+        # test getElementsByHref `href`
+        elem = self.svg.add(Use())
+        elem.set("href", "#path1")
+        href = self.svg.getElementsByHref("path1")[-1]
+        self.assertEqual(href.TAG, elem.TAG)
+        self.assertEqual(href.get_id(), elem.get_id())
+        # test getElementsByHref `xlink:href`
+        elem = self.svg.add(Use())
+        elem.set("xlink:href", "#path2")
+        href = self.svg.getElementsByHref("path2")[-1]
+        self.assertEqual(href.TAG, elem.TAG)
+        self.assertEqual(href.get_id(), elem.get_id())
+
+    def test_href_compat_xlink_create_read_update(self):
+        """Test attribute `href` is read and updated according to SVG2 spec
+        while creating defaults to `xlink:href` for SVG1.1 compatibility"""
+        # test setter (create) `xlink:href`
+        elem = self.svg.add(Use())
+        elem.href = self.elem.href
+        self.assertEqual(elem.get("xlink:href"), "#path1")
+        self.assertEqual(elem.href.get("id"), "path1")
+        # test setter (update existing) `href` [SVG2]
+        elem = self.svg.add(Use())
+        elem.set("href", "#path2")
+        elem.href = self.elem.href
+        self.assertEqual(elem.get("href"), "#path1")
+        self.assertEqual(elem.href.get("id"), "path1")
+        # test getter (read existing) `href` [SVG2]
+        elem = self.svg.add(Use())
+        elem.set("href", "#path1")
+        self.assertEqual(elem.get("href"), "#path1")
+        self.assertEqual(elem.href.get("id"), "path1")
+        # test getter (read existing) `xlink:href`
+        elem = self.svg.add(Use())
+        elem.set("xlink:href", "#path1")
+        self.assertEqual(elem.get("xlink:href"), "#path1")
+        self.assertEqual(elem.href.get("id"), "path1")
+
     def test_unlink(self):
         """Test use tag unlinking"""
         elem = self.elem.unlink()

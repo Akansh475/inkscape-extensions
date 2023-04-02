@@ -500,7 +500,7 @@ class BaseElement(IBaseElement):
 
         .. versionchanged:: 1.1
             A setter for href was added."""
-        ref = self.get("xlink:href")
+        ref = self.get("href") or self.get("xlink:href")
         if not ref:
             return None
         return self.root.getElementById(ref.strip("#"))
@@ -510,7 +510,10 @@ class BaseElement(IBaseElement):
         """Set the href object"""
         if isinstance(elem, BaseElement):
             elem = elem.get_id()
-        self.set("xlink:href", "#" + elem)
+        if self.get("href"):
+            self.set("href", "#" + elem)
+        else:
+            self.set("xlink:href", "#" + elem)
 
     @property
     def label(self):

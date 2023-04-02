@@ -471,7 +471,7 @@ class ColorExtension(EffectExtension):
     def _xlink_cloned(self, old_id, new_id, linker):  # pylint: disable=unused-argument
         lid = linker.get("id")
         linker = self.svg.getElementById(self._renamed.get(lid, lid))
-        linker.set("xlink:href", "#" + new_id)
+        linker.href = new_id
 
     def _modify_color(self, name, color):
         """Pre-process color value to filter out bad colors"""

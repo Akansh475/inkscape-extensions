@@ -217,23 +217,26 @@ class SvgDocumentElement(
         return self.xpath(ConditionalRule(f".{class_name}").to_xpath())
 
     def getElementsByHref(
-        self, eid: str, attribute="xlink:href"
+        self, eid: str, attribute="href"
     ):  # pylint: disable=invalid-name
         """Get elements that reference the element with id eid.
 
         Args:
             eid (str): _description_
             attribute (str, optional): Attribute to look for.
-                Valid choices: "xlink:href", "mask", "clip-path".
-                Defaults to "xlink:href".
+                Valid choices: "href", "xlink:href", "mask", "clip-path".
+                Defaults to "href".
 
                 .. versionadded:: 1.2
+
+            attribute set to "href" or "xlink:href" handles both cases.
+                .. versionchanged:: 1.3
 
         Returns:
             Any: list of elements
         """
-        if attribute == "xlink:href":
-            return self.xpath(f'//*[@xlink:href="#{eid}"]')
+        if attribute == "href" or attribute == "xlink:href":
+            return self.xpath(f'//*[@href|@xlink:href="#{eid}"]')
         elif attribute == "mask":
             return self.xpath(f'//*[@mask="url(#{eid})"]')
         elif attribute == "clip-path":

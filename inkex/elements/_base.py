@@ -743,13 +743,38 @@ class ShapeElement(BaseElement):
         return path.bounding_box()
 
     def is_visible(self):
-        """Returns false if the css says this object is invisible
+        """Returns false if this object is invisible
+
+        .. versionchanged:: 1.3
+            rely on cascaded_style() to include CSS and presentation attributes
+            include `visibility` attribute with check for inherit
+            include ancestors
 
         .. versionadded:: 1.1"""
-        if self.style.get("display", "") == "none":
-            return False
-        if not float(self.style.get("opacity", 1.0)):
-            return False
+        return self._is_visible()
+
+    def _is_visible(self, inherit_visibility=True):
+        # iterate over self and ancestors
+        for element in [self] + list(self.ancestors()):
+            get_style = element.cascaded_style().get
+            # case display:none
+            if get_style("display", "inline") == "none":
+                return False
+            # case opacity:0
+            if not float(get_style("opacity", 1.0)):
+                return False
+            # only check if childs visibility is inherited
+            if inherit_visibility:
+                # case visibility:hidden
+                if get_style("visibility", "inherit") in (
+                    "hidden",
+                    "collapse",
+                ):
+                    return False
+                # case visibility: not inherit
+                elif get_style("visibility", "inherit") != "inherit":
+                    inherit_visibility = False
+
         return True
 
     def get_line_height_uu(self):

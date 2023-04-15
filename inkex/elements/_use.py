@@ -45,9 +45,13 @@ class Use(ShapeElement):
         return ret
 
     def get_path(self):
-        """Returns the path of the cloned href plus any transformation"""
+        """Returns the path of the cloned href plus any transformation
+
+        .. versionchanged:: 1.3
+            include transform of the referenced element
+        """
         path = self.href.path
-        path.transform(self.href.transform)
+        path = path.transform(self.href.transform)
         return path
 
     def effective_style(self):

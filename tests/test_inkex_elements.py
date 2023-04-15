@@ -601,8 +601,10 @@ class UseTest(ElementTestCase):
     tag = "use"
 
     def test_path(self):
-        """Use path follows ref"""
+        """Use path follows ref (including refs transform)"""
         self.assertEqual(str(self.elem.path), "M 0 0 L 10 10 Z")
+        self.elem.href.transform = Transform("translate(100, 100)")
+        self.assertEqual(str(self.elem.path), "M 100 100 L 110 110 Z")
 
     def test_empty_ref(self):
         """An empty ref or None ref doesn't cause an error"""

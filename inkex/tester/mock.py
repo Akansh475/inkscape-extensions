@@ -200,7 +200,9 @@ class MockCommandMixin(MockMixin):
 
         try:
             for fdir in self.recorded_tempdirs:
+                data = replace(data, fdir + os.sep, "./")
                 data = replace(data, fdir, ".")
+                files = replace(files, fdir + os.sep, "./")
                 files = replace(files, fdir, ".")
             for fname in files:
                 data = replace(data, fname, os.path.basename(fname))

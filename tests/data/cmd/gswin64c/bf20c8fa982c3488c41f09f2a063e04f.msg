@@ -1,7 +1,7 @@
 Content-Type: multipart/mixed; boundary="--CALLDATA--//--CALLDATA--"
 MIME-Version: 1.0
 Program: gswin64c
-Arguments: -q -P- -dSAFER -dNOPAUSE -dBATCH -sDEVICE#pdfwrite -dCompatibilityLevel#1.4 -sOutputFile#.\output.pdf -dAutoRotatePages#/None test.eps
+Arguments: -q -P- -dSAFER -dNOPAUSE -dBATCH -sDEVICE#pdfwrite -dCompatibilityLevel#1.4 -sOutputFile#./output.pdf -dAutoRotatePages#/None test.eps
 
 ----CALLDATA--//--CALLDATA--
 Content-Type: application/octet-stream; Name="output.pdf"

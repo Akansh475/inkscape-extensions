@@ -85,14 +85,19 @@ class StyleTest(TestCase):
         st.pop("fill-opacity")
         self.assertEqual(calls, 1)
 
-        def cb(style):
+        def cb2(style):
             nonlocal calls
             self.assertEqual(style["fill-opacity"], ".75")
             calls += 1
 
-        st.callback = cb
+        st.callback = cb2
         st["fill-opacity"] = ".75"
         self.assertEqual(calls, 2)
+
+        # del and pop should both work, and call the callback only once.
+        st.callback = cb
+        del st["fill-opacity"]
+        self.assertEqual(calls, 3)
 
 
 class StyleSheetTest(TestCase):

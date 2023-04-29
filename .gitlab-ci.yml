@@ -95,7 +95,6 @@ test:python310:
     - tox -e py310-normal-linux
 
 test:python311:
-  allow_failure: true # python 3.11 compatibility is not yet complete.
   extends: .tests
   script:
     - source /root/pyenv-init

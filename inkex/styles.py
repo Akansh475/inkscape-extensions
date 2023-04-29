@@ -23,6 +23,7 @@ Functions for handling styles and embedded css
 """
 
 import re
+import sys
 from collections import OrderedDict
 from typing import MutableMapping, Union, Iterable, TYPE_CHECKING
 
@@ -251,6 +252,15 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         super().__delitem__(key)
         if self.callback is not None:
             self.callback(self)
+
+    def pop(self, key, default=None):
+        super().pop(key, default)
+        # On Python < 3.11, pop internally calls __delitem__.
+        # This does not happen in 3.11. To avoid
+        # calling the callback twice, we need to check the Python version.
+        if sys.version_info >= (3, 11):
+            if self.callback is not None:
+                self.callback(self)
 
     def __setitem__(self, key, value):
         """Sets a style value.

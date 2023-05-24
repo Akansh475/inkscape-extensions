@@ -35,7 +35,7 @@ codestyle:black:
   stage: test
   script:
     - source /root/pyenv-init
-    - pyenv shell 3.7.2
+    - pyenv shell 3.11.0
     - pip install black
     - black . --check --verbose --diff --color --exclude=other/
 
@@ -49,14 +49,6 @@ archive:
   artifacts:
     paths:
       - extensions.zip
-
-
-test:python37:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 3.7.2
-    - tox -e py37-normal-linux
 
 
 test:python38:
@@ -105,7 +97,7 @@ test:coverage:
   stage: coverage
   script:
     - source /root/pyenv-init
-    - pyenv shell 3.7.2
+    - pyenv shell 3.11.0
     - pip install coverage
     - ls -la | grep coverage
     - echo "     C:\GitLab-Runner\builds\*\*\$CI_PROJECT_NAME" >> .coveragerc
@@ -116,17 +108,16 @@ test:coverage:
       "Coverage report successfully created; you can access the full HTML report at\n"
       "  https://${CI_PROJECT_NAMESPACE}.gitlab.io/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/htmlcov/index.html"
       "\n\n"
-    - pyenv shell 3.9.0
-    - pip install pylint==2.13.9
+    - pip install pylint==2.17.4
     - python3 tests/add_pylint.py htmlcov/index.html
     - pip install anybadge
     - pylintscore=$(grep -Eo "[0-9]+.[0-9]+</td></tr></tfoot>" htmlcov/index.html | grep -Eo "[0-9]+.[0-9]+")
     - anybadge -l pylint -v $pylintscore -f htmlcov/pylint.svg 6=red 8=orange 9=yellow 10=green
   dependencies:
-    - test:python37
     - test:python38
     - test:python39
     - test:python310
+    - test:python311
     - test:python38-windows
   when: always
   coverage: '/TOTAL.+?(\d+.\d+%)/'
@@ -140,7 +131,7 @@ mypy:
   when: always
   script:
     - source /root/pyenv-init
-    - pyenv shell 3.7.2
+    - pyenv shell 3.11.0
     - pip install mypy
     - mypy inkex --ignore-missing-imports
 
@@ -149,7 +140,7 @@ sphinx:
   when: always
   script:
     - source /root/pyenv-init
-    - pyenv shell 3.9.0
+    - pyenv shell 3.11.0
     - poetry install
     - poetry run sphinx-apidoc -e -P -o docs/source/ inkex */deprecated.py
     - cd docs
@@ -172,7 +163,7 @@ pages:
     - if test -d htmlcov/; then cp -r htmlcov/ public/coverage/; fi
     - if test -d build/html/; then cp -r build/html/ public/documentation/; fi
     - source /root/pyenv-init
-    - pyenv shell 3.9.0
+    - pyenv shell 3.11.0
     - bash docs/poetry.sh > public/python-dependencies.txt # Flattened list of all dependencies
   artifacts:
     paths:

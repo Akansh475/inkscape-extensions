@@ -66,20 +66,6 @@ test:python39:
     - pyenv shell 3.9.0
     - tox -e py39-normal-linux
 
-test:python38-windows:
-  stage: test
-  allow_failure: true # The windows run is less reliable than the Linux test runs.
-  extends:
-    - .shared-windows-runners
-    - .tests
-  script:
-    - choco install python --version 3.8.3 -y -f --no-progress
-    - $env:PATH += ";C:\\PYTHON38\\;C:\\PYTHON38\\Scripts"
-    - refreshenv
-    - "python -m pip install --upgrade pip"
-    - "python -m pip install --upgrade tox poetry==1.1.14 tox-poetry"
-    - "tox -e py38-normal-win"
-
 test:python310:
   extends: .tests
   script:
@@ -93,6 +79,20 @@ test:python311:
     - source /root/pyenv-init
     - pyenv shell 3.11.0
     - tox -e py311-normal-linux
+
+test:python311-windows:
+  stage: test
+  allow_failure: true # The windows run is less reliable than the Linux test runs.
+  extends:
+    - .shared-windows-runners
+    - .tests
+  script:
+    - choco install python --version 3.11.0 -y -f --no-progress
+    - $env:PATH += ";C:\\PYTHON311\\;C:\\PYTHON311\\Scripts"
+    - refreshenv
+    - "python -m pip install --upgrade pip"
+    - "python -m pip install --upgrade 'tox<4.0' poetry==1.1.14 tox-poetry 'urllib3<1.27'" # pin urllib3<1.27 until release of cachecontrol>0.12.12 wrt https://github.com/ionrock/cachecontrol/commit/8f037ba1650c446759d6db581012714f6109850f
+    - "tox -e py311-normal-win"
 
 test:coverage:
   stage: coverage
@@ -119,7 +119,7 @@ test:coverage:
     - test:python39
     - test:python310
     - test:python311
-    - test:python38-windows
+    - test:python311-windows
   when: always
   coverage: '/TOTAL.+?(\d+.\d+%)/'
   artifacts:

@@ -4,6 +4,10 @@
 <!-- START EXTENSION DESCRIPTION (uses defines below) -->
   <start>
     <element name="inkscape-extension">
+      <optional>
+        <attribute name="translationdomain"/>
+      </optional>
+
       <element name="name">
         <text/>
       </element>

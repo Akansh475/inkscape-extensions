@@ -500,6 +500,11 @@
             <oneOrMore>
               <ref name="inx.widget"/>
             </oneOrMore>
+            <optional>
+              <attribute name="translatable">
+                <ref name="data_type_boolean_yes_no"/>
+              </attribute>
+            </optional>
           </element>
         </oneOrMore>
       </group>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Pattern Along Path</name>
+    <name>Pattern along Path</name>
     <id>effect.pattern_along_path</id>
     <dependency type="file" location="inx">pathmodifier.py</dependency>
     <param name="tab" type="notebook">

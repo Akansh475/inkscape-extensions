@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Distribute along path</name>
+    <name>Distribute along Path</name>
     <id>effect.distribute_along_path</id>
     <dependency type="file" location="inx">pathmodifier.py</dependency>
     <param name="tab" type="notebook">

@@ -24,7 +24,7 @@ import inkex
 from inkex import ClipPath, Filter
 
 
-class Edge3D(inkex.EffectExtension):
+class InsetShadow(inkex.EffectExtension):
     """Generate a 3d edge"""
 
     def add_arguments(self, pars):

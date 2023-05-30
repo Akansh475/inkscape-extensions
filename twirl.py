@@ -17,18 +17,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-"""Whirl path extension (modify path)"""
+"""Twirl path extension (modify path)"""
 
 import math
 import inkex
 
 
-class Whirl(inkex.EffectExtension):
+class Twirl(inkex.EffectExtension):
     """Modify a path by twisting the nodes around a point"""
 
     def add_arguments(self, pars):
         pars.add_argument(
-            "-t", "--whirl", type=float, default=5.0, help="amount of whirl"
+            "-t", "--twirl", type=float, default=5.0, help="amount of twirl"
         )
         pars.add_argument(
             "-r",
@@ -41,13 +41,13 @@ class Whirl(inkex.EffectExtension):
     def effect(self):
         view_center = self.svg.namedview.center
         rotation = 1 if self.options.rotation else -1
-        whirl = self.options.whirl / 1000
+        twirl = self.options.twirl / 1000
         for node in self.svg.selection.filter(inkex.PathElement):
-            self.whirl_node(view_center, rotation, whirl, node)
+            self.twirl_node(view_center, rotation, twirl, node)
 
     @staticmethod
-    def whirl_node(center, direction, ammount, node):
-        """Apply a whirl to a path given the center, direction and amount"""
+    def twirl_node(center, direction, ammount, node):
+        """Apply a twirl to a path given the center, direction and amount"""
         path = node.path.to_superpath()
         for sub in path:
             for csp in sub:
@@ -66,4 +66,4 @@ class Whirl(inkex.EffectExtension):
 
 
 if __name__ == "__main__":
-    Whirl().run()
+    Twirl().run()

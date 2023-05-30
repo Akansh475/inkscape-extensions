@@ -17,7 +17,7 @@ If border is zero, the pattern will be discontinuous at the edges. Use a positiv
     <effect>
         <object-type>all</object-type>
         <effects-menu>
-            <submenu name="Generate from Path"/>
+            <submenu name="Styles"/>
         </effects-menu>
     </effect>
     <script>

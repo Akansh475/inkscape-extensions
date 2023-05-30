@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # coding=utf-8
 import inkex
-from edge3d import Edge3D
+from inset_shadow import InsetShadow
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
 
-class Edge3dBasicTest(ComparisonMixin, TestCase):
-    effect_class = Edge3D
+class InsetShadowBasicTest(ComparisonMixin, TestCase):
+    effect_class = InsetShadow
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
     comparisons = [
         ("--id=p1", "--id=r3"),

@@ -2,10 +2,10 @@
 from inkex.tester import ComparisonMixin, InkscapeExtensionTestMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy, CompareWithPathSpace
 
-from whirl import Whirl
+from twirl import Twirl
 
 
-class WhirlBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
-    effect_class = Whirl
+class TwirlBasicTest(ComparisonMixin, InkscapeExtensionTestMixin, TestCase):
+    effect_class = Twirl
     compare_filters = [CompareNumericFuzzy(), CompareWithPathSpace()]
-    comparisons = [("--id=p1", "--id=r3", "--whirl=1.0")]
+    comparisons = [("--id=p1", "--id=r3", "--twirl=1.0")]

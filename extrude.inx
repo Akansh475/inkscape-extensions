@@ -29,7 +29,7 @@ There are 3 main options:
   corresponding pairs of nodes of each path. The polygons are
   grouped together.
 - follow curves: the same as polygons, but the 'segments' of the
-  path that lie on top of the original paths will follow The
+  path that lie on top of the original paths will follow the
   same curves as on the original path.
 
 The lines will be inserted above the bottom of the two elements.

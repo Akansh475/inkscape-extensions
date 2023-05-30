@@ -95,7 +95,7 @@ class Hpgl2Input(inkex.InputExtension):
             if unknown:
                 inkex.errormsg(
                     _(
-                        "Unsupported commands encountered."
+                        "Unsupported commands encountered. "
                         "The following commands were ignored:"
                     )
                 )

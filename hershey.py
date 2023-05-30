@@ -2010,7 +2010,7 @@ Evil Mad Scientist Laboratories
             inkex.errormsg(
                 _(
                     "Warning: unable to render text.\n"
-                    + "Please use Text > Remove Manual Kerns to convert it prior to use ."
+                    + "Please use Text > Remove Manual Kerns to remove kerning prior to using this extension."
                 )
             )
 

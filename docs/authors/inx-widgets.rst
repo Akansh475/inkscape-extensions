@@ -344,7 +344,8 @@ the value can be adjusted dynamically over the full range.
 .. figure:: widgets/float.png
    :alt: Rendering of float parameter
 
-   Rendering of ``float`` parameters: default and with ``appearance="full"``
+   Rendering of ``float`` parameters: default and with ``appearance="full"``. 
+   On the bottom parameter, ``precision="1"`` has been set.
 
 ``int``
 ~~~~~~~
@@ -425,8 +426,7 @@ selected.
    :alt: Rendering of float parameter
 
    Rendering of ``optionsgroup`` parameters: ``appearance="radio"`` and 
-   ``appearance="combo"``. On the bottom parameter, ``precision="1"`` 
-   has been set.
+   ``appearance="combo"``. 
 
 
 ``path``

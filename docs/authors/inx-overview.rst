@@ -22,8 +22,6 @@ The INX file allows the author to:
 -  Create :ref:`a GUI with control widgets <inx-widgets>` for those parameters
 -  Add a submenu to the Extensions menu for the extension to reside in
 -  Label strings for translation
--  Chain extensions
--  Etc
 
 Nothing beats a working example, and Inkscape includes a great number of
 extensions with INX files that you can read. To find the location of
@@ -32,6 +30,229 @@ INX files are located, look in the System pane of Inkscape Preferences,
 under "Inkscape extensions".
 
 .. _translation_of_extensions:
+
+
+
+Extension types
+---------------
+
+``<effect>`` extensions
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**Corresponding inkex class:** :class:`~inkex.extensions.EffectExtension`
+
+Effect extensions are given an SVG file on stdin and are expected to return a
+modified SVG file on stdout. Any additional messages to be displayed to the user
+can be passed on stderr. 
+
+XML Attributes
+``````````````
+
++---------------------------+-------------------------+
+| Attribute name            | Allowed values          |
++===========================+=========================+
+| ``implements-custom-gui`` | ``"true"`` |            |
+|                           | ``"false"`` (default)   |
+| .. versionadded:: 1.0     |                         |
++---------------------------+-------------------------+
+| If set to ``true`` **requires** an effect           |
+| extension to implement custom GUI.                  |
+|                                                     |
+| .. hint::                                           |
+|    *Implementation detail:* The "extension is       |
+|    working" window is not shown for this kind of    |
+|    extensions. This means user interaction with the |
+|    Inkscape interface is blocked until the          |
+|    extension returns, with no way for the user to   |
+|    abort the running extension! It is therefore     |
+|    **absolutely essential** that your extension     |
+|    provides the necessary visual feedback for the   |
+|    user and has proper error handling, to rule out  |
+|    any dead-locking behavior.                       |
++---------------------------+-------------------------+
+| ``needs-document``        | ``"true"`` (default) |  |
+|                           | ``"false"``             |
+| .. versionadded:: 1.0     |                         |
++---------------------------+-------------------------+
+| If set to ``false`` the extension will not be       |
+| passed a document nor will a document be read back  |
+| ("no-op" effect). This is currently a hack to make  |
+| extension manager work and will likely be           |
+| removed/replaced in future, so use at your          |
+| **own risk**!                                       |
++---------------------------+-------------------------+
+| ``needs-live-preview``    | ``"true"`` (default) |  |
+|                           | ``"false"``             |
+| .. versionadded:: 1.0     |                         |
++---------------------------+-------------------------+
+| If set to ``true`` in an effect extension, it will  |
+| offer a "Live preview" checkbox in its GUI. When    |
+| the user checks that box, it will run the extension |
+| in a "preview mode", visually showing the effect of |
+| the extension, but not making any changes to the    |
+| SVG document, unless the user clicks the Apply      |
+| button. While "Live preview" is checked in the GUI, |
+| any changes that the user makes to parameters       |
+| accessible in the GUI will generate an updated      |
+| preview.                                            |
++---------------------------+-------------------------+
+| ``refresh-extensions``    | ``"true"``  |           |
+|                           | ``"false"`` (default)   |
++---------------------------+-------------------------+
+| Reloads the extension list after the current        |
+| extension finishes. Useful for bootstrapping        |
+| extensions, currently used only by the extensions   |
+| manager.                                            |
++---------------------------+-------------------------+
+
+XML Children
+````````````
+
+- ``<effects-menu>``: Place of the extension in the menu. Example:
+
+  .. code-block:: xml
+
+    <effects-menu>
+      <submenu name="Render">
+          <submenu name="Grids"/>
+      </submenu>
+    </effects-menu>
+
+- ``<menu-tip>Tooltip</menu-tip>``: Tooltip of the extension.
+- ``<object-type>type|all</object-type>``: Specify for which selection of SVG
+  elements the extension is enabled and can be triggered from within Inkscape.
+  
+  .. warning::
+
+    This setting currently has no effect, see `inbox#723 <https://gitlab.com/inkscape/inbox/-/issues/723>`_.
+
+  
+
+``<input>`` extensions
+^^^^^^^^^^^^^^^^^^^^^^
+
+Input extensions are given an arbitrary file on stdin and are expected to return the 
+contents of the file, converted to SVG, on stdout. 
+Any additional messages to be displayed to the user can be passed on stderr. 
+
+**Corresponding inkex class:** :class:`~inkex.extensions.InputExtension`
+
+XML Attributes
+``````````````
+
++---------------------------+-------------------------+
+| Attribute name            | Allowed values          |
++===========================+=========================+
+| ``priority``              | ``<int>`` |             |
+|                           | not specified (default) |
+| .. versionadded:: 1.3     |                         |
++---------------------------+-------------------------+
+| In the Open dialog, the ``priority`` parameter      |
+| determines the order of extensions.                 |
+| When multiple extensions are registered as          |
+| import for a given file extension, the extension    |
+| with the lowest priority wins.                      |
+| If no priority is specified, sort order is          |
+| determined alphabetically.                          |
++---------------------------+-------------------------+
+| ``savecopyonly``          | ``"true"`` |            |
+|                           | ``"false"`` (default)   |
+| .. versionadded:: 1.2     |                         |
++---------------------------+-------------------------+
+
+XML Children
+````````````
+
+- ``<extension>.svg</extension>``: the file extension
+- ``<mimetype>text/xml+svg</mimetype>``: mime type. Needs to be specified if the 
+  extension should be called on clipboard data.
+- ``<filetypename>Scalable Vector Graphics (*.svg)</filetypename>``: 
+  this string is displayed in the filter of the Open dialog
+- ``<filetypetooltip>Additional details</filetypetooltip>``
+
+
+``<output>`` extensions
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Output extensions are given an SVG file on stdin and are expected to return the 
+exported representation of the file contents on stdout. 
+Any additional messages to be displayed to the user can be passed on stderr. 
+
+**Corresponding inkex class:** :class:`~inkex.extensions.OutputExtension`
+
+XML Attributes
+``````````````
+
++---------------------------+-------------------------+
+| Attribute name            | Allowed values          |
++===========================+=========================+
+| ``priority``              | ``<int>`` |             |
+|                           | not specified (default) |
+| .. versionadded:: 1.3     |                         |
++---------------------------+-------------------------+
+| In the Save / Save As dialog, the ``priority``      |
+| parameter determines the order of extensions.       |
+| If no priority is specified, sort order is          |
+| determined alphabetically.                          |
++---------------------------+-------------------------+
+| ``savecopyonly``          | ``"true"`` |            |
+|                           | ``"false"`` (default)   |
+| .. versionadded:: 1.2     |                         |
++---------------------------+-------------------------+
+| If set to ``true`` in an **output** extension, it   |
+| will limit the extension to being available only    |
+| in the "Save a Copy" menu.                          |
++---------------------------+-------------------------+
+
+XML Children
+````````````
+
+- ``<extension>.sif</extension>``: The file extension
+- ``<mimetype>image/sif</mimetype>``: Needs to be specified if the 
+  extension should be called when this particular clipboard format is requested.
+- ``<filetypename>Synfig Animation (*.sif)</filetypename>``:
+  this string is displayed in the filter of the Open dialog
+- ``<filetypetooltip>Additional details</filetypetooltip>``
+- ``<dataloss>true</dataloss>``: If the conversion to the output format is lossy,
+  Inkscape will prompt the user to save the file as SVG on close.
+
+Example
+-------
+
+.. code-block:: xml
+
+   <?xml version="1.0" encoding="UTF-8"?>
+   <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+     <name>{Friendly Extension Name}</name>
+     <id>{org.domain.sub-domain.extension-name}</id>
+     <dependency type="executable" location="[extensions|path|plugins|{location}]">program.ext</dependency>
+     <param name="tab" type="notebook">
+       <page name="controls" gui-text="Controls">
+         <param name="{argumentName}" type="[int|float|string|bool]" min="{number}" max="{number}"
+           gui-text="{Friendly Argument Name}">{default value}</param>
+       </page>
+       <page name="help" gui-text="Help">
+         <param name="help_text" type="description">{Friendly Extension Help}</param>
+       </page>
+     </param>
+     <effect>
+       <object-type>[all|{element type}]</object-type>
+         <effects-menu>
+           <submenu name="{Extension Group Name}"/>
+         </effects-menu>
+     </effect>
+     <script>
+       <command location="[inx|extensions]" interpreter="[python|perl|ruby|bash|{some other}]">program.ext</command>
+     </script>
+   </inkscape-extension>
+
+More example INX files are available in the Inkscape distribution, which
+takes its files from the `Inkscape Extensions Repository`_.
+
+For a full list of currently supported interpreters, please see 
+:ref:`supported_interpreters`.
+
+.. _dtd_xml_schema:
 
 Translation of extensions
 -------------------------
@@ -88,103 +309,6 @@ The following three locations are recursively searched for "${translationdomain}
 
 .. _attributes_description:
 
-Attributes description
-----------------------
-
-+---------------------------+-------------------------+
-| Attribute name            | Allowed values          |
-+===========================+=========================+
-| ``implements-custom-gui`` | ``"true"`` |            |
-|                           | ``"false"`` (default)   |
-| .. versionadded:: 1.0     |                         |
-+---------------------------+-------------------------+
-| If set to ``true`` **requires** an effect           |
-| extension to implement custom GUI.                  |
-|                                                     |
-| .. hint::                                           |
-|    *Implementation detail:* The "extension is       |
-|    working" window is not shown for this kind of    |
-|    extensions. This means user interaction with the |
-|    Inkscape interface is blocked until the          |
-|    extension returns, with no way for the user to   |
-|    abort the running extension! It is therefore     |
-|    **absolutely essential** that your extension     |
-|    provides the necessary visual feedback for the   |
-|    user and has proper error handling, to rule out  |
-|    any dead-locking behavior.                       |
-+---------------------------+-------------------------+
-| ``needs-document``        | ``"true"`` (default) |  |
-|                           | ``"false"``             |
-| .. versionadded:: 1.0     |                         |
-+---------------------------+-------------------------+
-| If set to ``false`` an effect extension will not be |
-| passed a document nor will a document be read back  |
-| ("no-op" effect). This is currently a hack to make  |
-| extension manager work and will likely be           |
-| removed/replaced in future, so use at your          |
-| **own risk**!                                       |
-+---------------------------+-------------------------+
-| ``needs-live-preview``    | ``"true"`` (default)    |
-|                           | ``"false"``             |
-+---------------------------+-------------------------+
-| If set to ``true`` in an effect extension, it will  |
-| offer a "Live preview" checkbox in its GUI. When    |
-| the user checks that box, it will run the extension |
-| in a "preview mode", visually showing the effect of |
-| the extension, but not making any changes to the    |
-| SVG document, unless the user clicks the Apply      |
-| button. While "Live preview" is checked in the GUI, |
-| any changes that the user makes to parameters       |
-| accessible in the GUI will generate an updated      |
-| preview.                                            |
-+---------------------------+-------------------------+
-| ``savecopyonly``          | ``"true"`` |            |
-|                           | ``"false"`` (default)   |
-| .. versionadded:: 1.2     |                         |
-+---------------------------+-------------------------+
-| If set to ``true`` in an **output** extension, it   |
-| will limit the extension to being available only    |
-| in the "Save a Copy" menu.                          |
-+---------------------------+-------------------------+
-
-
-Example
--------
-
-::
-
-   <?xml version="1.0" encoding="UTF-8"?>
-   <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-     <name>{Friendly Extension Name}</name>
-     <id>{org.domain.sub-domain.extension-name}</id>
-     <dependency type="executable" location="[extensions|path|plugins|{location}]">program.ext</dependency>
-     <param name="tab" type="notebook">
-       <page name="controls" gui-text="Controls">
-         <param name="{argumentName}" type="[int|float|string|bool]" min="{number}" max="{number}"
-           gui-text="{Friendly Argument Name}">{default value}</param>
-       </page>
-       <page name="help" gui-text="Help">
-         <param name="help_text" type="description">{Friendly Extension Help}</param>
-       </page>
-     </param>
-     <effect>
-       <object-type>[all|{element type}]</object-type>
-         <effects-menu>
-           <submenu name="{Extension Group Name}"/>
-         </effects-menu>
-     </effect>
-     <script>
-       <command location="[inx|extensions]" interpreter="[python|perl|ruby|bash|{some other}]">program.ext</command>
-     </script>
-   </inkscape-extension>
-
-More example INX files are available in the Inkscape distribution, which
-takes its files from the `Inkscape Extensions Repository`_.
-
-For a full list of currently supported interpreters, please see 
-:ref:`supported_interpreters`.
-
-.. _dtd_xml_schema:
 
 DTD XML schema
 --------------

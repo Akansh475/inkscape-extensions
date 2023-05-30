@@ -90,6 +90,7 @@ class DxfOutlines(inkex.OutputExtension):
         pars.add_argument("--tab")
         pars.add_argument("-R", "--ROBO", type=inkex.Boolean, default=False)
         pars.add_argument("-P", "--POLY", type=inkex.Boolean, default=False)
+        pars.add_argument("-F", "--FLATTENBEZ", type=inkex.Boolean, default=False)
         pars.add_argument(
             "--unit_from_document", type=inkex.Boolean, default=True
         )  # px
@@ -279,11 +280,20 @@ class DxfOutlines(inkex.OutputExtension):
 
         # Transforming /after/ superpath is more reliable than before
         # because of some issues with arcs in transformations
-        for sub in node.path.to_superpath().transform(Transform(mat) @ node.transform):
+        path = node.path.to_superpath().transform(Transform(mat) @ node.transform)
+
+        # If Flatten Beziers is enabled, subdivide our beziers and
+        # we'll later just ignore the curve and output flat lines
+        if self.options.FLATTENBEZ:
+            bezier.cspsubdiv(path, 0.1)  # default to most detailed (0.1)
+
+        # Now output the path.
+        for sub in path:
             for i in range(len(sub) - 1):
                 s = sub[i]
                 e = sub[i + 1]
-                if s[1] == s[2] and e[0] == e[1]:
+                # If flattening beziers, ignore curves and output flat lines
+                if (s[1] == s[2] and e[0] == e[1]) or self.options.FLATTENBEZ:
                     if self.options.POLY:
                         self.LWPOLY_line([s[1], e[1]])
                     else:

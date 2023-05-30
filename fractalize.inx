@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Fractal Distortion</name>
+    <name>Fractalize</name>
     <id>org.inkscape.filter.fractalize</id>
     <param name="subdivs" type="int" gui-text="Subdivisions:">6</param>
     <param name="smooth" type="float" gui-text="Smoothness:">4.0</param>

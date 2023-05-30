@@ -26,7 +26,7 @@
     <effect needs-live-preview="false">
                 <object-type>all</object-type>
                 <effects-menu>
-                      <submenu name="Styles"/>
+                      <submenu name="Text"/>
                 </effects-menu>
     </effect>
 

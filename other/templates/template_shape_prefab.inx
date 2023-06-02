@@ -24,7 +24,7 @@
       <preset name="Crown" icon="crown" svg="shape_prefab_15_crown.svg"/>
       <preset name="Diamond Target" icon="dtarget" svg="shape_prefab_11_diamond_target.svg"/>
       <preset name="TV Test Pattern" icon="tv" svg="shape_prefab_12_tv_test_pattern.svg"/>
-      <preset name="Expload" icon="expload" svg="shape_prefab_14_expload.svg"/>
+      <preset name="Explosion" icon="explosion" svg="shape_prefab_14_explosion.svg"/>
       <preset name="Droplet" icon="droplet" svg="shape_prefab_17_droplet.svg"/>
     </template>
 

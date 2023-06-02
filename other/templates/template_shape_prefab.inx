@@ -4,7 +4,7 @@
     <id>org.inkscape.template.prefab</id>
 
     <description>Starting templates for using the shape builder tool.</description>
-    <category>Shape Builder</category>
+    <category context="TemplateCategory">Shape Builder</category>
 
     <param name="svg" gui-text="Template:" type="string"></param>
 

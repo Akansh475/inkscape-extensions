@@ -4,7 +4,7 @@
     <id>org.inkscape.template.dvd_cover</id>
 
     <description>Various DVD Boxes</description>
-    <category>Print</category>
+    <category context="TemplateCategory">Print</category>
 
     <param name="spine" gui-text="DVD spine width:" type="optiongroup" appearance="combo">
         <option value="14">Normal (14mm)</option>

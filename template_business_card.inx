@@ -4,7 +4,7 @@
     <id>org.inkscape.template.business_card</id>
 
     <description>Various business card formats.</description>
-    <category>Print</category>
+    <category context="TemplateCategory">Print</category>
 
     <param name="size" gui-text="Business card size:" type="optiongroup" appearance="combo">
         <option value="74mmx52mm">74mm x 52mm (A8)</option>

@@ -20,7 +20,12 @@
       </zeroOrMore>
 
       <zeroOrMore>
-        <element name="category"><text/></element>
+        <element name="category">
+          <text/>
+          <optional>
+            <attribute name="context"/>
+          </optional>
+        </element>
       </zeroOrMore>
 
       <zeroOrMore>

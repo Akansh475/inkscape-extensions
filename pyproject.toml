@@ -47,7 +47,6 @@ tox = "^3.24.5"
 Sphinx = "^4.4.0"
 sphinx-autodoc-typehints = "^1.12.0"
 pydata-sphinx-theme = ">=0.7.2"
-typed-ast = "^1.5.2"
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]

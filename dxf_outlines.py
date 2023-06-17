@@ -399,7 +399,7 @@ class DxfOutlines(inkex.OutputExtension):
         with open(self.get_resource("dxf14_header.txt"), "r") as fhl:
             header = fhl.read()
             unit_map = {"px": 0, "in": 1, "ft": 2, "mm": 4, "cm": 5, "m": 6}
-            header = header.replace("<unit specifier>", str(unit_map[unit]))
+            header = header.replace("<unit specifier>", str(unit_map.get(unit, 0)))
             self.dxf_add(header)
         for node in self.svg.xpath("//svg:g"):
             if isinstance(node, Layer):

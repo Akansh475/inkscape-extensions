@@ -39,13 +39,14 @@ from typing import (
     Optional,
     List,
 )
+import cmath
 
 
 from .utils import strargs, KeyDict
 
 
 VectorLike = Union[
-    "ImmutableVector2d", Tuple[float, float]
+    "ImmutableVector2d", Tuple[float, float], complex
 ]  # pylint: disable=invalid-name
 MatrixLike = Union[
     str,
@@ -75,50 +76,55 @@ CUSTOM_DIRECTION = {270: "tb", 90: "bt", 0: "lr", 360: "lr", 180: "rl"}
 DIRECTION = ["tb", "bt", "lr", "rl", "ro", "ri"]
 
 
-class ImmutableVector2d:
+class ImmutableVector2d(complex):
     """Represents an immutable element of 2-dimensional Euclidean space"""
 
-    _x = 0.0
-    _y = 0.0
-
-    x = property(lambda self: self._x)
-    y = property(lambda self: self._y)
+    x = property(lambda self: self.real)
+    y = property(lambda self: self.imag)
 
     @overload
-    def __init__(self):
-        # type: () -> None
+    def __new__(cls):
         pass
 
     @overload
-    def __init__(self, v, fallback=None):
-        # type: (Union[VectorLike, str], Optional[Union[VectorLike, str]]) -> None
+    def __new__(
+        cls,
+        v: Union[VectorLike, str],
+        fallback: Optional[Union[VectorLike, str]] = None,
+    ):
         pass
 
     @overload
-    def __init__(self, x, y):
-        # type: (float, float) -> None
+    def __new__(cls, x: float, y: float):
         pass
 
-    def __init__(self, *args, fallback=None):
+    def __new__(cls, *args, fallback=None):
         try:
-            if len(args) == 0:
-                x, y = 0.0, 0.0
-            elif len(args) == 1:
-                x, y = self._parse(args[0])
-            elif len(args) == 2:
-                x, y = map(float, args)
-            else:
-                raise ValueError("too many arguments")
-        except (ValueError, TypeError) as error:
-            if fallback is None:
-                raise ValueError("Cannot parse vector and no fallback given") from error
-            x, y = ImmutableVector2d(fallback)
-        self._x, self._y = float(x), float(y)
+            # Most likely, there are either 0 parameters, 1 complex or 2 floats.
+            # Let the constructor of complex handle that.
+            return super().__new__(cls, *args)
+        except (ValueError, TypeError):
+            try:
+                if len(args) == 1:
+                    x, y = cls._parse(args[0])
+                elif len(args) == 2:
+                    x, y = map(float, args)
+                else:
+                    raise ValueError("too many arguments")
+            except (ValueError, TypeError) as error:
+                if fallback is None:
+                    raise ValueError(
+                        "Cannot parse vector and no fallback given"
+                    ) from error
+                x, y = ImmutableVector2d(fallback)
+            return super().__new__(cls, float(x), float(y))
 
     @staticmethod
     def _parse(point):
         # type: (Union[VectorLike, str]) -> Tuple[float, float]
-        if isinstance(point, ImmutableVector2d):
+        if isinstance(point, complex):
+            x, y = point.real, point.imag
+        elif isinstance(point, ImmutableVector2d):
             x, y = point.x, point.y
         elif isinstance(point, (tuple, list)) and len(point) == 2:
             x, y = map(float, point)
@@ -131,54 +137,49 @@ class ImmutableVector2d:
     def __add__(self, other):
         # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
-        return Vector2d(self.x + other.x, self.y + other.y)
+        return Vector2d(super().__add__(other))
 
     def __radd__(self, other):
         # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
-        return Vector2d(self.x + other.x, self.y + other.y)
+        return Vector2d(super().__radd__(other))
 
     def __sub__(self, other):
         # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
-        return Vector2d(self.x - other.x, self.y - other.y)
+        return Vector2d(super().__sub__(other))
 
     def __rsub__(self, other):
         # type: (VectorLike) -> Vector2d
         other = Vector2d(other)
-        return Vector2d(-self.x + other.x, -self.y + other.y)
+        return Vector2d(super().__rsub__(other))
 
     def __neg__(self):
         # type: () -> Vector2d
-        return Vector2d(-self.x, -self.y)
+        return Vector2d(super().__neg__())
 
     def __pos__(self):
         # type: () -> Vector2d
-        return Vector2d(self.x, self.y)
+        return Vector2d(super().__pos__())
 
     def __floordiv__(self, factor):
-        # type: (float) -> Vector2d
-        return Vector2d(self.x / float(factor), self.y / float(factor))
+        # type: (complex) -> Vector2d
+        return Vector2d(super().__truediv__(Vector2d(factor)))
 
     def __truediv__(self, factor):
-        # type: (float) -> Vector2d
-        return Vector2d(self.x / float(factor), self.y / float(factor))
+        # type: (complex) -> Vector2d
+        return Vector2d(super().__truediv__(Vector2d(factor)))
 
     def __div__(self, factor):
-        # type: (float) -> Vector2d
-        return Vector2d(self.x / float(factor), self.y / float(factor))
+        # type: (complex) -> Vector2d
+        return Vector2d(super().__truediv__(Vector2d(factor)))
 
     def __mul__(self, factor):
-        # type: (float) -> Vector2d
-        return Vector2d(self.x * factor, self.y * factor)
+        # type: (complex) -> Vector2d
+        return Vector2d(super().__mul__(factor))
 
-    def __abs__(self):
-        # type: () -> float
-        return self.length
-
-    def __rmul__(self, factor):
-        # type: (float) -> VectorLike
-        return Vector2d(self.x * factor, self.y * factor)
+    def __rmul__(self, factor: complex) -> Vector2d:
+        return Vector2d(super().__rmul__(factor))
 
     def __repr__(self):
         # type: () -> str
@@ -214,7 +215,7 @@ class ImmutableVector2d:
     def dot(self, other: VectorLike) -> float:
         """Multiply Vectors component-wise"""
         other = Vector2d(other)
-        return self.x * other.x + self.y * other.y
+        return (self * other.conjugate()).real
 
     def cross(self, other):
         # type: (VectorLike) -> float
@@ -232,14 +233,12 @@ class ImmutableVector2d:
     ) -> float:
         """Checks if two vectors are (almost) identical, up to both absolute and
         relative tolerance."""
-        other = Vector2d(other)
-        delta = (self - other).length
-        return delta < (atol + rtol * other.length)
+        return cmath.isclose(self, Vector2d(other), rel_tol=rtol, abs_tol=atol)
 
     @property
     def length(self) -> float:
         """Returns the length of the vector"""
-        return sqrt(self.dot(self))
+        return abs(self)
 
     @property
     def angle(self):
@@ -249,90 +248,22 @@ class ImmutableVector2d:
         .. versionadded:: 1.1"""
         if self.x == 0 and self.y == 0:
             return None
-        return atan2(self.y, self.x)
-
-
-class Vector2d(ImmutableVector2d):
-    """Represents an element of 2-dimensional Euclidean space"""
+        return cmath.phase(self)
 
     @staticmethod
     def from_polar(radius, theta):
-        # type: (float, Optional[float]) -> Optional[Vector2d]
-        """Creates a Vector2d from polar coordinates
-
-        None is returned when theta is None and radius is not zero.
-
-        .. versionadded:: 1.1
-        """
+        if radius == 0.0:
+            return Vector2d(0.0, 0.0)
+        if theta is not None:
+            return Vector2d(cmath.rect(radius, theta))
+        return None
         if radius == 0.0:
             return Vector2d(0.0, 0.0)
         if theta is not None:
             return Vector2d(radius * cos(theta), radius * sin(theta))
-        # A vector with a radius but no direction is invalid
-        return None
 
-    @ImmutableVector2d.x.setter
-    def x(self, value):
-        # type: (Union[float, int, str]) -> None
-        self._x = float(value)
 
-    @ImmutableVector2d.y.setter
-    def y(self, value):
-        # type: (Union[float, int, str]) -> None
-        self._y = float(value)
-
-    def __iadd__(self, other):
-        # type: (VectorLike) -> Vector2d
-        other = Vector2d(other)
-        self.x += other.x
-        self.y += other.y
-        return self
-
-    def __isub__(self, other):
-        # type: (VectorLike) -> Vector2d
-        other = Vector2d(other)
-        self.x -= other.x
-        self.y -= other.y
-        return self
-
-    def __imul__(self, factor):
-        # type: (float) -> Vector2d
-        self.x *= factor
-        self.y *= factor
-        return self
-
-    def __idiv__(self, factor):
-        # type: (float) -> Vector2d
-        self.x /= factor
-        self.y /= factor
-        return self
-
-    def __itruediv__(self, factor):
-        # type: (float) -> Vector2d
-        self.x /= factor
-        self.y /= factor
-        return self
-
-    def __ifloordiv__(self, factor):
-        # type: (float) -> Vector2d
-        self.x /= factor
-        self.y /= factor
-        return self
-
-    @overload
-    def assign(self, x, y):
-        # type: (float, float) -> VectorLike
-        pass
-
-    @overload
-    def assign(self, other):
-        # type: (VectorLike, str) -> VectorLike
-        pass
-
-    def assign(self, *args):
-        """Assigns a different vector in place"""
-        self.x, self.y = Vector2d(*args)
-        return self
+Vector2d = ImmutableVector2d
 
 
 class Transform:
@@ -697,26 +628,26 @@ class BoundingInterval:  # pylint: disable=too-few-public-methods
     """A pair of numbers that represent the minimum and maximum values."""
 
     @overload
-    def __init__(self, other=None):
-        # type: (Optional[BoundingInterval]) -> None
+    def __init__(self, x: Optional[BoundingInterval] = None) -> None:
         pass
 
     @overload
-    def __init__(self, pair):
-        # type: (Tuple[float, float]) -> None
+    def __init__(self, x: Tuple[float, float]) -> None:
         pass
 
     @overload
-    def __init__(self, value):
-        # type: (float) -> None
+    def __init__(self, x: float) -> None:
         pass
 
     @overload
-    def __init__(self, x, y):
-        # type: (float, float) -> None
+    def __init__(self, x: float, y: float) -> None:
         pass
 
-    def __init__(self, x=None, y=None):
+    def __init__(
+        self,
+        x: Union[Optional[BoundingInterval], Tuple[float, float], float] = None,
+        y: Optional[float] = None,
+    ) -> None:
         self.x: Union[int, float, Decimal]
         self.y: Union[int, float, Decimal]
         self.minimum: float

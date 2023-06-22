@@ -170,7 +170,7 @@ class NamedView(BaseElement):
 
     @deprecate
     def new_unique_guide(
-        self, position: VectorLike, orientation: VectorLike
+        self, position: Vector2d, orientation: Vector2d
     ) -> Optional[Guide]:
         """
         .. deprecated:: 1.3
@@ -185,7 +185,7 @@ class NamedView(BaseElement):
         return self.add(elem) if self.get_similar_guide(elem) is None else None
 
     def add_unique_guide(
-        self, position: VectorLike, orientation: VectorLike
+        self, position: Vector2d, orientation: Vector2d
     ) -> Optional[Guide]:
         """Add a guide iif there is no guide that looks the same.
 

@@ -30,8 +30,9 @@ from inkex.paths import (
     TepidQuadratic,
     Arc,
     ZoneClose,
+    Vector2d,
 )
-from inkex.transforms import Transform, Vector2d
+from inkex.transforms import Transform
 from inkex.tester import TestCase
 
 # pylint: disable=too-many-public-methods
@@ -297,7 +298,7 @@ class PathTest(TestCase):
         self._assertPath(Path("& 10 10 M 20 20"), "M 20 20")
         self.assertRaises(
             TypeError,
-            Line,
+            Curve,
             [
                 40,
             ],

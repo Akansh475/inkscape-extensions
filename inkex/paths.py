@@ -1730,14 +1730,14 @@ class CubicSuperPath(list):
                 )
                 # Then adds a new subpath for the next shape (if any)
                 self._closed = True
-                self._prev.assign(self._first)
+                self._prev = Vector2d(self._first)
                 return
             elif isinstance(item, Arc):
                 # Arcs are made up of three curves (approximated)
                 for arc_curve in item.to_curves(self._prev, self._prev_prev):
                     x2, y2, x3, y3, x4, y4 = arc_curve.args
                     self.append([[x2, y2], [x3, y3], [x4, y4]], force_shift=True)
-                    self._prev_prev.assign(x3, y3)
+                    self._prev_prev = Vector2d(x3, y3)
                 return
             else:
                 is_quadratic = isinstance(

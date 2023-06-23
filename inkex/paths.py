@@ -24,6 +24,7 @@ from __future__ import annotations
 import re
 import copy
 import abc
+from cmath import isclose
 
 from math import atan2, cos, pi, sin, sqrt, acos, tan
 from typing import (
@@ -36,6 +37,8 @@ from typing import (
     List,
     Generator,
     TypeVar,
+    overload,
+    Iterator,
 )
 from .transforms import (
     Transform,
@@ -95,6 +98,7 @@ class PathCommand(abc.ABC):
     Base class of all path commands
     """
 
+    letter = ""
     # Number of arguments that follow this path commands letter
     nargs = -1
 
@@ -104,33 +108,28 @@ class PathCommand(abc.ABC):
         return cls.__name__  # pylint: disable=no-member
 
     @classproperty
-    def letter(cls):  # pylint: disable=no-self-argument
-        """The single letter representation of this command (i.e. L, A, etc)"""
-        return cls.name[0]
-
-    @classproperty
     def next_command(self):
         """The implicit next command. This is for automatic chains where the next
         command isn't given, just a bunch on numbers which we automatically parse."""
         return self
 
     @property
-    def is_relative(self):  # type: () -> bool
+    def is_relative(self) -> bool:
         """Whether the command is defined in relative coordinates, i.e. relative to
         the previous endpoint (lower case path command letter)"""
         raise NotImplementedError
 
     @property
-    def is_absolute(self):  # type: () -> bool
+    def is_absolute(self) -> bool:
         """Whether the command is defined in absolute coordinates (upper case path
         command letter)"""
         raise NotImplementedError
 
-    def to_relative(self, prev):  # type: (Vector2d) -> RelativePathCommand
+    def to_relative(self, prev: complex) -> RelativePathCommand:
         """Return absolute counterpart for absolute commands or copy for relative"""
         raise NotImplementedError
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> AbsolutePathCommand
+    def to_absolute(self, prev: complex) -> AbsolutePathCommand:
         """Return relative counterpart for relative commands or copy for absolute"""
         raise NotImplementedError
 
@@ -139,8 +138,9 @@ class PathCommand(abc.ABC):
 
         .. versionadded:: 1.1"""
 
-    def to_non_shorthand(self, prev, prev_control):  # pylint: disable=unused-argument
-        # type: (Vector2d, Vector2d) -> AbsolutePathCommand
+    def to_non_shorthand(
+        self, prev: complex, prev_control: complex
+    ) -> AbsolutePathCommand:  # pylint: disable=unused-argument
         """Return an absolute non-shorthand command
 
         .. versionadded:: 1.1"""
@@ -151,7 +151,7 @@ class PathCommand(abc.ABC):
 
     # Maps single letter path command to corresponding class
     # (filled at the bottom of file, when all classes already defined)
-    _letter_to_class = {}  # type: Dict[str, Type[Any]]
+    _letter_to_class: Dict[str, Type[Any]] = {}
 
     @staticmethod
     def letter_to_class(letter):
@@ -159,13 +159,19 @@ class PathCommand(abc.ABC):
         return PathCommand._letter_to_class[letter]
 
     @property
-    def args(self):  # type: () -> List[float]
+    def args(self) -> List[float]:
         """Returns path command arguments as tuple of floats"""
         raise NotImplementedError()
 
     def control_points(
-        self, first: Vector2d, prev: Vector2d, prev_prev: Vector2d
-    ) -> Union[List[Vector2d], Generator[Vector2d, None, None]]:
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Generator[Vector2d, None, None]:
+        """Returns list of path command control points"""
+        yield from [Vector2d(i) for i in self.ccontrol_points(first, prev, prev_prev)]
+
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
         """Returns list of path command control points"""
         raise NotImplementedError
 
@@ -181,7 +187,7 @@ class PathCommand(abc.ABC):
         return "{{}}({})".format(self._argt(", ")).format(self.name, *self.args)
 
     def __eq__(self, other):
-        previous = Vector2d()
+        previous = 0j
         if type(self) == type(other):  # pylint: disable=unidiomatic-typecheck
             return self.args == other.args
         if isinstance(other, tuple):
@@ -195,42 +201,43 @@ class PathCommand(abc.ABC):
             pass
         return False
 
-    def end_point(self, first, prev):  # type: (Vector2d, Vector2d) -> Vector2d
-        """Returns last control point of path command"""
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        """Complex version of end_point"""
         raise NotImplementedError()
 
+    def end_point(self, first: complex, prev: complex) -> Vector2d:
+        """Returns last control point of path command"""
+        return Vector2d(self.cend_point(first, prev))
+
     def update_bounding_box(
-        self, first: Vector2d, last_two_points: List[Vector2d], bbox: BoundingBox
+        self, first: complex, last_two_points: List[complex], bbox: BoundingBox
     ):
         # pylint: disable=unused-argument
         """Enlarges given bbox to contain path element.
 
         Args:
-            first (Vector2d): first point of path. Required to calculate Z segment
-            last_two_points (List[Vector2d]): list with last two control points in abs
+            first (complex): first point of path. Required to calculate Z segment
+            last_two_points (List[complex]): list with last two control points in abs
                 coords.
             bbox (BoundingBox): bounding box to update
         """
 
         raise NotImplementedError(f"Bounding box is not implemented for {self.name}")
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_curve(self, prev: complex, prev_prev: complex = 0) -> Curve:
         """Convert command to :py:class:`Curve`
 
         Curve().to_curve() returns a copy
         """
         raise NotImplementedError(f"To curve not supported for {self.name}")
 
-    def to_curves(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> List[Curve]
+    def to_curves(self, prev: complex, prev_prev: complex = 0) -> List[Curve]:
         """Convert command to list of :py:class:`Curve` commands"""
         return [self.to_curve(prev, prev_prev)]
 
-    def to_line(self, prev):
-        # type: (Vector2d) -> Line
+    def to_line(self, prev: complex) -> Line:
         """Converts this segment to a line (copies if already a line)"""
-        return Line(*self.end_point(Vector2d(), prev))
+        return Line(self.cend_point(0, prev))
 
 
 class RelativePathCommand(PathCommand):
@@ -250,12 +257,16 @@ class RelativePathCommand(PathCommand):
         return False
 
     def control_points(
-        self, first: Vector2d, prev: Vector2d, prev_prev: Vector2d
-    ) -> Union[List[Vector2d], Generator[Vector2d, None, None]]:
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Generator[Vector2d, None, None]:
         return self.to_absolute(prev).control_points(first, prev, prev_prev)
 
-    def to_relative(self, prev):
-        # type: (Pathlike, Vector2d) -> Pathlike
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return self.to_absolute(prev).ccontrol_points(first, prev, prev_prev)
+
+    def to_relative(self, prev: complex) -> RelativePathCommand:
         return self.__class__(*self.args)
 
     def update_bounding_box(self, first, last_two_points, bbox):
@@ -263,16 +274,13 @@ class RelativePathCommand(PathCommand):
             first, last_two_points, bbox
         )
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return self.to_absolute(prev).end_point(first, prev)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.to_absolute(prev).cend_point(first, prev)
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
         return self.to_absolute(prev).to_curve(prev, prev_prev)
 
-    def to_curves(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> List[Curve]
+    def to_curves(self, prev: complex, prev_prev: complex = 0j) -> List[Curve]:
         return self.to_absolute(prev).to_curves(prev, prev_prev)
 
 
@@ -288,23 +296,17 @@ class AbsolutePathCommand(PathCommand):
     def is_absolute(self):
         return True
 
-    def to_absolute(
-        self, prev
-    ):  # type: (AbsolutePathlike, Vector2d) -> AbsolutePathlike
+    def to_absolute(self, prev: complex) -> AbsolutePathCommand:
         return self.__class__(*self.args)
 
-    def transform(
-        self, transform
-    ):  # type: (AbsolutePathlike, Transform) -> AbsolutePathlike
+    def transform(self, transform: Transform) -> AbsolutePathCommand:
         """Returns new transformed segment
 
         :param transform: a transformation to apply
         """
         raise NotImplementedError()
 
-    def rotate(
-        self, degrees, center
-    ):  # type: (AbsolutePathlike, float, Vector2d) -> AbsolutePathlike
+    def rotate(self, degrees: float, center: Vector2d) -> AbsolutePathCommand:
         """
         Returns new transformed segment
 
@@ -313,13 +315,11 @@ class AbsolutePathCommand(PathCommand):
         """
         return self.transform(Transform(rotate=(degrees, center[0], center[1])))
 
-    def translate(self, dr):  # type: (AbsolutePathlike, Vector2d) -> AbsolutePathlike
+    def translate(self, dr: Vector2d) -> AbsolutePathCommand:
         """Translate or scale this path command by dr"""
         return self.transform(Transform(translate=dr))
 
-    def scale(
-        self, factor
-    ):  # type: (AbsolutePathlike, Union[float, Tuple[float,float]]) -> AbsolutePathlike
+    def scale(self, factor: Union[float, Tuple[float, float]]) -> AbsolutePathCommand:
         """Returns new transformed segment
 
         :param factor: scale or (scale_x, scale_y)
@@ -330,130 +330,218 @@ class AbsolutePathCommand(PathCommand):
 class Line(AbsolutePathCommand):
     """Line segment"""
 
+    letter = "L"
     nargs = 2
+
+    arg1: complex
+    """The (absolute) end points of the line."""
+
+    @property
+    def x(self):
+        """x coordinate of the line's (absolute) end point."""
+        return self.arg1.real
+
+    @property
+    def y(self):
+        """y coordinate of the line's (absolute) end point."""
+        return self.arg1.imag
 
     @property
     def args(self):
         return self.x, self.y
 
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    @overload
+    def __init__(self, x: complex):
+        ...
+
+    @overload
+    def __init__(self, x: float, y: float):
+        ...
+
+    def __init__(self, x, y=None):
+        if y is not None:
+            self.arg1 = x + y * 1j
+        else:
+            self.arg1 = x
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(
-            (last_two_points[-1].x, self.x), (last_two_points[-1].y, self.y)
+            (last_two_points[-1].real, self.x), (last_two_points[-1].imag, self.y)
         )
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(self.x, self.y)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.arg1,)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> line
-        return line(self.x - prev.x, self.y - prev.y)
+    def to_relative(self, prev: complex) -> line:
+        return line(self.arg1 - prev)
 
-    def transform(self, transform):
-        # type: (Line, Transform) -> Line
+    def transform(self, transform) -> Line:
         return Line(*transform.apply_to_point((self.x, self.y)))
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(self.x, self.y)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg1
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Optional[Vector2d]) -> Curve
-        return Curve(prev.x, prev.y, self.x, self.y, self.x, self.y)
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+        return Curve(prev, self.arg1, self.arg1)
 
     def reverse(self, first, prev):
-        return Line(prev.x, prev.y)
+        return Line(prev)
 
 
 class line(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative line segment"""
 
+    letter = "l"
     nargs = 2
+
+    arg1: complex
+    """The (relative) end points of the line."""
+
+    @property
+    def dx(self):
+        """x coordinate of the line's (relative) end point."""
+        return self.arg1.real
+
+    @property
+    def dy(self):
+        """y coordinate of the line's (relative) end point."""
+        return self.arg1.imag
 
     @property
     def args(self):
         return self.dx, self.dy
 
-    def __init__(self, dx, dy):
-        self.dx = dx
-        self.dy = dy
+    @overload
+    def __init__(self, dx: complex):
+        ...
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> Line
-        return Line(prev.x + self.dx, prev.y + self.dy)
+    @overload
+    def __init__(self, dx: float, dy: float):
+        ...
+
+    def __init__(self, dx, dy=None):
+        if dy is not None:
+            self.arg1 = dx + dy * 1j
+        else:
+            self.arg1 = dx
+
+    def to_absolute(self, prev: complex) -> Line:
+        return Line(prev + self.arg1)
 
     def reverse(self, first, prev):
-        return line(-self.dx, -self.dy)
+        return line(-self.arg1)
 
 
 class Move(AbsolutePathCommand):
     """Move pen segment without a line"""
 
+    letter = "M"
     nargs = 2
     next_command = Line
+
+    arg1: complex
+    """The (absolute) end points of the Move command"""
+
+    @property
+    def x(self):
+        """x coordinate of the Moves's (absolute) end point."""
+        return self.arg1.real
+
+    @property
+    def y(self):
+        """y coordinate of the Move's (absolute) end point."""
+        return self.arg1.imag
 
     @property
     def args(self):
         return self.x, self.y
 
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    @overload
+    def __init__(self, x: complex):
+        ...
+
+    @overload
+    def __init__(self, x: float, y: float):
+        ...
+
+    def __init__(self, x, y=None):
+        if y is not None:
+            self.arg1 = x + y * 1j
+        else:
+            self.arg1 = x
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(self.x, self.y)
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(self.x, self.y)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.arg1,)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> move
-        return move(self.x - prev.x, self.y - prev.y)
+    def to_relative(self, prev: complex) -> move:
+        return move(self.arg1 - prev)
 
-    def transform(self, transform):
-        # type: (Transform) -> Move
+    def transform(self, transform: Transform) -> Move:
         return Move(*transform.apply_to_point((self.x, self.y)))
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(self.x, self.y)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg1
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         raise ValueError("Move segments can not be changed into curves.")
 
     def reverse(self, first, prev):
-        return Move(prev.x, prev.y)
+        return Move(prev)
 
 
 class move(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative move segment"""
 
+    letter = "m"
     nargs = 2
     next_command = line
+
+    @property
+    def dx(self):
+        """x coordinate of the moves's (relative) end point."""
+        return self.arg1.real
+
+    @property
+    def dy(self):
+        """y coordinate of the move's (relative) end point."""
+        return self.arg1.imag
 
     @property
     def args(self):
         return self.dx, self.dy
 
-    def __init__(self, dx, dy):
-        self.dx = dx
-        self.dy = dy
+    @overload
+    def __init__(self, dx: complex):
+        ...
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> Move
-        return Move(prev.x + self.dx, prev.y + self.dy)
+    @overload
+    def __init__(self, dx: float, dy: float):
+        ...
 
-    def reverse(self, first, prev):
-        return move(prev.x - first.x, prev.y - first.y)
+    def __init__(self, dx, dy=None):
+        if dy is not None:
+            self.arg1 = dx + dy * 1j
+        else:
+            self.arg1 = dx
+
+    def to_absolute(self, prev: complex) -> Move:
+        return Move(prev + self.arg1)
+
+    def reverse(self, first: complex, prev: complex):
+        return move(prev - first)
 
 
 class ZoneClose(AbsolutePathCommand):
     """Close segment to finish a path"""
 
+    letter = "Z"
     nargs = 0
     next_command = Move
 
@@ -464,33 +552,31 @@ class ZoneClose(AbsolutePathCommand):
     def update_bounding_box(self, first, last_two_points, bbox):
         pass
 
-    def transform(self, transform):
-        # type: (Transform) -> ZoneClose
+    def transform(self, transform: Transform) -> ZoneClose:
         return ZoneClose()
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield first
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (first,)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> zoneClose
+    def to_relative(self, prev: complex) -> zoneClose:
         return zoneClose()
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
+    def cend_point(self, first: complex, prev: complex) -> complex:
         return first
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         raise ValueError("ZoneClose segments can not be changed into curves.")
 
     def reverse(self, first, prev):
-        return Line(prev.x, prev.y)
+        return Line(prev)
 
 
 class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
     """Same as above (svg says no difference)"""
 
+    letter = "z"
     nargs = 0
     next_command = Move
 
@@ -498,16 +584,17 @@ class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
     def args(self):
         return ()
 
-    def to_absolute(self, prev):
+    def to_absolute(self, prev: complex):
         return ZoneClose()
 
-    def reverse(self, first, prev):
-        return line(prev.x - first.x, prev.y - first.y)
+    def reverse(self, first: complex, prev: complex):
+        return line(prev - first)
 
 
 class Horz(AbsolutePathCommand):
     """Horizontal Line segment"""
 
+    letter = "H"
     nargs = 1
 
     @property
@@ -518,45 +605,43 @@ class Horz(AbsolutePathCommand):
         self.x = x
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        bbox += BoundingBox((last_two_points[-1].x, self.x), last_two_points[-1].y)
+        bbox += BoundingBox(
+            (last_two_points[-1].real, self.x), last_two_points[-1].imag
+        )
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(self.x, prev.y)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.x + prev.imag * 1j,)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> horz
-        return horz(self.x - prev.x)
+    def to_relative(self, prev: complex) -> horz:
+        return horz(self.x - prev.real)
 
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> Line
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
         return self.to_line(prev)
 
-    def transform(self, transform):
-        # type: (Pathlike, Transform) -> Pathlike
+    def transform(self, transform: Transform) -> AbsolutePathCommand:
         raise ValueError("Horizontal lines can't be transformed directly.")
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(self.x, prev.y)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.x + prev.imag * 1j
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         """Convert a horizontal line into a curve"""
         return self.to_line(prev).to_curve(prev)
 
-    def to_line(self, prev):
-        # type: (Vector2d) -> Line
+    def to_line(self, prev: complex) -> Line:
         """Return this path command as a Line instead"""
-        return Line(self.x, prev.y)
+        return Line(self.x + prev.imag * 1j)
 
     def reverse(self, first, prev):
-        return Horz(prev.x)
+        return Horz(prev.real)
 
 
 class horz(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative horz line segment"""
 
+    letter = "h"
     nargs = 1
 
     @property
@@ -566,16 +651,15 @@ class horz(RelativePathCommand):  # pylint: disable=invalid-name
     def __init__(self, dx):
         self.dx = dx
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> Horz
-        return Horz(prev.x + self.dx)
+    def to_absolute(self, prev: complex) -> Horz:
+        return Horz(prev.real + self.dx)
 
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> Line
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
         return self.to_line(prev)
 
-    def to_line(self, prev):  # type: (Vector2d) -> Line
+    def to_line(self, prev: complex) -> Line:
         """Return this path command as a Line instead"""
-        return Line(prev.x + self.dx, prev.y)
+        return Line(prev.real + self.dx, prev.imag)
 
     def reverse(self, first, prev):
         return horz(-self.dx)
@@ -584,6 +668,7 @@ class horz(RelativePathCommand):  # pylint: disable=invalid-name
 class Vert(AbsolutePathCommand):
     """Vertical Line segment"""
 
+    letter = "V"
     nargs = 1
 
     @property
@@ -594,45 +679,43 @@ class Vert(AbsolutePathCommand):
         self.y = y
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        bbox += BoundingBox(last_two_points[-1].x, (last_two_points[-1].y, self.y))
+        bbox += BoundingBox(
+            last_two_points[-1].real, (last_two_points[-1].imag, self.y)
+        )
 
-    def transform(self, transform):  # type: (Pathlike, Transform) -> Pathlike
+    def transform(self, transform: Transform) -> AbsolutePathCommand:
         raise ValueError("Vertical lines can't be transformed directly.")
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(prev.x, self.y)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (prev.real + self.y * 1j,)
 
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> Line
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
         return self.to_line(prev)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> vert
-        return vert(self.y - prev.y)
+    def to_relative(self, prev: complex) -> vert:
+        return vert(self.y - prev.imag)
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(prev.x, self.y)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return prev.real + self.y * 1j
 
-    def to_line(self, prev):
-        # type: (Vector2d) -> Line
+    def to_line(self, prev: complex) -> Line:
         """Return this path command as a line instead"""
-        return Line(prev.x, self.y)
+        return Line(prev.real, self.y)
 
-    def to_curve(
-        self, prev, prev_prev=Vector2d()
-    ):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         """Convert a horizontal line into a curve"""
         return self.to_line(prev).to_curve(prev)
 
-    def reverse(self, first, prev):
-        return Vert(prev.y)
+    def reverse(self, first: complex, prev: complex):
+        return Vert(prev.imag)
 
 
 class vert(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative vertical line segment"""
 
+    letter = "v"
     nargs = 1
 
     @property
@@ -642,16 +725,15 @@ class vert(RelativePathCommand):  # pylint: disable=invalid-name
     def __init__(self, dy):
         self.dy = dy
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> Vert
-        return Vert(prev.y + self.dy)
+    def to_absolute(self, prev: complex) -> Vert:
+        return Vert(prev.imag + self.dy)
 
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> Line
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
         return self.to_line(prev)
 
-    def to_line(self, prev):  # type: (Vector2d) -> Line
+    def to_line(self, prev: complex) -> Line:
         """Return this path command as a line instead"""
-        return Line(prev.x, prev.y + self.dy)
+        return Line(prev.real, prev.imag + self.dy)
 
     def reverse(self, first, prev):
         return vert(-self.dy)
@@ -660,25 +742,82 @@ class vert(RelativePathCommand):  # pylint: disable=invalid-name
 class Curve(AbsolutePathCommand):
     """Absolute Curved Line segment"""
 
+    letter = "C"
     nargs = 6
+
+    arg1: complex
+    """The (absolute) first control point"""
+
+    arg2: complex
+    """The (absolute) second control point"""
+
+    arg3: complex
+    """The (absolute) end point"""
+
+    @property
+    def x2(self) -> float:
+        """x coordinate of the (absolute) first control point"""
+        return self.arg1.real
+
+    @property
+    def y2(self) -> float:
+        """y coordinate of the (absolute) first control point"""
+        return self.arg1.imag
+
+    @property
+    def x3(self) -> float:
+        """x coordinate of the (absolute) second control point"""
+        return self.arg2.real
+
+    @property
+    def y3(self) -> float:
+        """y coordinate of the (absolute) second control point"""
+        return self.arg2.imag
+
+    @property
+    def x4(self) -> float:
+        """x coordinate of the (absolute) end point"""
+        return self.arg3.real
+
+    @property
+    def y4(self) -> float:
+        """y coordinate of the (absolute) end point"""
+        return self.arg3.imag
 
     @property
     def args(self):
-        return self.x2, self.y2, self.x3, self.y3, self.x4, self.y4
+        return (
+            self.arg1.real,
+            self.arg1.imag,
+            self.arg2.real,
+            self.arg2.imag,
+            self.arg3.real,
+            self.arg3.imag,
+        )
 
-    def __init__(self, x2, y2, x3, y3, x4, y4):  # pylint: disable=too-many-arguments
-        self.x2 = x2
-        self.y2 = y2
+    @overload
+    def __init__(self, x2: complex, x3: complex, x4: complex):
+        ...
 
-        self.x3 = x3
-        self.y3 = y3
+    @overload
+    def __init__(
+        self, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float
+    ):
+        ...  # pylint: disable=too-many-arguments
 
-        self.x4 = x4
-        self.y4 = y4
+    def __init__(
+        self, x2, y2, x3, y3=None, x4=None, y4=None
+    ):  # pylint: disable=too-many-arguments
+        if y3 is not None:
+            self.arg1 = x2 + y2 * 1j
+            self.arg2 = x3 + y3 * 1j
+            self.arg3 = x4 + y4 * 1j
+        else:
+            self.arg1, self.arg2, self.arg3 = x2, y2, x3
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        x1, x2, x3, x4 = last_two_points[-1].x, self.x2, self.x3, self.x4
-        y1, y2, y3, y4 = last_two_points[-1].y, self.y2, self.y3, self.y4
+        x1, x2, x3, x4 = last_two_points[-1].real, self.x2, self.x3, self.x4
+        y1, y2, y3, y4 = last_two_points[-1].imag, self.y2, self.y3, self.y4
 
         if not (x1 in bbox.x and x2 in bbox.x and x3 in bbox.x and x4 in bbox.x):
             bbox.x += cubic_extrema(x1, x2, x3, x4)
@@ -686,35 +825,24 @@ class Curve(AbsolutePathCommand):
         if not (y1 in bbox.y and y2 in bbox.y and y3 in bbox.y and y4 in bbox.y):
             bbox.y += cubic_extrema(y1, y2, y3, y4)
 
-    def transform(self, transform):
-        # type: (Transform) -> Curve
+    def transform(self, transform: Transform) -> Curve:
         x2, y2 = transform.apply_to_point((self.x2, self.y2))
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         x4, y4 = transform.apply_to_point((self.x4, self.y4))
         return Curve(x2, y2, x3, y3, x4, y4)
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(self.x2, self.y2)
-        yield Vector2d(self.x3, self.y3)
-        yield Vector2d(self.x4, self.y4)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.arg1, self.arg2, self.arg3)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> curve
-        return curve(
-            self.x2 - prev.x,
-            self.y2 - prev.y,
-            self.x3 - prev.x,
-            self.y3 - prev.y,
-            self.x4 - prev.x,
-            self.y4 - prev.y,
-        )
+    def to_relative(self, prev: complex) -> curve:
+        return curve(self.arg1 - prev, self.arg2 - prev, self.arg3 - prev)
 
-    def end_point(self, first, prev):
-        return Vector2d(self.x4, self.y4)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg3
 
-    def to_curve(
-        self, prev, prev_prev=Vector2d()
-    ):  # type: (Vector2d, Optional[Vector2d]) -> Curve
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         """No conversion needed, pass-through, returns self"""
         return Curve(*self.args)
 
@@ -722,166 +850,291 @@ class Curve(AbsolutePathCommand):
         """Returns the list of coords for SuperPath"""
         return [list(self.args[:2]), list(self.args[2:4]), list(self.args[4:6])]
 
-    def reverse(self, first, prev):
-        return Curve(self.x3, self.y3, self.x2, self.y2, prev.x, prev.y)
+    def reverse(self, first: complex, prev: complex) -> Curve:
+        return Curve(self.arg2, self.arg1, prev)
 
 
 class curve(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative curved line segment"""
 
+    letter = "c"
     nargs = 6
+
+    arg1: complex
+    """The (relative) first control point"""
+
+    arg2: complex
+    """The (relative) second control point"""
+
+    arg3: complex
+    """The (relative) end point"""
+
+    @property
+    def dx2(self) -> float:
+        """x coordinate of the (relative) first control point"""
+        return self.arg1.real
+
+    @property
+    def dy2(self) -> float:
+        """y coordinate of the (relative) first control point"""
+        return self.arg1.imag
+
+    @property
+    def dx3(self) -> float:
+        """x coordinate of the (relative) second control point"""
+        return self.arg2.real
+
+    @property
+    def dy3(self) -> float:
+        """y coordinate of the (relative) second control point"""
+        return self.arg2.imag
+
+    @property
+    def dx4(self) -> float:
+        """x coordinate of the (relative) end point"""
+        return self.arg3.real
+
+    @property
+    def dy4(self) -> float:
+        """y coordinate of the (relative) end point"""
+        return self.arg3.imag
+
+    @overload
+    def __init__(self, dx2: complex, dx3: complex, dx4: complex):
+        ...
+
+    @overload
+    def __init__(
+        self, dx2: float, dy2: float, dx3: float, dy3: float, dx4: float, dy4: float
+    ):
+        ...  # pylint: disable=too-many-arguments
+
+    def __init__(
+        self, dx2, dy2, dx3, dy3=None, dx4=None, dy4=None
+    ):  # pylint: disable=too-many-arguments
+        if dy3 is not None:
+            self.arg1 = dx2 + dy2 * 1j
+            self.arg2 = dx3 + dy3 * 1j
+            self.arg3 = dx4 + dy4 * 1j
+        else:
+            self.arg1, self.arg2, self.arg3 = dx2, dy2, dx3
 
     @property
     def args(self):
         return self.dx2, self.dy2, self.dx3, self.dy3, self.dx4, self.dy4
 
-    def __init__(
-        self, dx2, dy2, dx3, dy3, dx4, dy4
-    ):  # pylint: disable=too-many-arguments
-        self.dx2 = dx2
-        self.dy2 = dy2
-
-        self.dx3 = dx3
-        self.dy3 = dy3
-
-        self.dx4 = dx4
-        self.dy4 = dy4
-
-    def to_absolute(self, prev):  # type: (Vector2d) -> Curve
+    def to_absolute(self, prev: complex) -> Curve:
         return Curve(
-            self.dx2 + prev.x,
-            self.dy2 + prev.y,
-            self.dx3 + prev.x,
-            self.dy3 + prev.y,
-            self.dx4 + prev.x,
-            self.dy4 + prev.y,
+            self.arg1 + prev,
+            self.arg2 + prev,
+            self.arg3 + prev,
         )
 
-    def reverse(self, first, prev):
-        return curve(
-            -self.dx4 + self.dx3,
-            -self.dy4 + self.dy3,
-            -self.dx4 + self.dx2,
-            -self.dy4 + self.dy2,
-            -self.dx4,
-            -self.dy4,
-        )
+    def reverse(self, first: complex, prev: complex) -> curve:
+        return curve(-self.arg3 + self.arg2, -self.arg3 + self.arg1, -self.arg3)
 
 
 class Smooth(AbsolutePathCommand):
     """Absolute Smoothed Curved Line segment"""
 
+    letter = "S"
     nargs = 4
+
+    arg1: complex
+    """The (absolute) control point"""
+
+    arg2: complex
+    """The (absolute) end point"""
+
+    @property
+    def x3(self) -> float:
+        """x coordinate of the (absolute) control point"""
+        return self.arg1.real
+
+    @property
+    def y3(self) -> float:
+        """y coordinate of the (absolute) control point"""
+        return self.arg1.imag
+
+    @property
+    def x4(self) -> float:
+        """x coordinate of the (absolute) end point"""
+        return self.arg2.real
+
+    @property
+    def y4(self) -> float:
+        """y coordinate of the (absolute) end point"""
+        return self.arg2.imag
 
     @property
     def args(self):
         return self.x3, self.y3, self.x4, self.y4
 
-    def __init__(self, x3, y3, x4, y4):
-        self.x3 = x3
-        self.y3 = y3
+    @overload
+    def __init__(self, x3: complex, x4: complex):
+        ...
 
-        self.x4 = x4
-        self.y4 = y4
+    @overload
+    def __init__(self, x3: float, y3: float, x4: float, y4: float):
+        ...
+
+    def __init__(self, x3, y3, x4=None, y4=None):
+        if x4 is not None:
+            self.arg1 = x3 + y3 * 1j
+            self.arg2 = x4 + y4 * 1j
+        else:
+            self.arg1, self.arg2 = x3, y3
 
     def update_bounding_box(self, first, last_two_points, bbox):
         self.to_curve(last_two_points[-1], last_two_points[-2]).update_bounding_box(
             first, last_two_points, bbox
         )
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (2 * prev - prev_prev, self.arg1, self.arg2)
 
-        x1, x2, x3, x4 = prev_prev.x, prev.x, self.x3, self.x4
-        y1, y2, y3, y4 = prev_prev.y, prev.y, self.y3, self.y4
-
-        # infer reflected point
-        x2 = 2 * x2 - x1
-        y2 = 2 * y2 - y1
-
-        yield Vector2d(x2, y2)
-        yield Vector2d(x3, y3)
-        yield Vector2d(x4, y4)
-
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Curve:
         return self.to_curve(prev, prev_control)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> smooth
-        return smooth(
-            self.x3 - prev.x, self.y3 - prev.y, self.x4 - prev.x, self.y4 - prev.y
-        )
+    def to_relative(self, prev: complex) -> smooth:
+        return smooth(self.arg1 - prev, self.arg2 - prev)
 
-    def transform(self, transform):
-        # type: (Transform) -> Smooth
+    def transform(self, transform: Transform) -> Smooth:
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         x4, y4 = transform.apply_to_point((self.x4, self.y4))
         return Smooth(x3, y3, x4, y4)
 
-    def end_point(self, first, prev):
-        return Vector2d(self.x4, self.y4)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg2
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
         """
         Convert this Smooth curve to a regular curve by creating a mirror
         set of nodes based on the previous node. Previous should be a curve.
         """
-        (x2, y2), (x3, y3), (x4, y4) = self.control_points(prev, prev, prev_prev)
-        return Curve(x2, y2, x3, y3, x4, y4)
+        return Curve(*self.ccontrol_points(prev, prev, prev_prev))
 
-    def reverse(self, first, prev):
-        return Smooth(self.x3, self.y3, prev.x, prev.y)
+    def reverse(self, first: complex, prev: complex) -> Smooth:
+        return Smooth(self.arg1, prev)
 
 
 class smooth(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative smoothed curved line segment"""
 
+    letter = "s"
     nargs = 4
+
+    arg1: complex
+    """The (absolute) control point"""
+
+    arg2: complex
+    """The (absolute) end point"""
+
+    @property
+    def dx3(self) -> float:
+        """x coordinate of the (relative) control point"""
+        return self.arg1.real
+
+    @property
+    def dy3(self) -> float:
+        """y coordinate of the (relative) control point"""
+        return self.arg1.imag
+
+    @property
+    def dx4(self) -> float:
+        """x coordinate of the (relative) end point"""
+        return self.arg2.real
+
+    @property
+    def dy4(self) -> float:
+        """y coordinate of the (relative) end point"""
+        return self.arg2.imag
 
     @property
     def args(self):
         return self.dx3, self.dy3, self.dx4, self.dy4
 
-    def __init__(self, dx3, dy3, dx4, dy4):
-        self.dx3 = dx3
-        self.dy3 = dy3
+    @overload
+    def __init__(self, dx3: complex, dx4: complex):
+        ...
 
-        self.dx4 = dx4
-        self.dy4 = dy4
+    @overload
+    def __init__(self, dx3: float, dy3: float, dx4: float, dy4: float):
+        ...
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> Smooth
-        return Smooth(
-            self.dx3 + prev.x, self.dy3 + prev.y, self.dx4 + prev.x, self.dy4 + prev.y
-        )
+    def __init__(self, dx3, dy3, dx4=None, dy4=None):
+        if dx4 is not None:
+            self.arg1 = dx3 + dy3 * 1j
+            self.arg2 = dx4 + dy4 * 1j
+        else:
+            self.arg1, self.arg2 = dx3, dy3
 
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_absolute(self, prev: complex) -> Smooth:
+        return Smooth(self.arg1 + prev, self.arg2 + prev)
+
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Curve:
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
-    def reverse(self, first, prev):
-        return smooth(-self.dx4 + self.dx3, -self.dy4 + self.dy3, -self.dx4, -self.dy4)
+    def reverse(self, first: complex, prev: complex):
+        return smooth(-self.arg2 + self.arg1, -self.arg2)
 
 
 class Quadratic(AbsolutePathCommand):
     """Absolute Quadratic Curved Line segment"""
 
+    letter = "Q"
     nargs = 4
+
+    arg1: complex
+    """The (absolute) control point"""
+
+    arg2: complex
+    """The (absolute) end point"""
+
+    @property
+    def x2(self) -> float:
+        """x coordinate of the (absolute) control point"""
+        return self.arg1.real
+
+    @property
+    def y2(self) -> float:
+        """y coordinate of the (absolute) control point"""
+        return self.arg1.imag
+
+    @property
+    def x3(self) -> float:
+        """x coordinate of the (absolute) end point"""
+        return self.arg2.real
+
+    @property
+    def y3(self) -> float:
+        """y coordinate of the (absolute) end point"""
+        return self.arg2.imag
 
     @property
     def args(self):
         return self.x2, self.y2, self.x3, self.y3
 
-    def __init__(self, x2, y2, x3, y3):
-        self.x2 = x2
-        self.y2 = y2
+    @overload
+    def __init__(self, x2: complex, x3: complex):
+        ...
 
-        self.x3 = x3
-        self.y3 = y3
+    @overload
+    def __init__(self, x2: float, y2: float, x3: float, y3: float):
+        ...
+
+    def __init__(self, x2, y2, x3=None, y3=None):
+        if x3 is not None:
+            self.arg1 = x2 + y2 * 1j
+            self.arg2 = x3 + y3 * 1j
+        else:
+            self.arg1, self.arg2 = x2, y2
 
     def update_bounding_box(self, first, last_two_points, bbox):
-        x1, x2, x3 = last_two_points[-1].x, self.x2, self.x3
-        y1, y2, y3 = last_two_points[-1].y, self.y2, self.y3
+        x1, x2, x3 = last_two_points[-1].real, self.x2, self.x3
+        y1, y2, y3 = last_two_points[-1].imag, self.y2, self.y3
 
         if not (x1 in bbox.x and x2 in bbox.x and x3 in bbox.x):
             bbox.x += quadratic_extrema(x1, x2, x3)
@@ -889,36 +1142,27 @@ class Quadratic(AbsolutePathCommand):
         if not (y1 in bbox.y and y2 in bbox.y and y3 in bbox.y):
             bbox.y += quadratic_extrema(y1, y2, y3)
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(self.x2, self.y2)
-        yield Vector2d(self.x3, self.y3)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.arg1, self.arg2)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> quadratic
-        return quadratic(
-            self.x2 - prev.x, self.y2 - prev.y, self.x3 - prev.x, self.y3 - prev.y
-        )
+    def to_relative(self, prev: complex) -> quadratic:
+        return quadratic(self.arg1 - prev, self.arg2 - prev)
 
-    def transform(self, transform):
-        # type: (Transform) -> Quadratic
+    def transform(self, transform: Transform) -> Quadratic:
         x2, y2 = transform.apply_to_point((self.x2, self.y2))
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         return Quadratic(x2, y2, x3, y3)
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(self.x3, self.y3)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg2
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         """Attempt to convert a quadratic to a curve"""
-        prev = Vector2d(prev)
-        x1 = 1.0 / 3 * prev.x + 2.0 / 3 * self.x2
-        x2 = 2.0 / 3 * self.x2 + 1.0 / 3 * self.x3
-        y1 = 1.0 / 3 * prev.y + 2.0 / 3 * self.y2
-        y2 = 2.0 / 3 * self.y2 + 1.0 / 3 * self.y3
-        return Curve(x1, y1, x2, y2, self.x3, self.y3)
+        pt1 = 1.0 / 3 * prev + 2.0 / 3 * self.arg1
+        pt2 = 2.0 / 3 * self.arg1 + 1.0 / 3 * self.arg2
+        return Curve(pt1, pt2, self.arg2)
 
     def reverse(self, first, prev):
         return Quadratic(self.x2, self.y2, prev.x, prev.y)
@@ -927,121 +1171,215 @@ class Quadratic(AbsolutePathCommand):
 class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative quadratic line segment"""
 
+    letter = "q"
     nargs = 4
+
+    arg1: complex
+    """The (relative) control point"""
+
+    arg2: complex
+    """The (relative) end point"""
+
+    @property
+    def dx2(self) -> float:
+        """x coordinate of the (relative) control point"""
+        return self.arg1.real
+
+    @property
+    def dy2(self) -> float:
+        """y coordinate of the (relative) control point"""
+        return self.arg1.imag
+
+    @property
+    def dx3(self) -> float:
+        """x coordinate of the (relative) end point"""
+        return self.arg2.real
+
+    @property
+    def dy3(self) -> float:
+        """y coordinate of the (relative) end point"""
+        return self.arg2.imag
 
     @property
     def args(self):
         return self.dx2, self.dy2, self.dx3, self.dy3
 
-    def __init__(self, dx2, dy2, dx3, dy3):
-        self.dx2 = dx2
-        self.dx3 = dx3
-        self.dy2 = dy2
-        self.dy3 = dy3
+    @overload
+    def __init__(self, dx2: complex, dx3: complex):
+        ...
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> Quadratic
-        return Quadratic(
-            self.dx2 + prev.x, self.dy2 + prev.y, self.dx3 + prev.x, self.dy3 + prev.y
-        )
+    @overload
+    def __init__(self, dx2: float, dy2: float, dx3: float, dy3: float):
+        ...
 
-    def reverse(self, first, prev):
-        return quadratic(
-            -self.dx3 + self.dx2, -self.dy3 + self.dy2, -self.dx3, -self.dy3
-        )
+    def __init__(self, dx2, dy2, dx3=None, dy3=None):
+        if dx3 is not None:
+            self.arg1 = dx2 + dy2 * 1j
+            self.arg2 = dx3 + dy3 * 1j
+        else:
+            self.arg1, self.arg2 = dx2, dy2
+
+    def to_absolute(self, prev: complex) -> Quadratic:
+        return Quadratic(self.arg1 + prev, self.arg2 + prev)
+
+    def reverse(self, first: complex, prev: complex) -> quadratic:
+        return quadratic(-self.arg2 + self.arg1, -self.arg2)
 
 
 class TepidQuadratic(AbsolutePathCommand):
     """Continued Quadratic Line segment"""
 
+    letter = "T"
     nargs = 2
+
+    arg1: complex
+    """The (absolute) control point"""
+
+    @property
+    def x3(self) -> float:
+        """x coordinate of the (absolute) end point"""
+        return self.arg1.real
+
+    @property
+    def y3(self) -> float:
+        """y coordinate of the (absolute) end point"""
+        return self.arg1.imag
 
     @property
     def args(self):
         return self.x3, self.y3
 
-    def __init__(self, x3, y3):
-        self.x3 = x3
-        self.y3 = y3
+    @overload
+    def __init__(self, x3: complex):
+        ...
+
+    @overload
+    def __init__(self, x3: float, y3: float):
+        ...
+
+    def __init__(self, x3, y3=None):
+        if y3 is not None:
+            self.arg1 = x3 + y3 * 1j
+        else:
+            self.arg1 = x3
 
     def update_bounding_box(self, first, last_two_points, bbox):
         self.to_quadratic(last_two_points[-1], last_two_points[-2]).update_bounding_box(
             first, last_two_points, bbox
         )
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (2 * prev - prev_prev, self.arg1)
 
-        x1, x2, x3 = prev_prev.x, prev.x, self.x3
-        y1, y2, y3 = prev_prev.y, prev.y, self.y3
-
-        # infer reflected point
-        x2 = 2 * x2 - x1
-        y2 = 2 * y2 - y1
-
-        yield Vector2d(x2, y2)
-        yield Vector2d(x3, y3)
-
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> AbsolutePathCommand
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Quadratic:
         return self.to_quadratic(prev, prev_control)
 
-    def to_relative(self, prev):  # type: (Vector2d) -> tepidQuadratic
-        return tepidQuadratic(self.x3 - prev.x, self.y3 - prev.y)
+    def to_relative(self, prev: complex) -> tepidQuadratic:
+        return tepidQuadratic(self.arg1 - prev)
 
-    def transform(self, transform):
-        # type: (Transform) -> TepidQuadratic
+    def transform(self, transform: Transform) -> TepidQuadratic:
         x3, y3 = transform.apply_to_point((self.x3, self.y3))
         return TepidQuadratic(x3, y3)
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(self.x3, self.y3)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg1
 
-    def to_curve(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> Curve
+    def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
         return self.to_quadratic(prev, prev_prev).to_curve(prev)
 
-    def to_quadratic(self, prev, prev_prev):
-        # type: (Vector2d, Vector2d) -> Quadratic
-        """
-        Convert this continued quadratic into a full quadratic
-        """
-        (x2, y2), (x3, y3) = self.control_points(prev, prev, prev_prev)
-        return Quadratic(x2, y2, x3, y3)
+    def to_quadratic(self, prev: complex, prev_prev: complex) -> Quadratic:
+        """Convert this continued quadratic into a full quadratic"""
+        return Quadratic(*self.ccontrol_points(prev, prev, prev_prev))
 
-    def reverse(self, first, prev):
-        return TepidQuadratic(prev.x, prev.y)
+    def reverse(self, first: complex, prev: complex) -> TepidQuadratic:
+        return TepidQuadratic(prev)
 
 
 class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
 
+    letter = "t"
     nargs = 2
+
+    arg1: complex
+    """The (relative) control point"""
+
+    @property
+    def dx3(self) -> float:
+        """x coordinate of the (relative) end point"""
+        return self.arg1.real
+
+    @property
+    def dy3(self) -> float:
+        """y coordinate of the (relative) end point"""
+        return self.arg1.imag
 
     @property
     def args(self):
         return self.dx3, self.dy3
 
-    def __init__(self, dx3, dy3):
-        self.dx3 = dx3
-        self.dy3 = dy3
+    @overload
+    def __init__(self, dx3: complex):
+        ...
 
-    def to_absolute(self, prev):
-        # type: (Vector2d) -> TepidQuadratic
-        return TepidQuadratic(self.dx3 + prev.x, self.dy3 + prev.y)
+    @overload
+    def __init__(self, dx3: float, dy3: float):
+        ...
 
-    def to_non_shorthand(self, prev, prev_control):
-        # type: (Vector2d, Vector2d) -> AbsolutePathCommand
+    def __init__(self, dx3, dy3=None):
+        if dy3 is not None:
+            self.arg1 = dx3 + dy3 * 1j
+        else:
+            self.arg1 = dx3
+
+    def to_absolute(self, prev: complex) -> TepidQuadratic:
+        return TepidQuadratic(self.arg1 + prev)
+
+    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Quadratic:
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
-    def reverse(self, first, prev):
-        return tepidQuadratic(-self.dx3, -self.dy3)
+    def reverse(self, first: complex, prev: complex) -> tepidQuadratic:
+        return tepidQuadratic(-self.arg1)
 
 
 class Arc(AbsolutePathCommand):
     """Special Arc segment"""
 
+    letter = "A"
+
     nargs = 7
+
+    radius: complex
+    """Radius of the Arc"""
+    x_axis_rotation: float
+
+    large_arc: bool
+    sweep: bool
+
+    endpoint: complex
+    """Endpoint (absolute) of the Arc"""
+
+    @property
+    def rx(self) -> float:
+        """x radius of the Arc"""
+        return self.radius.real
+
+    @property
+    def ry(self) -> float:
+        """y radius of the Arc"""
+        return self.radius.imag
+
+    @property
+    def x(self) -> float:
+        """x coordinate of the (absolute) endpoint of the Arc"""
+        return self.endpoint.real
+
+    @property
+    def y(self) -> float:
+        """x coordinate of the (relative) endpoint of the Arc"""
+        return self.endpoint.imag
 
     @property
     def args(self):
@@ -1055,42 +1393,78 @@ class Arc(AbsolutePathCommand):
             self.y,
         )
 
+    @property
+    def cargs(self):
+        return (
+            self.radius,
+            self.x_axis_rotation,
+            self.large_arc,
+            self.sweep,
+            self.endpoint,
+        )
+
+    @overload
     def __init__(
-        self, rx, ry, x_axis_rotation, large_arc, sweep, x, y
-    ):  # pylint: disable=too-many-arguments
-        self.rx = rx
-        self.ry = ry
-        self.x_axis_rotation = x_axis_rotation
-        self.large_arc = large_arc
-        self.sweep = sweep
-        self.x = x
-        self.y = y
+        self,
+        radius: complex,
+        x_axis_rotation: float,
+        large_arc: bool | int,
+        sweep: bool | int,
+        endpoint: complex,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(
+        self,
+        rx: float,
+        ry: float,
+        x_axis_rotation: float,
+        large_arc: bool | int,
+        sweep: bool | int,
+        x: float,
+        y: float,
+    ) -> None:
+        ...  # pylint: disable=too-many-arguments
+
+    def __init__(self, *args):
+        if len(args) == 5:
+            (
+                self.radius,
+                self.x_axis_rotation,
+                self.large_arc,
+                self.sweep,
+                self.endpoint,
+            ) = args
+        elif len(args) == 7:
+            self.radius = args[0] + args[1] * 1j
+            self.x_axis_rotation, self.large_arc, self.sweep = args[2:5]
+            self.endpoint = args[5] + args[6] * 1j
 
     def update_bounding_box(self, first, last_two_points, bbox):
         prev = last_two_points[-1]
         for seg in self.to_curves(prev=prev):
             seg.update_bounding_box(first, [None, prev], bbox)
-            prev = seg.end_point(first, prev)
+            prev = seg.cend_point(first, prev)
 
-    def control_points(self, first, prev, prev_prev):
-        # type: (Vector2d, Vector2d, Vector2d) -> Generator[Vector2d, None, None]
-        yield Vector2d(self.x, self.y)
+    def ccontrol_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.endpoint,)
 
-    def to_curves(self, prev, prev_prev=Vector2d()):
-        # type: (Vector2d, Vector2d) -> List[Curve]
+    def to_curves(self, prev: complex, prev_prev: complex = 0j) -> List[Curve]:
         """Convert this arc into bezier curves"""
-        path = CubicSuperPath([arc_to_path(list(prev), self.args)]).to_path(
+        path = CubicSuperPath([arc_to_path([prev.real, prev.imag], self.args)]).to_path(
             curves_only=True
         )
         # Ignore the first move command from to_path()
         return list(path)[1:]
 
-    def transform(self, transform):
-        # type: (Transform) -> Arc
+    def transform(self, transform: Transform) -> Arc:
         # pylint: disable=invalid-name, too-many-locals
         x_, y_ = transform.apply_to_point((self.x, self.y))
 
-        T = transform  # type: Transform
+        T: Transform = transform
         if self.x_axis_rotation != 0:
             T = T @ Transform(rotate=self.x_axis_rotation)
         a, c, b, d, _, _ = list(T.to_hexad())
@@ -1140,42 +1514,64 @@ class Arc(AbsolutePathCommand):
         if detT > 0:
             sweep = self.sweep
         else:
-            sweep = 0 if self.sweep > 0 else 1
+            sweep = False if self.sweep > 0 else True
 
         return Arc(rx_, ry_, theta_deg, self.large_arc, sweep, x_, y_)
 
-    def to_relative(self, prev):
-        # type: (Vector2d) -> arc
+    def to_relative(self, prev: complex) -> arc:
         return arc(
-            self.rx,
-            self.ry,
+            self.radius,
             self.x_axis_rotation,
             self.large_arc,
             self.sweep,
-            self.x - prev.x,
-            self.y - prev.y,
+            self.endpoint - prev,
         )
 
-    def end_point(self, first, prev):
-        # type: (Vector2d, Vector2d) -> Vector2d
-        return Vector2d(self.x, self.y)
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.endpoint
 
-    def reverse(self, first, prev):
+    def reverse(self, first: complex, prev: complex) -> Arc:
         return Arc(
-            self.rx,
-            self.ry,
-            self.x_axis_rotation,
-            self.large_arc,
-            1 - self.sweep,
-            prev.x,
-            prev.y,
+            self.radius, self.x_axis_rotation, self.large_arc, not self.sweep, prev
         )
 
 
 class arc(RelativePathCommand):  # pylint: disable=invalid-name
     """Relative Arc line segment"""
 
+    letter = "a"
+
     nargs = 7
+
+    radius: complex
+    """Radius of the arc"""
+    x_axis_rotation: float
+
+    large_arc: bool
+    sweep: bool
+
+    endpoint: complex
+    """Endpoint (relative) of the arc"""
+
+    @property
+    def rx(self) -> float:
+        """x radius of the arc"""
+        return self.radius.real
+
+    @property
+    def ry(self) -> float:
+        """y radius of the arc"""
+        return self.radius.imag
+
+    @property
+    def dx(self) -> float:
+        """x coordinate of the (relative) endpoint of the arc"""
+        return self.endpoint.real
+
+    @property
+    def dy(self) -> float:
+        """x coordinate of the (relative) endpoint of the arc"""
+        return self.endpoint.imag
 
     @property
     def args(self):
@@ -1189,38 +1585,60 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
             self.dy,
         )
 
+    @overload
     def __init__(
-        self, rx, ry, x_axis_rotation, large_arc, sweep, dx, dy
-    ):  # pylint: disable=too-many-arguments
-        self.rx = rx
-        self.ry = ry
-        self.x_axis_rotation = x_axis_rotation
-        self.large_arc = large_arc
-        self.sweep = sweep
-        self.dx = dx
-        self.dy = dy
+        self,
+        radius: complex,
+        x_axis_rotation: float,
+        large_arc: bool,
+        sweep: bool,
+        endpoint: complex,
+    ) -> None:
+        ...
 
-    def to_absolute(self, prev):  # type: (Vector2d) -> "Arc"
-        x1, y1 = prev
+    @overload
+    def __init__(
+        self,
+        rx: float,
+        ry: float,
+        x_axis_rotation: float,
+        large_arc: bool,
+        sweep: bool,
+        dx: float,
+        dy: float,
+    ) -> None:
+        ...  # pylint: disable=too-many-arguments
+
+    def __init__(self, *args):
+        if len(args) == 5:
+            (
+                self.radius,
+                self.x_axis_rotation,
+                self.large_arc,
+                self.sweep,
+                self.endpoint,
+            ) = args
+        elif len(args) == 7:
+            self.radius = args[0] + args[1] * 1j
+            self.x_axis_rotation, self.large_arc, self.sweep = args[2:5]
+            self.endpoint = args[5] + args[6] * 1j
+
+    def to_absolute(self, prev: complex) -> Arc:
         return Arc(
-            self.rx,
-            self.ry,
+            self.radius,
             self.x_axis_rotation,
             self.large_arc,
             self.sweep,
-            self.dx + x1,
-            self.dy + y1,
+            self.endpoint + prev,
         )
 
-    def reverse(self, first, prev):
+    def reverse(self, first: complex, prev: complex) -> arc:
         return arc(
-            self.rx,
-            self.ry,
+            self.radius,
             self.x_axis_rotation,
             self.large_arc,
-            1 - self.sweep,
-            -self.dx,
-            -self.dy,
+            not self.sweep,
+            -self.endpoint,
         )
 
 
@@ -1260,20 +1678,36 @@ class Path(list):
         """
 
         def __init__(
-            self, command, first_point, previous_end_point, prev2_control_point
+            self,
+            command: PathCommand,
+            first_point: complex,
+            previous_end_point: complex,
+            prev2_control_point: complex,
         ):
-            self.command = command  # type: PathCommand
-            self.first_point = first_point  # type: Vector2d
-            self.previous_end_point = previous_end_point  # type: Vector2d
-            self.prev2_control_point = prev2_control_point  # type: Vector2d
+            self.command = command
+            self.cfirst_point = first_point
+            self.cprevious_end_point = previous_end_point
+            self.cprev2_control_point = prev2_control_point
 
         @property
-        def name(self):
+        def first_point(self) -> Vector2d:
+            return Vector2d(self.cfirst_point)
+
+        @property
+        def previous_end_point(self) -> Vector2d:
+            return Vector2d(self.cprevious_end_point)
+
+        @property
+        def prev2_control_point(self) -> Vector2d:
+            return Vector2d(self.cprev2_control_point)
+
+        @property
+        def name(self) -> str:
             """The full name of the segment (i.e. Line, Arc, etc)"""
             return self.command.name
 
         @property
-        def letter(self):
+        def letter(self) -> str:
             """The single letter representation of this command (i.e. L, A, etc)"""
             return self.command.letter
 
@@ -1283,55 +1717,63 @@ class Path(list):
             return self.command.next_command
 
         @property
-        def is_relative(self):
+        def is_relative(self) -> bool:
             """Whether the command is defined in relative coordinates, i.e. relative to
             the previous endpoint (lower case path command letter)"""
             return self.command.is_relative
 
         @property
-        def is_absolute(self):
+        def is_absolute(self) -> bool:
             """Whether the command is defined in absolute coordinates (upper case path
             command letter)"""
             return self.command.is_absolute
 
         @property
-        def args(self):
+        def args(self) -> List[float]:
             """Returns path command arguments as tuple of floats"""
             return self.command.args
 
         @property
-        def control_points(self):
+        def control_points(self) -> List[Vector2d]:
             """Returns list of path command control points"""
-            return self.command.control_points(
-                self.first_point, self.previous_end_point, self.prev2_control_point
+            return list(
+                self.command.control_points(
+                    self.cfirst_point,
+                    self.cprevious_end_point,
+                    self.cprev2_control_point,
+                )
             )
 
         @property
-        def end_point(self):
+        def end_point(self) -> Vector2d:
             """Returns last control point of path command"""
-            return self.command.end_point(self.first_point, self.previous_end_point)
+            return Vector2d(self.cend_point)
 
-        def reverse(self):
+        @property
+        def cend_point(self) -> complex:
+            return self.command.cend_point(self.cfirst_point, self.cprevious_end_point)
+
+        def reverse(self) -> PathCommand:
             """Reverse path command"""
-            return self.command.reverse(self.end_point, self.previous_end_point)
+            return self.command.reverse(self.cend_point, self.cprevious_end_point)
 
-        def to_curve(self):
+        def to_curve(self) -> Curve:
             """Convert command to :py:class:`Curve`
             Curve().to_curve() returns a copy
             """
             return self.command.to_curve(
-                self.previous_end_point, self.prev2_control_point
+                self.cprevious_end_point, self.cprev2_control_point
             )
 
-        def to_curves(self):
+        def to_curves(self) -> List[Curve]:
             """Convert command to list of :py:class:`Curve` commands"""
             return self.command.to_curves(
-                self.previous_end_point, self.prev2_control_point
+                self.cprevious_end_point, self.cprev2_control_point
             )
 
-        def to_absolute(self):
+        def to_absolute(self) -> AbsolutePathCommand:
             """Return relative counterpart for relative commands or copy for absolute"""
-            return self.command.to_absolute(self.previous_end_point)
+            return self.command.to_absolute(self.cprevious_end_point)
 
         def __str__(self):
             return str(self.command)
@@ -1339,7 +1781,7 @@ class Path(list):
         def __repr__(self):
             return "<" + self.__class__.__name__ + ">" + repr(self.command)
 
-    def __init__(self, path_d=None):
+    def __init__(self, path_d=None) -> None:
         super().__init__()
         if isinstance(path_d, str):
             # Returns a generator returning PathCommand objects
@@ -1376,8 +1818,7 @@ class Path(list):
                 cmd = seg.next_command
                 yield seg
 
-    def bounding_box(self):
-        # type: () -> Optional[BoundingBox]
+    def bounding_box(self) -> Optional[BoundingBox]:
         """Return bounding box of the Path"""
         if not self:
             return None
@@ -1390,8 +1831,8 @@ class Path(list):
                 proxy.command.update_bounding_box(
                     proxy.first_point,
                     [
-                        proxy.prev2_control_point,
-                        proxy.previous_end_point,
+                        proxy.cprev2_control_point,
+                        proxy.cprevious_end_point,
                     ],
                     bbox,
                 )
@@ -1428,48 +1869,57 @@ class Path(list):
         )
 
     @property
-    def control_points(self):
+    def control_points(self) -> Iterator[Vector2d]:
         """Returns all control points of the Path"""
-        prev = Vector2d()
-        prev_prev = Vector2d()
-        first = Vector2d()
+        prev: complex = 0
+        prev_prev: complex = 0
+        first: complex = 0
 
-        for seg in self:  # type: PathCommand
-            cpts = list(seg.control_points(first, prev, prev_prev))
-            if isinstance(seg, (zoneClose, ZoneClose, move, Move)):
+        seg: PathCommand
+        for seg in self:
+            cpts = seg.ccontrol_points(first, prev, prev_prev)
+            if seg.letter in "zZmM":
                 first = cpts[-1]
             for cpt in cpts:
                 prev_prev = prev
                 prev = cpt
-                yield cpt
+                yield Vector2d(cpt)
 
     @property
-    def end_points(self):
-        """Returns all endpoints of all path commands (i.e. the nodes)"""
-        prev = Vector2d()
-        first = Vector2d()
+    def cend_points(self) -> Iterator[complex]:
+        """Complex version of end_points"""
+        prev = 0j
+        first = 0j
 
-        for seg in self:  # type: PathCommand
-            end_point = seg.end_point(first, prev)
-            if isinstance(seg, (zoneClose, ZoneClose, move, Move)):
+        seg: PathCommand
+        for seg in self:
+            end_point = seg.cend_point(first, prev)
+            if seg.letter in "zZmM":
                 first = end_point
             prev = end_point
             yield end_point
 
+    @property
+    def end_points(self) -> Iterator[Vector2d]:
+        """Returns all endpoints of all path commands (i.e. the nodes)"""
+        for i in self.cend_points:
+            yield Vector2d(i)
+
     def transform(self, transform, inplace=False):
         """Convert to new path"""
         result = Path()
-        previous = Vector2d()
-        previous_new = Vector2d()
+        previous = 0j
+        previous_new = 0j
         start_zone = True
-        first = Vector2d()
-        first_new = Vector2d()
+        first = 0j
+        first_new = 0j
 
-        for i, seg in enumerate(self):  # type: PathCommand
+        seg: PathCommand
+        for i, seg in enumerate(self):
             if start_zone:
-                first = seg.end_point(first, previous)
+                first = seg.cend_point(first, previous)
 
-            if isinstance(seg, (horz, Horz, Vert, vert)):
+            if seg.letter in "hHVv":
                 seg = seg.to_line(previous)
 
             if seg.is_relative:
@@ -1482,15 +1932,15 @@ class Path(list):
                 new_seg = seg.transform(transform)
 
             if start_zone:
-                first_new = new_seg.end_point(first_new, previous_new)
+                first_new = new_seg.cend_point(first_new, previous_new)
 
             if inplace:
                 self[i] = new_seg
             else:
                 result.append(new_seg)
-            previous = seg.end_point(first, previous)
-            previous_new = new_seg.end_point(first_new, previous_new)
-            start_zone = isinstance(seg, (zoneClose, ZoneClose))
+            previous = seg.cend_point(first, previous)
+            previous_new = new_seg.cend_point(first_new, previous_new)
+            start_zone = seg.letter in "zZ"
         if inplace:
             return self
         return result
@@ -1498,28 +1948,26 @@ class Path(list):
     def reverse(self):
         """Returns a reversed path"""
         result = Path()
-        *_, first = self.end_points
+        *_, first = self.cend_points
         closer = None
 
         # Go through the path in reverse order
         for index, prcom in reversed(list(enumerate(self.proxy_iterator()))):
-            if isinstance(prcom.command, (Move, move, ZoneClose, zoneClose)):
+            if prcom.letter in "MmZz":
                 if closer is not None:
-                    if len(result) > 0 and isinstance(
-                        result[-1], (Line, line, Vert, vert, Horz, horz)
-                    ):
+                    if len(result) > 0 and result[-1].letter in "LlVvHh":
                         result.pop()  # We can replace simple lines with Z
                     result.append(closer)  # replace with same type (rel or abs)
-                if isinstance(prcom.command, (ZoneClose, zoneClose)):
+                if prcom.letter in "Zz":
                     closer = prcom.command
                 else:
                     closer = None
 
             if index == 0:
                 if prcom.letter == "M":
-                    result.insert(0, Move(first.x, first.y))
+                    result.insert(0, Move(first))
                 elif prcom.letter == "m":
-                    result.insert(0, move(first.x, first.y))
+                    result.insert(0, move(first))
             else:
                 result.append(prcom.reverse())
 
@@ -1536,7 +1984,7 @@ class Path(list):
             if cmnd.letter.lower() == "m":
                 current = Path()
                 result.append(current)
-                current.append(Move(*cmnd.end_point))
+                current.append(Move(cmnd.cend_point))
             else:
                 current.append(cmnd.command)
         # Remove all subpaths that are empty or only contain move commands
@@ -1548,46 +1996,33 @@ class Path(list):
 
     def close(self):
         """Attempt to close the last path segment"""
-        if self and not isinstance(self[-1], (zoneClose, ZoneClose)):
+        if self and not self[-1].letter in "zZ":
             self.append(ZoneClose())
 
-    def proxy_iterator(self):
+    def proxy_iterator(self) -> Iterator[PathCommandProxy]:
         """
         Yields :py:class:`AugmentedPathIterator`
 
         :rtype: Iterator[ Path.PathCommandProxy ]
         """
 
-        previous = Vector2d()
-        prev_prev = Vector2d()
-        first = Vector2d()
-
-        for seg in self:  # type: PathCommand#
-            if isinstance(seg, (zoneClose, ZoneClose, move, Move)):
-                first = seg.end_point(first, previous)
+        previous = 0j
+        prev_prev = 0j
+        first = 0j
+        seg: PathCommand
+        for seg in self:
+            if seg.letter in "zZmM":
+                first = seg.cend_point(first, previous)
             yield Path.PathCommandProxy(seg, first, previous, prev_prev)
-            if isinstance(
-                seg,
-                (
-                    curve,
-                    tepidQuadratic,
-                    quadratic,
-                    smooth,
-                    Curve,
-                    TepidQuadratic,
-                    Quadratic,
-                    Smooth,
-                ),
-            ):
-                prev_prev = list(seg.control_points(first, previous, prev_prev))[-2]
-            previous = seg.end_point(first, previous)
+            if seg.letter in "ctqsCTQS":
+                prev_prev = seg.ccontrol_points(first, previous, prev_prev)[-2]
+            previous = seg.cend_point(first, previous)
 
     def to_absolute(self):
         """Convert this path to use only absolute coordinates"""
         return self._to_absolute(True)
 
-    def to_non_shorthand(self):
-        # type: () -> Path
+    def to_non_shorthand(self) -> Path:
         """Convert this path to use only absolute non-shorthand coordinates
 
         .. versionadded:: 1.1"""
@@ -1606,26 +2041,24 @@ class Path(list):
 
         abspath = Path()
 
-        previous = Vector2d()
-        first = Vector2d()
-
-        for seg in self:  # type: PathCommand
-            if isinstance(seg, (move, Move)):
-                first = seg.end_point(first, previous)
+        previous = 0j
+        first = 0j
+        seg: PathCommand
+        for seg in self:
+            if seg.letter in "mM":
+                first = seg.cend_point(first, previous)
 
             if shorthand:
                 abspath.append(seg.to_absolute(previous))
             else:
-                if abspath and isinstance(abspath[-1], (Curve, Quadratic)):
-                    prev_control = list(
-                        abspath[-1].control_points(Vector2d(), Vector2d(), Vector2d())
-                    )[-2]
+                if abspath and abspath[-1].letter in "QC":
+                    prev_control = list(abspath[-1].control_points(0, 0, 0))[-2]
                 else:
                     prev_control = previous
 
                 abspath.append(seg.to_non_shorthand(previous, prev_control))
 
-            previous = seg.end_point(first, previous)
+            previous = seg.cend_point(first, previous)
 
         return abspath
 
@@ -1633,15 +2066,15 @@ class Path(list):
         """Convert this path to use only relative coordinates"""
         abspath = Path()
 
-        previous = Vector2d()
-        first = Vector2d()
-
-        for seg in self:  # type: PathCommand
-            if isinstance(seg, (move, Move)):
-                first = seg.end_point(first, previous)
+        previous = 0j
+        first = 0j
+        seg: PathCommand
+        for seg in self:
+            if seg.letter in "mM":
+                first = seg.cend_point(first, previous)
 
             abspath.append(seg.to_relative(previous))
-            previous = seg.end_point(first, previous)
+            previous = seg.cend_point(first, previous)
 
         return abspath
 
@@ -1689,8 +2122,8 @@ class CubicSuperPath(list):
     def __init__(self, items):
         super().__init__()
         self._closed = True
-        self._prev = Vector2d()
-        self._prev_prev = Vector2d()
+        self._prev = 0j
+        self._prev_prev = 0j
 
         if isinstance(items, str):
             items = Path(items)
@@ -1717,11 +2150,11 @@ class CubicSuperPath(list):
             coordinate_shift = False
         is_quadratic = False
         if isinstance(item, PathCommand):
-            if isinstance(item, Move):
+            if item.letter == "M":
                 if self._closed is False:
                     super().append([])
                 item = [list(item.args), list(item.args), list(item.args)]
-            elif isinstance(item, ZoneClose) and self and self[-1]:
+            elif item.letter == "Z" and self and self[-1]:
                 # This duplicates the first segment to 'close' the path, it's appended
                 # directly because we don't want to last coord to change for the final
                 # segment.
@@ -1730,9 +2163,9 @@ class CubicSuperPath(list):
                 )
                 # Then adds a new subpath for the next shape (if any)
                 self._closed = True
-                self._prev = Vector2d(self._first)
+                self._prev = self._first
                 return
-            elif isinstance(item, Arc):
+            elif item.letter == "A":
                 # Arcs are made up of three curves (approximated)
                 for arc_curve in item.to_curves(self._prev, self._prev_prev):
                     x2, y2, x3, y3, x4, y4 = arc_curve.args
@@ -1740,10 +2173,8 @@ class CubicSuperPath(list):
                     self._prev_prev = Vector2d(x3, y3)
                 return
             else:
-                is_quadratic = isinstance(
-                    item, (Quadratic, TepidQuadratic, quadratic, tepidQuadratic)
-                )
-                if isinstance(item, (Horz, Vert)):
+                is_quadratic = item.letter in "QTqt"
+                if item.letter in "HV":
                     item = item.to_line(self._prev)
                 prp = self._prev_prev
                 if is_quadratic:
@@ -1827,16 +2258,20 @@ class CubicSuperPath(list):
             previous = []
             for segment in subpath:
                 if not previous:
-                    yield Move(*segment[1][:])
+                    yield Move(Vector2d(segment[1]))
                 elif self.is_line(previous, segment, rtol, atol) and not curves_only:
                     if segment is subpath[-1] and Vector2d(segment[1]).is_close(
-                        subpath[0][1], rtol, atol
+                        Vector2d(subpath[0][1]), rtol, atol
                     ):
                         yield ZoneClose()
                     else:
-                        yield Line(*segment[1][:])
+                        yield Line(Vector2d(segment[1]))
                 else:
-                    yield Curve(*(previous[2][:] + segment[0][:] + segment[1][:]))
+                    yield Curve(
+                        Vector2d(previous[2]),
+                        Vector2d(segment[0]),
+                        Vector2d(segment[1]),
+                    )
                 previous = segment
 
     def transform(self, transform):
@@ -1904,9 +2339,11 @@ class CubicSuperPath(list):
                 .. versionadded:: 1.2
         """
 
-        retracted = Vector2d(previous[1]).is_close(
-            previous[2], rtol, atol
-        ) and Vector2d(segment[0]).is_close(segment[1], rtol, atol)
+        retracted = isclose(
+            Vector2d(previous[1]), Vector2d(previous[2]), rel_tol=rtol, abs_tol=atol
+        ) and isclose(
+            Vector2d(segment[0]), Vector2d(segment[1]), rel_tol=rtol, abs_tol=atol
+        )
 
         if retracted:
             return True

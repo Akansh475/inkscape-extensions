@@ -623,6 +623,13 @@ class PathTest(TestCase):
         self.assertEqual(str(ret), "M 100 100 A 500 500 0 0 1 853.553 853.553 L 1000 0")
         self.assertRaises(ValueError, Horz([10]).transform, Transform())
 
+    @novector
+    def test_transforms_without_vector(self):
+        """Check that we can transform without invoking Vector2d()"""
+        path = Path("M 10 10 A 50,50 0 0 1 85.355333,85.355341 L 100 0")
+        transform = Transform().add_scale(1, 1)
+        path.transform(transform)
+
     def test_inline_transformations(self):
         path = Path()
         self.assertTrue(path is not path.translate(10, 20))

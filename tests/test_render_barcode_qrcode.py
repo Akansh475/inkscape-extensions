@@ -1,6 +1,7 @@
 # coding=utf-8
 from render_barcode_qrcode import QrCode, QRCode
 from inkex.tester import ComparisonMixin, TestCase
+from inkex.tester.filters import CompareNumericFuzzy
 
 
 class TestQRCodeInkscapeBasic(ComparisonMixin, TestCase):
@@ -57,6 +58,7 @@ class TestQRCodeInkscapeSelection(ComparisonMixin, TestCase):
     comparisons = [
         ("--text=test", "--drawtype=selection", "--id=r3", "--modulesize=10")
     ]
+    compare_filters = [CompareNumericFuzzy()]
 
 
 class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):

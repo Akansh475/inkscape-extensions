@@ -378,7 +378,7 @@ class Line(AbsolutePathCommand):
         return line(self.arg1 - prev)
 
     def transform(self, transform) -> Line:
-        return Line(*transform.apply_to_point((self.x, self.y)))
+        return Line(transform.capply_to_point(self.arg1))
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
@@ -484,7 +484,7 @@ class Move(AbsolutePathCommand):
         return move(self.arg1 - prev)
 
     def transform(self, transform: Transform) -> Move:
-        return Move(*transform.apply_to_point((self.x, self.y)))
+        return Move(transform.capply_to_point(self.arg1))
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
@@ -826,10 +826,11 @@ class Curve(AbsolutePathCommand):
             bbox.y += cubic_extrema(y1, y2, y3, y4)
 
     def transform(self, transform: Transform) -> Curve:
-        x2, y2 = transform.apply_to_point((self.x2, self.y2))
-        x3, y3 = transform.apply_to_point((self.x3, self.y3))
-        x4, y4 = transform.apply_to_point((self.x4, self.y4))
-        return Curve(x2, y2, x3, y3, x4, y4)
+        return Curve(
+            transform.capply_to_point(self.arg1),
+            transform.capply_to_point(self.arg2),
+            transform.capply_to_point(self.arg3),
+        )
 
     def ccontrol_points(
         self, first: complex, prev: complex, prev_prev: complex
@@ -1002,9 +1003,9 @@ class Smooth(AbsolutePathCommand):
         return smooth(self.arg1 - prev, self.arg2 - prev)
 
     def transform(self, transform: Transform) -> Smooth:
-        x3, y3 = transform.apply_to_point((self.x3, self.y3))
-        x4, y4 = transform.apply_to_point((self.x4, self.y4))
-        return Smooth(x3, y3, x4, y4)
+        return Smooth(
+            transform.capply_to_point(self.arg1), transform.capply_to_point(self.arg2)
+        )
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2
@@ -1151,9 +1152,9 @@ class Quadratic(AbsolutePathCommand):
         return quadratic(self.arg1 - prev, self.arg2 - prev)
 
     def transform(self, transform: Transform) -> Quadratic:
-        x2, y2 = transform.apply_to_point((self.x2, self.y2))
-        x3, y3 = transform.apply_to_point((self.x3, self.y3))
-        return Quadratic(x2, y2, x3, y3)
+        return Quadratic(
+            transform.capply_to_point(self.arg1), transform.capply_to_point(self.arg2)
+        )
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2
@@ -1280,8 +1281,7 @@ class TepidQuadratic(AbsolutePathCommand):
         return tepidQuadratic(self.arg1 - prev)
 
     def transform(self, transform: Transform) -> TepidQuadratic:
-        x3, y3 = transform.apply_to_point((self.x3, self.y3))
-        return TepidQuadratic(x3, y3)
+        return TepidQuadratic(transform.capply_to_point(self.arg1))
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
@@ -1462,7 +1462,7 @@ class Arc(AbsolutePathCommand):
 
     def transform(self, transform: Transform) -> Arc:
         # pylint: disable=invalid-name, too-many-locals
-        x_, y_ = transform.apply_to_point((self.x, self.y))
+        newend = transform.capply_to_point(self.endpoint)
 
         T: Transform = transform
         if self.x_axis_rotation != 0:
@@ -1481,13 +1481,11 @@ class Arc(AbsolutePathCommand):
             # invalid Arc parameters
             # transform only last point
             return Arc(
-                self.rx,
-                self.ry,
+                self.radius,
                 self.x_axis_rotation,
                 self.large_arc,
                 self.sweep,
-                x_,
-                y_,
+                newend,
             )
 
         A = (d**2 / rx**2 + c**2 / ry**2) / detT2
@@ -1509,14 +1507,12 @@ class Arc(AbsolutePathCommand):
         rx_ = 1.0 / sqrt(half + delta)
         ry_ = 1.0 / sqrt(half - delta)
 
-        x_, y_ = transform.apply_to_point((self.x, self.y))
-
         if detT > 0:
             sweep = self.sweep
         else:
             sweep = False if self.sweep > 0 else True
 
-        return Arc(rx_, ry_, theta_deg, self.large_arc, sweep, x_, y_)
+        return Arc(rx_ + 1j * ry_, theta_deg, self.large_arc, sweep, newend)
 
     def to_relative(self, prev: complex) -> arc:
         return arc(

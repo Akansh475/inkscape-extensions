@@ -275,9 +275,6 @@ class RelativePathCommand(PathCommand):
             first, last_two_points, bbox
         )
 
-    def cend_point(self, first: complex, prev: complex) -> complex:
-        return self.to_absolute(prev).cend_point(first, prev)
-
     def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
         return self.to_absolute(prev).to_curve(prev, prev_prev)
 
@@ -431,6 +428,9 @@ class line(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev: complex) -> Line:
         return Line(prev + self.arg1)
 
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg1 + prev
+
     def reverse(self, first, prev):
         return line(-self.arg1)
 
@@ -532,6 +532,9 @@ class move(RelativePathCommand):  # pylint: disable=invalid-name
         else:
             self.arg1 = dx
 
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg1 + prev
+
     def to_absolute(self, prev: complex) -> Move:
         return Move(prev + self.arg1)
 
@@ -590,6 +593,9 @@ class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
 
     def reverse(self, first: complex, prev: complex):
         return line(prev - first)
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return first
 
 
 class Horz(AbsolutePathCommand):
@@ -661,6 +667,9 @@ class horz(RelativePathCommand):  # pylint: disable=invalid-name
     def to_line(self, prev: complex) -> Line:
         """Return this path command as a Line instead"""
         return Line(prev.real + self.dx, prev.imag)
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return (self.dx + prev.real) + prev.imag * 1j
 
     def reverse(self, first, prev):
         return horz(-self.dx)
@@ -735,6 +744,9 @@ class vert(RelativePathCommand):  # pylint: disable=invalid-name
     def to_line(self, prev: complex) -> Line:
         """Return this path command as a line instead"""
         return Line(prev.real, prev.imag + self.dy)
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return prev.real + (prev.imag + self.dy) * 1j
 
     def reverse(self, first, prev):
         return vert(-self.dy)
@@ -850,7 +862,11 @@ class Curve(AbsolutePathCommand):
 
     def to_bez(self):
         """Returns the list of coords for SuperPath"""
-        return [list(self.args[:2]), list(self.args[2:4]), list(self.args[4:6])]
+        return [
+            [self.arg1.real, self.arg1.imag],
+            [self.arg2.real, self.arg2.imag],
+            [self.arg3.real, self.arg3.imag],
+        ]
 
     def reverse(self, first: complex, prev: complex) -> Curve:
         return Curve(self.arg2, self.arg1, prev)
@@ -931,6 +947,9 @@ class curve(RelativePathCommand):  # pylint: disable=invalid-name
             self.arg2 + prev,
             self.arg3 + prev,
         )
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg3 + prev
 
     def reverse(self, first: complex, prev: complex) -> curve:
         return curve(-self.arg3 + self.arg2, -self.arg3 + self.arg1, -self.arg3)
@@ -1075,6 +1094,9 @@ class smooth(RelativePathCommand):  # pylint: disable=invalid-name
 
     def to_absolute(self, prev: complex) -> Smooth:
         return Smooth(self.arg1 + prev, self.arg2 + prev)
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg2 + prev
 
     def to_non_shorthand(self, prev: complex, prev_control: complex) -> Curve:
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
@@ -1224,6 +1246,9 @@ class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
     def to_absolute(self, prev: complex) -> Quadratic:
         return Quadratic(self.arg1 + prev, self.arg2 + prev)
 
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg2 + prev
+
     def reverse(self, first: complex, prev: complex) -> quadratic:
         return quadratic(-self.arg2 + self.arg1, -self.arg2)
 
@@ -1340,6 +1365,9 @@ class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
 
     def to_non_shorthand(self, prev: complex, prev_control: complex) -> Quadratic:
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.arg1 + prev
 
     def reverse(self, first: complex, prev: complex) -> tepidQuadratic:
         return tepidQuadratic(-self.arg1)
@@ -1628,6 +1656,9 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
             self.sweep,
             self.endpoint + prev,
         )
+
+    def cend_point(self, first: complex, prev: complex) -> complex:
+        return self.endpoint + prev
 
     def reverse(self, first: complex, prev: complex) -> arc:
         return arc(

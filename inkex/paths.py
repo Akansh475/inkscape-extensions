@@ -230,7 +230,7 @@ class PathCommand(abc.ABC):
 
         Curve().to_curve() returns a copy
         """
-        raise NotImplementedError(f"To curve not supported for {self.name}")
+        return Curve(*self.ccurve_points(0 + 0j, prev, prev_prev))
 
     def to_curves(self, prev: complex, prev_prev: complex = 0) -> List[Curve]:
         """Convert command to list of :py:class:`Curve` commands"""
@@ -239,6 +239,13 @@ class PathCommand(abc.ABC):
     def to_line(self, prev: complex) -> Line:
         """Converts this segment to a line (copies if already a line)"""
         return Line(self.cend_point(0, prev))
+
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        """Converts the path element into a single cubic bezier"""
+        arg1 = self.cend_point(first, prev)
+        return prev, arg1, arg1
 
 
 class RelativePathCommand(PathCommand):
@@ -274,12 +281,6 @@ class RelativePathCommand(PathCommand):
         self.to_absolute(last_two_points[-1]).update_bounding_box(
             first, last_two_points, bbox
         )
-
-    def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
-        return self.to_absolute(prev).to_curve(prev, prev_prev)
-
-    def to_curves(self, prev: complex, prev_prev: complex = 0j) -> List[Curve]:
-        return self.to_absolute(prev).to_curves(prev, prev_prev)
 
 
 class AbsolutePathCommand(PathCommand):
@@ -381,9 +382,6 @@ class Line(AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
-        return Curve(prev, self.arg1, self.arg1)
-
     def reverse(self, first, prev):
         return Line(prev)
 
@@ -433,6 +431,9 @@ class line(RelativePathCommand):  # pylint: disable=invalid-name
 
     def reverse(self, first, prev):
         return line(-self.arg1)
+
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+        raise ValueError("Move segments can not be changed into curves.")
 
 
 class Move(AbsolutePathCommand):
@@ -541,6 +542,9 @@ class move(RelativePathCommand):  # pylint: disable=invalid-name
     def reverse(self, first: complex, prev: complex):
         return move(prev - first)
 
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+        raise ValueError("Move segments can not be changed into curves.")
+
 
 class ZoneClose(AbsolutePathCommand):
     """Close segment to finish a path"""
@@ -597,6 +601,9 @@ class zoneClose(RelativePathCommand):  # pylint: disable=invalid-name
     def cend_point(self, first: complex, prev: complex) -> complex:
         return first
 
+    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+        raise ValueError("ZoneClose segments can not be changed into curves.")
+
 
 class Horz(AbsolutePathCommand):
     """Horizontal Line segment"""
@@ -632,10 +639,6 @@ class Horz(AbsolutePathCommand):
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.x + prev.imag * 1j
-
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
-        """Convert a horizontal line into a curve"""
-        return self.to_line(prev).to_curve(prev)
 
     def to_line(self, prev: complex) -> Line:
         """Return this path command as a Line instead"""
@@ -713,10 +716,6 @@ class Vert(AbsolutePathCommand):
     def to_line(self, prev: complex) -> Line:
         """Return this path command as a line instead"""
         return Line(prev.real, self.y)
-
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
-        """Convert a horizontal line into a curve"""
-        return self.to_line(prev).to_curve(prev)
 
     def reverse(self, first: complex, prev: complex):
         return Vert(prev.imag)
@@ -856,20 +855,16 @@ class Curve(AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg3
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
-        """No conversion needed, pass-through, returns self"""
-        return Curve(*self.args)
-
-    def to_bez(self):
-        """Returns the list of coords for SuperPath"""
-        return [
-            [self.arg1.real, self.arg1.imag],
-            [self.arg2.real, self.arg2.imag],
-            [self.arg3.real, self.arg3.imag],
-        ]
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (self.arg1, self.arg2, self.arg3)
 
     def reverse(self, first: complex, prev: complex) -> Curve:
         return Curve(self.arg2, self.arg1, prev)
+
+    def to_bez(self):
+        return [Vector2d.c2t(i) for i in self.ccontrol_points(0j, 0j, 0j)]
 
 
 class curve(RelativePathCommand):  # pylint: disable=invalid-name
@@ -942,17 +937,22 @@ class curve(RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx2, self.dy2, self.dx3, self.dy3, self.dx4, self.dy4
 
     def to_absolute(self, prev: complex) -> Curve:
-        return Curve(
-            self.arg1 + prev,
-            self.arg2 + prev,
-            self.arg3 + prev,
-        )
+        return Curve(*self.ccurve_points(0j, prev, 0j))
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg3 + prev
 
     def reverse(self, first: complex, prev: complex) -> curve:
         return curve(-self.arg3 + self.arg2, -self.arg3 + self.arg1, -self.arg3)
+
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return (
+            self.arg1 + prev,
+            self.arg2 + prev,
+            self.arg3 + prev,
+        )
 
 
 class Smooth(AbsolutePathCommand):
@@ -1030,15 +1030,16 @@ class Smooth(AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2
 
-    def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
-        """
-        Convert this Smooth curve to a regular curve by creating a mirror
-        set of nodes based on the previous node. Previous should be a curve.
-        """
-        return Curve(*self.ccontrol_points(prev, prev, prev_prev))
-
     def reverse(self, first: complex, prev: complex) -> Smooth:
         return Smooth(self.arg1, prev)
+
+    def to_bez(self, first, prev, prev_prev):
+        return [Vector2d.c2t(i) for i in self.ccontrol_points(first, prev, prev_prev)]
+
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return self.ccontrol_points(first, prev, prev_prev)
 
 
 class smooth(RelativePathCommand):  # pylint: disable=invalid-name
@@ -1103,6 +1104,11 @@ class smooth(RelativePathCommand):  # pylint: disable=invalid-name
 
     def reverse(self, first: complex, prev: complex):
         return smooth(-self.arg2 + self.arg1, -self.arg2)
+
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        return 2 * prev - prev_prev, self.arg1 + prev, self.arg2 + prev
 
 
 class Quadratic(AbsolutePathCommand):
@@ -1182,11 +1188,12 @@ class Quadratic(AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
-        """Attempt to convert a quadratic to a curve"""
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
         pt1 = 1.0 / 3 * prev + 2.0 / 3 * self.arg1
         pt2 = 2.0 / 3 * self.arg1 + 1.0 / 3 * self.arg2
-        return Curve(pt1, pt2, self.arg2)
+        return pt1, pt2, self.arg2
 
     def reverse(self, first, prev):
         return Quadratic(self.x2, self.y2, prev.x, prev.y)
@@ -1245,6 +1252,13 @@ class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
 
     def to_absolute(self, prev: complex) -> Quadratic:
         return Quadratic(self.arg1 + prev, self.arg2 + prev)
+
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        pt1 = 1.0 / 3 * prev + 2.0 / 3 * (prev + self.arg1)
+        pt2 = 2.0 / 3 * (prev + self.arg1) + 1.0 / 3 * (prev + self.arg2)
+        return pt1, pt2, prev + self.arg2
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2 + prev
@@ -1309,11 +1323,17 @@ class TepidQuadratic(AbsolutePathCommand):
     def transform(self, transform: Transform) -> TepidQuadratic:
         return TepidQuadratic(transform.capply_to_point(self.arg1))
 
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        qp1 = 2 * prev - prev_prev
+        qp2 = self.arg1
+        pt1 = 1.0 / 3 * prev + 2.0 / 3 * qp1
+        pt2 = 2.0 / 3 * qp1 + 1.0 / 3 * qp2
+        return pt1, pt2, qp2
+
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
-
-    def to_curve(self, prev: complex, prev_prev: complex = 0j) -> Curve:
-        return self.to_quadratic(prev, prev_prev).to_curve(prev)
 
     def to_quadratic(self, prev: complex, prev_prev: complex) -> Quadratic:
         """Convert this continued quadratic into a full quadratic"""
@@ -1359,6 +1379,15 @@ class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
             self.arg1 = dx3 + dy3 * 1j
         else:
             self.arg1 = dx3
+
+    def ccurve_points(
+        self, first: complex, prev: complex, prev_prev: complex
+    ) -> Tuple[complex, ...]:
+        qp1 = 2 * prev - prev_prev
+        qp2 = self.arg1 + prev
+        pt1 = 1.0 / 3 * prev + 2.0 / 3 * qp1
+        pt2 = 2.0 / 3 * qp1 + 1.0 / 3 * qp2
+        return pt1, pt2, qp2
 
     def to_absolute(self, prev: complex) -> TepidQuadratic:
         return TepidQuadratic(self.arg1 + prev)
@@ -1668,6 +1697,9 @@ class arc(RelativePathCommand):  # pylint: disable=invalid-name
             not self.sweep,
             -self.endpoint,
         )
+
+    def to_curves(self, prev: complex, prev_prev: complex = 0j) -> List[Curve]:
+        return self.to_absolute(prev).to_curves(prev, prev_prev)
 
 
 PathCommand._letter_to_class = {  # pylint: disable=protected-access
@@ -2149,7 +2181,7 @@ class CubicSuperPath(list):
     When converting back into a path, all lines, arcs etc will be converted
     to curve instructions.
 
-    Structure is held as [SubPath[(point_a, bezier, point_b), ...]], ...]
+    Structure is held as [SubPath[(point_a, bezier, point_b), ...], ...]
     """
 
     def __init__(self, items):
@@ -2162,7 +2194,9 @@ class CubicSuperPath(list):
             items = Path(items)
 
         if isinstance(items, Path):
-            items = items.to_absolute()
+            for item in items:
+                self.append_path_command(item)
+            return
 
         for item in items:
             self.append(item)
@@ -2170,88 +2204,122 @@ class CubicSuperPath(list):
     def __str__(self):
         return str(self.to_path())
 
-    def append(self, item, force_shift=False):
-        """Accept multiple different formats for the data
-
-        .. versionchanged:: 1.2
-            ``force_shift`` parameter has been added
-        """
-        if isinstance(item, list) and len(item) == 2 and isinstance(item[0], str):
-            item = PathCommand.letter_to_class(item[0])(*item[1])
-        coordinate_shift = True
-        if isinstance(item, list) and len(item) == 3 and not force_shift:
-            coordinate_shift = False
-        is_quadratic = False
-        if isinstance(item, PathCommand):
-            if item.letter == "M":
-                if self._closed is False:
-                    super().append([])
-                item = [list(item.args), list(item.args), list(item.args)]
-            elif item.letter == "Z" and self and self[-1]:
-                # This duplicates the first segment to 'close' the path, it's appended
-                # directly because we don't want to last coord to change for the final
-                # segment.
-                self[-1].append(
-                    [self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]]
-                )
-                # Then adds a new subpath for the next shape (if any)
-                self._closed = True
-                self._prev = self._first
-                return
-            elif item.letter == "A":
-                # Arcs are made up of three curves (approximated)
-                for arc_curve in item.to_curves(self._prev, self._prev_prev):
-                    x2, y2, x3, y3, x4, y4 = arc_curve.args
-                    self.append([[x2, y2], [x3, y3], [x4, y4]], force_shift=True)
-                    self._prev_prev = Vector2d(x3, y3)
-                return
-            else:
-                is_quadratic = item.letter in "QTqt"
-                if item.letter in "HV":
-                    item = item.to_line(self._prev)
-                prp = self._prev_prev
-                if is_quadratic:
-                    self._prev_prev = list(
-                        item.control_points(self._first, self._prev, prp)
-                    )[-2:-1][0]
-                item = item.to_curve(self._prev, prp)
-
-        if isinstance(item, Curve):
-            # Curves are cut into three tuples for the super path.
-            item = item.to_bez()
-
-        if not isinstance(item, list):
-            raise ValueError(f"Unknown super curve item type: {item}")
-
-        if len(item) != 3 or not all(len(bit) == 2 for bit in item):
-            # The item is already a subpath (usually from some other process)
-            if len(item[0]) == 3 and all(len(bit) == 2 for bit in item[0]):
-                super().append(self._clean(item))
-                self._prev_prev = Vector2d(self[-1][-1][0])
-                self._prev = Vector2d(self[-1][-1][1])
-                return
-            raise ValueError(f"Unknown super curve list format: {item}")
-
+    def append_node_with_handles(self, command: List[Tuple[float, float]]):
+        """First item: left handle, second item: node coords,
+        third item: right handle"""
         if self._closed:
             # Closed means that the previous segment is closed so we need a new one
             # We always append to the last open segment. CSP starts out closed.
             self._closed = False
             super().append([])
 
-        if coordinate_shift:
-            if self[-1]:
-                # The last tuple is replaced, it's the coords of where the next segment
-                # will land.
-                self[-1][-1][-1] = item[0][:]
-            # The last coord is duplicated, but is expected to be replaced
-            self[-1].append(item[1:] + copy.deepcopy(item)[-1:])
-        else:
-            # Item is already a csp segment and has already been shifted.
-            self[-1].append(copy.deepcopy(item))
+        self[-1].append(command)
+        self._prev_prev = command[0][0] + command[0][1] * 1j
+        self._prev = command[1][0] + command[1][1] * 1j
 
-        self._prev = Vector2d(self[-1][-1][1])
-        if not is_quadratic:
-            self._prev_prev = Vector2d(self[-1][-1][0])
+    def append_path_command(self, command: PathCommand):
+        """Append a path command.
+
+        For ordinary commands:
+
+        ..code ::
+
+            old last entry -> [[.., ..], [.., ..], [x1, y1]]
+            new last entry -> [[x2, y2], [x3, y3], [x3, y3]]
+
+        The last tuple is duplicated (retracted handle): either it's the last command
+        of the subpath, then the handle will stay retracted, or it will be replaced
+        with the next path command.
+        """
+        if command.letter in "mM":
+            carg = command.cend_point(self._first, self._prev)
+            arg = Vector2d.c2t(carg)
+            super().append([[arg[:], arg[:], arg[:]]])
+            self._prev = self._prev_prev = carg
+            self._closed = False
+            return
+        if command.letter in "zZ" and self:
+            # This duplicates the first segment to 'close' the path
+            self[-1].append([self[-1][0][0][:], self[-1][0][1][:], self[-1][0][2][:]])
+            # Then adds a new subpath for the next shape (if any)
+            # self._closed = True
+            self._prev = self._first
+            return
+        if command.letter in "aA":
+            # Arcs are made up of (possibly) more than one curve, depending on their
+            # angle (approximated)
+            for arc_curve in command.to_curves(self._prev, self._prev_prev):
+                self.append_path_command(arc_curve)
+            return
+        # Handle regular curves.
+
+        if self._closed:
+            # Previous segment is closed. Append a new segment first.
+            self._closed = False
+            super().append([])
+
+        cp1, cp2, cp3 = command.ccurve_points(0j, self._prev, self._prev_prev)
+
+        item = [Vector2d.c2t(cp1), Vector2d.c2t(cp2), Vector2d.c2t(cp3)]
+        self._prev = cp3
+        if not command.letter in "QT":
+            self._prev_prev = cp2
+        else:
+            self._prev_prev = command.ccontrol_points(0j, self._prev, self._prev_prev)[
+                0
+            ]
+
+        if self[-1]:  # There exists a previous segment, replace its outgoing handle.
+            self[-1][-1][-1] = item[0]
+        # Append the segment with the last coordinate (node pos) repeated.
+        self[-1].append(item[1:] + [item[-1][:]])
+
+    def append(self, item):
+        """Append a segment/node to the superpath and update the internal state.
+
+        item may be specified in any of the following formats:
+
+        - PathCommand
+        - [str, List[float]] - A path command letter and its arguments
+        - [[float, float], [float, float], [float, float]] - Incoming handle, node,
+           outgoing handle.
+        - List[[float, float], [float, float], [float, float]] - An entire subpath.
+
+
+        """
+        if isinstance(item, list) and len(item) == 2 and isinstance(item[0], str):
+            item = PathCommand.letter_to_class(item[0])(*item[1])
+        if isinstance(item, PathCommand):
+            self.append_path_command(item)
+            return
+
+        if isinstance(item, list):
+            # Item is a subpath: List[Handle, node, Handle]. Just append the
+            # subpath, and update the prev/ prev_prev positions.
+            if (
+                (len(item) != 3 or not all(len(bit) == 2 for bit in item))
+                and len(item[0]) == 3
+                and all(len(bit) == 2 for bit in item[0])
+            ):
+                super().append(self._clean(item))
+
+            elif len(item) == 3 and all(len(bit) == 2 for bit in item):
+                # Item is already a csp segment [Handle, node, Handle].
+                if self._closed:
+                    # Closed means that the previous segment is closed so we need a new one
+                    # We always append to the last open segment. CSP starts out closed.
+                    self._closed = False
+                    super().append([])
+
+                # Item is already a csp segment and has already been shifted.
+                self[-1].append([i.copy() for i in item])
+            else:
+                raise ValueError(f"Unknown super curve list format: {item}")
+
+            self._prev_prev = Vector2d.t2c(self[-1][-1][0])
+            self._prev = Vector2d.t2c(self[-1][-1][1])
+        else:
+            raise ValueError(f"Unknown super curve list format: {item}")
 
     def _clean(self, lst):
         """Recursively clean lists so they have the same type"""
@@ -2262,9 +2330,9 @@ class CubicSuperPath(list):
     @property
     def _first(self):
         try:
-            return Vector2d(self[-1][0][0])
+            return self[-1][0][0][0] + self[-1][0][0][1] * 1j
         except IndexError:
-            return Vector2d()
+            return 0 + 0j
 
     def to_path(self, curves_only=False, rtol=1e-5, atol=1e-8):
         """Convert the super path back to an svg path

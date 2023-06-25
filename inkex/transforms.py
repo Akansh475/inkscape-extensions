@@ -257,10 +257,16 @@ class ImmutableVector2d(complex):
         if theta is not None:
             return Vector2d(cmath.rect(radius, theta))
         return None
-        if radius == 0.0:
-            return Vector2d(0.0, 0.0)
-        if theta is not None:
-            return Vector2d(radius * cos(theta), radius * sin(theta))
+
+    @staticmethod
+    def c2t(c: complex) -> List[float]:
+        """Complex to tuple"""
+        return [c.real, c.imag]
+
+    @staticmethod
+    def t2c(tup: Tuple[float, float]) -> complex:
+        """Tuple to complex"""
+        return tup[0] + 1j * tup[1]
 
 
 Vector2d = ImmutableVector2d

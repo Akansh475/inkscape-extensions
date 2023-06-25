@@ -24,6 +24,7 @@ from __future__ import annotations
 import re
 import copy
 import abc
+import warnings
 from cmath import isclose
 
 from math import atan2, cos, pi, sin, sqrt, acos, tan
@@ -1836,11 +1837,16 @@ class Path(list):
             return bbox
 
     def append(self, cmd):
-        """Append a command to this path including any chained commands"""
-        if isinstance(cmd, list):
-            self.extend(cmd)
-        elif isinstance(cmd, PathCommand):
+        """Append a command to this path."""
+        try:
+            cmd.letter  # pylint: disable=pointless-statement
             super().append(cmd)
+        except AttributeError:
+            self.extend(cmd)
+            warnings.warn(
+                "Passing a list to Path.add is deprecated, " "please use Path.extend",
+                category=DeprecationWarning,
+            )
 
     def translate(self, x, y, inplace=False):  # pylint: disable=invalid-name
         """Move all coords in this path by the given amount"""

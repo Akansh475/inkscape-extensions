@@ -1,4 +1,6 @@
 # coding=utf-8
+import pytest
+
 from render_barcode_qrcode import QrCode, QRCode
 from inkex.tester import ComparisonMixin, TestCase
 from inkex.tester.filters import CompareNumericFuzzy
@@ -77,6 +79,7 @@ class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
     ]
 
 
+@pytest.mark.slow
 class TestLargeQRCodes(ComparisonMixin, TestCase):
     """Test large qr codes with up to 2953 bytes of payload. Also tests numeric mode"""
 

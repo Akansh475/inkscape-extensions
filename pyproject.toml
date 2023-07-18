@@ -22,7 +22,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 PyGObject = {version = ">=3.36", markers = "platform_system!='Windows'"}
 pySerial = "^3.4"
 lxml = "^4.5.0"

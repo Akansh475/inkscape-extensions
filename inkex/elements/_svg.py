@@ -42,7 +42,7 @@ from ..styles import StyleSheets
 
 from ._base import BaseElement, ViewboxMixin
 from ._meta import StyleElement, NamedView
-from ._utils import registerNS
+from ._utils import registerNS, addNS, splitNS
 
 from typing import Optional, List, Tuple
 
@@ -205,7 +205,24 @@ class SvgDocumentElement(
         if eid is not None and not literal:
             eid = eid.strip()[4:-1] if eid.startswith("url(") else eid
             eid = eid.lstrip("#")
-        return self.getElement(f'//{elm}[@id="{eid}"]')
+        if elm != "*":
+            elm_with_ns = addNS(*splitNS(elm)[::-1])
+            elm_check = lambda el: super(etree.ElementBase, el).tag == elm_with_ns
+        else:
+            elm_check = lambda _: True
+
+        def check(el):
+            try:
+                return super(etree.ElementBase, el).get(
+                    "id", None
+                ) == eid and elm_check(el)
+            except TypeError:
+                return False
+
+        try:
+            return next(filter(check, self.iter()))
+        except StopIteration:
+            return None
 
     def getElementByName(self, name, elm="*"):  # pylint: disable=invalid-name
         """Get an element by it's inkscape:label (aka name)"""

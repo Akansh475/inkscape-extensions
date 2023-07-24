@@ -26,14 +26,16 @@ import re
 import sys
 from collections import OrderedDict
 from typing import MutableMapping, Union, Iterable, TYPE_CHECKING
+from lxml import etree
 
 from .interfaces.IElement import IBaseElement
 
 from .colors import Color
 from .properties import BaseStyleValue, all_properties, ShorthandValue
-from .css import ConditionalRule
+from .css import CSSCompiler, parser
 
 from .utils import FragmentError
+from .elements._utils import NSS
 
 if TYPE_CHECKING:
     from .elements._svg import SvgDocumentElement
@@ -435,7 +437,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             Style: the cascaded style
         """
         try:
-            styles = list(element.root.stylesheets.lookup_specificity(element.get_id()))
+            styles = list(element.root.stylesheets.lookup_specificity(element))
         except FragmentError:
             styles = []
 
@@ -491,34 +493,22 @@ class StyleSheets(list):
     re-created on the fly by lxml so lookups have to be centralised.
     """
 
-    def __init__(self, svg=None):
-        super().__init__()
-        self.svg = svg
-
-    def lookup(self, element_id, svg=None):
+    def lookup(self, element):
         """
         Find all styles for this element.
         """
-        # This is aweful, but required because we can't know for sure
-        # what might have changed in the xml tree.
-        if svg is None:
-            svg = self.svg
         for sheet in self:
-            for style in sheet.lookup(element_id, svg=svg):
+            for style in sheet.lookup(element):
                 yield style
 
-    def lookup_specificity(self, element_id, svg=None):
+    def lookup_specificity(self, element):
         """
         Find all styles for this element and return the specificity of the match.
 
         .. versionadded:: 1.2
         """
-        # This is aweful, but required because we can't know for sure
-        # what might have changed in the xml tree.
-        if svg is None:
-            svg = self.svg
         for sheet in self:
-            for style in sheet.lookup_specificity(element_id, svg=svg):
+            for style in sheet.lookup_specificity(element):
                 yield style
 
 
@@ -568,31 +558,27 @@ class StyleSheet(list):
         super().append(other)
         self._callback()
 
-    def lookup(self, element_id, svg):
-        """Lookup the element_id against all the styles in this sheet"""
+    def lookup(self, element):
+        """Lookup the element against all the styles in this sheet"""
         for style in self:
-            for elem in svg.xpath(style.to_xpath()):
-                if elem.get("id", None) == element_id:
-                    yield style
+            if any(style.checks(element)):
+                yield style
 
-    def lookup_specificity(self, element_id, svg):
+    def lookup_specificity(self, element):
         """Lookup the element_id against all the styles in this sheet
         and return the specificity of the match
 
         Args:
-            element_id (str): the id of the element that styles are being queried for
-            svg (SvgDocumentElement): The document that contains both element and the
-                styles
+            element: the element of the element that styles are being queried for
 
         Yields:
             Tuple[ConditionalStyle, Tuple[int, int, int]]: all matched styles and the
             specificity of the match
         """
         for style in self:
-            for rule, spec in zip(style.to_xpaths(), style.get_specificities()):
-                for elem in svg.xpath(rule):
-                    if elem.get("id", None) == element_id:
-                        yield (style, spec)
+            for rule, check in zip(style.rules, style.checks):
+                if check(element):
+                    yield (style, rule.specificity)
 
 
 class ConditionalStyle(Style):
@@ -604,7 +590,29 @@ class ConditionalStyle(Style):
 
     def __init__(self, rules="*", style=None, callback=None, **kwargs):
         super().__init__(style=style, callback=callback, **kwargs)
-        self.rules = [ConditionalRule(rule) for rule in rules.split(",")]
+        self._rules: str = rules
+        self.rules = list(parser.parse(rules, namespaces=NSS))
+        self.checks = [
+            CSSCompiler.compile_node(selector.parsed_tree) for selector in self.rules
+        ]
+
+    def matches(self, element: etree.Element):
+        """Checks if an individual element matches this selector.
+
+        .. versionadded:: 1.4"""
+        if isinstance(element, etree._Comment):
+            return False
+        if any(check(element) for check in self.checks):
+            return True
+        return False
+
+    def all_matches(self, document: etree.Element):
+        """Get all matches of this selector in document as iterator.
+
+        .. versionadded:: 1.4"""
+        for el in document.iter():
+            if self.matches(el):
+                yield el
 
     def __str__(self):
         """Return this style as a css entry with class"""
@@ -614,23 +622,9 @@ class ConditionalStyle(Style):
             return f"{rules} {{\n  {content};\n}}"
         return f"{rules} {{}}"
 
-    def to_xpath(self):
-        """Convert all rules to an xpath"""
-        # This can be converted to cssselect.CSSSelector (lxml.cssselect) later if we
-        # have coverage problems. The main reason we're not is that cssselect is doing
-        # exactly this xpath transform and provides no extra functionality for reverse
-        # lookups.
-        return "|".join(self.to_xpaths())
-
-    def to_xpaths(self):
-        """Gets a list of xpaths for all rules of this ConditionalStyle
-
-        .. versionadded:: 1.2"""
-        return [rule.to_xpath() for rule in self.rules]
-
     def get_specificities(self):
         """Gets an iterator of the specificity of all rules in this ConditionalStyle
 
         .. versionadded:: 1.2"""
         for rule in self.rules:
-            yield rule.get_specificity()
+            yield rule.specificity

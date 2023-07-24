@@ -31,14 +31,13 @@ import re
 
 from lxml import etree
 
-from ..css import ConditionalRule
 from ..interfaces.IElement import ISVGDocumentElement
 
 from ..deprecated.meta import DeprecatedSvgMixin, deprecate
 from ..units import discover_unit, parse_unit
 from ._selected import ElementList
 from ..transforms import BoundingBox
-from ..styles import StyleSheets
+from ..styles import StyleSheets, ConditionalStyle
 
 from ._base import BaseElement, ViewboxMixin
 from ._meta import StyleElement, NamedView
@@ -223,6 +222,10 @@ class SvgDocumentElement(
             return next(filter(check, self.iter()))
         except StopIteration:
             return None
+        if eid is not None and not literal:
+            eid = eid.strip()[4:-1] if eid.startswith("url(") else eid
+            eid = eid.lstrip("#")
+        return self.getElement(f'//{elm}[@id="{eid}"]')
 
     def getElementByName(self, name, elm="*"):  # pylint: disable=invalid-name
         """Get an element by it's inkscape:label (aka name)"""
@@ -230,8 +233,7 @@ class SvgDocumentElement(
 
     def getElementsByClass(self, class_name):  # pylint: disable=invalid-name
         """Get elements by it's class name"""
-
-        return self.xpath(ConditionalRule(f".{class_name}").to_xpath())
+        return ConditionalStyle(f".{class_name}").all_matches(self)
 
     def getElementsByHref(
         self, eid: str, attribute="href"
@@ -402,7 +404,7 @@ class SvgDocumentElement(
     @property
     def stylesheets(self):
         """Get all the stylesheets, bound together to one, (for reading)"""
-        sheets = StyleSheets(self)
+        sheets = StyleSheets()
         for node in self.xpath("//svg:style"):
             sheets.append(node.stylesheet())
         return sheets

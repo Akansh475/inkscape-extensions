@@ -167,7 +167,7 @@ class BaseElement(IBaseElement):
             value = getattr(self, prop, None)
             # We check the boolean nature of the value, because empty
             # transformations and style attributes are equiv to not-existing
-            ret = str(value) if value else (default or None)
+            ret = str(value) if value else default
             return ret
         return super().get(addNS(attr), default)
 

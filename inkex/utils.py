@@ -26,7 +26,7 @@ import random
 import re
 import math
 from argparse import ArgumentTypeError
-from itertools import tee
+from itertools import tee, cycle
 
 ABORT_STATUS = -5
 
@@ -234,6 +234,16 @@ def pairwise(iterable, start=True):
     if not start:
         starter = []
     return starter + list(zip(first, then))
+
+
+def circular_pairwise(l):
+    """Iterate over a list with overlapping pairs in a periodic way, i.e.
+    [1, 2, 3] -> [(1, 2), (2, 3), (3, 1)]
+
+    ..versionadded:: 1.3.1"""
+    second = cycle(l)
+    next(second)
+    return zip(l, second)
 
 
 EVAL_GLOBALS = {}

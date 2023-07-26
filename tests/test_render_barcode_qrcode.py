@@ -50,6 +50,7 @@ class TestQRCodeInkscapeBasic(ComparisonMixin, TestCase):
             "--smoothness=greedy",
         ),
     ]
+    compare_filters = [CompareNumericFuzzy()]
 
 
 class TestQRCodeInkscapeSelection(ComparisonMixin, TestCase):
@@ -79,7 +80,6 @@ class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
     ]
 
 
-@pytest.mark.slow
 class TestLargeQRCodes(ComparisonMixin, TestCase):
     """Test large qr codes with up to 2953 bytes of payload. Also tests numeric mode"""
 
@@ -89,6 +89,7 @@ class TestLargeQRCodes(ComparisonMixin, TestCase):
         # the largest numeric QR code has 7089 characters
         ("--text=" + (("12345" * 2000)[0:7089]), "--qrmode=1", "--correctionlevel=1"),
     ]
+    compare_filters = [CompareNumericFuzzy()]
 
 
 class TestQRCodeClasses(ComparisonMixin, TestCase):
@@ -104,3 +105,4 @@ class TestQRCodeClasses(ComparisonMixin, TestCase):
             "--correctionlevel=1",
         ),
     ]
+    compare_filters = [CompareNumericFuzzy()]

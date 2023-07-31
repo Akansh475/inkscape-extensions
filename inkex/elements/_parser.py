@@ -25,7 +25,7 @@
     Separated out from :py:mod:`inkex.elements._base`"""
 
 from collections import defaultdict
-from typing import DefaultDict, List, Any, Type
+from typing import DefaultDict, List, Any
 
 from lxml import etree
 
@@ -112,8 +112,12 @@ def load_svg(stream):
         )
         for __, element in enumerate(SVG_PARSER.error_log):
             errormsg(
-                _("{}. Line {}, column {}").format(
-                    element.message, element.line, element.column
+                _(
+                    "{error_message}. Line {line_number}, column {column_number}",
+                ).format(
+                    error_message=element.message,
+                    line_number=element.line,
+                    column_number=element.column,
                 )
             )
         errormsg(

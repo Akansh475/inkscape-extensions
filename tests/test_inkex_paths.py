@@ -6,7 +6,6 @@ Test Inkex path parsing functionality.
 import re
 
 from inkex.paths import (
-    InvalidPath,
     Path,
     PathCommand,
     CubicSuperPath,
@@ -30,9 +29,8 @@ from inkex.paths import (
     TepidQuadratic,
     Arc,
     ZoneClose,
-    Vector2d,
 )
-from inkex.transforms import Transform
+from inkex.transforms import Transform, Vector2d
 from inkex.tester import TestCase
 
 # pylint: disable=too-many-public-methods

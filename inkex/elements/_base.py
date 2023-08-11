@@ -28,7 +28,7 @@ give path, transform, and property access easily.
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Tuple, Optional, overload, TypeVar, List
+from typing import Any, Tuple, Optional, overload, TypeVar, List, Callable
 from lxml import etree
 import re
 
@@ -124,6 +124,8 @@ class BaseElement(IBaseElement):
     
     .. versionadded:: 1.1"""
 
+    _root: Optional[ISVGDocumentElement] = None
+
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""
         if name in self.wrapped_props:
@@ -173,6 +175,16 @@ class BaseElement(IBaseElement):
 
     def set(self, attr, value):
         """Set element attribute named, with addNS support"""
+        if attr == "id" and value is not None:
+            try:
+                oldid = self.get("id", None)
+                if oldid is not None and oldid in self.root.ids:
+                    self.root.ids.pop(oldid)
+                if value in self.root.ids:
+                    raise ValueError(f"ID {value} already exists in this document")
+                self.root.ids[value] = self
+            except FragmentError:  # element is unrooted
+                pass
         if attr in self.wrapped_attrs:
             # Always keep the local wrapped class up to date.
             (prop, cls) = self.wrapped_attrs[attr]
@@ -344,14 +356,19 @@ class BaseElement(IBaseElement):
                 elem.style.update_urls(old_id, new_id)
 
     @property
-    def root(self):
+    def root(self) -> ISVGDocumentElement:
         """Get the root document element from any element descendent"""
+        if self._root is not None:
+            return self._root
+
         root, parent = self, self
         while parent is not None:
             root, parent = parent, parent.getparent()
 
         if not isinstance(root, ISVGDocumentElement):
             raise FragmentError("Element fragment does not have a document root!")
+
+        self._root = root
         return root
 
     def get_or_create(self, xpath, nodeclass=None, prepend=False):
@@ -463,12 +480,12 @@ class BaseElement(IBaseElement):
 
     def replace_with(self, elem):
         """Replace this element with the given element"""
-        self.addnext(elem)
+        self.getparent().replace(self, elem)
+
         if not elem.get("id") and self.get("id"):
             elem.set("id", self.get("id"))
         if not elem.label and self.label:
             elem.label = self.label
-        self.delete()
         return elem
 
     def copy(self):
@@ -657,6 +674,89 @@ class BaseElement(IBaseElement):
         if parent is not other and isinstance(parent, BaseElement):
             return parent.composed_transform(other) @ self.transform
         return self.transform
+
+    def _add_to_tree_callback(self, element):
+        try:
+            element._root = self._root
+            self.root.add_to_tree_callback(element)
+        except FragmentError:
+            pass
+
+    @staticmethod
+    def _remove_from_tree_callback(oldtree, element):
+        try:
+            oldtree.root.remove_from_tree_callback(element)
+        except FragmentError:
+            pass
+
+    def __element_adder(
+        self, element: BaseElement, add_func: Callable[[BaseElement], None]
+    ):
+        BaseElement._remove_from_tree_callback(element, element)
+        # Make sure that we have an ID cache before adding the element,
+        # otherwise we will try to add this element twice to the cache
+        try:
+            self.root.ids
+        except FragmentError:
+            pass
+        try:
+            add_func(element)
+        except Exception as err:
+            BaseElement._add_to_tree_callback(element, element)
+            raise err
+        self._add_to_tree_callback(element)
+
+    # Overrides to keep track of styles and IDs
+    def addnext(self, element):
+        self.__element_adder(element, super(etree.ElementBase, self).addnext)
+
+    def addprevious(self, element):
+        self.__element_adder(element, super(etree.ElementBase, self).addprevious)
+
+    def append(self, element):
+        self.__element_adder(element, super(etree.ElementBase, self).append)
+
+    def clear(self, keep_tail=False):
+        subelements = iter(self)
+        old_id = self.get("id", None)
+        super().clear(keep_tail)
+        for element in subelements:
+            BaseElement._remove_from_tree_callback(self, element)
+        if old_id is not None and old_id in self.root.ids:
+            self.root.ids.pop(old_id)
+
+    def extend(self, elements):
+        for element in elements:
+            BaseElement._remove_from_tree_callback(element, element)
+        try:
+            self.root.ids
+        except FragmentError:
+            pass
+        try:
+            super().extend(elements)
+        except Exception as err:
+            for element in elements:
+                BaseElement._add_to_tree_callback(element, element)
+            raise err
+        for element in elements:
+            self._add_to_tree_callback(element)
+
+    def insert(self, index, element):
+        self.__element_adder(
+            element,
+            lambda element: super(etree.ElementBase, self).insert(index, element),
+        )
+
+    def remove(self, element):
+        super().remove(element)
+        BaseElement._remove_from_tree_callback(self, element)
+
+    def replace(self, old_element, new_element):
+        def replacer(new_element):
+            super(etree.ElementBase, self).replace(old_element, new_element)
+            BaseElement._remove_from_tree_callback(self, old_element)
+
+        self.__element_adder(new_element, replacer)
 
 
 NodeBasedLookup.default = BaseElement

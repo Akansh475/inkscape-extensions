@@ -21,14 +21,122 @@
 
 from __future__ import annotations
 
-from typing import overload, Tuple
+from typing import overload, Tuple, Callable
+from math import sqrt
+
+import numpy as np
 
 from ..transforms import quadratic_extrema, Transform
 
-from .interfaces import AbsolutePathCommand, RelativePathCommand
+from .interfaces import (
+    AbsolutePathCommand,
+    RelativePathCommand,
+    BezierComputationMixin,
+    BezierArcComputationMixin,
+    LengthSettings,
+)
 
 
-class Quadratic(AbsolutePathCommand):
+class QuadraticMixin(BezierComputationMixin, BezierArcComputationMixin):
+    # pylint: disable=unused-argument
+    ccontrol_points: Callable[[complex, complex, complex], Tuple[complex, ...]]
+
+    def _cderivative(
+        self, first: complex, prev: complex, prev_control: complex, t: float, n: int = 1
+    ) -> complex:
+        points = self.ccontrol_points(first, prev, prev_control)
+        if n == 1:
+            return 2 * ((points[0] - prev) * (1 - t) + (points[1] - points[0]) * t)
+        if n == 2:
+            return 2 * (prev - 2 * points[0] + points[1])
+        if n > 2:
+            return 0j
+        raise ValueError("n should be a positive integer.")
+
+    def _cunit_tangent(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        return self.bezier_unit_tangent(prev, prev_control, t)
+
+    def _cpoint(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        control, end = self.ccontrol_points(first, prev, prev_control)
+        return (1 - t) ** 2 * prev + 2 * t * (1 - t) * control + t**2 * end
+
+    # TODO maybe better treatment of degenerate beziers from
+    # https://github.com/linebender/kurbo/blob/c229a914d303c5989c9e6b1d766def2df27a8185/src/quadbez.rs#L239
+    # Ported from https://github.com/mathandy/svgpathtools/blob/19df25b99b405ec4fc7616b58384eca7879b6fd4/svgpathtools/path.py#L919
+    # (MIT licensed)
+    def _length(
+        self,
+        first: complex,
+        prev: complex,
+        prev_control: complex,
+        t0: float = 0,
+        t1: float = 1,
+        settings=LengthSettings(),
+    ) -> float:
+        control, end = self.ccontrol_points(first, prev, prev_control)
+        a = prev - 2 * control + end
+        b = 2 * (control - prev)
+
+        if abs(a) < 1e-12:
+            s = abs(b) * (t1 - t0)
+        else:
+            c2 = 4 * (a.real**2 + a.imag**2)
+            c1 = 4 * (a.real * b.real + a.imag * b.imag)
+            c0 = b.real**2 + b.imag**2
+
+            beta = c1 / (2 * c2)
+            gamma = c0 / c2 - beta**2
+
+            dq1_mag = sqrt(c2 * t1**2 + c1 * t1 + c0)
+            dq0_mag = sqrt(c2 * t0**2 + c1 * t0 + c0)
+            # this implicitly handles division by zero
+            try:
+                logarand = (sqrt(c2) * (t1 + beta) + dq1_mag) / (
+                    sqrt(c2) * (t0 + beta) + dq0_mag
+                )
+
+                s = (
+                    (t1 + beta) * dq1_mag
+                    - (t0 + beta) * dq0_mag
+                    + gamma * sqrt(c2) * np.log(logarand)
+                ) / 2
+            except ZeroDivisionError:
+                s = np.NaN
+            if np.isnan(s):
+                tstar = abs(b) / (2 * abs(a))
+                if t1 < tstar:
+                    return abs(a) * (t0**2 - t1**2) - abs(b) * (t0 - t1)
+                elif tstar < t0:
+                    return abs(a) * (t1**2 - t0**2) - abs(b) * (t1 - t0)
+                else:
+                    return (
+                        abs(a) * (t1**2 + t0**2)
+                        - abs(b) * (t1 + t0)
+                        + abs(b) ** 2 / (2 * abs(a))
+                    )
+        return s
+
+    def _abssplit(
+        self, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Quadratic, Quadratic]:
+        """Split this Quadratic and return two Quadratics using DeCasteljau's algorithm"""
+        p1, p2 = self.ccontrol_points(0j, prev, prev_control)
+        p1_1 = (1 - t) * prev + t * p1
+        p1_2 = (1 - t) * p1 + t * p2
+        p2_1 = (1 - t) * p1_1 + t * p1_2
+        return Quadratic(p1_1, p2_1), Quadratic(p1_2, p2)
+
+    def _relsplit(self, prev: complex, prev_control: complex, t: float):
+        """Split this curve and return two curves"""
+        c1abs, c2abs = self._abssplit(prev, prev_control, t)
+        return c1abs.to_relative(prev), c2abs.to_relative(c1abs.arg2)
+
+
+class Quadratic(QuadraticMixin, AbsolutePathCommand):
     """Absolute Quadratic Curved Line segment"""
 
     letter = "Q"
@@ -115,8 +223,13 @@ class Quadratic(AbsolutePathCommand):
     def reverse(self, first, prev):
         return Quadratic(self.x2, self.y2, prev.x, prev.y)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Quadratic, Quadratic]:
+        return self._abssplit(prev, prev_control, t)
 
-class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
+
+class quadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative quadratic line segment"""
 
     letter = "q"
@@ -188,8 +301,13 @@ class quadratic(RelativePathCommand):  # pylint: disable=invalid-name
     def reverse(self, first: complex, prev: complex) -> quadratic:
         return quadratic(-self.arg2 + self.arg1, -self.arg2)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[quadratic, quadratic]:
+        return self._relsplit(prev, prev_control, t)
 
-class TepidQuadratic(AbsolutePathCommand):
+
+class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
     """Continued Quadratic Line segment"""
 
     letter = "T"
@@ -264,8 +382,15 @@ class TepidQuadratic(AbsolutePathCommand):
     def reverse(self, first: complex, prev: complex) -> TepidQuadratic:
         return TepidQuadratic(prev)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Quadratic, Quadratic]:
+        return self._abssplit(prev, prev_control, t)
 
-class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
+
+class tepidQuadratic(
+    QuadraticMixin, RelativePathCommand
+):  # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
 
     letter = "t"
@@ -327,3 +452,8 @@ class tepidQuadratic(RelativePathCommand):  # pylint: disable=invalid-name
 
     def reverse(self, first: complex, prev: complex) -> tepidQuadratic:
         return tepidQuadratic(-self.arg1)
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[quadratic, quadratic]:
+        return self._relsplit(prev, prev_control, t)

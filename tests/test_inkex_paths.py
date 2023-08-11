@@ -919,6 +919,20 @@ class SuperPathTest(TestCase):
 
         self.assertEqual(str(csp.to_path()), "M 10 10 L 40 40 C 100 100 50 50 60 60")
 
+    def test_is_line_2(self):
+        assert CubicSuperPath.is_line(
+            [
+                [421.20367729252575, 115.75839791826027],
+                [417.7753678856422, 120.70730419246635],
+                [411.90718253542866, 129.17827219773602],
+            ],
+            [
+                [407.12100999999996, 136.08731000000003],
+                [407.12101, 136.08731000000003],
+                [407.12101, 136.08731000000003],
+            ],
+        )
+
     def test_is_line_collinear(self):
         self.assertFalse(CubicSuperPath.collinear([1, 2], [2, 2.00001], [3, 2]))
         self.assertTrue(CubicSuperPath.collinear([1, 2], [2, 2], [3, 2]))

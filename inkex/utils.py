@@ -25,8 +25,11 @@ import sys
 import random
 import re
 import math
+
 from argparse import ArgumentTypeError
 from itertools import tee, cycle
+
+import numpy as np
 
 ABORT_STATUS = -5
 
@@ -279,3 +282,17 @@ def is_number(string):
         return True
     except ValueError:
         return False
+
+
+def rational_limit(f: np.poly1d, g: np.poly1d, t0):
+    """Computes the limit of the rational function (f/g)(t)
+    as t approaches t0.
+
+    .. versionadded:: 1.4"""
+    assert g != np.poly1d([0])
+    if g(t0) != 0:
+        return f(t0) / g(t0)
+    elif f(t0) == 0:
+        return rational_limit(f.deriv(), g.deriv(), t0)
+    else:
+        raise ValueError("Limit does not exist.")

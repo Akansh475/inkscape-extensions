@@ -24,9 +24,11 @@ from __future__ import annotations
 
 from typing import overload, Tuple, Optional, TYPE_CHECKING, Callable
 
+from inkex.paths.interfaces import ILengthSettings, LengthSettings
+
 from ..transforms import Transform, BoundingBox
 
-from .interfaces import AbsolutePathCommand, RelativePathCommand
+from .interfaces import AbsolutePathCommand, RelativePathCommand, ILengthSettings
 
 if TYPE_CHECKING:
     from .curves import Curve
@@ -35,13 +37,13 @@ if TYPE_CHECKING:
 class LineMixin:
     """Common Line functions"""
 
+    # pylint: disable=unused-argument
+
     arg1: complex
 
     cend_point: Callable[[complex, complex], complex]
 
-    def ccurve_points(
-        self, first: complex, prev: complex, prev_prev: complex
-    ):  # pylint: disable=unused-argument
+    def ccurve_points(self, first: complex, prev: complex, prev_prev: complex):
         """Common implementation of ccurve_points for Lines"""
         arg1 = self.cend_point(first, prev)
         return prev, arg1, arg1
@@ -54,6 +56,47 @@ class LineMixin:
     ) -> Tuple[complex, ...]:
         """Common implementation of ccontrol_points for Lines"""
         return (self.cend_point(first, prev),)
+
+    def _cderivative(
+        self, first: complex, prev: complex, prev_control: complex, t: float, n: int = 1
+    ) -> complex:
+        start = self.cend_point(first, prev)
+        if prev == start:
+            raise ValueError("Derivative is not defined for zero-length segments")
+        if n == 1:
+            return start - prev
+        return 0j
+
+    def _curvature(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> float:
+        return 0
+
+    def _cpoint(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        return self.cend_point(first, prev) * t + (1 - t) * prev
+
+    def _length(
+        self,
+        first: complex,
+        prev: complex,
+        prev_control: complex,
+        t0: float = 0,
+        t1: float = 1,
+        settings=LengthSettings(),
+    ) -> float:
+        return abs(self.cend_point(first, prev) - prev) * (t1 - t0)
+
+    def _ilength(
+        self,
+        first: complex,
+        prev: complex,
+        prev_control: complex,
+        length: float,
+        settings: ILengthSettings = ILengthSettings(),
+    ):
+        return length / self._length(first, prev, prev_control)
 
 
 class Line(LineMixin, AbsolutePathCommand):
@@ -111,6 +154,11 @@ class Line(LineMixin, AbsolutePathCommand):
     def reverse(self, first, prev):
         return Line(prev)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Line, Line]:
+        return Line(self._cpoint(first, prev, prev_control, t)), Line(self.arg1)
+
 
 class line(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative line segment"""
@@ -162,8 +210,64 @@ class line(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         raise ValueError("Move segments can not be changed into curves.")
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[line, line]:
+        dx1 = self.cpoint(first, prev, prev_control, t) - prev
+        return line(dx1), line(self.arg1 - dx1)
 
-class Move(AbsolutePathCommand):
+
+class MoveMixin:
+    """Disable derivative / length method for Move command."""
+
+    def _cderivative(
+        self, first: complex, prev: complex, prev_control: complex, t: float, n: int = 1
+    ) -> complex:
+        raise ValueError("Derivative is not supported for move/Move")
+
+    def _cunit_tangent(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        raise ValueError("Unit Tangent is not supported for move/Move")
+
+    def _curvature(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> float:
+        raise ValueError("Curvature is not supported for move/Move")
+
+    def _cpoint(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        raise ValueError("Point is not supported for move/Move")
+
+    def _length(
+        self,
+        first: complex,
+        prev: complex,
+        prev_control: complex,
+        t0: float = 0,
+        t1: float = 1,
+        settings=LengthSettings(),
+    ) -> float:
+        raise ValueError("Length is not supported for move/Move")
+
+    def _ilength(
+        self,
+        first: complex,
+        prev: complex,
+        prev_control: complex,
+        length: float,
+        settings: ILengthSettings = ILengthSettings(),
+    ):
+        raise ValueError("ILength is not supported for move/Move")
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Move, Move]:
+        raise ValueError("Split is not supported for move/Move")
+
+
+class Move(MoveMixin, AbsolutePathCommand):
     """Move pen segment without a line"""
 
     letter = "M"
@@ -228,7 +332,7 @@ class Move(AbsolutePathCommand):
         return Move(prev)
 
 
-class move(RelativePathCommand):  # pylint: disable=invalid-name
+class move(MoveMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative move segment"""
 
     letter = "m"
@@ -314,6 +418,11 @@ class ZoneClose(LineMixin, AbsolutePathCommand):
     def reverse(self, first, prev):
         return Line(prev)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Line, ZoneClose]:
+        return Line(self._cpoint(first, prev, prev_control, t)), ZoneClose()
+
 
 class zoneClose(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Same as above (svg says no difference)"""
@@ -338,6 +447,11 @@ class zoneClose(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
 
     def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
         raise ValueError("ZoneClose segments can not be changed into curves.")
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[line, zoneClose]:
+        return line(self.cpoint(first, prev, prev_control, t) - prev), zoneClose()
 
 
 class Horz(LineMixin, AbsolutePathCommand):
@@ -374,6 +488,11 @@ class Horz(LineMixin, AbsolutePathCommand):
     def reverse(self, first, prev):
         return Horz(prev.real)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Horz, Horz]:
+        return Horz(self.cpoint(first, prev, prev_control, t).real), Horz(self.x)
+
 
 class horz(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative horz line segment"""
@@ -400,6 +519,12 @@ class horz(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
 
     def reverse(self, first, prev):
         return horz(-self.dx)
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[horz, horz]:
+        dx1 = (self.cpoint(first, prev, prev_control, t) - prev).real
+        return horz(dx1), horz(self.dx - dx1)
 
 
 class Vert(LineMixin, AbsolutePathCommand):
@@ -436,6 +561,11 @@ class Vert(LineMixin, AbsolutePathCommand):
     def reverse(self, first: complex, prev: complex):
         return Vert(prev.imag)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Vert, Vert]:
+        return Vert(self.cpoint(first, prev, prev_control, t).imag), Vert(self.y)
+
 
 class vert(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative vertical line segment"""
@@ -462,3 +592,9 @@ class vert(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
 
     def reverse(self, first, prev):
         return vert(-self.dy)
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[vert, vert]:
+        dy1 = (self.cpoint(first, prev, prev_control, t) - prev).imag
+        return vert(dy1), vert(self.dy - dy1)

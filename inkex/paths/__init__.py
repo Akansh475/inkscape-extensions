@@ -17,14 +17,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-"""Paths module"""
+"""Paths module.
 
-from .interfaces import PathCommand, AbsolutePathCommand, RelativePathCommand
+Most of the functions derivative, unit_tangent, curvature, point, split, length, ilength
+for the individual path commands are ported from 
+https://github.com/mathandy/svgpathtools/ (MIT licensed)
+"""
+
+from .interfaces import (
+    PathCommand,
+    AbsolutePathCommand,
+    RelativePathCommand,
+    LengthSettings,
+    ILengthSettings,
+)
 from .lines import Line, line, Move, move, ZoneClose, zoneClose, Horz, horz, Vert, vert
 from .curves import curve, Curve, smooth, Smooth
 from .quadratic import quadratic, Quadratic, tepidQuadratic, TepidQuadratic
 from .arc import Arc, arc, arc_to_path, matprod, rotmat, applymat, norm
 from .path import CubicSuperPath, Path, InvalidPath
+
+import numpy as np
+
+np.seterr(invalid="raise")
 
 
 # definitions that can't be inside the class due to circular dependencies
@@ -98,4 +113,7 @@ __all__ = (
     "arc",
     # errors
     "InvalidPath",
+    # structs
+    "LengthSettings",
+    "ILengthSettings",
 )

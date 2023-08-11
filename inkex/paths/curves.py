@@ -20,14 +20,21 @@
 """Curve and Smooth Path Commands"""
 from __future__ import annotations
 
-from typing import overload, Tuple, Callable
+from typing import overload, Tuple, Callable, cast
+
+import numpy as np
 
 from ..transforms import cubic_extrema, Transform, Vector2d
 
-from .interfaces import AbsolutePathCommand, RelativePathCommand
+from .interfaces import (
+    AbsolutePathCommand,
+    RelativePathCommand,
+    BezierArcComputationMixin,
+    BezierComputationMixin,
+)
 
 
-class CurveMixin:
+class CurveMixin(BezierComputationMixin, BezierArcComputationMixin):
     """Common functionality for curves"""
 
     ccontrol_points: Callable[[complex, complex, complex], Tuple[complex, ...]]
@@ -37,6 +44,90 @@ class CurveMixin:
     ) -> Tuple[complex, ...]:
         """Common implementation of ccurve_points for Curves"""
         return self.ccontrol_points(first, prev, prev_prev)
+
+    def _cderivative(
+        self, first: complex, prev: complex, prev_control: complex, t: float, n: int = 1
+    ) -> complex:
+        """Returns the nth derivative of the segment at t.
+
+        .. hint:: Bezier curves can have points where their derivative vanishes.
+        If you are interested in the tangent direction, use the :func:`unit_tangent`
+        method instead."""
+
+        points = self.ccontrol_points(first, prev, prev_control)
+
+        if n == 1:
+            return (
+                3 * (points[0] - prev) * ((1 - t) ** 2)
+                + 6 * (points[1] - points[0]) * (1 - t) * t
+                + 3 * (points[2] - points[1]) * t**2
+            )
+        elif n == 2:
+            return 6 * (
+                (1 - t) * (points[1] - 2 * points[0] + prev)
+                + t * (points[2] - 2 * points[1] + points[0])
+            )
+        elif n == 3:
+            return 6 * (points[2] - 3 * (points[1] - points[0]) - prev)
+        elif n > 3:
+            return Vector2d(0, 0)
+        else:
+            raise ValueError("n should be a positive integer.")
+
+    def poly(self, prev, prev_control, return_coeffs=False):
+        """Returns a the cubic as a complex Polynomial object.
+
+        .. versionadded:: 1.4"""
+        points = self.ccontrol_points(0j, prev, prev_control)
+        coeffs = (
+            -prev + 3 * (points[0] - points[1]) + points[2],
+            3 * (prev - 2 * points[0] + points[1]),
+            3 * (prev + points[0]),
+            prev,
+        )
+        if return_coeffs:
+            return coeffs
+        return np.poly1d(coeffs)
+
+    def _cunit_tangent(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Vector2d:
+        return self.bezier_unit_tangent(prev, prev_control, t)
+
+    def _curvature(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ):
+        return self.segment_curvature(prev, prev_control, t)
+
+    def _abssplit(
+        self, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Curve, Curve]:
+        """Split this curve and return two Curves using DeCasteljau's algorithm"""
+        p1, p2, p3 = self.ccontrol_points(0j, prev, prev_control)
+        p1_1 = (1 - t) * prev + t * p1
+        p1_2 = (1 - t) * p1 + t * p2
+        p1_3 = (1 - t) * p2 + t * p3
+        p2_1 = (1 - t) * p1_1 + t * p1_2
+        p2_2 = (1 - t) * p1_2 + t * p1_3
+        p3_1 = (1 - t) * p2_1 + t * p2_2
+
+        return Curve(p1_1, p2_1, p3_1), Curve(p2_2, p1_3, p3)
+
+    def _relsplit(self, prev: complex, prev_control: complex, t: float):
+        """Split this curve and return two curves"""
+        c1abs, c2abs = self._abssplit(prev, prev_control, t)
+        return c1abs.to_relative(prev), c2abs.to_relative(c1abs.arg3)
+
+    def _cpoint(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        control1, control2, end = self.ccontrol_points(first, prev, prev_control)
+        return (
+            (1 - t) ** 3 * prev
+            + 3 * t * (1 - t) ** 2 * control1
+            + 3 * t**2 * (1 - t) * control2
+            + t**3 * end
+        )
 
 
 class Curve(CurveMixin, AbsolutePathCommand):
@@ -151,6 +242,11 @@ class Curve(CurveMixin, AbsolutePathCommand):
         """Convert to [[c1x, c1y], [c2x, c2y], [end_x, end_y]]"""
         return [Vector2d.c2t(i) for i in self.ccontrol_points(0j, 0j, 0j)]
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Curve, Curve]:
+        return self._abssplit(prev, prev_control, t)
+
 
 class curve(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative curved line segment"""
@@ -240,6 +336,11 @@ class curve(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
             self.arg3 + prev,
         )
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[curve, curve]:
+        return self._relsplit(prev, prev_control, t)
+
 
 class Smooth(CurveMixin, AbsolutePathCommand):
     """Absolute Smoothed Curved Line segment"""
@@ -321,6 +422,18 @@ class Smooth(CurveMixin, AbsolutePathCommand):
     def reverse(self, first: complex, prev: complex) -> Smooth:
         return Smooth(self.arg1, prev)
 
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Curve, Curve]:
+        # We can't preserve the smooth type for a split because de Casteljau's
+        # algorithm changes the handles (obviously).
+        # Only in special cases such as splitting to subsequent smooth segments at
+        # t=1/2 such a preservation would be possible
+        crv = cast(Curve, self.to_non_shorthand(prev, prev_control))
+        return crv._split(  # pylint: disable=protected-access, no-member
+            first, prev, prev_control, t
+        )
+
 
 class smooth(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative smoothed curved line segment"""
@@ -390,3 +503,8 @@ class smooth(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
     ) -> Tuple[complex, ...]:
         # pylint: disable=unused-argument
         return (2 * prev - prev_prev, self.arg1 + prev, self.arg2 + prev)
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[curve, curve]:
+        return self._relsplit(prev, prev_control, t)

@@ -21,18 +21,27 @@
 
 
 from __future__ import annotations
-from math import atan2, pi, sqrt, sin, cos, tan, acos
+from math import atan2, pi, sqrt, sin, cos, tan, acos, radians, degrees
+from cmath import exp
 from typing import overload, Tuple, List, TYPE_CHECKING
+
+import numpy as np
 
 from ..transforms import Transform
 
-from .interfaces import AbsolutePathCommand, RelativePathCommand
+from .interfaces import (
+    AbsolutePathCommand,
+    RelativePathCommand,
+    LengthSettings,
+    ILengthSettings,
+    BezierArcComputationMixin,
+)
 
 if TYPE_CHECKING:
     from .curves import Curve
 
 
-class Arc(AbsolutePathCommand):
+class Arc(BezierArcComputationMixin, AbsolutePathCommand):
     """Special Arc segment"""
 
     letter = "A"
@@ -130,6 +139,115 @@ class Arc(AbsolutePathCommand):
             self.x_axis_rotation, self.large_arc, self.sweep = args[2:5]
             self.endpoint = args[5] + args[6] * 1j
 
+    def parametrize(self, prev):
+        """Return the parametrisation of the arc:
+            (radius, phi, rot_matrix, center, theta1, deltatheta)
+        See http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+
+        .. versionadded:: 1.4"""
+        # my notation roughly follows theirs
+        phi = radians(self.x_axis_rotation)
+        rot_matrix = exp(1j * phi)
+
+        radius = self.radius
+        rx = self.radius.real
+        ry = self.radius.imag
+        rx_sqd = rx * rx
+        ry_sqd = ry * ry
+
+        # Transform z-> z' = x' + 1j*y'
+        # = self.rot_matrix**(-1)*(z - (end+start)/2)
+        # coordinates.  This translates the ellipse so that the midpoint
+        # between self.end and self.start lies on the origin and rotates
+        # the ellipse so that the its axes align with the xy-coordinate axes.
+        # Note:  This sends self.end to -self.start
+        zp1 = (1 / rot_matrix) * (prev - self.cend_point(0j, prev)) / 2
+        x1p, y1p = zp1.real, zp1.imag
+        x1p_sqd = x1p * x1p
+        y1p_sqd = y1p * y1p
+
+        # Correct out of range radii
+        radius_check = (x1p_sqd / rx_sqd) + (y1p_sqd / ry_sqd)
+        if radius_check > 1:
+            rx *= sqrt(radius_check)
+            ry *= sqrt(radius_check)
+            radius = rx + 1j * ry
+            rx_sqd = rx * rx
+            ry_sqd = ry * ry
+
+        # Compute c'=(c_x', c_y'), the center of the ellipse in (x', y') coords
+        # Noting that, in our new coord system, (x_2', y_2') = (-x_1', -x_2')
+        # and our ellipse is cut out by of the plane by the algebraic equation
+        # (x'-c_x')**2 / r_x**2 + (y'-c_y')**2 / r_y**2 = 1,
+        # we can find c' by solving the system of two quadratics given by
+        # plugging our transformed endpoints (x_1', y_1') and (x_2', y_2')
+        tmp = rx_sqd * y1p_sqd + ry_sqd * x1p_sqd
+        radicand = (rx_sqd * ry_sqd - tmp) / tmp
+        radical = 0 if np.isclose(radicand, 0) else sqrt(radicand)
+
+        if self.large_arc == self.sweep:
+            cp = -radical * (rx * y1p / ry - 1j * ry * x1p / rx)
+        else:
+            cp = radical * (rx * y1p / ry - 1j * ry * x1p / rx)
+
+        # The center in (x,y) coordinates is easy to find knowing c'
+        center = exp(1j * phi) * cp + (prev + self.cend_point(0j, prev)) / 2
+
+        # Now we do a second transformation, from (x', y') to (u_x, u_y)
+        # coordinates, which is a translation moving the center of the
+        # ellipse to the origin and a dilation stretching the ellipse to be
+        # the unit circle
+        u1 = (x1p - cp.real) / rx + 1j * (y1p - cp.imag) / ry  # transformed start
+        u2 = (-x1p - cp.real) / rx + 1j * (-y1p - cp.imag) / ry  # transformed end
+
+        # clip in case of floating point error
+        u1 = np.clip(u1.real, -1, 1) + 1j * np.clip(u1.imag, -1, 1)
+        u2 = np.clip(u2.real, -1, 1) + 1j * np.clip(u2.imag, -1, 1)
+
+        # Now compute theta and delta (we'll define them as we go)
+        # delta is the angular distance of the arc (w.r.t the circle)
+        # theta is the angle between the positive x'-axis and the start point
+        # on the circle
+        if u1.imag > 0:
+            theta1 = degrees(acos(u1.real))
+        elif u1.imag < 0:
+            theta1 = -degrees(acos(u1.real))
+        else:
+            if u1.real > 0:  # start is on pos u_x axis
+                theta1 = 0
+            else:  # start is on neg u_x axis
+                # Note: This behavior disagrees with behavior documented in
+                # http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+                # where theta is set to 0 in this case.
+                theta1 = 180
+
+        det_uv = u1.real * u2.imag - u1.imag * u2.real
+
+        acosand = u1.real * u2.real + u1.imag * u2.imag
+        acosand = np.clip(acosand.real, -1, 1) + np.clip(acosand.imag, -1, 1)
+
+        if det_uv > 0:
+            deltatheta = degrees(acos(acosand))
+        elif det_uv < 0:
+            deltatheta = -degrees(acos(acosand))
+        else:
+            if u1.real * u2.real + u1.imag * u2.imag > 0:
+                # u1 == u2
+                deltatheta = 0
+            else:
+                # u1 == -u2
+                # Note: This behavior disagrees with behavior documented in
+                # http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+                # where deltatheta is set to 0 in this case.
+                deltatheta = 180
+
+        if not self.sweep and deltatheta >= 0:
+            deltatheta -= 360
+        elif self.large_arc and deltatheta <= 0:
+            deltatheta += 360
+
+        return radius, phi, rot_matrix, center, theta1, deltatheta
+
     def update_bounding_box(self, first, last_two_points, bbox):
         prev = last_two_points[-1]
         for seg in self.to_curves(prev=prev):
@@ -211,7 +329,7 @@ class Arc(AbsolutePathCommand):
 
         return Arc(rx_ + 1j * ry_, theta_deg, self.large_arc, sweep, newend)
 
-    def to_relative(self, prev: complex) -> arc:
+    def to_relative(self, prev: complex) -> RelativePathCommand:
         return arc(
             self.radius,
             self.x_axis_rotation,
@@ -228,20 +346,104 @@ class Arc(AbsolutePathCommand):
             self.radius, self.x_axis_rotation, self.large_arc, not self.sweep, prev
         )
 
+    def _cpoint(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> complex:
+        # TODO surely this can be expressed in a shorter way using complex geometry?
+        radius, _, rot_matrix, center, theta1, deltatheta = self.parametrize(prev)
+        angle = (theta1 + t * deltatheta) * pi / 180
+        cosphi = rot_matrix.real
+        sinphi = rot_matrix.imag
+        rx = radius.real
+        ry = radius.imag
 
-class arc(RelativePathCommand):  # pylint: disable=invalid-name
+        x = rx * cosphi * cos(angle) - ry * sinphi * sin(angle) + center.real
+        y = rx * sinphi * cos(angle) + ry * cosphi * sin(angle) + center.imag
+        return x + y * 1j
+
+    def _cderivative(
+        self, first: complex, prev: complex, prev_control: complex, t: float, n: int = 1
+    ) -> complex:
+        """returns the nth derivative of the segment at t."""
+        radius, phi, _, _, theta1, deltatheta = self.parametrize(prev)
+        angle = radians(theta1 + t * deltatheta)
+        rx = radius.real
+        ry = radius.imag
+        k = (deltatheta * pi / 180) ** n  # ((d/dt)angle)**n
+
+        if n % 4 == 0 and n > 0:
+            return (
+                rx * cos(phi) * cos(angle)
+                - ry * sin(phi) * sin(angle)
+                + 1j * (rx * sin(phi) * cos(angle) + ry * cos(phi) * sin(angle))
+            )
+        elif n % 4 == 1:
+            return k * (
+                -rx * cos(phi) * sin(angle)
+                - ry * sin(phi) * cos(angle)
+                + 1j * (-rx * sin(phi) * sin(angle) + ry * cos(phi) * cos(angle))
+            )
+        elif n % 4 == 2:
+            return k * (
+                -rx * cos(phi) * cos(angle)
+                + ry * sin(phi) * sin(angle)
+                + 1j * (-rx * sin(phi) * cos(angle) - ry * cos(phi) * sin(angle))
+            )
+        elif n % 4 == 3:
+            return k * (
+                rx * cos(phi) * sin(angle)
+                + ry * sin(phi) * cos(angle)
+                + 1j * (rx * sin(phi) * sin(angle) - ry * cos(phi) * cos(angle))
+            )
+        else:
+            raise ValueError("n should be a positive integer.")
+
+    def _split(
+        self, first: complex, prev: complex, prev_control: complex, t: float
+    ) -> Tuple[Arc, Arc]:
+        """returns two segments, whose union is this segment and which join
+        at self.point(t)."""
+        radius, _, _, _, _, deltatheta = self.parametrize(prev)
+
+        def crop(t0, t1):
+            return Arc(
+                radius,
+                self.x_axis_rotation,
+                not abs(deltatheta * (t1 - t0)) <= 180,
+                self.sweep,
+                self.cpoint(0j, prev, 0j, t1),
+            )
+
+        return crop(0, t), crop(t, 1)
+
+    def _ilength(
+        self,
+        first: complex,
+        prev: complex,
+        prev_control: complex,
+        length: float,
+        settings: ILengthSettings = ILengthSettings(),
+    ):
+        # ilength calls self.parametrize very often, so we cache the result
+        param = self.parametrize
+        params = param(prev)
+
+        def cached(prev):  # pylint: disable=unused-argument
+            return params
+
+        self.parametrize = cached  # type: ignore
+        try:
+            return super()._ilength(first, prev, prev_control, length, settings)
+        finally:
+            self.parametrize = param  # type: ignore
+
+
+class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
     """Relative Arc line segment"""
 
     letter = "a"
 
     nargs = 7
-
-    radius: complex
-    """Radius of the arc"""
-    x_axis_rotation: float
-
-    large_arc: bool
-    sweep: bool
 
     endpoint: complex
     """Endpoint (relative) of the arc"""

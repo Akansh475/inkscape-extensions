@@ -43,7 +43,12 @@ from ..utils import strargs
 
 from .lines import Line, Move, move, ZoneClose
 from .curves import Curve
-from .interfaces import PathCommand, AbsolutePathCommand
+from .interfaces import (
+    ILengthSettings,
+    LengthSettings,
+    PathCommand,
+    AbsolutePathCommand,
+)
 
 Pathlike = TypeVar("Pathlike", bound="PathCommand")
 AbsolutePathlike = TypeVar("AbsolutePathlike", bound="AbsolutePathCommand")
@@ -167,6 +172,107 @@ class Path(list):
         def to_absolute(self) -> AbsolutePathCommand:
             """Return relative counterpart for relative commands or copy for absolute"""
             return self.command.to_absolute(self.cprevious_end_point)
+
+        def to_non_shorthand(self) -> AbsolutePathCommand:
+            """Returns an absolute non-shorthand command
+
+            .. versionadded:: 1.4"""
+            return self.command.to_non_shorthand(
+                self.cprevious_end_point, self.cprev2_control_point
+            )
+
+        def split(self, time) -> Tuple[Path.PathCommandProxy, Path.PathCommandProxy]:
+            """Split this path command into two PathCommandProxy segments.
+            Raises ValueError for Move commands.
+
+            .. versionadded:: 1.4"""
+            result = self.command.split(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                time,
+            )
+            p1 = Path.PathCommandProxy(
+                result[0],
+                self.cfirst_point,
+                self.previous_end_point,
+                self.prev2_control_point,
+            )
+            prev2 = 0j if len(p1.control_points) < 2 else p1.control_points[-2]
+            p2 = Path.PathCommandProxy(
+                result[1], self.cfirst_point, p1.end_point, prev2
+            )
+            return (p1, p2)
+
+        def cpoint(self, time) -> complex:
+            """Returns the coordinates of the Bezier curve evaluated at t as complex number.
+
+            .. versionadded:: 1.4"""
+            return self.command.cpoint(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                time,
+            )
+
+        def point(self, time) -> Vector2d:
+            """Returns the coordinates of the Bezier curve evaluated at t as :class:`Vector2d`.
+
+            .. versionadded:: 1.4"""
+            return self.command.point(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                time,
+            )
+
+        def length(self, t0=0, t1=1, settings=LengthSettings()) -> float:
+            """Get the length of the command between t0 and t1 in user units
+
+            .. versionadded:: 1.4"""
+            return self.command.length(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                t0,
+                t1,
+                settings,
+            )
+
+        def ilength(self, length, settings=ILengthSettings()) -> float:
+            """Tries to compute the time t at which the path segment has the given
+            length along its trajectory
+
+            .. versionadded:: 1.4"""
+            return self.command.ilength(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                length,
+                settings,
+            )
+
+        def cunit_tangent(self, t) -> complex:
+            """Returns the unit tangent at t as complex number
+
+            .. versionadded:: 1.4"""
+            return self.command.cunit_tangent(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                t,
+            )
+
+        def unit_tangent(self, t) -> Vector2d:
+            """Returns the unit tangent at t as :class:`inkex.Vector2D`
+
+            .. versionadded::  1.4"""
+            return self.command.unit_tangent(
+                self.cfirst_point,
+                self.cprevious_end_point,
+                self.cprev2_control_point,
+                t,
+            )
 
         def __str__(self):
             return str(self.command)
@@ -720,7 +826,7 @@ class CubicSuperPath(list):
         .. versionadded:: 1.2"""
         return CubicSuperPath.collinear(pt_a, pt_b, pt_c, tol) and (
             CubicSuperPath.within(pt_a[0], pt_b[0], pt_c[0])
-            if pt_a[0] != pt_b[0]
+            if abs(pt_a[0] - pt_b[0]) > 1e-13
             else CubicSuperPath.within(pt_a[1], pt_b[1], pt_c[1])
         )
 

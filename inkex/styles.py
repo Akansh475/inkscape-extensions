@@ -34,55 +34,26 @@ from .colors import Color
 from .properties import BaseStyleValue, all_properties, ShorthandValue
 from .css import CSSCompiler, parser
 
-from .utils import FragmentError
+from .utils import FragmentError, NotifyList, NotifyOrderedDict
 from .elements._utils import NSS
 
 if TYPE_CHECKING:
     from .elements._svg import SvgDocumentElement
 
 
-class Classes(list):
+class Classes(NotifyList):
     """A list of classes applied to an element (used in css and js)"""
 
-    def __init__(self, classes=None, callback=None):
-        self.callback = None
+    def __init__(self, classes=None, callback=None, element=None):
         if isinstance(classes, str):
             classes = classes.split()
-        super().__init__(classes or ())
-        self.callback = callback
+        super().__init__(classes or (), callback=callback)
 
     def __str__(self):
         return " ".join(self)
 
-    def _callback(self):
-        if self.callback is not None:
-            self.callback(self)
 
-    def __setitem__(self, index, value):
-        super().__setitem__(index, value)
-        self._callback()
-
-    def append(self, value):
-        value = str(value)
-        if value not in self:
-            super().append(value)
-            self._callback()
-
-    def remove(self, value):
-        value = str(value)
-        if value in self:
-            super().remove(value)
-            self._callback()
-
-    def toggle(self, value):
-        """If exists, remove it, if not, add it"""
-        value = str(value)
-        if value in self:
-            return self.remove(value)
-        return self.append(value)
-
-
-class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
+class Style(NotifyOrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
     """A list of style directives
 
     .. versionchanged:: 1.2
@@ -113,19 +84,15 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
 
     def __init__(self, style=None, callback=None, element=None, **kw):
         self.element = element
-        # This callback is set twice because this is 'pre-initial' data (no callback)
-        self.callback = None
         # Either a string style or kwargs (with dashes as underscores).
         style = style or [(k.replace("_", "-"), v) for k, v in kw.items()]
         if isinstance(style, str):
-            style = self._parse_str(style)
+            style = self._parse_str(style, element)
         # Order raw dictionaries so tests can be made reliable
         if isinstance(style, dict) and not isinstance(style, OrderedDict):
             style = [(name, style[name]) for name in sorted(style)]
         # Should accept dict, Style, parsed string, list etc.
-        super().__init__(style)
-        # Now after the initial data, the callback makes sense.
-        self.callback = callback
+        super().__init__(style, callback=callback)
 
     @staticmethod
     def _parse_str(style: str, element=None) -> Iterable[BaseStyleValue]:
@@ -207,9 +174,6 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
                 if not (self.get_importance(key) and not other.get_importance(key)):
                     self[key] = other.get_store(key)
 
-        if self.callback is not None:
-            self.callback(self)
-
     def add_inherited(self, parent):
         """Creates a new Style containing all parent styles with importance "!important"
         and current styles with importance "!important"
@@ -250,20 +214,6 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             if isinstance(element, ShorthandValue):
                 element.apply_shorthand(self)
 
-    def __delitem__(self, key):
-        super().__delitem__(key)
-        if self.callback is not None:
-            self.callback(self)
-
-    def pop(self, key, default=None):
-        super().pop(key, default)
-        # On Python < 3.11, pop internally calls __delitem__.
-        # This does not happen in 3.11. To avoid
-        # calling the callback twice, we need to check the Python version.
-        if sys.version_info >= (3, 11):
-            if self.callback is not None:
-                self.callback(self)
-
     def __setitem__(self, key, value):
         """Sets a style value.
 
@@ -294,8 +244,6 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
                 provided key is different from the attribute name given in the value"""
             )
         super().__setitem__(key, value)
-        if self.callback is not None:
-            self.callback(self)
 
     def __getitem__(self, key):
         """Returns the unparsed value of the element (minus a possible ``!important``)
@@ -381,8 +329,7 @@ class Style(OrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             super().__getitem__(key).important = importance
         else:
             raise KeyError()
-        if self.callback is not None:
-            self.callback(self)
+        self._callback()
 
     def get_color(self, name="fill"):
         """Get the color AND opacity as one Color object"""

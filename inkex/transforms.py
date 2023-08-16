@@ -336,7 +336,7 @@ class Transform:
             ),
         )
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, element=None, **kwargs) -> None:
         if len(args) == 3:
             # Shortcut for complex initializer
             self.arg1, self.arg2, self.arg3 = args

@@ -41,7 +41,7 @@ from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
 from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
-from ..properties import BaseStyleValue, ShorthandValue, all_properties
+from ..properties import BaseStyleValue, ShorthandValue, all_properties, FilterList
 from ._selected import ElementList
 from ._parser import NodeBasedLookup, SVG_PARSER
 
@@ -141,9 +141,7 @@ class BaseElement(IBaseElement):
                     self.attrib.pop(attr, None)  # pylint: disable=no-member
 
             # pylint: disable=no-member
-            value = cls(self.attrib.get(attr, None), callback=_set_attr)
-            if name == "style":
-                value.element = self
+            value = cls(self.attrib.get(attr, None), callback=_set_attr, element=self)
             setattr(self, name, value)
             return value
         raise AttributeError(f"Can't find attribute {self.typename}.{name}")
@@ -660,7 +658,7 @@ class BaseElement(IBaseElement):
             ):
                 # Shorthands cannot be set by presentation attributes
                 result = BaseStyleValue.factory_errorhandled(
-                    key=key, value=self.attrib[key]
+                    key=key, value=self.attrib[key], element=self
                 )
                 if result is not None:  # parsing error
                     style[key] = result[1]

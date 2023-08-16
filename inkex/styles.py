@@ -94,8 +94,13 @@ class Style(NotifyOrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         # Should accept dict, Style, parsed string, list etc.
         super().__init__(style, callback=callback)
 
-    @staticmethod
-    def _parse_str(style: str, element=None) -> Iterable[BaseStyleValue]:
+    def _attr_callback(self, key):
+        def inner(value):
+            self[key] = value
+
+        return inner
+
+    def _parse_str(self, style: str, element=None) -> Iterable[BaseStyleValue]:
         """Create a dictionary from the value of a CSS rule (such as an inline style or
         from an embedded style sheet), including its !important state, parsing the value
         if possible.
@@ -113,6 +118,7 @@ class Style(NotifyOrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
                 result = BaseStyleValue.factory_errorhandled(
                     element, declaration=declaration.strip()
                 )
+                result[1].callback = self._attr_callback(result[0])
                 if result is not None:
                     yield result
 
@@ -235,7 +241,10 @@ class Style(NotifyOrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
             Error: Other exceptions may be raised when converting non-string objects."""
         if not isinstance(value, BaseStyleValue) or value is None:
             # try to convert the value using the factory
-            value = BaseStyleValue.factory(attr_name=key, value=value)
+            value = BaseStyleValue.factory(
+                attr_name=key, value=value, element=self.element
+            )
+            value.callback = self._attr_callback(key)
             # check if the set attribute is valid
             _ = value.parse_value(self.element)
         elif key != value.attr_name:
@@ -289,8 +298,9 @@ class Style(NotifyOrderedDict, MutableMapping[str, Union[str, BaseStyleValue]]):
         # style is not set, return the default value
         if key in all_properties or default is not None:
             defvalue = BaseStyleValue.factory(
-                attr_name=key, value=default or all_properties[key][1]
+                attr_name=key, value=default or all_properties[key][1], element=element
             )
+            defvalue.callback = self._attr_callback(key)
             return (
                 defvalue.parse_value()
             )  # default values are independent of the element

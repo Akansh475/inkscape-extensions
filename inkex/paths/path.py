@@ -27,13 +27,7 @@ import copy
 import warnings
 from cmath import isclose
 
-from typing import (
-    Optional,
-    Tuple,
-    List,
-    TypeVar,
-    Iterator,
-)
+from typing import Optional, Tuple, List, TypeVar, Iterator, Callable
 from ..transforms import (
     Transform,
     BoundingBox,
@@ -62,6 +56,8 @@ class InvalidPath(ValueError):
 
 class Path(list):
     """A list of segment commands which combine to draw a shape"""
+
+    callback: Optional[Callable] = None
 
     class PathCommandProxy:
         """
@@ -610,6 +606,13 @@ class Path(list):
     def copy(self):
         """Make a copy"""
         return copy.deepcopy(self)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if self.callback is not None:
+            self.callback(self)  # pylint: disable=not-callable
 
 
 class CubicSuperPath(list):

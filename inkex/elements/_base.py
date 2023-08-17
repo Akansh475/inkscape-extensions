@@ -764,9 +764,9 @@ class ShapeElement(BaseElement):
     """Elements which have a visible representation on the canvas"""
 
     @property
-    def path(self):
+    def path(self) -> Path:
         """Gets the outline or path of the element, this may be a simple bounding box"""
-        return Path(self.get_path())
+        return self.get_path()
 
     @path.setter
     def path(self, path):

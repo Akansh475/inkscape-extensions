@@ -13,7 +13,7 @@ are avaliable for accessing and writing data, in particular
     rectangle.set("inkscape:label", "my-rectangle") 
     rectangle.get("inkscape:label") # returns "my-rectangle"
 
-Inkscape hands these values more or less unchanged to the XAML (simplifying the way the 
+Inkscape hands these values more or less unchanged to the XML (simplifying the way the 
 namespace is specified). The only exception is the `id` attribute: when it is set, 
 inkex needs to check whether it is unique in the document.  
 
@@ -56,7 +56,7 @@ Styles have a :func:`~inkex.styles.Style.__call__` override that returns a parse
 If this value is a mutable datatype, changing it will immediately permeate back to the
 document. Examples::
 
-    _ = el.style("fill") # returns inkex.Color value (solid fill)
+    _ = el.style("fill") # returns inkex.Color value (i.e. solid fill)
 
     # Attaches the linear gradient to the document's defs, and sets the id as href 
     # on the fill
@@ -95,15 +95,46 @@ in a future major version.
 ``transform``
 ^^^^^^^^^^^^^
 
-``:attr:`element.transform <inkex.elements._base.BaseElement.transform>`.`` is also mutable through its public methods, 
-like :func:`~inkex.element.transform.add_matrix`, 
-:func:`~inkex.element.transform.add_translate`, and its operators, e.g.::
+:attr:`element.transform <inkex.elements._base.BaseElement.transform>` is also mutable
+through its public methods, like :func:`~inkex.transforms.Transform.add_matrix`, 
+:func:`~inkex.transforms.Transform.add_translate`, and its operators, e.g.::
     
     element.transform @= inkex.Transform(scale=2)
 
 which directly updates the ``transform`` attribute of ``element``.
 
 
+``path``
+--------
+
+:attr:`PathElement.path <inkex.elements._polygons.PathElementBase.get_path>` returns
+and object of type :class:`inkex.Path <inkex.paths.Path>`. For performance reasons, 
+modifying this object does not immediately write back into the ``PathElement``. To make
+the changes permanent, the following options are avaliable::
+    
+    from inkex.paths import Move, Line
+
+    pel = inkex.PathElement.new(path=[Move(10, 10), Line(20, 20)])
+    with pel.path as path:
+        path.append(Line(20, 10))
+        path.close()
+
+    str(pel.path)  # returns "M 10 10 L 20 20 L 20 10 Z"
+
+    # You can also modify the Path and write it back into the attribute manually.
+    p = pel.path
+    del p[-1]
+    pel.path = p
+
+    str(pel.path)  # returns "M 10 10 L 20 20 L 20 10"
+
+Similar to :attr:`element.style <inkex.elements._base.BaseElement.style>` vs.
+:attr:`element.specified_style() <inkex.elements._base.BaseElement.specified_style()>`
+(one provides modifyable object access, one is a derived / computed value),
+:class:`~inkex.elements._base.ShapeElement` also has a 
+:attr:`~inkex.elements._base.ShapeElement.path` property that returns the 
+:class:`inkex.Path <inkex.paths.Path>` representation of e.g. a rectangle or circle, 
+and the context manager is not available for it.
 
 
 

@@ -291,7 +291,10 @@ class Path(list):
                 if isinstance(item[1], (list, tuple)):
                     self.append(PathCommand.letter_to_class(item[0])(*item[1]))
                 else:
-                    self.append(Line(*item))
+                    if len(self) == 0:
+                        self.append(Move(*item))
+                    else:
+                        self.append(Line(*item))
             else:
                 raise TypeError(
                     f"Bad path type: {type(path_d).__name__}"

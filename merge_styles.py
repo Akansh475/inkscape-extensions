@@ -57,7 +57,6 @@ class MergeStyles(inkex.EffectExtension):
             return inkex.errormsg(
                 _("There are no common styles between these elements.")
             )
-
         self.svg.stylesheet.add("." + newclass, inkex.Style(sorted(common)))
 
         for elem in elements:

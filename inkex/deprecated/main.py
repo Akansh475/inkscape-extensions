@@ -38,7 +38,7 @@ from .. import units
 from ..elements._base import BaseElement, ShapeElement
 from ..elements._selected import ElementList
 from .meta import deprecate, _deprecated
-from ..styles import ConditionalStyle
+from ..styles import ConditionalStyle, Style
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -201,9 +201,10 @@ def to_xpaths(self):
         style.all_matches(subtree)
     """
     result = []
-    for rule in self._rules.split(","):
+    for rule in self.rules:
         ret = (
-            cssselect.HTMLTranslator().selector_to_xpath(cssselect.parse(rule)[0]) + " "
+            cssselect.HTMLTranslator().selector_to_xpath(cssselect.parse(str(rule))[0])
+            + " "
         )
         ret = re.compile(r"(::|\/)([a-z]+)(?=\W)(?!-)").sub(r"\1svg:\2", ret)
         result.append(ret.strip())
@@ -211,5 +212,13 @@ def to_xpaths(self):
     return result
 
 
-ConditionalStyle.to_xpath = deprecate(to_xpath, "1.3.1")  # type: ignore
-ConditionalStyle.to_xpaths = deprecate(to_xpaths, "1.3.1")  # type: ignore
+ConditionalStyle.to_xpath = deprecate(to_xpath, "1.4")  # type: ignore
+ConditionalStyle.to_xpaths = deprecate(to_xpaths, "1.4")  # type: ignore
+
+
+def apply_shorthands(self):
+    """Apply all shorthands in this style. Shorthands are now simplified automatically,
+    so this method does nothing"""
+
+
+Style.apply_shorthands = deprecate(apply_shorthands, "1.4")  # type: ignore

@@ -206,12 +206,17 @@ class StyleSheetTest(TestCase):
 
     def test_applied_styles(self):
         """Are styles applied to the svg elements correctly"""
+        font_default = (
+            "font-style:normal;font-variant:normal;"
+            "font-weight:normal;font-stretch:normal;font-size:Homie;"
+            "line-height:normal;font-family:sans-serif"
+        )
         self.assertEqual(
             str(self.svg.getElementById("rect1").cascaded_style()), "fill:blue"
         )
         self.assertEqual(
             str(self.svg.getElementById("rect2").cascaded_style()),
-            "fill:green;font:Homie",
+            "fill:green;" + font_default,
         )
         self.assertEqual(
             str(self.svg.getElementById("rect3").cascaded_style()), "fill:cyan"
@@ -220,11 +225,12 @@ class StyleSheetTest(TestCase):
             str(self.svg.getElementById("rect4").cascaded_style()),
             "fill:grey;stroke:red",
         )
+
         self.assertEqual(
             str(self.svg.getElementById("circle1").cascaded_style()),
-            "fill:red;font:Homie",
+            "fill:red;" + font_default,
         )
         self.assertEqual(
             str(self.svg.getElementById("circle2").cascaded_style()),
-            "fill:red;font:Homie",
+            "fill:red;" + font_default,
         )

@@ -22,6 +22,8 @@ Some more complicated styling tests, including inheritance and shorthand attribu
 """
 from lxml import etree
 from typing import List, Tuple
+
+import pytest
 from inkex.styles import Style
 from inkex.colors import Color
 from inkex.tester import TestCase
@@ -30,7 +32,6 @@ from inkex import (
     SvgDocumentElement,
     BaseElement,
     ColorError,
-    BaseStyleValue,
     RadialGradient,
     Stop,
     PathElement,
@@ -51,11 +52,23 @@ class StyleInheritanceTests(TestCase):
 
         circles: List[BaseElement] = doc.xpath("//svg:circle")
         for circle in circles:
+            self.assertEqual(
+                circle.get_computed_style("fill"),
+                Color("red"),
+                circle.getparent().get_id(),
+            )
+
             style = circle.specified_style()
             self.assertEqual(style("fill"), Color("red"), circle.getparent().get_id())
 
         rects: List[BaseElement] = doc.xpath("//svg:rect")
         for rect in rects:
+            self.assertEqual(
+                rect.get_computed_style("fill"),
+                Color("blue"),
+                rect.getparent().get_id(),
+            )
+
             style = rect.specified_style()
             self.assertEqual(style("fill"), Color("blue"))
 
@@ -86,7 +99,9 @@ class StyleInheritanceTests(TestCase):
 
             style = rect.specified_style()
             self.assertEqual(style("fill"), Color(result))
+            self.assertEqual(rect.get_computed_style("fill"), Color(result), ident)
             self.assertEqual(style["stroke-dasharray"], "none")
+            self.assertEqual(rect.get_computed_style("stroke-dasharray"), [])
 
     def test_current_color(self):
         """This is the unit test styling-inherit-01-b.svg from
@@ -101,6 +116,8 @@ class StyleInheritanceTests(TestCase):
 
         for counter, obj in zip(range(3), objects[:3]):
             fill = obj.specified_style()("fill")
+            fill2 = obj.get_computed_style("fill")
+            assert fill == fill2
             if counter == 0:
                 self.assertEqual(fill, Color("yellow"))
             else:
@@ -112,9 +129,12 @@ class StyleInheritanceTests(TestCase):
                 stops = [child for child in fill if isinstance(child, Stop)]
                 stop = stops[1]
                 self.assertEqual(stop.specified_style()("stop-color"), Color(result))
+                self.assertEqual(stop.get_computed_style("stop-color"), Color(result))
 
         stroke = objects[3].specified_style()("stroke")
         self.assertEqual(stroke, Color("red"))
+
+        self.assertEqual(objects[3].get_computed_style("stroke"), Color("red"))
 
     def test_marker_style(self):
         """Check if markers are read and written correctly"""
@@ -135,7 +155,7 @@ class StyleInheritanceTests(TestCase):
             elem.style["marker-start"] = "#url(test)"
 
         # write invalid attribute, second attempt
-        with self.assertRaisesRegex(ValueError, "invalid URL format"):
+        with self.assertRaisesRegex(ValueError, "Invalid property value"):
             elem.style["marker-start"] = "url('test)"
 
         # write shorthand
@@ -146,7 +166,7 @@ class StyleInheritanceTests(TestCase):
 
         # write shorthand to empty
         elem.style["marker"] = ""
-        self.assertEqual(elem.style("marker-start"), doc.getElementById("Arrow1Lend"))
+        self.assertEqual(elem.style("marker-start"), None)
 
     def test_get_default(self):
         """Test if the default values are returned for missing attributes"""
@@ -279,18 +299,17 @@ class StyleInheritanceTests(TestCase):
     def test_style_parsing_error(self):
         """Test if bad attribute data raises an exception during parsing"""
         doc: SvgDocumentElement = svg_file(self.data_file("svg", "interp_shapes.svg"))
-        tests: List[Tuple[str, Exception]] = [
-            (r"opacity: abc", ValueError),
-            (r"fill: #GHI", ColorError),
-            (r"stroke: url(#missing)", ValueError),
-            (r"fill: ", ColorError),
-            (r"font-variant: blue", ValueError),
+        tests: List[Tuple[str, str, Exception]] = [
+            (r"opacity", "abc", ValueError),
+            (r"fill", "#GHI", ColorError),
+            (r"stroke", "url(#missing)", ValueError),
+            (r"font-variant", "blue", ValueError),
         ]
 
-        for decl, exceptiontype in tests:
+        s = doc.style
+        for key, value, exceptiontype in tests:
             with self.assertRaises(exceptiontype):
-                value = BaseStyleValue.factory(declaration=decl)
-                _ = value.parse_value(doc)
+                s[key] = value
 
     def test_attribute_set_invalid(self):
         """Test if bad attribute data raises an exception when setting it on a style"""
@@ -303,7 +322,7 @@ class StyleInheritanceTests(TestCase):
             (
                 "font-variant",
                 "red",
-                "Value 'red' is invalid for the property font-variant",
+                "Value 'red' is invalid for the property",
             ),
             ("stroke", "url(#missing)", "Paint server not found"),
         ]
@@ -328,32 +347,6 @@ class StyleInheritanceTests(TestCase):
         self.assertEqual(st1, st2)
         st1["font-size"] = 1
         self.assertNotEqual(st1, st2)
-
-    def test_basestylevalue(self):
-        """Create BaseStyleValue's directly and work on them"""
-
-        val1 = BaseStyleValue.factory("fill: red;")
-        self.assertEqual(val1.parse_value(), Color("red"))
-
-        # Compare the style
-        self.assertNotEqual(val1, "fill: red;")
-
-        # Create a rule with an invalid declaration
-        with self.assertRaises(ValueError):
-            _ = BaseStyleValue.parse_declaration("fill=red;")
-
-        # Try to apply a shorthand to the wrong style
-        val2 = BaseStyleValue.factory("font: 12pt Verdana")
-        style = Style("fill: context-fill;")
-        copy = style.copy()
-
-        val2.apply_shorthand(style)
-
-        self.assertEqual(style, copy)
-
-        # Set a value to the wrong key
-        with self.assertRaises(ValueError):
-            style["stroke"] = BaseStyleValue.factory("font: 12pt Verdana")
 
     def test_style_bad_interfacing(self):
         """Check a few ways to wrongly interface the Style class"""
@@ -422,7 +415,9 @@ class StyleInheritanceTests(TestCase):
         doc = etree.fromstring(content, parser=SVG_PARSER)
         group = doc.getElementById("test")
         self.assertEqual(group.specified_style()("fill"), Color("black"))
+        self.assertEqual(group.get_computed_style("fill"), Color("black"))
         self.assertEqual(group.specified_style()("bla"), None)
+        self.assertEqual(group.get_computed_style("bla"), None)
 
     def test_direct_child_and_import(self):
         content = """<svg xmlns="http://www.w3.org/2000/svg">
@@ -471,3 +466,31 @@ class StyleInheritanceTests(TestCase):
         style[sd] = [1, 2, 3, 4]
         style(sd).extend([5, 6])
         self.assertAlmostTuple(style(sd), [1, 2, 3, 4, 5, 6])
+
+    def test_recursion_currentcolor(self):
+        svg = """<svg viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg">
+            <g
+                fill="currentColor">
+                <path d="M 21.797956,55.871 37.966447,36.549261 52.393685,54.300881"/>
+            </g>
+            </svg>"""
+        doc = etree.fromstring(svg, parser=SVG_PARSER)
+        path = doc[0][0]
+        assert path.get_computed_style("fill") == Color("black")
+        assert path.specified_style()("fill") == Color("black")
+
+
+def test_overwrite():
+    style = Style(
+        """marker-start: url(#id1) !important;
+        marker-mid: None;
+        marker: url(#id2);
+        marker-end: url(#id3);
+    """
+    )
+    assert style["marker-start"] == "url(#id1)"
+    assert style.get_importance("marker-start")
+    assert style["marker-mid"] == "url(#id2)"
+    assert not style.get_importance("marker-mid")
+    assert style["marker-end"] == "url(#id3)"
+    assert not style.get_importance("marker-end")

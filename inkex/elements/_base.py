@@ -36,12 +36,16 @@ from ..interfaces.IElement import IBaseElement, ISVGDocumentElement
 
 from ..base import SvgOutputMixin
 from ..paths import Path
-from ..styles import Style, Classes
+from ..styles import Style, Classes, StyleValue
 from ..transforms import Transform, BoundingBox
 from ..utils import FragmentError
 from ..units import convert_unit, render_unit, parse_unit
 from ._utils import ChildToProperty, NSS, addNS, removeNS, splitNS
-from ..properties import BaseStyleValue, ShorthandValue, all_properties, FilterList
+from ..properties import (
+    _ShorthandValueConverter,
+    _get_tokens_from_value,
+    all_properties,
+)
 from ._selected import ElementList
 from ._parser import NodeBasedLookup, SVG_PARSER
 
@@ -646,6 +650,18 @@ class BaseElement(IBaseElement):
         """
         return Style.specified_style(self)
 
+    def get_computed_style(self, key):
+        """Returns the computed style value with respect to
+         n element, i.e. the cascaded style +
+        inheritance, see https://www.w3.org/TR/CSS22/cascade.html#computed-value.
+
+        This is more efficient if only few style values per element are queried. If
+        many attributes are queried, use :func:`specified_style`.
+
+        .. versionadded:: 1.4
+        """
+        return Style._get_style(key, self)
+
     def presentation_style(self):
         """Return presentation attributes of an element as style
 
@@ -654,15 +670,13 @@ class BaseElement(IBaseElement):
         for key in self.keys():
             if (
                 key in all_properties
-                and all_properties[key][2]
-                and not issubclass(all_properties[key][0], ShorthandValue)
-            ):
                 # Shorthands cannot be set by presentation attributes
-                result = BaseStyleValue.factory_errorhandled(
-                    key=key, value=self.attrib[key], element=self
+                and not isinstance(
+                    all_properties[key].converter, _ShorthandValueConverter
                 )
-                if result is not None:  # parsing error
-                    style[key] = result[1]
+                and all_properties[key].presentation
+            ):
+                style[key] = StyleValue(_get_tokens_from_value(self.attrib[key]))
         return style
 
     def composed_transform(self, other=None):
@@ -778,10 +792,7 @@ class ShapeElement(BaseElement):
         """Gets the clip path element (if any). May be set through CSS.
 
         .. versionadded:: 1.1"""
-        ref = self.get("clip-path")
-        if not ref:
-            return self.specified_style()("clip-path")
-        return self.root.getElementById(ref)
+        return self.get_computed_style("clip-path")
 
     @clip.setter
     def clip(self, elem):

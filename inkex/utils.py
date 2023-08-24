@@ -20,7 +20,7 @@
 """
 Basic common utility functions for calculated things
 """
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import os
 import sys
 import random
@@ -358,6 +358,37 @@ class NotifyOrderedDict(OrderedDict):
     setdefault = callback_method(OrderedDict.setdefault)
     __setitem__ = callback_method(OrderedDict.__setitem__)
     __delitem__ = callback_method(OrderedDict.__delitem__)
+
+    def __init__(self, *args, callback=None, **kwargs):
+        self.callback = None
+        super().__init__(*args, **kwargs)
+        self.callback = callback
+
+    def _callback(self):
+        if self.callback is not None:
+            self.callback(self)
+
+    def pop(self, key, default=None):
+        super().pop(key, default)
+        # On Python < 3.11, pop internally calls __delitem__.
+        # This does not happen in 3.11. To avoid
+        # calling the callback twice, we need to check the Python version.
+        if sys.version_info >= (3, 11):
+            if self.callback is not None:
+                self.callback(self)
+
+
+class NotifyDefaultDict(defaultdict):
+    """A defaultdict that notifies a callback after a value is changed
+
+    .. versionadded:: 1.4"""
+
+    clear = callback_method(defaultdict.clear)
+    popitem = callback_method(defaultdict.popitem)
+    update = callback_method(defaultdict.update)
+    setdefault = callback_method(defaultdict.setdefault)
+    __setitem__ = callback_method(defaultdict.__setitem__)
+    __delitem__ = callback_method(defaultdict.__delitem__)
 
     def __init__(self, *args, callback=None, **kwargs):
         self.callback = None

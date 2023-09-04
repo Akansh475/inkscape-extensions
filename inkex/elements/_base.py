@@ -865,6 +865,11 @@ class ShapeElement(BaseElement):
 
     def _is_visible(self, inherit_visibility=True):
         # iterate over self and ancestors
+        # This does not use :func:`get_computed_style` but its own iteration
+        # logic to avoid duplicate evaluation of styles: a child is also invisible
+        # if the parent has opacity:0, but opacity is not inherited - so we need
+        # to check the specified style of all parents and ignore inheritance
+        # altogether
         for element in [self] + list(self.ancestors()):
             get_style = element.cascaded_style().get
             # case display:none

@@ -116,7 +116,7 @@ class TextSplit(inkex.EffectExtension):
     @staticmethod
     def get_font_size(element):
         """get the font size of an element"""
-        return element.specified_style()("font-size")
+        return element.get_computed_style("font-size")
 
     @staticmethod
     def get_line_height(element: ShapeElement):

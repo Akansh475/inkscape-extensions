@@ -62,9 +62,8 @@ class Dashit(inkex.EffectExtension):
         dashes = []
         offset = 0
         overlap = 0
-        style = node.specified_style()
-        dashes = style("stroke-dasharray")
-        offset = float(style("stroke-dashoffset"))
+        dashes = node.get_computed_style("stroke-dasharray")
+        offset = float(node.get_computed_style("stroke-dashoffset"))
         # Correct negative offsets
         while offset < 0:
             offset += sum(dashes)
@@ -125,10 +124,9 @@ class Dashit(inkex.EffectExtension):
                         new.append(current.to_non_shorthand())
 
             overlap = remaining_length
-        style.pop("stroke-dasharray")
+        node.style.pop("stroke-dasharray")
         node.pop("sodipodi:type")
         node.path = new
-        node.style = style
 
 
 if __name__ == "__main__":

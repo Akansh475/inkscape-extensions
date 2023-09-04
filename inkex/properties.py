@@ -836,7 +836,7 @@ all_properties: Dict[
         "auto",
         True,
         True,
-        ["auto", "optimizeQuality", "optimizeSpeed"],
+        ["auto", "optimizeQuality", "optimizeSpeed", "pixelated", "crisp-edges"],
     ),
     "letter-spacing": (BaseStyleValue, "normal", True, True, None),
     "lighting-color": (ColorValue, "normal", True, False, None),

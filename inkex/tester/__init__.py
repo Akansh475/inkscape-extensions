@@ -456,9 +456,7 @@ class ComparisonMixin(metaclass=ComparisonMeta):
             if write_output:
                 if isinstance(data_a, str):
                     data_a = data_a.encode("utf-8")
-                with open(write_output, "wb") as fhl:
-                    fhl.write(self._apply_compare_filters(data_a, True))
-                    print(f"Written output: {write_output}")
+                self.write_compare_data(infile, write_output, data_a)
                 # This only reruns if the original test failed.
                 # The idea here is to make sure the new output file is "stable"
                 # Because some tests can produce random changes and we don't
@@ -468,6 +466,12 @@ class ComparisonMixin(metaclass=ComparisonMeta):
                     self._base_compare(data_a, cmpfile, COMPARE_CHECK)
             if not write_output == cmpfile:
                 raise
+
+    def write_compare_data(self, infile, outfile, data):
+        """Write output"""
+        with open(outfile, "wb") as fhl:
+            fhl.write(self._apply_compare_filters(data, True))
+            print(f"Written output: {outfile}")
 
     def _base_compare(self, data_a, data_b, compare_mode):
         data_a = self._apply_compare_filters(data_a)

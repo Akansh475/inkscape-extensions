@@ -1091,8 +1091,9 @@ class QrCode(inkex.GenerateExtension):
 
         # for Python 3 ugly hack to represent bytes as str for Python2 compatibility
         text_str = str(opt.text)
+        text_in = opt.text.replace("\\n", "\n")
         cmode = [QR8BitByte, QRNumber, QRAlphaNum, QRKanji][opt.qrmode]
-        text_data = cmode(bytes(opt.text, opt.encoding).decode("latin_1"))
+        text_data = cmode(bytes(text_in, opt.encoding).decode("latin_1"))
 
         grp = Group()
         grp.set("inkscape:label", "QR Code: " + text_str)

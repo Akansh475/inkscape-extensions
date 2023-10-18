@@ -79,16 +79,16 @@ class TestQRCodeInkscapeSymbol(ComparisonMixin, TestCase):
         ),
     ]
 
+
 class TestQRCodeInkscapeNewLine(ComparisonMixin, TestCase):
     """Test new lines in qr codes"""
 
     effect_class = QrCode
     compare_file = "svg/empty.svg"
     comparisons = [
-        (
-            "--text=Multiline test\\ntest\\ntest",
-        ),
+        ("--text=Multiline test\\ntest\\ntest",),
     ]
+
 
 class TestLargeQRCodes(ComparisonMixin, TestCase):
     """Test large qr codes with up to 2953 bytes of payload. Also tests numeric mode"""

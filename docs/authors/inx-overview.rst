@@ -68,7 +68,19 @@ XML Attributes
 |    **absolutely essential** that your extension     |
 |    provides the necessary visual feedback for the   |
 |    user and has proper error handling, to rule out  |
-|    any dead-locking behavior.                       |
+|    any dead-locking behavior. It is also assumed    |
+|    that the extension displays any content written  |
+|    to stderr on its own (see ``show-stderr`` to     |
+|    change this behavior).                           |
++---------------------------+-------------------------+
+| ``show-stderr``           | ``"true"`` |            |
+|                           | ``"false"`` (default)   |
+| .. versionadded:: 1.4     |                         |
++---------------------------+-------------------------+
+| Only evaluated for extensions which implement a     |
+| custom gui. If set to ``true`` Inkscape will        |
+| display any content written to stderr in a dialog   |
+| after the extension is closed or has crashed.       |
 +---------------------------+-------------------------+
 | ``needs-document``        | ``"true"`` (default) |  |
 |                           | ``"false"``             |

@@ -191,8 +191,6 @@ class Nup(inkex.OutputExtension, SvgOutputMixin):
                 )
                 / num[rows],
             )
-        else:
-            size = self.expandTuple(unit, size, length=2)
 
         # sep is separation between same points on pieces
         sep = (

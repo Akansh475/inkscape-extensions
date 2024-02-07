@@ -4,7 +4,7 @@
 *egg-info
 .eggs/
 old_tests
-.coverage
+.coverage*
 htmlcov/
 TODO
 docs/source/**/*

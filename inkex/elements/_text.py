@@ -145,14 +145,15 @@ class TextElement(ShapeElement, TextBBMixin):
             if previous_depth >= depth:
                 poptail()
 
-            # Pop as many time as the depth reduction
+            # Pop as many times as the depth is reduced
             for _ in range(previous_depth - depth):
                 poptail()
 
-            # Add the value of the node to result
-            result.append(node.text)
+            # Add a node text to the result, if any
+            if node.text:
+                result.append(node.text)
 
-            # Add childs elements
+            # Add child elements
             stack.extend(
                 map(
                     lambda tspan: (tspan, depth + 1),
@@ -167,8 +168,9 @@ class TextElement(ShapeElement, TextBBMixin):
 
             previous_depth = depth
 
-        # Pop the last element of the tail
-        poptail()
+        # Pop remaining tail elements
+        while tail_stack:
+            poptail()
 
         return sep.join(result)
 

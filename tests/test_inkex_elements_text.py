@@ -28,9 +28,8 @@ class TextElementTestCase(SvgTestCase):
     def test_get_text(self):
         """Get text should get inside its boundary, tspans included"""
         elem = self.svg.getElementById("main")
-        texts = elem.get_text(sep="").split("\n")[:-1]
 
-        true_texts = [
+        expected_texts = [
             "Text Base",
             "tspan 1",
             "tail 1",
@@ -54,10 +53,15 @@ class TextElementTestCase(SvgTestCase):
             "tspan 5",
             "tspan 6",
             "tail 6",
+            "Child 5 tspan",
+            "Parent 4 tail",
+            "The end",
         ]
+        actual_texts = elem.get_text(sep="").strip().split("\n")
+
         # Test same number of elements
-        self.assertEqual(len(true_texts), len(texts))
+        self.assertEqual(len(expected_texts), len(actual_texts))
 
         # Test equality element wise
-        for true_text, text in zip(true_texts, texts):
-            self.assertEqual(true_text, text)
+        for expected, actual in zip(expected_texts, actual_texts):
+            self.assertEqual(expected, actual)

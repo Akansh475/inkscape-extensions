@@ -34,5 +34,8 @@ Grandparent 1 tail
 <tspan>tspan 5<title>Title tspan</title><desc>Desc tspan</desc></tspan>
 <tspan>tspan 6</tspan>
 tail 6
+<tspan><tspan>Child 5 tspan</tspan>
+Parent 4 tail</tspan>
+The end
 </text>
 </svg>

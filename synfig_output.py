@@ -1410,9 +1410,11 @@ class SynfigExport(OutputExtension):
                     {
                         "bline": bline,
                         "color": color,
-                        "winding_style": 1
-                        if style.setdefault("fill-rule", "nonzero") == "evenodd"
-                        else 0,
+                        "winding_style": (
+                            1
+                            if style.setdefault("fill-rule", "nonzero") == "evenodd"
+                            else 0
+                        ),
                     },
                     guids={"bline": bline_guid},
                 )
@@ -1443,15 +1445,21 @@ class SynfigExport(OutputExtension):
                         "bline": bline,
                         "color": color,
                         "width": extract_width(style, "stroke-width", mtx),
-                        "sharp_cusps": True
-                        if style.setdefault("stroke-linejoin", "miter") == "miter"
-                        else False,
-                        "round_tip[0]": False
-                        if style.setdefault("stroke-linecap", "butt") == "butt"
-                        else True,
-                        "round_tip[1]": False
-                        if style.setdefault("stroke-linecap", "butt") == "butt"
-                        else True,
+                        "sharp_cusps": (
+                            True
+                            if style.setdefault("stroke-linejoin", "miter") == "miter"
+                            else False
+                        ),
+                        "round_tip[0]": (
+                            False
+                            if style.setdefault("stroke-linecap", "butt") == "butt"
+                            else True
+                        ),
+                        "round_tip[1]": (
+                            False
+                            if style.setdefault("stroke-linecap", "butt") == "butt"
+                            else True
+                        ),
                     },
                     guids={"bline": bline_guid},
                 )

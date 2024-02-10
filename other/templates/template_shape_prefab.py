@@ -4,6 +4,7 @@
 import os
 from inkex import load_svg, TemplateExtension
 
+
 class ShapeBuilderTemplate(TemplateExtension):
     """Generate shape builder pattern"""
 
@@ -19,6 +20,7 @@ class ShapeBuilderTemplate(TemplateExtension):
 
     def set_namedview(self, width_px, height_px, unit):
         pass
+
 
 if __name__ == "__main__":
     ShapeBuilderTemplate().run()

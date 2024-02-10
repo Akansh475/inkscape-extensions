@@ -5,6 +5,7 @@ This is meant to be run an executable module, e.g.
     python -m inkex.tester.test_inx_file *.inx
 
 """
+
 import argparse
 import sys
 import unittest

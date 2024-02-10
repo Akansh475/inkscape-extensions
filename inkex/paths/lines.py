@@ -123,12 +123,10 @@ class Line(LineMixin, AbsolutePathCommand):
         return self.x, self.y
 
     @overload
-    def __init__(self, x: complex):
-        ...
+    def __init__(self, x: complex): ...
 
     @overload
-    def __init__(self, x: float, y: float):
-        ...
+    def __init__(self, x: float, y: float): ...
 
     def __init__(self, x, y=None):
         if y is not None:
@@ -184,12 +182,10 @@ class line(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx, self.dy
 
     @overload
-    def __init__(self, dx: complex):
-        ...
+    def __init__(self, dx: complex): ...
 
     @overload
-    def __init__(self, dx: float, dy: float):
-        ...
+    def __init__(self, dx: float, dy: float): ...
 
     def __init__(self, dx, dy=None):
         if dy is not None:
@@ -292,12 +288,10 @@ class Move(MoveMixin, AbsolutePathCommand):
         return self.x, self.y
 
     @overload
-    def __init__(self, x: complex):
-        ...
+    def __init__(self, x: complex): ...
 
     @overload
-    def __init__(self, x: float, y: float):
-        ...
+    def __init__(self, x: float, y: float): ...
 
     def __init__(self, x, y=None):
         if y is not None:
@@ -354,12 +348,10 @@ class move(MoveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx, self.dy
 
     @overload
-    def __init__(self, dx: complex):
-        ...
+    def __init__(self, dx: complex): ...
 
     @overload
-    def __init__(self, dx: float, dy: float):
-        ...
+    def __init__(self, dx: float, dy: float): ...
 
     def __init__(self, dx, dy=None):
         if dy is not None:

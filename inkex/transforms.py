@@ -406,20 +406,17 @@ class Transform:
     __nonzero__ = __bool__
 
     @overload
-    def add_matrix(self, a: MatrixLike) -> Transform:
-        ...
+    def add_matrix(self, a: MatrixLike) -> Transform: ...
 
     @overload
     def add_matrix(  # pylint: disable=too-many-arguments
         self, a: float, b: float, c: float, d: float, e: float, f: float
-    ) -> Transform:
-        ...
+    ) -> Transform: ...
 
     @overload
     def add_matrix(
         self, a: Tuple[float, float, float], b: Tuple[float, float, float]
-    ) -> Transform:
-        ...
+    ) -> Transform: ...
 
     def add_matrix(self, *args):
         """Add matrix in order they appear in the svg hexad"""
@@ -444,12 +441,10 @@ class Transform:
         return self
 
     @overload
-    def add_translate(self, dr: VectorLike) -> Transform:
-        ...
+    def add_translate(self, dr: VectorLike) -> Transform: ...
 
     @overload
-    def add_translate(self, tr_x: float, tr_y: float = 0.0) -> Transform:
-        ...
+    def add_translate(self, tr_x: float, tr_y: float = 0.0) -> Transform: ...
 
     def add_translate(self, *args):
         """Add translate to this transformation"""
@@ -471,24 +466,19 @@ class Transform:
         return self
 
     @overload
-    def add_rotate(self, deg: float, center: VectorLike):
-        ...
+    def add_rotate(self, deg: float, center: VectorLike): ...
 
     @overload
-    def add_rotate(self, deg: float, center_x: float, center_y: float):
-        ...
+    def add_rotate(self, deg: float, center_x: float, center_y: float): ...
 
     @overload
-    def add_rotate(self, deg: float) -> Transform:
-        ...
+    def add_rotate(self, deg: float) -> Transform: ...
 
     @overload
-    def add_rotate(self, deg: float, a: Union[VectorLike, str]) -> Transform:
-        ...
+    def add_rotate(self, deg: float, a: Union[VectorLike, str]) -> Transform: ...
 
     @overload
-    def add_rotate(self, deg: float, a: float, b: float) -> Transform:
-        ...
+    def add_rotate(self, deg: float, a: float, b: float) -> Transform: ...
 
     def add_rotate(self, deg, *args):
         """Add rotation to this transformation"""
@@ -838,9 +828,7 @@ class BoundingBox:  # pylint: disable=too-few-public-methods
     right = property(lambda self: self.x.maximum)
     center_x = property(lambda self: self.x.center)
     center_y = property(lambda self: self.y.center)
-    diagonal_length = property(
-        lambda self: (self.width**2 + self.height**2) ** (0.5)
-    )
+    diagonal_length = property(lambda self: (self.width**2 + self.height**2) ** (0.5))
 
     @overload
     def __init__(self, other=None):

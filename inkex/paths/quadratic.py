@@ -173,12 +173,10 @@ class Quadratic(QuadraticMixin, AbsolutePathCommand):
         return self.x2, self.y2, self.x3, self.y3
 
     @overload
-    def __init__(self, x2: complex, x3: complex):
-        ...
+    def __init__(self, x2: complex, x3: complex): ...
 
     @overload
-    def __init__(self, x2: float, y2: float, x3: float, y3: float):
-        ...
+    def __init__(self, x2: float, y2: float, x3: float, y3: float): ...
 
     def __init__(self, x2, y2, x3=None, y3=None):
         if x3 is not None:
@@ -266,12 +264,10 @@ class quadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=invalid
         return self.dx2, self.dy2, self.dx3, self.dy3
 
     @overload
-    def __init__(self, dx2: complex, dx3: complex):
-        ...
+    def __init__(self, dx2: complex, dx3: complex): ...
 
     @overload
-    def __init__(self, dx2: float, dy2: float, dx3: float, dy3: float):
-        ...
+    def __init__(self, dx2: float, dy2: float, dx3: float, dy3: float): ...
 
     def __init__(self, dx2, dy2, dx3=None, dy3=None):
         if dx3 is not None:
@@ -331,12 +327,10 @@ class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
         return self.x3, self.y3
 
     @overload
-    def __init__(self, x3: complex):
-        ...
+    def __init__(self, x3: complex): ...
 
     @overload
-    def __init__(self, x3: float, y3: float):
-        ...
+    def __init__(self, x3: float, y3: float): ...
 
     def __init__(self, x3, y3=None):
         if y3 is not None:
@@ -414,12 +408,10 @@ class tepidQuadratic(
         return self.dx3, self.dy3
 
     @overload
-    def __init__(self, dx3: complex):
-        ...
+    def __init__(self, dx3: complex): ...
 
     @overload
-    def __init__(self, dx3: float, dy3: float):
-        ...
+    def __init__(self, dx3: float, dy3: float): ...
 
     def __init__(self, dx3, dy3=None):
         if dy3 is not None:

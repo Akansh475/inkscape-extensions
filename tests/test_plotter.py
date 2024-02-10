@@ -1,4 +1,5 @@
 """Test Plotter extension"""
+
 import pytest
 import sys
 from plotter import Plot

@@ -245,8 +245,8 @@ class BooleanCompiler:
     def _compile_attribute(self, selector: parser.AttributeSelector):
         if selector.namespace is not None:
             if selector.namespace:
-                key_func = (
-                    lambda el: f"{{{selector.namespace}}}{selector.name}"
+                key_func = lambda el: (
+                    f"{{{selector.namespace}}}{selector.name}"
                     if el.NAMESPACE != selector.namespace
                     else selector.name
                 )

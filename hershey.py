@@ -78,7 +78,6 @@ from inkex import (
 
 
 class Hershey(inkex.Effect):
-
     """
     An extension for use with Inkscape 1.0
     """

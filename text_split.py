@@ -287,9 +287,11 @@ class TextSplit(inkex.EffectExtension):
 
         def process_element(element) -> float:
             elem_coords = {
-                i: element.root.unittouu(element.get(i))
-                if element.get(i) is not None
-                else None
+                i: (
+                    element.root.unittouu(element.get(i))
+                    if element.get(i) is not None
+                    else None
+                )
                 for i in "xy"
             }
             if elem_coords["x"] is not None:

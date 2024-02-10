@@ -109,8 +109,7 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
         large_arc: bool | int,
         sweep: bool | int,
         endpoint: complex,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -122,8 +121,7 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
         sweep: bool | int,
         x: float,
         y: float,
-    ) -> None:
-        ...  # pylint: disable=too-many-arguments
+    ) -> None: ...  # pylint: disable=too-many-arguments
 
     def __init__(self, *args):
         if len(args) == 5:
@@ -488,8 +486,7 @@ class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
         large_arc: bool,
         sweep: bool,
         endpoint: complex,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -501,8 +498,7 @@ class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
         sweep: bool,
         dx: float,
         dy: float,
-    ) -> None:
-        ...  # pylint: disable=too-many-arguments
+    ) -> None: ...  # pylint: disable=too-many-arguments
 
     def __init__(self, *args):
         if len(args) == 5:

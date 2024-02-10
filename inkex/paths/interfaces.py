@@ -276,8 +276,7 @@ class PathCommand(abc.ABC):
     @abc.abstractmethod
     def _cderivative(
         self, first: complex, prev: complex, prev_control: complex, t: float, n: int = 1
-    ) -> complex:
-        ...
+    ) -> complex: ...
 
     def cunit_tangent(
         self,
@@ -356,8 +355,7 @@ class PathCommand(abc.ABC):
     @abc.abstractmethod
     def _curvature(
         self, first: complex, prev: complex, prev_control: complex, t: float
-    ) -> float:
-        ...
+    ) -> float: ...
 
     # Point evaluation, splitting
     def cpoint(
@@ -379,8 +377,7 @@ class PathCommand(abc.ABC):
     @abc.abstractmethod
     def _cpoint(
         self, first: complex, prev: complex, prev_control: complex, t: float
-    ) -> complex:
-        ...
+    ) -> complex: ...
 
     def split(
         self, first: complex, prev: complex, prev_control: complex, t: float
@@ -395,8 +392,7 @@ class PathCommand(abc.ABC):
     @abc.abstractmethod
     def _split(
         self, first: complex, prev: complex, prev_control: complex, t: float
-    ) -> Tuple[PathCommand, PathCommand]:
-        ...
+    ) -> Tuple[PathCommand, PathCommand]: ...
 
     # Line integration
 
@@ -431,8 +427,7 @@ class PathCommand(abc.ABC):
         t0: float = 0,
         t1: float = 1,
         settings=LengthSettings(),
-    ) -> float:
-        ...
+    ) -> float: ...
 
     def ilength(
         self,
@@ -457,8 +452,7 @@ class PathCommand(abc.ABC):
         prev_control: complex,
         length: float,
         settings: ILengthSettings = ILengthSettings(),
-    ):
-        ...
+    ): ...
 
 
 class RelativePathCommand(PathCommand):

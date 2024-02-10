@@ -92,10 +92,50 @@ class Filter(BaseElement):
 
         tag_name = "feDisplacementMap"
 
+    class DistantLight(Primitive):
+        """DistanceLight Filter element
+        defines a light source for a DiffuseLighting or SpecularLighting Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feDistantLight"
+
     class Flood(Primitive):
         """DiffuseLightning Filter element"""
 
         tag_name = "feFlood"
+
+    class FuncA(Primitive):
+        """FuncR Filter element
+        defines the alpha channel transfer for a ComponentTransfer Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feFuncA"
+
+    class FuncB(Primitive):
+        """FuncR Filter element
+        defines the blue channel transfer for a ComponentTransfer Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feFuncB"
+
+    class FuncG(Primitive):
+        """FuncR Filter element
+        defines the green channel transfer for a ComponentTransfer Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feFuncG"
+
+    class FuncR(Primitive):
+        """FuncR Filter element
+        defines the red channel transfer for a ComponentTransfer Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feFuncR"
 
     class GaussianBlur(Primitive):
         """GaussianBlur Filter element"""
@@ -112,6 +152,14 @@ class Filter(BaseElement):
 
         tag_name = "feMerge"
 
+    class MergeNode(Primitive):
+        """MergeNode Filter element
+        defines an input for a Merge Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feMergeNode"
+
     class Morphology(Primitive):
         """Morphology Filter element"""
 
@@ -122,10 +170,26 @@ class Filter(BaseElement):
 
         tag_name = "feOffset"
 
+    class PointLight(Primitive):
+        """PointLight Filter elements
+        defines a light source for a DiffuseLighting or SpecularLighting Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "fePointLight"
+
     class SpecularLighting(Primitive):
         """SpecularLighting Filter element"""
 
         tag_name = "feSpecularLighting"
+
+    class SpotLight(Primitive):
+        """SpotLight Filter element
+        defines a light source for a DiffuseLighting or SpecularLighting Filter element
+
+        .. versionadded:: 1.4"""
+
+        tag_name = "feSpotLight"
 
     class Tile(Primitive):
         """Tile Filter element"""

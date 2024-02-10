@@ -223,12 +223,10 @@ class BaseElement(IBaseElement):
     @overload
     def add(
         self, child1: BaseElement, child2: BaseElement, *children: BaseElement
-    ) -> Tuple[BaseElement]:
-        ...
+    ) -> Tuple[BaseElement]: ...
 
     @overload
-    def add(self, child: T) -> T:
-        ...
+    def add(self, child: T) -> T: ...
 
     def add(self, *children):
         """

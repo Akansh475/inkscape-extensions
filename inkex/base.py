@@ -154,17 +154,19 @@ class InkscapeExtension:
                 # replace ranges, such as -3, 10- with startvalue,2,3,10..lastvalue
                 pages = re.sub(
                     r"(\d+|)\s?-\s?(\d+|)",
-                    lambda m: ",".join(
-                        map(
-                            str,
-                            range(
-                                int(m.group(1) or startvalue),
-                                int(m.group(2) or lastvalue) + 1,
-                            ),
+                    lambda m: (
+                        ",".join(
+                            map(
+                                str,
+                                range(
+                                    int(m.group(1) or startvalue),
+                                    int(m.group(2) or lastvalue) + 1,
+                                ),
+                            )
                         )
-                    )
-                    if not (m.group(1) or m.group(2)) == ""
-                    else "",
+                        if not (m.group(1) or m.group(2)) == ""
+                        else ""
+                    ),
                     pages,
                 )
 

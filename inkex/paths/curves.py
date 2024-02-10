@@ -187,14 +187,12 @@ class Curve(CurveMixin, AbsolutePathCommand):
         )
 
     @overload
-    def __init__(self, x2: complex, x3: complex, x4: complex):
-        ...
+    def __init__(self, x2: complex, x3: complex, x4: complex): ...
 
     @overload
     def __init__(
         self, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float
-    ):
-        ...  # pylint: disable=too-many-arguments
+    ): ...  # pylint: disable=too-many-arguments
 
     def __init__(
         self, x2, y2, x3, y3=None, x4=None, y4=None
@@ -294,14 +292,12 @@ class curve(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.arg3.imag
 
     @overload
-    def __init__(self, dx2: complex, dx3: complex, dx4: complex):
-        ...
+    def __init__(self, dx2: complex, dx3: complex, dx4: complex): ...
 
     @overload
     def __init__(
         self, dx2: float, dy2: float, dx3: float, dy3: float, dx4: float, dy4: float
-    ):
-        ...  # pylint: disable=too-many-arguments
+    ): ...  # pylint: disable=too-many-arguments
 
     def __init__(
         self, dx2, dy2, dx3, dy3=None, dx4=None, dy4=None
@@ -379,12 +375,10 @@ class Smooth(CurveMixin, AbsolutePathCommand):
         return self.x3, self.y3, self.x4, self.y4
 
     @overload
-    def __init__(self, x3: complex, x4: complex):
-        ...
+    def __init__(self, x3: complex, x4: complex): ...
 
     @overload
-    def __init__(self, x3: float, y3: float, x4: float, y4: float):
-        ...
+    def __init__(self, x3: float, y3: float, x4: float, y4: float): ...
 
     def __init__(self, x3, y3, x4=None, y4=None):
         if x4 is not None:
@@ -472,12 +466,10 @@ class smooth(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx3, self.dy3, self.dx4, self.dy4
 
     @overload
-    def __init__(self, dx3: complex, dx4: complex):
-        ...
+    def __init__(self, dx3: complex, dx4: complex): ...
 
     @overload
-    def __init__(self, dx3: float, dy3: float, dx4: float, dy4: float):
-        ...
+    def __init__(self, dx3: float, dy3: float, dx4: float, dy4: float): ...
 
     def __init__(self, dx3, dy3, dx4=None, dy4=None):
         if dx4 is not None:

@@ -27,6 +27,7 @@ No deformation is applied to the pattern itself.
 """
 import random
 import math
+import numpy as np
 
 import inkex
 from inkex import bezier, Transform, BoundingBox, Group, Use
@@ -195,9 +196,8 @@ class DistributeAlongPath(pathmodifier.Diffeo):
         counter = 0
         for skelnode in skeletons.values():
             skelnode.apply_transform()
-            cur_skeleton = skelnode.path.to_superpath()
-            for comp in cur_skeleton:
-                skelcomp, lengths = self.linearize(comp)
+            for subpath in skelnode.path.break_apart():
+                skelcomp, lengths = self.linearize(subpath.to_superpath()[0])
                 skel_closed = all(
                     [math.isclose(i, j) for i, j in zip(skelcomp[0], skelcomp[-1])]
                 )
@@ -205,12 +205,26 @@ class DistributeAlongPath(pathmodifier.Diffeo):
                 length = sum(lengths)
                 dx = width + self.options.space
                 if self.options.stretch:
-                    n = int((length + self.options.space) / dx)
-                    if n > 0:
-                        dx = (length) / n
+                    if subpath[-1].letter in "zZ":
+                        sval = np.linspace(
+                            0,
+                            length,
+                            int((length + self.options.space) / (dx)),
+                            endpoint=False,
+                        )
+                    else:
+                        sval = np.linspace(
+                            0,
+                            length,
+                            int((length + self.options.space) / (dx)) + 1,
+                            endpoint=True,
+                        )
+                else:
+                    sval = [self.options.toffset * 0.01 * dx]
+                    while sval[-1] + dx < length:
+                        sval.append(sval[-1] + dx)
 
-                s = 0 if self.options.stretch else self.options.toffset * 0.01 * dx
-                while s <= length:
+                for counter, s in enumerate(sval):
                     local_transform = self.localTransformAt(
                         s, skelcomp, lengths, skel_closed, self.options.follow
                     )
@@ -226,8 +240,6 @@ class DistributeAlongPath(pathmodifier.Diffeo):
                     g_node.append(clone)
 
                     clone.transform = local_transform @ clone.transform
-                    s += dx
-                    counter += 1
 
 
 if __name__ == "__main__":

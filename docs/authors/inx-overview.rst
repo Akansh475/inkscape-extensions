@@ -186,6 +186,14 @@ XML Attributes
 +---------------------------+-------------------------+
 | Attribute name            | Allowed values          |
 +===========================+=========================+
+| ``is_exported``           | ``"true"`` |            |
+|                           | ``"false"`` (default)   |
+| .. versionadded:: 1.2     |                         |
++---------------------------+-------------------------+
+| If set to ``true`` in an **output** extensions, the |
+| the extension will be available in the export       |
+| dialog.                                             |
++---------------------------+-------------------------+
 | ``priority``              | ``<int>`` |             |
 |                           | not specified (default) |
 | .. versionadded:: 1.3     |                         |

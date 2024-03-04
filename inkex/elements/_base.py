@@ -420,7 +420,10 @@ class BaseElement(IBaseElement):
             ElementList: list of ancestors
         """
 
-        return ElementList(self.root, self._ancestors(elem=elem, stop_at=stop_at))
+        try:
+            return ElementList(self.root, self._ancestors(elem=elem, stop_at=stop_at))
+        except FragmentError:
+            return ElementList(self, self._ancestors(elem=elem, stop_at=stop_at))
 
     def _ancestors(self, elem, stop_at):
         if isinstance(elem, BaseElement):

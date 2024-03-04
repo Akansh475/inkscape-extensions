@@ -26,7 +26,7 @@ Interface for all group based elements such as Groups, Use, Markers etc.
 from lxml import etree  # pylint: disable=unused-import
 
 from ..paths import Path
-from ..transforms import Transform
+from ..transforms import BoundingBox, Transform
 
 from ._utils import addNS
 from ._base import ShapeElement, ViewboxMixin
@@ -48,12 +48,43 @@ class GroupBase(ShapeElement):
                 ret += child.path.transform(child.transform)
         return ret
 
+    def bounding_box(self, transform=None):
+        # type: (Optional[Transform]) -> Optional[BoundingBox]
+        """BoundingBox of the shape
+
+        .. versionchanged:: 1.4
+            Exclude invisible child objects from bounding box computation
+
+        .. versionchanged:: 1.1
+            result adjusted for element's clip path if applicable.
+        """
+        bbox = None
+        effective_transform = Transform(transform) @ self.transform
+        for child in self:
+            if isinstance(child, ShapeElement) and child.is_visible():
+                child_bbox = child.bounding_box(transform=effective_transform)
+                if child_bbox is not None:
+                    bbox += child_bbox
+        clip = self.clip
+        if clip is None or bbox is None:
+            return bbox
+        return bbox & clip.bounding_box(Transform(transform) @ self.transform)
+
     def shape_box(self, transform=None):
+        # type: (Optional[Transform]) -> Optional[BoundingBox]
+        """BoundingBox of the unclipped shape
+
+        .. versionchanged:: 1.4
+            returns the bounding box without possible clip effects of child objects
+
+        .. versionadded:: 1.1
+            Previous :func:`bounding_box` function, returning the bounding box
+            without computing the effect of a possible clip."""
         bbox = None
         effective_transform = Transform(transform) @ self.transform
         for child in self:
             if isinstance(child, ShapeElement):
-                child_bbox = child.bounding_box(transform=effective_transform)
+                child_bbox = child.shape_box(transform=effective_transform)
                 if child_bbox is not None:
                     bbox += child_bbox
         return bbox

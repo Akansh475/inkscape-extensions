@@ -149,17 +149,15 @@ class TextElement(ShapeElement, TextBBMixin):
             for _ in range(previous_depth - depth):
                 poptail()
 
-            # Add a node text to the result, if any
-            if node.text:
+            # Add a node text to the result, if any if node is text or tspan
+            if node.text and node.TAG in ["text", "tspan"]:
                 result.append(node.text)
 
             # Add child elements
             stack.extend(
                 map(
                     lambda tspan: (tspan, depth + 1),
-                    node.iterchildren(
-                        tag="{http://www.w3.org/2000/svg}tspan", reversed=True
-                    ),
+                    node.iterchildren(reversed=True),
                 )
             )
 
@@ -169,7 +167,8 @@ class TextElement(ShapeElement, TextBBMixin):
             previous_depth = depth
 
         # Pop remaining tail elements
-        while tail_stack:
+        # Tail of the main text element should not be included
+        while len(tail_stack) > 1:
             poptail()
 
         return sep.join(result)

@@ -25,12 +25,14 @@ class SvgTestCase(TestCase):
 class TextElementTestCase(SvgTestCase):
     """Test text element functions"""
 
-    def test_get_text(self):
+    def test_get_text_multilevel(self):
         """Get text should get inside its boundary, tspans included"""
         elem = self.svg.getElementById("main")
 
         expected_texts = [
             "Text Base",
+            "",  # The inside of title and desc are not fetch but
+            "",  # their tail should still be fetched
             "tspan 1",
             "tail 1",
             "tspan 2",
@@ -56,12 +58,48 @@ class TextElementTestCase(SvgTestCase):
             "Child 5 tspan",
             "Parent 4 tail",
             "The end",
+            "",
         ]
-        actual_texts = elem.get_text(sep="").strip().split("\n")
+        # Split to compare each line independently
+        actual_texts = elem.get_text(sep="").split("\n")
 
         # Test same number of elements
-        self.assertEqual(len(expected_texts), len(actual_texts))
+        self.assertEqual(
+            len(expected_texts), len(actual_texts), "Number elements get_text()"
+        )
 
         # Test equality element wise
         for expected, actual in zip(expected_texts, actual_texts):
             self.assertEqual(expected, actual)
+
+    def test_whitespace_handling(self):
+        """Thorough whitespace exercise for get_text()"""
+
+        # Maps element IDs to expected value from get_text()
+        element_values = {
+            "zero_length_string": "",
+            "level1_oneline": "one",
+            "level1_oneline_spaced": "  one  ",
+            "level1_oneline_trailing_spaces": "one  ",
+            "level1_oneline_trailing_newlines": "one\n\n",
+            "level1_multiline": "one\ntwo",
+            "level1_multiline_spaced": " one\n\ntwo ",
+            "level1_multiline_trailing_spaces": "one\n\ntwo  ",
+            "level1_multiline_trailing_newline": "one\n\ntwo\n\n",
+            "level2_oneline": "onetwo",
+            "level2_oneline_spaced": "  one    two  ",
+            "level2_oneline_trailing_spaces": "one  two  ",
+            "level2_oneline_trailing_newlines": "one\n\ntwo\n\n",
+            "level2_multiline": "one\ntwothree\nfour",
+            "level2_multiline_spaced": " one\n\ntwo three \n\nfour ",
+            "level2_multiline_trailing_spaces": "one\n\ntwo  three ",
+            "level2_oneline_middle_element": "one  two   three     six  ",
+            "level2_multiline_trailing_newline": "one\n\ntwo\nthree\n\n",
+        }
+
+        # Fetch each element one by one to test them for their withespaces
+        for element_id, expected_string in element_values.items():
+            elem = self.svg.getElementById(element_id)
+            self.assertEqual(
+                expected_string, elem.get_text(sep=""), f"Element {element_id}"
+            )

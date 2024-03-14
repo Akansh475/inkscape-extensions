@@ -38,4 +38,62 @@ tail 6
 Parent 4 tail</tspan>
 The end
 </text>
+
+<!-- Word of warning, these are higly sensitive and picky about whitespace -->
+<text id="zero_length_string"></text>
+<text id="level1_oneline">one</text>
+<text id="level1_oneline_spaced">  one  </text>
+<text id="level1_oneline_trailing_spaces">one  </text>
+<text id="level1_oneline_trailing_newlines">one
+
+</text>
+
+<text id="level1_multiline">one
+two</text>
+<text id="level1_multiline_spaced"> one
+
+two </text>
+<text id="level1_multiline_trailing_spaces">one
+
+two  </text>
+<text id="level1_multiline_trailing_newline">one
+
+two
+
+</text>
+
+<!-- Similar to above but has 1 nested element -->
+<text id="level2_oneline">one<tspan>two</tspan></text>
+<text id="level2_oneline_spaced">  one  <tspan>  two  </tspan></text>
+<text id="level2_oneline_trailing_spaces">one  <tspan>two  </tspan></text>
+<text id="level2_oneline_trailing_newlines">one
+
+<tspan>two
+
+</tspan></text>
+
+<text id="level2_multiline">one
+two<tspan>three
+four</tspan></text>
+<text id="level2_multiline_spaced"> one
+
+two <tspan>three 
+
+four </tspan></text>
+
+<text id="level2_multiline_trailing_spaces">one
+
+two  <tspan>three </tspan></text>
+<text id="level2_multiline_trailing_newline">one
+
+two
+<tspan>three</tspan>
+
+</text>
+
+<text id="level2_oneline_middle_element">one <tspan> two </tspan>  three  <title>  four  </title> <desc>  five  </desc>  <tspan>six </tspan> </text>
+
+
+
+
 </svg>

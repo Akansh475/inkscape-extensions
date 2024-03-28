@@ -44,6 +44,20 @@ def run_extension(document, *args) -> str:
     return output.read()
 
 
+class CommentTest(TestCase):
+    """Check that a svg with comments is exported correctly"""
+
+    def test_comment(self):
+        """Test that the comments are removed and do not raise an exception"""
+        svg = load_svg('<svg xmlns="http://www.w3.org/2000/svg"><!-- comment --></svg>')
+        out1 = run_extension(svg)
+
+        svg = load_svg('<svg xmlns="http://www.w3.org/2000/svg"></svg>')
+        out2 = run_extension(svg)
+
+        self.assertEqual(out1, out2)
+
+
 class DXFDeeplyNestedTest(TestCase):
     """Check that a deeply nested SVG raises an AbortExtension"""
 

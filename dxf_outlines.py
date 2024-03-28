@@ -263,6 +263,9 @@ class DxfOutlines(inkex.OutputExtension):
             self.dxf_add(" 11\n%f\n 21\n%f\n 31\n0.0\n" % (self.xfit[i], self.yfit[i]))
 
     def process_shape(self, node, mat):
+        if not isinstance(node, (PathElement, Rectangle, Line, Circle, Ellipse)):
+            return
+
         rgb = (0, 0, 0)
         style = node.style("stroke")
         if style is not None and isinstance(style, inkex.Color):
@@ -271,9 +274,6 @@ class DxfOutlines(inkex.OutputExtension):
         self.color = 7  # default is blac
         if hsl[2]:
             self.color = 1 + (int(6 * hsl[0] + 0.5) % 6)  # use 6 hues
-
-        if not isinstance(node, (PathElement, Rectangle, Line, Circle, Ellipse)):
-            return
 
         # Transforming /after/ superpath is more reliable than before
         # because of some issues with arcs in transformations

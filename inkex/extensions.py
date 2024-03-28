@@ -52,7 +52,7 @@ from .base import (
     TempDirMixin,
 )
 from .transforms import Transform
-from .elements import LinearGradient, RadialGradient
+from .elements import LinearGradient, RadialGradient, MeshGradient
 from .command import write_svg, inkscape, ProgramRunError
 from .utils import errormsg
 from .localization import inkex_gettext as _
@@ -451,7 +451,9 @@ class ColorExtension(EffectExtension):
                 rgba_result = self._modify_color(name, col)
                 elem.style.set_color(rgba_result, name)
 
-            if isinstance(value, (LinearGradient, RadialGradient, Pattern)):
+            if isinstance(
+                value, (LinearGradient, RadialGradient, MeshGradient, Pattern)
+            ):
                 gradients.track(value, elem, self._ref_cloned, element=elem, name=name)
                 if value.href is not None:
                     gradients.track(value.href, elem, self._xlink_cloned, linker=value)

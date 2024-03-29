@@ -24,6 +24,9 @@ for the individual path commands are ported from
 https://github.com/mathandy/svgpathtools/ (MIT licensed)
 """
 
+from typing import Union
+
+from ..transforms import ComplexLike
 from .interfaces import (
     PathCommand,
     AbsolutePathCommand,
@@ -43,17 +46,17 @@ np.seterr(invalid="raise")
 
 
 # definitions that can't be inside the class due to circular dependencies
-def to_curve(self, prev: complex, prev_prev: complex = 0) -> Curve:
+def to_curve(self, prev: ComplexLike, prev_prev: ComplexLike = 0) -> Curve:
     """Convert command to :py:class:`Curve`
 
     Curve().to_curve() returns a copy
     """
-    return Curve(*self.ccurve_points(0 + 0j, prev, prev_prev))
+    return Curve(*self.ccurve_points(0 + 0j, complex(prev), complex(prev_prev)))
 
 
-def to_line(self, prev: complex) -> Line:
+def to_line(self, prev: ComplexLike) -> Line:
     """Converts this segment to a line (copies if already a line)"""
-    return Line(self.cend_point(0, prev))
+    return Line(self.cend_point(0, complex(prev)))
 
 
 PathCommand.to_curve = to_curve  # type: ignore

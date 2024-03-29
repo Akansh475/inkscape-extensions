@@ -22,11 +22,11 @@
 from __future__ import annotations
 from math import atan2, pi, sqrt, sin, cos, tan, acos, radians, degrees
 from cmath import exp
-from typing import overload, Tuple, List, TYPE_CHECKING
+from typing import overload, Tuple, List, Union, TYPE_CHECKING
 
 import numpy as np
 
-from ..transforms import Transform
+from ..transforms import Transform, Vector2d, ComplexLike
 
 from .interfaces import (
     AbsolutePathCommand,
@@ -103,11 +103,11 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
     @overload
     def __init__(
         self,
-        radius: complex,
+        radius: ComplexLike,
         x_axis_rotation: float,
         large_arc: bool | int,
         sweep: bool | int,
-        endpoint: complex,
+        endpoint: ComplexLike,
     ) -> None: ...
 
     @overload
@@ -131,6 +131,8 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
                 self.sweep,
                 self.endpoint,
             ) = args
+            self.radius = complex(self.radius)
+            self.endpoint = complex(self.endpoint)
         elif len(args) == 7:
             self.radius = args[0] + args[1] * 1j
             self.x_axis_rotation, self.large_arc, self.sweep = args[2:5]
@@ -261,14 +263,14 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
     ) -> Tuple[complex, ...]:
         return NotImplemented
 
-    def to_curves(self, prev: complex, prev_prev: complex = 0j) -> List[Curve]:
+    def to_curves(self, prev: ComplexLike, prev_prev: ComplexLike = 0j) -> List[Curve]:
         """Convert this arc into bezier curves"""
         # TODO Refactor out CubicSuperPath
         from .path import CubicSuperPath
 
-        path = CubicSuperPath([arc_to_path([prev.real, prev.imag], self.args)]).to_path(
-            curves_only=True
-        )
+        path = CubicSuperPath(
+            [arc_to_path(Vector2d.c2t(complex(prev)), self.args)]
+        ).to_path(curves_only=True)
         # Ignore the first move command from to_path()
         return list(path)[1:]
 
@@ -326,7 +328,7 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
 
         return Arc(rx_ + 1j * ry_, theta_deg, self.large_arc, sweep, newend)
 
-    def to_relative(self, prev: complex) -> RelativePathCommand:
+    def to_relative(self, prev: ComplexLike) -> RelativePathCommand:
         return arc(
             self.radius,
             self.x_axis_rotation,
@@ -338,7 +340,7 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.endpoint
 
-    def reverse(self, first: complex, prev: complex) -> Arc:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Arc:
         return Arc(
             self.radius, self.x_axis_rotation, self.large_arc, not self.sweep, prev
         )
@@ -480,11 +482,11 @@ class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
     @overload
     def __init__(
         self,
-        radius: complex,
+        radius: ComplexLike,
         x_axis_rotation: float,
         large_arc: bool,
         sweep: bool,
-        endpoint: complex,
+        endpoint: ComplexLike,
     ) -> None: ...
 
     @overload
@@ -508,12 +510,14 @@ class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
                 self.sweep,
                 self.endpoint,
             ) = args
+            self.radius = complex(self.radius)
+            self.endpoint = complex(self.endpoint)
         elif len(args) == 7:
             self.radius = args[0] + args[1] * 1j
             self.x_axis_rotation, self.large_arc, self.sweep = args[2:5]
             self.endpoint = args[5] + args[6] * 1j
 
-    def to_absolute(self, prev: complex) -> Arc:
+    def to_absolute(self, prev: ComplexLike) -> Arc:
         return Arc(
             self.radius,
             self.x_axis_rotation,
@@ -535,7 +539,7 @@ class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
     ) -> Tuple[complex, ...]:
         return NotImplemented
 
-    def reverse(self, first: complex, prev: complex) -> arc:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> arc:
         return arc(
             self.radius,
             self.x_axis_rotation,
@@ -544,7 +548,7 @@ class arc(RelativePathCommand, Arc):  # pylint: disable=invalid-name
             -self.endpoint,
         )
 
-    def to_curves(self, prev: complex, prev_prev: complex = 0j) -> List[Curve]:
+    def to_curves(self, prev: ComplexLike, prev_prev: ComplexLike = 0j) -> List[Curve]:
         return self.to_absolute(prev).to_curves(prev, prev_prev)
 
 

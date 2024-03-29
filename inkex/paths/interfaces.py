@@ -39,7 +39,7 @@ from dataclasses import dataclass
 
 import numpy as np
 from ..utils import classproperty, rational_limit
-from ..transforms import Vector2d, BoundingBox, Transform
+from ..transforms import Vector2d, BoundingBox, Transform, ComplexLike
 
 if TYPE_CHECKING:
     from .curves import Curve
@@ -112,23 +112,24 @@ class PathCommand(abc.ABC):
         command letter)"""
         raise NotImplementedError
 
-    def to_relative(self, prev: complex) -> RelativePathCommand:
+    def to_relative(self, prev: ComplexLike) -> RelativePathCommand:
         """Return absolute counterpart for absolute commands or copy for relative"""
         raise NotImplementedError
 
-    def to_absolute(self, prev: complex) -> AbsolutePathCommand:
+    def to_absolute(self, prev: ComplexLike) -> AbsolutePathCommand:
         """Return relative counterpart for relative commands or copy for absolute"""
         raise NotImplementedError
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> PathCommand:
         """Reverse path command
 
         .. versionadded:: 1.1"""
+        raise NotImplementedError
 
     def to_non_shorthand(
         self,
-        prev: complex,
-        prev_control: complex,  # pylint: disable=unused-argument
+        prev: ComplexLike,
+        prev_control: ComplexLike,  # pylint: disable=unused-argument
     ) -> AbsolutePathCommand:
         """Return an absolute non-shorthand command
 
@@ -153,9 +154,13 @@ class PathCommand(abc.ABC):
         """Returns path command arguments as tuple of floats"""
 
     def control_points(
-        self, first: complex, prev: complex, prev_prev: complex
+        self,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_prev: ComplexLike,
     ) -> Generator[Vector2d, None, None]:
         """Returns list of path command control points"""
+        first, prev, prev_prev = complex(first), complex(prev), complex(prev_prev)
         yield from [Vector2d(i) for i in self.ccontrol_points(first, prev, prev_prev)]
 
     @abc.abstractmethod
@@ -194,9 +199,9 @@ class PathCommand(abc.ABC):
     def cend_point(self, first: complex, prev: complex) -> complex:
         """Complex version of end_point"""
 
-    def end_point(self, first: complex, prev: complex) -> Vector2d:
+    def end_point(self, first: ComplexLike, prev: ComplexLike) -> Vector2d:
         """Returns last control point of path command"""
-        return Vector2d(self.cend_point(first, prev))
+        return Vector2d(self.cend_point(complex(first or 0), complex(prev or 0)))
 
     @abc.abstractmethod
     def update_bounding_box(
@@ -211,7 +216,7 @@ class PathCommand(abc.ABC):
             bbox (BoundingBox): bounding box to update
         """
 
-    def to_curve(self, prev: complex, prev_prev: complex = 0) -> Curve:
+    def to_curve(self, prev: ComplexLike, prev_prev: ComplexLike = 0) -> Curve:
         # pylint: disable=unused-argument
         """Convert command to :py:class:`Curve`
 
@@ -219,11 +224,11 @@ class PathCommand(abc.ABC):
         """
         return NotImplemented
 
-    def to_curves(self, prev: complex, prev_prev: complex = 0) -> List[Curve]:
+    def to_curves(self, prev: ComplexLike, prev_prev: ComplexLike = 0) -> List[Curve]:
         """Convert command to list of :py:class:`Curve` commands"""
         return [self.to_curve(prev, prev_prev)]
 
-    def to_line(self, prev: complex) -> Line:
+    def to_line(self, prev: ComplexLike) -> Line:
         # pylint: disable=unused-argument
         """Converts this segment to a line (copies if already a line)"""
         return NotImplemented
@@ -263,9 +268,9 @@ class PathCommand(abc.ABC):
 
     def derivative(
         self,
-        first: complex,
-        prev: complex,
-        prev_control: complex,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_control: ComplexLike,
         t: Optional[float] = None,
         n: int = 1,
     ) -> Vector2d:
@@ -273,7 +278,15 @@ class PathCommand(abc.ABC):
 
         .. versionadded:: 1.4
         """
-        return Vector2d(self.cderivative(first, prev, prev_control, t, n))
+        return Vector2d(
+            self.cderivative(
+                complex(first or 0),
+                complex(prev or 0),
+                complex(prev_control or 0),
+                t,
+                n,
+            )
+        )
 
     @abc.abstractmethod
     def _cderivative(
@@ -295,16 +308,20 @@ class PathCommand(abc.ABC):
 
     def unit_tangent(
         self,
-        first: complex,
-        prev: complex,
-        prev_control: complex,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_control: ComplexLike,
         t: Optional[float] = None,
     ) -> Vector2d:
         """Returns the unit tangent of the segment at t as a :class:`Vector2D`.
 
         ..versionadded:: 1.4
         """
-        return Vector2d(self.cunit_tangent(first, prev, prev_control, t))
+        return Vector2d(
+            self.cunit_tangent(
+                complex(first or 0), complex(prev or 0), complex(prev_control or 0), t
+            )
+        )
 
     def _cunit_tangent(
         self, first: complex, prev: complex, prev_control: complex, t: float
@@ -324,13 +341,13 @@ class PathCommand(abc.ABC):
 
         ..versionadded:: 1.4
         """
-        return self.unit_tangent(first, prev, prev_control, t) * 1j
+        return self.cunit_tangent(first, prev, prev_control, t) * 1j
 
     def normal(
         self,
-        first: complex,
-        prev: complex,
-        prev_control: complex,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_control: ComplexLike,
         t: Optional[float] = None,
     ) -> Vector2d:
         """Returns the (right-hand-rule) normal vector of the segment at t as
@@ -338,13 +355,17 @@ class PathCommand(abc.ABC):
 
         ..versionadded:: 1.4
         """
-        return Vector2d(self.cnormal(first, prev, prev_control, t))
+        return Vector2d(
+            self.cnormal(
+                complex(first or 0), complex(prev or 0), complex(prev_control or 0), t
+            )
+        )
 
     def curvature(
         self,
-        first: complex,
-        prev: complex,
-        prev_control: complex,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_control: ComplexLike,
         t: Optional[float] = None,
     ) -> float:
         """Returns the curvature of the segment at t.
@@ -352,7 +373,12 @@ class PathCommand(abc.ABC):
         ..versionadded:: 1.4
         """
         # pylint: disable=protected-access
-        return self._curvature(first, prev, prev_control, self.__check_t(t))
+        return self._curvature(
+            complex(first or 0),
+            complex(prev or 0),
+            complex(prev_control or 0),
+            self.__check_t(t),
+        )
 
     @abc.abstractmethod
     def _curvature(
@@ -369,12 +395,16 @@ class PathCommand(abc.ABC):
         return self._cpoint(first, prev, prev_control, self.__check_t(t, False))
 
     def point(
-        self, first: complex, prev: complex, prev_control: complex, t: float
+        self, first: ComplexLike, prev: ComplexLike, prev_control: ComplexLike, t: float
     ) -> Vector2d:
         """Returns the coordinates of the Bezier curve evaluated at t as :class:`Vector2d`.
 
         .. versionadded:: 1.4"""
-        return Vector2d(self.cpoint(first, prev, prev_control, t))
+        return Vector2d(
+            self.cpoint(
+                complex(first or 0), complex(prev or 0), complex(prev_control or 0), t
+            )
+        )
 
     @abc.abstractmethod
     def _cpoint(
@@ -382,14 +412,19 @@ class PathCommand(abc.ABC):
     ) -> complex: ...
 
     def split(
-        self, first: complex, prev: complex, prev_control: complex, t: float
+        self, first: ComplexLike, prev: ComplexLike, prev_control: ComplexLike, t: float
     ) -> Tuple[PathCommand, PathCommand]:
         """Returns two segments, whose union is this segment and which join at
         self.point(t).
 
         .. versionadded:: 1.4"""
         # no simplification here, we want to preserve the original type
-        return self._split(first, prev, prev_control, self.__check_t(t, False))
+        return self._split(
+            complex(first),
+            complex(prev),
+            complex(prev_control),
+            self.__check_t(t, False),
+        )
 
     @abc.abstractmethod
     def _split(
@@ -400,9 +435,9 @@ class PathCommand(abc.ABC):
 
     def length(
         self,
-        first: complex,
-        prev: complex,
-        prev_control: complex,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_control: ComplexLike,
         t0: float = 0,
         t1: float = 1,
         settings=LengthSettings(),
@@ -412,9 +447,9 @@ class PathCommand(abc.ABC):
         .. versionadded:: 1.4"""
         # pylint: disable=protected-access
         return self._length(
-            first,
-            prev,
-            prev_control,
+            complex(first),
+            complex(prev),
+            complex(prev_control),
             self.__check_t(t0, False),
             self.__check_t(t1, False),
             settings,
@@ -433,9 +468,9 @@ class PathCommand(abc.ABC):
 
     def ilength(
         self,
-        first: complex,
-        prev: complex,
-        prev_control: complex,
+        first: ComplexLike,
+        prev: ComplexLike,
+        prev_control: ComplexLike,
         length: float,
         settings: ILengthSettings = ILengthSettings(),
     ):
@@ -444,7 +479,9 @@ class PathCommand(abc.ABC):
 
         .. versionadded:: 1.4"""
         # pylint: disable=protected-access
-        return self._ilength(first, prev, prev_control, length, settings)
+        return self._ilength(
+            complex(first), complex(prev), complex(prev_control), length, settings
+        )
 
     @abc.abstractmethod
     def _ilength(
@@ -473,7 +510,7 @@ class RelativePathCommand(PathCommand):
     def is_absolute(self):
         return False
 
-    def to_relative(self, prev: complex) -> RelativePathCommand:
+    def to_relative(self, prev: ComplexLike) -> RelativePathCommand:
         return self.__class__(*self.args)
 
     def update_bounding_box(self, first, last_two_points, bbox):
@@ -494,7 +531,7 @@ class AbsolutePathCommand(PathCommand):
     def is_absolute(self):
         return True
 
-    def to_absolute(self, prev: complex) -> AbsolutePathCommand:
+    def to_absolute(self, prev: ComplexLike) -> AbsolutePathCommand:
         return self.__class__(*self.args)
 
     @abc.abstractmethod

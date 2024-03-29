@@ -21,12 +21,12 @@
 
 from __future__ import annotations
 
-from typing import overload, Tuple, Callable
+from typing import overload, Tuple, Callable, Union
 from math import sqrt
 
 import numpy as np
 
-from ..transforms import quadratic_extrema, Transform
+from ..transforms import quadratic_extrema, Transform, ComplexLike
 
 from .interfaces import (
     AbsolutePathCommand,
@@ -173,7 +173,7 @@ class Quadratic(QuadraticMixin, AbsolutePathCommand):
         return self.x2, self.y2, self.x3, self.y3
 
     @overload
-    def __init__(self, x2: complex, x3: complex): ...
+    def __init__(self, x2: ComplexLike, x3: ComplexLike): ...
 
     @overload
     def __init__(self, x2: float, y2: float, x3: float, y3: float): ...
@@ -183,7 +183,7 @@ class Quadratic(QuadraticMixin, AbsolutePathCommand):
             self.arg1 = x2 + y2 * 1j
             self.arg2 = x3 + y3 * 1j
         else:
-            self.arg1, self.arg2 = x2, y2
+            self.arg1, self.arg2 = complex(x2), complex(y2)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         x1, x2, x3 = last_two_points[-1].real, self.x2, self.x3
@@ -200,7 +200,7 @@ class Quadratic(QuadraticMixin, AbsolutePathCommand):
     ) -> Tuple[complex, ...]:
         return (self.arg1, self.arg2)
 
-    def to_relative(self, prev: complex) -> quadratic:
+    def to_relative(self, prev: ComplexLike) -> quadratic:
         return quadratic(self.arg1 - prev, self.arg2 - prev)
 
     def transform(self, transform: Transform) -> Quadratic:
@@ -218,8 +218,9 @@ class Quadratic(QuadraticMixin, AbsolutePathCommand):
         pt2 = 2.0 / 3 * self.arg1 + 1.0 / 3 * self.arg2
         return pt1, pt2, self.arg2
 
-    def reverse(self, first, prev):
-        return Quadratic(self.x2, self.y2, prev.x, prev.y)
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Quadratic:
+        prev = complex(prev)
+        return Quadratic(self.x2, self.y2, prev.real, prev.imag)
 
     def _split(
         self, first: complex, prev: complex, prev_control: complex, t: float
@@ -264,7 +265,7 @@ class quadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=invalid
         return self.dx2, self.dy2, self.dx3, self.dy3
 
     @overload
-    def __init__(self, dx2: complex, dx3: complex): ...
+    def __init__(self, dx2: ComplexLike, dx3: ComplexLike): ...
 
     @overload
     def __init__(self, dx2: float, dy2: float, dx3: float, dy3: float): ...
@@ -274,14 +275,14 @@ class quadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=invalid
             self.arg1 = dx2 + dy2 * 1j
             self.arg2 = dx3 + dy3 * 1j
         else:
-            self.arg1, self.arg2 = dx2, dy2
+            self.arg1, self.arg2 = complex(dx2), complex(dy2)
 
     def ccontrol_points(
         self, first: complex, prev: complex, prev_prev: complex
     ) -> Tuple[complex, ...]:
         return (self.arg1 + prev, self.arg2 + prev)
 
-    def to_absolute(self, prev: complex) -> Quadratic:
+    def to_absolute(self, prev: ComplexLike) -> Quadratic:
         return Quadratic(self.arg1 + prev, self.arg2 + prev)
 
     def ccurve_points(
@@ -294,7 +295,7 @@ class quadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=invalid
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2 + prev
 
-    def reverse(self, first: complex, prev: complex) -> quadratic:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> quadratic:
         return quadratic(-self.arg2 + self.arg1, -self.arg2)
 
     def _split(
@@ -327,7 +328,7 @@ class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
         return self.x3, self.y3
 
     @overload
-    def __init__(self, x3: complex): ...
+    def __init__(self, x3: ComplexLike): ...
 
     @overload
     def __init__(self, x3: float, y3: float): ...
@@ -336,7 +337,7 @@ class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
         if y3 is not None:
             self.arg1 = x3 + y3 * 1j
         else:
-            self.arg1 = x3
+            self.arg1 = complex(x3)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         self.to_quadratic(last_two_points[-1], last_two_points[-2]).update_bounding_box(
@@ -348,10 +349,12 @@ class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
     ) -> Tuple[complex, ...]:
         return (2 * prev - prev_prev, self.arg1)
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Quadratic:
+    def to_non_shorthand(
+        self, prev: ComplexLike, prev_control: ComplexLike
+    ) -> Quadratic:
         return self.to_quadratic(prev, prev_control)
 
-    def to_relative(self, prev: complex) -> tepidQuadratic:
+    def to_relative(self, prev: ComplexLike) -> tepidQuadratic:
         return tepidQuadratic(self.arg1 - prev)
 
     def transform(self, transform: Transform) -> TepidQuadratic:
@@ -369,11 +372,13 @@ class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
 
-    def to_quadratic(self, prev: complex, prev_prev: complex) -> Quadratic:
+    def to_quadratic(self, prev: ComplexLike, prev_prev: ComplexLike) -> Quadratic:
         """Convert this continued quadratic into a full quadratic"""
-        return Quadratic(*self.ccontrol_points(prev, prev, prev_prev))
+        return Quadratic(
+            *self.ccontrol_points(complex(prev), complex(prev), complex(prev_prev))
+        )
 
-    def reverse(self, first: complex, prev: complex) -> TepidQuadratic:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> TepidQuadratic:
         return TepidQuadratic(prev)
 
     def _split(
@@ -406,7 +411,7 @@ class tepidQuadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=in
         return self.dx3, self.dy3
 
     @overload
-    def __init__(self, dx3: complex): ...
+    def __init__(self, dx3: ComplexLike): ...
 
     @overload
     def __init__(self, dx3: float, dy3: float): ...
@@ -415,7 +420,7 @@ class tepidQuadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=in
         if dy3 is not None:
             self.arg1 = dx3 + dy3 * 1j
         else:
-            self.arg1 = dx3
+            self.arg1 = complex(dx3)
 
     def ccontrol_points(
         self, first: complex, prev: complex, prev_prev: complex
@@ -431,16 +436,18 @@ class tepidQuadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=in
         pt2 = 2.0 / 3 * qp1 + 1.0 / 3 * qp2
         return pt1, pt2, qp2
 
-    def to_absolute(self, prev: complex) -> TepidQuadratic:
+    def to_absolute(self, prev: ComplexLike) -> TepidQuadratic:
         return TepidQuadratic(self.arg1 + prev)
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Quadratic:
+    def to_non_shorthand(
+        self, prev: ComplexLike, prev_control: ComplexLike
+    ) -> Quadratic:
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1 + prev
 
-    def reverse(self, first: complex, prev: complex) -> tepidQuadratic:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> tepidQuadratic:
         return tepidQuadratic(-self.arg1)
 
     def _split(

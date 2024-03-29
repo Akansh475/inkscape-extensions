@@ -367,13 +367,13 @@ class SplitTests(TestCase):
 
         self.assertAlmostEqual(
             arc5.cpoint(0j, initial, 0j, 0.4),
-            a2.cpoint(0j, a1.end_point(0j, initial), 0j, 0),
+            a2.cpoint(0j, a1.cend_point(0j, initial), 0j, 0),
             delta=TOL,
         )
 
         self.assertAlmostEqual(
             arc5.cpoint(0j, initial, 0j, 1),
-            a2.cpoint(0j, a1.end_point(0j, initial), 0j, 1),
+            a2.cpoint(0j, a1.cend_point(0j, initial), 0j, 1),
             delta=TOL,
         )
 
@@ -397,13 +397,13 @@ class SplitTests(TestCase):
 
         self.assertAlmostEqual(
             arc5rel.cpoint(0j, initial, 0j, 0.4),
-            a2.cpoint(0j, a1.end_point(0j, initial), 0j, 0),
+            a2.cpoint(0j, a1.cend_point(0j, initial), 0j, 0),
             delta=TOL,
         )
 
         self.assertAlmostEqual(
             arc5rel.cpoint(0j, initial, 0j, 1),
-            a2.cpoint(0j, a1.end_point(0j, initial), 0j, 1),
+            a2.cpoint(0j, a1.cend_point(0j, initial), 0j, 1),
             delta=TOL,
         )
 

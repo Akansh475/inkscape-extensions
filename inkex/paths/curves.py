@@ -21,11 +21,11 @@
 
 from __future__ import annotations
 
-from typing import overload, Tuple, Callable, cast
+from typing import overload, Tuple, Callable, Union, cast
 
 import numpy as np
 
-from ..transforms import cubic_extrema, Transform, Vector2d
+from ..transforms import cubic_extrema, Transform, Vector2d, ComplexLike
 
 from .interfaces import (
     AbsolutePathCommand,
@@ -71,7 +71,7 @@ class CurveMixin(BezierComputationMixin, BezierArcComputationMixin):
         elif n == 3:
             return 6 * (points[2] - 3 * (points[1] - points[0]) - prev)
         elif n > 3:
-            return Vector2d(0, 0)
+            return complex(0, 0)
         else:
             raise ValueError("n should be a positive integer.")
 
@@ -92,7 +92,7 @@ class CurveMixin(BezierComputationMixin, BezierArcComputationMixin):
 
     def _cunit_tangent(
         self, first: complex, prev: complex, prev_control: complex, t: float
-    ) -> Vector2d:
+    ) -> complex:
         return self.bezier_unit_tangent(prev, prev_control, t)
 
     def _curvature(
@@ -188,7 +188,7 @@ class Curve(CurveMixin, AbsolutePathCommand):
         )
 
     @overload
-    def __init__(self, x2: complex, x3: complex, x4: complex): ...
+    def __init__(self, x2: ComplexLike, x3: ComplexLike, x4: ComplexLike): ...
 
     @overload
     def __init__(
@@ -201,7 +201,7 @@ class Curve(CurveMixin, AbsolutePathCommand):
             self.arg2 = x3 + y3 * 1j
             self.arg3 = x4 + y4 * 1j
         else:
-            self.arg1, self.arg2, self.arg3 = x2, y2, x3
+            self.arg1, self.arg2, self.arg3 = complex(x2), complex(y2), complex(x3)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         x1, x2, x3, x4 = last_two_points[-1].real, self.x2, self.x3, self.x4
@@ -226,13 +226,13 @@ class Curve(CurveMixin, AbsolutePathCommand):
         # pylint: disable=unused-argument
         return (self.arg1, self.arg2, self.arg3)
 
-    def to_relative(self, prev: complex) -> curve:
+    def to_relative(self, prev: ComplexLike) -> curve:
         return curve(self.arg1 - prev, self.arg2 - prev, self.arg3 - prev)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg3
 
-    def reverse(self, first: complex, prev: complex) -> Curve:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Curve:
         return Curve(self.arg2, self.arg1, prev)
 
     def to_bez(self):
@@ -291,7 +291,7 @@ class curve(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.arg3.imag
 
     @overload
-    def __init__(self, dx2: complex, dx3: complex, dx4: complex): ...
+    def __init__(self, dx2: ComplexLike, dx3: ComplexLike, dx4: ComplexLike): ...
 
     @overload
     def __init__(
@@ -304,19 +304,19 @@ class curve(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
             self.arg2 = dx3 + dy3 * 1j
             self.arg3 = dx4 + dy4 * 1j
         else:
-            self.arg1, self.arg2, self.arg3 = dx2, dy2, dx3
+            self.arg1, self.arg2, self.arg3 = complex(dx2), complex(dy2), complex(dx3)
 
     @property
     def args(self):
         return self.dx2, self.dy2, self.dx3, self.dy3, self.dx4, self.dy4
 
-    def to_absolute(self, prev: complex) -> Curve:
-        return Curve(*self.ccurve_points(0j, prev, 0j))
+    def to_absolute(self, prev: ComplexLike) -> Curve:
+        return Curve(*self.ccurve_points(0j, complex(prev), 0j))
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg3 + prev
 
-    def reverse(self, first: complex, prev: complex) -> curve:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> curve:
         return curve(-self.arg3 + self.arg2, -self.arg3 + self.arg1, -self.arg3)
 
     def ccontrol_points(
@@ -372,7 +372,7 @@ class Smooth(CurveMixin, AbsolutePathCommand):
         return self.x3, self.y3, self.x4, self.y4
 
     @overload
-    def __init__(self, x3: complex, x4: complex): ...
+    def __init__(self, x3: ComplexLike, x4: ComplexLike): ...
 
     @overload
     def __init__(self, x3: float, y3: float, x4: float, y4: float): ...
@@ -382,7 +382,7 @@ class Smooth(CurveMixin, AbsolutePathCommand):
             self.arg1 = x3 + y3 * 1j
             self.arg2 = x4 + y4 * 1j
         else:
-            self.arg1, self.arg2 = x3, y3
+            self.arg1, self.arg2 = complex(x3), complex(y3)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         # pylint: disable=no-member
@@ -396,10 +396,10 @@ class Smooth(CurveMixin, AbsolutePathCommand):
         # pylint: disable=unused-argument
         return (2 * prev - prev_prev, self.arg1, self.arg2)
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Curve:
+    def to_non_shorthand(self, prev: ComplexLike, prev_control: ComplexLike) -> Curve:
         return self.to_curve(prev, prev_control)
 
-    def to_relative(self, prev: complex) -> smooth:
+    def to_relative(self, prev: ComplexLike) -> smooth:
         return smooth(self.arg1 - prev, self.arg2 - prev)
 
     def transform(self, transform: Transform) -> Smooth:
@@ -410,7 +410,7 @@ class Smooth(CurveMixin, AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2
 
-    def reverse(self, first: complex, prev: complex) -> Smooth:
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Smooth:
         return Smooth(self.arg1, prev)
 
     def _split(
@@ -463,7 +463,7 @@ class smooth(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx3, self.dy3, self.dx4, self.dy4
 
     @overload
-    def __init__(self, dx3: complex, dx4: complex): ...
+    def __init__(self, dx3: ComplexLike, dx4: ComplexLike): ...
 
     @overload
     def __init__(self, dx3: float, dy3: float, dx4: float, dy4: float): ...
@@ -473,18 +473,18 @@ class smooth(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
             self.arg1 = dx3 + dy3 * 1j
             self.arg2 = dx4 + dy4 * 1j
         else:
-            self.arg1, self.arg2 = dx3, dy3
+            self.arg1, self.arg2 = complex(dx3), complex(dy3)
 
-    def to_absolute(self, prev: complex) -> Smooth:
+    def to_absolute(self, prev: ComplexLike) -> Smooth:
         return Smooth(self.arg1 + prev, self.arg2 + prev)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg2 + prev
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Curve:
+    def to_non_shorthand(self, prev: ComplexLike, prev_control: ComplexLike) -> Curve:
         return self.to_absolute(prev).to_non_shorthand(prev, prev_control)
 
-    def reverse(self, first: complex, prev: complex):
+    def reverse(self, first: ComplexLike, prev: ComplexLike):
         return smooth(-self.arg2 + self.arg1, -self.arg2)
 
     def ccontrol_points(

@@ -21,11 +21,11 @@
 
 from __future__ import annotations
 
-from typing import overload, Tuple, Optional, TYPE_CHECKING, Callable
+from typing import overload, Tuple, Optional, TYPE_CHECKING, Callable, Union
 
 from inkex.paths.interfaces import ILengthSettings, LengthSettings
 
-from ..transforms import Transform, BoundingBox
+from ..transforms import Transform, BoundingBox, ComplexLike
 
 from .interfaces import AbsolutePathCommand, RelativePathCommand, ILengthSettings
 
@@ -122,7 +122,7 @@ class Line(LineMixin, AbsolutePathCommand):
         return self.x, self.y
 
     @overload
-    def __init__(self, x: complex): ...
+    def __init__(self, x: ComplexLike): ...
 
     @overload
     def __init__(self, x: float, y: float): ...
@@ -131,14 +131,14 @@ class Line(LineMixin, AbsolutePathCommand):
         if y is not None:
             self.arg1 = x + y * 1j
         else:
-            self.arg1 = x
+            self.arg1 = complex(x)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(
             (last_two_points[-1].real, self.x), (last_two_points[-1].imag, self.y)
         )
 
-    def to_relative(self, prev: complex) -> line:
+    def to_relative(self, prev: ComplexLike) -> line:
         return line(self.arg1 - prev)
 
     def transform(self, transform) -> Line:
@@ -148,7 +148,7 @@ class Line(LineMixin, AbsolutePathCommand):
         # pylint: disable=unused-argument
         return self.arg1
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Line:
         return Line(prev)
 
     def _split(
@@ -181,7 +181,7 @@ class line(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx, self.dy
 
     @overload
-    def __init__(self, dx: complex): ...
+    def __init__(self, dx: ComplexLike): ...
 
     @overload
     def __init__(self, dx: float, dy: float): ...
@@ -190,19 +190,21 @@ class line(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
         if dy is not None:
             self.arg1 = dx + dy * 1j
         else:
-            self.arg1 = dx
+            self.arg1 = complex(dx)
 
-    def to_absolute(self, prev: complex) -> Line:
+    def to_absolute(self, prev: ComplexLike) -> Line:
         return Line(prev + self.arg1)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         # pylint: disable=unused-argument
         return self.arg1 + prev
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> line:
         return line(-self.arg1)
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+    def to_curve(
+        self, prev: ComplexLike, prev_prev: Optional[ComplexLike] = 0j
+    ) -> Curve:
         raise ValueError("Move segments can not be changed into curves.")
 
     def _split(
@@ -287,7 +289,7 @@ class Move(MoveMixin, AbsolutePathCommand):
         return self.x, self.y
 
     @overload
-    def __init__(self, x: complex): ...
+    def __init__(self, x: ComplexLike): ...
 
     @overload
     def __init__(self, x: float, y: float): ...
@@ -296,7 +298,7 @@ class Move(MoveMixin, AbsolutePathCommand):
         if y is not None:
             self.arg1 = x + y * 1j
         else:
-            self.arg1 = x
+            self.arg1 = complex(x)
 
     def update_bounding_box(self, first, last_two_points, bbox):
         bbox += BoundingBox(self.x, self.y)
@@ -309,7 +311,7 @@ class Move(MoveMixin, AbsolutePathCommand):
     ) -> Tuple[complex, ...]:
         return (self.arg1,)
 
-    def to_relative(self, prev: complex) -> move:
+    def to_relative(self, prev: ComplexLike) -> move:
         return move(self.arg1 - prev)
 
     def transform(self, transform: Transform) -> Move:
@@ -318,10 +320,12 @@ class Move(MoveMixin, AbsolutePathCommand):
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+    def to_curve(
+        self, prev: ComplexLike, prev_prev: Optional[ComplexLike] = 0j
+    ) -> Curve:
         raise ValueError("Move segments can not be changed into curves.")
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Move:
         return Move(prev)
 
 
@@ -347,7 +351,7 @@ class move(MoveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         return self.dx, self.dy
 
     @overload
-    def __init__(self, dx: complex): ...
+    def __init__(self, dx: ComplexLike): ...
 
     @overload
     def __init__(self, dx: float, dy: float): ...
@@ -356,7 +360,7 @@ class move(MoveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         if dy is not None:
             self.arg1 = dx + dy * 1j
         else:
-            self.arg1 = dx
+            self.arg1 = complex(dx)
 
     def ccurve_points(self, first: complex, prev: complex, prev_prev: complex):
         return prev, self.arg1 + prev, self.arg1 + prev
@@ -369,13 +373,15 @@ class move(MoveMixin, RelativePathCommand):  # pylint: disable=invalid-name
     def cend_point(self, first: complex, prev: complex) -> complex:
         return self.arg1 + prev
 
-    def to_absolute(self, prev: complex) -> Move:
+    def to_absolute(self, prev: ComplexLike) -> Move:
         return Move(prev + self.arg1)
 
-    def reverse(self, first: complex, prev: complex):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> move:
         return move(prev - first)
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+    def to_curve(
+        self, prev: ComplexLike, prev_prev: Optional[ComplexLike] = 0j
+    ) -> Curve:
         raise ValueError("Move segments can not be changed into curves.")
 
 
@@ -396,17 +402,19 @@ class ZoneClose(LineMixin, AbsolutePathCommand):
     def transform(self, transform: Transform) -> ZoneClose:
         return ZoneClose()
 
-    def to_relative(self, prev: complex) -> zoneClose:
+    def to_relative(self, prev: ComplexLike) -> zoneClose:
         return zoneClose()
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         # pylint: disable=unused-argument
         return first
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+    def to_curve(
+        self, prev: ComplexLike, prev_prev: Optional[ComplexLike] = 0j
+    ) -> Curve:
         raise ValueError("ZoneClose segments can not be changed into curves.")
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Line:
         return Line(prev)
 
     def _split(
@@ -426,17 +434,19 @@ class zoneClose(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     def args(self):
         return ()
 
-    def to_absolute(self, prev: complex):
+    def to_absolute(self, prev: ComplexLike):
         return ZoneClose()
 
-    def reverse(self, first: complex, prev: complex):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> line:
         return line(prev - first)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         # pylint: disable=unused-argument
         return first
 
-    def to_curve(self, prev: complex, prev_prev: Optional[complex] = 0j) -> Curve:
+    def to_curve(
+        self, prev: ComplexLike, prev_prev: Optional[ComplexLike] = 0j
+    ) -> Curve:
         raise ValueError("ZoneClose segments can not be changed into curves.")
 
     def _split(
@@ -463,10 +473,10 @@ class Horz(LineMixin, AbsolutePathCommand):
             (last_two_points[-1].real, self.x), last_two_points[-1].imag
         )
 
-    def to_relative(self, prev: complex) -> horz:
-        return horz(self.x - prev.real)
+    def to_relative(self, prev: ComplexLike) -> horz:
+        return horz(self.x - complex(prev).real)
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
+    def to_non_shorthand(self, prev: ComplexLike, prev_control: ComplexLike) -> Line:
         return self.to_line(prev)
 
     def transform(self, transform: Transform) -> AbsolutePathCommand:
@@ -476,8 +486,8 @@ class Horz(LineMixin, AbsolutePathCommand):
         # pylint: disable=unused-argument
         return self.x + prev.imag * 1j
 
-    def reverse(self, first, prev):
-        return Horz(prev.real)
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Horz:
+        return Horz(complex(prev).real)
 
     def _split(
         self, first: complex, prev: complex, prev_control: complex, t: float
@@ -498,17 +508,17 @@ class horz(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     def __init__(self, dx):
         self.dx = dx
 
-    def to_absolute(self, prev: complex) -> Horz:
-        return Horz(prev.real + self.dx)
+    def to_absolute(self, prev: ComplexLike) -> Horz:
+        return Horz(complex(prev).real + self.dx)
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
+    def to_non_shorthand(self, prev: ComplexLike, prev_control: ComplexLike) -> Line:
         return self.to_line(prev)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         # pylint: disable=unused-argument
         return (self.dx + prev.real) + prev.imag * 1j
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> horz:
         return horz(-self.dx)
 
     def _split(
@@ -539,18 +549,18 @@ class Vert(LineMixin, AbsolutePathCommand):
     def transform(self, transform: Transform) -> AbsolutePathCommand:
         raise ValueError("Vertical lines can't be transformed directly.")
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
+    def to_non_shorthand(self, prev: ComplexLike, prev_control: ComplexLike) -> Line:
         return self.to_line(prev)
 
-    def to_relative(self, prev: complex) -> vert:
-        return vert(self.y - prev.imag)
+    def to_relative(self, prev: ComplexLike) -> vert:
+        return vert(self.y - complex(prev).imag)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         # pylint: disable=unused-argument
         return prev.real + self.y * 1j
 
-    def reverse(self, first: complex, prev: complex):
-        return Vert(prev.imag)
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> Vert:
+        return Vert(complex(prev).imag)
 
     def _split(
         self, first: complex, prev: complex, prev_control: complex, t: float
@@ -571,17 +581,17 @@ class vert(LineMixin, RelativePathCommand):  # pylint: disable=invalid-name
     def __init__(self, dy):
         self.dy = dy
 
-    def to_absolute(self, prev: complex) -> Vert:
-        return Vert(prev.imag + self.dy)
+    def to_absolute(self, prev: ComplexLike) -> Vert:
+        return Vert(complex(prev).imag + self.dy)
 
-    def to_non_shorthand(self, prev: complex, prev_control: complex) -> Line:
+    def to_non_shorthand(self, prev: ComplexLike, prev_control: ComplexLike) -> Line:
         return self.to_line(prev)
 
     def cend_point(self, first: complex, prev: complex) -> complex:
         # pylint: disable=unused-argument
         return prev.real + (prev.imag + self.dy) * 1j
 
-    def reverse(self, first, prev):
+    def reverse(self, first: ComplexLike, prev: ComplexLike) -> vert:
         return vert(-self.dy)
 
     def _split(

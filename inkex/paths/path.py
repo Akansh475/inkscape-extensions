@@ -28,11 +28,12 @@ import copy
 import warnings
 from cmath import isclose
 
-from typing import Optional, Tuple, List, TypeVar, Iterator, Callable
+from typing import Optional, Tuple, List, TypeVar, Iterator, Callable, Union
 from ..transforms import (
     Transform,
     BoundingBox,
     Vector2d,
+    ComplexLike,
 )
 from ..utils import strargs
 
@@ -71,14 +72,14 @@ class Path(list):
         def __init__(
             self,
             command: PathCommand,
-            first_point: complex,
-            previous_end_point: complex,
-            prev2_control_point: complex,
+            first_point: ComplexLike,
+            previous_end_point: ComplexLike,
+            prev2_control_point: ComplexLike,
         ):
             self.command = command
-            self.cfirst_point = first_point
-            self.cprevious_end_point = previous_end_point
-            self.cprev2_control_point = prev2_control_point
+            self.cfirst_point = complex(first_point)
+            self.cprevious_end_point = complex(previous_end_point)
+            self.cprev2_control_point = complex(prev2_control_point)
 
         @property
         def first_point(self) -> Vector2d:
@@ -195,7 +196,9 @@ class Path(list):
                 self.previous_end_point,
                 self.prev2_control_point,
             )
-            prev2 = 0j if len(p1.control_points) < 2 else p1.control_points[-2]
+            prev2: ComplexLike = (
+                0j if len(p1.control_points) < 2 else p1.control_points[-2]
+            )
             p2 = Path.PathCommandProxy(
                 result[1], self.cfirst_point, p1.end_point, prev2
             )
@@ -328,7 +331,7 @@ class Path(list):
             while True:
                 proxy = next(iterator)
                 proxy.command.update_bounding_box(
-                    proxy.first_point,
+                    complex(proxy.first_point),
                     [
                         proxy.cprev2_control_point,
                         proxy.cprevious_end_point,

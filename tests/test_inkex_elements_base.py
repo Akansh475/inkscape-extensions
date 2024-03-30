@@ -364,6 +364,20 @@ class RelationshipTestCase(SvgTestCase):
         self.assertNotEqual(elem.get("id"), dup.get("id"))
         self.assertEqual(elem.getparent(), dup.getparent())
 
+    def test_duplicate_text(self):
+        """Test duplicating text elements, see
+        https://gitlab.com/inkscape/extensions/-/issues/480"""
+        root = TextElement()
+        self.svg.append(root)
+        el = Tspan()
+        el.text = "inner"
+        root.append(el)
+        el.tail = "after"
+        d = el.duplicate()
+        assert el.tail == "after"
+        assert d.tail == "after"
+        assert d.text == "inner"
+
     def test_duplicate_group(self):
         """Check that when duplicating a group, all ids are replaced
         (Issue https://gitlab.com/inkscape/extensions/-/issues/379)"""

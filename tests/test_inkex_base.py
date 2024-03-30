@@ -1,5 +1,6 @@
 # coding=utf-8
 """Test base inkex module functionality"""
+
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os

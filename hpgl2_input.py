@@ -19,6 +19,7 @@
 #
 
 """Parser for HP/GL2 Documents (includes ordinary HPGL)"""
+
 import pyparsing as pp
 
 from inkex.base import SvgOutputMixin

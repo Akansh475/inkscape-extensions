@@ -22,6 +22,7 @@
 This extension converts a path into a dashed line using 'stroke-dasharray'
 It is a modification of the file addnodes.py
 """
+
 import inkex
 from inkex import bezier, CubicSuperPath, Group, PathElement
 from inkex.localization import inkex_gettext as _

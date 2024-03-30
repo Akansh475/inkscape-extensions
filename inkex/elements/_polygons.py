@@ -116,9 +116,7 @@ class PathElement(PathElementBase):
         return computed.to_relative()
 
     @classmethod
-    def arc(
-        cls, center, rx, ry=None, arctype="", pathonly=False, **kw
-    ):  # pylint: disable=invalid-name
+    def arc(cls, center, rx, ry=None, arctype="", pathonly=False, **kw):  # pylint: disable=invalid-name
         """Generates a sodipodi elliptical arc (special type). Also computes the path
         that Inkscape uses under the hood.
         All data may be given as parseable strings or using numeric data types.

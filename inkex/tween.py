@@ -22,6 +22,7 @@
 .. versionchanged:: 1.2
     Rewritten in inkex 1.2 in an object-oriented structure to support more attributes.
 """
+
 from bisect import bisect_left
 import abc
 import copy

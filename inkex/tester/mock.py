@@ -74,9 +74,7 @@ class ManualVerbosity:
         self.okay = okay
         self.dots = dots
 
-    def flip(
-        self, exc_type=None, exc_val=None, exc_tb=None
-    ):  # pylint: disable=unused-argument
+    def flip(self, exc_type=None, exc_val=None, exc_tb=None):  # pylint: disable=unused-argument
         """Swap the stored verbosity with the original"""
         self.okay, self.result.showAll = self.result.showAll, self.okay
         self.dots, self.result.dots = self.result.dots, self.okay
@@ -428,9 +426,7 @@ class MockCommandMixin(MockMixin):
 
         return stdout
 
-    def save_call(
-        self, program, key, stdout, files, msg, ext="output"
-    ):  # pylint: disable=too-many-arguments
+    def save_call(self, program, key, stdout, files, msg, ext="output"):  # pylint: disable=too-many-arguments
         """
         Saves the results from the call into a debug output file, the resulting files
         should be a Mime msg file format with each attachment being one of the input

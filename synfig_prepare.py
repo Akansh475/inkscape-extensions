@@ -45,17 +45,14 @@ class MalformedSVGError(Exception):
         self.value = value
 
     def __str__(self):
-        return (
-            _(
-                """SVG document is invalid or contains unsupported features
+        return _(
+            """SVG document is invalid or contains unsupported features
 
 Error message: %s
 
 The SVG to Synfig converter is designed to handle SVG files that were created using Inkscape. Unsupported features are most likely to occur in SVG files written by other programs.
 """
-            )
-            % repr(self.value)
-        )
+        ) % repr(self.value)
 
 
 ###### Utility Functions ##################################

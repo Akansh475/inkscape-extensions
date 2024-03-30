@@ -1,5 +1,6 @@
 # coding=utf-8
 """Test inkex `.shape_box()` method functionality"""
+
 import pytest
 from inkex.tester import TestCase
 from inkex.command import is_inkscape_available

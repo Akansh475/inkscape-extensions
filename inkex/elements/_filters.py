@@ -22,6 +22,7 @@
 """
 Element interface for patterns, filters, gradients and path effects.
 """
+
 from __future__ import annotations
 from typing import List, Tuple, TYPE_CHECKING, Optional
 

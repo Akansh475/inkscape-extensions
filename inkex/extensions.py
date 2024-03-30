@@ -485,9 +485,7 @@ class ColorExtension(EffectExtension):
         """Replace this method with your colour modifier method"""
         raise NotImplementedError("Provide a modify_color method.")
 
-    def modify_opacity(
-        self, name, opacity
-    ):  # pylint: disable=no-self-use, unused-argument
+    def modify_opacity(self, name, opacity):  # pylint: disable=no-self-use, unused-argument
         """Optional opacity modification"""
         return opacity
 

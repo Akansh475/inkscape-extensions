@@ -23,6 +23,7 @@ This extension either adds nodes to a path so that
   into a given number of equal segments.
 
 """
+
 import math
 from typing import cast
 import inkex

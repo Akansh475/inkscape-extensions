@@ -20,6 +20,7 @@
 """
 Some more complicated styling tests, including inheritance and shorthand attributes
 """
+
 from lxml import etree
 from typing import List, Tuple
 

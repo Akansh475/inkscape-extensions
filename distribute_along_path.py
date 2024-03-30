@@ -25,6 +25,7 @@ the other selected ones are the skeletons.
 
 No deformation is applied to the pattern itself.
 """
+
 import random
 import math
 import numpy as np

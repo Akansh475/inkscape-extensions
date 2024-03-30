@@ -22,7 +22,6 @@
 Basic color controls
 """
 
-
 # All the names that get added to the inkex API itself.
 __all__ = ("Color", "ColorError", "ColorIdError")
 

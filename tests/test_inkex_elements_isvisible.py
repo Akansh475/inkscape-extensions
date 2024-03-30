@@ -3,6 +3,7 @@
 """
 Test the element APIs is_visible() method
 """
+
 import pytest
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file

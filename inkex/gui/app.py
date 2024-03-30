@@ -20,6 +20,7 @@ Gtk Application base classes, providing a way to load a GtkBuilder
 with a specific glade/ui file containing windows, and building
 a usable pythonic interface from them.
 """
+
 import os
 import signal
 import logging

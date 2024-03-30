@@ -3,6 +3,7 @@
 """
 Test the filter elements functionality
 """
+
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
 from inkex.elements._parser import load_svg

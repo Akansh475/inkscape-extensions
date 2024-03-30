@@ -24,6 +24,7 @@ Provide text based element classes interface.
 Because text is not rendered at all, no information about a text's path
 size or actual location can be generated yet.
 """
+
 from __future__ import annotations
 
 from tempfile import TemporaryDirectory

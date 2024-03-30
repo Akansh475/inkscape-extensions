@@ -2,7 +2,7 @@
 """
 Test CSS Selectors Implementation
 
-This unit test is a heavily modified version, adapted to SVG, originating from 
+This unit test is a heavily modified version, adapted to SVG, originating from
 CSSSelect2 (BSD).
 """
 

@@ -195,7 +195,7 @@ class WireframeSphere(inkex.GenerateExtension):
             start=start_end[0],
             end=start_end[1],
             open="true",
-            arctype="arc"
+            arctype="arc",
         )
         path.style = {
             "stroke": "#000000",

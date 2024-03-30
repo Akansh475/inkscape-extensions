@@ -2,6 +2,7 @@
 """
 Helper script to check that inkex can be imported with stdout closed
 """
+
 import sys
 import importlib
 from pathlib import Path

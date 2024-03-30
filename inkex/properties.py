@@ -26,6 +26,7 @@ Property management and parsing, CSS cascading, default value storage
     A list of all properties, their parser class, and additional information
     such as whether they are inheritable or can be given as presentation attributes
 """
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -409,8 +410,9 @@ class _TextDecorationValueConverter(_ShorthandValueConverter):
             ["text-decoration-style", "text-decoration-color", "text-decoration-line"]
         )
         self.options = {
-            "text-decoration-"
-            + key: all_properties["text-decoration-" + key].converter.options
+            "text-decoration-" + key: all_properties[
+                "text-decoration-" + key
+            ].converter.options
             for key in ("line", "style", "color")
             if isinstance(
                 all_properties["text-decoration-" + key].converter, _EnumValueConverter

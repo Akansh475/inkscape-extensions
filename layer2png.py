@@ -48,6 +48,7 @@ the Object Properties found in the right click contextual menu (the
 saved images name will be based on that value, so name them something
 like "header" instead of the default/non-useful "rect4312").
 """
+
 import os
 import tempfile
 

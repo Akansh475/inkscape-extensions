@@ -1,5 +1,6 @@
 # coding=utf-8
 """Test inkex `.bounding_box()` method functionality"""
+
 from copy import deepcopy
 import os
 import subprocess

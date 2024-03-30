@@ -20,6 +20,7 @@
 """
 Greate perfect bound cover
 """
+
 import textwrap
 
 import inkex

@@ -3,7 +3,6 @@
 Run the scour module on the svg output.
 """
 
-
 import inkex
 from inkex.localization import inkex_gettext as _
 

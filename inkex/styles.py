@@ -21,6 +21,7 @@
 """
 Functions for handling styles and embedded css
 """
+
 from __future__ import annotations
 
 import re
@@ -168,9 +169,12 @@ class Style(NotifyOrderedDict):
         )
         for declaration in result:
             if isinstance(declaration, tinycss2.ast.Declaration):
-                yield declaration.name, StyleValue(
-                    _strip_whitespace_nodes(declaration.value),
-                    declaration.important,
+                yield (
+                    declaration.name,
+                    StyleValue(
+                        _strip_whitespace_nodes(declaration.value),
+                        declaration.important,
+                    ),
                 )
 
     @staticmethod

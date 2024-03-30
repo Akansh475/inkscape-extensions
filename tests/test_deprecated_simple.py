@@ -1,5 +1,6 @@
 # coding=utf-8
 """Test deprecated-simple modules"""
+
 from __future__ import absolute_import, print_function
 
 import warnings

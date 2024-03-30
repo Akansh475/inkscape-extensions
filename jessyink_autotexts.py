@@ -17,7 +17,6 @@
 #
 """Automatic text for jessyInk"""
 
-
 import inkex
 from jessyink_install import JessyInkMixin, _
 

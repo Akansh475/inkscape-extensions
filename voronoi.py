@@ -135,12 +135,8 @@ class Context(object):
         self.plot = 0
         self.triangulate = False
         self.vertices = []  # list of vertex 2-tuples: (x,y)
-        self.lines = (
-            []
-        )  # equation of line 3-tuple (a b c), for the equation of the line a*x+b*y = c
-        self.edges = (
-            []
-        )  # edge 3-tuple: (line index, vertex 1 index, vertex 2 index)   if either vertex index is -1, the edge extends to infiinity
+        self.lines = []  # equation of line 3-tuple (a b c), for the equation of the line a*x+b*y = c
+        self.edges = []  # edge 3-tuple: (line index, vertex 1 index, vertex 2 index)   if either vertex index is -1, the edge extends to infiinity
         self.triangles = []  # 3-tuple of vertex indices
 
     def circle(self, x, y, rad):

@@ -61,9 +61,7 @@ def addNS(tag, ns=None, namespaces=NSS):  # pylint: disable=invalid-name
     return tag
 
 
-def removeNS(
-    name, reverse_namespaces=SSN, default="svg"
-):  # pylint: disable=invalid-name
+def removeNS(name, reverse_namespaces=SSN, default="svg"):  # pylint: disable=invalid-name
     """The reverse of addNS, finds any namespace and returns tuple (ns, tag)"""
     if name[0] == "{":
         (url, tag) = name[1:].split("}", 1)

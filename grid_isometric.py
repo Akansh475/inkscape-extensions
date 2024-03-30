@@ -101,9 +101,7 @@ class GridIsometric(inkex.GenerateExtension):
     @property
     def container_label(self):
         """Generate label from options"""
-        return "Grid_Polar:X{0.x_divs}:Y{0.y_divs}".format(
-            self.options
-        )  # pylint: disable=missing-format-attribute
+        return "Grid_Polar:X{0.x_divs}:Y{0.y_divs}".format(self.options)  # pylint: disable=missing-format-attribute
 
     def generate(self):
         self.options.dx = self.svg.unittouu(str(self.options.dx) + "px")

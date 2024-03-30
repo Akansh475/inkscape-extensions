@@ -202,9 +202,7 @@ class DeprecatedEffect:
         )
         return self.svg.namedview.add(Guide().move_to(posX, posY, angle))
 
-    def affect(
-        self, args=sys.argv[1:], output=True
-    ):  # pylint: disable=dangerous-default-value
+    def affect(self, args=sys.argv[1:], output=True):  # pylint: disable=dangerous-default-value
         # We need a list as the default value to preserve backwards compatibility
         self._deprecated(
             "affect", _("{} is now `Effect.run()`. The `output` argument has changed.")

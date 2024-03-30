@@ -2,6 +2,7 @@
 """
 Test Inkex command launching functionality.
 """
+
 import os
 import tempfile
 import pytest

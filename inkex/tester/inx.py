@@ -3,6 +3,7 @@
 """
 Test elements extra logic from svg xml lxml custom classes.
 """
+
 import os
 from importlib import resources
 
@@ -100,9 +101,7 @@ class InxMixin:
 
     def introspect_arg_parser(self, arg_parser):
         """Pull apart the arg parser to find out what we have in it"""
-        for (
-            action
-        ) in arg_parser._optionals._actions:  # pylint: disable=protected-access
+        for action in arg_parser._optionals._actions:  # pylint: disable=protected-access
             for opt in action.option_strings:
                 # Ignore params internal to inkscape (thus not in the inx)
                 if opt.startswith("--") and opt[2:] not in INTERNAL_ARGS:

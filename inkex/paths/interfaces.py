@@ -126,7 +126,9 @@ class PathCommand(abc.ABC):
         .. versionadded:: 1.1"""
 
     def to_non_shorthand(
-        self, prev: complex, prev_control: complex  # pylint: disable=unused-argument
+        self,
+        prev: complex,
+        prev_control: complex,  # pylint: disable=unused-argument
     ) -> AbsolutePathCommand:
         """Return an absolute non-shorthand command
 

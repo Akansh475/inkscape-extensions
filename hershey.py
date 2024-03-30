@@ -1487,9 +1487,7 @@ Evil Mad Scientist Laboratories
 
                 # Initialize text attribute lists for each top-level text object:
                 self.text_string = ""
-                self.text_families = (
-                    []
-                )  # Lis of font family for characters in the string
+                self.text_families = []  # Lis of font family for characters in the string
                 self.text_heights = []  # List of font heights
                 self.text_spacings = []  # List of vertical line heights
                 self.text_aligns = []  # List of horizontal alignment values

@@ -32,13 +32,13 @@ variables:
     - windows
     - windows-1809
 
-codestyle:black:
+codestyle:ci:
   stage: test
   script:
     - source /root/pyenv-init
     - pyenv shell 3.11.0
-    - pip install black
-    - black . --check --verbose --diff --color --exclude=other/
+    - pip install ruff
+    - ruff format --check --diff
 
 archive:
   stage: test

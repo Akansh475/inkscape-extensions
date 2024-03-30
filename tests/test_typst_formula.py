@@ -30,6 +30,7 @@ Clean up any old `.msg` files with invalid or old keys.
 
 (use EXPORT_COMPARE to generate the output svgs, see inkex.tester docs)
 """
+
 from typst_formula import TypstFormula
 from inkex.tester import ComparisonMixin, TestCase
 

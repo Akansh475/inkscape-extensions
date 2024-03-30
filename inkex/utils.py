@@ -20,6 +20,7 @@
 """
 Basic common utility functions for calculated things
 """
+
 from collections import OrderedDict, defaultdict
 import os
 import sys

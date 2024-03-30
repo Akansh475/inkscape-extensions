@@ -200,9 +200,7 @@ class SvgDocumentElement(
         """Gets a single element from the given xpath or returns None"""
         return self.findone(xpath)
 
-    def getElementById(
-        self, eid: str, elm="*", literal=False
-    ):  # pylint: disable=invalid-name
+    def getElementById(self, eid: str, elm="*", literal=False):  # pylint: disable=invalid-name
         """Get an element in this svg document by it's ID attribute.
 
         Args:
@@ -238,9 +236,7 @@ class SvgDocumentElement(
         """Get elements by it's class name"""
         return ConditionalStyle(f".{class_name}").all_matches(self)
 
-    def getElementsByHref(
-        self, eid: str, attribute="href"
-    ):  # pylint: disable=invalid-name
+    def getElementsByHref(self, eid: str, attribute="href"):  # pylint: disable=invalid-name
         """Get elements that reference the element with id eid.
 
         Args:

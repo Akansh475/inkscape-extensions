@@ -25,6 +25,7 @@ Provide extra utility to each svg element type specific to its type.
 This is useful for having a common interface for each element which can
 give path, transform, and property access easily.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy
@@ -456,9 +457,7 @@ class BaseElement(IBaseElement):
         """Wrap xpath call and add svg namespaces"""
         return super().xpath(pattern, namespaces=namespaces)
 
-    def findall(
-        self, pattern, namespaces=NSS
-    ):  # pylint: disable=dangerous-default-value
+    def findall(self, pattern, namespaces=NSS):  # pylint: disable=dangerous-default-value
         """Wrap findall call and add svg namespaces"""
         return super().findall(pattern, namespaces=namespaces)
 

@@ -19,7 +19,6 @@
 #
 """Line-like path commands (Line, Horz, Vert, ZoneClose and their relative siblings)"""
 
-
 from __future__ import annotations
 
 from typing import overload, Tuple, Optional, TYPE_CHECKING, Callable

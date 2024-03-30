@@ -19,7 +19,6 @@
 #
 """Join paths with lines or polygons"""
 
-
 import itertools
 from typing import List, Union
 

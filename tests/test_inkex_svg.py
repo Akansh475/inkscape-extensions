@@ -20,6 +20,7 @@
 """
 Test the svg interface for inkscape extensions.
 """
+
 from inkex.transforms import Vector2d
 from inkex import Guide, Rectangle
 from inkex.tester import TestCase
@@ -417,33 +418,25 @@ class GetDocumentUnitTest(TestCase):
 class UserUnitTest(TestCase):
     """Tests for methods that are based on the value of unit."""
 
-    def assertToUserUnit(
-        self, user_unit, test_value, expected
-    ):  # pylint: disable=invalid-name
+    def assertToUserUnit(self, user_unit, test_value, expected):  # pylint: disable=invalid-name
         """Checks a user unit and a test_value against the expected result"""
         doc = svg_unit_scaled(user_unit)
         self.assertEqual(doc.unit, user_unit, msg=svg)
         self.assertAlmostEqual(doc.to_dimensionless(test_value), expected)
 
-    def assertToDocumentUnit(
-        self, user_unit, test_value, expected
-    ):  # pylint: disable=invalid-name
+    def assertToDocumentUnit(self, user_unit, test_value, expected):  # pylint: disable=invalid-name
         """Checks a user unit and a test_value against the expected result"""
         doc = svg_unit_scaled(user_unit)
         self.assertEqual(doc.unit, user_unit, msg=svg)
         self.assertAlmostEqual(doc.unittouu(test_value), expected)
 
-    def assertFromUserUnit(
-        self, user_unit, value, unit, expected
-    ):  # pylint: disable=invalid-name
+    def assertFromUserUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(
             svg_unit_scaled(user_unit).to_dimensional(value, unit), expected
         )
 
-    def assertFromDocumentUnit(
-        self, user_unit, value, unit, expected
-    ):  # pylint: disable=invalid-name
+    def assertFromDocumentUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(
             svg_unit_scaled(user_unit).uutounit(value, unit), expected
@@ -629,17 +622,13 @@ class UserUnitTest(TestCase):
 
 
 class ViewportUnitTestCase(TestCase):
-    def assertFromVPUnit(
-        self, width_unit, test_value, unit, expected
-    ):  # pylint: disable=invalid-name
+    def assertFromVPUnit(self, width_unit, test_value, unit, expected):  # pylint: disable=invalid-name
         """Checks a viewport unit and a test_value against the expected result"""
         doc = svg_unit_scaled(width_unit)
         self.assertEqual(doc.unit, width_unit, msg=svg)
         self.assertAlmostEqual(doc.viewport_to_unit(test_value, unit), expected)
 
-    def assertToVPUnit(
-        self, user_unit, value, unit, expected
-    ):  # pylint: disable=invalid-name
+    def assertToVPUnit(self, user_unit, value, unit, expected):  # pylint: disable=invalid-name
         """Check converting from a user unity for the test_value"""
         self.assertAlmostEqual(
             svg_unit_scaled(user_unit).unit_to_viewport(value, unit), expected

@@ -20,7 +20,7 @@
 """Paths module.
 
 Most of the functions derivative, unit_tangent, curvature, point, split, length, ilength
-for the individual path commands are ported from 
+for the individual path commands are ported from
 https://github.com/mathandy/svgpathtools/ (MIT licensed)
 """
 

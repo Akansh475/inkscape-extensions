@@ -493,9 +493,9 @@ def add_finder_pattern(array, data_nrow, data_ncol, reg_row, reg_col):
 
     for i in range(reg_row):  # for each row of data regions
         for j in range(ncol):
-            datamatrix[i * (data_nrow + 2) + data_nrow + 1][
-                j
-            ] = 1  # horizontal black bar at bottom
+            datamatrix[i * (data_nrow + 2) + data_nrow + 1][j] = (
+                1  # horizontal black bar at bottom
+            )
             datamatrix[i * (data_nrow + 2)][j] = (j + 1) % 2  # alternating blocks
 
     for i in range(data_nrow * reg_row):

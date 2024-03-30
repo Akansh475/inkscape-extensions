@@ -149,9 +149,7 @@ class TestCase(MockCommandMixin, BaseCase):
         """Returns a common minimal svg file"""
         return self.data_file("svg", "default-inkscape-SVG.svg")
 
-    def assertAlmostTuple(
-        self, found, expected, precision=8, msg=""
-    ):  # pylint: disable=invalid-name
+    def assertAlmostTuple(self, found, expected, precision=8, msg=""):  # pylint: disable=invalid-name
         """
         Floating point results may vary with computer architecture; use
         assertAlmostEqual to allow a tolerance in the result.
@@ -398,9 +396,7 @@ class ComparisonMixin(metaclass=ComparisonMeta):
             args,
         )
 
-    def assertCompare(
-        self, infile, cmpfile, args, outfile=None
-    ):  # pylint: disable=invalid-name
+    def assertCompare(self, infile, cmpfile, args, outfile=None):  # pylint: disable=invalid-name
         """
         Compare the output of a previous run against this one.
 

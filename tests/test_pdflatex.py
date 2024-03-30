@@ -10,7 +10,7 @@ To re-generate the cached files, run the pytest command:
 
 NO_MOCK_COMMANDS=1 pytest tests/test_pdflatex.py -rP
 
-This will use pdflatex for missing mock commands, but will also store the output of 
+This will use pdflatex for missing mock commands, but will also store the output of
 the call to `tests/data/cmd/pdflatex/[key].msg.output (and also to `cmd/inkscape/...`).
 The generated file names will be displayed.
 
@@ -29,6 +29,7 @@ Clean up any old `.msg` files with invalid or old keys.
 
 (use EXPORT_COMPARE to generate the output svgs, see inkex.tester docs)
 """
+
 from pdflatex import PdfLatex
 from inkex.tester import ComparisonMixin, TestCase
 

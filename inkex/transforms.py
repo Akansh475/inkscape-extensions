@@ -24,6 +24,7 @@
 """
 Provide transformation parsing to extensions
 """
+
 from __future__ import annotations
 import re
 from decimal import Decimal
@@ -45,18 +46,14 @@ import cmath
 from .utils import strargs, KeyDict
 
 
-VectorLike = Union[
-    "ImmutableVector2d", Tuple[float, float], complex
-]  # pylint: disable=invalid-name
+VectorLike = Union["ImmutableVector2d", Tuple[float, float], complex]  # pylint: disable=invalid-name
 MatrixLike = Union[
     str,
     Tuple[Tuple[float, float, float], Tuple[float, float, float]],
     Tuple[float, float, float, float, float, float],
     "Transform",
 ]
-BoundingIntervalArgs = Union[
-    "BoundingInterval", Tuple[float, float], float
-]  # pylint: disable=invalid-name
+BoundingIntervalArgs = Union["BoundingInterval", Tuple[float, float], float]  # pylint: disable=invalid-name
 
 # All the names that get added to the inkex API itself.
 __all__ = (

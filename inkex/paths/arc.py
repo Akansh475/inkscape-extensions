@@ -19,7 +19,6 @@
 #
 """Arc path commands"""
 
-
 from __future__ import annotations
 from math import atan2, pi, sqrt, sin, cos, tan, acos, radians, degrees
 from cmath import exp

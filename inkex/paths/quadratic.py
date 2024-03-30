@@ -382,9 +382,7 @@ class TepidQuadratic(QuadraticMixin, AbsolutePathCommand):
         return self._abssplit(prev, prev_control, t)
 
 
-class tepidQuadratic(
-    QuadraticMixin, RelativePathCommand
-):  # pylint: disable=invalid-name
+class tepidQuadratic(QuadraticMixin, RelativePathCommand):  # pylint: disable=invalid-name
     """Relative continued quadratic line segment"""
 
     letter = "t"

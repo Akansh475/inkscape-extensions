@@ -171,9 +171,7 @@ class GimpXcf(inkex.OutputExtension):
       (gimp-image-add-{d}guide img {d}Guide)
     )
     '({g})
-  )""".format(
-                    d=dim, g=guides
-                )
+  )""".format(d=dim, g=guides)
 
         # Grid
         if self.options.grid:
@@ -184,9 +182,7 @@ class GimpXcf(inkex.OutputExtension):
   (gimp-image-undo-enable img)
   (gimp-file-save RUN-NONINTERACTIVE img (car (gimp-image-get-active-layer img)) "{xcf}" "{xcf}"))
 (gimp-quit 0)
-            """.format(
-            xcf=xcf
-        )
+            """.format(xcf=xcf)
 
         call(
             "gimp",

@@ -25,6 +25,7 @@ font.
 It can also replace all fonts indiscriminately, and list all fonts
 currently being used.
 """
+
 import inkex
 from inkex.localization import inkex_gettext as _
 

@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 """Curve and Smooth Path Commands"""
+
 from __future__ import annotations
 
 from typing import overload, Tuple, Callable, cast
@@ -194,9 +195,7 @@ class Curve(CurveMixin, AbsolutePathCommand):
         self, x2: float, y2: float, x3: float, y3: float, x4: float, y4: float
     ): ...  # pylint: disable=too-many-arguments
 
-    def __init__(
-        self, x2, y2, x3, y3=None, x4=None, y4=None
-    ):  # pylint: disable=too-many-arguments
+    def __init__(self, x2, y2, x3, y3=None, x4=None, y4=None):  # pylint: disable=too-many-arguments
         if y3 is not None:
             self.arg1 = x2 + y2 * 1j
             self.arg2 = x3 + y3 * 1j
@@ -299,9 +298,7 @@ class curve(CurveMixin, RelativePathCommand):  # pylint: disable=invalid-name
         self, dx2: float, dy2: float, dx3: float, dy3: float, dx4: float, dy4: float
     ): ...  # pylint: disable=too-many-arguments
 
-    def __init__(
-        self, dx2, dy2, dx3, dy3=None, dx4=None, dy4=None
-    ):  # pylint: disable=too-many-arguments
+    def __init__(self, dx2, dy2, dx3, dy3=None, dx4=None, dy4=None):  # pylint: disable=too-many-arguments
         if dy3 is not None:
             self.arg1 = dx2 + dy2 * 1j
             self.arg2 = dx3 + dy3 * 1j

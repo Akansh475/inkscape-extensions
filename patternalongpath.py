@@ -31,6 +31,7 @@ as painted on these lines.
 Now move and bend L to make it fit a skeleton, and see what happens to the normals:
 they move and rotate, deforming the pattern.
 """
+
 import copy
 import math
 

@@ -20,6 +20,7 @@
 """
 An Inkscape extension for exporting Synfig files (.sif)
 """
+
 import math
 import uuid
 from copy import deepcopy
@@ -69,9 +70,7 @@ class SynfigDocument(object):
         >
       <name>{}</name>
     </canvas>
-    """.format(
-                width, height, name
-            )
+    """.format(width, height, name)
         )
 
         self._update_viewbox()

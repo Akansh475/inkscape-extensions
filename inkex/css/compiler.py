@@ -22,7 +22,6 @@ our data structure). CSS selectors are compiled into boolean evaluator functions
 All HTML-specific code has been removed, and we don't duplicate the tree data structure
 but work on the normal tree."""
 
-
 import re
 from lxml import etree
 from typing import Union, List

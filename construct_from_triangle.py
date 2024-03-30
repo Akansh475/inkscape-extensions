@@ -286,9 +286,7 @@ class DrawFromTriangle(inkex.EffectExtension):
     def effect(self):
         so = self.options  # shorthand
 
-        pts = (
-            []
-        )  # initialise in case nothing is selected and following loop is not executed
+        pts = []  # initialise in case nothing is selected and following loop is not executed
         for node in self.svg.selection.filter(inkex.PathElement):
             # find the (x,y) coordinates of the first 3 points of the path
             pts = get_n_points_from_path(node, 3)
@@ -458,9 +456,7 @@ class DrawFromTriangle(inkex.EffectExtension):
                             func(params)
                         )  # evaluate the function for the trilinear element
                 else:  # we need a triangle function
-                    string = (
-                        so.cust_str
-                    )  # don't need to translate, as the pt_from_tcf function does that for us
+                    string = so.cust_str  # don't need to translate, as the pt_from_tcf function does that for us
                     pt = pt_from_tcf(
                         string, params
                     )  # get the point from the tcf directly

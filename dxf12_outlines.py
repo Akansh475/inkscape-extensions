@@ -138,7 +138,7 @@ class DxfTwelve(inkex.OutputExtension):
                 continue
             visible = True
             for parent in node.iterancestors():
-                if isinstance(parent, (inkex.ClipPath, inkex.Mask)):
+                if isinstance(parent, (inkex.ClipPath, inkex.Mask, inkex.Defs)):
                     visible = False
                     break
             if not visible:

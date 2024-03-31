@@ -355,15 +355,27 @@ class Polyline(ShapeElement):
         return p
 
     def set_path(self, path):
-        points = [f"{x:g},{y:g}" for x, y in Path(path).end_points]
+        if type(path) != Path:
+            path = Path("M" + str(path))
+        points = [f"{x:g},{y:g}" for x, y in path.end_points]
         self.set("points", " ".join(points))
 
+    @classmethod
+    def new(cls, points=None, **attrs):
+        p = super().new(**attrs)
+        p.path = points
+        return p
 
-class Polygon(ShapeElement):
+
+class Polygon(Polyline):
     """A closed polyline"""
 
     tag_name = "polygon"
-    get_path = lambda self: Path("M" + self.get("points") + " Z")
+
+    def get_path(self) -> Path:
+        p = Path("M" + self.get("points") + " Z")
+        p.callback = self.set_path
+        return p
 
 
 class Line(ShapeElement):

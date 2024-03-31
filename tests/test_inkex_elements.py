@@ -272,6 +272,12 @@ class PolylineElementTestCase(ElementTestCase):
         self.assertEqual(str(pol.path), "M 10 10 L 50 50 L 10 15 L 15 10")
         pol.path = "M 10 10 L 30 9 L 1 2 C 10 45 3 4 45 60 M 35 35"
         self.assertEqual(pol.get("points"), "10,10 30,9 1,2 45,60 35,35")
+        pol = Polyline.new(points="M 10 10 L 50 50 L 10 15 L 15 10")
+        self.assertEqual(pol.get("points"), "10,10 50,50 10,15 15,10")
+        pol = Polyline.new(points="10,10 50,50 10,15 5,0")
+        self.assertEqual(pol.get("points"), "10,10 50,50 10,15 5,0")
+        pol = Polyline.new(points=[(1, 2), (3, 4), (5, 6)])
+        self.assertEqual(str(pol.path), "M 1 2 L 3 4 L 5 6")
 
 
 class PolygonElementTestCase(ElementTestCase):
@@ -287,6 +293,10 @@ class PolygonElementTestCase(ElementTestCase):
         """Polygones are converted to paths"""
         pol = inkex.Polygon(points="10,10 50,50 10,15 15,10")
         self.assertEqual(str(pol.path), "M 10 10 L 50 50 L 10 15 L 15 10 Z")
+        pol = inkex.Polygon.new(points=[(1, 2), (3, 4), (5, 6)])
+        self.assertEqual(str(pol.path), "M 1 2 L 3 4 L 5 6 Z")
+        pol.path = inkex.Path("M 20 20 L 30 10 L 10 40")
+        self.assertEqual(str(pol.path), "M 20 20 L 30 10 L 10 40 Z")
 
 
 class LineElementTestCase(ElementTestCase):

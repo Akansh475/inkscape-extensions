@@ -31,7 +31,7 @@ from pylint import lint
 from pylint.reporters.text import TextReporter
 
 DIR = os.path.dirname(__file__)
-REX = re.compile(r"<tr\ class=\"file\"\>.+?\">([^<]+\.py).+?\<\/tr\>")
+REX = re.compile(r"<tr\ class=\"region\"\>.+?\">([^<]+\.py).+?\<\/tr\>")
 
 ARGS = ["--rcfile=" + os.path.join(DIR, "..", ".pylintrc")]
 stdout = sys.stdout

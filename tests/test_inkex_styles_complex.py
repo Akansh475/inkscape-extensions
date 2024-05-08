@@ -480,6 +480,34 @@ class StyleInheritanceTests(TestCase):
         assert path.get_computed_style("fill") == Color("black")
         assert path.specified_style()("fill") == Color("black")
 
+    def test_rgb_color(self):
+        elem = PathElement()
+        elem.style["fill"] = "rgb(255, 0, 0)"
+        self.assertEqual(elem.specified_style()("fill"), Color("rgb(255, 0, 0)"))
+        self.assertEqual(elem.get_computed_style("fill"), Color("rgb(255, 0, 0)"))
+
+    def test_rgba_color(self):
+        elem = PathElement()
+        elem.style["fill"] = "rgba(255, 0, 0, 0.5)"
+        self.assertEqual(elem.specified_style()("fill"), Color("rgba(255, 0, 0, 0.5)"))
+        self.assertEqual(elem.get_computed_style("fill"), Color("rgba(255, 0, 0, 0.5)"))
+
+    def test_hsl_color(self):
+        elem = PathElement()
+        elem.style["fill"] = "hsl(175, 75, 50)"
+        self.assertEqual(elem.specified_style()("fill"), Color("hsl(175, 75, 50)"))
+        self.assertEqual(elem.get_computed_style("fill"), Color("hsl(175, 75, 50)"))
+
+    def test_hsla_color(self):
+        elem = PathElement()
+        elem.style["fill"] = "hsla(175, 75, 50, 0.5)"
+        self.assertEqual(
+            elem.specified_style()("fill"), Color("hsla(175, 75, 50, 0.5)")
+        )
+        self.assertEqual(
+            elem.get_computed_style("fill"), Color("hsla(175, 75, 50, 0.5)")
+        )
+
 
 def test_overwrite():
     style = Style(

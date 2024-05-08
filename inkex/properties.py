@@ -284,6 +284,14 @@ class _PaintValueConverter(_ColorValueConverter, _URLNoneValueConverter):
                 if isinstance(i, tinycss2.ast.IdentToken):
                     return Color(i.value)
             raise ValueError("Paint server not found")
+        if isinstance(v0, tinycss2.ast.FunctionBlock) and v0.name in [
+            "rgb",
+            "rgba",
+            "hsl",
+            "hsla",
+        ]:
+            arguments = [str(argument.value) for argument in v0.arguments]
+            return Color(f"{v0.name}({''.join(arguments)})")
         raise ValueError("Unknown color specification")
 
     def convert_back(

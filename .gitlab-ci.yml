@@ -18,19 +18,13 @@ variables:
   IMAGE: registry.gitlab.com/inkscape/inkscape-ci-docker/extensions
 
 
-.tests:
+.artifacts:
   artifacts:
     name: "coverage"
     when: always
     paths:
       - .coverage-*
       - htmlcov
-
-.shared-windows-runners:
-  tags:
-    - shared-windows
-    - windows
-    - windows-1809
 
 codestyle:ci:
   stage: test
@@ -52,55 +46,38 @@ archive:
       - extensions.zip
 
 
-test:python38:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 3.8.0
-    - tox -e py38-normal-linux
-
-test:python39:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 3.9.0
-    - tox -e py39-normal-linux
-
-test:python310:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 3.10.0
-    - tox -e py310-normal-linux
-
-test:python311:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 3.11.0
-    - tox -e py311-normal-linux
-
-test:python312:
-  extends: .tests
-  script:
-    - source /root/pyenv-init
-    - pyenv shell 3.12.0
-    - tox -e py312-normal-linux
-
-test:python311-windows:
+test:linux:
   stage: test
-  allow_failure: true # The windows run is less reliable than the Linux test runs.
   extends:
-    - .shared-windows-runners
-    - .tests
+    - .artifacts
+  parallel:
+    matrix:
+      - PYTHON_VER: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
   script:
-    - choco install python --version 3.11.0 -y -f --no-progress
-    - $env:PATH += ";C:\\PYTHON311\\;C:\\PYTHON311\\Scripts"
+    - source /root/pyenv-init
+    - pyenv shell ${PYTHON_VER}.0
+    - tox -e py${PYTHON_VER//.}-normal-linux
+
+
+test:windows:
+  stage: test
+  extends:
+    - .artifacts
+  tags:
+    - saas-windows-medium-amd64
+  parallel:
+    matrix:
+      - PYTHON_VER: [ "3.11", "3.12" ]
+  script:
+    - choco install python --version "$Env:PYTHON_VER.0" -y -f --no-progress
+    - $env:PATH += ";C:\\PYTHON$Env:PYTHON_VER.Replace('.', '')\\;C:\\PYTHON$Env:PYTHON_VER.Replace('.', '')\\Scripts"
     - $env:PYTHON_KEYRING_BACKEND = "keyring.backends.null.Keyring"
+    - Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     - refreshenv
-    - "python -m pip install --upgrade pip"
-    - "python -m pip install --upgrade 'tox<4.0' poetry tox-poetry"
-    - "tox -e py311-normal-win"
+    - python -m pip install --upgrade pip
+    - python -m pip install --upgrade 'tox<4.0' poetry tox-poetry
+    - tox -e $("py"+$Env:PYTHON_VER.Replace(".", "")+"-normal-win")
+  allow_failure: true # The windows run is less reliable than the Linux test runs.
 
 test:coverage:
   stage: coverage
@@ -123,12 +100,13 @@ test:coverage:
     - pylintscore=$(grep -Eo "[0-9]+.[0-9]+</td></tr></tfoot>" htmlcov/index.html | grep -Eo "[0-9]+.[0-9]+")
     - anybadge -l pylint -v $pylintscore -f htmlcov/pylint.svg 6=red 8=orange 9=yellow 10=green
   dependencies:
-    - test:python38
-    - test:python39
-    - test:python310
-    - test:python311
-    - test:python312
-    - test:python311-windows
+    - "test:linux: [3.8]"
+    - "test:linux: [3.9]"
+    - "test:linux: [3.10]"
+    - "test:linux: [3.11]"
+    - "test:linux: [3.12]"
+    - "test:windows: [3.11]"
+    - "test:windows: [3.12]"
   when: always
   coverage: '/TOTAL.+?(\d+.\d+%)/'
   artifacts:

@@ -158,6 +158,8 @@ class Plot(inkex.OutputExtension):
             parity=self.options.serialParity,
         ) as comx:
             comx.write(hpgl.encode("utf8"))
+            comx.read(2)
+            comx.close()
 
     def save(self, stream):
         pass

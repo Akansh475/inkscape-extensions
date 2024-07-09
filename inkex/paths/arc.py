@@ -291,9 +291,7 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
         rx = float(self.rx)
         ry = float(self.ry)
 
-        if rx == 0.0 or ry == 0.0 or detT2 == 0.0:
-            # invalid Arc parameters
-            # transform only last point
+        def get_degen():
             return Arc(
                 self.radius,
                 self.x_axis_rotation,
@@ -302,6 +300,10 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
                 newend,
             )
 
+        if rx == 0.0 or ry == 0.0 or detT2 == 0.0:
+            # degenerate arc
+            # transform only last point
+            return get_degen()
         A = (d**2 / rx**2 + c**2 / ry**2) / detT2
         B = -(d * b / rx**2 + c * a / ry**2) / detT2
         D = (b**2 / rx**2 + a**2 / ry**2) / detT2
@@ -318,15 +320,17 @@ class Arc(BezierArcComputationMixin, AbsolutePathCommand):
 
         half = (A + D) / 2
 
-        rx_ = 1.0 / sqrt(half + delta)
-        ry_ = 1.0 / sqrt(half - delta)
+        try:
+            rx_ = 1.0 / sqrt(half + delta)
+            ry_ = 1.0 / sqrt(half - delta)
 
-        if detT > 0:
-            sweep = self.sweep
-        else:
-            sweep = not self.sweep > 0
-
-        return Arc(rx_ + 1j * ry_, theta_deg, self.large_arc, sweep, newend)
+            if detT > 0:
+                sweep = self.sweep
+            else:
+                sweep = not self.sweep > 0
+            return Arc(rx_ + 1j * ry_, theta_deg, self.large_arc, sweep, newend)
+        except ZeroDivisionError:
+            return get_degen()
 
     def to_relative(self, prev: ComplexLike) -> RelativePathCommand:
         return arc(

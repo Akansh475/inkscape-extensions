@@ -441,6 +441,28 @@ class RectTest(ElementTestCase):
         )
         self.assertEqual(str(self.elem.path), "M 200 200 h 100 v 100 h -100 z")
 
+    def test_bad_ry(self):
+        """Test for https://gitlab.com/inkscape/extensions/-/issues/579"""
+        rect = Rectangle(
+            attrib={
+                "x": "53.4809",
+                "y": "40.852928",
+                "width": "51.448818",
+                "height": "44.433071",
+                "rx": "40.130795",
+                "ry": "1.6217518e-12",
+            }
+        )
+        self.assertEqual(rect.ry, 1.6217518e-12)
+
+        # Transform this path
+        transformed = inkex.Path(rect.get_path()).transform(
+            inkex.Transform("translate(10, 0)")
+        )
+
+        assert isinstance(transformed[2], paths.Arc)
+        assert transformed[2].radius == 25.724409 + 1.6217518e-12j
+
 
 class PathTest(ElementTestCase):
     """Test path extra functionality"""

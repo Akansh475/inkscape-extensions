@@ -5,6 +5,7 @@ Test elements extra logic from svg xml lxml custom classes.
 """
 
 import os
+import sys
 from importlib import resources
 
 from lxml import etree
@@ -153,12 +154,12 @@ def _load_inx_schemas():
         ".schema": etree.Schematron,  # "pre-ISO-Schematron"
     }
 
-    try:
-        _contents = resources.contents
-    except AttributeError:
+    if sys.version_info > (3, 9):
 
         def _contents(pkg):
             return [path.name for path in resources.files(pkg).iterdir()]
+    else:
+        _contents = resources.contents
 
     for name in _contents(__package__):
         _, ext = os.path.splitext(name)
@@ -166,12 +167,12 @@ def _load_inx_schemas():
         if schema_class is None:
             continue
 
-        try:
-            _open_binary = resources.open_binary
-        except AttributeError:
+        if sys.version_info > (3, 9):
 
             def _open_binary(pkg, res):
                 return resources.files(pkg).joinpath(res).open("rb")
+        else:
+            _open_binary = resources.open_binary
 
         with _open_binary(__package__, name) as fp:
             schema_doc = etree.parse(fp)

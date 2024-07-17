@@ -9,6 +9,7 @@ for an example how to do the transform of parent to children.
 import inkex
 from inkex import (
     Group,
+    Layer,
     Anchor,
     Switch,
     NamedView,
@@ -23,6 +24,12 @@ from inkex import (
 
 class UngroupDeep(inkex.EffectExtension):
     def add_arguments(self, pars):
+        pars.add_argument(
+            "--preserve_layers",
+            type=inkex.Boolean,
+            default=False,
+            help="Do not ungroup layers",
+        )
         pars.add_argument(
             "--startdepth", type=int, default=0, help="starting depth for ungrouping"
         )
@@ -133,6 +140,7 @@ class UngroupDeep(inkex.EffectExtension):
     def _want_ungroup(self, node, depth, height):
         if (
             isinstance(node, Group)
+            and not (self.options.preserve_layers and isinstance(node, Layer))
             and node.getparent() is not None
             and height > self.options.keepdepth
             and self.options.startdepth <= depth <= self.options.maxdepth

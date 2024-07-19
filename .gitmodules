@@ -10,3 +10,6 @@
 [submodule "other/extension-xaml"]
 	path = other/extension-xaml
 	url = https://gitlab.com/inkscape/extras/extension-xaml.git
+[submodule "other/extension-afread"]
+	path = other/extension-afdesign
+	url = https://gitlab.com/inkscape/extras/extension-afdesign.git

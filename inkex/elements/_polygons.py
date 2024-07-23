@@ -23,8 +23,13 @@
 Interface for all shapes/polygons such as lines, paths, rectangles, circles etc.
 """
 
+from __future__ import annotations
+
 from math import cos, pi, sin
-from typing import Optional, Tuple
+import math
+from typing import Optional, Tuple, Union
+
+from ..paths.interfaces import PathCommand
 from ..paths import Arc, Curve, Move, Path, ZoneClose
 from ..paths import Line as PathLine
 from ..transforms import Transform, ImmutableVector2d, Vector2d
@@ -75,6 +80,8 @@ class PathElement(PathElementBase):
 
     tag_name = "path"
 
+    MAX_ARC_SUBDIVISIONS = 4
+
     @staticmethod
     def _arcpath(
         cx: float,
@@ -95,14 +102,22 @@ class PathElement(PathElementBase):
         incr = end - start
         if incr < 0:
             incr += 2 * pi
-        numsegs = min(1 + int(incr * 2.0 / pi), 4)
+        numsegs = min(1 + int(incr * 2.0 / pi), PathElement.MAX_ARC_SUBDIVISIONS)
         incr = incr / numsegs
 
         computed = Path()
         computed.append(Move(cos(start), sin(start)))
         for seg in range(1, numsegs + 1):
             computed.append(
-                Arc(1, 1, 0, 0, 1, cos(start + seg * incr), sin(start + seg * incr))
+                Arc(
+                    1,
+                    1,
+                    0,
+                    incr > pi,
+                    1,
+                    cos(start + seg * incr),
+                    sin(start + seg * incr),
+                )
             )
         if abs(incr * numsegs - 2 * pi) > 1e-8 and (
             arctype in ("slice", "")
@@ -172,6 +187,49 @@ class PathElement(PathElementBase):
         if path is not None:
             elem.path = path
         return elem
+
+    @classmethod
+    def arc_from_3_points(
+        cls,
+        x: complex,
+        y: complex,
+        z: complex,
+        arctype="slice",
+    ) -> PathElement:
+        """
+        Create an arc through the points x, y, z.
+        If those points are specified clockwise, the order is not preserved.
+        This is indicated with the second return value (=clockwise)
+
+        Returns a PathElement. May be a line if x,y,z are collinear.
+
+
+        Idea: http://www.math.okstate.edu/~wrightd/INDRA/MobiusonCircles/node4.html
+
+        .. versionadded:: 1.4
+        """
+        w = (z - x) / (y - x)
+        if abs(w.imag) > 1e-12:
+            c = -((x - y) * (w - abs(w) ** 2) / (2j * w.imag) - x)
+            r = abs(c - x)
+
+            # Now determine the arc flags by checking the angles
+            deltas = [x - c, y - c, z - c]
+            ang = [math.atan2(i.imag, i.real) for i in deltas]
+            # Check if the angles are "in order"
+            cw = int(any(ang[0 + i] < ang[-2 + i] < ang[-1 + i] for i in range(3)))
+            if not cw:
+                # Flip start and end angle
+                ang = ang[::-1]
+
+            return cls.arc(Vector2d(c), r, r, start=ang[0], end=ang[2], arctype=arctype)
+        else:
+            # Points lie on a line
+            # y between x and z -> draw a line, otherwise skip
+            if x.real <= y.real <= z.real or x.real >= y.real >= z.real:
+                return cls.new(Path([Move(x), PathLine(z)]))
+            else:
+                return cls.new(Path([Move(x), Move(z)]))
 
     @staticmethod
     def _starpath(

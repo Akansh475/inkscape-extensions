@@ -248,37 +248,20 @@ class HPGLStateMachine:
 
     def at_command(self, vals: ParseResults):
         """Draws an Absolute Three Point arc"""
+
         valsd = vals.as_dict()
-        # Convert the three points into the complex plane
-        # Idea: http://www.math.okstate.edu/~wrightd/INDRA/MobiusonCircles/node4.html
         x, y, z = [
             i + 1j * j for i, j in zip([self.x] + valsd["X"], [self.y] + valsd["Y"])
         ]
-        res: Optional[inkex.paths.PathCommand] = None
-        w = (z - x) / (y - x)
-        if abs(w.imag) > 1e-12:
-            c = -((x - y) * (w - abs(w) ** 2) / (2j * w.imag) - x)
-            r = abs(c - x)
+        pel = inkex.PathElement.arc_from_3_points(x, y, z, "arc")
+        path = pel.path
+        path = path.to_absolute()
+        if not list(path.end_points)[-1].is_close(z):
+            path = path.reverse()
+        assert list(path.end_points)[-1].is_close(z), list(path.end_points)
 
-            # Now determine the arc flags by checking the angles
-            deltas = [x - c, y - c, z - c]
-            ang = [math.atan2(i.imag, i.real) for i in deltas]
-            # Sweep flag is set if the three values are "in order"
-            sweep = int(any(ang[0 + i] < ang[-2 + i] < ang[-1 + i] for i in range(3)))
-            large_arc = 1 - int(
-                ang[2] - ang[0] > math.pi or -math.pi < ang[2] - ang[0] < 0
-            )
-            large_arc = 1 - large_arc if sweep else large_arc
-
-            res = inkex.paths.Arc(r, r, 0, large_arc, sweep, z.real, z.imag)
-        else:
-            # Points lie on a line
-            # y between x and z -> draw a line, otherwise skip
-            if x.real <= y.real <= z.real or x.real >= y.real >= z.real:
-                res = inkex.paths.Line(z.real, z.imag)
-            else:
-                res = inkex.paths.Move(z.real, z.imag)
-        self.current_path.append(res)
+        for com in path[1:]:  # skip initial move command
+            self.current_path.append(com)
 
     def bezier_command(self, vals: ParseResults):
         """Draws an absolute/relative bezier, possibly multiple"""

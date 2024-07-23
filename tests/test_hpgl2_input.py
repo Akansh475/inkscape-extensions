@@ -127,13 +127,20 @@ class HPGLVectorTests(HPGLTest):
                 "M 1000 100 L 2500 100 M 650 1150 L 1000 1150 "
                 "M 650 450 L 1000 450 M 1000 100 M 1000 100 "
                 "L 1000 1500 L 2500 1500 "
-                "A 700 700 0 1 0 2500 100 M 3200 900 "
-                "A 100 100 0 1 0 3200 700 M 3300 800 L 3500 800"
+                "A 700 700 0 0 0 3106.22 1150 "
+                "A 700 700 0 0 0 3106.22 450 "
+                "A 700 700 0 0 0 2500 100 M 3200 900 "
+                "A 100 100 0 0 0 3286.6 850 "
+                "A 100 100 0 0 0 3286.6 750 "
+                "A 100 100 0 0 0 3200 700 M 3300 800 L 3500 800"
             ),
+            str(doc[0].path),
         )
 
     def test_arc_threepoint_complex(self):
         """Test some more complex 3-point arcs"""
+
+        inkex.PathElement.MAX_ARC_SUBDIVISIONS = 1
         sq5 = math.sqrt(5)
 
         def compare_arc(data, result):
@@ -165,6 +172,8 @@ class HPGLVectorTests(HPGLTest):
         # CW small arc but angle jumps over 360
         compare_arc("IN;SP1; PA3,3;PD;AT4,0,3,-1", [sq5, sq5, 0, 0, 0, 3, -1])
 
+        inkex.PathElement.MAX_ARC_SUBDIVISIONS = 4
+
     def test_arc_threepoint_on_line(self):
         """Test the case where all three points of a three-point-arc lie on a line"""
         doc = self.run_to_layer("IN;SP1; PA2,2;PD;AT3,3,4,4")
@@ -182,8 +191,9 @@ class HPGLVectorTests(HPGLTest):
             doc = self.run_to_layer(data)
             # First command is move to (0,0), second command is lineto, third command
             # to be tested for
-            self.assertIsInstance(doc[0].path[2], command)
-            self.assertAlmostTuple(doc[0].path[2].args, result, 3)
+            for cmd in doc[0].path[2:]:
+                self.assertIsInstance(cmd, command)
+            self.assertAlmostTuple(doc[0].path[-1].args, result, 3)
 
         # Arc 3 Point always absolute
         assert_move("IN;SP1; PD3,3;PU;AT0,2,4,0", [4, 0], inkex.paths.Move)
@@ -299,17 +309,28 @@ class HPGLVectorTests(HPGLTest):
         self.assertEqual(
             doc[0].path,
             inkex.Path(
-                """M 45 35 L 100 35 C 115 45 85 55 100 65 L 100 85 A 15 15 0 0 1 70 85 A 15 15 0 0 0 40 85 A 10 10 0 0 1 40 65 A 10 10 0 1 0 40 45 Z 
-                M 65 55 L 120 55 C 135 65 105 75 120 85 L 120 105 A 15 15 0 0 1 90 105 A 15 15 0 0 0 60 105 A 10 10 0 0 1 60 85 A 10 10 0 1 0 60 65 Z"""
+                """M 45 35 L 100 35 C 115 45 85 55 100 65 L 100 85 
+                A 15 15 0 0 1 70 85 A 15 15 0 0 0 40 85 A 10 10 0 0 1 31.3398 80 
+                A 10 10 0 0 1 31.3397 70 A 10 10 0 0 1 40 65 A 10 10 0 0 0 48.6603 60 
+                A 10 10 0 0 0 48.6602 50 A 10 10 0 0 0 40 45 Z M 65 55 L 120 55 
+                C 135 65 105 75 120 85 L 120 105 A 15 15 0 0 1 90 105 A 15 15 0 0 0 60 105 
+                A 10 10 0 0 1 51.3398 100 A 10 10 0 0 1 51.3397 90 A 10 10 0 0 1 60 85 
+                A 10 10 0 0 0 68.6602 80 A 10 10 0 0 0 68.6603 70 A 10 10 0 0 0 60 65 Z"""
             ),
+            str(doc[0].path),
         )
         self.assertEqual(doc[0].style("fill"), inkex.Color("black"))
         self.assertEqual(
             doc[1].path,
             inkex.Path(
-                """M 45 35 L 100 35 C 115 45 85 55 100 65 L 70 85 A 15 15 0 0 0 40 85 L 40 65 A 10 10 0 1 0 40 45 Z 
-                M 65 55 L 120 55 C 135 65 105 75 120 85 L 90 105 A 15 15 0 0 0 60 105 L 60 85 A 10 10 0 1 0 60 65 Z"""
+                """M 45 35 L 100 35 C 115 45 85 55 100 65 L 70 85 
+                A 15 15 0 0 0 40 85 L 40 65 A 10 10 0 0 0 48.6603 60 
+                A 10 10 0 0 0 48.6602 50 A 10 10 0 0 0 40 45 Z 
+                M 65 55 L 120 55 C 135 65 105 75 120 85 L 90 105 
+                A 15 15 0 0 0 60 105 L 60 85 A 10 10 0 0 0 68.6602 80 
+                A 10 10 0 0 0 68.6603 70 A 10 10 0 0 0 60 65 Z"""
             ),
+            str(doc[1].path),
         )
         self.assertEqual(doc[1].style("stroke"), inkex.Color("green"))
 

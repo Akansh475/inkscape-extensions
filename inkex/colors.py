@@ -520,6 +520,16 @@ def hsl_to_rgb(hue, sat, light):
     ]
 
 
+def hsv_to_hsl(hue, saturation, value):
+    """Conversion according to
+    https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_HSL
+
+    .. versionadded:: 1.5"""
+    l = value * (1 - saturation / 2)
+    s = 0 if l == 0 or l == 1 else (value - l) / min(l, 1 - l)
+    return hue, s, l
+
+
 def _hue_to_rgb(val1, val2, hue):
     if hue < 0:
         hue += 6.0

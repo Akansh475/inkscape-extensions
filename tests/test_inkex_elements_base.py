@@ -5,7 +5,10 @@ Test the element API base classes and basic functionality
 """
 
 import random
+import lxml
+import pytest
 from lxml import etree
+from packaging.version import Version
 
 from inkex.elements import (
     load_svg,
@@ -365,6 +368,9 @@ class RelationshipTestCase(SvgTestCase):
         self.assertNotEqual(elem.get("id"), dup.get("id"))
         self.assertEqual(elem.getparent(), dup.getparent())
 
+    @pytest.mark.skipif(
+        Version(lxml.__version__) < Version("5.0.0"), reason="lxml upstream bug"
+    )
     def test_duplicate_text(self):
         """Test duplicating text elements, see
         https://gitlab.com/inkscape/extensions/-/issues/480"""

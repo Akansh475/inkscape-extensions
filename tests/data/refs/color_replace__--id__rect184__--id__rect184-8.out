@@ -8,7 +8,7 @@
     <pattern inkscape:collect="always" xlink:href="#Strips1_1" id="pattern4405-3" patternTransform="matrix(10,0,0,10,92.923652,-62.245507)"/>
   </defs>
   <g inkscape:label="Ebene 1" inkscape:groupmode="layer" id="layer1">
-    <rect style="fill:url(#pattern4405);fill-opacity:1;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#ff0000;stop-opacity:1.0" id="rect184" width="61.9491" height="61.059879" x="15.709581" y="14.820363"/>
-    <rect style="fill:url(#pattern4405-3);fill-opacity:1;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#ff0000;stop-opacity:1.0" id="rect184-8" width="61.9491" height="61.059879" x="113.37575" y="14.820363"/>
+    <rect style="fill:url(#pattern4405);fill-opacity:1;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#ff0000;stop-opacity:1" id="rect184" width="61.9491" height="61.059879" x="15.709581" y="14.820363"/>
+    <rect style="fill:url(#pattern4405-3);fill-opacity:1;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#ff0000" id="rect184-8" width="61.9491" height="61.059879" x="113.37575" y="14.820363"/>
   </g>
 </svg>

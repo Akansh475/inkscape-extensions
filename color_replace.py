@@ -14,14 +14,14 @@ class ReplaceColor(inkex.ColorExtension):
         pars.add_argument(
             "-f",
             "--from_color",
-            default=inkex.Color("black"),
+            default=inkex.Color("#000000"),
             type=inkex.Color,
             help="Replace color",
         )
         pars.add_argument(
             "-t",
             "--to_color",
-            default=inkex.Color("red"),
+            default=inkex.Color("#ff0000"),
             type=inkex.Color,
             help="By color",
         )
@@ -34,11 +34,18 @@ class ReplaceColor(inkex.ColorExtension):
         )
 
     def modify_color(self, name, color):  # color is rgba
-        if self.options.from_color.to_rgb() == color.to_rgb() and (
-            self.options.ignore_opacity
-            or abs(self.options.from_color.to_rgba().alpha - color.alpha) < 0.01
+        from_color = self.options.from_color
+        if from_color.alpha is None:
+            from_color.alpha = 1.0
+        if color.alpha is None:
+            color.alpha = 1.0
+
+        if from_color.to_rgb() == color.to_rgb() and (
+            self.options.ignore_opacity or abs(from_color.alpha - color.alpha) < 0.01
         ):
-            return self.options.to_color.to_rgba()
+            color = self.options.to_color
+        if color.alpha == 1.0:
+            color.alpha = None
         return color
 
 

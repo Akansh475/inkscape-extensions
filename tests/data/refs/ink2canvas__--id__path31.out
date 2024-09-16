@@ -15,8 +15,8 @@
 	ctx.save();
 	ctx.beginPath();
 	ctx.transform(0.264583, 0.000000, 0.000000, 0.264583, 0.000000, 0.000000);
-	ctx.fillStyle = 'rgba(0, 128, 0, 0.88482)';
-	ctx.strokeStyle = 'rgb(0, 0, 255)';
+	ctx.fillStyle = 'rgba(0, 128, 0, 88%)';
+	ctx.strokeStyle = '#0000ff';
 	ctx.lineWidth = 1.332831;
 	ctx.moveTo(255.585940, 41.617188);
 	ctx.lineTo(163.349610, 84.337891);

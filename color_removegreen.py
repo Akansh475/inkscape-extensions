@@ -7,8 +7,11 @@ import inkex
 class RemoveGreen(inkex.ColorExtension):
     """Remove green color from selected objects"""
 
+    target_space = "rgb"
+
     def modify_color(self, name, color):
-        return inkex.Color([color.red, 0, color.blue])
+        color.green = 0
+        return color
 
 
 if __name__ == "__main__":

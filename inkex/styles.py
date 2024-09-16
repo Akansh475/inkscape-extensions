@@ -422,17 +422,17 @@ class Style(NotifyOrderedDict):
     def get_color(self, name="fill"):
         """Get the color AND opacity as one Color object"""
         color = Color(self.get(name, "none"))
-        return color.to_rgba(self.get(name + "-opacity", 1.0))
+        color.alpha = float(self.get(name + "-opacity", 1.0))
+        return color
 
     def set_color(self, color, name="fill"):
         """Sets the given color AND opacity as rgba to the fill or stroke style
         properties."""
         color = Color(color)
-        if color.space == "rgba" and name in Style.associated_props:
+        if color.alpha is not None and name in Style.associated_props:
             self[Style.associated_props[name]] = color.alpha
-            self[name] = color.to_rgb()
-        else:
-            self[name] = color
+            color.alpha = None
+        self[name] = color
 
     def update_urls(self, old_id, new_id):
         """Find urls in this style and replace them with the new id"""

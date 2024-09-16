@@ -9,7 +9,7 @@ class Darker(inkex.ColorExtension):
 
     def modify_color(self, name, color):
         factor = 0.9
-        if color.space == "hsl":
+        if color.name == "hsl":
             color.lightness = int(round(max(color.lightness * factor, 0)))
         else:
             color.red = int(round(max(color.red * factor, 0)))

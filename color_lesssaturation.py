@@ -7,8 +7,10 @@ import inkex
 class LessSaturation(inkex.ColorExtension):
     """Make colours less saturated"""
 
+    target_space = "hsl"
+
     def modify_color(self, name, color):
-        color.saturation -= int(0.05 * 255)
+        color.saturation -= int(0.05 * 100)
         return color
 
 

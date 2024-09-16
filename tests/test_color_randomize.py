@@ -10,23 +10,23 @@ class ColorRandomizeTest(ColorBaseCase):
     effect_class = Randomize
     python3_only = True
     color_tests = [
-        # "hsl(191, 122, 150)" = rgb(150, 100, 200)
+        # "hsl(191, 48, 60)" = rgb(150, 100, 200)
         ("none", "none"),
         # The default ranges are set to 0, and thus the color and opacity should not change (except
         # for rounding errors)
-        ("hsl(191, 122, 150)", "hsl(191, 122, 149)"),
+        ("hsl(191, 48, 60)", "hsl(191, 48, 60)"),
         # The user selected 0% values, and thus the color should not change.
-        ("hsl(191, 122, 150)", "hsl(191, 122, 149)", ["-y 0", "-t 0", "-m 0"]),
+        ("hsl(191, 48, 60)", "hsl(191, 48, 60)", ["-y 0", "-t 0", "-m 0"]),
         # Random hue only. Saturation and lightness not changed.
-        ("hsl(191, 122, 150)", "hsl(223, 122, 149)", ["-y 50", "-t 0", "-m 0"]),
+        ("hsl(191, 48, 60)", "hsl(236, 48, 60)", ["-y 50", "-t 0", "-m 0"]),
         # Same settings, test stationarity of output.
-        ("hsl(191, 122, 150)", "hsl(223, 122, 149)", ["-y 50", "-t 0", "-m 0"]),
+        ("hsl(191, 48, 60)", "hsl(236, 48, 60)", ["-y 50", "-t 0", "-m 0"]),
         # Random saturation only. Hue and lightness not changed.
-        ("hsl(191, 122, 150)", "hsl(191, 146, 149)", ["-y 0", "-t 30", "-m 0"]),
+        ("hsl(191, 48, 60)", "hsl(191, 50, 60)", ["-y 0", "-t 30", "-m 0"]),
         # Random lightness only. Hue and saturation not changed.
-        ("hsl(191, 122, 150)", "hsl(190, 120, 190)", ["-y 0", "-t 0", "-m 50"]),
+        ("hsl(191, 48, 60)", "hsl(191, 48, 54)", ["-y 0", "-t 0", "-m 50"]),
         # The maximum hsl values should be between 0 and 100% of their maximum
-        ("hsl(190, 122, 150)", "hsl(81, 126, 209)", ["-y 100", "-t 100", "-m 100"]),
+        ("hsl(190, 48, 60)", "hsl(48, 70, 39)", ["-y 100", "-t 100", "-m 100"]),
     ]
 
     opacity_tests = [

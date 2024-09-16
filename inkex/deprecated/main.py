@@ -39,6 +39,7 @@ from ..elements._base import BaseElement, ShapeElement
 from ..elements._selected import ElementList
 from .meta import deprecate, _deprecated
 from ..styles import ConditionalStyle, Style
+from ..colors import Color
 
 warnings.simplefilter("default")
 # To load each of the deprecated sub-modules (the ones without a namespace)
@@ -222,3 +223,15 @@ def apply_shorthands(self):
 
 
 Style.apply_shorthands = deprecate(apply_shorthands, "1.4")  # type: ignore
+
+
+def to_rgba(self, alpha=1.0):
+    """
+    Opacity is now controlled via alpha property regardless of color space being used.
+    """
+    ret = self.to_rgb()
+    ret.alpha = float(alpha)
+    return ret
+
+
+Color.to_rgba = deprecate(to_rgba, "1.5")  # type: ignore

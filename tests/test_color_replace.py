@@ -1,7 +1,7 @@
 # coding=utf-8
 from color_replace import ReplaceColor
 from .test_inkex_extensions import ColorBaseCase
-from inkex import Color
+from inkex import ColorRGB
 from inkex.tester import ComparisonMixin, TestCase
 
 
@@ -16,18 +16,18 @@ class ColorReplaceTest(ColorBaseCase):
         ((18, 52, 86), "#696969", ["-f305420031", "-t1768516095"]),
         ((18, 52, 86), "#ff0000", ["-f305420031"]),
         (
-            Color([10, 20, 30, 0.2], space="rgba"),
-            Color([255, 0, 0, 20 / 255], space="rgba"),
+            ColorRGB([10, 20, 30, 0.2]),
+            ColorRGB([255, 0, 0, 20 / 255]),
             ["-f169090611", "-t4278190100"],
         ),
         (
-            Color([10, 20, 30, 0.5], space="rgba"),
-            Color([10, 20, 30, 0.5], space="rgba"),
+            ColorRGB([10, 20, 30, 0.5]),
+            ColorRGB([10, 20, 30, 0.5]),
             ["-f169090611", "-t4278190100", "-i=False"],
         ),
         (
-            Color([10, 20, 30, 0.5], space="rgba"),
-            Color([255, 0, 0, 20 / 255], space="rgba"),
+            ColorRGB([10, 20, 30, 0.5]),
+            ColorRGB([255, 0, 0, 20 / 255]),
             ["-f169090611", "-t4278190100"],
         ),
     ]

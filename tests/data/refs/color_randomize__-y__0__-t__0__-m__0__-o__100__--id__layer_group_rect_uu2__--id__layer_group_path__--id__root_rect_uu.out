@@ -13,7 +13,7 @@
   <defs id="defs5787">
     <rect id="abs_rect" width="96" height="96"/>
   </defs>
-  <rect id="root_rect_uu" x="192" y="96" width="96" height="96" style="fill:#7e0080;fill-opacity:0.5;stroke:#7e0080;stroke-width:1;opacity:0.7773566427005639"/>
+  <rect id="root_rect_uu" x="192" y="96" width="96" height="96" style="fill:purple;fill-opacity:0.5;stroke:purple;stroke-width:1;opacity:0.7773566427005639"/>
   <rect height="25.4mm" width="25.4mm" y="25.4mm" x="76.2mm" id="root_rect_mm" style="opacity:1.0;fill:#00ff00;stroke-width:1;fill-opacity:0.5;"/>
   <rect height="1in" width="1in" y="1in" x="4in" id="root_rect_in" style="opacity:1.0;fill:#ffff00;stroke-width:1;fill-opacity:0.5;"/>
   <g style="stroke:#000000;stroke-opacity:1;stroke-width:2" transform="translate(768, 384) rotate(180)" id="root_group_transform">
@@ -28,8 +28,8 @@
         <g transform="rotate(45)" id="rot_group">
           <g transform="translate(576, 384)" id="trans_group">
             <g transform="scale(2)" id="scale_group">
-              <rect id="layer_group_rect_uu2" x="192" y="96" width="96" height="96" style="fill:#7e0080;fill-opacity:0.5;stroke:#7e0080;stroke-width:1;opacity:0.7773566427005639"/>
-              <path id="layer_group_path" style="opacity:0.7773566427005639;fill:#00fe00;fill-opacity:0.5;stroke-width:1" d="m 288,96 h 96 v 96 h -96 z"/>
+              <rect id="layer_group_rect_uu2" x="192" y="96" width="96" height="96" style="fill:purple;fill-opacity:0.5;stroke:purple;stroke-width:1;opacity:0.7773566427005639"/>
+              <path id="layer_group_path" style="opacity:0.7773566427005639;fill:#00ff00;fill-opacity:0.5;stroke-width:1" d="m 288,96 h 96 v 96 h -96 z"/>
               <rect height="1in" width="1in" y="1in" x="4in" id="layer_group_rect_in2" style="opacity:1.0;fill:#ffff00;stroke-width:1;fill-opacity:0.5;" transform="translate(96,0)"/>
             </g>
           </g>

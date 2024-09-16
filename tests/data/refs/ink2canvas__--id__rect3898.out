@@ -17,7 +17,7 @@
 	ctx.save();
 	ctx.beginPath();
 	ctx.transform(-0.971767, -0.235942, 0.235942, -0.971767, 541.898000, 1030.860000);
-	ctx.fillStyle = 'rgb(255, 204, 170)';
+	ctx.fillStyle = '#ffccaa';
 	ctx.moveTo(431.428570, 463.790760);
 	ctx.lineTo(283.139170, 424.837610);
 	ctx.lineTo(166.982970, 524.911760);
@@ -33,7 +33,7 @@
 	ctx.restore();
 	
 // #text3926
-	ctx.fillStyle = 'rgb(0, 0, 0)';
+	ctx.fillStyle = '#000000';
 	ctx.font = "normal normal 40px Sans";
 	ctx.fillText("Bottom layer", 245.714290, 723.790770);
 	
@@ -43,7 +43,7 @@
 	
 // #path3900
 	ctx.beginPath();
-	ctx.fillStyle = 'rgb(255, 170, 170)';
+	ctx.fillStyle = '#ffaaaa';
 	ctx.moveTo(522.857140, 488.076480);
 	ctx.bezierCurveTo(522.857140, 561.451460, 451.222700, 620.933630, 362.857140, 620.933630);
 	ctx.bezierCurveTo(274.491580, 620.933630, 202.857150, 561.451460, 202.857150, 488.076480);
@@ -61,12 +61,12 @@
 	
 // #rect3898
 	ctx.beginPath();
-	ctx.fillStyle = 'rgb(204, 204, 204)';
+	ctx.fillStyle = '#cccccc';
 	ctx.rect(162.857150, 406.647890, 385.714290, 134.285720);
 	ctx.fill();
 	
 // #text3909
-	ctx.fillStyle = 'rgb(0, 0, 0)';
+	ctx.fillStyle = '#000000';
 	ctx.font = "normal normal 40px Sans";
 	ctx.fillText("Middle layer", 294.285710, 520.933650);
 	ctx.restore();
@@ -78,7 +78,7 @@
 	
 // #path3904
 	ctx.beginPath();
-	ctx.fillStyle = 'rgb(0, 212, 170)';
+	ctx.fillStyle = '#00d4aa';
 	ctx.moveTo(199.544030, 352.969100);
 	ctx.bezierCurveTo(233.442580, 329.577360, 271.650540, 316.012310, 309.336550, 300.484470);
 	ctx.bezierCurveTo(317.049990, 297.291210, 324.782330, 294.143230, 332.476870, 290.904690);

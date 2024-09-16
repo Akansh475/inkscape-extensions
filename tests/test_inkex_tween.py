@@ -108,9 +108,9 @@ class TweenTest(TestCase):
                 {"fill": grad1},
                 {
                     "fill/grad/stops": [
-                        [0, "#7f7f00"],
+                        [0, "#808000"],
                         [0.5, "#00ff00"],
-                        [1, "#007f7f"],
+                        [1, "#008080"],
                     ],
                     "fill/grad/x1": "5.23564px",
                 },
@@ -120,9 +120,9 @@ class TweenTest(TestCase):
                 {"fill": grad3},
                 {
                     "fill/grad/stops": [
-                        [0, "#7f7f00"],
+                        [0, "#808000"],
                         [0.5, "#00ff00"],
-                        [1, "#007f7f"],
+                        [1, "#008080"],
                     ],
                     "fill/grad/cx": "106.932px",
                 },
@@ -134,9 +134,9 @@ class TweenTest(TestCase):
                 {
                     "fill/grad/stops": [
                         [0, "#ff0000"],
-                        [0.25, "#bf3f00"],
-                        [0.5, "#3f7f3f"],
-                        [0.75, "#003fbf"],
+                        [0.25, "#c04000"],
+                        [0.5, "#408040"],
+                        [0.75, "#0040c0"],
                         [1, "#0000ff"],
                     ]
                 },

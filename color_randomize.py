@@ -35,6 +35,7 @@ class Randomize(inkex.ColorExtension):
     """Randomize the colours of all objects"""
 
     deterministic_output = False
+    target_space = "hsl"
 
     def add_arguments(self, pars):
         pars.add_argument("--tab")
@@ -49,7 +50,7 @@ class Randomize(inkex.ColorExtension):
             "-o", "--opacity_range", type=int, default=0, help="Opacity range"
         )
 
-    def _rand(self, limit, value, roof=255, method=randrange, circular=False):
+    def _rand(self, limit, value, roof=100, method=randrange, circular=False):
         return _rand(
             limit,
             value,
@@ -60,16 +61,19 @@ class Randomize(inkex.ColorExtension):
         )
 
     def modify_color(self, name, color):
-        hsl = color.to_hsl()
         if self.options.hue_range > 0:
-            hsl.hue = int(self._rand(self.options.hue_range, hsl.hue, circular=True))
+            color.hue = int(
+                self._rand(self.options.hue_range, color.hue, 360, circular=True)
+            )
         if self.options.saturation_range > 0:
-            hsl.saturation = int(
-                self._rand(self.options.saturation_range, hsl.saturation)
+            color.saturation = int(
+                self._rand(self.options.saturation_range, color.saturation)
             )
         if self.options.lightness_range > 0:
-            hsl.lightness = int(self._rand(self.options.lightness_range, hsl.lightness))
-        return hsl.to_rgb()
+            color.lightness = int(
+                self._rand(self.options.lightness_range, color.lightness)
+            )
+        return color
 
     def modify_opacity(self, name, opacity):
         if name != "opacity":

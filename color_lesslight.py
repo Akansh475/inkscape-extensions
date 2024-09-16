@@ -7,8 +7,10 @@ import inkex
 class LessLight(inkex.ColorExtension):
     """Reduce the light of the color"""
 
+    target_space = "hsl"
+
     def modify_color(self, name, color):
-        color.lightness -= int(0.05 * 255)
+        color.lightness -= int(0.05 * 100)
         return color
 
 

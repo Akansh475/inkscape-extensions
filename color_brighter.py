@@ -10,7 +10,7 @@ class Brighter(inkex.ColorExtension):
     def modify_color(self, name, color):
         factor = 0.9
         contra = int(1 / (1 - factor))
-        if color.space == "hsl":
+        if color.name == "hsl":
             color.lightness = min(int(round(color.lightness / factor)), 255)
         elif color.red == 0 and color.green == 0 and color.blue == 0:
             color.red = contra

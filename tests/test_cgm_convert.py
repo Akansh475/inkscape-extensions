@@ -119,8 +119,8 @@ def test_rectangle():
     assert svg[1][0].style("fill") == None
     assert svg[1][0].style("stroke") == None
     assert isinstance(svg[1][1], inkex.Rectangle)
-    assert svg[1][1].style("fill") == inkex.Color([255, 0, 255])
-    assert svg[1][1].style("stroke") == inkex.Color([255, 255, 0])
+    assert svg[1][1].style("fill") == inkex.ColorRGB([255, 0, 255])
+    assert svg[1][1].style("stroke") == inkex.ColorRGB([255, 255, 0])
 
 
 def test_circle():
@@ -139,8 +139,8 @@ def test_circle():
     assert isinstance(circle, inkex.Circle)
     assert circle.center == 10 + 20j
     assert circle.radius == 10
-    assert circle.style("fill") == inkex.Color([255, 255, 0])
-    assert circle.style("stroke") == inkex.Color([0, 127, 127])
+    assert circle.style("fill") == inkex.ColorRGB([255, 255, 0])
+    assert circle.style("stroke") == inkex.ColorRGB([0, 127, 127])
 
 
 def test_polyline():
@@ -175,13 +175,13 @@ def test_polyline():
     assert isinstance(polyline, inkex.PathElement)
     assert polyline.path == inkex.Path("M 580, 286 L 630, 329 L 636 325 L 630 329")
     assert polyline.style("fill") == None
-    assert polyline.style("stroke") == inkex.Color([0, 30, 40])
+    assert polyline.style("stroke") == inkex.ColorRGB([0, 30, 40])
 
     disjoint = svg[1][1]
     assert isinstance(disjoint, inkex.PathElement)
     assert disjoint.path == inkex.Path("M 390 388 L 388 386 M 369 391 L 369 398")
     assert disjoint.style("fill") == None
-    assert disjoint.style("stroke") == inkex.Color([0, 30, 40])
+    assert disjoint.style("stroke") == inkex.ColorRGB([0, 30, 40])
 
 
 @pytest.mark.parametrize(
@@ -342,7 +342,7 @@ def test_text():
     assert text[0].style("font-size") == 10
     assert text.style("font-size") == 10
     assert text.style("text-anchor") == "middle"
-    assert text[0].style("fill") == inkex.Color([255, 120, 5])
+    assert text[0].style("fill") == inkex.ColorRGB([255, 120, 5])
     assert text[0].style("font-stretch") == "150.0%"
     assert text.get("dy") == "0.4em"
     assert text[0].style("letter-spacing") == "1.5"

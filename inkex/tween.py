@@ -380,10 +380,24 @@ class ColorInterpolator(ArrayInterpolator):
         return this
 
     def __init__(self, start_value=Color("#000000"), end_value=Color("#000000")):
-        super().__init__(start_value, end_value)
+        # Remember what type the color was, handle none types as a special case
+        # so we can tween from "none" to some color effectively.
+        self.output_type = type(start_value)
+        if self.output_type.name == "none":
+            self.output_type = type(end_value)
+
+        # We tween alpha is there is any in either value
+        tween_alpha = (
+            start_value.effective_alpha != end_value.effective_alpha
+            or start_value.alpha is not None
+            or end_value.alpha is not None
+        )
+        super().__init__(
+            start_value.get_values(tween_alpha), end_value.get_values(tween_alpha)
+        )
 
     def interpolate(self, time=0):
-        """Interpolates a color by interpolating its r, g, b, a channels separately.
+        """Interpolates a color by interpolating its channels separately.
 
         Args:
             time (int, optional): Interpolation position. If 0, start_value is returned,
@@ -392,7 +406,7 @@ class ColorInterpolator(ArrayInterpolator):
         Returns:
             Color: interpolated color
         """
-        return Color(list(map(int, super().interpolate(time))))
+        return self.output_type(list(map(float, super().interpolate(time))))
 
 
 class GradientInterpolator(AttributeInterpolator):

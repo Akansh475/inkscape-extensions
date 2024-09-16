@@ -7,7 +7,7 @@ import pytest
 import warnings
 
 from inkex.styles import Style
-from inkex.colors import Color
+from inkex.colors import ColorRGB
 from inkex.tester import TestCase
 from inkex.tester.svg import svg_file
 
@@ -48,7 +48,7 @@ class StyleTest(TestCase):
         """Color special handling"""
         stl = Style("fill-opacity:0.7;fill:red;")
         self.assertEqual(stl.get_color("fill").alpha, 0.7)
-        self.assertEqual(str(stl.get_color("fill")), "rgba(255, 0, 0, 0.7)")
+        self.assertEqual(str(stl.get_color("fill")), "rgba(255, 0, 0, 70%)")
         stl.set_color("rgba(0, 127, 0, 0.5)", "stroke")
         self.assertEqual(
             str(stl), "fill-opacity:0.7;fill:red;stroke-opacity:0.5;stroke:#007f00"
@@ -57,10 +57,14 @@ class StyleTest(TestCase):
     def test_interpolate(self):
         """Test interpolation method."""
         stl1 = Style(
-            {"stroke-width": "0px", "fill-opacity": 1.0, "fill": Color((200, 0, 0))}
+            {"stroke-width": "0px", "fill-opacity": 1.0, "fill": ColorRGB((200, 0, 0))}
         )
         stl2 = Style(
-            {"stroke-width": "1pc", "fill-opacity": 0.0, "fill": Color((100, 0, 100))}
+            {
+                "stroke-width": "1pc",
+                "fill-opacity": 0.0,
+                "fill": ColorRGB((100, 0, 100)),
+            }
         )
         stl3 = stl1.interpolate(stl2, 0.5)
         print(stl3)
@@ -78,7 +82,7 @@ class StyleTest(TestCase):
             calls += 1
 
         st = Style(
-            {"stroke-width": "0px", "fill-opacity": 1.0, "fill": Color((200, 0, 0))},
+            {"stroke-width": "0px", "fill-opacity": 1.0, "fill": ColorRGB((200, 0, 0))},
             callback=cb,
         )
         self.assertEqual(calls, 0)

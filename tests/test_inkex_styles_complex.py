@@ -318,7 +318,7 @@ class StyleInheritanceTests(TestCase):
 
         elem = doc.getElementById("path6")
         tests = [
-            ("fill", "nocolor", "Unknown color format"),
+            ("fill", "nocolor", "Not a known color value: 'nocolor'"),
             ("opacity", Style(), "Value must be number"),
             (
                 "font-variant",

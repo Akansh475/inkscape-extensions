@@ -401,6 +401,7 @@ class ColorExtension(EffectExtension):
     process_none = False  # should we call modify_color for the "none" color.
     select_all = (ShapeElement,)
     pass_rgba = False
+    target_space = None
     """
     If true, color and opacity are processed together (as RGBA color) 
     by :func:`modify_color`.
@@ -445,9 +446,7 @@ class ColorExtension(EffectExtension):
             if isinstance(value, Color):
                 col = Color(value)
                 if self.pass_rgba:
-                    col = col.to_rgba(
-                        alpha=elem.style(elem.style.associated_props[name])
-                    )
+                    col.alpha = elem.style(elem.style.associated_props[name])
                 rgba_result = self._modify_color(name, col)
                 elem.style.set_color(rgba_result, name)
 
@@ -478,7 +477,10 @@ class ColorExtension(EffectExtension):
     def _modify_color(self, name, color):
         """Pre-process color value to filter out bad colors"""
         if color or self.process_none:
-            return self.modify_color(name, color)
+            output_space = type(color)
+            if self.target_space:
+                color = color.to(self.target_space)
+            return self.modify_color(name, color).to(output_space)
         return color
 
     def modify_color(self, name, color):

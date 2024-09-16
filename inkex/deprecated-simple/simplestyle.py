@@ -3,7 +3,7 @@
 """DOCSTRING"""
 
 import inkex
-from inkex.colors import SVG_COLOR as svgcolors
+from inkex.colors.spaces.named import _COLORS as svgcolors
 from inkex.deprecated import deprecate
 
 
@@ -34,22 +34,22 @@ def parseColor(c):
 @deprecate
 def formatColoria(a):
     """str(inkex.Color(a))"""
-    return str(inkex.Color(a))
+    return str(inkex.ColorRGB(a))
 
 
 @deprecate
 def formatColorfa(a):
     """str(inkex.Color(a))"""
-    return str(inkex.Color(a))
+    return str(inkex.ColorRGB([b * 255 for b in a]))
 
 
 @deprecate
 def formatColor3i(r, g, b):
     """str(inkex.Color((r, g, b)))"""
-    return str(inkex.Color((r, g, b)))
+    return str(inkex.ColorRGB((r, g, b)))
 
 
 @deprecate
 def formatColor3f(r, g, b):
     """str(inkex.Color((r, g, b)))"""
-    return str(inkex.Color((r, g, b)))
+    return str(inkex.ColorRGB((r * 255, g * 255, b * 255)))

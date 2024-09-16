@@ -266,14 +266,14 @@ class DxfOutlines(inkex.OutputExtension):
         if not isinstance(node, (PathElement, Rectangle, Line, Circle, Ellipse)):
             return
 
-        rgb = (0, 0, 0)
+        rgb = colors.ColorRGB([0, 0, 0])
         style = node.style("stroke")
         if style is not None and isinstance(style, inkex.Color):
             rgb = style.to_rgb()
-        hsl = colors.rgb_to_hsl(rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0)
+        hsl = rgb.to_hsl()
         self.color = 7  # default is blac
         if hsl[2]:
-            self.color = 1 + (int(6 * hsl[0] + 0.5) % 6)  # use 6 hues
+            self.color = 1 + (int(6 * (hsl[0] / 360) + 0.5) % 6)  # use 6 hues
 
         # Transforming /after/ superpath is more reliable than before
         # because of some issues with arcs in transformations

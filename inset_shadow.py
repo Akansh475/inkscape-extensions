@@ -112,7 +112,7 @@ class InsetShadow(inkex.EffectExtension):
                     new_node.style = "fill:none;stroke-opacity:1;stroke-width:10"
                     new_node.style += filt
                     col = 255 - int(255.0 * level)
-                    new_node.style["stroke"] = inkex.Color((col, col, col))
+                    new_node.style["stroke"] = inkex.ColorRGB((col, col, col))
 
     def get_group(self, node):
         """

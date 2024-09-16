@@ -17,7 +17,7 @@ layout-position-anchor: tl</desc>
   </g>
   <g inkscape:groupmode="layer" id="layer2" inkscape:label="Slide2" style="display:inline">
     <circle style="display:inline;fill:#ff0000;stroke:none" id="c1" cx="150" cy="450" r="50" inkscape:label="#path3736"/>
-    <ellipse style="display:inline;fill:#7f007f;stroke:#ff0000;stroke-width:16" id="c2" cx="400" cy="450" rx="100" ry="50" inkscape:label="#path3738"/>
+    <ellipse style="display:inline;fill:#800080;stroke:#ff0000;stroke-width:16" id="c2" cx="400" cy="450" rx="100" ry="50" inkscape:label="#path3738"/>
     <path style="display:inline;fill:#0000ff;stroke:#008000;stroke-width:16" id="c3" sodipodi:type="arc" sodipodi:cx="700" sodipodi:cy="450" sodipodi:rx="100" sodipodi:ry="50" sodipodi:start="0.59013865" sodipodi:end="5.6484511" d="m 783.08635,477.82381 a 100,50 0 0 1 -111.09848,20.17442 100,50 0 0 1 -71.96301,-46.88343 100,50 0 0 1 67.71127,-48.44091 100,50 0 0 1 112.7868,17.67793 L 700,450 Z" inkscape:label="#path3740"/>
     <path style="display:inline;fill:none;stroke:#000000;stroke-width:10;marker-start:url(#Arrow2Lstart)" d="M 100,600 200,700 300,600 400,700" id="p1" inkscape:connector-curvature="0" inkscape:label="#path3746"/>
     <path style="display:inline;fill:none;stroke:#000000;stroke-width:10" d="m 500,600 c 0,0 0,100 100,100 100,0 0,-100 100,-100 100,0 100,100 100,100" id="p2" inkscape:connector-curvature="0" inkscape:label="#path3748"/>
@@ -37,5 +37,5 @@ layout-position-anchor: tl</desc>
     <rect style="fill:#ffff00;stroke:#008000;stroke-width:16" id="r3" width="200" height="100" x="600" y="200" ry="38.950798" rx="44.943226" inkscape:label="#rect3744"/>
   </g>
   <script ns1:version="1.5.5" id="JessyInk">// dummy
-  </script>
+</script>
 </svg>

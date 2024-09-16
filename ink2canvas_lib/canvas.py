@@ -92,7 +92,12 @@ class Canvas:
 
     @staticmethod
     def get_color(rgb, alpha):
-        return "'{}'".format(str(Color(rgb).to_rgba(alpha)))
+        color = Color(rgb).to_rgb()
+        if alpha is not None:
+            color.alpha = color.effective_alpha * alpha
+        if color.alpha == 1.0:
+            color.alpha = None
+        return "'{}'".format(str(color.to_rgb()))
 
     def set_gradient(self, href):
         """

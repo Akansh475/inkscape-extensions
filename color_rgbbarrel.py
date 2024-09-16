@@ -11,8 +11,10 @@ class RgbBarrel(inkex.ColorExtension):
     aka  Do a Barrel Roll!
     """
 
+    target_space = "rgb"
+
     def modify_color(self, name, color):
-        return inkex.Color((color.blue, color.red, color.green))
+        return inkex.ColorRGB((color.blue, color.red, color.green))
 
 
 if __name__ == "__main__":

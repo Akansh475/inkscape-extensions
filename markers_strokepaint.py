@@ -64,7 +64,7 @@ class ColorMarkers(inkex.EffectExtension):
         pars.add_argument(
             "--fill_color",
             type=inkex.Color,
-            default=inkex.Color(1364325887),
+            default=inkex.Color(0x5151F5FF),
             help="Choose a custom fill color",
         )
         pars.add_argument(
@@ -76,7 +76,7 @@ class ColorMarkers(inkex.EffectExtension):
         pars.add_argument(
             "--stroke_color",
             type=inkex.Color,
-            default=inkex.Color(1364325887),
+            default=inkex.Color(0x5151F5FF),
             help="Choose a custom fill color",
         )
         pars.add_argument(
@@ -108,9 +108,8 @@ class ColorMarkers(inkex.EffectExtension):
             fill, stroke = stroke, fill
 
         if not self.options.assign_alpha:
-            # Remove alpha values
-            fill = fill.to_rgb()
-            stroke = stroke.to_rgb()
+            fill.alpha = None
+            stroke.alpha = None
 
         return fill, stroke
 
@@ -139,9 +138,9 @@ class ColorMarkers(inkex.EffectExtension):
                 node.style[attr] = marker_node
 
                 for child in marker_node:
-                    if stroke is not None:
+                    if stroke.name != "none":
                         child.style.set_color(stroke, "stroke")
-                    if fill is not None:
+                    if fill.name != "none":
                         child.style.set_color(fill, "fill")
 
 

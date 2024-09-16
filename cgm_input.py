@@ -24,6 +24,7 @@ Convert CGM files to SVG
 from dataclasses import dataclass
 import inspect
 from inkex.utils import pairwise
+from inkex.colors import ColorRGB, ColorDeviceCMYK
 import math
 from typing import Callable, Dict, List, Optional, Tuple, get_type_hints, Union
 
@@ -189,7 +190,9 @@ class CGMConverter(metaclass=CGMConverterMeta):
             )
         if isinstance(colour, cgm_enums.DirectColour):
             if colour.colour_model == cgm_enums.ColourModelEnum.RGB:
-                return inkex.Color([colour.v1, colour.v2, colour.v3])
+                return ColorRGB([colour.v1, colour.v2, colour.v3])
+            elif color.colour_model == cgm_enums.ColorModelEnum.CMYK:
+                return ColorDeviceCMYK([colour.v1, colour.v2, colour.v3, colour.v4])
             else:
                 inkex.errormsg(f"Color model {colour.colour_model} not implemented")
 

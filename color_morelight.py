@@ -7,8 +7,10 @@ import inkex
 class MoreLight(inkex.ColorExtension):
     """Lighten selected objects"""
 
+    target_space = "hsl"
+
     def modify_color(self, name, color):
-        color.lightness += int(0.05 * 255.0)
+        color.lightness += int(0.05 * 100.0)
         return color
 
 

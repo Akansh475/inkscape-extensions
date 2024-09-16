@@ -24,9 +24,9 @@
     ]]></style>
   </defs>
   <!--Regular shape with style properties-->
-  <rect y="15" x="10" height="40" width="40" id="r1" style="opacity:1;fill:green;fill-opacity:0.9;stroke:green;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.5;paint-order:markers fill stroke;stop-color:green"/>
+  <rect y="15" x="10" height="40" width="40" id="r1" style="opacity:1;fill:#008000;fill-opacity:0.9;stroke:#008000;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.5;paint-order:markers fill stroke;stop-color:green"/>
   <!--Regular shape with css styles-->
-  <rect y="15" x="60" height="40" width="40" id="r2" style="opacity:1;fill-opacity:1;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;stroke:green;fill:green;stop-color:green"/>
+  <rect y="15" x="60" height="40" width="40" id="r2" style="opacity:1;fill-opacity:1;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;stroke:#008000;fill:#008000;stop-color:green"/>
   <!--Regular shape with element attributes-->
   <rect y="15" x="110" height="40" width="40" id="r3" fill="#cc0000" fill-opacity="0.9" stroke="#2e3436" stroke-opacity="0.5" style="opacity:0.81;stroke:#2e3436;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers fill stroke;stop-color:red"/>
   <!--Regular shape with swatch-->

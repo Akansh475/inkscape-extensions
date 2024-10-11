@@ -407,7 +407,7 @@ elements.
 
 The **returned value** for ``optiongroup`` type parameters is the value
 of the ``value`` attribute of the selected . By default the first is
-selected.
+selected, unless one of the options has a ``default="true"`` attribute.
 
 .. code:: xml
 
@@ -415,12 +415,17 @@ selected.
    gui-text="Some label text">
       <option value="1">First option</option>
       <option value="2">Second option</option>
+      <option value="3" default="true">Third option</option>
    </param>
 
 .. versionadded:: 1.0
    Set the attribute ``appearance="radio"``\  to render radio buttons
    (default). Set the attribute ``appearance="combo"``\  to display a
    drop-down list instead.
+
+.. versionadded:: 1.5
+   Set the attribute ``default="true"`` on **one option** to select it
+   as the default option.
 
 .. figure:: widgets/optiongroup.png
    :alt: Rendering of float parameter

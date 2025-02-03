@@ -46,7 +46,7 @@ is ready to be made available in Inkscape:
 #. Sign your zip file
 
    * Use GnuPG to sign your zip file, use the same signature as the public key you 
-     uploaded to inkscape.org
+     uploaded to inkscape.org using a detached signature like so: `gpg --output your_ext-version.sig --detach-sign --sign your_ext-version.zip`
    * OR use md5hash to create a less secure md5 signature of the zip file. Make sure 
      you have some text in your inkscape.org gnupg key profile setting so you see the 
      signature field when uploading.

@@ -1080,7 +1080,7 @@ def export_insert(vals):
         x = vals.x1 + scale * xmin
         y = vals.y1 - scale * ymin - height
         ixscale = iyscale = 1
-        if vals.has_insert_scale_y:
+        if vals.has_insert_scale_x:
             ixscale = vals.insert_scale_x
         if vals.has_insert_scale_y:
             iyscale = vals.insert_scale_y
@@ -1098,7 +1098,7 @@ def export_insert(vals):
         elem.style["stroke-width"] = "%.3fpx" % fwide
 
         elem.transform.add_translate(x, y)
-        if vals.has_insert_scale_x and vals.has_insert_scale_y:
+        if vals.has_insert_scale_x or vals.has_insert_scale_y:
             elem.transform.add_scale(ixscale, iyscale)
         if vals.has_angle:
             rotated_angle = vals.angle

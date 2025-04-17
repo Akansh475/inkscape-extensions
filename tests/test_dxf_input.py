@@ -36,6 +36,9 @@ class TestDxfInputBasic(ComparisonMixin, TestCase, DxfInputFiltersMixin):
         "io/test_input_rotated_ellipse_r14.dxf",
         "io/test_one_blankline_at_the_end.dxf",
         "io/Testdata - 2018 - Binary.dxf",
+        # Test for https://gitlab.com/inkscape/extensions/-/issues/605
+        # File insert_mirror.dxf is public domain
+        "io/insert_mirror.dxf",
     ]
     compare_filters = [CompareNumericFuzzy()]
     comparisons = [()]

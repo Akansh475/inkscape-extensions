@@ -22,6 +22,7 @@ from tempfile import TemporaryDirectory
 from inkex.command import is_inkscape_available
 from inkex.tester.decorators import requires_inkscape
 from inkex.tester.svg import svg_file
+from inkex.paths import Line, Move
 
 try:
     from typing import Optional, Tuple
@@ -682,9 +683,16 @@ class BoundingBoxTest(TestCase):
         self.assert_bounding_box_is_equal(pe, (10, 50), (10, 17.5))
 
     def test_path_combined_relative(self):
+        """Test concatenation of two paths where the second path has a lower-case
+        first move command"""
         g = Group()
         g.append(PathElement.new(path="m -32,-16 h 16"))
         g.append(PathElement.new(path="m -32,0 h 16"))
+
+        # Two relative paths can not be concatenated, but must be converted to absolute
+        # (at least the first command) before concatenation.
+        assert g.path[2] == Move(-32, 0)
+
         bbx = g.bounding_box()
         assert bbx.width == bbx.height == 16
         pbx = g.path.bounding_box()

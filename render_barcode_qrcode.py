@@ -1236,7 +1236,7 @@ class QrCode(inkex.GenerateExtension):
             raise inkex.AbortExtension(
                 _("Can't find symbol {}").format(self.options.symbolid)
             )
-        bbox = symbol.path.bounding_box()
+        bbox = symbol.bounding_box()
         transform = inkex.Transform(
             scale=(
                 float(self.boxsize) / bbox.width,

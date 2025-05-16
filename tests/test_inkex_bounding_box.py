@@ -681,6 +681,15 @@ class BoundingBoxTest(TestCase):
         pe.path = path
         self.assert_bounding_box_is_equal(pe, (10, 50), (10, 17.5))
 
+    def test_path_combined_relative(self):
+        g = Group()
+        g.append(PathElement.new(path="m -32,-16 h 16"))
+        g.append(PathElement.new(path="m -32,0 h 16"))
+        bbx = g.bounding_box()
+        assert bbx.width == bbx.height == 16
+        pbx = g.path.bounding_box()
+        assert pbx.width == pbx.height == 16
+
     @requires_inkscape
     def test_path_combined_1(self):
         path = Path("M 0 0 C 11 14 33 3 85 98 H 84 V 91 L 13 78 C 26 83 65 24 94 77")

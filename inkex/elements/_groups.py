@@ -26,7 +26,7 @@ Interface for all group based elements such as Groups, Use, Markers etc.
 from lxml import etree  # pylint: disable=unused-import
 
 from ..paths import Path
-from ..transforms import BoundingBox, Transform
+from ..transforms import BoundingBox, Transform, Vector2d
 
 from ._utils import addNS
 from ._base import ShapeElement, ViewboxMixin
@@ -45,7 +45,10 @@ class GroupBase(ShapeElement):
         ret = Path()
         for child in self:
             if isinstance(child, ShapeElement):
-                ret += child.path.transform(child.transform)
+                child_path = child.path.transform(child.transform)
+                if child_path and child_path[0].is_relative:
+                    child_path[0] = child_path[0].to_absolute(Vector2d(0, 0))
+                ret += child_path
         return ret
 
     def bounding_box(self, transform=None):

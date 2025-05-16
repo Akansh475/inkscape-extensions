@@ -603,10 +603,19 @@ class Path(list):
     def __str__(self):
         return " ".join([str(seg) for seg in self])
 
-    def __add__(self, other):
-        acopy = copy.deepcopy(self)
+    @staticmethod
+    def __add_helper__(other):
+        """Prepare a path for adding (either add or iadd)"""
         if isinstance(other, str):
             other = Path(other)
+        return other
+
+    def __iadd__(self, value):
+        return super().__iadd__(self.__add_helper__(value))
+
+    def __add__(self, other):
+        acopy = copy.deepcopy(self)
+        other = self.__add_helper__(other)
         if isinstance(other, list):
             acopy.extend(other)
         return acopy

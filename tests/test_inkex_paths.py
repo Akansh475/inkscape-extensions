@@ -485,6 +485,11 @@ class PathTest(TestCase):
         self.assertEqual(type(ret), Path)
         self._assertPath(ret, "M 20 20 C 40 40 9 10 10 10")
 
+        ret = Path("M 20 20")
+        ret += "C 40 40 9 10 10 10"
+        self.assertEqual(type(ret), Path)
+        self._assertPath(ret, "M 20 20 C 40 40 9 10 10 10")
+
     def test_subtracting_from_path(self):
         """Paths can be translated using addition"""
         ret = Path("M 20,20 L 90,90 l 10,10 Z").translate(-10, -10)

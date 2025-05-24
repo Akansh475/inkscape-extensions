@@ -12,7 +12,8 @@ from .extensions import *
 from .utils import AbortExtension, DependencyError, Boolean, errormsg
 from .styles import *
 from .paths import Path, CubicSuperPath  # Path commands are not exported
-from .colors import *
+from .colors import Color, ColorError, ColorIdError, is_color
+from .colors.spaces import *
 from .transforms import *
 from .elements import *
 

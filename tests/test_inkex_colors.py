@@ -101,3 +101,10 @@ class ColorTest(TestCase):
         # Same assumption, but now it's 1.0-0.0 so 0.5 is expected
         result = Color("#000000").interpolate(white, 0.5)
         self.assertEqual(result.alpha, 0.5)
+
+    def test_namespace_pollution(self):
+        """Ensure that inkex.utils does not point to inkex.colors.utils"""
+        import inkex.utils
+
+        assert not hasattr(inkex.utils, "is_color")
+        assert not inkex.utils == inkex.colors.utils

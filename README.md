@@ -43,8 +43,7 @@ contained within the core inkscape extensions repository should follow these
 basic rules of quality assurance:
 
 * Use Python 3.8 or later, no Python 2 code would be used here.
-* Use [Black](https://black.readthedocs.io/en/stable/) to ensure code is written
-  consistantly.
+* Use `ruff` to ensure code is written consistently.
 * Write tests so that each line of an extension is covered in the coverage report.
 * Do not cross streams between extensions, so your extension should import from
   a module and not from another extension.

@@ -149,7 +149,6 @@ class CleanUpPath(PathModifier):
                         break
                 cand_to_curve = False
                 if len(collected) > 0:
-                    assert lengthsum <= self.min_length
                     if newsub[-1].letter != "M":
                         # TODO This could use proper re-discretisation of the
                         # collected commands
@@ -226,27 +225,27 @@ class CleanUpPath(PathModifier):
         self, path_points: Dict[int, Tuple[complex, complex]]
     ) -> List[JoinCandidate]:
         candidates = []
+
+        def _join_candidate(
+            ep1: Tuple[int, int], ep2: Tuple[int, int], rev1: bool, rev2: bool
+        ):
+            if ep1 != ep2:
+                if (
+                    abs(path_points[ep1[0]][ep1[1]] - path_points[ep2[0]][ep2[1]])
+                    < self.max_dist_join
+                ):
+                    yield JoinCandidate(ep1, ep2, rev1, rev2)
+
         for id1, _ in path_points.items():
             for id2, _ in path_points.items():
                 if id1 >= id2:
                     continue
-                combos: List[Tuple[Tuple[int, int], Tuple[int, int], bool, bool]] = [
-                    ((id1, 1), (id2, 0), False, False),
-                    ((id2, 1), (id1, 0), False, False),
-                ]
+                candidates += _join_candidate((id1, 1), (id2, 0), False, False)
+                candidates += _join_candidate((id2, 1), (id1, 0), False, False)
                 if self.options.allow_reverse:
-                    combos += [
-                        ((id1, 1), (id2, 1), False, True),
-                        ((id1, 0), (id2, 0), True, False),
-                    ]
-                for ep1, ep2, rev1, rev2 in combos:
-                    if ep1 == ep2:
-                        continue
-                    if (
-                        abs(path_points[ep1[0]][ep1[1]] - path_points[ep2[0]][ep2[1]])
-                        < self.max_dist_join
-                    ):
-                        candidates.append(JoinCandidate(ep1, ep2, rev1, rev2))
+                    candidates += _join_candidate((id1, 1), (id2, 1), False, True)
+                    candidates += _join_candidate((id1, 0), (id2, 0), True, False)
+
         return candidates
 
     def join_subpaths(self, path: inkex.Path) -> inkex.Path:
@@ -271,7 +270,8 @@ class CleanUpPath(PathModifier):
 
         def flip_candidates(subpath_id: int):
             for cand in candidates:
-                assert cand.endpoint1 is not None and cand.endpoint2 is not None
+                if cand.endpoint1 is None or cand.endpoint2 is None:
+                    continue
                 if cand.endpoint1[0] == subpath_id:
                     cand.reverse1 = not cand.reverse1
                 if cand.endpoint2[0] == subpath_id:
@@ -294,11 +294,14 @@ class CleanUpPath(PathModifier):
             id2, end2 = pt2
 
             if id1 == id2:
-                assert end1 != end2
                 flip1 = flip2 = False
             entry1 = subpaths[id1]
             entry2 = subpaths[id2]
-            assert entry1 is not None and entry2 is not None
+            if entry1 is None or entry2 is None:
+                raise inkex.AbortExtension(
+                    "Something went wrong while trying to figure out "
+                    "connections between subpaths. Please report your file."
+                )
 
             path1 = maybe_flip(entry1.subpath, flip1)
             path2 = maybe_flip(entry2.subpath, flip2)

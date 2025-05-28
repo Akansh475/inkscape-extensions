@@ -8,31 +8,17 @@ from inkex.tester.filters import WindowsTextCompat
 
 class Ink2CanvasBasicTest(ComparisonMixin, TestCase):
     effect_class = Html5Canvas
-    compare_file = "svg/shapes-clipboard.svg"
-    compare_filters = [CompareOrderIndependentLines()]
+    compare_file = [
+        "svg/shapes.svg",
+        "svg/clips_and_masks.svg",
+        "svg/multilayered-test.svg",
+        "svg/multiple_closed_subpaths.svg",
+        "svg/styling-css-04-f.svg",
+        "svg/dashes_examples.svg",
+        "svg/embed.svg",
+        "svg/simple_patterns.svg",
+        "svg/colors.svg",
+    ]
+
+    compare_filters = [WindowsTextCompat()]
     comparisons = [()]
-
-
-class Ink2CanvasTestTextPath(ComparisonMixin, TestCase):
-    effect_class = Html5Canvas
-    compare_file = "svg/multilayered-test.svg"
-    # This file contains a textPath
-    compare_filters = [CompareOrderIndependentLines()]
-    # We don't need a selection for this case, but we need unique filenames for the tester
-    comparisons = [("--id=rect3898",)]
-
-
-class Ink2CanvasTestClosedPath(ComparisonMixin, TestCase):
-    effect_class = Html5Canvas
-    compare_file = "svg/multiple_closed_subpaths.svg"
-    comparisons = [("--id=path31",)]
-    compare_filters = [WindowsTextCompat()]
-
-
-class Ink2CanvasTestCSS(ComparisonMixin, TestCase):
-    """Test CSS styles"""
-
-    effect_class = Html5Canvas
-    compare_file = "svg/styling-css-04-f.svg"
-    comparisons = [("--id=alpha",)]
-    compare_filters = [WindowsTextCompat()]

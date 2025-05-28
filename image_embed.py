@@ -24,21 +24,10 @@ Embed images so they are base64 encoded data inside the svg.
 
 from __future__ import unicode_literals
 
-import os
 
 import inkex
 from inkex import Image
 from inkex.localization import inkex_gettext as _
-
-try:
-    import urllib.request as urllib
-    import urllib.parse as urlparse
-    from base64 import encodebytes
-except ImportError:
-    # python2 compatibility, remove when python3 only.
-    import urllib
-    import urlparse
-    from base64 import encodestring as encodebytes
 
 
 class EmbedImage(inkex.EffectExtension):
@@ -58,89 +47,10 @@ class EmbedImage(inkex.EffectExtension):
             images = self.svg.xpath("//svg:image")
 
         for node in images:
-            self.embed_image(node)
-
-    def embed_image(self, node):
-        """Embed the data of the selected Image Tag element"""
-        xlink = node.get("xlink:href")
-        if xlink is not None and xlink[:5] == "data:":
-            # No need, data already embedded
-            return
-        if xlink is None:
-            inkex.errormsg(
-                _('Attribute "xlink:href" not set on node {}.'.format(node.get_id()))
-            )
-            return
-
-        url = urlparse.urlparse(xlink)
-        href = urllib.url2pathname(url.path)
-
-        # Look relative to the *temporary* filename instead of the original filename.
-        try:
-            cwd = os.path.dirname(self.options.input_file)
-        except TypeError:
-            # input_file was actually stdin, fall back.
-            cwd = None
-
-        path = self.absolute_href(href or "", cwd=cwd)
-
-        # Backup directory where we can find the image
-        if not os.path.isfile(path):
-            path = node.get("sodipodi:absref", path)
-
-        if not os.path.isfile(path):
-            inkex.errormsg(
-                _('File not found "{}". Unable to embed image.').format(path)
-            )
-            return
-
-        with open(path, "rb") as handle:
-            # Don't read the whole file to check the header
-            file_type = get_type(path, handle.read(10))
-            handle.seek(0)
-
-            if file_type:
-                # Future: Change encodestring to encodebytes when python3 only
-                node.set(
-                    "xlink:href",
-                    "data:{};base64,{}".format(
-                        file_type, encodebytes(handle.read()).decode("ascii")
-                    ),
-                )
-                node.pop("sodipodi:absref")
-            else:
-                inkex.errormsg(
-                    _(
-                        "%s is not of type image/png, image/jpeg, "
-                        "image/bmp, image/gif, image/tiff, or image/x-icon"
-                    )
-                    % path
-                )
-
-
-def get_type(path, header):
-    """Basic magic header checker, returns mime type"""
-    for head, mime in (
-        (b"\x89PNG", "image/png"),
-        (b"\xff\xd8", "image/jpeg"),
-        (b"BM", "image/bmp"),
-        (b"GIF87a", "image/gif"),
-        (b"GIF89a", "image/gif"),
-        (b"MM\x00\x2a", "image/tiff"),
-        (b"II\x2a\x00", "image/tiff"),
-    ):
-        if header.startswith(head):
-            return mime
-
-    # ico files lack any magic... therefore we check the filename instead
-    for ext, mime in (
-        # official IANA registered MIME is 'image/vnd.microsoft.icon' tho
-        (".ico", "image/x-icon"),
-        (".svg", "image/svg+xml"),
-    ):
-        if path.endswith(ext):
-            return mime
-    return None
+            try:
+                node.embed_image(self.options.input_file)
+            except Exception as e:
+                inkex.errormsg(e)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,8 @@
 Save an SVG file into an html canvas file.
 """
 
+from textwrap import dedent
+from typing import List
 import inkex
 
 import ink2canvas_lib.svg as svg
@@ -33,31 +35,43 @@ class Html5Canvas(inkex.OutputExtension):
         svg_root = self.document.getroot()
         width = self.svg.viewbox_width
         height = self.svg.viewbox_height
+
         canvas = Canvas(self, width, height)
+        self.create_patterns(canvas)
         self.walk_tree(svg_root, canvas)
         stream.write(canvas.output().encode("utf-8"))
 
-    def get_gradient_defs(self, elem):
-        """Return the gradient information"""
-        url_id = elem.get_gradient_href()
-        # get the gradient element
-        gradient = self.svg.getElementById(url_id)
-        # get the color stops
-        gstops = gradient.href
-        colors = []
-        for stop in gstops:
-            colors.append(stop.style)
-        if gradient.get("r"):
-            return svg.RadialGradientDef(gradient, colors)
-        return svg.LinearGradientDef(gradient, colors)
+    def create_patterns(self, parent_canvas: Canvas):
+        patterns: List[inkex.Pattern] = self.svg.xpath("//svg:pattern")
+        for pattern in patterns:
+            canvas_id = parent_canvas.get_unique_id(pattern.get_id())
+            viewbox = pattern.get_viewbox()
+            width = viewbox[2] if viewbox else pattern.width
+            height = viewbox[3] if viewbox else pattern.height
+            canvas = Canvas(self, width, height, f"{canvas_id}_ctx")
+            self.walk_tree(pattern, canvas)
+            parent_canvas.patterns_dict[pattern.get_id()] = (
+                canvas_id,
+                dedent(f"""
+            // pattern {pattern.get_id()}
+                const {canvas_id} = document.createElement("canvas");
+                {canvas_id}.width = {canvas.width};
+                {canvas_id}.height = {canvas.height};
+                const {canvas_id}_ctx = patternCanvas.getContext("2d");
+                {"".join(canvas.code)}
+            """),
+            )
 
-    @staticmethod
-    def _shape_from_node(node, canvas):
+    def _shape_from_node(self, node, canvas):
         """
         Make a canvas shape object for the given node. Returns `None` if
         the node is not an SVG shape element.
         @rtype svg.AbstractShape or NoneType
         """
+        if isinstance(node, inkex.Use):
+            node = node.unlink()
+        elif isinstance(node, inkex.Image):
+            node.embed_image(self.options.input_file)
         try:
             prefix, _brace_, command = node.tag.partition("}")
         except AttributeError:
@@ -70,21 +84,19 @@ class Html5Canvas(inkex.OutputExtension):
 
         cls = getattr(svg, command.capitalize(), None)
 
-        if not (isinstance(cls, type) and issubclass(cls, svg.AbstractShape)):
+        if not (isinstance(cls, type) and issubclass(cls, svg.ElementWrapper)):
             return None
 
-        return cls(command, node, canvas)
+        return cls(node, canvas)
 
     def walk_tree(self, root, canvas):
-        """Walk throug the whole svg tree"""
+        """Walk through the whole svg tree"""
+
         for node in root:
             elem = self._shape_from_node(node, canvas)
             if elem is None:
                 continue
-            gradient = None
-            if elem.has_gradient():
-                gradient = self.get_gradient_defs(elem)
-            elem.start(gradient)
+            elem.start()
             try:
                 elem.draw()
             except ValueError as error:

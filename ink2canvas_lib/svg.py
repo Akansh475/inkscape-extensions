@@ -22,272 +22,153 @@ Element parsing and context for ink2canvas extensions
 
 from __future__ import unicode_literals
 import math
+import abc
 
 import inkex
 from inkex.localization import inkex_gettext as _
+from .canvas import Canvas
 
 
 # pylint: disable=missing-function-docstring, missing-class-docstring
 # pylint: disable=too-few-public-methods
 
 
-class Element:
-    """Base Element"""
-
-    def __init__(self, node):
+class ElementWrapper(metaclass=abc.ABCMeta):
+    def __init__(self, node, ctx):
         self.node = node
-
-    def attr(self, val):
-        """Get attribute"""
-        try:
-            attr = float(self.node.get(val))
-        except (ValueError, TypeError, AttributeError):
-            attr = self.node.get(val)
-        return attr
-
-
-class GradientDef(Element):
-    def __init__(self, node, stops):
-        super().__init__(node)
-        self.stops = stops
-
-
-class LinearGradientDef(GradientDef):
-    def get_data(self):
-        # pylint: disable=unused-variable
-        x1 = self.attr("x1")
-        y1 = self.attr("y1")
-        x2 = self.attr("x2")
-        y2 = self.attr("y2")
-        # self.create_linear_gradient(href, x1, y1, x2, y2)
-
-    def draw(self):
-        pass
-
-
-class RadialGradientDef(GradientDef):
-    def get_data(self):
-        # pylint: disable=unused-variable
-        cx = self.attr("cx")
-        cy = self.attr("cy")
-        r = self.attr("r")
-        # self.create_radial_gradient(href, cx, cy, r, cx, cy, r)
-
-    def draw(self):
-        pass
-
-
-class AbstractShape(Element):
-    def __init__(self, command, node, ctx):
-        super().__init__(node)
-        self.command = command
-        self.ctx = ctx
-        self.gradient = None
-
-    def get_data(self):  # pylint: disable=no-self-use
-        return None
+        self.ctx: Canvas = ctx
 
     def get_style(self):
         return self.node.specified_style()
 
     def set_style(self, style):
         """Translates style properties names into method calls"""
-        self.ctx.style = style
-        for key in style:
-            method = "set_" + "_".join(key.split("-"))
-            if hasattr(self.ctx, method) and style[key] != "none":
-                getattr(self.ctx, method)(style[key])
-        # saves style to compare in next iteration
-        if (
-            hasattr(self.ctx, "style_cache")
-            and "opacity" not in style
-            and self.ctx.style_cache("opacity") != style("opacity")
-        ):
-            self.ctx.set_opacity(
-                style("opacity")
-            )  # opacity is kept in memory, need to reset
-        self.ctx.style_cache = style
+        self.ctx.set_opacity(style("opacity"))
+        if style("fill") is not None:
+            self.ctx.set_fill(style("fill"), style("fill-opacity"))
+
+        if style("stroke") is not None:
+            self.ctx.set_stroke(style("stroke"), style("stroke-opacity"))
+            self.ctx.set_stroke_width(
+                self.node.root.to_dimensionless(style("stroke-width"))
+            )
+            self.ctx.set_stroke_miterlimit(style("stroke-miterlimit"))
+            self.ctx.set_stroke_linejoin(style("stroke-linejoin"))
+            self.ctx.set_stroke_linecap(style("stroke-linecap"))
+            self.ctx.set_stroke_dasharray(style("stroke-dasharray"))
 
     def has_transform(self):
-        return bool(self.attr("transform"))
+        return self.node.transform != inkex.Transform()
 
     def get_transform(self):
-        return self.node.transform.to_hexad()
-
-    def has_gradient(self):
-        style = self.get_style()
-        fill = style("fill")
-        return fill is not None and isinstance(fill, inkex.Gradient)
-
-    def get_gradient_href(self):
-        style = self.get_style()
-        return style("fill").get_id()
+        return self.node.transform
 
     def has_clip(self):
-        return bool(self.attr("clip-path"))
+        return self.node.get("clip-path") is not None
 
-    def start(self, gradient):
-        self.gradient = gradient
-        self.ctx.write("\n// #%s" % self.node.get_id())
-        if self.has_transform() or self.has_clip():
+    def apply_clip(self):
+        if self.has_clip():
+            clipPath = self.node.root.getElementById(self.node.get("clip-path"))
+            id = self.ctx.get_unique_id(clipPath.get_id())
+            self.ctx.create_path2d(id)
+            if len(clipPath):
+                Path.draw_path(clipPath.get_path(), self.ctx, id)
+                self.ctx.clip(id)
+
+    def has_gradient(self):
+        return isinstance(self.get_style()("fill"), inkex.Gradient) or isinstance(
+            self.get_style()("stroke"), inkex.Gradient
+        )
+
+    def start(self):
+        self.ctx.write(f"\n// #{self.node.get_id()}")
+        if self.has_transform() or self.has_clip() or self.has_gradient():
             self.ctx.save()
 
-    def draw(self):
-        data = self.get_data()  # pylint: disable=assignment-from-none
-        style = self.get_style()
-        self.ctx.begin_path()
-        if self.has_transform():
-            trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix)  # unpacks argument list
-        if self.has_gradient():
-            self.gradient.draw()
-        self.set_style(style)
-        # unpacks "data" in parameters to given method
-        getattr(self.ctx, self.command)(*data)
-        self.ctx.finish_path()
-
     def end(self):
-        if self.has_transform() or self.has_clip():
+        if self.has_transform() or self.has_clip() or self.has_gradient():
             self.ctx.restore()
 
 
-class G(AbstractShape):  # pylint: disable=invalid-name
+class ShapeWrapper(ElementWrapper, metaclass=abc.ABCMeta):
     def draw(self):
-        # get layer label, if exists
-        if self.has_transform():
-            trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix)
-
-
-class Rect(AbstractShape):
-    def get_data(self):
-        x = self.attr("x")
-        y = self.attr("y")
-        width = self.attr("width")
-        height = self.attr("height")
-        rx = self.attr("rx") or 0
-        ry = self.attr("ry") or 0
-        return x, y, width, height, rx, ry
-
-
-class Circle(AbstractShape):
-    def __init__(self, command, node, ctx):
-        AbstractShape.__init__(self, command, node, ctx)
-        self.command = "arc"
-
-    def get_data(self):
-        cx = self.attr("cx")
-        cy = self.attr("cy")
-        r = self.attr("r")
-        return cx, cy, r, 0, math.pi * 2, True
-
-
-class Ellipse(AbstractShape):
-    def get_data(self):
-        cx = self.attr("cx")
-        cy = self.attr("cy")
-        rx = self.attr("rx")
-        ry = self.attr("ry")
-        return cx, cy, rx, ry
-
-    def draw(self):
-        cx, cy, rx, ry = self.get_data()
         style = self.get_style()
         self.ctx.begin_path()
-        if self.has_transform():
-            trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix)  # unpacks argument list
+        self.ctx.transform(self.get_transform())  # unpacks argument list
+        self.apply_clip()
         self.set_style(style)
+        self.draw_shape()
+        if style("fill") is not None:
+            self.ctx.fill()
+        if style("stroke") is not None:
+            self.ctx.stroke()
 
-        kappa = 4 * ((math.sqrt(2) - 1) / 3)
-        self.ctx.move_to(cx, cy - ry)
-        self.ctx.bezier_curve_to(
-            cx + (kappa * rx), cy - ry, cx + rx, cy - (kappa * ry), cx + rx, cy
-        )
-        self.ctx.bezier_curve_to(
-            cx + rx, cy + (kappa * ry), cx + (kappa * rx), cy + ry, cx, cy + ry
-        )
-        self.ctx.bezier_curve_to(
-            cx - (kappa * rx), cy + ry, cx - rx, cy + (kappa * ry), cx - rx, cy
-        )
-        self.ctx.bezier_curve_to(
-            cx - rx, cy - (kappa * ry), cx - (kappa * rx), cy - ry, cx, cy - ry
-        )
-        self.ctx.finish_path()
+    @abc.abstractmethod
+    def draw_shape(self): ...
 
 
-class Path(AbstractShape):
-    def __init__(self, command, node, ctx):
-        AbstractShape.__init__(self, command, node, ctx)
-        self.current_position = 0, 0
-
-    def path_move_to(self, data):
-        self.ctx.move_to(data[0], data[1])
-        self.current_position = data[0], data[1]
-
-    def path_line_to(self, data):
-        self.ctx.line_to(data[0], data[1])
-        self.current_position = data[0], data[1]
-
-    def path_curve_to(self, data):
-        x1, y1, x2, y2 = data[0], data[1], data[2], data[3]
-        x, y = data[4], data[5]
-        self.ctx.bezier_curve_to(x1, y1, x2, y2, x, y)
-        self.current_position = x, y
-
-    def path_close(self, data):  # pylint: disable=unused-argument
-        self.ctx.close_path()
-
+class G(ElementWrapper):  # pylint: disable=invalid-name
     def draw(self):
+        self.ctx.transform(self.get_transform())
+        self.apply_clip()
+
+
+class Rect(ShapeWrapper):
+    def draw_shape(self):
+        self.node: inkex.Rectangle
+        rx = self.node.rx
+        ry = self.node.ry
+        if rx or ry or self.ctx.residual_transform != inkex.Transform():
+            Path.draw_path(self.node.get_path(), self.ctx)
+        else:
+            self.ctx.rect(
+                self.node.left, self.node.top, self.node.width, self.node.height
+            )
+
+
+class Circle(ShapeWrapper):
+    def draw_shape(self):
+        self.node: inkex.Circle
+        if self.ctx.residual_transform != inkex.Transform():
+            Path.draw_path(self.node.get_path(), self.ctx)
+        else:
+            self.ctx.arc(*self.node.center, self.node.radius, 0, math.pi * 2, True)
+
+
+class Path(ShapeWrapper):
+    @staticmethod
+    def draw_path(path: inkex.Path, ctx, target="ctx"):
         """Gets the node type and calls the given method"""
-        style = self.get_style()
-        self.ctx.begin_path()
-        if self.has_transform():
-            trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix)  # unpacks argument list
-        self.set_style(style)
-
         # Draws path commands
-        path_command = {
-            "M": self.path_move_to,
-            "L": self.path_line_to,
-            "C": self.path_curve_to,
-            "Z": self.path_close,
-        }
         # Make sure we only have Lines and curves (no arcs etc)
-        for comm, data in self.node.path.to_superpath().to_path().to_arrays():
-            if comm in path_command:
-                path_command[comm](data)
+        for comm in path.to_absolute().to_non_shorthand().proxy_iterator():
+            if comm.letter == "A":
+                for sub in comm.to_curves():
+                    ctx.path_command(sub, target)
+            else:
+                ctx.path_command(comm.command, target)
 
-        self.ctx.finish_path()
+    def draw_shape(self):
+        Path.draw_path(self.node.get_path(), self.ctx)
 
 
 class Line(Path):
-    def get_data(self):
-        x1 = self.attr("x1")
-        y1 = self.attr("y1")
-        x2 = self.attr("x2")
-        y2 = self.attr("y2")
-        return ("M", (x1, y1)), ("L", (x2, y2))
+    pass
+
+
+class Ellipse(Path):
+    pass
 
 
 class Polygon(Path):
-    def get_data(self):
-        points = self.attr("points").strip().split(" ")
-        points = map(lambda x: x.split(","), points)
-        comm = []
-        for point in points:  # creating path command similar
-            point = list(map(float, point))
-            comm.append(["L", point])
-        comm[0][0] = "M"  # first command must be a 'M' => moveTo
-        return comm
+    pass
 
 
 class Polyline(Polygon):
     pass
 
 
-class Text(AbstractShape):
+class Text(ElementWrapper):
     def text_helper(self, tspan):
         if tspan is not None:
             return tspan.text
@@ -299,27 +180,44 @@ class Text(AbstractShape):
         text = []
         for key in keys:
             if key in style:
-                text.append(style[key])
-        self.ctx.set_font(" ".join(text))
-
-    def get_data(self):
-        x = self.attr("x")
-        y = self.attr("y")
-        return x, y
+                text.append(str(style(key)) + ("px" if key == "font-size" else ""))
+        self.ctx.set_font(" ".join([i.replace('"', "'") for i in text]))
 
     def draw(self):
         for tspan in self.node:
             if isinstance(tspan, inkex.TextPath):
                 raise ValueError(_("TextPath elements are not supported"))
         style = self.get_style()
-        if self.has_transform():
-            trans_matrix = self.get_transform()
-            self.ctx.transform(*trans_matrix)  # unpacks argument list
+        self.ctx.transform(self.get_transform())
+        self.apply_clip()
         self.set_style(style)
         self.set_text_style(style)
+
+        if self.ctx.residual_transform != inkex.Transform and self.has_gradient():
+            self.ctx.write("// Transformed gradient on text will look wrong")
+        self.ctx.transform(self.ctx.residual_transform)
 
         for tspan in self.node:
             text = self.text_helper(tspan)
             cur_x = float(tspan.get("x").split()[0])
             cur_y = float(tspan.get("y").split()[0])
             self.ctx.fill_text(text, cur_x, cur_y)
+
+
+class Image(ElementWrapper):
+    def draw(self):
+        self.ctx.transform(self.get_transform())
+        self.apply_clip()
+
+        href = self.node.get("href") or self.node.get("xlink:href")
+        # Remove unescaped line breaks
+        href = href.replace("\n", "")
+
+        self.ctx.draw_image(
+            self.node.get_id(),
+            href,
+            self.node.get("x"),
+            self.node.get("y"),
+            self.node.get("width"),
+            self.node.get("height"),
+        )

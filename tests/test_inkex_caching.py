@@ -84,6 +84,18 @@ def test_move_objects_advanced(shapes: inkex.SvgDocumentElement):
     assert "p1" not in shapes.ids
 
 
+def test_extend_iterator(shapes: inkex.SvgDocumentElement):
+    """Test for https://gitlab.com/inkscape/extensions/-/issues/597"""
+    l1 = shapes.getElementById("layer1")
+
+    p1 = shapes.getElementById("p1")
+    p2 = shapes.getElementById("p2")
+    it = iter([p1, p2])
+    l1.extend(it)
+    assert p1 in l1
+    assert p2 in l1
+
+
 def test_error(shapes: inkex.SvgDocumentElement):
     """Assert that the IDs are unchanged if the LXML append function errors out"""
 

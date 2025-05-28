@@ -738,6 +738,8 @@ class BaseElement(IBaseElement):
             self.root.ids.pop(old_id)
 
     def extend(self, elements):
+        if not isinstance(elements, (list, tuple)):
+            elements = list(elements)
         for element in elements:
             BaseElement._remove_from_tree_callback(element, element)
         try:

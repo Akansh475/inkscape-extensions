@@ -394,13 +394,46 @@ paragraph <relax_ng_xml_schema>`.
 
 .. _relax_ng_xml_schema:
 
-RELAX NG XML schema
--------------------
+RELAX NG XML schema and INX file validation
+-------------------------------------------
 
 The XML schema for INX files is available in the `Inkscape extensions
 Git repository`_. This is a `RELAX NG schema`_.
 
-.. _see_also:
+To ensure the INX file is clean and does not produce errors or warnings, we are going to validate it. 
+We can use the command ``xmllint`` together with the provided RELAX NG XML schema.
+
+On Linux
+^^^^^^^^
+
+**Download the scheme:**
+::
+
+   curl https://gitlab.com/inkscape/extensions/-/raw/master/inkex/tester/inkscape.extension.rng -o /tmp/inkscape.extension.rng
+
+**Go to the directory of your extension and execute:**
+::
+
+   xmllint --noout --relaxng /tmp/inkscape.extension.rng *.inx
+
+On Windows
+^^^^^^^^^^
+
+**Install xmllint:**
+::
+
+   choco install xsltproc
+
+**Download the scheme:**
+::
+
+   curl https://gitlab.com/inkscape/extensions/-/raw/master/inkex/tester/inkscape.extension.rng -o %TEMP%\inkscape.extension.rng
+
+**Go to the directory of your extension and execute:**
+::
+
+   xmllint --noout --relaxng %TEMP%\inkscape.extension.rng *.inx
+
 
 .. _next paragraph: INX_extension_descriptor_format#RELAX_NG_XML_schema
 .. _Inkscape extensions Git repository: https://gitlab.com/inkscape/extensions/-/blob/master/inkex/tester/inkscape.extension.rng

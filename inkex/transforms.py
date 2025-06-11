@@ -42,6 +42,8 @@ from typing import (
 )
 import cmath
 
+import numpy as np
+
 
 from .utils import strargs, KeyDict
 
@@ -82,6 +84,13 @@ class ImmutableVector2d:
 
     x = property(lambda self: self._x)
     y = property(lambda self: self._y)
+
+    @property
+    def __array_interface__(self):
+        z = complex(self)
+        # Allocate a NumPy scalar just to get the memory buffer
+        arr = np.array([z], dtype=np.complex128)
+        return {"shape": (), "typestr": arr.dtype.str, "data": (arr.ctypes.data, False)}
 
     @overload
     def __init__(self):

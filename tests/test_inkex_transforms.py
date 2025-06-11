@@ -22,7 +22,6 @@ from inkex.tester import TestCase
 class ImmutableVector2dTest(TestCase):
     """Test the ImmutableVector2d object"""
 
-    @pytest.mark.xfail
     def test_numpy_conversion(self):
         """Check that vectors work fine in numpy datatypes (they are complex under
         the hood)"""
@@ -796,7 +795,6 @@ class ExtremaTest(TestCase):
         self.assertAlmostEqual(cmin, a, delta=1e-6)
         self.assertAlmostEqual(cmax, a, delta=1e-6)
 
-    @pytest.mark.xfail
     def test_numpy_conversion(self):
         """Conversion to numpy"""
 

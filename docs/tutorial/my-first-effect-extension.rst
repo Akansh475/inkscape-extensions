@@ -123,7 +123,7 @@ modified the style in place.
 
 Save your python script, and re-launch Inkscape. If inkscape was already
 open, close it first. You should find your new extension available in
-the ``Effect`` menu.
+the ``Extensions`` menu under ``Color``.
 
 Draw some shapes in Inkscape. Select some of the shapes and use the extension. 
 The fill of all objects should change to red.

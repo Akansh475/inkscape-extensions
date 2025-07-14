@@ -798,6 +798,12 @@ class PathTest(TestCase):
         self._assertPath(ret, "M 500 500 q -150 -150 -400 -250")
 
     @novector
+    def test_reverse_empty_path(self):
+        """Reversing an empty path should not raise an error"""
+        ret = Path()
+        ret = ret.reverse()
+
+    @novector
     def test_reverse_multiple_subpaths(self):
         """Test for https://gitlab.com/inkscape/extensions/-/issues/445. First two
         examples are from the issue"""

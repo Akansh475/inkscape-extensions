@@ -455,7 +455,11 @@ class Path(list):
     def reverse(self):
         """Returns a reversed path"""
         result = Path()
-        *_, first = self.cend_points
+        try:
+            *_, first = self.cend_points
+        except ValueError:
+            # Empty path, return empty path
+            return result
         closer = None
 
         # Go through the path in reverse order

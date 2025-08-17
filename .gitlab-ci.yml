@@ -75,7 +75,7 @@ test:windows:
     - Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     - refreshenv
     - python -m pip install --upgrade pip
-    - python -m pip install --upgrade 'tox<4.0' poetry tox-poetry
+    - python -m pip install --upgrade 'tox<4.0' poetry tox-poetry poetry-plugin-export
     - tox -e $("py"+$Env:PYTHON_VER.Replace(".", "")+"-normal-win")
   allow_failure: true # The windows run is less reliable than the Linux test runs.
 
@@ -129,6 +129,7 @@ sphinx:
   script:
     - source /root/pyenv-init
     - pyenv shell 3.11.0
+    - python -m pip install poetry-plugin-export
     - poetry install
     - poetry run sphinx-apidoc -e -P -o docs/source/ inkex */deprecated.py
     - cd docs

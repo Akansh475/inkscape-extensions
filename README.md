@@ -62,7 +62,7 @@ This section should get you set up.
 
 1. Install [Poetry](https://pypi.org/project/poetry/) and the dependencies.
    ```
-   pip3 install poetry
+   pip3 install poetry poetry-plugin-export
    poetry install
    poetry run sphinx-apidoc -e -P -o docs/source/ inkex */deprecated.py
    ```

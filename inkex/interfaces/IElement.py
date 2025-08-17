@@ -6,13 +6,12 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-import sys
 from lxml import etree
 
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol
+from typing import Protocol, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..elements._svg import SvgDocumentElement
 
 
 class IBaseElement(ABC, etree.ElementBase):
@@ -29,11 +28,9 @@ class BaseElementProtocol(Protocol):
 
     def get_id(self, as_url=0) -> str:
         """Returns the element ID. If not set, generates a unique ID."""
+        ...
 
     @property
-    def root(self) -> ISVGDocumentElement:
+    def root(self) -> "SvgDocumentElement":
         """Returns the element's root."""
-
-
-class ISVGDocumentElement(IBaseElement):
-    """Abstraction for SVGDocumentElement"""
+        ...

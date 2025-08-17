@@ -29,11 +29,23 @@ give path, transform, and property access easily.
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, Tuple, Optional, overload, TypeVar, List, Callable
+from typing import (
+    Any,
+    Tuple,
+    Optional,
+    overload,
+    TypeVar,
+    List,
+    Callable,
+    TYPE_CHECKING,
+)
 from lxml import etree
 import re
 
-from ..interfaces.IElement import IBaseElement, ISVGDocumentElement
+from ..interfaces.IElement import IBaseElement
+
+if TYPE_CHECKING:
+    from ._svg import SvgDocumentElement
 
 from ..base import SvgOutputMixin
 from ..paths import Path
@@ -129,7 +141,7 @@ class BaseElement(IBaseElement):
     
     .. versionadded:: 1.1"""
 
-    _root: Optional[ISVGDocumentElement] = None
+    _root: Optional["SvgDocumentElement"] = None
 
     def __getattr__(self, name):
         """Get the attribute, but load it if it is not available yet"""
@@ -357,7 +369,7 @@ class BaseElement(IBaseElement):
                 elem.style.update_urls(old_id, new_id)
 
     @property
-    def root(self) -> ISVGDocumentElement:
+    def root(self) -> "SvgDocumentElement":
         """Get the root document element from any element descendent"""
         if self._root is not None:
             return self._root
@@ -366,7 +378,9 @@ class BaseElement(IBaseElement):
         while parent is not None:
             root, parent = parent, parent.getparent()
 
-        if not isinstance(root, ISVGDocumentElement):
+        from ._svg import SvgDocumentElement
+
+        if not isinstance(root, SvgDocumentElement):
             raise FragmentError("Element fragment does not have a document root!")
 
         self._root = root

@@ -31,8 +31,6 @@ from functools import cached_property
 
 from lxml import etree
 
-from ..interfaces.IElement import ISVGDocumentElement
-
 from ..deprecated.meta import DeprecatedSvgMixin, deprecate
 from ..units import discover_unit, parse_unit
 from ._selected import ElementList
@@ -49,9 +47,7 @@ if False:  # pylint: disable=using-constant-test
     import typing  # pylint: disable=unused-import
 
 
-class SvgDocumentElement(
-    DeprecatedSvgMixin, ISVGDocumentElement, BaseElement, ViewboxMixin
-):
+class SvgDocumentElement(DeprecatedSvgMixin, BaseElement, ViewboxMixin):
     """Provide access to the document level svg functionality"""
 
     # pylint: disable=too-many-public-methods

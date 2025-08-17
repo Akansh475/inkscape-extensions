@@ -23,9 +23,12 @@ When elements are selected, these structures provide an advanced API.
 """
 
 from collections import OrderedDict
-from typing import Any, overload, Union, Optional
+from typing import Any, overload, Union, Optional, TYPE_CHECKING
 
-from ..interfaces.IElement import IBaseElement
+if TYPE_CHECKING:
+    from ..elements._base import BaseElement
+
+from ..elements import _base
 from ._utils import natural_sort_key
 from ..localization import inkex_gettext
 from ..utils import AbortExtension
@@ -66,7 +69,7 @@ class ElementList(OrderedDict):
             elem = self.svg.getElementById(elem, literal=True)
             if elem is None:
                 return
-        if isinstance(elem, IBaseElement):
+        if isinstance(elem, _base.BaseElement):
             # Selection is a list of elements to select
             key = elem.xml_path
             element_id = elem.get("id")
@@ -81,7 +84,7 @@ class ElementList(OrderedDict):
     def _to_key(self, key: None, default: Any) -> Any: ...
 
     @overload
-    def _to_key(self, key: Union[int, IBaseElement, str], default: Any) -> str: ...
+    def _to_key(self, key: Union[int, "BaseElement", str], default: Any) -> str: ...
 
     def _to_key(self, key, default=None) -> str:
         """Takes a key (id, element, etc) and returns an xml_path key"""
@@ -90,7 +93,7 @@ class ElementList(OrderedDict):
             key = default
         if isinstance(key, int):
             return list(self.keys())[key]
-        if isinstance(key, IBaseElement):
+        if isinstance(key, _base.BaseElement):
             return key.xml_path
         if isinstance(key, str) and key[0] != "/":
             return self.ids.get(key, key)
@@ -206,7 +209,7 @@ class ElementList(OrderedDict):
                 r
                 for e in self
                 for r in _recurse(e)
-                if isinstance(r, (IBaseElement, str))
+                if isinstance(r, (_base.BaseElement, str))
             ],
         )
 

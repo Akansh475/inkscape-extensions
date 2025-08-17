@@ -41,8 +41,6 @@ from typing import (
 import tinycss2
 import tinycss2.ast
 
-from .interfaces.IElement import IBaseElement
-
 from .units import convert_unit
 from .utils import FragmentError
 
@@ -50,6 +48,8 @@ from .colors import Color
 
 if TYPE_CHECKING:
     from .elements import BaseElement
+
+from .elements import _base
 
 TokenList = List[tinycss2.ast.Node]
 
@@ -205,7 +205,7 @@ class _URLNoneValueConverter(_StyleConverter):
     def convert_back(
         self, value: object, element: Optional[BaseElement] = None
     ) -> TokenList:
-        if isinstance(value, IBaseElement):
+        if isinstance(value, _base.BaseElement):
             if element is not None:
                 value = _URLNoneValueConverter._insert_if_necessary(element, value)
             return [tinycss2.ast.URLToken(0, 0, value.get_id(), value.get_id(as_url=2))]
@@ -299,7 +299,7 @@ class _PaintValueConverter(_ColorValueConverter, _URLNoneValueConverter):
     ) -> TokenList:
         if value is None:
             return [tinycss2.ast.IdentToken(0, 0, "none")]
-        if isinstance(value, IBaseElement):
+        if isinstance(value, _base.BaseElement):
             return _URLNoneValueConverter.convert_back(self, value, element=element)
         return _ColorValueConverter.convert_back(self, value, element=element)
 
@@ -570,7 +570,7 @@ class _FilterListConverter(_URLNoneValueConverter):
     def convert_back(
         self, value: object, element: Optional[BaseElement] = None
     ) -> TokenList:
-        if isinstance(value, IBaseElement) or not isinstance(value, (list, tuple)):
+        if isinstance(value, _base.BaseElement) or not isinstance(value, (list, tuple)):
             value = [value]
         if all((isinstance(i, str) for i in value)):
             return _get_tokens_from_value(" ".join(value))  # type: ignore

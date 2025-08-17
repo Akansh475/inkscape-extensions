@@ -43,7 +43,6 @@ from typing import (
 from argparse import ArgumentParser, Namespace
 from lxml import etree
 
-from .interfaces.IElement import IBaseElement
 from .utils import filename_arg, AbortExtension, ABORT_STATUS, errormsg, do_nothing
 from .elements._parser import load_svg
 from .elements._utils import NSS
@@ -51,6 +50,7 @@ from .localization import localize
 
 if TYPE_CHECKING:
     from .elements._svg import SvgDocumentElement
+    from .elements._base import BaseElement
 
 
 class InkscapeExtension:
@@ -472,7 +472,7 @@ class SvgInputMixin(_Base):  # pylint: disable=too-few-public-methods, abstract-
     """
 
     # Select all objects if none are selected
-    select_all: Tuple[Type[IBaseElement], ...] = ()
+    select_all: Tuple[Type["BaseElement"], ...] = ()
 
     def __init__(self):
         super().__init__()

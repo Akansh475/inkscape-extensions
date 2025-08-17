@@ -31,8 +31,6 @@ from lxml import etree
 import tinycss2
 import tinycss2.ast
 
-from .interfaces.IElement import IBaseElement
-
 from .colors import Color
 from .properties import (
     _get_tokens_from_value,
@@ -47,6 +45,7 @@ from .css import CSSCompiler, parser
 
 from .utils import FragmentError, NotifyList, NotifyOrderedDict
 from .elements._utils import NSS
+from .elements import _base
 
 if TYPE_CHECKING:
     from .elements._base import BaseElement
@@ -519,7 +518,7 @@ class Style(NotifyOrderedDict):
 
         parent = element.getparent()
 
-        if parent is not None and isinstance(parent, IBaseElement):
+        if parent is not None and isinstance(parent, _base.BaseElement):
             cascaded = Style.add_inherited(cascaded, parent.specified_style())
         cascaded.element = element
         return cascaded  # doesn't have a parent

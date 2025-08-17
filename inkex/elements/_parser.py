@@ -25,11 +25,12 @@
     Separated out from :py:mod:`inkex.elements._base`"""
 
 from collections import defaultdict
-from typing import DefaultDict, List, Any
+from typing import DefaultDict, List, Any, Type, TYPE_CHECKING
 
 from lxml import etree
 
-from ..interfaces.IElement import IBaseElement
+if TYPE_CHECKING:
+    from ..elements._base import BaseElement
 
 from ._utils import splitNS, addNS
 from ..utils import errormsg
@@ -42,7 +43,7 @@ class NodeBasedLookup(etree.PythonElementClassLookup):
     SVG based API to our extensions system.
     """
 
-    default = IBaseElement
+    default: Type["BaseElement"]
 
     # (ns,tag) -> list(cls) ; ascending priority
     lookup_table: DefaultDict[str, List[Any]] = defaultdict()

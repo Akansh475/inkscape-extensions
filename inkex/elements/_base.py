@@ -42,8 +42,6 @@ from typing import (
 from lxml import etree
 import re
 
-from ..interfaces.IElement import IBaseElement
-
 if TYPE_CHECKING:
     from ._svg import SvgDocumentElement
 
@@ -65,7 +63,7 @@ from ._parser import NodeBasedLookup, SVG_PARSER
 T = TypeVar("T", bound="BaseElement")  # pylint: disable=invalid-name
 
 
-class BaseElement(IBaseElement):
+class BaseElement(etree.ElementBase):
     """Provide automatic namespaces to all calls"""
 
     # pylint: disable=too-many-public-methods

@@ -65,7 +65,7 @@ class Image(RectangleBase):
         """ "Embed the data of the selected Image Tag element.
         Relative image paths are interpreted relative to file_path.
 
-        ..versionadded: 1.5
+        .. versionadded:: 1.5
 
         Args:
             file_path (str): Relative image paths are interpreted relative to file_path.

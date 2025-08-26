@@ -23,9 +23,10 @@ import logging
 
 from typing import List
 from collections.abc import Iterable
-from gi.repository import Gtk, GLib, GdkPixbuf
+from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
+import cairo
 
-ICON_THEME = Gtk.IconTheme.get_default()
+ICON_THEME = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
 BILINEAR = GdkPixbuf.InterpType.BILINEAR
 HYPER = GdkPixbuf.InterpType.HYPER
 
@@ -286,6 +287,19 @@ class PixmapManager:
                 logging.warning(str(err))
                 return self.get_missing_image()
 
+            if isinstance(img, Gtk.IconPaintable):
+                # Temporary porting hack: rasterise iconpaintable to pixbuf
+                # https://discourse.gnome.org/t/convert-symbolic-icon-to-gdktexture-gdkpixbuf/29324/3
+                w = img.get_intrinsic_width()
+                h = img.get_intrinsic_height()
+                snapshot = Gtk.Snapshot()
+                img.snapshot(snapshot, w, h)
+                node = snapshot.to_node()
+                surface = cairo.ImageSurface(cairo.Format.ARGB32, w, h)
+                ctx = cairo.Context(surface)
+                node.draw(ctx)
+                img = Gdk.pixbuf_get_from_surface(surface, 0, 0, w, h)
+
             if img is not None:
                 self.cache[key] = self.apply_filters(img, **kwargs)
 
@@ -310,7 +324,7 @@ class PixmapManager:
             loader.write(data)
             loader.close()
         except GLib.GError as err:
-            raise PixmapLoadError(f"Faled to load pixbuf from data: {err}")
+            raise PixmapLoadError(f"Failed to load pixbuf from data: {err}")
         return loader.get_pixbuf()
 
     def load_from_name(self, name):
@@ -320,7 +334,7 @@ class PixmapManager:
             try:
                 return GdkPixbuf.Pixbuf.new_from_file(pixmap_path)
             except RuntimeError as msg:
-                raise PixmapLoadError(f"Faild to load pixmap '{pixmap_path}', {msg}")
+                raise PixmapLoadError(f"Failed to load pixmap '{pixmap_path}', {msg}")
         elif (
             self.icon_theme and "/" not in name and "." not in name and "<" not in name
         ):
@@ -332,7 +346,7 @@ class PixmapManager:
         size = size or 32
         if not self.icon_theme.has_icon(name):
             name = "image-missing"
-        return self.icon_theme.load_icon(name, size, 0)
+        return self.icon_theme.lookup_icon(name, [], size, 1, Gtk.TextDirection.NONE, 0)
 
     def pixmap_path(self, name):
         """Returns the pixmap path based on stored location"""

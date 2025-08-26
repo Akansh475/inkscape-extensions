@@ -6,7 +6,7 @@ It provides
  - a simplification layer for SVG manipulation through lxml
  - base classes for common types of Inkscape extensions
  - simplified testing of those extensions
- - a user interface library based on GTK3
+ - a user interface library based on GTK4
 
 At its core, Inkscape extensions take in a file, and output a file.
 - For effect extensions, those two files are SVG files.

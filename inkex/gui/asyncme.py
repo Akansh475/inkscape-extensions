@@ -245,7 +245,7 @@ def in_mainloop(func):
         """Function to be called in the future"""
         future.run(func)
 
-    Gdk.threads_add_idle(0, handler, None)
+    GLib.idle_add(handler, None, 0)
     return future
 
 

@@ -38,7 +38,7 @@ from ..utils import DependencyError
 try:
     import gi
 
-    gi.require_version("Gtk", "3.0")
+    gi.require_version("Gtk", "4.0")
 
     # Importing while covering stderr because pygobject has broken
     # warnings support and will force import warnings on our users.
@@ -53,6 +53,6 @@ except ImportError:  # pragma: no cover
     )
 
 from .app import GtkApp
-from .window import Window, ChildWindow, FakeWidget
+from .window import Window
 from .listview import TreeView, IconView, ViewColumn, ViewSort, Separator
 from .pixmap import PixmapManager

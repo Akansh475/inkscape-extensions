@@ -189,7 +189,7 @@ class TreeView(BaseView):
         """Setup the treeview"""
         self._sel = self._list.get_selection()
         self._sel.set_mode(Gtk.SelectionMode.MULTIPLE)
-        self._list.connect("button-press-event", self.item_selected_signal)
+        self._list.connect("cursor-changed", self.item_selected_signal)
         # Separators should do something
         self._list.set_row_separator_func(TreeView.is_separator, None)
         super().setup()

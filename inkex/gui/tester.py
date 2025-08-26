@@ -20,7 +20,7 @@ Structures for consistant testing of Gtk GUI programs.
 """
 
 import sys
-from gi.repository import Gtk, GLib
+from gi.repository import Gio, GLib
 
 
 class MainLoopProtection:
@@ -49,7 +49,7 @@ class MainLoopProtection:
         self._old_excepthook = sys.excepthook
         sys.excepthook = self.excepthook
         # Remove mainloop by force if it doesn't die within 10 seconds
-        self._timeout = GLib.timeout_add(self.timeout, self.idle_exit)
+        self._timeout = GLib.timeout_add(self.timeout, self.exit)
 
     def __exit__(self, exc, value, traceback):  # pragma: no cover
         """Put the except handler back, cancel the timer and raise if needed"""
@@ -64,13 +64,13 @@ class MainLoopProtection:
         if value and traceback:
             raise value.with_traceback(traceback)
 
-    def idle_exit(self):  # pragma: no cover
+    def exit(self):  # pragma: no cover
         """Try to going to kill any running mainloop."""
-        GLib.idle_add(Gtk.main_quit)
+        Gio.Application.get_default().quit()
 
     def excepthook(self, ex_type, ex_value, traceback):  # pragma: no cover
         """Catch errors thrown by the Gtk mainloop"""
-        self.idle_exit()
+        self.exit()
         # Remember the exception data for raising inside the test context
         if ex_value is not None:
             self._hooked = [ex_type, ex_value, traceback]

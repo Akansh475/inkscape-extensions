@@ -98,7 +98,9 @@ def add_lint(fname):
         html = html[:start] + new_content + html[end:]
         adjust += len(new_content) - len(old_content)
 
-    total = total_score / total_statements
+    total = 0
+    if total_statements > 0:
+        total = total_score / total_statements
     html = html.replace("coverage</th>", "coverage</th><th>pylint</th>")
     html = html.replace("</tr></tfoot>", f"<td>{total:.2f}</td></tr></tfoot>")
 

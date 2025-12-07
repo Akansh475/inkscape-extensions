@@ -8,7 +8,7 @@ import os
 import sys
 from importlib import resources
 
-from lxml import etree
+from lxml import etree, isoschematron
 
 from ..utils import PY3
 from ..inx import InxFile
@@ -151,7 +151,7 @@ class InxMixin:
 def _load_inx_schemas():
     _SCHEMA_CLASSES = {
         ".rng": etree.RelaxNG,
-        ".schema": etree.Schematron,  # "pre-ISO-Schematron"
+        ".schema": isoschematron.Schematron,
     }
 
     if sys.version_info > (3, 9):

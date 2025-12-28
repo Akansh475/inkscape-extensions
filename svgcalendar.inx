@@ -18,7 +18,7 @@
                 <option value="sun">Sunday</option>
             </param>
         </page>
-        <page name="layout" gui-text="Layout">
+        <page name="layout" gui-text="Layout" context="Calendar Layout">
             <param name="auto-organize" type="bool" gui-text="Automatically set size and position">true</param>
             <label>The options below have no influence when the above is checked.</label>
             <param name="months-per-line" type="int" min="1" max="12" gui-text="Months per line:">3</param>

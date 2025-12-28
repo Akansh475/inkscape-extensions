@@ -524,6 +524,11 @@
                 <ref name="data_type_boolean_yes_no"/>
               </attribute>
             </optional>
+            <optional>
+              <attribute name="context">
+                <data type="string"/>
+              </attribute>
+            </optional>
           </element>
         </oneOrMore>
       </group>

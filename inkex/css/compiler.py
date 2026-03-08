@@ -139,8 +139,8 @@ class BooleanCompiler:
             left = lambda el: el.getparent() is not None and left_inside(el.getparent())
 
         elif selector.combinator == "+":
-            left = lambda el: getprevious(el) is not None and left_inside(
-                getprevious(el)
+            left = lambda el: (
+                getprevious(el) is not None and left_inside(getprevious(el))
             )
 
         elif selector.combinator == "~":
@@ -257,8 +257,8 @@ class BooleanCompiler:
             if selector.case_sensitive is False:
                 value = value.lower()
 
-                attribute_value = (
-                    lambda el: super(etree.ElementBase, el)
+                attribute_value = lambda el: (
+                    super(etree.ElementBase, el)
                     .get(key_func(el), "")  # type: ignore
                     .lower()
                 )
@@ -355,8 +355,9 @@ class BooleanCompiler:
         if selector.name == "only-child":
             return lambda el: getnext(el) is None and getprevious(el) is None
         if selector.name == "only-of-type":
-            return lambda el: all(s.tag != el.tag for s in itersiblings(el)) and all(
-                s.tag != el.tag for s in itersiblings(el, preceding=True)
+            return lambda el: (
+                all(s.tag != el.tag for s in itersiblings(el))
+                and all(s.tag != el.tag for s in itersiblings(el, preceding=True))
             )
         if selector.name == "empty":
             return lambda el: not list(el) and el.text is None

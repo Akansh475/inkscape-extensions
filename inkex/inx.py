@@ -21,8 +21,10 @@ Parsing inx files for checking and generating.
 """
 
 import os
-from inspect import isclass
+import pkgutil
 from importlib import util
+from inspect import isclass
+
 from lxml import etree
 
 from .base import InkscapeExtension
@@ -86,13 +88,18 @@ class InxFile:
 
     @property
     def extension_class(self):
-        """Attempt to get the extension class"""
-        script = self.script.get("script", None)
-        if script is not None:
-            name = script[:-3].replace("/", ".")
-            spec = util.spec_from_file_location(name, script)
-            mod = util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
+        """Attempt to get the extension class. Supports packages as well."""
+
+        def extract_class(name, current_spec):
+            if current_spec is None:
+                return None
+
+            mod = util.module_from_spec(current_spec)
+            try:
+                current_spec.loader.exec_module(mod)
+            except Exception:
+                return None
+
             for value in mod.__dict__.values():
                 if (
                     "Base" not in name
@@ -101,6 +108,31 @@ class InxFile:
                     and issubclass(value, InkscapeExtension)
                 ):
                     return value
+            return None
+
+        script = self.script.get("script", None)
+        if script is None:
+            return None
+
+        name = script[:-3] if script.endswith(".py") else script
+        name = name.replace("/", ".")
+        spec = util.find_spec(name)
+        if spec is None or spec.loader is None:
+            return None
+
+        cls = extract_class(name, spec)
+        if cls:
+            return cls
+
+        if spec.submodule_search_locations is not None:
+            for m in pkgutil.walk_packages(
+                spec.submodule_search_locations, prefix=name + "."
+            ):
+                sub_spec = m.module_finder.find_spec(m.name)
+                cls = extract_class(m.name, sub_spec)
+                if cls:
+                    return cls
+
         return None
 
     @property

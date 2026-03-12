@@ -191,7 +191,7 @@ class CGMConverter(metaclass=CGMConverterMeta):
         if isinstance(colour, cgm_enums.DirectColour):
             if colour.colour_model == cgm_enums.ColourModelEnum.RGB:
                 return ColorRGB([colour.v1, colour.v2, colour.v3])
-            elif color.colour_model == cgm_enums.ColorModelEnum.CMYK:
+            elif colour.colour_model == cgm_enums.ColorModelEnum.CMYK:
                 return ColorDeviceCMYK([colour.v1, colour.v2, colour.v3, colour.v4])
             else:
                 inkex.errormsg(f"Color model {colour.colour_model} not implemented")

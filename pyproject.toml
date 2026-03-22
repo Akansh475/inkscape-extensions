@@ -22,38 +22,34 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 PyGObject = {version = ">=3.36", markers = "platform_system!='Windows'"}
 pySerial = "^3.4"
-lxml = "^4.5.0 || ^5.0.0"
-numpy = [
-    #numpy incorrectly specifies its required Python version until 1.21.2
-    {version = "^1.17.0", python = "^3.7, <3.10"},
-    {version = ">=1.21.2, <3.0.0", python = "^3.10"},
+lxml = [
+    {version = ">=6.0.0,<7.0.0", python = ">=3.14" },
+    {version = ">=4.5.0,<7.0.0"},
 ]
-Pillow = ">=7.0.0" # Used by RasterOutputExtension
+numpy = ">=1.21.2,<3" #numpy incorrectly specifies its required Python version until 1.21.2
+Pillow = [ # Used by RasterOutputExtension
+    {version = ">=11.0.0", python = ">=3.14"}, # avoid compiling from source in CI
+    {version = ">=7.0.0"},
+]
 scour = "^0.37" # Used by Optimized SVG Extension
 packaging = ">=20.3" # Used by Optimized SVG Extension to compare scour versions
 pyparsing = ">=3.0.9"
 cssselect = "^1.2.0"
 tinycss2 = "^1.0.1"
-[tool.poetry.dev-dependencies]
-pytest = [
-    {version = "^9.0.2", python = "^3.10"},
-    # pytest only supports python 3.8 until ^8.3
-    # and all 8.x need python-subtests
-    {version = "< 8.4.0", python = "<= 3.9.25" }
-    ]
-pytest-subtests = { python = "<= 3.9.25" }
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.2"
 pytest-cov = "^3.0.0"
 pytest-xvfb = "^2.0.0"
 coverage = "^6.2"
 tox = "^3.24.5"
 # Documentation dependencies
 # Move to [tool.poetry.group.docs.dependencies] in the future
-Sphinx = "^4.4.0"
-sphinx-autodoc-typehints = "^1.12.0"
-pydata-sphinx-theme = ">=0.7.2"
+Sphinx = "^8.0.2"
+sphinx-autodoc-typehints = "^2.5.0"
+pydata-sphinx-theme = ">=0.15.4"
 
 [build-system]
 requires = ["poetry_core>=1.0.0"]

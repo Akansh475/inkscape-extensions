@@ -7,8 +7,9 @@ import inkex
 class Negative(inkex.ColorExtension):
     """Make the colour oposite"""
 
+    target_space = "rgb"
+
     def modify_color(self, name, color):
-        # Support any colour space
         for i, channel in enumerate(color):
             color[i] = 255 - channel
         return color

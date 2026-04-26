@@ -23,4 +23,5 @@ class ColorNegativeTest(ColorBaseCase):
         ((0, 0, 255), "#ffff00"),
         ((128, 0, 128), "#7fff7f"),
         ((255, 0, 255), "#00ff00"),
+        ("hsl(52, 50%, 50%)", "hsl(232, 50%, 50%)"),
     ]

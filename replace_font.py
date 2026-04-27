@@ -174,7 +174,7 @@ class ReplaceFont(inkex.EffectExtension):
             items.extend(self.find_child_text_items(item))
 
         if not items:
-            return inkex.errormsg(_("There was nothing selected"))
+            inkex.errormsg(_("There was nothing selected"))
 
         return items
 

@@ -132,3 +132,12 @@ class ElementListTestCase(SvgTestCase):
         self.svg.append(PathElement(id="#asdf"))
         selection.set("#asdf")
         self.assertEqual(tuple(selection.ids), ("#asdf",))
+
+
+class TestBoundingBoxNone(SvgTestCase):
+    source_file = "default-inkscape-SVG.svg"
+
+    def test_get_bounding_box_none(self):
+        self.svg.selection.set("layer1")
+
+        self.assertIsNone(self.svg.selection.bounding_box())

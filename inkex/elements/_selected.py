@@ -226,9 +226,15 @@ class ElementList(OrderedDict):
         the selection's boundary, the bounding box may be inaccurate.
 
         When no object is selected or when the object's location cannot be
-        determined (e.g. empty group or layer), all coordinates will be None.
+        determined (e.g. empty group or layer), the result will be None.
         """
-        return sum([elem.bounding_box() for elem in self], None)
+
+        boxes = [b for elem in self if (b := elem.bounding_box()) is not None]
+
+        if not len(boxes):
+            return None
+
+        return sum(boxes[1:], boxes[0])
 
     def first(self):
         """Returns the first item in the selected list"""

@@ -55,9 +55,6 @@ Other options include:
 
 d    Print debugging info
 
-p    Produce output suitable for input to plot (1), rather than the forms
-     described above.
-
 On unsorted data uniformly distributed in the unit square, voronoi uses about
 20n+140 bytes of storage.
 
@@ -132,7 +129,6 @@ class Context(object):
     def __init__(self):
         self.doPrint = 0
         self.debug = 0
-        self.plot = 0
         self.triangulate = False
         self.vertices = []  # list of vertex 2-tuples: (x,y)
         self.lines = []  # equation of line 3-tuple (a b c), for the equation of the line a*x+b*y = c
@@ -153,8 +149,6 @@ class Context(object):
             print("site (%d) at %f %f" % (s.sitenum, s.x, s.y))
         elif self.triangulate:
             pass
-        elif self.plot:
-            self.circle(s.x, s.y, cradius)
         elif self.doPrint:
             print("s %f %f" % (s.x, s.y))
 
@@ -164,7 +158,7 @@ class Context(object):
             print("vertex(%d) at %f %f" % (s.sitenum, s.x, s.y))
         elif self.triangulate:
             pass
-        elif self.doPrint and not self.plot:
+        elif self.doPrint:
             print("v %f %f" % (s.x, s.y))
 
     def outTriple(self, s1, s2, s3):
@@ -174,7 +168,7 @@ class Context(object):
                 "circle through left=%d right=%d bottom=%d"
                 % (s1.sitenum, s2.sitenum, s3.sitenum)
             )
-        elif self.triangulate and self.doPrint and not self.plot:
+        elif self.triangulate and self.doPrint:
             print("%d %d %d" % (s1.sitenum, s2.sitenum, s3.sitenum))
 
     def outBisector(self, edge):
@@ -192,9 +186,8 @@ class Context(object):
                 )
             )
         elif self.triangulate:
-            if self.plot:
-                self.line(edge.reg[0].x, edge.reg[0].y, edge.reg[1].x, edge.reg[1].y)
-        elif self.doPrint and not self.plot:
+            pass
+        elif self.doPrint:
             print("l %f %f %f" % (edge.a, edge.b, edge.c))
 
     def outEdge(self, edge):
@@ -206,9 +199,7 @@ class Context(object):
             sitenumR = edge.ep[Edge.RE].sitenum
         self.edges.append((edge.edgenum, sitenumL, sitenumR))
         if not self.triangulate:
-            if self.plot:
-                self.clip_line(edge)
-            elif self.doPrint:
+            if self.doPrint:
                 print("e %d" % edge.edgenum, end=" ")
                 print(" %d " % sitenumL, end=" ")
                 print("%d" % sitenumR)
@@ -832,8 +823,6 @@ if __name__ == "__main__":
     for opt in optlist:
         if opt[0] == "-d":
             c.debug = 1
-        if opt[0] == "-p":
-            c.plot = 1
         if opt[0] == "-t":
             c.triangulate = 1
         if opt[0] == "-h":

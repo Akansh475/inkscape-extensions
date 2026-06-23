@@ -33,7 +33,8 @@ class ExportGimpPalette(inkex.OutputExtension):
 
     def save(self, stream):
         name = self.svg.name.replace(".svg", "")
-        stream.write("GIMP Palette\nName: {}\n#\n".format(name).encode("utf-8"))
+        name = f"Name: {name}\n" if name else ""
+        stream.write("GIMP Palette\n{}#\n".format(name).encode("utf-8"))
 
         for key, value in sorted(list(set(self.get_colors()))):
             stream.write("{} {}\n".format(key, value).encode("utf-8"))

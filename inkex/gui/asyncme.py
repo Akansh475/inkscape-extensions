@@ -222,9 +222,12 @@ class DebouncedSyncVar:
 def spawn_thread(func):
     """Call ``func()`` in a separate thread
 
+    This spawned thread will exit when the main thread does.
+    If you want to wait for the thread to exit, use join() on the returned thread.
+
     Returns the corresponding :class:`threading.Thread` object.
     """
-    thread = threading.Thread(target=func)
+    thread = threading.Thread(target=func, daemon=True)
     thread.start()
     return thread
 
@@ -294,7 +297,7 @@ def holding(lock, task, blocking=True):
             ret.wait()
         lock.release()
 
-    threading.Thread(target=_target).start()
+    spawn_thread(_target)
     return ret
 
 

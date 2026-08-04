@@ -51,6 +51,7 @@ You need to read the documentation available inside the tester module to learn h
 
 ```python
 from inkex import tester
+
 help(tester)
 ```
 

@@ -38,3 +38,12 @@ class RestackMillimeterGrouped(ComparisonMixin, TestCase):
             "--id=g20854",
         ),
     ]
+
+
+class RestackWithNodesWithoutBoundingBox(TestCase):
+    effect_class = Restack
+    stderr_output = True
+
+    def testLayerSelected(self):
+        """Restack with only one empty layer selected."""
+        self.assertEffect(id="layer1")

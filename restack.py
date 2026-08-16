@@ -68,9 +68,13 @@ class Restack(inkex.EffectExtension):
         self.options.tab(parentnode)
 
     def restack_positional(self, parentnode):
-        """Restack based on canvas position"""
+        """Restack based on canvas position. Ignores nodes without bounding box."""
+        selected = [
+            n for n in self.svg.selection.values() if n.bounding_box() is not None
+        ]
+
         # move them to the top of the object stack in this order.
-        for node in sorted(self.svg.selection.values(), key=self._sort):
+        for node in sorted(selected, key=self._sort):
             parentnode.append(node)
         return True
 

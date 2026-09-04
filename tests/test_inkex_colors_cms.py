@@ -55,3 +55,13 @@ class ColorCmykTest(TestCase):
         color = Color("icc-color(icc-name, 0.1)")
         self.assertRaises(NotImplementedError, color.convert_to_rgb)
         self.assertRaises(NotImplementedError, color.convert_from_rgb)
+
+    def test_to_rgb_with_fallback(self):
+        """to_rgb() should return the fallback RGB color when one was provided"""
+        color = Color("#aabbcc icc-color(icc-name, 0.1, 0.2, 0.3)")
+        self.assertEqual(color.to_rgb(), [170, 187, 204])
+
+    def test_to_rgb_without_fallback(self):
+        """to_rgb() should raise a clear error when no fallback color exists"""
+        color = Color("icc-color(icc-name, 0.1, 0.2, 0.3)")
+        self.assertRaises(NotImplementedError, color.to_rgb)

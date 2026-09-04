@@ -71,6 +71,16 @@ class ColorCMS(CssColor, AlphaNotAllowed):
     def scale_down(cls, index, value):
         return value  # All cms values are already 0.0 to 1.0
 
+    def to_rgb(self):
+        """Return the fallback RGB color if one was provided, since ICC
+        color values themselves cannot be converted to RGB without the
+        actual ICC profile."""
+        if self.fallback_rgb is not None:
+            return ColorRGB(list(self.fallback_rgb), alpha=self.fallback_rgb.alpha)
+        raise NotImplementedError(
+            "Can not convert to RGB from icc color: no fallback color was provided"
+        )
+
     @staticmethod
     def convert_to_rgb(*data):
         """Catch attempted conversions to rgb"""
@@ -80,7 +90,6 @@ class ColorCMS(CssColor, AlphaNotAllowed):
     def convert_from_rgb(*data):
         """Catch attempted conversions from rgb"""
         raise NotImplementedError("Can not convert from RGB to icc color")
-
 
 # This is research code for a future developer to use. We already use PIL and this will
 # allow icc colors to be converted in python. This isn't needed right now, so this work

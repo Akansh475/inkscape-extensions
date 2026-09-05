@@ -91,6 +91,7 @@ class ColorCMS(CssColor, AlphaNotAllowed):
         """Catch attempted conversions from rgb"""
         raise NotImplementedError("Can not convert from RGB to icc color")
 
+
 # This is research code for a future developer to use. We already use PIL and this will
 # allow icc colors to be converted in python. This isn't needed right now, so this work
 # will be left undone.
